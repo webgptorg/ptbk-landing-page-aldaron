@@ -10,7 +10,6 @@ import {
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
 } from '@/businesses/ai-ta-krajta/config';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
-import { PromptbookCoderBadge } from '@/components/promptbook-coder/PromptbookCoderBadge';
 import { ORGANIZATION_LEGAL_NAME } from '@/lib/metadata/site-config';
 import Link from 'next/link';
 
@@ -49,8 +48,6 @@ export function AiTaKrajtaFooter() {
                         <p className="mt-5 text-sm leading-relaxed text-white/50">
                             {AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE.cs}
                         </p>
-
-                        <PromptbookCoderBadge className="mt-6" />
                     </div>
 
                     <nav aria-label="Kde podcast vychází">

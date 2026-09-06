@@ -153,16 +153,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in GET parameters. Editing changes only shortcode, destinations, note, and
   landing page; deletion also deletes recorded clicks.
 - The single "Done by Promptbook coder" badge lives in `components/promptbook-coder/`.
-  It wears the octopus of that tool as one line of characters, drawn only by
-  `promptbookCoderOctopusArt.ts` in `currentColor` and reused through `className`;
-  do not redraw it elsewhere. Which frame is drawn is decided by
-  `promptbookCoderOctopusPose.ts` out of what `usePromptbookCoderOctopusSenses.ts`
-  notices: the octopus works, watches a pointer which came close, rides a scrolled
-  page, and greets whoever points at the badge or reaches it with the keyboard.
-  Every frame is the same width, no frame is named to a screen reader, and a
-  visitor who asked for less movement gets a still octopus which still reacts.
-  `/ai-ta-krajta` wears it in the footer and floating in the corner from the first
-  screen on, where it steps over the mini player rather than under it.
+  Its artwork is recorded in `promptbookCoderMarkArtwork.ts`, uses `currentColor`,
+  and is reused through `className`; do not redraw it elsewhere.
 
 ### Database and verification
 
