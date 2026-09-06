@@ -298,14 +298,6 @@ html {
         pointer-events: none;
     }
 
-    /* The badge of the tool a page was written with waits out the cookie tray in the same corner of the page, the
-       same way the social-proof notification does. It comes back the moment the visitor has answered, which is the
-       one thing they must be able to do without anything else reaching over it. */
-    body:has([data-cookie-consent]) [data-promptbook-coder-badge] {
-        visibility: hidden;
-        pointer-events: none;
-    }
-
     @media (min-width: 640px) {
         .cookie-consent {
             padding: 1rem 1.5rem;

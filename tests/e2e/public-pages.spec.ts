@@ -8,12 +8,6 @@ import {
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_PATH,
 } from '@/businesses/ai-ta-krajta/config';
-import {
-    PROMPTBOOK_CODER_BADGE_LABEL,
-    PROMPTBOOK_CODER_URL,
-} from '@/components/promptbook-coder/promptbookCoderConfig';
-import { getLanguageFromPathname } from '@/lib/language/pageLanguage';
-import { getCookieConsentContent } from '@/lib/legal/cookieConsentContent';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 /**
@@ -142,13 +136,13 @@ for (const path of PUBLIC_PAGE_PATHS) {
     });
 }
 
-test('AI ta Krajta owns its metadata, icon and installable manifest and credits Promptbook coder', async ({ page }) => {
+test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ page }) => {
     await page.goto(AI_TA_KRAJTA_PATH, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('footer')).toBeVisible();
     await expect(page).toHaveTitle(`${AI_TA_KRAJTA_BRAND_NAME} | Český podcast o umělé inteligenci`);
 
     const metadataIdentity = await page.evaluate(
-        ({ scalableIconPath, rasterIconPath, manifestPath, coderUrl, coderBadgeLabel }) => {
+        ({ scalableIconPath, rasterIconPath, manifestPath }) => {
             const identityTags = Array.from(document.head.querySelectorAll('meta, link'));
             const structuredDataNodes = Array.from(document.head.querySelectorAll('script[type*=ld]'));
             const footerText = document.querySelector('footer')?.textContent ?? '';
@@ -171,13 +165,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest and credits 
             const isPodcastManifestUsed = identityTags.some(
                 (element) => element.getAttribute('rel') === 'manifest' && element.getAttribute('href') === manifestPath,
             );
-            const coderBadgeLink = document.querySelector(`footer a[href^="${coderUrl}"]`);
-            const isCoderBadgePresent = (coderBadgeLink?.textContent ?? '').includes(coderBadgeLabel);
-
-            // Note: The badge which credits the tool the page was written with is the one place the footer may name
-            //       Promptbook. Everything the footer says about the show itself is read without it, so a second
-            //       mention still fails this.
-            const isFooterPromptbookAbsent = !footerText.split(coderBadgeLabel).join('').includes('Promptbook');
+            const isFooterPromptbookAbsent = !footerText.includes('Promptbook');
             const isLegalCompanyPresent = footerText.includes('AI Web s.r.o.');
 
             return {
@@ -186,7 +174,6 @@ test('AI ta Krajta owns its metadata, icon and installable manifest and credits 
                 isPodcastIconUsed,
                 isPodcastTouchIconUsed,
                 isPodcastManifestUsed,
-                isCoderBadgePresent,
                 isFooterPromptbookAbsent,
                 isLegalCompanyPresent,
             };
@@ -195,8 +182,6 @@ test('AI ta Krajta owns its metadata, icon and installable manifest and credits 
             scalableIconPath: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
             rasterIconPath: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
             manifestPath: AI_TA_KRAJTA_MANIFEST_PATH,
-            coderUrl: PROMPTBOOK_CODER_URL,
-            coderBadgeLabel: PROMPTBOOK_CODER_BADGE_LABEL,
         },
     );
 
@@ -206,37 +191,9 @@ test('AI ta Krajta owns its metadata, icon and installable manifest and credits 
         isPodcastIconUsed: true,
         isPodcastTouchIconUsed: true,
         isPodcastManifestUsed: true,
-        isCoderBadgePresent: true,
         isFooterPromptbookAbsent: true,
         isLegalCompanyPresent: true,
     });
-
-    // Note: The page wears the badge twice: once in the footer and once floating in the corner, which the page renders
-    //       after the footer. The floating one is the one a visitor sees before scrolling anywhere.
-    const coderBadgeLinks = page.locator(`a[href="${PROMPTBOOK_CODER_URL}"]`);
-    const floatingCoderBadge = coderBadgeLinks.last();
-    const drawnTerminalLine = floatingCoderBadge.locator('[aria-hidden="true"]');
-
-    await expect(coderBadgeLinks).toHaveCount(2);
-
-    // Note: The corner the badge floats in belongs to the cookie tray until the visitor has answered it, which is
-    //       the one thing on the page nothing else may reach over.
-    const cookieConsentContent = getCookieConsentContent(getLanguageFromPathname(AI_TA_KRAJTA_PATH));
-    const cookieConsentTray = page.locator(COOKIE_CONSENT_SELECTOR);
-
-    await expect(floatingCoderBadge).toBeHidden();
-    await page.getByRole('button', { name: cookieConsentContent.acceptAllButton }).click();
-    await expect(cookieConsentTray).toBeHidden();
-
-    await expect(floatingCoderBadge).toBeVisible();
-    await expect(floatingCoderBadge).toBeInViewport({ ratio: 1 });
-
-    // Note: The terminal types its command one character at a time and the octopus it prints then keeps moving, so
-    //       the badge is watched until it is drawn differently than it was served, which is what says it animates.
-    const servedTerminalLine = await drawnTerminalLine.textContent();
-
-    expect(servedTerminalLine?.trim().length).toBeGreaterThan(0);
-    await expect.poll(() => drawnTerminalLine.textContent()).not.toBe(servedTerminalLine);
 
     const manifestResponse = await page.request.get(AI_TA_KRAJTA_MANIFEST_PATH);
 

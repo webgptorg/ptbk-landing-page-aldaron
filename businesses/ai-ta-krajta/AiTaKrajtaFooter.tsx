@@ -10,7 +10,6 @@ import {
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
 } from '@/businesses/ai-ta-krajta/config';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
-import { PromptbookCoderBadge } from '@/components/promptbook-coder/PromptbookCoderBadge';
 import { ORGANIZATION_LEGAL_NAME } from '@/lib/metadata/site-config';
 import Link from 'next/link';
 
@@ -94,14 +93,11 @@ export function AiTaKrajtaFooter() {
                         © {CURRENT_YEAR} {AI_TA_KRAJTA_NAME}. Vydává {ORGANIZATION_LEGAL_NAME}. Všechna práva
                         vyhrazena.
                     </p>
-                    <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
-                        <LegalFooterLinks
-                            language="cs"
-                            className="gap-x-5"
-                            linkClassName="text-white/45 hover:text-white"
-                        />
-                        <PromptbookCoderBadge className="text-white/45" />
-                    </div>
+                    <LegalFooterLinks
+                        language="cs"
+                        className="gap-x-5"
+                        linkClassName="text-white/45 hover:text-white"
+                    />
                 </div>
             </div>
         </footer>

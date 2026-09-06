@@ -1,7 +1,6 @@
 'use client';
 
 import type { AiTaKrajtaArchive } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
-import { AiTaKrajtaCoderBadge } from '@/businesses/ai-ta-krajta/AiTaKrajtaCoderBadge';
 import { AiTaKrajtaCollaborationSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaCollaborationSection';
 import { AiTaKrajtaEpisodeList } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisodeList';
 import { AiTaKrajtaFooter } from '@/businesses/ai-ta-krajta/AiTaKrajtaFooter';
@@ -16,7 +15,6 @@ import { AiTaKrajtaPeopleSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaPeo
  *
  * Note: The provider shares the archive and its shareable URL state. The game keeps its own local state, while the
  *       mini player is last so that it lies over the whole page and the padding at the bottom leaves room for it.
- *       The badge of the tool the page was written with floats in the corner above everything but that player.
  *
  * @param archive episodes of the show as they were read from its feed on the server
  */
@@ -34,7 +32,6 @@ export function AiTaKrajtaPage({ archive }: { readonly archive: AiTaKrajtaArchiv
                 </main>
 
                 <AiTaKrajtaFooter />
-                <AiTaKrajtaCoderBadge />
                 <AiTaKrajtaMiniPlayer />
             </div>
         </AiTaKrajtaPageStateProvider>
