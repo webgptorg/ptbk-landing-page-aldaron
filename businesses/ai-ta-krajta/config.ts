@@ -161,6 +161,11 @@ export const AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE: Readonly<Record<SupportedHomepage
 export const AI_TA_KRAJTA_YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@aitakrajta_tv';
 
 /**
+ * Home of the Promptbook coding-agent runner which helped make the page
+ */
+export const PROMPTBOOK_CODER_URL = 'https://coder.ptbk.io/';
+
+/**
  * The very same channel as the address above, said the way its public feed asks to be named
  *
  * Note: YouTube serves the feed of a channel by this identifier alone and not by the handle the channel is linked
