@@ -4,6 +4,7 @@ import {
     type ShortcodeLinkSourceApp,
 } from '@/lib/shortener/shortcodeLink';
 import { SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
+import { fetchPublicWebPageTitle } from '@/lib/network/publicWebPagePreview';
 import {
     WORKSHOP_COMMENT_SHORTCODE_LINK_TABLE_NAME,
     WORKSHOP_CONTENT_SHORTCODE_LINK_TABLE_NAME,
@@ -23,10 +24,12 @@ type WorkshopMaterialLinkRange = {
     readonly destination: string;
     readonly start: number;
     readonly end: number;
+    readonly isTitleRequired: boolean;
 };
 
 type WorkshopShortcodeLinkMappingRow = {
     readonly destination_url: string;
+    readonly destination_title?: string | null;
     readonly shortcode_link_id: number | string;
 };
 
@@ -47,9 +50,23 @@ type ShortcodeLinkReferenceRow = {
     readonly shortcode: string;
 };
 
+export type WorkshopShortcodeLinkPresentation = {
+    readonly shortUrl: string;
+    readonly title: string;
+};
+
+type WorkshopShortcodeLinkReplacement = string | WorkshopShortcodeLinkPresentation;
+
+type LoadedWorkshopShortcodeLink = WorkshopShortcodeLinkPresentation & {
+    readonly isTitleStored: boolean;
+};
+
 type LoadedWorkshopShortcodeLinks =
-    | { readonly shortUrlByDestination: ReadonlyMap<string, string>; readonly errorMessage: null }
-    | { readonly shortUrlByDestination: null; readonly errorMessage: string };
+    | {
+          readonly shortcodeLinkByDestination: ReadonlyMap<string, LoadedWorkshopShortcodeLink>;
+          readonly errorMessage: null;
+      }
+    | { readonly shortcodeLinkByDestination: null; readonly errorMessage: string };
 
 function getWorkshopMaterialLinkBaseUrl(): string {
     return WORKSHOP_MATERIAL_LINK_BASE_URL;
@@ -130,7 +147,12 @@ function collectMarkdownInlineLinkRanges(markdown: string): readonly WorkshopMat
 
             const destination = markdown.slice(destinationStart + 1, closingAngleBracket);
             if (destination !== '') {
-                ranges.push({ destination, start: destinationStart + 1, end: closingAngleBracket });
+                ranges.push({
+                    destination,
+                    start: destinationStart + 1,
+                    end: closingAngleBracket,
+                    isTitleRequired: false,
+                });
             }
             continue;
         }
@@ -160,7 +182,7 @@ function collectMarkdownInlineLinkRanges(markdown: string): readonly WorkshopMat
 
         const destination = markdown.slice(destinationStart, destinationEnd);
         if (destination !== '') {
-            ranges.push({ destination, start: destinationStart, end: destinationEnd });
+            ranges.push({ destination, start: destinationStart, end: destinationEnd, isTitleRequired: false });
         }
     }
 
@@ -200,6 +222,7 @@ function collectHtmlLinkRanges(markdown: string): readonly WorkshopMaterialLinkR
             destination,
             start: openingAnchorIndex + hrefIndexInAnchor + destinationIndexInHref,
             end: openingAnchorIndex + hrefIndexInAnchor + destinationIndexInHref + destination.length,
+            isTitleRequired: false,
         });
     }
 
@@ -214,7 +237,12 @@ function collectAutolinkRanges(markdown: string): readonly WorkshopMaterialLinkR
         const destination = autolinkMatch[1];
         const matchIndex = autolinkMatch.index ?? 0;
         if (destination !== undefined && !isInsideCode(markdown, matchIndex)) {
-            ranges.push({ destination, start: matchIndex + 1, end: matchIndex + 1 + destination.length });
+            ranges.push({
+                destination,
+                start: matchIndex,
+                end: matchIndex + autolinkMatch[0].length,
+                isTitleRequired: true,
+            });
         }
     }
 
@@ -238,7 +266,7 @@ function collectBareUrlRanges(markdown: string): readonly WorkshopMaterialLinkRa
         const start = matchIndex + leadingWhitespace.length;
 
         if (destination !== '' && !isInsideCode(markdown, start)) {
-            ranges.push({ destination, start, end: start + destination.length });
+            ranges.push({ destination, start, end: start + destination.length, isTitleRequired: true });
         }
     }
 
@@ -265,6 +293,7 @@ function collectReferenceDefinitionRanges(markdown: string): readonly WorkshopMa
             destination,
             start: matchIndex + destinationIndexInDefinition,
             end: matchIndex + destinationIndexInDefinition + destination.length,
+            isTitleRequired: false,
         });
     }
 
@@ -276,9 +305,14 @@ function collectWorkshopMaterialLinkRanges(markdown: string): readonly WorkshopM
         ...collectMarkdownInlineLinkRanges(markdown),
         ...collectHtmlLinkRanges(markdown),
         ...collectAutolinkRanges(markdown),
-        ...collectBareUrlRanges(markdown),
         ...collectReferenceDefinitionRanges(markdown),
-    ].sort((firstRange, secondRange) => firstRange.start - secondRange.start || firstRange.end - secondRange.end);
+        ...collectBareUrlRanges(markdown),
+    ].sort(
+        (firstRange, secondRange) =>
+            firstRange.start - secondRange.start ||
+            firstRange.end - secondRange.end ||
+            Number(firstRange.isTitleRequired) - Number(secondRange.isTitleRequired),
+    );
 
     const nonOverlappingRanges: WorkshopMaterialLinkRange[] = [];
     for (const range of sortedRanges) {
@@ -359,23 +393,75 @@ export function getWorkshopMaterialLinkDestinations(bodyMarkdown: string): reado
     return getWorkshopShortcodeLinkDestinations(bodyMarkdown);
 }
 
+function getWorkshopShortcodeLinkDestinationsRequiringTitle(bodyMarkdown: string): readonly string[] {
+    return Array.from(
+        new Set(
+            collectWorkshopMaterialLinkRanges(bodyMarkdown)
+                .filter((range) => range.isTitleRequired)
+                .map((range) => range.destination)
+                .filter((destination) => getTrackableWorkshopMaterialUrl(destination) !== null),
+        ),
+    );
+}
+
+function escapeMarkdownLinkTitle(title: string): string {
+    return title.replace(/[\\\[\]]/g, '\\$&');
+}
+
+function createMarkdownShortcodeLink(title: string, shortUrl: string): string {
+    return `[${escapeMarkdownLinkTitle(title)}](${shortUrl})`;
+}
+
+function getWorkshopShortcodeLinkFallbackTitle(destinationUrl: string): string {
+    const trackableUrl = getTrackableWorkshopMaterialUrl(destinationUrl);
+
+    return trackableUrl === null ? destinationUrl : new URL(trackableUrl).hostname;
+}
+
+function getStoredWorkshopShortcodeLinkTitle(value: string | null | undefined): string | null {
+    const title = value?.trim() ?? '';
+
+    return title === '' ? null : title;
+}
+
+async function resolveWorkshopShortcodeLinkTitle(destinationUrl: string): Promise<string> {
+    const trackableUrl = getTrackableWorkshopMaterialUrl(destinationUrl);
+    if (trackableUrl === null) {
+        return destinationUrl;
+    }
+
+    try {
+        return await fetchPublicWebPageTitle(trackableUrl);
+    } catch {
+        // A remote page may reject our bounded metadata request, but that must
+        // never prevent a room from handing out its already-safe short link.
+        return getWorkshopShortcodeLinkFallbackTitle(destinationUrl);
+    }
+}
+
 /**
- * Replaces only the address part of each material link. Keeping the Markdown
- * itself intact means content editors continue to own its text, titles, HTML,
- * and layout while every public destination becomes safely shareable.
+ * Replaces a source address with its persisted short URL. An authored Markdown,
+ * HTML, or reference label remains its author's wording; raw URLs and
+ * autolinks receive the fetched page title in ordinary Markdown link syntax.
  */
 export function replaceWorkshopShortcodeLinkDestinations(
     bodyMarkdown: string,
-    shortUrlByDestination: ReadonlyMap<string, string>,
+    shortcodeLinkByDestination: ReadonlyMap<string, WorkshopShortcodeLinkReplacement>,
 ): string {
     let replacedMarkdown = bodyMarkdown;
     const ranges = collectWorkshopMaterialLinkRanges(bodyMarkdown);
 
     for (const range of [...ranges].reverse()) {
-        const shortUrl = shortUrlByDestination.get(range.destination);
-        if (shortUrl !== undefined) {
+        const shortcodeLink = shortcodeLinkByDestination.get(range.destination);
+        if (shortcodeLink !== undefined) {
+            const replacement =
+                typeof shortcodeLink === 'string'
+                    ? shortcodeLink
+                    : range.isTitleRequired
+                      ? createMarkdownShortcodeLink(shortcodeLink.title, shortcodeLink.shortUrl)
+                      : shortcodeLink.shortUrl;
             replacedMarkdown =
-                replacedMarkdown.slice(0, range.start) + shortUrl + replacedMarkdown.slice(range.end);
+                replacedMarkdown.slice(0, range.start) + replacement + replacedMarkdown.slice(range.end);
         }
     }
 
@@ -384,9 +470,9 @@ export function replaceWorkshopShortcodeLinkDestinations(
 
 export function replaceWorkshopMaterialLinkDestinations(
     bodyMarkdown: string,
-    shortUrlByDestination: ReadonlyMap<string, string>,
+    shortcodeLinkByDestination: ReadonlyMap<string, WorkshopShortcodeLinkReplacement>,
 ): string {
-    return replaceWorkshopShortcodeLinkDestinations(bodyMarkdown, shortUrlByDestination);
+    return replaceWorkshopShortcodeLinkDestinations(bodyMarkdown, shortcodeLinkByDestination);
 }
 
 export function getWorkshopShortcodeLinkSourceApp(workshopKind: WorkshopKind): ShortcodeLinkSourceApp {
@@ -409,10 +495,10 @@ async function loadWorkshopShortcodeLinks(
 ): Promise<LoadedWorkshopShortcodeLinks> {
     const { data: mappingData, error: mappingError } = await supabase
         .from(linkOwner.mappingTableName)
-        .select('destination_url, shortcode_link_id')
+        .select('destination_url, destination_title, shortcode_link_id')
         .eq(linkOwner.mappingOwnerColumnName, linkOwner.id);
     if (mappingError) {
-        return { shortUrlByDestination: null, errorMessage: mappingError.message };
+        return { shortcodeLinkByDestination: null, errorMessage: mappingError.message };
     }
 
     const mappings = (mappingData ?? []) as WorkshopShortcodeLinkMappingRow[];
@@ -424,7 +510,7 @@ async function loadWorkshopShortcodeLinks(
         ),
     );
     if (shortcodeLinkIds.length === 0) {
-        return { shortUrlByDestination: new Map(), errorMessage: null };
+        return { shortcodeLinkByDestination: new Map(), errorMessage: null };
     }
 
     const { data: shortcodeLinkData, error: shortcodeLinkError } = await supabase
@@ -432,7 +518,7 @@ async function loadWorkshopShortcodeLinks(
         .select('id, shortcode')
         .in('id', shortcodeLinkIds);
     if (shortcodeLinkError) {
-        return { shortUrlByDestination: null, errorMessage: shortcodeLinkError.message };
+        return { shortcodeLinkByDestination: null, errorMessage: shortcodeLinkError.message };
     }
 
     const shortcodeById = new Map<number, string>(
@@ -444,17 +530,37 @@ async function loadWorkshopShortcodeLinks(
             })
             .filter((shortcodeLink): shortcodeLink is readonly [number, string] => shortcodeLink !== null),
     );
-    const shortUrlByDestination = new Map<string, string>();
+    const shortcodeLinkByDestination = new Map<string, LoadedWorkshopShortcodeLink>();
 
     for (const mapping of mappings) {
         const shortcodeLinkId = getShortcodeLinkId(mapping.shortcode_link_id);
         const shortcode = shortcodeLinkId === null ? undefined : shortcodeById.get(shortcodeLinkId);
         if (shortcode !== undefined) {
-            shortUrlByDestination.set(mapping.destination_url, createPublicShortcodeLinkUrl(shortcode));
+            const storedTitle = getStoredWorkshopShortcodeLinkTitle(mapping.destination_title);
+            shortcodeLinkByDestination.set(mapping.destination_url, {
+                shortUrl: createPublicShortcodeLinkUrl(shortcode),
+                title: storedTitle ?? getWorkshopShortcodeLinkFallbackTitle(mapping.destination_url),
+                isTitleStored: storedTitle !== null,
+            });
         }
     }
 
-    return { shortUrlByDestination, errorMessage: null };
+    return { shortcodeLinkByDestination, errorMessage: null };
+}
+
+async function persistWorkshopShortcodeLinkTitle(
+    supabase: SupabaseClient,
+    linkOwner: WorkshopShortcodeLinkOwner,
+    destination: string,
+    title: string,
+): Promise<string | null> {
+    const { error } = await supabase
+        .from(linkOwner.mappingTableName)
+        .update({ destination_title: title })
+        .eq(linkOwner.mappingOwnerColumnName, linkOwner.id)
+        .eq('destination_url', destination);
+
+    return error?.message ?? null;
 }
 
 /**
@@ -476,16 +582,20 @@ async function materializeWorkshopShortLinks(
     if (destinations.length === 0) {
         return { bodyMarkdown: context.bodyMarkdown, errorMessage: null };
     }
+    const destinationsRequiringTitle = new Set(getWorkshopShortcodeLinkDestinationsRequiringTitle(context.bodyMarkdown));
 
     const loadedShortcodeLinks = await loadWorkshopShortcodeLinks(supabase, linkOwner);
-    if (loadedShortcodeLinks.shortUrlByDestination === null) {
+    if (loadedShortcodeLinks.shortcodeLinkByDestination === null) {
         return { bodyMarkdown: null, errorMessage: loadedShortcodeLinks.errorMessage };
     }
 
     const missingDestinations = destinations.filter(
-        (destination) => !loadedShortcodeLinks.shortUrlByDestination.has(destination),
+        (destination) => !loadedShortcodeLinks.shortcodeLinkByDestination.has(destination),
     );
     for (const destination of missingDestinations) {
+        const destinationTitle = destinationsRequiringTitle.has(destination)
+            ? await resolveWorkshopShortcodeLinkTitle(destination)
+            : null;
         const trackedDestination = createWorkshopShortcodeLinkTrackingUrl(
             destination,
             context.workshopSlug,
@@ -510,6 +620,7 @@ async function materializeWorkshopShortLinks(
                     [linkOwner.mappingOwnerColumnName]: linkOwner.id,
                     destination_url: destination,
                     shortcode_link_id: createdShortcodeLink.shortcodeLink.id,
+                    ...(destinationTitle === null ? {} : { destination_title: destinationTitle }),
                 },
                 { onConflict: `${linkOwner.mappingOwnerColumnName},destination_url`, ignoreDuplicates: true },
             );
@@ -522,12 +633,38 @@ async function materializeWorkshopShortLinks(
         missingDestinations.length === 0
             ? loadedShortcodeLinks
             : await loadWorkshopShortcodeLinks(supabase, linkOwner);
-    if (resolvedShortcodeLinks.shortUrlByDestination === null) {
+    const resolvedShortcodeLinkByDestination = resolvedShortcodeLinks.shortcodeLinkByDestination;
+    if (resolvedShortcodeLinkByDestination === null) {
         return { bodyMarkdown: null, errorMessage: resolvedShortcodeLinks.errorMessage };
     }
 
+    const destinationsWithoutStoredTitle = Array.from(destinationsRequiringTitle).filter(
+        (destination) => !resolvedShortcodeLinkByDestination.get(destination)?.isTitleStored,
+    );
+    for (const destination of destinationsWithoutStoredTitle) {
+        const titleErrorMessage = await persistWorkshopShortcodeLinkTitle(
+            supabase,
+            linkOwner,
+            destination,
+            await resolveWorkshopShortcodeLinkTitle(destination),
+        );
+        if (titleErrorMessage !== null) {
+            return { bodyMarkdown: null, errorMessage: titleErrorMessage };
+        }
+    }
+
+    let shortcodeLinkByDestination = resolvedShortcodeLinkByDestination;
+    if (destinationsWithoutStoredTitle.length > 0) {
+        const reloadedShortcodeLinks = await loadWorkshopShortcodeLinks(supabase, linkOwner);
+        const reloadedShortcodeLinkByDestination = reloadedShortcodeLinks.shortcodeLinkByDestination;
+        if (reloadedShortcodeLinkByDestination === null) {
+            return { bodyMarkdown: null, errorMessage: reloadedShortcodeLinks.errorMessage };
+        }
+        shortcodeLinkByDestination = reloadedShortcodeLinkByDestination;
+    }
+
     return {
-        bodyMarkdown: replaceWorkshopShortcodeLinkDestinations(context.bodyMarkdown, resolvedShortcodeLinks.shortUrlByDestination),
+        bodyMarkdown: replaceWorkshopShortcodeLinkDestinations(context.bodyMarkdown, shortcodeLinkByDestination),
         errorMessage: null,
     };
 }

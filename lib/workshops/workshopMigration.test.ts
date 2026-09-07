@@ -69,6 +69,11 @@ const SHORTCODE_CHAT_LINK_MIGRATION_PATH = path.resolve(
     'migrations/2026-08-2500-online-workshop-chat-shortcode-links.sql',
 );
 const SHORTCODE_CHAT_LINK_MIGRATION_SQL = readFileSync(SHORTCODE_CHAT_LINK_MIGRATION_PATH, 'utf8');
+const SHORTCODE_LINK_TITLE_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-0700-workshop-shortcode-link-titles.sql',
+);
+const SHORTCODE_LINK_TITLE_MIGRATION_SQL = readFileSync(SHORTCODE_LINK_TITLE_MIGRATION_PATH, 'utf8');
 const COMMUNITY_POLL_MIGRATION_PATH = path.resolve(process.cwd(), 'migrations/2026-08-2400-community-polls.sql');
 const COMMUNITY_POLL_MIGRATION_SQL = readFileSync(COMMUNITY_POLL_MIGRATION_PATH, 'utf8');
 const COMMUNITY_POLL_ADMINISTRATION_MIGRATION_PATH = path.resolve(
@@ -640,6 +645,17 @@ describe('workshop database migration', () => {
         expect(SHORTCODE_CHAT_LINK_MIGRATION_SQL).toContain(
             'REVOKE ALL ON TABLE public.workshop_comment_shortcode_links FROM PUBLIC, anon, authenticated',
         );
+    });
+
+    it('remembers a fetched title beside every source-to-shortcode mapping', () => {
+        expect(SHORTCODE_LINK_TITLE_MIGRATION_SQL).toContain(
+            'ALTER TABLE public.workshop_content_shortcode_links',
+        );
+        expect(SHORTCODE_LINK_TITLE_MIGRATION_SQL).toContain(
+            'ALTER TABLE public.workshop_comment_shortcode_links',
+        );
+        expect(SHORTCODE_LINK_TITLE_MIGRATION_SQL).toContain('ADD COLUMN IF NOT EXISTS destination_title text');
+        expect(SHORTCODE_LINK_TITLE_MIGRATION_SQL).toContain("btrim(destination_title) <> ''");
     });
 
     it('remembers how every measured minute of a room was attended', () => {

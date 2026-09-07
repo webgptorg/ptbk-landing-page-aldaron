@@ -5,19 +5,28 @@ import {
     materializeWorkshopCommentShortLinks,
     materializeWorkshopMaterialShortLinks,
     replaceWorkshopMaterialLinkDestinations,
+    type WorkshopShortcodeLinkPresentation,
 } from '@/lib/workshops/workshopMaterialLinks';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { createAdHocShortcodeLinkMock } = vi.hoisted(() => ({
+const { createAdHocShortcodeLinkMock, fetchPublicWebPageTitleMock } = vi.hoisted(() => ({
     createAdHocShortcodeLinkMock: vi.fn(),
+    fetchPublicWebPageTitleMock: vi.fn(),
 }));
 
 vi.mock('@/lib/shortener/shortcodeLinkAdHoc', () => ({
     createAdHocShortcodeLink: createAdHocShortcodeLinkMock,
 }));
 
-afterEach(() => createAdHocShortcodeLinkMock.mockReset());
+vi.mock('@/lib/network/publicWebPagePreview', () => ({
+    fetchPublicWebPageTitle: fetchPublicWebPageTitleMock,
+}));
+
+afterEach(() => {
+    createAdHocShortcodeLinkMock.mockReset();
+    fetchPublicWebPageTitleMock.mockReset();
+});
 
 describe('workshop material tracking links', () => {
     it('adds stable workshop UTM parameters without losing existing query parameters', () => {
@@ -63,21 +72,38 @@ describe('workshop material tracking links', () => {
         ]);
     });
 
-    it('replaces only material hrefs with their persisted short URLs', () => {
+    it('uses the fetched title in Markdown when a raw URL becomes a short link', () => {
         const materialMarkdown =
             '[Inline](https://example.com/inline) and <a href="https://example.com/html">HTML</a> with https://example.com/bare and ![image](https://example.com/image.png)';
         const materialWithShortLinks = replaceWorkshopMaterialLinkDestinations(
             materialMarkdown,
-            new Map([
+            new Map<string, string | WorkshopShortcodeLinkPresentation>([
                 ['https://example.com/inline', 'https://ptbk.io/inline123'],
                 ['https://example.com/html', 'https://ptbk.io/html123'],
-                ['https://example.com/bare', 'https://ptbk.io/bare123'],
+                [
+                    'https://example.com/bare',
+                    { shortUrl: 'https://ptbk.io/bare123', title: 'Příručka [pro účastníky]' },
+                ],
             ]),
         );
 
         expect(materialWithShortLinks).toBe(
-            '[Inline](https://ptbk.io/inline123) and <a href="https://ptbk.io/html123">HTML</a> with https://ptbk.io/bare123 and ![image](https://example.com/image.png)',
+            '[Inline](https://ptbk.io/inline123) and <a href="https://ptbk.io/html123">HTML</a> with [Příručka \\[pro účastníky\\]](https://ptbk.io/bare123) and ![image](https://example.com/image.png)',
         );
+    });
+
+    it('turns a Markdown autolink into one title-backed short link', () => {
+        expect(
+            replaceWorkshopMaterialLinkDestinations(
+                '<https://example.com/autolink>',
+                new Map<string, WorkshopShortcodeLinkPresentation>([
+                    [
+                        'https://example.com/autolink',
+                        { shortUrl: 'https://ptbk.io/autolink123', title: 'Veřejná dokumentace' },
+                    ],
+                ]),
+            ),
+        ).toBe('[Veřejná dokumentace](https://ptbk.io/autolink123)');
     });
 
     it('labels automatic material links by the app which created them', () => {
@@ -164,14 +190,20 @@ describe('workshop material tracking links', () => {
     });
 
     it('reuses the persisted material short-link path for an artificial or moderator chat message', async () => {
-        let mappings: readonly { readonly destination_url: string; readonly shortcode_link_id: number }[] = [];
+        let mappings: readonly {
+            readonly destination_url: string;
+            readonly destination_title?: string;
+            readonly shortcode_link_id: number;
+        }[] = [];
         const mappingUpsert = vi.fn(async (values: {
             readonly destination_url: string;
+            readonly destination_title?: string;
             readonly shortcode_link_id: number;
         }) => {
             mappings = [
                 {
                     destination_url: values.destination_url,
+                    ...(values.destination_title === undefined ? {} : { destination_title: values.destination_title }),
                     shortcode_link_id: values.shortcode_link_id,
                 },
             ];
@@ -208,6 +240,7 @@ describe('workshop material tracking links', () => {
             },
             errorMessage: null,
         });
+        fetchPublicWebPageTitleMock.mockResolvedValue('Průvodce AI agenty');
 
         const materializedLink = await materializeWorkshopCommentShortLinks(
             { from } as unknown as SupabaseClient,
@@ -220,7 +253,7 @@ describe('workshop material tracking links', () => {
         );
 
         expect(materializedLink).toEqual({
-            bodyMarkdown: 'Podívejte se na https://ptbk.io/comment-45.',
+            bodyMarkdown: 'Podívejte se na [Průvodce AI agenty](https://ptbk.io/comment-45).',
             errorMessage: null,
         });
         expect(createAdHocShortcodeLinkMock).toHaveBeenCalledWith(expect.anything(), {
@@ -234,9 +267,72 @@ describe('workshop material tracking links', () => {
             {
                 comment_id: 'comment-45',
                 destination_url: 'https://example.com/guide',
+                destination_title: 'Průvodce AI agenty',
                 shortcode_link_id: 45,
             },
             { onConflict: 'comment_id,destination_url', ignoreDuplicates: true },
         );
+        expect(fetchPublicWebPageTitleMock).toHaveBeenCalledWith('https://example.com/guide');
+    });
+
+    it('backfills a title for an existing community short link without making a second short link', async () => {
+        let mappings: readonly {
+            readonly destination_url: string;
+            readonly destination_title: string | null;
+            readonly shortcode_link_id: number;
+        }[] = [
+            {
+                destination_url: 'https://example.com/community-guide',
+                destination_title: null,
+                shortcode_link_id: 46,
+            },
+        ];
+        const updateDestination = vi.fn(async (_columnName: string, destination: string) => {
+            mappings = mappings.map((mapping) =>
+                mapping.destination_url === destination ? { ...mapping, destination_title: 'Průvodce komunitou' } : mapping,
+            );
+            return { error: null };
+        });
+        const updateOwner = vi.fn(() => ({ eq: updateDestination }));
+        const mappingUpdate = vi.fn(() => ({ eq: updateOwner }));
+        const from = vi.fn((tableName: string) => {
+            if (tableName === 'workshop_content_shortcode_links') {
+                return {
+                    select: vi.fn(() => ({ eq: vi.fn(async () => ({ data: mappings, error: null })) })),
+                    update: mappingUpdate,
+                };
+            }
+
+            if (tableName === 'ShortcodeLink') {
+                return {
+                    select: vi.fn(() => ({
+                        in: vi.fn(async () => ({ data: [{ id: 46, shortcode: 'community-46' }], error: null })),
+                    })),
+                };
+            }
+
+            throw new Error(`Unexpected table ${tableName}`);
+        });
+        fetchPublicWebPageTitleMock.mockResolvedValue('Průvodce komunitou');
+
+        const materializedLink = await materializeWorkshopMaterialShortLinks(
+            { from } as unknown as SupabaseClient,
+            {
+                workshopSlug: 'komunita',
+                workshopKind: 'community',
+                contentBlockId: 'content-46',
+                bodyMarkdown: 'Začněte zde: https://example.com/community-guide',
+            },
+        );
+
+        expect(materializedLink).toEqual({
+            bodyMarkdown: 'Začněte zde: [Průvodce komunitou](https://ptbk.io/community-46)',
+            errorMessage: null,
+        });
+        expect(createAdHocShortcodeLinkMock).not.toHaveBeenCalled();
+        expect(mappingUpdate).toHaveBeenCalledWith({ destination_title: 'Průvodce komunitou' });
+        expect(updateOwner).toHaveBeenCalledWith('content_block_id', 'content-46');
+        expect(updateDestination).toHaveBeenCalledWith('destination_url', 'https://example.com/community-guide');
+        expect(fetchPublicWebPageTitleMock).toHaveBeenCalledWith('https://example.com/community-guide');
     });
 });

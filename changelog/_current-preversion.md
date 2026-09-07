@@ -1,4 +1,11 @@
 # Current preversion
+- Gave the automatically shortened links of `/cs/komunita` and the online workshop rooms their context back: a raw
+  URL or Markdown autolink now becomes `[the page title](the same short link)` for members, while an editor's own
+  Markdown, HTML, and reference-link labels remain their own words. The page title is read once through the same
+  bounded, public-only preview path used by community projects, stored beside the durable source-to-shortcode mapping,
+  and reused on later room loads; a page which cannot be previewed still receives its short link with its hostname as
+  a safe label. Existing raw-link mappings fill their missing title the next time they are read, so old materials and
+  moderator messages gain the context too without rewriting their original Markdown.
 - Made the landing-page audience of an administered term actionable without making a second contact system. The
   `Účastníci` section of `/admin/workshops` now puts `Registrovaní na webu` beside `Účastníci v místnosti`: the first
   says how many people signed up through the event form and leads to the exact filtered list in `/admin/contacts`,
