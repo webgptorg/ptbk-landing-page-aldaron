@@ -45,11 +45,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
   measurements of the animal along its own length. The snake of the minigame
   starts in exactly that shape, in the frame the still logo occupied, and only
   then eases into the proportions, colours and speed of a game snake.
-  The main page also carries a compact, fixed Promptbook coder terminal badge:
-  it enters `$ ptbk`, becomes the one-line ASCII octopus, and lightly reacts to
-  nearby pointer movement, hover, scrolling and the snake game starting without
-  interrupting the page. It opens `https://coder.ptbk.io/`; the shared podcast
-  footer credits it as "Done by Promptbook coder" with the same link.
 - `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` are the two pages beside
   the podcast. They are named once, in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page

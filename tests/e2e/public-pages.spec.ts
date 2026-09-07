@@ -167,14 +167,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
             const isPodcastManifestUsed = identityTags.some(
                 (element) => element.getAttribute('rel') === 'manifest' && element.getAttribute('href') === manifestPath,
             );
-            const isPromptbookCoderFooterLinkPresent = Array.from(document.querySelectorAll('footer a')).some(
-                (link) =>
-                    link.textContent?.trim() === 'Done by Promptbook coder' &&
-                    link.getAttribute('href') === 'https://coder.ptbk.io/',
-            );
-            const promptbookCoderBadge = document.querySelector('[data-ai-ta-krajta-promptbook-coder-badge]');
-            const isPromptbookCoderBadgePresent =
-                promptbookCoderBadge?.getAttribute('href') === 'https://coder.ptbk.io/';
+            const isFooterPromptbookAbsent = !footerText.includes('Promptbook');
             const isLegalCompanyPresent = footerText.includes('AI Web s.r.o.');
 
             return {
@@ -183,8 +176,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
                 isPodcastIconUsed,
                 isPodcastTouchIconUsed,
                 isPodcastManifestUsed,
-                isPromptbookCoderFooterLinkPresent,
-                isPromptbookCoderBadgePresent,
+                isFooterPromptbookAbsent,
                 isLegalCompanyPresent,
             };
         },
@@ -201,8 +193,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
         isPodcastIconUsed: true,
         isPodcastTouchIconUsed: true,
         isPodcastManifestUsed: true,
-        isPromptbookCoderFooterLinkPresent: true,
-        isPromptbookCoderBadgePresent: true,
+        isFooterPromptbookAbsent: true,
         isLegalCompanyPresent: true,
     });
 

@@ -2,7 +2,6 @@
 
 import { AiTaKrajtaMark } from '@/businesses/ai-ta-krajta/AiTaKrajtaMark';
 import { AiTaKrajtaSnakeGame } from '@/businesses/ai-ta-krajta/AiTaKrajtaSnakeGame';
-import { AI_TA_KRAJTA_SNAKE_GAME_STARTED_EVENT_NAME } from '@/businesses/ai-ta-krajta/aiTaKrajtaPromptbookCoder';
 import {
     AI_TA_KRAJTA_MARK_SHADOW_CLASS_NAME,
     type AiTaKrajtaMarkFrame,
@@ -81,7 +80,6 @@ export function AiTaKrajtaSnakeTerrarium() {
 
         setInitialMarkFrame(markFrame);
         setIsLogoOverlayVisible(true);
-        window.dispatchEvent(new Event(AI_TA_KRAJTA_SNAKE_GAME_STARTED_EVENT_NAME));
     };
 
     const handleInitialMarkFrameDrawn = useCallback(() => {
