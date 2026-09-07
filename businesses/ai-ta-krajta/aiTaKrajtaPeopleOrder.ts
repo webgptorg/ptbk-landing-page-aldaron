@@ -40,7 +40,7 @@ export function orderAiTaKrajtaPeopleByAppearances(
  *
  * Note: A roster written down once has the same person on top of it every single time, which reads as a ranking the
  *       show never made. The draw keeps the list alive between visits while somebody who is on every other episode
- *       still comes up high far more often than a guest of one díl.
+ *       still comes up high far more often than somebody named in one díl.
  */
 export function shuffleAiTaKrajtaPeopleByAppearances(
     people: readonly AiTaKrajtaPerson[],

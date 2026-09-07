@@ -13,7 +13,6 @@ function createPerson(photoFileName: string | null): AiTaKrajtaPerson {
     return {
         id: 'someone',
         name: 'Někdo Nový',
-        role: 'guest',
         headline: 'Přišel na jeden díl.',
         url: null,
         photoFileName,

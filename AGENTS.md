@@ -30,13 +30,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `scripts/_cutAiTaKrajtaPeoplePortraits.mjs` out of the episode cover the show
   itself published them on, or out of the picture they publish of themselves when
   no cover carries them; the roster names only the file, and a person without one
-  keeps the initials on the brand gradient. Within each of the two groups the
-  people are drawn anew for every visit, weighted by how many episodes of the
-  archive name them, so somebody heard often comes up high far more often than a
-  guest of one díl without the list ever becoming a ranking. The draw is local
-  state and is made in the browser; the page itself is built in the order the
-  draw leans towards, from the most often named person to the least often named
-  one, so the browser hydrates into the list it was sent.
+  keeps the initials on the brand gradient. The one people list is drawn anew
+  for every visit, weighted by how many episodes of the archive name each
+  person, so somebody heard often comes up high far more often than someone in
+  one díl without the list ever becoming a ranking. The draw is local state and
+  is made in the browser; the page itself is built in the order the draw leans
+  towards, from the most often named person to the least often named one, so the
+  browser hydrates into the list it was sent.
   Collaboration submissions use `/admin/contacts`. Its tab icon is the page's
   own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are
   rounded and transparent, while the raster fills its square. That drawing is

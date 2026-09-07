@@ -14,7 +14,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 const MOUNT_COUNT = 20;
 
 /**
- * An archive which names one guest far more often than anybody else, so that the leaning of the draw is visible
+ * An archive which names one person far more often than anybody else, so that the leaning of the draw is visible
  */
 const EPISODE_COUNT_BY_PERSON_ID: ReadonlyMap<string, number> = new Map([['petr-brzek', 99]]);
 
