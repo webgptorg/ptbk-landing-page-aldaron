@@ -1,4 +1,11 @@
 import moment from 'moment';
+import type { AdminContactGroup } from '@/lib/admin/adminContactJoin';
+import { isEventRegistrationPlaceName } from '@/lib/events/eventTypes';
+import {
+    isWorkshopRegistrationForTerm,
+    readWorkshopRegistration,
+    type WorkshopRegistrationTerm,
+} from '@/lib/workshops/workshopRegistrations';
 import type { Contact } from './Contact';
 import { parseContactDate } from './contactDates';
 import { getContactSearchText, normalizeSearchText } from './contactValues';
@@ -47,6 +54,14 @@ export type ContactsFilter = {
     readonly userNotePresence: PresenceFilterValue;
     readonly contactedStatus: ContactedFilterValue;
     readonly contactOriginSelections: readonly ContactOriginSelection[];
+
+    /**
+     * A particular event term whose landing-page registrations are shown, or `null` for no term-specific restriction.
+     *
+     * Note: The contact row stores neither a workshop id nor a foreign key. Its note is the durable source of which
+     *       term it registered for, so the same term shape used by registration counting identifies it here.
+     */
+    readonly workshopRegistrationTerm: WorkshopRegistrationTerm | null;
 };
 
 /**
@@ -61,6 +76,7 @@ export const EMPTY_CONTACTS_FILTER: ContactsFilter = {
     userNotePresence: 'ANY',
     contactedStatus: 'ANY',
     contactOriginSelections: EMPTY_CONTACT_ORIGIN_SELECTIONS,
+    workshopRegistrationTerm: null,
 };
 
 /**
@@ -73,7 +89,9 @@ export const DEFAULT_CONTACTS_FILTER: ContactsFilter = {
     contactedStatus: 'NOT_CONTACTED',
 };
 
-const CONTACTS_FILTER_SCALAR_KEYS: readonly (Exclude<keyof ContactsFilter, 'contactOriginSelections'>)[] = [
+const CONTACTS_FILTER_SCALAR_KEYS: readonly (
+    Exclude<keyof ContactsFilter, 'contactOriginSelections' | 'workshopRegistrationTerm'>
+)[] = [
     'searchQuery',
     'createdFromDate',
     'createdToDate',
@@ -90,7 +108,9 @@ export function isContactsFilterActive(filter: ContactsFilter): boolean {
     return (
         CONTACTS_FILTER_SCALAR_KEYS.some(
             (filterKey) => filter[filterKey] !== EMPTY_CONTACTS_FILTER[filterKey],
-        ) || isContactOriginSelectionActive(filter.contactOriginSelections)
+        ) ||
+        filter.workshopRegistrationTerm !== null ||
+        isContactOriginSelectionActive(filter.contactOriginSelections)
     );
 }
 
@@ -162,6 +182,40 @@ function matchesContactedStatus(contact: Contact, contactedStatus: ContactedFilt
     return contactedStatus === 'CONTACTED' ? isContacted : !isContacted;
 }
 
+type ContactWithAdminContactGroup = Contact & {
+    readonly contactGroup?: AdminContactGroup | null;
+};
+
+/**
+ * Read every source Contact row which can describe a registration for the identity displayed by the contacts admin.
+ *
+ * Note: The contacts administration merges rows with the same normalized e-mail. Its displayed primary row can be a
+ *       newer newsletter or inquiry, while an older source row is the actual event registration. A term filter must
+ *       therefore inspect the complete source group or it could hide a person who really registered.
+ */
+function getSourceContactsForRegistration(contact: Contact): readonly Contact[] {
+    const sourceContacts = (contact as ContactWithAdminContactGroup).contactGroup?.contacts;
+
+    return sourceContacts === undefined || sourceContacts.length === 0 ? [contact] : sourceContacts;
+}
+
+/**
+ * Does the contact record one registration for the requested event term?
+ *
+ * Note: The origin check comes before parsing the note. A term-like note left in a different form must not become a
+ *       workshop registration merely because it contains a date or a slug.
+ */
+function matchesWorkshopRegistrationTerm(contact: Contact, workshopRegistrationTerm: WorkshopRegistrationTerm | null): boolean {
+    return (
+        workshopRegistrationTerm === null ||
+        getSourceContactsForRegistration(contact).some(
+            (sourceContact) =>
+                isEventRegistrationPlaceName(sourceContact.placeName) &&
+                isWorkshopRegistrationForTerm(readWorkshopRegistration(sourceContact.userNote), workshopRegistrationTerm),
+        )
+    );
+}
+
 /**
  * Does the contact match every part of the filter?
  */
@@ -177,6 +231,7 @@ function matchesContactsFilter(
         matchesPresence(contact.userNote, filter.userNotePresence) &&
         matchesCreatedDateRange(contact, filter.createdFromDate, filter.createdToDate) &&
         matchesSearchQuery(contact, filter.searchQuery) &&
+        matchesWorkshopRegistrationTerm(contact, filter.workshopRegistrationTerm) &&
         matchesContactOriginSelections(contact, contactOriginSelections)
     );
 }

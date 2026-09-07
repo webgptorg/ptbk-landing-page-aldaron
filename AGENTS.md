@@ -77,7 +77,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   reactions, content, attached community polls, and settings. Every term says both
   of its audiences: the people registered on the landing page of its event, and
   the people who entered its room. A room which is no term of an event says
-  nothing about registrations at all.
+  nothing about registrations at all. The registration block opens the exact
+  filtered `/admin/contacts` list and its shared CSV, vCard, and Book exports;
+  it never creates a second contact table or serializer in workshop administration.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
@@ -148,6 +150,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   terms had slugs keep counting. Registration forms write the term through the
   same line prefixes that rule reads back. Contacts are still gathered, recorded
   and shown only by `/admin/contacts`; counting reads nothing but their notes.
+  The registration actions in workshop administration carry that same term filter
+  into the contacts list and its exports.
 - Workshop polls are read-only in workshop administration. Stage settings contain
   the live stream and recording teaser. An end may be empty; admins can record,
   adjust, clear, and reopen it. Overview analytics are zoomable and share their

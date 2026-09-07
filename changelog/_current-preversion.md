@@ -1,4 +1,18 @@
 # Current preversion
+- Made the landing-page audience of an administered term actionable without making a second contact system. The
+  `Účastníci` section of `/admin/workshops` now puts `Registrovaní na webu` beside `Účastníci v místnosti`: the first
+  says how many people signed up through the event form and leads to the exact filtered list in `/admin/contacts`,
+  while the second remains the people who actually opened the participant room. From that registration block an
+  administrator can also export CSV, vCard, or AI context directly. Those are the very same contact list and export
+  formats that `/admin/contacts` already owns, rather than a copied table, serializer, or store.
+
+  The shared contact filter identifies a registration by the same source places and slug, Prague-day, and exact-moment
+  aliases used to count the term, so old registrations written before stable term URLs continue to appear and export
+  with their term. Answered contacts remain included in this purpose-built view; clearing its filter returns to the
+  ordinary contacts dashboard. A group registration still counts every person it signed up, although its export has
+  one Contact record because no separate contact exists for the other people in that group. Permanent rooms without an
+  event have no such block.
+
 - Said of every term in `/admin/workshops` how many people signed up for it, next to how many of them really came.
   Until now the administration counted one audience only — the people who entered the live room through the participant
   application — so a term which nobody had opened yet looked as though nobody wanted it, however full its registration

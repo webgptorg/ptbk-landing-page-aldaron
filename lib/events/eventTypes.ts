@@ -83,3 +83,13 @@ export const EVENT_TYPE_DEFINITION_LIST: readonly EventTypeDefinition[] = EVENT_
 export const EVENT_REGISTRATION_PLACE_NAMES: readonly string[] = EVENT_TYPE_DEFINITION_LIST.map(
     (eventTypeDefinition) => eventTypeDefinition.registrationPlaceName,
 );
+
+/**
+ * Whether one gathered contact comes from a landing-page registration form of an administered event.
+ *
+ * Note: Registration notes are meaningful only at these origins. Reusing this rule whenever contacts are selected
+ *       keeps an ordinary contact whose note happens to resemble a registration out of an event audience.
+ */
+export function isEventRegistrationPlaceName(placeName: string | null): boolean {
+    return placeName !== null && EVENT_REGISTRATION_PLACE_NAMES.includes(placeName);
+}

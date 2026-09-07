@@ -11,8 +11,8 @@ import {
     getContactsExportFormatOrNull,
     type ContactsExportFormat,
 } from './contactsExportFormats';
-import { selectContacts, type ContactsSelection } from './contactsSelection';
-import { buildContactsExportUrl, describeContactsExportScope } from './exportContacts';
+import { createWorkshopRegistrationContactsSelection, selectContacts, type ContactsSelection } from './contactsSelection';
+import { buildContactsDashboardUrl, buildContactsExportUrl, describeContactsExportScope } from './exportContacts';
 import {
     DEFAULT_CONTACTS_FILTER,
     EMPTY_CONTACTS_FILTER,
@@ -31,6 +31,7 @@ import { getContactLink } from './contactLinks';
 import { serializeContactsAsCsv } from './serializeContactsAsCsv';
 import { serializeContactsAsVcard } from './serializeContactsAsVcard';
 import { DEFAULT_CONTACTS_SORT_STATE, sortContacts, toggleContactsSortState } from './sortContacts';
+import type { WorkshopRegistrationTerm } from '@/lib/workshops/workshopRegistrations';
 
 /**
  * Build one contact where only the interesting values are filled in
@@ -75,6 +76,11 @@ const CAPEK = buildContact({
 const ANONYMOUS = buildContact({ id: 3, createdAt: '2026-06-01T10:00:00.000Z' });
 
 const ALL_CONTACTS = [NOVAK, CAPEK, ANONYMOUS];
+
+const ONLINE_WORKSHOP_TERM: WorkshopRegistrationTerm = {
+    slug: 'online-workshop-2026-08-26',
+    startsAt: '2026-08-26T19:00:00+02:00',
+};
 
 /**
  * Contact gathered by a landing page, with everything the export has to deal with filled in
@@ -217,6 +223,72 @@ describe('filterContacts', () => {
                 contactOriginSelections: [{ appName: 'Landing page' }],
             }),
         ).toBe(true);
+    });
+
+    it('selects event registrations for one term with the same historical identifiers as the registration count', () => {
+        const contactsWithRegistrations = [
+            buildContact({
+                id: 10,
+                placeName: 'OnlineWorkshopRegistration',
+                userNote: JSON.stringify({ selectedDateId: ONLINE_WORKSHOP_TERM.slug, participantCount: 1 }),
+            }),
+            buildContact({
+                id: 11,
+                placeName: 'AiSupervizeMiniWorkshopRegistration',
+                userNote: JSON.stringify({ selectedDateId: '2026-08-26', participantCount: 3 }),
+            }),
+            buildContact({
+                id: 12,
+                placeName: 'OnlineWorkshopRegistration',
+                userNote: 'Online workshop registration\nDate: středa 26. 8. 2026 19:00',
+            }),
+            buildContact({
+                id: 13,
+                placeName: 'Newsletter',
+                userNote: JSON.stringify({ selectedDateId: ONLINE_WORKSHOP_TERM.slug, participantCount: 1 }),
+            }),
+            buildContact({
+                id: 14,
+                placeName: 'OnlineWorkshopRegistration',
+                userNote: JSON.stringify({ selectedDateId: 'online-workshop-2026-09-02', participantCount: 1 }),
+            }),
+            {
+                ...buildContact({
+                    id: 15,
+                    email: 'registered@example.com',
+                    placeName: 'Newsletter',
+                    userNote: 'Nesouvisející novější kontakt',
+                }),
+                contactGroup: {
+                    normalizedEmail: 'registered@example.com',
+                    contacts: [
+                        buildContact({
+                            id: 15,
+                            email: 'registered@example.com',
+                            placeName: 'Newsletter',
+                            userNote: 'Nesouvisející novější kontakt',
+                        }),
+                        buildContact({
+                            id: 16,
+                            email: 'registered@example.com',
+                            placeName: 'OnlineWorkshopRegistration',
+                            userNote: JSON.stringify({
+                                selectedDateId: ONLINE_WORKSHOP_TERM.slug,
+                                participantCount: 1,
+                            }),
+                        }),
+                    ],
+                    workshopParticipations: [],
+                    workshopFeedbacks: [],
+                },
+            },
+        ];
+        const contactsSelection = createWorkshopRegistrationContactsSelection(ONLINE_WORKSHOP_TERM);
+
+        expect(filterContacts(contactsWithRegistrations, contactsSelection.filter).map(({ id }) => id)).toEqual([
+            10, 11, 12, 15,
+        ]);
+        expect(isContactsFilterActive(contactsSelection.filter)).toBe(true);
     });
 });
 
@@ -446,6 +518,7 @@ describe('the shared link to one view of the contacts table', () => {
                 { appName: 'Landing page', placeName: 'Online workshop' },
                 { appName: 'Podcast' },
             ],
+            workshopRegistrationTerm: ONLINE_WORKSHOP_TERM,
         },
         sortState: { columnKey: 'fullname', direction: 'ASCENDING' },
         contactsPerPage: 200,
@@ -469,6 +542,7 @@ describe('the shared link to one view of the contacts table', () => {
         expect(searchParams.get('token')).toBe('secret');
         expect(searchParams.get('search')).toBe('novák praha');
         expect(searchParams.get('origins')).not.toBeNull();
+        expect(searchParams.get('registrationTerm')).not.toBeNull();
     });
 
     it('drops the parameters of the values which went back to the default', () => {
@@ -631,6 +705,17 @@ describe('the link which opens one export in a new tab', () => {
         expect(
             selectContacts(ALL_CONTACTS, parseContactsViewState(exportUrl.searchParams)).map((contact) => contact.id),
         ).toEqual([1, 3]);
+    });
+
+    it('uses one term-specific contacts selection for the dashboard and every export', () => {
+        const contactsSelection = createWorkshopRegistrationContactsSelection(ONLINE_WORKSHOP_TERM);
+        const contactsDashboardUrl = new URL(buildContactsDashboardUrl(contactsSelection), 'http://localhost');
+        const exportUrl = buildExportUrl(CONTACTS_EXPORT_FORMATS[0], contactsSelection);
+
+        expect(contactsDashboardUrl.pathname).toBe('/admin/contacts');
+        expect(contactsDashboardUrl.searchParams.get('contacted')).toBe('ANY');
+        expect(parseContactsViewState(contactsDashboardUrl.searchParams).filter).toEqual(contactsSelection.filter);
+        expect(parseContactsViewState(exportUrl.searchParams).filter).toEqual(contactsSelection.filter);
     });
 });
 

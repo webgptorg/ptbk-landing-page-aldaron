@@ -45,6 +45,11 @@ const ALREADY_ANSWERED = {
     createdAt: '2026-06-01T10:00:00.000Z',
 };
 
+const ONLINE_WORKSHOP_TERM = {
+    slug: 'online-workshop-2026-08-26',
+    startsAt: '2026-08-26T19:00:00+02:00',
+};
+
 /**
  * Let the database answer with the given contacts, in the order in which they are gathered
  */
@@ -75,6 +80,13 @@ function requestContactsExport(formatId: string, viewSearchParams = ''): Promise
     });
 }
 
+function createWorkshopRegistrationSearchParams(): string {
+    return new URLSearchParams({
+        contacted: 'ANY',
+        registrationTerm: JSON.stringify(ONLINE_WORKSHOP_TERM),
+    }).toString();
+}
+
 describe('the export of the contacts served in a new tab', () => {
     beforeEach(() => {
         getWorkshopDatabaseOrNullMock.mockReset();
@@ -103,6 +115,37 @@ describe('the export of the contacts served in a new tab', () => {
         expect(response.status).toBe(200);
         expect(exportedFile).toContain('Karel Čapek');
         expect(exportedFile).not.toContain('Jan Novák');
+    });
+
+    it('exports only the contact records registered for the requested event term', async () => {
+        serveContacts([
+            {
+                ...NOVAK,
+                fullname: 'Registrovaný člověk',
+                isContacted: true,
+                placeName: 'OnlineWorkshopRegistration',
+                userNote: JSON.stringify({ selectedDateId: ONLINE_WORKSHOP_TERM.slug, participantCount: 1 }),
+            },
+            {
+                ...CAPEK,
+                fullname: 'Jiný termín',
+                placeName: 'OnlineWorkshopRegistration',
+                userNote: JSON.stringify({ selectedDateId: 'online-workshop-2026-09-02', participantCount: 1 }),
+            },
+            {
+                ...ALREADY_ANSWERED,
+                fullname: 'Stejná poznámka mimo registraci',
+                placeName: 'Newsletter',
+                userNote: JSON.stringify({ selectedDateId: ONLINE_WORKSHOP_TERM.slug, participantCount: 1 }),
+            },
+        ]);
+
+        const response = await requestContactsExport('CSV', createWorkshopRegistrationSearchParams());
+        const exportedFile = await response.text();
+
+        expect(exportedFile).toContain('Registrovaný člověk');
+        expect(exportedFile).not.toContain('Jiný termín');
+        expect(exportedFile).not.toContain('Stejná poznámka mimo registraci');
     });
 
     it('serves the vCard file of the very same view', async () => {

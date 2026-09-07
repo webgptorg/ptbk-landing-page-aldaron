@@ -197,6 +197,17 @@ export function getWorkshopRegistrationTermIds(term: WorkshopRegistrationTerm): 
 }
 
 /**
+ * Whether one parsed registration belongs to this term, whichever identifier the form recorded before or after terms
+ * had their own stable addresses.
+ */
+export function isWorkshopRegistrationForTerm(
+    registration: WorkshopRegistration | null,
+    term: WorkshopRegistrationTerm,
+): boolean {
+    return registration !== null && getWorkshopRegistrationTermIds(term).includes(registration.termId);
+}
+
+/**
  * Add up the people every term was registered for, by the identifier each registration named its term with
  *
  * @param registrations the registrations read out of the gathered notes, where a note which is no registration reads

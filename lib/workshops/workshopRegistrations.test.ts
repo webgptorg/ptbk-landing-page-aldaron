@@ -2,6 +2,7 @@ import {
     countRegisteredParticipantsByTermId,
     getRegisteredParticipantCount,
     getWorkshopRegistrationTermIds,
+    isWorkshopRegistrationForTerm,
     readWorkshopRegistration,
     REGISTRATION_TERM_MOMENT_LINE_PREFIX,
     REGISTRATION_TERM_SLUG_LINE_PREFIX,
@@ -167,5 +168,29 @@ describe('counting the people registered for a term', () => {
         expect(
             getWorkshopRegistrationTermIds({ slug: '2026-09-09', startsAt: AI_SUPERVIZE_MINI_TERM.startsAt }),
         ).toEqual(['2026-09-09', 'středa 9. 9. 2026 13:00']);
+    });
+
+    it('recognizes every historical identifier of a term when selecting its registration records', () => {
+        expect(
+            isWorkshopRegistrationForTerm(
+                { termId: ONLINE_WORKSHOP_TERM.slug, participantCount: 1 },
+                ONLINE_WORKSHOP_TERM,
+            ),
+        ).toBe(true);
+        expect(
+            isWorkshopRegistrationForTerm({ termId: '2026-08-26', participantCount: 1 }, ONLINE_WORKSHOP_TERM),
+        ).toBe(true);
+        expect(
+            isWorkshopRegistrationForTerm(
+                { termId: 'středa 26. 8. 2026 19:00', participantCount: 1 },
+                ONLINE_WORKSHOP_TERM,
+            ),
+        ).toBe(true);
+        expect(
+            isWorkshopRegistrationForTerm(
+                { termId: 'online-workshop-2026-09-02', participantCount: 1 },
+                ONLINE_WORKSHOP_TERM,
+            ),
+        ).toBe(false);
     });
 });

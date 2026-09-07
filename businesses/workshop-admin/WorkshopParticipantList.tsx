@@ -282,10 +282,11 @@ export function WorkshopParticipantList({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h2 className="flex items-center gap-2 text-xl font-bold text-slate-950">
-                            <Users className="h-5 w-5 text-cyan-600" /> Účastníci
+                            <Users className="h-5 w-5 text-cyan-600" /> Účastníci v místnosti
                         </h2>
                         <p className="mt-1 text-sm text-slate-500">
-                            Pro velké workshopy se načítá jen vybraná stránka. Detail otevře úplnou časovou osu člověka.
+                            Lidé, kteří do místnosti opravdu vstoupili. Pro velké workshopy se načítá jen vybraná
+                            stránka; detail otevře úplnou časovou osu člověka.
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">

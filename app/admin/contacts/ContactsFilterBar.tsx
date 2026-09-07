@@ -111,6 +111,12 @@ export function ContactsFilterBar(props: ContactsFilterBarProps) {
                     onChange={(userNotePresence) => changeFilter({ userNotePresence })}
                 />
             </div>
+            {filter.workshopRegistrationTerm !== null && (
+                <p className="mt-3 rounded-md border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm text-cyan-900">
+                    Zobrazeny jsou registrace na termín{' '}
+                    <strong>{filter.workshopRegistrationTerm.slug}</strong>.
+                </p>
+            )}
             {isContactsFilterActive(filter) && (
                 <Button className="mt-3" variant="ghost" size="sm" onClick={() => onChangeFilter(EMPTY_CONTACTS_FILTER)}>
                     <X className="mr-1 h-4 w-4" />

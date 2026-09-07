@@ -46,6 +46,7 @@ import { WorkshopFeedbackAdmin } from '@/businesses/workshop-admin/WorkshopFeedb
 import { WorkshopParticipantList } from '@/businesses/workshop-admin/WorkshopParticipantList';
 import { WorkshopPollAdmin } from '@/businesses/workshop-admin/WorkshopPollAdmin';
 import { WorkshopReactionSummary } from '@/businesses/workshop-admin/WorkshopReactionSummary';
+import { WorkshopRegistrationContacts } from '@/businesses/workshop-admin/WorkshopRegistrationContacts';
 import { WorkshopSelectorCardList } from '@/businesses/workshop-admin/WorkshopSelectorCardList';
 import { WorkshopSettingsForm } from '@/businesses/workshop-admin/WorkshopSettingsForm';
 import { mergeWorkshopAdminSnapshot } from '@/businesses/workshop-admin/workshopAdminSnapshot';
@@ -605,7 +606,8 @@ export function WorkshopAdminDashboard({
                             />
                         </TabsContent>
 
-                        <TabsContent value="participants">
+                        <TabsContent value="participants" className="space-y-6">
+                            {selectedWorkshop !== null && <WorkshopRegistrationContacts workshop={selectedWorkshop} />}
                             <WorkshopParticipantList
                                 workshopId={snapshot.workshop.id}
                                 workshopStartsAt={scheduleStartsAt}

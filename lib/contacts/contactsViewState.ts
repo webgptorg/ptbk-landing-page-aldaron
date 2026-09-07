@@ -8,6 +8,7 @@ import {
     type UrlViewValueCodec,
 } from '@/lib/api/urlViewState';
 import moment from 'moment';
+import type { WorkshopRegistrationTerm } from '@/lib/workshops/workshopRegistrations';
 import { CONTACT_COLUMN_DEFINITIONS } from './contactColumnDefinitions';
 import {
     areContactOriginSelectionsEqual,
@@ -155,6 +156,51 @@ const CONTACT_ORIGIN_SELECTIONS_VALUE_CODEC: ContactsViewValueCodec<readonly Con
 };
 
 /**
+ * Read the event term carried by a contacts link made from an event administration.
+ *
+ * JSON keeps a slug and a timestamp together without assuming which punctuation a future stable slug may contain.
+ */
+function readWorkshopRegistrationTerm(parameterValue: string): WorkshopRegistrationTerm | null {
+    let parsedValue: unknown;
+
+    try {
+        parsedValue = JSON.parse(parameterValue);
+    } catch {
+        return null;
+    }
+
+    if (typeof parsedValue !== 'object' || parsedValue === null || Array.isArray(parsedValue)) {
+        return null;
+    }
+
+    const { slug, startsAt } = parsedValue as Record<string, unknown>;
+
+    if (typeof slug !== 'string' || typeof startsAt !== 'string') {
+        return null;
+    }
+
+    const normalizedSlug = slug.trim();
+    const normalizedStartsAt = startsAt.trim();
+
+    return normalizedSlug === '' || normalizedStartsAt === '' || Number.isNaN(Date.parse(normalizedStartsAt))
+        ? null
+        : { slug: normalizedSlug, startsAt: normalizedStartsAt };
+}
+
+function areWorkshopRegistrationTermsEqual(
+    firstTerm: WorkshopRegistrationTerm | null,
+    secondTerm: WorkshopRegistrationTerm | null,
+): boolean {
+    return firstTerm?.slug === secondTerm?.slug && firstTerm?.startsAt === secondTerm?.startsAt;
+}
+
+const WORKSHOP_REGISTRATION_TERM_VALUE_CODEC: ContactsViewValueCodec<WorkshopRegistrationTerm | null> = {
+    parseValue: readWorkshopRegistrationTerm,
+    serializeValue: (term) => JSON.stringify(term),
+    areValuesEqual: areWorkshopRegistrationTermsEqual,
+};
+
+/**
  * Describe one value of the filter, all of which are carried by one query parameter each
  */
 function defineContactsFilterParameter<TFilterKey extends keyof ContactsFilter>(
@@ -200,6 +246,7 @@ const CONTACTS_VIEW_PARAMETERS: readonly ContactsViewParameter<unknown>[] = [
     defineContactsFilterParameter('userNotePresence', 'userNote', PRESENCE_FILTER_VALUE_CODEC),
     defineContactsFilterParameter('contactedStatus', 'contacted', CONTACTED_FILTER_VALUE_CODEC),
     defineContactsFilterParameter('contactOriginSelections', 'origins', CONTACT_ORIGIN_SELECTIONS_VALUE_CODEC),
+    defineContactsFilterParameter('workshopRegistrationTerm', 'registrationTerm', WORKSHOP_REGISTRATION_TERM_VALUE_CODEC),
     defineContactsSortParameter('columnKey', 'sortBy', SORT_COLUMN_VALUE_CODEC),
     defineContactsSortParameter('direction', 'sortDirection', SORT_DIRECTION_VALUE_CODEC),
     defineContactsViewParameter<ContactsPerPage>({

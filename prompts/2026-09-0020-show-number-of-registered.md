@@ -17,7 +17,7 @@
 
 ---
 
-[ ]
+[x] by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.6424 26 minutes; Testing 17 minutes
 
 [✨🧞] Allow to show and export registered participants of each event in admin
 
@@ -30,3 +30,4 @@
     - The contact exports and listings should reuse same code, also reuse the logic with `/admin/contacts`
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+
