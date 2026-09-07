@@ -289,16 +289,6 @@ html {
         bottom: 5.25rem;
     }
 
-    /* The floating coder is a page ornament, so a privacy choice always gets the unobstructed corner first. */
-    body:has([data-cookie-consent]) [data-ai-ta-krajta-promptbook-coder-badge] {
-        bottom: calc(13rem + env(safe-area-inset-bottom));
-    }
-
-    body:has([data-cookie-consent]):has([data-ai-ta-krajta-mini-player])
-        [data-ai-ta-krajta-promptbook-coder-badge] {
-        bottom: calc(18.25rem + env(safe-area-inset-bottom));
-    }
-
     body:has([data-admin-fixed-horizontal-scrollbar]) .cookie-consent {
         bottom: 1.25rem;
     }
@@ -309,15 +299,6 @@ html {
     }
 
     @media (min-width: 640px) {
-        body:has([data-cookie-consent]) [data-ai-ta-krajta-promptbook-coder-badge] {
-            bottom: calc(9.25rem + env(safe-area-inset-bottom));
-        }
-
-        body:has([data-cookie-consent]):has([data-ai-ta-krajta-mini-player])
-            [data-ai-ta-krajta-promptbook-coder-badge] {
-            bottom: calc(14.5rem + env(safe-area-inset-bottom));
-        }
-
         .cookie-consent {
             padding: 1rem 1.5rem;
             padding-bottom: max(1rem, env(safe-area-inset-bottom));

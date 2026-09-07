@@ -8,7 +8,6 @@ import {
     AI_TA_KRAJTA_SECTION_IDS,
     AI_TA_KRAJTA_SUBPAGES,
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
-    PROMPTBOOK_CODER_URL,
 } from '@/businesses/ai-ta-krajta/config';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { ORGANIZATION_LEGAL_NAME } from '@/lib/metadata/site-config';
@@ -91,26 +90,16 @@ export function AiTaKrajtaFooter() {
                     </nav>
                 </div>
 
-                <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/40 lg:flex-row lg:items-center lg:justify-between">
+                <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/40 sm:flex-row sm:items-center sm:justify-between">
                     <p>
                         © {CURRENT_YEAR} {AI_TA_KRAJTA_NAME}. Vydává {ORGANIZATION_LEGAL_NAME}. Všechna práva
                         vyhrazena.
                     </p>
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                        <a
-                            href={PROMPTBOOK_CODER_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-white/55 transition-colors hover:text-white"
-                        >
-                            Done by Promptbook coder
-                        </a>
-                        <LegalFooterLinks
-                            language="cs"
-                            className="gap-x-5"
-                            linkClassName="text-white/45 hover:text-white"
-                        />
-                    </div>
+                    <LegalFooterLinks
+                        language="cs"
+                        className="gap-x-5"
+                        linkClassName="text-white/45 hover:text-white"
+                    />
                 </div>
             </div>
         </footer>

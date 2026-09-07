@@ -8,7 +8,6 @@ import {
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_PATH,
-    PROMPTBOOK_CODER_URL,
 } from '@/businesses/ai-ta-krajta/config';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
@@ -145,14 +144,10 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
     await expect(page).toHaveTitle(`${AI_TA_KRAJTA_BRAND_NAME} | Český podcast o umělé inteligenci`);
 
     const metadataIdentity = await page.evaluate(
-        ({ scalableIconPath, rasterIconPath, manifestPath, promptbookCoderUrl }) => {
+        ({ scalableIconPath, rasterIconPath, manifestPath }) => {
             const identityTags = Array.from(document.head.querySelectorAll('meta, link'));
             const structuredDataNodes = Array.from(document.head.querySelectorAll('script[type*=ld]'));
-            const coderCreditLink = Array.from(document.querySelectorAll('footer a')).find(
-                (link) =>
-                    link.getAttribute('href') === promptbookCoderUrl &&
-                    link.textContent?.trim() === 'Done by Promptbook coder',
-            );
+            const footerText = document.querySelector('footer')?.textContent ?? '';
 
             const isPromptbookIdentityAbsent = identityTags
                 .filter((element) => /application-name|creator|publisher|og:site_name|twitter:site/.test(element.outerHTML))
@@ -172,8 +167,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
             const isPodcastManifestUsed = identityTags.some(
                 (element) => element.getAttribute('rel') === 'manifest' && element.getAttribute('href') === manifestPath,
             );
-            const isFooterPromptbookCoderCreditPresent = coderCreditLink !== undefined;
-            const footerText = document.querySelector('footer')?.textContent ?? '';
+            const isFooterPromptbookAbsent = !footerText.includes('Promptbook');
             const isLegalCompanyPresent = footerText.includes('AI Web s.r.o.');
 
             return {
@@ -182,7 +176,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
                 isPodcastIconUsed,
                 isPodcastTouchIconUsed,
                 isPodcastManifestUsed,
-                isFooterPromptbookCoderCreditPresent,
+                isFooterPromptbookAbsent,
                 isLegalCompanyPresent,
             };
         },
@@ -190,7 +184,6 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
             scalableIconPath: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
             rasterIconPath: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
             manifestPath: AI_TA_KRAJTA_MANIFEST_PATH,
-            promptbookCoderUrl: PROMPTBOOK_CODER_URL,
         },
     );
 
@@ -200,7 +193,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
         isPodcastIconUsed: true,
         isPodcastTouchIconUsed: true,
         isPodcastManifestUsed: true,
-        isFooterPromptbookCoderCreditPresent: true,
+        isFooterPromptbookAbsent: true,
         isLegalCompanyPresent: true,
     });
 
