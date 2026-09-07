@@ -164,14 +164,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in GET parameters. Editing changes only shortcode, destinations, note, and
   landing page; deletion also deletes recorded clicks.
 - The single "Done by Promptbook coder" badge lives in `components/promptbook-coder/`.
-  It is one line of a terminal: `$ ptbk` is typed into it and what running that
-  prints is the ASCII octopus of the tool, `-<@@/>-`, recorded in
-  `promptbookCoderOctopusArt.ts` and drawn to one fixed width so nothing around it
-  moves. The octopus works, watches the pointer, rides a scrolled page and greets
-  whoever points at the badge or reaches it with the keyboard; every badge of a
-  page reads one shared clock, and a visitor who asked for less movement keeps the
-  resting octopus. Only what it notices knows the browser exists, and colours are
-  reused through `className`; do not redraw it elsewhere.
+  Its artwork is recorded in `promptbookCoderMarkArtwork.ts`, uses `currentColor`,
+  and is reused through `className`; do not redraw it elsewhere.
 
 ### Database and verification
 
