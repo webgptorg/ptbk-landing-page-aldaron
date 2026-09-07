@@ -109,7 +109,7 @@ export function AiTaKrajtaHero() {
                                 )}
                                 {estimatedListeningHours !== null && (
                                     <AiTaKrajtaFact
-                                        label="Odhad poslechu"
+                                        label="Naposloucháno"
                                         value={`${formatAiTaKrajtaEstimate(estimatedListeningHours)} hodin`}
                                     />
                                 )}
