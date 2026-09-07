@@ -44,10 +44,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork.ts`, together with the
   measurements of the animal along its own length. The snake of the minigame
   starts in exactly that shape, in the frame the still logo occupied, and only
-  then eases into the proportions, colours and speed of a game snake. The page
-  wears the Promptbook coder badge twice: in the footer among the legal links,
-  and floating in its bottom right corner, where it steps above the mini player
-  while an episode plays.
+  then eases into the proportions, colours and speed of a game snake.
 - `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` are the two pages beside
   the podcast. They are named once, in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page
@@ -163,9 +160,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - Shortener search, provenance filters, sorting, and selected click history live
   in GET parameters. Editing changes only shortcode, destinations, note, and
   landing page; deletion also deletes recorded clicks.
-- The single "Done by Promptbook coder" badge lives in `components/promptbook-coder/`.
-  Its artwork is recorded in `promptbookCoderMarkArtwork.ts`, uses `currentColor`,
-  and is reused through `className`; do not redraw it elsewhere.
 
 ### Database and verification
 
