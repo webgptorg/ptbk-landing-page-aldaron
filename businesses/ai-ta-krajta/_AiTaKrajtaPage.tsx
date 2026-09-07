@@ -9,6 +9,7 @@ import { AiTaKrajtaHero } from '@/businesses/ai-ta-krajta/AiTaKrajtaHero';
 import { AiTaKrajtaMiniPlayer } from '@/businesses/ai-ta-krajta/AiTaKrajtaMiniPlayer';
 import { AiTaKrajtaPageStateProvider } from '@/businesses/ai-ta-krajta/AiTaKrajtaPageState';
 import { AiTaKrajtaPeopleSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaPeopleSection';
+import { AiTaKrajtaPromptbookCoderBadge } from '@/businesses/ai-ta-krajta/AiTaKrajtaPromptbookCoderBadge';
 
 /**
  * The page of the AI ta Krajta podcast
@@ -33,6 +34,7 @@ export function AiTaKrajtaPage({ archive }: { readonly archive: AiTaKrajtaArchiv
 
                 <AiTaKrajtaFooter />
                 <AiTaKrajtaMiniPlayer />
+                <AiTaKrajtaPromptbookCoderBadge />
             </div>
         </AiTaKrajtaPageStateProvider>
     );
