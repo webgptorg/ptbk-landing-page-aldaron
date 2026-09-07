@@ -1,6 +1,7 @@
 import { AI_SUPERVIZE_MINI_PAGE_DEFINITION } from '@/businesses/ai-supervize-mini/aiSupervizeMiniMetadata';
 import { AI_SUPERVIZE_PAGE_DEFINITION } from '@/businesses/ai-supervize/aiSupervizeMetadata';
 import {
+    AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION,
     AI_TA_KRAJTA_MEDIA_KIT_PAGE_DEFINITION,
     AI_TA_KRAJTA_PAGE_DEFINITION,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMetadata';
@@ -39,6 +40,7 @@ const PAGE_METADATA_DEFINITIONS: readonly PageMetadataDefinition[] = [
     HACKATHON_FACTORY_PAGE_DEFINITION,
     AI_TA_KRAJTA_PAGE_DEFINITION,
     AI_TA_KRAJTA_MEDIA_KIT_PAGE_DEFINITION,
+    AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION,
     PAVOL_PAGE_DEFINITIONS.cs,
     PAVOL_PAGE_DEFINITIONS.en,
     CONTACT_PAGE_DEFINITION,

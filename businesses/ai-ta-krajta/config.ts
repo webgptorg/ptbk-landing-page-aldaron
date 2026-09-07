@@ -11,9 +11,54 @@ export const AI_TA_KRAJTA_PATH = '/ai-ta-krajta';
 export const AI_TA_KRAJTA_MEDIA_KIT_PATH = AI_TA_KRAJTA_PATH + '/media-kit';
 
 /**
+ * Public page which hands out the logo of the show and says how to draw and write it
+ */
+export const AI_TA_KRAJTA_BRANDING_PATH = AI_TA_KRAJTA_PATH + '/branding';
+
+/**
  * Section of the media kit which contains the one shared contact form
  */
 export const AI_TA_KRAJTA_MEDIA_KIT_CONTACT_SECTION_ID = 'kontakt';
+
+/**
+ * A page which stands beside the podcast page itself
+ */
+export type AiTaKrajtaSubpage = {
+    readonly path: string;
+
+    /**
+     * Short name of the page, worn in its own header and in every link which opens it
+     */
+    readonly title: string;
+
+    /**
+     * What a visitor finds there, said in one line
+     */
+    readonly description: string;
+};
+
+export const AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE: AiTaKrajtaSubpage = {
+    path: AI_TA_KRAJTA_MEDIA_KIT_PATH,
+    title: 'Media kit',
+    description: 'Nabídka spolupráce, redakční pravidla a kontakt na redakci.',
+};
+
+export const AI_TA_KRAJTA_BRANDING_SUBPAGE: AiTaKrajtaSubpage = {
+    path: AI_TA_KRAJTA_BRANDING_PATH,
+    title: 'Brand kit',
+    description: 'Logo ke stažení, barvy pořadu, psaní názvu a pravidla použití.',
+};
+
+/**
+ * Every page beside the podcast itself, in the order the footer offers them
+ *
+ * Note: The footer, the media kit and the brand kit all read this one list, so a link from one of them can never name
+ *       a page differently than the page names itself.
+ */
+export const AI_TA_KRAJTA_SUBPAGES: readonly AiTaKrajtaSubpage[] = [
+    AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE,
+    AI_TA_KRAJTA_BRANDING_SUBPAGE,
+];
 
 /**
  * English query parameter used by media-kit links to select a kind of inquiry in the contact form

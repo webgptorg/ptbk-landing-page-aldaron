@@ -3,10 +3,10 @@
 import { AiTaKrajtaMark } from '@/businesses/ai-ta-krajta/AiTaKrajtaMark';
 import {
     AI_TA_KRAJTA_NAME,
-    AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_PATH,
     AI_TA_KRAJTA_PLATFORMS,
     AI_TA_KRAJTA_SECTION_IDS,
+    AI_TA_KRAJTA_SUBPAGES,
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
 } from '@/businesses/ai-ta-krajta/config';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
@@ -72,11 +72,13 @@ export function AiTaKrajtaFooter() {
                     <nav aria-label="Další stránky">
                         <h2 className="text-xs uppercase tracking-[0.16em] text-white/35">Dál</h2>
                         <ul className="mt-4 grid gap-3">
-                            <li>
-                                <Link href={AI_TA_KRAJTA_MEDIA_KIT_PATH} className={FOOTER_LINK_CLASS_NAME}>
-                                    Media kit a spolupráce
-                                </Link>
-                            </li>
+                            {AI_TA_KRAJTA_SUBPAGES.map((subpage) => (
+                                <li key={subpage.path}>
+                                    <Link href={subpage.path} className={FOOTER_LINK_CLASS_NAME}>
+                                        {subpage.title}
+                                    </Link>
+                                </li>
+                            ))}
                             <li>
                                 <Link
                                     href={AI_TA_KRAJTA_PATH + '#' + AI_TA_KRAJTA_SECTION_IDS.PEOPLE}

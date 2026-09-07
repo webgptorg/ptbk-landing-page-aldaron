@@ -3,6 +3,7 @@ import { AI_SUPERVIZE_MINI_PATH, createDiscountCodePrefillPath } from '@/lib/dis
 import {
     AI_TA_KRAJTA_APP_ICONS,
     AI_TA_KRAJTA_BRAND_NAME,
+    AI_TA_KRAJTA_BRANDING_PATH,
     AI_TA_KRAJTA_EPISODE_SEARCH_API_PATH,
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
@@ -30,6 +31,7 @@ const PUBLIC_PAGE_PATHS = [
     // '/ai-supervize-mini',
     '/ai-ta-krajta',
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
+    AI_TA_KRAJTA_BRANDING_PATH,
     '/hackathon-factory',
     '/cs/online-workshop',
     '/cs/komunita/clenstvi',

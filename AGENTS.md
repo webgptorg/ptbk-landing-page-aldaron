@@ -48,6 +48,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   wears the Promptbook coder badge twice: in the footer among the legal links,
   and floating in its bottom right corner, where it steps above the mini player
   while an episode plays.
+- `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` are the two pages beside
+  the podcast. They are named once, in `AI_TA_KRAJTA_SUBPAGES`, which the footer
+  lists and which they point at each other through, so no link can name a page
+  differently than the page names itself. Both wear the same compact header,
+  section heading and footer as each other. The brand kit hands out the logo the
+  site already serves at `/ai-ta-krajta/logo.svg`, `.png` and the cover artwork,
+  publishes no colour outside `AI_TA_KRAJTA_COLORS`, and says how the name is
+  written; it asks for nothing and sends visitors to the media-kit form.
 - `/cs/komunita` is the permanent Czech community room. It has chat, polls,
   projects, materials, and published terms, but no schedule, stage, or live
   updates. Terms show event kind, format/place, price, and status. A term with a

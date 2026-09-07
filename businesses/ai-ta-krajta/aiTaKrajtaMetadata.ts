@@ -3,6 +3,7 @@ import { createAiTaKrajtaEpisodePath } from '@/businesses/ai-ta-krajta/aiTaKrajt
 import {
     AI_TA_KRAJTA_APP_ICONS,
     AI_TA_KRAJTA_BRAND_NAME,
+    AI_TA_KRAJTA_BRANDING_PATH,
     AI_TA_KRAJTA_COLORS,
     AI_TA_KRAJTA_COVER_IMAGE_PATH,
     AI_TA_KRAJTA_MANIFEST_PATH,
@@ -97,6 +98,33 @@ export const AI_TA_KRAJTA_MEDIA_KIT_PAGE_DEFINITION: PageMetadataDefinition = {
 };
 
 /**
+ * Search and sharing metadata of the brand kit, which keeps the podcast identity the same way the media kit does
+ */
+export const AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
+    path: AI_TA_KRAJTA_BRANDING_PATH,
+    language: 'cs',
+    brand: {
+        name: AI_TA_KRAJTA_BRAND_NAME,
+        socialHandle: AI_TA_KRAJTA_X_HANDLE,
+    },
+    title: AI_TA_KRAJTA_BRAND_NAME + ' | Brand kit a logo ke stažení',
+    socialTitle: 'Brand kit | ' + AI_TA_KRAJTA_BRAND_NAME,
+    description:
+        'Logo AI ta Krajta ke stažení, barvy pořadu, psaní názvu a pravidla použití pro novináře, partnery i pořadatele.',
+    socialPreviewImageAlt: AI_TA_KRAJTA_BRAND_NAME + ', brand kit a logo ke stažení',
+    socialPreviewImagePath: AI_TA_KRAJTA_COVER_IMAGE_PATH,
+    keywords: [
+        'AI ta Krajta logo',
+        'AI ta Krajta brand kit',
+        'logo podcastu ke stažení',
+        'barvy AI ta Krajta',
+        'český podcast o AI',
+    ],
+    sitemapPriority: 0.4,
+    sitemapChangeFrequency: 'yearly',
+};
+
+/**
  * Route-level metadata which must use the podcast identity instead of the site's default one
  */
 export const AI_TA_KRAJTA_METADATA: Metadata = {
@@ -143,6 +171,14 @@ export const AI_TA_KRAJTA_METADATA: Metadata = {
 export const AI_TA_KRAJTA_MEDIA_KIT_METADATA: Metadata = {
     ...AI_TA_KRAJTA_METADATA,
     ...createPageMetadata(AI_TA_KRAJTA_MEDIA_KIT_PAGE_DEFINITION),
+};
+
+/**
+ * Route-level metadata of the brand kit, built the same way as the metadata of the media kit above it
+ */
+export const AI_TA_KRAJTA_BRANDING_METADATA: Metadata = {
+    ...AI_TA_KRAJTA_METADATA,
+    ...createPageMetadata(AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION),
 };
 
 /**
