@@ -29,11 +29,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   estimates. The fixed mini-player, newest-episode header button, person/search/
   episode/play/archive/collaboration filters, and section hash are shareable as
   query/hash state; the snake game is local state. Person clicks filter episodes.
-  Everyone in the roster shows a portrait, cut by
-  `scripts/_cutAiTaKrajtaPeoplePortraits.mjs` out of the episode cover the show
-  itself published them on, or out of the picture they publish of themselves when
-  no cover carries them; the roster names only the file, and a person without one
-  keeps the initials on the brand gradient. The one people list is drawn anew
+  Everyone in the roster shows a normalized, transparent PNG portrait. The source
+  crop is recorded by `scripts/_cutAiTaKrajtaPeoplePortraits.mjs`, from the
+  episode cover the show itself published them on or from the picture they publish
+  of themselves when no cover carries them; the final alpha PNG is named by the
+  roster and a test verifies its format and transparent pixels. Portrait frames
+  supply subtle, stable neutral-gradient variations and a restrained hover cue,
+  so photographed backgrounds never compete with the page. The one people list
+  is drawn anew
   for every visit, weighted by how many episodes of the archive name each
   person, so somebody heard often comes up high far more often than someone in
   one díl without the list ever becoming a ranking. The draw is local state and

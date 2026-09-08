@@ -31,7 +31,7 @@ export function AiTaKrajtaPersonCard({
     return (
         <div
             className={cn(
-                'relative flex h-full flex-col rounded-2xl border p-6 transition-colors',
+                'group/person-card relative flex h-full flex-col rounded-2xl border p-6 transition-colors',
                 isSelected
                     ? 'border-[#ff6b6b]/60 bg-[#ff6b6b]/[0.08]'
                     : 'border-white/10 bg-white/[0.03] hover:border-white/25',
@@ -43,7 +43,11 @@ export function AiTaKrajtaPersonCard({
                 aria-pressed={isSelected}
                 className="text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-[#ff6b6b]"
             >
-                <AiTaKrajtaPersonAvatar person={person} size="large" />
+                <AiTaKrajtaPersonAvatar
+                    person={person}
+                    size="large"
+                    className="group-hover/person-card:-translate-y-0.5 group-hover/person-card:border-white/35 group-hover/person-card:shadow-[0_10px_26px_rgba(10,16,12,0.34)] motion-reduce:group-hover/person-card:translate-y-0"
+                />
 
                 <h3 className="mt-4 text-lg font-semibold text-white">{person.name}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/60">{person.headline}</p>

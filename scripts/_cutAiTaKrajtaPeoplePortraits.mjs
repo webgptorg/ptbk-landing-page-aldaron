@@ -1,19 +1,19 @@
 /**
- * Cuts a square portrait of every person of AI ta Krajta out of a picture that person is published in, and writes
- * them into `public/people/`, where `businesses/ai-ta-krajta/aiTaKrajtaPeople.ts` names them by file.
+ * Cuts a square source portrait of every person of AI ta Krajta out of a picture that person is published in.
  *
  * Almost every portrait is cut from the cover picture of an episode the person sat in, because the show photographs
  * its own line-up against one background and therefore already owns a picture of everyone. Whoever the show never put
  * on a cover is cut from the portrait they publish of themselves instead; `sourceNote` says which is which.
  *
- * Nothing here runs at build time, and the cut files are committed. Run it again after replacing a source, with
- * `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs`, or cut only the portraits which are still missing by naming their
- * people: `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs ondra tomas-mikolov`.
+ * This script deliberately writes temporary source crops. The committed page assets are normalized transparent PNGs in
+ * `public/people/`; keeping source crops out of that folder prevents a fresh opaque crop from replacing a finished
+ * portrait. Run this after replacing a source with `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs`, or cut only
+ * selected people with `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs ondra tomas-mikolov`.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
 
-const PORTRAIT_DIRECTORY = 'public/people';
+const SOURCE_PORTRAIT_DIRECTORY = '.tmp/ai-ta-krajta-portrait-sources';
 
 /**
  * Edge of a written portrait, in pixels
@@ -21,7 +21,7 @@ const PORTRAIT_DIRECTORY = 'public/people';
  * Note: The page draws a portrait 96 pixels wide at most, so this carries a screen of three times that density and
  *       nothing beyond it.
  */
-const PORTRAIT_SIZE_IN_PIXELS = 320;
+const SOURCE_PORTRAIT_SIZE_IN_PIXELS = 320;
 
 /**
  * How far down its own height the face sits in the cut square
@@ -30,7 +30,7 @@ const PORTRAIT_SIZE_IN_PIXELS = 320;
  */
 const FACE_HEIGHT_RATIO = 0.42;
 
-const PORTRAIT_JPEG_QUALITY = 88;
+const SOURCE_PORTRAIT_JPEG_QUALITY = 88;
 
 /**
  * Where the portrait of each person is cut from, and where their face sits in that picture
@@ -105,6 +105,12 @@ const PORTRAITS = [
         sourceUrl: 'https://github.com/petrbrzek.png?size=400',
         sourceNote: 'His own picture on GitHub, where he writes he works on Macaly',
         face: { x: 200, y: 175, size: 380 },
+    },
+    {
+        personId: 'petr-simecek',
+        sourceUrl: 'https://www.keboola.com/about/team/simecek.webp',
+        sourceNote: 'His own portrait on the Keboola founders page, where he is listed as Petr Simecek',
+        face: { x: 180, y: 100, size: 220 },
     },
     {
         personId: 'dalibor-krejci',
@@ -197,17 +203,17 @@ async function fetchPicture(sourceUrl) {
     return Buffer.from(await response.arrayBuffer());
 }
 
-async function cutPortrait({ personId, sourceUrl, face }) {
+async function createSourcePortraitCrop({ personId, sourceUrl, face }) {
     const picture = sharp(await fetchPicture(sourceUrl));
     const { width, height } = await picture.metadata();
-    const filePath = `${PORTRAIT_DIRECTORY}/${personId}.jpg`;
+    const filePath = `${SOURCE_PORTRAIT_DIRECTORY}/${personId}.jpg`;
 
     await writeFile(
         filePath,
         await picture
             .extract(createFaceCrop(face, width, height))
-            .resize(PORTRAIT_SIZE_IN_PIXELS, PORTRAIT_SIZE_IN_PIXELS, { fit: 'cover' })
-            .jpeg({ quality: PORTRAIT_JPEG_QUALITY, mozjpeg: true })
+            .resize(SOURCE_PORTRAIT_SIZE_IN_PIXELS, SOURCE_PORTRAIT_SIZE_IN_PIXELS, { fit: 'cover' })
+            .jpeg({ quality: SOURCE_PORTRAIT_JPEG_QUALITY, mozjpeg: true })
             .toBuffer(),
     );
 
@@ -234,10 +240,10 @@ function selectPortraits(personIdsToCut) {
 }
 
 async function main() {
-    await mkdir(PORTRAIT_DIRECTORY, { recursive: true });
+    await mkdir(SOURCE_PORTRAIT_DIRECTORY, { recursive: true });
 
     for (const portrait of selectPortraits(process.argv.slice(2))) {
-        console.log(await cutPortrait(portrait), '←', portrait.sourceNote);
+        console.log(await createSourcePortraitCrop(portrait), '←', portrait.sourceNote);
     }
 }
 
