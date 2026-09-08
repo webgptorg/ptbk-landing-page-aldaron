@@ -45,3 +45,6 @@ next-env.d.ts
 # Prmptbook Coder
 /.tmp
 /.promptbook
+
+# Promptbook Coder
+.codex
