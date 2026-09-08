@@ -6,9 +6,9 @@ import {
     PROMPTBOOK_CODER_URL,
     type PromptbookCoderPose,
 } from './promptbookCoderAnimation';
-import { usePromptbookCoderAnimation } from './usePromptbookCoderAnimation';
-import { useCoderBadgeClearance } from './useCoderBadgeClearance';
 import styles from './PromptbookCoderBadge.module.css';
+import { useCoderBadgeClearance } from './useCoderBadgeClearance';
+import { usePromptbookCoderAnimation } from './usePromptbookCoderAnimation';
 
 /** The footer and the animated terminal draw exactly the same independently movable body parts. */
 function PromptbookCoderOctopus({ pose = DEFAULT_PROMPTBOOK_CODER_POSE }: { readonly pose?: PromptbookCoderPose }) {
@@ -57,7 +57,8 @@ export function PromptbookCoderBadge({
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Promptbook coder (otevře se v nové kartě)"
-            title="Promptbook coder"
+            // Note: we dont want to obstruct the view with a title tooltip
+            // title="Promptbook coder"
             className={`${styles.terminal} ${styles.floating}`}
             data-promptbook-coder-badge
             data-mood={frame.command === null ? frame.mood : 'boot'}
@@ -80,13 +81,7 @@ export function PromptbookCoderBadge({
 /** A quiet, static credit keeps the footer from running a second animation clock. */
 export function PromptbookCoderCredit() {
     return (
-        <a
-            className={styles.credit}
-            href={PROMPTBOOK_CODER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            lang="en"
-        >
+        <a className={styles.credit} href={PROMPTBOOK_CODER_URL} target="_blank" rel="noopener noreferrer" lang="en">
             <span className={styles.terminal} aria-hidden="true">
                 <span className={styles.line}>
                     <PromptbookCoderOctopus />
