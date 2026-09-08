@@ -1,4 +1,5 @@
-import { AI_TA_KRAJTA_PEOPLE, type AiTaKrajtaPerson } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
+import { AI_TA_KRAJTA_PEOPLE, isAiTaKrajtaPersonNamedByText } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
+import { normalizeAiTaKrajtaSearchText } from '@/businesses/ai-ta-krajta/aiTaKrajtaTextSearch';
 
 /**
  * Heading which separates the roster from the rest of the text in the descriptions the show publishes
@@ -14,16 +15,6 @@ const HOST_LIST_END_PATTERN = /děkujeme sponzorům|sítě, kde nás můžete sl
  * One person in the source roster, written after the cowboy-hat marker the show uses
  */
 const HOST_LIST_ENTRY_PATTERN = /🤠\s*([^:\n<]+?)\s*:/g;
-
-/**
- * Writes source text the way host names and source headings are compared
- */
-function normalizeForHostMatching(text: string): string {
-    return text
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
-}
 
 /**
  * Keeps just the explicit host roster from an unabridged publisher description, still in its original spelling
@@ -42,23 +33,10 @@ function readHostListText(descriptionHtml: string): string {
 }
 
 /**
- * Whether this source name identifies one of the people the page can render as a profile
- */
-function isPersonNamedByHostName(person: AiTaKrajtaPerson, hostName: string): boolean {
-    const normalizedPersonName = normalizeForHostMatching(person.name);
-    const normalizedHostName = normalizeForHostMatching(hostName);
-
-    return (
-        normalizedHostName === normalizedPersonName ||
-        person.mentionPatterns.some((pattern) => normalizedHostName.includes(normalizeForHostMatching(pattern)))
-    );
-}
-
-/**
  * Uses the page's published spelling for a known person, while retaining an unrecognised source name unchanged
  */
 function normalizeKnownHostName(hostName: string): string {
-    return AI_TA_KRAJTA_PEOPLE.find((person) => isPersonNamedByHostName(person, hostName))?.name ?? hostName;
+    return AI_TA_KRAJTA_PEOPLE.find((person) => isAiTaKrajtaPersonNamedByText(person, hostName))?.name ?? hostName;
 }
 
 /**
@@ -71,7 +49,7 @@ function addHostName(hostNamesByNormalizedName: Map<string, string>, hostName: s
         return;
     }
 
-    const normalizedHostName = normalizeForHostMatching(trimmedHostName);
+    const normalizedHostName = normalizeAiTaKrajtaSearchText(trimmedHostName);
 
     if (!hostNamesByNormalizedName.has(normalizedHostName)) {
         hostNamesByNormalizedName.set(normalizedHostName, trimmedHostName);

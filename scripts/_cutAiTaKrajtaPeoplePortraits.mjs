@@ -7,7 +7,8 @@
  * on a cover is cut from the portrait they publish of themselves instead; `sourceNote` says which is which.
  *
  * Nothing here runs at build time, and the cut files are committed. Run it again after replacing a source, with
- * `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs`.
+ * `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs`, or cut only the portraits which are still missing by naming their
+ * people: `node scripts/_cutAiTaKrajtaPeoplePortraits.mjs ondra tomas-mikolov`.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
@@ -112,6 +113,67 @@ const PORTRAITS = [
         sourceNote: 'His portrait on pauseai.cz, the movement he came to the show to explain',
         face: { x: 760, y: 620, size: 1000 },
     },
+    {
+        personId: 'prokop-simek',
+        sourceUrl: 'https://i.ytimg.com/vi/W5RVPpiolYs/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #34, which is "s Petrem, Pavlem a Prokopem" - last from the left',
+        face: { x: 940, y: 515, size: 250 },
+    },
+    {
+        personId: 'matyas-krecek',
+        sourceUrl: 'https://i.ytimg.com/vi/Kev5eZwiWMU/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #24, the díl "s Lenkou a Janem z CloudTalku" - first from the left',
+        face: { x: 128, y: 545, size: 250 },
+    },
+    {
+        personId: 'jan-cienciala',
+        sourceUrl: 'https://i.ytimg.com/vi/Kev5eZwiWMU/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #24, the díl "s Lenkou a Janem z CloudTalku" - second from the left',
+        face: { x: 352, y: 540, size: 250 },
+    },
+    {
+        personId: 'lenka-sefcakova',
+        sourceUrl: 'https://i.ytimg.com/vi/Kev5eZwiWMU/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #24, the díl "s Lenkou a Janem z CloudTalku" - the only woman on it',
+        face: { x: 600, y: 545, size: 250 },
+    },
+    {
+        personId: 'tomas-mikolov',
+        sourceUrl: 'https://i.ytimg.com/vi/RrKFAyYjbgg/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #23, whose only guest is Tomáš Mikolov - in the middle',
+        face: { x: 640, y: 545, size: 250 },
+    },
+    {
+        personId: 'pavel-ungr',
+        sourceUrl: 'https://i.ytimg.com/vi/8pe_TMlItOY/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #30, whose only guest is Pavel Ungr - in the middle',
+        face: { x: 640, y: 555, size: 260 },
+    },
+    {
+        personId: 'matous-havlena',
+        sourceUrl: 'https://i.ytimg.com/vi/p9PvTNkc2qY/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #47, whose guest is Matouš from Apoco - third from the left',
+        face: { x: 788, y: 530, size: 250 },
+    },
+    {
+        personId: 'tomas-kroupa',
+        sourceUrl: 'https://i.ytimg.com/vi/xtebb91xaIo/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #21, whose guests are Tomáš and Ondřej from Agent ID and Galenio - first from the left',
+        face: { x: 128, y: 555, size: 240 },
+    },
+    {
+        personId: 'ondrej-sukac',
+        sourceUrl: 'https://i.ytimg.com/vi/xtebb91xaIo/maxresdefault.jpg',
+        sourceNote: 'Cover of díl #21, whose guests are Tomáš and Ondřej from Agent ID and Galenio - last from the left',
+        face: { x: 1148, y: 545, size: 230 },
+    },
+    {
+        personId: 'ondra',
+        sourceUrl: 'https://i.ytimg.com/vi/p30kZEcrivI/maxresdefault.jpg',
+        sourceNote:
+            'Cover of díl #58, which welcomes "Ondru": the one of its four faces which is not Petr, Jacek nor Katka',
+        face: { x: 1078, y: 490, size: 250 },
+    },
 ];
 
 /**
@@ -152,10 +214,29 @@ async function cutPortrait({ personId, sourceUrl, face }) {
     return filePath;
 }
 
+/**
+ * The portraits to cut: every one of them, or only those the command line names
+ *
+ * Note: An identifier which is not a portrait of this script is a typo, and saying so beats quietly cutting nothing.
+ */
+function selectPortraits(personIdsToCut) {
+    if (personIdsToCut.length === 0) {
+        return PORTRAITS;
+    }
+
+    const unknownPersonIds = personIdsToCut.filter((personId) => !PORTRAITS.some((portrait) => portrait.personId === personId));
+
+    if (unknownPersonIds.length > 0) {
+        throw new Error(`No portrait is cut from ${unknownPersonIds.join(', ')}`);
+    }
+
+    return PORTRAITS.filter((portrait) => personIdsToCut.includes(portrait.personId));
+}
+
 async function main() {
     await mkdir(PORTRAIT_DIRECTORY, { recursive: true });
 
-    for (const portrait of PORTRAITS) {
+    for (const portrait of selectPortraits(process.argv.slice(2))) {
         console.log(await cutPortrait(portrait), '←', portrait.sourceNote);
     }
 }

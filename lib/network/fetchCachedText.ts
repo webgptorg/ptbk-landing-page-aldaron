@@ -1,3 +1,13 @@
+/**
+ * How long a publisher may take to answer before the page is built without it
+ *
+ * Note: A publisher which accepts a connection and then never answers would otherwise hold the render of a page open
+ *       for as long as whatever asked for that page is willing to wait. The bound is far above what any of the
+ *       publishers this page reads takes on a good day, so a slow answer still arrives, while a silent one stops
+ *       taking the whole page down with it.
+ */
+const REMOTE_DOCUMENT_TIMEOUT_IN_MILLISECONDS = 60_000;
+
 export type FetchCachedTextOptions = {
     /**
      * Address the text is read from
@@ -21,8 +31,9 @@ export type FetchCachedTextOptions = {
  * Note: The server asks a publisher at most once per revalidation window however many visitors open the page, which is
  *       both what keeps the page fast and what keeps this application a polite client of somebody else's feed.
  *
- *       A page built on somebody else's document is a landing page first. When the publisher is unreachable or answers
- *       with an error, the failure ends here and the caller receives nothing instead of an exception.
+ *       A page built on somebody else's document is a landing page first. When the publisher is unreachable, answers
+ *       with an error, or stays silent longer than the bound above, the failure ends here and the caller receives
+ *       nothing instead of an exception.
  *
  * @returns body of the answer, `null` when it could not be read
  */
@@ -30,6 +41,7 @@ export async function fetchCachedText(options: FetchCachedTextOptions): Promise<
     try {
         const response = await fetch(options.url, {
             headers: { Accept: options.acceptedMediaTypes },
+            signal: AbortSignal.timeout(REMOTE_DOCUMENT_TIMEOUT_IN_MILLISECONDS),
             next: { revalidate: options.revalidateSeconds },
         });
 

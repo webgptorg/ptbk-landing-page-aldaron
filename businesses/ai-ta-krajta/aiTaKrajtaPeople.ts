@@ -1,3 +1,5 @@
+import { normalizeAiTaKrajtaSearchText } from '@/businesses/ai-ta-krajta/aiTaKrajtaTextSearch';
+
 /**
  * Folder of `public` which every portrait this page draws is kept in, shared with the rest of the site
  */
@@ -61,7 +63,10 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
         url: 'https://www.ptbk.io/pavol',
         photoFileName: 'pavol-hejny-transparent-square.png',
-        mentionPatterns: ['pavol', 'pavlem', 'hejn'],
+        // Note: `pavlem` is the same ending as the one a description uses before the surname of a Pavel it talks
+        //       about, as in `speciálním hostem Pavlem Ungrem`. The comma and the conjunction are what say that the
+        //       sentence is listing who sat at the microphone, the same way `petrem,` does for Petr Glaser.
+        mentionPatterns: ['pavol', 'pavlem,', 'pavlem a ', 'hejn'],
         episodeNumbers: [],
     },
     {
@@ -130,6 +135,24 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         episodeNumbers: [],
     },
     {
+        id: 'prokop-simek',
+        name: 'Prokop Simek',
+        headline: 'Šéf DX Heroes, prvního sponzora podcastu. V IT je 13 let napříč vývojem, marketingem a byznysem.',
+        url: 'https://prokopsimek.cz/en',
+        photoFileName: 'prokop-simek.jpg',
+        mentionPatterns: ['prokop'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'matyas-krecek',
+        name: 'Matyáš Křeček',
+        headline: 'I on je z DX Heroes. Pomáhá firmám zavést AI do celého vývojového procesu, dřív sám vyvíjel.',
+        url: 'https://cz.linkedin.com/in/matyas-krecek',
+        photoFileName: 'matyas-krecek.jpg',
+        mentionPatterns: ['matyáš', 'křečk'],
+        episodeNumbers: [],
+    },
+    {
         id: 'tomas-koblizek',
         name: 'Tomáš Koblížek',
         headline: 'Analytický filozof, spoluautor knihy Dezinformace a Hate Speech.',
@@ -185,6 +208,93 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         mentionPatterns: ['brzkem'],
         episodeNumbers: [],
     },
+    {
+        id: 'petr-simecek',
+        name: 'Petr Šimeček',
+        headline: 'V Googlu dělal časové řady a predikci návštěvnosti. Host dílu o tom, jak se do Googlu dostat.',
+        url: 'https://about.me/petr',
+        // Note: The cover of díl #6 carries only the three regular hosts, so there is no picture of him to cut.
+        photoFileName: null,
+        mentionPatterns: ['šimeček'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'tomas-kroupa',
+        name: 'Tomáš Kroupa',
+        headline: 'CTO Agent ID, který hlídá AI agenty deterministickými limity a auditovatelností.',
+        url: 'https://cz.linkedin.com/in/tom-kroupa',
+        photoFileName: 'tomas-kroupa.jpg',
+        mentionPatterns: ['kroup'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'ondrej-sukac',
+        name: 'Ondřej Sukač',
+        headline: 'Spoluzakladatel Galenia, které bourá jazykové bariéry ve zdravotnictví. Studuje právo v Brně.',
+        url: 'https://cz.linkedin.com/in/ondrej-sukac',
+        photoFileName: 'ondrej-sukac.jpg',
+        mentionPatterns: ['sukač'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'tomas-mikolov',
+        name: 'Tomáš Mikolov',
+        headline: 'Spoluzakladatel BottleCap AI. V Googlu zažil doby, kdy se stavěly základy dnešních modelů.',
+        url: 'https://bottlecapai.com/',
+        photoFileName: 'tomas-mikolov.jpg',
+        // Note: No `mikolov` pattern, because the show talks about him in later díly he never sat in - a description
+        //       which only quotes what BottleCap AI or he himself published is not a person at the microphone.
+        mentionPatterns: [],
+        episodeNumbers: [23],
+    },
+    {
+        id: 'jan-cienciala',
+        name: 'Jan Cienciala',
+        headline: 'V AI týmu CloudTalku dělá research a prototypy, které kolegové dotáhnou do produkce.',
+        url: 'https://cz.linkedin.com/in/cienciala',
+        photoFileName: 'jan-cienciala.jpg',
+        // Note: The transcript of díl #24 hears him as `Činčala`; he spells his own surname without háčky.
+        mentionPatterns: ['ciencial', 'činčal'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'lenka-sefcakova',
+        name: 'Lenka Šefčáková',
+        headline: 'V CloudTalku vyvíjí a prototypuje jejich AI funkce, třeba detekci hlasové schránky.',
+        url: 'https://sk.linkedin.com/in/lenkasefcakova',
+        photoFileName: 'lenka-sefcakova.jpg',
+        mentionPatterns: ['šefčák'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'pavel-ungr',
+        name: 'Pavel Ungr',
+        headline: 'SEO konzultant s dvacetiletou praxí. Říkal, jak zviditelnit web v ChatGPT, Geminu i u Googlu.',
+        url: 'https://www.pavelungr.cz/',
+        photoFileName: 'pavel-ungr.jpg',
+        mentionPatterns: ['ungr'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'matous-havlena',
+        name: 'Matouš Havlena',
+        headline: 'Spoluzakladatel a CTO Apoca, s IBM Research dělá aplikovaný výzkum. Host dílu o emocích v LLM.',
+        url: 'https://www.havlena.com/about',
+        photoFileName: 'matous-havlena.jpg',
+        mentionPatterns: ['havlen'],
+        episodeNumbers: [],
+    },
+    {
+        id: 'ondra',
+        name: 'Ondra',
+        headline: 'CTO startupu, který se snaží pomocí AI zlepšit život mladým lidem a pomoct jim s administrativou.',
+        url: null,
+        photoFileName: 'ondra.jpg',
+        // Note: The show never says his surname, so nothing here may match on a first name: `Ondra` is also what the
+        //       host of díl #21 calls Ondřej Sukač. The díl he sat in is what attributes him.
+        mentionPatterns: [],
+        episodeNumbers: [58],
+    },
 ];
 
 /**
@@ -203,4 +313,20 @@ export function getAiTaKrajtaPersonPhotoPath(person: AiTaKrajtaPerson): string |
  */
 export function getAiTaKrajtaPersonById(personId: string | null): AiTaKrajtaPerson | null {
     return AI_TA_KRAJTA_PEOPLE.find((person) => person.id === personId) ?? null;
+}
+
+/**
+ * Whether a piece of text names a person, either by their published name or by one of their mention patterns
+ *
+ * Note: This is the one rule which decides that a name written by a publisher and a line of the roster are the same
+ *       person. Both the roster reading of a description and the credit list of an episode ask it, so the two can
+ *       never disagree about who is who.
+ */
+export function isAiTaKrajtaPersonNamedByText(person: AiTaKrajtaPerson, text: string): boolean {
+    const normalizedText = normalizeAiTaKrajtaSearchText(text);
+
+    return (
+        normalizedText === normalizeAiTaKrajtaSearchText(person.name) ||
+        person.mentionPatterns.some((pattern) => normalizedText.includes(normalizeAiTaKrajtaSearchText(pattern)))
+    );
 }

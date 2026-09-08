@@ -1,5 +1,5 @@
 import type { AiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
-import { AI_TA_KRAJTA_PEOPLE, getAiTaKrajtaPersonById, type AiTaKrajtaPerson } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
+import { AI_TA_KRAJTA_PEOPLE, getAiTaKrajtaPersonById, isAiTaKrajtaPersonNamedByText, type AiTaKrajtaPerson } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
 import {
     createAiTaKrajtaSearchWords,
     isAiTaKrajtaTextMatchingSearchWords,
@@ -22,16 +22,7 @@ function isPersonInEpisode(person: AiTaKrajtaPerson, episode: PodcastEpisode, ep
  * Does a merged source explicitly list this person by name?
  */
 function isPersonListedAsHost(person: AiTaKrajtaPerson, hostNames: readonly string[]): boolean {
-    const normalizedPersonName = normalizeAiTaKrajtaSearchText(person.name);
-
-    return hostNames.some((hostName) => {
-        const normalizedHostName = normalizeAiTaKrajtaSearchText(hostName);
-
-        return (
-            normalizedHostName === normalizedPersonName ||
-            person.mentionPatterns.some((pattern) => normalizedHostName.includes(normalizeAiTaKrajtaSearchText(pattern)))
-        );
-    });
+    return hostNames.some((hostName) => isAiTaKrajtaPersonNamedByText(person, hostName));
 }
 
 /**

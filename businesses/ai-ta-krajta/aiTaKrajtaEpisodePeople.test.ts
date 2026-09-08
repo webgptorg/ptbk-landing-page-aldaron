@@ -5,6 +5,8 @@ import {
     getAiTaKrajtaEpisodePeople,
     resolveAiTaKrajtaEpisodePersonIds,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodePeople';
+import { AI_TA_KRAJTA_INTERNAL_EPISODES } from '@/businesses/ai-ta-krajta/aiTaKrajtaInternalEpisodes';
+import { AI_TA_KRAJTA_PEOPLE, isAiTaKrajtaPersonNamedByText } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
 import type { PodcastEpisode } from '@/lib/podcast/PodcastFeed';
 import { describe, expect, it } from 'vitest';
 
@@ -81,6 +83,34 @@ describe('getAiTaKrajtaEpisodePeople', () => {
         const episode = createPageEpisode({ personIds: ['pavol-hejny', 'kdosi-neznamy'] });
 
         expect(getAiTaKrajtaEpisodePeople(episode).map((person) => person.name)).toEqual(['Pavol Hejný']);
+    });
+});
+
+describe('the archive against the roster', () => {
+    // Note: A host the show credits by name and the page has no card for is the bug this keeps out: the person then
+    //       misses every portrait row and the filter of the episode list, however often they sat at the microphone.
+    it('has a people card for everyone the written down archive credits', () => {
+        const hostNamesWithoutCard = new Set<string>();
+
+        for (const episode of AI_TA_KRAJTA_INTERNAL_EPISODES) {
+            for (const hostName of episode.hosts) {
+                if (!AI_TA_KRAJTA_PEOPLE.some((person) => isAiTaKrajtaPersonNamedByText(person, hostName))) {
+                    hostNamesWithoutCard.add(hostName);
+                }
+            }
+        }
+
+        expect(Array.from(hostNamesWithoutCard)).toEqual([]);
+    });
+
+    it('never lets one card answer to the name of another person', () => {
+        const collidingNames = AI_TA_KRAJTA_PEOPLE.flatMap((person) =>
+            AI_TA_KRAJTA_PEOPLE.filter(
+                (otherPerson) => otherPerson.id !== person.id && isAiTaKrajtaPersonNamedByText(person, otherPerson.name),
+            ).map((otherPerson) => `${person.name} also answers to ${otherPerson.name}`),
+        );
+
+        expect(collidingNames).toEqual([]);
     });
 });
 
