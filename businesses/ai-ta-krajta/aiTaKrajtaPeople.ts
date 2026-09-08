@@ -1,9 +1,4 @@
 /**
- * Whether a person sits at the microphone regularly or came for one conversation
- */
-export type AiTaKrajtaPersonRole = 'host' | 'guest';
-
-/**
  * Folder of `public` which every portrait this page draws is kept in, shared with the rest of the site
  */
 const PERSON_PHOTO_DIRECTORY_PATH = '/people';
@@ -15,7 +10,6 @@ export type AiTaKrajtaPerson = {
     readonly id: string;
 
     readonly name: string;
-    readonly role: AiTaKrajtaPersonRole;
 
     /**
      * What the person does, in one line and only as far as the episodes of the show actually say it
@@ -52,7 +46,7 @@ export type AiTaKrajtaPerson = {
 };
 
 /**
- * Everyone the show has introduced by name, hosts first
+ * Everyone the show has introduced by name
  *
  * Note: Every line here is taken from the episode descriptions of the show or from the site itself. Nobody is given a
  *       title the show has not given them.
@@ -64,7 +58,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'pavol-hejny',
         name: 'Pavol Hejný',
-        role: 'host',
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
         url: 'https://www.ptbk.io/pavol',
         photoFileName: 'pavol-hejny-transparent-square.png',
@@ -74,7 +67,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'jiri-jahn',
         name: 'Jiří Jahn',
-        role: 'host',
         headline: 'Řeší, co z AI firma reálně použije. Tahá debatu k praktickým otázkám.',
         url: 'https://www.ptbk.io/jirka',
         photoFileName: 'jiri-jahn-transparent-square.png',
@@ -84,7 +76,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'petr-glaser',
         name: 'Petr Glaser',
-        role: 'host',
         headline: 'Vývojář, píše bleeding.dev. Testuje nové modely dřív, než se o nich začne psát.',
         url: 'https://bleeding.dev/',
         photoFileName: 'petr-glaser.jpg',
@@ -96,7 +87,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'patrik-braborec',
         name: 'Patrik Braborec',
-        role: 'host',
         headline: 'Součást klasické sestavy podcastu. Drží díly pohromadě a hlídá, aby debata nesklouzla do hype.',
         url: null,
         photoFileName: 'patrik-braborec.jpg',
@@ -106,7 +96,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'jacek-soubusta',
         name: 'Jacek Soubusta',
-        role: 'host',
         headline: 'Data a nástroje kolem AI. Umí veřejně přiznat, že vlastní MCP server spláchl do záchodu.',
         url: null,
         photoFileName: 'jacek-soubusta.jpg',
@@ -116,7 +105,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'simon-podhajsky',
         name: 'Šimon Podhajský',
-        role: 'host',
         headline: 'Přednášel na AI Engineer o read-only AI a kognitivních výparech. Nejskeptičtější hlas u stolu.',
         url: null,
         photoFileName: 'simon-podhajsky.jpg',
@@ -126,7 +114,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'roman-baranovic',
         name: 'Roman Baranovič',
-        role: 'guest',
         headline: 'Expert na digitální transformaci školství. Vrací se do dílů o AI ve školách.',
         url: 'https://narnia.sk/employees/roman-baranovic-2/',
         photoFileName: 'roman-baranovic.jpg',
@@ -136,7 +123,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'katka-fajmanova',
         name: 'Katka Fajmanová',
-        role: 'guest',
         headline: 'Architektura a interpretabilita modelů. Díl o tom, co se děje uvnitř sítě.',
         url: null,
         photoFileName: 'katka-fajmanova.jpg',
@@ -146,7 +132,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'tomas-koblizek',
         name: 'Tomáš Koblížek',
-        role: 'guest',
         headline: 'Analytický filozof, spoluautor knihy Dezinformace a Hate Speech.',
         url: null,
         photoFileName: 'tomas-koblizek.jpg',
@@ -156,7 +141,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'adam-zvada',
         name: 'Adam Zvada',
-        role: 'guest',
         headline: 'Prodal Steer Code firmě Expo. Mluvil o agent engineeringu a orchestraci agentů.',
         url: null,
         photoFileName: 'adam-zvada.jpg',
@@ -166,7 +150,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'lukas-caha',
         name: 'Lukáš Caha',
-        role: 'guest',
         headline: 'Zakladatel Youklidu. Ukázal, že se dá růst i tak, že AI hype ignorujete.',
         url: 'https://youklid.cz/',
         photoFileName: 'lukas-caha.jpg',
@@ -176,7 +159,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'richard-mladek',
         name: 'Richard Mládek',
-        role: 'guest',
         headline: 'Staví autonomní kódovací agenty ovládané přes Telegram. Díl o AI psychóze z produktivity.',
         url: null,
         photoFileName: 'richard-mladek.jpg',
@@ -186,7 +168,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'dalibor-krejci',
         name: 'Dalibor Krejčí',
-        role: 'guest',
         headline: 'Česká odnož hnutí PAUSE AI. Přišel obhájit moratorium na vývoj pokročilých modelů.',
         url: null,
         photoFileName: 'dalibor-krejci.jpg',
@@ -196,7 +177,6 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'petr-brzek',
         name: 'Petr Brzek',
-        role: 'guest',
         headline: 'Macaly, český AI startup. Díl o tom, co drží second time founders nad vodou.',
         url: null,
         photoFileName: 'petr-brzek.jpg',
@@ -223,17 +203,4 @@ export function getAiTaKrajtaPersonPhotoPath(person: AiTaKrajtaPerson): string |
  */
 export function getAiTaKrajtaPersonById(personId: string | null): AiTaKrajtaPerson | null {
     return AI_TA_KRAJTA_PEOPLE.find((person) => person.id === personId) ?? null;
-}
-
-/**
- * Everyone of one group of the page, in the order they were handed in
- *
- * Note: The people are handed in rather than taken from the roster, so that whoever decides in which order the page
- *       shows them decides it once for both groups.
- */
-export function filterAiTaKrajtaPeopleByRole(
-    people: readonly AiTaKrajtaPerson[],
-    role: AiTaKrajtaPersonRole,
-): readonly AiTaKrajtaPerson[] {
-    return people.filter((person) => person.role === role);
 }

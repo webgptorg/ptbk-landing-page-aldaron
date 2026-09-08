@@ -22,6 +22,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   full-load conversion page; `/participant` is the live room.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`.
+  Each episode lists every credited person by name; people with a profile also
+  appear as filterable portraits.
   It keeps exact episode counts but labels subscriptions and listening hours as
   estimates. The fixed mini-player, newest-episode header button, person/search/
   episode/play/archive/collaboration filters, and section hash are shareable as
@@ -30,13 +32,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `scripts/_cutAiTaKrajtaPeoplePortraits.mjs` out of the episode cover the show
   itself published them on, or out of the picture they publish of themselves when
   no cover carries them; the roster names only the file, and a person without one
-  keeps the initials on the brand gradient. Within each of the two groups the
-  people are drawn anew for every visit, weighted by how many episodes of the
-  archive name them, so somebody heard often comes up high far more often than a
-  guest of one díl without the list ever becoming a ranking. The draw is local
-  state and is made in the browser; the page itself is built in the order the
-  draw leans towards, from the most often named person to the least often named
-  one, so the browser hydrates into the list it was sent.
+  keeps the initials on the brand gradient. The one people list is drawn anew
+  for every visit, weighted by how many episodes of the archive name each
+  person, so somebody heard often comes up high far more often than someone in
+  one díl without the list ever becoming a ranking. The draw is local state and
+  is made in the browser; the page itself is built in the order the draw leans
+  towards, from the most often named person to the least often named one, so the
+  browser hydrates into the list it was sent.
   Collaboration submissions use `/admin/contacts`. Its tab icon is the page's
   own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are
   rounded and transparent, while the raster fills its square. That drawing is
@@ -45,6 +47,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   measurements of the animal along its own length. The snake of the minigame
   starts in exactly that shape, in the frame the still logo occupied, and only
   then eases into the proportions, colours and speed of a game snake.
+  A seven-cell Promptbook coder terminal floats in the bottom-right corner and
+  clears the player and cookie controls. It types `$ ptbk`, then animates an
+  ASCII octopus in response to pointer, focus, scrolling, and the snake terrarium.
+  It stays still for reduced motion and pauses its clock in hidden tabs. The
+  badge and the shared footer credit link to `https://coder.ptbk.io/`.
 - `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` are the two pages beside
   the podcast. They are named once, in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page
