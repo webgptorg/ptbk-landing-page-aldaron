@@ -1,10 +1,7 @@
 'use client';
 
 import type { AiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
-import {
-    getAiTaKrajtaEpisodeLink,
-    type AiTaKrajtaEpisodeLink,
-} from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodeLink';
+import { getAiTaKrajtaEpisodeLink, type AiTaKrajtaEpisodeLink } from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodeLink';
 import { getAiTaKrajtaEpisodePeople } from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodePeople';
 import { formatAiTaKrajtaDate } from '@/businesses/ai-ta-krajta/aiTaKrajtaFormatting';
 import { AiTaKrajtaPersonAvatar } from '@/businesses/ai-ta-krajta/AiTaKrajtaPersonAvatar';
@@ -153,6 +150,18 @@ function AiTaKrajtaEpisodePlaybackMark({
 }
 
 /**
+ * The complete credit line kept independently of portrait profiles, so a guest never disappears merely because the
+ * archive does not have a portrait for them yet.
+ */
+function AiTaKrajtaEpisodeHostList({ hostNames }: { readonly hostNames: readonly string[] }) {
+    if (hostNames.length === 0) {
+        return null;
+    }
+
+    return <p className="mt-3 text-sm leading-relaxed text-white/55">U mikrofonu: {hostNames.join(', ')}</p>;
+}
+
+/**
  * One episode of the archive, with everything a listener decides by before pressing play
  */
 export function AiTaKrajtaEpisodeCard({
@@ -229,6 +238,8 @@ export function AiTaKrajtaEpisodeCard({
                     {episode.summary !== '' && (
                         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/55">{episode.summary}</p>
                     )}
+
+                    <AiTaKrajtaEpisodeHostList hostNames={episode.hosts} />
 
                     <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
                         {people.length > 0 && (

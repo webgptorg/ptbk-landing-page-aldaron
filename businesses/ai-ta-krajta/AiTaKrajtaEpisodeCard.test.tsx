@@ -56,6 +56,12 @@ describe('AI ta Krajta episode card', () => {
         expect(episodeLink.getAttribute('target')).toBe('_blank');
     });
 
+    it('lists every credited person, including a person without a portrait profile', () => {
+        renderEpisodeCard({ ...EPISODE, hosts: ['Pavol Hejný', 'Petr Šimeček'] });
+
+        expect(screen.getByText('U mikrofonu: Pavol Hejný, Petr Šimeček')).toBeDefined();
+    });
+
     it('opens the YouTube video from its round control when the RSS recording is not available yet', () => {
         renderEpisodeCard({ ...EPISODE, audioUrl: null });
 

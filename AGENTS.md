@@ -22,6 +22,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   full-load conversion page; `/participant` is the live room.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`.
+  Each episode lists every credited person by name; people with a profile also
+  appear as filterable portraits.
   It keeps exact episode counts but labels subscriptions and listening hours as
   estimates. The fixed mini-player, newest-episode header button, person/search/
   episode/play/archive/collaboration filters, and section hash are shareable as
