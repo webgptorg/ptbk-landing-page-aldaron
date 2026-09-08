@@ -47,11 +47,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
   measurements of the animal along its own length. The snake of the minigame
   starts in exactly that shape, in the frame the still logo occupied, and only
   then eases into the proportions, colours and speed of a game snake.
-  A seven-cell Promptbook coder terminal floats in the bottom-right corner and
-  clears the player and cookie controls. It types `$ ptbk`, then animates an
-  ASCII octopus in response to pointer, focus, scrolling, and the snake terrarium.
-  It stays still for reduced motion and pauses its clock in hidden tabs. The
-  badge and the shared footer credit link to `https://coder.ptbk.io/`.
 - `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` are the two pages beside
   the podcast. They are named once, in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page

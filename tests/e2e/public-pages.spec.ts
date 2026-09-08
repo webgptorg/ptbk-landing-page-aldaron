@@ -167,6 +167,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
             const isPodcastManifestUsed = identityTags.some(
                 (element) => element.getAttribute('rel') === 'manifest' && element.getAttribute('href') === manifestPath,
             );
+            const isFooterPromptbookAbsent = !footerText.includes('Promptbook');
             const isLegalCompanyPresent = footerText.includes('AI Web s.r.o.');
 
             return {
@@ -175,6 +176,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
                 isPodcastIconUsed,
                 isPodcastTouchIconUsed,
                 isPodcastManifestUsed,
+                isFooterPromptbookAbsent,
                 isLegalCompanyPresent,
             };
         },
@@ -191,11 +193,9 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
         isPodcastIconUsed: true,
         isPodcastTouchIconUsed: true,
         isPodcastManifestUsed: true,
+        isFooterPromptbookAbsent: true,
         isLegalCompanyPresent: true,
     });
-
-    await expect(page.locator('footer').getByRole('link', { name: 'Done by Promptbook coder', exact: true }))
-        .toHaveAttribute('href', 'https://coder.ptbk.io/');
 
     const manifestResponse = await page.request.get(AI_TA_KRAJTA_MANIFEST_PATH);
 
