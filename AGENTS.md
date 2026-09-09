@@ -21,7 +21,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
   full-load conversion page; `/participant` is the live room.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
-  merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`.
+  merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
+  the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as
+  `application/rss+xml`.
   Each episode lists every credited person by name, and every person any source
   credits has a card in `aiTaKrajtaPeople.ts`, which a test keeps in step, so a
   credited person never misses their portrait and the filter cannot lose them.

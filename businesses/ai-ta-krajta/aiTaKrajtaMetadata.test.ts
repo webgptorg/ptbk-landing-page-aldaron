@@ -9,6 +9,8 @@ import {
     AI_TA_KRAJTA_BRAND_NAME,
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_PATH,
+    AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
+    AI_TA_KRAJTA_RSS_FEED_PLATFORM,
     AI_TA_KRAJTA_THEME_COLOR,
     AI_TA_KRAJTA_X_HANDLE,
 } from '@/businesses/ai-ta-krajta/config';
@@ -23,6 +25,17 @@ describe('AI ta Krajta metadata', () => {
             creator: AI_TA_KRAJTA_BRAND_NAME,
             publisher: AI_TA_KRAJTA_BRAND_NAME,
             manifest: AI_TA_KRAJTA_MANIFEST_PATH,
+            alternates: {
+                canonical: AI_TA_KRAJTA_PATH,
+                types: {
+                    [AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE]: [
+                        {
+                            title: AI_TA_KRAJTA_RSS_FEED_PLATFORM.label,
+                            url: AI_TA_KRAJTA_RSS_FEED_PLATFORM.url,
+                        },
+                    ],
+                },
+            },
             icons: {
                 icon: [{ url: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path }, { url: AI_TA_KRAJTA_APP_ICONS.RASTER.path }],
                 apple: [{ url: AI_TA_KRAJTA_APP_ICONS.RASTER.path }],

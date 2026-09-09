@@ -117,7 +117,7 @@ export function AiTaKrajtaMediaKitPage() {
                         <AiTaKrajtaSectionHeading
                             eyebrow="O podcastu"
                             title="Co se v AI mění, probíráme každý týden."
-                            description="AI ta Krajta vychází každý týden na YouTube, Spotify a Apple Podcasts. V každém díle probíráme novinky, nástroje, souvislosti a vedeme otevřenou debatu."
+                            description="AI ta Krajta vychází každý týden na YouTube, Spotify a Apple Podcasts. Posluchači si ji mohou přidat i do vlastní podcastové aplikace přes RSS feed. V každém díle probíráme novinky, nástroje, souvislosti a vedeme otevřenou debatu."
                         />
 
                         <dl className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

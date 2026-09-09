@@ -189,6 +189,11 @@ export const AI_TA_KRAJTA_MANIFEST_PATH = `${AI_TA_KRAJTA_PATH}/manifest.webmani
 export const AI_TA_KRAJTA_RSS_FEED_URL = 'https://anchor.fm/s/104a797ac/podcast/rss';
 
 /**
+ * Media type podcast applications use when they discover the show's feed
+ */
+export const AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE = 'application/rss+xml';
+
+/**
  * Where an episode description stops describing the episode and starts listing links, sponsors and chapters
  *
  * Note: These are the headings the editors of this one show type into every description.
@@ -207,7 +212,7 @@ export const AI_TA_KRAJTA_SUMMARY_STOP_PHRASES: readonly string[] = [
     'Témata v tomto díle',
 ];
 
-export type AiTaKrajtaPlatformId = 'youtube' | 'spotify' | 'applePodcasts' | 'linkedin';
+export type AiTaKrajtaPlatformId = 'youtube' | 'spotify' | 'applePodcasts' | 'rssFeed' | 'linkedin';
 
 export type AiTaKrajtaPlatform = {
     readonly id: AiTaKrajtaPlatformId;
@@ -219,6 +224,16 @@ export type AiTaKrajtaPlatform = {
     readonly description: string;
     readonly url: string;
 };
+
+/**
+ * Direct subscription option for listeners whose podcast application is not named above
+ */
+export const AI_TA_KRAJTA_RSS_FEED_PLATFORM = {
+    id: 'rssFeed',
+    label: 'RSS feed',
+    description: 'Přidejte si pořad do vlastní podcastové aplikace',
+    url: AI_TA_KRAJTA_RSS_FEED_URL,
+} as const satisfies AiTaKrajtaPlatform;
 
 /**
  * Every place the same show is published, in the order the page offers them
@@ -242,6 +257,7 @@ export const AI_TA_KRAJTA_PLATFORMS: readonly AiTaKrajtaPlatform[] = [
         description: 'Když máte podcasty v Applu',
         url: AI_TA_KRAJTA_APPLE_PODCASTS_SHOW_URL,
     },
+    AI_TA_KRAJTA_RSS_FEED_PLATFORM,
     {
         id: 'linkedin',
         label: 'LinkedIn',

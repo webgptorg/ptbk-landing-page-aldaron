@@ -9,6 +9,8 @@ import {
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_PATH,
+    AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
+    AI_TA_KRAJTA_RSS_FEED_PLATFORM,
     AI_TA_KRAJTA_SOCIAL_URLS,
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
     AI_TA_KRAJTA_THEME_COLOR,
@@ -127,8 +129,22 @@ export const AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
 /**
  * Route-level metadata which must use the podcast identity instead of the site's default one
  */
+const AI_TA_KRAJTA_PAGE_METADATA = createPageMetadata(AI_TA_KRAJTA_PAGE_DEFINITION);
+
 export const AI_TA_KRAJTA_METADATA: Metadata = {
-    ...createPageMetadata(AI_TA_KRAJTA_PAGE_DEFINITION),
+    ...AI_TA_KRAJTA_PAGE_METADATA,
+    alternates: {
+        ...AI_TA_KRAJTA_PAGE_METADATA.alternates,
+        types: {
+            ...AI_TA_KRAJTA_PAGE_METADATA.alternates?.types,
+            [AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE]: [
+                {
+                    title: AI_TA_KRAJTA_RSS_FEED_PLATFORM.label,
+                    url: AI_TA_KRAJTA_RSS_FEED_PLATFORM.url,
+                },
+            ],
+        },
+    },
     icons: {
         // Note: A browser which cannot draw the scalable icon falls back to the raster one below it.
         icon: [

@@ -49,8 +49,9 @@ export function AiTaKrajtaHero() {
                     </p>
 
                     <p className="mt-4 max-w-xl leading-relaxed text-white/55">
-                        Dívat se můžete na YouTube, poslouchat na Spotify nebo v Apple Podcasts. Česky. U mikrofonu se
-                        střídají lidé, kteří AI staví nebo nasazují, s hosty, kteří k tématu mají co říct.
+                        Dívat se můžete na YouTube, poslouchat na Spotify nebo v Apple Podcasts. Vlastní podcastovou
+                        aplikaci připojíte přes RSS feed. Česky. U mikrofonu se střídají lidé, kteří AI staví nebo
+                        nasazují, s hosty, kteří k tématu mají co říct.
                     </p>
 
                     <div className="mt-8 flex flex-wrap items-center gap-3">

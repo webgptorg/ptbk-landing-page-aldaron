@@ -252,6 +252,6 @@ export const AI_TA_KRAJTA_BRAND_BOILERPLATES: readonly AiTaKrajtaBrandBoilerplat
         text:
             `${AI_TA_KRAJTA_NAME} je český podcast o umělé inteligenci. Každý týden probírá nové modely, nástroje a ` +
             'průšvihy, které se kolem AI staly, a ptá se, co z toho plyne pro lidi, kteří s ní pracují. Vychází na ' +
-            'YouTube, Spotify a v Apple Podcasts.',
+            'YouTube, Spotify a v Apple Podcasts. Posluchači si ho mohou přidat i do vlastní podcastové aplikace přes RSS feed.',
     },
 ];

@@ -8,6 +8,8 @@ import {
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_PATH,
+    AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
+    AI_TA_KRAJTA_RSS_FEED_PLATFORM,
 } from '@/businesses/ai-ta-krajta/config';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
@@ -144,7 +146,7 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
     await expect(page).toHaveTitle(`${AI_TA_KRAJTA_BRAND_NAME} | Český podcast o umělé inteligenci`);
 
     const metadataIdentity = await page.evaluate(
-        ({ scalableIconPath, rasterIconPath, manifestPath }) => {
+        ({ scalableIconPath, rasterIconPath, manifestPath, rssFeedMediaType, rssFeedUrl, rssFeedLabel }) => {
             const identityTags = Array.from(document.head.querySelectorAll('meta, link'));
             const structuredDataNodes = Array.from(document.head.querySelectorAll('script[type*=ld]'));
             const footerText = document.querySelector('footer')?.textContent ?? '';
@@ -167,6 +169,15 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
             const isPodcastManifestUsed = identityTags.some(
                 (element) => element.getAttribute('rel') === 'manifest' && element.getAttribute('href') === manifestPath,
             );
+            const isPodcastRssFeedAdvertised = identityTags.some(
+                (element) =>
+                    element.getAttribute('rel') === 'alternate' &&
+                    element.getAttribute('type') === rssFeedMediaType &&
+                    element.getAttribute('href') === rssFeedUrl,
+            );
+            const isPodcastRssFeedLinked = Array.from(document.querySelectorAll('a')).some(
+                (element) => element.textContent?.trim() === rssFeedLabel && element.getAttribute('href') === rssFeedUrl,
+            );
             const isLegalCompanyPresent = footerText.includes('AI Web s.r.o.');
 
             return {
@@ -175,6 +186,8 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
                 isPodcastIconUsed,
                 isPodcastTouchIconUsed,
                 isPodcastManifestUsed,
+                isPodcastRssFeedAdvertised,
+                isPodcastRssFeedLinked,
                 isLegalCompanyPresent,
             };
         },
@@ -182,6 +195,9 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
             scalableIconPath: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
             rasterIconPath: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
             manifestPath: AI_TA_KRAJTA_MANIFEST_PATH,
+            rssFeedMediaType: AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
+            rssFeedUrl: AI_TA_KRAJTA_RSS_FEED_PLATFORM.url,
+            rssFeedLabel: AI_TA_KRAJTA_RSS_FEED_PLATFORM.label,
         },
     );
 
@@ -191,6 +207,8 @@ test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ p
         isPodcastIconUsed: true,
         isPodcastTouchIconUsed: true,
         isPodcastManifestUsed: true,
+        isPodcastRssFeedAdvertised: true,
+        isPodcastRssFeedLinked: true,
         isLegalCompanyPresent: true,
     });
 
