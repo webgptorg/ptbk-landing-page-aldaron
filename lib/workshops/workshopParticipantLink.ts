@@ -46,6 +46,15 @@ export function readWorkshopSlug(value: SearchParameterValue): string | null {
 }
 
 /**
+ * Adds search parameters to a site-relative path, preserving everything that path already carried
+ */
+function createPathWithSearchParameters(path: string, searchParameters: URLSearchParams): string {
+    const pathUrl = new URL(path, SITE_RELATIVE_URL_ORIGIN);
+    searchParameters.forEach((value, name) => pathUrl.searchParams.set(name, value));
+    return createSiteRelativePath(pathUrl);
+}
+
+/**
  * Adds the stable workshop selection to a site-relative path, preserving any existing search parameters and adding
  * any supplied details after it.
  */
@@ -54,10 +63,9 @@ export function createWorkshopSelectionPath(
     workshopSlug: string,
     additionalSearchParameters?: URLSearchParams,
 ): string {
-    const workshopUrl = new URL(path, SITE_RELATIVE_URL_ORIGIN);
-    workshopUrl.searchParams.set(WORKSHOP_SEARCH_PARAMETER_NAME, workshopSlug);
-    additionalSearchParameters?.forEach((value, name) => workshopUrl.searchParams.set(name, value));
-    return createSiteRelativePath(workshopUrl);
+    const searchParameters = new URLSearchParams({ [WORKSHOP_SEARCH_PARAMETER_NAME]: workshopSlug });
+    additionalSearchParameters?.forEach((value, name) => searchParameters.set(name, value));
+    return createPathWithSearchParameters(path, searchParameters);
 }
 
 /**
@@ -83,6 +91,19 @@ export function createWorkshopParticipantSearchParameters(
         email: normalizedIdentity.email,
         fullname: normalizedIdentity.fullname,
     });
+}
+
+/**
+ * The address of a room which is entered without choosing a term in it, carrying an already verified identity there.
+ *
+ * Note: This is what leads a participant into the one permanent room of the application, whose address is decided once
+ *       and for all, so nothing selects a term in it. An identity which is not complete leaves the address exactly as
+ *       it was, rather than half filling the connection form of that room.
+ */
+export function createParticipantIdentityPath(path: string, identity: WorkshopParticipantIdentity): string {
+    const searchParameters = createWorkshopParticipantSearchParameters(identity);
+
+    return searchParameters === null ? path : createPathWithSearchParameters(path, searchParameters);
 }
 
 /**

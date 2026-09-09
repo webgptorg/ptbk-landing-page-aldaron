@@ -59,6 +59,16 @@ export type WorkshopKindCapabilities = {
     readonly isMembershipOffered: boolean;
 
     /**
+     * Whether a room leads its participants on into the permanent community, which is where everything outlasting one
+     * term is kept
+     *
+     * Note: The community never invites anybody into itself, and a project discussion is opened from the community
+     *       which already showed that project, so only a room a member can reach without the community offers the way
+     *       there.
+     */
+    readonly isCommunityInvitationOffered: boolean;
+
+    /**
      * Whether a room updates itself while it is open, which its broadcast, its reactions, and its watching count need
      */
     readonly isRealtime: boolean;
@@ -83,6 +93,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isPollsOffered: false,
         isAttachedCommunityPollsShown: true,
         isMembershipOffered: true,
+        isCommunityInvitationOffered: true,
         isRealtime: true,
     },
     community: {
@@ -95,6 +106,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isPollsOffered: true,
         isAttachedCommunityPollsShown: false,
         isMembershipOffered: true,
+        isCommunityInvitationOffered: false,
         isRealtime: false,
     },
     project: {
@@ -107,6 +119,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isPollsOffered: false,
         isAttachedCommunityPollsShown: false,
         isMembershipOffered: false,
+        isCommunityInvitationOffered: false,
         isRealtime: false,
     },
 };

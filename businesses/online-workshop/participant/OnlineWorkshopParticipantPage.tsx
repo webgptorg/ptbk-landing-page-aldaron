@@ -1,5 +1,6 @@
 'use client';
 
+import { CommunityRoomInvitation } from '@/businesses/community/CommunityRoomInvitation';
 import { CommunityMembershipBadge } from '@/businesses/community/membership/CommunityMembershipBadge';
 import { CommunityMembershipModal } from '@/businesses/community/membership/CommunityMembershipModal';
 import { CommunityMembershipRoomProvider } from '@/businesses/community/membership/CommunityMembershipRoomProvider';
@@ -326,6 +327,14 @@ export function OnlineWorkshopParticipantPage({
                             isInteractionBanned={state.participant.isInteractionBanned}
                             onReact={controller.react}
                         />
+                    )}
+                    {/*
+                      * Note: The community lists the terms and leads a member into the room of each of them, and this
+                      *       is the way back out of such a room. It closes the main column rather than competing with
+                      *       the stage, because it says where to go next rather than what is happening now.
+                      */}
+                    {roomCapabilities.isCommunityInvitationOffered && (
+                        <CommunityRoomInvitation participantIdentity={state.participant} />
                     )}
                 </div>
 

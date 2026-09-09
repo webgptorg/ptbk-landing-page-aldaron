@@ -1,5 +1,6 @@
 'use client';
 
+import { CZECH_COMMUNITY_ROOM_COPY } from '@/businesses/community/communityContent';
 import { COMMUNITY_PROJECTS_PATH } from '@/businesses/community/config';
 import {
     CommunityProjectApiError,
@@ -142,7 +143,7 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
                 <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">Tvoříme spolu</p>
                     <h2 id="community-projects-title" className="mt-1 text-xl font-bold text-white">
-                        Projekty komunity
+                        {CZECH_COMMUNITY_ROOM_COPY.projectsTitle}
                     </h2>
                     <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
                         Podívejte se, co členové vytvořili, podpořte nejlepší nápady a přidejte vlastní tvorbu.

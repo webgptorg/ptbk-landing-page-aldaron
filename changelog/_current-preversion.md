@@ -1,4 +1,21 @@
 # Current preversion
+- Made the way between a workshop and the community lead both ways. `/cs/komunita` has always listed the terms of every
+  event and led a member into the room of each of them, while `/cs/online-workshop/participant` led nowhere at all: a
+  workshop ended, and the people who had just spent an hour together were left in a room which said nothing about where
+  the rest of it happens. Every room which is not the community itself now closes its main column with a `Komunita
+  Promptbooku` invitation, which says that the chat stays open once the workshop is over, names the sections waiting
+  there — `Projekty komunity`, `Materiály komunity` and `Termíny akcí Promptbooku` — and opens the community with one
+  click.
+
+  It is deliberately one hand-off read in the other direction rather than a second way of linking rooms: the invitation
+  carries the very name and address the room has already verified, exactly as the terms listed in the community carry
+  them into a workshop room, so a participant who is already connected is never asked who they are a second time, and
+  an identity which is incomplete opens the community without half-filling its connection form. Which rooms offer the
+  invitation is answered once by the room-kind capabilities, where the community does not invite anybody into itself
+  and a project discussion — which is opened from the community in the first place — does not either. What is promised
+  in the invitation is named by the community's own sections rather than by words written beside them, so the gallery
+  of projects cannot be called one thing in the community and another in the invitation to it.
+
 - Let a workshop be about a project, and let its participants watch that project being built. `/admin/workshops` now
   asks every term for `GitHub repozitář projektu`, and optionally for the branch it follows and for the address the
   project runs at. The repository is written however it is at hand — `vlastník/název`, the address of the repository

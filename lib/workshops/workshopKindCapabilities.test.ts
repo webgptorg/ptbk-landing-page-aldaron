@@ -24,6 +24,7 @@ describe('workshop kind capabilities', () => {
             isPollsOffered: false,
             isAttachedCommunityPollsShown: true,
             isMembershipOffered: true,
+            isCommunityInvitationOffered: true,
             isRealtime: true,
         });
     });
@@ -39,6 +40,7 @@ describe('workshop kind capabilities', () => {
             isPollsOffered: true,
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: true,
+            isCommunityInvitationOffered: false,
             isRealtime: false,
         });
     });
@@ -54,6 +56,7 @@ describe('workshop kind capabilities', () => {
             isPollsOffered: false,
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: false,
+            isCommunityInvitationOffered: false,
             isRealtime: false,
         });
     });
@@ -68,6 +71,13 @@ describe('workshop kind capabilities', () => {
         expect(getWorkshopKindCapabilities('community').isMembershipOffered).toBe(true);
         expect(getWorkshopKindCapabilities('workshop').isMembershipOffered).toBe(true);
         expect(getWorkshopKindCapabilities('project').isMembershipOffered).toBe(false);
+    });
+
+    it('leads into the community from the rooms which are reached without it', () => {
+        expect(getWorkshopKindCapabilities('workshop').isCommunityInvitationOffered).toBe(true);
+        // The community never invites anybody into itself, and a project discussion is opened from the community.
+        expect(getWorkshopKindCapabilities('community').isCommunityInvitationOffered).toBe(false);
+        expect(getWorkshopKindCapabilities('project').isCommunityInvitationOffered).toBe(false);
     });
 
     it('refuses a schedule, a stage, a project, and an address written into a room which has none of them', () => {

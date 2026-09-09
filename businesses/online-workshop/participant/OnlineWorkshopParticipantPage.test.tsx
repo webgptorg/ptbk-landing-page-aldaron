@@ -368,6 +368,24 @@ describe('online workshop participant room', () => {
         );
     });
 
+    it('leads from a workshop into the permanent community with that very same identity', () => {
+        renderParticipantRoom(WORKSHOP);
+
+        expect(screen.getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')).toBe(
+            '/cs/komunita?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
+        );
+    });
+
+    it('invites nobody into the community from the community itself, nor from a project discussion inside it', () => {
+        renderParticipantRoom(COMMUNITY);
+        expect(screen.queryByRole('link', { name: /Vstoupit do komunity/ })).toBeNull();
+
+        cleanup();
+
+        renderParticipantRoom(PROJECT_DISCUSSION);
+        expect(screen.queryByRole('link', { name: /Vstoupit do komunity/ })).toBeNull();
+    });
+
     it('keeps the chat and the materials of the shared room in a permanent room', () => {
         renderParticipantRoom(COMMUNITY);
 

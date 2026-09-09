@@ -1,3 +1,8 @@
+import {
+    createParticipantIdentityPath,
+    type WorkshopParticipantIdentity,
+} from '@/lib/workshops/workshopParticipantLink';
+
 /**
  * Czech community entry point. Future localized routes can reuse the room component while supplying their own path
  * and copy, without changing the stable community room in the database.
@@ -53,4 +58,15 @@ export const COMMUNITY_ADMIN_PATH = '/admin/community';
 
 export function createCommunityProjectPath(projectId: string): string {
     return `${COMMUNITY_PROJECTS_PATH}/${encodeURIComponent(projectId)}`;
+}
+
+/**
+ * Where the permanent community is entered from another room, carrying the identity that room already verified.
+ *
+ * Note: This is the other direction of the very same hand-off which leads a member of the community into the room of a
+ *       term it lists, see `createWorkshopRoomLink`. Both carry the connected member on, so neither room asks somebody
+ *       who is already connected for their name and address a second time.
+ */
+export function createCommunityRoomLink(participantIdentity: WorkshopParticipantIdentity): string {
+    return createParticipantIdentityPath(COMMUNITY_PATH, participantIdentity);
 }
