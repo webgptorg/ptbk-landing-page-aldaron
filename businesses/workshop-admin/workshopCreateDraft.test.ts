@@ -25,11 +25,27 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-09-12T15:00:00.000Z',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: 'M7lc1UVf-VE',
+    repository: {
+        owner: 'hejny',
+        name: 'promptbook',
+        branch: 'main',
+        deploymentUrl: 'https://workshop.example/app',
+    },
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
     disabledPanels: ['reactions'],
     createdAt: '2026-08-01T10:00:00.000Z',
     updatedAt: '2026-08-01T10:00:00.000Z',
+};
+
+/**
+ * The connected project as it is written again, which names the repository by its address rather than by the two words
+ * it is stored as
+ */
+const DUPLICATED_WORKSHOP_REPOSITORY = {
+    url: 'https://github.com/hejny/promptbook',
+    branch: 'main',
+    deploymentUrl: 'https://workshop.example/app',
 };
 
 describe('workshop creation drafts', () => {
@@ -56,10 +72,15 @@ describe('workshop creation drafts', () => {
             event: WORKSHOP.event,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
+            repository: DUPLICATED_WORKSHOP_REPOSITORY,
             isPublished: false,
             allowedReactions: WORKSHOP.allowedReactions,
             disabledPanels: WORKSHOP.disabledPanels,
         });
+    });
+
+    it('leaves a copy of a workshop about no project about no project either', () => {
+        expect(createWorkshopDuplicateDraft({ ...WORKSHOP, repository: null })?.repository).toBeNull();
     });
 
     it('suggests the next available copy URL when another duplicate already exists', () => {
@@ -95,6 +116,7 @@ describe('workshop creation drafts', () => {
             maximumParticipantCount: WORKSHOP.event?.maximumParticipantCount,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
+            repository: DUPLICATED_WORKSHOP_REPOSITORY,
             isPublished: false,
             allowedReactions: WORKSHOP.allowedReactions,
             disabledPanels: WORKSHOP.disabledPanels,

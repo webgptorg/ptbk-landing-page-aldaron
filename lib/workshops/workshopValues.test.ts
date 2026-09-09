@@ -52,6 +52,34 @@ describe('workshop admin values', () => {
         });
     });
 
+    it('writes the whole project of a room at once, so unsetting it leaves nothing of it behind', () => {
+        expect(
+            createWorkshopUpdateDatabaseValues({
+                repository: {
+                    owner: 'hejny',
+                    name: 'promptbook',
+                    branch: 'main',
+                    deploymentUrl: 'https://workshop.example/app',
+                },
+            }),
+        ).toEqual({
+            github_repository: 'hejny/promptbook',
+            github_repository_branch: 'main',
+            deployment_url: 'https://workshop.example/app',
+        });
+        expect(createWorkshopUpdateDatabaseValues({ repository: null })).toEqual({
+            github_repository: null,
+            github_repository_branch: null,
+            deployment_url: null,
+        });
+    });
+
+    it('leaves the project of a room alone while nothing about it is being changed', () => {
+        expect(createWorkshopUpdateDatabaseValues({ title: 'Produkční kód s AI agenty' })).toEqual({
+            title: 'Produkční kód s AI agenty',
+        });
+    });
+
     it('writes a follow-up flag as part of one ordinary material and only the feedback fields that changed', () => {
         expect(
             createWorkshopContentDatabaseValues({

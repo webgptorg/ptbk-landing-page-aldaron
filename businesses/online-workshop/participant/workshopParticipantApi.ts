@@ -1,3 +1,4 @@
+import type { WorkshopRepositoryProgress } from '@/lib/workshops/workshopRepositoryProgress';
 import type {
     WorkshopComment,
     WorkshopCommentSort,
@@ -116,6 +117,22 @@ export async function fetchWorkshopState(
 ): Promise<WorkshopPublicState> {
     const searchParameters = new URLSearchParams({ sort: commentSort });
     const response = await fetch(`${getWorkshopApiUrl(workshopSlug, 'state')}?${searchParameters}`, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+    });
+    return readResponseJson(response);
+}
+
+/**
+ * Reads how far the project of this workshop has come
+ *
+ * Note: This is asked for on its own rather than with the state of the room, because it is read from GitHub instead of
+ *       from the room itself, and a slow answer of GitHub must not hold up the chat, the materials, or the stage.
+ */
+export async function fetchWorkshopRepositoryProgress(
+    workshopSlug: string,
+): Promise<{ readonly progress: WorkshopRepositoryProgress | null }> {
+    const response = await fetch(getWorkshopApiUrl(workshopSlug, 'repository'), {
         credentials: 'same-origin',
         cache: 'no-store',
     });

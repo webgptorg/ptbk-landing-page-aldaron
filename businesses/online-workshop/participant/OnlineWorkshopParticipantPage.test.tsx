@@ -24,6 +24,21 @@ vi.mock('@/businesses/online-workshop/participant/useWorkshopParticipant', () =>
     useWorkshopParticipant: () => participantMocks.controller,
 }));
 
+/**
+ * What the room was told about the project of the workshop, which is read from GitHub rather than from the room
+ */
+const repositoryProgressMocks = vi.hoisted(() => ({
+    controller: {
+        progress: null as unknown,
+        isProgressRead: true,
+        newCommitShas: new Set<string>(),
+    },
+}));
+
+vi.mock('@/businesses/online-workshop/participant/useWorkshopRepositoryProgress', () => ({
+    useWorkshopRepositoryProgress: () => repositoryProgressMocks.controller,
+}));
+
 const fetchCommunityMembership = vi.fn<(workshopSlug: string) => Promise<CommunityMembershipRoomState>>();
 
 vi.mock('@/businesses/community/membership/communityMembershipRoomApi', () => ({
@@ -70,6 +85,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-08-21T20:30:00+02:00',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: null,
+    repository: null,
     isPublished: true,
     allowedReactions: ['👍'],
     disabledPanels: [],
@@ -129,6 +145,19 @@ const ENDED_WORKSHOP_WITHOUT_ITS_RECORDING: WorkshopDetails = {
     ...WORKSHOP,
     endsAt: '2026-08-21T19:10:00+02:00',
     youtubeVideoId: null,
+};
+
+/**
+ * A term which is about a project, together with the branch it follows and where that project runs
+ */
+const WORKSHOP_ABOUT_A_PROJECT: WorkshopDetails = {
+    ...WORKSHOP,
+    repository: {
+        owner: 'hejny',
+        name: 'promptbook',
+        branch: 'main',
+        deploymentUrl: 'https://workshop.example/app',
+    },
 };
 
 const ATTACHED_COMMUNITY_POLL: WorkshopPoll = {
@@ -251,6 +280,7 @@ function renderParticipantRoom(
 beforeEach(() => {
     window.history.replaceState({}, '', '/cs/online-workshop/participant');
     fetchCommunityMembership.mockResolvedValue(FREE_MEMBERSHIP);
+    repositoryProgressMocks.controller = { progress: null, isProgressRead: true, newCommitShas: new Set<string>() };
 });
 
 afterEach(() => {
@@ -274,6 +304,52 @@ describe('online workshop participant room', () => {
         expect(container.querySelector('iframe')).toBeNull();
         expect(screen.queryByRole('button', { name: /Reagovat/ })).toBeNull();
         expect(screen.queryByText('Sledují 3 lidé')).toBeNull();
+    });
+
+    it('shows the project a workshop is about, together with what has been committed in it', () => {
+        repositoryProgressMocks.controller = {
+            progress: {
+                details: {
+                    description: 'Kniha promptů pro AI agenty',
+                    defaultBranch: 'main',
+                    primaryLanguage: 'TypeScript',
+                    starCount: 1_275,
+                },
+                commits: [
+                    {
+                        sha: '6dcb09b5b57875f334f61aebed695e2e4193db5e',
+                        message: 'Přidat panel repozitáře',
+                        authorName: 'Pavol Hejný',
+                        committedAt: '2026-08-21T19:25:00+02:00',
+                    },
+                ],
+                commitCountSinceStart: 1,
+                isCommitCountSinceStartComplete: true,
+            },
+            isProgressRead: true,
+            newCommitShas: new Set(['6dcb09b5b57875f334f61aebed695e2e4193db5e']),
+        };
+
+        renderParticipantRoom(WORKSHOP_ABOUT_A_PROJECT);
+
+        expect(screen.getByText('hejny/promptbook')).not.toBeNull();
+        expect(screen.getByText('Kniha promptů pro AI agenty')).not.toBeNull();
+        expect(screen.getByText('Od začátku workshopu přibylo 1 commit.')).not.toBeNull();
+        expect(screen.getByText('Přidat panel repozitáře')).not.toBeNull();
+        expect(screen.getByText('Nový')).not.toBeNull();
+        expect(screen.getByRole('link', { name: /Živá aplikace/ }).getAttribute('href')).toBe(
+            'https://workshop.example/app',
+        );
+    });
+
+    it('shows nothing about a project in a room which is about none, and in a room which cannot be about one', () => {
+        renderParticipantRoom(WORKSHOP);
+        expect(screen.queryByLabelText('Projekt workshopu')).toBeNull();
+
+        cleanup();
+
+        renderParticipantRoom({ ...COMMUNITY, repository: WORKSHOP_ABOUT_A_PROJECT.repository });
+        expect(screen.queryByLabelText('Projekt workshopu')).toBeNull();
     });
 
     it('lets a member vote on a visible community poll attached to a workshop', () => {

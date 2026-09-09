@@ -27,6 +27,7 @@ function createState(workshopSlug = WORKSHOP_SLUG): WorkshopPublicState {
             endsAt: '2026-08-24T20:00:00.000Z',
             youtubeVideoId: 'dQw4w9WgXcQ',
             previewYoutubeVideoId: null,
+            repository: null,
             isPublished: true,
             allowedReactions: ['👍'],
             disabledPanels: [],

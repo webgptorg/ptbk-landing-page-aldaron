@@ -1,3 +1,5 @@
+import { formatGithubRepositoryName } from '@/lib/github/githubRepository';
+import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { z } from 'zod';
 import type {
     workshopArtificialCommentSchema,
@@ -19,6 +21,20 @@ type WorkshopParticipantUpdateValues = z.infer<typeof workshopParticipantUpdateS
 type WorkshopArtificialCommentValues = z.infer<typeof workshopArtificialCommentSchema>;
 type WorkshopFeedbackUpdateValues = z.infer<typeof workshopFeedbackUpdateSchema>;
 
+/**
+ * The database names of a whole connection to a project, whether it is being set, changed, or unset
+ *
+ * Note: All three of them are written together, so unsetting the connection can never leave a branch or a deployment
+ *       of a repository which is no longer connected behind.
+ */
+function createWorkshopRepositoryDatabaseValues(repository: WorkshopRepository | null) {
+    return {
+        github_repository: repository === null ? null : formatGithubRepositoryName(repository),
+        github_repository_branch: repository?.branch ?? null,
+        deployment_url: repository?.deploymentUrl ?? null,
+    };
+}
+
 export function createWorkshopDatabaseValues(values: WorkshopCreateValues) {
     return {
         slug: values.slug,
@@ -34,6 +50,7 @@ export function createWorkshopDatabaseValues(values: WorkshopCreateValues) {
         artificial_watching_participant_count: values.artificialWatchingParticipantCount,
         youtube_video_id: values.youtubeVideoId,
         preview_youtube_video_id: values.previewYoutubeVideoId,
+        ...createWorkshopRepositoryDatabaseValues(values.repository),
         is_published: values.isPublished,
         allowed_reactions: values.allowedReactions,
         disabled_panels: values.disabledPanels,
@@ -61,6 +78,7 @@ export function createWorkshopUpdateDatabaseValues(values: WorkshopUpdateValues)
         ...(values.previewYoutubeVideoId === undefined
             ? {}
             : { preview_youtube_video_id: values.previewYoutubeVideoId }),
+        ...(values.repository === undefined ? {} : createWorkshopRepositoryDatabaseValues(values.repository)),
         ...(values.isPublished === undefined ? {} : { is_published: values.isPublished }),
         ...(values.allowedReactions === undefined ? {} : { allowed_reactions: values.allowedReactions }),
         ...(values.disabledPanels === undefined ? {} : { disabled_panels: values.disabledPanels }),

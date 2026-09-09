@@ -41,6 +41,7 @@ const COMMUNITY: WorkshopDetails = {
     endsAt: null,
     youtubeVideoId: null,
     previewYoutubeVideoId: null,
+    repository: null,
     isPublished: true,
     allowedReactions: [],
     disabledPanels: [],

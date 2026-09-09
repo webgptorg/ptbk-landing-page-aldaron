@@ -48,7 +48,27 @@ export type WorkshopWriteValues = {
      * The teaser of the recording which everybody who has not unlocked it watches once the term is over
      */
     readonly previewYoutubeVideoId?: string | null;
+
+    /**
+     * The project this term is about, or `null` to disconnect the project it was about
+     *
+     * Note: The whole connection is written at once, so setting, changing, and unsetting it are one and the same
+     *       request and a branch or a deployment can never outlive the repository it belongs to.
+     */
+    readonly repository?: WorkshopRepositoryWriteValues | null;
     readonly allowedReactions?: readonly string[];
+};
+
+/**
+ * The project of one term as its administration writes it, before the server reads the repository out of it
+ */
+export type WorkshopRepositoryWriteValues = {
+    /**
+     * The repository, written either as its address or as `owner/name`
+     */
+    readonly url: string;
+    readonly branch: string | null;
+    readonly deploymentUrl: string | null;
 };
 
 /**

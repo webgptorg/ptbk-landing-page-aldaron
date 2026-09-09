@@ -1,5 +1,6 @@
 import { serializeRowsAsCsv } from '@/lib/exports/serializeRowsAsCsv';
 import { serializeVcards } from '@/lib/exports/serializeVcards';
+import { formatGithubRepositoryName } from '@/lib/github/githubRepository';
 import type {
     WorkshopAdminComment,
     WorkshopAdminParticipant,
@@ -75,6 +76,23 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
                       {
                           header: 'YouTube video ID ukázky',
                           getValue: (item: WorkshopDetails) => item.previewYoutubeVideoId,
+                      },
+                  ]
+                : []),
+            ...(roomCapabilities.isRepositoryOffered
+                ? [
+                      {
+                          header: 'GitHub repozitář',
+                          getValue: (item: WorkshopDetails) =>
+                              item.repository === null ? null : formatGithubRepositoryName(item.repository),
+                      },
+                      {
+                          header: 'Větev repozitáře',
+                          getValue: (item: WorkshopDetails) => item.repository?.branch ?? null,
+                      },
+                      {
+                          header: 'URL nasazení',
+                          getValue: (item: WorkshopDetails) => item.repository?.deploymentUrl ?? null,
                       },
                   ]
                 : []),

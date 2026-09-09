@@ -74,6 +74,11 @@ const SHORTCODE_LINK_TITLE_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-0700-workshop-shortcode-link-titles.sql',
 );
 const SHORTCODE_LINK_TITLE_MIGRATION_SQL = readFileSync(SHORTCODE_LINK_TITLE_MIGRATION_PATH, 'utf8');
+const WORKSHOP_REPOSITORY_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-0800-workshop-repository.sql',
+);
+const WORKSHOP_REPOSITORY_MIGRATION_SQL = readFileSync(WORKSHOP_REPOSITORY_MIGRATION_PATH, 'utf8');
 const COMMUNITY_POLL_MIGRATION_PATH = path.resolve(process.cwd(), 'migrations/2026-08-2400-community-polls.sql');
 const COMMUNITY_POLL_MIGRATION_SQL = readFileSync(COMMUNITY_POLL_MIGRATION_PATH, 'utf8');
 const COMMUNITY_POLL_ADMINISTRATION_MIGRATION_PATH = path.resolve(
@@ -644,6 +649,26 @@ describe('workshop database migration', () => {
         );
         expect(SHORTCODE_CHAT_LINK_MIGRATION_SQL).toContain(
             'REVOKE ALL ON TABLE public.workshop_comment_shortcode_links FROM PUBLIC, anon, authenticated',
+        );
+    });
+
+    it('keeps the project a term is about beside the term itself, without a second record of it', () => {
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain('ALTER TABLE public.workshops');
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain('ADD COLUMN IF NOT EXISTS github_repository text');
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain('ADD COLUMN IF NOT EXISTS github_repository_branch text');
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain('ADD COLUMN IF NOT EXISTS deployment_url text');
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).not.toContain('CREATE TABLE');
+    });
+
+    it('lets neither a branch nor a deployment outlive the repository they belong to', () => {
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain(
+            'DROP CONSTRAINT IF EXISTS workshops_repository_connection;',
+        );
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain(
+            'ADD CONSTRAINT workshops_repository_connection CHECK (',
+        );
+        expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain(
+            'OR (github_repository_branch IS NULL AND deployment_url IS NULL)',
         );
     });
 

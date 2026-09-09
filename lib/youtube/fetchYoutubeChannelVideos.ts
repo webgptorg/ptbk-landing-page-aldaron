@@ -1,3 +1,4 @@
+import { ATOM_FEED_MEDIA_TYPES } from '@/lib/network/feedMediaTypes';
 import { fetchCachedText } from '@/lib/network/fetchCachedText';
 import {
     createYoutubeChannelFeedUrl,
@@ -18,11 +19,6 @@ export type FetchYoutubeChannelVideosOptions = {
 };
 
 /**
- * Every kind of document YouTube answers a request for a channel feed with
- */
-const CHANNEL_FEED_MEDIA_TYPES = 'application/atom+xml, application/xml;q=0.9, text/xml;q=0.8';
-
-/**
  * Reads the newest videos of a YouTube channel
  *
  * Note: A page which lists videos has to render even when YouTube is unreachable, so the caller receives no video
@@ -36,7 +32,7 @@ export async function fetchYoutubeChannelVideos(
     const feedXml = await fetchCachedText({
         url: createYoutubeChannelFeedUrl(options.channelId),
         revalidateSeconds: options.revalidateSeconds,
-        acceptedMediaTypes: CHANNEL_FEED_MEDIA_TYPES,
+        acceptedMediaTypes: ATOM_FEED_MEDIA_TYPES,
     });
 
     return feedXml === null ? [] : parseYoutubeChannelFeed(feedXml);

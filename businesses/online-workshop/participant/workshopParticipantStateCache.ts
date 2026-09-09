@@ -30,6 +30,18 @@ function isWorkshopPaidMembersVideoOrNull(value: unknown): boolean {
     );
 }
 
+/**
+ * Note: A snapshot saved before a room could be about a project carries no connection at all, which is neither a
+ *       connected project nor a room without one. Such a snapshot is therefore read as no snapshot, so a room never
+ *       shows a project it cannot describe.
+ */
+function isWorkshopRepositoryOrNull(value: unknown): boolean {
+    return (
+        value === null ||
+        (isObject(value) && typeof value.owner === 'string' && typeof value.name === 'string')
+    );
+}
+
 function isWorkshopCommentReferenceOrNull(value: unknown): boolean {
     return (
         value === null ||
@@ -62,6 +74,7 @@ function isWorkshopPublicStateCacheEntry(
         typeof workshop.startsAt === 'string' &&
         (typeof workshop.endsAt === 'string' || workshop.endsAt === null) &&
         (typeof workshop.youtubeVideoId === 'string' || workshop.youtubeVideoId === null) &&
+        isWorkshopRepositoryOrNull(workshop.repository) &&
         Array.isArray(workshop.allowedReactions) &&
         Array.isArray(workshop.disabledPanels) &&
         isObject(participant) &&

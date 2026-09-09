@@ -36,6 +36,7 @@ import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModerat
 import { normalizeWorkshopParticipantEmail } from '@/lib/workshops/workshopParticipantEmail';
 import { selectWorkshopContentForMember } from '@/lib/workshops/workshopPaidMembersContent';
 import { selectWorkshopVideoForMember } from '@/lib/workshops/workshopPaidMembersVideo';
+import { createWorkshopRepositoryOrNull } from '@/lib/workshops/workshopRepository';
 import { loadRegisteredParticipantCountsByTermId } from '@/lib/workshops/workshopRegistrationDatabase';
 import { getRegisteredParticipantCount } from '@/lib/workshops/workshopRegistrations';
 import type {
@@ -88,6 +89,14 @@ export type WorkshopRow = {
      * unlock the recording itself
      */
     readonly preview_youtube_video_id: string | null;
+
+    /**
+     * The project this term is about, written as `owner/name`, together with the branch which is followed and the
+     * address the project runs at, all three of which a term without a connected project leaves empty
+     */
+    readonly github_repository?: string | null;
+    readonly github_repository_branch?: string | null;
+    readonly deployment_url?: string | null;
     readonly is_published: boolean;
     readonly allowed_reactions: string[];
 
@@ -422,6 +431,11 @@ export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
         ...mapWorkshopSummaryRow(row),
         youtubeVideoId: row.youtube_video_id,
         previewYoutubeVideoId: row.preview_youtube_video_id,
+        repository: createWorkshopRepositoryOrNull({
+            repository: row.github_repository ?? null,
+            branch: row.github_repository_branch ?? null,
+            deploymentUrl: row.deployment_url ?? null,
+        }),
         allowedReactions: row.allowed_reactions,
         disabledPanels: normalizeWorkshopDisabledPanels(row.disabled_panels),
         artificialWatchingParticipantCount: row.artificial_watching_participant_count ?? 0,

@@ -32,6 +32,12 @@ export type WorkshopKindCapabilities = {
     readonly isStageOffered: boolean;
 
     /**
+     * Whether a room can be about a project, so its administration connects a repository to it and the room shows what
+     * is being built in that repository while the room runs
+     */
+    readonly isRepositoryOffered: boolean;
+
+    /**
      * Whether the room offers member polls, which are currently the permanent community's way to make a decision
      * together without turning an individual live workshop into a survey.
      */
@@ -73,6 +79,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isScheduled: true,
         isEvent: true,
         isStageOffered: true,
+        isRepositoryOffered: true,
         isPollsOffered: false,
         isAttachedCommunityPollsShown: true,
         isMembershipOffered: true,
@@ -84,6 +91,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isScheduled: false,
         isEvent: false,
         isStageOffered: false,
+        isRepositoryOffered: false,
         isPollsOffered: true,
         isAttachedCommunityPollsShown: false,
         isMembershipOffered: true,
@@ -95,6 +103,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isScheduled: false,
         isEvent: false,
         isStageOffered: false,
+        isRepositoryOffered: false,
         isPollsOffered: false,
         isAttachedCommunityPollsShown: false,
         isMembershipOffered: false,
@@ -120,6 +129,7 @@ export function isWorkshopPollVisibleInRoom(workshopKind: WorkshopKind): boolean
  */
 const WORKSHOP_SCHEDULE_FIELD_NAMES = ['startsAt', 'endsAt'] as const;
 const WORKSHOP_STAGE_FIELD_NAMES = ['youtubeVideoId', 'previewYoutubeVideoId'] as const;
+const WORKSHOP_REPOSITORY_FIELD_NAMES = ['repository'] as const;
 const WORKSHOP_SLUG_FIELD_NAMES = ['slug'] as const;
 const WORKSHOP_EVENT_FIELD_NAMES = [
     'eventType',
@@ -133,8 +143,8 @@ const WORKSHOP_EVENT_FIELD_NAMES = [
  * The written settings which the kind of a room does not have
  *
  * Note: The administration already leaves these settings out of its form, so this only refuses a stale or a forged
- *       request which would give a calm room a schedule or a stage that nothing in it could ever show, or move the
- *       only room of its kind to an address every link to it would miss.
+ *       request which would give a calm room a schedule, a stage, or a project that nothing in it could ever show, or
+ *       move the only room of its kind to an address every link to it would miss.
  */
 export function getUnsupportedWorkshopKindFieldNames(
     workshopKind: WorkshopKind,
@@ -145,6 +155,7 @@ export function getUnsupportedWorkshopKindFieldNames(
         ...(capabilities.isScheduled ? [] : WORKSHOP_SCHEDULE_FIELD_NAMES),
         ...(capabilities.isEvent ? [] : WORKSHOP_EVENT_FIELD_NAMES),
         ...(capabilities.isStageOffered ? [] : WORKSHOP_STAGE_FIELD_NAMES),
+        ...(capabilities.isRepositoryOffered ? [] : WORKSHOP_REPOSITORY_FIELD_NAMES),
         ...(capabilities.isSlugFixed ? WORKSHOP_SLUG_FIELD_NAMES : []),
     ];
 

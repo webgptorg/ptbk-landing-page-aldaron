@@ -1,7 +1,12 @@
 import {
     createWorkshopEventWriteValues,
     type WorkshopCreateValues,
+    type WorkshopRepositoryWriteValues,
 } from '@/businesses/workshop-admin/workshopAdminApiClient';
+import {
+    createWorkshopRepositoryDraft,
+    createWorkshopRepositoryWriteValues,
+} from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
 import { DEFAULT_EVENT_DETAILS, type EventDetails } from '@/lib/events/event';
 import { DEFAULT_WORKSHOP_REACTIONS, MAXIMAL_WORKSHOP_SLUG_LENGTH } from '@/lib/workshops/workshopConstants';
@@ -27,6 +32,11 @@ export type WorkshopCreateDraft = {
     readonly event: EventDetails;
     readonly youtubeVideoId: string | null;
     readonly previewYoutubeVideoId: string | null;
+
+    /**
+     * The project the new term is about, which a copy inherits from the term it was copied from
+     */
+    readonly repository: WorkshopRepositoryWriteValues | null;
     readonly isPublished: boolean;
     readonly allowedReactions: readonly string[];
     readonly disabledPanels: readonly WorkshopPanelKey[];
@@ -74,6 +84,7 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
         event: copyEventDetails(DEFAULT_EVENT_DETAILS),
         youtubeVideoId: null,
         previewYoutubeVideoId: null,
+        repository: null,
         isPublished: false,
         allowedReactions: [...DEFAULT_WORKSHOP_REACTIONS],
         disabledPanels: [],
@@ -104,6 +115,7 @@ export function createWorkshopDuplicateDraft(
         event: copyEventDetails(workshop.event),
         youtubeVideoId: workshop.youtubeVideoId,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId,
+        repository: createWorkshopRepositoryWriteValues(createWorkshopRepositoryDraft(workshop.repository)),
         isPublished: false,
         allowedReactions: [...workshop.allowedReactions],
         disabledPanels: [...workshop.disabledPanels],
@@ -131,6 +143,7 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         ...createWorkshopEventWriteValues(draft.event),
         youtubeVideoId: draft.youtubeVideoId,
         previewYoutubeVideoId: draft.previewYoutubeVideoId,
+        repository: draft.repository,
         isPublished: draft.isPublished,
         allowedReactions: draft.allowedReactions,
         disabledPanels: draft.disabledPanels,

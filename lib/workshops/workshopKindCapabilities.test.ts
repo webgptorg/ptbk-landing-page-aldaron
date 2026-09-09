@@ -20,6 +20,7 @@ describe('workshop kind capabilities', () => {
             isScheduled: true,
             isEvent: true,
             isStageOffered: true,
+            isRepositoryOffered: true,
             isPollsOffered: false,
             isAttachedCommunityPollsShown: true,
             isMembershipOffered: true,
@@ -34,6 +35,7 @@ describe('workshop kind capabilities', () => {
             isScheduled: false,
             isEvent: false,
             isStageOffered: false,
+            isRepositoryOffered: false,
             isPollsOffered: true,
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: true,
@@ -48,6 +50,7 @@ describe('workshop kind capabilities', () => {
             isScheduled: false,
             isEvent: false,
             isStageOffered: false,
+            isRepositoryOffered: false,
             isPollsOffered: false,
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: false,
@@ -67,7 +70,7 @@ describe('workshop kind capabilities', () => {
         expect(getWorkshopKindCapabilities('project').isMembershipOffered).toBe(false);
     });
 
-    it('refuses a schedule, a stage, and an address written into a room which has none of them', () => {
+    it('refuses a schedule, a stage, a project, and an address written into a room which has none of them', () => {
         expect(
             getUnsupportedWorkshopKindFieldNames('community', {
                 slug: 'jina-komunita',
@@ -75,8 +78,18 @@ describe('workshop kind capabilities', () => {
                 endsAt: null,
                 youtubeVideoId: 'dQw4w9WgXcQ',
                 previewYoutubeVideoId: 'M7lc1UVf-VE',
+                repository: { owner: 'hejny', name: 'promptbook', branch: null, deploymentUrl: null },
             }),
-        ).toEqual(['startsAt', 'endsAt', 'youtubeVideoId', 'previewYoutubeVideoId', 'slug']);
+        ).toEqual(['startsAt', 'endsAt', 'youtubeVideoId', 'previewYoutubeVideoId', 'repository', 'slug']);
+    });
+
+    it('lets a workshop occurrence be about a project, because that is what it is held about', () => {
+        expect(getWorkshopKindCapabilities('workshop').isRepositoryOffered).toBe(true);
+        expect(
+            getUnsupportedWorkshopKindFieldNames('workshop', {
+                repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: null },
+            }),
+        ).toEqual([]);
     });
 
     it('refuses the fields of an event written into a room which is no event at all', () => {

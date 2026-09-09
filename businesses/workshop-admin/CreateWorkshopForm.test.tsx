@@ -19,6 +19,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-09-12T15:00:00.000Z',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: 'M7lc1UVf-VE',
+    repository: null,
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
     disabledPanels: ['reactions'],

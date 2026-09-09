@@ -10,6 +10,11 @@ import {
 } from '@/businesses/workshop-admin/WorkshopEndControls';
 import { WorkshopEventFields } from '@/businesses/workshop-admin/WorkshopEventFields';
 import { WorkshopPanelSettings } from '@/businesses/workshop-admin/WorkshopPanelSettings';
+import { WorkshopRepositoryFields } from '@/businesses/workshop-admin/WorkshopRepositoryFields';
+import {
+    createWorkshopRepositoryDraft,
+    createWorkshopRepositoryWriteValues,
+} from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { WorkshopReactionAnimationPreview } from '@/businesses/workshop-admin/WorkshopReactionAnimationPreview';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,6 +64,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
     const [eventDetails, setEventDetails] = useState(() => workshop.event ?? DEFAULT_EVENT_DETAILS);
     const [youtubeVideoId, setYoutubeVideoId] = useState(workshop.youtubeVideoId ?? '');
     const [previewYoutubeVideoId, setPreviewYoutubeVideoId] = useState(workshop.previewYoutubeVideoId ?? '');
+    const [repositoryDraft, setRepositoryDraft] = useState(() => createWorkshopRepositoryDraft(workshop.repository));
     const [reactionText, setReactionText] = useState(workshop.allowedReactions.join(' '));
     const [disabledPanels, setDisabledPanels] = useState(workshop.disabledPanels);
     const [artificialWatchingParticipantCount, setArtificialWatchingParticipantCount] = useState(
@@ -91,6 +97,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
         setEventDetails(workshop.event ?? DEFAULT_EVENT_DETAILS);
         setYoutubeVideoId(workshop.youtubeVideoId ?? '');
         setPreviewYoutubeVideoId(workshop.previewYoutubeVideoId ?? '');
+        setRepositoryDraft(createWorkshopRepositoryDraft(workshop.repository));
         setReactionText(workshop.allowedReactions.join(' '));
         setDisabledPanels(workshop.disabledPanels);
         setArtificialWatchingParticipantCount(workshop.artificialWatchingParticipantCount ?? 0);
@@ -124,6 +131,9 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                       youtubeVideoId: youtubeVideoId.trim() || null,
                       previewYoutubeVideoId: previewYoutubeVideoId.trim() || null,
                   }
+                : {}),
+            ...(roomCapabilities.isRepositoryOffered
+                ? { repository: createWorkshopRepositoryWriteValues(repositoryDraft) }
                 : {}),
             ...(isReactionSettingOffered ? { allowedReactions: parseWorkshopReactions(reactionText) } : {}),
         });
@@ -265,6 +275,9 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                             </span>
                         </label>
                     </>
+                )}
+                {roomCapabilities.isRepositoryOffered && (
+                    <WorkshopRepositoryFields repository={repositoryDraft} onChange={setRepositoryDraft} />
                 )}
                 {isReactionSettingOffered && (
                     <>

@@ -1,4 +1,28 @@
 # Current preversion
+- Let a workshop be about a project, and let its participants watch that project being built. `/admin/workshops` now
+  asks every term for `GitHub repozitář projektu`, and optionally for the branch it follows and for the address the
+  project runs at. The repository is written however it is at hand — `vlastník/název`, the address of the repository
+  page, of a branch or a file in it, or the address `git clone` was given — and the administration says which project
+  it read out of it before the term is saved. All three are one connection rather than three loose settings, so
+  connecting, changing and disconnecting a project is one save: clearing the repository disconnects the whole thing,
+  and neither a branch nor a deployment can outlive the repository it belonged to, which the database itself refuses.
+  A copy of a term inherits the project it was about, exactly as it inherits its stream, and the settings export names
+  the repository, the branch and the deployment beside them.
+
+  The room of such a term gains a `Projekt workshopu` panel under its stage: the repository with what GitHub says
+  about it, the branch which is being followed, a link into the repository, a link to the running application when one
+  was written, and — this is what a workshop is really about — what has been committed in it. The panel says how much
+  was committed since the workshop began and lists the newest commits with their message, their author and the moment
+  they were made, and every commit which arrives while somebody has the room open is marked `Nový` for them, so the
+  work happening on stage is visible in the room as it happens. Nothing of this is stored: the commits are read from
+  the feed GitHub publishes for every public repository and what the repository says about itself from the public
+  API, both without a key of any kind, both read once for the whole room rather than once per participant, and both
+  read beside the state of the room rather than inside it — so a slow or unreachable GitHub delays neither the chat,
+  nor the materials, nor the stream. A repository which cannot be read leaves the room saying which project it is
+  about and where it runs instead of taking anything down, a term which is about no project shows no panel at all, and
+  a permanent room such as the community cannot be about a project in the first place, so it is neither asked for one
+  nor allowed to be given one.
+
 - Gave the automatically shortened links of `/cs/komunita` and the online workshop rooms their context back: a raw
   URL or Markdown autolink now becomes `[the page title](the same short link)` for members, while an editor's own
   Markdown, HTML, and reference-link labels remain their own words. The page title is read once through the same

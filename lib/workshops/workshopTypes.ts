@@ -2,6 +2,7 @@ import type { AdminContactJoin } from '@/lib/admin/adminContactJoin';
 import type { CommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import type { EventDetails } from '@/lib/events/event';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
+import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 
 /**
  * A live room is normally one workshop occurrence. The community uses the same resilient room infrastructure, but
@@ -90,6 +91,15 @@ export type WorkshopDetails = WorkshopSummary & {
      *       of the first one, so nothing of the recording itself has to reach a member who has not unlocked it.
      */
     readonly previewYoutubeVideoId: string | null;
+
+    /**
+     * The project this workshop is about, or `null` while no project is connected to it
+     *
+     * Note: This is the whole connection — the repository, the branch which is followed, and the address the project
+     *       runs at — so the administration sets, changes, and unsets it as one thing. What has been committed in it
+     *       is deliberately not part of it: that is read from GitHub, see `fetchWorkshopRepositoryProgress`.
+     */
+    readonly repository: WorkshopRepository | null;
     readonly allowedReactions: readonly string[];
 
     /**

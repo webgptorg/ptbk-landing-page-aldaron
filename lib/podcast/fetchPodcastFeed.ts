@@ -1,3 +1,4 @@
+import { RSS_FEED_MEDIA_TYPES } from '@/lib/network/feedMediaTypes';
 import { fetchCachedText } from '@/lib/network/fetchCachedText';
 import { parsePodcastRssFeed, type ParsePodcastRssFeedOptions } from '@/lib/podcast/parsePodcastRssFeed';
 import { EMPTY_PODCAST_FEED, type PodcastFeed } from '@/lib/podcast/PodcastFeed';
@@ -13,11 +14,6 @@ export type FetchPodcastFeedOptions = ParsePodcastRssFeedOptions & {
      */
     readonly revalidateSeconds: number;
 };
-
-/**
- * Every kind of document a podcast host answers a request for a feed with
- */
-const RSS_FEED_MEDIA_TYPES = 'application/rss+xml, application/xml;q=0.9, text/xml;q=0.8';
 
 /**
  * Reads the feed of a podcast from its publisher

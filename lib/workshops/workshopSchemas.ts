@@ -12,6 +12,7 @@ import {
     MAXIMAL_WORKSHOP_PARTICIPANT_EMAIL_LENGTH,
     MAXIMAL_WORKSHOP_PRESENCE_REPORT_SECONDS,
     MAXIMAL_WORKSHOP_REACTION_LENGTH,
+    MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH,
     MAXIMAL_WORKSHOP_SLUG_LENGTH,
     MINIMAL_WORKSHOP_POLL_OPTION_COUNT,
 } from '@/lib/workshops/workshopConstants';
@@ -20,6 +21,9 @@ import {
     MAXIMAL_EVENT_PARTICIPANT_COUNT,
     MAXIMAL_EVENT_PRICE_CZK,
 } from '@/lib/events/eventConstants';
+import { extractGithubBranchName, extractGithubRepository } from '@/lib/github/githubRepository';
+import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
+import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import { isEventLocationKind, type EventLocationKind } from '@/lib/events/eventLocation';
 import { isEventType, type EventType } from '@/lib/events/eventTypes';
 import {
@@ -67,6 +71,60 @@ const workshopDisabledPanelsSchema = z
     .array(z.custom<WorkshopPanelKey>(isWorkshopPanelKey, 'Unknown workshop panel'))
     .max(WORKSHOP_PANEL_DEFINITIONS.length)
     .refine((panelKeys) => new Set(panelKeys).size === panelKeys.length, 'Workshop panels must be unique');
+/**
+ * The project one term is about, written as one whole connection
+ *
+ * Note: The branch and the deployment belong to the repository, so they are written together with it and cannot be
+ *       left behind by unsetting it. A repository, a branch, or an address which cannot be read is refused instead of
+ *       being stored as a connection leading nowhere.
+ */
+const workshopRepositoryWriteSchema = z
+    .object({
+        url: z.string().trim().max(2_000),
+        branch: z.union([z.string().trim().max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH), z.null()]).default(null),
+        deploymentUrl: z.union([z.string().trim().max(2_000), z.null()]).default(null),
+    })
+    .transform((values, context) => {
+        const repository = extractGithubRepository(values.url);
+        if (repository === null) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['url'],
+                message: 'A valid GitHub repository URL or owner/name is required',
+            });
+            return z.NEVER;
+        }
+
+        // Note: A branch and a deployment are optional, so an unwritten one is no branch and no deployment, while one
+        //       which was written and cannot be read is refused rather than silently dropped.
+        const writtenBranch = values.branch === '' ? null : values.branch;
+        const branch = writtenBranch === null ? null : extractGithubBranchName(writtenBranch);
+        if (writtenBranch !== null && branch === null) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['branch'],
+                message: 'A valid Git branch name is required',
+            });
+            return z.NEVER;
+        }
+
+        const writtenDeploymentUrl = values.deploymentUrl === '' ? null : values.deploymentUrl;
+        const deploymentUrl =
+            writtenDeploymentUrl === null ? null : normalizePublicWebPageUrl(writtenDeploymentUrl);
+        if (writtenDeploymentUrl !== null && deploymentUrl === null) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['deploymentUrl'],
+                message: 'A valid deployment URL is required',
+            });
+            return z.NEVER;
+        }
+
+        return { ...repository, branch, deploymentUrl } satisfies WorkshopRepository;
+    });
+
+const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);
+
 const nullableYoutubeVideoIdSchema = z.union([z.string().trim().max(2_000), z.null()]).transform((value, context) => {
     if (!value) {
         return null;
@@ -309,6 +367,7 @@ export const workshopCreateSchema = z
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.default(0),
         youtubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.default(null),
+        repository: nullableWorkshopRepositorySchema.default(null),
         isPublished: z.boolean().default(false),
         allowedReactions: workshopAllowedReactionsSchema.default([...DEFAULT_WORKSHOP_REACTIONS]),
         disabledPanels: workshopDisabledPanelsSchema.default([]),
@@ -337,6 +396,7 @@ export const workshopUpdateSchema = z
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.optional(),
         youtubeVideoId: nullableYoutubeVideoIdSchema.optional(),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.optional(),
+        repository: nullableWorkshopRepositorySchema.optional(),
         isPublished: z.boolean().optional(),
         allowedReactions: workshopAllowedReactionsSchema.optional(),
         disabledPanels: workshopDisabledPanelsSchema.optional(),

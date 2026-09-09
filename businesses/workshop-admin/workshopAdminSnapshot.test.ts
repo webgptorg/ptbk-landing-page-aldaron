@@ -16,6 +16,7 @@ function createSnapshot(workshopUpdatedAt: string, contentUpdatedAt: string): Wo
             endsAt: null,
             youtubeVideoId: null,
             previewYoutubeVideoId: null,
+            repository: null,
             isPublished: true,
             allowedReactions: ['👏'],
             disabledPanels: [],

@@ -20,6 +20,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-08-20T18:30:00.000Z',
     youtubeVideoId: null,
     previewYoutubeVideoId: null,
+    repository: null,
     isPublished: true,
     allowedReactions: ['👍', '🚀'],
     disabledPanels: [],
@@ -151,6 +152,25 @@ describe('workshop admin exports', () => {
         expect(communitySettingsCsv).not.toContain('Povolené reakce');
         expect(communitySettingsCsv).not.toContain('"Slug"');
         expect(communitySettingsCsv).not.toContain('komunita');
+        expect(workshopSettingsCsv).toContain('GitHub repozitář');
+        expect(communitySettingsCsv).not.toContain('GitHub repozitář');
+    });
+
+    it('exports the whole project a term is about, as one repository, one branch and one deployment', () => {
+        const settingsCsv = createWorkshopAdminExportFile('settings', {
+            workshop: {
+                ...WORKSHOP,
+                repository: {
+                    owner: 'hejny',
+                    name: 'promptbook',
+                    branch: 'main',
+                    deploymentUrl: 'https://workshop.example/app',
+                },
+            },
+        }).content;
+
+        expect(settingsCsv).toContain('"GitHub repozitář","Větev repozitáře","URL nasazení"');
+        expect(settingsCsv).toContain('"hejny/promptbook","main","https://workshop.example/app"');
     });
 
     it('uses the matching MIME type and filename for participant vCards', () => {

@@ -110,6 +110,50 @@ describe('workshop request validation', () => {
         ).toBe(false);
     });
 
+    it('reads the project of a term out of whatever address names its repository', () => {
+        expect(
+            workshopCreateSchema.parse({
+                ...VALID_WORKSHOP,
+                repository: {
+                    url: 'https://github.com/hejny/promptbook/tree/main',
+                    branch: 'feature/rooms',
+                    deploymentUrl: 'https://workshop.example/app#top',
+                },
+            }).repository,
+        ).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: 'feature/rooms',
+            deploymentUrl: 'https://workshop.example/app',
+        });
+        expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook' } }).repository).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: null,
+            deploymentUrl: null,
+        });
+    });
+
+    it('leaves a term about no project, and unsets the whole connection of one which was about a project', () => {
+        expect(workshopCreateSchema.parse(VALID_WORKSHOP).repository).toBeNull();
+        expect(workshopUpdateSchema.parse({ repository: null }).repository).toBeNull();
+    });
+
+    it('refuses a project which names no repository, no branch, or no reachable deployment', () => {
+        expect(workshopUpdateSchema.safeParse({ repository: { url: 'https://gitlab.com/hejny/x' } }).success).toBe(
+            false,
+        );
+        expect(workshopUpdateSchema.safeParse({ repository: { url: 'hejny' } }).success).toBe(false);
+        expect(
+            workshopUpdateSchema.safeParse({ repository: { url: 'hejny/promptbook', branch: 'main..x' } }).success,
+        ).toBe(false);
+        expect(
+            workshopUpdateSchema.safeParse({
+                repository: { url: 'hejny/promptbook', deploymentUrl: 'javascript:alert(1)' },
+            }).success,
+        ).toBe(false);
+    });
+
     it('rejects duplicate reactions and an end before the start', () => {
         expect(workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, allowedReactions: ['👏', '👏'] }).success).toBe(
             false,

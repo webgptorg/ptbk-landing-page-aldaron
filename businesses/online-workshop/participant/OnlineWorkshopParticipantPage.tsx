@@ -13,6 +13,7 @@ import { WorkshopContent } from '@/businesses/online-workshop/participant/Worksh
 import { WorkshopParticipantBadge } from '@/businesses/online-workshop/participant/WorkshopParticipantBadge';
 import { WorkshopPolls } from '@/businesses/online-workshop/participant/WorkshopPolls';
 import { WorkshopReactions } from '@/businesses/online-workshop/participant/WorkshopReactions';
+import { WorkshopRepositoryPanel } from '@/businesses/online-workshop/participant/WorkshopRepositoryPanel';
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
 import { WorkshopServerConnectionStatus } from '@/businesses/online-workshop/participant/WorkshopServerConnectionStatus';
 import { WorkshopWatchingBadge } from '@/businesses/online-workshop/participant/WorkshopWatchingBadge';
@@ -273,6 +274,16 @@ export function OnlineWorkshopParticipantPage({
                             stageComment={state.stageComment}
                             paidMembersOnlyVideo={state.paidMembersOnlyVideo}
                             onSaveFeedback={controller.saveFeedback}
+                        />
+                    )}
+                    {/*
+                      * Note: A term is about a project only while its administration connected one, so a room which is
+                      *       about no project shows nothing about one rather than an empty panel.
+                      */}
+                    {roomCapabilities.isRepositoryOffered && state.workshop.repository !== null && (
+                        <WorkshopRepositoryPanel
+                            workshopSlug={workshopSlug}
+                            repository={state.workshop.repository}
                         />
                     )}
                     {calendarDetails !== null && (

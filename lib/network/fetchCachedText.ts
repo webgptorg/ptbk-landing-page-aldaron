@@ -23,6 +23,13 @@ export type FetchCachedTextOptions = {
      * Which kinds of document the publisher may answer with, as an `Accept` header
      */
     readonly acceptedMediaTypes: string;
+
+    /**
+     * How this application names itself to the publisher, left out when the publisher does not care
+     *
+     * Note: Some publishers, the API of GitHub among them, refuse a request which does not say which client made it.
+     */
+    readonly userAgent?: string;
 };
 
 /**
@@ -40,7 +47,10 @@ export type FetchCachedTextOptions = {
 export async function fetchCachedText(options: FetchCachedTextOptions): Promise<string | null> {
     try {
         const response = await fetch(options.url, {
-            headers: { Accept: options.acceptedMediaTypes },
+            headers: {
+                Accept: options.acceptedMediaTypes,
+                ...(options.userAgent === undefined ? {} : { 'User-Agent': options.userAgent }),
+            },
             signal: AbortSignal.timeout(REMOTE_DOCUMENT_TIMEOUT_IN_MILLISECONDS),
             next: { revalidate: options.revalidateSeconds },
         });

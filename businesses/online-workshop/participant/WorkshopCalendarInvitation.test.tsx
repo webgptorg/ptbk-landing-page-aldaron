@@ -27,6 +27,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-08-20T20:30:00+02:00',
     youtubeVideoId: null,
     previewYoutubeVideoId: null,
+    repository: null,
     isPublished: true,
     allowedReactions: ['👍'],
     disabledPanels: [],

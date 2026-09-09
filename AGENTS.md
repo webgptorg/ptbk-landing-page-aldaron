@@ -131,6 +131,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   term runs until its recorded end; its stage does not end automatically. Admins
   can select, replace, clear, or create the displayed comment through the same
   private realtime channel used by reactions.
+- A term can be about a project. The connection is one value — GitHub repository,
+  optional branch, optional deployment URL — so it is set, changed, and unset at
+  once and neither branch nor deployment outlives its repository. Room kinds which
+  offer it are named in `lib/workshops/workshopKindCapabilities.ts`. The room shows
+  the repository, its branch, its links, how much was committed since the workshop
+  began, and the newest commits, marking those which arrive while a participant
+  watches. Commits come from the public commit feed and repository facts from the
+  public GitHub API, both keyless, cached once per server, and read beside the room
+  state; an unreadable repository still leaves the room naming its project.
 - Paid-only materials are decided on the server in one pass. Members receive
   unlocked material; others receive only the published titles as an offer. An
   untitled item is not named, items are not named before their unlock time, and a
@@ -166,8 +175,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The registration actions in workshop administration carry that same term filter
   into the contacts list and its exports.
 - Workshop polls are read-only in workshop administration. Stage settings contain
-  the live stream and recording teaser. An end may be empty; admins can record,
-  adjust, clear, and reopen it. Overview analytics are zoomable and share their
+  the live stream and recording teaser, and project settings the repository the
+  term is about, written as an address or as `owner/name`. An end may be empty;
+  admins can record, adjust, clear, and reopen it. Overview analytics are zoomable and share their
   room, section, lines, reaction, zoom, and keyword metrics through query params.
 - Community administration is the workshop dashboard restricted to the
   `community` room kind: no room picker, schedule, stage, reactions, or address.
