@@ -20,13 +20,24 @@
     bottom: calc(var(--coder-obstacle-inset, 0px) + max(12px, env(safe-area-inset-bottom)));
     z-index: 40;
     touch-action: manipulation;
-    transition: border-color 160ms, background-color 160ms;
+    border-color: #7aebff2b;
+    background: #101a1be8;
+    box-shadow: 0 2px 8px #0002, inset 0 1px #ffffff04;
+    opacity: 0.74;
+    transition: border-color 160ms, background-color 160ms, box-shadow 160ms, opacity 160ms;
 }
 
 .floating:hover,
+.floating:focus-visible,
 .credit:hover .terminal {
     border-color: #7aebff99;
     background: #152326;
+}
+
+.floating:hover,
+.floating:focus-visible {
+    box-shadow: 0 3px 12px #0003, inset 0 1px #ffffff05;
+    opacity: 1;
 }
 
 .floating:focus-visible,
