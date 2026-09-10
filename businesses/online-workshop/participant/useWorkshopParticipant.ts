@@ -8,6 +8,7 @@ import {
 import {
     changeWorkshopParticipantFullname,
     connectToWorkshop,
+    disconnectFromWorkshop,
     fetchWorkshopState,
     moderateWorkshopAuthor,
     moderateWorkshopComment,
@@ -74,6 +75,11 @@ type WorkshopParticipantController = {
     readonly newlyUnlockedContentBlockIds: ReadonlySet<string>;
     readonly connect: (values: { readonly fullname: string; readonly email: string }) => Promise<boolean>;
     readonly changeFullname: (fullname: string) => Promise<boolean>;
+
+    /**
+     * Ends the session of this browser and offers the connection form of the room again
+     */
+    readonly disconnect: () => Promise<boolean>;
     readonly refresh: () => Promise<boolean>;
     readonly changeCommentSort: (sort: WorkshopCommentSort) => void;
     readonly submitComment: (values: WorkshopCommentValues) => Promise<boolean>;
@@ -626,6 +632,35 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         [refresh, workshopSlug],
     );
 
+    /**
+     * Note: A signed-out browser is left exactly as an expired session leaves it — no snapshot of the room stays
+     *       behind and the connection form is what comes next — so a member who signs out on a shared computer hands
+     *       on neither the room nor the name and the address they entered it with.
+     */
+    const disconnect = useCallback(async (): Promise<boolean> => {
+        setErrorMessage(null);
+        try {
+            await disconnectFromWorkshop(workshopSlug);
+        } catch (error) {
+            setErrorMessage(getCzechApiErrorMessage(error));
+            return false;
+        }
+
+        // The minutes of a member are counted up to their last heartbeat: the room they are leaving reports no
+        // presence on the way out, because the session that report belongs to is already over.
+        lastPresenceReportAtRef.current = null;
+        isConnectionReportedRef.current = false;
+        invalidatePendingRefresh();
+        clearWorkshopParticipantStateCache(workshopSlug);
+        cachedStateRef.current = null;
+        setState(null);
+        setIsUsingCachedState(false);
+        setIsConnectionRequired(true);
+        markRefreshSucceeded();
+        trackGoogleAnalyticsEvent('workshop_disconnected', { workshop_slug: workshopSlug });
+        return true;
+    }, [invalidatePendingRefresh, markRefreshSucceeded, workshopSlug]);
+
     const submitComment = useCallback(
         async (values: WorkshopCommentValues): Promise<boolean> => {
             setErrorMessage(null);
@@ -819,6 +854,7 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         newlyUnlockedContentBlockIds,
         connect,
         changeFullname,
+        disconnect,
         refresh,
         changeCommentSort,
         submitComment,

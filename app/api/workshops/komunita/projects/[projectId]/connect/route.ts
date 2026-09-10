@@ -5,12 +5,12 @@ import {
     getAuthenticatedCommunityRequest,
 } from '@/lib/community/communityRequest';
 import { communityProjectIdSchema } from '@/lib/community-projects/communityProjectSchemas';
+import { WORKSHOP_PARTICIPANT_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import {
-    WORKSHOP_PARTICIPANT_TABLE_NAME,
-    WORKSHOP_SESSION_MAX_AGE_SECONDS,
-    getWorkshopSessionCookieName,
-} from '@/lib/workshops/workshopConstants';
-import { createWorkshopSessionToken, hashWorkshopSessionToken } from '@/lib/workshops/workshopSession';
+    createWorkshopSessionToken,
+    hashWorkshopSessionToken,
+    setWorkshopSessionCookie,
+} from '@/lib/workshops/workshopSession';
 import { NextRequest, NextResponse } from 'next/server';
 
 type CommunityProjectDiscussionConnectRouteContext = {
@@ -62,17 +62,7 @@ export async function POST(request: NextRequest, context: CommunityProjectDiscus
     }
 
     const response = NextResponse.json({ discussionWorkshopSlug: connectedDiscussion.connection.discussionWorkshopSlug });
-    response.cookies.set(
-        getWorkshopSessionCookieName(connectedDiscussion.connection.discussionWorkshopSlug),
-        sessionToken,
-        {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production',
-            path: `/api/workshops/${connectedDiscussion.connection.discussionWorkshopSlug}`,
-            maxAge: WORKSHOP_SESSION_MAX_AGE_SECONDS,
-        },
-    );
+    setWorkshopSessionCookie(response, connectedDiscussion.connection.discussionWorkshopSlug, sessionToken);
     response.headers.set('Cache-Control', 'no-store');
     return response;
 }

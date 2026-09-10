@@ -7,8 +7,7 @@ import {
     loadWorkshopPublicState,
 } from '@/lib/workshops/workshopDatabase';
 import { workshopConnectionSchema } from '@/lib/workshops/workshopSchemas';
-import { createWorkshopParticipant } from '@/lib/workshops/workshopSession';
-import { WORKSHOP_SESSION_MAX_AGE_SECONDS, getWorkshopSessionCookieName } from '@/lib/workshops/workshopConstants';
+import { createWorkshopParticipant, setWorkshopSessionCookie } from '@/lib/workshops/workshopSession';
 import { NextRequest, NextResponse } from 'next/server';
 
 type WorkshopConnectRouteContext = {
@@ -70,13 +69,7 @@ export async function POST(request: NextRequest, context: WorkshopConnectRouteCo
     }
 
     const response = NextResponse.json({ state });
-    response.cookies.set(getWorkshopSessionCookieName(workshopSlug), connection.sessionToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-        secure: process.env.NODE_ENV === 'production',
-        path: `/api/workshops/${workshopSlug}`,
-        maxAge: WORKSHOP_SESSION_MAX_AGE_SECONDS,
-    });
+    setWorkshopSessionCookie(response, workshopSlug, connection.sessionToken);
     response.headers.set('Cache-Control', 'no-store');
     return response;
 }

@@ -6,10 +6,15 @@ import { WorkshopParticipantBadge } from '@/businesses/online-workshop/participa
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+type RenderedBadgeOptions = {
+    readonly isInteractionBanned?: boolean;
+    readonly isModerating?: boolean;
+    readonly onDisconnect?: () => Promise<boolean>;
+};
+
 function renderBadge(
     onChangeFullname: (fullname: string) => Promise<boolean>,
-    isInteractionBanned = false,
-    isModerating = false,
+    { isInteractionBanned = false, isModerating = false, onDisconnect }: RenderedBadgeOptions = {},
 ) {
     return render(
         <WorkshopParticipantBadge
@@ -18,6 +23,7 @@ function renderBadge(
             isModerating={isModerating}
             isRefreshing={false}
             onChangeFullname={onChangeFullname}
+            onDisconnect={onDisconnect}
         />,
     );
 }
@@ -25,6 +31,11 @@ function renderBadge(
 function openRenameForm() {
     fireEvent.click(screen.getByRole('button', { name: 'Změnit jméno' }));
     return screen.getByRole('textbox', { name: 'Vaše jméno' });
+}
+
+function openDisconnectConfirmation() {
+    fireEvent.click(screen.getByRole('button', { name: 'Odhlásit se' }));
+    return screen.getByRole('button', { name: 'Ano, odhlásit' });
 }
 
 describe('workshop participant badge', () => {
@@ -86,19 +97,63 @@ describe('workshop participant badge', () => {
     });
 
     it('does not offer renaming to a participant who may not interact', () => {
-        renderBadge(vi.fn(), true);
+        renderBadge(vi.fn(), { isInteractionBanned: true });
 
         expect(screen.queryByRole('button', { name: 'Změnit jméno' })).toBeNull();
         expect(screen.getByText(/Připojen\/a jako/).textContent).toBe('Připojen/a jako Karel Novák');
     });
 
     it('says who moderates the room, and says nothing about anybody else', () => {
-        renderBadge(vi.fn(), false, true);
+        renderBadge(vi.fn(), { isModerating: true });
         expect(screen.queryByText('Moderátor')).not.toBeNull();
 
         cleanup();
         renderBadge(vi.fn());
 
         expect(screen.queryByText('Moderátor')).toBeNull();
+    });
+
+    it('signs the participant out only once they confirm it', async () => {
+        const onDisconnect = vi.fn().mockResolvedValue(true);
+        renderBadge(vi.fn(), { onDisconnect });
+
+        const confirmButton = openDisconnectConfirmation();
+        expect(onDisconnect).not.toHaveBeenCalled();
+
+        fireEvent.click(confirmButton);
+
+        await waitFor(() => expect(onDisconnect).toHaveBeenCalledTimes(1));
+    });
+
+    it('keeps the participant connected when they give up the sign-out', () => {
+        const onDisconnect = vi.fn();
+        renderBadge(vi.fn(), { onDisconnect });
+
+        openDisconnectConfirmation();
+        fireEvent.click(screen.getByRole('button', { name: 'Zrušit' }));
+
+        expect(screen.getByText(/Připojen\/a jako/).textContent).toBe('Připojen/a jako Karel Novák');
+        expect(onDisconnect).not.toHaveBeenCalled();
+    });
+
+    it('lets the sign-out be answered again when it did not go through', async () => {
+        const onDisconnect = vi.fn().mockResolvedValue(false);
+        renderBadge(vi.fn(), { onDisconnect });
+
+        fireEvent.click(openDisconnectConfirmation());
+
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Ano, odhlásit' })).toHaveProperty('disabled', false));
+    });
+
+    it('offers the sign-out to a participant who may not interact, whose messages it does not touch', () => {
+        renderBadge(vi.fn(), { isInteractionBanned: true, onDisconnect: vi.fn() });
+
+        expect(screen.queryByRole('button', { name: 'Odhlásit se' })).not.toBeNull();
+    });
+
+    it('offers no sign-out in a room which is not left this way', () => {
+        renderBadge(vi.fn());
+
+        expect(screen.queryByRole('button', { name: 'Odhlásit se' })).toBeNull();
     });
 });

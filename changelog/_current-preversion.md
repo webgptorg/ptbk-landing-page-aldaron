@@ -1,4 +1,32 @@
 # Current preversion
+- Let a member of `/cs/komunita` and of `/cs/online-workshop/participant` stop being who they are connected as, and not
+  merely rename themselves. The badge in the header of every room has always said `Připojen/a jako …` and offered to
+  change that name, but never to end the connection behind it: a session lasts a month, so somebody who had entered the
+  community on a borrowed or a shared computer, or under an address they did not want to keep writing into the chat
+  under, had no way out of it at all — closing the tab left the session standing and coming back reopened the very same
+  identity. `Odhlásit se` now stands beside `Změnit jméno` in that badge. It asks `Opravdu se odhlásit?` first, because
+  a misclick in the header of a running workshop would take somebody out of the stream they are watching, and it hands
+  the member back the door they came through: the waiting room with its choice of terms in the online workshop, the
+  connection form of the community in `/cs/komunita`.
+
+  Signing out really ends the session rather than hiding it. The cookie, which is the only copy of the session token
+  there ever was, is taken out of the browser; the token the room was opened with is replaced in the database by one
+  nobody was ever handed, so a copy of that cookie cannot open the room again either; and the room snapshot this
+  browser had stored for the outages is deleted with it, so neither the name and the address the member connected with
+  nor anything they had read stays behind on that computer. Nothing they did in the room is touched: their messages,
+  their reactions and the minutes they were counted for keep their author, exactly as a session which expires on its
+  own leaves them. A sign-out the database refuses says so and leaves the member connected, rather than showing them a
+  door which did not open.
+
+  It is one way out of one room, offered by the one badge both pages already share, so neither page carries a sign-out
+  of its own and the session cookie is now written and cleared in a single place instead of being described anew
+  wherever a room hands one out. Which rooms offer the way out is answered where every such question about a room is
+  answered, in the room-kind capabilities: a workshop occurrence and the community do, because a member connected to
+  them themselves, while a project discussion does not — its session is made out of the community session which opened
+  it, so leaving it would be undone by the very next visit and its member signs out of the community instead. A
+  participant whom a moderator has silenced is offered the way out like everybody else, because leaving rewrites none
+  of the messages their ban froze, which is the very reason renaming is still not offered to them.
+
 - Took the choice of workshop in the waiting room of `/cs/online-workshop/participant` down to the size of what it is.
   Offering every published term there was drawn as a third full panel of the connection card — a bright cyan `Vyberte
   si workshop` heading over full-size cards, two across, each carrying the whole description of its term — so the

@@ -2,13 +2,14 @@ import { readClientIpAddress } from '@/lib/api/readClientIpAddress';
 import {
     MAXIMAL_WORKSHOP_PARTICIPANT_USER_AGENT_LENGTH,
     WORKSHOP_PARTICIPANT_TABLE_NAME,
+    WORKSHOP_SESSION_MAX_AGE_SECONDS,
     WORKSHOP_SESSION_TOKEN_BYTES,
     getWorkshopSessionCookieName,
 } from '@/lib/workshops/workshopConstants';
 import type { WorkshopParticipant } from '@/lib/workshops/workshopTypes';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createHash, randomBytes } from 'node:crypto';
-import type { NextRequest } from 'next/server';
+import type { NextRequest, NextResponse } from 'next/server';
 
 export type WorkshopParticipantRow = {
     readonly id: string;
@@ -40,6 +41,40 @@ export function hashWorkshopSessionToken(sessionToken: string): string {
 
 export function readWorkshopSessionToken(request: NextRequest, workshopSlug: string): string | null {
     return request.cookies.get(getWorkshopSessionCookieName(workshopSlug))?.value ?? null;
+}
+
+/**
+ * How the session of one room is kept in the browser
+ *
+ * Note: The path is the narrow one of the very endpoints this session opens, so the cookie of one room never travels
+ *       to the endpoints of another. Handing the session out and taking it away are written here together, because a
+ *       cookie is only ever cleared by naming exactly the attributes it was set with.
+ */
+function getWorkshopSessionCookieAttributes(workshopSlug: string) {
+    return {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+        path: `/api/workshops/${workshopSlug}`,
+    } as const;
+}
+
+export function setWorkshopSessionCookie(response: NextResponse, workshopSlug: string, sessionToken: string): void {
+    response.cookies.set(getWorkshopSessionCookieName(workshopSlug), sessionToken, {
+        ...getWorkshopSessionCookieAttributes(workshopSlug),
+        maxAge: WORKSHOP_SESSION_MAX_AGE_SECONDS,
+    });
+}
+
+/**
+ * Takes the session of one room out of the browser, which is what really signs a participant out of it: the cookie is
+ * the only copy of their session token there ever was.
+ */
+export function clearWorkshopSessionCookie(response: NextResponse, workshopSlug: string): void {
+    response.cookies.set(getWorkshopSessionCookieName(workshopSlug), '', {
+        ...getWorkshopSessionCookieAttributes(workshopSlug),
+        maxAge: 0,
+    });
 }
 
 export function mapWorkshopParticipantRow(row: WorkshopParticipantRow): WorkshopParticipant {
@@ -81,6 +116,33 @@ export async function createWorkshopParticipant(
     }
 
     return { participant: mapWorkshopParticipantRow(data as WorkshopParticipantRow), sessionToken };
+}
+
+/**
+ * Ends the room session of one participant, leaving everything they did in that room exactly where it is.
+ *
+ * Note: A participant row is the author of every message, reaction and measured minute they left behind, so signing
+ *       out never removes it — it ends the session and nothing else. Because the database keeps a session token of
+ *       every participant rather than none at all, the token is replaced by a fresh one which no browser was ever
+ *       given, so a copy of the old cookie cannot open the room again either.
+ */
+export async function endWorkshopParticipantSession(
+    supabase: SupabaseClient,
+    workshopId: string,
+    participantId: string,
+): Promise<boolean> {
+    const { error } = await supabase
+        .from(WORKSHOP_PARTICIPANT_TABLE_NAME)
+        .update({ session_token_hash: hashWorkshopSessionToken(createWorkshopSessionToken()) })
+        .eq('id', participantId)
+        .eq('workshop_id', workshopId);
+
+    if (error) {
+        console.error('Failed to end the session of a workshop participant:', error.message);
+        return false;
+    }
+
+    return true;
 }
 
 export async function authenticateWorkshopParticipant(

@@ -69,6 +69,16 @@ export type WorkshopKindCapabilities = {
     readonly isCommunityInvitationOffered: boolean;
 
     /**
+     * Whether a participant can end their own session in this room and be offered its connection form again, which
+     * they read as signing out of it
+     *
+     * Note: Only a room a participant connected to themselves is left this way. The session of a project discussion is
+     *       made out of the community session which opened it, so signing out there would be undone by the very next
+     *       visit; a member of a project discussion signs out of the community instead.
+     */
+    readonly isDisconnectionOffered: boolean;
+
+    /**
      * Whether a room updates itself while it is open, which its broadcast, its reactions, and its watching count need
      */
     readonly isRealtime: boolean;
@@ -94,6 +104,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isAttachedCommunityPollsShown: true,
         isMembershipOffered: true,
         isCommunityInvitationOffered: true,
+        isDisconnectionOffered: true,
         isRealtime: true,
     },
     community: {
@@ -107,6 +118,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isAttachedCommunityPollsShown: false,
         isMembershipOffered: true,
         isCommunityInvitationOffered: false,
+        isDisconnectionOffered: true,
         isRealtime: false,
     },
     project: {
@@ -120,6 +132,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isAttachedCommunityPollsShown: false,
         isMembershipOffered: false,
         isCommunityInvitationOffered: false,
+        isDisconnectionOffered: false,
         isRealtime: false,
     },
 };

@@ -10,16 +10,18 @@ import { useWorkshopParticipant } from '@/businesses/online-workshop/participant
 import { WorkshopApiError } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
 import type { WorkshopPublicState } from '@/lib/workshops/workshopTypes';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { act, cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const participantApiMocks = vi.hoisted(() => ({
     fetchWorkshopState: vi.fn(),
+    disconnectFromWorkshop: vi.fn(),
 }));
 
 vi.mock('@/businesses/online-workshop/participant/workshopParticipantApi', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/businesses/online-workshop/participant/workshopParticipantApi')>()),
     fetchWorkshopState: participantApiMocks.fetchWorkshopState,
+    disconnectFromWorkshop: participantApiMocks.disconnectFromWorkshop,
 }));
 
 vi.mock('@/lib/supabase', () => ({ getSupabaseForBrowser: () => null }));
@@ -124,5 +126,42 @@ describe('workshop participant resilience', () => {
             expect(latestController?.isConnectionRequired).toBe(true);
             expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)).toBeNull();
         });
+    });
+});
+
+describe('workshop participant sign-out', () => {
+    it('leaves no room behind in the browser and asks for the connection again', async () => {
+        participantApiMocks.fetchWorkshopState.mockResolvedValue(createState());
+        participantApiMocks.disconnectFromWorkshop.mockResolvedValue(undefined);
+
+        render(<WorkshopParticipantControllerProbe />);
+        await waitFor(() => expect(latestController?.state).not.toBeNull());
+
+        await act(async () => {
+            expect(await latestController?.disconnect()).toBe(true);
+        });
+
+        expect(participantApiMocks.disconnectFromWorkshop).toHaveBeenCalledWith(WORKSHOP_SLUG);
+        expect(latestController?.state).toBeNull();
+        expect(latestController?.isConnectionRequired).toBe(true);
+        expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)).toBeNull();
+    });
+
+    it('keeps the member in the room when the session could not be ended', async () => {
+        const connectedState = createState();
+        participantApiMocks.fetchWorkshopState.mockResolvedValue(connectedState);
+        participantApiMocks.disconnectFromWorkshop.mockRejectedValue(new WorkshopApiError('Unavailable', 503));
+
+        render(<WorkshopParticipantControllerProbe />);
+        await waitFor(() => expect(latestController?.state).not.toBeNull());
+
+        await act(async () => {
+            expect(await latestController?.disconnect()).toBe(false);
+        });
+
+        expect(latestController?.state).toEqual(connectedState);
+        expect(latestController?.isConnectionRequired).toBe(false);
+        expect(latestController?.errorMessage).not.toBeNull();
+        expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)?.state).toEqual(connectedState);
     });
 });

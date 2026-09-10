@@ -236,12 +236,18 @@ export function OnlineWorkshopParticipantPage({
                         {isPanelOffered('watching-count') && (
                             <WorkshopWatchingBadge watchingParticipantCount={state.watchingParticipantCount} />
                         )}
+                        {/*
+                          * Note: Who the participant is connected as, and both ways of changing that — renaming
+                          *       themselves and signing out — belong to the room they are connected to, so every room
+                          *       offers them from this one badge.
+                          */}
                         <WorkshopParticipantBadge
                             fullname={state.participant.fullname}
                             isInteractionBanned={state.participant.isInteractionBanned}
                             isModerating={isModerating}
                             isRefreshing={controller.isRefreshing}
                             onChangeFullname={controller.changeFullname}
+                            onDisconnect={roomCapabilities.isDisconnectionOffered ? controller.disconnect : undefined}
                         />
                         {/*
                           * Note: Every room which offers the membership says which one its member has and lets them

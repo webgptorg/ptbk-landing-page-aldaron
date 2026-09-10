@@ -111,6 +111,17 @@ export async function changeWorkshopParticipantFullname(
     return readResponseJson(response);
 }
 
+/**
+ * Ends the session of this browser in the room, which the connected member reads as signing out of it
+ */
+export async function disconnectFromWorkshop(workshopSlug: string): Promise<void> {
+    const response = await fetch(getWorkshopApiUrl(workshopSlug, 'participant'), {
+        method: 'DELETE',
+        credentials: 'same-origin',
+    });
+    await readResponseJson(response);
+}
+
 export async function fetchWorkshopState(
     workshopSlug: string,
     commentSort: WorkshopCommentSort,

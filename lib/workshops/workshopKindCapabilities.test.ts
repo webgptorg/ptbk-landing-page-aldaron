@@ -25,6 +25,7 @@ describe('workshop kind capabilities', () => {
             isAttachedCommunityPollsShown: true,
             isMembershipOffered: true,
             isCommunityInvitationOffered: true,
+            isDisconnectionOffered: true,
             isRealtime: true,
         });
     });
@@ -41,6 +42,7 @@ describe('workshop kind capabilities', () => {
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: true,
             isCommunityInvitationOffered: false,
+            isDisconnectionOffered: true,
             isRealtime: false,
         });
     });
@@ -57,6 +59,7 @@ describe('workshop kind capabilities', () => {
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: false,
             isCommunityInvitationOffered: false,
+            isDisconnectionOffered: false,
             isRealtime: false,
         });
     });
@@ -78,6 +81,13 @@ describe('workshop kind capabilities', () => {
         // The community never invites anybody into itself, and a project discussion is opened from the community.
         expect(getWorkshopKindCapabilities('community').isCommunityInvitationOffered).toBe(false);
         expect(getWorkshopKindCapabilities('project').isCommunityInvitationOffered).toBe(false);
+    });
+
+    it('lets a participant sign out of the rooms they connected to themselves', () => {
+        expect(getWorkshopKindCapabilities('workshop').isDisconnectionOffered).toBe(true);
+        expect(getWorkshopKindCapabilities('community').isDisconnectionOffered).toBe(true);
+        // A project discussion is opened with the community session, which is where its member signs out instead.
+        expect(getWorkshopKindCapabilities('project').isDisconnectionOffered).toBe(false);
     });
 
     it('refuses a schedule, a stage, a project, and an address written into a room which has none of them', () => {
