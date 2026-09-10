@@ -951,20 +951,28 @@ export async function findMostRecentPublishedWorkshop(
 }
 
 /**
- * Lists every published term of every kind of event for the persistent community room. Drafts stay private, while
- * past terms stay available as useful community history.
+ * Lists every published term for the persistent community room, or every published term of one kind of event when a
+ * kind is named. Drafts stay private, while past terms stay available as useful community history.
+ *
+ * Note: The very same query answers both questions, so a page which lists the terms of one event and a page which
+ *       lists all of them can never disagree about which terms are published.
  */
-export async function findPublishedWorkshops(supabase: SupabaseClient): Promise<readonly WorkshopSummaryRow[]> {
-    const { rows, errorMessage } = await loadAllSupabaseRows<WorkshopSummaryRow>((fromIndex, toIndex) =>
-        supabase
+export async function findPublishedWorkshops(
+    supabase: SupabaseClient,
+    eventType?: EventType,
+): Promise<readonly WorkshopSummaryRow[]> {
+    const { rows, errorMessage } = await loadAllSupabaseRows<WorkshopSummaryRow>((fromIndex, toIndex) => {
+        const publishedWorkshopQuery = supabase
             .from(WORKSHOP_TABLE_NAME)
             .select(WORKSHOP_SUMMARY_COLUMNS)
             .eq('room_kind', 'workshop')
-            .eq('is_published', true)
+            .eq('is_published', true);
+
+        return (eventType === undefined ? publishedWorkshopQuery : publishedWorkshopQuery.eq('event_type', eventType))
             .order('starts_at', { ascending: false })
             .order('id', { ascending: false })
-            .range(fromIndex, toIndex),
-    );
+            .range(fromIndex, toIndex);
+    });
 
     if (rows === null) {
         console.error('Failed to load published workshops:', errorMessage ?? 'Unknown database error');

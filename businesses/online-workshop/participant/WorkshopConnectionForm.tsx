@@ -11,7 +11,7 @@ import {
 } from '@/lib/workshops/workshopConstants';
 import { isWorkshopParticipantFullnameValid } from '@/lib/workshops/workshopParticipantFullname';
 import { ArrowRight, LockKeyhole, Radio } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 
 type WorkshopConnectionFormProps = {
     readonly connectionDetails: WorkshopConnectionDetails;
@@ -19,6 +19,15 @@ type WorkshopConnectionFormProps = {
     readonly initialFullname: string;
     readonly errorMessage: string | null;
     readonly onConnect: (values: { readonly fullname: string; readonly email: string }) => Promise<boolean>;
+
+    /**
+     * Optional choice of the term this form connects to, offered below the term it currently describes
+     *
+     * Note: The form neither knows what can be chosen nor decides what a choice changes. It only keeps that choice in
+     *       the one place a participant is already looking at a term, so picking another one never costs them the name
+     *       and the e-mail they have just typed.
+     */
+    readonly connectionTermPicker?: ReactNode;
 };
 
 export type WorkshopConnectionDetails = {
@@ -39,6 +48,7 @@ export function WorkshopConnectionForm({
     initialFullname,
     errorMessage,
     onConnect,
+    connectionTermPicker,
 }: WorkshopConnectionFormProps) {
     const [fullname, setFullname] = useState(initialFullname);
     const [email, setEmail] = useState(initialEmail);
@@ -166,6 +176,17 @@ export function WorkshopConnectionForm({
                         className="mt-4 text-center text-xs text-slate-500"
                     />
                 </form>
+
+                {/*
+                  * Note: The choice closes the door rather than standing in it. A participant who came for one very
+                  *       workshop connects to it without ever reading this, while a participant who came for another
+                  *       one finds it right below the term they were offered.
+                  */}
+                {connectionTermPicker !== undefined && (
+                    <section className="border-t border-white/10 bg-white/[0.02] p-6 sm:p-8 md:col-span-2 md:p-10">
+                        {connectionTermPicker}
+                    </section>
+                )}
             </div>
         </main>
     );

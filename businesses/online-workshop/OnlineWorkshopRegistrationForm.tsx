@@ -4,7 +4,8 @@ import {
     ONLINE_WORKSHOP_REGISTRATION_PLACE_NAME,
     ONLINE_WORKSHOP_THANK_YOU_PATH,
 } from '@/businesses/online-workshop/config';
-import { EventTermOptionCard } from '@/components/events/EventTermOptionCard';
+import { createOnlineWorkshopTermNoteText } from '@/businesses/online-workshop/onlineWorkshopTerms';
+import { EventTermOptionList } from '@/components/events/EventTermOptionList';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,19 +78,15 @@ function OnlineWorkshopTermPicker({ workshops, selectedWorkshop, onSelectWorksho
     return (
         <fieldset>
             <legend className="text-sm font-semibold text-slate-700">Vyber termín workshopu</legend>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {workshops.map((workshop) => (
-                    <EventTermOptionCard
-                        key={workshop.id}
-                        occurrence={workshop}
-                        isSelected={selectedWorkshop.slug === workshop.slug}
-                        onSelect={() => onSelectWorkshop(workshop)}
-                        isTopicShown={true}
-                        noteIcon={Clock}
-                        noteText={`${formatCzechWorkshopDuration(workshop.startsAt, workshop.endsAt)} + Q&A`}
-                    />
-                ))}
-            </div>
+            <EventTermOptionList
+                terms={workshops}
+                selectedTermSlug={selectedWorkshop.slug}
+                onSelectTerm={onSelectWorkshop}
+                isTopicShown={true}
+                noteIcon={Clock}
+                createNoteText={createOnlineWorkshopTermNoteText}
+                className="mt-3"
+            />
         </fieldset>
     );
 }

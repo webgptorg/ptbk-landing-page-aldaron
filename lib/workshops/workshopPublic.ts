@@ -30,6 +30,25 @@ export async function loadUpcomingPublishedEventSummaries(
 }
 
 /**
+ * Loads every published term of one kind of event, including the ones which are running right now and the ones which
+ * are already over. A missing workshop database deliberately looks like no listed terms, exactly as it does on the
+ * public landing page of that event.
+ *
+ * Note: This is what a room offers a participant to choose from, so it deliberately says more than the landing page
+ *       of the same event does. A term is worth entering while it runs and long after it ended, while only a term
+ *       which has not started yet is worth registering for.
+ */
+export async function loadPublishedEventSummaries(eventType: EventType): Promise<readonly EventOccurrence[]> {
+    const supabase = getWorkshopDatabaseOrNull();
+    if (supabase === null) {
+        return [];
+    }
+
+    const workshopRows = await findPublishedWorkshops(supabase, eventType);
+    return selectEventOccurrences(workshopRows.map(mapWorkshopSummaryRow));
+}
+
+/**
  * Resolves a published occurrence of one kind of event selected by the URL. Legacy links without a selection
  * deliberately enter the most recent published occurrence of that event, while an explicitly unknown slug never
  * silently opens a different workshop.

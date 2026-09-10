@@ -21,7 +21,7 @@ import {
     type AiSupervizeMiniWorkshopRegistrationState,
 } from '@/businesses/ai-supervize-mini/workshopRegistration';
 import { DiscountCodeField } from '@/components/discounts/DiscountCodeField';
-import { EventTermOptionCard } from '@/components/events/EventTermOptionCard';
+import { EventTermOptionList } from '@/components/events/EventTermOptionList';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -517,27 +517,24 @@ function AiSupervizeMiniEventRegistrationForm({
             <div className="mt-6 space-y-6">
                 <div>
                     <label className="text-sm font-semibold text-slate-700">Termín workshopu</label>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        {events.map((event) => {
-                            const workshopAvailability =
+                    <EventTermOptionList
+                        terms={events}
+                        selectedTermSlug={selectedEvent.slug}
+                        onSelectTerm={(event) => setSelectedEventSlug(event.slug)}
+                        noteIcon={Users}
+                        createNoteText={(event) =>
+                            formatEventSeatCount(
+                                event,
                                 workshopAvailabilities === null
                                     ? null
                                     : getAiSupervizeMiniWorkshopAvailabilityByEventSlug(
                                           workshopAvailabilities,
                                           event.slug,
-                                      );
-                            return (
-                                <EventTermOptionCard
-                                    key={event.slug}
-                                    occurrence={event}
-                                    isSelected={selectedEvent.slug === event.slug}
-                                    onSelect={() => setSelectedEventSlug(event.slug)}
-                                    noteIcon={Users}
-                                    noteText={formatEventSeatCount(event, workshopAvailability)}
-                                />
-                            );
-                        })}
-                    </div>
+                                      ),
+                            )
+                        }
+                        className="mt-3"
+                    />
                 </div>
 
                 {isSelectedWorkshopFull && (

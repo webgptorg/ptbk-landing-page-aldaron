@@ -19,7 +19,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/cs/online-workshop` lists free 60-minute online workshops about writing
   production code with AI agents. Each term has its own subject and description,
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
-  full-load conversion page; `/participant` is the live room.
+  full-load conversion page; `/participant` is the live room. Its waiting room
+  offers every published term as the same term cards the landing page registers
+  with: running and upcoming ones first, finished ones behind a disclosure.
+  Picking one changes the room being connected to and the `workshop` parameter,
+  without losing the name and e-mail already typed.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
   the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as

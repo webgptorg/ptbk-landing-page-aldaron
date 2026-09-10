@@ -5,6 +5,60 @@ import { cn } from '@/lib/utils';
 import { formatCzechWorkshopDay, formatCzechWorkshopTimeRange } from '@/lib/workshops/workshopDate';
 import type { LucideIcon } from 'lucide-react';
 
+/**
+ * The two surfaces a term of an event is offered on: the bright landing page of that event and the dark room a
+ * participant connects to
+ */
+export const EVENT_TERM_APPEARANCES = ['light', 'dark'] as const;
+
+export type EventTermAppearance = (typeof EVENT_TERM_APPEARANCES)[number];
+
+/**
+ * How one card is drawn on each of those surfaces
+ *
+ * Note: Both appearances say the very same things in the very same places and differ only in colour, so a term never
+ *       becomes easier or harder to read by being offered somewhere else.
+ */
+const EVENT_TERM_OPTION_CARD_APPEARANCES: Readonly<
+    Record<
+        EventTermAppearance,
+        {
+            readonly card: string;
+            readonly selectedCard: string;
+            readonly heading: string;
+            readonly title: string;
+            readonly description: string;
+            readonly formatBadge: string;
+            readonly price: string;
+            readonly note: string;
+            readonly noteIcon: string;
+        }
+    >
+> = {
+    light: {
+        card: 'border-slate-200 bg-white hover:border-cyan-200',
+        selectedCard: 'border-cyan-500 bg-cyan-50 ring-2 ring-cyan-100',
+        heading: 'text-slate-950',
+        title: 'text-slate-950',
+        description: 'text-slate-600',
+        formatBadge: 'bg-slate-100 text-slate-700',
+        price: 'text-slate-700',
+        note: 'text-slate-600',
+        noteIcon: 'text-cyan-600',
+    },
+    dark: {
+        card: 'border-white/10 bg-white/[0.04] hover:border-cyan-300/40',
+        selectedCard: 'border-cyan-300/70 bg-cyan-300/10 ring-2 ring-cyan-300/20',
+        heading: 'text-white',
+        title: 'text-white',
+        description: 'text-slate-300',
+        formatBadge: 'bg-white/10 text-slate-200',
+        price: 'text-slate-200',
+        note: 'text-slate-300',
+        noteIcon: 'text-cyan-300',
+    },
+};
+
 type EventTermOptionCardProps = {
     readonly occurrence: EventOccurrence;
     readonly isSelected: boolean;
@@ -18,6 +72,11 @@ type EventTermOptionCardProps = {
      *       where it is, and naming it again on every card would only repeat what the card already carries.
      */
     readonly isTopicShown?: boolean;
+
+    /**
+     * Which of the two surfaces this card is offered on, see `EVENT_TERM_OPTION_CARD_APPEARANCES`
+     */
+    readonly appearance?: EventTermAppearance;
 
     /**
      * Icon and text of the one line each landing page adds about its terms, such as how long they take or how many
@@ -40,9 +99,12 @@ export function EventTermOptionCard({
     isSelected,
     onSelect,
     isTopicShown = false,
+    appearance = 'light',
     noteIcon: NoteIcon,
     noteText,
 }: EventTermOptionCardProps) {
+    const appearanceClassNames = EVENT_TERM_OPTION_CARD_APPEARANCES[appearance];
+
     return (
         <button
             type="button"
@@ -50,33 +112,35 @@ export function EventTermOptionCard({
             onClick={onSelect}
             className={cn(
                 'rounded-xl border p-4 text-left transition-all',
-                isSelected
-                    ? 'border-cyan-500 bg-cyan-50 ring-2 ring-cyan-100'
-                    : 'border-slate-200 bg-white hover:border-cyan-200',
+                isSelected ? appearanceClassNames.selectedCard : appearanceClassNames.card,
             )}
         >
-            <span className="block text-lg font-bold text-slate-950">
+            <span className={cn('block text-lg font-bold', appearanceClassNames.heading)}>
                 {formatCzechWorkshopDay(occurrence.startsAt)} ·{' '}
                 {formatCzechWorkshopTimeRange(occurrence.startsAt, occurrence.endsAt)}
             </span>
             {isTopicShown && (
                 <>
-                    <span className="mt-2 block font-semibold text-slate-950">{occurrence.title}</span>
+                    <span className={cn('mt-2 block font-semibold', appearanceClassNames.title)}>
+                        {occurrence.title}
+                    </span>
                     {occurrence.description.trim() !== '' && (
-                        <span className="mt-1 block text-sm leading-relaxed text-slate-600">
+                        <span className={cn('mt-1 block text-sm leading-relaxed', appearanceClassNames.description)}>
                             {occurrence.description}
                         </span>
                     )}
                 </>
             )}
             <span className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', appearanceClassNames.formatBadge)}>
                     {formatEventFormat(occurrence.event)}
                 </span>
-                <span className="font-medium text-slate-700">{formatEventPrice(occurrence.event.priceCzk)}</span>
+                <span className={cn('font-medium', appearanceClassNames.price)}>
+                    {formatEventPrice(occurrence.event.priceCzk)}
+                </span>
             </span>
-            <span className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-                <NoteIcon className="h-4 w-4 shrink-0 text-cyan-600" aria-hidden="true" />
+            <span className={cn('mt-2 flex items-center gap-2 text-sm', appearanceClassNames.note)}>
+                <NoteIcon className={cn('h-4 w-4 shrink-0', appearanceClassNames.noteIcon)} aria-hidden="true" />
                 {noteText}
             </span>
         </button>

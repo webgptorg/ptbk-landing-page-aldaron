@@ -1,4 +1,25 @@
 # Current preversion
+- Let the waiting room of `/cs/online-workshop/participant` offer every online workshop instead of the one its address
+  happened to name. A participant who opened an older reminder, or the room with no term at all, was shown a single
+  workshop — the newest published one — and had no way from there to the workshop which is actually running, so
+  entering the right room meant finding the right e-mail first. The waiting room now closes with `Vyberte si
+  workshop`: every published term of the online workshop is offered there, the one running right now and the ones
+  still ahead lead the list, and the terms which are already over wait one click away behind `Proběhlé workshopy`,
+  because their rooms keep the chat and the materials of the workshop which was held in them.
+
+  Picking a term changes both the room which is being connected to and the term the address names, so reloading or
+  sharing the waiting room opens the workshop which was picked rather than the one which was offered first. Nothing
+  navigates away while picking, so the name and the e-mail already typed into the form stay exactly where they are.
+  Which terms are running, ahead, or over is decided against the moment the server built the page, so the browser
+  groups them exactly as it received them, and the choice is offered at all only where there is more than one term to
+  make it between.
+
+  The terms are offered as the very same cards the landing page of the event registers visitors with — the same day
+  and time, subject, format, and price — merely drawn for a dark room, so a term can never be described one way where
+  it is registered for and another way where it is entered. The room below the choice remains the shared participant
+  room every kind of event uses: it carries the choice to its connection form without learning anything about online
+  workshops, and only the landing page of the event knows which terms belong to it.
+
 - Made the way between a workshop and the community lead both ways. `/cs/komunita` has always listed the terms of every
   event and led a member into the room of each of them, while `/cs/online-workshop/participant` led nowhere at all: a
   workshop ended, and the people who had just spent an hour together were left in a room which said nothing about where

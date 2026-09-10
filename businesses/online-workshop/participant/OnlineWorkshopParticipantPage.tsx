@@ -102,6 +102,14 @@ type OnlineWorkshopParticipantPageProps = {
      * A room may require a domain-specific reconnection flow instead of the general name-and-email form.
      */
     readonly connectionRequiredContent?: ReactNode;
+
+    /**
+     * Optional choice of the term to connect to, offered by the connection form of this room
+     *
+     * Note: Which terms can be entered and what picking one changes is known by the business surface which owns them,
+     *       so the room only carries that choice to the one screen where a participant is choosing at all.
+     */
+    readonly connectionTermPicker?: ReactNode;
 };
 
 export function OnlineWorkshopParticipantPage({
@@ -119,6 +127,7 @@ export function OnlineWorkshopParticipantPage({
     mainContentAfterWorkshopNavigation,
     isMaterialsShown = true,
     connectionRequiredContent,
+    connectionTermPicker,
 }: OnlineWorkshopParticipantPageProps) {
     const controller = useWorkshopParticipant(workshopSlug);
     useWorkshopParticipantOfflineSupport();
@@ -168,6 +177,7 @@ export function OnlineWorkshopParticipantPage({
                     initialFullname={initialFullname}
                     errorMessage={controller.errorMessage}
                     onConnect={controller.connect}
+                    connectionTermPicker={connectionTermPicker}
                 />
             )
         );
