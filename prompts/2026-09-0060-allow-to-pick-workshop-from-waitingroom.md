@@ -9,7 +9,7 @@
 
 ---
 
-[ ]
+[x] (2 attempts) by Claude Code `claude-opus-5` thinking `max` - Implementation $4.05 4 hours; Testing 9 minutes; Fixing $2.34 21 minutes; Testing 24 minutes
 
 [✨🪃] Picking available online workshops from the waiting room should be little bit smaller and less prominent.
 
@@ -19,3 +19,4 @@
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
 ![alt text](prompts/screenshots/2026-09-0060-allow-to-pick-workshop-from-waitingroom.png)
+

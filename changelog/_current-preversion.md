@@ -1,4 +1,20 @@
 # Current preversion
+- Took the choice of workshop in the waiting room of `/cs/online-workshop/participant` down to the size of what it is.
+  Offering every published term there was drawn as a third full panel of the connection card — a bright cyan `Vyberte
+  si workshop` heading over full-size cards, two across, each carrying the whole description of its term — so the
+  choice took more of the room than the workshop being entered and the form entering it together, and a participant
+  who had come for one very workshop was met by a wall of the other ones. The choice is now a quiet footer of that
+  card: the heading and the sentence under it are small and grey rather than cyan, the terms are offered as tighter
+  cards which fit three across on a wide screen and cut their description off after two lines, and `Proběhlé
+  workshopy` opens the finished terms from a smaller, quieter line. Nothing was taken away — every term still says
+  when it is held, what it is about, in what form and at what price, and picking one still changes the room being
+  connected to without costing the name and the e-mail already typed.
+
+  The two sizes are one description of how much room a term card is given, read by the shared card and by the shared
+  list which lays those cards out, so the tighter card is the very same card with the very same things in the very
+  same order rather than a second card written for the room. `/cs/online-workshop` and `/ai-supervize-mini`, where
+  choosing a term is what the visitor came to do, keep offering it in full.
+
 - Put the way to the event itself into the administration of that event. `/admin/workshops` could describe a term in
   every detail — its schedule, its stream, its materials, its audience — without ever offering to open it, so an
   administrator who wanted to see what they had just saved had to assemble the address of the room by hand out of the

@@ -66,15 +66,13 @@ export function OnlineWorkshopRoomTermPicker({
 
     return (
         <fieldset className="min-w-0">
-            <legend className="text-sm font-semibold uppercase tracking-[0.14em] text-cyan-200">
+            <legend className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.legend}
             </legend>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-                {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.description}
-            </p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">{ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.description}</p>
 
             {currentTerms.length === 0 ? (
-                <p className="mt-4 rounded-xl border border-dashed border-white/15 bg-white/[0.025] px-4 py-4 text-sm text-slate-400">
+                <p className="mt-3 rounded-lg border border-dashed border-white/15 bg-white/[0.025] px-3 py-3 text-xs text-slate-400">
                     {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.noCurrentTermsMessage}
                 </p>
             ) : (
@@ -84,9 +82,10 @@ export function OnlineWorkshopRoomTermPicker({
                     onSelectTerm={onSelectTerm}
                     isTopicShown={true}
                     appearance="dark"
+                    density="compact"
                     noteIcon={Clock}
                     createNoteText={createOnlineWorkshopTermNoteText}
-                    className="mt-4"
+                    className="mt-3"
                 />
             )}
 
@@ -97,11 +96,11 @@ export function OnlineWorkshopRoomTermPicker({
                         aria-controls={pastTermsListId}
                         aria-expanded={isPastTermsShown}
                         onClick={() => setIsPastTermsShown((isShown) => !isShown)}
-                        className="mt-4 flex w-full items-center justify-between gap-3 rounded-lg px-1 py-2 text-left text-sm font-semibold text-slate-400 transition-colors hover:text-slate-200"
+                        className="mt-3 flex w-full items-center justify-between gap-3 rounded-lg px-1 py-1.5 text-left text-xs font-semibold text-slate-500 transition-colors hover:text-slate-300"
                     >
                         {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.pastTermsLabel} ({pastTerms.length})
                         <ChevronDown
-                            className={`h-4 w-4 shrink-0 transition-transform ${isPastTermsShown ? 'rotate-180' : ''}`}
+                            className={`h-3.5 w-3.5 shrink-0 transition-transform ${isPastTermsShown ? 'rotate-180' : ''}`}
                             aria-hidden="true"
                         />
                     </button>
@@ -113,6 +112,7 @@ export function OnlineWorkshopRoomTermPicker({
                             onSelectTerm={onSelectTerm}
                             isTopicShown={true}
                             appearance="dark"
+                            density="compact"
                             noteIcon={History}
                             createNoteText={() => ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.pastTermNoteText}
                             className="mt-1"

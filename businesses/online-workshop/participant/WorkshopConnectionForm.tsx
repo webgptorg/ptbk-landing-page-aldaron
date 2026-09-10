@@ -178,12 +178,14 @@ export function WorkshopConnectionForm({
                 </form>
 
                 {/*
-                  * Note: The choice closes the door rather than standing in it. A participant who came for one very
-                  *       workshop connects to it without ever reading this, while a participant who came for another
-                  *       one finds it right below the term they were offered.
-                  */}
+                 * Note: The choice closes the door rather than standing in it. A participant who came for one very
+                 *       workshop connects to it without ever reading this, while a participant who came for another
+                 *       one finds it right below the term they were offered. It is deliberately drawn as a quiet
+                 *       footer of the card rather than as a third panel of it, so the workshop being entered and the
+                 *       form entering it are what the room is read as.
+                 */}
                 {connectionTermPicker !== undefined && (
-                    <section className="border-t border-white/10 bg-white/[0.02] p-6 sm:p-8 md:col-span-2 md:p-10">
+                    <section className="border-t border-white/10 bg-white/[0.02] px-6 py-5 sm:px-8 md:col-span-2 md:px-10 md:py-6">
                         {connectionTermPicker}
                     </section>
                 )}

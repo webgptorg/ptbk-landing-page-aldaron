@@ -59,6 +59,58 @@ const EVENT_TERM_OPTION_CARD_APPEARANCES: Readonly<
     },
 };
 
+/**
+ * The two amounts of room a term is given: the full card a visitor chooses a term with, and the tighter one a surface
+ * which is already about one term offers the other terms beside it with
+ */
+export const EVENT_TERM_DENSITIES = ['comfortable', 'compact'] as const;
+
+export type EventTermDensity = (typeof EVENT_TERM_DENSITIES)[number];
+
+/**
+ * How much room each part of one card takes at each of those densities
+ *
+ * Note: A compact card says everything a comfortable one says, in the same order, only quieter and with a description
+ *       which is cut off after two lines — so a term offered beside another one is never described differently, merely
+ *       shorter.
+ */
+const EVENT_TERM_OPTION_CARD_DENSITIES: Readonly<
+    Record<
+        EventTermDensity,
+        {
+            readonly card: string;
+            readonly heading: string;
+            readonly title: string;
+            readonly description: string;
+            readonly detailsRow: string;
+            readonly formatBadge: string;
+            readonly note: string;
+            readonly noteIcon: string;
+        }
+    >
+> = {
+    comfortable: {
+        card: 'rounded-xl p-4',
+        heading: 'text-lg',
+        title: 'mt-2 block text-base',
+        description: 'mt-1 block text-sm leading-relaxed',
+        detailsRow: 'mt-2 gap-2 text-sm',
+        formatBadge: 'px-2.5 py-1 text-xs',
+        note: 'mt-2 gap-2 text-sm',
+        noteIcon: 'h-4 w-4',
+    },
+    compact: {
+        card: 'rounded-lg p-3',
+        heading: 'text-base',
+        title: 'mt-1 block text-sm',
+        description: 'mt-0.5 line-clamp-2 text-xs leading-5',
+        detailsRow: 'mt-1.5 gap-1.5 text-xs',
+        formatBadge: 'px-2 py-0.5 text-[11px]',
+        note: 'mt-1.5 gap-1.5 text-xs',
+        noteIcon: 'h-3.5 w-3.5',
+    },
+};
+
 type EventTermOptionCardProps = {
     readonly occurrence: EventOccurrence;
     readonly isSelected: boolean;
@@ -77,6 +129,11 @@ type EventTermOptionCardProps = {
      * Which of the two surfaces this card is offered on, see `EVENT_TERM_OPTION_CARD_APPEARANCES`
      */
     readonly appearance?: EventTermAppearance;
+
+    /**
+     * How much room this card is given, see `EVENT_TERM_OPTION_CARD_DENSITIES`
+     */
+    readonly density?: EventTermDensity;
 
     /**
      * Icon and text of the one line each landing page adds about its terms, such as how long they take or how many
@@ -100,10 +157,12 @@ export function EventTermOptionCard({
     onSelect,
     isTopicShown = false,
     appearance = 'light',
+    density = 'comfortable',
     noteIcon: NoteIcon,
     noteText,
 }: EventTermOptionCardProps) {
     const appearanceClassNames = EVENT_TERM_OPTION_CARD_APPEARANCES[appearance];
+    const densityClassNames = EVENT_TERM_OPTION_CARD_DENSITIES[density];
 
     return (
         <button
@@ -111,36 +170,46 @@ export function EventTermOptionCard({
             aria-pressed={isSelected}
             onClick={onSelect}
             className={cn(
-                'rounded-xl border p-4 text-left transition-all',
+                'border text-left transition-all',
+                densityClassNames.card,
                 isSelected ? appearanceClassNames.selectedCard : appearanceClassNames.card,
             )}
         >
-            <span className={cn('block text-lg font-bold', appearanceClassNames.heading)}>
+            <span className={cn('block font-bold', densityClassNames.heading, appearanceClassNames.heading)}>
                 {formatCzechWorkshopDay(occurrence.startsAt)} ·{' '}
                 {formatCzechWorkshopTimeRange(occurrence.startsAt, occurrence.endsAt)}
             </span>
             {isTopicShown && (
                 <>
-                    <span className={cn('mt-2 block font-semibold', appearanceClassNames.title)}>
+                    <span className={cn('font-semibold', densityClassNames.title, appearanceClassNames.title)}>
                         {occurrence.title}
                     </span>
                     {occurrence.description.trim() !== '' && (
-                        <span className={cn('mt-1 block text-sm leading-relaxed', appearanceClassNames.description)}>
+                        <span className={cn(densityClassNames.description, appearanceClassNames.description)}>
                             {occurrence.description}
                         </span>
                     )}
                 </>
             )}
-            <span className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', appearanceClassNames.formatBadge)}>
+            <span className={cn('flex flex-wrap items-center', densityClassNames.detailsRow)}>
+                <span
+                    className={cn(
+                        'rounded-full font-semibold',
+                        densityClassNames.formatBadge,
+                        appearanceClassNames.formatBadge,
+                    )}
+                >
                     {formatEventFormat(occurrence.event)}
                 </span>
                 <span className={cn('font-medium', appearanceClassNames.price)}>
                     {formatEventPrice(occurrence.event.priceCzk)}
                 </span>
             </span>
-            <span className={cn('mt-2 flex items-center gap-2 text-sm', appearanceClassNames.note)}>
-                <NoteIcon className={cn('h-4 w-4 shrink-0', appearanceClassNames.noteIcon)} aria-hidden="true" />
+            <span className={cn('flex items-center', densityClassNames.note, appearanceClassNames.note)}>
+                <NoteIcon
+                    className={cn('shrink-0', densityClassNames.noteIcon, appearanceClassNames.noteIcon)}
+                    aria-hidden="true"
+                />
                 {noteText}
             </span>
         </button>
