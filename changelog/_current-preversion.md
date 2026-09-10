@@ -1,4 +1,22 @@
 # Current preversion
+- Put the way to the event itself into the administration of that event. `/admin/workshops` could describe a term in
+  every detail — its schedule, its stream, its materials, its audience — without ever offering to open it, so an
+  administrator who wanted to see what they had just saved had to assemble the address of the room by hand out of the
+  slug the settings form happened to be showing them. Every administered term now carries `Online workshop na webu`
+  above its sections: it names the kind of event the term belongs to, writes out the exact public address of that
+  term, and opens it in a new tab with `Otevřít akci`, so the administration is never left behind for the sake of one
+  look at the event. Where the term is published and registered for is one click further, under `Landing page akce`,
+  because a term with a live room of its own is listed on a page which is somewhere else; a term of an event which is
+  entered through its landing page in the first place offers that one address alone rather than the same link twice.
+
+  Where a term leads is not decided here: it is read from the very rule which already leads a member of `/cs/komunita`
+  into a term and which a calendar invitation and a registration confirmation carry, so the administration can never
+  open a different page than the one it is handing out. The link is deliberately the public one, carrying neither a
+  name nor an e-mail into the room, so an administrator taking a look is not connected as a participant of their own
+  workshop. A term which is not published yet says so beside its address, because a visitor following it would be
+  offered the published terms instead of that term, and a permanent room such as the community is no term of an event,
+  so it offers no such link at all.
+
 - Let the waiting room of `/cs/online-workshop/participant` offer every online workshop instead of the one its address
   happened to name. A participant who opened an older reminder, or the room with no term at all, was shown a single
   workshop — the newest published one — and had no way from there to the workshop which is actually running, so

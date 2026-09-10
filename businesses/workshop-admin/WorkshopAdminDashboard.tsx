@@ -41,6 +41,7 @@ import { WorkshopArtificialComment } from '@/businesses/workshop-admin/WorkshopA
 import { WorkshopArtificialReaction } from '@/businesses/workshop-admin/WorkshopArtificialReaction';
 import { WorkshopCommentModeration } from '@/businesses/workshop-admin/WorkshopCommentModeration';
 import { WorkshopContentAdmin } from '@/businesses/workshop-admin/WorkshopContentAdmin';
+import { WorkshopEventLinks } from '@/businesses/workshop-admin/WorkshopEventLinks';
 import { WorkshopExportButton } from '@/businesses/workshop-admin/WorkshopExportButton';
 import { WorkshopFeedbackAdmin } from '@/businesses/workshop-admin/WorkshopFeedbackAdmin';
 import { WorkshopParticipantList } from '@/businesses/workshop-admin/WorkshopParticipantList';
@@ -563,179 +564,184 @@ export function WorkshopAdminDashboard({
                         {emptyStateMessage}
                     </div>
                 ) : (
-                    <Tabs value={selectedSection} onValueChange={handleSectionChange}>
-                        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl p-1 sm:grid-cols-3 xl:grid-cols-8">
-                            {sectionDefinitions.map((sectionDefinition) => {
-                                const SectionIcon = sectionDefinition.icon;
-                                return (
-                                    <TabsTrigger
-                                        key={sectionDefinition.value}
-                                        value={sectionDefinition.value}
-                                        className="gap-1.5 px-2.5 py-2"
-                                    >
-                                        <SectionIcon className="h-4 w-4" /> {sectionDefinition.label}
-                                    </TabsTrigger>
-                                );
-                            })}
-                        </TabsList>
+                    <>
+                        {/* Note: The way to the event stays above every section, so it is at hand whichever part of
+                                  the term is being administered. */}
+                        <WorkshopEventLinks workshop={snapshot.workshop} />
+                        <Tabs value={selectedSection} onValueChange={handleSectionChange}>
+                            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl p-1 sm:grid-cols-3 xl:grid-cols-8">
+                                {sectionDefinitions.map((sectionDefinition) => {
+                                    const SectionIcon = sectionDefinition.icon;
+                                    return (
+                                        <TabsTrigger
+                                            key={sectionDefinition.value}
+                                            value={sectionDefinition.value}
+                                            className="gap-1.5 px-2.5 py-2"
+                                        >
+                                            <SectionIcon className="h-4 w-4" /> {sectionDefinition.label}
+                                        </TabsTrigger>
+                                    );
+                                })}
+                            </TabsList>
 
-                        <TabsContent value="overview" className="space-y-6">
-                            <div
-                                className={`grid gap-4 ${overviewStatistics.length === 4 ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-3'}`}
-                            >
-                                {overviewStatistics.map((statistic) => (
-                                    <div
-                                        key={statistic.label}
-                                        title={statistic.description}
-                                        className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-                                    >
-                                        <statistic.icon className="h-5 w-5 text-cyan-600" />
-                                        <p className="mt-3 text-2xl font-bold text-slate-950">{statistic.value}</p>
-                                        <p className="text-xs text-slate-500">{statistic.label}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            <WorkshopActivityGraph
-                                workshopId={snapshot.workshop.id}
-                                workshopSlug={snapshot.workshop.slug}
-                                isRoomScheduled={isRoomScheduled}
-                                subjectLabel={subjectLabel}
-                                refreshVersion={snapshotRefreshVersion}
-                                graphState={viewState.graph}
-                                onChangeGraphState={handleGraphStateChange}
-                            />
-                        </TabsContent>
-
-                        <TabsContent value="participants" className="space-y-6">
-                            {selectedWorkshop !== null && <WorkshopRegistrationContacts workshop={selectedWorkshop} />}
-                            <WorkshopParticipantList
-                                workshopId={snapshot.workshop.id}
-                                workshopStartsAt={scheduleStartsAt}
-                                workshopEndsAt={snapshot.workshop.endsAt}
-                                refreshVersion={snapshotRefreshVersion}
-                                isCommunityMembershipStatusShown={workshopKind === 'community'}
-                                onChangeInteractionBan={handleChangeParticipantInteractionBan}
-                                onChangeTrusted={handleChangeParticipantTrusted}
-                                onChangeModerator={handleChangeParticipantModerator}
-                                onDelete={handleDeleteParticipant}
-                            />
-                        </TabsContent>
-
-                        <TabsContent value="comments" className="space-y-4">
-                            <div className="flex justify-end">
-                                <WorkshopExportButton
+                            <TabsContent value="overview" className="space-y-6">
+                                <div
+                                    className={`grid gap-4 ${overviewStatistics.length === 4 ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-3'}`}
+                                >
+                                    {overviewStatistics.map((statistic) => (
+                                        <div
+                                            key={statistic.label}
+                                            title={statistic.description}
+                                            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                                        >
+                                            <statistic.icon className="h-5 w-5 text-cyan-600" />
+                                            <p className="mt-3 text-2xl font-bold text-slate-950">{statistic.value}</p>
+                                            <p className="text-xs text-slate-500">{statistic.label}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <WorkshopActivityGraph
                                     workshopId={snapshot.workshop.id}
-                                    exportKind="comments"
-                                    label="Exportovat komentáře CSV"
+                                    workshopSlug={snapshot.workshop.slug}
+                                    isRoomScheduled={isRoomScheduled}
+                                    subjectLabel={subjectLabel}
+                                    refreshVersion={snapshotRefreshVersion}
+                                    graphState={viewState.graph}
+                                    onChangeGraphState={handleGraphStateChange}
                                 />
-                            </div>
-                            <WorkshopCommentModeration
-                                comments={snapshot.comments}
-                                commentStatus={commentStatus}
-                                pinnedComment={snapshot.pinnedComment}
-                                stageComment={isStageOffered ? snapshot.stageComment : null}
-                                onChangeCommentStatus={setCommentStatus}
-                                onModerate={handleModerateComment}
-                                onEditBody={handleEditCommentBody}
-                                onChangePin={handleChangeCommentPin}
-                                onSetStageComment={isStageOffered ? handleSetStageComment : null}
-                                onAdjustArtificialUpvotes={handleAdjustArtificialUpvotes}
-                                onDelete={handleDeleteComment}
-                            />
-                            <WorkshopArtificialComment
-                                onCreate={handleCreateArtificialComment}
-                                isStageOffered={isStageOffered}
-                            />
-                        </TabsContent>
-
-                        <TabsContent value="reactions" className="space-y-4">
-                            <div className="flex justify-end">
-                                <WorkshopExportButton
-                                    workshopId={snapshot.workshop.id}
-                                    exportKind="reactions"
-                                    label="Exportovat reakce CSV"
-                                />
-                            </div>
-                            <WorkshopReactionSummary
-                                workshopId={snapshot.workshop.id}
-                                refreshVersion={snapshotRefreshVersion}
-                            />
-                            <WorkshopArtificialReaction
-                                reactionCount={snapshot.reactionCount}
-                                artificialReactionCount={snapshot.artificialReactionCount}
-                                onSend={handleSendArtificialReaction}
-                                onClear={handleClearReactions}
-                            />
-                        </TabsContent>
-
-                        <TabsContent value="content" className="space-y-4">
-                            <div className="flex justify-end">
-                                <WorkshopExportButton
-                                    workshopId={snapshot.workshop.id}
-                                    exportKind="content"
-                                    label="Exportovat obsah CSV"
-                                />
-                            </div>
-                            <WorkshopContentAdmin
-                                defaultUnlockAt={scheduleStartsAt ?? currentUnlockAt}
-                                contentBlocks={snapshot.contentBlocks}
-                                onCreate={handleCreateContent}
-                                onUpdate={handleUpdateContent}
-                                onDelete={handleDeleteContent}
-                                onUnlockNow={handleUnlockContentNow}
-                            />
-                        </TabsContent>
-
-                        {isPollSectionOffered && (
-                            <TabsContent value="polls">
-                                {isPollsOffered ? (
-                                    <WorkshopPollAdmin
-                                        polls={snapshot.polls}
-                                        attachableWorkshops={attachableWorkshops}
-                                        onCreate={handleCreatePoll}
-                                        onUpdate={handleUpdatePoll}
-                                        onDelete={handleDeletePoll}
-                                        onAdjustArtificialVotes={handleAdjustArtificialPollVotes}
-                                    />
-                                ) : (
-                                    <WorkshopAttachedPollList
-                                        polls={snapshot.attachedPolls}
-                                        pollAdministrationPath={attachedPollAdministrationPath}
-                                    />
-                                )}
                             </TabsContent>
-                        )}
 
-                        {workshopKind === 'workshop' && (
-                            <TabsContent value="feedback">
-                                <WorkshopFeedbackAdmin
+                            <TabsContent value="participants" className="space-y-6">
+                                {selectedWorkshop !== null && <WorkshopRegistrationContacts workshop={selectedWorkshop} />}
+                                <WorkshopParticipantList
+                                    workshopId={snapshot.workshop.id}
+                                    workshopStartsAt={scheduleStartsAt}
+                                    workshopEndsAt={snapshot.workshop.endsAt}
+                                    refreshVersion={snapshotRefreshVersion}
+                                    isCommunityMembershipStatusShown={workshopKind === 'community'}
+                                    onChangeInteractionBan={handleChangeParticipantInteractionBan}
+                                    onChangeTrusted={handleChangeParticipantTrusted}
+                                    onChangeModerator={handleChangeParticipantModerator}
+                                    onDelete={handleDeleteParticipant}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="comments" className="space-y-4">
+                                <div className="flex justify-end">
+                                    <WorkshopExportButton
+                                        workshopId={snapshot.workshop.id}
+                                        exportKind="comments"
+                                        label="Exportovat komentáře CSV"
+                                    />
+                                </div>
+                                <WorkshopCommentModeration
+                                    comments={snapshot.comments}
+                                    commentStatus={commentStatus}
+                                    pinnedComment={snapshot.pinnedComment}
+                                    stageComment={isStageOffered ? snapshot.stageComment : null}
+                                    onChangeCommentStatus={setCommentStatus}
+                                    onModerate={handleModerateComment}
+                                    onEditBody={handleEditCommentBody}
+                                    onChangePin={handleChangeCommentPin}
+                                    onSetStageComment={isStageOffered ? handleSetStageComment : null}
+                                    onAdjustArtificialUpvotes={handleAdjustArtificialUpvotes}
+                                    onDelete={handleDeleteComment}
+                                />
+                                <WorkshopArtificialComment
+                                    onCreate={handleCreateArtificialComment}
+                                    isStageOffered={isStageOffered}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="reactions" className="space-y-4">
+                                <div className="flex justify-end">
+                                    <WorkshopExportButton
+                                        workshopId={snapshot.workshop.id}
+                                        exportKind="reactions"
+                                        label="Exportovat reakce CSV"
+                                    />
+                                </div>
+                                <WorkshopReactionSummary
                                     workshopId={snapshot.workshop.id}
                                     refreshVersion={snapshotRefreshVersion}
                                 />
-                            </TabsContent>
-                        )}
-
-                        <TabsContent value="settings" className="space-y-4">
-                            <div className="flex justify-end">
-                                <WorkshopExportButton
-                                    workshopId={snapshot.workshop.id}
-                                    exportKind="settings"
-                                    label="Exportovat nastavení CSV"
+                                <WorkshopArtificialReaction
+                                    reactionCount={snapshot.reactionCount}
+                                    artificialReactionCount={snapshot.artificialReactionCount}
+                                    onSend={handleSendArtificialReaction}
+                                    onClear={handleClearReactions}
                                 />
-                            </div>
-                            <WorkshopSettingsForm
-                                workshop={snapshot.workshop}
-                                onSave={handleSaveWorkshop}
-                                subjectLabel={subjectLabel}
-                            />
-                        </TabsContent>
-
-                        {additionalSections.map((section) => (
-                            <TabsContent key={section.value} value={section.value} className="space-y-4">
-                                {section.content}
                             </TabsContent>
-                        ))}
-                    </Tabs>
+
+                            <TabsContent value="content" className="space-y-4">
+                                <div className="flex justify-end">
+                                    <WorkshopExportButton
+                                        workshopId={snapshot.workshop.id}
+                                        exportKind="content"
+                                        label="Exportovat obsah CSV"
+                                    />
+                                </div>
+                                <WorkshopContentAdmin
+                                    defaultUnlockAt={scheduleStartsAt ?? currentUnlockAt}
+                                    contentBlocks={snapshot.contentBlocks}
+                                    onCreate={handleCreateContent}
+                                    onUpdate={handleUpdateContent}
+                                    onDelete={handleDeleteContent}
+                                    onUnlockNow={handleUnlockContentNow}
+                                />
+                            </TabsContent>
+
+                            {isPollSectionOffered && (
+                                <TabsContent value="polls">
+                                    {isPollsOffered ? (
+                                        <WorkshopPollAdmin
+                                            polls={snapshot.polls}
+                                            attachableWorkshops={attachableWorkshops}
+                                            onCreate={handleCreatePoll}
+                                            onUpdate={handleUpdatePoll}
+                                            onDelete={handleDeletePoll}
+                                            onAdjustArtificialVotes={handleAdjustArtificialPollVotes}
+                                        />
+                                    ) : (
+                                        <WorkshopAttachedPollList
+                                            polls={snapshot.attachedPolls}
+                                            pollAdministrationPath={attachedPollAdministrationPath}
+                                        />
+                                    )}
+                                </TabsContent>
+                            )}
+
+                            {workshopKind === 'workshop' && (
+                                <TabsContent value="feedback">
+                                    <WorkshopFeedbackAdmin
+                                        workshopId={snapshot.workshop.id}
+                                        refreshVersion={snapshotRefreshVersion}
+                                    />
+                                </TabsContent>
+                            )}
+
+                            <TabsContent value="settings" className="space-y-4">
+                                <div className="flex justify-end">
+                                    <WorkshopExportButton
+                                        workshopId={snapshot.workshop.id}
+                                        exportKind="settings"
+                                        label="Exportovat nastavení CSV"
+                                    />
+                                </div>
+                                <WorkshopSettingsForm
+                                    workshop={snapshot.workshop}
+                                    onSave={handleSaveWorkshop}
+                                    subjectLabel={subjectLabel}
+                                />
+                            </TabsContent>
+
+                            {additionalSections.map((section) => (
+                                <TabsContent key={section.value} value={section.value} className="space-y-4">
+                                    {section.content}
+                                </TabsContent>
+                            ))}
+                        </Tabs>
+                    </>
                 )}
             </div>
         </div>
