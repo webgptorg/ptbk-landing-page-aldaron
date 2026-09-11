@@ -30,17 +30,17 @@ export function ForAgroPage() {
             <Suspense>
                 <BusinessGetStartedModal
                     placeName="ForAgroPage"
-                    title="Jste připraveni převést agronomické know-how do AI?"
+                    title="Chcete dostat agronomické know-how do AI?"
                     requestSent="Děkujeme, ozveme se."
-                    specialistContact="Náš specialista vás bude brzy kontaktovat."
-                    ceoOf="CEO společnosti Promptbook"
-                    description="Naplánujte si bezplatnou a nezávaznou konzultaci a zjistěte, jak může Promptbook pomoci vašemu agronomickému týmu škálovat expertizu, compliance i provozní know-how."
+                    specialistContact="Ozve se vám náš specialista."
+                    ceoOf="CEO Promptbooku"
+                    description="Domluvte si bezplatnou a nezávaznou konzultaci. Společně projdeme, jak dostat expertizu, compliance a provozní know-how k týmům v různých regionech."
                     emailPlaceholder="jmeno@agrofirma.cz"
                     phonePlaceholder="+420 777 000 000"
                     errorNoEmailOrPhone="Zadejte prosím e-mail nebo telefonní číslo."
                     genericErrorMessage="Nastala chyba. Zkuste to prosím znovu."
                     sending="Odesílání..."
-                    scheduleCall="Nezávazně poptat"
+                    scheduleCall="Domluvit konzultaci"
                 />
             </Suspense>
 
@@ -67,13 +67,13 @@ export function ForAgroPage() {
                                     <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
                                         Vytvořte AI, která{' '}
                                         <span className="bg-gradient-promptbook bg-clip-text text-transparent">
-                                            skutečně rozumí
+                                            rozumí
                                         </span>{' '}
                                         {you || <>agronomii vašeho podniku</>}
                                     </h1>
                                     <p className="max-w-2xl text-lg leading-relaxed text-white sm:text-xl">
-                                        S Promptbookem zachytíte agronomické know-how, regulatorní pravidla i provozní
-                                        postupy do AI agentů, kteří pomáhají týmům napříč regiony.
+                                        S Promptbookem převedete agronomické know-how, regulatorní pravidla a provozní
+                                        postupy do AI agentů, kteří pomohou týmům v různých regionech.
                                     </p>
                                 </div>
 
@@ -91,15 +91,15 @@ export function ForAgroPage() {
                                 <div className="flex flex-wrap items-center gap-4 text-sm opacity-80 sm:gap-8">
                                     <div className="flex items-center gap-2">
                                         <CheckCircle className="h-4 w-4" />
-                                        Open-source řešení
+                                        Open source
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CheckCircle className="h-4 w-4" />
-                                        Vaše data, Vaše kontrola
+                                        Data máte pod kontrolou
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CheckCircle className="h-4 w-4" />
-                                        Škálování napříč regiony
+                                        Stejná expertiza v každém regionu
                                     </div>
                                 </div>
                             </>
@@ -108,46 +108,46 @@ export function ForAgroPage() {
                 </Suspense>
 
                 <BenefitsSection
-                    title="AI řešení pro agronomy a zemědělské společnosti"
-                    description="Zachyťte odborné know-how, zrychlete rozhodování v terénu a držte compliance pod kontrolou s AI, která zná vaše dokumenty i procesy."
+                    title="AI pro agronomy a zemědělské firmy"
+                    description="Dostaňte odborné know-how k lidem v terénu rychleji a držte compliance pod kontrolou. AI pracuje s vašimi dokumenty a postupy."
                     benefits={forAgroBenefits}
                 />
                 <IntegrationsSection
-                    title="Kde využít AI v agronomii"
-                    description="Od terénních dotazů přes compliance až po logistiku: váš AI odborník může fungovat tam, kde ho tým opravdu potřebuje."
+                    title="Kde AI pomůže v agronomii"
+                    description="Od dotazů z terénu po compliance a logistiku. AI můžete použít tam, kde ji tým potřebuje."
                     integrations={forAgroIntegrations}
                 />
                 <TestimonialsSection
-                    title="Co o nás říkají"
-                    description="Promptbook pomáhá převádět odborné know-how do AI systémů, které jsou použitelné v reálném provozu."
+                    title="Co o Promptbooku říkají jeho uživatelé"
+                    description="Promptbook pomáhá dostat znalosti z dokumentů a hlav lidí do nástrojů, které se dají používat každý den."
                     testimonials={forAgroTestimonials}
                 />
                 <PricingSection
-                    title="Jednoduché a škálovatelné ceny"
-                    description="Od pilotu pro jeden agronomický tým po řešení pro více regionů a velké holdingy. Začněte tam, kde dává největší smysl."
+                    title="Začněte pilotem"
+                    description="Začněte u jednoho týmu a podle potřeby přidejte další regiony nebo celý holding."
                     plans={forAgroPricing}
                     footnotes={forAgroPricingFootnotes}
                     monthlyText="Měsíčně"
                     yearlyText="Ročně"
                     saveText="Ušetřete"
-                    openSourceGuaranteeText="Promptbook je open-source a můžete začít pilotem bez vendor lock-inu. Když agronomický use-case nebude dávat smysl, řekneme to rovnou."
+                    openSourceGuaranteeText="Promptbook je open source. Začněte pilotem bez závislosti na jednom dodavateli. Pokud se pro agronomii nehodí, řekneme vám to rovnou."
                 />
                 {isLocalhost && <PlaygroundSection />}
                 <TeamSection
                     title="Náš tým"
-                    description="Jsme tým, který pomáhá firmám převádět odborné know-how, procesy a dokumentaci do AI systémů, které fungují bezpečně i v regulovaném provozu."
+                    description="Pomáháme firmám převést odborné znalosti, procesy a dokumenty do AI, která se dá bezpečně používat i v regulovaném provozu."
                     jiriDescription={
                         <>
-                            Ph.D. v oboru matematika, bývalý výzkumník v{' '}
-                            <Link href="https://www.it4i.cz/">Národním superpočítačovém centru IT4I</Link>. Pomáhá
-                            navrhovat, jak převést složité odborné znalosti a metodiky do srozumitelného AI workflow.
+                            Matematik s titulem Ph.D. a bývalý výzkumník v{' '}
+                            <Link href="https://www.it4i.cz/">Národním superpočítačovém centru IT4I</Link>. Navrhuje,
+                            jak složité odborné znalosti a metodiky převést do srozumitelného postupu pro AI.
                         </>
                     }
                     pavolDescription={
                         <>
-                            Významný <Link href="https://www.pavolhejny.com/">open-source přispěvatel</Link> s více než
-                            15 lety zkušeností ve vývoji softwaru. Zaměřuje se na praktickou implementaci AI agentů,
-                            integrace a bezpečné nasazení do firemních procesů.
+                            <Link href="https://www.pavolhejny.com/">Open-source přispěvatel</Link> s více než 15 lety
+                            zkušeností ve vývoji softwaru. Zaměřuje se na praktické nasazení AI agentů, integrace a
+                            bezpečné zapojení do firemních procesů.
                         </>
                     }
                 />

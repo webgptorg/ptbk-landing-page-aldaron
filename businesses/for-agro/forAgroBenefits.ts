@@ -3,38 +3,38 @@ import { Benefit } from '@/components/benefits-section';
 export const forAgroBenefits: Benefit[] = [
     {
         iconName: 'Book',
-        title: 'Agronomické know-how na jednom místě',
+        title: 'Agronomické know-how pohromadě',
         description:
-            'Zachyťte doporučení k chorobám plodin, výživě, ochraně rostlin a správě půdy do jednoho AI odborníka.',
+            'AI odborník pracuje s doporučeními k chorobám plodin, výživě, ochraně rostlin a správě půdy.',
     },
     {
         iconName: 'FileStack',
-        title: 'Práce s dokumenty a protokoly',
+        title: 'Dokumenty a protokoly bez hledání',
         description:
-            'Nahrajete metodiky, evidence zásahů, dodavatelské postupy i compliance dokumenty a AI s nimi bude umět pracovat.',
+            'Metodiky, evidence zásahů, dodavatelské postupy i compliance dokumenty nahrajete na jedno místo. AI v nich pak umí pracovat.',
     },
     {
         iconName: 'Shield',
         title: 'Compliance bez improvizace',
         description:
-            'AI pomáhá orientovat se v environmentálních, bezpečnostních i personálních pravidlech a držet tým v souladu s interními postupy.',
+            'AI pomůže týmu projít environmentální, bezpečnostní i personální pravidla a držet se interních postupů.',
     },
     {
         iconName: 'Users',
-        title: 'Sdílení expertizy napříč regiony',
+        title: 'Expertiza pro každý region',
         description:
-            'Seniorní znalosti už nezůstávají jen v hlavách jednotlivců. Každý regionální tým má přístup ke stejné ověřené expertize.',
+            'Znalosti seniorních lidí nezůstanou jen v jejich hlavách. Regionální týmy dostanou přístup ke stejné ověřené expertize.',
     },
     {
         iconName: 'Zap',
-        title: 'Rychlejší rozhodování v terénu',
+        title: 'Odpovědi přímo v terénu',
         description:
-            'Agronomové, provozní týmy i management dostanou odpovědi rychleji, bez zdlouhavého dohledávání a telefonátů.',
+            'Agronomové, provozní týmy i management dostanou odpověď bez dlouhého hledání a obvolávání kolegů.',
     },
     {
         iconName: 'Mail',
-        title: 'Nasazení tam, kde už tým pracuje',
+        title: 'Tam, kde tým pracuje',
         description:
-            'Web, interní chat, e-mail nebo další systémy. Promptbook se přizpůsobí kanálům, které už ve firmě používáte.',
+            'Web, interní chat, e-mail nebo další systémy. Promptbook funguje v kanálech, které už ve firmě používáte.',
     },
 ];

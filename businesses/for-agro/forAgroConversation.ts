@@ -5,8 +5,7 @@ import spaceTrim from 'spacetrim';
 
 export const forAgroConversation = {
     title: 'Agronomický expert a compliance',
-    description:
-        'Ukázka rozhovoru, ve kterém agronomický tým řeší symptomy na pšenici, doporučený interní postup a evidenci zásahu.',
+    description: 'Agronomický tým řeší symptomy na pšenici, interní postup a zápis zásahu.',
     participants: [
         {
             name: 'USER',
@@ -28,11 +27,11 @@ export const forAgroConversation = {
         {
             author: 'USER',
             content: spaceTrim(`
-                Na třech lokalitách po deštích vidíme žloutnutí a skvrny na listech pšenice.
+                Po deštích vidíme na třech lokalitách žloutnutí a skvrny na listech pšenice.
 
                 Potřebuju rychle sjednotit doporučení pro terén:
                 - jak odlišit padlí od septoriózy
-                - jaký interní postup spustit
+                - který interní postup spustit
                 - co zapsat kvůli compliance a evidenci zásahu
             `),
             timestamp: '2026-03-11T07:30:00Z',
@@ -40,9 +39,9 @@ export const forAgroConversation = {
         {
             author: 'AGENT',
             content: spaceTrim(`
-                Jasně. Tady je pracovní doporučení pro regionální tým:
+                Rozumím. Pro regionální tým bych postupoval takto:
 
-                ## 1. Rychlé rozlišení v terénu
+                ## 1. Jak to rychle rozlišit v terénu
 
                 | Příznak | Padlí travní | Septorióza pšenice |
                 |---|---|---|
@@ -50,21 +49,21 @@ export const forAgroConversation = {
                 | Typ šíření | často od spodních pater za suššího počasí | rychleji po deštích a při vysoké vlhkosti |
                 | Co ověřit | intenzitu povlaku a napadení odnoží | rozsah skvrn, lokalitu a vývoj v horních listech |
 
-                ## 2. Doporučený interní postup
-                1. Potvrdit symptomy na každé lokalitě a přiložit fotodokumentaci.
-                2. Porovnat stav s posledním monitoringem a počasím za posledních 7 dní.
-                3. Rozhodnout, zda stačí lokální zásah, nebo je potřeba plošné doporučení pro celý region.
-                4. Pokud je výskyt nejasný nebo rozsáhlý, eskalovat na seniorního agronoma.
+                ## 2. Interní postup
+                1. Potvrďte symptomy na každé lokalitě a přiložte fotodokumentaci.
+                2. Porovnejte stav s posledním monitoringem a počasím za posledních 7 dní.
+                3. Rozhodněte, jestli stačí lokální zásah, nebo je potřeba doporučení pro celý region.
+                4. Při nejasném nebo rozsáhlém výskytu zapojte seniorního agronoma.
 
-                ## 3. Co zapsat do evidence a compliance
-                - lokalita, kultura, odrůda, datum zjištění
+                ## 3. Co zapsat do evidence a pro compliance
+                - lokalitu, kulturu, odrůdu a datum zjištění
                 - pozorované symptomy a rozsah napadení
-                - doporučený / provedený zásah a odpovědná osoba
+                - doporučený nebo provedený zásah a odpovědnou osobu
                 - použitý přípravek, dávkování a důvod rozhodnutí
-                - návaznost na interní metodiku a záznam o schválení
+                - vazbu na interní metodiku a záznam o schválení
 
-                ## 4. Poznámka pro tým
-                Pokud si nejsme jistí diagnózou, doporučuji nejdřív potvrdit původce a teprve potom sjednotit zásah pro všechny lokality.
+                ## 4. Pro tým
+                Pokud si diagnózou nejsme jistí, nejdřív potvrďme původce. Teprve potom sjednoťme zásah pro všechny lokality.
             `),
             timestamp: '2026-03-11T07:31:10Z',
         },

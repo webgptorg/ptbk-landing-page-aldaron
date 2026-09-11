@@ -6,46 +6,46 @@ import { Integration } from '@/components/integrations-section';
 export const forAgroIntegrations: Integration[] = [
     {
         preview: chatAsset,
-        title: 'Agent agronomické expertízy',
+        title: 'Agronomický AI expert',
         description:
             'Odpovídá na dotazy k chorobám plodin, výživě, správě půdy a osvědčeným postupům podle vašich interních metodik.',
         features: [
             'Jednotná doporučení pro terénní týmy',
-            'Rychlé vyhledání symptomů a postupů',
-            'Znalosti z interních metodik i sezónních doporučení',
+            'Symptomy a postupy najdete rychle',
+            'Interní metodiky i sezónní doporučení na jednom místě',
         ],
     },
     {
         preview: graphAsset,
-        title: 'Bot pro regulatorní compliance',
+        title: 'Asistent pro regulatorní compliance',
         description:
-            'Pomáhá navigovat složité zemědělské předpisy, interní pravidla a auditní požadavky bez zbytečné improvizace.',
+            'Pomáhá týmu projít zemědělské předpisy, interní pravidla a auditní požadavky bez zbytečného dohadování.',
         features: [
             'Odkazy na interní směrnice a legislativu',
-            'Kontrola povinných kroků a evidence',
-            'Méně stresu při auditu a interních kontrolách',
+            'Povinné kroky a evidence pod kontrolou',
+            'Přehlednější audity a interní kontroly',
         ],
     },
     {
         preview: gmailAsset,
-        title: 'Agent pro dodavatelský řetězec',
+        title: 'Dodavatelský řetězec pod kontrolou',
         description:
-            'Podpora logistiky, inventáře a dodavatelských protokolů pro osiva, hnojiva, přípravky i technické vybavení.',
+            'Pomáhá s logistikou, inventářem a dodavatelskými protokoly pro osiva, hnojiva, přípravky i technické vybavení.',
         features: [
             'Dodavatelské postupy na jednom místě',
             'Přehled zásob a kritických položek',
-            'Standardizace procesů napříč provozy',
+            'Stejné postupy ve všech provozech',
         ],
     },
     {
         preview: chatAsset,
         title: 'Asistent pro regionální týmy',
         description:
-            'Pomocník pro distributory, agronomy a vedoucí provozu, kteří potřebují sdílet know-how mezi více lokalitami.',
+            'Pomůže distributorům, agronomům a vedoucím provozu sdílet know-how mezi více lokalitami.',
         features: [
-            'Sdílení expertizy napříč oblastmi',
+            'Expertiza dostupná v každé oblasti',
             'Odpovědi v mobilu, chatu i e-mailu',
-            'Nižší závislost na jednotlivcích',
+            'Menší závislost na jednotlivcích',
         ],
     },
 ];

@@ -4,7 +4,7 @@ import { Building, Rocket, Shield } from 'lucide-react';
 export const forAgroPricingFootnotes: PricingFootnote[] = [
     {
         id: '*',
-        text: 'AI úvazek znamená, že agent vykoná ekvivalent 1 člověka na plný úvazek při znalostní a administrativní práci.',
+        text: 'AI úvazek odpovídá práci jednoho člověka na plný úvazek při znalostní a administrativní práci.',
     },
 ];
 
@@ -15,7 +15,7 @@ export const forAgroPricing = [
         priceYearly: '35 000',
         currency: 'Kč',
         period: 'měsíčně',
-        description: 'Pro menší agronomický tým nebo jednu oblast, kde chcete rychle ověřit přínos.',
+        description: 'Pro menší agronomický tým nebo jednu oblast. Přínos ověříte rychle.',
         icon: Building,
         iconName: 'Building',
         features: [
@@ -23,7 +23,7 @@ export const forAgroPricing = [
             'Až 100 dokumentů',
             '1 plný AI úvazek*',
             '10 AI agentů',
-            'Základní web / chat integrace',
+            'Základní webová a chatová integrace',
         ],
         buttonText: 'Začít',
         popular: false,
@@ -34,7 +34,7 @@ export const forAgroPricing = [
         priceYearly: '89 000',
         currency: 'Kč',
         period: 'měsíčně',
-        description: 'Pro firmy, které potřebují sdílet know-how napříč více lokalitami nebo regiony.',
+        description: 'Pro firmy, které sdílejí know-how mezi více lokalitami a regiony.',
         icon: Rocket,
         iconName: 'Rocket',
         features: [
@@ -43,7 +43,7 @@ export const forAgroPricing = [
             'Až 1 000 dokumentů',
             '10 plných AI úvazků*',
             '100 AI agentů',
-            'E-mailové a interní workflow integrace',
+            'Integrace e-mailu a interních pracovních postupů',
             'Prioritní podpora',
         ],
         buttonText: 'Spustit pilot',
@@ -55,7 +55,7 @@ export const forAgroPricing = [
         priceYearly: 'Dohodou',
         currency: '',
         period: 'na vyžádání',
-        description: 'Řešení na míru pro velké zemědělské skupiny s vlastním provozem, compliance a systémy.',
+        description: 'Na míru pro velké zemědělské skupiny s vlastním provozem, compliance a systémy.',
         icon: Shield,
         iconName: 'Shield',
         features: [
@@ -64,7 +64,7 @@ export const forAgroPricing = [
             'Nasazení on-premise nebo ve vyhrazeném cloudu',
             'Vlastní integrace do ERP, CRM a skladových systémů',
             'Vlastní SLA a auditní podpora',
-            'Prémiové zaškolení a onboarding',
+            'Zaškolení a uvedení do provozu',
         ],
         buttonText: 'Kontaktovat',
         popular: false,

@@ -15,9 +15,9 @@ export function ForAgroChatbot() {
                 fullname: 'AI asistent pro agronomii',
                 title: 'AI asistent pro agronomii',
                 description:
-                    'Pomáhá zemědělským společnostem pochopit, jak může Promptbook převést agronomické know-how, compliance a provozní postupy do AI agentů.',
+                    'Zjistěte, kde může Promptbook zemědělské společnosti pomoct převést agronomické know-how, compliance a provozní postupy do AI agentů.',
                 inputPlaceholder:
-                    'Zeptejte se na agronomické use-casy, compliance workflow nebo škálování expertizy napříč regiony...',
+                    'Zeptejte se, jak může AI pomoct s agronomií, compliance nebo sdílením expertizy mezi regiony...',
             }}
         />
     );
