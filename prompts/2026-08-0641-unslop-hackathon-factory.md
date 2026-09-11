@@ -1,4 +1,4 @@
-[-]
+[ ]
 
 [✨🛸] Unslop the `/hackathon-factory`
 

@@ -1,4 +1,4 @@
-[ ] by `unslopper`
+[ ]
 
 [✨🛸] Unslop the `/ai-ta-krajta/branding`
 
