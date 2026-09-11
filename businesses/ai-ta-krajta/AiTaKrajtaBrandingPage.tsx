@@ -83,7 +83,7 @@ export function AiTaKrajtaBrandingPage() {
                                     Brand kit {AI_TA_KRAJTA_NAME}
                                 </p>
                                 <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl">
-                                    Půjčte si našeho hada. Jen ho nechte hadem.
+                                    Ai ta Krajta
                                 </h1>
                                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75">
                                     Píšete o pořadu, zvete nás na konferenci nebo chystáte grafiku ke společnému dílu?
