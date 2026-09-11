@@ -9,6 +9,7 @@
 ---
 
 
+[x] by OpenAI Codex `gpt-5.6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.6039 14 minutes; Testing 9 minutes
 [✨🦒] When creating or duplicating events, the duplicated event should be published by default, and only not published when duplicating a non-published event. 
 
 - Also, when duplicating a workshop, duplicate the attached polls. 

@@ -11,6 +11,7 @@ export const WORKSHOP_POLL_TABLE_NAME = 'workshop_polls';
 export const WORKSHOP_POLL_OPTION_TABLE_NAME = 'workshop_poll_options';
 export const WORKSHOP_POLL_VOTE_TABLE_NAME = 'workshop_poll_votes';
 export const WORKSHOP_POLL_WORKSHOP_TABLE_NAME = 'workshop_poll_workshops';
+export const DUPLICATE_WORKSHOP_ATTACHED_POLLS_FUNCTION_NAME = 'duplicate_workshop_attached_polls';
 
 export const WORKSHOP_SESSION_COOKIE_PREFIX = 'workshop_session_';
 export const WORKSHOP_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;

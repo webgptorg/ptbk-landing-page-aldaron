@@ -98,7 +98,8 @@ export function CreateWorkshopForm({
                     </h3>
                     {isDuplicating && (
                         <p className="mt-1 text-xs text-slate-500">
-                            Zkontrolujte termín a URL. Kopie začíná neveřejná; účastníci ani historie se nepřenášejí.
+                            Zkontrolujte termín a URL. Kopie přebírá zveřejnění zdrojového workshopu; připojené ankety
+                            se zkopírují, účastníci ani historie se nepřenášejí.
                         </p>
                     )}
                 </div>

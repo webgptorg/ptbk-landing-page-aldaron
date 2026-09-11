@@ -368,7 +368,8 @@ export const workshopCreateSchema = z
         youtubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         repository: nullableWorkshopRepositorySchema.default(null),
-        isPublished: z.boolean().default(false),
+        isPublished: z.boolean().default(true),
+        duplicateAttachedPollsFromWorkshopId: z.string().uuid().optional(),
         allowedReactions: workshopAllowedReactionsSchema.default([...DEFAULT_WORKSHOP_REACTIONS]),
         disabledPanels: workshopDisabledPanelsSchema.default([]),
     })

@@ -30,7 +30,7 @@ const WORKSHOP: WorkshopDetails = {
 afterEach(cleanup);
 
 describe('create workshop form', () => {
-    it('opens a selected workshop as an unpublished duplicate draft and creates it through the normal callback', async () => {
+    it('opens a selected workshop with its publication state and creates it through the normal callback', async () => {
         const onCreate = vi.fn().mockResolvedValue(true);
         const { container } = render(<CreateWorkshopForm onCreate={onCreate} workshopToDuplicate={WORKSHOP} />);
 
@@ -50,13 +50,26 @@ describe('create workshop form', () => {
                     description: WORKSHOP.description,
                     youtubeVideoId: WORKSHOP.youtubeVideoId,
                     previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
-                    isPublished: false,
+                    isPublished: true,
+                    duplicateAttachedPollsFromWorkshopId: WORKSHOP.id,
                     allowedReactions: WORKSHOP.allowedReactions,
                     disabledPanels: WORKSHOP.disabledPanels,
                 }),
             ),
         );
         await waitFor(() => expect(screen.queryByText('Kopie workshopu')).toBeNull());
+    });
+
+    it('keeps an unpublished source unpublished when it is duplicated', async () => {
+        const onCreate = vi.fn().mockResolvedValue(true);
+        const { container } = render(
+            <CreateWorkshopForm onCreate={onCreate} workshopToDuplicate={{ ...WORKSHOP, isPublished: false }} />,
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Duplikovat workshop' }));
+        fireEvent.submit(container.querySelector('form') as HTMLFormElement);
+
+        await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ isPublished: false })));
     });
 
     it('resets a dismissed duplicate back to a blank new workshop', () => {

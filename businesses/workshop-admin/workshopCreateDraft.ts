@@ -32,6 +32,7 @@ export type WorkshopCreateDraft = {
     readonly event: EventDetails;
     readonly youtubeVideoId: string | null;
     readonly previewYoutubeVideoId: string | null;
+    readonly duplicateAttachedPollsFromWorkshopId?: string;
 
     /**
      * The project the new term is about, which a copy inherits from the term it was copied from
@@ -70,7 +71,7 @@ function createAvailableDuplicateWorkshopSlug(slug: string, existingWorkshopSlug
 }
 
 /**
- * Starts a blank, unpublished event occurrence one day from now.
+ * Starts a blank, published event occurrence one day from now.
  */
 export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopCreateDraft {
     const startsAt = currentTimestamp + DEFAULT_WORKSHOP_START_DELAY_MILLISECONDS;
@@ -85,7 +86,7 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
         youtubeVideoId: null,
         previewYoutubeVideoId: null,
         repository: null,
-        isPublished: false,
+        isPublished: true,
         allowedReactions: [...DEFAULT_WORKSHOP_REACTIONS],
         disabledPanels: [],
         artificialWatchingParticipantCount: 0,
@@ -95,8 +96,8 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
 /**
  * Copies settings that describe an event occurrence, but deliberately leaves all occurrence history behind.
  *
- * Participants, comments, reactions, feedback, polls, and content blocks belong to the original occurrence. The
- * copied occurrence starts unpublished, so its inherited settings can be reviewed before anybody sees it.
+ * Participants, comments, reactions, feedback, and content blocks belong to the original occurrence. Attached polls
+ * are copied by the server from the source workshop when the resulting create values are submitted.
  */
 export function createWorkshopDuplicateDraft(
     workshop: WorkshopDetails,
@@ -116,7 +117,8 @@ export function createWorkshopDuplicateDraft(
         youtubeVideoId: workshop.youtubeVideoId,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId,
         repository: createWorkshopRepositoryWriteValues(createWorkshopRepositoryDraft(workshop.repository)),
-        isPublished: false,
+        isPublished: workshop.isPublished,
+        duplicateAttachedPollsFromWorkshopId: workshop.id,
         allowedReactions: [...workshop.allowedReactions],
         disabledPanels: [...workshop.disabledPanels],
         ...(workshop.artificialWatchingParticipantCount === undefined
@@ -145,6 +147,9 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         previewYoutubeVideoId: draft.previewYoutubeVideoId,
         repository: draft.repository,
         isPublished: draft.isPublished,
+        ...(draft.duplicateAttachedPollsFromWorkshopId === undefined
+            ? {}
+            : { duplicateAttachedPollsFromWorkshopId: draft.duplicateAttachedPollsFromWorkshopId }),
         allowedReactions: draft.allowedReactions,
         disabledPanels: draft.disabledPanels,
         ...(draft.artificialWatchingParticipantCount === undefined

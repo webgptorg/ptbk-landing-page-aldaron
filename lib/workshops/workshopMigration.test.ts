@@ -134,6 +134,11 @@ const PAID_MEMBERS_ONLY_VIDEO_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-0300-workshop-paid-members-video-preview.sql',
 );
 const PAID_MEMBERS_ONLY_VIDEO_MIGRATION_SQL = readFileSync(PAID_MEMBERS_ONLY_VIDEO_MIGRATION_PATH, 'utf8');
+const DUPLICATE_ATTACHED_POLLS_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-0900-workshop-duplicate-attached-polls.sql',
+);
+const DUPLICATE_ATTACHED_POLLS_MIGRATION_SQL = readFileSync(DUPLICATE_ATTACHED_POLLS_MIGRATION_PATH, 'utf8');
 
 /**
  * The very same SQL on one line, so that a statement can be searched for without repeating how it happens to be wrapped.
@@ -525,6 +530,19 @@ describe('workshop database migration', () => {
         expect(COMMUNITY_POLL_SHARED_EMAIL_VOTE_MIGRATION_SQL).toContain('ON CONFLICT (poll_id, voter_email) DO UPDATE');
         expect(COMMUNITY_POLL_SHARED_EMAIL_VOTE_MIGRATION_SQL).toContain(
             'GRANT EXECUTE ON FUNCTION public.set_community_workshop_poll_vote',
+        );
+    });
+
+    it('duplicates attached polls with fresh identities and without member vote history', () => {
+        expect(DUPLICATE_ATTACHED_POLLS_MIGRATION_SQL).toContain(
+            'CREATE OR REPLACE FUNCTION public.duplicate_workshop_attached_polls',
+        );
+        expect(DUPLICATE_ATTACHED_POLLS_MIGRATION_SQL).toContain(
+            'INSERT INTO public.workshop_poll_options',
+        );
+        expect(DUPLICATE_ATTACHED_POLLS_MIGRATION_SQL).not.toContain('workshop_poll_votes');
+        expect(DUPLICATE_ATTACHED_POLLS_MIGRATION_SQL).toContain(
+            'GRANT EXECUTE ON FUNCTION public.duplicate_workshop_attached_polls(uuid, uuid)',
         );
     });
 

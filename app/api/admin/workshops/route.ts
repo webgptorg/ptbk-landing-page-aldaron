@@ -3,6 +3,8 @@ import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { WORKSHOP_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import {
     createWorkshopDatabaseUnavailableResponse,
+    duplicateWorkshopAttachedPolls,
+    findWorkshopById,
     getWorkshopDatabaseOrNull,
     loadWorkshopAdminSummaries,
     mapWorkshopRow,
@@ -58,6 +60,17 @@ export async function POST(request: NextRequest) {
         return createWorkshopDatabaseUnavailableResponse();
     }
 
+    const sourceWorkshopId = parsedResult.data.duplicateAttachedPollsFromWorkshopId;
+    if (sourceWorkshopId !== undefined) {
+        const sourceWorkshop = await findWorkshopById(supabase, sourceWorkshopId);
+        if (sourceWorkshop === null) {
+            return NextResponse.json({ error: 'Workshop to duplicate was not found' }, { status: 404 });
+        }
+        if (sourceWorkshop.room_kind !== 'workshop') {
+            return NextResponse.json({ error: 'Only workshop occurrences can be duplicated' }, { status: 400 });
+        }
+    }
+
     const { data, error } = await supabase
         .from(WORKSHOP_TABLE_NAME)
         .insert(createWorkshopDatabaseValues(parsedResult.data))
@@ -66,6 +79,18 @@ export async function POST(request: NextRequest) {
     if (error) {
         const status = error.code === '23505' ? 409 : 500;
         return NextResponse.json({ error: error.message }, { status });
+    }
+
+    if (sourceWorkshopId !== undefined) {
+        const duplicatePollsErrorMessage = await duplicateWorkshopAttachedPolls(supabase, sourceWorkshopId, data.id);
+        if (duplicatePollsErrorMessage !== null) {
+            const { error: cleanupError } = await supabase.from(WORKSHOP_TABLE_NAME).delete().eq('id', data.id);
+            if (cleanupError) {
+                console.error(`Failed to clean up workshop after poll duplication: ${cleanupError.message}`);
+            }
+            console.error(`Failed to duplicate attached workshop polls: ${duplicatePollsErrorMessage}`);
+            return NextResponse.json({ error: duplicatePollsErrorMessage }, { status: 500 });
+        }
     }
 
     return NextResponse.json({ workshop: mapWorkshopRow(data as WorkshopRow) }, { status: 201 });

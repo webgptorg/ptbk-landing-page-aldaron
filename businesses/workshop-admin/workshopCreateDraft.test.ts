@@ -49,20 +49,20 @@ const DUPLICATED_WORKSHOP_REPOSITORY = {
 };
 
 describe('workshop creation drafts', () => {
-    it('starts a blank workshop as an unpublished event one day ahead', () => {
+    it('starts a blank workshop as a published event one day ahead', () => {
         const currentTimestamp = Date.parse('2026-09-01T10:00:00.000Z');
 
         expect(createNewWorkshopDraft(currentTimestamp)).toMatchObject({
             slug: '',
             title: '',
-            isPublished: false,
+            isPublished: true,
             startsAt: toDateTimeLocalValue('2026-09-02T10:00:00.000Z'),
             endsAt: toDateTimeLocalValue('2026-09-02T11:30:00.000Z'),
             event: DEFAULT_EVENT_DETAILS,
         });
     });
 
-    it('copies an event workshop configuration into a safe unpublished draft', () => {
+    it('copies an event workshop configuration and its publication state into a duplicate draft', () => {
         expect(createWorkshopDuplicateDraft(WORKSHOP)).toEqual({
             slug: 'production-ai-workshop-2026-09-copy',
             title: WORKSHOP.title,
@@ -73,10 +73,15 @@ describe('workshop creation drafts', () => {
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
-            isPublished: false,
+            isPublished: true,
+            duplicateAttachedPollsFromWorkshopId: WORKSHOP.id,
             allowedReactions: WORKSHOP.allowedReactions,
             disabledPanels: WORKSHOP.disabledPanels,
         });
+    });
+
+    it('keeps a duplicate of an unpublished workshop unpublished', () => {
+        expect(createWorkshopDuplicateDraft({ ...WORKSHOP, isPublished: false })?.isPublished).toBe(false);
     });
 
     it('leaves a copy of a workshop about no project about no project either', () => {
@@ -117,7 +122,8 @@ describe('workshop creation drafts', () => {
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
-            isPublished: false,
+            isPublished: true,
+            duplicateAttachedPollsFromWorkshopId: WORKSHOP.id,
             allowedReactions: WORKSHOP.allowedReactions,
             disabledPanels: WORKSHOP.disabledPanels,
         });
