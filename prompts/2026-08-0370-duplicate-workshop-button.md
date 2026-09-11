@@ -6,3 +6,7 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 
+---
+
+
+[✨🦒] When creating or duplicating events, the duplicated event should be published by default, and only not published when duplicating a non-published event. 
