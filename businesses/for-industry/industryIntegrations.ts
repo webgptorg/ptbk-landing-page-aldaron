@@ -7,26 +7,26 @@ import { Integration } from '../../components/integrations-section';
 export const industryIntegrations: Array<Integration> = [
     {
         preview: chatAsset,
-        title: 'Chat Apps !!!',
-        description: 'Create a chat shopping assistant for your eShop or a customer support bot.',
-        features: ['24/7 availability', 'Personalized recommendations', 'Tightly controlled responses'],
+        title: 'Technical support chat',
+        description: 'Answer customer and technician questions from the manuals and procedures you provide.',
+        features: ['Available 24/7', 'Answers grounded in your material', 'Controlled responses'],
     },
     {
         preview: gmailAsset,
-        title: 'Reply Agent !!!',
-        description: 'Automatically analyze and reply to emails, or create drafts for your review.',
-        features: ['Auto-replies', 'Context awareness', 'Draft generation'],
+        title: 'Support email drafts',
+        description: 'Analyze technical questions and prepare replies for your team to review.',
+        features: ['Automatic analysis', 'Relevant context', 'Draft replies'],
     },
     {
         preview: vscodeAsset,
-        title: 'Coding Agent !!!',
-        description: 'Enforce your coding style and architecture rules in any vibecoding platform.',
-        features: ['Custom coding standards', 'Architecture alignment', 'Security enforcement'],
+        title: 'Engineering coding assistant',
+        description: 'Keep your coding style, architecture, and security rules close at hand in the tools your team uses.',
+        features: ['Your coding standards', 'Architecture rules', 'Security checks'],
     },
     {
         preview: graphAsset,
-        title: 'Internal Expertise !!!',
-        description: 'Integrate AI into your internal apps for data analysis, sentiment analysis, and more.',
+        title: 'Internal expertise',
+        description: 'Bring company knowledge into internal apps for data analysis, sentiment analysis, and other tasks.',
         features: ['Custom automations', 'Data analysis', 'Sentiment classification'],
     },
 ];

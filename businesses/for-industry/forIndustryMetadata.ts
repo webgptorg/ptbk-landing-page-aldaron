@@ -7,12 +7,12 @@ export const FOR_INDUSTRY_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/for-industry',
     language: 'en',
     title: 'AI for industrial companies | Promptbook',
-    socialTitle: 'Create AI that truly understands the industry',
+    socialTitle: 'Put your technical knowledge to work',
     description:
-        'Turn technical manuals, standard operating procedures, and maintenance know-how into AI agents that give technicians and support staff instant, reliable answers.',
+        'Turn technical manuals, standard operating procedures, and maintenance know-how into AI agents that help technicians and support staff find reliable answers.',
     socialDescription:
-        'Technical manuals, standard operating procedures, and maintenance know-how in AI agents your technicians can actually rely on.',
-    socialPreviewImageAlt: 'Promptbook for industry - AI that truly understands your operations',
+        'Technical manuals, SOPs, and maintenance know-how in AI agents your technicians and support staff can use.',
+    socialPreviewImageAlt: 'Promptbook for industrial companies',
     keywords: ['AI for industry', 'manufacturing', 'technical documentation', 'maintenance', 'SOP', 'Promptbook'],
     isSocialPreviewImageGenerated: true,
     sitemapPriority: 0.7,
@@ -21,7 +21,7 @@ export const FOR_INDUSTRY_PAGE_DEFINITION: PageMetadataDefinition = {
 export const FOR_INDUSTRY_METADATA: Metadata = createPageMetadata(FOR_INDUSTRY_PAGE_DEFINITION);
 
 export const FOR_INDUSTRY_SOCIAL_PREVIEW_OPTIONS = createSocialPreviewOptions(FOR_INDUSTRY_PAGE_DEFINITION, {
-    eyebrow: 'AI transformation for industry',
+    eyebrow: 'AI for industrial operations',
     artwork: 'industry',
     paletteSeed: {
         backgroundStart: '#12100a',

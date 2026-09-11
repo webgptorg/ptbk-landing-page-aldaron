@@ -4,20 +4,20 @@ import { Benefit } from '@/components/benefits-section';
 export const industryBenefits: Benefit[] = [
     {
         iconName: 'Briefcase',
-        title: 'Instant Access to Technical Knowledge',
+        title: 'Find the right technical detail',
         description:
-            'Provide field technicians and support staff with immediate access to relevant information from technical manuals and SOPs.',
+            'Give field technicians and support staff quick access to the manuals and SOPs they need.',
     },
     {
         iconName: 'Zap',
-        title: 'Reduce Equipment Downtime',
+        title: 'Cut equipment downtime',
         description:
-            'Minimize downtime by empowering your team with AI-driven troubleshooting guides and maintenance procedures.',
+            'Give your team troubleshooting guides and maintenance procedures when equipment needs attention.',
     },
     {
         iconName: 'Shield',
-        title: 'Enhance Technical Support',
+        title: 'Give support a reliable starting point',
         description:
-            'Build AI-powered support bots that can answer complex technical questions and guide users through repairs.',
+            'Build support assistants that answer complex technical questions and guide users through repairs.',
     },
 ];
