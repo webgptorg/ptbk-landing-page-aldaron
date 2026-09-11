@@ -124,7 +124,7 @@ describe('community poll administration', () => {
         );
     });
 
-    it('keeps the occurrences a poll is about when only its lifecycle changes', async () => {
+    it('hides attached workshop badges and keeps the occurrences when only poll lifecycle changes', async () => {
         const props = createProps();
         render(
             <WorkshopPollAdmin
@@ -133,7 +133,7 @@ describe('community poll administration', () => {
             />,
         );
 
-        expect(screen.getByRole('list', { name: 'Týká se workshopů' }).textContent).toContain('Zářijový workshop');
+        expect(screen.queryByRole('list', { name: 'Týká se workshopů' })).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: 'Ukončit hlasování' }));
 

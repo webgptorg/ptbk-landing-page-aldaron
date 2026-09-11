@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { WorkshopPollAttachedWorkshops } from '@/components/workshops/WorkshopPollAttachedWorkshops';
 import {
     getWorkshopPollOptionVotePercentage,
     getWorkshopPollVoteCount,
@@ -58,7 +57,6 @@ export function WorkshopAttachedPollList({ polls, pollAdministrationPath }: Work
                                 {totalVoteCount} hlasů · {poll.isClosed ? 'Hlasování ukončeno' : 'Hlasování probíhá'} ·{' '}
                                 {poll.isVisible ? 'Viditelná pro členy' : 'Skrytá před členy'}
                             </p>
-                            <WorkshopPollAttachedWorkshops workshops={poll.attachedWorkshops} className="mt-2" />
                             <ol className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                                 {poll.options.map((option) => (
                                     <li key={option.id} className="rounded-lg border border-slate-100 bg-white p-3">

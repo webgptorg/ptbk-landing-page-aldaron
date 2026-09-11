@@ -1,4 +1,8 @@
 # Current preversion
+- Removed attached-event badges from polls in the community, community administration, participant rooms, and the
+  read-only workshop administration. Polls still keep their event attachments: administrators can select and edit them
+  in the poll editor, and the shared poll and vote behavior remains unchanged.
+
 - Let a member of `/cs/komunita` and of `/cs/online-workshop/participant` stop being who they are connected as, and not
   merely rename themselves. The badge in the header of every room has always said `Připojen/a jako …` and offered to
   change that name, but never to end the connection behind it: a session lasts a month, so somebody who had entered the

@@ -1,9 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { WorkshopPollAttachedWorkshops } from '@/components/workshops/WorkshopPollAttachedWorkshops';
-import { createEventLinkOrNull } from '@/lib/events/eventLinks';
-import type { WorkshopParticipantIdentity } from '@/lib/workshops/workshopParticipantLink';
 import { getWorkshopPollOptionVotePercentage, getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
 import type { WorkshopPoll } from '@/lib/workshops/workshopTypes';
 import { BarChart3, Check, Lock, Vote } from 'lucide-react';
@@ -12,15 +9,6 @@ import { useState } from 'react';
 type WorkshopPollsProps = {
     readonly polls: readonly WorkshopPoll[];
     readonly isInteractionBanned: boolean;
-
-    /**
-     * The identity the reading member already verified, carried into every term a poll is about.
-     *
-     * Note: A room which leads nowhere leaves this out, and the terms of a poll are then named without linking
-     *       anywhere. Where one term leads is decided by the kind of event it is a term of, so a poll about a paid
-     *       workshop leads to its landing page while a poll about an online workshop leads into its room.
-     */
-    readonly linkedParticipantIdentity?: WorkshopParticipantIdentity;
     /**
      * Records the one e-mail-owned vote shared by the community and every workshop occurrence the poll is attached to.
      */
@@ -35,7 +23,6 @@ type WorkshopPollsProps = {
 export function WorkshopPolls({
     polls,
     isInteractionBanned,
-    linkedParticipantIdentity,
     onVote,
 }: WorkshopPollsProps) {
     const [votingPollId, setVotingPollId] = useState<string | null>(null);
@@ -76,17 +63,6 @@ export function WorkshopPolls({
                                     <Vote className="h-4 w-4" /> Anketa komunity
                                 </p>
                                 <h2 className="mt-2 text-lg font-bold leading-6 text-white">{poll.question}</h2>
-                                <WorkshopPollAttachedWorkshops
-                                    workshops={poll.attachedWorkshops}
-                                    variant="dark"
-                                    className="mt-2.5"
-                                    createWorkshopLink={
-                                        linkedParticipantIdentity === undefined
-                                            ? undefined
-                                            : (attachedWorkshop) =>
-                                                  createEventLinkOrNull(attachedWorkshop, linkedParticipantIdentity)
-                                    }
-                                />
                             </div>
                             <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-slate-950/30 px-2.5 py-1 text-xs font-medium text-slate-300">
                                 {poll.isClosed ? <Lock className="h-3.5 w-3.5" /> : <BarChart3 className="h-3.5 w-3.5" />}

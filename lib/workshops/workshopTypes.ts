@@ -456,8 +456,8 @@ export type WorkshopPoll = {
      * The workshop occurrences this poll is about
      *
      * Note: A poll keeps belonging to the community which administers it. An attached occurrence is the subject of the
-     *       question, which is what lets the room lead a member to it and what lets the administration of that
-     *       occurrence see the question asked about it. Members are only ever told about published occurrences.
+     *       question, which is what lets its room receive the poll and what lets the administration of that occurrence
+     *       see the question asked about it. Members are only ever told about published occurrences.
      */
     readonly attachedWorkshops: readonly WorkshopSummary[];
 };

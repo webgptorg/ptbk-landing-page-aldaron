@@ -3,7 +3,8 @@
  */
 
 import { WorkshopPolls } from '@/businesses/online-workshop/participant/WorkshopPolls';
-import type { WorkshopPoll } from '@/lib/workshops/workshopTypes';
+import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
+import type { WorkshopPoll, WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,6 +20,18 @@ const POLL: WorkshopPoll = {
         { id: 'option-2', label: 'Nasazování', sortOrder: 1, voteCount: 1, isVotedByParticipant: false },
     ],
     attachedWorkshops: [],
+};
+
+const ATTACHED_WORKSHOP: WorkshopSummary = {
+    id: 'workshop-1',
+    kind: 'workshop',
+    slug: 'zari',
+    title: 'Zářijový workshop',
+    description: 'Zářijový termín online workshopu.',
+    startsAt: '2026-09-10T16:00:00.000Z',
+    endsAt: null,
+    isPublished: true,
+    event: DEFAULT_EVENT_DETAILS,
 };
 
 afterEach(cleanup);
@@ -66,5 +79,18 @@ describe('community polls', () => {
         fireEvent.click(screen.getByRole('button', { name: /Nasazování/ }));
 
         await waitFor(() => expect(onVote).toHaveBeenCalledWith('poll-1', 'option-2'));
+    });
+
+    it('does not show badges for the poll occurrences it is attached to', () => {
+        render(
+            <WorkshopPolls
+                polls={[{ ...POLL, attachedWorkshops: [ATTACHED_WORKSHOP] }]}
+                isInteractionBanned={false}
+                onVote={vi.fn().mockResolvedValue(true)}
+            />,
+        );
+
+        expect(screen.queryByText('Zářijový workshop')).toBeNull();
+        expect(screen.queryByRole('list', { name: 'Týká se workshopů' })).toBeNull();
     });
 });

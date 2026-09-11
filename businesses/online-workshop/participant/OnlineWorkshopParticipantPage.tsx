@@ -316,9 +316,6 @@ export function OnlineWorkshopParticipantPage({
                         <WorkshopPolls
                             polls={state.polls}
                             isInteractionBanned={state.participant.isInteractionBanned}
-                            linkedParticipantIdentity={
-                                workshopNavigation === undefined ? undefined : state.participant
-                            }
                             onVote={controller.voteOnPoll}
                         />
                     )}

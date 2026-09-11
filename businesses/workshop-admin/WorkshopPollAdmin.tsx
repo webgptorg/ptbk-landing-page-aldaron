@@ -8,7 +8,6 @@ import type {
 import { WorkshopPollWorkshopPicker } from '@/businesses/workshop-admin/WorkshopPollWorkshopPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { WorkshopPollAttachedWorkshops } from '@/components/workshops/WorkshopPollAttachedWorkshops';
 import { MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT } from '@/lib/workshops/workshopConstants';
 import { getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
 import type { WorkshopAdminPoll, WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
@@ -391,10 +390,6 @@ export function WorkshopPollAdmin({
                                             {poll.isClosed ? 'Hlasování ukončeno' : 'Hlasování probíhá'} ·{' '}
                                             {poll.isVisible ? 'Viditelná pro členy' : 'Skrytá před členy'}
                                         </p>
-                                        <WorkshopPollAttachedWorkshops
-                                            workshops={poll.attachedWorkshops}
-                                            className="mt-2"
-                                        />
                                     </div>
                                     <div className="flex flex-wrap justify-end gap-2">
                                         <Button
