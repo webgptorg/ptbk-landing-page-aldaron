@@ -85,13 +85,14 @@ export const AI_TA_KRAJTA_BRAND_TYPEFACES: readonly AiTaKrajtaBrandTypeface[] = 
         id: 'outfit',
         name: 'Outfit',
         role: 'Nadpisy',
-        description: 'Geometrický grotesk, kterým je vysázený každý nadpis. Tučně, těsně, bez proložení.',
+        description:
+            'Geometrický grotesk pro všechny nadpisy. Používáme ho tučně a bez velkých rozestupů mezi písmeny.',
     },
     {
         id: 'inter',
         name: 'Inter',
         role: 'Text',
-        description: 'Běžný text, popisky a tlačítka. Čte se dobře i v malém a na tmavém pozadí.',
+        description: 'Pro běžný text, popisky a tlačítka. Zůstává čitelný i v malé velikosti a na tmavém pozadí.',
     },
 ];
 
@@ -106,21 +107,21 @@ export const AI_TA_KRAJTA_BRAND_COLORS: readonly AiTaKrajtaBrandColor[] = [
         id: 'moss',
         name: 'Mechová',
         hex: AI_TA_KRAJTA_COLORS.MOSS,
-        description: 'Dlaždice, na které logo leží, a plocha obalu pořadu.',
+        description: 'Podklad pro logo a hlavní plocha obalu pořadu.',
         isLogoBackground: true,
     },
     {
         id: 'moss-deep',
         name: 'Tmavá mechová',
         hex: AI_TA_KRAJTA_COLORS.MOSS_DEEP,
-        description: 'Nejtmavší plocha stránky: lišta prohlížeče, patička a přehrávač.',
+        description: 'Nejtmavší zelená na stránce. Patří do lišty prohlížeče, patičky a přehrávače.',
         isLogoBackground: true,
     },
     {
         id: 'coral',
         name: 'Korálová',
         hex: AI_TA_KRAJTA_COLORS.CORAL,
-        description: 'Hlava hada a hlavní tlačítko. Jedna hlavní akce na obrazovku.',
+        description: 'Hlava hada a hlavní tlačítko. Držte se jedné hlavní akce na obrazovku.',
         isLogoBackground: false,
     },
     {
@@ -134,7 +135,7 @@ export const AI_TA_KRAJTA_BRAND_COLORS: readonly AiTaKrajtaBrandColor[] = [
         id: 'paper',
         name: 'Papírová',
         hex: AI_TA_KRAJTA_COLORS.PAPER,
-        description: 'Světlý podklad pro tisk a pro místa, kde tmavá plocha nedává smysl.',
+        description: 'Světlý podklad pro tisk a pro místa, kde tmavá plocha nefunguje.',
         isLogoBackground: true,
     },
 ];
@@ -155,21 +156,21 @@ export const AI_TA_KRAJTA_BRAND_FILES: readonly AiTaKrajtaBrandFile[] = [
         label: 'Logo SVG',
         path: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
         description:
-            'Kresba hada na mechové dlaždici se zaoblenými rohy a průhledem okolo nich. Zvětší se do jakékoli velikosti, takže sedí na plakát i do patičky.',
+            'Kresba hada na mechové dlaždici se zaoblenými rohy a průhledem kolem nich. Zůstane ostrá v jakékoli velikosti, od plakátu po patičku.',
     },
     {
         id: 'logo-png',
         label: `Logo PNG ${AI_TA_KRAJTA_ICON_SIZE_IN_PIXELS} × ${AI_TA_KRAJTA_ICON_SIZE_IN_PIXELS}`,
         path: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
         description:
-            'Ta samá kresba do celého čtverce, pro místa, která si rohy zaoblují sama: dlaždice na ploše, profilovky a aplikace.',
+            'Stejná kresba vyplňuje celý čtverec. Hodí se tam, kde rohy zaoblí samotná plocha, třeba u dlaždic, profilovek a ikon aplikací.',
     },
     {
         id: 'cover',
         label: 'Obal pořadu JPG',
         path: AI_TA_KRAJTA_COVER_IMAGE_PATH,
         description:
-            'Obal, pod kterým pořad vychází na YouTube, Spotify i v Apple Podcasts. Použijte ho, když píšete o konkrétních dílech.',
+            'Obal, pod kterým pořad vychází na YouTube, Spotify i v Apple Podcasts. Použijte ho, když píšete o konkrétním dílu.',
     },
 ];
 
@@ -180,12 +181,12 @@ export const AI_TA_KRAJTA_BRAND_RULES: readonly AiTaKrajtaBrandRule[] = [
     {
         title: 'Nechte hadovi místo',
         description:
-            'Okolo dlaždice nechte volný prostor aspoň ve výšce hlavy hada. Do těsného rámečku ani do bloku textu logo nepatří.',
+            'Nechte kolem dlaždice místo aspoň na výšku hadovy hlavy. Logo nemačkejte do rámečku ani do textového bloku.',
     },
     {
         title: 'Držte kontrast',
         description:
-            'Logo leží na tmavé, mechové nebo papírové ploše. Na fotku ho pokládejte jen tam, kde je pod ním klid a had zůstane čitelný.',
+            'Logo patří na tmavou, mechovou nebo papírovou plochu. Na fotce ho použijte jen na klidném místě, kde zůstane had čitelný.',
     },
     {
         title: 'Zmenšujte s mírou',
@@ -193,9 +194,9 @@ export const AI_TA_KRAJTA_BRAND_RULES: readonly AiTaKrajtaBrandRule[] = [
             'Pod zhruba 24 pixelů se z hada stane skvrna. V takové velikosti raději napište jen název pořadu.',
     },
     {
-        title: 'Berte soubory odsud',
+        title: 'Stahujte soubory odsud',
         description:
-            'Logo tady je to samé, které nosí lišta prohlížeče i obal pořadu. Nevytahujte ho ze snímku obrazovky ani z cizí prezentace.',
+            'Logo na této stránce je stejné jako to, které používá lišta prohlížeče a obal pořadu. Použijte soubor odsud, ne výřez ze snímku obrazovky nebo cizí prezentace.',
     },
 ];
 
@@ -206,9 +207,9 @@ export const AI_TA_KRAJTA_BRAND_MISUSES: readonly string[] = [
     'Přebarvovat hada nebo dlaždici pod ním na firemní barvy.',
     'Natahovat, naklánět, otáčet nebo zrcadlit kresbu.',
     'Přidávat obrys, stín, přechod nebo efekt, který v kresbě není.',
-    'Skládat logo dohromady s jiným logem do jednoho znaku.',
-    'Nahrazovat hada jiným hadem, emoji nebo vlastní ilustrací.',
-    'Vydávat spolupráci za pořad. Partnerství se označuje textem, ne naším logem.',
+    'Spojovat logo s jiným logem do jednoho znaku.',
+    'Nahrazovat hada jiným hadem, emotikonem nebo vlastní ilustrací.',
+    'Vydávat spolupráci za pořad. Partnerství označte textem, ne naším logem.',
 ];
 
 /**
@@ -218,22 +219,22 @@ export const AI_TA_KRAJTA_BRAND_NAME_EXAMPLES: readonly AiTaKrajtaBrandNameExamp
     {
         correct: AI_TA_KRAJTA_NAME,
         incorrect: 'AI Ta Krajta',
-        explanation: '„ta“ je obyčejné slovo uprostřed názvu, a proto zůstává malé.',
+        explanation: '"ta" je obyčejné slovo uprostřed názvu, proto zůstává malé.',
     },
     {
         correct: AI_TA_KRAJTA_NAME,
         incorrect: 'AI TA KRAJTA',
-        explanation: 'Verzálky z názvu dělají křik. Nepíšeme je ani v titulku, ani v perexu.',
+        explanation: 'Velká písmena z názvu dělají křik. Nepíšeme ho tak ani v titulku, ani v perexu.',
     },
     {
         correct: AI_TA_KRAJTA_NAME,
         incorrect: 'Ai ta krajta',
-        explanation: 'AI je zkratka, Krajta je jméno. Obojí zůstává velké.',
+        explanation: 'AI je zkratka a Krajta jméno. Obojí zůstává velké.',
     },
     {
         correct: AI_TA_KRAJTA_BRAND_NAME,
-        incorrect: 'AI ta Krajta 🐍🐍🐍',
-        explanation: 'Had za názvem je nepovinný, a když ho použijete, tak jeden. Nosí ho lišty a záložky, ne věty.',
+        incorrect: 'AI ta Krajta 🐍🐍',
+        explanation: 'Had za názvem je nepovinný. Když ho použijete, stačí jeden. Patří do lišt a záložek, ne do vět.',
     },
 ];
 
@@ -251,7 +252,7 @@ export const AI_TA_KRAJTA_BRAND_BOILERPLATES: readonly AiTaKrajtaBrandBoilerplat
         label: 'Odstavec',
         text:
             `${AI_TA_KRAJTA_NAME} je český podcast o umělé inteligenci. Každý týden probírá nové modely, nástroje a ` +
-            'průšvihy, které se kolem AI staly, a ptá se, co z toho plyne pro lidi, kteří s ní pracují. Vychází na ' +
+            'průšvihy kolem AI a řeší, co znamenají pro lidi, kteří s ní pracují. Vychází na ' +
             'YouTube, Spotify a v Apple Podcasts. Posluchači si ho mohou přidat i do vlastní podcastové aplikace přes RSS feed.',
     },
 ];

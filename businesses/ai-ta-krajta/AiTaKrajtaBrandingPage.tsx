@@ -87,15 +87,15 @@ export function AiTaKrajtaBrandingPage() {
                                 </h1>
                                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75">
                                     Píšete o pořadu, zvete nás na konferenci nebo chystáte grafiku ke společnému dílu?
-                                    Tady je logo v souborech, které používáme my sami, barvy pořadu a pár pravidel, aby
-                                    Krajta zůstala poznat.
+                                    Níže najdete logo, barvy pořadu a pár jednoduchých pravidel. Jsou to stejné
+                                    podklady, které používáme sami, aby AI ta Krajta zůstala poznat.
                                 </p>
                                 <div className="mt-8 flex flex-wrap gap-3">
                                     <a
                                         href={`#${BRANDING_SECTION_IDS.FILES}`}
                                         className="inline-flex h-12 items-center gap-2 rounded-full bg-[#ff6b6b] px-6 text-base font-semibold text-[#1a201c] transition-transform hover:scale-[1.02]"
                                     >
-                                        Stáhnout logo
+                                        Stáhnout soubory
                                         <ArrowDown className="h-4 w-4" />
                                     </a>
                                     <Link
@@ -125,7 +125,7 @@ export function AiTaKrajtaBrandingPage() {
                         <AiTaKrajtaSectionHeading
                             eyebrow="Logo"
                             title="Jeden had, tři plochy."
-                            description="Logo je kresba, ne fotka obalu, takže se dá zvětšit i zmenšit a nikde nezůstanou bílé rohy. Leží na tmavé, mechové nebo papírové ploše. Nic dalšího si pod něj nepodkládejte."
+                            description="Logo je kresba, ne fotka obalu. Můžete ho zvětšit i zmenšit bez bílých rohů kolem. Patří na tmavou, mechovou nebo papírovou plochu. Jiný podklad mu nedávejte."
                         />
 
                         <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -137,8 +137,8 @@ export function AiTaKrajtaBrandingPage() {
                         <div id={BRANDING_SECTION_IDS.FILES} className="mt-14 scroll-mt-20">
                             <h3 className="text-2xl font-bold tracking-tight text-white">Soubory ke stažení</h3>
                             <p className="mt-3 max-w-2xl leading-relaxed text-white/60">
-                                Všechny tři soubory servíruje přímo tenhle web, takže máte to samé, co nosí lišta
-                                prohlížeče i katalogy podcastů.
+                                Všechny tři soubory jsou přímo z tohoto webu. Používáme je v liště prohlížeče i v
+                                katalozích podcastů.
                             </p>
 
                             <ul className="mt-8 grid gap-4 md:grid-cols-3">
@@ -173,7 +173,7 @@ export function AiTaKrajtaBrandingPage() {
                         <AiTaKrajtaSectionHeading
                             eyebrow="Barvy"
                             title="Pět barev, které jsme vzali z obalu."
-                            description="Zelené jsou plochy, korálová a indigová jsou had. Ty dvě teplé používejte po kapkách: jedno tlačítko, jeden akcent. Když je rozlijete po celé stránce, přestanou být vidět."
+                            description="Zelené barvy patří plochám, korálová a indigová hadovi. Korálovou a indigovou používejte střídmě, třeba na jedno tlačítko a jeden akcent. Když je rozlijete po celé stránce, přestanou vynikat."
                         />
 
                         <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -205,7 +205,9 @@ export function AiTaKrajtaBrandingPage() {
                         <AiTaKrajtaSectionHeading
                             eyebrow="Název a písmo"
                             title={`Píše se ${AI_TA_KRAJTA_NAME}.`}
-                            description="Zkratka velká, „ta“ malé, Krajta velká. Vypadá to jako drobnost, ale je to jediné místo, kde nás lidé napíšou dřív, než uvidí logo."
+                            description={
+                                'AI píšeme velkými písmeny, "ta" malým a Krajtu s velkým K. Název se v textu objeví dřív než logo, tak ať je napsaný správně.'
+                            }
                         />
 
                         <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -234,8 +236,8 @@ export function AiTaKrajtaBrandingPage() {
                         <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
                             <h3 className="text-xl font-semibold text-white">Písmo</h3>
                             <p className="mt-3 max-w-3xl leading-relaxed text-white/60">
-                                Obě písma jsou zdarma na Google Fonts. Když je po ruce nemáte, sáhněte po systémovém
-                                bezpatkovém písmu. Ozdobná ani psaná písma k pořadu nepatří.
+                                Obě písma najdete zdarma na Google Fonts. Když je nemáte, použijte systémové bezpatkové
+                                písmo. Ozdobná ani psaná písma k pořadu nepatří.
                             </p>
 
                             <dl className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -275,7 +277,7 @@ export function AiTaKrajtaBrandingPage() {
                         <AiTaKrajtaSectionHeading
                             eyebrow="Pravidla použití"
                             title="Co s logem můžete a co ne."
-                            description="Nemusíte nám nic schvalovat, když píšete o pořadu, zvete na díl nebo odkazujete na epizodu. Stačí držet tohle."
+                            description="Když píšete o pořadu, zvete nás na díl nebo odkazujete na epizodu, nic nám ke schválení posílat nemusíte. Stačí dodržet pár pravidel níže."
                         />
 
                         <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
@@ -318,8 +320,8 @@ export function AiTaKrajtaBrandingPage() {
                     <div className="mx-auto max-w-6xl px-4 sm:px-6">
                         <AiTaKrajtaSectionHeading
                             eyebrow="Text o pořadu"
-                            title="Když o nás píšete, vezměte si tohle."
-                            description="Hotové věty, které nemusíte s nikým konzultovat. Zkraťte je, jak potřebujete, jen nám prosím neměňte, čím se pořad zabývá."
+                            title="Pár vět o pořadu, rovnou k použití."
+                            description="Tyhle texty můžete použít bez ptaní. Klidně je zkraťte. Jen neměňte, o čem pořad je."
                         />
 
                         <div className="mt-10 grid gap-4 md:grid-cols-2">

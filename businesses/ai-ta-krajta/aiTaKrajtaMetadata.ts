@@ -112,7 +112,7 @@ export const AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
     title: AI_TA_KRAJTA_BRAND_NAME + ' | Brand kit a logo ke stažení',
     socialTitle: 'Brand kit | ' + AI_TA_KRAJTA_BRAND_NAME,
     description:
-        'Logo AI ta Krajta ke stažení, barvy pořadu, psaní názvu a pravidla použití pro novináře, partnery i pořadatele.',
+        'Logo AI ta Krajta ke stažení. Barvy, správné psaní názvu a pravidla použití pro novináře, partnery a pořadatele.',
     socialPreviewImageAlt: AI_TA_KRAJTA_BRAND_NAME + ', brand kit a logo ke stažení',
     socialPreviewImagePath: AI_TA_KRAJTA_COVER_IMAGE_PATH,
     keywords: [
