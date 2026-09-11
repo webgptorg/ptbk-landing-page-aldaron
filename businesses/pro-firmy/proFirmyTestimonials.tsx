@@ -13,7 +13,7 @@ interface ProFirmyTestimonial {
 
 const testimonials: ProFirmyTestimonial[] = [
     {
-        quote: 'Promptbook nás od sebe neodstřihl. Naopak - konečně máme čas řešit opravdovou práci, za kterou jsme placeni.',
+        quote: 'Promptbook nás od sebe neodstřihl. Naopak. Konečně máme čas řešit opravdovou práci, za kterou jsme placeni.',
         author: 'IT oddělení',
         company: 'Slezská univerzita v Opavě',
         icon: BookOpen,
@@ -31,7 +31,7 @@ const testimonials: ProFirmyTestimonial[] = [
 
 const metrics = [
     { value: '1 000 000', label: 'normostran kapacity' /* <- !!!!!! */ },
-    { value: '100%', label: 'GDPR compliance' },
+    { value: '100%', label: 'v souladu s GDPR' },
     { value: '0', label: 'halucinací' },
 ];
 
@@ -52,9 +52,9 @@ export function ProFirmyTestimonialsSection() {
                         className="text-2xl sm:text-3xl lg:text-[2.5rem] font-extrabold text-[#0f172a] tracking-tight max-w-3xl mx-auto"
                         style={{ lineHeight: 1.2 }}
                     >
-                        Co říkají firmy, které{' '}
+                        Co o Promptbooku říkají firmy, které ho{' '}
                         <span className="bg-gradient-to-r from-[#0891b2] to-[#06b6d4] bg-clip-text text-transparent">
-                            přestaly hledat.
+                            používají.
                         </span>
                     </h2>
                 </motion.div>
@@ -75,7 +75,7 @@ export function ProFirmyTestimonialsSection() {
                             </div>
 
                             <blockquote className="text-[17px] text-[#0f172a] leading-relaxed font-medium mb-6 pr-8 italic">
-                                &bdquo;{testimonial.quote}&ldquo;
+                                "{testimonial.quote}"
                             </blockquote>
 
                             <div className="flex items-center gap-3">

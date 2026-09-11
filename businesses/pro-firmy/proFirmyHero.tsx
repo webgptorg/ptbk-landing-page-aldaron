@@ -11,28 +11,28 @@ export const proFirmyChatMessages = [
     {
         id: 1,
         type: 'user' as const,
-        text: 'Ahoj, jsem tu nová zaměstnankyně a potřebuju najít informace o dovolenkové politice firmy. Může mi někdo pomoct?',
+        text: 'Ahoj, jsem tu nová a nemůžu najít, kolik mám dní dovolené. Poradíte?',
         startDelay: 0,
         static: true,
     },
     {
         id: 2,
         type: 'bot' as const,
-        text: 'Vítejte ve firmě, Anno! Všechny informace o dovolenkové politice najdete v naší interní znalostní bázi. Máte nárok na **25 dní dovolené ročně**.',
+        text: 'Vítejte ve firmě, Anno! Podle pracovního řádu máte nárok na **25 dní dovolené ročně**.',
         startDelay: 2000,
         static: false,
     },
     {
         id: 3,
         type: 'bot' as const,
-        text: 'Pošlu vám shrnutí přímo na e-mail, ať to máte po ruce. Potřebujete ještě s něčím pomoct?',
+        text: 'Pošlu vám to i na e-mail, ať to máte po ruce. Ještě něco?',
         startDelay: 1200,
         static: false,
     },
     {
         id: 4,
         type: 'user' as const,
-        text: 'Super, děkuji moc! To je přesně to, co jsem potřebovala. \u{1F64C}',
+        text: 'Super, díky! Přesně tohle jsem potřebovala.',
         startDelay: 1000,
         static: false,
     },
@@ -132,8 +132,8 @@ export function ProFirmyHeroSection() {
                             </h1>
 
                             <p className="text-[17px] sm:text-lg text-gray-500 leading-[1.7] max-w-lg tracking-[0.01em]">
-                                Promptbook přečte stovky tisíc normostran vašich dokumentů a&nbsp;odpoví na cokoliv.
-                                Nový zaměstnanec. Zkušený manažer. Každý dostane stejně přesnou odpověď.
+                                Promptbook přečte stovky tisíc normostran vašich dokumentů a&nbsp;odpoví na cokoliv. Ptát
+                                se může nováček i zkušený manažer. Oba dostanou stejně přesnou odpověď.
                             </p>
                         </div>
 
@@ -192,7 +192,7 @@ export function ProFirmyHeroSection() {
                                     <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                                     <div className="w-3 h-3 rounded-full bg-green-400"></div>
                                     <span className="ml-3 text-sm font-medium text-gray-600">
-                                        Promptbook - HR Asistent
+                                        Promptbook, HR asistent
                                     </span>
                                 </div>
                             </div>
