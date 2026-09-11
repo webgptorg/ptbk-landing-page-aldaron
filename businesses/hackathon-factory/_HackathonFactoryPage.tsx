@@ -39,17 +39,17 @@ export function HackathonFactoryPage() {
             <Suspense>
                 <BusinessGetStartedModal
                     placeName="HackathonFactoryPage"
-                    title="Řekněte nám svůj problém nebo zájem o účast"
+                    title="Chcete zadat problém nebo se zapojit?"
                     requestSent="Děkujeme, ozveme se."
-                    specialistContact="Do 24 hodin vám napíšeme s návrhem dalšího kroku."
+                    specialistContact="Do 24 hodin vám napíšeme, co může být další krok."
                     ceoOf="CEO AI Web s.r.o."
-                    description="Stačí e-mail nebo telefon. Napište, co chcete na hackathonu řešit, nebo že se chcete zapojit jako účastník."
+                    description="Stačí e-mail nebo telefon. Napište nám, co chcete řešit, nebo že se chcete zapojit jako účastník."
                     emailPlaceholder="jmeno@firma.cz"
                     phonePlaceholder="+420 777 000 000"
                     errorNoEmailOrPhone="Zadejte prosím e-mail nebo telefonní číslo."
                     genericErrorMessage="Nastala chyba. Zkuste to prosím znovu."
                     sending="Odesílání..."
-                    scheduleCall="Ozvat se nám"
+                    scheduleCall="Napsat nám"
                 />
             </Suspense>
 
@@ -58,8 +58,8 @@ export function HackathonFactoryPage() {
                     tryItYourselfText={null}
                     whyPromptbookText="Jak to funguje"
                     integrationsText="Pro koho"
-                    pricingText="Zapojení"
-                    getStartedText="Ozvat se"
+                    pricingText="Jak se zapojit"
+                    getStartedText="Napsat nám"
                     brandLogo={
                         <HackathonFactoryLogo
                             showWordmark={false}
@@ -87,18 +87,18 @@ export function HackathonFactoryPage() {
                                             className="gap-0"
                                             markClassName="h-7 w-7 text-slate-800"
                                         />
-                                        Hackathon Factory – tržiště pro reálné problémy a buildery
+                                        Hackathon Factory: skutečné problémy a lidé, kteří je umějí řešit
                                     </div>
 
                                     <h1 className="text-5xl font-bold leading-tight text-slate-900 lg:text-6xl">
-                                        Spojujeme <span className="text-amber-500">reálné problémy</span> s týmy, které
-                                        je umí dotáhnout do výsledku
+                                        Spojujeme <span className="text-amber-500">skutečné problémy</span> s týmy,
+                                        které je umějí řešit
                                     </h1>
 
                                     <p className="max-w-2xl text-xl leading-relaxed text-slate-600">
-                                        Krátké hackathon sprinty pro CTO, zakladatele startupů, inovátory i developery.
-                                        Cílem není hackovat pro hackování, ale dodat funkční prototyp, rozhodnutí nebo
-                                        plán, který použijete hned další den.
+                                        Krátké hackathon sprinty pro CTO, zakladatele startupů, inovátory a developery.
+                                        Nejde o hackování pro hackování. Za jeden až dva dny vznikne prototyp, podklad
+                                        pro rozhodnutí nebo plán, který použijete hned další den.
                                     </p>
                                 </div>
 
@@ -108,7 +108,7 @@ export function HackathonFactoryPage() {
                                             size="lg"
                                             className="bg-slate-900 text-white hover:bg-slate-700 text-lg px-8 py-6 rounded-full"
                                         >
-                                            Přihlásit problém nebo zájem
+                                            Přihlásit problém nebo se zapojit
                                             <ArrowRight className="ml-2 h-5 w-5" />
                                         </Button>
                                     </Link>
@@ -133,10 +133,10 @@ export function HackathonFactoryPage() {
                                 </div>
 
                                 <div className="max-w-2xl rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-relaxed text-slate-700 shadow-sm">
-                                    <p className="font-semibold text-slate-900">Nejde o soutěž pro efekt.</p>
+                                    <p className="font-semibold text-slate-900">Není to soutěž o tričko.</p>
                                     <p className="mt-2">
-                                        Každý sprint stojí na zadání z praxe. Žádné umělé výzvy, žádné teoretické
-                                        scénáře - jen skutečné problémy, skutečná řešení a skutečný dopad.
+                                        Každý sprint vychází ze zadání z praxe. Bez umělých výzev a teoretických
+                                        scénářů. Řešíme skutečný problém a na konci má být něco, co použijete.
                                     </p>
                                 </div>
                             </>
@@ -173,7 +173,7 @@ export function HackathonFactoryPage() {
                 <FeatureCardsSection
                     id="benefits"
                     title="Jak Hackathon Factory funguje"
-                    description="Zadání nejdřív zpřesníme, během sprintu ho týmy řeší v reálném čase a po hackathonu můžete rovnou navázat další spolupráci."
+                    description="Nejdřív zadání zpřesníme. Týmy na něm pracují v reálném čase a po sprintu můžete navázat další spoluprací."
                     note={hackathonFactoryProcessNote}
                     cards={hackathonFactoryProcess}
                     columns={3}
@@ -184,23 +184,23 @@ export function HackathonFactoryPage() {
                 <FeatureCardsSection
                     id="integrations"
                     title="Pro koho je Hackathon Factory"
-                    description="Potkávají se tu lidé s konkrétním problémem a lidé, kteří chtějí opravdu stavět. Obojí je stejně důležité."
+                    description="Setkávají se tu lidé s konkrétním problémem a lidé, kteří chtějí stavět. Potřebujeme obě strany."
                     cards={hackathonFactoryAudience}
                     columns={2}
                     tone="white"
                 />
 
                 <FeatureCardsSection
-                    title="Typické situace, se kterými k nám přicházíte"
-                    description="Když potřebujete rychle ověřit hypotézu, rozhodnout se kudy dál nebo najít tým pro další krok."
+                    title="S čím za námi přicházíte"
+                    description="Když potřebujete rychle ověřit hypotézu, rozhodnout se, kudy dál, nebo najít tým pro další krok."
                     cards={hackathonFactorySituations}
                     columns={3}
                     tone="contrast"
                 />
 
                 <FeatureCardsSection
-                    title="Proč to nebude hackathon bez výsledku"
-                    description="Každé zadání filtrujeme podle toho, jestli může vést k použitelnému dopadu i po skončení akce."
+                    title="Aby sprint měl výsledek"
+                    description="Každé zadání posuzujeme podle toho, jestli z něj může vzniknout něco použitelného i po akci."
                     note={hackathonFactoryPrinciplesNote}
                     cards={hackathonFactoryPrinciples}
                     columns={3}
@@ -211,38 +211,38 @@ export function HackathonFactoryPage() {
                     title="Kdo za tím stojí"
                     description={
                         <>
-                            Za Hackathon Factory stojí <strong>AI Web s.r.o.</strong> - Jiří Jahn a Pavol Hejný.
-                            <strong> Promptbook</strong> je naše platforma pro nasazování AI agentů v reálném provozu
-                            pro obce, univerzity a firmy, takže dobře víme, co je použitelné řešení a co je jen
-                            technologický hype. Hackathon Factory stavíme proto, že nejlepší způsob, jak pochopit novou
-                            technologii, je použít ji na skutečný problém.
+                            Za Hackathon Factory stojí <strong>AI Web s.r.o.</strong>, tedy Jiří Jahn a Pavol Hejný.
+                            <strong> Promptbook</strong> je naše platforma pro nasazování AI agentů v reálném provozu v
+                            obcích, na univerzitách a ve firmách. Víme proto, co je použitelné řešení a co je jen
+                            technologický hype. Hackathon Factory stavíme z jednoduchého důvodu: novou technologii
+                            nejlépe pochopíte při práci na skutečném problému.
                         </>
                     }
                     jiriDescription={
                         <>
-                            Ph.D. v oboru matematika a bývalý výzkumník v{' '}
-                            <Link href="https://www.it4i.cz/">IT4Innovations</Link>. Drží metodiku, scope zadání a
-                            kvalitu výstupů tak, aby sprint vedl k rozhodnutí nebo funkčnímu prototypu, ne k hezké
-                            prezentaci bez dalšího použití.
+                            Matematik s Ph.D. a bývalý výzkumník v{' '}
+                            <Link href="https://www.it4i.cz/">IT4Innovations</Link>. Hlídá metodiku, rozsah zadání a
+                            kvalitu výstupu, aby sprint vedl k rozhodnutí nebo funkčnímu prototypu, ne k prezentaci,
+                            která pak leží v šuplíku.
                         </>
                     }
                     pavolDescription={
                         <>
-                            Developer s 15+ lety praxe a aktivní{' '}
+                            Developer s více než 15 lety praxe a aktivní{' '}
                             <Link href="https://www.pavolhejny.com/">open-source contributor</Link>. Přináší praktický
-                            pohled na vývoj, tooling, prototypování a na to, co je po hackathonu skutečně udržitelné v
-                            produktu nebo interním procesu.
+                            pohled na vývoj, tooling a prototypování. Hlídá, aby výsledek šel udržet v produktu nebo
+                            interním procesu i po hackathonu.
                         </>
                     }
                 />
 
                 <PricingSection
                     title="Jak se zapojit"
-                    description="Zadání můžete přihlásit zdarma, účast vývojářů je zdarma. Placená je jen partnerská varianta pro firmy, které chtějí mít brief pečlivě připravený, odmoderovaný a dotažený k použitelným výstupům."
+                    description="Zadání i účast vývojářů jsou zdarma. Firmy si mohou připlatit za partnerství s přípravou briefu, moderováním a dotažením výstupů."
                     plans={hackathonFactoryPricing}
                     footnotes={hackathonFactoryPricingFootnotes}
                     showBillingToggle={false}
-                    openSourceGuaranteeText="Úvodní 30min konzultace je zdarma a bez závazků. Pokud zjistíme, že zadání pro Hackathon Factory není vhodné, řekneme to rovnou a doporučíme jiný postup."
+                    openSourceGuaranteeText="Úvodní 30min konzultace je zdarma a bez závazků. Když zadání pro Hackathon Factory nesedí, řekneme to rovnou a doporučíme jiný postup."
                 />
 
                 {isLocalhost && <PlaygroundSection />}

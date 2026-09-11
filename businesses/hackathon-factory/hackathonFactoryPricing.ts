@@ -4,7 +4,7 @@ import { Building, Gift, Rocket } from 'lucide-react';
 export const hackathonFactoryPricingFootnotes: PricingFootnote[] = [
     {
         id: '*',
-        text: 'Cena partnerství se odvíjí od rozsahu podpory, formátu akce a náročnosti briefu. Úvodní konzultace je vždy zdarma.',
+        text: 'Cena partnerství závisí na rozsahu podpory, formátu akce a náročnosti briefu. Úvodní konzultace je vždy zdarma.',
     },
 ];
 
@@ -15,14 +15,15 @@ export const hackathonFactoryPricing: PricingPlan[] = [
         priceYearly: 'Zdarma',
         currency: '',
         period: 'bez závazků',
-        description: 'Pro firmy a organizace, které chtějí nejdřív ověřit, jestli je jejich problém vhodný pro sprint.',
+        description:
+            'Pro firmy a organizace, které si chtějí nejdřív ověřit, jestli se jejich problém hodí pro sprint.',
         icon: Gift,
         iconName: 'Gift',
         features: [
             'Krátká úvodní konzultace',
-            'Posouzení vhodnosti zadání',
-            'Zpřesnění scope a očekávaného výstupu',
-            'Schválený brief pro účastníky',
+            'Posouzení zadání',
+            'Ujasnění rozsahu a očekávaného výstupu',
+            'Schválené zadání pro účastníky',
         ],
         buttonText: 'Poslat problém',
         popular: false,
@@ -33,13 +34,12 @@ export const hackathonFactoryPricing: PricingPlan[] = [
         priceYearly: 'od 10 000',
         currency: 'Kč',
         period: 'dle rozsahu*',
-        description:
-            'Pro firmy, které chtějí mít své zadání plně připravené, odmoderované a zdokumentované.',
+        description: 'Pro firmy, které chtějí mít zadání připravené, odmoderované a zdokumentované.',
         icon: Rocket,
         iconName: 'Rocket',
         features: [
             'Příprava a vyladění zadání',
-            'Prezentace problému účastníkům',
+            'Představení problému účastníkům',
             'Moderování a mentoring během sprintu',
             'Přístup ke všem výstupům a prezentacím',
         ],
@@ -52,14 +52,14 @@ export const hackathonFactoryPricing: PricingPlan[] = [
         priceYearly: 'Zdarma',
         currency: '',
         period: 'za účast',
-        description: 'Pro developery, designéry a technology, kteří chtějí řešit konkrétní zadání z praxe.',
+        description: 'Pro developery, designéry a technology, kteří chtějí řešit konkrétní problém z praxe.',
         icon: Building,
         iconName: 'Building',
         features: [
             'Výběr ze schválených zadání',
-            'Reálný brief místo umělé výzvy',
+            'Konkrétní brief místo umělé výzvy',
             'Možnost ukázat práci na funkčním výstupu',
-            'Potenciál navazující spolupráce',
+            'Možnost navazující spolupráce',
         ],
         buttonText: 'Registrovat se',
         popular: false,
