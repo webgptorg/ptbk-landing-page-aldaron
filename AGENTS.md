@@ -147,11 +147,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   optional branch, optional deployment URL — so it is set, changed, and unset at
   once and neither branch nor deployment outlives its repository. Room kinds which
   offer it are named in `lib/workshops/workshopKindCapabilities.ts`. The room shows
-  the repository, its branch, its links, how much was committed since the workshop
-  began, and the newest commits, marking those which arrive while a participant
-  watches. Commits come from the public commit feed and repository facts from the
-  public GitHub API, both keyless, cached once per server, and read beside the room
-  state; an unreadable repository still leaves the room naming its project.
+  the repository, its links, and the newest commits, marking those which arrive
+  while a participant watches. Commits come from the public commit feed, keyless,
+  cached once per server, and read beside the room state; an unreadable feed still
+  leaves the room naming its project.
 - Paid-only materials are decided on the server in one pass. Members receive
   unlocked material; others receive only the published titles as an offer. An
   untitled item is not named, items are not named before their unlock time, and a

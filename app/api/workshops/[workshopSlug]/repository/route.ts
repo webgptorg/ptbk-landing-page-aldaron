@@ -29,6 +29,6 @@ export async function GET(request: NextRequest, context: WorkshopRepositoryRoute
         return NextResponse.json({ error: 'Workshop repository not found' }, { status: 404 });
     }
 
-    const progress = await fetchWorkshopRepositoryProgress(workshop.repository, workshop.startsAt);
+    const progress = await fetchWorkshopRepositoryProgress(workshop.repository);
     return NextResponse.json({ progress }, { headers: { 'Cache-Control': 'no-store' } });
 }

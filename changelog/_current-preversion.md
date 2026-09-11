@@ -1,4 +1,9 @@
 # Current preversion
+
+- Simplified the `Projekt workshopu` panel in participant rooms to keep only the connected repository, its useful links,
+  and the commit list. Repository description, branch, language, star count, and the redundant number of commits since
+  the workshop began are no longer shown or fetched; new-commit marking and links to individual and all commits remain.
+
 - Removed attached-event badges from polls in the community, community administration, participant rooms, and the
   read-only workshop administration. Polls still keep their event attachments: administrators can select and edit them
   in the poll editor, and the shared poll and vote behavior remains unchanged.

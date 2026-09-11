@@ -7,10 +7,10 @@ import {
     createGithubRepositoryUrl,
     formatGithubRepositoryName,
 } from '@/lib/github/githubRepository';
-import { formatCzechCountedNoun, formatCzechNumber } from '@/lib/language/czechNumbers';
+import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { WorkshopRepositoryProgress } from '@/lib/workshops/workshopRepositoryProgress';
-import { ExternalLink, GitBranch, GitCommitHorizontal, Github, RefreshCw, Rocket, Star } from 'lucide-react';
+import { ExternalLink, GitCommitHorizontal, Github, RefreshCw, Rocket } from 'lucide-react';
 
 const CZECH_COMMIT_TIME_FORMAT = new Intl.DateTimeFormat('cs-CZ', {
     day: 'numeric',
@@ -33,10 +33,6 @@ type WorkshopRepositoryPanelProps = {
     readonly repository: WorkshopRepository;
 };
 
-function formatCommitCount(commitCount: number): string {
-    return formatCzechCountedNoun(commitCount, ['commit', 'commity', 'commitů']);
-}
-
 /**
  * Names the commits which arrived while this participant watched the workshop
  */
@@ -45,41 +41,15 @@ function formatNewCommitCount(commitCount: number): string {
 }
 
 /**
- * Says how much was committed since the workshop began, and says it as exactly as the published commits allow
- *
- * Note: Only the newest commits of a repository are published, so a repository which committed nothing else than
- *       during this workshop is counted from below rather than claiming a number which may be too small.
- */
-function formatRepositoryProgress(progress: WorkshopRepositoryProgress): string {
-    if (progress.commits.length === 0) {
-        return 'Commity se teď nepodařilo načíst.';
-    }
-
-    if (progress.commitCountSinceStart === 0) {
-        return 'Od začátku workshopu zatím nepřibyl žádný commit.';
-    }
-
-    const commitCountLabel = formatCommitCount(progress.commitCountSinceStart);
-    return progress.isCommitCountSinceStartComplete
-        ? `Od začátku workshopu přibylo ${commitCountLabel}.`
-        : `Od začátku workshopu přibylo nejméně ${commitCountLabel}.`;
-}
-
-/**
  * The project one workshop is about, together with what is being committed in it while the workshop runs
  *
  * Note: The connection itself comes with the state of the room, while the commits are read from GitHub on their own,
- *       see `useWorkshopRepositoryProgress`. That is why the repository, its branch and its deployment are shown even
- *       when GitHub cannot be reached: the room still says which project it is about and where it runs.
+ *       see `useWorkshopRepositoryProgress`. That is why the repository and its links are shown even when GitHub
+ *       cannot be reached.
  */
 export function WorkshopRepositoryPanel({ workshopSlug, repository }: WorkshopRepositoryPanelProps) {
     const { progress, isProgressRead, newCommitShas } = useWorkshopRepositoryProgress(workshopSlug);
     const repositoryName = formatGithubRepositoryName(repository);
-    const repositoryDetails = progress?.details ?? null;
-
-    // Note: A workshop which follows no branch of its own follows the one the repository itself is read at, which is
-    //       the branch GitHub names — so the room says which branch it is showing rather than saying nothing.
-    const branchLabel = repository.branch ?? repositoryDetails?.defaultBranch ?? null;
 
     return (
         <section
@@ -126,40 +96,17 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository }: WorkshopRe
             </div>
 
             <div className="space-y-3 px-5 py-4">
-                {repositoryDetails !== null && repositoryDetails.description !== null && (
-                    <p className="text-sm leading-6 text-slate-300">{repositoryDetails.description}</p>
-                )}
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    {branchLabel !== null && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-slate-950/40 px-2.5 py-1 font-mono text-slate-300">
-                            <GitBranch className="h-3.5 w-3.5" aria-hidden="true" /> {branchLabel}
-                        </span>
-                    )}
-                    {repositoryDetails !== null && repositoryDetails.primaryLanguage !== null && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-slate-950/40 px-2.5 py-1 text-slate-300">
-                            {repositoryDetails.primaryLanguage}
-                        </span>
-                    )}
-                    {repositoryDetails !== null && repositoryDetails.starCount > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-slate-950/40 px-2.5 py-1 text-slate-300">
-                            <Star className="h-3.5 w-3.5" aria-hidden="true" />{' '}
-                            {formatCzechNumber(repositoryDetails.starCount)}
-                        </span>
-                    )}
-                </div>
-
                 {!isProgressRead ? (
                     <p className="flex items-center gap-2 text-sm text-slate-400">
-                        <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> Načítám průběh projektu…
+                        <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> Načítám commity…
                     </p>
                 ) : progress === null ? (
                     <p className="text-sm leading-6 text-slate-400">
-                        Průběh repozitáře se teď nepodařilo načíst. Odkaz na projekt funguje dál a průběh se objeví,
+                        Commity repozitáře se teď nepodařilo načíst. Odkaz na projekt funguje dál a commity se objeví,
                         jakmile bude repozitář znovu dostupný.
                     </p>
                 ) : (
                     <>
-                        <p className="text-sm font-semibold text-slate-200">{formatRepositoryProgress(progress)}</p>
                         {progress.commits.length > 0 && (
                             <ol className="space-y-2">
                                 {progress.commits.map((commit) => {

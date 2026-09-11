@@ -2,7 +2,6 @@ import {
     createGithubCommitFeedUrl,
     createGithubCommitsUrl,
     createGithubCommitUrl,
-    createGithubRepositoryApiUrl,
     createGithubRepositoryUrl,
     extractGithubBranchName,
     extractGithubRepository,
@@ -76,18 +75,13 @@ describe('the branch one workshop follows', () => {
 describe('the addresses of a connected repository', () => {
     it('are all built from the repository itself, so a room can only ever link into it', () => {
         expect(createGithubRepositoryUrl(PROMPTBOOK_REPOSITORY)).toBe('https://github.com/hejny/promptbook');
-        expect(createGithubRepositoryApiUrl(PROMPTBOOK_REPOSITORY)).toBe(
-            'https://api.github.com/repos/hejny/promptbook',
-        );
         expect(createGithubCommitUrl(PROMPTBOOK_REPOSITORY, 'a1b2c3d')).toBe(
             'https://github.com/hejny/promptbook/commit/a1b2c3d',
         );
     });
 
     it('follow the branch of the workshop, or the branch of the repository itself when it follows none', () => {
-        expect(createGithubCommitsUrl(PROMPTBOOK_REPOSITORY, null)).toBe(
-            'https://github.com/hejny/promptbook/commits',
-        );
+        expect(createGithubCommitsUrl(PROMPTBOOK_REPOSITORY, null)).toBe('https://github.com/hejny/promptbook/commits');
         expect(createGithubCommitFeedUrl(PROMPTBOOK_REPOSITORY, null)).toBe(
             'https://github.com/hejny/promptbook/commits.atom',
         );

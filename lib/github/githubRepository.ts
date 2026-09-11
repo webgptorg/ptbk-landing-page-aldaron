@@ -150,10 +150,3 @@ export function createGithubCommitFeedUrl(repository: GithubRepository, branch: 
 export function createGithubCommitUrl(repository: GithubRepository, commitSha: string): string {
     return `${createGithubRepositoryUrl(repository)}/commit/${encodeURIComponent(commitSha)}`;
 }
-
-/**
- * Where the public API of GitHub describes this repository
- */
-export function createGithubRepositoryApiUrl({ owner, name }: GithubRepository): string {
-    return `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`;
-}

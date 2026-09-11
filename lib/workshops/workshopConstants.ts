@@ -47,13 +47,10 @@ export const MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT = 1_000_000;
 export const MAXIMAL_WORKSHOP_PRESENCE_REPORT_SECONDS = 120;
 
 /**
- * How much of the connected repository one room says: how many of its newest commits it lists, and how long an answer
- * of GitHub is reused before it is asked again
+ * How many of the newest commits of the connected repository one room lists
  *
- * Note: The commits are what changes during a workshop, so they are read often, while what the repository says about
- *       itself changes hardly at all and is therefore read rarely. Both bounds keep this application a polite client
- *       of GitHub however many participants have the room open, because every one of them reads one and the same
- *       server-side answer.
+ * Note: The commits are read through one cached server-side answer however many participants have the room open, so
+ *       the room can follow the project without turning every participant into a GitHub client.
  */
 export const MAXIMAL_WORKSHOP_REPOSITORY_COMMIT_COUNT = 10;
 
@@ -62,7 +59,6 @@ export const MAXIMAL_WORKSHOP_REPOSITORY_COMMIT_COUNT = 10;
  */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH = 255;
 export const WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS = 60;
-export const WORKSHOP_REPOSITORY_DETAILS_REVALIDATE_SECONDS = 15 * 60;
 
 /**
  * How long after their last request a participant still counts as watching the workshop

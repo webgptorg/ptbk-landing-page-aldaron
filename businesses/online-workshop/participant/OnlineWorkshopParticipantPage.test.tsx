@@ -11,7 +11,7 @@ import type {
     WorkshopPoll,
     WorkshopPublicState,
 } from '@/lib/workshops/workshopTypes';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -309,11 +309,12 @@ describe('online workshop participant room', () => {
     it('shows the project a workshop is about, together with what has been committed in it', () => {
         repositoryProgressMocks.controller = {
             progress: {
+                // Keep the fields from the former response shape here to ensure the panel only presents commits.
                 details: {
-                    description: 'Kniha promptů pro AI agenty',
+                    description: 'A/B testing landing page for Promptbook',
                     defaultBranch: 'main',
                     primaryLanguage: 'TypeScript',
-                    starCount: 1_275,
+                    starCount: 1,
                 },
                 commits: [
                     {
@@ -323,7 +324,7 @@ describe('online workshop participant room', () => {
                         committedAt: '2026-08-21T19:25:00+02:00',
                     },
                 ],
-                commitCountSinceStart: 1,
+                commitCountSinceStart: 2,
                 isCommitCountSinceStartComplete: true,
             },
             isProgressRead: true,
@@ -333,13 +334,18 @@ describe('online workshop participant room', () => {
         renderParticipantRoom(WORKSHOP_ABOUT_A_PROJECT);
 
         expect(screen.getByText('hejny/promptbook')).not.toBeNull();
-        expect(screen.getByText('Kniha promptů pro AI agenty')).not.toBeNull();
-        expect(screen.getByText('Od začátku workshopu přibylo 1 commit.')).not.toBeNull();
         expect(screen.getByText('Přidat panel repozitáře')).not.toBeNull();
         expect(screen.getByText('Nový')).not.toBeNull();
         expect(screen.getByRole('link', { name: /Živá aplikace/ }).getAttribute('href')).toBe(
             'https://workshop.example/app',
         );
+
+        const repositoryPanel = screen.getByLabelText('Projekt workshopu');
+        expect(repositoryPanel.textContent).not.toContain('A/B testing landing page for Promptbook');
+        expect(repositoryPanel.textContent).not.toContain('Od začátku workshopu');
+        expect(repositoryPanel.textContent).not.toContain('main');
+        expect(repositoryPanel.textContent).not.toContain('TypeScript');
+        expect(within(repositoryPanel).queryByText('1')).toBeNull();
     });
 
     it('shows nothing about a project in a room which is about none, and in a room which cannot be about one', () => {
@@ -450,7 +456,9 @@ describe('online workshop participant room', () => {
         renderParticipantRoom(COMMUNITY, undefined, true);
 
         expect(screen.getByRole('button', { name: /Spojení nedostupné/ })).not.toBeNull();
-        expect(screen.queryByText('Spojení s workshopem je dočasně nedostupné. Zobrazuje se naposledy uložená verze.')).toBeNull();
+        expect(
+            screen.queryByText('Spojení s workshopem je dočasně nedostupné. Zobrazuje se naposledy uložená verze.'),
+        ).toBeNull();
     });
 
     it('names the paid materials and opens the membership offer for a member who has not paid', async () => {
