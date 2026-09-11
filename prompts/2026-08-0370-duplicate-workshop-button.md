@@ -10,3 +10,5 @@
 
 
 [✨🦒] When creating or duplicating events, the duplicated event should be published by default, and only not published when duplicating a non-published event. 
+
+- Also, when duplicating a workshop, duplicate the attached polls. 
