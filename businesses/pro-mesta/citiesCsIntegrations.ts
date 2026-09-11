@@ -11,28 +11,28 @@ export const citiesCsIntegrations: Array<Integration> = [
         preview: chatAsset,
         title: 'Asistent pro úředníky',
         description:
-            'Pomocník při tvorbě dokumentů, usnesení a zápisů, který hlídá soulad s interními směrnicemi a legislativou.',
-        features: ['Kontrola formální správnosti', 'Dodržování standardů města', 'Úspora času při administrativě'],
+            'Pomůže s dokumenty, usneseními a zápisy. Hlídá přitom interní směrnice a legislativu.',
+        features: ['Kontroluje formální správnost', 'Drží se standardů města', 'Méně času na administrativu'],
     },
     {
         preview: graphAsset,
         title: 'Znalostní báze úřadu',
         description:
-            'Centralizovaný přístup k interním předpisům, metodikám a zkušenostem pro rychlejší a konzistentní rozhodování.',
-        features: ['Vyhledávání v dokumentech', 'Sdílení know-how napříč odbory', 'Řešení na míru vašemu městu'],
+            'Interní předpisy, metodiky a zkušenosti najdete na jednom místě. Odbory pak mohou rozhodovat rychleji a jednotněji.',
+        features: ['Rychlé hledání v dokumentech', 'Sdílené zkušenosti mezi odbory', 'Přizpůsobení vašemu městu'],
     },
     {
         preview: chatAsset,
         title: 'Virtuální asistent pro občany',
         description:
-            'Inteligentní chatbot na webu města, který okamžitě zodpoví dotazy občanů k úředním hodinám, životním situacím či místním akcím.',
-        features: ['Nepřetržitá dostupnost 24/7', 'Odpovědi dle aktuálních dat města', 'Snížení zátěže infolinky'],
+            'Chatbot na webu města odpoví na dotazy k úředním hodinám, životním situacím i místním akcím.',
+        features: ['Dostupný 24 hodin denně, 7 dní v týdnu', 'Odpovědi podle aktuálních dat města', 'Méně dotazů na infolince'],
     },
     {
         preview: gmailAsset,
-        title: 'Chytrá e-mailová podatelna',
+        title: 'E-mailová podatelna',
         description:
-            'Automatická analýza příchozích e-mailů, jejich třídění dle agendy a generování návrhů odpovědí pro rychlejší vyřízení.',
-        features: ['Kategorizace dle tématu', 'Návrhy odpovědí jedním klikem', 'Zkrácení doby odezvy'],
+            'Příchozí e-maily roztřídí podle agendy a připraví návrh odpovědi pro rychlejší vyřízení.',
+        features: ['Třídění podle tématu', 'Návrh odpovědi jedním kliknutím', 'Rychlejší vyřízení'],
     },
 ];

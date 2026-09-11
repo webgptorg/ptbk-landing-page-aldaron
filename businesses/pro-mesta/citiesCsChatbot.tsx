@@ -15,8 +15,8 @@ export function CitiesCsChatbot() {
                 fullname: 'AI asistent pro města a obce',
                 title: 'AI asistent pro města a obce',
                 description:
-                    'Pomáhá samosprávám pochopit, jak Promptbook může transformovat znalosti úřadu do AI agentů.',
-                inputPlaceholder: 'Zeptejte se na přínosy pro vaše město, ceník nebo jak začít...',
+                    'Pomůže vám zjistit, jak může Promptbook pracovat se znalostmi vašeho úřadu.',
+                inputPlaceholder: 'Zeptejte se na využití ve vašem městě, ceny nebo první krok',
             }}
         />
     );

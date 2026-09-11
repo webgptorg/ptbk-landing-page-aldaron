@@ -6,7 +6,7 @@ import spaceTrim from 'spacetrim';
 export const citiesCsConversation = {
     title: 'Městské vyhlášky a chodníky',
     description:
-        'Dva účastníci diskutují o městských vyhláškách, zákonu 106/1999 Sb. o svobodném přístupu k informacím a opravách chodníků ve městě.',
+        'Petr se ptá na novou vyhlášku o opravách chodníků a na zákon 106/1999 Sb. o svobodném přístupu k informacím. Lucie shrne, co se změnilo.',
     participants: [
         {
             name: 'USER',
@@ -28,13 +28,13 @@ export const citiesCsConversation = {
         {
             author: 'USER',
             content:
-                'V posledních měsících jsme schválili novou vyhlášku, která upravuje pravidla pro opravy chodníků.\n\n\n\nCo je v ní obsaženo oproti předchozím verzím?',
+                'V posledních měsících jsme schválili novou vyhlášku o opravách chodníků.\n\nCo se v ní změnilo oproti předchozí verzi?',
             timestamp: '2024-01-15T10:00:00Z',
         },
         {
             author: 'AGENT',
             content: spaceTrim(`
-                    Nová vyhláška zavádí přísnější normy pro kvalitu materiálů používaných při opravách chodníků, stanovuje jasnější termíny pro dokončení prací a zvyšuje pokuty za nedodržení těchto pravidel. Dále klade větší důraz na bezpečnost chodců během oprav.
+                    Nová vyhláška zpřísňuje normy pro materiály, zavádí jasné termíny dokončení a zvyšuje pokuty za nedodržení těchto pravidel. Myslí také víc na bezpečnost chodců během oprav.
 
 
                     | Kategorie              | Předchozí vyhláška         | Nová vyhláška                        |

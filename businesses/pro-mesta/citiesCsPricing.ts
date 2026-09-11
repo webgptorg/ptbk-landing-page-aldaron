@@ -8,7 +8,7 @@ import { Building, Rocket, Shield } from 'lucide-react';
 export const citiesCsPricingFootnotes: PricingFootnote[] = [
     {
         id: '*',
-        text: 'AI úvazek znamená, že agent vykoná ekvivalent 1 člověka na plný úvazek.',
+        text: 'AI úvazek odpovídá výkonu jednoho člověka na plný úvazek.',
     },
 ];
 
@@ -19,7 +19,7 @@ export const citiesCsPricing = [
         priceYearly: '20 000',
         currency: 'Kč',
         period: 'měsíčně',
-        description: 'Ideální pro obce a města do 3000 obyvatel.',
+        description: 'Pro obce a města do 3 000 obyvatel.',
         icon: Building,
         iconName: 'Building',
         features: [
@@ -29,7 +29,7 @@ export const citiesCsPricing = [
             '10 AI agentů',
             //
         ],
-        buttonText: 'Začněte',
+        buttonText: 'Začít',
         popular: false,
     },
     {
@@ -38,7 +38,7 @@ export const citiesCsPricing = [
         priceYearly: '45 000',
         currency: 'Kč',
         period: 'měsíčně',
-        description: 'Ideální pro střední a větší města',
+        description: 'Pro střední a větší města.',
         icon: Rocket,
         iconName: 'Rocket',
         features: [
@@ -50,7 +50,7 @@ export const citiesCsPricing = [
             'Vlastní integrace',
             'Prioritní podpora',
         ],
-        buttonText: 'Vyzkoušet pokročilou verzi',
+        buttonText: 'Domluvit konzultaci',
         popular: true,
     },
     {
@@ -59,7 +59,7 @@ export const citiesCsPricing = [
         priceYearly: 'Dohodou',
         currency: '',
         period: 'na vyžádání',
-        description: 'Řešení na míru pro rozsáhlé městské aplikace.',
+        description: 'Pro rozsáhlé městské aplikace na míru.',
         icon: Shield,
         iconName: 'Shield',
         features: [
@@ -70,7 +70,7 @@ export const citiesCsPricing = [
             'Vlastní SLA',
             'Prémiové zaškolení',
         ],
-        buttonText: 'Kontaktujte prodej',
+        buttonText: 'Probrat řešení',
         popular: false,
     },
 ];

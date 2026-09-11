@@ -9,9 +9,8 @@ import { Testimonial } from '../../components/testimonials-section';
 export const citiesCsTestimonials: Array<Testimonial> = [
     {
         name: 'Daria Hvizdalova',
-        role: 'Ředitelka, AI & Learning, 42 London',
-        testimonial:
-            'By enabling programming in your native language, tools like Promptbook are bridging the gap between technology and people.',
+        role: 'Ředitelka AI a vzdělávání, 42 London',
+        testimonial: 'Programování ve vlastním jazyce s nástroji jako Promptbook přibližuje technologie lidem.',
 
         avatar: dariaHvizdalova,
     },
@@ -19,7 +18,7 @@ export const citiesCsTestimonials: Array<Testimonial> = [
         name: 'Tomas Studenik',
         role: 'Produktový manažer, Inovativní technologie',
         testimonial:
-            'Promptbook transforms programming into a creative process accessible to everyone. As someone passionate about innovation, I see this as a game-changer.',
+            'Promptbook dělá z programování tvůrčí proces dostupný každému. Pro člověka, kterého baví inovace, je to velká změna.',
         avatar: tomasStudenik,
     },
 ];

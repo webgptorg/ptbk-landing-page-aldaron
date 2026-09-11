@@ -30,16 +30,16 @@ export function CitiesCsPage() {
             <Suspense>
                 <BusinessGetStartedModal
                     placeName="ProMestaPage"
-                    title="Jste připraveni na transformaci vašeho města s pomocí AI?"
-                    requestSent="Požadavek odeslán!"
-                    specialistContact="Náš specialista vás bude brzy kontaktovat."
+                    title="Chcete zjistit, kde může AI pomoct vašemu městu?"
+                    requestSent="Požadavek jsme přijali"
+                    specialistContact="Ozveme se vám brzy."
                     ceoOf="CEO společnosti Promptbook"
-                    description="Naplánujte si bezplatnou a nezávaznou konzultaci a zjistěte, jak může Promptbook revolučně změnit znalosti vaší společnosti a posílit váš tým."
+                    description="Domluvte si bezplatnou konzultaci bez závazků. Zjistěte, jak může Promptbook pracovat se znalostmi vašeho úřadu a pomoct vašemu týmu."
                     emailPlaceholder="jmeno@mesto.cz"
                     phonePlaceholder="+420 777 000 000"
-                    errorNoEmailOrPhone="Zadejte prosím e-mail nebo telefonní číslo"
-                    sending="Odesílání..."
-                    scheduleCall="Nezávazně poptat"
+                    errorNoEmailOrPhone="Zadejte e-mail nebo telefon."
+                    sending="Odesílám..."
+                    scheduleCall="Domluvit konzultaci"
                 />
             </Suspense>
             <main className="min-h-screen">
@@ -59,17 +59,17 @@ export function CitiesCsPage() {
                                 <div className="space-y-4">
                                     <div className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium">
                                         <BookOpen className="w-4 h-4" />
-                                        AI Transformace pro {you || 'města a obce'}
+                                        AI pro {you || 'města a obce'}
                                     </div>
                                     <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
                                         AI odborník, který{' '}
                                         <span className="bg-gradient-promptbook bg-clip-text text-transparent">
-                                            mluví jazykem
+                                            rozumí
                                         </span>{' '}
-                                        {you || <>Vaší obce</>}
+                                        {you || <>vaší obci</>}
                                     </h1>
                                     <p className="max-w-2xl text-lg leading-relaxed text-white sm:text-xl">
-                                        Pomáháme samosprávám vytvářet kontext pro AI.
+                                        AI odborník pracuje s pravidly a znalostmi vašeho úřadu.
                                     </p>
                                 </div>
 
@@ -91,11 +91,11 @@ export function CitiesCsPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CheckCircle className="w-4 h-4" />
-                                        Vaše data, Vaše kontrola
+                                        Data máte pod kontrolou
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CheckCircle className="w-4 h-4" />
-                                        Jednoduché nasazení
+                                        Nasadíte ho jednoduše
                                     </div>
                                 </div>
                             </>
@@ -104,18 +104,18 @@ export function CitiesCsPage() {
                 </Suspense>
 
                 <BenefitsSection
-                    title="AI řešení pro města a obce"
-                    description="Zefektivněte provoz, snižte administrativní zátěž a vylepšete služby s AI odborníkem, který skutečně rozumí Vašemu městu."
+                    title="AI pro města a obce"
+                    description="Pomůže úřadu zrychlit práci a snížit administrativní zátěž. Vychází přitom z pravidel, dokumentů a znalostí vašeho města."
                     benefits={citiesCsBenefits}
                 />
                 <IntegrationsSection
-                    title="Kde využít vašeho AI odborníka"
-                    description="Váš AI odborník není jen chat na webu. Může být integrován do různých kanálů a systémů."
+                    title="Kde může AI odborník pomoct"
+                    description="Nemusí zůstat jen na webu. Může být součástí nástrojů, které úřad používá každý den."
                     integrations={citiesCsIntegrations}
                 />
                 <TestimonialsSection
-                    title="Co o nás říkají"
-                    description="Už jsme pomohli mnoha městům a obcím."
+                    title="Co o Promptbooku říkají"
+                    description="Pár slov od lidí, kteří ho znají."
                     testimonials={citiesCsTestimonials}
                 />
 
@@ -129,8 +129,8 @@ export function CitiesCsPage() {
                 </Suspense>
                 */}
                 <PricingSection
-                    title="Jednoduché a transparentní ceny"
-                    description="Nabízíme plány od malých obcí až po velká města. Žádné skryté poplatky, žádné složité smlouvy."
+                    title="Ceník pro obce i města"
+                    description="Plány máme pro malé obce i velká města. Cena je jasná, bez skrytých poplatků a složitých smluv."
                     plans={citiesCsPricing}
                     footnotes={citiesCsPricingFootnotes}
                     monthlyText="Měsíčně"
@@ -140,18 +140,18 @@ export function CitiesCsPage() {
                 />
                 {isLocalhost && <PlaygroundSection />}
                 <TeamSection
-                    title="Náš tým"
-                    description="Jsme tým zkušených profesionálů, kteří pomáhají obcím a městům využívat umělou inteligenci."
+                    title="Tým Promptbooku"
+                    description="Pomáháme obcím a městům dostat umělou inteligenci do běžné práce."
                     jiriDescription={
                         <>
-                            Ph.D. v oboru matematika, bývalý výzkumník v{' '}
+                            Ph.D. z matematiky. Dříve výzkumník v{' '}
                             <Link href="https://www.it4i.cz/">Národním superpočítačovém centru IT4I</Link>.
                         </>
                     }
                     pavolDescription={
                         <>
-                            Významný <Link href="https://www.pavolhejny.com/">open-source přispěvatel</Link> v České
-                            republice s více než 15 lety zkušeností ve vývoji softwaru.
+                            Aktivní <Link href="https://www.pavolhejny.com/">open-source přispěvatel</Link> z Česka.
+                            Software vyvíjí přes 15 let.
                         </>
                     }
                 />

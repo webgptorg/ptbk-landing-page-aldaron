@@ -4,41 +4,41 @@ import { Benefit } from '../../components/benefits-section';
 export const citiesCsBenefits: Array<Benefit> = [
     {
         iconName: 'Zap',
-        title: 'Jednoduchost',
+        title: 'Rychlý start',
         description: (
             <>
-                <b>Virtuální AI odborník</b> vytvořený rychle v rámci jednoduché konverzace.
+                <b>Virtuální AI odborník</b> vznikne v krátké, jednoduché konverzaci.
             </>
         ),
     },
     {
         iconName: 'UserRound',
-        title: 'Virtuální odborník',
+        title: 'AI pro vaše město',
         description: (
             <>
-                Díky nám získáte AI, která <b>skutečně rozumí</b> specifikům vašeho města.
+                Dostanete AI, která se orientuje ve specifikách vašeho města.
             </>
         ),
     },
     {
         iconName: 'FileStack',
         title: 'Práce s dokumenty',
-        description: <>Snadno nahrajete specifické znalosti, vyhlášky, pravidla a další dokumenty.</>,
+        description: <>Nahrajete vyhlášky, pravidla, interní znalosti i další dokumenty.</>,
     },
     {
         iconName: 'Shield',
         title: 'Bezpečnost',
-        description: <>Mějte jistotu, že vaše data a informace jsou v bezpečí pod Vaší kontrolou.</>,
+        description: <>Vaše data a informace zůstávají v bezpečí pod vaší kontrolou.</>,
     },
 
     {
         iconName: 'Mail',
-        title: 'Email',
-        description: <>Komunikujte se svým virtuálním odborníkem přes jakýkoliv kanál, web, email, WhatsApp,...</>,
+        title: 'E-mail',
+        description: <>Připojíte ho k webu, e-mailu, WhatsAppu i dalším kanálům.</>,
     },
     {
         iconName: 'Code',
-        title: 'Široké možnosti integrace',
-        description: <>Napojte své AI do dalších systémů a platforem, rádi vám pomůžeme s integrací.</>,
+        title: 'Napojení na další systémy',
+        description: <>Napojíme ho na další systémy a platformy. S konkrétní integrací vám pomůžeme.</>,
     },
 ];
