@@ -1,11 +1,15 @@
 import {
     createGithubCommitFeedUrl,
+    createGithubCommitsUrlForBranchSelection,
     createGithubCommitsUrl,
     createGithubCommitUrl,
     createGithubRepositoryUrl,
     extractGithubBranchName,
+    extractGithubBranchSelection,
     extractGithubRepository,
+    formatGithubBranchSelection,
     formatGithubRepositoryName,
+    serializeGithubBranchSelection,
 } from '@/lib/github/githubRepository';
 import { describe, expect, it } from 'vitest';
 
@@ -70,6 +74,19 @@ describe('the branch one workshop follows', () => {
             },
         );
     });
+
+    it('reads one, several, and all branches without confusing all branches with the default branch', () => {
+        expect(extractGithubBranchSelection('main')).toBe('main');
+        expect(extractGithubBranchSelection(['main', 'feature/rooms'])).toEqual(['main', 'feature/rooms']);
+        expect(extractGithubBranchSelection([])).toEqual([]);
+        expect(extractGithubBranchSelection(['main', 'main'])).toBeNull();
+        expect(serializeGithubBranchSelection(null)).toBeNull();
+        expect(serializeGithubBranchSelection('main')).toEqual(['main']);
+        expect(serializeGithubBranchSelection([])).toEqual([]);
+        expect(formatGithubBranchSelection(null)).toBeNull();
+        expect(formatGithubBranchSelection(['main', 'feature/rooms'])).toBe('main, feature/rooms');
+        expect(formatGithubBranchSelection([])).toBe('Všechny větve');
+    });
 });
 
 describe('the addresses of a connected repository', () => {
@@ -87,6 +104,12 @@ describe('the addresses of a connected repository', () => {
         );
         expect(createGithubCommitFeedUrl(PROMPTBOOK_REPOSITORY, 'feature/rooms')).toBe(
             'https://github.com/hejny/promptbook/commits/feature/rooms.atom',
+        );
+        expect(createGithubCommitsUrlForBranchSelection(PROMPTBOOK_REPOSITORY, ['feature/rooms'])).toBe(
+            'https://github.com/hejny/promptbook/commits/feature/rooms',
+        );
+        expect(createGithubCommitsUrlForBranchSelection(PROMPTBOOK_REPOSITORY, ['main', 'feature/rooms'])).toBe(
+            'https://github.com/hejny/promptbook/commits',
         );
     });
 });

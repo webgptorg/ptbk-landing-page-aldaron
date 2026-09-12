@@ -92,10 +92,12 @@ export type WorkshopRow = {
     readonly preview_youtube_video_id: string | null;
 
     /**
-     * The project this term is about, written as `owner/name`, together with the branch which is followed and the
-     * address the project runs at, all three of which a term without a connected project leaves empty
+     * The project this term is about, written as `owner/name`, together with the selected branch array and the address
+     * the project runs at, all of which a term without a connected project leaves empty
      */
     readonly github_repository?: string | null;
+    readonly github_repository_branches?: readonly string[] | null;
+    /** Kept only so old in-memory rows can still be mapped while the branch migration is rolled out. */
     readonly github_repository_branch?: string | null;
     readonly deployment_url?: string | null;
     readonly is_published: boolean;
@@ -434,7 +436,10 @@ export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
         previewYoutubeVideoId: row.preview_youtube_video_id,
         repository: createWorkshopRepositoryOrNull({
             repository: row.github_repository ?? null,
-            branch: row.github_repository_branch ?? null,
+            branch:
+                row.github_repository_branches === undefined
+                    ? row.github_repository_branch ?? null
+                    : row.github_repository_branches,
             deploymentUrl: row.deployment_url ?? null,
         }),
         allowedReactions: row.allowed_reactions,

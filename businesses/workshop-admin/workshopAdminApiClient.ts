@@ -53,7 +53,7 @@ export type WorkshopWriteValues = {
      * The project this term is about, or `null` to disconnect the project it was about
      *
      * Note: The whole connection is written at once, so setting, changing, and unsetting it are one and the same
-     *       request and a branch or a deployment can never outlive the repository it belongs to.
+     *       request and branch selection or a deployment can never outlive the repository it belongs to.
      */
     readonly repository?: WorkshopRepositoryWriteValues | null;
     readonly allowedReactions?: readonly string[];
@@ -67,7 +67,8 @@ export type WorkshopRepositoryWriteValues = {
      * The repository, written either as its address or as `owner/name`
      */
     readonly url: string;
-    readonly branch: string | null;
+    /** `null` follows the default branch, an empty array follows all branches. */
+    readonly branch: string | readonly string[] | null;
     readonly deploymentUrl: string | null;
 };
 

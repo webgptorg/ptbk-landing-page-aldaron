@@ -1,19 +1,25 @@
-import { extractGithubBranchName, extractGithubRepository, type GithubRepository } from '@/lib/github/githubRepository';
+import {
+    extractGithubBranchSelection,
+    extractGithubRepository,
+    type GithubBranchSelection,
+    type GithubRepository,
+} from '@/lib/github/githubRepository';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 
 /**
  * The project one workshop is about
  *
- * Note: A term either is about a project or is about none, so the branch which is followed and the address the project
- *       runs at belong to the repository rather than standing beside it. That is what lets the administration set,
- *       change, and unset the whole connection at once, and what keeps a room from following a branch of a repository
- *       nobody connected.
+ * Note: A term either is about a project or is about none, so the branch selection and the address the project runs at
+ *       belong to the repository rather than standing beside it. That is what lets the administration set, change, and
+ *       unset the whole connection at once, and what keeps a room from following a branch of a repository nobody
+ *       connected.
  */
 export type WorkshopRepository = GithubRepository & {
     /**
-     * The branch the workshop follows, `null` when it follows the branch the repository is read at by default
+     * The branch selection the workshop follows. `null` is the repository default branch, a string or non-empty array
+     * names selected branches, and an empty array explicitly means all branches.
      */
-    readonly branch: string | null;
+    readonly branch: GithubBranchSelection;
 
     /**
      * Where the project of the workshop runs, `null` when it is published nowhere
@@ -30,7 +36,7 @@ export type WorkshopRepository = GithubRepository & {
  */
 export function createWorkshopRepositoryOrNull(values: {
     readonly repository: string | null;
-    readonly branch: string | null;
+    readonly branch: string | readonly string[] | null;
     readonly deploymentUrl: string | null;
 }): WorkshopRepository | null {
     const repository = extractGithubRepository(values.repository);
@@ -43,7 +49,7 @@ export function createWorkshopRepositoryOrNull(values: {
 
     return {
         ...repository,
-        branch: extractGithubBranchName(values.branch),
+        branch: extractGithubBranchSelection(values.branch),
         deploymentUrl: values.deploymentUrl === null ? null : normalizePublicWebPageUrl(values.deploymentUrl),
     };
 }

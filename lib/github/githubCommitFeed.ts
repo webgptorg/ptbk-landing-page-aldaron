@@ -26,6 +26,16 @@ export type GithubCommit = {
      * Moment the commit was made, as an ISO 8601 string
      */
     readonly committedAt: string;
+
+    /**
+     * The commits directly before this one, available from the GitHub API and absent from the small Atom feed
+     */
+    readonly parentShas?: readonly string[];
+
+    /**
+     * The branches whose histories contained this commit when several histories were merged for a room
+     */
+    readonly branchNames?: readonly string[];
 };
 
 const COMMIT_SHA_PATTERN = /[0-9a-f]{7,40}/i;

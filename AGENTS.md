@@ -144,11 +144,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   can select, replace, clear, or create the displayed comment through the same
   private realtime channel used by reactions.
 - A term can be about a project. The connection is one value — GitHub repository,
-  optional branch, optional deployment URL — so it is set, changed, and unset at
-  once and neither branch nor deployment outlives its repository. Room kinds which
-  offer it are named in `lib/workshops/workshopKindCapabilities.ts`. The room shows
-  the repository, its links, and the newest commits, marking those which arrive
-  while a participant watches. Commits come from the public commit feed, keyless,
+  the default branch, one selected branch, several selected branches, or all
+  branches, and an optional deployment URL — so it is set, changed, and unset at
+  once and neither branch selection nor deployment outlives its repository. Room
+  kinds which offer it are named in `lib/workshops/workshopKindCapabilities.ts`.
+  The room shows the repository, its links, and the newest commits, marking those
+  which arrive while a participant watches; multiple branch selections are shown
+  as a commit graph. Commits come from the public commit feed or keyless API,
   cached once per server, and read beside the room state; an unreadable feed still
   leaves the room naming its project.
 - Paid-only materials are decided on the server in one pass. Members receive
@@ -190,7 +192,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   source is unpublished. Duplicating a workshop also makes fresh copies of its
   attached polls without copying participant votes or room history. Stage settings contain
   the live stream and recording teaser, and project settings the repository the
-  term is about, written as an address or as `owner/name`. An end may be empty;
+  term is about, written as an address or as `owner/name`, together with its branch
+  selection. An end may be empty;
   admins can record, adjust, clear, and reopen it. Overview analytics are zoomable and share their
   room, section, lines, reaction, zoom, and keyword metrics through query params.
 - Community administration is the workshop dashboard restricted to the

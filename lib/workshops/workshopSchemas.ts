@@ -12,6 +12,7 @@ import {
     MAXIMAL_WORKSHOP_PARTICIPANT_EMAIL_LENGTH,
     MAXIMAL_WORKSHOP_PRESENCE_REPORT_SECONDS,
     MAXIMAL_WORKSHOP_REACTION_LENGTH,
+    MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH,
     MAXIMAL_WORKSHOP_SLUG_LENGTH,
     MINIMAL_WORKSHOP_POLL_OPTION_COUNT,
@@ -74,14 +75,21 @@ const workshopDisabledPanelsSchema = z
 /**
  * The project one term is about, written as one whole connection
  *
- * Note: The branch and the deployment belong to the repository, so they are written together with it and cannot be
- *       left behind by unsetting it. A repository, a branch, or an address which cannot be read is refused instead of
- *       being stored as a connection leading nowhere.
+ * Note: The branch selection and the deployment belong to the repository, so they are written together with it and
+ *       cannot be left behind by unsetting it. A repository, a branch, or an address which cannot be read is refused
+ *       instead of being stored as a connection leading nowhere.
  */
+const workshopRepositoryBranchNameSchema = z.string().trim().max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH);
+const workshopRepositoryBranchesSchema = z
+    .array(workshopRepositoryBranchNameSchema)
+    .max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT)
+    .refine((branches) => new Set(branches).size === branches.length, 'Workshop branches must be unique');
 const workshopRepositoryWriteSchema = z
     .object({
         url: z.string().trim().max(2_000),
-        branch: z.union([z.string().trim().max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH), z.null()]).default(null),
+        branch: z
+            .union([workshopRepositoryBranchNameSchema, workshopRepositoryBranchesSchema, z.null()])
+            .default(null),
         deploymentUrl: z.union([z.string().trim().max(2_000), z.null()]).default(null),
     })
     .transform((values, context) => {
@@ -95,11 +103,18 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        // Note: A branch and a deployment are optional, so an unwritten one is no branch and no deployment, while one
-        //       which was written and cannot be read is refused rather than silently dropped.
+        // Note: An empty text value is the default branch, an empty array is the explicit all-branches choice, and a
+        //       non-empty array lets the administrator follow several branch histories together.
         const writtenBranch = values.branch === '' ? null : values.branch;
-        const branch = writtenBranch === null ? null : extractGithubBranchName(writtenBranch);
-        if (writtenBranch !== null && branch === null) {
+        const branch = Array.isArray(writtenBranch)
+            ? writtenBranch.map((branchName) => extractGithubBranchName(branchName))
+            : writtenBranch === null
+              ? null
+              : extractGithubBranchName(writtenBranch);
+        if (
+            (Array.isArray(branch) && branch.some((branchName) => branchName === null)) ||
+            (branch === null && writtenBranch !== null)
+        ) {
             context.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ['branch'],
@@ -107,6 +122,10 @@ const workshopRepositoryWriteSchema = z
             });
             return z.NEVER;
         }
+
+        const normalizedBranch = Array.isArray(branch)
+            ? branch.filter((branchName): branchName is string => branchName !== null)
+            : branch;
 
         const writtenDeploymentUrl = values.deploymentUrl === '' ? null : values.deploymentUrl;
         const deploymentUrl =
@@ -120,7 +139,7 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        return { ...repository, branch, deploymentUrl } satisfies WorkshopRepository;
+        return { ...repository, branch: normalizedBranch, deploymentUrl } satisfies WorkshopRepository;
     });
 
 const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);

@@ -257,6 +257,47 @@ describe('workshop settings form', () => {
         );
     });
 
+    it('saves several selected branches as one connection', async () => {
+        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+
+        fireEvent.change(screen.getByDisplayValue('main'), {
+            target: { value: 'main\nfeature/rooms' },
+        });
+        submit();
+
+        await waitFor(() =>
+            expect(onSave).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    repository: {
+                        url: 'https://github.com/hejny/promptbook',
+                        branch: ['main', 'feature/rooms'],
+                        deploymentUrl: 'https://workshop.example/app',
+                    },
+                }),
+            ),
+        );
+    });
+
+    it('saves all branches as a distinct branch selection', async () => {
+        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+        const allBranchesCheckbox = screen.getByLabelText('Sledovat všechny větve');
+
+        fireEvent.click(allBranchesCheckbox);
+        submit();
+
+        await waitFor(() =>
+            expect(onSave).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    repository: {
+                        url: 'https://github.com/hejny/promptbook',
+                        branch: [],
+                        deploymentUrl: 'https://workshop.example/app',
+                    },
+                }),
+            ),
+        );
+    });
+
     it('disconnects the whole project once the repository is cleared', async () => {
         const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
 

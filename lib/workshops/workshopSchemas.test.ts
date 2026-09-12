@@ -147,6 +147,30 @@ describe('workshop request validation', () => {
         });
     });
 
+    it('keeps selected branches separate and distinguishes all branches from the default branch', () => {
+        expect(
+            workshopUpdateSchema.parse({
+                repository: { url: 'hejny/promptbook', branch: ['main', 'feature/rooms'] },
+            }).repository,
+        ).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: ['main', 'feature/rooms'],
+            deploymentUrl: null,
+        });
+        expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: [] } }).repository).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: [],
+            deploymentUrl: null,
+        });
+        expect(
+            workshopUpdateSchema.safeParse({
+                repository: { url: 'hejny/promptbook', branch: ['main', 'main'] },
+            }).success,
+        ).toBe(false);
+    });
+
     it('leaves a term about no project, and unsets the whole connection of one which was about a project', () => {
         expect(workshopCreateSchema.parse(VALID_WORKSHOP).repository).toBeNull();
         expect(workshopUpdateSchema.parse({ repository: null }).repository).toBeNull();

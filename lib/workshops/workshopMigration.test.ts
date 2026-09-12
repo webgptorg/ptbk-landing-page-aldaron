@@ -79,6 +79,14 @@ const WORKSHOP_REPOSITORY_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-0800-workshop-repository.sql',
 );
 const WORKSHOP_REPOSITORY_MIGRATION_SQL = readFileSync(WORKSHOP_REPOSITORY_MIGRATION_PATH, 'utf8');
+const WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-1200-workshop-repository-multiple-branches.sql',
+);
+const WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL = readFileSync(
+    WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_PATH,
+    'utf8',
+);
 const COMMUNITY_POLL_MIGRATION_PATH = path.resolve(process.cwd(), 'migrations/2026-08-2400-community-polls.sql');
 const COMMUNITY_POLL_MIGRATION_SQL = readFileSync(COMMUNITY_POLL_MIGRATION_PATH, 'utf8');
 const COMMUNITY_POLL_ADMINISTRATION_MIGRATION_PATH = path.resolve(
@@ -687,6 +695,27 @@ describe('workshop database migration', () => {
         );
         expect(WORKSHOP_REPOSITORY_MIGRATION_SQL).toContain(
             'OR (github_repository_branch IS NULL AND deployment_url IS NULL)',
+        );
+    });
+
+    it('migrates the repository branch into one array which distinguishes selected branches from all branches', () => {
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS github_repository_branches text[]',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
+            'SET github_repository_branches = ARRAY[github_repository_branch]',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
+            'DROP COLUMN IF EXISTS github_repository_branch',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
+            'cardinality(github_repository_branches) <= 50',
+        );
+    });
+
+    it('keeps branch selection and deployment tied to a connected repository after migration', () => {
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
+            'OR (github_repository_branches IS NULL AND deployment_url IS NULL)',
         );
     });
 

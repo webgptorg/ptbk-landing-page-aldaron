@@ -58,6 +58,8 @@ export const MAXIMAL_WORKSHOP_REPOSITORY_COMMIT_COUNT = 10;
  * How long a branch name may be, which is what Git itself allows a reference to be
  */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH = 255;
+/** How many branch names one workshop may select explicitly; an empty selection means all branches */
+export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT = 50;
 export const WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS = 60;
 
 /**

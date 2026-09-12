@@ -1,5 +1,12 @@
 # Current preversion
 
+- Let a workshop project follow the repository default branch, one selected branch, several selected branches, or every
+  branch. The administration keeps the selection with the repository in one save, carries existing branch settings
+  through the migration, and exports the selected branches without creating a second project record. A room reads the
+  newest commits from every selected branch through the cached public GitHub API, merges shared commits once, and shows
+  a VSCode-like commit graph whenever more than one branch is followed; the original compact commit list remains for
+  the default or single-branch view.
+
 - Simplified the `Projekt workshopu` panel in participant rooms to keep only the connected repository, its useful links,
   and the commit list. Repository description, branch, language, star count, and the redundant number of commits since
   the workshop began are no longer shown or fetched; new-commit marking and links to individual and all commits remain.

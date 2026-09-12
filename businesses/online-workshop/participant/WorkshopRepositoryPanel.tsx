@@ -1,28 +1,19 @@
 'use client';
 
+import { WorkshopRepositoryCommitCard } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitCard';
+import { WorkshopRepositoryGraph } from '@/businesses/online-workshop/participant/WorkshopRepositoryGraph';
 import { useWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
 import {
-    createGithubCommitsUrl,
-    createGithubCommitUrl,
+    createGithubCommitsUrlForBranchSelection,
     createGithubRepositoryUrl,
     formatGithubRepositoryName,
+    getGithubSelectedBranchNames,
+    isGithubMultipleBranchesSelection,
 } from '@/lib/github/githubRepository';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
-import type { WorkshopRepositoryProgress } from '@/lib/workshops/workshopRepositoryProgress';
-import { ExternalLink, GitCommitHorizontal, Github, RefreshCw, Rocket } from 'lucide-react';
-
-const CZECH_COMMIT_TIME_FORMAT = new Intl.DateTimeFormat('cs-CZ', {
-    day: 'numeric',
-    month: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-});
-
-/**
- * How much of a commit identifier is enough to recognise it, which is how Git itself writes one short
- */
-const SHORT_COMMIT_SHA_LENGTH = 7;
+import type { WorkshopRepositoryBranch } from '@/lib/workshops/workshopRepositoryProgress';
+import { ExternalLink, Github, RefreshCw, Rocket } from 'lucide-react';
 
 type WorkshopRepositoryPanelProps = {
     readonly workshopSlug: string;
@@ -50,6 +41,10 @@ function formatNewCommitCount(commitCount: number): string {
 export function WorkshopRepositoryPanel({ workshopSlug, repository }: WorkshopRepositoryPanelProps) {
     const { progress, isProgressRead, newCommitShas } = useWorkshopRepositoryProgress(workshopSlug);
     const repositoryName = formatGithubRepositoryName(repository);
+    const isMultipleBranchSelection = isGithubMultipleBranchesSelection(repository.branch);
+    const graphBranches: readonly WorkshopRepositoryBranch[] =
+        progress?.branches ??
+        getGithubSelectedBranchNames(repository.branch).map((branchName) => ({ name: branchName, headSha: null }));
 
     return (
         <section
@@ -108,51 +103,29 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository }: WorkshopRe
                 ) : (
                     <>
                         {progress.commits.length > 0 && (
-                            <ol className="space-y-2">
-                                {progress.commits.map((commit) => {
-                                    const isCommitNew = newCommitShas.has(commit.sha);
-
-                                    return (
+                            isMultipleBranchSelection ? (
+                                <WorkshopRepositoryGraph
+                                    repository={repository}
+                                    commits={progress.commits}
+                                    branches={graphBranches}
+                                    newCommitShas={newCommitShas}
+                                />
+                            ) : (
+                                <ol className="space-y-2">
+                                    {progress.commits.map((commit) => (
                                         <li key={commit.sha}>
-                                            <a
-                                                href={createGithubCommitUrl(repository, commit.sha)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className={`flex items-start gap-3 rounded-xl border px-3.5 py-2.5 transition ${
-                                                    isCommitNew
-                                                        ? 'border-amber-300/40 bg-amber-300/[0.08] hover:border-amber-200/70'
-                                                        : 'border-white/[0.08] bg-slate-950/30 hover:border-cyan-300/35 hover:bg-white/[0.05]'
-                                                }`}
-                                            >
-                                                <GitCommitHorizontal
-                                                    className={`mt-0.5 h-4 w-4 shrink-0 ${isCommitNew ? 'text-amber-300' : 'text-cyan-300'}`}
-                                                    aria-hidden="true"
-                                                />
-                                                <span className="min-w-0 flex-1">
-                                                    <span className="block break-words text-sm font-medium leading-5 text-slate-100">
-                                                        {commit.message}
-                                                    </span>
-                                                    <span className="mt-1 block text-xs text-slate-400">
-                                                        <span className="font-mono">
-                                                            {commit.sha.slice(0, SHORT_COMMIT_SHA_LENGTH)}
-                                                        </span>
-                                                        {commit.authorName !== null && ` · ${commit.authorName}`} ·{' '}
-                                                        {CZECH_COMMIT_TIME_FORMAT.format(new Date(commit.committedAt))}
-                                                    </span>
-                                                </span>
-                                                {isCommitNew && (
-                                                    <span className="shrink-0 rounded-full bg-amber-300 px-2 py-0.5 text-[11px] font-bold text-slate-950">
-                                                        Nový
-                                                    </span>
-                                                )}
-                                            </a>
+                                            <WorkshopRepositoryCommitCard
+                                                repository={repository}
+                                                commit={commit}
+                                                isNew={newCommitShas.has(commit.sha)}
+                                            />
                                         </li>
-                                    );
-                                })}
-                            </ol>
+                                    ))}
+                                </ol>
+                            )
                         )}
                         <a
-                            href={createGithubCommitsUrl(repository, repository.branch)}
+                            href={createGithubCommitsUrlForBranchSelection(repository, repository.branch)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-200 underline underline-offset-4 hover:text-cyan-100"

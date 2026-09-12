@@ -10,6 +10,20 @@ export type GithubRepository = {
 };
 
 /**
+ * The branches a workshop follows
+ *
+ * Note: `null` keeps the original meaning of following the repository's default branch. A non-empty array contains
+ * explicitly selected branches, while an empty array is the explicit choice to follow every branch. The three values
+ * are deliberately one shape everywhere so a connection cannot grow a second, conflicting branch setting.
+ */
+export type GithubBranchSelection = string | readonly string[] | null;
+
+export type GithubBranch = {
+    readonly name: string;
+    readonly headSha: string | null;
+};
+
+/**
  * How GitHub itself writes an account name and a repository name
  *
  * Note: An account is letters, digits and hyphens, a repository additionally a dot and an underscore. A repository
@@ -30,6 +44,8 @@ const GITHUB_BRANCH_PATTERN = /^[A-Za-z0-9._\-/]{1,255}$/;
 const GITHUB_HOSTNAMES = new Set(['github.com', 'www.github.com']);
 const GITHUB_SSH_PREFIX = 'git@github.com:';
 const GITHUB_REPOSITORY_URL_SUFFIX = '.git';
+const GITHUB_API_URL = 'https://api.github.com';
+const GITHUB_API_REPOSITORY_PATH_PREFIX = '/repos';
 
 function createGithubRepositoryOrNull(owner: string | undefined, name: string | undefined): GithubRepository | null {
     // Note: The address `git clone` is given ends with `.git`, which is not a part of the name of the repository.
@@ -114,6 +130,68 @@ export function extractGithubBranchName(value: string | null | undefined): strin
 }
 
 /**
+ * Reads the branch selection stored for a workshop, leaving an invalid database value at the safe default branch
+ * rather than constructing a URL from it.
+ */
+export function extractGithubBranchSelection(
+    value: string | readonly string[] | null | undefined,
+): GithubBranchSelection {
+    if (typeof value !== 'string' && value !== null && value !== undefined) {
+        const branches = value.map((branch) => extractGithubBranchName(branch));
+        if (branches.some((branch) => branch === null) || new Set(branches).size !== branches.length) {
+            return null;
+        }
+
+        const validBranches = branches.filter((branch): branch is string => branch !== null);
+        return validBranches.length === 1 ? validBranches[0] : validBranches;
+    }
+
+    return extractGithubBranchName(value);
+}
+
+/**
+ * Turns the one branch selection into the database array representation. `[]` is the explicit all-branches choice;
+ * `null` is the legacy/default-branch choice.
+ */
+export function serializeGithubBranchSelection(selection: GithubBranchSelection): readonly string[] | null {
+    if (selection === null) {
+        return null;
+    }
+
+    return typeof selection === 'string' ? [selection] : selection;
+}
+
+export function isGithubAllBranchesSelection(selection: GithubBranchSelection): boolean {
+    return typeof selection !== 'string' && selection !== null && selection.length === 0;
+}
+
+export function isGithubMultipleBranchesSelection(selection: GithubBranchSelection): boolean {
+    return typeof selection !== 'string' && selection !== null && (selection.length === 0 || selection.length > 1);
+}
+
+/**
+ * The branch names explicitly named by a selection, leaving the default branch unnamed because GitHub chooses it.
+ */
+export function getGithubSelectedBranchNames(selection: GithubBranchSelection): readonly string[] {
+    if (selection === null) {
+        return [];
+    }
+
+    return typeof selection === 'string' ? [selection] : selection;
+}
+
+/**
+ * Gives an administrator-facing compact value for the branch selection, while leaving the default choice empty
+ */
+export function formatGithubBranchSelection(selection: GithubBranchSelection): string | null {
+    if (selection === null) {
+        return null;
+    }
+
+    return isGithubAllBranchesSelection(selection) ? 'Všechny větve' : getGithubSelectedBranchNames(selection).join(', ');
+}
+
+/**
  * Writes a repository the way GitHub names it, for example `hejny/promptbook`
  */
 export function formatGithubRepositoryName({ owner, name }: GithubRepository): string {
@@ -145,6 +223,47 @@ export function createGithubCommitsUrl(repository: GithubRepository, branch: str
  */
 export function createGithubCommitFeedUrl(repository: GithubRepository, branch: string | null): string {
     return `${createGithubCommitsUrl(repository, branch)}.atom`;
+}
+
+function createGithubApiRepositoryUrl(repository: GithubRepository): string {
+    return `${GITHUB_API_URL}${GITHUB_API_REPOSITORY_PATH_PREFIX}/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.name)}`;
+}
+
+/**
+ * The keyless GitHub API address which lists the branches of a repository
+ */
+export function createGithubApiBranchesUrl(repository: GithubRepository, page: number, pageSize: number): string {
+    const url = new URL(`${createGithubApiRepositoryUrl(repository)}/branches`);
+    url.searchParams.set('per_page', String(pageSize));
+    url.searchParams.set('page', String(page));
+    return url.toString();
+}
+
+/**
+ * The keyless GitHub API address which reads a branch's commits, including their parents for the graph
+ */
+export function createGithubApiCommitsUrl(
+    repository: GithubRepository,
+    branch: string,
+    page: number,
+    pageSize: number,
+): string {
+    const url = new URL(`${createGithubApiRepositoryUrl(repository)}/commits`);
+    url.searchParams.set('sha', branch);
+    url.searchParams.set('per_page', String(pageSize));
+    url.searchParams.set('page', String(page));
+    return url.toString();
+}
+
+/**
+ * Links to the commits selected by a workshop, with a repository-wide page for more than one branch
+ */
+export function createGithubCommitsUrlForBranchSelection(
+    repository: GithubRepository,
+    selection: GithubBranchSelection,
+): string {
+    const selectedBranchNames = getGithubSelectedBranchNames(selection);
+    return createGithubCommitsUrl(repository, selectedBranchNames.length === 1 ? selectedBranchNames[0]! : null);
 }
 
 export function createGithubCommitUrl(repository: GithubRepository, commitSha: string): string {

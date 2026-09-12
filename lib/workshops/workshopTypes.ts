@@ -95,9 +95,9 @@ export type WorkshopDetails = WorkshopSummary & {
     /**
      * The project this workshop is about, or `null` while no project is connected to it
      *
-     * Note: This is the whole connection — the repository, the branch which is followed, and the address the project
-     *       runs at — so the administration sets, changes, and unsets it as one thing. What has been committed in it
-     *       is deliberately not part of it: that is read from GitHub, see `fetchWorkshopRepositoryProgress`.
+     * Note: This is the whole connection — the repository, its branch selection, and the address the project runs at
+     *       — so the administration sets, changes, and unsets it as one thing. What has been committed in it is
+     *       deliberately not part of it: that is read from GitHub, see `fetchWorkshopRepositoryProgress`.
      */
     readonly repository: WorkshopRepository | null;
     readonly allowedReactions: readonly string[];

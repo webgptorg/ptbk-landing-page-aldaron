@@ -1,6 +1,6 @@
 import { serializeRowsAsCsv } from '@/lib/exports/serializeRowsAsCsv';
 import { serializeVcards } from '@/lib/exports/serializeVcards';
-import { formatGithubRepositoryName } from '@/lib/github/githubRepository';
+import { formatGithubBranchSelection, formatGithubRepositoryName } from '@/lib/github/githubRepository';
 import type {
     WorkshopAdminComment,
     WorkshopAdminParticipant,
@@ -88,7 +88,8 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
                       },
                       {
                           header: 'Větev repozitáře',
-                          getValue: (item: WorkshopDetails) => item.repository?.branch ?? null,
+                          getValue: (item: WorkshopDetails) =>
+                              item.repository === null ? null : formatGithubBranchSelection(item.repository.branch),
                       },
                       {
                           header: 'URL nasazení',

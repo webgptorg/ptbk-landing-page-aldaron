@@ -10,13 +10,17 @@ import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
  */
 export type WorkshopRepositoryDraft = {
     readonly repositoryUrl: string;
+    /** One branch per line; an empty value follows the repository default branch. */
     readonly branch: string;
+    /** An explicit all-branches choice, distinct from the empty default-branch value. */
+    readonly isAllBranches: boolean;
     readonly deploymentUrl: string;
 };
 
 export const EMPTY_WORKSHOP_REPOSITORY_DRAFT: WorkshopRepositoryDraft = {
     repositoryUrl: '',
     branch: '',
+    isAllBranches: false,
     deploymentUrl: '',
 };
 
@@ -30,9 +34,22 @@ export function createWorkshopRepositoryDraft(repository: WorkshopRepository | n
 
     return {
         repositoryUrl: createGithubRepositoryUrl(repository),
-        branch: repository.branch ?? '',
+        branch:
+            repository.branch === null
+                ? ''
+                : typeof repository.branch === 'string'
+                  ? repository.branch
+                  : repository.branch.join('\n'),
+        isAllBranches: repository.branch !== null && typeof repository.branch !== 'string' && repository.branch.length === 0,
         deploymentUrl: repository.deploymentUrl ?? '',
     };
+}
+
+function readWrittenBranches(branchValue: string): readonly string[] {
+    return branchValue
+        .split(/[,\r\n]/)
+        .map((branch) => branch.trim())
+        .filter((branch) => branch !== '');
 }
 
 /**
@@ -49,9 +66,19 @@ export function createWorkshopRepositoryWriteValues(
         return null;
     }
 
+    if (draft.isAllBranches) {
+        return {
+            url: repositoryUrl,
+            branch: [],
+            deploymentUrl: draft.deploymentUrl.trim() || null,
+        };
+    }
+
+    const branches = readWrittenBranches(draft.branch);
+
     return {
         url: repositoryUrl,
-        branch: draft.branch.trim() || null,
+        branch: branches.length === 0 ? null : branches.length === 1 ? branches[0] : branches,
         deploymentUrl: draft.deploymentUrl.trim() || null,
     };
 }

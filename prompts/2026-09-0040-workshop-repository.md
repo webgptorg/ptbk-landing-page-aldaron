@@ -37,7 +37,7 @@ Od začátku workshopu přibylo 2 commity.
 
 ---
 
-[ ]
+[x] by OpenAI Codex `gpt-5.6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.9708 25 minutes; Testing 8 minutes
 
 [✨🤌] Allow multiple branches for the project connected to the workshop.
 
@@ -64,4 +64,5 @@ Od začátku workshopu přibylo 2 commity.
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+
 

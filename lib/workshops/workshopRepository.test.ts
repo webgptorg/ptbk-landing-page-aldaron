@@ -17,6 +17,24 @@ describe('the stored project of a workshop', () => {
         });
     });
 
+    it('reads selected branches and preserves an explicit all-branches selection', () => {
+        expect(
+            createWorkshopRepositoryOrNull({
+                repository: 'hejny/promptbook',
+                branch: ['main', 'feature/rooms'],
+                deploymentUrl: null,
+            }),
+        ).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: ['main', 'feature/rooms'],
+            deploymentUrl: null,
+        });
+        expect(
+            createWorkshopRepositoryOrNull({ repository: 'hejny/promptbook', branch: [], deploymentUrl: null }),
+        ).toEqual({ owner: 'hejny', name: 'promptbook', branch: [], deploymentUrl: null });
+    });
+
     it('is no project at all for a room which is about none', () => {
         expect(
             createWorkshopRepositoryOrNull({ repository: null, branch: null, deploymentUrl: null }),
