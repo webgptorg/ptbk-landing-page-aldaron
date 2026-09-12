@@ -2,6 +2,8 @@
 
 import { WorkshopWrapUp } from '@/businesses/online-workshop/participant/WorkshopWrapUp';
 import { WorkshopStageComment } from '@/businesses/online-workshop/participant/WorkshopStageComment';
+import { WorkshopRepositoryCommitNotification } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitNotification';
+import { useWorkshopRepositoryCommitNotification } from '@/businesses/online-workshop/participant/useWorkshopRepositoryCommitNotification';
 import type { SubscribeToWorkshopReactions } from '@/businesses/online-workshop/participant/useWorkshopReactionAnimations';
 import type { WorkshopFeedbackValues } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import { useWorkshopReactionStream } from '@/components/workshops/useWorkshopReactionStream';
@@ -10,6 +12,8 @@ import { trackGoogleAnalyticsEvent } from '@/lib/tracking/track-google-analytics
 import { createYoutubeEmbedUrl } from '@/lib/youtube/youtubeEmbed';
 import { keepYoutubeVideoSubtitlesHidden, unmuteYoutubeVideo } from '@/lib/youtube/youtubePlayerCommands';
 import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
+import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import type {
     WorkshopCommentReference,
     WorkshopContentBlock,
@@ -33,6 +37,12 @@ type WorkshopStageProps = {
      * Note: The stage keeps the flying reactions itself, so a busy room re-renders nothing but the stage they fly over.
      */
     readonly subscribeToReactions: SubscribeToWorkshopReactions;
+
+    /** The project connected to this workshop, if there is one */
+    readonly repository?: WorkshopRepository | null;
+
+    /** Offers the stage commits found by the repository monitor or its polling fallback */
+    readonly subscribeToRepositoryCommits?: SubscribeToWorkshopRepositoryCommits;
 
     /**
      * All of these values are supplied by the participant room in production. Defaults keep this low-level stage usable
@@ -77,6 +87,8 @@ export function WorkshopStage({
     workshop,
     serverTime,
     subscribeToReactions,
+    repository = null,
+    subscribeToRepositoryCommits,
     feedback = null,
     followUpContentBlock = null,
     stageComment = null,
@@ -94,6 +106,12 @@ export function WorkshopStage({
     const isWorkshopOngoing = phase === 'ongoing';
     const isWorkshopPast = phase === 'past';
     const remainingMilliseconds = Date.parse(workshop.startsAt) - currentTime;
+    const newRepositoryCommit = useWorkshopRepositoryCommitNotification({
+        workshopSlug: workshop.slug,
+        isWorkshopOngoing,
+        isEnabled: repository !== null,
+        subscribeToRepositoryCommits,
+    });
 
     // Note: Once the workshop is over, the room only holds its video for the members whose membership pays for it, and
     //       the server is what decides that. The wrap-up therefore keeps its feedback for everybody and gains either
@@ -235,6 +253,13 @@ export function WorkshopStage({
             )}
 
             <WorkshopReactionStream reactions={flyingReactions} />
+            {isWorkshopOngoing && newRepositoryCommit !== null && repository !== null && (
+                <WorkshopRepositoryCommitNotification
+                    key={newRepositoryCommit.sha}
+                    repository={repository}
+                    commit={newRepositoryCommit}
+                />
+            )}
             {isWorkshopOngoing && <WorkshopStageComment stageComment={stageComment} />}
 
             {isWorkshopOngoing && workshop.youtubeVideoId && (

@@ -20,15 +20,17 @@ import { WorkshopServerConnectionStatus } from '@/businesses/online-workshop/par
 import { WorkshopWatchingBadge } from '@/businesses/online-workshop/participant/WorkshopWatchingBadge';
 import { useWorkshopParticipantOfflineSupport } from '@/businesses/online-workshop/participant/useWorkshopParticipantOfflineSupport';
 import { useWorkshopParticipant } from '@/businesses/online-workshop/participant/useWorkshopParticipant';
+import { useWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
 import { WorkshopLinksPanel } from '@/components/workshops/WorkshopLinksPanel';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { isWorkshopPanelOffered, type WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import { WORKSHOP_SEARCH_PARAMETER_NAME } from '@/lib/workshops/workshopParticipantLink';
+import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { RefreshCw, Radio } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, type ReactNode } from 'react';
+import { useCallback, useEffect, type ReactNode } from 'react';
 
 /**
  * What it takes to offer this workshop to the calendar of a participant
@@ -131,6 +133,24 @@ export function OnlineWorkshopParticipantPage({
 }: OnlineWorkshopParticipantPageProps) {
     const controller = useWorkshopParticipant(workshopSlug);
     useWorkshopParticipantOfflineSupport();
+    const isRepositoryProgressEnabled =
+        controller.state !== null &&
+        getWorkshopKindCapabilities(controller.state.workshop.kind).isRepositoryOffered &&
+        controller.state.workshop.repository !== null;
+    const repositoryProgressController = useWorkshopRepositoryProgress(workshopSlug, isRepositoryProgressEnabled);
+    const subscribeToRepositoryCommits = useCallback<SubscribeToWorkshopRepositoryCommits>(
+        (listener) => {
+            const unsubscribeFromRealtime = controller.subscribeToRepositoryCommits?.(listener) ?? (() => undefined);
+            const unsubscribeFromPolling =
+                repositoryProgressController.subscribeToNewCommits?.(listener) ?? (() => undefined);
+
+            return () => {
+                unsubscribeFromRealtime();
+                unsubscribeFromPolling();
+            };
+        },
+        [controller.subscribeToRepositoryCommits, repositoryProgressController.subscribeToNewCommits],
+    );
 
     useEffect(() => {
         if (controller.state === null) {
@@ -286,6 +306,8 @@ export function OnlineWorkshopParticipantPage({
                             workshop={state.workshop}
                             serverTime={state.serverTime}
                             subscribeToReactions={controller.subscribeToReactions}
+                            repository={state.workshop.repository}
+                            subscribeToRepositoryCommits={subscribeToRepositoryCommits}
                             feedback={state.feedback}
                             followUpContentBlock={followUpContentBlock}
                             stageComment={state.stageComment}
@@ -299,8 +321,8 @@ export function OnlineWorkshopParticipantPage({
                       */}
                     {roomCapabilities.isRepositoryOffered && state.workshop.repository !== null && (
                         <WorkshopRepositoryPanel
-                            workshopSlug={workshopSlug}
                             repository={state.workshop.repository}
+                            progressController={repositoryProgressController}
                         />
                     )}
                     {calendarDetails !== null && (

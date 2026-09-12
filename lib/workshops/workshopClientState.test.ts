@@ -79,6 +79,17 @@ describe('workshop realtime events', () => {
             }),
         ).toBe(true);
         expect(isWorkshopRealtimeEvent({ kind: 'stage-comment', stageComment: null })).toBe(true);
+        expect(
+            isWorkshopRealtimeEvent({
+                kind: 'repository-commit',
+                commit: {
+                    sha: '6dcb09b5b57875f334f61aebed695e2e4193db5b',
+                    message: 'Přidat oznámení commitů',
+                    authorName: 'Pavol Hejný',
+                    committedAt: '2026-08-20T17:00:00.000Z',
+                },
+            }),
+        ).toBe(true);
     });
 
     it('rejects malformed broadcast payloads before they reach the UI', () => {
@@ -98,6 +109,12 @@ describe('workshop realtime events', () => {
         ).toBe(false);
         expect(isWorkshopRealtimeEvent({ kind: 'upvote', commentId: 'comment-1', upvoteCount: -1 })).toBe(false);
         expect(isWorkshopRealtimeEvent({ kind: 'stage-comment', stageComment: { id: 'comment-1' } })).toBe(false);
+        expect(
+            isWorkshopRealtimeEvent({
+                kind: 'repository-commit',
+                commit: { sha: 'commit-1', message: 'Commit', authorName: 'Pavol', committedAt: 123 },
+            }),
+        ).toBe(false);
         expect(isWorkshopRealtimeEvent({ kind: 'unknown' })).toBe(false);
     });
 });

@@ -2,10 +2,13 @@
 
 import { fetchWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import {
-    selectNewWorkshopRepositoryCommitShas,
+    selectNewWorkshopRepositoryCommits,
+    type WorkshopRepositoryCommitListener,
+    type SubscribeToWorkshopRepositoryCommits,
     type WorkshopRepositoryProgress,
 } from '@/lib/workshops/workshopRepositoryProgress';
-import { useEffect, useRef, useState } from 'react';
+import { WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * How often an open room asks what has been committed in the project of the workshop
@@ -13,7 +16,7 @@ import { useEffect, useRef, useState } from 'react';
  * Note: The server reuses one answer of GitHub for a while, see `WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS`, so
  *       asking this often costs one request of this application per participant and no more requests to GitHub.
  */
-const WORKSHOP_REPOSITORY_REFRESH_INTERVAL_MILLISECONDS = 60_000;
+const WORKSHOP_REPOSITORY_REFRESH_INTERVAL_MILLISECONDS = WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS * 1_000;
 
 export type WorkshopRepositoryProgressController = {
     /**
@@ -30,6 +33,11 @@ export type WorkshopRepositoryProgressController = {
      * The commits which arrived while this participant had the room open
      */
     readonly newCommitShas: ReadonlySet<string>;
+
+    /**
+     * Lets the stage hear about a commit as soon as the repository monitor or the polling fallback finds it
+     */
+    readonly subscribeToNewCommits: SubscribeToWorkshopRepositoryCommits;
 };
 
 /**
@@ -39,10 +47,14 @@ export type WorkshopRepositoryProgressController = {
  *       afterwards is marked. A room which is not in front of anybody stops asking, exactly as the rest of the room
  *       does, and keeps the last answer it received rather than emptying itself when GitHub cannot be reached.
  */
-export function useWorkshopRepositoryProgress(workshopSlug: string): WorkshopRepositoryProgressController {
+export function useWorkshopRepositoryProgress(
+    workshopSlug: string,
+    isEnabled = true,
+): WorkshopRepositoryProgressController {
     const [progress, setProgress] = useState<WorkshopRepositoryProgress | null>(null);
     const [isProgressRead, setIsProgressRead] = useState(false);
     const [newCommitShas, setNewCommitShas] = useState<ReadonlySet<string>>(new Set());
+    const commitListenersRef = useRef(new Set<WorkshopRepositoryCommitListener>());
     /**
      * Every commit this room has already read, which is nothing at all until it has read the repository once
      */
@@ -56,6 +68,10 @@ export function useWorkshopRepositoryProgress(workshopSlug: string): WorkshopRep
         setIsProgressRead(false);
         setNewCommitShas(new Set());
 
+        if (!isEnabled) {
+            return;
+        }
+
         const rememberArrivedCommits = (readProgress: WorkshopRepositoryProgress | null) => {
             const commits = readProgress?.commits ?? [];
             const knownCommitShas = knownCommitShasRef.current;
@@ -65,17 +81,23 @@ export function useWorkshopRepositoryProgress(workshopSlug: string): WorkshopRep
                 return;
             }
 
-            const arrivedCommitShas = selectNewWorkshopRepositoryCommitShas(knownCommitShas, commits);
-            if (arrivedCommitShas.length === 0) {
+            const arrivedCommits = selectNewWorkshopRepositoryCommits(knownCommitShas, commits);
+            if (arrivedCommits.length === 0) {
                 return;
             }
 
-            arrivedCommitShas.forEach((commitSha) => knownCommitShas.add(commitSha));
+            arrivedCommits.forEach((commit) => knownCommitShas.add(commit.sha));
             setNewCommitShas((previousCommitShas) => {
                 const markedCommitShas = new Set<string>();
                 previousCommitShas.forEach((commitSha) => markedCommitShas.add(commitSha));
-                arrivedCommitShas.forEach((commitSha) => markedCommitShas.add(commitSha));
+                arrivedCommits.forEach((commit) => markedCommitShas.add(commit.sha));
                 return markedCommitShas;
+            });
+
+            // The response is newest-first. Announcing oldest-first leaves the newest commit on top when several
+            // commits arrived between two reads, while the persistent list still marks all of them.
+            [...arrivedCommits].reverse().forEach((commit) => {
+                commitListenersRef.current.forEach((listener) => listener(commit));
             });
         };
 
@@ -116,7 +138,14 @@ export function useWorkshopRepositoryProgress(workshopSlug: string): WorkshopRep
             isCurrentWorkshop = false;
             window.clearInterval(intervalId);
         };
-    }, [workshopSlug]);
+    }, [isEnabled, workshopSlug]);
 
-    return { progress, isProgressRead, newCommitShas };
+    const subscribeToNewCommits = useCallback<SubscribeToWorkshopRepositoryCommits>((listener) => {
+        commitListenersRef.current.add(listener);
+        return () => {
+            commitListenersRef.current.delete(listener);
+        };
+    }, []);
+
+    return { progress, isProgressRead, newCommitShas, subscribeToNewCommits };
 }

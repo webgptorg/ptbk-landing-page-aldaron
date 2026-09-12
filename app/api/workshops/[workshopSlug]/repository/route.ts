@@ -1,6 +1,6 @@
-import { fetchWorkshopRepositoryProgress } from '@/lib/workshops/fetchWorkshopRepositoryProgress';
 import { mapWorkshopRow } from '@/lib/workshops/workshopDatabase';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
+import { watchWorkshopRepository } from '@/lib/workshops/workshopRepositoryMonitor';
 import { getAuthenticatedWorkshopRequest, isAuthenticatedWorkshopRequest } from '@/lib/workshops/workshopRequest';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -29,6 +29,13 @@ export async function GET(request: NextRequest, context: WorkshopRepositoryRoute
         return NextResponse.json({ error: 'Workshop repository not found' }, { status: 404 });
     }
 
-    const progress = await fetchWorkshopRepositoryProgress(workshop.repository);
+    const progress = await watchWorkshopRepository({
+        repository: workshop.repository,
+        room: {
+            room_kind: workshopRow.room_kind,
+            slug: workshopRow.slug,
+        },
+        supabase: authenticatedRequest.supabase,
+    });
     return NextResponse.json({ progress }, { headers: { 'Cache-Control': 'no-store' } });
 }

@@ -2,7 +2,7 @@
 
 import { WorkshopRepositoryCommitCard } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitCard';
 import { WorkshopRepositoryGraph } from '@/businesses/online-workshop/participant/WorkshopRepositoryGraph';
-import { useWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
+import type { WorkshopRepositoryProgressController } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
 import {
     createGithubCommitsUrlForBranchSelection,
     createGithubRepositoryUrl,
@@ -16,12 +16,14 @@ import type { WorkshopRepositoryBranch } from '@/lib/workshops/workshopRepositor
 import { ExternalLink, Github, RefreshCw, Rocket } from 'lucide-react';
 
 type WorkshopRepositoryPanelProps = {
-    readonly workshopSlug: string;
-
     /**
      * The project this workshop is about, as its administration connected it
      */
     readonly repository: WorkshopRepository;
+    readonly progressController: Pick<
+        WorkshopRepositoryProgressController,
+        'progress' | 'isProgressRead' | 'newCommitShas'
+    >;
 };
 
 /**
@@ -38,8 +40,8 @@ function formatNewCommitCount(commitCount: number): string {
  *       see `useWorkshopRepositoryProgress`. That is why the repository and its links are shown even when GitHub
  *       cannot be reached.
  */
-export function WorkshopRepositoryPanel({ workshopSlug, repository }: WorkshopRepositoryPanelProps) {
-    const { progress, isProgressRead, newCommitShas } = useWorkshopRepositoryProgress(workshopSlug);
+export function WorkshopRepositoryPanel({ repository, progressController }: WorkshopRepositoryPanelProps) {
+    const { progress, isProgressRead, newCommitShas } = progressController;
     const repositoryName = formatGithubRepositoryName(repository);
     const isMultipleBranchSelection = isGithubMultipleBranchesSelection(repository.branch);
     const graphBranches: readonly WorkshopRepositoryBranch[] =

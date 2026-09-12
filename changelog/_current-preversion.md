@@ -1,5 +1,10 @@
 # Current preversion
 
+- Let a new commit in a workshop's connected GitHub project arrive in the live room without a page refresh: the server
+  pools repository reads and broadcasts one validated commit event to every active room, while the existing cached
+  polling remains the fallback. The stage announces the newest commit for ten seconds and the project panel keeps its
+  persistent new-commit marking.
+
 - Let a workshop project follow the repository default branch, one selected branch, several selected branches, or every
   branch. The administration keeps the selection with the repository in one save, carries existing branch settings
   through the migration, and exports the selected branches without creating a second project record. A room reads the

@@ -1,6 +1,7 @@
 import type { AdminContactJoin } from '@/lib/admin/adminContactJoin';
 import type { CommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import type { EventDetails } from '@/lib/events/event';
+import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 
@@ -563,4 +564,5 @@ export type WorkshopRealtimeEvent =
     | { readonly kind: 'state-changed' }
     | { readonly kind: 'reaction'; readonly reaction: WorkshopReaction; readonly reactionCount: number }
     | { readonly kind: 'upvote'; readonly commentId: string; readonly upvoteCount: number }
-    | { readonly kind: 'stage-comment'; readonly stageComment: WorkshopCommentReference | null };
+    | { readonly kind: 'stage-comment'; readonly stageComment: WorkshopCommentReference | null }
+    | { readonly kind: 'repository-commit'; readonly commit: GithubCommit };

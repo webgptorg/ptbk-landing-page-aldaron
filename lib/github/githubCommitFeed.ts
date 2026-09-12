@@ -38,6 +38,42 @@ export type GithubCommit = {
     readonly branchNames?: readonly string[];
 };
 
+/**
+ * Checks the compact commit shape which is allowed to cross a realtime boundary
+ */
+export function isGithubCommit(value: unknown): value is GithubCommit {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const commit = value as {
+        readonly sha?: unknown;
+        readonly message?: unknown;
+        readonly authorName?: unknown;
+        readonly committedAt?: unknown;
+        readonly parentShas?: unknown;
+        readonly branchNames?: unknown;
+    };
+
+    const isParentShasValid =
+        commit.parentShas === undefined ||
+        (Array.isArray(commit.parentShas) && commit.parentShas.every((parentSha) => typeof parentSha === 'string'));
+    const isBranchNamesValid =
+        commit.branchNames === undefined ||
+        (Array.isArray(commit.branchNames) && commit.branchNames.every((branchName) => typeof branchName === 'string'));
+
+    return (
+        typeof commit.sha === 'string' &&
+        commit.sha.length > 0 &&
+        typeof commit.message === 'string' &&
+        commit.message.length > 0 &&
+        (typeof commit.authorName === 'string' || commit.authorName === null) &&
+        typeof commit.committedAt === 'string' &&
+        isParentShasValid &&
+        isBranchNamesValid
+    );
+}
+
 const COMMIT_SHA_PATTERN = /[0-9a-f]{7,40}/i;
 
 /**

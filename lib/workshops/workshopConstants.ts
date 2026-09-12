@@ -54,13 +54,20 @@ export const MAXIMAL_WORKSHOP_PRESENCE_REPORT_SECONDS = 120;
  */
 export const MAXIMAL_WORKSHOP_REPOSITORY_COMMIT_COUNT = 10;
 
+/** How long the server remembers commit identifiers while a repository monitor is active */
+export const MAXIMAL_WORKSHOP_REPOSITORY_MONITOR_COMMIT_COUNT = 500;
+
+export const WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS = 60;
+
+/** How long a room remains a target of a repository monitor without another repository request */
+export const WORKSHOP_REPOSITORY_MONITOR_TARGET_LEASE_SECONDS = 3 * WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS;
+
 /**
  * How long a branch name may be, which is what Git itself allows a reference to be
  */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH = 255;
 /** How many branch names one workshop may select explicitly; an empty selection means all branches */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT = 50;
-export const WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS = 60;
 
 /**
  * How long after their last request a participant still counts as watching the workshop

@@ -1,3 +1,4 @@
+import { isGithubCommit } from '@/lib/github/githubCommitFeed';
 import type { WorkshopReaction, WorkshopRealtimeEvent } from '@/lib/workshops/workshopTypes';
 
 export { sortWorkshopComments } from '@/lib/workshops/workshopCommentValues';
@@ -42,6 +43,10 @@ export function isWorkshopRealtimeEvent(value: unknown): value is WorkshopRealti
 
     if (value.kind === 'stage-comment') {
         return value.stageComment === null || isWorkshopCommentReference(value.stageComment);
+    }
+
+    if (value.kind === 'repository-commit') {
+        return isGithubCommit(value.commit);
     }
 
     return (

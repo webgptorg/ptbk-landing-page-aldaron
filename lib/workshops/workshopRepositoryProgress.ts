@@ -1,6 +1,13 @@
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { GithubBranch } from '@/lib/github/githubRepository';
 
+export type WorkshopRepositoryCommitListener = (commit: GithubCommit) => void;
+
+/**
+ * Asks to hear about commits which appeared in an open room and answers with the way to stop listening
+ */
+export type SubscribeToWorkshopRepositoryCommits = (listener: WorkshopRepositoryCommitListener) => () => void;
+
 export type WorkshopRepositoryBranch = GithubBranch;
 
 /**
@@ -84,5 +91,15 @@ export function selectNewWorkshopRepositoryCommitShas(
     knownCommitShas: ReadonlySet<string>,
     commits: readonly GithubCommit[],
 ): readonly string[] {
-    return commits.map((commit) => commit.sha).filter((commitSha) => !knownCommitShas.has(commitSha));
+    return selectNewWorkshopRepositoryCommits(knownCommitShas, commits).map((commit) => commit.sha);
+}
+
+/**
+ * Selects the complete commits which were not in the room's previous repository answer
+ */
+export function selectNewWorkshopRepositoryCommits(
+    knownCommitShas: ReadonlySet<string>,
+    commits: readonly GithubCommit[],
+): readonly GithubCommit[] {
+    return commits.filter((commit) => !knownCommitShas.has(commit.sha));
 }

@@ -53,7 +53,7 @@ Od začátku workshopu přibylo 2 commity.
 
 ---
 
-[ ]
+[x] by OpenAI Codex `gpt-5.6-luna` thinking `max` (ChatGPT account) - Implementation ~.00 34 minutes; Testing 8 minutes
 
 [✨🤌] When a new commit appears in the connected project to the workshop, show it as a notification.
 
@@ -64,5 +64,6 @@ Od začátku workshopu přibylo 2 commity.
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+
 
 

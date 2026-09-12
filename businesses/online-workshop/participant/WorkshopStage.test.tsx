@@ -6,7 +6,9 @@ import type { SubscribeToWorkshopReactions } from '@/businesses/online-workshop/
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
 import type { CommunityMembershipRoomState } from '@/lib/community-membership/communityMembershipTypes';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
+import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { FlyingWorkshopReaction } from '@/lib/workshops/workshopReactionAnimations';
+import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import type { WorkshopCommentReference, WorkshopContentBlock, WorkshopDetails } from '@/lib/workshops/workshopTypes';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -132,6 +134,24 @@ function createReactionSource() {
     };
 }
 
+function createRepositoryCommitSource() {
+    const listeners = new Set<(commit: GithubCommit) => void>();
+    const subscribeToRepositoryCommits: SubscribeToWorkshopRepositoryCommits = (listener) => {
+        listeners.add(listener);
+        return () => {
+            listeners.delete(listener);
+        };
+    };
+
+    return {
+        subscribeToRepositoryCommits,
+        sendCommit: (commit: GithubCommit) =>
+            act(() => {
+                listeners.forEach((listener) => listener(commit));
+            }),
+    };
+}
+
 afterEach(() => {
     cleanup();
     membershipRoomMock.membershipRoom = null;
@@ -152,6 +172,42 @@ describe('workshop stage', () => {
         await reactionSource.sendReaction({ flightId: 'first', reactionText: '🎉' });
         await waitFor(() => expect(container.querySelectorAll('.workshop-reaction')).toHaveLength(1));
         expect(container.querySelector('.workshop-reaction')?.className).toContain('workshop-reaction-flight--launch');
+    });
+
+    it('shows a new repository commit on the stage for ten seconds', () => {
+        vi.useFakeTimers();
+        try {
+            const reactionSource = createReactionSource();
+            const repositoryCommitSource = createRepositoryCommitSource();
+            const commit: GithubCommit = {
+                sha: '6dcb09b5b57875f334f61aebed695e2e4193db5b',
+                message: 'Přidat oznámení commitů',
+                authorName: 'Pavol Hejný',
+                committedAt: '2026-08-20T19:09:00.000Z',
+            };
+
+            render(
+                <WorkshopStage
+                    workshop={WORKSHOP}
+                    serverTime="2026-08-20T19:10:00+02:00"
+                    subscribeToReactions={reactionSource.subscribeToReactions}
+                    repository={{ owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: null }}
+                    subscribeToRepositoryCommits={repositoryCommitSource.subscribeToRepositoryCommits}
+                />,
+            );
+
+            repositoryCommitSource.sendCommit(commit);
+            expect(screen.getByRole('status').textContent).toContain('Nový commit na projektu');
+            expect(screen.getByText(commit.message)).not.toBeNull();
+
+            act(() => vi.advanceTimersByTime(9_999));
+            expect(screen.getByText(commit.message)).not.toBeNull();
+
+            act(() => vi.advanceTimersByTime(1));
+            expect(screen.queryByText(commit.message)).toBeNull();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('shows the question the host selected over the stream', () => {

@@ -42,6 +42,10 @@ import {
 } from '@/lib/workshops/workshopClientState';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { sortWorkshopComments } from '@/lib/workshops/workshopCommentValues';
+import type {
+    SubscribeToWorkshopRepositoryCommits,
+    WorkshopRepositoryCommitListener,
+} from '@/lib/workshops/workshopRepositoryProgress';
 import type { WorkshopCommentSort, WorkshopContentBlock, WorkshopPublicState } from '@/lib/workshops/workshopTypes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -72,6 +76,9 @@ type WorkshopParticipantController = {
      * Offers the stage the reactions which deserve to fly over it
      */
     readonly subscribeToReactions: SubscribeToWorkshopReactions;
+
+    /** Offers the stage commits announced by the repository monitor */
+    readonly subscribeToRepositoryCommits: SubscribeToWorkshopRepositoryCommits;
     readonly newlyUnlockedContentBlockIds: ReadonlySet<string>;
     readonly connect: (values: { readonly fullname: string; readonly email: string }) => Promise<boolean>;
     readonly changeFullname: (fullname: string) => Promise<boolean>;
@@ -161,6 +168,7 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
     const [newlyUnlockedContentBlockIds, setNewlyUnlockedContentBlockIds] = useState<ReadonlySet<string>>(new Set());
     const { subscribeToReactions, showReaction, showLoadedReactions } = useWorkshopReactionAnimations();
     const getIsActivelyAttending = useWorkshopAttendanceTracker();
+    const repositoryCommitListenersRef = useRef(new Set<WorkshopRepositoryCommitListener>());
     const refreshSequenceRef = useRef(0);
     const realtimeRefreshTimeoutRef = useRef<number | null>(null);
     const isContentHistoryLoadedRef = useRef(false);
@@ -396,6 +404,17 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         });
     }, []);
 
+    const subscribeToRepositoryCommits = useCallback<SubscribeToWorkshopRepositoryCommits>((listener) => {
+        repositoryCommitListenersRef.current.add(listener);
+        return () => {
+            repositoryCommitListenersRef.current.delete(listener);
+        };
+    }, []);
+
+    const showRepositoryCommit = useCallback((commit: Parameters<WorkshopRepositoryCommitListener>[0]) => {
+        repositoryCommitListenersRef.current.forEach((listener) => listener(commit));
+    }, []);
+
     const reportCurrentPresence = useCallback(() => {
         if (isUsingCachedState) {
             // Presence is nonessential during an outage. Resetting the clock also keeps recovery from attributing the
@@ -528,6 +547,10 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
                     applyReactionCount(payload.reaction.emoji, payload.reactionCount);
                     return;
                 }
+                if (payload.kind === 'repository-commit') {
+                    showRepositoryCommit(payload.commit);
+                    return;
+                }
                 if (payload.kind === 'stage-comment') {
                     setState((currentState) =>
                         currentState === null ? currentState : { ...currentState, stageComment: payload.stageComment },
@@ -581,6 +604,7 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         isConnected,
         isRoomRealtime,
         scheduleRealtimeRefresh,
+        showRepositoryCommit,
         showReaction,
         workshopSlug,
     ]);
@@ -851,6 +875,7 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         isUsingCachedState,
         errorMessage,
         subscribeToReactions,
+        subscribeToRepositoryCommits,
         newlyUnlockedContentBlockIds,
         connect,
         changeFullname,
