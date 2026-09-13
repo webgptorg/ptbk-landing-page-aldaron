@@ -51,6 +51,15 @@ Od začátku workshopu přibylo 2 commity.
 ![alt text](prompts/screenshots/2026-09-0040-workshop-repository-1.png)
 ![alt text](prompts/screenshots/2026-09-0040-workshop-repository-2.png)
 
+
+---
+
+[✨🤌] Allow multiple branches or wildcards for the project connected to the workshop.
+
+- Allow specifiing branches like `main`, `client-*`, `feature/*` or even `*`
+- By putting * on the single line you will effectively track all the branches, no need for special checkbox
+
+
 ---
 
 [x] by OpenAI Codex `gpt-5.6-luna` thinking `max` (ChatGPT account) - Implementation ~.00 34 minutes; Testing 8 minutes
