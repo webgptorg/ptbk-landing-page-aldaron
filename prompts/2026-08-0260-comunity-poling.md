@@ -71,7 +71,7 @@
 
 [x] by OpenAI Codex `gpt-5.6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.3436 12 minutes; Testing 9 minutes
 
-[✨🛬]  Polls shouldn't have badges of attached events 
+[✨🛬] Polls shouldn't have badges of attached events
 
 - Attaching polls to the events should work exactly as before, just do not show the event badges
 - You are working with `/cs/komunita` and `/admin/community?tab=polls` and `/cs/online-workshop/participant`
@@ -79,4 +79,12 @@
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
+---
 
+[ ]
+
+[✨🛬] Remove some texts from polls
+
+- Remove "Anketa komunity"
+- Remove the badge with the total count of the votes
+- Remove "Vyberte jednu možnost. Stejný hlas uvidíte v komunitě i v připojených workshopech a můžete jej kdykoli změnit."
