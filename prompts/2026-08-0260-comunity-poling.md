@@ -81,10 +81,11 @@
 
 ---
 
-[ ]
+[x] by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.1380 4 minutes; Testing 8 minutes
 
 [✨🛬] Remove some texts from polls
 
 - Remove "Anketa komunity"
 - Remove the badge with the total count of the votes
 - Remove "Vyberte jednu možnost. Stejný hlas uvidíte v komunitě i v připojených workshopech a můžete jej kdykoli změnit."
+

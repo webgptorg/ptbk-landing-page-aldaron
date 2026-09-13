@@ -57,6 +57,7 @@ describe('community membership activity section', () => {
         expect(screen.getByText('ptbk coder')).toBeTruthy();
         expect(screen.getByText('Pavol')).toBeTruthy();
         expect(screen.getByText('Co od komunity čekáte?')).toBeTruthy();
+        expect(screen.queryByText('Anketa komunity')).toBeNull();
         expect(screen.getByText('Naučit se AI prakticky používat')).toBeTruthy();
         expect(screen.getByText('65 %')).toBeTruthy();
         expect(screen.getByText('Vytvořit vlastní AI projekt')).toBeTruthy();

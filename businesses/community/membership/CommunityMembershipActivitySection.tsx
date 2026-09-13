@@ -10,7 +10,7 @@ import type {
     CommunityPreviewTotals,
 } from '@/lib/community/communityPreviewTypes';
 import { formatCzechNumber } from '@/lib/language/czechNumbers';
-import { ArrowRight, BarChart3, MessageSquareText, Sparkles, ThumbsUp, Users, Video } from 'lucide-react';
+import { ArrowRight, MessageSquareText, Sparkles, ThumbsUp, Users, Video } from 'lucide-react';
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 
@@ -71,10 +71,7 @@ function CommunityPollAnswerBar({ answer }: { answer: CommunityPreviewPollAnswer
 function CommunityPollCard({ poll }: { poll: CommunityPreviewPoll }) {
     return (
         <article className="flex h-full flex-col rounded-[1.75rem] border border-slate-200 bg-white p-6">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-700">
-                <BarChart3 className="h-4 w-4" /> Anketa komunity
-            </p>
-            <h3 className="mt-4 text-lg font-bold leading-snug text-slate-950">{poll.question}</h3>
+            <h3 className="text-lg font-bold leading-snug text-slate-950">{poll.question}</h3>
             <div className="mt-6 flex-1 space-y-4">
                 {poll.answers.map((answer) => (
                     <CommunityPollAnswerBar key={answer.label} answer={answer} />

@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { getWorkshopPollOptionVotePercentage, getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
 import type { WorkshopPoll } from '@/lib/workshops/workshopTypes';
-import { BarChart3, Check, Lock, Vote } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useState } from 'react';
 
 type WorkshopPollsProps = {
@@ -51,23 +51,19 @@ export function WorkshopPolls({
                 const isVoting = votingPollId === poll.id;
                 const isVotingInCurrentRoomEnabled = onVote !== undefined;
                 const isVoteAvailable = isVotingInCurrentRoomEnabled && !poll.isClosed && !isInteractionBanned;
+                const interactionAvailabilityMessage = !isVotingInCurrentRoomEnabled
+                    ? 'Hlasování v této místnosti není dostupné.'
+                    : isInteractionBanned
+                      ? 'Pro tento účet nejsou interakce dostupné.'
+                      : null;
 
                 return (
                     <article
                         key={poll.id}
                         className="overflow-hidden rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-cyan-300/[0.10] to-slate-950/20 shadow-lg shadow-cyan-950/10"
                     >
-                        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
-                            <div className="min-w-0">
-                                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
-                                    <Vote className="h-4 w-4" /> Anketa komunity
-                                </p>
-                                <h2 className="mt-2 text-lg font-bold leading-6 text-white">{poll.question}</h2>
-                            </div>
-                            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-slate-950/30 px-2.5 py-1 text-xs font-medium text-slate-300">
-                                {poll.isClosed ? <Lock className="h-3.5 w-3.5" /> : <BarChart3 className="h-3.5 w-3.5" />}
-                                {poll.isClosed ? 'Hlasování skončilo' : `${totalVoteCount} hlasů`}
-                            </span>
+                        <div className="border-b border-white/[0.08] px-5 py-4">
+                            <h2 className="text-lg font-bold leading-6 text-white">{poll.question}</h2>
                         </div>
 
                         <div className="space-y-2.5 p-4">
@@ -116,14 +112,8 @@ export function WorkshopPolls({
                             })}
                         </div>
 
-                        {!poll.isClosed && (
-                            <p className="px-5 pb-4 text-xs leading-5 text-slate-400">
-                                {!isVotingInCurrentRoomEnabled
-                                    ? 'Hlasování v této místnosti není dostupné.'
-                                    : isInteractionBanned
-                                    ? 'Pro tento účet nejsou interakce dostupné.'
-                                    : 'Vyberte jednu možnost. Stejný hlas uvidíte v komunitě i v připojených workshopech a můžete jej kdykoli změnit.'}
-                            </p>
+                        {!poll.isClosed && interactionAvailabilityMessage !== null && (
+                            <p className="px-5 pb-4 text-xs leading-5 text-slate-400">{interactionAvailabilityMessage}</p>
                         )}
                     </article>
                 );

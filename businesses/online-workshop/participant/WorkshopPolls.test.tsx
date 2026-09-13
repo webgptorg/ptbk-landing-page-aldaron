@@ -45,6 +45,13 @@ describe('community polls', () => {
         expect(screen.getByRole('button', { name: /Testování/ }).getAttribute('aria-pressed')).toBe('true');
         expect(screen.getByText('3 · 75 %')).not.toBeNull();
         expect(screen.getByText('1 · 25 %')).not.toBeNull();
+        expect(screen.queryByText('Anketa komunity')).toBeNull();
+        expect(screen.queryByText('4 hlasů')).toBeNull();
+        expect(
+            screen.queryByText(
+                'Vyberte jednu možnost. Stejný hlas uvidíte v komunitě i v připojených workshopech a můžete jej kdykoli změnit.',
+            ),
+        ).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /Nasazování/ }));
 
@@ -56,7 +63,7 @@ describe('community polls', () => {
         const { rerender } = render(<WorkshopPolls polls={[{ ...POLL, isClosed: true }]} isInteractionBanned={false} onVote={onVote} />);
 
         expect(screen.getByRole('button', { name: /Testování/ }).hasAttribute('disabled')).toBe(true);
-        expect(screen.getByText('Hlasování skončilo')).not.toBeNull();
+        expect(screen.queryByText('Hlasování skončilo')).toBeNull();
 
         rerender(<WorkshopPolls polls={[POLL]} isInteractionBanned={true} onVote={onVote} />);
 
@@ -70,11 +77,6 @@ describe('community polls', () => {
 
         expect(screen.getByText('Kterému tématu se máme věnovat?')).not.toBeNull();
         expect(screen.getByRole('button', { name: /Testování/ }).hasAttribute('disabled')).toBe(false);
-        expect(
-            screen.getByText(
-                'Vyberte jednu možnost. Stejný hlas uvidíte v komunitě i v připojených workshopech a můžete jej kdykoli změnit.',
-            ),
-        ).not.toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /Nasazování/ }));
 
