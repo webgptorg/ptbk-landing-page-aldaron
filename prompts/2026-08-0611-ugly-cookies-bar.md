@@ -1,5 +1,9 @@
 [x] by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.8348 31 minutes; Testing 6 minutes
 
+---
+
+[ ] use `astra`
+
 [✨👇] The placement of the cookies bar is very ugly and not very aware of the page placed in, enhance it
 
 - Look at the attached screen shots. To analyze the problem and figure out the best cookies bar layout and design
@@ -14,4 +18,3 @@
 ![alt text](prompts/screenshots/2026-08-0611-ugly-cookies-bar-3.png)
 ![alt text](prompts/screenshots/2026-08-0611-ugly-cookies-bar-4.png)
 ![alt text](prompts/screenshots/2026-08-0611-ugly-cookies-bar-5.png)
-

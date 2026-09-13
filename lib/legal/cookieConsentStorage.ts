@@ -17,12 +17,6 @@ const COOKIE_CHOICE_STORAGE_KEY = 'cookiesAccepted';
 const COOKIE_PREFERENCES_STORAGE_KEY = 'cookiePreferences';
 
 /**
- * Browser event sent after a visitor answers the cookie choice, so non-essential surfaces can wait until the consent
- * tray has left the screen instead of competing with it for the same part of the viewport.
- */
-export const COOKIE_PREFERENCES_SAVED_EVENT_NAME = 'cookie-preferences-saved';
-
-/**
  * Everything the visitor can allow, which is what the "accept all" button stores
  */
 export const ALL_COOKIES_ALLOWED: CookiePreferences = {
@@ -65,8 +59,4 @@ export function saveCookiePreferences(preferences: CookiePreferences): void {
         }),
     );
     localStorage.setItem(COOKIE_CHOICE_STORAGE_KEY, 'true');
-
-    if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event(COOKIE_PREFERENCES_SAVED_EVENT_NAME));
-    }
 }

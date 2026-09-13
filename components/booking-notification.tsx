@@ -1,10 +1,6 @@
 'use client';
 
 import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
-import {
-    COOKIE_PREFERENCES_SAVED_EVENT_NAME,
-    isCookieChoiceMade,
-} from '@/lib/legal/cookieConsentStorage';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -14,26 +10,15 @@ const STORAGE_KEY = 'promptbook_notif_shown';
 export function BookingNotification({ language = 'cs' }: { language?: HomepageLanguage }) {
     const { bookingNotification } = getHomepageContent(language);
     const notifications = bookingNotification.notifications;
-    const [isVisible, setIsVisible] = useState(false);
-    const [isCookieConsentChoiceMade, setIsCookieConsentChoiceMade] = useState(false);
+    const [visible, setVisible] = useState(false);
     const [notification, setNotification] = useState(notifications[0]);
 
     useEffect(() => {
-        const updateCookieConsentChoice = () => setIsCookieConsentChoiceMade(isCookieChoiceMade());
+        // Check if already shown this session
+        if (typeof window === 'undefined') return;
 
-        updateCookieConsentChoice();
-        window.addEventListener(COOKIE_PREFERENCES_SAVED_EVENT_NAME, updateCookieConsentChoice);
-
-        return () => window.removeEventListener(COOKIE_PREFERENCES_SAVED_EVENT_NAME, updateCookieConsentChoice);
-    }, []);
-
-    useEffect(() => {
-        // A social-proof notification can wait for the required consent choice. It would otherwise compete with the
-        // cookie tray on smaller screens, even though the tray is the action the visitor must be able to complete.
-        if (!isCookieConsentChoiceMade) return;
-
-        const isAlreadyShown = sessionStorage.getItem(STORAGE_KEY);
-        if (isAlreadyShown) return;
+        const alreadyShown = sessionStorage.getItem(STORAGE_KEY);
+        if (alreadyShown) return;
 
         // Pick a random notification
         const randomNotif = notifications[Math.floor(Math.random() * notifications.length)];
@@ -41,30 +26,29 @@ export function BookingNotification({ language = 'cs' }: { language?: HomepageLa
 
         // Show after 6 seconds
         const showTimer = setTimeout(() => {
-            setIsVisible(true);
+            setVisible(true);
             sessionStorage.setItem(STORAGE_KEY, 'true');
         }, 6000);
 
         return () => clearTimeout(showTimer);
-    }, [isCookieConsentChoiceMade, notifications]);
+    }, [notifications]);
 
     // Auto-dismiss after 8 seconds
     useEffect(() => {
-        if (!isVisible) return;
-        const hideTimer = setTimeout(() => setIsVisible(false), 8000);
+        if (!visible) return;
+        const hideTimer = setTimeout(() => setVisible(false), 8000);
         return () => clearTimeout(hideTimer);
-    }, [isVisible]);
+    }, [visible]);
 
     return (
         <AnimatePresence>
-            {isVisible && (
+            {visible && (
                 <motion.div
                     initial={{ opacity: 0, y: 30, x: 0 }}
                     animate={{ opacity: 1, y: 0, x: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
                     className="fixed bottom-6 left-6 z-50 max-w-sm"
-                    data-booking-notification
                 >
                     <div className="bg-white rounded-xl shadow-2xl shadow-black/10 border border-gray-100 px-5 py-4 flex items-start gap-3">
                         {/* Pulse dot */}
@@ -82,7 +66,7 @@ export function BookingNotification({ language = 'cs' }: { language?: HomepageLa
 
                         {/* Close button */}
                         <button
-                            onClick={() => setIsVisible(false)}
+                            onClick={() => setVisible(false)}
                             className="shrink-0 text-gray-300 hover:text-gray-500 transition-colors mt-0.5"
                         >
                             <X className="w-4 h-4" />

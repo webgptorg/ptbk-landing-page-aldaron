@@ -11,7 +11,7 @@ type CookieCategoryContent = {
 /**
  * Everything the cookie bar and its settings say to the visitor
  */
-export type CookieConsentContent = {
+type CookieConsentContent = {
     readonly barTitle: string;
     readonly barDescription: string;
     readonly privacyNotePrefix: string;

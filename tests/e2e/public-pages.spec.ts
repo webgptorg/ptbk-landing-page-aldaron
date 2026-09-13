@@ -89,10 +89,6 @@ const E2E_DISCOUNT_CODE = 'E2E SLEVA';
 
 const PUBLIC_PAGE_TEST_TIMEOUT_MS = 180_000;
 
-const COOKIE_CONSENT_SELECTOR = '[data-cookie-consent]';
-const COOKIE_CONSENT_PANEL_SELECTOR = '.cookie-consent__panel';
-const BOOKING_NOTIFICATION_DELAY_IN_MILLISECONDS = 6_100;
-
 async function expectPublicPageToLoad(page: Page, path: PublicPagePath): Promise<void> {
     const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
 
@@ -140,7 +136,18 @@ for (const path of PUBLIC_PAGE_PATHS) {
     });
 }
 
-test('AI ta Krajta owns its metadata, icon and installable manifest', async ({ page }) => {
+test('AI ta Krajta collaboration section deep-links to its media kit', async ({ page }) => {
+    await page.goto(AI_TA_KRAJTA_PATH, { waitUntil: 'domcontentloaded' });
+
+    const mediaKitLink = page.getByRole('link', { name: 'Otevřít media kit' });
+    await expect(mediaKitLink).toHaveAttribute('href', AI_TA_KRAJTA_MEDIA_KIT_PATH);
+    await mediaKitLink.click();
+
+    await expect(page).toHaveURL(AI_TA_KRAJTA_MEDIA_KIT_PATH);
+    await expect(page.getByRole('heading', { name: /Oslovte české a slovenské publikum/i })).toBeVisible();
+});
+
+test('AI ta Krajta owns its metadata, icon and installable manifest and credits Promptbook coder', async ({ page }) => {
     await page.goto(AI_TA_KRAJTA_PATH, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('footer')).toBeVisible();
     await expect(page).toHaveTitle(`${AI_TA_KRAJTA_BRAND_NAME} | Český podcast o umělé inteligenci`);
