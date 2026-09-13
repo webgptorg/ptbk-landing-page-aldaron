@@ -18,6 +18,14 @@
 
 [ ]
 
+[✨🦒] When duplicating a workshop, the attached polls shouldn't be duplicated
+
+- Only the connection to the already existing poll should be preserved in the duplicate.
+
+---
+
+[ ]
+
 [✨🦒] Alongside the new workshop and duplicate workshop, add a button to delete the workshop.
 
 - When deleting a workshop, do not remove the attached polls
