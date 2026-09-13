@@ -12,7 +12,7 @@ import {
     MAXIMAL_VISIBLE_WORKSHOP_POLL_COUNT,
     MAXIMAL_VISIBLE_COMMENT_COUNT,
     MAXIMAL_VISIBLE_PENDING_COMMENT_COUNT,
-    DUPLICATE_WORKSHOP_ATTACHED_POLLS_FUNCTION_NAME,
+    COPY_WORKSHOP_POLL_ATTACHMENTS_FUNCTION_NAME,
     WORKSHOP_COMMENT_TABLE_NAME,
     WORKSHOP_CONTENT_TABLE_NAME,
     WORKSHOP_FEEDBACK_TABLE_NAME,
@@ -1019,17 +1019,17 @@ export async function findWorkshopById(supabase: SupabaseClient, workshopId: str
 }
 
 /**
- * Copies the community polls attached to one workshop occurrence onto another occurrence.
+ * Copies the connections to community polls from one workshop occurrence onto another occurrence.
  *
- * The database function creates new poll and option identities in one transaction. Votes remain with the source
- * polls, while the poll settings and explicitly seeded artificial counts are part of the copied poll configuration.
+ * The polls, their options, and their votes retain their identities, so every occurrence sees the same community
+ * poll and its aggregate.
  */
-export async function duplicateWorkshopAttachedPolls(
+export async function copyWorkshopPollAttachments(
     supabase: SupabaseClient,
     sourceWorkshopId: string,
     targetWorkshopId: string,
 ): Promise<string | null> {
-    const { error } = await supabase.rpc(DUPLICATE_WORKSHOP_ATTACHED_POLLS_FUNCTION_NAME, {
+    const { error } = await supabase.rpc(COPY_WORKSHOP_POLL_ATTACHMENTS_FUNCTION_NAME, {
         source_workshop_id: sourceWorkshopId,
         target_workshop_id: targetWorkshopId,
     });

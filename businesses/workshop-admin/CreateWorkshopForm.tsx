@@ -99,7 +99,7 @@ export function CreateWorkshopForm({
                     {isDuplicating && (
                         <p className="mt-1 text-xs text-slate-500">
                             Zkontrolujte termín a URL. Kopie přebírá zveřejnění zdrojového workshopu; připojené ankety
-                            se zkopírují, účastníci ani historie se nepřenášejí.
+                            zůstávají společné s původním termínem, účastníci ani historie se nepřenášejí.
                         </p>
                     )}
                 </div>

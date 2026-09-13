@@ -190,8 +190,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   into the contacts list and its exports.
 - Workshop polls are read-only in workshop administration. Creating a new event
   publishes it by default; duplicating an event keeps it published unless the
-  source is unpublished. Duplicating a workshop also makes fresh copies of its
-  attached polls without copying participant votes or room history. Stage settings contain
+  source is unpublished. Duplicating a workshop preserves its connections to
+  the already existing attached polls; it creates no polls, options, votes, or room history. Stage settings contain
   the live stream and recording teaser, and project settings the repository the
   term is about, written as an address or as `owner/name`, together with its branch
   selection. An end may be empty;

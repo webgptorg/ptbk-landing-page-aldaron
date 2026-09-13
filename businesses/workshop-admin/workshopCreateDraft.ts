@@ -32,7 +32,7 @@ export type WorkshopCreateDraft = {
     readonly event: EventDetails;
     readonly youtubeVideoId: string | null;
     readonly previewYoutubeVideoId: string | null;
-    readonly duplicateAttachedPollsFromWorkshopId?: string;
+    readonly attachedPollsSourceWorkshopId?: string;
 
     /**
      * The project the new term is about, which a copy inherits from the term it was copied from
@@ -97,7 +97,8 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
  * Copies settings that describe an event occurrence, but deliberately leaves all occurrence history behind.
  *
  * Participants, comments, reactions, feedback, and content blocks belong to the original occurrence. Attached polls
- * are copied by the server from the source workshop when the resulting create values are submitted.
+ * remain shared with it: the server copies their connections from the source workshop when the resulting create
+ * values are submitted.
  */
 export function createWorkshopDuplicateDraft(
     workshop: WorkshopDetails,
@@ -118,7 +119,7 @@ export function createWorkshopDuplicateDraft(
         previewYoutubeVideoId: workshop.previewYoutubeVideoId,
         repository: createWorkshopRepositoryWriteValues(createWorkshopRepositoryDraft(workshop.repository)),
         isPublished: workshop.isPublished,
-        duplicateAttachedPollsFromWorkshopId: workshop.id,
+        attachedPollsSourceWorkshopId: workshop.id,
         allowedReactions: [...workshop.allowedReactions],
         disabledPanels: [...workshop.disabledPanels],
         ...(workshop.artificialWatchingParticipantCount === undefined
@@ -147,9 +148,9 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         previewYoutubeVideoId: draft.previewYoutubeVideoId,
         repository: draft.repository,
         isPublished: draft.isPublished,
-        ...(draft.duplicateAttachedPollsFromWorkshopId === undefined
+        ...(draft.attachedPollsSourceWorkshopId === undefined
             ? {}
-            : { duplicateAttachedPollsFromWorkshopId: draft.duplicateAttachedPollsFromWorkshopId }),
+            : { attachedPollsSourceWorkshopId: draft.attachedPollsSourceWorkshopId }),
         allowedReactions: draft.allowedReactions,
         disabledPanels: draft.disabledPanels,
         ...(draft.artificialWatchingParticipantCount === undefined

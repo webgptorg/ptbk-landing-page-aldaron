@@ -1,5 +1,6 @@
 import { createInMemorySupabaseClient } from '@/lib/e2e/inMemorySupabase';
 import {
+    copyWorkshopPollAttachments,
     loadWorkshopAdminPolls,
     loadWorkshopAttachedAdminPolls,
     loadWorkshopPolls,
@@ -116,6 +117,23 @@ async function createAttachedPollSupabase(): Promise<SupabaseClient> {
 }
 
 describe('shared community poll votes', () => {
+    it('asks the database to copy only existing poll attachments for a duplicated workshop', async () => {
+        const rpc = vi.fn().mockResolvedValue({ error: null });
+        const targetWorkshopId = 'duplicate-workshop-id';
+
+        const errorMessage = await copyWorkshopPollAttachments(
+            { rpc } as unknown as SupabaseClient,
+            WORKSHOP_ROW.id,
+            targetWorkshopId,
+        );
+
+        expect(errorMessage).toBeNull();
+        expect(rpc).toHaveBeenCalledWith('copy_workshop_poll_attachments', {
+            source_workshop_id: WORKSHOP_ROW.id,
+            target_workshop_id: targetWorkshopId,
+        });
+    });
+
     it('loads the same visible poll selection and aggregate in the community and its attached workshop', async () => {
         const supabase = await createAttachedPollSupabase();
 

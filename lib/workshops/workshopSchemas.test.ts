@@ -95,15 +95,26 @@ describe('workshop request validation', () => {
         expect(workshop.youtubeVideoId).toBe('dQw4w9WgXcQ');
     });
 
-    it('publishes a newly created event by default and accepts a source for attached poll duplication', () => {
+    it('publishes a newly created event by default and accepts a source for attached poll connections', () => {
         expect(
             workshopCreateSchema.parse({
                 ...VALID_WORKSHOP,
                 isPublished: undefined,
-                duplicateAttachedPollsFromWorkshopId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
+                attachedPollsSourceWorkshopId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
             }),
         ).toMatchObject({
             isPublished: true,
+            attachedPollsSourceWorkshopId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
+        });
+    });
+
+    it('accepts the attached poll source from an already loaded duplicate form', () => {
+        expect(
+            workshopCreateSchema.parse({
+                ...VALID_WORKSHOP,
+                duplicateAttachedPollsFromWorkshopId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
+            }),
+        ).toMatchObject({
             duplicateAttachedPollsFromWorkshopId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
         });
     });

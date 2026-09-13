@@ -74,7 +74,7 @@ describe('workshop creation drafts', () => {
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
             isPublished: true,
-            duplicateAttachedPollsFromWorkshopId: WORKSHOP.id,
+            attachedPollsSourceWorkshopId: WORKSHOP.id,
             allowedReactions: WORKSHOP.allowedReactions,
             disabledPanels: WORKSHOP.disabledPanels,
         });
@@ -123,7 +123,7 @@ describe('workshop creation drafts', () => {
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
             isPublished: true,
-            duplicateAttachedPollsFromWorkshopId: WORKSHOP.id,
+            attachedPollsSourceWorkshopId: WORKSHOP.id,
             allowedReactions: WORKSHOP.allowedReactions,
             disabledPanels: WORKSHOP.disabledPanels,
         });

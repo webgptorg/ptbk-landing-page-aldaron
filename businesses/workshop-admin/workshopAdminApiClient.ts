@@ -80,6 +80,11 @@ export type WorkshopCreateValues = WorkshopWriteValues & {
     readonly startsAt: string;
     readonly eventType: EventType;
     readonly locationKind: EventLocationKind;
+
+    /**
+     * The source occurrence whose existing community poll connections a duplicated workshop keeps.
+     */
+    readonly attachedPollsSourceWorkshopId?: string;
 };
 
 /**

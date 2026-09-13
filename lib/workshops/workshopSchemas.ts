@@ -370,6 +370,18 @@ const eventMaximumParticipantCountSchema = z
     .max(MAXIMAL_EVENT_PARTICIPANT_COUNT)
     .nullable();
 const artificialWatchingParticipantCountSchema = z.number().int().min(0).max(1_000_000);
+const ATTACHED_POLLS_SOURCE_WORKSHOP_ID_SCHEMA = z.string().uuid().optional();
+
+function areAttachedPollSourceWorkshopIdsConsistent(values: {
+    readonly attachedPollsSourceWorkshopId?: string;
+    readonly duplicateAttachedPollsFromWorkshopId?: string;
+}): boolean {
+    return (
+        values.attachedPollsSourceWorkshopId === undefined ||
+        values.duplicateAttachedPollsFromWorkshopId === undefined ||
+        values.attachedPollsSourceWorkshopId === values.duplicateAttachedPollsFromWorkshopId
+    );
+}
 
 export const workshopCreateSchema = z
     .object({
@@ -388,9 +400,15 @@ export const workshopCreateSchema = z
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         repository: nullableWorkshopRepositorySchema.default(null),
         isPublished: z.boolean().default(true),
-        duplicateAttachedPollsFromWorkshopId: z.string().uuid().optional(),
+        attachedPollsSourceWorkshopId: ATTACHED_POLLS_SOURCE_WORKSHOP_ID_SCHEMA,
+        /** The former internal field, accepted so an already loaded administration page can finish its request. */
+        duplicateAttachedPollsFromWorkshopId: ATTACHED_POLLS_SOURCE_WORKSHOP_ID_SCHEMA,
         allowedReactions: workshopAllowedReactionsSchema.default([...DEFAULT_WORKSHOP_REACTIONS]),
         disabledPanels: workshopDisabledPanelsSchema.default([]),
+    })
+    .refine(areAttachedPollSourceWorkshopIdsConsistent, {
+        message: 'Attached poll sources must match',
+        path: ['attachedPollsSourceWorkshopId'],
     })
     .refine(({ startsAt, endsAt }) => endsAt === null || Date.parse(endsAt) > Date.parse(startsAt), {
         message: 'Workshop end must be after its start',

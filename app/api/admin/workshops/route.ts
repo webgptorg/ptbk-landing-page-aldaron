@@ -2,8 +2,8 @@ import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { WORKSHOP_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import {
+    copyWorkshopPollAttachments,
     createWorkshopDatabaseUnavailableResponse,
-    duplicateWorkshopAttachedPolls,
     findWorkshopById,
     getWorkshopDatabaseOrNull,
     loadWorkshopAdminSummaries,
@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
         return createWorkshopDatabaseUnavailableResponse();
     }
 
-    const sourceWorkshopId = parsedResult.data.duplicateAttachedPollsFromWorkshopId;
+    const sourceWorkshopId =
+        parsedResult.data.attachedPollsSourceWorkshopId ?? parsedResult.data.duplicateAttachedPollsFromWorkshopId;
     if (sourceWorkshopId !== undefined) {
         const sourceWorkshop = await findWorkshopById(supabase, sourceWorkshopId);
         if (sourceWorkshop === null) {
@@ -82,14 +83,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (sourceWorkshopId !== undefined) {
-        const duplicatePollsErrorMessage = await duplicateWorkshopAttachedPolls(supabase, sourceWorkshopId, data.id);
-        if (duplicatePollsErrorMessage !== null) {
+        const copyPollAttachmentsErrorMessage = await copyWorkshopPollAttachments(supabase, sourceWorkshopId, data.id);
+        if (copyPollAttachmentsErrorMessage !== null) {
             const { error: cleanupError } = await supabase.from(WORKSHOP_TABLE_NAME).delete().eq('id', data.id);
             if (cleanupError) {
-                console.error(`Failed to clean up workshop after poll duplication: ${cleanupError.message}`);
+                console.error(`Failed to clean up workshop after copying poll attachments: ${cleanupError.message}`);
             }
-            console.error(`Failed to duplicate attached workshop polls: ${duplicatePollsErrorMessage}`);
-            return NextResponse.json({ error: duplicatePollsErrorMessage }, { status: 500 });
+            console.error(`Failed to copy attached workshop poll connections: ${copyPollAttachmentsErrorMessage}`);
+            return NextResponse.json({ error: copyPollAttachmentsErrorMessage }, { status: 500 });
         }
     }
 

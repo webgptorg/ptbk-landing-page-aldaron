@@ -51,7 +51,7 @@ describe('create workshop form', () => {
                     youtubeVideoId: WORKSHOP.youtubeVideoId,
                     previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
                     isPublished: true,
-                    duplicateAttachedPollsFromWorkshopId: WORKSHOP.id,
+                    attachedPollsSourceWorkshopId: WORKSHOP.id,
                     allowedReactions: WORKSHOP.allowedReactions,
                     disabledPanels: WORKSHOP.disabledPanels,
                 }),
