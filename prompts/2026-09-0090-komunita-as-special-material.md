@@ -1,8 +1,8 @@
 [ ]
 
-[✨🚌] brr
+[✨🚌] The link to the community should be shown alongside materials and behave like kinda a special material.
 
-- @@@@@@@@
+- It should appear alongside the materials as a material for all participants (both paying and non-paying)
 - You are working with page `/cs/online-workshop/participant?workshop=`
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
