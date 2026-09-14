@@ -49,18 +49,18 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
         getGithubBranchSelectionPatterns(repository.branch).map((branchName) => ({ name: branchName, headSha: null }));
 
     return (
-        <section
+        <article
             aria-label="Projekt workshopu"
-            className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-[#081a24] shadow-lg"
+            className="relative scroll-mt-5 overflow-hidden rounded-2xl border border-white/10 bg-[#081a24] shadow-lg"
         >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
                 <div className="min-w-0">
                     <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
                         <Github className="h-4 w-4" aria-hidden="true" /> Projekt workshopu
                     </p>
-                    <h2 className="mt-2 break-all font-mono text-lg font-bold leading-6 text-white">
+                    <h3 className="mt-2 break-all font-mono text-lg font-bold leading-6 text-white">
                         {repositoryName}
-                    </h2>
+                    </h3>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     {newCommitShas.size > 0 && (
@@ -137,6 +137,6 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                     </>
                 )}
             </div>
-        </section>
+        </article>
     );
 }

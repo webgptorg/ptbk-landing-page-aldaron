@@ -149,13 +149,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `feature/*`, or `*` for all branches, plus an optional deployment URL — so it is
   set, changed, and unset at once and neither branch selection nor deployment
   outlives its repository. Room kinds which offer it are named in
-  `lib/workshops/workshopKindCapabilities.ts`. The room shows the repository, its
-  links, and the newest commits, marking those which arrive while a participant
-  watches; a newly found commit is broadcast to active rooms and appears on the
-  stage for ten seconds. A selection resolving to multiple branches is shown as a
-  commit graph. Commits come from the public commit feed or keyless API, pooled
-  once per server and cached through the revalidation window; an
-  unreadable feed still leaves the room naming its project.
+  `lib/workshops/workshopKindCapabilities.ts`. The room shows the repository as a
+  special material beside its ordinary materials for every participant, with its
+  links and newest commits, marking those which arrive while a participant watches;
+  a newly found commit is broadcast to active rooms and appears on the stage for
+  ten seconds. A selection resolving to multiple branches is shown as a commit
+  graph. Commits come from the public commit feed or keyless API, pooled once per
+  server and cached through the revalidation window; an unreadable feed still
+  leaves the room naming its project.
 - Paid-only materials are decided on the server in one pass. Members receive
   unlocked material; others receive only the published titles as an offer. An
   untitled item is not named, items are not named before their unlock time, and a

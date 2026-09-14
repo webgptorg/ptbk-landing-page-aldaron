@@ -306,7 +306,7 @@ describe('online workshop participant room', () => {
         expect(screen.queryByText('Sledují 3 lidé')).toBeNull();
     });
 
-    it('shows the project a workshop is about, together with what has been committed in it', () => {
+    it('shows the project a workshop is about as a special material, together with what has been committed in it', async () => {
         repositoryProgressMocks.controller = {
             progress: {
                 // Keep the fields from the former response shape here to ensure the panel only presents commits.
@@ -333,6 +333,8 @@ describe('online workshop participant room', () => {
 
         renderParticipantRoom(WORKSHOP_ABOUT_A_PROJECT);
 
+        await screen.findByRole('button', { name: 'Free členství. Otevřít možnosti členství' });
+
         expect(screen.getByText('hejny/promptbook')).not.toBeNull();
         expect(screen.getByText('Přidat panel repozitáře')).not.toBeNull();
         expect(screen.getByText('Nový')).not.toBeNull();
@@ -341,11 +343,32 @@ describe('online workshop participant room', () => {
         );
 
         const repositoryPanel = screen.getByLabelText('Projekt workshopu');
+        const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
+
+        expect(materialsSection?.contains(repositoryPanel)).toBe(true);
+        expect(repositoryPanel.tagName).toBe('ARTICLE');
         expect(repositoryPanel.textContent).not.toContain('A/B testing landing page for Promptbook');
         expect(repositoryPanel.textContent).not.toContain('Od začátku workshopu');
         expect(repositoryPanel.textContent).not.toContain('main');
         expect(repositoryPanel.textContent).not.toContain('TypeScript');
         expect(within(repositoryPanel).queryByText('1')).toBeNull();
+    });
+
+    it('keeps the repository material available to a paying participant', async () => {
+        fetchCommunityMembership.mockResolvedValue({
+            status: 'active',
+            monthlyPriceCzk: 199,
+            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
+            isCancellationScheduled: false,
+            isPurchaseOffered: false,
+            isSubscriptionManagementOffered: true,
+            isCoveredByDiscountCode: false,
+            isPaymentInTestMode: false,
+        });
+        renderParticipantRoom(WORKSHOP_ABOUT_A_PROJECT);
+
+        await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
+        expect(screen.getByLabelText('Projekt workshopu')).not.toBeNull();
     });
 
     it('shows nothing about a project in a room which is about none, and in a room which cannot be about one', () => {

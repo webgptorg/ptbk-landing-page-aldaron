@@ -1,4 +1,9 @@
 # Current preversion
+- Moved a connected GitHub repository in `/cs/online-workshop/participant` into the materials list as a special
+  material. Its existing repository, deployment, and live-commit links now stay with ordinary workshop materials,
+  are visible even when no ordinary material has been unlocked, and remain available to both free and paid
+  participants without turning the repository into timed or membership-gated content.
+
 - Moved the community hand-off in `/cs/online-workshop/participant` into the materials list as a dedicated
   community material. It is shown even before an administrator has unlocked any ordinary material and remains
   available to free and paid members alike, while carrying the participant identity through the existing shared

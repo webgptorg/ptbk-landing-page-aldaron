@@ -229,14 +229,30 @@ export function OnlineWorkshopParticipantPage({
     const isWorkshopPollVisible = isWorkshopPollVisibleInRoom(state.workshop.kind);
     const isModerating = isWorkshopParticipantModerating(state.participant);
     const followUpContentBlock = state.contentBlocks.find((contentBlock) => contentBlock.isFollowUp) ?? null;
-    const specialMaterials = roomCapabilities.isCommunityInvitationOffered
-        ? [
-              {
-                  id: 'community',
-                  content: <CommunityRoomInvitation participantIdentity={state.participant} />,
-              },
-          ]
-        : [];
+    const connectedRepository = roomCapabilities.isRepositoryOffered ? state.workshop.repository : null;
+    const specialMaterials = [
+        ...(connectedRepository === null
+            ? []
+            : [
+                  {
+                      id: 'repository',
+                      content: (
+                          <WorkshopRepositoryPanel
+                              repository={connectedRepository}
+                              progressController={repositoryProgressController}
+                          />
+                      ),
+                  },
+              ]),
+        ...(roomCapabilities.isCommunityInvitationOffered
+            ? [
+                  {
+                      id: 'community',
+                      content: <CommunityRoomInvitation participantIdentity={state.participant} />,
+                  },
+              ]
+            : []),
+    ];
 
     // Note: What the kind of this room has and what an administrator switched off is asked here once, so a new panel
     //       is one line of the room.
@@ -321,16 +337,6 @@ export function OnlineWorkshopParticipantPage({
                             stageComment={state.stageComment}
                             paidMembersOnlyVideo={state.paidMembersOnlyVideo}
                             onSaveFeedback={controller.saveFeedback}
-                        />
-                    )}
-                    {/*
-                      * Note: A term is about a project only while its administration connected one, so a room which is
-                      *       about no project shows nothing about one rather than an empty panel.
-                      */}
-                    {roomCapabilities.isRepositoryOffered && state.workshop.repository !== null && (
-                        <WorkshopRepositoryPanel
-                            repository={state.workshop.repository}
-                            progressController={repositoryProgressController}
                         />
                     )}
                     {calendarDetails !== null && (

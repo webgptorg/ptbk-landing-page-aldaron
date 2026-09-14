@@ -1,4 +1,4 @@
-[ ]
+[x] by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.3132 6 minutes; Testing 4 minutes
 
 [✨🧽] Linked repository should appear alongside the materials as a kind of special material.
 
@@ -10,3 +10,4 @@
 
 ![alt text](prompts/screenshots/2026-09-0100-repository-as-special-material.png)
 ![alt text](prompts/screenshots/2026-09-0100-repository-as-special-material-1.png)
+
