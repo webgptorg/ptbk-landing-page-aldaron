@@ -134,6 +134,24 @@ describe('workshop request validation', () => {
         ).toBe(false);
     });
 
+    it('accepts a presentation as a PDF, PowerPoint file, or GitHub Markdown page and normalizes its public URL', () => {
+        expect(
+            workshopUpdateSchema.parse({ presentationUrl: ' https://files.example.com/ai-agents.pdf#introduction ' })
+                .presentationUrl,
+        ).toBe('https://files.example.com/ai-agents.pdf');
+        expect(
+            workshopUpdateSchema.parse({ presentationUrl: 'https://files.example.com/ai-agents.pptx' }).presentationUrl,
+        ).toBe('https://files.example.com/ai-agents.pptx');
+        expect(
+            workshopUpdateSchema.parse({
+                presentationUrl: 'https://github.com/hejny/workshop/blob/main/WORKSHOP.md#slides',
+            }).presentationUrl,
+        ).toBe('https://github.com/hejny/workshop/blob/main/WORKSHOP.md');
+        expect(workshopCreateSchema.parse(VALID_WORKSHOP).presentationUrl).toBeNull();
+        expect(workshopUpdateSchema.parse({ presentationUrl: '' }).presentationUrl).toBeNull();
+        expect(workshopUpdateSchema.safeParse({ presentationUrl: 'javascript:alert(1)' }).success).toBe(false);
+    });
+
     it('reads the project of a term out of whatever address names its repository', () => {
         expect(
             workshopCreateSchema.parse({
@@ -169,12 +187,14 @@ describe('workshop request validation', () => {
             branch: ['main', 'client-*', 'feature/*'],
             deploymentUrl: null,
         });
-        expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: '*' } }).repository).toEqual({
+        expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: '*' } }).repository).toEqual(
+            {
             owner: 'hejny',
             name: 'promptbook',
             branch: '*',
             deploymentUrl: null,
-        });
+            },
+        );
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: [] } }).repository).toEqual({
             owner: 'hejny',
             name: 'promptbook',
@@ -251,8 +271,7 @@ describe('workshop request validation', () => {
         expect(workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, priceCzk: -1 }).success).toBe(false);
         expect(workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, maximumParticipantCount: 0 }).success).toBe(false);
         expect(
-            workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, locationKind: 'onsite', locationLabel: '   ' })
-                .success,
+            workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, locationKind: 'onsite', locationLabel: '   ' }).success,
         ).toBe(false);
         expect(workshopUpdateSchema.safeParse({ locationKind: 'onsite', locationLabel: '' }).success).toBe(false);
         expect(workshopUpdateSchema.safeParse({ locationKind: 'onsite' }).success).toBe(true);
@@ -383,10 +402,7 @@ describe('workshop request validation', () => {
             }),
         ).toEqual({
             question: 'Upravené téma',
-            options: [
-                { id: '5a7eb2ad-2583-4e98-9640-50bc773b5fde', label: 'Testování' },
-                { label: 'Nasazování' },
-            ],
+            options: [{ id: '5a7eb2ad-2583-4e98-9640-50bc773b5fde', label: 'Testování' }, { label: 'Nasazování' }],
             isClosed: false,
             isVisible: false,
             attachedWorkshopIds: [],
@@ -408,10 +424,7 @@ describe('workshop request validation', () => {
                 options: [{ label: 'Testování' }, { label: 'Nasazování' }],
                 isClosed: false,
                 isVisible: true,
-                attachedWorkshopIds: [
-                    '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
-                    '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
-                ],
+                attachedWorkshopIds: ['5a7eb2ad-2583-4e98-9640-50bc773b5fde', '5a7eb2ad-2583-4e98-9640-50bc773b5fde'],
             }).success,
         ).toBe(false);
     });
@@ -432,9 +445,9 @@ describe('workshop request validation', () => {
     });
 
     it('selects an existing comment for the stage or clears the selected question', () => {
-        expect(
-            workshopStageCommentSchema.parse({ commentId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde' }),
-        ).toEqual({ commentId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde' });
+        expect(workshopStageCommentSchema.parse({ commentId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde' })).toEqual({
+            commentId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
+        });
         expect(workshopStageCommentSchema.parse({ commentId: null })).toEqual({ commentId: null });
         expect(workshopStageCommentSchema.safeParse({ commentId: 'not-a-comment-id' }).success).toBe(false);
         expect(workshopStageCommentSchema.safeParse({}).success).toBe(false);

@@ -44,7 +44,23 @@ type WorkshopContentProps = {
 };
 
 type WorkshopMaterialBodyProps = {
-    readonly contentBlock: WorkshopContentBlock;
+    readonly bodyMarkdown: string;
+    readonly callToActionLabel?: string;
+};
+
+/**
+ * The portion of a material card which is shared by an administrator-managed material and a room-level material.
+ */
+export type WorkshopMaterialCardContent = Pick<
+    WorkshopContentBlock,
+    'id' | 'title' | 'bodyMarkdown' | 'isFollowUp' | 'isPaidMembersOnly'
+>;
+
+type WorkshopMaterialCardProps = {
+    readonly contentBlock: WorkshopMaterialCardContent;
+    readonly isNewlyUnlocked?: boolean;
+    readonly callToActionLabel?: string;
+    readonly ariaLabel?: string;
 };
 
 type WorkshopMaterialLink = {
@@ -80,10 +96,13 @@ function areWorkshopMaterialLinkListsEqual(
     currentMaterialLinks: readonly WorkshopMaterialLink[],
     nextMaterialLinks: readonly WorkshopMaterialLink[],
 ): boolean {
-    return currentMaterialLinks.length === nextMaterialLinks.length && currentMaterialLinks.every(
+    return (
+        currentMaterialLinks.length === nextMaterialLinks.length &&
+        currentMaterialLinks.every(
         (currentMaterialLink, index) =>
             currentMaterialLink.href === nextMaterialLinks[index]?.href &&
             currentMaterialLink.label === nextMaterialLinks[index]?.label,
+        )
     );
 }
 
@@ -93,10 +112,7 @@ function areWorkshopMaterialLinkListsEqual(
  */
 function WorkshopMaterialQrCodes({ materialLinks }: { readonly materialLinks: readonly WorkshopMaterialLink[] }) {
     return (
-        <aside
-            aria-label="QR kódy materiálů"
-            className="hidden shrink-0 lg:flex lg:flex-col lg:items-center lg:gap-4"
-        >
+        <aside aria-label="QR kódy materiálů" className="hidden shrink-0 lg:flex lg:flex-col lg:items-center lg:gap-4">
             {materialLinks.map((materialLink, index) => (
                 <figure
                     key={`${materialLink.href}-${index}`}
@@ -122,7 +138,10 @@ function WorkshopMaterialQrCodes({ materialLinks }: { readonly materialLinks: re
     );
 }
 
-function WorkshopMaterialBody({ contentBlock }: WorkshopMaterialBodyProps) {
+function WorkshopMaterialBody({
+    bodyMarkdown,
+    callToActionLabel = MATERIAL_CALL_TO_ACTION_LABEL,
+}: WorkshopMaterialBodyProps) {
     const materialBodyReference = useRef<HTMLDivElement>(null);
     const [materialLinks, setMaterialLinks] = useState<readonly WorkshopMaterialLink[]>([]);
     const singleMaterialLink = materialLinks.length === 1 ? materialLinks[0] : null;
@@ -134,7 +153,9 @@ function WorkshopMaterialBody({ contentBlock }: WorkshopMaterialBodyProps) {
         }
 
         const configureMaterialLinks = () => {
-            const linkElements = Array.from(materialBodyElement.querySelectorAll<HTMLAnchorElement>(MATERIAL_LINK_SELECTOR));
+            const linkElements = Array.from(
+                materialBodyElement.querySelectorAll<HTMLAnchorElement>(MATERIAL_LINK_SELECTOR),
+            );
             linkElements.forEach((linkElement) => {
                 configureMaterialLink(linkElement);
             });
@@ -151,13 +172,13 @@ function WorkshopMaterialBody({ contentBlock }: WorkshopMaterialBodyProps) {
         const observer = new MutationObserver(configureMaterialLinks);
         observer.observe(materialBodyElement, { childList: true, subtree: true });
         return () => observer.disconnect();
-    }, [contentBlock.bodyMarkdown]);
+    }, [bodyMarkdown]);
 
     return (
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-8">
             <div ref={materialBodyReference} className="min-w-0 break-words">
                 <MarkdownContent
-                    content={contentBlock.bodyMarkdown}
+                    content={bodyMarkdown}
                     theme="DARK"
                     className="max-w-none leading-7 text-slate-200 [--chat-md-link-color:#f1f5f9] [&_a]:font-semibold [&_code]:break-words [&_code]:text-cyan-100 [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
                 />
@@ -168,10 +189,10 @@ function WorkshopMaterialBody({ contentBlock }: WorkshopMaterialBodyProps) {
                             target="_blank"
                             rel="noopener noreferrer"
                             data-workshop-material-call-to-action
-                            aria-label={`${MATERIAL_CALL_TO_ACTION_LABEL}: ${singleMaterialLink.label}`}
+                            aria-label={`${callToActionLabel}: ${singleMaterialLink.label}`}
                             className="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-300/10 transition hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07151d]"
                         >
-                            {MATERIAL_CALL_TO_ACTION_LABEL}
+                            {callToActionLabel}
                             <ExternalLink className="h-4 w-4" aria-hidden="true" />
                         </a>
                     </div>
@@ -179,6 +200,56 @@ function WorkshopMaterialBody({ contentBlock }: WorkshopMaterialBodyProps) {
             </div>
             {materialLinks.length > 0 && <WorkshopMaterialQrCodes materialLinks={materialLinks} />}
         </div>
+    );
+}
+
+/**
+ * The shared card for every material-shaped item in a room.
+ *
+ * Note: A presentation is configured with the workshop rather than stored as scheduled content, but it deliberately
+ *       uses this card so its link, primary action, and desktop QR code never drift from ordinary materials.
+ */
+export function WorkshopMaterialCard({
+    contentBlock,
+    isNewlyUnlocked = false,
+    callToActionLabel,
+    ariaLabel,
+}: WorkshopMaterialCardProps) {
+    const isReducedMotionPreferred = useReducedMotion() === true;
+    const isFollowUp = contentBlock.isFollowUp;
+    const isPaidMembersOnly = contentBlock.isPaidMembersOnly;
+
+    return (
+        <motion.article
+            id={`workshop-material-${contentBlock.id}`}
+            aria-label={ariaLabel}
+            initial={isNewlyUnlocked && !isReducedMotionPreferred ? { opacity: 0, y: 24, scale: 0.97 } : false}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: isReducedMotionPreferred ? 0 : 0.55, ease: 'easeOut' }}
+            className={`relative scroll-mt-5 overflow-hidden rounded-2xl border bg-white/[0.045] p-5 text-slate-200 shadow-lg transition-colors sm:p-8 ${isNewlyUnlocked ? 'border-cyan-300/60 pt-16 shadow-cyan-300/10 sm:pt-8' : isFollowUp || isPaidMembersOnly ? 'border-amber-300/60 shadow-amber-300/10' : 'border-white/10'}`}
+        >
+            {isNewlyUnlocked && (
+                <span className="absolute right-4 top-4 rounded-full bg-cyan-300 px-3 py-1 text-xs font-bold text-slate-950 shadow-lg">
+                    Právě odemčeno
+                </span>
+            )}
+            {(isFollowUp || isPaidMembersOnly) && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                    {isFollowUp && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-100">
+                            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Navazující materiál
+                        </span>
+                    )}
+                    {isPaidMembersOnly && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-100">
+                            <Crown className="h-3.5 w-3.5" aria-hidden="true" /> Pro placené členy
+                        </span>
+                    )}
+                </div>
+            )}
+            {contentBlock.title && <h3 className="mb-5 text-xl font-bold text-white">{contentBlock.title}</h3>}
+            <WorkshopMaterialBody bodyMarkdown={contentBlock.bodyMarkdown} callToActionLabel={callToActionLabel} />
+        </motion.article>
     );
 }
 
@@ -230,8 +301,6 @@ export function WorkshopContent({
     specialMaterials = [],
     title = 'Materiály z workshopu',
 }: WorkshopContentProps) {
-    const isReducedMotionPreferred = useReducedMotion() === true;
-
     // Note: The purchase is only offered while a gate is configured and the member has not paid yet, which is exactly
     //       when the server keeps the paid materials hidden, so the notice and the hidden materials cannot disagree.
     const membershipPurchaseOffer = useCommunityMembershipPurchaseOffer();
@@ -258,47 +327,13 @@ export function WorkshopContent({
             </div>
 
             <div className="space-y-4">
-                {contentBlocks.map((contentBlock) => {
-                    const isNewlyUnlocked = newlyUnlockedContentBlockIds.has(contentBlock.id);
-                    const isFollowUp = contentBlock.isFollowUp;
-                    const isPaidMembersOnly = contentBlock.isPaidMembersOnly;
-                    return (
-                        <motion.article
+                {contentBlocks.map((contentBlock) => (
+                    <WorkshopMaterialCard
                             key={contentBlock.id}
-                            id={`workshop-material-${contentBlock.id}`}
-                            initial={isNewlyUnlocked && !isReducedMotionPreferred ? { opacity: 0, y: 24, scale: 0.97 } : false}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: isReducedMotionPreferred ? 0 : 0.55, ease: 'easeOut' }}
-                            className={`relative scroll-mt-5 overflow-hidden rounded-2xl border bg-white/[0.045] p-5 text-slate-200 shadow-lg transition-colors sm:p-8 ${isNewlyUnlocked ? 'border-cyan-300/60 pt-16 shadow-cyan-300/10 sm:pt-8' : isFollowUp || isPaidMembersOnly ? 'border-amber-300/60 shadow-amber-300/10' : 'border-white/10'}`}
-                        >
-                            {isNewlyUnlocked && (
-                                <span className="absolute right-4 top-4 rounded-full bg-cyan-300 px-3 py-1 text-xs font-bold text-slate-950 shadow-lg">
-                                    Právě odemčeno
-                                </span>
-                            )}
-                            {(isFollowUp || isPaidMembersOnly) && (
-                                <div className="mb-4 flex flex-wrap gap-2">
-                                    {isFollowUp && (
-                                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-100">
-                                            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Navazující materiál
-                                        </span>
-                                    )}
-                                    {isPaidMembersOnly && (
-                                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-100">
-                                            <Crown className="h-3.5 w-3.5" aria-hidden="true" /> Pro placené členy
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-                            {contentBlock.title && (
-                                <h3 className="mb-5 text-xl font-bold text-white">{contentBlock.title}</h3>
-                            )}
-                            <WorkshopMaterialBody
                                 contentBlock={contentBlock}
+                        isNewlyUnlocked={newlyUnlockedContentBlockIds.has(contentBlock.id)}
                             />
-                        </motion.article>
-                    );
-                })}
+                ))}
 
                 {specialMaterials.map((specialMaterial) => (
                     <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>

@@ -25,6 +25,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-09-12T15:00:00.000Z',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: 'M7lc1UVf-VE',
+    presentationUrl: 'https://files.example.com/production-ai-workshop.pdf',
     repository: {
         owner: 'hejny',
         name: 'promptbook',
@@ -72,6 +73,7 @@ describe('workshop creation drafts', () => {
             event: WORKSHOP.event,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
+            presentationUrl: WORKSHOP.presentationUrl,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
             isPublished: true,
             attachedPollsSourceWorkshopId: WORKSHOP.id,
@@ -121,6 +123,7 @@ describe('workshop creation drafts', () => {
             maximumParticipantCount: WORKSHOP.event?.maximumParticipantCount,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
+            presentationUrl: WORKSHOP.presentationUrl,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
             isPublished: true,
             attachedPollsSourceWorkshopId: WORKSHOP.id,

@@ -32,6 +32,7 @@ export type WorkshopCreateDraft = {
     readonly event: EventDetails;
     readonly youtubeVideoId: string | null;
     readonly previewYoutubeVideoId: string | null;
+    readonly presentationUrl: string | null;
     readonly attachedPollsSourceWorkshopId?: string;
 
     /**
@@ -85,6 +86,7 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
         event: copyEventDetails(DEFAULT_EVENT_DETAILS),
         youtubeVideoId: null,
         previewYoutubeVideoId: null,
+        presentationUrl: null,
         repository: null,
         isPublished: true,
         allowedReactions: [...DEFAULT_WORKSHOP_REACTIONS],
@@ -117,6 +119,7 @@ export function createWorkshopDuplicateDraft(
         event: copyEventDetails(workshop.event),
         youtubeVideoId: workshop.youtubeVideoId,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId,
+        presentationUrl: workshop.presentationUrl,
         repository: createWorkshopRepositoryWriteValues(createWorkshopRepositoryDraft(workshop.repository)),
         isPublished: workshop.isPublished,
         attachedPollsSourceWorkshopId: workshop.id,
@@ -146,6 +149,7 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         ...createWorkshopEventWriteValues(draft.event),
         youtubeVideoId: draft.youtubeVideoId,
         previewYoutubeVideoId: draft.previewYoutubeVideoId,
+        presentationUrl: draft.presentationUrl,
         repository: draft.repository,
         isPublished: draft.isPublished,
         ...(draft.attachedPollsSourceWorkshopId === undefined

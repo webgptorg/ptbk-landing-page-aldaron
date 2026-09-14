@@ -13,6 +13,7 @@ import {
 import { WorkshopContent } from '@/businesses/online-workshop/participant/WorkshopContent';
 import { WorkshopParticipantBadge } from '@/businesses/online-workshop/participant/WorkshopParticipantBadge';
 import { WorkshopPolls } from '@/businesses/online-workshop/participant/WorkshopPolls';
+import { WorkshopPresentationMaterial } from '@/businesses/online-workshop/participant/WorkshopPresentationMaterial';
 import { WorkshopReactions } from '@/businesses/online-workshop/participant/WorkshopReactions';
 import { WorkshopRepositoryPanel } from '@/businesses/online-workshop/participant/WorkshopRepositoryPanel';
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
@@ -158,7 +159,8 @@ export function OnlineWorkshopParticipantPage({
         }
 
         const sanitizedUrl = new URL(window.location.href);
-        const isWorkshopSelectionChanged = sanitizedUrl.searchParams.get(WORKSHOP_SEARCH_PARAMETER_NAME) !== workshopSlug;
+        const isWorkshopSelectionChanged =
+            sanitizedUrl.searchParams.get(WORKSHOP_SEARCH_PARAMETER_NAME) !== workshopSlug;
         const isUrlChanged =
             (isWorkshopSelectionInUrl && isWorkshopSelectionChanged) ||
             (!isWorkshopSelectionInUrl && sanitizedUrl.searchParams.has(WORKSHOP_SEARCH_PARAMETER_NAME)) ||
@@ -230,7 +232,16 @@ export function OnlineWorkshopParticipantPage({
     const isModerating = isWorkshopParticipantModerating(state.participant);
     const followUpContentBlock = state.contentBlocks.find((contentBlock) => contentBlock.isFollowUp) ?? null;
     const connectedRepository = roomCapabilities.isRepositoryOffered ? state.workshop.repository : null;
+    const presentationUrl = roomCapabilities.isPresentationOffered ? state.workshop.presentationUrl : null;
     const specialMaterials = [
+        ...(presentationUrl === null
+            ? []
+            : [
+                  {
+                      id: 'presentation',
+                      content: <WorkshopPresentationMaterial presentationUrl={presentationUrl} />,
+                  },
+              ]),
         ...(connectedRepository === null
             ? []
             : [

@@ -2,10 +2,10 @@ import 'dotenv/config';
 import { defineConfig } from '@playwright/test';
 
 /**
- * How long one E2E test may take, cold Next.js compilation included
+ * How long a cold Next.js start or one E2E test may take, compilation included
  *
- * Note: This is the single budget of every E2E test, so no test file has to repeat it, and a route which is reached
- *       first cannot be reported as broken merely for having been compiled.
+ * Note: This is the shared cold-start budget for the server and every E2E test, so neither a slow first server
+ *       readiness check nor a route reached first can be reported as broken merely for having been compiled.
  */
 const E2E_COLD_COMPILATION_TEST_TIMEOUT_MS = 180_000;
 
@@ -40,7 +40,7 @@ export default defineConfig({
               command: 'npx next dev -p 4009',
               url: baseURL,
               reuseExistingServer: !process.env.CI,
-              timeout: 120_000,
+              timeout: E2E_COLD_COMPILATION_TEST_TIMEOUT_MS,
               // The test server exercises the public API without running or repairing
               // migrations as a side effect.
               // Without a service role key, the same endpoints use an isolated in-memory

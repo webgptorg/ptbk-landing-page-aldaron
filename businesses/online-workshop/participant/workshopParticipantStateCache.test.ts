@@ -27,6 +27,7 @@ function createState(workshopSlug = WORKSHOP_SLUG): WorkshopPublicState {
             endsAt: '2026-08-24T20:00:00.000Z',
             youtubeVideoId: 'dQw4w9WgXcQ',
             previewYoutubeVideoId: null,
+            presentationUrl: null,
             repository: null,
             isPublished: true,
             allowedReactions: ['👍'],
@@ -81,8 +82,22 @@ describe('workshop participant state cache', () => {
     });
 
     it('does not revive a snapshot from an older cache version', () => {
-        const legacyCacheKey = `promptbook.workshop-participant-state.v2.${encodeURIComponent(WORKSHOP_SLUG)}`;
+        const legacyCacheKey = `promptbook.workshop-participant-state.v5.${encodeURIComponent(WORKSHOP_SLUG)}`;
         localStorage.setItem(legacyCacheKey, JSON.stringify({ savedAt: Date.now(), state: createState() }));
+
+        expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)).toBeNull();
+    });
+
+    it('drops a current cache entry whose presentation address is not a public URL', () => {
+        const state: WorkshopPublicState = {
+            ...createState(),
+            workshop: {
+                ...createState().workshop,
+                presentationUrl: 'javascript:alert(1)',
+            },
+        };
+
+        saveWorkshopParticipantStateCache(WORKSHOP_SLUG, state);
 
         expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)).toBeNull();
     });

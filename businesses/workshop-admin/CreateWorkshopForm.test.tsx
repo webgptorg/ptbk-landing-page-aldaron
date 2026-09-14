@@ -19,6 +19,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-09-12T15:00:00.000Z',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: 'M7lc1UVf-VE',
+    presentationUrl: null,
     repository: null,
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
@@ -93,7 +94,13 @@ describe('create workshop form', () => {
         const confirm = vi.fn().mockReturnValue(true);
         vi.stubGlobal('confirm', confirm);
 
-        render(<CreateWorkshopForm onCreate={vi.fn().mockResolvedValue(true)} onDelete={onDelete} workshopToDuplicate={WORKSHOP} />);
+        render(
+            <CreateWorkshopForm
+                onCreate={vi.fn().mockResolvedValue(true)}
+                onDelete={onDelete}
+                workshopToDuplicate={WORKSHOP}
+            />,
+        );
 
         expect(screen.getByRole('button', { name: 'Nový workshop' })).not.toBeNull();
         expect(screen.getByRole('button', { name: 'Duplikovat workshop' })).not.toBeNull();

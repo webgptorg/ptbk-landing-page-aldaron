@@ -37,6 +37,7 @@ import { extractYoutubeVideoId } from '@/lib/youtube/youtubeEmbed';
 import { z } from 'zod';
 
 const WORKSHOP_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH = 2_000;
 
 const nullableTimestampSchema = z.string().datetime({ offset: true }).nullable();
 const WORKSHOP_SLUG_SCHEMA = z.string().trim().min(1).max(MAXIMAL_WORKSHOP_SLUG_LENGTH).regex(WORKSHOP_SLUG_PATTERN);
@@ -72,6 +73,38 @@ const workshopDisabledPanelsSchema = z
     .array(z.custom<WorkshopPanelKey>(isWorkshopPanelKey, 'Unknown workshop panel'))
     .max(WORKSHOP_PANEL_DEFINITIONS.length)
     .refine((panelKeys) => new Set(panelKeys).size === panelKeys.length, 'Workshop panels must be unique');
+
+/**
+ * One publicly opened workshop address. Presentations and project deployments share the same safety and
+ * canonicalization rules, while each caller can still explain which field needs correcting.
+ */
+function createNullableWorkshopPublicUrlSchema(invalidUrlMessage: string) {
+    return z
+        .union([z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH), z.null()])
+        .transform((value, context) => {
+            if (value === '') {
+                return null;
+            }
+
+            if (value === null) {
+                return null;
+            }
+
+            const normalizedUrl = normalizePublicWebPageUrl(value);
+            if (normalizedUrl === null) {
+                context.addIssue({ code: z.ZodIssueCode.custom, message: invalidUrlMessage });
+                return z.NEVER;
+            }
+
+            return normalizedUrl;
+        });
+}
+
+const nullableWorkshopPresentationUrlSchema = createNullableWorkshopPublicUrlSchema(
+    'A valid presentation URL is required',
+);
+const nullableWorkshopDeploymentUrlSchema = createNullableWorkshopPublicUrlSchema('A valid deployment URL is required');
+
 /**
  * The project one term is about, written as one whole connection
  *
@@ -86,11 +119,11 @@ const workshopRepositoryBranchesSchema = z
     .refine((branches) => new Set(branches).size === branches.length, 'Workshop branches must be unique');
 const workshopRepositoryWriteSchema = z
     .object({
-        url: z.string().trim().max(2_000),
+        url: z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH),
         branch: z
             .union([workshopRepositoryBranchPatternSchema, workshopRepositoryBranchesSchema, z.null()])
             .default(null),
-        deploymentUrl: z.union([z.string().trim().max(2_000), z.null()]).default(null),
+        deploymentUrl: nullableWorkshopDeploymentUrlSchema.default(null),
     })
     .transform((values, context) => {
         const repository = extractGithubRepository(values.url);
@@ -116,19 +149,7 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        const writtenDeploymentUrl = values.deploymentUrl === '' ? null : values.deploymentUrl;
-        const deploymentUrl =
-            writtenDeploymentUrl === null ? null : normalizePublicWebPageUrl(writtenDeploymentUrl);
-        if (writtenDeploymentUrl !== null && deploymentUrl === null) {
-            context.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['deploymentUrl'],
-                message: 'A valid deployment URL is required',
-            });
-            return z.NEVER;
-        }
-
-        return { ...repository, branch, deploymentUrl } satisfies WorkshopRepository;
+        return { ...repository, branch, deploymentUrl: values.deploymentUrl } satisfies WorkshopRepository;
     });
 
 const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);
@@ -173,9 +194,8 @@ function areWorkshopPollOptionLabelsUnique(
     options: readonly string[] | readonly { readonly label: string }[],
 ): boolean {
     return (
-        new Set(
-            options.map((option) => (typeof option === 'string' ? option : option.label).toLowerCase()),
-        ).size === options.length
+        new Set(options.map((option) => (typeof option === 'string' ? option : option.label).toLowerCase())).size ===
+        options.length
     );
 }
 
@@ -218,13 +238,10 @@ export const workshopPollUpdateSchema = z.object({
         .min(MINIMAL_WORKSHOP_POLL_OPTION_COUNT)
         .max(MAXIMAL_WORKSHOP_POLL_OPTION_COUNT)
         .refine(areWorkshopPollOptionLabelsUnique, 'Poll options must be unique')
-        .refine(
-            (options) => {
+        .refine((options) => {
                 const optionIds = options.flatMap((option) => (option.id === undefined ? [] : [option.id]));
                 return new Set(optionIds).size === optionIds.length;
-            },
-            'Poll options must not repeat',
-        ),
+        }, 'Poll options must not repeat'),
     isClosed: z.boolean(),
     isVisible: z.boolean(),
     attachedWorkshopIds: workshopPollWorkshopIdsSchema,
@@ -352,12 +369,7 @@ const eventLocationKindSchema = z.custom<EventLocationKind>(
 );
 const eventLocationLabelSchema = z.string().trim().max(MAXIMAL_EVENT_LOCATION_LABEL_LENGTH);
 const eventPriceCzkSchema = z.number().int().min(0).max(MAXIMAL_EVENT_PRICE_CZK);
-const eventMaximumParticipantCountSchema = z
-    .number()
-    .int()
-    .min(1)
-    .max(MAXIMAL_EVENT_PARTICIPANT_COUNT)
-    .nullable();
+const eventMaximumParticipantCountSchema = z.number().int().min(1).max(MAXIMAL_EVENT_PARTICIPANT_COUNT).nullable();
 const artificialWatchingParticipantCountSchema = z.number().int().min(0).max(1_000_000);
 const ATTACHED_POLLS_SOURCE_WORKSHOP_ID_SCHEMA = z.string().uuid().optional();
 
@@ -387,6 +399,7 @@ export const workshopCreateSchema = z
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.default(0),
         youtubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.default(null),
+        presentationUrl: nullableWorkshopPresentationUrlSchema.default(null),
         repository: nullableWorkshopRepositorySchema.default(null),
         isPublished: z.boolean().default(true),
         attachedPollsSourceWorkshopId: ATTACHED_POLLS_SOURCE_WORKSHOP_ID_SCHEMA,
@@ -423,6 +436,7 @@ export const workshopUpdateSchema = z
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.optional(),
         youtubeVideoId: nullableYoutubeVideoIdSchema.optional(),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.optional(),
+        presentationUrl: nullableWorkshopPresentationUrlSchema.optional(),
         repository: nullableWorkshopRepositorySchema.optional(),
         isPublished: z.boolean().optional(),
         allowedReactions: workshopAllowedReactionsSchema.optional(),

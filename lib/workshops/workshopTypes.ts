@@ -94,6 +94,13 @@ export type WorkshopDetails = WorkshopSummary & {
     readonly previewYoutubeVideoId: string | null;
 
     /**
+     * A public PDF, presentation file, or Markdown page which belongs to this workshop, or `null` while none was
+     * published. It is a workshop setting rather than an ordinary content block, so every participant can open it
+     * without waiting for a scheduled unlock or buying a membership.
+     */
+    readonly presentationUrl: string | null;
+
+    /**
      * The project this workshop is about, or `null` while no project is connected to it
      *
      * Note: This is the whole connection — the repository, its branch selection, and the address the project runs at

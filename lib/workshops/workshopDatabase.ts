@@ -2,6 +2,7 @@ import { loadCommunityMembershipByEmail } from '@/lib/community-membership/commu
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import { createEventDetailsOrNull } from '@/lib/events/event';
 import type { EventType } from '@/lib/events/eventTypes';
+import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import { loadAllSupabaseRows, SUPABASE_ROW_PAGE_SIZE, type SupabaseRowsPage } from '@/lib/supabase/loadAllSupabaseRows';
 import { reportSupabaseError } from '@/lib/supabase/reportSupabaseError';
@@ -92,6 +93,9 @@ export type WorkshopRow = {
      * unlock the recording itself
      */
     readonly preview_youtube_video_id: string | null;
+
+    /** A public presentation which belongs to the term, kept apart from timed and membership-gated content blocks. */
+    readonly presentation_url?: string | null;
 
     /**
      * The project this term is about, written as `owner/name`, together with the selected branch array and the address
@@ -439,11 +443,14 @@ export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
         ...mapWorkshopSummaryRow(row),
         youtubeVideoId: row.youtube_video_id,
         previewYoutubeVideoId: row.preview_youtube_video_id,
+        // Read defensively as well as validating writes: an old or manually altered row must not hand an unsafe URL
+        // to a participant browser.
+        presentationUrl: normalizePublicWebPageUrl(row.presentation_url ?? ''),
         repository: createWorkshopRepositoryOrNull({
             repository: row.github_repository ?? null,
             branch:
                 row.github_repository_branches === undefined
-                    ? row.github_repository_branch ?? null
+                    ? (row.github_repository_branch ?? null)
                     : row.github_repository_branches,
             deploymentUrl: row.deployment_url ?? null,
         }),
@@ -894,9 +901,7 @@ export async function findWorkshopBySlug(
     workshopSlug: string,
     isPublishedRequired: boolean,
 ): Promise<WorkshopRow | null> {
-    const { data, error } = await loadWorkshopQueryWithActiveStatus(
-        supabase,
-        (isActiveStatusFilterEnabled) => {
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
             let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('slug', workshopSlug);
 
             if (isPublishedRequired) {
@@ -907,8 +912,7 @@ export async function findWorkshopBySlug(
             }
 
             return workshopQuery.maybeSingle();
-        },
-    );
+    });
     if (error) {
         console.error(`Failed to load workshop "${workshopSlug}":`, error.message);
         return null;
@@ -926,9 +930,7 @@ export async function findUpcomingPublishedWorkshops(
     eventType: EventType,
     currentTime = new Date().toISOString(),
 ): Promise<readonly WorkshopSummaryRow[]> {
-    const { data, error } = await loadWorkshopQueryWithActiveStatus(
-        supabase,
-        (isActiveStatusFilterEnabled) => {
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
             let workshopQuery = supabase
                 .from(WORKSHOP_TABLE_NAME)
                 .select(WORKSHOP_SUMMARY_COLUMNS)
@@ -943,8 +945,7 @@ export async function findUpcomingPublishedWorkshops(
             }
 
             return workshopQuery;
-        },
-    );
+    });
 
     if (error) {
         console.error(`Failed to load upcoming "${eventType}" terms:`, error.message);
@@ -962,9 +963,7 @@ export async function findMostRecentPublishedWorkshop(
     supabase: SupabaseClient,
     eventType: EventType,
 ): Promise<WorkshopRow | null> {
-    const { data, error } = await loadWorkshopQueryWithActiveStatus(
-        supabase,
-        (isActiveStatusFilterEnabled) => {
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
             let workshopQuery = supabase
                 .from(WORKSHOP_TABLE_NAME)
                 .select('*')
@@ -979,8 +978,7 @@ export async function findMostRecentPublishedWorkshop(
             }
 
             return workshopQuery.maybeSingle();
-        },
-    );
+    });
 
     if (error) {
         console.error('Failed to load the most recent workshop:', error.message);
@@ -1013,9 +1011,8 @@ export async function findPublishedWorkshops(
                 publishedWorkshopQuery = publishedWorkshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
             }
 
-            return (eventType === undefined
-                ? publishedWorkshopQuery
-                : publishedWorkshopQuery.eq('event_type', eventType)
+            return (
+                eventType === undefined ? publishedWorkshopQuery : publishedWorkshopQuery.eq('event_type', eventType)
             )
                 .order('starts_at', { ascending: false })
                 .order('id', { ascending: false })
@@ -1036,9 +1033,7 @@ export async function findPublishedWorkshops(
  * configuration into an ordinary unavailable public page instead of picking an arbitrary room.
  */
 export async function findPublishedCommunity(supabase: SupabaseClient): Promise<WorkshopRow | null> {
-    const { data, error } = await loadWorkshopQueryWithActiveStatus(
-        supabase,
-        (isActiveStatusFilterEnabled) => {
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
             let workshopQuery = supabase
                 .from(WORKSHOP_TABLE_NAME)
                 .select('*')
@@ -1050,8 +1045,7 @@ export async function findPublishedCommunity(supabase: SupabaseClient): Promise<
             }
 
             return workshopQuery.maybeSingle();
-        },
-    );
+    });
 
     if (error) {
         console.error('Failed to load the community room:', error.message);
@@ -1062,9 +1056,7 @@ export async function findPublishedCommunity(supabase: SupabaseClient): Promise<
 }
 
 export async function findWorkshopById(supabase: SupabaseClient, workshopId: string): Promise<WorkshopRow | null> {
-    const { data, error } = await loadWorkshopQueryWithActiveStatus(
-        supabase,
-        (isActiveStatusFilterEnabled) => {
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
             let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('id', workshopId);
 
             if (isActiveStatusFilterEnabled) {
@@ -1072,8 +1064,7 @@ export async function findWorkshopById(supabase: SupabaseClient, workshopId: str
             }
 
             return workshopQuery.maybeSingle();
-        },
-    );
+    });
     if (error) {
         console.error(`Failed to load workshop "${workshopId}":`, error.message);
         return null;
@@ -2439,9 +2430,7 @@ export async function loadWorkshopPublicState(
     const materializedCommentResults = await Promise.all(
         commentRows.map(async (commentRow) => {
             const author =
-                commentRow.participant_id === null
-                    ? undefined
-                    : authorByParticipantId.get(commentRow.participant_id);
+                commentRow.participant_id === null ? undefined : authorByParticipantId.get(commentRow.participant_id);
             if (
                 !areWorkshopCommentLinksEnabled({
                     isArtificial: commentRow.is_artificial,

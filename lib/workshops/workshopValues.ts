@@ -50,6 +50,7 @@ export function createWorkshopDatabaseValues(values: WorkshopCreateValues) {
         artificial_watching_participant_count: values.artificialWatchingParticipantCount,
         youtube_video_id: values.youtubeVideoId,
         preview_youtube_video_id: values.previewYoutubeVideoId,
+        presentation_url: values.presentationUrl,
         ...createWorkshopRepositoryDatabaseValues(values.repository),
         is_published: values.isPublished,
         allowed_reactions: values.allowedReactions,
@@ -78,6 +79,7 @@ export function createWorkshopUpdateDatabaseValues(values: WorkshopUpdateValues)
         ...(values.previewYoutubeVideoId === undefined
             ? {}
             : { preview_youtube_video_id: values.previewYoutubeVideoId }),
+        ...(values.presentationUrl === undefined ? {} : { presentation_url: values.presentationUrl }),
         ...(values.repository === undefined ? {} : createWorkshopRepositoryDatabaseValues(values.repository)),
         ...(values.isPublished === undefined ? {} : { is_published: values.isPublished }),
         ...(values.allowedReactions === undefined ? {} : { allowed_reactions: values.allowedReactions }),
@@ -152,9 +154,7 @@ export function getWorkshopCommentPinChange(values: WorkshopCommentUpdateValues)
  */
 export function createWorkshopParticipantUpdateDatabaseValues(values: WorkshopParticipantUpdateValues) {
     return {
-        ...(values.isInteractionBanned === undefined
-            ? {}
-            : { is_interaction_banned: values.isInteractionBanned }),
+        ...(values.isInteractionBanned === undefined ? {} : { is_interaction_banned: values.isInteractionBanned }),
         ...(values.isTrusted === undefined ? {} : { is_trusted: values.isTrusted }),
         ...(values.isModerator === undefined ? {} : { is_moderator: values.isModerator }),
     };

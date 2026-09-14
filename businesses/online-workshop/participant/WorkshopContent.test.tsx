@@ -6,6 +6,7 @@ import {
     WorkshopContent,
     type WorkshopSpecialMaterial,
 } from '@/businesses/online-workshop/participant/WorkshopContent';
+import { WorkshopPresentationMaterial } from '@/businesses/online-workshop/participant/WorkshopPresentationMaterial';
 import type { CommunityMembershipRoomState } from '@/lib/community-membership/communityMembershipTypes';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -27,24 +28,33 @@ vi.mock('@/businesses/community/membership/CommunityMembershipRoomProvider', () 
 
 vi.mock('@/components/markdown-content', () => ({
     MarkdownContent: ({ content, className }: { readonly content: string; readonly className?: string }) => {
-        const markdownLinks = Array.from(content.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g));
+        const markdownLinks = Array.from(content.matchAll(/\[([^\]]+)\]\((?:<([^>]+)>|([^)]+))\)/g));
 
         return (
             <div data-testid="markdown-content" className={className}>
-                {markdownLinks.map((markdownLink) => (
-                    <a key={markdownLink[2]} href={markdownLink[2]}>
+                {markdownLinks.map((markdownLink) => {
+                    const href = markdownLink[2] ?? markdownLink[3];
+                    return (
+                        <a key={href} href={href}>
                         {markdownLink[1]}
                     </a>
-                ))}
+                    );
+                })}
             </div>
         );
     },
 }));
 
 vi.mock('@/components/promptbook-qr-code', () => ({
-    PromptbookQrCode: ({ value, size, className }: { readonly value: string; readonly size?: number; readonly className?: string }) => (
-        <span data-testid="workshop-material-qr-code" data-value={value} data-size={size} className={className} />
-    ),
+    PromptbookQrCode: ({
+        value,
+        size,
+        className,
+    }: {
+        readonly value: string;
+        readonly size?: number;
+        readonly className?: string;
+    }) => <span data-testid="workshop-material-qr-code" data-value={value} data-size={size} className={className} />,
 }));
 
 const CONTENT_BLOCK: WorkshopContentBlock = {
@@ -99,15 +109,42 @@ afterEach(() => {
 
 describe('workshop materials', () => {
     it('keeps a special material in the material list even when no ordinary material is unlocked', () => {
-        renderWorkshopContent([], [], [
+        renderWorkshopContent(
+            [],
+            [],
+            [
             {
                 id: 'community',
                 content: <article aria-label="Komunita Promptbooku">Komunita Promptbooku</article>,
             },
-        ]);
+            ],
+        );
 
         expect(screen.getByRole('heading', { name: 'Materiály z workshopu' })).not.toBeNull();
         expect(screen.getByRole('article', { name: 'Komunita Promptbooku' })).not.toBeNull();
+    });
+
+    it('uses the ordinary material card, primary action, and QR code for a workshop presentation', async () => {
+        const presentationUrl = 'https://files.example.com/(ai-agents).pptx';
+        renderWorkshopContent(
+            [],
+            [],
+            [
+                {
+                    id: 'presentation',
+                    content: <WorkshopPresentationMaterial presentationUrl={presentationUrl} />,
+                },
+            ],
+        );
+
+        expect(screen.getByLabelText('Prezentace workshopu')).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Prezentace' })).not.toBeNull();
+        expect(screen.getByRole('link', { name: 'Otevřít prezentaci: Prezentace' }).getAttribute('href')).toBe(
+            presentationUrl,
+        );
+        expect((await screen.findByTestId('workshop-material-qr-code')).getAttribute('data-value')).toBe(
+            presentationUrl,
+        );
     });
 
     it('offers a prominent short-link call to action when a material has one link', async () => {
@@ -136,12 +173,12 @@ describe('workshop materials', () => {
         ]);
         expect(qrCodes.every((qrCode) => qrCode.getAttribute('data-size') === '144')).toBe(true);
         expect(screen.getAllByLabelText('QR kódy materiálů')).toHaveLength(2);
-        expect(screen.getAllByLabelText('QR kódy materiálů').every((qrCodes) => qrCodes.className.includes('hidden'))).toBe(
-            true,
-        );
-        expect(screen.getAllByLabelText('QR kódy materiálů').every((qrCodes) => qrCodes.className.includes('lg:flex'))).toBe(
-            true,
-        );
+        expect(
+            screen.getAllByLabelText('QR kódy materiálů').every((qrCodes) => qrCodes.className.includes('hidden')),
+        ).toBe(true);
+        expect(
+            screen.getAllByLabelText('QR kódy materiálů').every((qrCodes) => qrCodes.className.includes('lg:flex')),
+        ).toBe(true);
     });
 
     it('uses the QR renderer quiet zone without an extra frame or redundant phone prompt', async () => {
@@ -172,7 +209,8 @@ describe('workshop materials', () => {
     it('keeps every link of a multi-link material available through its own QR code', async () => {
         const contentBlockWithMultipleLinks: WorkshopContentBlock = {
             ...CONTENT_BLOCK,
-            bodyMarkdown: '[První materiál](https://ptbk.io/material-one) a [druhý materiál](https://ptbk.io/material-two)',
+            bodyMarkdown:
+                '[První materiál](https://ptbk.io/material-one) a [druhý materiál](https://ptbk.io/material-two)',
         };
         renderWorkshopContent([contentBlockWithMultipleLinks]);
 

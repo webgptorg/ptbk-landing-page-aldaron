@@ -1,4 +1,10 @@
 # Current preversion
+
+- Added a presentation setting to `/admin/workshops`. A workshop can now link a PDF, PowerPoint file, or public GitHub
+  Markdown page, and `/cs/online-workshop/participant?workshop=` shows it beside ordinary materials with the same
+  open action and desktop QR code. The presentation is a shared workshop-level material, so it is immediately visible
+  to free and paid participants alike without becoming timed or membership-gated content.
+
 - Moved a connected GitHub repository in `/cs/online-workshop/participant` into the materials list as a special
   material. Its existing repository, deployment, and live-commit links now stay with ordinary workshop materials,
   are visible even when no ordinary material has been unlocked, and remain available to both free and paid

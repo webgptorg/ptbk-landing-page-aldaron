@@ -157,6 +157,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   graph. Commits come from the public commit feed or keyless API, pooled once per
   server and cached through the revalidation window; an unreadable feed still
   leaves the room naming its project.
+- A workshop can carry one public presentation URL for a PDF, PowerPoint file, or
+  GitHub Markdown page. The room renders it beside ordinary materials through the
+  shared material card, primary action, and QR code, for every participant without
+  making it timed or membership-gated content.
 - Paid-only materials are decided on the server in one pass. Members receive
   unlocked material; others receive only the published titles as an offer. An
   untitled item is not named, items are not named before their unlock time, and a
@@ -195,9 +199,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   publishes it by default; duplicating an event keeps it published unless the
   source is unpublished. Duplicating a workshop preserves its connections to
   the already existing attached polls; it creates no polls, options, votes, or room history. Stage settings contain
-  the live stream and recording teaser, and project settings the repository the
-  term is about, written as an address or as `owner/name`, together with its branch
-  patterns. Deleting a workshop is a soft deletion: its room data and attached
+  the live stream and recording teaser, presentation settings the public presentation
+  address, and project settings the repository the term is about, written as an
+  address or as `owner/name`, together with its branch patterns. Deleting a workshop is a soft deletion: its room
+  data and attached
   community polls stay stored, but the term leaves normal public and administrative
   lists and no longer holds its slug for a replacement. An end may be empty;
   admins can record, adjust, clear, and reopen it. Overview analytics are zoomable and share their

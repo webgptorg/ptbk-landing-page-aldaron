@@ -39,6 +39,12 @@ vi.mock('@/businesses/online-workshop/participant/useWorkshopRepositoryProgress'
     useWorkshopRepositoryProgress: () => repositoryProgressMocks.controller,
 }));
 
+vi.mock('@/components/promptbook-qr-code', () => ({
+    PromptbookQrCode: ({ value }: { readonly value: string }) => (
+        <span data-testid="workshop-material-qr-code" data-value={value} />
+    ),
+}));
+
 const fetchCommunityMembership = vi.fn<(workshopSlug: string) => Promise<CommunityMembershipRoomState>>();
 
 vi.mock('@/businesses/community/membership/communityMembershipRoomApi', () => ({
@@ -85,6 +91,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-08-21T20:30:00+02:00',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: null,
+    presentationUrl: null,
     repository: null,
     isPublished: true,
     allowedReactions: ['👍'],
@@ -158,6 +165,11 @@ const WORKSHOP_ABOUT_A_PROJECT: WorkshopDetails = {
         branch: 'main',
         deploymentUrl: 'https://workshop.example/app',
     },
+};
+
+const WORKSHOP_WITH_PRESENTATION: WorkshopDetails = {
+    ...WORKSHOP,
+    presentationUrl: 'https://files.example.com/(production-ai-workshop).pptx',
 };
 
 const ATTACHED_COMMUNITY_POLL: WorkshopPoll = {
@@ -371,6 +383,36 @@ describe('online workshop participant room', () => {
         expect(screen.getByLabelText('Projekt workshopu')).not.toBeNull();
     });
 
+    it('shows the workshop presentation as a shared material even when no ordinary material has unlocked', async () => {
+        renderParticipantRoom(WORKSHOP_WITH_PRESENTATION);
+
+        const presentationMaterial = await screen.findByLabelText('Prezentace workshopu');
+        const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
+        const presentationLink = await screen.findByRole('link', { name: /Otevřít prezentaci/ });
+
+        expect(materialsSection?.contains(presentationMaterial)).toBe(true);
+        expect(presentationLink.getAttribute('href')).toBe(WORKSHOP_WITH_PRESENTATION.presentationUrl);
+        expect(presentationLink.getAttribute('target')).toBe('_blank');
+        expect(presentationLink.getAttribute('rel')).toBe('noopener noreferrer');
+    });
+
+    it('keeps the presentation material available to a paying participant', async () => {
+        fetchCommunityMembership.mockResolvedValue({
+            status: 'active',
+            monthlyPriceCzk: 199,
+            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
+            isCancellationScheduled: false,
+            isPurchaseOffered: false,
+            isSubscriptionManagementOffered: true,
+            isCoveredByDiscountCode: false,
+            isPaymentInTestMode: false,
+        });
+        renderParticipantRoom(WORKSHOP_WITH_PRESENTATION);
+
+        await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
+        expect(screen.getByLabelText('Prezentace workshopu')).not.toBeNull();
+    });
+
     it('shows nothing about a project in a room which is about none, and in a room which cannot be about one', () => {
         renderParticipantRoom(WORKSHOP);
         expect(screen.queryByLabelText('Projekt workshopu')).toBeNull();
@@ -379,6 +421,12 @@ describe('online workshop participant room', () => {
 
         renderParticipantRoom({ ...COMMUNITY, repository: WORKSHOP_ABOUT_A_PROJECT.repository });
         expect(screen.queryByLabelText('Projekt workshopu')).toBeNull();
+    });
+
+    it('does not put a presentation into a room kind which cannot offer one', () => {
+        renderParticipantRoom({ ...COMMUNITY, presentationUrl: WORKSHOP_WITH_PRESENTATION.presentationUrl });
+
+        expect(screen.queryByLabelText('Prezentace workshopu')).toBeNull();
     });
 
     it('lets a member vote on a visible community poll attached to a workshop', () => {

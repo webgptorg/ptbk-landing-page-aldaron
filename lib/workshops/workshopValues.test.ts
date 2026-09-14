@@ -52,6 +52,15 @@ describe('workshop admin values', () => {
         });
     });
 
+    it('writes only the presentation address which changed', () => {
+        expect(
+            createWorkshopUpdateDatabaseValues({ presentationUrl: 'https://files.example.com/workshop.pdf' }),
+        ).toEqual({
+            presentation_url: 'https://files.example.com/workshop.pdf',
+        });
+        expect(createWorkshopUpdateDatabaseValues({ presentationUrl: null })).toEqual({ presentation_url: null });
+    });
+
     it('writes the whole project of a room at once, so unsetting it leaves nothing of it behind', () => {
         expect(
             createWorkshopUpdateDatabaseValues({

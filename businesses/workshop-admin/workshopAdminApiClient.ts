@@ -50,6 +50,11 @@ export type WorkshopWriteValues = {
     readonly previewYoutubeVideoId?: string | null;
 
     /**
+     * The public PDF, presentation file, or Markdown page participants receive as a shared workshop material.
+     */
+    readonly presentationUrl?: string | null;
+
+    /**
      * The project this term is about, or `null` to disconnect the project it was about
      *
      * Note: The whole connection is written at once, so setting, changing, and unsetting it are one and the same

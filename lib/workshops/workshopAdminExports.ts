@@ -79,6 +79,9 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
                       },
                   ]
                 : []),
+            ...(roomCapabilities.isPresentationOffered
+                ? [{ header: 'URL prezentace', getValue: (item: WorkshopDetails) => item.presentationUrl }]
+                : []),
             ...(roomCapabilities.isRepositoryOffered
                 ? [
                       {
@@ -121,9 +124,7 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
 }
 
 export function serializeWorkshopAdminParticipantsAsCsv(participants: readonly WorkshopAdminParticipant[]): string {
-    return serializeRowsAsCsv(
-        participants,
-        [
+    return serializeRowsAsCsv(participants, [
             { header: 'Jméno', getValue: (participant) => participant.fullname },
             { header: 'E-mail', getValue: (participant) => participant.email },
             { header: 'Registrace', getValue: (participant) => participant.connectedAt },
@@ -147,8 +148,7 @@ export function serializeWorkshopAdminParticipantsAsCsv(participants: readonly W
                 header: 'Účasti ve workshopech',
                 getValue: (participant) => formatAdminWorkshopParticipations(participant.contactGroup),
             },
-        ],
-    );
+    ]);
 }
 
 export function serializeWorkshopAdminParticipantsAsVcard(
@@ -182,9 +182,7 @@ export function serializeWorkshopAdminParticipantsAsVcard(
 }
 
 export function serializeWorkshopAdminCommentsAsCsv(comments: readonly WorkshopAdminComment[]): string {
-    return serializeRowsAsCsv(
-        comments,
-        [
+    return serializeRowsAsCsv(comments, [
             { header: 'Čas', getValue: (comment) => comment.createdAt },
             { header: 'Autor', getValue: (comment) => comment.authorName },
             { header: 'ID účastníka', getValue: (comment) => comment.participantId },
@@ -198,27 +196,21 @@ export function serializeWorkshopAdminCommentsAsCsv(comments: readonly WorkshopA
             { header: 'Odpověď na ID', getValue: (comment) => comment.parentCommentId },
             { header: 'Odpověď na autora', getValue: (comment) => comment.parentComment?.authorName ?? null },
             { header: 'Odpověď na text', getValue: (comment) => comment.parentComment?.body ?? null },
-        ],
-    );
+    ]);
 }
 
 export function serializeWorkshopAdminReactionsAsCsv(reactions: readonly WorkshopAdminReactionExportRow[]): string {
-    return serializeRowsAsCsv(
-        reactions,
-        [
+    return serializeRowsAsCsv(reactions, [
             { header: 'Čas', getValue: (reaction) => reaction.occurredAt },
             { header: 'Reakce', getValue: (reaction) => reaction.emoji },
             { header: 'Jméno účastníka', getValue: (reaction) => reaction.participantFullname },
             { header: 'E-mail účastníka', getValue: (reaction) => reaction.participantEmail },
             { header: 'Umělá reakce', getValue: (reaction) => formatBoolean(reaction.isArtificial) },
-        ],
-    );
+    ]);
 }
 
 export function serializeWorkshopAdminContentAsCsv(contentBlocks: readonly WorkshopContentBlock[]): string {
-    return serializeRowsAsCsv(
-        contentBlocks,
-        [
+    return serializeRowsAsCsv(contentBlocks, [
             { header: 'Název', getValue: (contentBlock) => contentBlock.title },
             { header: 'Text Markdown', getValue: (contentBlock) => contentBlock.bodyMarkdown },
             { header: 'Odemknout', getValue: (contentBlock) => contentBlock.unlockAt },
@@ -229,14 +221,11 @@ export function serializeWorkshopAdminContentAsCsv(contentBlocks: readonly Works
             { header: 'Kliknutí na odkazy', getValue: (contentBlock) => contentBlock.linkClickCount },
             { header: 'Vytvořeno', getValue: (contentBlock) => contentBlock.createdAt },
             { header: 'Aktualizováno', getValue: (contentBlock) => contentBlock.updatedAt },
-        ],
-    );
+    ]);
 }
 
 export function serializeWorkshopAdminTimelineAsCsv(timeline: readonly WorkshopAdminTimelinePoint[]): string {
-    return serializeRowsAsCsv(
-        timeline,
-        [
+    return serializeRowsAsCsv(timeline, [
             { header: 'Začátek úseku', getValue: (point) => point.startsAt },
             { header: 'Diváci', getValue: (point) => point.watchingParticipantCount },
             { header: 'Nově připojení', getValue: (point) => point.participantCount },
@@ -253,8 +242,7 @@ export function serializeWorkshopAdminTimelineAsCsv(timeline: readonly WorkshopA
                     point.upvoteCount +
                     point.linkClickCount,
             },
-        ],
-    );
+    ]);
 }
 
 /**
@@ -264,7 +252,10 @@ export function isWorkshopAdminExportKind(value: string): value is WorkshopAdmin
     return WORKSHOP_ADMIN_EXPORT_KINDS.includes(value as WorkshopAdminExportKind);
 }
 
-export function buildWorkshopAdminExportFileName(workshop: WorkshopDetails, exportKind: WorkshopAdminExportKind): string {
+export function buildWorkshopAdminExportFileName(
+    workshop: WorkshopDetails,
+    exportKind: WorkshopAdminExportKind,
+): string {
     const fileExtension = exportKind === 'participants-vcard' ? 'vcf' : 'csv';
     return `${workshop.slug}-${exportKind}.${fileExtension}`;
 }

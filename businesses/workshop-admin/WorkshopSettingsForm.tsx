@@ -4,10 +4,7 @@ import {
     createWorkshopEventWriteValues,
     type WorkshopWriteValues,
 } from '@/businesses/workshop-admin/workshopAdminApiClient';
-import {
-    WorkshopEndControls,
-    type WorkshopEndSaveAction,
-} from '@/businesses/workshop-admin/WorkshopEndControls';
+import { WorkshopEndControls, type WorkshopEndSaveAction } from '@/businesses/workshop-admin/WorkshopEndControls';
 import { WorkshopEventFields } from '@/businesses/workshop-admin/WorkshopEventFields';
 import { WorkshopPanelSettings } from '@/businesses/workshop-admin/WorkshopPanelSettings';
 import { WorkshopRepositoryFields } from '@/businesses/workshop-admin/WorkshopRepositoryFields';
@@ -64,6 +61,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
     const [eventDetails, setEventDetails] = useState(() => workshop.event ?? DEFAULT_EVENT_DETAILS);
     const [youtubeVideoId, setYoutubeVideoId] = useState(workshop.youtubeVideoId ?? '');
     const [previewYoutubeVideoId, setPreviewYoutubeVideoId] = useState(workshop.previewYoutubeVideoId ?? '');
+    const [presentationUrl, setPresentationUrl] = useState(workshop.presentationUrl ?? '');
     const [repositoryDraft, setRepositoryDraft] = useState(() => createWorkshopRepositoryDraft(workshop.repository));
     const [reactionText, setReactionText] = useState(workshop.allowedReactions.join(' '));
     const [disabledPanels, setDisabledPanels] = useState(workshop.disabledPanels);
@@ -97,6 +95,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
         setEventDetails(workshop.event ?? DEFAULT_EVENT_DETAILS);
         setYoutubeVideoId(workshop.youtubeVideoId ?? '');
         setPreviewYoutubeVideoId(workshop.previewYoutubeVideoId ?? '');
+        setPresentationUrl(workshop.presentationUrl ?? '');
         setRepositoryDraft(createWorkshopRepositoryDraft(workshop.repository));
         setReactionText(workshop.allowedReactions.join(' '));
         setDisabledPanels(workshop.disabledPanels);
@@ -132,6 +131,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                       previewYoutubeVideoId: previewYoutubeVideoId.trim() || null,
                   }
                 : {}),
+            ...(roomCapabilities.isPresentationOffered ? { presentationUrl: presentationUrl.trim() || null } : {}),
             ...(roomCapabilities.isRepositoryOffered
                 ? { repository: createWorkshopRepositoryWriteValues(repositoryDraft) }
                 : {}),
@@ -245,7 +245,8 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                             className="mt-2"
                         />
                         <span className="mt-1 block text-xs font-normal text-slate-400">
-                            Přičte se k živému počtu v místnosti. Nezapisuje žádné skutečné účastníky ani analytickou návštěvnost.
+                            Přičte se k živému počtu v místnosti. Nezapisuje žádné skutečné účastníky ani analytickou
+                            návštěvnost.
                         </span>
                     </label>
                 )}
@@ -275,6 +276,26 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                             </span>
                         </label>
                     </>
+                )}
+                {roomCapabilities.isPresentationOffered && (
+                    <label
+                        htmlFor="workshop-presentation-url"
+                        className="text-sm font-medium text-slate-700 md:col-span-2"
+                    >
+                        URL prezentace
+                        <Input
+                            id="workshop-presentation-url"
+                            type="url"
+                            value={presentationUrl}
+                            onChange={(event) => setPresentationUrl(event.target.value)}
+                            className="mt-2"
+                            placeholder="https://…/prezentace.pdf"
+                        />
+                        <span className="mt-1 block text-xs font-normal text-slate-400">
+                            Nepovinné. Může vést na PDF, PowerPoint nebo veřejný Markdown na GitHubu. Všichni účastníci
+                            ji najdou mezi materiály bez čekání a bez placeného členství.
+                        </span>
+                    </label>
                 )}
                 {roomCapabilities.isRepositoryOffered && (
                     <WorkshopRepositoryFields repository={repositoryDraft} onChange={setRepositoryDraft} />

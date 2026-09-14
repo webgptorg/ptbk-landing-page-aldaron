@@ -3,14 +3,16 @@ import {
     removeBrowserLocalStorageItem,
     writeBrowserLocalStorageItem,
 } from '@/lib/browser/browserStorage';
+import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import { WORKSHOP_SESSION_MAX_AGE_SECONDS } from '@/lib/workshops/workshopConstants';
 import type { WorkshopPublicState } from '@/lib/workshops/workshopTypes';
 
 // Version the snapshot whenever its room-state shape or security boundary changes:
 // an older cached state may still contain raw material destinations from before
 // every public link was materialized through the shortener, predate community polls, miss the question selected
-// for the shared stage, or still carry the recording of an ended workshop which the paid membership now unlocks.
-const WORKSHOP_PARTICIPANT_STATE_CACHE_KEY_PREFIX = 'promptbook.workshop-participant-state.v5.';
+// for the shared stage, omit the workshop presentation, or still carry the recording of an ended workshop which the
+// paid membership now unlocks.
+const WORKSHOP_PARTICIPANT_STATE_CACHE_KEY_PREFIX = 'promptbook.workshop-participant-state.v6.';
 const WORKSHOP_PARTICIPANT_STATE_CACHE_MAX_AGE_MILLISECONDS = WORKSHOP_SESSION_MAX_AGE_SECONDS * 1_000;
 
 type WorkshopParticipantStateCacheEntry = {
@@ -40,6 +42,10 @@ function isWorkshopRepositoryOrNull(value: unknown): boolean {
         value === null ||
         (isObject(value) && typeof value.owner === 'string' && typeof value.name === 'string')
     );
+}
+
+function isWorkshopPresentationUrlOrNull(value: unknown): boolean {
+    return value === null || (typeof value === 'string' && normalizePublicWebPageUrl(value) === value);
 }
 
 function isWorkshopCommentReferenceOrNull(value: unknown): boolean {
@@ -74,6 +80,7 @@ function isWorkshopPublicStateCacheEntry(
         typeof workshop.startsAt === 'string' &&
         (typeof workshop.endsAt === 'string' || workshop.endsAt === null) &&
         (typeof workshop.youtubeVideoId === 'string' || workshop.youtubeVideoId === null) &&
+        isWorkshopPresentationUrlOrNull(workshop.presentationUrl) &&
         isWorkshopRepositoryOrNull(workshop.repository) &&
         Array.isArray(workshop.allowedReactions) &&
         Array.isArray(workshop.disabledPanels) &&

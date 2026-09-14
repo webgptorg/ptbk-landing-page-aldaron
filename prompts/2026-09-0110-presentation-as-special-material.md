@@ -1,4 +1,4 @@
-[ ]
+[x] (2 attempts) by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.9920 24 minutes; Testing an hour; Fixing ~$0.3287 an hour; Testing 6 minutes
 
 [✨💻] Add option to link presentation of the workshop
 

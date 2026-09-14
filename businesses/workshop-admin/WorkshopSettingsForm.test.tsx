@@ -19,6 +19,7 @@ const WORKSHOP: WorkshopDetails = {
     endsAt: '2026-08-21T20:30:00+02:00',
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: 'M7lc1UVf-VE',
+    presentationUrl: null,
     repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: 'https://workshop.example/app' },
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
@@ -55,6 +56,7 @@ const END_ONE_HOUR_AFTER_START_LABEL = 'Nastavit konec 1 hodinu po začátku';
 const END_TWO_HOURS_AFTER_START_LABEL = 'Nastavit konec 2 hodiny po začátku';
 const STAGE_LABEL = 'YouTube URL nebo video ID';
 const STAGE_PREVIEW_LABEL = 'YouTube URL nebo video ID ukázky';
+const PRESENTATION_LABEL = 'URL prezentace';
 const REPOSITORY_LABEL = 'GitHub repozitář projektu';
 const REPOSITORY_BRANCH_LABEL = 'Větve repozitáře';
 const REPOSITORY_DEPLOYMENT_LABEL = 'URL nasazení projektu';
@@ -78,6 +80,7 @@ describe('workshop settings form', () => {
         SCHEDULE_LABELS.forEach((scheduleLabel) => expect(screen.queryByText(scheduleLabel)).not.toBeNull());
         expect(screen.queryByText(STAGE_LABEL)).not.toBeNull();
         expect(screen.queryByText(STAGE_PREVIEW_LABEL)).not.toBeNull();
+        expect(screen.queryByText(PRESENTATION_LABEL)).not.toBeNull();
         expect(screen.queryByText(REACTION_LABEL)).not.toBeNull();
         expect(screen.queryByText('Počet sledujících')).not.toBeNull();
     });
@@ -105,6 +108,7 @@ describe('workshop settings form', () => {
         SCHEDULE_LABELS.forEach((scheduleLabel) => expect(screen.queryByText(scheduleLabel)).toBeNull());
         expect(screen.queryByText(STAGE_LABEL)).toBeNull();
         expect(screen.queryByText(STAGE_PREVIEW_LABEL)).toBeNull();
+        expect(screen.queryByText(PRESENTATION_LABEL)).toBeNull();
         expect(screen.queryByText(REACTION_LABEL)).toBeNull();
         expect(screen.queryByText('Reakce účastníků')).toBeNull();
         expect(screen.queryByText('Počet sledujících')).toBeNull();
@@ -232,10 +236,23 @@ describe('workshop settings form', () => {
                     endsAt: expect.any(String),
                     youtubeVideoId: WORKSHOP.youtubeVideoId,
                     previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
+                    presentationUrl: WORKSHOP.presentationUrl,
                     allowedReactions: WORKSHOP.allowedReactions,
                 }),
             ),
         );
+    });
+
+    it('saves a public presentation URL separately from timed workshop content', async () => {
+        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+        const presentationUrl = 'https://files.example.com/ai-agents.pptx';
+
+        fireEvent.change(screen.getByLabelText(new RegExp(`^${PRESENTATION_LABEL}`)), {
+            target: { value: presentationUrl },
+        });
+        submit();
+
+        await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ presentationUrl })));
     });
 
     it('saves the whole project of a workshop occurrence as one connection', async () => {

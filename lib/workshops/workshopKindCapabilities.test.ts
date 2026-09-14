@@ -21,6 +21,7 @@ describe('workshop kind capabilities', () => {
             isEvent: true,
             isStageOffered: true,
             isRepositoryOffered: true,
+            isPresentationOffered: true,
             isPollsOffered: false,
             isAttachedCommunityPollsShown: true,
             isMembershipOffered: true,
@@ -38,6 +39,7 @@ describe('workshop kind capabilities', () => {
             isEvent: false,
             isStageOffered: false,
             isRepositoryOffered: false,
+            isPresentationOffered: false,
             isPollsOffered: true,
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: true,
@@ -55,6 +57,7 @@ describe('workshop kind capabilities', () => {
             isEvent: false,
             isStageOffered: false,
             isRepositoryOffered: false,
+            isPresentationOffered: false,
             isPollsOffered: false,
             isAttachedCommunityPollsShown: false,
             isMembershipOffered: false,
@@ -98,16 +101,27 @@ describe('workshop kind capabilities', () => {
                 endsAt: null,
                 youtubeVideoId: 'dQw4w9WgXcQ',
                 previewYoutubeVideoId: 'M7lc1UVf-VE',
+                presentationUrl: 'https://files.example.com/workshop.pdf',
                 repository: { owner: 'hejny', name: 'promptbook', branch: null, deploymentUrl: null },
             }),
-        ).toEqual(['startsAt', 'endsAt', 'youtubeVideoId', 'previewYoutubeVideoId', 'repository', 'slug']);
+        ).toEqual([
+            'startsAt',
+            'endsAt',
+            'youtubeVideoId',
+            'previewYoutubeVideoId',
+            'repository',
+            'presentationUrl',
+            'slug',
+        ]);
     });
 
     it('lets a workshop occurrence be about a project, because that is what it is held about', () => {
         expect(getWorkshopKindCapabilities('workshop').isRepositoryOffered).toBe(true);
+        expect(getWorkshopKindCapabilities('workshop').isPresentationOffered).toBe(true);
         expect(
             getUnsupportedWorkshopKindFieldNames('workshop', {
                 repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: null },
+                presentationUrl: 'https://files.example.com/workshop.pdf',
             }),
         ).toEqual([]);
     });
