@@ -1,4 +1,5 @@
 export const WORKSHOP_TABLE_NAME = 'workshops';
+export const WORKSHOP_IS_DELETED_COLUMN_NAME = 'is_deleted';
 export const WORKSHOP_CONTENT_TABLE_NAME = 'workshop_content_blocks';
 export const WORKSHOP_PARTICIPANT_TABLE_NAME = 'workshop_participants';
 export const WORKSHOP_COMMENT_TABLE_NAME = 'workshop_comments';

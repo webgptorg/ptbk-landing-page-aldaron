@@ -260,6 +260,13 @@ export async function updateAdminWorkshop(workshopId: string, values: WorkshopWr
     return result.workshop;
 }
 
+/**
+ * Soft-deletes one event occurrence. Its room history and its shared community polls remain stored on the server.
+ */
+export async function deleteAdminWorkshop(workshopId: string): Promise<void> {
+    await requestAdminJson(createAdminApiUrl(`/${encodeURIComponent(workshopId)}`), { method: 'DELETE' });
+}
+
 export async function createAdminWorkshopContent(
     workshopId: string,
     values: WorkshopContentWriteValues,

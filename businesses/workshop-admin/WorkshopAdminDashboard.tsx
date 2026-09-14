@@ -9,6 +9,7 @@ import {
     createAdminWorkshop,
     createAdminWorkshopContent,
     createAdminWorkshopPoll,
+    deleteAdminWorkshop,
     deleteAdminWorkshopComment,
     deleteAdminWorkshopContent,
     deleteAdminWorkshopParticipant,
@@ -241,12 +242,15 @@ export function WorkshopAdminDashboard({
     );
     const selectedWorkshopId = selectedWorkshop?.id ?? null;
 
-    const loadWorkshopList = useCallback(async () => {
+    const loadWorkshopList = useCallback(async (): Promise<readonly WorkshopAdminSummary[] | null> => {
         try {
-            setWorkshops(await fetchAdminWorkshopList(workshopKind));
+            const loadedWorkshops = await fetchAdminWorkshopList(workshopKind);
+            setWorkshops(loadedWorkshops);
             setErrorMessage(null);
+            return loadedWorkshops;
         } catch (error) {
             setErrorMessage((error as Error).message);
+            return null;
         } finally {
             setIsLoading(false);
         }
@@ -326,6 +330,30 @@ export function WorkshopAdminDashboard({
             const workshop = await createAdminWorkshop(values);
             await loadWorkshopList();
             selectWorkshopBySlug(workshop.slug);
+            return true;
+        } catch (error) {
+            setErrorMessage((error as Error).message);
+            return false;
+        }
+    };
+
+    const handleDeleteWorkshop = async (workshopId: string): Promise<boolean> => {
+        try {
+            await deleteAdminWorkshop(workshopId);
+
+            // A snapshot request started before the deletion must not put the just-removed room back on screen while
+            // the selector reloads its remaining occurrences.
+            snapshotLoadSequenceReference.current += 1;
+            setSnapshot(null);
+            setIsSnapshotLoading(true);
+            changeViewState((previousViewState) => ({ ...previousViewState, workshopSlug: null }));
+
+            const remainingWorkshops = await loadWorkshopList();
+            if (remainingWorkshops === null) {
+                setIsSnapshotLoading(false);
+                return false;
+            }
+
             return true;
         } catch (error) {
             setErrorMessage((error as Error).message);
@@ -538,6 +566,7 @@ export function WorkshopAdminDashboard({
                     </div>
                     <CreateWorkshopForm
                         onCreate={handleCreateWorkshop}
+                        onDelete={handleDeleteWorkshop}
                         workshopToDuplicate={snapshot?.workshop ?? null}
                         existingWorkshopSlugs={workshops.map((workshop) => workshop.slug)}
                     />

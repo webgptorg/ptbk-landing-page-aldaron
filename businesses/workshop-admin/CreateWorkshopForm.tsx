@@ -6,6 +6,7 @@ import {
     createWorkshopCreateValues,
     createWorkshopDuplicateDraft,
 } from '@/businesses/workshop-admin/workshopCreateDraft';
+import { DeleteWorkshopButton } from '@/businesses/workshop-admin/DeleteWorkshopButton';
 import { WorkshopEventFields } from '@/businesses/workshop-admin/WorkshopEventFields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,12 +16,14 @@ import { useState, type FormEvent } from 'react';
 
 type CreateWorkshopFormProps = {
     readonly onCreate: (values: WorkshopCreateValues) => Promise<boolean>;
+    readonly onDelete?: (workshopId: string) => Promise<boolean>;
     readonly workshopToDuplicate?: WorkshopDetails | null;
     readonly existingWorkshopSlugs?: readonly string[];
 };
 
 export function CreateWorkshopForm({
     onCreate,
+    onDelete,
     workshopToDuplicate = null,
     existingWorkshopSlugs = [],
 }: CreateWorkshopFormProps) {
@@ -84,6 +87,9 @@ export function CreateWorkshopForm({
                     <Button type="button" variant="outline" className="w-full" onClick={openWorkshopDuplicate}>
                         <Copy className="mr-2 h-4 w-4" /> Duplikovat workshop
                     </Button>
+                )}
+                {workshopToDuplicate?.kind === 'workshop' && onDelete !== undefined && (
+                    <DeleteWorkshopButton workshop={workshopToDuplicate} onDelete={onDelete} />
                 )}
             </div>
         );

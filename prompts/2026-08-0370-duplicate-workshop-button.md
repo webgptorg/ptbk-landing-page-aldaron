@@ -24,10 +24,11 @@
 
 ---
 
-[ ]
+[x] (2 attempts) by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.5243 13 minutes; Testing 6 minutes; Fixing ~$0.4098 16 minutes; Testing 2 minutes
 
 [✨🦒] Alongside the new workshop and duplicate workshop, add a button to delete the workshop.
 
 - When deleting a workshop, do not remove the attached polls
 - Deletion of the workshop should be a "soft delete", they should be still in the database, but flagged as deleted.
+
 

@@ -147,6 +147,11 @@ const COPY_WORKSHOP_POLL_ATTACHMENTS_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-1300-workshop-copy-poll-attachments.sql',
 );
 const COPY_WORKSHOP_POLL_ATTACHMENTS_MIGRATION_SQL = readFileSync(COPY_WORKSHOP_POLL_ATTACHMENTS_MIGRATION_PATH, 'utf8');
+const WORKSHOP_SOFT_DELETE_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-1400-workshop-soft-delete.sql',
+);
+const WORKSHOP_SOFT_DELETE_MIGRATION_SQL = readFileSync(WORKSHOP_SOFT_DELETE_MIGRATION_PATH, 'utf8');
 
 /**
  * The very same SQL on one line, so that a statement can be searched for without repeating how it happens to be wrapped.
@@ -764,5 +769,19 @@ describe('workshop database migration', () => {
         expect(ATTENDANCE_MIGRATION_SQL).toContain(
             'GRANT EXECUTE ON FUNCTION public.get_workshop_admin_timeline(uuid, integer) TO service_role;',
         );
+    });
+
+    it('flags deleted workshops while retaining their shared-poll records and attachments', () => {
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS is_deleted boolean NOT NULL DEFAULT false',
+        );
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).toContain(
+            'CREATE INDEX IF NOT EXISTS workshops_active_kind_starts_at_idx',
+        );
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).toContain('DROP CONSTRAINT IF EXISTS workshops_slug_key');
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).toContain('CREATE UNIQUE INDEX IF NOT EXISTS workshops_active_slug_key');
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).toContain('AND workshop.is_deleted = false');
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).not.toContain('DELETE FROM public.workshop_polls');
+        expect(WORKSHOP_SOFT_DELETE_MIGRATION_SQL).not.toContain('DELETE FROM public.workshop_poll_workshops');
     });
 });

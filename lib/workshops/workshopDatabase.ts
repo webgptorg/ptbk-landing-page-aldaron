@@ -16,6 +16,7 @@ import {
     WORKSHOP_COMMENT_TABLE_NAME,
     WORKSHOP_CONTENT_TABLE_NAME,
     WORKSHOP_FEEDBACK_TABLE_NAME,
+    WORKSHOP_IS_DELETED_COLUMN_NAME,
     WORKSHOP_PARTICIPANT_TABLE_NAME,
     WORKSHOP_POLL_OPTION_TABLE_NAME,
     WORKSHOP_POLL_TABLE_NAME,
@@ -32,6 +33,7 @@ import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/
 import { materializeWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { materializeWorkshopCommentShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { areWorkshopCommentLinksEnabled } from '@/lib/workshops/workshopCommentLinks';
+import { loadWorkshopQueryWithActiveStatus } from '@/lib/workshops/workshopActiveStatusQuery';
 import { isWorkshopPanelOffered, normalizeWorkshopDisabledPanels } from '@/lib/workshops/workshopPanels';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { normalizeWorkshopParticipantEmail } from '@/lib/workshops/workshopParticipantEmail';
@@ -101,6 +103,9 @@ export type WorkshopRow = {
     readonly github_repository_branch?: string | null;
     readonly deployment_url?: string | null;
     readonly is_published: boolean;
+
+    /** A removed occurrence remains stored together with its room history and shared-poll attachment. */
+    readonly is_deleted: boolean;
     readonly allowed_reactions: string[];
 
     /**
@@ -889,13 +894,21 @@ export async function findWorkshopBySlug(
     workshopSlug: string,
     isPublishedRequired: boolean,
 ): Promise<WorkshopRow | null> {
-    let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('slug', workshopSlug);
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(
+        supabase,
+        (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('slug', workshopSlug);
 
-    if (isPublishedRequired) {
-        workshopQuery = workshopQuery.eq('is_published', true);
-    }
+            if (isPublishedRequired) {
+                workshopQuery = workshopQuery.eq('is_published', true);
+            }
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
 
-    const { data, error } = await workshopQuery.maybeSingle();
+            return workshopQuery.maybeSingle();
+        },
+    );
     if (error) {
         console.error(`Failed to load workshop "${workshopSlug}":`, error.message);
         return null;
@@ -913,14 +926,25 @@ export async function findUpcomingPublishedWorkshops(
     eventType: EventType,
     currentTime = new Date().toISOString(),
 ): Promise<readonly WorkshopSummaryRow[]> {
-    const { data, error } = await supabase
-        .from(WORKSHOP_TABLE_NAME)
-        .select(WORKSHOP_SUMMARY_COLUMNS)
-        .eq('room_kind', 'workshop')
-        .eq('event_type', eventType)
-        .eq('is_published', true)
-        .gt('starts_at', currentTime)
-        .order('starts_at', { ascending: true });
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(
+        supabase,
+        (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select(WORKSHOP_SUMMARY_COLUMNS)
+                .eq('room_kind', 'workshop')
+                .eq('event_type', eventType)
+                .eq('is_published', true)
+                .gt('starts_at', currentTime)
+                .order('starts_at', { ascending: true });
+
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return workshopQuery;
+        },
+    );
 
     if (error) {
         console.error(`Failed to load upcoming "${eventType}" terms:`, error.message);
@@ -938,15 +962,25 @@ export async function findMostRecentPublishedWorkshop(
     supabase: SupabaseClient,
     eventType: EventType,
 ): Promise<WorkshopRow | null> {
-    const { data, error } = await supabase
-        .from(WORKSHOP_TABLE_NAME)
-        .select('*')
-        .eq('room_kind', 'workshop')
-        .eq('event_type', eventType)
-        .eq('is_published', true)
-        .order('starts_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(
+        supabase,
+        (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select('*')
+                .eq('room_kind', 'workshop')
+                .eq('event_type', eventType)
+                .eq('is_published', true)
+                .order('starts_at', { ascending: false })
+                .limit(1);
+
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return workshopQuery.maybeSingle();
+        },
+    );
 
     if (error) {
         console.error('Failed to load the most recent workshop:', error.message);
@@ -968,16 +1002,25 @@ export async function findPublishedWorkshops(
     eventType?: EventType,
 ): Promise<readonly WorkshopSummaryRow[]> {
     const { rows, errorMessage } = await loadAllSupabaseRows<WorkshopSummaryRow>((fromIndex, toIndex) => {
-        const publishedWorkshopQuery = supabase
-            .from(WORKSHOP_TABLE_NAME)
-            .select(WORKSHOP_SUMMARY_COLUMNS)
-            .eq('room_kind', 'workshop')
-            .eq('is_published', true);
+        return loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
+            let publishedWorkshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select(WORKSHOP_SUMMARY_COLUMNS)
+                .eq('room_kind', 'workshop')
+                .eq('is_published', true);
 
-        return (eventType === undefined ? publishedWorkshopQuery : publishedWorkshopQuery.eq('event_type', eventType))
-            .order('starts_at', { ascending: false })
-            .order('id', { ascending: false })
-            .range(fromIndex, toIndex);
+            if (isActiveStatusFilterEnabled) {
+                publishedWorkshopQuery = publishedWorkshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return (eventType === undefined
+                ? publishedWorkshopQuery
+                : publishedWorkshopQuery.eq('event_type', eventType)
+            )
+                .order('starts_at', { ascending: false })
+                .order('id', { ascending: false })
+                .range(fromIndex, toIndex);
+        });
     });
 
     if (rows === null) {
@@ -993,12 +1036,22 @@ export async function findPublishedWorkshops(
  * configuration into an ordinary unavailable public page instead of picking an arbitrary room.
  */
 export async function findPublishedCommunity(supabase: SupabaseClient): Promise<WorkshopRow | null> {
-    const { data, error } = await supabase
-        .from(WORKSHOP_TABLE_NAME)
-        .select('*')
-        .eq('room_kind', 'community')
-        .eq('is_published', true)
-        .maybeSingle();
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(
+        supabase,
+        (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select('*')
+                .eq('room_kind', 'community')
+                .eq('is_published', true);
+
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return workshopQuery.maybeSingle();
+        },
+    );
 
     if (error) {
         console.error('Failed to load the community room:', error.message);
@@ -1009,7 +1062,18 @@ export async function findPublishedCommunity(supabase: SupabaseClient): Promise<
 }
 
 export async function findWorkshopById(supabase: SupabaseClient, workshopId: string): Promise<WorkshopRow | null> {
-    const { data, error } = await supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('id', workshopId).maybeSingle();
+    const { data, error } = await loadWorkshopQueryWithActiveStatus(
+        supabase,
+        (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('id', workshopId);
+
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return workshopQuery.maybeSingle();
+        },
+    );
     if (error) {
         console.error(`Failed to load workshop "${workshopId}":`, error.message);
         return null;
@@ -1078,11 +1142,19 @@ export async function loadWorkshopAdminSummaries(
     workshopKind: WorkshopKind,
 ): Promise<{ readonly workshops: readonly WorkshopAdminSummary[] | null; readonly errorMessage: string | null }> {
     const [workshopsResult, participantCountByWorkshopId, registeredParticipantCountByTermId] = await Promise.all([
-        supabase
-            .from(WORKSHOP_TABLE_NAME)
-            .select(WORKSHOP_SUMMARY_COLUMNS)
-            .eq('room_kind', workshopKind)
-            .order('starts_at', { ascending: false }),
+        loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select(WORKSHOP_SUMMARY_COLUMNS)
+                .eq('room_kind', workshopKind)
+                .order('starts_at', { ascending: false });
+
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return workshopQuery;
+        }),
         countWorkshopParticipantsByWorkshop(supabase, workshopKind),
         getWorkshopKindCapabilities(workshopKind).isEvent
             ? loadRegisteredParticipantCountsByTermId()
@@ -1234,16 +1306,24 @@ async function loadWorkshopPollAttachedWorkshops(
         return { attachedWorkshopsByPollId: new Map(), errorMessage: null };
     }
 
-    let workshopQuery = supabase
-        .from(WORKSHOP_TABLE_NAME)
-        .select(WORKSHOP_SUMMARY_COLUMNS)
-        .in('id', Array.from(new Set(attachmentRows.map((attachment) => attachment.workshop_id))))
-        .order('starts_at', { ascending: true });
-    if (isPublishedOnly) {
-        workshopQuery = workshopQuery.eq('is_published', true);
-    }
+    const { data: workshopData, error: workshopError } = await loadWorkshopQueryWithActiveStatus(
+        supabase,
+        (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select(WORKSHOP_SUMMARY_COLUMNS)
+                .in('id', Array.from(new Set(attachmentRows.map((attachment) => attachment.workshop_id))))
+                .order('starts_at', { ascending: true });
+            if (isPublishedOnly) {
+                workshopQuery = workshopQuery.eq('is_published', true);
+            }
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
 
-    const { data: workshopData, error: workshopError } = await workshopQuery;
+            return workshopQuery;
+        },
+    );
     if (workshopError) {
         return { attachedWorkshopsByPollId: null, errorMessage: workshopError.message };
     }

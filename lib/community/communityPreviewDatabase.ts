@@ -4,8 +4,10 @@ import {
     WORKSHOP_COMMENT_TABLE_NAME,
     WORKSHOP_PARTICIPANT_TABLE_NAME,
     WORKSHOP_REACTION_TABLE_NAME,
+    WORKSHOP_IS_DELETED_COLUMN_NAME,
     WORKSHOP_TABLE_NAME,
 } from '@/lib/workshops/workshopConstants';
+import { loadWorkshopQueryWithActiveStatus } from '@/lib/workshops/workshopActiveStatusQuery';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -110,13 +112,21 @@ export function countHeldWebinars(
     currentTime = new Date().toISOString(),
 ): Promise<number> {
     return countCommunityRows(
-        supabase
-            .from(WORKSHOP_TABLE_NAME)
-            .select('id', { count: 'exact', head: true })
-            .eq('room_kind', 'workshop')
-            .eq('event_type', eventType)
-            .eq('is_published', true)
-            .lte('starts_at', currentTime),
+        loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
+            let workshopQuery = supabase
+                .from(WORKSHOP_TABLE_NAME)
+                .select('id', { count: 'exact', head: true })
+                .eq('room_kind', 'workshop')
+                .eq('event_type', eventType)
+                .eq('is_published', true)
+                .lte('starts_at', currentTime);
+
+            if (isActiveStatusFilterEnabled) {
+                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+            }
+
+            return workshopQuery;
+        }),
         'the webinars which have already been held',
     );
 }

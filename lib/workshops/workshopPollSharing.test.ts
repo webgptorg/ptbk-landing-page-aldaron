@@ -21,6 +21,7 @@ const WORKSHOP_ROW: WorkshopRow = {
     youtube_video_id: null,
     preview_youtube_video_id: null,
     is_published: true,
+    is_deleted: false,
     allowed_reactions: [],
     event_type: 'online-workshop',
     location_kind: 'online',
@@ -64,13 +65,13 @@ async function insertInMemoryRow(
     await inMemorySupabase.from(tableName).insert(values).select().single();
 }
 
-async function createAttachedPollSupabase(): Promise<SupabaseClient> {
+async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_ROW): Promise<SupabaseClient> {
     const supabase = createInMemorySupabaseClient();
     await insertInMemoryRow(supabase, 'workshops', COMMUNITY_ROW);
-    await insertInMemoryRow(supabase, 'workshops', WORKSHOP_ROW);
+    await insertInMemoryRow(supabase, 'workshops', workshopRow);
     await insertInMemoryRow(supabase, 'workshop_poll_workshops', {
         poll_id: POLL_ID,
-        workshop_id: WORKSHOP_ROW.id,
+        workshop_id: workshopRow.id,
     });
     await insertInMemoryRow(supabase, 'workshop_polls', {
         id: POLL_ID,
@@ -204,5 +205,19 @@ describe('shared community poll votes', () => {
                 artificialVoteCount: 0,
             }),
         );
+    });
+
+    it('keeps a shared poll when one attached workshop is soft-deleted, without showing the removed occurrence', async () => {
+        const supabase = await createAttachedPollSupabase({ ...WORKSHOP_ROW, is_deleted: true });
+
+        const result = await loadWorkshopAdminPolls(supabase, COMMUNITY_ROW);
+
+        expect(result.errorMessage).toBeNull();
+        expect(result.polls).toEqual([
+            expect.objectContaining({
+                id: POLL_ID,
+                attachedWorkshops: [],
+            }),
+        ]);
     });
 });

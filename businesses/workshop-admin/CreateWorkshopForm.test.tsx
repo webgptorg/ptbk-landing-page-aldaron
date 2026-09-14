@@ -27,7 +27,10 @@ const WORKSHOP: WorkshopDetails = {
     updatedAt: '2026-08-01T10:00:00.000Z',
 };
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+});
 
 describe('create workshop form', () => {
     it('opens a selected workshop with its publication state and creates it through the normal callback', async () => {
@@ -83,5 +86,21 @@ describe('create workshop form', () => {
         expect((screen.getByPlaceholderText('slug-workshopu') as HTMLInputElement).value).toBe('');
         expect(screen.queryByDisplayValue(WORKSHOP.title)).toBeNull();
         expect(screen.queryByDisplayValue('production-ai-workshop-2026-09-copy')).toBeNull();
+    });
+
+    it('offers a confirmed soft deletion beside the new-workshop and duplicate actions', async () => {
+        const onDelete = vi.fn().mockResolvedValue(true);
+        const confirm = vi.fn().mockReturnValue(true);
+        vi.stubGlobal('confirm', confirm);
+
+        render(<CreateWorkshopForm onCreate={vi.fn().mockResolvedValue(true)} onDelete={onDelete} workshopToDuplicate={WORKSHOP} />);
+
+        expect(screen.getByRole('button', { name: 'Nový workshop' })).not.toBeNull();
+        expect(screen.getByRole('button', { name: 'Duplikovat workshop' })).not.toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Smazat workshop' }));
+
+        expect(confirm).toHaveBeenCalledWith(expect.stringContaining('připojené ankety zůstanou uložené'));
+        await waitFor(() => expect(onDelete).toHaveBeenCalledWith(WORKSHOP.id));
     });
 });

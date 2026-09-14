@@ -194,7 +194,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   the already existing attached polls; it creates no polls, options, votes, or room history. Stage settings contain
   the live stream and recording teaser, and project settings the repository the
   term is about, written as an address or as `owner/name`, together with its branch
-  selection. An end may be empty;
+  selection. Deleting a workshop is a soft deletion: its room data and attached
+  community polls stay stored, but the term leaves normal public and administrative
+  lists and no longer holds its slug for a replacement. An end may be empty;
   admins can record, adjust, clear, and reopen it. Overview analytics are zoomable and share their
   room, section, lines, reaction, zoom, and keyword metrics through query params.
 - Community administration is the workshop dashboard restricted to the

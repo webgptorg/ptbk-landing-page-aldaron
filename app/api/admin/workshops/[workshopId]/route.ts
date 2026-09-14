@@ -1,6 +1,6 @@
 import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
-import { WORKSHOP_TABLE_NAME } from '@/lib/workshops/workshopConstants';
+import { WORKSHOP_IS_DELETED_COLUMN_NAME, WORKSHOP_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import {
     createWorkshopDatabaseUnavailableResponse,
     findWorkshopById,
@@ -113,4 +113,46 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopRouteCon
     const updatedWorkshopRow = data as WorkshopRow;
     await broadcastWorkshopEvent(supabase, updatedWorkshopRow, { kind: 'state-changed' });
     return NextResponse.json({ workshop: mapWorkshopRow(updatedWorkshopRow) });
+}
+
+/**
+ * Removes an event occurrence from every active list without erasing the room's audit trail or the shared community
+ * polls attached to it. The attachment rows deliberately remain: they belong to polls which the community owns.
+ */
+export async function DELETE(request: NextRequest, context: AdminWorkshopRouteContext) {
+    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    if (unauthorizedResponse) {
+        return unauthorizedResponse;
+    }
+
+    const { workshopId } = await context.params;
+    const supabase = getWorkshopDatabaseOrNull();
+    if (supabase === null) {
+        return createWorkshopDatabaseUnavailableResponse();
+    }
+
+    const workshopRow = await findWorkshopById(supabase, workshopId);
+    if (workshopRow === null) {
+        return NextResponse.json({ error: 'Workshop not found' }, { status: 404 });
+    }
+    if (workshopRow.room_kind !== 'workshop') {
+        return NextResponse.json({ error: 'Only workshop occurrences can be deleted' }, { status: 400 });
+    }
+
+    const { data: deletedWorkshop, error } = await supabase
+        .from(WORKSHOP_TABLE_NAME)
+        .update({ is_deleted: true })
+        .eq('id', workshopId)
+        .eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false)
+        .select('id')
+        .maybeSingle();
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    if (deletedWorkshop === null) {
+        return NextResponse.json({ error: 'Workshop not found' }, { status: 404 });
+    }
+
+    await broadcastWorkshopEvent(supabase, workshopRow, { kind: 'state-changed' });
+    return NextResponse.json({ isDeleted: true });
 }
