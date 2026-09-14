@@ -67,7 +67,7 @@ export type WorkshopRepositoryWriteValues = {
      * The repository, written either as its address or as `owner/name`
      */
     readonly url: string;
-    /** `null` follows the default branch, an empty array follows all branches. */
+    /** `null` follows the default branch; strings may use `*` to match branches. */
     readonly branch: string | readonly string[] | null;
     readonly deploymentUrl: string | null;
 };

@@ -16,8 +16,8 @@ import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
  */
 export type WorkshopRepository = GithubRepository & {
     /**
-     * The branch selection the workshop follows. `null` is the repository default branch, a string or non-empty array
-     * names selected branches, and an empty array explicitly means all branches.
+     * The branch selection the workshop follows. `null` is the repository default branch; strings may be literal
+     * branch names or patterns such as `client-*`, `feature/*`, and `*`.
      */
     readonly branch: GithubBranchSelection;
 

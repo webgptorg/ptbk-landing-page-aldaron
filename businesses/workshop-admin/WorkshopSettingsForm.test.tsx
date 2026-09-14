@@ -56,7 +56,7 @@ const END_TWO_HOURS_AFTER_START_LABEL = 'Nastavit konec 2 hodiny po začátku';
 const STAGE_LABEL = 'YouTube URL nebo video ID';
 const STAGE_PREVIEW_LABEL = 'YouTube URL nebo video ID ukázky';
 const REPOSITORY_LABEL = 'GitHub repozitář projektu';
-const REPOSITORY_BRANCH_LABEL = 'Větev repozitáře';
+const REPOSITORY_BRANCH_LABEL = 'Větve repozitáře';
 const REPOSITORY_DEPLOYMENT_LABEL = 'URL nasazení projektu';
 const REACTION_LABEL = 'Reakce oddělené mezerou';
 
@@ -257,11 +257,11 @@ describe('workshop settings form', () => {
         );
     });
 
-    it('saves several selected branches as one connection', async () => {
+    it('saves literal branches and wildcard patterns as one connection', async () => {
         const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
 
         fireEvent.change(screen.getByDisplayValue('main'), {
-            target: { value: 'main\nfeature/rooms' },
+            target: { value: 'main, client-*\nfeature/*' },
         });
         submit();
 
@@ -270,7 +270,7 @@ describe('workshop settings form', () => {
                 expect.objectContaining({
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
-                        branch: ['main', 'feature/rooms'],
+                        branch: ['main', 'client-*', 'feature/*'],
                         deploymentUrl: 'https://workshop.example/app',
                     },
                 }),
@@ -278,11 +278,10 @@ describe('workshop settings form', () => {
         );
     });
 
-    it('saves all branches as a distinct branch selection', async () => {
+    it('saves an asterisk as the all-branches pattern without a checkbox', async () => {
         const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
-        const allBranchesCheckbox = screen.getByLabelText('Sledovat všechny větve');
 
-        fireEvent.click(allBranchesCheckbox);
+        fireEvent.change(screen.getByDisplayValue('main'), { target: { value: '*' } });
         submit();
 
         await waitFor(() =>
@@ -290,7 +289,7 @@ describe('workshop settings form', () => {
                 expect.objectContaining({
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
-                        branch: [],
+                        branch: '*',
                         deploymentUrl: 'https://workshop.example/app',
                     },
                 }),

@@ -43,41 +43,19 @@ export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepos
             </label>
 
             <div className="text-sm font-medium text-slate-700">
-                <label htmlFor="workshop-repository-branches">Větev repozitáře</label>
+                <label htmlFor="workshop-repository-branches">Větve repozitáře</label>
                 <Textarea
                     id="workshop-repository-branches"
-                    value={repository.isAllBranches ? '' : repository.branch}
-                    onChange={(changeEvent) =>
-                        onChange({ ...repository, branch: changeEvent.target.value, isAllBranches: false })
-                    }
+                    value={repository.branch}
+                    onChange={(changeEvent) => onChange({ ...repository, branch: changeEvent.target.value })}
                     className="mt-2 font-mono"
-                    placeholder="Výchozí větev nebo jedna větev na řádek"
+                    placeholder="main, client-*, feature/* nebo *"
                     rows={3}
-                    disabled={repository.isAllBranches}
                 />
                 <span className="mt-1 block text-xs font-normal text-slate-400">
-                    Prázdné znamená výchozí větev. Pro více větví zadejte jednu na řádek nebo je oddělte čárkou.
+                    Prázdné znamená výchozí větev. Vzory oddělte čárkou nebo novým řádkem; <code>*</code> sleduje
+                    všechny větve.
                 </span>
-                <label className="mt-3 flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <input
-                        type="checkbox"
-                    checked={repository.isAllBranches}
-                    onChange={(changeEvent) =>
-                        onChange({
-                            ...repository,
-                            isAllBranches: changeEvent.target.checked,
-                        })
-                    }
-                        disabled={repository.repositoryUrl.trim() === ''}
-                        className="h-4 w-4 rounded"
-                    />
-                    Sledovat všechny větve
-                </label>
-                {repository.isAllBranches && (
-                    <span className="mt-1 block text-xs font-normal text-cyan-700">
-                        Účastníci uvidí commity všech větví v grafu historie.
-                    </span>
-                )}
             </div>
 
             <label className="text-sm font-medium text-slate-700">

@@ -1,10 +1,15 @@
 import {
+    GITHUB_ALL_BRANCHES_PATTERN,
     createGithubCommitFeedUrl,
     createGithubCommitsUrlForBranchSelection,
     createGithubCommitsUrl,
     createGithubCommitUrl,
     createGithubRepositoryUrl,
+    doesGithubBranchNameMatchPattern,
+    doesGithubBranchNameMatchSelection,
+    doesGithubBranchSelectionUseWildcard,
     extractGithubBranchName,
+    extractGithubBranchPattern,
     extractGithubBranchSelection,
     extractGithubRepository,
     formatGithubBranchSelection,
@@ -68,24 +73,52 @@ describe('the branch one workshop follows', () => {
     });
 
     it('is nothing when what was written is no branch name', () => {
-        ['', '   ', null, undefined, 'main..next', '/main', 'main/', 'my branch', 'main?x=1'].forEach(
+        ['', '   ', null, undefined, 'main..next', '/main', 'main/', 'my branch', 'main?x=1', 'client-*'].forEach(
             (writtenBranch) => {
                 expect(extractGithubBranchName(writtenBranch)).toBeNull();
             },
         );
     });
 
-    it('reads one, several, and all branches without confusing all branches with the default branch', () => {
+    it('reads branch patterns with a wildcard at any point in a branch name', () => {
+        expect(extractGithubBranchPattern('main')).toBe('main');
+        expect(extractGithubBranchPattern(' client-* ')).toBe('client-*');
+        expect(extractGithubBranchPattern('feature/*')).toBe('feature/*');
+        expect(extractGithubBranchPattern('*')).toBe(GITHUB_ALL_BRANCHES_PATTERN);
+
+        ['', 'main..next', '/feature/*', 'feature/*/', 'my branch', 'main?x=1'].forEach((writtenBranch) => {
+            expect(extractGithubBranchPattern(writtenBranch)).toBeNull();
+        });
+    });
+
+    it('matches branch patterns without treating their punctuation as regular expressions', () => {
+        expect(doesGithubBranchNameMatchPattern('main', 'main')).toBe(true);
+        expect(doesGithubBranchNameMatchPattern('client-dashboard', 'client-*')).toBe(true);
+        expect(doesGithubBranchNameMatchPattern('server-dashboard', 'client-*')).toBe(false);
+        expect(doesGithubBranchNameMatchPattern('feature/repository/panel', 'feature/*')).toBe(true);
+        expect(doesGithubBranchNameMatchPattern('release-1.0', 'release-1.0')).toBe(true);
+        expect(doesGithubBranchNameMatchPattern('release-1x0', 'release-1.0')).toBe(false);
+        expect(doesGithubBranchNameMatchSelection('feature/room', ['main', 'feature/*'])).toBe(true);
+        expect(doesGithubBranchNameMatchSelection('anything', GITHUB_ALL_BRANCHES_PATTERN)).toBe(true);
+    });
+
+    it('reads one, several, and wildcard branch patterns without confusing all branches with the default branch', () => {
         expect(extractGithubBranchSelection('main')).toBe('main');
-        expect(extractGithubBranchSelection(['main', 'feature/rooms'])).toEqual(['main', 'feature/rooms']);
-        expect(extractGithubBranchSelection([])).toEqual([]);
+        expect(extractGithubBranchSelection(['main', 'client-*', 'feature/*'])).toEqual([
+            'main',
+            'client-*',
+            'feature/*',
+        ]);
+        expect(extractGithubBranchSelection([])).toBe(GITHUB_ALL_BRANCHES_PATTERN);
         expect(extractGithubBranchSelection(['main', 'main'])).toBeNull();
         expect(serializeGithubBranchSelection(null)).toBeNull();
         expect(serializeGithubBranchSelection('main')).toEqual(['main']);
-        expect(serializeGithubBranchSelection([])).toEqual([]);
+        expect(serializeGithubBranchSelection([])).toEqual([GITHUB_ALL_BRANCHES_PATTERN]);
         expect(formatGithubBranchSelection(null)).toBeNull();
-        expect(formatGithubBranchSelection(['main', 'feature/rooms'])).toBe('main, feature/rooms');
-        expect(formatGithubBranchSelection([])).toBe('Všechny větve');
+        expect(formatGithubBranchSelection(['main', 'feature/*'])).toBe('main, feature/*');
+        expect(formatGithubBranchSelection([])).toBe(GITHUB_ALL_BRANCHES_PATTERN);
+        expect(doesGithubBranchSelectionUseWildcard('client-*')).toBe(true);
+        expect(doesGithubBranchSelectionUseWildcard('main')).toBe(false);
     });
 });
 
@@ -109,6 +142,9 @@ describe('the addresses of a connected repository', () => {
             'https://github.com/hejny/promptbook/commits/feature/rooms',
         );
         expect(createGithubCommitsUrlForBranchSelection(PROMPTBOOK_REPOSITORY, ['main', 'feature/rooms'])).toBe(
+            'https://github.com/hejny/promptbook/commits',
+        );
+        expect(createGithubCommitsUrlForBranchSelection(PROMPTBOOK_REPOSITORY, 'feature/*')).toBe(
             'https://github.com/hejny/promptbook/commits',
         );
     });

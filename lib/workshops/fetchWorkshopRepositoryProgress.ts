@@ -4,7 +4,9 @@ import {
     fetchGithubRepositoryCommits,
 } from '@/lib/github/fetchGithubRepository';
 import {
-    getGithubSelectedBranchNames,
+    doesGithubBranchNameMatchSelection,
+    doesGithubBranchSelectionUseWildcard,
+    getGithubBranchSelectionPatterns,
     isGithubMultipleBranchesSelection,
 } from '@/lib/github/githubRepository';
 import {
@@ -36,7 +38,7 @@ export async function fetchWorkshopRepositoryProgress(
 
     const allCommits = await fetchGithubRepositoryCommits({
         repository,
-        branch: getGithubSelectedBranchNames(repository.branch)[0] ?? null,
+        branch: getGithubBranchSelectionPatterns(repository.branch)[0] ?? null,
         revalidateSeconds: WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS,
     });
 
@@ -52,14 +54,7 @@ export async function fetchWorkshopRepositoryProgress(
 async function fetchMultipleWorkshopRepositoryBranchProgress(
     repository: WorkshopRepository,
 ): Promise<WorkshopRepositoryProgress | null> {
-    const selectedBranchNames = getGithubSelectedBranchNames(repository.branch);
-    const branches: readonly WorkshopRepositoryBranch[] =
-        selectedBranchNames.length === 0
-            ? (await fetchGithubRepositoryBranches({
-                  repository,
-                  revalidateSeconds: WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS,
-              })).map((branch) => createWorkshopRepositoryBranch(branch))
-            : selectedBranchNames.map((branchName) => createWorkshopRepositoryBranch({ name: branchName, headSha: null }));
+    const branches = await resolveWorkshopRepositoryBranches(repository);
 
     if (branches.length === 0) {
         return null;
@@ -81,4 +76,25 @@ async function fetchMultipleWorkshopRepositoryBranchProgress(
     );
 
     return progress.commits.length === 0 ? null : progress;
+}
+
+/**
+ * Resolves a workshop's literal branch names directly and expands wildcard patterns from GitHub's current branch list.
+ */
+async function resolveWorkshopRepositoryBranches(
+    repository: WorkshopRepository,
+): Promise<readonly WorkshopRepositoryBranch[]> {
+    const branchPatterns = getGithubBranchSelectionPatterns(repository.branch);
+
+    if (!doesGithubBranchSelectionUseWildcard(repository.branch)) {
+        return branchPatterns.map((branchName) => createWorkshopRepositoryBranch({ name: branchName, headSha: null }));
+    }
+
+    const availableBranches = await fetchGithubRepositoryBranches({
+        repository,
+        revalidateSeconds: WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS,
+    });
+    return availableBranches
+        .filter((branch) => doesGithubBranchNameMatchSelection(branch.name, repository.branch))
+        .map((branch) => createWorkshopRepositoryBranch(branch));
 }

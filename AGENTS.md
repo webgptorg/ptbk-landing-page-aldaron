@@ -144,15 +144,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   can select, replace, clear, or create the displayed comment through the same
   private realtime channel used by reactions.
 - A term can be about a project. The connection is one value — GitHub repository,
-  the default branch, one selected branch, several selected branches, or all
-  branches, and an optional deployment URL — so it is set, changed, and unset at
-  once and neither branch selection nor deployment outlives its repository. Room
-  kinds which offer it are named in `lib/workshops/workshopKindCapabilities.ts`.
-  The room shows the repository, its links, and the newest commits, marking those
-  which arrive while a participant watches; a newly found commit is broadcast to
-  active rooms and appears on the stage for ten seconds. Multiple branch selections
-  are shown as a commit graph. Commits come from the public commit feed or keyless
-  API, pooled once per server and cached through the revalidation window; an
+  the default branch, and one or more branch patterns such as `main`, `client-*`,
+  `feature/*`, or `*` for all branches, plus an optional deployment URL — so it is
+  set, changed, and unset at once and neither branch selection nor deployment
+  outlives its repository. Room kinds which offer it are named in
+  `lib/workshops/workshopKindCapabilities.ts`. The room shows the repository, its
+  links, and the newest commits, marking those which arrive while a participant
+  watches; a newly found commit is broadcast to active rooms and appears on the
+  stage for ten seconds. A selection resolving to multiple branches is shown as a
+  commit graph. Commits come from the public commit feed or keyless API, pooled
+  once per server and cached through the revalidation window; an
   unreadable feed still leaves the room naming its project.
 - Paid-only materials are decided on the server in one pass. Members receive
   unlocked material; others receive only the published titles as an offer. An
@@ -194,7 +195,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   the already existing attached polls; it creates no polls, options, votes, or room history. Stage settings contain
   the live stream and recording teaser, and project settings the repository the
   term is about, written as an address or as `owner/name`, together with its branch
-  selection. Deleting a workshop is a soft deletion: its room data and attached
+  patterns. Deleting a workshop is a soft deletion: its room data and attached
   community polls stay stored, but the term leaves normal public and administrative
   lists and no longer holds its slug for a replacement. An end may be empty;
   admins can record, adjust, clear, and reopen it. Overview analytics are zoomable and share their

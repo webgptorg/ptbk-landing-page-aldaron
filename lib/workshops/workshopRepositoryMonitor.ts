@@ -1,7 +1,7 @@
 import { fetchWorkshopRepositoryProgress } from '@/lib/workshops/fetchWorkshopRepositoryProgress';
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import {
-    getGithubSelectedBranchNames,
+    getGithubBranchSelectionPatterns,
     type GithubRepository,
 } from '@/lib/github/githubRepository';
 import { broadcastWorkshopEvent } from '@/lib/workshops/workshopRealtime';
@@ -52,9 +52,9 @@ type WorkshopRepositoryMonitor = {
 const repositoryMonitorsByKey = new Map<string, WorkshopRepositoryMonitor>();
 
 function createWorkshopRepositoryMonitorKey(repository: WorkshopRepository): string {
-    const branchNames = [...getGithubSelectedBranchNames(repository.branch)].sort().join(',');
+    const branchPatterns = [...getGithubBranchSelectionPatterns(repository.branch)].sort().join(',');
     const isDefaultBranchSelected = repository.branch === null;
-    return `${repository.owner}/${repository.name}|${isDefaultBranchSelected ? 'default' : branchNames}`;
+    return `${repository.owner}/${repository.name}|${isDefaultBranchSelected ? 'default' : branchPatterns}`;
 }
 
 function getOrCreateWorkshopRepositoryMonitor(repository: WorkshopRepository): WorkshopRepositoryMonitor {

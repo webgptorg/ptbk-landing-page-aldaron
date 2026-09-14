@@ -12,9 +12,9 @@ export type GithubRepository = {
 /**
  * The branches a workshop follows
  *
- * Note: `null` keeps the original meaning of following the repository's default branch. A non-empty array contains
- * explicitly selected branches, while an empty array is the explicit choice to follow every branch. The three values
- * are deliberately one shape everywhere so a connection cannot grow a second, conflicting branch setting.
+ * Note: `null` keeps the original meaning of following the repository's default branch. A string or non-empty array
+ * contains branch patterns, such as `main`, `client-*`, or `feature/*`; `*` follows every branch. The values are
+ * deliberately one shape everywhere so a connection cannot grow a second, conflicting branch setting.
  */
 export type GithubBranchSelection = string | readonly string[] | null;
 
@@ -39,7 +39,12 @@ const GITHUB_REPOSITORY_NAME_PATTERN = /^(?=.*[A-Za-z0-9_-])[A-Za-z0-9._-]{1,100
  * Note: A branch name may carry slashes, which is what makes `feature/repository-panel` one name rather than two, and
  *       must carry neither a space nor a `..`, which Git itself refuses as well.
  */
-const GITHUB_BRANCH_PATTERN = /^[A-Za-z0-9._\-/]{1,255}$/;
+const GITHUB_BRANCH_NAME_PATTERN = /^[A-Za-z0-9._\-/]{1,255}$/;
+const GITHUB_BRANCH_SELECTION_PATTERN = /^[A-Za-z0-9._\-/\*]{1,255}$/;
+const GITHUB_BRANCH_WILDCARD_CHARACTER = '*';
+
+/** A branch pattern which follows every branch of a repository. */
+export const GITHUB_ALL_BRANCHES_PATTERN = GITHUB_BRANCH_WILDCARD_CHARACTER;
 
 const GITHUB_HOSTNAMES = new Set(['github.com', 'www.github.com']);
 const GITHUB_SSH_PREFIX = 'git@github.com:';
@@ -110,10 +115,10 @@ export function extractGithubRepository(value: string | null | undefined): Githu
     return createGithubRepositoryOrNull(owner, name);
 }
 
-/**
- * Reads the branch an administrator wrote, `null` when they wrote none or wrote something which is no branch name
- */
-export function extractGithubBranchName(value: string | null | undefined): string | null {
+function extractGithubBranchValue(
+    value: string | null | undefined,
+    allowedCharactersPattern: RegExp,
+): string | null {
     const trimmedValue = value?.trim() ?? '';
 
     if (
@@ -121,12 +126,26 @@ export function extractGithubBranchName(value: string | null | undefined): strin
         trimmedValue.includes('..') ||
         trimmedValue.startsWith('/') ||
         trimmedValue.endsWith('/') ||
-        !GITHUB_BRANCH_PATTERN.test(trimmedValue)
+        !allowedCharactersPattern.test(trimmedValue)
     ) {
         return null;
     }
 
     return trimmedValue;
+}
+
+/**
+ * Reads the exact branch GitHub returned, `null` when the value is not a branch name
+ */
+export function extractGithubBranchName(value: string | null | undefined): string | null {
+    return extractGithubBranchValue(value, GITHUB_BRANCH_NAME_PATTERN);
+}
+
+/**
+ * Reads a branch pattern an administrator wrote. `*` stands for any part of the branch name, including slashes.
+ */
+export function extractGithubBranchPattern(value: string | null | undefined): string | null {
+    return extractGithubBranchValue(value, GITHUB_BRANCH_SELECTION_PATTERN);
 }
 
 /**
@@ -137,47 +156,95 @@ export function extractGithubBranchSelection(
     value: string | readonly string[] | null | undefined,
 ): GithubBranchSelection {
     if (typeof value !== 'string' && value !== null && value !== undefined) {
-        const branches = value.map((branch) => extractGithubBranchName(branch));
-        if (branches.some((branch) => branch === null) || new Set(branches).size !== branches.length) {
+        if (value.length === 0) {
+            // An empty array was the stored all-branches marker before branch patterns existed.
+            return GITHUB_ALL_BRANCHES_PATTERN;
+        }
+
+        const branchPatterns = value.map((branch) => extractGithubBranchPattern(branch));
+        if (branchPatterns.some((branchPattern) => branchPattern === null) || new Set(branchPatterns).size !== branchPatterns.length) {
             return null;
         }
 
-        const validBranches = branches.filter((branch): branch is string => branch !== null);
-        return validBranches.length === 1 ? validBranches[0] : validBranches;
+        const validBranchPatterns = branchPatterns.filter(
+            (branchPattern): branchPattern is string => branchPattern !== null,
+        );
+        return validBranchPatterns.length === 1 ? validBranchPatterns[0] : validBranchPatterns;
     }
 
-    return extractGithubBranchName(value);
+    return extractGithubBranchPattern(value);
 }
 
-/**
- * Turns the one branch selection into the database array representation. `[]` is the explicit all-branches choice;
- * `null` is the legacy/default-branch choice.
- */
+/** Turns one branch selection into the database array representation. */
 export function serializeGithubBranchSelection(selection: GithubBranchSelection): readonly string[] | null {
     if (selection === null) {
         return null;
     }
 
-    return typeof selection === 'string' ? [selection] : selection;
-}
+    if (typeof selection === 'string') {
+        return [selection];
+    }
 
-export function isGithubAllBranchesSelection(selection: GithubBranchSelection): boolean {
-    return typeof selection !== 'string' && selection !== null && selection.length === 0;
-}
-
-export function isGithubMultipleBranchesSelection(selection: GithubBranchSelection): boolean {
-    return typeof selection !== 'string' && selection !== null && (selection.length === 0 || selection.length > 1);
+    // An empty array is accepted only for rows written before branch patterns. New writes keep the visible `*` value.
+    return selection.length === 0 ? [GITHUB_ALL_BRANCHES_PATTERN] : selection;
 }
 
 /**
- * The branch names explicitly named by a selection, leaving the default branch unnamed because GitHub chooses it.
+ * Gives the patterns a selection names. The empty legacy array is normalized to the visible all-branches pattern.
  */
-export function getGithubSelectedBranchNames(selection: GithubBranchSelection): readonly string[] {
+export function getGithubBranchSelectionPatterns(selection: GithubBranchSelection): readonly string[] {
     if (selection === null) {
         return [];
     }
 
-    return typeof selection === 'string' ? [selection] : selection;
+    if (typeof selection === 'string') {
+        return [selection];
+    }
+
+    return selection.length === 0 ? [GITHUB_ALL_BRANCHES_PATTERN] : selection;
+}
+
+export function isGithubAllBranchesSelection(selection: GithubBranchSelection): boolean {
+    return getGithubBranchSelectionPatterns(selection).includes(GITHUB_ALL_BRANCHES_PATTERN);
+}
+
+export function isGithubBranchPattern(branchPattern: string): boolean {
+    return branchPattern.includes(GITHUB_BRANCH_WILDCARD_CHARACTER);
+}
+
+/** Whether matching this selection needs GitHub's list of branches rather than one literal branch address. */
+export function doesGithubBranchSelectionUseWildcard(selection: GithubBranchSelection): boolean {
+    return getGithubBranchSelectionPatterns(selection).some(isGithubBranchPattern);
+}
+
+export function isGithubMultipleBranchesSelection(selection: GithubBranchSelection): boolean {
+    return (
+        doesGithubBranchSelectionUseWildcard(selection) ||
+        getGithubBranchSelectionPatterns(selection).length > 1
+    );
+}
+
+function escapeRegularExpression(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Tells whether one actual GitHub branch is selected by a pattern. Wildcards stand for any number of characters,
+ * including `/`, so `feature/*` covers nested feature branches too.
+ */
+export function doesGithubBranchNameMatchPattern(branchName: string, branchPattern: string): boolean {
+    const patternExpression = branchPattern
+        .split(GITHUB_BRANCH_WILDCARD_CHARACTER)
+        .map(escapeRegularExpression)
+        .join('.*');
+    return new RegExp(`^${patternExpression}$`).test(branchName);
+}
+
+/** Tells whether one actual GitHub branch is included by the whole workshop selection. */
+export function doesGithubBranchNameMatchSelection(branchName: string, selection: GithubBranchSelection): boolean {
+    return getGithubBranchSelectionPatterns(selection).some((branchPattern) =>
+        doesGithubBranchNameMatchPattern(branchName, branchPattern),
+    );
 }
 
 /**
@@ -188,7 +255,7 @@ export function formatGithubBranchSelection(selection: GithubBranchSelection): s
         return null;
     }
 
-    return isGithubAllBranchesSelection(selection) ? 'Všechny větve' : getGithubSelectedBranchNames(selection).join(', ');
+    return getGithubBranchSelectionPatterns(selection).join(', ');
 }
 
 /**
@@ -262,8 +329,11 @@ export function createGithubCommitsUrlForBranchSelection(
     repository: GithubRepository,
     selection: GithubBranchSelection,
 ): string {
-    const selectedBranchNames = getGithubSelectedBranchNames(selection);
-    return createGithubCommitsUrl(repository, selectedBranchNames.length === 1 ? selectedBranchNames[0]! : null);
+    const branchPatterns = getGithubBranchSelectionPatterns(selection);
+    return createGithubCommitsUrl(
+        repository,
+        branchPatterns.length === 1 && !isGithubBranchPattern(branchPatterns[0]!) ? branchPatterns[0]! : null,
+    );
 }
 
 export function createGithubCommitUrl(repository: GithubRepository, commitSha: string): string {

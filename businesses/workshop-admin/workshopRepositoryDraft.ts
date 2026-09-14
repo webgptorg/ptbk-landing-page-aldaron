@@ -1,5 +1,8 @@
 import type { WorkshopRepositoryWriteValues } from '@/businesses/workshop-admin/workshopAdminApiClient';
-import { createGithubRepositoryUrl } from '@/lib/github/githubRepository';
+import {
+    createGithubRepositoryUrl,
+    getGithubBranchSelectionPatterns,
+} from '@/lib/github/githubRepository';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 
 /**
@@ -10,17 +13,14 @@ import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
  */
 export type WorkshopRepositoryDraft = {
     readonly repositoryUrl: string;
-    /** One branch per line; an empty value follows the repository default branch. */
+    /** Branch patterns separated by lines or commas; an empty value follows the repository default branch. */
     readonly branch: string;
-    /** An explicit all-branches choice, distinct from the empty default-branch value. */
-    readonly isAllBranches: boolean;
     readonly deploymentUrl: string;
 };
 
 export const EMPTY_WORKSHOP_REPOSITORY_DRAFT: WorkshopRepositoryDraft = {
     repositoryUrl: '',
     branch: '',
-    isAllBranches: false,
     deploymentUrl: '',
 };
 
@@ -34,13 +34,7 @@ export function createWorkshopRepositoryDraft(repository: WorkshopRepository | n
 
     return {
         repositoryUrl: createGithubRepositoryUrl(repository),
-        branch:
-            repository.branch === null
-                ? ''
-                : typeof repository.branch === 'string'
-                  ? repository.branch
-                  : repository.branch.join('\n'),
-        isAllBranches: repository.branch !== null && typeof repository.branch !== 'string' && repository.branch.length === 0,
+        branch: getGithubBranchSelectionPatterns(repository.branch).join('\n'),
         deploymentUrl: repository.deploymentUrl ?? '',
     };
 }
@@ -64,14 +58,6 @@ export function createWorkshopRepositoryWriteValues(
     const repositoryUrl = draft.repositoryUrl.trim();
     if (repositoryUrl === '') {
         return null;
-    }
-
-    if (draft.isAllBranches) {
-        return {
-            url: repositoryUrl,
-            branch: [],
-            deploymentUrl: draft.deploymentUrl.trim() || null,
-        };
     }
 
     const branches = readWrittenBranches(draft.branch);

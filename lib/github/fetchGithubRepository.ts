@@ -84,7 +84,7 @@ export async function fetchGithubRepositoryCommits(
 
 /**
  * Reads every branch of a repository through the keyless public API, keeping each page cached independently. The
- * histories themselves are fetched in small batches, so the explicit all-branches setting remains polite to GitHub.
+ * histories themselves are fetched in small batches, so wildcard branch selections remain polite to GitHub.
  */
 export async function fetchGithubRepositoryBranches(
     options: FetchGithubRepositoryOptions,
@@ -135,7 +135,7 @@ export async function fetchGithubRepositoryBranchCommits(
 }
 
 /**
- * Reads several branch histories in small batches, so an all-branches workshop remains polite to GitHub even when a
+ * Reads several branch histories in small batches, so a wildcard workshop remains polite to GitHub even when a
  * repository has many active branches. Each URL is still cached by `fetchCachedText`, so participants do not multiply
  * the public API traffic.
  */

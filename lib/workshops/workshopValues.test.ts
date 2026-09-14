@@ -74,28 +74,28 @@ describe('workshop admin values', () => {
         });
     });
 
-    it('writes several selected branches and the explicit all-branches choice in one array field', () => {
+    it('writes several branch patterns and the all-branches wildcard in one array field', () => {
         expect(
             createWorkshopUpdateDatabaseValues({
                 repository: {
                     owner: 'hejny',
                     name: 'promptbook',
-                    branch: ['main', 'feature/rooms'],
+                    branch: ['main', 'feature/*'],
                     deploymentUrl: null,
                 },
             }),
         ).toEqual({
             github_repository: 'hejny/promptbook',
-            github_repository_branches: ['main', 'feature/rooms'],
+            github_repository_branches: ['main', 'feature/*'],
             deployment_url: null,
         });
         expect(
             createWorkshopUpdateDatabaseValues({
-                repository: { owner: 'hejny', name: 'promptbook', branch: [], deploymentUrl: null },
+                repository: { owner: 'hejny', name: 'promptbook', branch: '*', deploymentUrl: null },
             }),
         ).toEqual({
             github_repository: 'hejny/promptbook',
-            github_repository_branches: [],
+            github_repository_branches: ['*'],
             deployment_url: null,
         });
     });

@@ -67,7 +67,7 @@ export const WORKSHOP_REPOSITORY_MONITOR_TARGET_LEASE_SECONDS = 3 * WORKSHOP_REP
  * How long a branch name may be, which is what Git itself allows a reference to be
  */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH = 255;
-/** How many branch names one workshop may select explicitly; an empty selection means all branches */
+/** How many branch patterns one workshop may select explicitly */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT = 50;
 
 /**

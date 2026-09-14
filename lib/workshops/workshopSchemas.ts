@@ -22,7 +22,7 @@ import {
     MAXIMAL_EVENT_PARTICIPANT_COUNT,
     MAXIMAL_EVENT_PRICE_CZK,
 } from '@/lib/events/eventConstants';
-import { extractGithubBranchName, extractGithubRepository } from '@/lib/github/githubRepository';
+import { extractGithubBranchSelection, extractGithubRepository } from '@/lib/github/githubRepository';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import { isEventLocationKind, type EventLocationKind } from '@/lib/events/eventLocation';
@@ -79,16 +79,16 @@ const workshopDisabledPanelsSchema = z
  *       cannot be left behind by unsetting it. A repository, a branch, or an address which cannot be read is refused
  *       instead of being stored as a connection leading nowhere.
  */
-const workshopRepositoryBranchNameSchema = z.string().trim().max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH);
+const workshopRepositoryBranchPatternSchema = z.string().trim().max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH);
 const workshopRepositoryBranchesSchema = z
-    .array(workshopRepositoryBranchNameSchema)
+    .array(workshopRepositoryBranchPatternSchema)
     .max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT)
     .refine((branches) => new Set(branches).size === branches.length, 'Workshop branches must be unique');
 const workshopRepositoryWriteSchema = z
     .object({
         url: z.string().trim().max(2_000),
         branch: z
-            .union([workshopRepositoryBranchNameSchema, workshopRepositoryBranchesSchema, z.null()])
+            .union([workshopRepositoryBranchPatternSchema, workshopRepositoryBranchesSchema, z.null()])
             .default(null),
         deploymentUrl: z.union([z.string().trim().max(2_000), z.null()]).default(null),
     })
@@ -103,29 +103,18 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        // Note: An empty text value is the default branch, an empty array is the explicit all-branches choice, and a
-        //       non-empty array lets the administrator follow several branch histories together.
+        // Note: An empty text value follows the default branch. Every other value is one or several branch patterns,
+        //       including `*` for all branches.
         const writtenBranch = values.branch === '' ? null : values.branch;
-        const branch = Array.isArray(writtenBranch)
-            ? writtenBranch.map((branchName) => extractGithubBranchName(branchName))
-            : writtenBranch === null
-              ? null
-              : extractGithubBranchName(writtenBranch);
-        if (
-            (Array.isArray(branch) && branch.some((branchName) => branchName === null)) ||
-            (branch === null && writtenBranch !== null)
-        ) {
+        const branch = extractGithubBranchSelection(writtenBranch);
+        if (branch === null && writtenBranch !== null) {
             context.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ['branch'],
-                message: 'A valid Git branch name is required',
+                message: 'A valid Git branch pattern is required',
             });
             return z.NEVER;
         }
-
-        const normalizedBranch = Array.isArray(branch)
-            ? branch.filter((branchName): branchName is string => branchName !== null)
-            : branch;
 
         const writtenDeploymentUrl = values.deploymentUrl === '' ? null : values.deploymentUrl;
         const deploymentUrl =
@@ -139,7 +128,7 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        return { ...repository, branch: normalizedBranch, deploymentUrl } satisfies WorkshopRepository;
+        return { ...repository, branch, deploymentUrl } satisfies WorkshopRepository;
     });
 
 const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);

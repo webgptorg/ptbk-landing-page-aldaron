@@ -7,7 +7,7 @@ import {
     createGithubCommitsUrlForBranchSelection,
     createGithubRepositoryUrl,
     formatGithubRepositoryName,
-    getGithubSelectedBranchNames,
+    getGithubBranchSelectionPatterns,
     isGithubMultipleBranchesSelection,
 } from '@/lib/github/githubRepository';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
@@ -46,7 +46,7 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
     const isMultipleBranchSelection = isGithubMultipleBranchesSelection(repository.branch);
     const graphBranches: readonly WorkshopRepositoryBranch[] =
         progress?.branches ??
-        getGithubSelectedBranchNames(repository.branch).map((branchName) => ({ name: branchName, headSha: null }));
+        getGithubBranchSelectionPatterns(repository.branch).map((branchName) => ({ name: branchName, headSha: null }));
 
     return (
         <section
