@@ -22,9 +22,9 @@ type CommunityRoomInvitationProps = {
  */
 export function CommunityRoomInvitation({ participantIdentity }: CommunityRoomInvitationProps) {
     return (
-        <section
+        <article
             aria-labelledby={COMMUNITY_ROOM_INVITATION_TITLE_ID}
-            className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4 sm:p-5"
+            className="relative scroll-mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] p-5 text-slate-200 shadow-lg sm:p-8"
         >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
@@ -35,10 +35,10 @@ export function CommunityRoomInvitation({ participantIdentity }: CommunityRoomIn
                         <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">
                             {CZECH_COMMUNITY_INVITATION_COPY.eyebrow}
                         </p>
-                        <h2 id={COMMUNITY_ROOM_INVITATION_TITLE_ID} className="mt-1 text-sm font-bold text-white">
+                        <h3 id={COMMUNITY_ROOM_INVITATION_TITLE_ID} className="mt-1 text-xl font-bold text-white">
                             {CZECH_COMMUNITY_INVITATION_COPY.title}
-                        </h2>
-                        <p className="mt-1 text-xs leading-5 text-slate-400">
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
                             {CZECH_COMMUNITY_INVITATION_COPY.description}
                         </p>
                         <ul className="mt-3 flex flex-wrap gap-2">
@@ -61,6 +61,6 @@ export function CommunityRoomInvitation({ participantIdentity }: CommunityRoomIn
                     <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
             </div>
-        </section>
+        </article>
     );
 }

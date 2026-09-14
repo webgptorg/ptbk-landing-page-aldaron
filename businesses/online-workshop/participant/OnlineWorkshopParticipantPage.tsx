@@ -229,6 +229,14 @@ export function OnlineWorkshopParticipantPage({
     const isWorkshopPollVisible = isWorkshopPollVisibleInRoom(state.workshop.kind);
     const isModerating = isWorkshopParticipantModerating(state.participant);
     const followUpContentBlock = state.contentBlocks.find((contentBlock) => contentBlock.isFollowUp) ?? null;
+    const specialMaterials = roomCapabilities.isCommunityInvitationOffered
+        ? [
+              {
+                  id: 'community',
+                  content: <CommunityRoomInvitation participantIdentity={state.participant} />,
+              },
+          ]
+        : [];
 
     // Note: What the kind of this room has and what an administrator switched off is asked here once, so a new panel
     //       is one line of the room.
@@ -363,14 +371,6 @@ export function OnlineWorkshopParticipantPage({
                             onReact={controller.react}
                         />
                     )}
-                    {/*
-                      * Note: The community lists the terms and leads a member into the room of each of them, and this
-                      *       is the way back out of such a room. It closes the main column rather than competing with
-                      *       the stage, because it says where to go next rather than what is happening now.
-                      */}
-                    {roomCapabilities.isCommunityInvitationOffered && (
-                        <CommunityRoomInvitation participantIdentity={state.participant} />
-                    )}
                 </div>
 
                 <WorkshopChat
@@ -394,6 +394,7 @@ export function OnlineWorkshopParticipantPage({
                             nextContentUnlockAt={state.nextContentUnlockAt}
                             newlyUnlockedContentBlockIds={controller.newlyUnlockedContentBlockIds}
                             paidMembersOnlyContentPreviews={state.paidMembersOnlyContentPreviews}
+                            specialMaterials={specialMaterials}
                             title={materialsTitle}
                         />
                     </div>

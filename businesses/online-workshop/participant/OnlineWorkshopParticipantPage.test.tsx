@@ -377,9 +377,31 @@ describe('online workshop participant room', () => {
     it('leads from a workshop into the permanent community with that very same identity', () => {
         renderParticipantRoom(WORKSHOP);
 
-        expect(screen.getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')).toBe(
+        const communityLink = screen.getByRole('link', { name: /Vstoupit do komunity/ });
+        const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
+
+        expect(communityLink.getAttribute('href')).toBe(
             '/cs/komunita?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
         );
+        expect(materialsSection?.contains(communityLink)).toBe(true);
+        expect(communityLink.closest('article')).not.toBeNull();
+    });
+
+    it('keeps the community material available to a paying member as well', async () => {
+        fetchCommunityMembership.mockResolvedValue({
+            status: 'active',
+            monthlyPriceCzk: 199,
+            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
+            isCancellationScheduled: false,
+            isPurchaseOffered: false,
+            isSubscriptionManagementOffered: true,
+            isCoveredByDiscountCode: false,
+            isPaymentInTestMode: false,
+        });
+        renderParticipantRoom(WORKSHOP);
+
+        await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
+        expect(screen.getByRole('link', { name: /Vstoupit do komunity/ })).not.toBeNull();
     });
 
     it('invites nobody into the community from the community itself, nor from a project discussion inside it', () => {

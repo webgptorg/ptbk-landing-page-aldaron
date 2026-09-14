@@ -2,7 +2,10 @@
  * @vitest-environment jsdom
  */
 
-import { WorkshopContent } from '@/businesses/online-workshop/participant/WorkshopContent';
+import {
+    WorkshopContent,
+    type WorkshopSpecialMaterial,
+} from '@/businesses/online-workshop/participant/WorkshopContent';
 import type { CommunityMembershipRoomState } from '@/lib/community-membership/communityMembershipTypes';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -76,6 +79,7 @@ const PAID_MEMBERS_ONLY_CONTENT_PREVIEWS: readonly WorkshopContentPreview[] = [
 function renderWorkshopContent(
     contentBlocks: readonly WorkshopContentBlock[],
     paidMembersOnlyContentPreviews: readonly WorkshopContentPreview[] = [],
+    specialMaterials: readonly WorkshopSpecialMaterial[] = [],
 ) {
     return render(
         <WorkshopContent
@@ -83,6 +87,7 @@ function renderWorkshopContent(
             nextContentUnlockAt={null}
             newlyUnlockedContentBlockIds={new Set()}
             paidMembersOnlyContentPreviews={paidMembersOnlyContentPreviews}
+            specialMaterials={specialMaterials}
         />,
     );
 }
@@ -93,6 +98,18 @@ afterEach(() => {
 });
 
 describe('workshop materials', () => {
+    it('keeps a special material in the material list even when no ordinary material is unlocked', () => {
+        renderWorkshopContent([], [], [
+            {
+                id: 'community',
+                content: <article aria-label="Komunita Promptbooku">Komunita Promptbooku</article>,
+            },
+        ]);
+
+        expect(screen.getByRole('heading', { name: 'Materiály z workshopu' })).not.toBeNull();
+        expect(screen.getByRole('article', { name: 'Komunita Promptbooku' })).not.toBeNull();
+    });
+
     it('offers a prominent short-link call to action when a material has one link', async () => {
         renderWorkshopContent([CONTENT_BLOCK]);
 

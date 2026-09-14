@@ -7,7 +7,19 @@ import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Clock3, Crown, ExternalLink, Lock, Sparkles } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+
+/**
+ * A participant-facing card which belongs in the material list without being an administrator-managed material.
+ *
+ * Note: A room can lead someone to a durable place such as the community without turning that link into content that
+ *       is stored, timed, paid-only, or measured as an ordinary workshop material. Keeping these cards in the one
+ *       material list still gives every participant the same predictable place to find them.
+ */
+export type WorkshopSpecialMaterial = {
+    readonly id: string;
+    readonly content: ReactNode;
+};
 
 type WorkshopContentProps = {
     readonly contentBlocks: readonly WorkshopContentBlock[];
@@ -20,6 +32,14 @@ type WorkshopContentProps = {
      * key.
      */
     readonly paidMembersOnlyContentPreviews: readonly WorkshopContentPreview[];
+
+    /**
+     * Cards which share the materials placement but have their own source and access rules.
+     *
+     * Note: The room which knows whether a card applies supplies it here. This component only owns the common list,
+     *       so it cannot accidentally make a special material conditional on paid-material visibility.
+     */
+    readonly specialMaterials?: readonly WorkshopSpecialMaterial[];
     readonly title?: string;
 };
 
@@ -207,6 +227,7 @@ export function WorkshopContent({
     nextContentUnlockAt,
     newlyUnlockedContentBlockIds,
     paidMembersOnlyContentPreviews,
+    specialMaterials = [],
     title = 'Materiály z workshopu',
 }: WorkshopContentProps) {
     const isReducedMotionPreferred = useReducedMotion() === true;
@@ -216,8 +237,14 @@ export function WorkshopContent({
     const membershipPurchaseOffer = useCommunityMembershipPurchaseOffer();
     const isPaidMembersContentNoticeShown =
         paidMembersOnlyContentPreviews.length > 0 && membershipPurchaseOffer !== null;
+    const isSpecialMaterialShown = specialMaterials.length > 0;
 
-    if (contentBlocks.length === 0 && nextContentUnlockAt === null && !isPaidMembersContentNoticeShown) {
+    if (
+        contentBlocks.length === 0 &&
+        nextContentUnlockAt === null &&
+        !isPaidMembersContentNoticeShown &&
+        !isSpecialMaterialShown
+    ) {
         return null;
     }
 
@@ -272,6 +299,10 @@ export function WorkshopContent({
                         </motion.article>
                     );
                 })}
+
+                {specialMaterials.map((specialMaterial) => (
+                    <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
+                ))}
 
                 {nextContentUnlockAt && (
                     <div className="flex items-start gap-3 rounded-xl border border-dashed border-cyan-300/20 bg-cyan-300/[0.04] px-5 py-4 text-sm text-slate-400">

@@ -1,4 +1,10 @@
 # Current preversion
+- Moved the community hand-off in `/cs/online-workshop/participant` into the materials list as a dedicated
+  community material. It is shown even before an administrator has unlocked any ordinary material and remains
+  available to free and paid members alike, while carrying the participant identity through the existing shared
+  community link. The material list now has one reusable special-material slot for room features that belong beside
+  ordinary materials without becoming timed or membership-gated workshop content.
+
 - Let an administrator make a prefix discount code by ending it in `*`: `SUMMER*` now gives its configured discount
   to every submitted code starting with `SUMMER`. The same database resolver supplies form previews and the atomic
   registration consumption, so one path cannot accept a code which the other would reject; an exact code takes

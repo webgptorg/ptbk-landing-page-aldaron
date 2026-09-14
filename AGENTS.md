@@ -112,10 +112,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
 ### Shared community and workshop behavior
 
 - Rooms lead to each other in both directions, through one identity hand-off. The
-  community lists the terms and opens the room of each; every other room closes
-  its main column with an invitation into the community. Both carry the connected
-  member's name and email on, and an incomplete identity carries nothing rather
-  than half of it. Which rooms invite is answered by
+  community lists the terms and opens the room of each; an invited workshop room
+  places its community link beside its materials as a special material for every
+  participant, regardless of paid membership. Both carry the connected member's
+  name and email on, and an incomplete identity carries nothing rather than half
+  of it. Which rooms invite is answered by
   `lib/workshops/workshopKindCapabilities.ts`; the community and project
   discussions do not. The invitation names the community's sections by the names
   the community itself uses.
