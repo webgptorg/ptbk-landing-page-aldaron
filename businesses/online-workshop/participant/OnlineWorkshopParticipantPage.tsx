@@ -28,6 +28,7 @@ import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModerat
 import { isWorkshopPanelOffered, type WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import { WORKSHOP_SEARCH_PARAMETER_NAME } from '@/lib/workshops/workshopParticipantLink';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
+import type { WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { RefreshCw, Radio } from 'lucide-react';
 import Image from 'next/image';
@@ -233,7 +234,7 @@ export function OnlineWorkshopParticipantPage({
     const followUpContentBlock = state.contentBlocks.find((contentBlock) => contentBlock.isFollowUp) ?? null;
     const connectedRepository = roomCapabilities.isRepositoryOffered ? state.workshop.repository : null;
     const presentationUrl = roomCapabilities.isPresentationOffered ? state.workshop.presentationUrl : null;
-    const specialMaterials = [
+    const specialMaterials: readonly WorkshopSpecialMaterial[] = [
         ...(presentationUrl === null
             ? []
             : [
@@ -260,6 +261,11 @@ export function OnlineWorkshopParticipantPage({
                   {
                       id: 'community',
                       content: <CommunityRoomInvitation participantIdentity={state.participant} />,
+                      // Note: This is an invitation rather than something the workshop hands over, so a member who
+                      //       has not joined the community yet reads it before the materials, while a member who
+                      //       already pays for it keeps it at the end as one more way on. It is written as the one
+                      //       placement it is, because a spread condition widens it into any string otherwise.
+                      placement: 'before-materials-until-paid' as const,
                   },
               ]
             : []),

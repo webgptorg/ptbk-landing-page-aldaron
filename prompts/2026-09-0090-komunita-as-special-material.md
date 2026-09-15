@@ -12,7 +12,7 @@
 
 ---
 
-[ ]
+[x] by Claude Code `claude-opus-5` thinking `max` - Implementation $7.33 19 minutes; Testing 8 minutes
 
 [✨🚌] The link to the community should be shown alongside materials for non-paying participants as first material.
 
@@ -26,3 +26,4 @@
 ![Payed member correct order](prompts/screenshots/2026-09-0090-komunita-as-special-material-4.png)
 ![non-Payed member incorrect order](prompts/screenshots/2026-09-0090-komunita-as-special-material-2.png)
 ![non-Payed member incorrect order](prompts/screenshots/2026-09-0090-komunita-as-special-material-1.png)
+

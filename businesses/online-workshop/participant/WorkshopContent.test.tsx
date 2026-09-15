@@ -2,12 +2,10 @@
  * @vitest-environment jsdom
  */
 
-import {
-    WorkshopContent,
-    type WorkshopSpecialMaterial,
-} from '@/businesses/online-workshop/participant/WorkshopContent';
+import { WorkshopContent } from '@/businesses/online-workshop/participant/WorkshopContent';
 import { WorkshopPresentationMaterial } from '@/businesses/online-workshop/participant/WorkshopPresentationMaterial';
 import type { CommunityMembershipRoomState } from '@/lib/community-membership/communityMembershipTypes';
+import type { WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -82,9 +80,43 @@ const FREE_PURCHASABLE_MEMBERSHIP: CommunityMembershipRoomState = {
     isPaymentInTestMode: false,
 };
 
+const PAID_MEMBERSHIP: CommunityMembershipRoomState = {
+    ...FREE_PURCHASABLE_MEMBERSHIP,
+    status: 'active',
+    monthlyPriceCzk: 199,
+    currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
+    isPurchaseOffered: false,
+    isSubscriptionManagementOffered: true,
+};
+
 const PAID_MEMBERS_ONLY_CONTENT_PREVIEWS: readonly WorkshopContentPreview[] = [
     { id: 'paid-material-1', title: 'Bonusové podklady' },
 ];
+
+/**
+ * The material list of a room which has an ordinary material, a card placed by the membership, and one placed after it
+ */
+const TITLED_CONTENT_BLOCK: WorkshopContentBlock = { ...CONTENT_BLOCK, title: 'Podklady z workshopu' };
+
+const COMMUNITY_INVITATION: WorkshopSpecialMaterial = {
+    id: 'community',
+    content: <article aria-label="Komunita Promptbooku">Komunita Promptbooku</article>,
+    placement: 'before-materials-until-paid',
+};
+
+const PRESENTATION_SPECIAL_MATERIAL: WorkshopSpecialMaterial = {
+    id: 'presentation',
+    content: <WorkshopPresentationMaterial presentationUrl="https://files.example.com/prezentace.pdf" />,
+};
+
+/**
+ * Every card of the material list, in the order it is read in, named the way the member reading it is told
+ */
+function getMaterialOrder(container: HTMLElement): readonly string[] {
+    return Array.from(container.querySelectorAll('article')).map(
+        (materialCard) => materialCard.getAttribute('aria-label') ?? materialCard.querySelector('h3')?.textContent ?? '',
+    );
+}
 
 function renderWorkshopContent(
     contentBlocks: readonly WorkshopContentBlock[],
@@ -122,6 +154,42 @@ describe('workshop materials', () => {
 
         expect(screen.getByRole('heading', { name: 'Materiály z workshopu' })).not.toBeNull();
         expect(screen.getByRole('article', { name: 'Komunita Promptbooku' })).not.toBeNull();
+    });
+
+    it('opens the material list of a member who does not pay with the invitation into the community', () => {
+        membershipRoomMock.membershipRoom = { membership: FREE_PURCHASABLE_MEMBERSHIP, openMembershipModal: vi.fn() };
+        const { container } = renderWorkshopContent(
+            [TITLED_CONTENT_BLOCK],
+            [],
+            [PRESENTATION_SPECIAL_MATERIAL, COMMUNITY_INVITATION],
+        );
+
+        expect(getMaterialOrder(container)).toEqual([
+            'Komunita Promptbooku',
+            'Podklady z workshopu',
+            'Prezentace workshopu',
+        ]);
+    });
+
+    it('closes the material list of a paying member with that very same invitation', () => {
+        membershipRoomMock.membershipRoom = { membership: PAID_MEMBERSHIP, openMembershipModal: vi.fn() };
+        const { container } = renderWorkshopContent(
+            [TITLED_CONTENT_BLOCK],
+            [],
+            [PRESENTATION_SPECIAL_MATERIAL, COMMUNITY_INVITATION],
+        );
+
+        expect(getMaterialOrder(container)).toEqual([
+            'Podklady z workshopu',
+            'Prezentace workshopu',
+            'Komunita Promptbooku',
+        ]);
+    });
+
+    it('invites into the community first while the membership of the member is still unknown', () => {
+        const { container } = renderWorkshopContent([TITLED_CONTENT_BLOCK], [], [COMMUNITY_INVITATION]);
+
+        expect(getMaterialOrder(container)).toEqual(['Komunita Promptbooku', 'Podklady z workshopu']);
     });
 
     it('uses the ordinary material card, primary action, and QR code for a workshop presentation', async () => {

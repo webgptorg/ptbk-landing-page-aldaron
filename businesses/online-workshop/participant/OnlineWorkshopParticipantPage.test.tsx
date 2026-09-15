@@ -135,6 +135,15 @@ const FREE_MEMBERSHIP: CommunityMembershipRoomState = {
     isPaymentInTestMode: false,
 };
 
+const PAID_MEMBERSHIP: CommunityMembershipRoomState = {
+    ...FREE_MEMBERSHIP,
+    status: 'active',
+    monthlyPriceCzk: 199,
+    currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
+    isPurchaseOffered: false,
+    isSubscriptionManagementOffered: true,
+};
+
 /**
  * The paid materials of a room as far as a member who has not paid is told about them
  */
@@ -289,6 +298,24 @@ function renderParticipantRoom(
     );
 }
 
+/**
+ * The cards of the material list of the room, in the order the member reading it comes to them
+ */
+function getMaterialCards(): readonly Element[] {
+    const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
+
+    return Array.from(materialsSection?.querySelectorAll('article') ?? []);
+}
+
+/**
+ * Where among those cards the way into the permanent community is offered
+ */
+function getCommunityMaterialIndex(materialCards: readonly Element[]): number {
+    const communityLink = screen.getByRole('link', { name: /Vstoupit do komunity/ });
+
+    return materialCards.findIndex((materialCard) => materialCard.contains(communityLink));
+}
+
 beforeEach(() => {
     window.history.replaceState({}, '', '/cs/online-workshop/participant');
     fetchCommunityMembership.mockResolvedValue(FREE_MEMBERSHIP);
@@ -367,16 +394,7 @@ describe('online workshop participant room', () => {
     });
 
     it('keeps the repository material available to a paying participant', async () => {
-        fetchCommunityMembership.mockResolvedValue({
-            status: 'active',
-            monthlyPriceCzk: 199,
-            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
-            isCancellationScheduled: false,
-            isPurchaseOffered: false,
-            isSubscriptionManagementOffered: true,
-            isCoveredByDiscountCode: false,
-            isPaymentInTestMode: false,
-        });
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
         renderParticipantRoom(WORKSHOP_ABOUT_A_PROJECT);
 
         await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
@@ -397,16 +415,7 @@ describe('online workshop participant room', () => {
     });
 
     it('keeps the presentation material available to a paying participant', async () => {
-        fetchCommunityMembership.mockResolvedValue({
-            status: 'active',
-            monthlyPriceCzk: 199,
-            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
-            isCancellationScheduled: false,
-            isPurchaseOffered: false,
-            isSubscriptionManagementOffered: true,
-            isCoveredByDiscountCode: false,
-            isPaymentInTestMode: false,
-        });
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
         renderParticipantRoom(WORKSHOP_WITH_PRESENTATION);
 
         await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
@@ -459,20 +468,32 @@ describe('online workshop participant room', () => {
     });
 
     it('keeps the community material available to a paying member as well', async () => {
-        fetchCommunityMembership.mockResolvedValue({
-            status: 'active',
-            monthlyPriceCzk: 199,
-            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
-            isCancellationScheduled: false,
-            isPurchaseOffered: false,
-            isSubscriptionManagementOffered: true,
-            isCoveredByDiscountCode: false,
-            isPaymentInTestMode: false,
-        });
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
         renderParticipantRoom(WORKSHOP);
 
         await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
         expect(screen.getByRole('link', { name: /Vstoupit do komunity/ })).not.toBeNull();
+    });
+
+    it('invites a member who does not pay into the community before the other materials of the room', async () => {
+        renderParticipantRoom(WORKSHOP_WITH_PRESENTATION);
+
+        await screen.findByRole('button', { name: 'Free členství. Otevřít možnosti členství' });
+        const materialCards = getMaterialCards();
+
+        expect(getCommunityMaterialIndex(materialCards)).toBe(0);
+        expect(materialCards.indexOf(screen.getByLabelText('Prezentace workshopu'))).toBe(materialCards.length - 1);
+    });
+
+    it('leaves the community at the end of the materials of a paying member', async () => {
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
+        renderParticipantRoom(WORKSHOP_WITH_PRESENTATION);
+
+        await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
+        const materialCards = getMaterialCards();
+
+        expect(getCommunityMaterialIndex(materialCards)).toBe(materialCards.length - 1);
+        expect(materialCards.indexOf(screen.getByLabelText('Prezentace workshopu'))).toBe(0);
     });
 
     it('invites nobody into the community from the community itself, nor from a project discussion inside it', () => {
@@ -512,16 +533,7 @@ describe('online workshop participant room', () => {
     });
 
     it('lets a paying member manage the very same membership from a workshop occurrence', async () => {
-        fetchCommunityMembership.mockResolvedValue({
-            status: 'active',
-            monthlyPriceCzk: 199,
-            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
-            isCancellationScheduled: false,
-            isPurchaseOffered: false,
-            isSubscriptionManagementOffered: true,
-            isCoveredByDiscountCode: false,
-            isPaymentInTestMode: false,
-        });
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
         renderParticipantRoom(WORKSHOP);
 
         fireEvent.click(await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' }));
@@ -606,16 +618,7 @@ describe('online workshop participant room', () => {
     });
 
     it('shows no paid-materials notice to a member whose membership already unlocked them, nor in a room with none', async () => {
-        fetchCommunityMembership.mockResolvedValue({
-            status: 'active',
-            monthlyPriceCzk: 199,
-            currentPeriodEndsAt: '2026-09-30T10:00:00.000Z',
-            isCancellationScheduled: false,
-            isPurchaseOffered: false,
-            isSubscriptionManagementOffered: true,
-            isCoveredByDiscountCode: false,
-            isPaymentInTestMode: false,
-        });
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
         renderParticipantRoom(WORKSHOP, undefined, false, undefined, [], PAID_MEMBERS_ONLY_CONTENT_PREVIEWS);
 
         await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });

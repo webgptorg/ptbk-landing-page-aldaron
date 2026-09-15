@@ -114,7 +114,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - Rooms lead to each other in both directions, through one identity hand-off. The
   community lists the terms and opens the room of each; an invited workshop room
   places its community link beside its materials as a special material for every
-  participant, regardless of paid membership. Both carry the connected member's
+  participant, regardless of paid membership. Where a special material sits is
+  decided once, in `lib/workshops/workshopSpecialMaterials.ts`: a card says where
+  among the ordinary materials it belongs, and the invitation opens the material
+  list of a participant who does not pay while it closes the list of a paying
+  member. A membership which is not loaded yet leaves it where a participant who
+  does not pay reads it. Both carry the connected member's
   name and email on, and an incomplete identity carries nothing rather than half
   of it. Which rooms invite is answered by
   `lib/workshops/workshopKindCapabilities.ts`; the community and project

@@ -1,5 +1,12 @@
 # Current preversion
 
+- Placed the community material of `/cs/online-workshop/participant?workshop=` by what the member reading it has: a
+  participant who does not pay for the membership is invited into the community before the materials of the workshop,
+  while a paying member keeps that invitation at the end of the list as one more way on. The card itself, its link and
+  the identity it carries are unchanged, and the presentation and the project of a workshop stay where they were. Every
+  card which shares the material list now says where among the ordinary materials it belongs, so one rule places them
+  all instead of each room deciding its own order.
+
 - Added a presentation setting to `/admin/workshops`. A workshop can now link a PDF, PowerPoint file, or public GitHub
   Markdown page, and `/cs/online-workshop/participant?workshop=` shows it beside ordinary materials with the same
   open action and desktop QR code. The presentation is a shared workshop-level material, so it is immediately visible

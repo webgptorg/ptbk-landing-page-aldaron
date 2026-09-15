@@ -2,24 +2,17 @@
 
 import { CommunityPaidMembersNotice } from '@/businesses/community/membership/CommunityPaidMembersNotice';
 import { useCommunityMembershipPurchaseOffer } from '@/businesses/community/membership/useCommunityMembershipPurchaseOffer';
+import { useIsPaidCommunityMember } from '@/businesses/community/membership/useIsPaidCommunityMember';
 import { MarkdownContent } from '@/components/markdown-content';
 import { PromptbookQrCode } from '@/components/promptbook-qr-code';
+import {
+    selectWorkshopSpecialMaterialsByPlacement,
+    type WorkshopSpecialMaterial,
+} from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Clock3, Crown, ExternalLink, Lock, Sparkles } from 'lucide-react';
-import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
-
-/**
- * A participant-facing card which belongs in the material list without being an administrator-managed material.
- *
- * Note: A room can lead someone to a durable place such as the community without turning that link into content that
- *       is stored, timed, paid-only, or measured as an ordinary workshop material. Keeping these cards in the one
- *       material list still gives every participant the same predictable place to find them.
- */
-export type WorkshopSpecialMaterial = {
-    readonly id: string;
-    readonly content: ReactNode;
-};
+import { Fragment, useEffect, useRef, useState } from 'react';
 
 type WorkshopContentProps = {
     readonly contentBlocks: readonly WorkshopContentBlock[];
@@ -38,6 +31,9 @@ type WorkshopContentProps = {
      *
      * Note: The room which knows whether a card applies supplies it here. This component only owns the common list,
      *       so it cannot accidentally make a special material conditional on paid-material visibility.
+     * Note: Each card says where among the ordinary materials it belongs, while the membership of the member reading
+     *       them is known here, so a card whose placement depends on that membership is placed without the room which
+     *       supplied it having to ask what its reader pays for.
      */
     readonly specialMaterials?: readonly WorkshopSpecialMaterial[];
     readonly title?: string;
@@ -307,6 +303,11 @@ export function WorkshopContent({
     const isPaidMembersContentNoticeShown =
         paidMembersOnlyContentPreviews.length > 0 && membershipPurchaseOffer !== null;
     const isSpecialMaterialShown = specialMaterials.length > 0;
+    // Note: The community is invited to at the head of the list of a member who has not joined it yet and stays at
+    //       the end of the list of a member who already pays, which is the one difference the membership makes here.
+    const isPaidMember = useIsPaidCommunityMember();
+    const { specialMaterialsBeforeContentBlocks, specialMaterialsAfterContentBlocks } =
+        selectWorkshopSpecialMaterialsByPlacement(specialMaterials, { isPaidMember });
 
     if (
         contentBlocks.length === 0 &&
@@ -327,6 +328,10 @@ export function WorkshopContent({
             </div>
 
             <div className="space-y-4">
+                {specialMaterialsBeforeContentBlocks.map((specialMaterial) => (
+                    <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
+                ))}
+
                 {contentBlocks.map((contentBlock) => (
                     <WorkshopMaterialCard
                             key={contentBlock.id}
@@ -335,7 +340,7 @@ export function WorkshopContent({
                             />
                 ))}
 
-                {specialMaterials.map((specialMaterial) => (
+                {specialMaterialsAfterContentBlocks.map((specialMaterial) => (
                     <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
                 ))}
 
