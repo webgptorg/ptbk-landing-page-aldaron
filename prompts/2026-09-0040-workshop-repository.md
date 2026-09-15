@@ -51,15 +51,13 @@ Od začátku workshopu přibylo 2 commity.
 ![alt text](prompts/screenshots/2026-09-0040-workshop-repository-1.png)
 ![alt text](prompts/screenshots/2026-09-0040-workshop-repository-2.png)
 
-
 ---
 
 [x] (2 attempts) by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.3091 9 minutes; Testing 7 minutes; Fixing ~$0.3063 10 minutes; Testing 3 minutes
 [✨🤌] Allow multiple branches or wildcards for the project connected to the workshop.
 
 - Allow specifiing branches like `main`, `client-*`, `feature/*` or even `*`
-- By putting * on the single line you will effectively track all the branches, no need for special checkbox
-
+- By putting \* on the single line you will effectively track all the branches, no need for special checkbox
 
 ---
 
@@ -75,6 +73,13 @@ Od začátku workshopu přibylo 2 commity.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
+---
 
+[ ]
 
+[✨🤌] Allow multiple deployments for the project connected to the workshop.
 
+- Allow to set multiple URLs for deployments of the project.
+- Keep in mind the DRY _(don't repeat yourself)_ principle.
+- Do a analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](./changelog/_current-preversion.md)
