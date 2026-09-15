@@ -10,3 +10,19 @@
 
 ![alt text](prompts/screenshots/2026-09-0090-komunita-as-special-material.png)
 
+---
+
+[ ]
+
+[✨🚌] The link to the community should be shown alongside materials for non-paying participants as first material.
+
+- For paying participants, the community link should appear as last material.
+- You are working with page `/cs/online-workshop/participant?workshop=`
+- Keep in mind the DRY _(don't repeat yourself)_ principle.
+- Do a analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](./changelog/_current-preversion.md)
+
+![Payed member correct order](prompts/screenshots/2026-09-0090-komunita-as-special-material-3.png)
+![Payed member correct order](prompts/screenshots/2026-09-0090-komunita-as-special-material-4.png)
+![non-Payed member incorrect order](prompts/screenshots/2026-09-0090-komunita-as-special-material-2.png)
+![non-Payed member incorrect order](prompts/screenshots/2026-09-0090-komunita-as-special-material-1.png)
