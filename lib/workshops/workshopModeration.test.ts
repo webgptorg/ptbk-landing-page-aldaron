@@ -30,6 +30,7 @@ describe('workshop moderation roles', () => {
             expect(capabilities.isCommentModerationOffered).toBe(true);
             expect(capabilities.isCommentEditingOffered).toBe(true);
             expect(capabilities.isCommentPinningOffered).toBe(true);
+            expect(capabilities.isCommentMaterialConversionOffered).toBe(true);
             expect(capabilities.isTrustingOffered).toBe(true);
             expect(capabilities.isInteractionBanningOffered).toBe(true);
         });

@@ -102,6 +102,8 @@ export function WorkshopChatMessage({
                 <WorkshopChatMessageModeration
                     comment={comment}
                     onModerateComment={moderation.onModerateComment}
+                    isCommentMaterialConversionOffered={moderation.isCommentMaterialConversionOffered}
+                    onConvertCommentToMaterial={moderation.onConvertCommentToMaterial}
                     onModerateAuthor={moderation.onModerateAuthor}
                 />
             )}

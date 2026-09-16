@@ -39,6 +39,7 @@ function renderModeration(
     comments: readonly WorkshopAdminComment[] = [COMMENT],
     onChangePin: (commentId: string, isPinned: boolean) => Promise<boolean> = vi.fn(),
     pinnedComment: WorkshopCommentReference | null = null,
+    onConvertToMaterial: (commentId: string) => Promise<boolean> = vi.fn(),
 ) {
     return render(
         <WorkshopCommentModeration
@@ -47,6 +48,7 @@ function renderModeration(
             pinnedComment={pinnedComment}
             onChangeCommentStatus={vi.fn()}
             onModerate={vi.fn()}
+            onConvertToMaterial={onConvertToMaterial}
             onEditBody={onEditBody}
             onChangePin={onChangePin}
             onAdjustArtificialUpvotes={vi.fn()}
@@ -87,6 +89,7 @@ describe('workshop comment moderation', () => {
                 pinnedComment={null}
                 onChangeCommentStatus={vi.fn()}
                 onModerate={vi.fn()}
+                onConvertToMaterial={vi.fn()}
                 onEditBody={vi.fn()}
                 onChangePin={vi.fn()}
                 onAdjustArtificialUpvotes={vi.fn()}
@@ -117,6 +120,16 @@ describe('workshop comment moderation', () => {
         expect(onChangePin).toHaveBeenCalledWith('question', true);
     });
 
+    it('creates a material from a comment while keeping the comment in the moderation list', async () => {
+        const onConvertToMaterial = vi.fn().mockResolvedValue(true);
+        renderModeration(vi.fn(), [COMMENT], vi.fn(), null, onConvertToMaterial);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Převést komentář od Jana Nováková na materiál' }));
+
+        await waitFor(() => expect(onConvertToMaterial).toHaveBeenCalledWith(COMMENT.id));
+        expect(screen.getByText(COMMENT.body)).not.toBeNull();
+    });
+
     it('selects an attendee question for the shared stage and can clear it again', async () => {
         const onSetStageComment = vi.fn().mockResolvedValue(true);
         render(
@@ -127,6 +140,7 @@ describe('workshop comment moderation', () => {
                 stageComment={{ id: COMMENT.id, authorName: COMMENT.authorName, body: COMMENT.body }}
                 onChangeCommentStatus={vi.fn()}
                 onModerate={vi.fn()}
+                onConvertToMaterial={vi.fn()}
                 onEditBody={vi.fn()}
                 onChangePin={vi.fn()}
                 onSetStageComment={onSetStageComment}

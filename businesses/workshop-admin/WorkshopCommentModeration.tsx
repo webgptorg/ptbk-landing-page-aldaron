@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { WorkshopCommentMarkdown } from '@/components/workshop-comment-markdown';
 import { MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT } from '@/lib/workshops/workshopConstants';
+import { getWorkshopModerationCapabilities } from '@/lib/workshops/workshopModeration';
 import type {
     WorkshopAdminComment,
     WorkshopCommentReference,
     WorkshopCommentStatus,
 } from '@/lib/workshops/workshopTypes';
-import { Check, Clock3, MessageCircle, Pencil, Pin, PinOff, Send, ThumbsUp, Trash2, X } from 'lucide-react';
+import { BookOpenText, Check, Clock3, MessageCircle, Pencil, Pin, PinOff, Send, ThumbsUp, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 type WorkshopCommentModerationProps = {
@@ -22,6 +23,7 @@ type WorkshopCommentModerationProps = {
     readonly stageComment?: WorkshopCommentReference | null;
     readonly onChangeCommentStatus: (commentStatus: WorkshopCommentStatus) => void;
     readonly onModerate: (commentId: string, status: Exclude<WorkshopCommentStatus, 'pending'>) => Promise<void>;
+    readonly onConvertToMaterial: (commentId: string) => Promise<boolean>;
     readonly onEditBody: (commentId: string, body: string) => Promise<boolean>;
     readonly onChangePin: (commentId: string, isPinned: boolean) => Promise<boolean>;
     readonly onSetStageComment?: ((commentId: string | null) => Promise<boolean>) | null;
@@ -47,6 +49,7 @@ export function WorkshopCommentModeration({
     stageComment = null,
     onChangeCommentStatus,
     onModerate,
+    onConvertToMaterial,
     onEditBody,
     onChangePin,
     onSetStageComment = null,
@@ -57,6 +60,7 @@ export function WorkshopCommentModeration({
     const [artificialUpvoteAdjustments, setArtificialUpvoteAdjustments] = useState<Readonly<Record<string, string>>>({});
     const [editedCommentId, setEditedCommentId] = useState<string | null>(null);
     const isStageCommentControlsOffered = onSetStageComment !== null;
+    const isCommentMaterialConversionOffered = getWorkshopModerationCapabilities('admin').isCommentMaterialConversionOffered;
 
     const runCommentAction = async (commentId: string, action: () => Promise<unknown>) => {
         setProcessingCommentIds((currentIds) => new Set(currentIds).add(commentId));
@@ -73,6 +77,8 @@ export function WorkshopCommentModeration({
 
     const handleModeration = (commentId: string, status: 'approved' | 'rejected') =>
         runCommentAction(commentId, () => onModerate(commentId, status));
+
+    const handleConvertToMaterial = (commentId: string) => runCommentAction(commentId, () => onConvertToMaterial(commentId));
 
     const handleEditBody = (commentId: string, body: string) =>
         runCommentAction(commentId, async () => {
@@ -272,6 +278,19 @@ export function WorkshopCommentModeration({
                                         aria-label={`Upravit komentář od ${comment.authorName}`}
                                     >
                                         <Pencil className="mr-1.5 h-4 w-4" /> Upravit
+                                    </Button>
+                                )}
+                                {isCommentMaterialConversionOffered && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isProcessing}
+                                        onClick={() => void handleConvertToMaterial(comment.id)}
+                                        aria-label={`Převést komentář od ${comment.authorName} na materiál`}
+                                        className="border-cyan-200 text-cyan-800 hover:bg-cyan-50"
+                                    >
+                                        <BookOpenText className="mr-1.5 h-4 w-4" /> Převést na materiál
                                     </Button>
                                 )}
                                 <Button

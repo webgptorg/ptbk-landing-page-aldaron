@@ -1,5 +1,11 @@
 # Current preversion
 
+- An administrator in `/admin/workshops` or a moderator in
+  `/cs/online-workshop/participant?workshop=` can now turn any chat comment into an immediately available material.
+  The source comment remains in the chat untouched; the new material keeps its complete Markdown body and names its
+  chat author in the title. Both entry points use the ordinary material-creation path, so its short links, live room
+  refresh, publication and member access behave exactly like a material created in the content editor.
+
 - Made the compact cards of the published terms in `/cs/komunita` tell more of the story of an event without giving
   the calendar and the card-list two versions of it: the same card is shown below a selected calendar day, below a
   month, and in the `Karty` view, and can now show the anonymous average of the star ratings with its count, a visual

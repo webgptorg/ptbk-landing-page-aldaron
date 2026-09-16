@@ -3,6 +3,7 @@ import type {
     WorkshopComment,
     WorkshopCommentSort,
     WorkshopCommentStatus,
+    WorkshopContentBlock,
     WorkshopFeedback,
     WorkshopParticipant,
     WorkshopPoll,
@@ -210,6 +211,24 @@ export async function moderateWorkshopComment(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
     });
+    return readResponseJson(response);
+}
+
+/**
+ * Keeps a chat message in place and creates an immediately available material
+ * from it as the moderator of this very room.
+ */
+export async function convertWorkshopCommentToMaterial(
+    workshopSlug: string,
+    commentId: string,
+): Promise<{ readonly contentBlock: WorkshopContentBlock }> {
+    const response = await fetch(
+        getWorkshopApiUrl(workshopSlug, `comments/${encodeURIComponent(commentId)}/material`),
+        {
+            method: 'POST',
+            credentials: 'same-origin',
+        },
+    );
     return readResponseJson(response);
 }
 

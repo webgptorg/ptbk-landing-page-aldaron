@@ -6,11 +6,13 @@ import type {
     WorkshopCommentModerationValues,
 } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import type { WorkshopComment } from '@/lib/workshops/workshopTypes';
-import { Ban, Check, Pencil, Pin, PinOff, ShieldCheck, ShieldOff, X, type LucideIcon } from 'lucide-react';
+import { Ban, BookOpenText, Check, Pencil, Pin, PinOff, ShieldCheck, ShieldOff, X, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 
 export type WorkshopChatModerationHandlers = {
     readonly onModerateComment: (commentId: string, values: WorkshopCommentModerationValues) => Promise<boolean>;
+    readonly isCommentMaterialConversionOffered: boolean;
+    readonly onConvertCommentToMaterial: (commentId: string) => Promise<boolean>;
     readonly onModerateAuthor: (participantId: string, values: WorkshopAuthorModerationValues) => Promise<boolean>;
 };
 
@@ -60,6 +62,8 @@ function WorkshopModerationAction({
 export function WorkshopChatMessageModeration({
     comment,
     onModerateComment,
+    isCommentMaterialConversionOffered,
+    onConvertCommentToMaterial,
     onModerateAuthor,
 }: WorkshopChatMessageModerationProps) {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -77,6 +81,8 @@ export function WorkshopChatMessageModeration({
 
     const moderateComment = (values: WorkshopCommentModerationValues) =>
         void runModeration(() => onModerateComment(comment.id, values));
+
+    const convertCommentToMaterial = () => void runModeration(() => onConvertCommentToMaterial(comment.id));
 
     const moderateAuthor = (values: WorkshopAuthorModerationValues) => {
         if (moderatedAuthor !== null) {
@@ -130,6 +136,15 @@ export function WorkshopChatMessageModeration({
                         icon={Pencil}
                         isDisabled={isProcessing}
                         onClick={() => setIsEditorOpen(true)}
+                    />
+                )}
+                {isCommentMaterialConversionOffered && (
+                    <WorkshopModerationAction
+                        label="Převést na materiál"
+                        ariaLabel={`Převést komentář od ${comment.authorName} na materiál`}
+                        icon={BookOpenText}
+                        isDisabled={isProcessing}
+                        onClick={convertCommentToMaterial}
                     />
                 )}
                 {moderatedAuthor !== null && !moderatedAuthor.isModerator && (

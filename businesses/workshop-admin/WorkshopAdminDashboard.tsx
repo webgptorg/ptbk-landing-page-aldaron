@@ -9,6 +9,7 @@ import {
     createAdminWorkshop,
     createAdminWorkshopContent,
     createAdminWorkshopPoll,
+    convertAdminWorkshopCommentToMaterial,
     deleteAdminWorkshop,
     deleteAdminWorkshopComment,
     deleteAdminWorkshopContent,
@@ -441,6 +442,10 @@ export function WorkshopAdminDashboard({
             await runAndReload(() => moderateAdminWorkshopComment(snapshot.workshop.id, commentId, status));
         }
     };
+    const handleConvertCommentToMaterial = (commentId: string) =>
+        snapshot === null
+            ? Promise.resolve(false)
+            : runAndReload(() => convertAdminWorkshopCommentToMaterial(snapshot.workshop.id, commentId));
     const handleEditCommentBody = (commentId: string, body: string) =>
         snapshot === null
             ? Promise.resolve(false)
@@ -670,6 +675,7 @@ export function WorkshopAdminDashboard({
                                     stageComment={isStageOffered ? snapshot.stageComment : null}
                                     onChangeCommentStatus={setCommentStatus}
                                     onModerate={handleModerateComment}
+                                    onConvertToMaterial={handleConvertCommentToMaterial}
                                     onEditBody={handleEditCommentBody}
                                     onChangePin={handleChangeCommentPin}
                                     onSetStageComment={isStageOffered ? handleSetStageComment : null}

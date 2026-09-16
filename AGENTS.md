@@ -198,7 +198,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   countdown or live stream.
 - Trusted participants remain invisible and their messages are auto-approved.
   Moderators see pending messages, can approve/reject/correct/pin them, and can
-  trust or silence authors. Workshop and community moderators are appointed in
+  trust or silence authors. An administrator in `/admin/workshops` and a moderator
+  in a workshop room can also turn any comment into an ordinary, immediately
+  available material. That preserves the comment in chat, carries its complete
+  Markdown body into the material, and names its author in the material title;
+  both entry points use the shared material creation path, including its short
+  links and room refresh. Workshop and community moderators are appointed in
   `/admin/workshops`; project authors moderate their own discussions.
 - The room records whether each open browser is actively or passively attended
   from pointer, typing, scroll, and touch activity. Admin analytics distinguish

@@ -14,7 +14,7 @@ import type {
 
 type WorkshopCreateValues = z.infer<typeof workshopCreateSchema>;
 type WorkshopUpdateValues = z.infer<typeof workshopUpdateSchema>;
-type WorkshopContentCreateValues = z.infer<typeof workshopContentCreateSchema>;
+export type WorkshopContentCreateValues = z.infer<typeof workshopContentCreateSchema>;
 type WorkshopContentUpdateValues = z.infer<typeof workshopContentUpdateSchema>;
 type WorkshopCommentUpdateValues = z.infer<typeof workshopCommentUpdateSchema>;
 type WorkshopParticipantUpdateValues = z.infer<typeof workshopParticipantUpdateSchema>;

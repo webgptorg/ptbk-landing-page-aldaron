@@ -1,17 +1,8 @@
 import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
-import { WORKSHOP_CONTENT_TABLE_NAME } from '@/lib/workshops/workshopConstants';
-import {
-    createWorkshopDatabaseUnavailableResponse,
-    findWorkshopById,
-    getWorkshopDatabaseOrNull,
-    mapWorkshopContentRow,
-    WORKSHOP_CONTENT_COLUMNS,
-} from '@/lib/workshops/workshopDatabase';
-import { broadcastWorkshopEvent } from '@/lib/workshops/workshopRealtime';
-import { ensureWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
+import { getAdminWorkshopDataOrResponse } from '@/lib/workshops/workshopAdminRequest';
+import { createWorkshopContent } from '@/lib/workshops/workshopContentCreation';
 import { workshopContentCreateSchema } from '@/lib/workshops/workshopSchemas';
-import { createWorkshopContentDatabaseValues } from '@/lib/workshops/workshopValues';
 import { NextRequest, NextResponse } from 'next/server';
 
 type AdminWorkshopContentRouteContext = {
@@ -34,37 +25,18 @@ export async function POST(request: NextRequest, context: AdminWorkshopContentRo
     }
 
     const { workshopId } = await context.params;
-    const supabase = getWorkshopDatabaseOrNull();
-    if (supabase === null) {
-        return createWorkshopDatabaseUnavailableResponse();
+    const workshopData = await getAdminWorkshopDataOrResponse(workshopId);
+    if ('response' in workshopData) {
+        return workshopData.response;
     }
 
-    const workshopRow = await findWorkshopById(supabase, workshopId);
-    if (workshopRow === null) {
-        return NextResponse.json({ error: 'Workshop not found' }, { status: 404 });
+    const createdContent = await createWorkshopContent(workshopData.supabase, workshopData.workshopRow, parsedResult.data);
+    if (createdContent.errorMessage !== null || createdContent.contentBlock === null) {
+        return NextResponse.json(
+            { error: createdContent.errorMessage ?? 'Content was not returned' },
+            { status: 500 },
+        );
     }
 
-    const { data, error } = await supabase
-        .from(WORKSHOP_CONTENT_TABLE_NAME)
-        .insert({ workshop_id: workshopId, ...createWorkshopContentDatabaseValues(parsedResult.data) })
-        .select(WORKSHOP_CONTENT_COLUMNS)
-        .single();
-    if (error || data === null) {
-        return NextResponse.json({ error: error?.message ?? 'Content was not returned' }, { status: 500 });
-    }
-
-    const materialShortLinkErrorMessage = await ensureWorkshopMaterialShortLinks(supabase, {
-        workshopSlug: workshopRow.slug,
-        workshopKind: workshopRow.room_kind,
-        contentBlockId: data.id,
-        bodyMarkdown: data.body_markdown,
-    });
-    if (materialShortLinkErrorMessage !== null) {
-        // The source Markdown was persisted safely. The participant-state load
-        // will retry preparation rather than exposing an untracked raw URL.
-        console.error('Failed to prepare short links for workshop material:', materialShortLinkErrorMessage);
-    }
-
-    await broadcastWorkshopEvent(supabase, workshopRow, { kind: 'state-changed' });
-    return NextResponse.json({ contentBlock: mapWorkshopContentRow(data) }, { status: 201 });
+    return NextResponse.json({ contentBlock: createdContent.contentBlock }, { status: 201 });
 }

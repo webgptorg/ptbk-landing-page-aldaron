@@ -419,6 +419,7 @@ export function OnlineWorkshopParticipantPage({
                     onSubmitComment={controller.submitComment}
                     onUpvoteComment={controller.upvoteComment}
                     onModerateComment={controller.moderateComment}
+                    onConvertCommentToMaterial={controller.convertCommentToMaterial}
                     onModerateAuthor={controller.moderateAuthor}
                 />
 

@@ -65,6 +65,7 @@ type WorkshopChatOptions = {
     readonly isEnabled?: boolean;
     readonly isModerating?: boolean;
     readonly onModerateComment?: (commentId: string, values: unknown) => Promise<boolean>;
+    readonly onConvertCommentToMaterial?: (commentId: string) => Promise<boolean>;
     readonly onModerateAuthor?: (participantId: string, values: unknown) => Promise<boolean>;
 };
 
@@ -75,6 +76,7 @@ function renderChat(
         isEnabled = true,
         isModerating = false,
         onModerateComment = vi.fn().mockResolvedValue(true),
+        onConvertCommentToMaterial = vi.fn().mockResolvedValue(true),
         onModerateAuthor = vi.fn().mockResolvedValue(true),
     }: WorkshopChatOptions = {},
 ) {
@@ -89,6 +91,7 @@ function renderChat(
             onSubmitComment={onSubmitComment}
             onUpvoteComment={vi.fn()}
             onModerateComment={onModerateComment}
+            onConvertCommentToMaterial={onConvertCommentToMaterial}
             onModerateAuthor={onModerateAuthor}
         />,
     );
@@ -227,6 +230,7 @@ describe('workshop chat', () => {
 
         expect(screen.queryByText('Moderujete tuto místnost')).toBeNull();
         expect(screen.queryByRole('button', { name: /^Schválit komentář/ })).toBeNull();
+        expect(screen.queryByRole('button', { name: /^Převést komentář/ })).toBeNull();
         expect(screen.queryByRole('button', { name: /^Důvěřovat účastníkovi/ })).toBeNull();
     });
 
@@ -239,6 +243,16 @@ describe('workshop chat', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Schválit komentář od Jana Nováková' }));
 
         expect(onModerateComment).toHaveBeenCalledWith(MODERATED_QUESTION.id, { status: 'approved' });
+    });
+
+    it('lets a moderator preserve a useful comment as a material without taking it out of the chat', async () => {
+        const onConvertCommentToMaterial = vi.fn().mockResolvedValue(true);
+        renderChat(vi.fn(), { comments: [MODERATED_QUESTION], isModerating: true, onConvertCommentToMaterial });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Převést komentář od Jana Nováková na materiál' }));
+
+        await waitFor(() => expect(onConvertCommentToMaterial).toHaveBeenCalledWith(MODERATED_QUESTION.id));
+        expect(screen.getByText(MODERATED_QUESTION.body)).not.toBeNull();
     });
 
     it('lets a moderator pin a message and correct its text', async () => {

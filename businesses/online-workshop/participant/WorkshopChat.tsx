@@ -12,6 +12,7 @@ import type {
 import { cn } from '@/lib/utils';
 import { getWorkshopChatInteractivity } from '@/lib/workshops/workshopChatInteractivity';
 import { buildWorkshopCommentThreads } from '@/lib/workshops/workshopCommentThreads';
+import { getWorkshopModerationCapabilities } from '@/lib/workshops/workshopModeration';
 import type { WorkshopComment, WorkshopCommentSort } from '@/lib/workshops/workshopTypes';
 import { Clock3, Lock, MessageCircle, ShieldCheck, ThumbsUp } from 'lucide-react';
 import { useMemo } from 'react';
@@ -35,6 +36,7 @@ type WorkshopChatProps = {
     readonly onSubmitComment: (values: WorkshopCommentValues) => Promise<boolean>;
     readonly onUpvoteComment: (commentId: string) => Promise<void>;
     readonly onModerateComment: (commentId: string, values: WorkshopCommentModerationValues) => Promise<boolean>;
+    readonly onConvertCommentToMaterial: (commentId: string) => Promise<boolean>;
     readonly onModerateAuthor: (participantId: string, values: WorkshopAuthorModerationValues) => Promise<boolean>;
 };
 
@@ -49,6 +51,7 @@ export function WorkshopChat({
     onSubmitComment,
     onUpvoteComment,
     onModerateComment,
+    onConvertCommentToMaterial,
     onModerateAuthor,
 }: WorkshopChatProps) {
     const threads = useMemo(() => buildWorkshopCommentThreads(comments, commentSort), [comments, commentSort]);
@@ -57,10 +60,16 @@ export function WorkshopChat({
         isInteractionBanned,
         isModerating,
     });
+    const moderationCapabilities = getWorkshopModerationCapabilities('moderator');
 
     // Note: Whether this chat is moderated is decided once here, so no message below has to judge it again.
     const moderation: WorkshopChatModerationHandlers | null = interactivity.isModerationOffered
-        ? { onModerateComment, onModerateAuthor }
+        ? {
+              onModerateComment,
+              isCommentMaterialConversionOffered: moderationCapabilities.isCommentMaterialConversionOffered,
+              onConvertCommentToMaterial,
+              onModerateAuthor,
+          }
         : null;
 
     return (

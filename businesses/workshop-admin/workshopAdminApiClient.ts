@@ -362,6 +362,23 @@ export async function deleteAdminWorkshopComment(workshopId: string, commentId: 
     );
 }
 
+/**
+ * Keeps the source comment in the chat and creates a new material from its
+ * author and body in the administration of the same workshop.
+ */
+export async function convertAdminWorkshopCommentToMaterial(
+    workshopId: string,
+    commentId: string,
+): Promise<WorkshopContentBlock> {
+    const result = await requestAdminJson<{ readonly contentBlock: WorkshopContentBlock }>(
+        createAdminApiUrl(
+            `/${encodeURIComponent(workshopId)}/comments/${encodeURIComponent(commentId)}/material`,
+        ),
+        { method: 'POST' },
+    );
+    return result.contentBlock;
+}
+
 async function updateAdminWorkshopComment(
     workshopId: string,
     commentId: string,

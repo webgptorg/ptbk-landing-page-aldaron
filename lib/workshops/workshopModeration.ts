@@ -27,6 +27,11 @@ export type WorkshopModerationCapabilities = {
     readonly isCommentPinningOffered: boolean;
 
     /**
+     * Whether this role can preserve a chat message as an ordinary material
+     */
+    readonly isCommentMaterialConversionOffered: boolean;
+
+    /**
      * Whether this role has the messages of a participant approved as they are written from now on
      */
     readonly isTrustingOffered: boolean;
@@ -58,6 +63,7 @@ const WORKSHOP_MODERATION_CAPABILITY_DEFINITIONS: Readonly<
         isCommentModerationOffered: true,
         isCommentEditingOffered: true,
         isCommentPinningOffered: true,
+        isCommentMaterialConversionOffered: true,
         isTrustingOffered: true,
         isInteractionBanningOffered: true,
         isModeratorAppointmentOffered: true,
@@ -66,6 +72,7 @@ const WORKSHOP_MODERATION_CAPABILITY_DEFINITIONS: Readonly<
         isCommentModerationOffered: true,
         isCommentEditingOffered: true,
         isCommentPinningOffered: true,
+        isCommentMaterialConversionOffered: true,
         isTrustingOffered: true,
         isInteractionBanningOffered: true,
         isModeratorAppointmentOffered: false,

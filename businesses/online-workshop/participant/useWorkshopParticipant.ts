@@ -8,6 +8,7 @@ import {
 import {
     changeWorkshopParticipantFullname,
     connectToWorkshop,
+    convertWorkshopCommentToMaterial,
     disconnectFromWorkshop,
     fetchWorkshopState,
     moderateWorkshopAuthor,
@@ -107,6 +108,12 @@ type WorkshopParticipantController = {
      * Moderates one message of the chat, which only a moderator of the room is offered
      */
     readonly moderateComment: (commentId: string, values: WorkshopCommentModerationValues) => Promise<boolean>;
+
+    /**
+     * Keeps a useful chat message and makes it a participant-visible material,
+     * which only a moderator of the room is offered.
+     */
+    readonly convertCommentToMaterial: (commentId: string) => Promise<boolean>;
 
     /**
      * Moderates the author of one message of the chat, which only a moderator of the room is offered
@@ -806,6 +813,24 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         [refresh, workshopSlug],
     );
 
+    const convertCommentToMaterial = useCallback(
+        async (commentId: string): Promise<boolean> => {
+            setErrorMessage(null);
+            try {
+                await convertWorkshopCommentToMaterial(workshopSlug, commentId);
+                await refresh();
+                trackGoogleAnalyticsEvent('workshop_comment_converted_to_material', {
+                    workshop_slug: workshopSlug,
+                });
+                return true;
+            } catch (error) {
+                setErrorMessage(getCzechApiErrorMessage(error));
+                return false;
+            }
+        },
+        [refresh, workshopSlug],
+    );
+
     const moderateAuthor = useCallback(
         async (participantId: string, values: WorkshopAuthorModerationValues): Promise<boolean> => {
             setErrorMessage(null);
@@ -892,6 +917,7 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         upvoteComment,
         voteOnPoll,
         moderateComment,
+        convertCommentToMaterial,
         moderateAuthor,
         react,
         saveFeedback,

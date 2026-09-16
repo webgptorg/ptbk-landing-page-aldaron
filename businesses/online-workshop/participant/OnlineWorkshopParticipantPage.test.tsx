@@ -275,6 +275,7 @@ function renderParticipantRoom(
         upvoteComment: async () => undefined,
         voteOnPoll: async () => true,
         moderateComment: async () => true,
+        convertCommentToMaterial: async () => true,
         moderateAuthor: async () => true,
         react: async () => undefined,
         saveFeedback: async () => true,
