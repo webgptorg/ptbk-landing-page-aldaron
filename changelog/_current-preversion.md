@@ -1,5 +1,12 @@
 # Current preversion
 
+- Let an administrator write the start of a paid replay on a clock. The stage settings of `/admin/workshops` now ask
+  for `Začít záznam od` in its own `Hodiny`, `Minuty` and `Sekundy` boxes instead of in one number of seconds, so the
+  moment the workshop itself begins at is written as `0 : 1 : 15` rather than counted out as `75`. Nothing about the
+  offset itself changed: it is held, saved, exported and read by `/cs/online-workshop/participant?workshop=` in exactly
+  the same seconds as before, the field says underneath which number of seconds it is about to save, and a term which
+  was given its offset before this change opens on the very same position of its recording.
+
 - Let the project a term is about run in more than one place. The project settings of `/admin/workshops` now take one
   address of a deployment per line instead of a single address altogether, and
   `/cs/online-workshop/participant?workshop=` opens every one of them beside the repository the workshop follows. A

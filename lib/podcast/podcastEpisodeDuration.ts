@@ -1,5 +1,4 @@
-const SECONDS_PER_MINUTE = 60;
-const MINUTES_PER_HOUR = 60;
+import { SECONDS_PER_MINUTE, splitDurationIntoParts } from '@/lib/durationParts';
 
 /**
  * Reads the length of a recording as an RSS feed states it
@@ -31,11 +30,7 @@ export function parsePodcastEpisodeDuration(rawDuration: string | null): number 
  * @returns length written as `1:05:30` or as `35:34`
  */
 export function formatMediaDuration(durationInSeconds: number): string {
-    const wholeSeconds = Math.max(0, Math.floor(durationInSeconds));
-    const seconds = wholeSeconds % SECONDS_PER_MINUTE;
-    const wholeMinutes = Math.floor(wholeSeconds / SECONDS_PER_MINUTE);
-    const minutes = wholeMinutes % MINUTES_PER_HOUR;
-    const hours = Math.floor(wholeMinutes / MINUTES_PER_HOUR);
+    const { hours, minutes, seconds } = splitDurationIntoParts(durationInSeconds);
     const paddedSeconds = String(seconds).padStart(2, '0');
 
     if (hours === 0) {

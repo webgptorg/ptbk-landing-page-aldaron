@@ -14,6 +14,8 @@
 
 ---
 
+[x] by Developer on Claude Code `claude-opus-5` thinking `max` - Implementation $4.87 4 hours; Testing 10 minutes
 [✨🦵] The "Začít záznam od (sekundy)" field in should have hour:minute:second picker.
 
 - Do not change anything in the data, just change the picker.
+

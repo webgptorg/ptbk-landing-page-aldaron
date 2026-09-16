@@ -58,12 +58,22 @@ const END_ONE_HOUR_AFTER_START_LABEL = 'Nastavit konec 1 hodinu po začátku';
 const END_TWO_HOURS_AFTER_START_LABEL = 'Nastavit konec 2 hodiny po začátku';
 const STAGE_LABEL = 'YouTube URL nebo video ID';
 const STAGE_PREVIEW_LABEL = 'YouTube URL nebo video ID ukázky';
-const RECORDING_START_OFFSET_LABEL = 'Začít záznam od (sekundy)';
+const RECORDING_START_OFFSET_LABEL = 'Začít záznam od';
 const PRESENTATION_LABEL = 'URL prezentace';
 const REPOSITORY_LABEL = 'GitHub repozitář projektu';
 const REPOSITORY_BRANCH_LABEL = 'Větve repozitáře';
 const REPOSITORY_DEPLOYMENT_LABEL = 'URL nasazení projektu';
 const REACTION_LABEL = 'Reakce oddělené mezerou';
+
+/**
+ * What the three parts of the recording-offset picker say right now
+ */
+function readRecordingStartOffsetParts() {
+    const readPart = (partLabel: string) =>
+        (screen.getByRole('spinbutton', { name: partLabel }) as HTMLInputElement).value;
+
+    return { hours: readPart('Hodiny'), minutes: readPart('Minuty'), seconds: readPart('Sekundy') };
+}
 
 function renderWorkshopSettingsForm(workshop: WorkshopDetails, onSave = vi.fn().mockResolvedValue(true)) {
     const { container } = render(<WorkshopSettingsForm workshop={workshop} onSave={onSave} />);
@@ -249,15 +259,23 @@ describe('workshop settings form', () => {
         );
     });
 
+    it('writes the stored recording offset as hours, minutes and seconds', () => {
+        renderWorkshopSettingsForm(WORKSHOP);
+
+        expect(readRecordingStartOffsetParts()).toEqual({ hours: '0', minutes: '1', seconds: '15' });
+        expect(screen.queryByText(/Uloží se jako 75 sekund\./)).not.toBeNull();
+    });
+
     it('saves the selected recording offset separately from the live stream', async () => {
         const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
 
-        fireEvent.change(screen.getByRole('spinbutton', { name: /^Začít záznam od \(sekundy\)/ }), {
-            target: { value: '125' },
-        });
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Minuty' }), { target: { value: '2' } });
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Sekundy' }), { target: { value: '5' } });
         submit();
 
-        await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ recordingStartOffsetSeconds: 125 })));
+        await waitFor(() =>
+            expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ recordingStartOffsetSeconds: 125 })),
+        );
     });
 
     it('saves a public presentation URL separately from timed workshop content', async () => {

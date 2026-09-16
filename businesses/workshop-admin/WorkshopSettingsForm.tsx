@@ -13,11 +13,13 @@ import {
     createWorkshopRepositoryWriteValues,
 } from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { WorkshopReactionAnimationPreview } from '@/businesses/workshop-admin/WorkshopReactionAnimationPreview';
+import { DurationPicker } from '@/components/admin/DurationPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
+import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
 import { MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS } from '@/lib/workshops/workshopConstants';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopPanelOfferedByKind } from '@/lib/workshops/workshopPanels';
@@ -30,6 +32,13 @@ import { useEffect, useState, type FormEvent } from 'react';
  * Which of the two ways of saving the room is running, so each button says what it is doing
  */
 type WorkshopSettingsSave = 'settings' | WorkshopEndSaveAction;
+
+/**
+ * Names the hour, minute and second parts the recording offset is written in, and what all three of them are called
+ * together
+ */
+const RECORDING_START_OFFSET_FIELD_ID = 'workshop-recording-start-offset';
+const RECORDING_START_OFFSET_LABEL_ID = 'workshop-recording-start-offset-label';
 
 type WorkshopSettingsFormProps = {
     readonly workshop: WorkshopDetails;
@@ -279,29 +288,22 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                                 nevyplníte, uvidí jen nabídku členství, které záznam odemyká.
                             </span>
                         </label>
-                        <label className="text-sm font-medium text-slate-700">
-                            Začít záznam od (sekundy)
-                            <Input
-                                type="number"
-                                min={0}
-                                max={MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS}
-                                step={1}
-                                value={recordingStartOffsetSeconds}
-                                onChange={(event) => {
-                                    const nextRecordingStartOffsetSeconds = Number(event.target.value);
-                                    setRecordingStartOffsetSeconds(
-                                        Number.isFinite(nextRecordingStartOffsetSeconds)
-                                            ? Math.max(0, Math.trunc(nextRecordingStartOffsetSeconds))
-                                            : 0,
-                                    );
-                                }}
+                        <div className="text-sm font-medium text-slate-700">
+                            <span id={RECORDING_START_OFFSET_LABEL_ID}>Začít záznam od</span>
+                            <DurationPicker
+                                id={RECORDING_START_OFFSET_FIELD_ID}
+                                labelledById={RECORDING_START_OFFSET_LABEL_ID}
+                                durationInSeconds={recordingStartOffsetSeconds}
+                                onChange={setRecordingStartOffsetSeconds}
+                                maximalDurationInSeconds={MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS}
                                 className="mt-2"
                             />
                             <span className="mt-1 block text-xs font-normal text-slate-400">
                                 Použije se jen po skončení workshopu, když placený člen otevře záznam. Živý stream ani
-                                odpočet se tím nemění.
+                                odpočet se tím nemění. Uloží se jako{' '}
+                                {formatCzechCountedNoun(recordingStartOffsetSeconds, ['sekunda', 'sekundy', 'sekund'])}.
                             </span>
-                        </label>
+                        </div>
                     </>
                 )}
                 {roomCapabilities.isPresentationOffered && (

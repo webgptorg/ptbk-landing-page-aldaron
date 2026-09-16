@@ -200,9 +200,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   room without membership hides paid-only items without naming them.
 - After a workshop ends, its recording is server-gated to members. Others receive
   the published teaser, or a generic offer when no teaser exists; a term without
-  a recording offers nothing. An administrator can set the recording's start
-  offset in seconds, which applies only to that paid replay and never to the
-  countdown or live stream.
+  a recording offers nothing. An administrator writes the recording's start
+  offset as hours, minutes and seconds, while it stays stored, exported and read
+  in seconds; it applies only to that paid replay and never to the countdown or
+  live stream.
 - Trusted participants remain invisible and their messages are auto-approved.
   Moderators see pending messages, can approve/reject/correct/pin them, and can
   trust or silence authors. An administrator in `/admin/workshops` and a moderator
