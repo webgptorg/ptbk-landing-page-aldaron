@@ -11,3 +11,11 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+
+---
+
+[✨🌷] In administration, show freshly past events under the primary current events category, not in the history.
+
+- Do not change anything in the data, just how you are showing the events in the administration.
+
+![alt text](prompts/screenshots/2026-09-0170-freshly-past-events.png)
