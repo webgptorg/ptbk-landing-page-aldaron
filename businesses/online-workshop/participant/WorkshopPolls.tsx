@@ -26,12 +26,7 @@ type WorkshopPollsProps = {
  * reveal who voted for an option; a member knows solely whether the highlighted choice is their own, whichever room
  * they used to make it.
  */
-export function WorkshopPolls({
-    className,
-    polls,
-    isInteractionBanned,
-    onVote,
-}: WorkshopPollsProps) {
+export function WorkshopPolls({ className, polls, isInteractionBanned, onVote }: WorkshopPollsProps) {
     const [votingPollId, setVotingPollId] = useState<string | null>(null);
     const [otherOptionLabels, setOtherOptionLabels] = useState<Readonly<Record<string, string>>>({});
 
@@ -129,7 +124,9 @@ export function WorkshopPolls({
                                             >
                                                 <Check className="h-3.5 w-3.5" />
                                             </span>
-                                            <span className="min-w-0 flex-1 break-words font-medium">{option.label}</span>
+                                            <span className="min-w-0 flex-1 break-words font-medium">
+                                                {option.label}
+                                            </span>
                                             <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">
                                                 {option.voteCount} · {percentage} %
                                             </span>
@@ -172,15 +169,14 @@ export function WorkshopPolls({
                                             Přidat a hlasovat
                                         </Button>
                                     </div>
-                                    <p className="mt-2 text-xs leading-5 text-slate-400">
-                                        Vaše odpověď se přidá mezi možnosti a zároveň pro ni odevzdáte svůj hlas.
-                                    </p>
                                 </form>
                             )}
                         </div>
 
                         {!poll.isClosed && interactionAvailabilityMessage !== null && (
-                            <p className="px-5 pb-4 text-xs leading-5 text-slate-400">{interactionAvailabilityMessage}</p>
+                            <p className="px-5 pb-4 text-xs leading-5 text-slate-400">
+                                {interactionAvailabilityMessage}
+                            </p>
                         )}
                     </article>
                 );
