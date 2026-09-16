@@ -2,6 +2,7 @@ import { formatGithubRepositoryName } from '@/lib/github/githubRepository';
 import { scrapePublicWebPagePreview } from '@/lib/network/publicWebPagePreview';
 import { fetchYoutubeVideoDurationSeconds } from '@/lib/youtube/fetchYoutubeVideoDuration';
 import { WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
+import { getPrimaryWorkshopDeploymentUrl } from '@/lib/workshops/workshopDeployments';
 import { getWorkshopRecordingDurationSeconds } from '@/lib/workshops/workshopRecordingDuration';
 import type {
     WorkshopEventCardDetails,
@@ -32,7 +33,9 @@ function createRepositoryProjectPreview(repository: WorkshopRepository): Worksho
  * Resolves the public metadata of a project's deployed application when it has one.
  *
  * Note: The repository remains a useful preview even when its deployment cannot be reached or has no Open Graph
- *       metadata. A card therefore never depends on another project's server being online.
+ *       metadata. A card therefore never depends on another project's server being online. A project deployed in
+ *       several places is previewed by the first of them, so one card costs one request however many addresses the
+ *       project runs at.
  */
 async function createWorkshopProjectPreview(
     repository: WorkshopRepository | null,
@@ -42,12 +45,13 @@ async function createWorkshopProjectPreview(
     }
 
     const repositoryPreview = createRepositoryProjectPreview(repository);
-    if (repository.deploymentUrl === null) {
+    const primaryDeploymentUrl = getPrimaryWorkshopDeploymentUrl(repository.deploymentUrls);
+    if (primaryDeploymentUrl === null) {
         return repositoryPreview;
     }
 
     try {
-        const deploymentPreview = await scrapePublicWebPagePreview(repository.deploymentUrl, {
+        const deploymentPreview = await scrapePublicWebPagePreview(primaryDeploymentUrl, {
             revalidateSeconds: WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS,
         });
         return {

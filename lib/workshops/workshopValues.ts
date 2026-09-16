@@ -25,13 +25,16 @@ type WorkshopFeedbackUpdateValues = z.infer<typeof workshopFeedbackUpdateSchema>
  * The database names of a whole connection to a project, whether it is being set, changed, or unset
  *
  * Note: All three of them are written together, so unsetting the connection can never leave branch selection or a
- *       deployment of a repository which is no longer connected behind.
+ *       deployment of a repository which is no longer connected behind. A project which is published nowhere writes
+ *       no deployment at all rather than an empty list of them.
  */
 function createWorkshopRepositoryDatabaseValues(repository: WorkshopRepository | null) {
+    const deploymentUrls = repository?.deploymentUrls ?? [];
+
     return {
         github_repository: repository === null ? null : formatGithubRepositoryName(repository),
         github_repository_branches: repository === null ? null : serializeGithubBranchSelection(repository.branch),
-        deployment_url: repository?.deploymentUrl ?? null,
+        deployment_urls: deploymentUrls.length === 0 ? null : deploymentUrls,
     };
 }
 

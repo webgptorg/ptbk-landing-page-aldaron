@@ -2,7 +2,11 @@ import {
     WORKSHOP_ADMIN_PARTICIPANT_SORT_BY_VALUES,
     type WorkshopAdminParticipantSortBy,
 } from '@/lib/workshops/workshopAdminParticipantQuery';
-import { DEFAULT_WORKSHOP_REACTIONS, MAXIMAL_WORKSHOP_ALLOWED_REACTION_COUNT } from '@/lib/workshops/workshopConstants';
+import {
+    DEFAULT_WORKSHOP_REACTIONS,
+    MAXIMAL_WORKSHOP_ALLOWED_REACTION_COUNT,
+    MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT,
+} from '@/lib/workshops/workshopConstants';
 import { WORKSHOP_KIND_VALUES } from '@/lib/workshops/workshopTypes';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -85,6 +89,14 @@ const WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_PATH = path.resolve(
 );
 const WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL = readFileSync(
     WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_PATH,
+    'utf8',
+);
+const WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-1900-workshop-repository-multiple-deployments.sql',
+);
+const WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL = readFileSync(
+    WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_PATH,
     'utf8',
 );
 const WORKSHOP_PRESENTATION_MIGRATION_PATH = path.resolve(
@@ -781,6 +793,43 @@ describe('workshop database migration', () => {
     it('keeps branch selection and deployment tied to a connected repository after migration', () => {
         expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
             'OR (github_repository_branches IS NULL AND deployment_url IS NULL)',
+        );
+    });
+
+    it('migrates the one deployment of a project into the array of every place it runs at', () => {
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS deployment_urls text[]',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'SET deployment_urls = ARRAY[deployment_url]',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'DROP COLUMN IF EXISTS deployment_url',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            `cardinality(deployment_urls) BETWEEN 1 AND ${MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT}`,
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).not.toContain('CREATE TABLE');
+
+        // Note: Joining the array leaves a NULL element out instead of failing on it, so it is asked for on its own.
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'array_position(deployment_urls, NULL::text) IS NULL',
+        );
+    });
+
+    it('keeps every migrated deployment an address which can be opened', () => {
+        // Note: No address may carry whitespace, which is what makes the joined value one unambiguous line of them.
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            String.raw`array_to_string(deployment_urls, ' ') ~* '^https?://\S+( https?://\S+)*$'`,
+        );
+    });
+
+    it('lets no deployment of a project outlive the repository it belongs to', () => {
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'DROP CONSTRAINT IF EXISTS workshops_repository_connection;',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'OR (github_repository_branches IS NULL AND deployment_urls IS NULL)',
         );
     });
 

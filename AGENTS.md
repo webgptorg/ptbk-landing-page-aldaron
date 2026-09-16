@@ -172,17 +172,21 @@ use cases, and audiences. Keep these rules current when behavior changes.
   private realtime channel used by reactions.
 - A term can be about a project. The connection is one value — GitHub repository,
   the default branch, and one or more branch patterns such as `main`, `client-*`,
-  `feature/*`, or `*` for all branches, plus an optional deployment URL — so it is
-  set, changed, and unset at once and neither branch selection nor deployment
+  `feature/*`, or `*` for all branches, plus any number of public deployment
+  addresses, written one per line — so it is set, changed, and unset at once and
+  neither branch selection nor deployment
   outlives its repository. Room kinds which offer it are named in
   `lib/workshops/workshopKindCapabilities.ts`. The room shows the repository as a
   special material beside its ordinary materials for every participant, with its
-  links and newest commits, marking those which arrive while a participant watches;
+  links, every deployment and newest commits, marking those which arrive while a
+  participant watches;
   a newly found commit is broadcast to active rooms and appears on the stage for
   ten seconds. A selection resolving to multiple branches is shown as a commit
   graph. Commits come from the public commit feed or keyless API, pooled once per
   server and cached through the revalidation window; an unreadable feed still
-  leaves the room naming its project.
+  leaves the room naming its project. A project deployed once is opened as the live
+  application of the workshop; several deployments are each named by their own
+  address, and the first of them is the one a term card is previewed from.
 - A workshop can carry one public presentation URL for a PDF, PowerPoint file, or
   GitHub Markdown page. The room renders it beside ordinary materials through the
   shared material card, primary action, and QR code, for every participant without

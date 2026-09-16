@@ -58,19 +58,21 @@ export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepos
                 </span>
             </div>
 
-            <label className="text-sm font-medium text-slate-700">
-                URL nasazení projektu
-                <Input
-                    type="url"
-                    value={repository.deploymentUrl}
-                    onChange={(changeEvent) => onChange({ ...repository, deploymentUrl: changeEvent.target.value })}
-                    className="mt-2"
+            <div className="text-sm font-medium text-slate-700">
+                <label htmlFor="workshop-repository-deployments">URL nasazení projektu</label>
+                <Textarea
+                    id="workshop-repository-deployments"
+                    value={repository.deploymentUrls}
+                    onChange={(changeEvent) => onChange({ ...repository, deploymentUrls: changeEvent.target.value })}
+                    className="mt-2 font-mono"
                     placeholder="https://…"
+                    rows={3}
                 />
                 <span className="mt-1 block text-xs font-normal text-slate-400">
-                    Nepovinné. Účastníci dostanou odkaz na běžící aplikaci.
+                    Nepovinné. Každé nasazení na vlastní řádek; účastníci dostanou odkaz na každé z nich. Náhled v
+                    kartě termínu se bere z prvního.
                 </span>
-            </label>
+            </div>
         </>
     );
 }

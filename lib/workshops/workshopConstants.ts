@@ -91,6 +91,8 @@ export const WORKSHOP_REPOSITORY_MONITOR_TARGET_LEASE_SECONDS = 3 * WORKSHOP_REP
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH = 255;
 /** How many branch patterns one workshop may select explicitly */
 export const MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT = 50;
+/** How many public addresses the project of one workshop may be deployed at */
+export const MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT = 50;
 
 /**
  * How long after their last request a participant still counts as watching the workshop

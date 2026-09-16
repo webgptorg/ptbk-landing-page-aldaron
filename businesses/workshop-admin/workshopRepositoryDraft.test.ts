@@ -9,22 +9,22 @@ const REPOSITORY: WorkshopRepository = {
     owner: 'hejny',
     name: 'promptbook',
     branch: ['main', 'client-*', 'feature/*'],
-    deploymentUrl: 'https://workshop.example/app',
+    deploymentUrls: ['https://workshop.example/app', 'https://staging.workshop.example/app'],
 };
 
 describe('the workshop repository administration draft', () => {
-    it('round-trips branch patterns as one pattern per line', () => {
+    it('round-trips branch patterns and deployments as one value per line', () => {
         const draft = createWorkshopRepositoryDraft(REPOSITORY);
 
         expect(draft).toEqual({
             repositoryUrl: 'https://github.com/hejny/promptbook',
             branch: 'main\nclient-*\nfeature/*',
-            deploymentUrl: 'https://workshop.example/app',
+            deploymentUrls: 'https://workshop.example/app\nhttps://staging.workshop.example/app',
         });
         expect(createWorkshopRepositoryWriteValues(draft)).toEqual({
             url: 'https://github.com/hejny/promptbook',
             branch: ['main', 'client-*', 'feature/*'],
-            deploymentUrl: 'https://workshop.example/app',
+            deploymentUrls: ['https://workshop.example/app', 'https://staging.workshop.example/app'],
         });
     });
 
@@ -33,21 +33,45 @@ describe('the workshop repository administration draft', () => {
             createWorkshopRepositoryWriteValues({
                 repositoryUrl: 'hejny/promptbook',
                 branch: '*',
-                deploymentUrl: '',
+                deploymentUrls: '',
             }),
-        ).toEqual({ url: 'hejny/promptbook', branch: '*', deploymentUrl: null });
+        ).toEqual({ url: 'hejny/promptbook', branch: '*', deploymentUrls: [] });
         expect(
             createWorkshopRepositoryWriteValues({
                 repositoryUrl: 'hejny/promptbook',
                 branch: '',
-                deploymentUrl: '',
+                deploymentUrls: '',
             }),
-        ).toEqual({ url: 'hejny/promptbook', branch: null, deploymentUrl: null });
+        ).toEqual({ url: 'hejny/promptbook', branch: null, deploymentUrls: [] });
+    });
+
+    it('keeps a comma of a written deployment address, which only whitespace separates', () => {
+        expect(
+            createWorkshopRepositoryWriteValues({
+                repositoryUrl: 'hejny/promptbook',
+                branch: '',
+                deploymentUrls: '  https://workshop.example/app?tags=a,b \n\n https://staging.workshop.example/  ',
+            }),
+        ).toEqual({
+            url: 'hejny/promptbook',
+            branch: null,
+            deploymentUrls: ['https://workshop.example/app?tags=a,b', 'https://staging.workshop.example/'],
+        });
     });
 
     it('shows old all-branches records as the editable wildcard pattern', () => {
         expect(
             createWorkshopRepositoryDraft({ ...REPOSITORY, branch: [] }),
         ).toMatchObject({ branch: '*' });
+    });
+
+    it('drops every deployment together with the repository which was cleared', () => {
+        expect(
+            createWorkshopRepositoryWriteValues({
+                repositoryUrl: '   ',
+                branch: 'main',
+                deploymentUrls: 'https://workshop.example/app',
+            }),
+        ).toBeNull();
     });
 });

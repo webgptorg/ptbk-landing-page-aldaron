@@ -15,6 +15,7 @@ import {
     MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH,
+    MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT,
     MAXIMAL_WORKSHOP_SLUG_LENGTH,
     MINIMAL_WORKSHOP_POLL_OPTION_COUNT,
 } from '@/lib/workshops/workshopConstants';
@@ -75,42 +76,53 @@ const workshopDisabledPanelsSchema = z
     .max(WORKSHOP_PANEL_DEFINITIONS.length)
     .refine((panelKeys) => new Set(panelKeys).size === panelKeys.length, 'Workshop panels must be unique');
 
+const WORKSHOP_PUBLIC_URL_TEXT_SCHEMA = z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH);
+
 /**
- * One publicly opened workshop address. Presentations and project deployments share the same safety and
- * canonicalization rules, while each caller can still explain which field needs correcting.
+ * Reads one written address the way every public workshop address is read, naming the field which needs correcting
+ *
+ * Note: Presentations, project deployments and the address of an external event share these safety and
+ *       canonicalization rules, so an address is judged exactly once however many of them a request carries.
+ */
+function readWorkshopPublicUrl(value: string, context: z.RefinementCtx, invalidUrlMessage: string) {
+    const normalizedUrl = normalizePublicWebPageUrl(value);
+    if (normalizedUrl === null) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: invalidUrlMessage });
+        return z.NEVER;
+    }
+
+    return normalizedUrl;
+}
+
+/**
+ * One publicly opened workshop address which has to be there, such as every single deployment of a project
+ */
+function createWorkshopPublicUrlSchema(invalidUrlMessage: string) {
+    return WORKSHOP_PUBLIC_URL_TEXT_SCHEMA.transform((value, context) =>
+        readWorkshopPublicUrl(value, context, invalidUrlMessage),
+    );
+}
+
+/**
+ * One publicly opened workshop address which may be left out, where an empty value clears the address
  */
 function createNullableWorkshopPublicUrlSchema(invalidUrlMessage: string) {
     return z
-        .union([z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH), z.null()])
-        .transform((value, context) => {
-            if (value === '') {
-                return null;
-            }
-
-            if (value === null) {
-                return null;
-            }
-
-            const normalizedUrl = normalizePublicWebPageUrl(value);
-            if (normalizedUrl === null) {
-                context.addIssue({ code: z.ZodIssueCode.custom, message: invalidUrlMessage });
-                return z.NEVER;
-            }
-
-            return normalizedUrl;
-        });
+        .union([WORKSHOP_PUBLIC_URL_TEXT_SCHEMA, z.null()])
+        .transform((value, context) =>
+            value === null || value === '' ? null : readWorkshopPublicUrl(value, context, invalidUrlMessage),
+        );
 }
 
 const nullableWorkshopPresentationUrlSchema = createNullableWorkshopPublicUrlSchema(
     'A valid presentation URL is required',
 );
-const nullableWorkshopDeploymentUrlSchema = createNullableWorkshopPublicUrlSchema('A valid deployment URL is required');
 const nullableEventExternalUrlSchema = createNullableWorkshopPublicUrlSchema('A valid event URL is required');
 
 /**
  * The project one term is about, written as one whole connection
  *
- * Note: The branch selection and the deployment belong to the repository, so they are written together with it and
+ * Note: The branch selection and every deployment belong to the repository, so they are written together with it and
  *       cannot be left behind by unsetting it. A repository, a branch, or an address which cannot be read is refused
  *       instead of being stored as a connection leading nowhere.
  */
@@ -119,13 +131,20 @@ const workshopRepositoryBranchesSchema = z
     .array(workshopRepositoryBranchPatternSchema)
     .max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT)
     .refine((branches) => new Set(branches).size === branches.length, 'Workshop branches must be unique');
+const workshopRepositoryDeploymentUrlsSchema = z
+    .array(createWorkshopPublicUrlSchema('A valid deployment URL is required'))
+    .max(MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT)
+    .refine(
+        (deploymentUrls) => new Set(deploymentUrls).size === deploymentUrls.length,
+        'Workshop deployments must be unique',
+    );
 const workshopRepositoryWriteSchema = z
     .object({
         url: z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH),
         branch: z
             .union([workshopRepositoryBranchPatternSchema, workshopRepositoryBranchesSchema, z.null()])
             .default(null),
-        deploymentUrl: nullableWorkshopDeploymentUrlSchema.default(null),
+        deploymentUrls: workshopRepositoryDeploymentUrlsSchema.default([]),
     })
     .transform((values, context) => {
         const repository = extractGithubRepository(values.url);
@@ -151,7 +170,7 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        return { ...repository, branch, deploymentUrl: values.deploymentUrl } satisfies WorkshopRepository;
+        return { ...repository, branch, deploymentUrls: values.deploymentUrls } satisfies WorkshopRepository;
     });
 
 const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);

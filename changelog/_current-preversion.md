@@ -1,5 +1,18 @@
 # Current preversion
 
+- Let the project a term is about run in more than one place. The project settings of `/admin/workshops` now take one
+  address of a deployment per line instead of a single address altogether, and
+  `/cs/online-workshop/participant?workshop=` opens every one of them beside the repository the workshop follows. A
+  project deployed in one place is still simply its `Živá aplikace`, exactly as it was; several deployments are named
+  by the addresses they are reached at — `workshop.example/app` beside `staging.workshop.example/app` — because one
+  repeated name would say nothing about which of them a participant is opening. The compact card of the term in
+  `/cs/komunita` is previewed from the first written address, so a card still costs one request however many places
+  the project runs at, and the settings export writes them all on one line. Every deployment belongs to the connected
+  repository exactly as its branch patterns already did: they are written, changed and cleared as one connection, so
+  clearing the repository can leave behind no address of a project nobody is connected to. An address which cannot be
+  opened, and a second address which means the very same page, are refused when written and left out when read, while
+  an address stored before this change keeps its place as the first deployment of its project.
+
 - An administrator in `/admin/workshops` or a moderator in
   `/cs/online-workshop/participant?workshop=` can now turn any chat comment into an immediately available material.
   The source comment remains in the chat untouched; the new material keeps its complete Markdown body and names its

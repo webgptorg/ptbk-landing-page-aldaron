@@ -39,7 +39,7 @@ function createCommit(branchName: string): GithubCommit {
 }
 
 function createRepository(branch: WorkshopRepository['branch']): WorkshopRepository {
-    return { owner: 'hejny', name: 'promptbook', branch, deploymentUrl: null };
+    return { owner: 'hejny', name: 'promptbook', branch, deploymentUrls: [] };
 }
 
 describe('workshop repository progress branch patterns', () => {

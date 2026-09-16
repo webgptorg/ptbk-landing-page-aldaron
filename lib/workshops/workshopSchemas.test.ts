@@ -169,21 +169,45 @@ describe('workshop request validation', () => {
                 repository: {
                     url: 'https://github.com/hejny/promptbook/tree/main',
                     branch: 'feature/rooms',
-                    deploymentUrl: 'https://workshop.example/app#top',
+                    deploymentUrls: ['https://workshop.example/app#top'],
                 },
             }).repository,
         ).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: 'feature/rooms',
-            deploymentUrl: 'https://workshop.example/app',
+            deploymentUrls: ['https://workshop.example/app'],
         });
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook' } }).repository).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: null,
-            deploymentUrl: null,
+            deploymentUrls: [],
         });
+    });
+
+    it('keeps every place a project is deployed at and refuses two of the same', () => {
+        expect(
+            workshopUpdateSchema.parse({
+                repository: {
+                    url: 'hejny/promptbook',
+                    deploymentUrls: ['https://workshop.example/app', 'https://staging.workshop.example/app'],
+                },
+            }).repository,
+        ).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: null,
+            deploymentUrls: ['https://workshop.example/app', 'https://staging.workshop.example/app'],
+        });
+        expect(
+            workshopUpdateSchema.safeParse({
+                repository: {
+                    url: 'hejny/promptbook',
+                    deploymentUrls: ['https://workshop.example/app', 'https://workshop.example/app#top'],
+                },
+            }).success,
+        ).toBe(false);
     });
 
     it('keeps branch patterns separate and uses an asterisk for all branches', () => {
@@ -195,21 +219,21 @@ describe('workshop request validation', () => {
             owner: 'hejny',
             name: 'promptbook',
             branch: ['main', 'client-*', 'feature/*'],
-            deploymentUrl: null,
+            deploymentUrls: [],
         });
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: '*' } }).repository).toEqual(
             {
             owner: 'hejny',
             name: 'promptbook',
             branch: '*',
-            deploymentUrl: null,
+            deploymentUrls: [],
             },
         );
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: [] } }).repository).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: '*',
-            deploymentUrl: null,
+            deploymentUrls: [],
         });
         expect(
             workshopUpdateSchema.safeParse({
@@ -236,7 +260,12 @@ describe('workshop request validation', () => {
         ).toBe(false);
         expect(
             workshopUpdateSchema.safeParse({
-                repository: { url: 'hejny/promptbook', deploymentUrl: 'javascript:alert(1)' },
+                repository: { url: 'hejny/promptbook', deploymentUrls: ['javascript:alert(1)'] },
+            }).success,
+        ).toBe(false);
+        expect(
+            workshopUpdateSchema.safeParse({
+                repository: { url: 'hejny/promptbook', deploymentUrls: ['https://workshop.example/app', ''] },
             }).success,
         ).toBe(false);
     });

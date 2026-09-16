@@ -21,7 +21,7 @@ const WORKSHOP: WorkshopDetails = {
     recordingStartOffsetSeconds: 75,
     previewYoutubeVideoId: 'M7lc1UVf-VE',
     presentationUrl: null,
-    repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: 'https://workshop.example/app' },
+    repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrls: ['https://workshop.example/app'] },
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
     disabledPanels: [],
@@ -284,7 +284,28 @@ describe('workshop settings form', () => {
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
                         branch: 'produkce',
-                        deploymentUrl: 'https://workshop.example/app',
+                        deploymentUrls: ['https://workshop.example/app'],
+                    },
+                }),
+            ),
+        );
+    });
+
+    it('saves every place the project of a workshop occurrence is deployed at', async () => {
+        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+
+        fireEvent.change(screen.getByDisplayValue('https://workshop.example/app'), {
+            target: { value: 'https://workshop.example/app\nhttps://staging.workshop.example/app' },
+        });
+        submit();
+
+        await waitFor(() =>
+            expect(onSave).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    repository: {
+                        url: 'https://github.com/hejny/promptbook',
+                        branch: 'main',
+                        deploymentUrls: ['https://workshop.example/app', 'https://staging.workshop.example/app'],
                     },
                 }),
             ),
@@ -305,7 +326,7 @@ describe('workshop settings form', () => {
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
                         branch: ['main', 'client-*', 'feature/*'],
-                        deploymentUrl: 'https://workshop.example/app',
+                        deploymentUrls: ['https://workshop.example/app'],
                     },
                 }),
             ),
@@ -324,7 +345,7 @@ describe('workshop settings form', () => {
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
                         branch: '*',
-                        deploymentUrl: 'https://workshop.example/app',
+                        deploymentUrls: ['https://workshop.example/app'],
                     },
                 }),
             ),

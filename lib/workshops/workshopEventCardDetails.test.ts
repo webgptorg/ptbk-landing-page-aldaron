@@ -26,7 +26,7 @@ const SOURCE: WorkshopEventCardDetailsSource = {
         owner: 'promptbook',
         name: 'automation-dashboard',
         branch: null,
-        deploymentUrl: 'https://projects.example.com/dashboard',
+        deploymentUrls: ['https://projects.example.com/dashboard', 'https://staging.projects.example.com/dashboard'],
     },
 };
 
@@ -38,7 +38,7 @@ describe('workshop event card details', () => {
     it('combines anonymous feedback, a deployment preview, and the offset replay length without serializing the video ID', async () => {
         eventCardDetailMocks.fetchYoutubeVideoDurationSeconds.mockResolvedValue(5_400);
         eventCardDetailMocks.scrapePublicWebPagePreview.mockResolvedValue({
-            url: SOURCE.repository?.deploymentUrl,
+            url: SOURCE.repository?.deploymentUrls[0],
             title: 'Automatizační dashboard',
             description: 'Projekt vytvořený během workshopu.',
             previewImageUrl: 'https://projects.example.com/dashboard-preview.png',
@@ -57,11 +57,18 @@ describe('workshop event card details', () => {
             recordingDurationSeconds: 5_325,
         });
         expect(JSON.stringify(details)).not.toContain(SOURCE.youtubeVideoId);
+
+        // Note: A project deployed in several places is previewed by the first of them, so one card stays one request.
+        expect(eventCardDetailMocks.scrapePublicWebPagePreview).toHaveBeenCalledTimes(1);
+        expect(eventCardDetailMocks.scrapePublicWebPagePreview).toHaveBeenCalledWith(
+            'https://projects.example.com/dashboard',
+            expect.anything(),
+        );
     });
 
     it('keeps a repository useful when it has no deployment and skips an unfinished recording', async () => {
         const details = await createWorkshopEventCardDetails(
-            { ...SOURCE, isRecordingAvailable: false, repository: { ...SOURCE.repository!, deploymentUrl: null } },
+            { ...SOURCE, isRecordingAvailable: false, repository: { ...SOURCE.repository!, deploymentUrls: [] } },
             null,
         );
 

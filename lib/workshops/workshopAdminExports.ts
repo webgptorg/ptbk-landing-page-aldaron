@@ -13,6 +13,7 @@ import {
     formatAdminWorkshopParticipations,
     getAdminContactPhoneNumbers,
 } from '@/lib/admin/adminContactJoin';
+import { formatWorkshopDeploymentUrls } from '@/lib/workshops/workshopDeployments';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopPanelOfferedByKind } from '@/lib/workshops/workshopPanels';
 
@@ -100,7 +101,10 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
                       },
                       {
                           header: 'URL nasazení',
-                          getValue: (item: WorkshopDetails) => item.repository?.deploymentUrl ?? null,
+                          getValue: (item: WorkshopDetails) =>
+                              item.repository === null
+                                  ? null
+                                  : formatWorkshopDeploymentUrls(item.repository.deploymentUrls),
                       },
                   ]
                 : []),

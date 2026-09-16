@@ -11,6 +11,7 @@ import {
     isGithubMultipleBranchesSelection,
 } from '@/lib/github/githubRepository';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
+import { formatWorkshopDeploymentName } from '@/lib/workshops/workshopDeployments';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { WorkshopRepositoryBranch } from '@/lib/workshops/workshopRepositoryProgress';
 import { ExternalLink, Github, RefreshCw, Rocket } from 'lucide-react';
@@ -31,6 +32,17 @@ type WorkshopRepositoryPanelProps = {
  */
 function formatNewCommitCount(commitCount: number): string {
     return formatCzechCountedNoun(commitCount, ['nový commit', 'nové commity', 'nových commitů']);
+}
+
+/**
+ * Names the button which opens one running deployment of the project
+ *
+ * Note: A project which runs in one place is simply its live application, exactly as it always was. Several of them
+ *       are named by their own addresses instead, because one repeated name would say nothing about which of them a
+ *       participant is opening.
+ */
+function formatWorkshopDeploymentLabel(deploymentUrl: string, deploymentCount: number): string {
+    return deploymentCount === 1 ? 'Živá aplikace' : formatWorkshopDeploymentName(deploymentUrl);
 }
 
 /**
@@ -78,17 +90,22 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                         <Github className="h-3.5 w-3.5" aria-hidden="true" /> Repozitář
                         <ExternalLink className="h-3 w-3" aria-hidden="true" />
                     </a>
-                    {repository.deploymentUrl !== null && (
+                    {repository.deploymentUrls.map((deploymentUrl) => (
                         <a
-                            href={repository.deploymentUrl}
+                            key={deploymentUrl}
+                            href={deploymentUrl}
+                            title={deploymentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-full bg-cyan-300 px-3 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-200"
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-cyan-300 px-3 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-200"
                         >
-                            <Rocket className="h-3.5 w-3.5" aria-hidden="true" /> Živá aplikace
-                            <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                            <Rocket className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                            <span className="truncate">
+                                {formatWorkshopDeploymentLabel(deploymentUrl, repository.deploymentUrls.length)}
+                            </span>
+                            <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
                         </a>
-                    )}
+                    ))}
                 </div>
             </div>
 

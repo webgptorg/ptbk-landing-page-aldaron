@@ -105,13 +105,15 @@ export type WorkshopRow = {
     readonly presentation_url?: string | null;
 
     /**
-     * The project this term is about, written as `owner/name`, together with the selected branch array and the address
-     * the project runs at, all of which a term without a connected project leaves empty
+     * The project this term is about, written as `owner/name`, together with the selected branch array and the
+     * addresses the project runs at, all of which a term without a connected project leaves empty
      */
     readonly github_repository?: string | null;
     readonly github_repository_branches?: readonly string[] | null;
     /** Kept only so old in-memory rows can still be mapped while the branch migration is rolled out. */
     readonly github_repository_branch?: string | null;
+    readonly deployment_urls?: readonly string[] | null;
+    /** Kept only so old in-memory rows can still be mapped while the deployment migration is rolled out. */
     readonly deployment_url?: string | null;
     readonly is_published: boolean;
 
@@ -181,7 +183,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
         | 'recording_start_offset_seconds'
         | 'github_repository'
         | 'github_repository_branches'
-        | 'deployment_url'
+        | 'deployment_urls'
     >;
 
 /**
@@ -191,7 +193,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
 export const WORKSHOP_SUMMARY_COLUMNS =
     'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
 
-const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_url`;
+const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_urls`;
 
 type WorkshopContentRow = {
     readonly id: string;
@@ -475,13 +477,32 @@ export function createWorkshopDatabaseUnavailableResponse(): NextResponse {
 }
 
 /**
+ * Reads where the project of a row runs, whether the row was written before or after a project could run in several
+ * places at once
+ */
+function readWorkshopRowDeploymentUrls(
+    row: Pick<WorkshopRow, 'deployment_urls' | 'deployment_url'>,
+): readonly string[] | null {
+    if (row.deployment_urls !== undefined) {
+        return row.deployment_urls;
+    }
+
+    const singleDeploymentUrl = row.deployment_url ?? null;
+    return singleDeploymentUrl === null ? null : [singleDeploymentUrl];
+}
+
+/**
  * Maps the one repository connection from a database row. The full room and the rich event-card projection both use
  * this mapper, so an old rollout row can never mean a different repository to the community than to its participants.
  */
 export function mapWorkshopRepository(
     row: Pick<
         WorkshopRow,
-        'github_repository' | 'github_repository_branches' | 'github_repository_branch' | 'deployment_url'
+        | 'github_repository'
+        | 'github_repository_branches'
+        | 'github_repository_branch'
+        | 'deployment_urls'
+        | 'deployment_url'
     >,
 ): WorkshopRepository | null {
     return createWorkshopRepositoryOrNull({
@@ -490,7 +511,7 @@ export function mapWorkshopRepository(
             row.github_repository_branches === undefined
                 ? (row.github_repository_branch ?? null)
                 : row.github_repository_branches,
-        deploymentUrl: row.deployment_url ?? null,
+        deploymentUrls: readWorkshopRowDeploymentUrls(row),
     });
 }
 

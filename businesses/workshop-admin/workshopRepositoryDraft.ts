@@ -15,13 +15,14 @@ export type WorkshopRepositoryDraft = {
     readonly repositoryUrl: string;
     /** Branch patterns separated by lines or commas; an empty value follows the repository default branch. */
     readonly branch: string;
-    readonly deploymentUrl: string;
+    /** One address of a deployment per line; an empty value means the project is published nowhere. */
+    readonly deploymentUrls: string;
 };
 
 export const EMPTY_WORKSHOP_REPOSITORY_DRAFT: WorkshopRepositoryDraft = {
     repositoryUrl: '',
     branch: '',
-    deploymentUrl: '',
+    deploymentUrls: '',
 };
 
 /**
@@ -35,16 +36,28 @@ export function createWorkshopRepositoryDraft(repository: WorkshopRepository | n
     return {
         repositoryUrl: createGithubRepositoryUrl(repository),
         branch: getGithubBranchSelectionPatterns(repository.branch).join('\n'),
-        deploymentUrl: repository.deploymentUrl ?? '',
+        deploymentUrls: repository.deploymentUrls.join('\n'),
     };
 }
 
-function readWrittenBranches(branchValue: string): readonly string[] {
-    return branchValue
-        .split(/[,\r\n]/)
-        .map((branch) => branch.trim())
-        .filter((branch) => branch !== '');
+/**
+ * Reads the values an administrator listed in one field, whichever of its separators they reached for
+ */
+function readWrittenValues(writtenValue: string, separatorPattern: RegExp): readonly string[] {
+    return writtenValue
+        .split(separatorPattern)
+        .map((value) => value.trim())
+        .filter((value) => value !== '');
 }
+
+/** A branch name carries neither a comma nor a line break, so either of them separates two of them. */
+const BRANCH_SEPARATOR_PATTERN = /[,\r\n]/;
+
+/**
+ * An address carries no whitespace at all, which is what separates two of them. A comma is deliberately not a
+ * separator here, because it is a legitimate character of a query string.
+ */
+const DEPLOYMENT_URL_SEPARATOR_PATTERN = /\s+/;
 
 /**
  * The project of one term as it is saved, or `null` when the form names no repository
@@ -60,11 +73,11 @@ export function createWorkshopRepositoryWriteValues(
         return null;
     }
 
-    const branches = readWrittenBranches(draft.branch);
+    const branches = readWrittenValues(draft.branch, BRANCH_SEPARATOR_PATTERN);
 
     return {
         url: repositoryUrl,
         branch: branches.length === 0 ? null : branches.length === 1 ? branches[0] : branches,
-        deploymentUrl: draft.deploymentUrl.trim() || null,
+        deploymentUrls: readWrittenValues(draft.deploymentUrls, DEPLOYMENT_URL_SEPARATOR_PATTERN),
     };
 }
