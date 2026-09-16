@@ -1,4 +1,4 @@
-[ ] !
+[x] by Developer on Claude Code `claude-opus-5` thinking `max` - Implementation $9.49 17 minutes; Testing 9 minutes
 
 [✨🌷] When the event is freshly passed (last 24 hours), do not show it as a standard event from last week, but in some special way.
 
@@ -11,3 +11,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

@@ -1,5 +1,18 @@
 # Current preversion
 
+- A term which has only just been held is no longer one more term of the history. Where an event stands in time is now
+  one of four things instead of three — it is still ahead, it runs right now, it is freshly past while less than a day
+  has gone by since the end recorded for it, or it is past — and that is answered in the single place which already
+  answered the other three, so no list, badge, or colour can decide it on its own. In `/cs/komunita` such a term wears
+  its own amber `Právě proběhlo` badge, colours its own day of the calendar, is named in the legend beside the three
+  others, and is listed after what is ahead rather than at the head of the archive. In
+  `/cs/online-workshop/participant?workshop=` it is offered in the open under `Právě proběhlo`, between the workshops
+  which run or are coming and the `Proběhlé workshopy` disclosure, so somebody who was at last night's workshop finds
+  the room they have just left without unfolding the whole history to look for it. Everything which opens only after a
+  workshop is over is untouched: the wrap-up, its PDF, the feedback, and the paid recording all read a freshly past
+  term as exactly as finished as one from last spring, and `/admin/workshops` keeps both of them in its `Historie`,
+  the freshest one leading it.
+
 - A term near enough to be looked forward to is now named rather than merely dated. One held today reads
   `dnes, úterý 15. 9. 2026 · 11:11`, one held tomorrow `zítra, středa 16. 9. 2026 · 11:11`, and one held later in the
   same week `tento čtvrtek 17. 9. 2026 · 11:11` — in the gender the name of that weekday has in Czech, so that

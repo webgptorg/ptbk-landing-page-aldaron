@@ -1,13 +1,31 @@
-import { DEFAULT_WORKSHOP_DURATION_MINUTES } from '@/lib/workshops/workshopConstants';
+import { DEFAULT_WORKSHOP_DURATION_MINUTES, FRESHLY_PAST_WORKSHOP_HOURS } from '@/lib/workshops/workshopConstants';
 
 const MILLISECONDS_PER_MINUTE = 60 * 1000;
+const MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
 
 /**
- * Where one occurrence currently stands in time
+ * Where one occurrence currently stands in time, named from the most pressing phase to the least
+ *
+ * Note: An occurrence which has only just been held is a phase of its own rather than the beginning of the history,
+ *       because what a member does with a workshop of yesterday evening — its room, its recording, its materials — has
+ *       nothing to do with what they do with a workshop of last spring.
+ * Note: This order is what ranks the phases wherever they are listed, coloured, or grouped, so a phase is placed among
+ *       the others only here.
  */
-export const WORKSHOP_PHASE_VALUES = ['ongoing', 'upcoming', 'past'] as const;
+export const WORKSHOP_PHASE_VALUES = ['ongoing', 'upcoming', 'freshly-past', 'past'] as const;
 
 export type WorkshopPhase = (typeof WORKSHOP_PHASE_VALUES)[number];
+
+/**
+ * Whether an occurrence of this phase has already been held, however long ago that was
+ *
+ * Note: This is the one answer to the question everything which opens after a workshop asks — the wrap-up, the
+ *       feedback, and the recording — so a workshop which has only just ended is over exactly as much as one which
+ *       ended a year ago.
+ */
+export function isWorkshopPhasePast(phase: WorkshopPhase): boolean {
+    return phase === 'freshly-past' || phase === 'past';
+}
 
 /**
  * As much of a workshop as it takes to decide when it happens
@@ -23,14 +41,11 @@ export type WorkshopOccurrenceTiming = {
 };
 
 /**
- * The order in which an administrator needs the phases: what runs right now, then what is being prepared, and
- * finally the history.
+ * How pressing one phase is, which is nothing but the order the phases are named in
  */
-const WORKSHOP_PHASE_ORDER: Readonly<Record<WorkshopPhase, number>> = {
-    ongoing: 0,
-    upcoming: 1,
-    past: 2,
-};
+function getWorkshopPhaseRank(phase: WorkshopPhase): number {
+    return WORKSHOP_PHASE_VALUES.indexOf(phase);
+}
 
 /**
  * Moment an occurrence was really given as its end, or `null` while that end is left open
@@ -66,10 +81,12 @@ export function getWorkshopExpectedEndsAtMilliseconds(occurrence: WorkshopOccurr
 }
 
 /**
- * Decides whether an occurrence is still ahead, running right now, or already over
+ * Decides whether an occurrence is still ahead, running right now, only just over, or already history
  *
  * Note: An occurrence whose end is open never becomes past by itself. It keeps running — and keeps its stage on —
  *       until an administrator records the end of it.
+ * Note: How long an occurrence stays freshly past is counted from the end which was really recorded for it rather than
+ *       from the end it was expected to have, so a workshop is never called fresh before anybody ended it.
  *
  * @param currentTimeMilliseconds moment to compare against, so a list places every occurrence against the same instant
  */
@@ -82,9 +99,12 @@ export function getWorkshopPhase(
     }
 
     const recordedEndsAtMilliseconds = getWorkshopRecordedEndsAtMilliseconds(occurrence);
-    return recordedEndsAtMilliseconds === null || recordedEndsAtMilliseconds > currentTimeMilliseconds
-        ? 'ongoing'
-        : 'past';
+    if (recordedEndsAtMilliseconds === null || recordedEndsAtMilliseconds > currentTimeMilliseconds) {
+        return 'ongoing';
+    }
+
+    const millisecondsSinceEnd = currentTimeMilliseconds - recordedEndsAtMilliseconds;
+    return millisecondsSinceEnd <= FRESHLY_PAST_WORKSHOP_HOURS * MILLISECONDS_PER_HOUR ? 'freshly-past' : 'past';
 }
 
 /**
@@ -97,7 +117,7 @@ export function getWorkshopPhase(
 export function getMostProminentWorkshopPhase(phases: readonly WorkshopPhase[]): WorkshopPhase {
     return phases.reduce(
         (mostProminentPhase, phase) =>
-            WORKSHOP_PHASE_ORDER[phase] < WORKSHOP_PHASE_ORDER[mostProminentPhase] ? phase : mostProminentPhase,
+            getWorkshopPhaseRank(phase) < getWorkshopPhaseRank(mostProminentPhase) ? phase : mostProminentPhase,
         'past',
     );
 }
@@ -116,7 +136,7 @@ function getWorkshopPhaseOrder(
     const startsAtMilliseconds = Date.parse(occurrence.startsAt);
     const dateRank = Number.isFinite(startsAtMilliseconds) ? startsAtMilliseconds : 0;
 
-    return { phaseRank: WORKSHOP_PHASE_ORDER[phase], dateRank: phase === 'past' ? -dateRank : dateRank };
+    return { phaseRank: getWorkshopPhaseRank(phase), dateRank: isWorkshopPhasePast(phase) ? -dateRank : dateRank };
 }
 
 /**
@@ -151,6 +171,7 @@ export function groupWorkshopsByPhase<TWorkshop extends WorkshopOccurrenceTiming
     const workshopsByPhase: Record<WorkshopPhase, TWorkshop[]> = {
         ongoing: [],
         upcoming: [],
+        'freshly-past': [],
         past: [],
     };
 

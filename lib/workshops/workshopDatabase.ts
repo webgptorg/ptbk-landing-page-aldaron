@@ -29,7 +29,7 @@ import {
     WORKSHOP_WATCHING_WINDOW_SECONDS,
 } from '@/lib/workshops/workshopConstants';
 import { getDisplayedWorkshopCommentUpvoteCount, sortWorkshopComments } from '@/lib/workshops/workshopCommentValues';
-import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
 import { materializeWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { materializeWorkshopCommentShortLinks } from '@/lib/workshops/workshopMaterialLinks';
@@ -2235,7 +2235,7 @@ export async function loadWorkshopPublicState(
 ): Promise<LoadedWorkshopPublicState> {
     const contentVisibilityCutoff = new Date().toISOString();
     const workshop = mapWorkshopRow(workshopRow);
-    const isWorkshopPast = workshopRow.room_kind === 'workshop' && getWorkshopPhase(workshop) === 'past';
+    const isWorkshopPast = workshopRow.room_kind === 'workshop' && isWorkshopPhasePast(getWorkshopPhase(workshop));
 
     // Note: The reactions which flew over the stage recently are replayed for somebody entering the room. A room
     //       without that panel therefore does not load them, exactly as it does not count them.

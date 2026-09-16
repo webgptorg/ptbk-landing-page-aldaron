@@ -11,7 +11,7 @@ import { WorkshopReactionStream } from '@/components/workshops/WorkshopReactionS
 import { trackGoogleAnalyticsEvent } from '@/lib/tracking/track-google-analytics-event';
 import { createYoutubeEmbedUrl } from '@/lib/youtube/youtubeEmbed';
 import { keepYoutubeVideoSubtitlesHidden, unmuteYoutubeVideo } from '@/lib/youtube/youtubePlayerCommands';
-import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import type {
@@ -106,7 +106,7 @@ export function WorkshopStage({
 
     const phase = getWorkshopPhase(workshop, currentTime);
     const isWorkshopOngoing = phase === 'ongoing';
-    const isWorkshopPast = phase === 'past';
+    const isWorkshopPast = isWorkshopPhasePast(phase);
     const remainingMilliseconds = Date.parse(workshop.startsAt) - currentTime;
     const newRepositoryCommit = useWorkshopRepositoryCommitNotification({
         workshopSlug: workshop.slug,

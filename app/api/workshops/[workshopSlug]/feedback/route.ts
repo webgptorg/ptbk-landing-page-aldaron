@@ -2,7 +2,7 @@ import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { WORKSHOP_FEEDBACK_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import { mapWorkshopFeedbackRow, mapWorkshopRow, type WorkshopFeedbackRow } from '@/lib/workshops/workshopDatabase';
-import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { getAuthenticatedWorkshopRequest, isAuthenticatedWorkshopRequest } from '@/lib/workshops/workshopRequest';
 import { workshopFeedbackUpdateSchema } from '@/lib/workshops/workshopSchemas';
 import { createWorkshopFeedbackUpdateDatabaseValues } from '@/lib/workshops/workshopValues';
@@ -41,7 +41,7 @@ export async function PATCH(request: NextRequest, context: WorkshopFeedbackRoute
 
     if (
         authenticatedRequest.workshopRow.room_kind !== 'workshop' ||
-        getWorkshopPhase(mapWorkshopRow(authenticatedRequest.workshopRow)) !== 'past'
+        !isWorkshopPhasePast(getWorkshopPhase(mapWorkshopRow(authenticatedRequest.workshopRow)))
     ) {
         return NextResponse.json({ error: 'Feedback is available after the workshop ends' }, { status: 403 });
     }

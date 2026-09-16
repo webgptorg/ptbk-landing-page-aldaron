@@ -25,6 +25,15 @@ export const MAXIMAL_WORKSHOP_REACTION_LENGTH = 16;
 export const DEFAULT_WORKSHOP_DURATION_MINUTES = 60;
 
 /**
+ * How long after its recorded end an occurrence is still freshly past
+ *
+ * Note: A workshop which ended within the last day is what a member has just been at, so it is still worth reading as
+ *       something which has only just happened rather than as one more term of the history. A whole day is what that
+ *       takes, because somebody who was at an evening workshop reads about it again the next morning.
+ */
+export const FRESHLY_PAST_WORKSHOP_HOURS = 24;
+
+/**
  * The greatest whole-second position PostgreSQL can safely store in the recording offset's integer column.
  */
 export const MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS = 2_147_483_647;

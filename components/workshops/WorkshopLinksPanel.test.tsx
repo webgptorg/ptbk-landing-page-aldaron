@@ -63,6 +63,18 @@ const THIS_WEEK_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-09-12T20:30:00+02:00',
 };
 
+/**
+ * The workshop of yesterday evening, which ended a few hours before the moment this list is drawn against
+ */
+const FRESHLY_PAST_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'freshly-past-workshop-id',
+    slug: 'production-ai-2026-09-09',
+    title: 'Produkční kód s AI agenty včera',
+    startsAt: '2026-09-09T19:00:00+02:00',
+    endsAt: '2026-09-09T20:30:00+02:00',
+};
+
 const PAST_WORKSHOP: WorkshopSummary = {
     ...ONGOING_WORKSHOP,
     id: 'past-workshop-id',
@@ -182,6 +194,31 @@ describe('workshop links panel', () => {
         expect(ongoingCard?.textContent).toContain('Probíhá');
         expect(upcomingCard?.textContent).toContain('Nadchází');
         expect(pastCard?.textContent).toContain('Proběhlo');
+    });
+
+    it('sets a term which has only just been held apart from the history it would otherwise close', () => {
+        renderWorkshopLinksPanel([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP, UPCOMING_WORKSHOP]);
+        showCardsView();
+
+        const [ongoingCard, upcomingCard, freshlyPastCard, pastCard] = findTermLinks();
+
+        expect(ongoingCard?.textContent).toContain(ONGOING_WORKSHOP.title);
+        expect(upcomingCard?.textContent).toContain(UPCOMING_WORKSHOP.title);
+        expect(freshlyPastCard?.textContent).toContain(FRESHLY_PAST_WORKSHOP.title);
+        expect(freshlyPastCard?.textContent).toContain('Právě proběhlo');
+        expect(pastCard?.textContent).toContain(PAST_WORKSHOP.title);
+        expect(pastCard?.textContent).toContain('Proběhlo');
+    });
+
+    it('colours the day of a term which has only just been held as neither running nor history', () => {
+        renderWorkshopLinksPanel([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP]);
+
+        expect(findCalendarDay('2026-09-09').className).toContain(
+            getWorkshopPhaseAppearance('freshly-past').calendarDayClassName,
+        );
+        expect(findCalendarDay('2026-09-10').className).toContain(
+            getWorkshopPhaseAppearance('ongoing').calendarDayClassName,
+        );
     });
 
     it('links a community member to every workshop room with their identity prefilled', () => {

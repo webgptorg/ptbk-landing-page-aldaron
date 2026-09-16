@@ -21,7 +21,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
   full-load conversion page; `/participant` is the live room. Its waiting room
   offers every published term as the same term cards the landing page registers
-  with: running and upcoming ones first, finished ones behind a disclosure.
+  with: running and upcoming ones first, then the ones which ended within the
+  last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,
   without losing the name and e-mail already typed. Once a term has its recorded
   end, its participant wrap-up offers a locally generated PDF using only the
@@ -75,7 +76,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   written; it asks for nothing and sends visitors to the media-kit form.
 - `/cs/komunita` is the permanent Czech community room. It has chat, polls,
   projects, materials, and published terms, but no schedule, stage, or live
-  updates. Terms show event kind, format/place, price, and status. A term with a
+  updates. Terms show event kind, format/place, price, and status. Where a term
+  stands in time is decided once, in `lib/workshops/workshopPhase.ts`, as one of
+  four phases: upcoming, ongoing, freshly past while it ended within the last
+  `FRESHLY_PAST_WORKSHOP_HOURS`, and past. Every list, badge, and calendar colour
+  reads that one answer, and everything which opens after a workshop — the
+  wrap-up, the feedback, the recording — treats freshly past as over. A term with a
   live room links there; a term of an event held elsewhere opens its organizer's
   address in a new tab; otherwise it links to its landing page. The calendar
   opens on the member's month, can filter by day, and uses the same terms and

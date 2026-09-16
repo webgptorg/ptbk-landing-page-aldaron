@@ -2,7 +2,7 @@
 
 import { WorkshopSelectorCard } from '@/businesses/workshop-admin/WorkshopSelectorCard';
 import { Input } from '@/components/ui/input';
-import { getWorkshopPhase, groupWorkshopsByPhase } from '@/lib/workshops/workshopPhase';
+import { getWorkshopPhase, groupWorkshopsByPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import type { WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
 import { ChevronDown, RefreshCw, Search } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
@@ -94,8 +94,14 @@ export function WorkshopSelectorCardList({
         ...matchingWorkshopsByPhase.ongoing,
         ...matchingWorkshopsByPhase.upcoming,
     ];
+
+    // Note: An administrator works on a term which has only just been held exactly as they work on any other finished
+    //       one, so the history holds both of them. It merely leads that history, because the workshop of last night
+    //       is the one still being wrapped up.
+    const pastWorkshops = [...matchingWorkshopsByPhase['freshly-past'], ...matchingWorkshopsByPhase.past];
     const selectedWorkshop = workshops.find((workshop) => workshop.id === selectedWorkshopId);
-    const isSelectedWorkshopPast = selectedWorkshop !== undefined && getWorkshopPhase(selectedWorkshop) === 'past';
+    const isSelectedWorkshopPast =
+        selectedWorkshop !== undefined && isWorkshopPhasePast(getWorkshopPhase(selectedWorkshop));
     const isSearchQueryPresent = normalizedSearchQuery.length > 0;
     const isPastWorkshopsVisible = isPastWorkshopsExpanded || isSelectedWorkshopPast || isSearchQueryPresent;
 
@@ -154,7 +160,7 @@ export function WorkshopSelectorCardList({
                                 </section>
                             )}
 
-                            {matchingWorkshopsByPhase.past.length > 0 && (
+                            {pastWorkshops.length > 0 && (
                                 <section>
                                     <button
                                         type="button"
@@ -163,7 +169,7 @@ export function WorkshopSelectorCardList({
                                         onClick={() => setIsPastWorkshopsExpanded((isExpanded) => !isExpanded)}
                                         className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors hover:text-slate-800"
                                     >
-                                        Historie ({matchingWorkshopsByPhase.past.length})
+                                        Historie ({pastWorkshops.length})
                                         <ChevronDown
                                             className={`h-4 w-4 shrink-0 transition-transform ${isPastWorkshopsVisible ? 'rotate-180' : ''}`}
                                             aria-hidden="true"
@@ -173,7 +179,7 @@ export function WorkshopSelectorCardList({
                                         <div className="mt-1.5" id={pastWorkshopsListId}>
                                             <WorkshopSelectorCardGrid
                                                 accessibleLabel="Historie workshopů"
-                                                workshops={matchingWorkshopsByPhase.past}
+                                                workshops={pastWorkshops}
                                                 selectedWorkshopId={selectedWorkshopId}
                                                 onSelect={onSelect}
                                             />
