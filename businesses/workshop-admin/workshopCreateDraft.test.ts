@@ -31,7 +31,7 @@ const WORKSHOP: WorkshopDetails = {
         owner: 'hejny',
         name: 'promptbook',
         branch: 'main',
-        deploymentUrls: ['https://workshop.example/app'],
+        deploymentUrl: 'https://workshop.example/app',
     },
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
@@ -47,7 +47,7 @@ const WORKSHOP: WorkshopDetails = {
 const DUPLICATED_WORKSHOP_REPOSITORY = {
     url: 'https://github.com/hejny/promptbook',
     branch: 'main',
-    deploymentUrls: ['https://workshop.example/app'],
+    deploymentUrl: 'https://workshop.example/app',
 };
 
 describe('workshop creation drafts', () => {

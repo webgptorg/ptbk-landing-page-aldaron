@@ -103,7 +103,7 @@ describe('workshop kind capabilities', () => {
                 recordingStartOffsetSeconds: 75,
                 previewYoutubeVideoId: 'M7lc1UVf-VE',
                 presentationUrl: 'https://files.example.com/workshop.pdf',
-                repository: { owner: 'hejny', name: 'promptbook', branch: null, deploymentUrls: [] },
+                repository: { owner: 'hejny', name: 'promptbook', branch: null, deploymentUrl: null },
             }),
         ).toEqual([
             'startsAt',
@@ -122,7 +122,7 @@ describe('workshop kind capabilities', () => {
         expect(getWorkshopKindCapabilities('workshop').isPresentationOffered).toBe(true);
         expect(
             getUnsupportedWorkshopKindFieldNames('workshop', {
-                repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrls: [] },
+                repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: null },
                 presentationUrl: 'https://files.example.com/workshop.pdf',
             }),
         ).toEqual([]);

@@ -173,7 +173,7 @@ const WORKSHOP_ABOUT_A_PROJECT: WorkshopDetails = {
         owner: 'hejny',
         name: 'promptbook',
         branch: 'main',
-        deploymentUrls: ['https://workshop.example/app'],
+        deploymentUrl: 'https://workshop.example/app',
     },
 };
 

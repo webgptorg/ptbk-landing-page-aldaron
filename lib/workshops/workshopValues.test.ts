@@ -71,18 +71,18 @@ describe('workshop admin values', () => {
                     owner: 'hejny',
                     name: 'promptbook',
                     branch: 'main',
-                    deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
+                    deploymentUrl: 'https://workshop.example/app',
                 },
             }),
         ).toEqual({
             github_repository: 'hejny/promptbook',
             github_repository_branches: ['main'],
-            deployment_urls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
+            deployment_url: 'https://workshop.example/app',
         });
         expect(createWorkshopUpdateDatabaseValues({ repository: null })).toEqual({
             github_repository: null,
             github_repository_branches: null,
-            deployment_urls: null,
+            deployment_url: null,
         });
     });
 
@@ -93,22 +93,22 @@ describe('workshop admin values', () => {
                     owner: 'hejny',
                     name: 'promptbook',
                     branch: ['main', 'feature/*'],
-                    deploymentUrls: [],
+                    deploymentUrl: null,
                 },
             }),
         ).toEqual({
             github_repository: 'hejny/promptbook',
             github_repository_branches: ['main', 'feature/*'],
-            deployment_urls: null,
+            deployment_url: null,
         });
         expect(
             createWorkshopUpdateDatabaseValues({
-                repository: { owner: 'hejny', name: 'promptbook', branch: '*', deploymentUrls: [] },
+                repository: { owner: 'hejny', name: 'promptbook', branch: '*', deploymentUrl: null },
             }),
         ).toEqual({
             github_repository: 'hejny/promptbook',
             github_repository_branches: ['*'],
-            deployment_urls: null,
+            deployment_url: null,
         });
     });
 

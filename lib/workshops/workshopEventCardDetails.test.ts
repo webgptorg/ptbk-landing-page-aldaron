@@ -26,10 +26,7 @@ const SOURCE: WorkshopEventCardDetailsSource = {
         owner: 'promptbook',
         name: 'automation-dashboard',
         branch: null,
-        deploymentUrls: [
-            'https://projects.example.com/dashboard',
-            'https://preview.projects.example.com/dashboard',
-        ],
+        deploymentUrl: 'https://projects.example.com/dashboard',
     },
 };
 
@@ -41,7 +38,7 @@ describe('workshop event card details', () => {
     it('combines anonymous feedback, a deployment preview, and the offset replay length without serializing the video ID', async () => {
         eventCardDetailMocks.fetchYoutubeVideoDurationSeconds.mockResolvedValue(5_400);
         eventCardDetailMocks.scrapePublicWebPagePreview.mockResolvedValue({
-            url: SOURCE.repository?.deploymentUrls[0],
+            url: SOURCE.repository?.deploymentUrl,
             title: 'Automatizační dashboard',
             description: 'Projekt vytvořený během workshopu.',
             previewImageUrl: 'https://projects.example.com/dashboard-preview.png',
@@ -64,7 +61,7 @@ describe('workshop event card details', () => {
 
     it('keeps a repository useful when it has no deployment and skips an unfinished recording', async () => {
         const details = await createWorkshopEventCardDetails(
-            { ...SOURCE, isRecordingAvailable: false, repository: { ...SOURCE.repository!, deploymentUrls: [] } },
+            { ...SOURCE, isRecordingAvailable: false, repository: { ...SOURCE.repository!, deploymentUrl: null } },
             null,
         );
 

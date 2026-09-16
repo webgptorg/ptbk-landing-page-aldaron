@@ -172,7 +172,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   private realtime channel used by reactions.
 - A term can be about a project. The connection is one value — GitHub repository,
   the default branch, and one or more branch patterns such as `main`, `client-*`,
-  `feature/*`, or `*` for all branches, plus zero or more deployment URLs — so it is
+  `feature/*`, or `*` for all branches, plus an optional deployment URL — so it is
   set, changed, and unset at once and neither branch selection nor deployment
   outlives its repository. Room kinds which offer it are named in
   `lib/workshops/workshopKindCapabilities.ts`. The room shows the repository as a

@@ -194,7 +194,7 @@ describe('workshop stage', () => {
                     workshop={WORKSHOP}
                     serverTime="2026-08-20T19:10:00+02:00"
                     subscribeToReactions={reactionSource.subscribeToReactions}
-                    repository={{ owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrls: [] }}
+                    repository={{ owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: null }}
                     subscribeToRepositoryCommits={repositoryCommitSource.subscribeToRepositoryCommits}
                 />,
             );

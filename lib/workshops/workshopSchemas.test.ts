@@ -169,20 +169,20 @@ describe('workshop request validation', () => {
                 repository: {
                     url: 'https://github.com/hejny/promptbook/tree/main',
                     branch: 'feature/rooms',
-                    deploymentUrls: ['https://workshop.example/app#top', 'https://preview.workshop.example/app'],
+                    deploymentUrl: 'https://workshop.example/app#top',
                 },
             }).repository,
         ).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: 'feature/rooms',
-            deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
+            deploymentUrl: 'https://workshop.example/app',
         });
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook' } }).repository).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: null,
-            deploymentUrls: [],
+            deploymentUrl: null,
         });
     });
 
@@ -195,21 +195,21 @@ describe('workshop request validation', () => {
             owner: 'hejny',
             name: 'promptbook',
             branch: ['main', 'client-*', 'feature/*'],
-            deploymentUrls: [],
+            deploymentUrl: null,
         });
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: '*' } }).repository).toEqual(
             {
             owner: 'hejny',
             name: 'promptbook',
             branch: '*',
-            deploymentUrls: [],
+            deploymentUrl: null,
             },
         );
         expect(workshopUpdateSchema.parse({ repository: { url: 'hejny/promptbook', branch: [] } }).repository).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: '*',
-            deploymentUrls: [],
+            deploymentUrl: null,
         });
         expect(
             workshopUpdateSchema.safeParse({
@@ -236,15 +236,7 @@ describe('workshop request validation', () => {
         ).toBe(false);
         expect(
             workshopUpdateSchema.safeParse({
-                repository: { url: 'hejny/promptbook', deploymentUrls: ['javascript:alert(1)'] },
-            }).success,
-        ).toBe(false);
-        expect(
-            workshopUpdateSchema.safeParse({
-                repository: {
-                    url: 'hejny/promptbook',
-                    deploymentUrls: ['https://workshop.example/app#first', 'https://workshop.example/app#second'],
-                },
+                repository: { url: 'hejny/promptbook', deploymentUrl: 'javascript:alert(1)' },
             }).success,
         ).toBe(false);
     });

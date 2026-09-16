@@ -42,13 +42,12 @@ async function createWorkshopProjectPreview(
     }
 
     const repositoryPreview = createRepositoryProjectPreview(repository);
-    const [primaryDeploymentUrl] = repository.deploymentUrls;
-    if (primaryDeploymentUrl === undefined) {
+    if (repository.deploymentUrl === null) {
         return repositoryPreview;
     }
 
     try {
-        const deploymentPreview = await scrapePublicWebPagePreview(primaryDeploymentUrl, {
+        const deploymentPreview = await scrapePublicWebPagePreview(repository.deploymentUrl, {
             revalidateSeconds: WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS,
         });
         return {

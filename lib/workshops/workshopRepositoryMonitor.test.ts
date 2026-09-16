@@ -21,7 +21,7 @@ const REPOSITORY: WorkshopRepository = {
     owner: 'hejny',
     name: 'promptbook',
     branch: 'main',
-    deploymentUrls: [],
+    deploymentUrl: null,
 };
 
 const REPOSITORY_WITH_NOTIFICATIONS: WorkshopRepository = {

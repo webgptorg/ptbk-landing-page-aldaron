@@ -15,7 +15,6 @@ import {
     MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH,
-    MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT,
     MAXIMAL_WORKSHOP_SLUG_LENGTH,
     MINIMAL_WORKSHOP_POLL_OPTION_COUNT,
 } from '@/lib/workshops/workshopConstants';
@@ -80,12 +79,18 @@ const workshopDisabledPanelsSchema = z
  * One publicly opened workshop address. Presentations and project deployments share the same safety and
  * canonicalization rules, while each caller can still explain which field needs correcting.
  */
-function createWorkshopPublicUrlSchema(invalidUrlMessage: string) {
+function createNullableWorkshopPublicUrlSchema(invalidUrlMessage: string) {
     return z
-        .string()
-        .trim()
-        .max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH)
+        .union([z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH), z.null()])
         .transform((value, context) => {
+            if (value === '') {
+                return null;
+            }
+
+            if (value === null) {
+                return null;
+            }
+
             const normalizedUrl = normalizePublicWebPageUrl(value);
             if (normalizedUrl === null) {
                 context.addIssue({ code: z.ZodIssueCode.custom, message: invalidUrlMessage });
@@ -96,21 +101,16 @@ function createWorkshopPublicUrlSchema(invalidUrlMessage: string) {
         });
 }
 
-function createNullableWorkshopPublicUrlSchema(invalidUrlMessage: string) {
-    return z
-        .union([z.literal(''), z.null(), createWorkshopPublicUrlSchema(invalidUrlMessage)])
-        .transform((value) => (value === '' ? null : value));
-}
-
 const nullableWorkshopPresentationUrlSchema = createNullableWorkshopPublicUrlSchema(
     'A valid presentation URL is required',
 );
+const nullableWorkshopDeploymentUrlSchema = createNullableWorkshopPublicUrlSchema('A valid deployment URL is required');
 const nullableEventExternalUrlSchema = createNullableWorkshopPublicUrlSchema('A valid event URL is required');
 
 /**
  * The project one term is about, written as one whole connection
  *
- * Note: The branch selection and every deployment belong to the repository, so they are written together with it and
+ * Note: The branch selection and the deployment belong to the repository, so they are written together with it and
  *       cannot be left behind by unsetting it. A repository, a branch, or an address which cannot be read is refused
  *       instead of being stored as a connection leading nowhere.
  */
@@ -119,20 +119,13 @@ const workshopRepositoryBranchesSchema = z
     .array(workshopRepositoryBranchPatternSchema)
     .max(MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT)
     .refine((branches) => new Set(branches).size === branches.length, 'Workshop branches must be unique');
-const workshopRepositoryDeploymentUrlsSchema = z
-    .array(createWorkshopPublicUrlSchema('A valid deployment URL is required'))
-    .max(MAXIMAL_WORKSHOP_REPOSITORY_DEPLOYMENT_COUNT)
-    .refine(
-        (deploymentUrls) => new Set(deploymentUrls).size === deploymentUrls.length,
-        'Workshop deployment URLs must be unique',
-    );
 const workshopRepositoryWriteSchema = z
     .object({
         url: z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH),
         branch: z
             .union([workshopRepositoryBranchPatternSchema, workshopRepositoryBranchesSchema, z.null()])
             .default(null),
-        deploymentUrls: workshopRepositoryDeploymentUrlsSchema.default([]),
+        deploymentUrl: nullableWorkshopDeploymentUrlSchema.default(null),
     })
     .transform((values, context) => {
         const repository = extractGithubRepository(values.url);
@@ -158,7 +151,7 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        return { ...repository, branch, deploymentUrls: values.deploymentUrls } satisfies WorkshopRepository;
+        return { ...repository, branch, deploymentUrl: values.deploymentUrl } satisfies WorkshopRepository;
     });
 
 const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);

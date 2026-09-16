@@ -162,7 +162,7 @@ describe('workshop admin exports', () => {
         expect(communitySettingsCsv).not.toContain('GitHub repozitář');
     });
 
-    it('exports the whole project a term is about, including several selected branches and deployments', () => {
+    it('exports the whole project a term is about, including several selected branches', () => {
         const settingsCsv = createWorkshopAdminExportFile('settings', {
             workshop: {
                 ...WORKSHOP,
@@ -170,15 +170,13 @@ describe('workshop admin exports', () => {
                     owner: 'hejny',
                     name: 'promptbook',
                     branch: ['main', 'feature/rooms'],
-                    deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
+                    deploymentUrl: 'https://workshop.example/app',
                 },
             },
         }).content;
 
         expect(settingsCsv).toContain('"GitHub repozitář","Větev repozitáře","URL nasazení"');
-        expect(settingsCsv).toContain(
-            '"hejny/promptbook","main, feature/rooms","https://workshop.example/app\nhttps://preview.workshop.example/app"',
-        );
+        expect(settingsCsv).toContain('"hejny/promptbook","main, feature/rooms","https://workshop.example/app"');
     });
 
     it('uses the matching MIME type and filename for participant vCards', () => {
