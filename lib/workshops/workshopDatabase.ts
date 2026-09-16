@@ -88,6 +88,9 @@ export type WorkshopRow = {
     readonly ends_at: string | null;
     readonly youtube_video_id: string | null;
 
+    /** Where an unlocked recording begins, in seconds from the beginning of its stream. */
+    readonly recording_start_offset_seconds: number;
+
     /**
      * The public teaser of the recording, shown once the workshop is over to everybody whose membership does not
      * unlock the recording itself
@@ -442,6 +445,7 @@ export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
     return {
         ...mapWorkshopSummaryRow(row),
         youtubeVideoId: row.youtube_video_id,
+        recordingStartOffsetSeconds: row.recording_start_offset_seconds,
         previewYoutubeVideoId: row.preview_youtube_video_id,
         // Read defensively as well as validating writes: an old or manually altered row must not hand an unsafe URL
         // to a participant browser.

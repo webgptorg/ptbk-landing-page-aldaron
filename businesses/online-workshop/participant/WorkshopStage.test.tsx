@@ -59,6 +59,7 @@ const WORKSHOP: WorkshopDetails = {
     startsAt: '2026-08-20T19:00:00+02:00',
     endsAt: '2026-08-20T20:30:00+02:00',
     youtubeVideoId: null,
+    recordingStartOffsetSeconds: 0,
     previewYoutubeVideoId: null,
     presentationUrl: null,
     repository: null,
@@ -72,6 +73,7 @@ const WORKSHOP: WorkshopDetails = {
 const WORKSHOP_WITH_VIDEO: WorkshopDetails = {
     ...WORKSHOP,
     youtubeVideoId: 'dQw4w9WgXcQ',
+    recordingStartOffsetSeconds: 75,
 };
 
 const OPEN_ENDED_WORKSHOP_WITH_VIDEO: WorkshopDetails = {
@@ -287,6 +289,19 @@ describe('workshop stage', () => {
         contentWindowSpy.mockRestore();
     });
 
+    it('keeps the configured replay offset out of the live stream', () => {
+        const reactionSource = createReactionSource();
+        const { container } = render(
+            <WorkshopStage
+                workshop={WORKSHOP_WITH_VIDEO}
+                serverTime="2026-08-20T19:10:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+            />,
+        );
+
+        expect(container.querySelector('iframe')?.getAttribute('src')).not.toContain('start=75');
+    });
+
     it('says nothing to a player of a workshop which has not started', () => {
         const reactionSource = createReactionSource();
         const postMessage = vi.fn();
@@ -428,6 +443,7 @@ describe('workshop stage', () => {
         expect(rewatchFrame).not.toBeNull();
         expect(rewatchFrame?.getAttribute('src')).toContain('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
         expect(rewatchFrame?.getAttribute('src')).toContain('controls=1');
+        expect(rewatchFrame?.getAttribute('src')).toContain('start=75');
         expect(screen.queryByRole('heading', { name: 'Děkujeme, že jste byli u toho!' })).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /Zpět na závěrečné shrnutí/ }));

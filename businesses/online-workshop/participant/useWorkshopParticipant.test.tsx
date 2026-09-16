@@ -42,6 +42,7 @@ function createState(title = 'Produkční kód s AI agenty'): WorkshopPublicStat
             startsAt: '2026-08-24T19:00:00.000Z',
             endsAt: '2026-08-24T20:00:00.000Z',
             youtubeVideoId: 'dQw4w9WgXcQ',
+            recordingStartOffsetSeconds: 0,
             previewYoutubeVideoId: null,
             presentationUrl: null,
             repository: null,

@@ -26,6 +26,7 @@ function createState(workshopSlug = WORKSHOP_SLUG): WorkshopPublicState {
             startsAt: '2026-08-24T19:00:00.000Z',
             endsAt: '2026-08-24T20:00:00.000Z',
             youtubeVideoId: 'dQw4w9WgXcQ',
+            recordingStartOffsetSeconds: 0,
             previewYoutubeVideoId: null,
             presentationUrl: null,
             repository: null,
@@ -82,7 +83,7 @@ describe('workshop participant state cache', () => {
     });
 
     it('does not revive a snapshot from an older cache version', () => {
-        const legacyCacheKey = `promptbook.workshop-participant-state.v5.${encodeURIComponent(WORKSHOP_SLUG)}`;
+        const legacyCacheKey = `promptbook.workshop-participant-state.v6.${encodeURIComponent(WORKSHOP_SLUG)}`;
         localStorage.setItem(legacyCacheKey, JSON.stringify({ savedAt: Date.now(), state: createState() }));
 
         expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)).toBeNull();
@@ -94,6 +95,20 @@ describe('workshop participant state cache', () => {
             workshop: {
                 ...createState().workshop,
                 presentationUrl: 'javascript:alert(1)',
+            },
+        };
+
+        saveWorkshopParticipantStateCache(WORKSHOP_SLUG, state);
+
+        expect(loadWorkshopParticipantStateCache(WORKSHOP_SLUG)).toBeNull();
+    });
+
+    it('drops a current cache entry whose recording offset could not have come from workshop settings', () => {
+        const state: WorkshopPublicState = {
+            ...createState(),
+            workshop: {
+                ...createState().workshop,
+                recordingStartOffsetSeconds: -1,
             },
         };
 

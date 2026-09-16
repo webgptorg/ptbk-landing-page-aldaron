@@ -11,8 +11,9 @@ import type { WorkshopPublicState } from '@/lib/workshops/workshopTypes';
 // an older cached state may still contain raw material destinations from before
 // every public link was materialized through the shortener, predate community polls, miss the question selected
 // for the shared stage, omit the workshop presentation, or still carry the recording of an ended workshop which the
-// paid membership now unlocks.
-const WORKSHOP_PARTICIPANT_STATE_CACHE_KEY_PREFIX = 'promptbook.workshop-participant-state.v6.';
+// paid membership now unlocks. The recording's configured starting offset also belongs to the member-specific video
+// selection, so a cache made before it existed cannot safely stand in for current server state.
+const WORKSHOP_PARTICIPANT_STATE_CACHE_KEY_PREFIX = 'promptbook.workshop-participant-state.v7.';
 const WORKSHOP_PARTICIPANT_STATE_CACHE_MAX_AGE_MILLISECONDS = WORKSHOP_SESSION_MAX_AGE_SECONDS * 1_000;
 
 type WorkshopParticipantStateCacheEntry = {
@@ -80,6 +81,9 @@ function isWorkshopPublicStateCacheEntry(
         typeof workshop.startsAt === 'string' &&
         (typeof workshop.endsAt === 'string' || workshop.endsAt === null) &&
         (typeof workshop.youtubeVideoId === 'string' || workshop.youtubeVideoId === null) &&
+        typeof workshop.recordingStartOffsetSeconds === 'number' &&
+        Number.isSafeInteger(workshop.recordingStartOffsetSeconds) &&
+        workshop.recordingStartOffsetSeconds >= 0 &&
         isWorkshopPresentationUrlOrNull(workshop.presentationUrl) &&
         isWorkshopRepositoryOrNull(workshop.repository) &&
         Array.isArray(workshop.allowedReactions) &&

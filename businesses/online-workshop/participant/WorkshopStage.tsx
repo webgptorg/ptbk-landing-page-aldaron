@@ -178,6 +178,7 @@ export function WorkshopStage({
                                 isRelatedVideoEnabled: false,
                                 isControlsVisible: true,
                                 isJavaScriptApiEnabled: false,
+                                startAtSeconds: workshop.recordingStartOffsetSeconds,
                             })}
                             title={workshop.title}
                             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"

@@ -44,6 +44,9 @@ export type WorkshopWriteValues = {
     readonly maximumParticipantCount?: number | null;
     readonly youtubeVideoId?: string | null;
 
+    /** The number of waiting-room seconds to skip when a paid member replays an ended workshop. */
+    readonly recordingStartOffsetSeconds?: number;
+
     /**
      * The teaser of the recording which everybody who has not unlocked it watches once the term is over
      */

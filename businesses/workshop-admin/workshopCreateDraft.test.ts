@@ -24,6 +24,7 @@ const WORKSHOP: WorkshopDetails = {
     startsAt: '2026-09-12T08:00:00.000Z',
     endsAt: '2026-09-12T15:00:00.000Z',
     youtubeVideoId: 'dQw4w9WgXcQ',
+    recordingStartOffsetSeconds: 75,
     previewYoutubeVideoId: 'M7lc1UVf-VE',
     presentationUrl: 'https://files.example.com/production-ai-workshop.pdf',
     repository: {
@@ -72,6 +73,7 @@ describe('workshop creation drafts', () => {
             endsAt: toDateTimeLocalValue(WORKSHOP.endsAt),
             event: WORKSHOP.event,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
+            recordingStartOffsetSeconds: WORKSHOP.recordingStartOffsetSeconds,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
             presentationUrl: WORKSHOP.presentationUrl,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,
@@ -122,6 +124,7 @@ describe('workshop creation drafts', () => {
             priceCzk: WORKSHOP.event?.priceCzk,
             maximumParticipantCount: WORKSHOP.event?.maximumParticipantCount,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
+            recordingStartOffsetSeconds: WORKSHOP.recordingStartOffsetSeconds,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
             presentationUrl: WORKSHOP.presentationUrl,
             repository: DUPLICATED_WORKSHOP_REPOSITORY,

@@ -18,6 +18,7 @@ const WORKSHOP: WorkshopDetails = {
     startsAt: '2026-08-21T19:00:00+02:00',
     endsAt: '2026-08-21T20:30:00+02:00',
     youtubeVideoId: 'dQw4w9WgXcQ',
+    recordingStartOffsetSeconds: 75,
     previewYoutubeVideoId: 'M7lc1UVf-VE',
     presentationUrl: null,
     repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: 'https://workshop.example/app' },
@@ -36,6 +37,7 @@ const COMMUNITY: WorkshopDetails = {
     title: 'Komunita Promptbooku',
     description: 'Společný prostor pro účastníky workshopů Promptbooku.',
     youtubeVideoId: null,
+    recordingStartOffsetSeconds: 0,
     previewYoutubeVideoId: null,
     repository: null,
 };
@@ -56,6 +58,7 @@ const END_ONE_HOUR_AFTER_START_LABEL = 'Nastavit konec 1 hodinu po začátku';
 const END_TWO_HOURS_AFTER_START_LABEL = 'Nastavit konec 2 hodiny po začátku';
 const STAGE_LABEL = 'YouTube URL nebo video ID';
 const STAGE_PREVIEW_LABEL = 'YouTube URL nebo video ID ukázky';
+const RECORDING_START_OFFSET_LABEL = 'Začít záznam od (sekundy)';
 const PRESENTATION_LABEL = 'URL prezentace';
 const REPOSITORY_LABEL = 'GitHub repozitář projektu';
 const REPOSITORY_BRANCH_LABEL = 'Větve repozitáře';
@@ -80,6 +83,7 @@ describe('workshop settings form', () => {
         SCHEDULE_LABELS.forEach((scheduleLabel) => expect(screen.queryByText(scheduleLabel)).not.toBeNull());
         expect(screen.queryByText(STAGE_LABEL)).not.toBeNull();
         expect(screen.queryByText(STAGE_PREVIEW_LABEL)).not.toBeNull();
+        expect(screen.queryByText(RECORDING_START_OFFSET_LABEL)).not.toBeNull();
         expect(screen.queryByText(PRESENTATION_LABEL)).not.toBeNull();
         expect(screen.queryByText(REACTION_LABEL)).not.toBeNull();
         expect(screen.queryByText('Počet sledujících')).not.toBeNull();
@@ -108,6 +112,7 @@ describe('workshop settings form', () => {
         SCHEDULE_LABELS.forEach((scheduleLabel) => expect(screen.queryByText(scheduleLabel)).toBeNull());
         expect(screen.queryByText(STAGE_LABEL)).toBeNull();
         expect(screen.queryByText(STAGE_PREVIEW_LABEL)).toBeNull();
+        expect(screen.queryByText(RECORDING_START_OFFSET_LABEL)).toBeNull();
         expect(screen.queryByText(PRESENTATION_LABEL)).toBeNull();
         expect(screen.queryByText(REACTION_LABEL)).toBeNull();
         expect(screen.queryByText('Reakce účastníků')).toBeNull();
@@ -235,12 +240,24 @@ describe('workshop settings form', () => {
                     startsAt: expect.any(String),
                     endsAt: expect.any(String),
                     youtubeVideoId: WORKSHOP.youtubeVideoId,
+                    recordingStartOffsetSeconds: WORKSHOP.recordingStartOffsetSeconds,
                     previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
                     presentationUrl: WORKSHOP.presentationUrl,
                     allowedReactions: WORKSHOP.allowedReactions,
                 }),
             ),
         );
+    });
+
+    it('saves the selected recording offset separately from the live stream', async () => {
+        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+
+        fireEvent.change(screen.getByRole('spinbutton', { name: /^Začít záznam od \(sekundy\)/ }), {
+            target: { value: '125' },
+        });
+        submit();
+
+        await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ recordingStartOffsetSeconds: 125 })));
     });
 
     it('saves a public presentation URL separately from timed workshop content', async () => {

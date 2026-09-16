@@ -19,6 +19,7 @@ const WORKSHOP_ROW: WorkshopRow = {
     starts_at: '2026-09-07T13:00:00.000Z',
     ends_at: '2026-09-07T14:00:00.000Z',
     youtube_video_id: null,
+    recording_start_offset_seconds: 0,
     preview_youtube_video_id: null,
     is_published: true,
     is_deleted: false,

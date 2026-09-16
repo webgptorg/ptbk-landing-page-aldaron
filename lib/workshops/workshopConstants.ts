@@ -25,6 +25,11 @@ export const MAXIMAL_WORKSHOP_REACTION_LENGTH = 16;
 export const DEFAULT_WORKSHOP_DURATION_MINUTES = 60;
 
 /**
+ * The greatest whole-second position PostgreSQL can safely store in the recording offset's integer column.
+ */
+export const MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS = 2_147_483_647;
+
+/**
  * How many reactions a single workshop may offer at once
  *
  * Note: The database guards the very same number, so both of them are changed together.

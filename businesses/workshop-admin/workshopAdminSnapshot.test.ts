@@ -15,6 +15,7 @@ function createSnapshot(workshopUpdatedAt: string, contentUpdatedAt: string): Wo
             startsAt: '2026-08-20T17:00:00.000Z',
             endsAt: null,
             youtubeVideoId: null,
+            recordingStartOffsetSeconds: 0,
             previewYoutubeVideoId: null,
             presentationUrl: null,
             repository: null,

@@ -37,6 +37,12 @@ describe('reading of a YouTube video', () => {
         expect(embedUrl).toContain('enablejsapi=1');
     });
 
+    it('starts an on-demand video from a positive whole-second offset', () => {
+        expect(createYoutubeEmbedUrl('dQw4w9WgXcQ', { startAtSeconds: 75 })).toContain('start=75');
+        expect(createYoutubeEmbedUrl('dQw4w9WgXcQ', { startAtSeconds: 0 })).not.toContain('start=');
+        expect(createYoutubeEmbedUrl('dQw4w9WgXcQ', { startAtSeconds: 7.5 })).not.toContain('start=');
+    });
+
     it('points at the widescreen still image of the video', () => {
         expect(createYoutubeThumbnailUrl('dQw4w9WgXcQ')).toBe(
             'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',

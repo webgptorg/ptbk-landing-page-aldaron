@@ -92,6 +92,14 @@ const WORKSHOP_PRESENTATION_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-1500-workshop-presentation.sql',
 );
 const WORKSHOP_PRESENTATION_MIGRATION_SQL = readFileSync(WORKSHOP_PRESENTATION_MIGRATION_PATH, 'utf8');
+const WORKSHOP_RECORDING_START_OFFSET_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-1600-workshop-recording-start-offset.sql',
+);
+const WORKSHOP_RECORDING_START_OFFSET_MIGRATION_SQL = readFileSync(
+    WORKSHOP_RECORDING_START_OFFSET_MIGRATION_PATH,
+    'utf8',
+);
 const COMMUNITY_POLL_MIGRATION_PATH = path.resolve(process.cwd(), 'migrations/2026-08-2400-community-polls.sql');
 const COMMUNITY_POLL_MIGRATION_SQL = readFileSync(COMMUNITY_POLL_MIGRATION_PATH, 'utf8');
 const COMMUNITY_POLL_ADMINISTRATION_MIGRATION_PATH = path.resolve(
@@ -751,6 +759,15 @@ describe('workshop database migration', () => {
             "presentation_url IS NULL OR presentation_url ~* '^https?://'",
         );
         expect(WORKSHOP_PRESENTATION_MIGRATION_SQL).not.toContain('CREATE TABLE');
+    });
+
+    it('stores a non-negative replay start offset beside a workshop without copying its recording', () => {
+        expect(WORKSHOP_RECORDING_START_OFFSET_MIGRATION_SQL).toContain('ALTER TABLE public.workshops');
+        expect(WORKSHOP_RECORDING_START_OFFSET_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS recording_start_offset_seconds integer NOT NULL DEFAULT 0',
+        );
+        expect(WORKSHOP_RECORDING_START_OFFSET_MIGRATION_SQL).toContain('CHECK (recording_start_offset_seconds >= 0)');
+        expect(WORKSHOP_RECORDING_START_OFFSET_MIGRATION_SQL).not.toContain('CREATE TABLE');
     });
 
     it('remembers a fetched title beside every source-to-shortcode mapping', () => {

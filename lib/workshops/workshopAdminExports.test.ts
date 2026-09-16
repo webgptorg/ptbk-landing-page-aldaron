@@ -19,6 +19,7 @@ const WORKSHOP: WorkshopDetails = {
     startsAt: '2026-08-20T17:00:00.000Z',
     endsAt: '2026-08-20T18:30:00.000Z',
     youtubeVideoId: null,
+    recordingStartOffsetSeconds: 0,
     previewYoutubeVideoId: null,
     presentationUrl: 'https://files.example.com/production-ai-workshop.pdf',
     repository: null,
@@ -143,6 +144,7 @@ describe('workshop admin exports', () => {
 
         expect(workshopSettingsCsv).toContain('"Začíná","Končí"');
         expect(workshopSettingsCsv).toContain('YouTube video ID');
+        expect(workshopSettingsCsv).toContain('Začátek záznamu (s)');
         expect(workshopSettingsCsv).toContain('URL prezentace');
         expect(workshopSettingsCsv).toContain('Povolené reakce');
         expect(workshopSettingsCsv).toContain('"Slug"');
@@ -151,6 +153,7 @@ describe('workshop admin exports', () => {
         expect(communitySettingsCsv).not.toContain('Začíná');
         expect(communitySettingsCsv).not.toContain('Končí');
         expect(communitySettingsCsv).not.toContain('YouTube video ID');
+        expect(communitySettingsCsv).not.toContain('Začátek záznamu (s)');
         expect(communitySettingsCsv).not.toContain('URL prezentace');
         expect(communitySettingsCsv).not.toContain('Povolené reakce');
         expect(communitySettingsCsv).not.toContain('"Slug"');

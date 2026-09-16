@@ -100,6 +100,7 @@ describe('workshop kind capabilities', () => {
                 startsAt: '2026-08-21T19:00:00+02:00',
                 endsAt: null,
                 youtubeVideoId: 'dQw4w9WgXcQ',
+                recordingStartOffsetSeconds: 75,
                 previewYoutubeVideoId: 'M7lc1UVf-VE',
                 presentationUrl: 'https://files.example.com/workshop.pdf',
                 repository: { owner: 'hejny', name: 'promptbook', branch: null, deploymentUrl: null },
@@ -108,6 +109,7 @@ describe('workshop kind capabilities', () => {
             'startsAt',
             'endsAt',
             'youtubeVideoId',
+            'recordingStartOffsetSeconds',
             'previewYoutubeVideoId',
             'repository',
             'presentationUrl',
@@ -150,6 +152,7 @@ describe('workshop kind capabilities', () => {
                 startsAt: '2026-08-21T19:00:00+02:00',
                 endsAt: '2026-08-21T20:30:00+02:00',
                 youtubeVideoId: 'dQw4w9WgXcQ',
+                recordingStartOffsetSeconds: 75,
                 previewYoutubeVideoId: 'M7lc1UVf-VE',
             }),
         ).toEqual([]);

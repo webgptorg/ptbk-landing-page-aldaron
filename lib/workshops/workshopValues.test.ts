@@ -50,6 +50,9 @@ describe('workshop admin values', () => {
         expect(createWorkshopUpdateDatabaseValues({ youtubeVideoId: 'dQw4w9WgXcQ' })).toEqual({
             youtube_video_id: 'dQw4w9WgXcQ',
         });
+        expect(createWorkshopUpdateDatabaseValues({ recordingStartOffsetSeconds: 75 })).toEqual({
+            recording_start_offset_seconds: 75,
+        });
     });
 
     it('writes only the presentation address which changed', () => {

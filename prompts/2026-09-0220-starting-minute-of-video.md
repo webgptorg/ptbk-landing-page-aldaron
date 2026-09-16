@@ -1,4 +1,4 @@
-[ ] !!!!
+[x] by OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.00 18 minutes; Testing 8 minutes
 
 [✨🦵] Allow setting the starting time of the workshop video. 
 

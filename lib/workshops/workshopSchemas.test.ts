@@ -134,6 +134,16 @@ describe('workshop request validation', () => {
         ).toBe(false);
     });
 
+    it('starts an unlocked recording at a whole, non-negative second and defaults it to the beginning', () => {
+        expect(workshopCreateSchema.parse(VALID_WORKSHOP).recordingStartOffsetSeconds).toBe(0);
+        expect(workshopUpdateSchema.parse({ recordingStartOffsetSeconds: 75 })).toEqual({
+            recordingStartOffsetSeconds: 75,
+        });
+        expect(workshopUpdateSchema.safeParse({ recordingStartOffsetSeconds: -1 }).success).toBe(false);
+        expect(workshopUpdateSchema.safeParse({ recordingStartOffsetSeconds: 7.5 }).success).toBe(false);
+        expect(workshopUpdateSchema.safeParse({ recordingStartOffsetSeconds: 2_147_483_648 }).success).toBe(false);
+    });
+
     it('accepts a presentation as a PDF, PowerPoint file, or GitHub Markdown page and normalizes its public URL', () => {
         expect(
             workshopUpdateSchema.parse({ presentationUrl: ' https://files.example.com/ai-agents.pdf#introduction ' })

@@ -31,6 +31,7 @@ export type WorkshopCreateDraft = {
     readonly endsAt: string;
     readonly event: EventDetails;
     readonly youtubeVideoId: string | null;
+    readonly recordingStartOffsetSeconds: number;
     readonly previewYoutubeVideoId: string | null;
     readonly presentationUrl: string | null;
     readonly attachedPollsSourceWorkshopId?: string;
@@ -85,6 +86,7 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
         endsAt: toDateTimeLocalValue(new Date(startsAt + DEFAULT_WORKSHOP_DURATION_MILLISECONDS).toISOString()),
         event: copyEventDetails(DEFAULT_EVENT_DETAILS),
         youtubeVideoId: null,
+        recordingStartOffsetSeconds: 0,
         previewYoutubeVideoId: null,
         presentationUrl: null,
         repository: null,
@@ -118,6 +120,7 @@ export function createWorkshopDuplicateDraft(
         endsAt: toDateTimeLocalValue(workshop.endsAt),
         event: copyEventDetails(workshop.event),
         youtubeVideoId: workshop.youtubeVideoId,
+        recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId,
         presentationUrl: workshop.presentationUrl,
         repository: createWorkshopRepositoryWriteValues(createWorkshopRepositoryDraft(workshop.repository)),
@@ -148,6 +151,7 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         endsAt: fromDateTimeLocalValue(draft.endsAt),
         ...createWorkshopEventWriteValues(draft.event),
         youtubeVideoId: draft.youtubeVideoId,
+        recordingStartOffsetSeconds: draft.recordingStartOffsetSeconds,
         previewYoutubeVideoId: draft.previewYoutubeVideoId,
         presentationUrl: draft.presentationUrl,
         repository: draft.repository,

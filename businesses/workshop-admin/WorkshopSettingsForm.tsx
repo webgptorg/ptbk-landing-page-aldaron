@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
+import { MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS } from '@/lib/workshops/workshopConstants';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopPanelOfferedByKind } from '@/lib/workshops/workshopPanels';
 import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
@@ -60,6 +61,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
     const [endsAt, setEndsAt] = useState(() => toDateTimeLocalValue(workshop.endsAt));
     const [eventDetails, setEventDetails] = useState(() => workshop.event ?? DEFAULT_EVENT_DETAILS);
     const [youtubeVideoId, setYoutubeVideoId] = useState(workshop.youtubeVideoId ?? '');
+    const [recordingStartOffsetSeconds, setRecordingStartOffsetSeconds] = useState(workshop.recordingStartOffsetSeconds);
     const [previewYoutubeVideoId, setPreviewYoutubeVideoId] = useState(workshop.previewYoutubeVideoId ?? '');
     const [presentationUrl, setPresentationUrl] = useState(workshop.presentationUrl ?? '');
     const [repositoryDraft, setRepositoryDraft] = useState(() => createWorkshopRepositoryDraft(workshop.repository));
@@ -94,6 +96,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
         setEndsAt(toDateTimeLocalValue(workshop.endsAt));
         setEventDetails(workshop.event ?? DEFAULT_EVENT_DETAILS);
         setYoutubeVideoId(workshop.youtubeVideoId ?? '');
+        setRecordingStartOffsetSeconds(workshop.recordingStartOffsetSeconds);
         setPreviewYoutubeVideoId(workshop.previewYoutubeVideoId ?? '');
         setPresentationUrl(workshop.presentationUrl ?? '');
         setRepositoryDraft(createWorkshopRepositoryDraft(workshop.repository));
@@ -128,6 +131,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
             ...(roomCapabilities.isStageOffered
                 ? {
                       youtubeVideoId: youtubeVideoId.trim() || null,
+                      recordingStartOffsetSeconds,
                       previewYoutubeVideoId: previewYoutubeVideoId.trim() || null,
                   }
                 : {}),
@@ -273,6 +277,29 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                             <span className="mt-1 block text-xs font-normal text-slate-400">
                                 Po skončení workshopu ji uvidí místo záznamu členové bez placeného členství. Když ji
                                 nevyplníte, uvidí jen nabídku členství, které záznam odemyká.
+                            </span>
+                        </label>
+                        <label className="text-sm font-medium text-slate-700">
+                            Začít záznam od (sekundy)
+                            <Input
+                                type="number"
+                                min={0}
+                                max={MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS}
+                                step={1}
+                                value={recordingStartOffsetSeconds}
+                                onChange={(event) => {
+                                    const nextRecordingStartOffsetSeconds = Number(event.target.value);
+                                    setRecordingStartOffsetSeconds(
+                                        Number.isFinite(nextRecordingStartOffsetSeconds)
+                                            ? Math.max(0, Math.trunc(nextRecordingStartOffsetSeconds))
+                                            : 0,
+                                    );
+                                }}
+                                className="mt-2"
+                            />
+                            <span className="mt-1 block text-xs font-normal text-slate-400">
+                                Použije se jen po skončení workshopu, když placený člen otevře záznam. Živý stream ani
+                                odpočet se tím nemění.
                             </span>
                         </label>
                     </>

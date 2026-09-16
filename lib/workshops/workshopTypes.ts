@@ -85,6 +85,14 @@ export type WorkshopDetails = WorkshopSummary & {
     readonly youtubeVideoId: string | null;
 
     /**
+     * Where paid members begin an ended workshop's recording, in seconds from the beginning of its stream.
+     *
+     * Note: This has no effect on the countdown or the live stream. It only removes the waiting-room portion from the
+     *       replay which the membership unlocks after the workshop ends.
+     */
+    readonly recordingStartOffsetSeconds: number;
+
+    /**
      * The teaser of that stream which stands in for it once the workshop is over, or `null` while none was published
      *
      * Note: The recording of an ended workshop is unlocked by the paid membership, and this is the snippet of it which

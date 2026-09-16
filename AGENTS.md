@@ -172,7 +172,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   room without membership hides paid-only items without naming them.
 - After a workshop ends, its recording is server-gated to members. Others receive
   the published teaser, or a generic offer when no teaser exists; a term without
-  a recording offers nothing.
+  a recording offers nothing. An administrator can set the recording's start
+  offset in seconds, which applies only to that paid replay and never to the
+  countdown or live stream.
 - Trusted participants remain invisible and their messages are auto-approved.
   Moderators see pending messages, can approve/reject/correct/pin them, and can
   trust or silence authors. Workshop and community moderators are appointed in
@@ -204,7 +206,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   publishes it by default; duplicating an event keeps it published unless the
   source is unpublished. Duplicating a workshop preserves its connections to
   the already existing attached polls; it creates no polls, options, votes, or room history. Stage settings contain
-  the live stream and recording teaser, presentation settings the public presentation
+  the live stream, paid-recording start offset, and recording teaser; presentation settings the public presentation
   address, and project settings the repository the term is about, written as an
   address or as `owner/name`, together with its branch patterns. Deleting a workshop is a soft deletion: its room
   data and attached

@@ -12,6 +12,7 @@ import {
     MAXIMAL_WORKSHOP_PARTICIPANT_EMAIL_LENGTH,
     MAXIMAL_WORKSHOP_PRESENCE_REPORT_SECONDS,
     MAXIMAL_WORKSHOP_REACTION_LENGTH,
+    MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_COUNT,
     MAXIMAL_WORKSHOP_REPOSITORY_BRANCH_LENGTH,
     MAXIMAL_WORKSHOP_SLUG_LENGTH,
@@ -371,6 +372,11 @@ const eventLocationLabelSchema = z.string().trim().max(MAXIMAL_EVENT_LOCATION_LA
 const eventPriceCzkSchema = z.number().int().min(0).max(MAXIMAL_EVENT_PRICE_CZK);
 const eventMaximumParticipantCountSchema = z.number().int().min(1).max(MAXIMAL_EVENT_PARTICIPANT_COUNT).nullable();
 const artificialWatchingParticipantCountSchema = z.number().int().min(0).max(1_000_000);
+const WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA = z
+    .number()
+    .int()
+    .min(0)
+    .max(MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS);
 const ATTACHED_POLLS_SOURCE_WORKSHOP_ID_SCHEMA = z.string().uuid().optional();
 
 function areAttachedPollSourceWorkshopIdsConsistent(values: {
@@ -398,6 +404,7 @@ export const workshopCreateSchema = z
         maximumParticipantCount: eventMaximumParticipantCountSchema.default(null),
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.default(0),
         youtubeVideoId: nullableYoutubeVideoIdSchema.default(null),
+        recordingStartOffsetSeconds: WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA.default(0),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         presentationUrl: nullableWorkshopPresentationUrlSchema.default(null),
         repository: nullableWorkshopRepositorySchema.default(null),
@@ -435,6 +442,7 @@ export const workshopUpdateSchema = z
         maximumParticipantCount: eventMaximumParticipantCountSchema.optional(),
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.optional(),
         youtubeVideoId: nullableYoutubeVideoIdSchema.optional(),
+        recordingStartOffsetSeconds: WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA.optional(),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.optional(),
         presentationUrl: nullableWorkshopPresentationUrlSchema.optional(),
         repository: nullableWorkshopRepositorySchema.optional(),

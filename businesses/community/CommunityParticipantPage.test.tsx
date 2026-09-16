@@ -40,6 +40,7 @@ const COMMUNITY: WorkshopDetails = {
     startsAt: '2026-08-21T19:00:00+02:00',
     endsAt: null,
     youtubeVideoId: null,
+    recordingStartOffsetSeconds: 0,
     previewYoutubeVideoId: null,
     presentationUrl: null,
     repository: null,

@@ -74,6 +74,10 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
                 ? [
                       { header: 'YouTube video ID', getValue: (item: WorkshopDetails) => item.youtubeVideoId },
                       {
+                          header: 'Začátek záznamu (s)',
+                          getValue: (item: WorkshopDetails) => item.recordingStartOffsetSeconds,
+                      },
+                      {
                           header: 'YouTube video ID ukázky',
                           getValue: (item: WorkshopDetails) => item.previewYoutubeVideoId,
                       },

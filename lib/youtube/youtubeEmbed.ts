@@ -54,6 +54,8 @@ export function createYoutubeEmbedUrl(
         readonly isControlsVisible?: boolean;
         readonly isCaptionsEnabled?: boolean;
         readonly isJavaScriptApiEnabled?: boolean;
+        /** A positive position in seconds from which an on-demand video should begin. */
+        readonly startAtSeconds?: number;
     } = {},
 ): string {
     const searchParameters = new URLSearchParams({ autoplay: options.isAutoplayed === true ? '1' : '0' });
@@ -74,6 +76,10 @@ export function createYoutubeEmbedUrl(
     }
     if (options.isJavaScriptApiEnabled !== undefined) {
         searchParameters.set('enablejsapi', options.isJavaScriptApiEnabled ? '1' : '0');
+    }
+    const startAtSeconds = options.startAtSeconds;
+    if (startAtSeconds !== undefined && Number.isSafeInteger(startAtSeconds) && startAtSeconds > 0) {
+        searchParameters.set('start', String(startAtSeconds));
     }
 
     return `https://www.youtube-nocookie.com/embed/${requireYoutubeVideoId(value)}?${searchParameters}`;

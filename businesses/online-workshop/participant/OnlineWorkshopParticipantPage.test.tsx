@@ -90,6 +90,7 @@ const WORKSHOP: WorkshopDetails = {
     startsAt: '2026-08-21T19:00:00+02:00',
     endsAt: '2026-08-21T20:30:00+02:00',
     youtubeVideoId: 'dQw4w9WgXcQ',
+    recordingStartOffsetSeconds: 0,
     previewYoutubeVideoId: null,
     presentationUrl: null,
     repository: null,

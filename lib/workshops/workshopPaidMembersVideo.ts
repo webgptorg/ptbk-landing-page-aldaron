@@ -1,12 +1,12 @@
-import type { WorkshopPaidMembersVideo } from '@/lib/workshops/workshopTypes';
+import type { WorkshopDetails, WorkshopPaidMembersVideo } from '@/lib/workshops/workshopTypes';
 
 /**
- * The two videos of one occurrence as an administrator wrote them: the stream itself and the teaser of it
+ * The video configuration of one occurrence as an administrator wrote it.
  */
-export type WorkshopVideo = {
-    readonly youtubeVideoId: string | null;
-    readonly previewYoutubeVideoId: string | null;
-};
+export type WorkshopVideo = Pick<
+    WorkshopDetails,
+    'youtubeVideoId' | 'previewYoutubeVideoId' | 'recordingStartOffsetSeconds'
+>;
 
 /**
  * What decides whether the recording of a workshop reaches the member reading the room
@@ -46,7 +46,11 @@ export type WorkshopMemberVideoSelection = {
     readonly paidMembersOnlyVideo: WorkshopPaidMembersVideo | null;
 };
 
-const EMPTY_WORKSHOP_VIDEO: WorkshopVideo = { youtubeVideoId: null, previewYoutubeVideoId: null };
+const EMPTY_WORKSHOP_VIDEO: WorkshopVideo = {
+    youtubeVideoId: null,
+    previewYoutubeVideoId: null,
+    recordingStartOffsetSeconds: 0,
+};
 
 /**
  * Decides which video of an occurrence one member receives and which of it is offered to them instead.
@@ -57,12 +61,15 @@ const EMPTY_WORKSHOP_VIDEO: WorkshopVideo = { youtubeVideoId: null, previewYoutu
  *       to put in front of its video either.
  */
 export function selectWorkshopVideoForMember(
-    { youtubeVideoId, previewYoutubeVideoId }: WorkshopVideo,
+    { youtubeVideoId, previewYoutubeVideoId, recordingStartOffsetSeconds }: WorkshopVideo,
     { isWorkshopPast, isPaidMember, isMembershipOffered }: WorkshopMemberVideoAccess,
 ): WorkshopMemberVideoSelection {
     const isVideoWithheld = isMembershipOffered && isWorkshopPast && !isPaidMember && youtubeVideoId !== null;
 
     return isVideoWithheld
         ? { readableVideo: EMPTY_WORKSHOP_VIDEO, paidMembersOnlyVideo: { previewYoutubeVideoId } }
-        : { readableVideo: { youtubeVideoId, previewYoutubeVideoId: null }, paidMembersOnlyVideo: null };
+        : {
+              readableVideo: { youtubeVideoId, previewYoutubeVideoId: null, recordingStartOffsetSeconds },
+              paidMembersOnlyVideo: null,
+          };
 }

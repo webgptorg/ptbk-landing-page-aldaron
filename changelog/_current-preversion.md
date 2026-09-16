@@ -1,5 +1,10 @@
 # Current preversion
 
+- Added a configurable start offset in seconds to the stage settings of `/admin/workshops`. After an online workshop
+  ends, `/cs/online-workshop/participant?workshop=` now opens the paid member replay at that position, so the same
+  uploaded stream can skip its empty waiting room without a second trimmed upload. The countdown and live stream are
+  unchanged; members without replay access still receive only the existing teaser or membership offer.
+
 - Placed the community material of `/cs/online-workshop/participant?workshop=` by what the member reading it has: a
   participant who does not pay for the membership is invited into the community before the materials of the workshop,
   while a paying member keeps that invitation at the end of the list as one more way on. The card itself, its link and
