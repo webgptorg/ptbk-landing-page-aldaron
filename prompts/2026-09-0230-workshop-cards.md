@@ -1,4 +1,4 @@
-[ ]
+[ ] !
 
 [✨👌] When listing workshop events in a mini card (for example, under the calendar or in the list), show more information there. 
 

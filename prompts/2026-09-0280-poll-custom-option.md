@@ -1,4 +1,4 @@
-[ ]
+[ ] !!!
 
 [✨🪱] Allow the polls to have an "Other" option, and every user can write his own option, and other users can vote for his options. 
 

@@ -1,4 +1,4 @@
-[ ]
+[ ] !
 
 [✨🌷] When the event is freshly passed (last 24 hours), do not show it as a standard event from last week, but in some special way.
 
