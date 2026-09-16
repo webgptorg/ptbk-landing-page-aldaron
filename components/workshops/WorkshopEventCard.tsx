@@ -3,8 +3,8 @@ import { WorkshopPhaseBadge } from '@/components/workshops/WorkshopPhaseBadge';
 import type { EventListing } from '@/lib/events/eventListing';
 import { formatEventFormat } from '@/lib/events/eventLocation';
 import { formatEventPrice } from '@/lib/events/eventPrice';
-import { getEventTypeDefinition } from '@/lib/events/eventTypes';
-import { ArrowUpRight, CalendarDays } from 'lucide-react';
+import { getEventTypeDefinition, isExternalEventType } from '@/lib/events/eventTypes';
+import { ArrowUpRight, CalendarDays, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 type WorkshopEventCardProps = {
@@ -41,13 +41,18 @@ function formatEventListingDateTime(startsAt: string, locale: string, timeZone: 
 export function WorkshopEventCard({ listing, locale, timeZone }: WorkshopEventCardProps) {
     const { workshop, event, link, phase } = listing;
 
+    // Note: A term held by somebody else leads out of this application, so it opens beside the room a member is
+    //       reading rather than taking them out of it, and says so with its own icon.
+    const isEventHeldExternally = isExternalEventType(event.type);
+    const EventLinkIcon = isEventHeldExternally ? ExternalLink : ArrowUpRight;
+
     return (
         <Button
             asChild
             variant="outline"
             className="h-auto w-full justify-between whitespace-normal border-white/10 bg-white/[0.035] p-4 text-left text-slate-100 hover:border-cyan-200/50 hover:bg-cyan-300/10 hover:text-white"
         >
-            <Link href={link}>
+            <Link href={link} {...(isEventHeldExternally ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                 <span className="min-w-0">
                     <span className="flex flex-wrap items-center gap-2">
                         <span className="break-words font-semibold">{workshop.title}</span>
@@ -62,7 +67,7 @@ export function WorkshopEventCard({ listing, locale, timeZone }: WorkshopEventCa
                         {formatEventPrice(event.priceCzk)}
                     </span>
                 </span>
-                <ArrowUpRight className="ml-3 h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                <EventLinkIcon className="ml-3 h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
             </Link>
         </Button>
     );

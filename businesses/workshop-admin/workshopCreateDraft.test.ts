@@ -123,6 +123,7 @@ describe('workshop creation drafts', () => {
             locationLabel: WORKSHOP.event?.locationLabel,
             priceCzk: WORKSHOP.event?.priceCzk,
             maximumParticipantCount: WORKSHOP.event?.maximumParticipantCount,
+            externalUrl: WORKSHOP.event?.externalUrl,
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             recordingStartOffsetSeconds: WORKSHOP.recordingStartOffsetSeconds,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,

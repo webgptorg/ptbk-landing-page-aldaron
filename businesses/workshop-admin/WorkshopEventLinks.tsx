@@ -30,9 +30,10 @@ export function WorkshopEventLinks({ workshop }: WorkshopEventLinksProps) {
     }
 
     // Note: A kind of event without a live room leads to its landing page already, so that page is offered a second
-    //       time only where it is really somewhere else than the term itself.
+    //       time only where it is really somewhere else than the term itself. An event held by somebody else has no
+    //       landing page here at all, so nothing but the address of its organizer is offered for it.
     const { label: eventTypeLabel, landingPagePath } = getEventTypeDefinition(workshop.event.type);
-    const isLandingPageSeparate = landingPagePath !== eventLink;
+    const isLandingPageSeparate = landingPagePath !== null && landingPagePath !== eventLink;
 
     return (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">

@@ -37,6 +37,7 @@ const ONSITE_EVENT: EventOccurrence = {
         locationLabel: 'Praha',
         priceCzk: 12000,
         maximumParticipantCount: 10,
+        externalUrl: null,
     },
 };
 
@@ -55,6 +56,7 @@ const ONLINE_EVENT: EventOccurrence = {
         locationLabel: '',
         priceCzk: 3000,
         maximumParticipantCount: 50,
+        externalUrl: null,
     },
 };
 

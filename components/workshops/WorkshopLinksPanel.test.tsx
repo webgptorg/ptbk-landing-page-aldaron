@@ -54,6 +54,18 @@ const PAST_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-07-10T20:30:00+02:00',
 };
 
+const EXTERNAL_CONFERENCE_URL = 'https://konference.example.com/program';
+
+const EXTERNAL_CONFERENCE: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'external-conference-id',
+    slug: 'webexpo-2026-09-18',
+    title: 'WebExpo · přednáška lektora komunity',
+    event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: EXTERNAL_CONFERENCE_URL },
+    startsAt: '2026-09-18T09:00:00+02:00',
+    endsAt: '2026-09-18T17:00:00+02:00',
+};
+
 const WORKSHOPS: readonly WorkshopSummary[] = [PAST_WORKSHOP, ONGOING_WORKSHOP, UPCOMING_WORKSHOP];
 
 function renderWorkshopLinksPanel(workshops: readonly WorkshopSummary[] = WORKSHOPS) {
@@ -160,6 +172,29 @@ describe('workshop links panel', () => {
         expect(paidWorkshopLink.getAttribute('href')).toBe('/ai-supervize-mini');
         expect(paidWorkshopLink.textContent).toContain('Praha');
         expect(paidWorkshopLink.textContent).toContain(formatEventPrice(12000));
+    });
+
+    it('leads a term held by somebody else to its organizer, beside the room the member is reading', () => {
+        renderWorkshopLinksPanel([...WORKSHOPS, EXTERNAL_CONFERENCE]);
+        showCardsView();
+
+        const externalConferenceLink = screen.getByRole('link', { name: /WebExpo/ });
+
+        expect(externalConferenceLink.getAttribute('href')).toBe(EXTERNAL_CONFERENCE_URL);
+        expect(externalConferenceLink.getAttribute('target')).toBe('_blank');
+        expect(externalConferenceLink.getAttribute('rel')).toBe('noopener noreferrer');
+        expect(externalConferenceLink.textContent).toContain('Externí akce');
+    });
+
+    it('leaves out a term held by somebody else which names no address to lead to', () => {
+        renderWorkshopLinksPanel([
+            ONGOING_WORKSHOP,
+            { ...EXTERNAL_CONFERENCE, event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: null } },
+        ]);
+        showCardsView();
+
+        expect(screen.queryByRole('link', { name: /WebExpo/ })).toBeNull();
+        expect(findTermLinks()).toHaveLength(1);
     });
 
     it('offers the whole calendar to the calendar application of a member', () => {

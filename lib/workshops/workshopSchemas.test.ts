@@ -287,6 +287,36 @@ describe('workshop request validation', () => {
         expect(workshopUpdateSchema.safeParse({ locationKind: 'onsite' }).success).toBe(true);
     });
 
+    it('takes the address of a term held by somebody else and canonicalizes it', () => {
+        expect(
+            workshopCreateSchema.parse({
+                ...VALID_WORKSHOP,
+                eventType: 'external',
+                externalUrl: '  https://konference.example.com/program#sal-b  ',
+            }),
+        ).toMatchObject({ eventType: 'external', externalUrl: 'https://konference.example.com/program' });
+    });
+
+    it('refuses a term held by somebody else which says no address, and an address nobody could open', () => {
+        expect(workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, eventType: 'external' }).success).toBe(false);
+        expect(
+            workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, eventType: 'external', externalUrl: null }).success,
+        ).toBe(false);
+        expect(
+            workshopCreateSchema.safeParse({ ...VALID_WORKSHOP, eventType: 'external', externalUrl: 'konference' })
+                .success,
+        ).toBe(false);
+        expect(workshopUpdateSchema.safeParse({ eventType: 'external', externalUrl: null }).success).toBe(false);
+    });
+
+    it('keeps the address already written on a term which an edit does not mention', () => {
+        expect(workshopUpdateSchema.safeParse({ eventType: 'external' }).success).toBe(true);
+        expect(workshopUpdateSchema.parse({ eventType: 'online-workshop', externalUrl: null })).toEqual({
+            eventType: 'online-workshop',
+            externalUrl: null,
+        });
+    });
+
     it('offers every panel to a workshop which switched none of them off', () => {
         expect(workshopCreateSchema.parse(VALID_WORKSHOP).disabledPanels).toEqual([]);
         expect(

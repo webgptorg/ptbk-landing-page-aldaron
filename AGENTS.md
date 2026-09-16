@@ -76,7 +76,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/cs/komunita` is the permanent Czech community room. It has chat, polls,
   projects, materials, and published terms, but no schedule, stage, or live
   updates. Terms show event kind, format/place, price, and status. A term with a
-  live room links there; otherwise it links to its landing page. The calendar
+  live room links there; a term of an event held elsewhere opens its organizer's
+  address in a new tab; otherwise it links to its landing page. The calendar
   opens on the member's month, can filter by day, and uses the same terms and
   statuses as the cards. Empty days cannot be selected; an empty month is only
   selected when the member's month has no terms. The room offers Google Calendar
@@ -200,6 +201,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   not require database migration or page-specific duplication. Terms ask for kind,
   online/place format, price, and capacity. Each kind also names where its landing
   page records registrations, which is the `placeName` of the contacts it gathers.
+  A kind which names no landing page is held by somebody else: its terms carry the
+  address they are held at, are refused without one, and this application runs no
+  room, gathers no registration, and returns no payer to them.
 - Which term a registration belongs to is decided once, in
   `lib/workshops/workshopRegistrations.ts`. A term is recognised by its slug, by
   its Prague day, and by the moment it begins at, so registrations written before

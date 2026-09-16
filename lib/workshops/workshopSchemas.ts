@@ -27,7 +27,7 @@ import { extractGithubBranchSelection, extractGithubRepository } from '@/lib/git
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import { isEventLocationKind, type EventLocationKind } from '@/lib/events/eventLocation';
-import { isEventType, type EventType } from '@/lib/events/eventTypes';
+import { isEventType, isExternalEventType, type EventType } from '@/lib/events/eventTypes';
 import {
     isWorkshopParticipantFullnameValid,
     normalizeWorkshopParticipantFullname,
@@ -105,6 +105,7 @@ const nullableWorkshopPresentationUrlSchema = createNullableWorkshopPublicUrlSch
     'A valid presentation URL is required',
 );
 const nullableWorkshopDeploymentUrlSchema = createNullableWorkshopPublicUrlSchema('A valid deployment URL is required');
+const nullableEventExternalUrlSchema = createNullableWorkshopPublicUrlSchema('A valid event URL is required');
 
 /**
  * The project one term is about, written as one whole connection
@@ -362,6 +363,20 @@ function isEventLocationWritten(values: {
 }
 
 /**
+ * Whether a term of an event held by somebody else really says which address it is held at
+ *
+ * Note: Such a term leads nowhere at all without it, so it is refused instead of being published as a term nobody can
+ *       reach. An edit which leaves the address alone keeps the address already written on the term, exactly as an
+ *       edit which leaves the place alone keeps its place.
+ */
+function isExternalEventUrlWritten(values: {
+    readonly eventType?: EventType;
+    readonly externalUrl?: string | null;
+}): boolean {
+    return values.eventType === undefined || !isExternalEventType(values.eventType) || values.externalUrl !== null;
+}
+
+/**
  * What one term says about the event it is a term of
  *
  * Note: The kind of event and the place are validated against the very registries every page reads, so a kind of
@@ -409,6 +424,7 @@ export const workshopCreateSchema = z
         locationLabel: eventLocationLabelSchema.default(''),
         priceCzk: eventPriceCzkSchema.default(0),
         maximumParticipantCount: eventMaximumParticipantCountSchema.default(null),
+        externalUrl: nullableEventExternalUrlSchema.default(null),
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.default(0),
         youtubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         recordingStartOffsetSeconds: WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA.default(0),
@@ -433,6 +449,10 @@ export const workshopCreateSchema = z
     .refine(isEventLocationWritten, {
         message: 'An on-site event needs the place it is held at',
         path: ['locationLabel'],
+    })
+    .refine(isExternalEventUrlWritten, {
+        message: 'An external event needs the address it is held at',
+        path: ['externalUrl'],
     });
 
 export const workshopUpdateSchema = z
@@ -447,6 +467,7 @@ export const workshopUpdateSchema = z
         locationLabel: eventLocationLabelSchema.optional(),
         priceCzk: eventPriceCzkSchema.optional(),
         maximumParticipantCount: eventMaximumParticipantCountSchema.optional(),
+        externalUrl: nullableEventExternalUrlSchema.optional(),
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.optional(),
         youtubeVideoId: nullableYoutubeVideoIdSchema.optional(),
         recordingStartOffsetSeconds: WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA.optional(),
@@ -461,6 +482,10 @@ export const workshopUpdateSchema = z
     .refine(isEventLocationWritten, {
         message: 'An on-site event needs the place it is held at',
         path: ['locationLabel'],
+    })
+    .refine(isExternalEventUrlWritten, {
+        message: 'An external event needs the address it is held at',
+        path: ['externalUrl'],
     });
 
 const workshopContentFieldsSchema = z.object({

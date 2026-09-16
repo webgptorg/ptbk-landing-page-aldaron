@@ -1,7 +1,7 @@
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import { createEventDetailsOrNull } from '@/lib/events/event';
-import type { EventType } from '@/lib/events/eventTypes';
+import { isEventRegistrationGathered, type EventType } from '@/lib/events/eventTypes';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import { loadAllSupabaseRows, SUPABASE_ROW_PAGE_SIZE, type SupabaseRowsPage } from '@/lib/supabase/loadAllSupabaseRows';
@@ -124,6 +124,9 @@ export type WorkshopRow = {
     readonly location_label: string;
     readonly price_czk: number | null;
     readonly maximum_participant_count: number | null;
+
+    /** The address a term of an event held by somebody else is held at, which every other room leaves empty. */
+    readonly external_url?: string | null;
     readonly artificial_watching_participant_count?: number;
 
     /**
@@ -159,6 +162,7 @@ type WorkshopSummaryRow = Pick<
     | 'location_label'
     | 'price_czk'
     | 'maximum_participant_count'
+    | 'external_url'
 >;
 
 /**
@@ -166,7 +170,7 @@ type WorkshopSummaryRow = Pick<
  * describe the event it is a term of, without exposing its live room configuration.
  */
 export const WORKSHOP_SUMMARY_COLUMNS =
-    'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count';
+    'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
 
 type WorkshopContentRow = {
     readonly id: string;
@@ -486,6 +490,7 @@ export function mapWorkshopSummaryRow(row: WorkshopSummaryRow): WorkshopSummary 
             locationLabel: row.location_label,
             priceCzk: row.price_czk,
             maximumParticipantCount: row.maximum_participant_count,
+            externalUrl: row.external_url ?? null,
         }),
     };
 }
@@ -493,6 +498,9 @@ export function mapWorkshopSummaryRow(row: WorkshopSummaryRow): WorkshopSummary 
 /**
  * @param registeredParticipantCountByTermId how many people registered for each term on the landing page of its event,
  *                                           or `null` when the listed rooms are no terms of an event at all
+ *
+ * Note: A term of an event which this application gathers no registrations for has no registered audience to read at
+ *       all, which is deliberately said as nothing rather than as nobody.
  */
 function mapWorkshopAdminSummaryRow(
     row: WorkshopSummaryRow,
@@ -500,12 +508,14 @@ function mapWorkshopAdminSummaryRow(
     registeredParticipantCountByTermId: ReadonlyMap<string, number> | null,
 ): WorkshopAdminSummary {
     const workshopSummary = mapWorkshopSummaryRow(row);
+    const isRegisteredAudienceGathered =
+        workshopSummary.event !== null && isEventRegistrationGathered(workshopSummary.event.type);
 
     return {
         ...workshopSummary,
         participantCount,
         registeredParticipantCount:
-            registeredParticipantCountByTermId === null || workshopSummary.event === null
+            registeredParticipantCountByTermId === null || !isRegisteredAudienceGathered
                 ? null
                 : getRegisteredParticipantCount(registeredParticipantCountByTermId, workshopSummary),
     };

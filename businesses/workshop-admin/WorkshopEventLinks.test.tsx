@@ -56,6 +56,37 @@ describe('workshop event links', () => {
         expect(screen.queryByRole('link', { name: 'Landing page akce' })).toBeNull();
     });
 
+    it('offers the address of its organizer alone for a term held by somebody else', () => {
+        render(
+            <WorkshopEventLinks
+                workshop={{
+                    ...ONLINE_WORKSHOP_TERM,
+                    event: {
+                        ...DEFAULT_EVENT_DETAILS,
+                        type: 'external',
+                        externalUrl: 'https://konference.example.com/program',
+                    },
+                }}
+            />,
+        );
+
+        expect(readLinkPath('Otevřít akci')).toBe('https://konference.example.com/program');
+        expect(screen.queryByRole('link', { name: 'Landing page akce' })).toBeNull();
+    });
+
+    it('offers nothing for a term held by somebody else which names no address', () => {
+        render(
+            <WorkshopEventLinks
+                workshop={{
+                    ...ONLINE_WORKSHOP_TERM,
+                    event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: null },
+                }}
+            />,
+        );
+
+        expect(screen.queryByRole('link', { name: 'Otevřít akci' })).toBeNull();
+    });
+
     it('says that an unpublished term is not reachable by a visitor yet', () => {
         render(<WorkshopEventLinks workshop={{ ...ONLINE_WORKSHOP_TERM, isPublished: false }} />);
 

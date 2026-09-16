@@ -1,5 +1,15 @@
 # Current preversion
 
+- Let `/cs/komunita` list the conferences and workshops which lecturers of the community speak at elsewhere. A term of
+  the new `Externí akce` kind of event is administered in `/admin/workshops` beside every other term and carries one
+  thing the terms held here never do: the address of its organizer, which is where its card and its calendar day lead,
+  opened beside the room rather than instead of it. It is otherwise an ordinary term, so it is dated, placed, priced,
+  coloured by whether it is over, running or still ahead, and published to `/cs/komunita/calendar.ics` exactly like
+  the rest. Because such an event is held by somebody else, this application runs no room and gathers no registration
+  for it: its administration says so rather than reporting an audience of nobody, the membership never returns a payer
+  to somebody else's website, and a term whose address is missing is refused when written and offered nowhere if it
+  was ever stored without one.
+
 - An administrator can now enable an `Other` answer for a community poll. In both `/cs/komunita` and an attached
   `/cs/online-workshop/participant?workshop=` room, a member can write an answer which immediately becomes a normal,
   anonymous option and receives that member's shared e-mail-owned vote at the same time. Everyone can then vote for
