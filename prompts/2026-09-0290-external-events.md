@@ -8,10 +8,16 @@
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
-
 ---
 
+[ ]
+
 [✨🧄] Modifying the way of adding external events
+
+- Change "Work"
+    - For example "Živé workshopy" ->
+    - Chamge also the admin url slugs
+        - Do not keep the backward-compatible slugs.
 
 @@@@
 Nový workshop
@@ -35,12 +41,16 @@ Nula znamená akci zdarma, teď: Zdarma.
 Maximální počet účastníků
 Bez omezení
 
-
+- Also, it doesn't make sense for external events to have things like the timeline, materials, etc. They should be only:
+    - the name of the event
+    - the basic metadata
+    - start
+    - end
+    - URL
+    - ![alt text](prompts/screenshots/2026-09-0290-external-events-1.png)
 - You are working with page `/cs/komunita` and `/admin/workshops`
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
-
-
 
 ![alt text](prompts/screenshots/2026-09-0290-external-events.png)
