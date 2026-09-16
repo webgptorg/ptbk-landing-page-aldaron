@@ -182,6 +182,7 @@ export function WorkshopCalendarMonth({ listings, locale, timeZone, todayDayKey 
                     listings={shownListings}
                     locale={locale}
                     timeZone={timeZone}
+                    todayDayKey={todayDayKey}
                     className="mt-2"
                 />
             )}

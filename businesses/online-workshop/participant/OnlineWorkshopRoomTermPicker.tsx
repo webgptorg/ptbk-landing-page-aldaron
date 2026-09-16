@@ -80,6 +80,7 @@ export function OnlineWorkshopRoomTermPicker({
                     terms={currentTerms}
                     selectedTermSlug={selectedTermSlug}
                     onSelectTerm={onSelectTerm}
+                    currentTime={currentTime}
                     isTopicShown={true}
                     appearance="dark"
                     density="compact"
@@ -110,6 +111,7 @@ export function OnlineWorkshopRoomTermPicker({
                             terms={pastTerms}
                             selectedTermSlug={selectedTermSlug}
                             onSelectTerm={onSelectTerm}
+                            currentTime={currentTime}
                             isTopicShown={true}
                             appearance="dark"
                             density="compact"

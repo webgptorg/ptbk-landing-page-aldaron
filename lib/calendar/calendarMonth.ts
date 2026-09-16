@@ -82,6 +82,44 @@ function createDayKeyOfDate(date: Date): CalendarDayKey {
 }
 
 /**
+ * The moment one day of the grid is counted and named from
+ *
+ * Note: A day is placed in UTC on purpose, for the same reason a month is: it is a day of a calendar rather than a
+ *       moment in a time zone, and it has already been dated for the country its calendar is drawn for.
+ */
+function createDayKeyDate(dayKey: CalendarDayKey): Date {
+    return new Date(`${dayKey}T00:00:00Z`);
+}
+
+/**
+ * The day one many days away from another, for example the day after the one a visitor is reading on
+ */
+export function shiftCalendarDayKey(dayKey: CalendarDayKey, dayOffset: number): CalendarDayKey {
+    return createDayKeyOfDate(new Date(createDayKeyDate(dayKey).getTime() + dayOffset * MILLISECONDS_PER_DAY));
+}
+
+/**
+ * Which day of the week one day falls on, counted the way `Date` counts days from Sunday
+ */
+export function getCalendarWeekDayIndex(dayKey: CalendarDayKey): number {
+    return createDayKeyDate(dayKey).getUTCDay();
+}
+
+/**
+ * The first day of the week one day belongs to
+ *
+ * Note: This is what tells whether two days fall into the same week, so which day a week starts on is answered here
+ *       once rather than by everything asking that question.
+ */
+export function getCalendarWeekStartDayKey(dayKey: CalendarDayKey): CalendarDayKey {
+    const weekDayOffset =
+        (getCalendarWeekDayIndex(dayKey) - CALENDAR_FIRST_WEEK_DAY_INDEX + CALENDAR_DAYS_PER_WEEK) %
+        CALENDAR_DAYS_PER_WEEK;
+
+    return shiftCalendarDayKey(dayKey, -weekDayOffset);
+}
+
+/**
  * The month one many months away from another, for example the month a visitor reaches by paging back
  */
 export function shiftCalendarMonthKey(monthKey: CalendarMonthKey, monthOffset: number): CalendarMonthKey {
@@ -149,7 +187,7 @@ export function formatCalendarDayTitle(dayKey: CalendarDayKey, locale: string): 
         month: 'long',
         year: 'numeric',
         timeZone: 'UTC',
-    }).format(new Date(`${dayKey}T00:00:00Z`));
+    }).format(createDayKeyDate(dayKey));
 }
 
 /**

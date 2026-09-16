@@ -15,8 +15,8 @@ import {
     type WorkshopParticipantIdentity,
 } from '@/lib/workshops/workshopParticipantLink';
 import {
-    formatCzechWorkshopDate,
     formatCzechWorkshopDuration,
+    formatCzechWorkshopRelativeDate,
     formatCzechWorkshopTime,
 } from '@/lib/workshops/workshopDate';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
@@ -63,10 +63,19 @@ function createNextSteps(durationLabel: string) {
 type OnlineWorkshopThankYouPageProps = {
     readonly workshop: WorkshopDetails;
     readonly participantIdentity: WorkshopParticipantIdentity;
+
+    /**
+     * Moment the server built this page at, from which a term near enough is named rather than merely dated
+     */
+    readonly currentTime: string;
 };
 
-export function OnlineWorkshopThankYouPage({ workshop, participantIdentity }: OnlineWorkshopThankYouPageProps) {
-    const dateLabel = formatCzechWorkshopDate(workshop.startsAt);
+export function OnlineWorkshopThankYouPage({
+    workshop,
+    participantIdentity,
+    currentTime,
+}: OnlineWorkshopThankYouPageProps) {
+    const dateLabel = formatCzechWorkshopRelativeDate(workshop.startsAt, currentTime);
     const timeLabel = formatCzechWorkshopTime(workshop.startsAt);
     const durationLabel = formatCzechWorkshopDuration(workshop.startsAt, workshop.endsAt);
     const nextSteps = createNextSteps(durationLabel);

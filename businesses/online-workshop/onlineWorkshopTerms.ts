@@ -1,7 +1,7 @@
 import type { WorkshopConnectionDetails } from '@/businesses/online-workshop/participant/WorkshopConnectionForm';
 import {
-    formatCzechWorkshopDate,
     formatCzechWorkshopDuration,
+    formatCzechWorkshopRelativeDate,
     formatCzechWorkshopTime,
 } from '@/lib/workshops/workshopDate';
 import type { WorkshopOccurrenceTiming } from '@/lib/workshops/workshopPhase';
@@ -22,12 +22,17 @@ export function createOnlineWorkshopTermNoteText(workshop: WorkshopOccurrenceTim
  *
  * Note: Every term is described by the words its own administration wrote, so the waiting room says what the term a
  *       participant picked is about rather than what the event as a whole is about.
+ *
+ * @param currentTime moment the server built this room at, from which a term near enough is named rather than dated
  */
-export function createOnlineWorkshopConnectionDetails(workshop: WorkshopSummary): WorkshopConnectionDetails {
+export function createOnlineWorkshopConnectionDetails(
+    workshop: WorkshopSummary,
+    currentTime: string,
+): WorkshopConnectionDetails {
     return {
         title: workshop.title,
         description: workshop.description,
-        dateLabel: `${formatCzechWorkshopDate(workshop.startsAt)} · ${formatCzechWorkshopTime(workshop.startsAt)}`,
+        dateLabel: `${formatCzechWorkshopRelativeDate(workshop.startsAt, currentTime)} · ${formatCzechWorkshopTime(workshop.startsAt)}`,
         durationLabel: formatCzechWorkshopDuration(workshop.startsAt, workshop.endsAt),
     };
 }

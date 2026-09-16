@@ -45,6 +45,24 @@ const UPCOMING_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-09-24T16:00:00+02:00',
 };
 
+const TOMORROW_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'tomorrow-workshop-id',
+    slug: 'production-ai-2026-09-11',
+    title: 'Produkční kód s AI agenty zítra',
+    startsAt: '2026-09-11T19:00:00+02:00',
+    endsAt: '2026-09-11T20:30:00+02:00',
+};
+
+const THIS_WEEK_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'this-week-workshop-id',
+    slug: 'production-ai-2026-09-12',
+    title: 'Produkční kód s AI agenty v sobotu',
+    startsAt: '2026-09-12T19:00:00+02:00',
+    endsAt: '2026-09-12T20:30:00+02:00',
+};
+
 const PAST_WORKSHOP: WorkshopSummary = {
     ...ONGOING_WORKSHOP,
     id: 'past-workshop-id',
@@ -140,6 +158,18 @@ describe('workshop links panel', () => {
             expect.stringContaining(ONGOING_WORKSHOP.title),
             expect.stringContaining(UPCOMING_WORKSHOP.title),
             expect.stringContaining(PAST_WORKSHOP.title),
+        ]);
+    });
+
+    it('names a term held today, tomorrow, or later this week rather than only dating it', () => {
+        renderWorkshopLinksPanel([ONGOING_WORKSHOP, TOMORROW_WORKSHOP, THIS_WEEK_WORKSHOP, UPCOMING_WORKSHOP]);
+        showCardsView();
+
+        expect(findTermLinks().map((termLink) => termLink.textContent)).toEqual([
+            expect.stringContaining('dnes, čtvrtek 10. 9. 2026'),
+            expect.stringContaining('zítra, pátek 11. 9. 2026'),
+            expect.stringContaining('tato sobota 12. 9. 2026'),
+            expect.stringContaining('čtvrtek 24. 9. 2026'),
         ]);
     });
 

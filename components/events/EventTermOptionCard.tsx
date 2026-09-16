@@ -2,7 +2,7 @@ import { formatEventFormat } from '@/lib/events/eventLocation';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
 import { formatEventPrice } from '@/lib/events/eventPrice';
 import { cn } from '@/lib/utils';
-import { formatCzechWorkshopDay, formatCzechWorkshopTimeRange } from '@/lib/workshops/workshopDate';
+import { formatCzechWorkshopRelativeDay, formatCzechWorkshopTimeRange } from '@/lib/workshops/workshopDate';
 import type { LucideIcon } from 'lucide-react';
 
 /**
@@ -117,6 +117,15 @@ type EventTermOptionCardProps = {
     readonly onSelect: () => void;
 
     /**
+     * Moment the server built the page this card is offered on at, which is what makes this term today, tomorrow, or
+     * one of the days of this week
+     *
+     * Note: That moment comes from the server rather than from the browser, so the card says the very same thing it
+     *       was sent as instead of renaming its day the instant it hydrates.
+     */
+    readonly currentTime: string;
+
+    /**
      * Whether the card says what this very term is about
      *
      * Note: An event whose terms each have a subject of their own is chosen by that subject, so those cards name it.
@@ -155,6 +164,7 @@ export function EventTermOptionCard({
     occurrence,
     isSelected,
     onSelect,
+    currentTime,
     isTopicShown = false,
     appearance = 'light',
     density = 'comfortable',
@@ -176,7 +186,7 @@ export function EventTermOptionCard({
             )}
         >
             <span className={cn('block font-bold', densityClassNames.heading, appearanceClassNames.heading)}>
-                {formatCzechWorkshopDay(occurrence.startsAt)} ·{' '}
+                {formatCzechWorkshopRelativeDay(occurrence.startsAt, currentTime)} ·{' '}
                 {formatCzechWorkshopTimeRange(occurrence.startsAt, occurrence.endsAt)}
             </span>
             {isTopicShown && (

@@ -125,7 +125,13 @@ export function WorkshopLinksPanel({
                     todayDayKey={todayDayKey}
                 />
             ) : (
-                <WorkshopEventCardList listings={listings} locale={locale} timeZone={timeZone} className="mt-5" />
+                <WorkshopEventCardList
+                    listings={listings}
+                    locale={locale}
+                    timeZone={timeZone}
+                    todayDayKey={todayDayKey}
+                    className="mt-5"
+                />
             )}
         </section>
     );

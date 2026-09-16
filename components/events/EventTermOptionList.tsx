@@ -28,6 +28,12 @@ type EventTermOptionListProps = {
     readonly onSelectTerm: (term: EventOccurrence) => void;
 
     /**
+     * Moment the server built this page at, from which each term is named today, tomorrow, or a day of this week, see
+     * `EventTermOptionCard`
+     */
+    readonly currentTime: string;
+
+    /**
      * Icon and text of the one line this surface adds about each of its terms, see `EventTermOptionCard`
      */
     readonly noteIcon: LucideIcon;
@@ -59,6 +65,7 @@ export function EventTermOptionList({
     terms,
     selectedTermSlug,
     onSelectTerm,
+    currentTime,
     noteIcon,
     createNoteText,
     isTopicShown = false,
@@ -75,6 +82,7 @@ export function EventTermOptionList({
                     occurrence={term}
                     isSelected={term.slug === selectedTermSlug}
                     onSelect={() => onSelectTerm(term)}
+                    currentTime={currentTime}
                     isTopicShown={isTopicShown}
                     appearance={appearance}
                     density={density}

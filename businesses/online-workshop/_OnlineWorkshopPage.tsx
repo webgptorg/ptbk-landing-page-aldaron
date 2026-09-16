@@ -24,8 +24,8 @@ import { TestimonialsSection } from '@/components/testimonials-section';
 import { Button } from '@/components/ui/button';
 import { AI_SUPERVIZE_MINI_PATH } from '@/lib/discounts/discountPlaces';
 import {
-    formatCzechWorkshopDate,
     formatCzechWorkshopDuration,
+    formatCzechWorkshopRelativeDate,
     formatCzechWorkshopTime,
 } from '@/lib/workshops/workshopDate';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
@@ -38,13 +38,20 @@ import Link from 'next/link';
 
 type OnlineWorkshopPageProps = {
     readonly workshops: readonly EventOccurrence[];
+
+    /**
+     * Moment the server built this page at, from which a term near enough is named rather than merely dated
+     */
+    readonly currentTime: string;
 };
 
-export function OnlineWorkshopPage({ workshops }: OnlineWorkshopPageProps) {
+export function OnlineWorkshopPage({ workshops, currentTime }: OnlineWorkshopPageProps) {
     useWorkshopParticipantOfflineSupport();
     const nearestUpcomingWorkshop = workshops[0] ?? null;
     const nearestWorkshopDateLabel =
-        nearestUpcomingWorkshop === null ? null : formatCzechWorkshopDate(nearestUpcomingWorkshop.startsAt);
+        nearestUpcomingWorkshop === null
+            ? null
+            : formatCzechWorkshopRelativeDate(nearestUpcomingWorkshop.startsAt, currentTime);
     const nearestWorkshopTimeLabel =
         nearestUpcomingWorkshop === null ? null : formatCzechWorkshopTime(nearestUpcomingWorkshop.startsAt);
     const nearestWorkshopDurationLabel =
@@ -417,7 +424,7 @@ export function OnlineWorkshopPage({ workshops }: OnlineWorkshopPageProps) {
                             </p>
                         </div>
 
-                        <OnlineWorkshopRegistrationForm workshops={workshops} />
+                        <OnlineWorkshopRegistrationForm workshops={workshops} currentTime={currentTime} />
                     </div>
                 </div>
             </section>

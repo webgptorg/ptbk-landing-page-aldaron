@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { WorkshopPhaseBadge } from '@/components/workshops/WorkshopPhaseBadge';
+import type { CalendarDayKey } from '@/lib/calendar/calendarMonth';
+import { formatCzechRelativeDayPrefix } from '@/lib/calendar/czechRelativeDay';
 import type { EventListing } from '@/lib/events/eventListing';
 import { formatEventFormat } from '@/lib/events/eventLocation';
 import { formatEventPrice } from '@/lib/events/eventPrice';
@@ -11,13 +13,27 @@ type WorkshopEventCardProps = {
     readonly listing: EventListing;
     readonly locale: string;
     readonly timeZone: string;
+
+    /**
+     * The day it is today in the country this card is drawn for, which makes its term today, tomorrow, or one of the
+     * days of this week
+     */
+    readonly todayDayKey: CalendarDayKey;
 };
 
 /**
- * When one term is held, as a member reads it, for example `pátek 4. 9. 2026 · 19:00`
+ * When one term is held, as a member reads it, for example `dnes, pátek 4. 9. 2026 · 19:00`
+ *
+ * Note: The term has already been dated for the country this list is drawn for, so how near its day is is read from
+ *       that day rather than dated a second time.
  */
-function formatEventListingDateTime(startsAt: string, locale: string, timeZone: string): string {
-    const startsAtDate = new Date(startsAt);
+function formatEventListingDateTime(
+    listing: EventListing,
+    todayDayKey: CalendarDayKey,
+    locale: string,
+    timeZone: string,
+): string {
+    const startsAtDate = new Date(listing.workshop.startsAt);
     const dateLabel = new Intl.DateTimeFormat(locale, {
         weekday: 'long',
         day: 'numeric',
@@ -29,7 +45,7 @@ function formatEventListingDateTime(startsAt: string, locale: string, timeZone: 
         startsAtDate,
     );
 
-    return `${dateLabel} · ${timeLabel}`;
+    return `${formatCzechRelativeDayPrefix(listing.dayKey, todayDayKey)}${dateLabel} · ${timeLabel}`;
 }
 
 /**
@@ -38,7 +54,7 @@ function formatEventListingDateTime(startsAt: string, locale: string, timeZone: 
  * Note: The list of cards and the day of a calendar show a term with this very same card, so a member reads the same
  *       thing about a term however they came to it.
  */
-export function WorkshopEventCard({ listing, locale, timeZone }: WorkshopEventCardProps) {
+export function WorkshopEventCard({ listing, locale, timeZone, todayDayKey }: WorkshopEventCardProps) {
     const { workshop, event, link, phase } = listing;
 
     // Note: A term held by somebody else leads out of this application, so it opens beside the room a member is
@@ -60,7 +76,7 @@ export function WorkshopEventCard({ listing, locale, timeZone }: WorkshopEventCa
                     </span>
                     <span className="mt-1 flex items-center gap-1.5 text-xs font-normal text-slate-400">
                         <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        {formatEventListingDateTime(workshop.startsAt, locale, timeZone)}
+                        {formatEventListingDateTime(listing, todayDayKey, locale, timeZone)}
                     </span>
                     <span className="mt-1 block break-words text-xs font-normal text-slate-500">
                         {getEventTypeDefinition(event.type).label} · {formatEventFormat(event)} ·{' '}

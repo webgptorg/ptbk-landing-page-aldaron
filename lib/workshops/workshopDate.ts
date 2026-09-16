@@ -1,3 +1,5 @@
+import type { CalendarDayKey } from '@/lib/calendar/calendarMonth';
+import { formatCzechRelativeDayPrefix } from '@/lib/calendar/czechRelativeDay';
 import { DEFAULT_WORKSHOP_DURATION_MINUTES } from '@/lib/workshops/workshopConstants';
 import { getWorkshopExpectedEndsAtMilliseconds } from '@/lib/workshops/workshopPhase';
 
@@ -95,8 +97,40 @@ const PRAGUE_CALENDAR_DATE_FORMAT = new Intl.DateTimeFormat('en-CA', {
  * Note: This is the machine-readable day of a term rather than a label for a visitor, which is what identifies a term
  *       by the day it is held on.
  */
-export function formatPragueCalendarDate(startsAt: string): string {
+export function formatPragueCalendarDate(startsAt: string): CalendarDayKey {
     return PRAGUE_CALENDAR_DATE_FORMAT.format(new Date(startsAt));
+}
+
+/**
+ * How near one occurrence is to the day a visitor is reading about it on, as the words standing in front of its date
+ */
+function formatCzechWorkshopDayPrefix(startsAt: string, currentTime: string): string {
+    return formatCzechRelativeDayPrefix(formatPragueCalendarDate(startsAt), formatPragueCalendarDate(currentTime));
+}
+
+/**
+ * When one occurrence is held, said from the day a visitor reads it on, for example `dnes, úterý 15. 9. 2026`,
+ * `zítra, středa 16. 9. 2026`, `tento čtvrtek 17. 9. 2026`, or `pátek 2. 10. 2026` once it is further away than that
+ *
+ * Note: This is how a term near enough to be looked forward to is named, so a participant reads that a workshop is
+ *       today rather than working that out from its date.
+ */
+export function formatCzechWorkshopRelativeDate(startsAt: string, currentTime: string): string {
+    return `${formatCzechWorkshopDayPrefix(startsAt, currentTime)}${formatCzechWorkshopDate(startsAt)}`;
+}
+
+/**
+ * The day one occurrence falls on, said from the day a visitor reads it on, for example `dnes, úterý 15. 9. 2026`,
+ * `tento čtvrtek 17. 9. 2026`, or `2. 10. 2026` once it is further away than this week
+ *
+ * Note: A near day is named rather than merely dated, which is why it takes the name of its weekday with it. A day
+ *       nothing can be said about beyond its date stays the plain date it already was, so a list of far-away terms
+ *       does not grow a weekday it never showed.
+ */
+export function formatCzechWorkshopRelativeDay(startsAt: string, currentTime: string): string {
+    const dayPrefix = formatCzechWorkshopDayPrefix(startsAt, currentTime);
+
+    return dayPrefix === '' ? formatCzechWorkshopDay(startsAt) : `${dayPrefix}${formatCzechWorkshopDate(startsAt)}`;
 }
 
 /**

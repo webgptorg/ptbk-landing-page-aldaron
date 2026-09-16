@@ -51,6 +51,11 @@ type AiSupervizeMiniPageProps = {
     readonly initialDiscountCode: string;
     readonly initialActiveDiscountByPlaceId: ActiveDiscountByPlaceId;
     readonly workshopAvailabilities: readonly AiSupervizeMiniWorkshopAvailability[] | null;
+
+    /**
+     * Moment the server built this page at, from which a term near enough is named rather than merely dated
+     */
+    readonly currentTime: string;
 };
 
 /**
@@ -93,6 +98,7 @@ export function AiSupervizeMiniPage({
     initialDiscountCode,
     initialActiveDiscountByPlaceId,
     workshopAvailabilities,
+    currentTime,
 }: AiSupervizeMiniPageProps) {
     const dateSummary = formatEventOccurrenceDaySummary(events);
     const placeSummary = formatEventOccurrenceLocationSummary(events);
@@ -294,6 +300,7 @@ export function AiSupervizeMiniPage({
                             initialDiscountCode={initialDiscountCode}
                             initialActiveDiscountByPlaceId={initialActiveDiscountByPlaceId}
                             initialWorkshopAvailabilities={workshopAvailabilities}
+                            currentTime={currentTime}
                         />
                     </div>
                 </div>

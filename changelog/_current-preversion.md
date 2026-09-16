@@ -1,5 +1,19 @@
 # Current preversion
 
+- A term near enough to be looked forward to is now named rather than merely dated. One held today reads
+  `dnes, úterý 15. 9. 2026 · 11:11`, one held tomorrow `zítra, středa 16. 9. 2026 · 11:11`, and one held later in the
+  same week `tento čtvrtek 17. 9. 2026 · 11:11` — in the gender the name of that weekday has in Czech, so that
+  `tento čtvrtek` stands beside `tato středa` and `toto úterý`. A week runs from Monday to Sunday, as it does in the
+  Czech Republic, and a term further away than that stays the plain date it always was, so a list of distant terms
+  does not grow a weekday it never showed. The waiting room and the term picker of `/cs/online-workshop/participant`,
+  the cards and the calendar day of `/cs/komunita`, the header, hero, term picker and chosen-term line of
+  `/cs/online-workshop`, its thank-you page, and the term picker of `/ai-supervize-mini` all say it, because how near a
+  day is is worked out once, from the day a term falls on in Prague and the day the page was built on. That day comes
+  from the server rather than from the browser, so a page says exactly what it was sent as instead of renaming its
+  terms the instant it hydrates. Nothing which is not a term read against today changed: the times of chat messages and
+  materials, the dates a membership is paid to, the printed participant sheet, the published calendar, and the notes a
+  registration is counted by are untouched.
+
 - Moved the community polls attached to an occurrence to the bottom of `/cs/online-workshop/participant?workshop=`.
   A participant now reads the stage, the invitation, and everything the workshop hands over in its materials first, and
   is asked for their vote below them, because a poll a workshop is merely the subject of matters less to its
