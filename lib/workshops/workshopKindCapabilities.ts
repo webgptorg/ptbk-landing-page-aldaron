@@ -174,6 +174,7 @@ const WORKSHOP_EVENT_FIELD_NAMES = [
     'locationLabel',
     'priceCzk',
     'maximumParticipantCount',
+    'externalUrl',
 ] as const;
 
 /**

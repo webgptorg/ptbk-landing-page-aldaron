@@ -251,6 +251,11 @@ type AiSupervizeMiniRegistrationFormProps = {
     readonly initialDiscountCode: string;
     readonly initialActiveDiscountByPlaceId: ActiveDiscountByPlaceId;
     readonly initialWorkshopAvailabilities: readonly AiSupervizeMiniWorkshopAvailability[] | null;
+
+    /**
+     * Moment the server built this page at, from which a term near enough is named rather than merely dated
+     */
+    readonly currentTime: string;
 };
 
 /**
@@ -287,6 +292,7 @@ function AiSupervizeMiniEventRegistrationForm({
     initialDiscountCode,
     initialActiveDiscountByPlaceId,
     initialWorkshopAvailabilities,
+    currentTime,
 }: AiSupervizeMiniEventRegistrationFormProps) {
     const [firstEvent] = events;
     const [selectedEventSlug, setSelectedEventSlug] = useState<string>(
@@ -521,6 +527,7 @@ function AiSupervizeMiniEventRegistrationForm({
                         terms={events}
                         selectedTermSlug={selectedEvent.slug}
                         onSelectTerm={(event) => setSelectedEventSlug(event.slug)}
+                        currentTime={currentTime}
                         noteIcon={Users}
                         createNoteText={(event) =>
                             formatEventSeatCount(

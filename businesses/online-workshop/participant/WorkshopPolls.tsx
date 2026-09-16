@@ -1,18 +1,24 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { getWorkshopPollOptionVotePercentage, getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
-import type { WorkshopPoll } from '@/lib/workshops/workshopTypes';
+import type { WorkshopPoll, WorkshopPollVoteValues } from '@/lib/workshops/workshopTypes';
 import { Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 
 type WorkshopPollsProps = {
+    /**
+     * Where the room which shows these polls put them, which is the one thing about them that room decides
+     */
+    readonly className?: string;
     readonly polls: readonly WorkshopPoll[];
     readonly isInteractionBanned: boolean;
     /**
      * Records the one e-mail-owned vote shared by the community and every workshop occurrence the poll is attached to.
      */
-    readonly onVote?: (pollId: string, optionId: string) => Promise<boolean>;
+    readonly onVote?: (pollId: string, voteValues: WorkshopPollVoteValues) => Promise<boolean>;
 };
 
 /**
@@ -21,36 +27,57 @@ type WorkshopPollsProps = {
  * they used to make it.
  */
 export function WorkshopPolls({
+    className,
     polls,
     isInteractionBanned,
     onVote,
 }: WorkshopPollsProps) {
     const [votingPollId, setVotingPollId] = useState<string | null>(null);
+    const [otherOptionLabels, setOtherOptionLabels] = useState<Readonly<Record<string, string>>>({});
 
     if (polls.length === 0) {
         return null;
     }
 
-    const handleVote = async (pollId: string, optionId: string) => {
+    const handleVote = async (pollId: string, voteValues: WorkshopPollVoteValues): Promise<boolean> => {
         if (onVote === undefined) {
-            return;
+            return false;
         }
 
         setVotingPollId(pollId);
         try {
-            await onVote(pollId, optionId);
+            return await onVote(pollId, voteValues);
         } finally {
             setVotingPollId((currentPollId) => (currentPollId === pollId ? null : currentPollId));
         }
     };
 
+    const handleOtherOptionSubmit = async (
+        event: FormEvent<HTMLFormElement>,
+        pollId: string,
+        isVoteAvailable: boolean,
+    ) => {
+        event.preventDefault();
+        const otherOptionLabel = (otherOptionLabels[pollId] ?? '').trim();
+        if (!isVoteAvailable || otherOptionLabel === '') {
+            return;
+        }
+
+        const isVoteSaved = await handleVote(pollId, { otherOptionLabel });
+        if (isVoteSaved) {
+            setOtherOptionLabels((currentLabels) => ({ ...currentLabels, [pollId]: '' }));
+        }
+    };
+
     return (
-        <section aria-label="Ankety komunity" className="space-y-4">
+        <section aria-label="Ankety komunity" className={cn('space-y-4', className)}>
             {polls.map((poll) => {
                 const totalVoteCount = getWorkshopPollVoteCount(poll);
                 const isVoting = votingPollId === poll.id;
                 const isVotingInCurrentRoomEnabled = onVote !== undefined;
                 const isVoteAvailable = isVotingInCurrentRoomEnabled && !poll.isClosed && !isInteractionBanned;
+                const otherOptionLabel = otherOptionLabels[poll.id] ?? '';
+                const isOtherOptionLabelWritten = otherOptionLabel.trim() !== '';
                 const interactionAvailabilityMessage = !isVotingInCurrentRoomEnabled
                     ? 'Hlasování v této místnosti není dostupné.'
                     : isInteractionBanned
@@ -78,7 +105,7 @@ export function WorkshopPolls({
                                         variant="ghost"
                                         disabled={!isVoteAvailable || isVoting}
                                         aria-pressed={isSelected}
-                                        onClick={() => void handleVote(poll.id, option.id)}
+                                        onClick={() => void handleVote(poll.id, { optionId: option.id })}
                                         className={`relative flex h-auto w-full overflow-hidden rounded-xl border px-4 py-3 text-left transition ${
                                             isSelected
                                                 ? 'border-cyan-300/80 bg-cyan-300/[0.17] text-white hover:bg-cyan-300/[0.20]'
@@ -110,6 +137,46 @@ export function WorkshopPolls({
                                     </Button>
                                 );
                             })}
+
+                            {poll.isOtherOptionEnabled && (
+                                <form
+                                    className="mt-3 rounded-xl border border-dashed border-cyan-300/35 bg-slate-950/20 p-3"
+                                    onSubmit={(event) => void handleOtherOptionSubmit(event, poll.id, isVoteAvailable)}
+                                >
+                                    <label
+                                        className="block text-sm font-medium text-slate-100"
+                                        htmlFor={`poll-${poll.id}-other-option`}
+                                    >
+                                        Jiná odpověď
+                                    </label>
+                                    <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                                        <Input
+                                            id={`poll-${poll.id}-other-option`}
+                                            value={otherOptionLabel}
+                                            onChange={(event) =>
+                                                setOtherOptionLabels((currentLabels) => ({
+                                                    ...currentLabels,
+                                                    [poll.id]: event.target.value,
+                                                }))
+                                            }
+                                            disabled={!isVoteAvailable || isVoting}
+                                            maxLength={200}
+                                            placeholder="Napište vlastní odpověď"
+                                            className="border-white/[0.14] bg-slate-950/40 text-white placeholder:text-slate-400"
+                                        />
+                                        <Button
+                                            type="submit"
+                                            disabled={!isVoteAvailable || isVoting || !isOtherOptionLabelWritten}
+                                            className="shrink-0"
+                                        >
+                                            Přidat a hlasovat
+                                        </Button>
+                                    </div>
+                                    <p className="mt-2 text-xs leading-5 text-slate-400">
+                                        Vaše odpověď se přidá mezi možnosti a zároveň pro ni odevzdáte svůj hlas.
+                                    </p>
+                                </form>
+                            )}
                         </div>
 
                         {!poll.isClosed && interactionAvailabilityMessage !== null && (

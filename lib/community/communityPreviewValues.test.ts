@@ -24,6 +24,7 @@ function createPoll(question: string, options: readonly WorkshopPollOption[]): W
         question,
         isClosed: false,
         isVisible: true,
+        isOtherOptionEnabled: false,
         createdAt: '2026-08-20T10:00:00.000Z',
         updatedAt: '2026-08-20T10:00:00.000Z',
         options,

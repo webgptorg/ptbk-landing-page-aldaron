@@ -47,6 +47,7 @@ export function createWorkshopDatabaseValues(values: WorkshopCreateValues) {
         location_label: values.locationLabel,
         price_czk: values.priceCzk,
         maximum_participant_count: values.maximumParticipantCount,
+        external_url: values.externalUrl,
         artificial_watching_participant_count: values.artificialWatchingParticipantCount,
         youtube_video_id: values.youtubeVideoId,
         recording_start_offset_seconds: values.recordingStartOffsetSeconds,
@@ -73,6 +74,7 @@ export function createWorkshopUpdateDatabaseValues(values: WorkshopUpdateValues)
         ...(values.maximumParticipantCount === undefined
             ? {}
             : { maximum_participant_count: values.maximumParticipantCount }),
+        ...(values.externalUrl === undefined ? {} : { external_url: values.externalUrl }),
         ...(values.artificialWatchingParticipantCount === undefined
             ? {}
             : { artificial_watching_participant_count: values.artificialWatchingParticipantCount }),

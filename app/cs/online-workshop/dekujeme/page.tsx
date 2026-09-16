@@ -30,5 +30,11 @@ export default async function CsOnlineWorkshopThankYouRoute({ searchParams }: On
         notFound();
     }
 
-    return <OnlineWorkshopThankYouPage workshop={workshop} participantIdentity={participantIdentity} />;
+    return (
+        <OnlineWorkshopThankYouPage
+            workshop={workshop}
+            participantIdentity={participantIdentity}
+            currentTime={new Date().toISOString()}
+        />
+    );
 }

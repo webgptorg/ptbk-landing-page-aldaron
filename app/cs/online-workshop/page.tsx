@@ -16,7 +16,7 @@ export default async function CsOnlineWorkshopRoute() {
     return (
         <>
             <StructuredData nodes={createOnlineWorkshopStructuredData(workshops)} />
-            <OnlineWorkshopPage workshops={workshops} />
+            <OnlineWorkshopPage workshops={workshops} currentTime={new Date().toISOString()} />
         </>
     );
 }

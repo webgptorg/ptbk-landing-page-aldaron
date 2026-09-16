@@ -6,6 +6,7 @@ import type {
     WorkshopFeedback,
     WorkshopParticipant,
     WorkshopPoll,
+    WorkshopPollVoteValues,
     WorkshopPublicState,
     WorkshopReaction,
 } from '@/lib/workshops/workshopTypes';
@@ -181,7 +182,7 @@ export async function upvoteWorkshopComment(
 export async function voteOnWorkshopPoll(
     workshopSlug: string,
     pollId: string,
-    optionId: string,
+    voteValues: WorkshopPollVoteValues,
 ): Promise<{ readonly poll: WorkshopPoll }> {
     const response = await fetch(
         getWorkshopApiUrl(workshopSlug, `polls/${encodeURIComponent(pollId)}/votes`),
@@ -189,7 +190,7 @@ export async function voteOnWorkshopPoll(
             method: 'POST',
             credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ optionId }),
+            body: JSON.stringify(voteValues),
         },
     );
     return readResponseJson(response);

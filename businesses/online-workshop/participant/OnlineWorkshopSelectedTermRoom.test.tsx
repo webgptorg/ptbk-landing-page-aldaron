@@ -93,6 +93,16 @@ const PAST_WORKSHOP = createOnlineWorkshopTerm({
     endsAt: '2026-09-07T14:00:00+02:00',
 });
 
+/**
+ * The workshop of yesterday evening, which ended well within the day before this room was built
+ */
+const FRESHLY_PAST_WORKSHOP = createOnlineWorkshopTerm({
+    slug: 'online-workshop-testy-s-agenty-2026-09-09',
+    title: 'Testy s agenty',
+    startsAt: '2026-09-09T19:00:00+02:00',
+    endsAt: '2026-09-09T20:00:00+02:00',
+});
+
 const PUBLISHED_WORKSHOPS: readonly EventOccurrence[] = [
     LATER_UPCOMING_WORKSHOP,
     NEAREST_UPCOMING_WORKSHOP,
@@ -141,6 +151,19 @@ describe('online workshop waiting room', () => {
         fireEvent.click(screen.getByRole('button', { name: /Proběhlé workshopy \(1\)/ }));
 
         expect(screen.getByRole('button', { name: new RegExp(PAST_WORKSHOP.title) })).toBeDefined();
+    });
+
+    it('names the workshop which has only just been held in the open, rather than filing it into the history', () => {
+        renderWaitingRoom(LATER_UPCOMING_WORKSHOP, [...PUBLISHED_WORKSHOPS, FRESHLY_PAST_WORKSHOP]);
+
+        expect(screen.getByText('Právě proběhlo (1)')).toBeDefined();
+        expect(
+            screen.getByRole('button', { name: new RegExp(FRESHLY_PAST_WORKSHOP.title) }).textContent,
+        ).toContain('Právě skončil, místnost zůstává otevřená');
+
+        // Note: The history is still the one click it always was, and holds only the terms which are really behind us.
+        expect(screen.getByRole('button', { name: /Proběhlé workshopy \(1\)/ })).toBeDefined();
+        expect(screen.queryByRole('button', { name: new RegExp(PAST_WORKSHOP.title) })).toBeNull();
     });
 
     it('connects to the workshop a participant picked instead of the one their link opened', () => {

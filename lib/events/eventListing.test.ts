@@ -31,6 +31,14 @@ const UPCOMING_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-10-08T20:30:00+02:00',
 };
 
+const FRESHLY_PAST_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'freshly-past-workshop-id',
+    slug: 'production-ai-2026-09-09',
+    startsAt: '2026-09-09T19:00:00+02:00',
+    endsAt: '2026-09-09T20:30:00+02:00',
+};
+
 const PAST_WORKSHOP: WorkshopSummary = {
     ...ONGOING_WORKSHOP,
     id: 'past-workshop-id',
@@ -58,11 +66,16 @@ function createListings(workshops: readonly WorkshopSummary[]) {
 }
 
 describe('event listings', () => {
-    it('leads with the running term, then what is ahead, and closes with the history', () => {
-        const listings = createListings([PAST_WORKSHOP, UPCOMING_WORKSHOP, ONGOING_WORKSHOP]);
+    it('leads with the running term, then what is ahead, then what has only just been held, and closes with the history', () => {
+        const listings = createListings([PAST_WORKSHOP, UPCOMING_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP]);
 
-        expect(listings.map((listing) => listing.phase)).toEqual(['ongoing', 'upcoming', 'past']);
-        expect(listings.map((listing) => listing.dayKey)).toEqual(['2026-09-10', '2026-10-08', '2026-07-10']);
+        expect(listings.map((listing) => listing.phase)).toEqual(['ongoing', 'upcoming', 'freshly-past', 'past']);
+        expect(listings.map((listing) => listing.dayKey)).toEqual([
+            '2026-09-10',
+            '2026-10-08',
+            '2026-09-09',
+            '2026-07-10',
+        ]);
     });
 
     it('carries the identity of the member into every term which has a room', () => {

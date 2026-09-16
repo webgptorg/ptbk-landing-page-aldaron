@@ -1,4 +1,4 @@
-[ ] !!!
+[x] by Developer on OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.6794 23 minutes; Testing 9 minutes
 
 [✨🪱] Allow the polls to have an "Other" option, and every user can write his own option, and other users can vote for his options. 
 

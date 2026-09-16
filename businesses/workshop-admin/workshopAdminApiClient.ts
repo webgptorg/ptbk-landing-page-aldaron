@@ -42,6 +42,9 @@ export type WorkshopWriteValues = {
     readonly locationLabel?: string;
     readonly priceCzk?: number;
     readonly maximumParticipantCount?: number | null;
+
+    /** The address a term of an event held by somebody else leads to, which every other term leaves empty. */
+    readonly externalUrl?: string | null;
     readonly youtubeVideoId?: string | null;
 
     /** The number of waiting-room seconds to skip when a paid member replays an ended workshop. */
@@ -108,6 +111,7 @@ export function createWorkshopEventWriteValues(event: EventDetails) {
         locationLabel: event.locationLabel,
         priceCzk: event.priceCzk,
         maximumParticipantCount: event.maximumParticipantCount,
+        externalUrl: event.externalUrl,
     };
 }
 
@@ -126,6 +130,7 @@ export type WorkshopPollCreateValues = {
     readonly options: readonly string[];
     readonly isClosed: boolean;
     readonly isVisible: boolean;
+    readonly isOtherOptionEnabled: boolean;
 
     /**
      * The workshop occurrences this poll is about, which the community administers together with the poll itself
@@ -143,6 +148,7 @@ export type WorkshopPollUpdateValues = {
     readonly options: readonly WorkshopPollOptionWriteValues[];
     readonly isClosed: boolean;
     readonly isVisible: boolean;
+    readonly isOtherOptionEnabled: boolean;
     readonly attachedWorkshopIds: readonly string[];
 };
 

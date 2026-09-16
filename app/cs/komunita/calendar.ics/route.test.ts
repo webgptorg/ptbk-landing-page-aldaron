@@ -42,6 +42,21 @@ const PUBLISHED_WORKSHOPS: readonly WorkshopSummary[] = [
         isPublished: true,
     },
     {
+        id: 'external-conference-id',
+        kind: 'workshop',
+        event: {
+            ...DEFAULT_EVENT_DETAILS,
+            type: 'external',
+            externalUrl: 'https://konference.example.com/program',
+        },
+        slug: 'webexpo-2026-09-18',
+        title: 'WebExpo · přednáška lektora komunity',
+        description: 'Přednáška lektora komunity na konferenci jiného pořadatele',
+        startsAt: '2026-09-18T09:00:00+02:00',
+        endsAt: '2026-09-18T17:00:00+02:00',
+        isPublished: true,
+    },
+    {
         id: 'community-id',
         kind: 'community',
         event: null,
@@ -72,7 +87,7 @@ describe('community calendar feed', () => {
         );
         expect(response.headers.get('Cache-Control')).toBe('no-store');
         expect(calendarContent).toContain('X-WR-CALNAME:Termíny akcí Promptbooku');
-        expect(calendarContent.match(/BEGIN:VEVENT/g)).toHaveLength(2);
+        expect(calendarContent.match(/BEGIN:VEVENT/g)).toHaveLength(3);
         expect(calendarContent).toContain('SUMMARY:Produkční kód s AI agenty');
         expect(calendarContent).toContain('SUMMARY:AI Supervize Mini');
         expect(calendarContent).toContain('UID:production-ai-2026-09-10@ptbk.io');
@@ -97,6 +112,15 @@ describe('community calendar feed', () => {
         expect(calendarContent).toContain('URL:https://ptbk.io/ai-supervize-mini');
         expect(calendarContent).not.toContain('email=');
         expect(calendarContent).not.toContain('fullname=');
+    });
+
+    it('leads a term held by somebody else to its organizer rather than back to this site', async () => {
+        loadPublishedWorkshopSummariesMock.mockResolvedValue(PUBLISHED_WORKSHOPS);
+
+        const calendarContent = await (await GET()).text();
+
+        expect(calendarContent).toContain('URL:https://konference.example.com/program');
+        expect(calendarContent).not.toContain('ptbk.io/https');
     });
 
     it('keeps an empty calendar valid while no term is published', async () => {

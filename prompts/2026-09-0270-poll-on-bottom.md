@@ -1,4 +1,4 @@
-[ ] !!
+[x] by Developer on Claude Code `claude-opus-5` thinking `max` - Implementation $5.68 15 minutes; Testing 8 minutes
 
 [✨🐓] Polls attached to the workshops should be displayed at the bottom. 
 

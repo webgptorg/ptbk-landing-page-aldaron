@@ -1,7 +1,7 @@
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import { createEventDetailsOrNull } from '@/lib/events/event';
-import type { EventType } from '@/lib/events/eventTypes';
+import { isEventRegistrationGathered, type EventType } from '@/lib/events/eventTypes';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import { loadAllSupabaseRows, SUPABASE_ROW_PAGE_SIZE, type SupabaseRowsPage } from '@/lib/supabase/loadAllSupabaseRows';
@@ -29,7 +29,7 @@ import {
     WORKSHOP_WATCHING_WINDOW_SECONDS,
 } from '@/lib/workshops/workshopConstants';
 import { getDisplayedWorkshopCommentUpvoteCount, sortWorkshopComments } from '@/lib/workshops/workshopCommentValues';
-import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
 import { materializeWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { materializeWorkshopCommentShortLinks } from '@/lib/workshops/workshopMaterialLinks';
@@ -69,6 +69,7 @@ import type {
     WorkshopParticipantTimelineEvent,
     WorkshopPoll,
     WorkshopPollOption,
+    WorkshopPollVoteValues,
     WorkshopPublicState,
     WorkshopReaction,
     WorkshopReactionCount,
@@ -123,6 +124,9 @@ export type WorkshopRow = {
     readonly location_label: string;
     readonly price_czk: number | null;
     readonly maximum_participant_count: number | null;
+
+    /** The address a term of an event held by somebody else is held at, which every other room leaves empty. */
+    readonly external_url?: string | null;
     readonly artificial_watching_participant_count?: number;
 
     /**
@@ -158,6 +162,7 @@ type WorkshopSummaryRow = Pick<
     | 'location_label'
     | 'price_czk'
     | 'maximum_participant_count'
+    | 'external_url'
 >;
 
 /**
@@ -165,7 +170,7 @@ type WorkshopSummaryRow = Pick<
  * describe the event it is a term of, without exposing its live room configuration.
  */
 export const WORKSHOP_SUMMARY_COLUMNS =
-    'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count';
+    'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
 
 type WorkshopContentRow = {
     readonly id: string;
@@ -364,11 +369,12 @@ type WorkshopPollRow = {
     readonly question: string;
     readonly is_closed: boolean;
     readonly is_visible: boolean;
+    readonly is_other_option_enabled: boolean;
     readonly created_at: string;
     readonly updated_at: string;
 };
 
-const WORKSHOP_POLL_COLUMNS = 'id, question, is_closed, is_visible, created_at, updated_at';
+const WORKSHOP_POLL_COLUMNS = 'id, question, is_closed, is_visible, is_other_option_enabled, created_at, updated_at';
 
 type WorkshopPollOptionRow = {
     readonly id: string;
@@ -376,9 +382,11 @@ type WorkshopPollOptionRow = {
     readonly label: string;
     readonly sort_order: number;
     readonly artificial_vote_count: number;
+    readonly is_created_by_participant: boolean;
 };
 
-const WORKSHOP_POLL_OPTION_COLUMNS = 'id, poll_id, label, sort_order, artificial_vote_count';
+const WORKSHOP_POLL_OPTION_COLUMNS =
+    'id, poll_id, label, sort_order, artificial_vote_count, is_created_by_participant';
 
 type WorkshopPollVoteCountRow = {
     readonly option_id: string;
@@ -482,6 +490,7 @@ export function mapWorkshopSummaryRow(row: WorkshopSummaryRow): WorkshopSummary 
             locationLabel: row.location_label,
             priceCzk: row.price_czk,
             maximumParticipantCount: row.maximum_participant_count,
+            externalUrl: row.external_url ?? null,
         }),
     };
 }
@@ -489,6 +498,9 @@ export function mapWorkshopSummaryRow(row: WorkshopSummaryRow): WorkshopSummary 
 /**
  * @param registeredParticipantCountByTermId how many people registered for each term on the landing page of its event,
  *                                           or `null` when the listed rooms are no terms of an event at all
+ *
+ * Note: A term of an event which this application gathers no registrations for has no registered audience to read at
+ *       all, which is deliberately said as nothing rather than as nobody.
  */
 function mapWorkshopAdminSummaryRow(
     row: WorkshopSummaryRow,
@@ -496,12 +508,14 @@ function mapWorkshopAdminSummaryRow(
     registeredParticipantCountByTermId: ReadonlyMap<string, number> | null,
 ): WorkshopAdminSummary {
     const workshopSummary = mapWorkshopSummaryRow(row);
+    const isRegisteredAudienceGathered =
+        workshopSummary.event !== null && isEventRegistrationGathered(workshopSummary.event.type);
 
     return {
         ...workshopSummary,
         participantCount,
         registeredParticipantCount:
-            registeredParticipantCountByTermId === null || workshopSummary.event === null
+            registeredParticipantCountByTermId === null || !isRegisteredAudienceGathered
                 ? null
                 : getRegisteredParticipantCount(registeredParticipantCountByTermId, workshopSummary),
     };
@@ -795,6 +809,7 @@ function mapWorkshopAdminPollOptionRow(
         ...mapWorkshopPollOptionRow(row, voteCountByOptionId, selectedOptionIds),
         realVoteCount,
         artificialVoteCount,
+        isCreatedByParticipant: row.is_created_by_participant,
     };
 }
 
@@ -808,6 +823,7 @@ function mapWorkshopPollRow<Option extends WorkshopPollOption>(
         question: row.question,
         isClosed: row.is_closed,
         isVisible: row.is_visible,
+        isOtherOptionEnabled: row.is_other_option_enabled,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         options,
@@ -815,7 +831,7 @@ function mapWorkshopPollRow<Option extends WorkshopPollOption>(
     };
 }
 
-type WorkshopPollVoteErrorKind = 'not-found' | 'closed' | 'invalid-participant' | 'database';
+type WorkshopPollVoteErrorKind = 'not-found' | 'closed' | 'invalid-participant' | 'invalid-vote' | 'database';
 
 export type WorkshopPollVoteSaveResult =
     | { readonly isSuccessful: true }
@@ -830,25 +846,31 @@ const WORKSHOP_POLL_VOTE_ERROR_KIND_BY_DATABASE_MESSAGE: Readonly<
     WORKSHOP_POLL_CLOSED: 'closed',
     WORKSHOP_POLL_PARTICIPANT_INVALID: 'invalid-participant',
     WORKSHOP_POLL_VOTER_EMAIL_INVALID: 'invalid-participant',
+    WORKSHOP_POLL_VOTE_INVALID: 'invalid-vote',
+    WORKSHOP_POLL_OTHER_OPTION_INVALID: 'invalid-vote',
+    WORKSHOP_POLL_OTHER_OPTION_DISABLED: 'invalid-vote',
+    WORKSHOP_POLL_OTHER_OPTION_LIMIT_REACHED: 'invalid-vote',
 };
 
 /**
  * Persists one shared community-poll choice from the room a member currently entered.
  *
  * Note: The database owns the cross-room authorization and locks the poll with the write, so an attached workshop
- *       cannot create a second poll vote and an administrator cannot close a poll halfway through a choice.
+ *       cannot create a second poll vote, a member-written answer and its first vote cannot split apart, and an
+ *       administrator cannot close a poll halfway through either choice.
  */
 export async function saveWorkshopPollVote(
     supabase: SupabaseClient,
     workshopRow: Pick<WorkshopRow, 'id'>,
     participant: Pick<WorkshopParticipant, 'id' | 'email'>,
     pollId: string,
-    optionId: string,
+    voteValues: WorkshopPollVoteValues,
 ): Promise<WorkshopPollVoteSaveResult> {
     const { error } = await supabase.rpc('set_community_workshop_poll_vote', {
         target_room_id: workshopRow.id,
         target_poll_id: pollId,
-        target_option_id: optionId,
+        target_option_id: 'optionId' in voteValues ? voteValues.optionId : null,
+        target_other_option_label: 'otherOptionLabel' in voteValues ? voteValues.otherOptionLabel : null,
         target_participant_id: participant.id,
         target_voter_email: normalizeWorkshopParticipantEmail(participant.email),
     });
@@ -2213,7 +2235,7 @@ export async function loadWorkshopPublicState(
 ): Promise<LoadedWorkshopPublicState> {
     const contentVisibilityCutoff = new Date().toISOString();
     const workshop = mapWorkshopRow(workshopRow);
-    const isWorkshopPast = workshopRow.room_kind === 'workshop' && getWorkshopPhase(workshop) === 'past';
+    const isWorkshopPast = workshopRow.room_kind === 'workshop' && isWorkshopPhasePast(getWorkshopPhase(workshop));
 
     // Note: The reactions which flew over the stage recently are replayed for somebody entering the room. A room
     //       without that panel therefore does not load them, exactly as it does not count them.

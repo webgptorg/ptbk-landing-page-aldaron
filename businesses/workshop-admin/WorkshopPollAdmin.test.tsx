@@ -13,6 +13,7 @@ const POLL: WorkshopAdminPoll = {
     question: 'Kterému tématu se máme věnovat?',
     isClosed: false,
     isVisible: true,
+    isOtherOptionEnabled: false,
     createdAt: '2026-08-24T10:00:00.000Z',
     updatedAt: '2026-08-24T10:00:00.000Z',
     options: [
@@ -24,6 +25,7 @@ const POLL: WorkshopAdminPoll = {
             realVoteCount: 2,
             artificialVoteCount: 3,
             isVotedByParticipant: false,
+            isCreatedByParticipant: false,
         },
         {
             id: 'option-2',
@@ -33,6 +35,7 @@ const POLL: WorkshopAdminPoll = {
             realVoteCount: 1,
             artificialVoteCount: 0,
             isVotedByParticipant: false,
+            isCreatedByParticipant: false,
         },
     ],
     attachedWorkshops: [],
@@ -85,6 +88,7 @@ describe('community poll administration', () => {
                 options: ['Testování', 'Nasazování'],
                 isClosed: false,
                 isVisible: true,
+                isOtherOptionEnabled: false,
                 attachedWorkshopIds: [],
             }),
         );
@@ -103,6 +107,25 @@ describe('community poll administration', () => {
         expect(screen.getByText('Každá možnost musí být jiná.')).not.toBeNull();
     });
 
+    it('lets an administrator enable member-written other answers', async () => {
+        const props = createProps();
+        render(<WorkshopPollAdmin polls={[]} {...props} />);
+
+        fireEvent.change(screen.getByPlaceholderText(/Kterému tématu/), { target: { value: 'Téma?' } });
+        fireEvent.change(screen.getByPlaceholderText('Možnost 1'), { target: { value: 'Testování' } });
+        fireEvent.change(screen.getByPlaceholderText('Možnost 2'), { target: { value: 'Nasazování' } });
+        fireEvent.click(screen.getByLabelText('Povolit vlastní odpověď'));
+        fireEvent.click(screen.getByRole('button', { name: 'Vytvořit anketu' }));
+
+        await waitFor(() =>
+            expect(props.onCreate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    isOtherOptionEnabled: true,
+                }),
+            ),
+        );
+    });
+
     it('attaches the chosen workshop occurrences to a new poll', async () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
@@ -119,6 +142,7 @@ describe('community poll administration', () => {
                 options: ['Testování', 'Nasazování'],
                 isClosed: false,
                 isVisible: true,
+                isOtherOptionEnabled: false,
                 attachedWorkshopIds: ['workshop-1'],
             }),
         );
@@ -162,6 +186,7 @@ describe('community poll administration', () => {
                 options: ['Testování', 'Nasazování'],
                 isClosed: true,
                 isVisible: false,
+                isOtherOptionEnabled: false,
                 attachedWorkshopIds: [],
             }),
         );
@@ -182,6 +207,7 @@ describe('community poll administration', () => {
                 ],
                 isClosed: true,
                 isVisible: true,
+                isOtherOptionEnabled: false,
                 attachedWorkshopIds: [],
             }),
         );
@@ -197,6 +223,7 @@ describe('community poll administration', () => {
                 ],
                 isClosed: false,
                 isVisible: false,
+                isOtherOptionEnabled: false,
                 attachedWorkshopIds: [],
             }),
         );
@@ -241,6 +268,7 @@ describe('community poll administration', () => {
                 ],
                 isClosed: false,
                 isVisible: true,
+                isOtherOptionEnabled: false,
                 attachedWorkshopIds: [],
             }),
         );
@@ -248,5 +276,50 @@ describe('community poll administration', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Smazat' }));
 
         await waitFor(() => expect(props.onDelete).toHaveBeenCalledWith('poll-1'));
+    });
+
+    it('keeps member-written answers out of the prepared-answer editor', async () => {
+        const props = createProps();
+        render(
+            <WorkshopPollAdmin
+                polls={[
+                    {
+                        ...POLL,
+                        isOtherOptionEnabled: true,
+                        options: [
+                            ...POLL.options,
+                            {
+                                id: 'member-option',
+                                label: 'Bezpečnost',
+                                sortOrder: 2,
+                                voteCount: 1,
+                                realVoteCount: 1,
+                                artificialVoteCount: 0,
+                                isVotedByParticipant: false,
+                                isCreatedByParticipant: true,
+                            },
+                        ],
+                    },
+                ]}
+                {...props}
+            />,
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Upravit' }));
+        expect(screen.queryByDisplayValue('Bezpečnost')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Uložit změny' }));
+
+        await waitFor(() =>
+            expect(props.onUpdate).toHaveBeenCalledWith(
+                'poll-1',
+                expect.objectContaining({
+                    isOtherOptionEnabled: true,
+                    options: [
+                        { id: 'option-1', label: 'Testování' },
+                        { id: 'option-2', label: 'Nasazování' },
+                    ],
+                }),
+            ),
+        );
     });
 });

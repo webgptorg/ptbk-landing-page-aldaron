@@ -21,7 +21,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
   full-load conversion page; `/participant` is the live room. Its waiting room
   offers every published term as the same term cards the landing page registers
-  with: running and upcoming ones first, finished ones behind a disclosure.
+  with: running and upcoming ones first, then the ones which ended within the
+  last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,
   without losing the name and e-mail already typed. Once a term has its recorded
   end, its participant wrap-up offers a locally generated PDF using only the
@@ -75,8 +76,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   written; it asks for nothing and sends visitors to the media-kit form.
 - `/cs/komunita` is the permanent Czech community room. It has chat, polls,
   projects, materials, and published terms, but no schedule, stage, or live
-  updates. Terms show event kind, format/place, price, and status. A term with a
-  live room links there; otherwise it links to its landing page. The calendar
+  updates. Terms show event kind, format/place, price, and status. Where a term
+  stands in time is decided once, in `lib/workshops/workshopPhase.ts`, as one of
+  four phases: upcoming, ongoing, freshly past while it ended within the last
+  `FRESHLY_PAST_WORKSHOP_HOURS`, and past. Every list, badge, and calendar colour
+  reads that one answer, and everything which opens after a workshop — the
+  wrap-up, the feedback, the recording — treats freshly past as over. A term with a
+  live room links there; a term of an event held elsewhere opens its organizer's
+  address in a new tab; otherwise it links to its landing page. The calendar
   opens on the member's month, can filter by day, and uses the same terms and
   statuses as the cards. Empty days cannot be selected; an empty month is only
   selected when the member's month has no terms. The room offers Google Calendar
@@ -129,8 +136,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   discussions do not. The invitation names the community's sections by the names
   the community itself uses.
 - Community polls attached to workshops are shared. A normalized email gives a
-  member one vote across the community and all attached workshops. Workshops
-  may display and accept votes, but the community owns administration.
+  member one vote across the community and all attached workshops. An
+  administrator can enable an Other answer: a member-written response becomes
+  one shared, anonymous option and receives that member's vote atomically, so
+  every room can vote for it; later poll edits keep member-written answers.
+  Workshops may display and accept votes, but the community owns administration.
+  Where a room puts its polls is decided once, in
+  `lib/workshops/workshopPollPlacement.ts`: the community, which decides in its
+  own polls, opens with them, while a workshop, which is only their subject,
+  keeps them below the materials it was held for.
 - The participant room owns the membership badge and popup. Community and live
   workshop rooms use the same membership for the connecting email, and checkout
   returns to the room where it started. Membership is offered only by room kinds
@@ -197,6 +211,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   not require database migration or page-specific duplication. Terms ask for kind,
   online/place format, price, and capacity. Each kind also names where its landing
   page records registrations, which is the `placeName` of the contacts it gathers.
+  A kind which names no landing page is held by somebody else: its terms carry the
+  address they are held at, are refused without one, and this application runs no
+  room, gathers no registration, and returns no payer to them.
 - Which term a registration belongs to is decided once, in
   `lib/workshops/workshopRegistrations.ts`. A term is recognised by its slug, by
   its Prague day, and by the moment it begins at, so registrations written before

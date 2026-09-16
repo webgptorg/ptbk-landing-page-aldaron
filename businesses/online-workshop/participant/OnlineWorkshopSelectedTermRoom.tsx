@@ -78,7 +78,7 @@ export function OnlineWorkshopSelectedTermRoom({
     return (
         <OnlineWorkshopParticipantPage
             workshopSlug={selectedWorkshop.slug}
-            connectionDetails={createOnlineWorkshopConnectionDetails(selectedWorkshop)}
+            connectionDetails={createOnlineWorkshopConnectionDetails(selectedWorkshop, currentTime)}
             calendarDetails={{
                 hostFullname: ONLINE_WORKSHOP_HOST_FULLNAME,
                 participantPath: ONLINE_WORKSHOP_PARTICIPANT_PATH,

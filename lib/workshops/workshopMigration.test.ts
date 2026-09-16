@@ -120,6 +120,11 @@ const COMMUNITY_POLL_SHARED_EMAIL_VOTE_MIGRATION_SQL = readFileSync(
     COMMUNITY_POLL_SHARED_EMAIL_VOTE_MIGRATION_PATH,
     'utf8',
 );
+const COMMUNITY_POLL_OTHER_OPTION_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-1700-community-poll-other-options.sql',
+);
+const COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL = readFileSync(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_PATH, 'utf8');
 const COMMUNITY_PROJECT_MIGRATION_PATH = path.resolve(process.cwd(), 'migrations/2026-08-2800-community-projects.sql');
 const COMMUNITY_PROJECT_MIGRATION_SQL = readFileSync(COMMUNITY_PROJECT_MIGRATION_PATH, 'utf8');
 const COMMUNITY_PROJECT_BACKEND_MIGRATION_PATH = path.resolve(
@@ -560,6 +565,33 @@ describe('workshop database migration', () => {
         );
         expect(COMMUNITY_POLL_SHARED_EMAIL_VOTE_MIGRATION_SQL).toContain(
             'GRANT EXECUTE ON FUNCTION public.set_community_workshop_poll_vote',
+        );
+    });
+
+    it('keeps an enabled other answer atomic, shared, and safe from an administrative edit', () => {
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS is_other_option_enabled boolean NOT NULL DEFAULT false',
+        );
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS is_created_by_participant boolean NOT NULL DEFAULT false',
+        );
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'AND existing_option.is_created_by_participant = false',
+        );
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'AND existing_option.is_created_by_participant = false\n      AND NOT EXISTS',
+        );
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'WHERE lower(btrim(target_option.value ->> \'label\')) = lower(btrim(participant_option.label))',
+        );
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain('FOR UPDATE;');
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain('WORKSHOP_POLL_OTHER_OPTION_DISABLED');
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain('WORKSHOP_POLL_OTHER_OPTION_LIMIT_REACHED');
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'INSERT INTO public.workshop_poll_options (\n                poll_id,\n                label,\n                sort_order,\n                is_created_by_participant',
+        );
+        expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
+            'ON CONFLICT (poll_id, voter_email) DO UPDATE',
         );
     });
 

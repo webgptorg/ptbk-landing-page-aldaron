@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, context: WorkshopPollVoteRouteC
     const body = await readJsonObjectOrNull(request);
     const parsedResult = workshopPollVoteSchema.safeParse(body);
     if (!parsedResult.success) {
-        return NextResponse.json({ error: 'Invalid poll option' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid poll vote' }, { status: 400 });
     }
 
     const { workshopSlug, pollId } = await context.params;
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest, context: WorkshopPollVoteRouteC
         authenticatedRequest.workshopRow,
         authenticatedRequest.participant,
         pollId,
-        parsedResult.data.optionId,
+        parsedResult.data,
     );
     if (!voteResult.isSuccessful) {
         if (voteResult.errorKind === 'not-found') {
@@ -59,6 +59,9 @@ export async function POST(request: NextRequest, context: WorkshopPollVoteRouteC
         }
         if (voteResult.errorKind === 'closed') {
             return NextResponse.json({ error: 'Poll has already ended' }, { status: 409 });
+        }
+        if (voteResult.errorKind === 'invalid-vote') {
+            return NextResponse.json({ error: 'This poll does not accept another option' }, { status: 409 });
         }
 
         console.error('Failed to save a workshop poll vote:', voteResult.errorMessage);

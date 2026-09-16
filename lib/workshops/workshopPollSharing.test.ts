@@ -80,6 +80,7 @@ async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_RO
         question: 'Které téma chcete probrat?',
         is_closed: false,
         is_visible: true,
+        is_other_option_enabled: true,
         created_at: '2026-09-01T10:00:00.000Z',
         updated_at: '2026-09-01T10:00:00.000Z',
     });
@@ -89,6 +90,7 @@ async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_RO
         label: 'Git workflow',
         sort_order: 0,
         artificial_vote_count: 0,
+        is_created_by_participant: false,
     });
     await insertInMemoryRow(supabase, 'workshop_poll_options', {
         id: OTHER_OPTION_ID,
@@ -96,6 +98,7 @@ async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_RO
         label: 'Automatizace',
         sort_order: 1,
         artificial_vote_count: 0,
+        is_created_by_participant: true,
     });
     await insertInMemoryRow(supabase, 'workshop_poll_votes', {
         id: 'vote-id',
@@ -176,7 +179,7 @@ describe('shared community poll votes', () => {
             WORKSHOP_ROW,
             { id: 'workshop-participant-id', email: MEMBER_EMAIL },
             POLL_ID,
-            SELECTED_OPTION_ID,
+            { optionId: SELECTED_OPTION_ID },
         );
 
         expect(result).toEqual({ isSuccessful: true });
@@ -184,6 +187,30 @@ describe('shared community poll votes', () => {
             target_room_id: WORKSHOP_ROW.id,
             target_poll_id: POLL_ID,
             target_option_id: SELECTED_OPTION_ID,
+            target_other_option_label: null,
+            target_participant_id: 'workshop-participant-id',
+            target_voter_email: MEMBER_EMAIL,
+        });
+    });
+
+    it('passes a member-written answer to the same shared vote procedure without inventing a second endpoint', async () => {
+        const rpc = vi.fn().mockResolvedValue({ error: null });
+        const supabase = { rpc } as unknown as SupabaseClient;
+
+        const result = await saveWorkshopPollVote(
+            supabase,
+            WORKSHOP_ROW,
+            { id: 'workshop-participant-id', email: MEMBER_EMAIL },
+            POLL_ID,
+            { otherOptionLabel: 'Bezpečnost' },
+        );
+
+        expect(result).toEqual({ isSuccessful: true });
+        expect(rpc).toHaveBeenCalledWith('set_community_workshop_poll_vote', {
+            target_room_id: WORKSHOP_ROW.id,
+            target_poll_id: POLL_ID,
+            target_option_id: null,
+            target_other_option_label: 'Bezpečnost',
             target_participant_id: 'workshop-participant-id',
             target_voter_email: MEMBER_EMAIL,
         });

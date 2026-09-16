@@ -26,7 +26,7 @@ export type EventListing = {
     readonly link: string;
 
     /**
-     * Whether this term is still ahead, running right now, or already over
+     * Whether this term is still ahead, running right now, only just over, or already history
      */
     readonly phase: WorkshopPhase;
 

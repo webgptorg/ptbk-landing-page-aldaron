@@ -35,6 +35,7 @@ export default async function AiSupervizeMiniRoute({ searchParams }: AiSupervize
             initialDiscountCode={initialDiscountCode}
             initialActiveDiscountByPlaceId={initialDiscountResult.activeDiscountByPlaceId}
             workshopAvailabilities={workshopAvailabilities}
+            currentTime={new Date().toISOString()}
         />
     );
 }

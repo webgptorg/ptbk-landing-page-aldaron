@@ -9,7 +9,7 @@ import { AI_SUPERVIZE_MINI_PATH } from '@/lib/discounts/discountPlaces';
 /**
  * Every kind of event which can be administered, ordered as an administration offers them
  */
-export const EVENT_TYPE_VALUES = ['online-workshop', 'ai-supervize-mini'] as const;
+export const EVENT_TYPE_VALUES = ['online-workshop', 'ai-supervize-mini', 'external'] as const;
 
 export type EventType = (typeof EVENT_TYPE_VALUES)[number];
 
@@ -26,18 +26,24 @@ export type EventTypeDefinition = {
     readonly label: string;
 
     /**
-     * The public page which lists the terms of this kind of event and registers visitors for them
+     * The page of this application which lists the terms of this kind of event and registers visitors for them, or
+     * `null` for an event somebody else holds
+     *
+     * Note: This is what tells an event held by this application apart from an event held elsewhere, see
+     *       `isExternalEventType`. An event nobody here holds is reached at the address written on the term itself,
+     *       because this application has no page of its own to offer for it.
      */
-    readonly landingPagePath: string;
+    readonly landingPagePath: string | null;
 
     /**
-     * Where that landing page records its registrations, which is the `placeName` of every contact it gathers
+     * Where that landing page records its registrations, which is the `placeName` of every contact it gathers, or
+     * `null` when this application registers nobody for this kind of event
      *
      * Note: The term a registration was made for is recorded in the note of that contact, so counting the people
      *       registered for a term means reading the notes gathered in this one place rather than every contact there
      *       is.
      */
-    readonly registrationPlaceName: string;
+    readonly registrationPlaceName: string | null;
 
     /**
      * The live room the terms of this kind of event are held in, or `null` when this kind of event has no room
@@ -69,6 +75,17 @@ const EVENT_TYPE_DEFINITIONS: Readonly<Record<EventType, EventTypeDefinition>> =
         registrationPlaceName: AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_PLACE_NAME,
         participantPath: null,
     },
+
+    // Note: A conference or a workshop which a lecturer of the community speaks at is held by its own organizer. This
+    //       application only says that it is happening and leads to the organizer, so it has no page, no registration
+    //       and no room of its own to name here.
+    external: {
+        id: 'external',
+        label: 'Externí akce',
+        landingPagePath: null,
+        registrationPlaceName: null,
+        participantPath: null,
+    },
 };
 
 export function getEventTypeDefinition(eventType: EventType): EventTypeDefinition {
@@ -78,10 +95,32 @@ export function getEventTypeDefinition(eventType: EventType): EventTypeDefinitio
 export const EVENT_TYPE_DEFINITION_LIST: readonly EventTypeDefinition[] = EVENT_TYPE_VALUES.map(getEventTypeDefinition);
 
 /**
+ * Whether the terms of this kind of event are held by somebody else, so each of them leads to the address written on
+ * the term rather than to a page of this application
+ *
+ * Note: An event held elsewhere is listed exactly like every other event, but this application runs no room for it and
+ *       gathers no registration for it, because neither of them is its to run.
+ */
+export function isExternalEventType(eventType: EventType): boolean {
+    return getEventTypeDefinition(eventType).landingPagePath === null;
+}
+
+/**
+ * Whether this application gathers the registrations for the terms of this kind of event at all
+ *
+ * Note: A term nobody registers for here has no registered audience to read, which is a different thing from a term
+ *       nobody has registered for yet.
+ */
+export function isEventRegistrationGathered(eventType: EventType): boolean {
+    return getEventTypeDefinition(eventType).registrationPlaceName !== null;
+}
+
+/**
  * Every place a landing page of this application records a registration for a term in
  */
-export const EVENT_REGISTRATION_PLACE_NAMES: readonly string[] = EVENT_TYPE_DEFINITION_LIST.map(
-    (eventTypeDefinition) => eventTypeDefinition.registrationPlaceName,
+export const EVENT_REGISTRATION_PLACE_NAMES: readonly string[] = EVENT_TYPE_DEFINITION_LIST.flatMap(
+    (eventTypeDefinition) =>
+        eventTypeDefinition.registrationPlaceName === null ? [] : [eventTypeDefinition.registrationPlaceName],
 );
 
 /**

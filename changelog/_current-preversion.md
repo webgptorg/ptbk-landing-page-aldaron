@@ -1,5 +1,56 @@
 # Current preversion
 
+- A term which has only just been held is no longer one more term of the history. Where an event stands in time is now
+  one of four things instead of three — it is still ahead, it runs right now, it is freshly past while less than a day
+  has gone by since the end recorded for it, or it is past — and that is answered in the single place which already
+  answered the other three, so no list, badge, or colour can decide it on its own. In `/cs/komunita` such a term wears
+  its own amber `Právě proběhlo` badge, colours its own day of the calendar, is named in the legend beside the three
+  others, and is listed after what is ahead rather than at the head of the archive. In
+  `/cs/online-workshop/participant?workshop=` it is offered in the open under `Právě proběhlo`, between the workshops
+  which run or are coming and the `Proběhlé workshopy` disclosure, so somebody who was at last night's workshop finds
+  the room they have just left without unfolding the whole history to look for it. Everything which opens only after a
+  workshop is over is untouched: the wrap-up, its PDF, the feedback, and the paid recording all read a freshly past
+  term as exactly as finished as one from last spring, and `/admin/workshops` keeps both of them in its `Historie`,
+  the freshest one leading it.
+
+- A term near enough to be looked forward to is now named rather than merely dated. One held today reads
+  `dnes, úterý 15. 9. 2026 · 11:11`, one held tomorrow `zítra, středa 16. 9. 2026 · 11:11`, and one held later in the
+  same week `tento čtvrtek 17. 9. 2026 · 11:11` — in the gender the name of that weekday has in Czech, so that
+  `tento čtvrtek` stands beside `tato středa` and `toto úterý`. A week runs from Monday to Sunday, as it does in the
+  Czech Republic, and a term further away than that stays the plain date it always was, so a list of distant terms
+  does not grow a weekday it never showed. The waiting room and the term picker of `/cs/online-workshop/participant`,
+  the cards and the calendar day of `/cs/komunita`, the header, hero, term picker and chosen-term line of
+  `/cs/online-workshop`, its thank-you page, and the term picker of `/ai-supervize-mini` all say it, because how near a
+  day is is worked out once, from the day a term falls on in Prague and the day the page was built on. That day comes
+  from the server rather than from the browser, so a page says exactly what it was sent as instead of renaming its
+  terms the instant it hydrates. Nothing which is not a term read against today changed: the times of chat messages and
+  materials, the dates a membership is paid to, the printed participant sheet, the published calendar, and the notes a
+  registration is counted by are untouched.
+
+- Moved the community polls attached to an occurrence to the bottom of `/cs/online-workshop/participant?workshop=`.
+  A participant now reads the stage, the invitation, and everything the workshop hands over in its materials first, and
+  is asked for their vote below them, because a poll a workshop is merely the subject of matters less to its
+  participant than the materials they came for. The poll itself, its options, its written answers and the one shared
+  e-mail-owned vote are unchanged, and `/cs/komunita` keeps its own polls above its materials, because that is where
+  the community makes its decisions rather than being asked about somebody else's. Where the polls of a room belong is
+  now decided once, by the kind of that room, so the two rooms cannot drift into their own orders.
+
+- Let `/cs/komunita` list the conferences and workshops which lecturers of the community speak at elsewhere. A term of
+  the new `Externí akce` kind of event is administered in `/admin/workshops` beside every other term and carries one
+  thing the terms held here never do: the address of its organizer, which is where its card and its calendar day lead,
+  opened beside the room rather than instead of it. It is otherwise an ordinary term, so it is dated, placed, priced,
+  coloured by whether it is over, running or still ahead, and published to `/cs/komunita/calendar.ics` exactly like
+  the rest. Because such an event is held by somebody else, this application runs no room and gathers no registration
+  for it: its administration says so rather than reporting an audience of nobody, the membership never returns a payer
+  to somebody else's website, and a term whose address is missing is refused when written and offered nowhere if it
+  was ever stored without one.
+
+- An administrator can now enable an `Other` answer for a community poll. In both `/cs/komunita` and an attached
+  `/cs/online-workshop/participant?workshop=` room, a member can write an answer which immediately becomes a normal,
+  anonymous option and receives that member's shared e-mail-owned vote at the same time. Everyone can then vote for
+  it from either room; duplicate wording reuses the existing option, and later administration edits keep member-written
+  answers intact.
+
 - After an online workshop has its recorded end, `/cs/online-workshop/participant?workshop=` now offers its attendee a
   downloadable, paginated wrap-up PDF. It uses the same participant-visible workshop description, takeaways already
   authored in material titles, headings and lists, and material text/links the room already unlocked for that person;

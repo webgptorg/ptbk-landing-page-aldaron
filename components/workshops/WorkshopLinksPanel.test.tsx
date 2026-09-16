@@ -45,6 +45,36 @@ const UPCOMING_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-09-24T16:00:00+02:00',
 };
 
+const TOMORROW_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'tomorrow-workshop-id',
+    slug: 'production-ai-2026-09-11',
+    title: 'Produkční kód s AI agenty zítra',
+    startsAt: '2026-09-11T19:00:00+02:00',
+    endsAt: '2026-09-11T20:30:00+02:00',
+};
+
+const THIS_WEEK_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'this-week-workshop-id',
+    slug: 'production-ai-2026-09-12',
+    title: 'Produkční kód s AI agenty v sobotu',
+    startsAt: '2026-09-12T19:00:00+02:00',
+    endsAt: '2026-09-12T20:30:00+02:00',
+};
+
+/**
+ * The workshop of yesterday evening, which ended a few hours before the moment this list is drawn against
+ */
+const FRESHLY_PAST_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'freshly-past-workshop-id',
+    slug: 'production-ai-2026-09-09',
+    title: 'Produkční kód s AI agenty včera',
+    startsAt: '2026-09-09T19:00:00+02:00',
+    endsAt: '2026-09-09T20:30:00+02:00',
+};
+
 const PAST_WORKSHOP: WorkshopSummary = {
     ...ONGOING_WORKSHOP,
     id: 'past-workshop-id',
@@ -52,6 +82,18 @@ const PAST_WORKSHOP: WorkshopSummary = {
     title: 'Produkční kód s AI agenty v červenci',
     startsAt: '2026-07-10T19:00:00+02:00',
     endsAt: '2026-07-10T20:30:00+02:00',
+};
+
+const EXTERNAL_CONFERENCE_URL = 'https://konference.example.com/program';
+
+const EXTERNAL_CONFERENCE: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'external-conference-id',
+    slug: 'webexpo-2026-09-18',
+    title: 'WebExpo · přednáška lektora komunity',
+    event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: EXTERNAL_CONFERENCE_URL },
+    startsAt: '2026-09-18T09:00:00+02:00',
+    endsAt: '2026-09-18T17:00:00+02:00',
 };
 
 const WORKSHOPS: readonly WorkshopSummary[] = [PAST_WORKSHOP, ONGOING_WORKSHOP, UPCOMING_WORKSHOP];
@@ -131,6 +173,18 @@ describe('workshop links panel', () => {
         ]);
     });
 
+    it('names a term held today, tomorrow, or later this week rather than only dating it', () => {
+        renderWorkshopLinksPanel([ONGOING_WORKSHOP, TOMORROW_WORKSHOP, THIS_WEEK_WORKSHOP, UPCOMING_WORKSHOP]);
+        showCardsView();
+
+        expect(findTermLinks().map((termLink) => termLink.textContent)).toEqual([
+            expect.stringContaining('dnes, čtvrtek 10. 9. 2026'),
+            expect.stringContaining('zítra, pátek 11. 9. 2026'),
+            expect.stringContaining('tato sobota 12. 9. 2026'),
+            expect.stringContaining('čtvrtek 24. 9. 2026'),
+        ]);
+    });
+
     it('says on every card whether its term is running, still ahead, or already over', () => {
         renderWorkshopLinksPanel();
         showCardsView();
@@ -140,6 +194,31 @@ describe('workshop links panel', () => {
         expect(ongoingCard?.textContent).toContain('Probíhá');
         expect(upcomingCard?.textContent).toContain('Nadchází');
         expect(pastCard?.textContent).toContain('Proběhlo');
+    });
+
+    it('sets a term which has only just been held apart from the history it would otherwise close', () => {
+        renderWorkshopLinksPanel([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP, UPCOMING_WORKSHOP]);
+        showCardsView();
+
+        const [ongoingCard, upcomingCard, freshlyPastCard, pastCard] = findTermLinks();
+
+        expect(ongoingCard?.textContent).toContain(ONGOING_WORKSHOP.title);
+        expect(upcomingCard?.textContent).toContain(UPCOMING_WORKSHOP.title);
+        expect(freshlyPastCard?.textContent).toContain(FRESHLY_PAST_WORKSHOP.title);
+        expect(freshlyPastCard?.textContent).toContain('Právě proběhlo');
+        expect(pastCard?.textContent).toContain(PAST_WORKSHOP.title);
+        expect(pastCard?.textContent).toContain('Proběhlo');
+    });
+
+    it('colours the day of a term which has only just been held as neither running nor history', () => {
+        renderWorkshopLinksPanel([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP]);
+
+        expect(findCalendarDay('2026-09-09').className).toContain(
+            getWorkshopPhaseAppearance('freshly-past').calendarDayClassName,
+        );
+        expect(findCalendarDay('2026-09-10').className).toContain(
+            getWorkshopPhaseAppearance('ongoing').calendarDayClassName,
+        );
     });
 
     it('links a community member to every workshop room with their identity prefilled', () => {
@@ -160,6 +239,29 @@ describe('workshop links panel', () => {
         expect(paidWorkshopLink.getAttribute('href')).toBe('/ai-supervize-mini');
         expect(paidWorkshopLink.textContent).toContain('Praha');
         expect(paidWorkshopLink.textContent).toContain(formatEventPrice(12000));
+    });
+
+    it('leads a term held by somebody else to its organizer, beside the room the member is reading', () => {
+        renderWorkshopLinksPanel([...WORKSHOPS, EXTERNAL_CONFERENCE]);
+        showCardsView();
+
+        const externalConferenceLink = screen.getByRole('link', { name: /WebExpo/ });
+
+        expect(externalConferenceLink.getAttribute('href')).toBe(EXTERNAL_CONFERENCE_URL);
+        expect(externalConferenceLink.getAttribute('target')).toBe('_blank');
+        expect(externalConferenceLink.getAttribute('rel')).toBe('noopener noreferrer');
+        expect(externalConferenceLink.textContent).toContain('Externí akce');
+    });
+
+    it('leaves out a term held by somebody else which names no address to lead to', () => {
+        renderWorkshopLinksPanel([
+            ONGOING_WORKSHOP,
+            { ...EXTERNAL_CONFERENCE, event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: null } },
+        ]);
+        showCardsView();
+
+        expect(screen.queryByRole('link', { name: /WebExpo/ })).toBeNull();
+        expect(findTermLinks()).toHaveLength(1);
     });
 
     it('offers the whole calendar to the calendar application of a member', () => {

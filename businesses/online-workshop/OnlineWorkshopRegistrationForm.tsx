@@ -12,9 +12,9 @@ import { Input } from '@/components/ui/input';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import {
-    formatCzechWorkshopDate,
     formatCzechWorkshopDuration,
     formatCzechWorkshopMoment,
+    formatCzechWorkshopRelativeDate,
     formatCzechWorkshopTime,
 } from '@/lib/workshops/workshopDate';
 import { subscribeToWaitlist } from '@/lib/subscription/subscribeToWaitlist';
@@ -60,12 +60,18 @@ type OnlineWorkshopRegistrationFormProps = {
      * to retype their contact details just to choose another date.
      */
     readonly workshops: readonly EventOccurrence[];
+
+    /**
+     * Moment the server built this page at, from which a term near enough is named rather than merely dated
+     */
+    readonly currentTime: string;
 };
 
 type OnlineWorkshopTermPickerProps = {
     readonly workshops: readonly EventOccurrence[];
     readonly selectedWorkshop: EventOccurrence;
     readonly onSelectWorkshop: (workshop: EventOccurrence) => void;
+    readonly currentTime: string;
 };
 
 /**
@@ -74,7 +80,12 @@ type OnlineWorkshopTermPickerProps = {
  * Note: Every term of this event is a workshop about something of its own, so each card names its subject and says
  *       what it is about rather than leaving a visitor to choose between dates alone.
  */
-function OnlineWorkshopTermPicker({ workshops, selectedWorkshop, onSelectWorkshop }: OnlineWorkshopTermPickerProps) {
+function OnlineWorkshopTermPicker({
+    workshops,
+    selectedWorkshop,
+    onSelectWorkshop,
+    currentTime,
+}: OnlineWorkshopTermPickerProps) {
     return (
         <fieldset>
             <legend className="text-sm font-semibold text-slate-700">Vyber termín workshopu</legend>
@@ -82,6 +93,7 @@ function OnlineWorkshopTermPicker({ workshops, selectedWorkshop, onSelectWorksho
                 terms={workshops}
                 selectedTermSlug={selectedWorkshop.slug}
                 onSelectTerm={onSelectWorkshop}
+                currentTime={currentTime}
                 isTopicShown={true}
                 noteIcon={Clock}
                 createNoteText={createOnlineWorkshopTermNoteText}
@@ -99,19 +111,26 @@ function OnlineWorkshopNoTermNotice() {
     );
 }
 
-export function OnlineWorkshopRegistrationForm({ workshops }: OnlineWorkshopRegistrationFormProps) {
+export function OnlineWorkshopRegistrationForm({ workshops, currentTime }: OnlineWorkshopRegistrationFormProps) {
     const [firstWorkshop] = workshops;
 
     if (firstWorkshop === undefined) {
         return <OnlineWorkshopNoTermNotice />;
     }
 
-    return <OnlineWorkshopSelectedTermRegistrationForm workshops={workshops} firstWorkshop={firstWorkshop} />;
+    return (
+        <OnlineWorkshopSelectedTermRegistrationForm
+            workshops={workshops}
+            firstWorkshop={firstWorkshop}
+            currentTime={currentTime}
+        />
+    );
 }
 
 type OnlineWorkshopSelectedTermRegistrationFormProps = {
     readonly workshops: readonly EventOccurrence[];
     readonly firstWorkshop: EventOccurrence;
+    readonly currentTime: string;
 };
 
 /**
@@ -120,6 +139,7 @@ type OnlineWorkshopSelectedTermRegistrationFormProps = {
 function OnlineWorkshopSelectedTermRegistrationForm({
     workshops,
     firstWorkshop,
+    currentTime,
 }: OnlineWorkshopSelectedTermRegistrationFormProps) {
     const [selectedWorkshopSlug, setSelectedWorkshopSlug] = useState(firstWorkshop.slug);
     const [fullname, setFullname] = useState('');
@@ -132,7 +152,7 @@ function OnlineWorkshopSelectedTermRegistrationForm({
     const { fullnameError, emailError } = getFieldErrors({ fullname, email });
     const isSubmissionAllowed = !fullnameError && !emailError;
     const selectedWorkshop = workshops.find((workshop) => workshop.slug === selectedWorkshopSlug) ?? firstWorkshop;
-    const dateLabel = formatCzechWorkshopDate(selectedWorkshop.startsAt);
+    const dateLabel = formatCzechWorkshopRelativeDate(selectedWorkshop.startsAt, currentTime);
     const timeLabel = formatCzechWorkshopTime(selectedWorkshop.startsAt);
     const durationLabel = formatCzechWorkshopDuration(selectedWorkshop.startsAt, selectedWorkshop.endsAt);
     const fieldIdPrefix = `workshop-${selectedWorkshop.slug}`;
@@ -205,6 +225,7 @@ function OnlineWorkshopSelectedTermRegistrationForm({
                 workshops={workshops}
                 selectedWorkshop={selectedWorkshop}
                 onSelectWorkshop={handleWorkshopSelection}
+                currentTime={currentTime}
             />
 
             <div className="flex items-center gap-3 border-y border-slate-100 py-5" aria-live="polite">

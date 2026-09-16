@@ -14,6 +14,11 @@ vi.mock('next/image', () => ({
 
 import { OnlineWorkshopRegistrationForm } from './OnlineWorkshopRegistrationForm';
 
+/**
+ * Moment the page is read at, which is far enough from both terms for neither of them to be named rather than dated
+ */
+const CURRENT_TIME = '2026-08-20T09:00:00+02:00';
+
 const FIRST_WORKSHOP: EventOccurrence = {
     id: 'first-workshop-id',
     kind: 'workshop',
@@ -44,7 +49,9 @@ describe('Online workshop registration form', () => {
     });
 
     it('uses one form to choose between terms without clearing contact details', () => {
-        const { container } = render(<OnlineWorkshopRegistrationForm workshops={[FIRST_WORKSHOP, SECOND_WORKSHOP]} />);
+        const { container } = render(
+            <OnlineWorkshopRegistrationForm workshops={[FIRST_WORKSHOP, SECOND_WORKSHOP]} currentTime={CURRENT_TIME} />,
+        );
 
         expect(container.querySelectorAll('form')).toHaveLength(1);
 
@@ -63,7 +70,9 @@ describe('Online workshop registration form', () => {
     });
 
     it('says on every term what that very workshop is called and what it is about', () => {
-        render(<OnlineWorkshopRegistrationForm workshops={[FIRST_WORKSHOP, SECOND_WORKSHOP]} />);
+        render(
+            <OnlineWorkshopRegistrationForm workshops={[FIRST_WORKSHOP, SECOND_WORKSHOP]} currentTime={CURRENT_TIME} />,
+        );
 
         const firstWorkshopButton = screen.getByRole('button', { name: /4\. 9\. 2026/ });
         expect(firstWorkshopButton.textContent).toContain(FIRST_WORKSHOP.title);
@@ -75,7 +84,7 @@ describe('Online workshop registration form', () => {
     });
 
     it('offers no registration form until an online workshop is published', () => {
-        const { container } = render(<OnlineWorkshopRegistrationForm workshops={[]} />);
+        const { container } = render(<OnlineWorkshopRegistrationForm workshops={[]} currentTime={CURRENT_TIME} />);
 
         expect(container.querySelector('form')).toBeNull();
         expect(screen.getByText(/Zatím není vypsaný další termín\./)).toBeTruthy();

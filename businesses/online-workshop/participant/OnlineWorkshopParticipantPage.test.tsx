@@ -187,6 +187,7 @@ const ATTACHED_COMMUNITY_POLL: WorkshopPoll = {
     question: 'Co si z workshopu odnášíte?',
     isClosed: false,
     isVisible: true,
+    isOtherOptionEnabled: false,
     createdAt: '2026-08-21T19:00:00+02:00',
     updatedAt: '2026-08-21T19:00:00+02:00',
     options: [
@@ -317,6 +318,19 @@ function getCommunityMaterialIndex(materialCards: readonly Element[]): number {
     return materialCards.findIndex((materialCard) => materialCard.contains(communityLink));
 }
 
+/**
+ * Whether one part of the room is reached before another one, in the order the room really puts them in
+ *
+ * Note: A part which the room does not have at all is reached nowhere, so it is before nothing.
+ */
+function isRenderedBefore(firstElement: Element | null, secondElement: Element | null): boolean {
+    if (firstElement === null || secondElement === null) {
+        return false;
+    }
+
+    return (firstElement.compareDocumentPosition(secondElement) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+}
+
 beforeEach(() => {
     window.history.replaceState({}, '', '/cs/online-workshop/participant');
     fetchCommunityMembership.mockResolvedValue(FREE_MEMBERSHIP);
@@ -445,6 +459,26 @@ describe('online workshop participant room', () => {
         expect(screen.getByText('Co si z workshopu odnášíte?')).not.toBeNull();
         expect(screen.getByText('7 · 64 %')).not.toBeNull();
         expect(screen.getByRole('button', { name: /Praktické tipy/ }).hasAttribute('disabled')).toBe(false);
+    });
+
+    it('closes a workshop occurrence with the poll attached to it, below the materials it was held for', async () => {
+        renderParticipantRoom(WORKSHOP_WITH_PRESENTATION, undefined, false, undefined, [ATTACHED_COMMUNITY_POLL]);
+
+        await screen.findByRole('button', { name: 'Free členství. Otevřít možnosti členství' });
+        const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
+        const pollsSection = screen.getByLabelText('Ankety komunity');
+
+        expect(materialsSection?.contains(pollsSection)).toBe(false);
+        expect(isRenderedBefore(materialsSection, pollsSection)).toBe(true);
+    });
+
+    it('keeps the polls of the room which owns them above what that room hands over', () => {
+        renderParticipantRoom(COMMUNITY, WORKSHOP_NAVIGATION, false, undefined, [ATTACHED_COMMUNITY_POLL]);
+
+        const pollsSection = screen.getByLabelText('Ankety komunity');
+        const workshopLinksSection = screen.getByRole('heading', { name: WORKSHOP_NAVIGATION.title }).closest('section');
+
+        expect(isRenderedBefore(pollsSection, workshopLinksSection)).toBe(true);
     });
 
     it('leads from a permanent room to a workshop with the identity the room already verified', () => {

@@ -35,6 +35,7 @@ function createEventOccurrence(occurrence: {
             locationLabel: occurrence.locationLabel,
             priceCzk: occurrence.priceCzk,
             maximumParticipantCount: occurrence.maximumParticipantCount,
+            externalUrl: null,
         },
     };
 }

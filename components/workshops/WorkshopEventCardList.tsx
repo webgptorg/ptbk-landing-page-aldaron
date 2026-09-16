@@ -1,4 +1,5 @@
 import { WorkshopEventCard } from '@/components/workshops/WorkshopEventCard';
+import type { CalendarDayKey } from '@/lib/calendar/calendarMonth';
 import { classNames } from '@/lib/classNames';
 import type { EventListing } from '@/lib/events/eventListing';
 
@@ -11,6 +12,11 @@ type WorkshopEventCardListProps = {
     readonly listings: readonly EventListing[];
     readonly locale: string;
     readonly timeZone: string;
+
+    /**
+     * The day it is today in the country these terms are listed for, see `WorkshopEventCard`
+     */
+    readonly todayDayKey: CalendarDayKey;
     readonly className?: string;
 };
 
@@ -20,12 +26,23 @@ type WorkshopEventCardListProps = {
  * Note: Both views of the terms end in this one list - the cards show every term with it, and the calendar shows the
  *       terms of the chosen day or month with it - so a term is never described in two different ways.
  */
-export function WorkshopEventCardList({ listings, locale, timeZone, className }: WorkshopEventCardListProps) {
+export function WorkshopEventCardList({
+    listings,
+    locale,
+    timeZone,
+    todayDayKey,
+    className,
+}: WorkshopEventCardListProps) {
     return (
         <ul aria-label={WORKSHOP_EVENT_CARD_LIST_LABEL} className={classNames('grid gap-3 sm:grid-cols-2', className)}>
             {listings.map((listing) => (
                 <li key={listing.workshop.id}>
-                    <WorkshopEventCard listing={listing} locale={locale} timeZone={timeZone} />
+                    <WorkshopEventCard
+                        listing={listing}
+                        locale={locale}
+                        timeZone={timeZone}
+                        todayDayKey={todayDayKey}
+                    />
                 </li>
             ))}
         </ul>

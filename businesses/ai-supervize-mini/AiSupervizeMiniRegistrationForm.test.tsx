@@ -22,6 +22,11 @@ vi.mock('@/lib/discounts/discountCodeApi', () => ({
 
 import { AiSupervizeMiniRegistrationForm } from './AiSupervizeMiniRegistrationForm';
 
+/**
+ * Moment the page is read at, which is far enough from every term for none of them to be named rather than dated
+ */
+const CURRENT_TIME = '2026-08-20T09:00:00+02:00';
+
 const ONSITE_EVENT: EventOccurrence = {
     id: 'onsite-event-id',
     kind: 'workshop',
@@ -37,6 +42,7 @@ const ONSITE_EVENT: EventOccurrence = {
         locationLabel: 'Praha',
         priceCzk: 12000,
         maximumParticipantCount: 10,
+        externalUrl: null,
     },
 };
 
@@ -55,6 +61,7 @@ const ONLINE_EVENT: EventOccurrence = {
         locationLabel: '',
         priceCzk: 3000,
         maximumParticipantCount: 50,
+        externalUrl: null,
     },
 };
 
@@ -70,6 +77,7 @@ describe('AI Supervize Mini registration form', () => {
         render(
             <AiSupervizeMiniRegistrationForm
                 events={EVENTS}
+                currentTime={CURRENT_TIME}
                 initialDiscountCode="webinar-2026-08-20"
                 initialActiveDiscountByPlaceId={{
                     'ai-supervize-mini-onsite': null,
@@ -89,6 +97,7 @@ describe('AI Supervize Mini registration form', () => {
         render(
             <AiSupervizeMiniRegistrationForm
                 events={EVENTS}
+                currentTime={CURRENT_TIME}
                 initialDiscountCode="WEBINAR_2026_08_20"
                 initialActiveDiscountByPlaceId={{
                     'ai-supervize-mini-onsite': {
@@ -121,6 +130,7 @@ describe('AI Supervize Mini registration form', () => {
         render(
             <AiSupervizeMiniRegistrationForm
                 events={EVENTS}
+                currentTime={CURRENT_TIME}
                 initialDiscountCode=""
                 initialActiveDiscountByPlaceId={{
                     'ai-supervize-mini-onsite': null,

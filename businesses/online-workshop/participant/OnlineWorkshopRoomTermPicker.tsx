@@ -4,7 +4,7 @@ import { createOnlineWorkshopTermNoteText } from '@/businesses/online-workshop/o
 import { EventTermOptionList } from '@/components/events/EventTermOptionList';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
 import { groupWorkshopsByPhase } from '@/lib/workshops/workshopPhase';
-import { ChevronDown, Clock, History } from 'lucide-react';
+import { ChevronDown, Clock, History, Sparkles } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 
 /**
@@ -14,7 +14,14 @@ const ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY = {
     legend: 'Vyberte si workshop',
     description: 'Do místnosti kteréhokoli workshopu se dostanete stejným jménem a e-mailem.',
     noCurrentTermsMessage: 'Právě teď žádný workshop neběží a další termín zatím není vypsaný.',
+    freshlyPastTermsLabel: 'Právě proběhlo',
     pastTermsLabel: 'Proběhlé workshopy',
+
+    /**
+     * Note: A workshop which has only just been held promises exactly what any finished one does, and says only that
+     *       it was now — what a participant came back for is waiting behind the very same open door.
+     */
+    freshlyPastTermNoteText: 'Právě skončil, místnost zůstává otevřená',
 
     /**
      * Note: A room which is over is worth entering for what stayed in it, and that is all this promises. What a
@@ -43,6 +50,9 @@ type OnlineWorkshopRoomTermPickerProps = {
  * Note: A workshop which runs right now or is still ahead is what a participant is nearly always looking for, so those
  *       terms lead. The ones which are over stay reachable behind one click, because their rooms keep the chat and the
  *       materials of the workshop which was held in them.
+ * Note: A workshop which has only just been held is named on its own, in the open, between the two of them. Somebody
+ *       who was at it last night comes back for what stayed in its room, and asking them to unfold the whole history
+ *       to find the workshop they have just left would hide it among the terms they are not looking for at all.
  */
 export function OnlineWorkshopRoomTermPicker({
     terms,
@@ -56,6 +66,7 @@ export function OnlineWorkshopRoomTermPicker({
         [currentTime, terms],
     );
     const currentTerms = [...termsByPhase.ongoing, ...termsByPhase.upcoming];
+    const freshlyPastTerms = termsByPhase['freshly-past'];
     const { past: pastTerms } = termsByPhase;
     const isSelectedTermPast = pastTerms.some((term) => term.slug === selectedTermSlug);
 
@@ -63,6 +74,18 @@ export function OnlineWorkshopRoomTermPicker({
     //       for is where they can see it. That is asked about the workshop the room was entered with rather than kept
     //       in step with the choice, because from then on it is the participant who opens and closes the history.
     const [isPastTermsShown, setIsPastTermsShown] = useState(isSelectedTermPast);
+
+    // Note: Which term is chosen, which moment the terms are placed against, and how much room a card is given is one
+    //       and the same question for every group this picker offers, so each of them is laid out by the very same
+    //       description of a list and adds nothing but its own terms and its own note.
+    const sharedTermOptionListProps = {
+        selectedTermSlug,
+        onSelectTerm,
+        currentTime,
+        isTopicShown: true,
+        appearance: 'dark',
+        density: 'compact',
+    } as const;
 
     return (
         <fieldset className="min-w-0">
@@ -77,16 +100,27 @@ export function OnlineWorkshopRoomTermPicker({
                 </p>
             ) : (
                 <EventTermOptionList
+                    {...sharedTermOptionListProps}
                     terms={currentTerms}
-                    selectedTermSlug={selectedTermSlug}
-                    onSelectTerm={onSelectTerm}
-                    isTopicShown={true}
-                    appearance="dark"
-                    density="compact"
                     noteIcon={Clock}
                     createNoteText={createOnlineWorkshopTermNoteText}
                     className="mt-3"
                 />
+            )}
+
+            {freshlyPastTerms.length > 0 && (
+                <>
+                    <p className="mt-3 px-1 text-xs font-semibold text-amber-200">
+                        {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.freshlyPastTermsLabel} ({freshlyPastTerms.length})
+                    </p>
+                    <EventTermOptionList
+                        {...sharedTermOptionListProps}
+                        terms={freshlyPastTerms}
+                        noteIcon={Sparkles}
+                        createNoteText={() => ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.freshlyPastTermNoteText}
+                        className="mt-1"
+                    />
+                </>
             )}
 
             {pastTerms.length > 0 && (
@@ -106,13 +140,9 @@ export function OnlineWorkshopRoomTermPicker({
                     </button>
                     {isPastTermsShown && (
                         <EventTermOptionList
+                            {...sharedTermOptionListProps}
                             id={pastTermsListId}
                             terms={pastTerms}
-                            selectedTermSlug={selectedTermSlug}
-                            onSelectTerm={onSelectTerm}
-                            isTopicShown={true}
-                            appearance="dark"
-                            density="compact"
                             noteIcon={History}
                             createNoteText={() => ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.pastTermNoteText}
                             className="mt-1"
