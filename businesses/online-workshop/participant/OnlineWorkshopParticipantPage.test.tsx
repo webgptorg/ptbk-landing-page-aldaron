@@ -187,6 +187,7 @@ const ATTACHED_COMMUNITY_POLL: WorkshopPoll = {
     question: 'Co si z workshopu odnášíte?',
     isClosed: false,
     isVisible: true,
+    isOtherOptionEnabled: false,
     createdAt: '2026-08-21T19:00:00+02:00',
     updatedAt: '2026-08-21T19:00:00+02:00',
     options: [

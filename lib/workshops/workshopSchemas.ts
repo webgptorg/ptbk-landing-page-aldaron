@@ -225,6 +225,7 @@ export const workshopPollCreateSchema = z.object({
         .refine(areWorkshopPollOptionLabelsUnique, 'Poll options must be unique'),
     isClosed: z.boolean().default(false),
     isVisible: z.boolean().default(true),
+    isOtherOptionEnabled: z.boolean().default(false),
     attachedWorkshopIds: workshopPollWorkshopIdsSchema,
 });
 
@@ -245,12 +246,18 @@ export const workshopPollUpdateSchema = z.object({
         }, 'Poll options must not repeat'),
     isClosed: z.boolean(),
     isVisible: z.boolean(),
+    isOtherOptionEnabled: z.boolean(),
     attachedWorkshopIds: workshopPollWorkshopIdsSchema,
 });
 
-export const workshopPollVoteSchema = z.object({
-    optionId: z.string().uuid(),
-});
+/**
+ * A participant either selects an answer already shown by the poll or supplies one new answer. Strict branches make
+ * the two actions exclusive, so a forged request cannot claim both choices at once.
+ */
+export const workshopPollVoteSchema = z.union([
+    z.object({ optionId: z.string().uuid() }).strict(),
+    z.object({ otherOptionLabel: workshopPollOptionSchema }).strict(),
+]);
 
 export const workshopPollOptionArtificialVoteSchema = z.object({
     artificialVoteAdjustment: z

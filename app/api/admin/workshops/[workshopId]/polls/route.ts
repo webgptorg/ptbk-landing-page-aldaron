@@ -45,6 +45,7 @@ export async function POST(request: NextRequest, context: AdminWorkshopPollsRout
         target_options: parsedResult.data.options,
         target_is_closed: parsedResult.data.isClosed,
         target_is_visible: parsedResult.data.isVisible,
+        target_is_other_option_enabled: parsedResult.data.isOtherOptionEnabled,
         target_attached_workshop_ids: parsedResult.data.attachedWorkshopIds,
     });
     if (error || pollId === null) {

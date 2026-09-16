@@ -46,7 +46,12 @@ import type {
     SubscribeToWorkshopRepositoryCommits,
     WorkshopRepositoryCommitListener,
 } from '@/lib/workshops/workshopRepositoryProgress';
-import type { WorkshopCommentSort, WorkshopContentBlock, WorkshopPublicState } from '@/lib/workshops/workshopTypes';
+import type {
+    WorkshopCommentSort,
+    WorkshopContentBlock,
+    WorkshopPollVoteValues,
+    WorkshopPublicState,
+} from '@/lib/workshops/workshopTypes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DISCONNECTED_REFRESH_MINIMUM_MILLISECONDS = 25_000;
@@ -93,9 +98,10 @@ type WorkshopParticipantController = {
     readonly upvoteComment: (commentId: string) => Promise<void>;
 
     /**
-     * Chooses an option of a community poll, or changes this participant's earlier choice.
+     * Chooses an option of a community poll, writes an enabled other answer, or changes this participant's earlier
+     * choice.
      */
-    readonly voteOnPoll: (pollId: string, optionId: string) => Promise<boolean>;
+    readonly voteOnPoll: (pollId: string, voteValues: WorkshopPollVoteValues) => Promise<boolean>;
 
     /**
      * Moderates one message of the chat, which only a moderator of the room is offered
@@ -751,10 +757,10 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
     );
 
     const voteOnPoll = useCallback(
-        async (pollId: string, optionId: string): Promise<boolean> => {
+        async (pollId: string, voteValues: WorkshopPollVoteValues): Promise<boolean> => {
             setErrorMessage(null);
             try {
-                const { poll } = await voteOnWorkshopPoll(workshopSlug, pollId, optionId);
+                const { poll } = await voteOnWorkshopPoll(workshopSlug, pollId, voteValues);
                 setState((currentState) =>
                     currentState === null
                         ? currentState

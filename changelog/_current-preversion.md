@@ -1,5 +1,11 @@
 # Current preversion
 
+- An administrator can now enable an `Other` answer for a community poll. In both `/cs/komunita` and an attached
+  `/cs/online-workshop/participant?workshop=` room, a member can write an answer which immediately becomes a normal,
+  anonymous option and receives that member's shared e-mail-owned vote at the same time. Everyone can then vote for
+  it from either room; duplicate wording reuses the existing option, and later administration edits keep member-written
+  answers intact.
+
 - After an online workshop has its recorded end, `/cs/online-workshop/participant?workshop=` now offers its attendee a
   downloadable, paginated wrap-up PDF. It uses the same participant-visible workshop description, takeaways already
   authored in material titles, headings and lists, and material text/links the room already unlocked for that person;

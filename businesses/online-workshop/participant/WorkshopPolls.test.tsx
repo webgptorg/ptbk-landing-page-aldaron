@@ -13,6 +13,7 @@ const POLL: WorkshopPoll = {
     question: 'Kterému tématu se máme věnovat?',
     isClosed: false,
     isVisible: true,
+    isOtherOptionEnabled: false,
     createdAt: '2026-08-24T10:00:00.000Z',
     updatedAt: '2026-08-24T10:00:00.000Z',
     options: [
@@ -55,7 +56,7 @@ describe('community polls', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /Nasazování/ }));
 
-        await waitFor(() => expect(onVote).toHaveBeenCalledWith('poll-1', 'option-2'));
+        await waitFor(() => expect(onVote).toHaveBeenCalledWith('poll-1', { optionId: 'option-2' }));
     });
 
     it('keeps the result readable but disables a closed poll and a banned member', () => {
@@ -80,7 +81,27 @@ describe('community polls', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /Nasazování/ }));
 
-        await waitFor(() => expect(onVote).toHaveBeenCalledWith('poll-1', 'option-2'));
+        await waitFor(() => expect(onVote).toHaveBeenCalledWith('poll-1', { optionId: 'option-2' }));
+    });
+
+    it('writes an enabled other answer, votes for it immediately, and clears the field after saving', async () => {
+        const onVote = vi.fn().mockResolvedValue(true);
+        render(
+            <WorkshopPolls
+                polls={[{ ...POLL, isOtherOptionEnabled: true }]}
+                isInteractionBanned={false}
+                onVote={onVote}
+            />,
+        );
+
+        const otherOptionInput = screen.getByLabelText('Jiná odpověď');
+        fireEvent.change(otherOptionInput, { target: { value: ' Bezpečnost ' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Přidat a hlasovat' }));
+
+        await waitFor(() =>
+            expect(onVote).toHaveBeenCalledWith('poll-1', { otherOptionLabel: 'Bezpečnost' }),
+        );
+        await waitFor(() => expect((otherOptionInput as HTMLInputElement).value).toBe(''));
     });
 
     it('does not show badges for the poll occurrences it is attached to', () => {

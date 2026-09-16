@@ -129,8 +129,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   discussions do not. The invitation names the community's sections by the names
   the community itself uses.
 - Community polls attached to workshops are shared. A normalized email gives a
-  member one vote across the community and all attached workshops. Workshops
-  may display and accept votes, but the community owns administration.
+  member one vote across the community and all attached workshops. An
+  administrator can enable an Other answer: a member-written response becomes
+  one shared, anonymous option and receives that member's vote atomically, so
+  every room can vote for it; later poll edits keep member-written answers.
+  Workshops may display and accept votes, but the community owns administration.
 - The participant room owns the membership badge and popup. Community and live
   workshop rooms use the same membership for the connecting email, and checkout
   returns to the room where it started. Membership is offered only by room kinds

@@ -126,6 +126,7 @@ export type WorkshopPollCreateValues = {
     readonly options: readonly string[];
     readonly isClosed: boolean;
     readonly isVisible: boolean;
+    readonly isOtherOptionEnabled: boolean;
 
     /**
      * The workshop occurrences this poll is about, which the community administers together with the poll itself
@@ -143,6 +144,7 @@ export type WorkshopPollUpdateValues = {
     readonly options: readonly WorkshopPollOptionWriteValues[];
     readonly isClosed: boolean;
     readonly isVisible: boolean;
+    readonly isOtherOptionEnabled: boolean;
     readonly attachedWorkshopIds: readonly string[];
 };
 

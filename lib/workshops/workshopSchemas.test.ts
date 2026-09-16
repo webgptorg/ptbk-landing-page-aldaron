@@ -388,6 +388,7 @@ describe('workshop request validation', () => {
             options: ['Testování', 'Nasazování'],
             isClosed: false,
             isVisible: true,
+            isOtherOptionEnabled: false,
             attachedWorkshopIds: [],
         });
         expect(
@@ -400,6 +401,15 @@ describe('workshop request validation', () => {
         expect(workshopPollVoteSchema.parse({ optionId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde' })).toEqual({
             optionId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
         });
+        expect(workshopPollVoteSchema.parse({ otherOptionLabel: ' Bezpečnost ' })).toEqual({
+            otherOptionLabel: 'Bezpečnost',
+        });
+        expect(
+            workshopPollVoteSchema.safeParse({
+                optionId: '5a7eb2ad-2583-4e98-9640-50bc773b5fde',
+                otherOptionLabel: 'Bezpečnost',
+            }).success,
+        ).toBe(false);
         expect(
             workshopPollUpdateSchema.parse({
                 question: ' Upravené téma ',
@@ -409,12 +419,14 @@ describe('workshop request validation', () => {
                 ],
                 isClosed: false,
                 isVisible: false,
+                isOtherOptionEnabled: true,
             }),
         ).toEqual({
             question: 'Upravené téma',
             options: [{ id: '5a7eb2ad-2583-4e98-9640-50bc773b5fde', label: 'Testování' }, { label: 'Nasazování' }],
             isClosed: false,
             isVisible: false,
+            isOtherOptionEnabled: true,
             attachedWorkshopIds: [],
         });
         expect(

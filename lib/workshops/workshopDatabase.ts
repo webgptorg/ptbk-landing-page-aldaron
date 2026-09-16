@@ -69,6 +69,7 @@ import type {
     WorkshopParticipantTimelineEvent,
     WorkshopPoll,
     WorkshopPollOption,
+    WorkshopPollVoteValues,
     WorkshopPublicState,
     WorkshopReaction,
     WorkshopReactionCount,
@@ -364,11 +365,12 @@ type WorkshopPollRow = {
     readonly question: string;
     readonly is_closed: boolean;
     readonly is_visible: boolean;
+    readonly is_other_option_enabled: boolean;
     readonly created_at: string;
     readonly updated_at: string;
 };
 
-const WORKSHOP_POLL_COLUMNS = 'id, question, is_closed, is_visible, created_at, updated_at';
+const WORKSHOP_POLL_COLUMNS = 'id, question, is_closed, is_visible, is_other_option_enabled, created_at, updated_at';
 
 type WorkshopPollOptionRow = {
     readonly id: string;
@@ -376,9 +378,11 @@ type WorkshopPollOptionRow = {
     readonly label: string;
     readonly sort_order: number;
     readonly artificial_vote_count: number;
+    readonly is_created_by_participant: boolean;
 };
 
-const WORKSHOP_POLL_OPTION_COLUMNS = 'id, poll_id, label, sort_order, artificial_vote_count';
+const WORKSHOP_POLL_OPTION_COLUMNS =
+    'id, poll_id, label, sort_order, artificial_vote_count, is_created_by_participant';
 
 type WorkshopPollVoteCountRow = {
     readonly option_id: string;
@@ -795,6 +799,7 @@ function mapWorkshopAdminPollOptionRow(
         ...mapWorkshopPollOptionRow(row, voteCountByOptionId, selectedOptionIds),
         realVoteCount,
         artificialVoteCount,
+        isCreatedByParticipant: row.is_created_by_participant,
     };
 }
 
@@ -808,6 +813,7 @@ function mapWorkshopPollRow<Option extends WorkshopPollOption>(
         question: row.question,
         isClosed: row.is_closed,
         isVisible: row.is_visible,
+        isOtherOptionEnabled: row.is_other_option_enabled,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         options,
@@ -815,7 +821,7 @@ function mapWorkshopPollRow<Option extends WorkshopPollOption>(
     };
 }
 
-type WorkshopPollVoteErrorKind = 'not-found' | 'closed' | 'invalid-participant' | 'database';
+type WorkshopPollVoteErrorKind = 'not-found' | 'closed' | 'invalid-participant' | 'invalid-vote' | 'database';
 
 export type WorkshopPollVoteSaveResult =
     | { readonly isSuccessful: true }
@@ -830,25 +836,31 @@ const WORKSHOP_POLL_VOTE_ERROR_KIND_BY_DATABASE_MESSAGE: Readonly<
     WORKSHOP_POLL_CLOSED: 'closed',
     WORKSHOP_POLL_PARTICIPANT_INVALID: 'invalid-participant',
     WORKSHOP_POLL_VOTER_EMAIL_INVALID: 'invalid-participant',
+    WORKSHOP_POLL_VOTE_INVALID: 'invalid-vote',
+    WORKSHOP_POLL_OTHER_OPTION_INVALID: 'invalid-vote',
+    WORKSHOP_POLL_OTHER_OPTION_DISABLED: 'invalid-vote',
+    WORKSHOP_POLL_OTHER_OPTION_LIMIT_REACHED: 'invalid-vote',
 };
 
 /**
  * Persists one shared community-poll choice from the room a member currently entered.
  *
  * Note: The database owns the cross-room authorization and locks the poll with the write, so an attached workshop
- *       cannot create a second poll vote and an administrator cannot close a poll halfway through a choice.
+ *       cannot create a second poll vote, a member-written answer and its first vote cannot split apart, and an
+ *       administrator cannot close a poll halfway through either choice.
  */
 export async function saveWorkshopPollVote(
     supabase: SupabaseClient,
     workshopRow: Pick<WorkshopRow, 'id'>,
     participant: Pick<WorkshopParticipant, 'id' | 'email'>,
     pollId: string,
-    optionId: string,
+    voteValues: WorkshopPollVoteValues,
 ): Promise<WorkshopPollVoteSaveResult> {
     const { error } = await supabase.rpc('set_community_workshop_poll_vote', {
         target_room_id: workshopRow.id,
         target_poll_id: pollId,
-        target_option_id: optionId,
+        target_option_id: 'optionId' in voteValues ? voteValues.optionId : null,
+        target_other_option_label: 'otherOptionLabel' in voteValues ? voteValues.otherOptionLabel : null,
         target_participant_id: participant.id,
         target_voter_email: normalizeWorkshopParticipantEmail(participant.email),
     });

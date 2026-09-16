@@ -36,6 +36,7 @@ type WorkshopPollFormValues = {
     readonly options: readonly WorkshopPollOptionWriteValues[];
     readonly isClosed: boolean;
     readonly isVisible: boolean;
+    readonly isOtherOptionEnabled: boolean;
     readonly attachedWorkshopIds: readonly string[];
 };
 
@@ -71,6 +72,7 @@ const INITIAL_POLL_FORM_VALUES: WorkshopPollFormValues = {
     options: [{ label: '' }, { label: '' }],
     isClosed: false,
     isVisible: true,
+    isOtherOptionEnabled: false,
     attachedWorkshopIds: [],
 };
 
@@ -80,9 +82,12 @@ function createPollUpdateValues(
 ): WorkshopPollUpdateValues {
     return {
         question: poll.question,
-        options: poll.options.map((option) => ({ id: option.id, label: option.label })),
+        options: poll.options
+            .filter((option) => !option.isCreatedByParticipant)
+            .map((option) => ({ id: option.id, label: option.label })),
         isClosed: changes.isClosed ?? poll.isClosed,
         isVisible: changes.isVisible ?? poll.isVisible,
+        isOtherOptionEnabled: poll.isOtherOptionEnabled,
         attachedWorkshopIds: poll.attachedWorkshops.map((attachedWorkshop) => attachedWorkshop.id),
     };
 }
@@ -92,6 +97,7 @@ function getValidatedPollFormValues(
     options: readonly WorkshopPollOptionWriteValues[],
     isClosed: boolean,
     isVisible: boolean,
+    isOtherOptionEnabled: boolean,
     attachedWorkshopIds: readonly string[],
 ): { readonly values: WorkshopPollFormValues | null; readonly error: string | null } {
     const trimmedQuestion = question.trim();
@@ -107,7 +113,14 @@ function getValidatedPollFormValues(
     }
 
     return {
-        values: { question: trimmedQuestion, options: trimmedOptions, isClosed, isVisible, attachedWorkshopIds },
+        values: {
+            question: trimmedQuestion,
+            options: trimmedOptions,
+            isClosed,
+            isVisible,
+            isOtherOptionEnabled,
+            attachedWorkshopIds,
+        },
         error: null,
     };
 }
@@ -130,6 +143,7 @@ function WorkshopPollForm({
     const [options, setOptions] = useState<readonly WorkshopPollOptionWriteValues[]>(initialFormValues.options);
     const [isClosed, setIsClosed] = useState(initialFormValues.isClosed);
     const [isVisible, setIsVisible] = useState(initialFormValues.isVisible);
+    const [isOtherOptionEnabled, setIsOtherOptionEnabled] = useState(initialFormValues.isOtherOptionEnabled);
     const [attachedWorkshopIds, setAttachedWorkshopIds] = useState<readonly string[]>(
         initialFormValues.attachedWorkshopIds,
     );
@@ -166,12 +180,20 @@ function WorkshopPollForm({
         setOptions(INITIAL_POLL_FORM_VALUES.options);
         setIsClosed(INITIAL_POLL_FORM_VALUES.isClosed);
         setIsVisible(INITIAL_POLL_FORM_VALUES.isVisible);
+        setIsOtherOptionEnabled(INITIAL_POLL_FORM_VALUES.isOtherOptionEnabled);
         setAttachedWorkshopIds(INITIAL_POLL_FORM_VALUES.attachedWorkshopIds);
     };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const validated = getValidatedPollFormValues(question, options, isClosed, isVisible, attachedWorkshopIds);
+        const validated = getValidatedPollFormValues(
+            question,
+            options,
+            isClosed,
+            isVisible,
+            isOtherOptionEnabled,
+            attachedWorkshopIds,
+        );
         if (validated.values === null) {
             setFormError(validated.error);
             return;
@@ -250,7 +272,7 @@ function WorkshopPollForm({
                     </div>
                 ))}
             </div>
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-cyan-100 bg-white px-3 py-2 text-sm text-slate-700">
                     <input
                         type="checkbox"
@@ -268,6 +290,15 @@ function WorkshopPollForm({
                         className="h-4 w-4 accent-cyan-600"
                     />
                     Hlasování je otevřené
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-cyan-100 bg-white px-3 py-2 text-sm text-slate-700">
+                    <input
+                        type="checkbox"
+                        checked={isOtherOptionEnabled}
+                        onChange={(event) => setIsOtherOptionEnabled(event.target.checked)}
+                        className="h-4 w-4 accent-cyan-600"
+                    />
+                    Povolit vlastní odpověď
                 </label>
             </div>
             <WorkshopPollWorkshopPicker
@@ -389,6 +420,7 @@ export function WorkshopPollAdmin({
                                             {getWorkshopPollVoteCount(poll)} hlasů ·{' '}
                                             {poll.isClosed ? 'Hlasování ukončeno' : 'Hlasování probíhá'} ·{' '}
                                             {poll.isVisible ? 'Viditelná pro členy' : 'Skrytá před členy'}
+                                            {poll.isOtherOptionEnabled ? ' · Vlastní odpovědi povoleny' : ''}
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap justify-end gap-2">
@@ -461,6 +493,7 @@ export function WorkshopPollAdmin({
                                                 </div>
                                                 <p className="mt-1 text-xs text-slate-500">
                                                     Skutečné: {option.realVoteCount} · Umělé: {option.artificialVoteCount}
+                                                    {option.isCreatedByParticipant ? ' · Napsal člen' : ''}
                                                 </p>
                                                 <div className="mt-3 flex flex-wrap items-end gap-2">
                                                     <label className="text-xs font-medium text-violet-950">
@@ -551,6 +584,7 @@ export function WorkshopPollAdmin({
                             options: values.options.map((option) => option.label),
                             isClosed: values.isClosed,
                             isVisible: values.isVisible,
+                            isOtherOptionEnabled: values.isOtherOptionEnabled,
                             attachedWorkshopIds: values.attachedWorkshopIds,
                         })
                     }

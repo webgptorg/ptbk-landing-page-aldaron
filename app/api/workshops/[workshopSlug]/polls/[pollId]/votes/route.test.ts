@@ -56,6 +56,7 @@ const POLL: WorkshopPoll = {
     question: 'Které téma chcete probrat?',
     isClosed: false,
     isVisible: true,
+    isOtherOptionEnabled: false,
     createdAt: '2026-09-01T10:00:00.000Z',
     updatedAt: '2026-09-01T10:00:00.000Z',
     options: [
@@ -71,10 +72,10 @@ const POLL: WorkshopPoll = {
 };
 const ROUTE_CONTEXT = { params: Promise.resolve({ workshopSlug: WORKSHOP_SLUG, pollId: POLL_ID }) };
 
-function createRequest(): NextRequest {
+function createRequest(body: unknown = { optionId: SELECTED_OPTION_ID }): NextRequest {
     return new NextRequest(`https://promptbook.studio/api/workshops/${WORKSHOP_SLUG}/polls/${POLL_ID}/votes`, {
         method: 'POST',
-        body: JSON.stringify({ optionId: SELECTED_OPTION_ID }),
+        body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' },
     });
 }
@@ -113,9 +114,23 @@ describe('workshop-attached community poll voting endpoint', () => {
             WORKSHOP_ROW,
             PARTICIPANT,
             POLL_ID,
-            SELECTED_OPTION_ID,
+            { optionId: SELECTED_OPTION_ID },
         );
         expect(loadWorkshopPollsMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT.email);
+        expect(broadcastWorkshopEventMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, { kind: 'state-changed' });
+    });
+
+    it('creates and votes for a member-written other option through the same shared endpoint', async () => {
+        const response = await POST(createRequest({ otherOptionLabel: 'Bezpečnost' }), ROUTE_CONTEXT);
+
+        expect(response.status).toBe(200);
+        expect(saveWorkshopPollVoteMock).toHaveBeenCalledWith(
+            SUPABASE,
+            WORKSHOP_ROW,
+            PARTICIPANT,
+            POLL_ID,
+            { otherOptionLabel: 'Bezpečnost' },
+        );
         expect(broadcastWorkshopEventMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, { kind: 'state-changed' });
     });
 

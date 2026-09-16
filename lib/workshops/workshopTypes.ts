@@ -453,7 +453,23 @@ export type WorkshopPollOption = {
 export type WorkshopAdminPollOption = WorkshopPollOption & {
     readonly realVoteCount: number;
     readonly artificialVoteCount: number;
+
+    /**
+     * A member wrote this answer through the poll's optional other-answer field. It stays out of the ordinary editor,
+     * so an administrator changing prepared choices cannot accidentally remove what members already contributed.
+     */
+    readonly isCreatedByParticipant: boolean;
 };
+
+/**
+ * One request to choose an existing answer or write a new answer through an enabled other-answer field.
+ *
+ * Note: Both public rooms use this single shape, which makes an answer written in one room immediately vote in the
+ * same shared poll rather than creating a room-local response.
+ */
+export type WorkshopPollVoteValues =
+    | { readonly optionId: string; readonly otherOptionLabel?: never }
+    | { readonly optionId?: never; readonly otherOptionLabel: string };
 
 /**
  * A community question prepared by an administrator. Poll infrastructure is shared with the room model, while the
@@ -464,6 +480,9 @@ export type WorkshopPoll = {
     readonly question: string;
     readonly isClosed: boolean;
     readonly isVisible: boolean;
+
+    /** Whether a member may add an answer which becomes a normal voteable choice for everybody. */
+    readonly isOtherOptionEnabled: boolean;
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly options: readonly WorkshopPollOption[];
