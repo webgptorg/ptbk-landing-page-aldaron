@@ -27,6 +27,7 @@ import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { isWorkshopPanelOffered, type WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import { WORKSHOP_SEARCH_PARAMETER_NAME } from '@/lib/workshops/workshopParticipantLink';
+import { getWorkshopPollPlacement } from '@/lib/workshops/workshopPollPlacement';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import type { WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
@@ -276,6 +277,22 @@ export function OnlineWorkshopParticipantPage({
     const isPanelOffered = (panelKey: WorkshopPanelKey) =>
         isWorkshopPanelOffered(state.workshop.kind, state.workshop.disabledPanels, panelKey);
 
+    /*
+     * Note: The polls of the room are written once and put where the kind of this room keeps them, so the place a
+     *       member reads them from can never offer a different poll or a different vote than the other one would.
+     */
+    const pollsPanel = isWorkshopPollVisible ? (
+        <WorkshopPolls
+            className="mt-4 first:mt-0"
+            polls={state.polls}
+            isInteractionBanned={state.participant.isInteractionBanned}
+            onVote={controller.voteOnPoll}
+        />
+    ) : null;
+    const pollPlacement = getWorkshopPollPlacement(state.workshop.kind);
+    const pollsBeforeMaterials = pollPlacement === 'before-materials' ? pollsPanel : null;
+    const pollsAfterMaterials = pollPlacement === 'after-materials' ? pollsPanel : null;
+
     const roomLayout = (
         <div className="min-h-screen bg-[#06131b] text-slate-200">
             <header className="border-b border-white/[0.07] bg-[#071820]/90 backdrop-blur">
@@ -366,13 +383,7 @@ export function OnlineWorkshopParticipantPage({
                             participantIdentity={state.participant}
                         />
                     )}
-                    {isWorkshopPollVisible && (
-                        <WorkshopPolls
-                            polls={state.polls}
-                            isInteractionBanned={state.participant.isInteractionBanned}
-                            onVote={controller.voteOnPoll}
-                        />
-                    )}
+                    {pollsBeforeMaterials}
                     {workshopNavigation !== undefined && (
                         <WorkshopLinksPanel
                             workshops={workshopNavigation.workshops}
@@ -411,16 +422,24 @@ export function OnlineWorkshopParticipantPage({
                     onModerateAuthor={controller.moderateAuthor}
                 />
 
-                {isMaterialsShown && (
+                {/*
+                  * Note: What the room hands over and the polls it closes with share one cell of the layout, so a
+                  *       poll always follows the materials directly instead of an empty row being kept for a room
+                  *       which shows one of the two.
+                  */}
+                {(isMaterialsShown || pollsAfterMaterials !== null) && (
                     <div className="min-w-0 lg:col-start-1 lg:row-start-2">
-                        <WorkshopContent
-                            contentBlocks={state.contentBlocks}
-                            nextContentUnlockAt={state.nextContentUnlockAt}
-                            newlyUnlockedContentBlockIds={controller.newlyUnlockedContentBlockIds}
-                            paidMembersOnlyContentPreviews={state.paidMembersOnlyContentPreviews}
-                            specialMaterials={specialMaterials}
-                            title={materialsTitle}
-                        />
+                        {isMaterialsShown && (
+                            <WorkshopContent
+                                contentBlocks={state.contentBlocks}
+                                nextContentUnlockAt={state.nextContentUnlockAt}
+                                newlyUnlockedContentBlockIds={controller.newlyUnlockedContentBlockIds}
+                                paidMembersOnlyContentPreviews={state.paidMembersOnlyContentPreviews}
+                                specialMaterials={specialMaterials}
+                                title={materialsTitle}
+                            />
+                        )}
+                        {pollsAfterMaterials}
                     </div>
                 )}
             </main>

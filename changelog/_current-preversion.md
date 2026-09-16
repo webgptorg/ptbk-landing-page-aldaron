@@ -1,5 +1,13 @@
 # Current preversion
 
+- Moved the community polls attached to an occurrence to the bottom of `/cs/online-workshop/participant?workshop=`.
+  A participant now reads the stage, the invitation, and everything the workshop hands over in its materials first, and
+  is asked for their vote below them, because a poll a workshop is merely the subject of matters less to its
+  participant than the materials they came for. The poll itself, its options, its written answers and the one shared
+  e-mail-owned vote are unchanged, and `/cs/komunita` keeps its own polls above its materials, because that is where
+  the community makes its decisions rather than being asked about somebody else's. Where the polls of a room belong is
+  now decided once, by the kind of that room, so the two rooms cannot drift into their own orders.
+
 - Let `/cs/komunita` list the conferences and workshops which lecturers of the community speak at elsewhere. A term of
   the new `Externí akce` kind of event is administered in `/admin/workshops` beside every other term and carries one
   thing the terms held here never do: the address of its organizer, which is where its card and its calendar day lead,

@@ -2,12 +2,17 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { getWorkshopPollOptionVotePercentage, getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
 import type { WorkshopPoll, WorkshopPollVoteValues } from '@/lib/workshops/workshopTypes';
 import { Check } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 type WorkshopPollsProps = {
+    /**
+     * Where the room which shows these polls put them, which is the one thing about them that room decides
+     */
+    readonly className?: string;
     readonly polls: readonly WorkshopPoll[];
     readonly isInteractionBanned: boolean;
     /**
@@ -22,6 +27,7 @@ type WorkshopPollsProps = {
  * they used to make it.
  */
 export function WorkshopPolls({
+    className,
     polls,
     isInteractionBanned,
     onVote,
@@ -64,7 +70,7 @@ export function WorkshopPolls({
     };
 
     return (
-        <section aria-label="Ankety komunity" className="space-y-4">
+        <section aria-label="Ankety komunity" className={cn('space-y-4', className)}>
             {polls.map((poll) => {
                 const totalVoteCount = getWorkshopPollVoteCount(poll);
                 const isVoting = votingPollId === poll.id;

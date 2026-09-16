@@ -135,6 +135,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   one shared, anonymous option and receives that member's vote atomically, so
   every room can vote for it; later poll edits keep member-written answers.
   Workshops may display and accept votes, but the community owns administration.
+  Where a room puts its polls is decided once, in
+  `lib/workshops/workshopPollPlacement.ts`: the community, which decides in its
+  own polls, opens with them, while a workshop, which is only their subject,
+  keeps them below the materials it was held for.
 - The participant room owns the membership badge and popup. Community and live
   workshop rooms use the same membership for the connecting email, and checkout
   returns to the room where it started. Membership is offered only by room kinds
