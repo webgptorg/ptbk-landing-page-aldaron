@@ -256,6 +256,7 @@ describe('workshop stage', () => {
         const requestFullscreen = vi.fn().mockResolvedValue(undefined);
 
         expect(videoFrame).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'Stáhnout shrnutí workshopu (PDF)' })).toBeNull();
         Object.defineProperty(videoFrame, 'requestFullscreen', { value: requestFullscreen });
 
         expect(videoFrame?.getAttribute('allow')).toContain('fullscreen');
@@ -371,6 +372,7 @@ describe('workshop stage', () => {
         expect(screen.getByRole('link', { name: /Materiály pro další krok/ }).getAttribute('href')).toBe(
             '#workshop-material-follow-up-material',
         );
+        expect(screen.getByRole('button', { name: 'Stáhnout shrnutí workshopu (PDF)' })).not.toBeNull();
         expect(reactionSource.listenerCount()).toBe(1);
     });
 

@@ -1,5 +1,11 @@
 # Current preversion
 
+- After an online workshop has its recorded end, `/cs/online-workshop/participant?workshop=` now offers its attendee a
+  downloadable, paginated wrap-up PDF. It uses the same participant-visible workshop description, takeaways already
+  authored in material titles, headings and lists, and material text/links the room already unlocked for that person;
+  the public presentation is included too. The PDF is created locally only when requested, so it adds no admin setting,
+  database record, or new source of material access.
+
 - Added a configurable start offset in seconds to the stage settings of `/admin/workshops`. After an online workshop
   ends, `/cs/online-workshop/participant?workshop=` now opens the paid member replay at that position, so the same
   uploaded stream can skip its empty waiting room without a second trimmed upload. The countdown and live stream are

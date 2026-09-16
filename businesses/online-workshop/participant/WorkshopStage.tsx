@@ -49,6 +49,7 @@ type WorkshopStageProps = {
      * in isolation while it is still responsible for choosing the correct temporal phase.
      */
     readonly feedback?: WorkshopFeedback | null;
+    readonly contentBlocks?: readonly WorkshopContentBlock[];
     readonly followUpContentBlock?: WorkshopContentBlock | null;
     readonly stageComment?: WorkshopCommentReference | null;
 
@@ -90,6 +91,7 @@ export function WorkshopStage({
     repository = null,
     subscribeToRepositoryCommits,
     feedback = null,
+    contentBlocks = [],
     followUpContentBlock = null,
     stageComment = null,
     paidMembersOnlyVideo = null,
@@ -189,6 +191,8 @@ export function WorkshopStage({
                 </div>
             ) : isWorkshopPast ? (
                 <WorkshopWrapUp
+                    workshop={workshop}
+                    contentBlocks={contentBlocks}
                     feedback={feedback}
                     followUpContentBlock={followUpContentBlock}
                     paidMembersOnlyVideo={paidMembersOnlyVideo}
