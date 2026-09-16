@@ -1,11 +1,5 @@
 # Current preversion
 
-- Replaced the centered cookie card across the site with a compact, responsive bottom bar. Its shared light, dark,
-  and podcast appearances also style the settings dialog; its measured height sizes full-height heroes and forms and reserves space for page content,
-  the podcast player, coder badge, booking notices, and administrative table scrollbars. Mobile controls wrap into
-  large tap targets and respect safe areas. Visitors can choose only necessary cookies directly, revisit their saved
-  preferences, and reopen settings repeatedly through the privacy-policy link.
-
 - Placed the community material of `/cs/online-workshop/participant?workshop=` by what the member reading it has: a
   participant who does not pay for the membership is invited into the community before the materials of the workshop,
   while a paying member keeps that invitation at the end of the list as one more way on. The card itself, its link and

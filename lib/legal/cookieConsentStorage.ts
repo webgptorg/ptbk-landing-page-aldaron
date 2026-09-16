@@ -41,21 +41,6 @@ export function isCookieChoiceMade(): boolean {
     return localStorage.getItem(COOKIE_CHOICE_STORAGE_KEY) !== null;
 }
 
-/** Reopening settings starts from the visitor's saved choice; missing or invalid preferences grant nothing extra. */
-export function readCookiePreferences(): CookiePreferences {
-    try {
-        const storedPreferences = JSON.parse(
-            localStorage.getItem(COOKIE_PREFERENCES_STORAGE_KEY) ?? 'null',
-        ) as CookiePreferences;
-        return {
-            isAnalyticsAllowed: storedPreferences?.isAnalyticsAllowed === true,
-            isMarketingAllowed: storedPreferences?.isMarketingAllowed === true,
-        };
-    } catch {
-        return ONLY_NECESSARY_COOKIES_ALLOWED;
-    }
-}
-
 /**
  * Remembers what the visitor allowed
  *
@@ -69,8 +54,8 @@ export function saveCookiePreferences(preferences: CookiePreferences): void {
         COOKIE_PREFERENCES_STORAGE_KEY,
         JSON.stringify({
             necessary: true,
-            isAnalyticsAllowed: preferences.isAnalyticsAllowed,
-            isMarketingAllowed: preferences.isMarketingAllowed,
+            analytics: preferences.isAnalyticsAllowed,
+            marketing: preferences.isMarketingAllowed,
         }),
     );
     localStorage.setItem(COOKIE_CHOICE_STORAGE_KEY, 'true');

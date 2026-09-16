@@ -51,9 +51,8 @@ export function TableScrollArea({
                 createPortal(
                     <div
                         ref={fixedScrollbarRef}
-                        className="admin-fixed-horizontal-scrollbar fixed z-40 h-5 overflow-x-scroll overflow-y-hidden border-t border-slate-300 bg-white/95 shadow-[0_-2px_8px_rgba(15,23,42,0.14)] backdrop-blur-sm"
+                        className="admin-fixed-horizontal-scrollbar fixed bottom-0 z-40 h-5 overflow-x-scroll overflow-y-hidden border-t border-slate-300 bg-white/95 shadow-[0_-2px_8px_rgba(15,23,42,0.14)] backdrop-blur-sm"
                         style={{
-                            bottom: 'var(--cookie-consent-height, 0px)',
                             left: `${fixedHorizontalScrollbarState.leftPixels}px`,
                             width: `${fixedHorizontalScrollbarState.widthPixels}px`,
                         }}

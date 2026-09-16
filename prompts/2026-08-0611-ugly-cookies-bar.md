@@ -2,7 +2,7 @@
 
 ---
 
-[!] failed after 6 hours by OpenAI Codex `gpt-6-astra`
+[ ] use `astra`
 
 [✨👇] The placement of the cookies bar is very ugly and not very aware of the page placed in, enhance it
 
@@ -18,4 +18,3 @@
 ![alt text](prompts/screenshots/2026-08-0611-ugly-cookies-bar-3.png)
 ![alt text](prompts/screenshots/2026-08-0611-ugly-cookies-bar-4.png)
 ![alt text](prompts/screenshots/2026-08-0611-ugly-cookies-bar-5.png)
-

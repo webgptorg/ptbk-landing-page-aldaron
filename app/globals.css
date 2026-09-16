@@ -10,17 +10,6 @@ body {
 
 html {
     scroll-behavior: smooth;
-    scroll-padding-bottom: calc(var(--cookie-consent-height, 0px) + 1rem);
-}
-
-body {
-    padding-bottom: var(--cookie-consent-height, 0px);
-}
-
-@media print {
-    body {
-        padding-bottom: 0;
-    }
 }
 
 :root {

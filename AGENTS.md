@@ -109,18 +109,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `/terms`, `/dekujeme`, `/branding`, and the routes under `/k`, `/old`, and
   `/test`.
 
-### Shared cookie controls
-
-- Every page uses the root layout's cookie bar and settings dialog. Their light,
-  dark, or podcast appearance is chosen once in `lib/legal/cookieConsentAppearance.ts`.
-  The bottom bar publishes its measured `--cookie-consent-height`, which reserves
-  document space, sizes full-height heroes and forms, and lifts the podcast player, booking notices, and administrative
-  table scrollbars. The coder badge measures the bar and player through their data
-  attributes. Keep new fixed bottom controls clear of the same inset.
-- Accepting all, choosing only necessary cookies, and saving individual preferences
-  use the same browser storage. Reopened settings show that choice; the privacy
-  policy's `#cookies` link remains usable after each dismissal.
-
 ### Shared community and workshop behavior
 
 - Rooms lead to each other in both directions, through one identity hand-off. The
