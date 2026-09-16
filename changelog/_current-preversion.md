@@ -37,10 +37,12 @@
   others, and is listed after what is ahead rather than at the head of the archive. In
   `/cs/online-workshop/participant?workshop=` it is offered in the open under `Právě proběhlo`, between the workshops
   which run or are coming and the `Proběhlé workshopy` disclosure, so somebody who was at last night's workshop finds
-  the room they have just left without unfolding the whole history to look for it. Everything which opens only after a
-  workshop is over is untouched: the wrap-up, its PDF, the feedback, and the paid recording all read a freshly past
-  term as exactly as finished as one from last spring, and `/admin/workshops` keeps both of them in its `Historie`,
-  the freshest one leading it.
+  the room they have just left without unfolding the whole history to look for it. `/admin/workshops` lists such a term
+  under `Aktuální a nadcházející`, after what runs and what is coming, because the workshop of last night is the one an
+  administrator is still working on — reading its participants, moderating its comments, publishing its recording — and
+  its `Historie` now holds only the terms nobody is wrapping up any more, so opening a freshly held term no longer
+  unfolds that archive either. Everything which opens only after a workshop is over is untouched: the wrap-up, its PDF,
+  the feedback, and the paid recording all read a freshly past term as exactly as finished as one from last spring.
 
 - A term near enough to be looked forward to is now named rather than merely dated. One held today reads
   `dnes, úterý 15. 9. 2026 · 11:11`, one held tomorrow `zítra, středa 16. 9. 2026 · 11:11`, and one held later in the

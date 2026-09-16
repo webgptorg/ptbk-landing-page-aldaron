@@ -111,6 +111,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   nothing about registrations at all. The registration block opens the exact
   filtered `/admin/contacts` list and its shared CSV, vCard, and Book exports;
   it never creates a second contact table or serializer in workshop administration.
+  Its term picker leads with the ongoing, upcoming, and freshly past terms
+  together, because a term which has only just been held is still being wrapped
+  up; only past terms stay behind its history disclosure.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,

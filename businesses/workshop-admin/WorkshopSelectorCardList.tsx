@@ -2,7 +2,12 @@
 
 import { WorkshopSelectorCard } from '@/businesses/workshop-admin/WorkshopSelectorCard';
 import { Input } from '@/components/ui/input';
-import { getWorkshopPhase, groupWorkshopsByPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
+import {
+    getWorkshopPhase,
+    groupWorkshopsByPhase,
+    WORKSHOP_PHASE_VALUES,
+    type WorkshopPhase,
+} from '@/lib/workshops/workshopPhase';
 import type { WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
 import { ChevronDown, RefreshCw, Search } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
@@ -35,6 +40,30 @@ function isWorkshopMatchingSearchQuery(workshop: WorkshopAdminSummary, normalize
     }
 
     return normalizeWorkshopSearchQuery(`${workshop.title} ${workshop.slug}`).includes(normalizedSearchQuery);
+}
+
+/**
+ * Whether a term of this phase is one the administration is still busy with rather than one of its history
+ *
+ * Note: A term which has only just been held is the one an administrator has the most to do with — its participants
+ *       are being read, its comments moderated, its recording published — so it waits in the open where they left it
+ *       instead of being looked for among everything which was ever held. That it is over is untouched: it still says
+ *       `Právě proběhlo`, and everything which opens only after a workshop still reads it as finished.
+ * Note: This is the one answer to which terms the administration leads with, so the list it draws and the history it
+ *       unfolds for a selected term cannot disagree about where that term is to be found.
+ */
+function isCurrentWorkshopPhase(phase: WorkshopPhase): boolean {
+    return phase !== 'past';
+}
+
+/**
+ * The terms of the chosen phases, ranked as those phases themselves are ranked
+ */
+function selectWorkshopsOfPhases(
+    workshopsByPhase: Readonly<Record<WorkshopPhase, readonly WorkshopAdminSummary[]>>,
+    isPhaseSelected: (phase: WorkshopPhase) => boolean,
+): readonly WorkshopAdminSummary[] {
+    return WORKSHOP_PHASE_VALUES.filter(isPhaseSelected).flatMap((phase) => workshopsByPhase[phase]);
 }
 
 type WorkshopSelectorCardGridProps = {
@@ -70,8 +99,8 @@ function WorkshopSelectorCardGrid({
 }
 
 /**
- * Offers every occurrence as a card, ordered so that a running room leads the list, the prepared terms follow it, and
- * the history closes it.
+ * Offers every occurrence as a card, ordered so that a running room leads the list, the prepared terms and the ones
+ * which have only just been held follow it, and the history closes it.
  */
 export function WorkshopSelectorCardList({
     label,
@@ -90,20 +119,13 @@ export function WorkshopSelectorCardList({
         return workshops.filter((workshop) => isWorkshopMatchingSearchQuery(workshop, normalizedSearchQuery));
     }, [normalizedSearchQuery, workshops]);
     const matchingWorkshopsByPhase = useMemo(() => groupWorkshopsByPhase(matchingWorkshops), [matchingWorkshops]);
-    const currentAndUpcomingWorkshops = [
-        ...matchingWorkshopsByPhase.ongoing,
-        ...matchingWorkshopsByPhase.upcoming,
-    ];
-
-    // Note: An administrator works on a term which has only just been held exactly as they work on any other finished
-    //       one, so the history holds both of them. It merely leads that history, because the workshop of last night
-    //       is the one still being wrapped up.
-    const pastWorkshops = [...matchingWorkshopsByPhase['freshly-past'], ...matchingWorkshopsByPhase.past];
+    const currentWorkshops = selectWorkshopsOfPhases(matchingWorkshopsByPhase, isCurrentWorkshopPhase);
+    const pastWorkshops = selectWorkshopsOfPhases(matchingWorkshopsByPhase, (phase) => !isCurrentWorkshopPhase(phase));
     const selectedWorkshop = workshops.find((workshop) => workshop.id === selectedWorkshopId);
-    const isSelectedWorkshopPast =
-        selectedWorkshop !== undefined && isWorkshopPhasePast(getWorkshopPhase(selectedWorkshop));
+    const isSelectedWorkshopInHistory =
+        selectedWorkshop !== undefined && !isCurrentWorkshopPhase(getWorkshopPhase(selectedWorkshop));
     const isSearchQueryPresent = normalizedSearchQuery.length > 0;
-    const isPastWorkshopsVisible = isPastWorkshopsExpanded || isSelectedWorkshopPast || isSearchQueryPresent;
+    const isPastWorkshopsVisible = isPastWorkshopsExpanded || isSelectedWorkshopInHistory || isSearchQueryPresent;
 
     return (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -141,18 +163,18 @@ export function WorkshopSelectorCardList({
                         </p>
                     ) : (
                         <div className={WORKSHOP_LIST_CLASS_NAME}>
-                            {currentAndUpcomingWorkshops.length > 0 && (
+                            {currentWorkshops.length > 0 && (
                                 <section aria-labelledby={`${pastWorkshopsListId}-current`}>
                                     <h3
                                         id={`${pastWorkshopsListId}-current`}
                                         className="px-1 text-xs font-semibold uppercase tracking-wider text-slate-500"
                                     >
-                                        Aktuální a nadcházející ({currentAndUpcomingWorkshops.length})
+                                        Aktuální a nadcházející ({currentWorkshops.length})
                                     </h3>
                                     <div className="mt-1.5">
                                         <WorkshopSelectorCardGrid
                                             accessibleLabel="Seznam workshopů"
-                                            workshops={currentAndUpcomingWorkshops}
+                                            workshops={currentWorkshops}
                                             selectedWorkshopId={selectedWorkshopId}
                                             onSelect={onSelect}
                                         />

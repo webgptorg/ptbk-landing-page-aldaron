@@ -35,6 +35,19 @@ const UPCOMING_WORKSHOP: WorkshopAdminSummary = {
     participantCount: 3,
     registeredParticipantCount: 1,
 };
+const FRESHLY_PAST_WORKSHOP: WorkshopAdminSummary = {
+    id: 'freshly-past-workshop-id',
+    kind: 'workshop',
+    event: DEFAULT_EVENT_DETAILS,
+    slug: 'produkcni-kod-2026-08-20',
+    title: 'Produkční kód s AI agenty včera',
+    description: 'Včerejší termín online workshopu.',
+    startsAt: '2026-08-20T19:00:00+02:00',
+    endsAt: '2026-08-20T20:30:00+02:00',
+    isPublished: true,
+    participantCount: 12,
+    registeredParticipantCount: 15,
+};
 const PAST_WORKSHOP: WorkshopAdminSummary = {
     id: 'past-workshop-id',
     kind: 'workshop',
@@ -99,6 +112,36 @@ describe('workshop selector card list', () => {
             expect.stringContaining(UPCOMING_WORKSHOP.title),
             expect.stringContaining(PAST_WORKSHOP.title),
         ]);
+    });
+
+    it('keeps a workshop which has only just been held among the current terms rather than in the history', () => {
+        renderWorkshopSelectorCardList([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, UPCOMING_WORKSHOP, ONGOING_WORKSHOP]);
+
+        expect(screen.getByRole('heading', { name: 'Aktuální a nadcházející (3)' })).not.toBeNull();
+        expect(getWorkshopCards().map((workshopCard) => workshopCard.textContent)).toEqual([
+            expect.stringContaining(ONGOING_WORKSHOP.title),
+            expect.stringContaining(UPCOMING_WORKSHOP.title),
+            expect.stringContaining(FRESHLY_PAST_WORKSHOP.title),
+        ]);
+
+        // A term which has only just been held is still shown as finished; only where it is listed has changed.
+        expect(getWorkshopCards()[2].textContent).toContain('Právě proběhlo');
+        expect(screen.getByRole('button', { name: 'Historie (1)' }).getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('leaves the history closed while the selected workshop has only just been held', () => {
+        renderWorkshopSelectorCardList(
+            [ONGOING_WORKSHOP, FRESHLY_PAST_WORKSHOP, PAST_WORKSHOP],
+            vi.fn(),
+            FRESHLY_PAST_WORKSHOP.id,
+        );
+
+        expect(screen.getByRole('button', { name: 'Historie (1)' }).getAttribute('aria-expanded')).toBe('false');
+
+        const [, freshlyPastCard] = getWorkshopCards();
+
+        expect(freshlyPastCard.textContent).toContain(FRESHLY_PAST_WORKSHOP.title);
+        expect(freshlyPastCard.getAttribute('aria-pressed')).toBe('true');
     });
 
     it('says of every workshop when it happens, where it stands, and how large its audience is', () => {
