@@ -1,4 +1,4 @@
-[ ] !
+[x] by Developer on OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~.22 32 minutes; Testing 11 minutes
 
 [✨👌] When listing workshop events in a mini card (for example, under the calendar or in the list), show more information there. 
 

@@ -17,12 +17,23 @@ export type PublicWebPagePreview = {
     readonly previewImageUrl: string | null;
 };
 
+export type ScrapePublicWebPagePreviewOptions = {
+    /**
+     * How long a successfully fetched public page may be reused. A form which is editing a project leaves this out,
+     * while a repeatedly rendered public card can avoid asking the project host on every visit.
+     */
+    readonly revalidateSeconds?: number;
+};
+
 export class PublicWebPagePreviewError extends Error {}
 
 type HtmlAttributes = Readonly<Record<string, string>>;
 
 function normalizeMetadataText(value: string): string {
-    return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return value
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function parseHtmlAttributes(htmlTag: string): HtmlAttributes {
@@ -99,7 +110,10 @@ export function extractPublicWebPagePreview(html: string, pageUrl: string): Publ
     const fallbackTitle = new URL(normalizedUrl).hostname;
     const title = getMetadataValue(html, ['og:title', 'twitter:title']) ?? getHtmlTitle(html) ?? fallbackTitle;
     const description = getMetadataValue(html, ['og:description', 'twitter:description', 'description']) ?? '';
-    const previewImageUrl = resolvePreviewImageUrl(getMetadataValue(html, ['og:image', 'twitter:image']), normalizedUrl);
+    const previewImageUrl = resolvePreviewImageUrl(
+        getMetadataValue(html, ['og:image', 'twitter:image']),
+        normalizedUrl,
+    );
 
     return {
         url: normalizedUrl,
@@ -145,7 +159,11 @@ function isPrivateIpv6Address(address: string): boolean {
         return true;
     }
 
-    if (normalizedAddress.startsWith('fc') || normalizedAddress.startsWith('fd') || normalizedAddress.startsWith('fe80:')) {
+    if (
+        normalizedAddress.startsWith('fc') ||
+        normalizedAddress.startsWith('fd') ||
+        normalizedAddress.startsWith('fe80:')
+    ) {
         return true;
     }
 
@@ -182,7 +200,10 @@ async function assertPublicWebPageUrl(url: string): Promise<void> {
         throw new PublicWebPagePreviewError('Page URL could not be resolved');
     }
 
-    if (addressRecords.length === 0 || addressRecords.some((addressRecord) => isPrivateIpAddress(addressRecord.address))) {
+    if (
+        addressRecords.length === 0 ||
+        addressRecords.some((addressRecord) => isPrivateIpAddress(addressRecord.address))
+    ) {
         throw new PublicWebPagePreviewError('Page URL must be publicly reachable');
     }
 }
@@ -215,7 +236,10 @@ async function readPublicWebPageHtml(response: Response): Promise<string> {
     return html + decoder.decode();
 }
 
-async function fetchPublicWebPageHtml(initialUrl: string): Promise<{ readonly html: string; readonly url: string }> {
+async function fetchPublicWebPageHtml(
+    initialUrl: string,
+    revalidateSeconds: number | undefined,
+): Promise<{ readonly html: string; readonly url: string }> {
     let currentUrl = initialUrl;
 
     for (let redirectCount = 0; redirectCount <= MAXIMAL_PUBLIC_WEB_PAGE_REDIRECT_COUNT; redirectCount += 1) {
@@ -233,6 +257,7 @@ async function fetchPublicWebPageHtml(initialUrl: string): Promise<{ readonly ht
                     Accept: 'text/html,application/xhtml+xml',
                     'User-Agent': PUBLIC_WEB_PAGE_USER_AGENT,
                 },
+                ...(revalidateSeconds === undefined ? {} : { next: { revalidate: revalidateSeconds } }),
             });
         } catch {
             throw new PublicWebPagePreviewError('Page could not be loaded');
@@ -276,12 +301,15 @@ export async function fetchPublicWebPageTitle(value: string): Promise<string> {
 }
 
 /** Fetches a public page and resolves its Open Graph metadata for a link preview. */
-export async function scrapePublicWebPagePreview(value: string): Promise<PublicWebPagePreview> {
+export async function scrapePublicWebPagePreview(
+    value: string,
+    { revalidateSeconds }: ScrapePublicWebPagePreviewOptions = {},
+): Promise<PublicWebPagePreview> {
     const normalizedUrl = normalizePublicWebPageUrl(value);
     if (normalizedUrl === null) {
         throw new PublicWebPagePreviewError('Page URL is invalid');
     }
 
-    const { html, url } = await fetchPublicWebPageHtml(normalizedUrl);
+    const { html, url } = await fetchPublicWebPageHtml(normalizedUrl, revalidateSeconds);
     return extractPublicWebPagePreview(html, url);
 }

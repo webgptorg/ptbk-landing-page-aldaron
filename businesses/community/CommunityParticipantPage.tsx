@@ -5,11 +5,11 @@ import {
 } from '@/businesses/community/communityContent';
 import { CommunityProjectsSection } from '@/businesses/community/projects/CommunityProjectsSection';
 import { OnlineWorkshopParticipantPage } from '@/businesses/online-workshop/participant/OnlineWorkshopParticipantPage';
-import type { WorkshopDetails, WorkshopSummary } from '@/lib/workshops/workshopTypes';
+import type { WorkshopDetails, WorkshopEventCardSummary } from '@/lib/workshops/workshopTypes';
 
 type CommunityParticipantPageProps = {
     readonly community: WorkshopDetails;
-    readonly workshops: readonly WorkshopSummary[];
+    readonly workshops: readonly WorkshopEventCardSummary[];
     readonly initialEmail: string;
     readonly initialFullname: string;
 };

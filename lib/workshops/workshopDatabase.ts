@@ -34,6 +34,7 @@ import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/
 import { materializeWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { materializeWorkshopCommentShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { areWorkshopCommentLinksEnabled } from '@/lib/workshops/workshopCommentLinks';
+import { createWorkshopFeedbackSummary } from '@/lib/workshops/workshopFeedbackSummary';
 import { loadWorkshopQueryWithActiveStatus } from '@/lib/workshops/workshopActiveStatusQuery';
 import { isWorkshopPanelOffered, normalizeWorkshopDisabledPanels } from '@/lib/workshops/workshopPanels';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
@@ -64,6 +65,7 @@ import type {
     WorkshopContentBlock,
     WorkshopDetails,
     WorkshopFeedback,
+    WorkshopFeedbackSummary,
     WorkshopKind,
     WorkshopParticipant,
     WorkshopParticipantTimelineEvent,
@@ -76,6 +78,7 @@ import type {
     WorkshopSummary,
 } from '@/lib/workshops/workshopTypes';
 import type { WorkshopAdminParticipantQuery } from '@/lib/workshops/workshopAdminParticipantQuery';
+import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
@@ -166,11 +169,29 @@ type WorkshopSummaryRow = Pick<
 >;
 
 /**
+ * The server-only source fields needed to make the rich public event card projection.
+ *
+ * Note: The raw video ID and repository branch configuration never leave this database layer. They are reduced to
+ *       safe card details before the community page is serialized.
+ */
+export type WorkshopEventCardRow = WorkshopSummaryRow &
+    Pick<
+        WorkshopRow,
+        | 'youtube_video_id'
+        | 'recording_start_offset_seconds'
+        | 'github_repository'
+        | 'github_repository_branches'
+        | 'deployment_url'
+    >;
+
+/**
  * Fields the public list and the administration selector need to identify one occurrence, say what it is about, and
  * describe the event it is a term of, without exposing its live room configuration.
  */
 export const WORKSHOP_SUMMARY_COLUMNS =
     'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
+
+const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_url`;
 
 type WorkshopContentRow = {
     readonly id: string;
@@ -208,6 +229,11 @@ export type WorkshopFeedbackRow = {
 
 const WORKSHOP_FEEDBACK_COLUMNS =
     'id, workshop_id, participant_id, rating, what_was_good, what_was_bad, note, created_at, updated_at';
+
+/** The anonymous fields a public event card needs from feedback records. */
+type WorkshopFeedbackRatingRow = Pick<WorkshopFeedbackRow, 'workshop_id' | 'rating'>;
+
+const WORKSHOP_FEEDBACK_RATING_COLUMNS = 'workshop_id, rating';
 
 type WorkshopFeedbackParticipantRow = Pick<WorkshopAdminParticipantRow, 'id' | 'fullname' | 'email'>;
 
@@ -385,8 +411,7 @@ type WorkshopPollOptionRow = {
     readonly is_created_by_participant: boolean;
 };
 
-const WORKSHOP_POLL_OPTION_COLUMNS =
-    'id, poll_id, label, sort_order, artificial_vote_count, is_created_by_participant';
+const WORKSHOP_POLL_OPTION_COLUMNS = 'id, poll_id, label, sort_order, artificial_vote_count, is_created_by_participant';
 
 type WorkshopPollVoteCountRow = {
     readonly option_id: string;
@@ -449,6 +474,26 @@ export function createWorkshopDatabaseUnavailableResponse(): NextResponse {
     return NextResponse.json({ error: WORKSHOP_DATABASE_UNAVAILABLE_MESSAGE }, { status: 503 });
 }
 
+/**
+ * Maps the one repository connection from a database row. The full room and the rich event-card projection both use
+ * this mapper, so an old rollout row can never mean a different repository to the community than to its participants.
+ */
+export function mapWorkshopRepository(
+    row: Pick<
+        WorkshopRow,
+        'github_repository' | 'github_repository_branches' | 'github_repository_branch' | 'deployment_url'
+    >,
+): WorkshopRepository | null {
+    return createWorkshopRepositoryOrNull({
+        repository: row.github_repository ?? null,
+        branch:
+            row.github_repository_branches === undefined
+                ? (row.github_repository_branch ?? null)
+                : row.github_repository_branches,
+        deploymentUrl: row.deployment_url ?? null,
+    });
+}
+
 export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
     return {
         ...mapWorkshopSummaryRow(row),
@@ -458,14 +503,7 @@ export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
         // Read defensively as well as validating writes: an old or manually altered row must not hand an unsafe URL
         // to a participant browser.
         presentationUrl: normalizePublicWebPageUrl(row.presentation_url ?? ''),
-        repository: createWorkshopRepositoryOrNull({
-            repository: row.github_repository ?? null,
-            branch:
-                row.github_repository_branches === undefined
-                    ? (row.github_repository_branch ?? null)
-                    : row.github_repository_branches,
-            deploymentUrl: row.deployment_url ?? null,
-        }),
+        repository: mapWorkshopRepository(row),
         allowedReactions: row.allowed_reactions,
         disabledPanels: normalizeWorkshopDisabledPanels(row.disabled_panels),
         artificialWatchingParticipantCount: row.artificial_watching_participant_count ?? 0,
@@ -546,6 +584,60 @@ export function mapWorkshopFeedbackRow(row: WorkshopFeedbackRow): WorkshopFeedba
         createdAt: row.created_at,
         updatedAt: row.updated_at,
     };
+}
+
+/**
+ * Reads the public, anonymous rating totals for several terms in batched queries rather than making every mini card
+ * ask for feedback on its own.
+ */
+export async function loadWorkshopFeedbackSummaries(
+    supabase: SupabaseClient,
+    workshopIds: readonly string[],
+): Promise<{
+    readonly feedbackSummaryByWorkshopId: ReadonlyMap<string, WorkshopFeedbackSummary> | null;
+    readonly errorMessage: string | null;
+}> {
+    const distinctWorkshopIds = Array.from(new Set(workshopIds));
+    const feedbackRows: WorkshopFeedbackRatingRow[] = [];
+
+    // The selected workshop IDs are batched for PostgREST, while each batch is independently paged because one very
+    // popular term can have more feedback rows than one response carries.
+    for (let fromIndex = 0; fromIndex < distinctWorkshopIds.length; fromIndex += SUPABASE_ROW_PAGE_SIZE) {
+        const pageWorkshopIds = distinctWorkshopIds.slice(fromIndex, fromIndex + SUPABASE_ROW_PAGE_SIZE);
+        const feedbackResult = await loadAllSupabaseRows<WorkshopFeedbackRatingRow>(
+            (pageFromIndex, pageToIndex) =>
+                supabase
+                    .from(WORKSHOP_FEEDBACK_TABLE_NAME)
+                    .select(WORKSHOP_FEEDBACK_RATING_COLUMNS)
+                    .in('workshop_id', pageWorkshopIds)
+                    .order('workshop_id', { ascending: true })
+                    .order('id', { ascending: true })
+                    .range(pageFromIndex, pageToIndex),
+            'the feedback ratings of published workshops',
+        );
+        if (feedbackResult.rows === null) {
+            return { feedbackSummaryByWorkshopId: null, errorMessage: feedbackResult.errorMessage };
+        }
+
+        feedbackRows.push(...feedbackResult.rows);
+    }
+
+    const ratingsByWorkshopId = new Map<string, number[]>();
+    feedbackRows.forEach((feedback) => {
+        const ratings = ratingsByWorkshopId.get(feedback.workshop_id) ?? [];
+        ratings.push(Number(feedback.rating));
+        ratingsByWorkshopId.set(feedback.workshop_id, ratings);
+    });
+
+    const feedbackSummaryByWorkshopId = new Map<string, WorkshopFeedbackSummary>();
+    ratingsByWorkshopId.forEach((ratings, workshopId) => {
+        const feedbackSummary = createWorkshopFeedbackSummary(ratings);
+        if (feedbackSummary !== null) {
+            feedbackSummaryByWorkshopId.set(workshopId, feedbackSummary);
+        }
+    });
+
+    return { feedbackSummaryByWorkshopId, errorMessage: null };
 }
 
 function mapWorkshopAdminFeedbackRow(
@@ -928,16 +1020,16 @@ export async function findWorkshopBySlug(
     isPublishedRequired: boolean,
 ): Promise<WorkshopRow | null> {
     const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
-            let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('slug', workshopSlug);
+        let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('slug', workshopSlug);
 
-            if (isPublishedRequired) {
-                workshopQuery = workshopQuery.eq('is_published', true);
-            }
-            if (isActiveStatusFilterEnabled) {
-                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
-            }
+        if (isPublishedRequired) {
+            workshopQuery = workshopQuery.eq('is_published', true);
+        }
+        if (isActiveStatusFilterEnabled) {
+            workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+        }
 
-            return workshopQuery.maybeSingle();
+        return workshopQuery.maybeSingle();
     });
     if (error) {
         console.error(`Failed to load workshop "${workshopSlug}":`, error.message);
@@ -957,20 +1049,20 @@ export async function findUpcomingPublishedWorkshops(
     currentTime = new Date().toISOString(),
 ): Promise<readonly WorkshopSummaryRow[]> {
     const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
-            let workshopQuery = supabase
-                .from(WORKSHOP_TABLE_NAME)
-                .select(WORKSHOP_SUMMARY_COLUMNS)
-                .eq('room_kind', 'workshop')
-                .eq('event_type', eventType)
-                .eq('is_published', true)
-                .gt('starts_at', currentTime)
-                .order('starts_at', { ascending: true });
+        let workshopQuery = supabase
+            .from(WORKSHOP_TABLE_NAME)
+            .select(WORKSHOP_SUMMARY_COLUMNS)
+            .eq('room_kind', 'workshop')
+            .eq('event_type', eventType)
+            .eq('is_published', true)
+            .gt('starts_at', currentTime)
+            .order('starts_at', { ascending: true });
 
-            if (isActiveStatusFilterEnabled) {
-                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
-            }
+        if (isActiveStatusFilterEnabled) {
+            workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+        }
 
-            return workshopQuery;
+        return workshopQuery;
     });
 
     if (error) {
@@ -990,20 +1082,20 @@ export async function findMostRecentPublishedWorkshop(
     eventType: EventType,
 ): Promise<WorkshopRow | null> {
     const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
-            let workshopQuery = supabase
-                .from(WORKSHOP_TABLE_NAME)
-                .select('*')
-                .eq('room_kind', 'workshop')
-                .eq('event_type', eventType)
-                .eq('is_published', true)
-                .order('starts_at', { ascending: false })
-                .limit(1);
+        let workshopQuery = supabase
+            .from(WORKSHOP_TABLE_NAME)
+            .select('*')
+            .eq('room_kind', 'workshop')
+            .eq('event_type', eventType)
+            .eq('is_published', true)
+            .order('starts_at', { ascending: false })
+            .limit(1);
 
-            if (isActiveStatusFilterEnabled) {
-                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
-            }
+        if (isActiveStatusFilterEnabled) {
+            workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+        }
 
-            return workshopQuery.maybeSingle();
+        return workshopQuery.maybeSingle();
     });
 
     if (error) {
@@ -1015,21 +1107,19 @@ export async function findMostRecentPublishedWorkshop(
 }
 
 /**
- * Lists every published term for the persistent community room, or every published term of one kind of event when a
- * kind is named. Drafts stay private, while past terms stay available as useful community history.
- *
- * Note: The very same query answers both questions, so a page which lists the terms of one event and a page which
- *       lists all of them can never disagree about which terms are published.
+ * The shared published-term query behind ordinary summaries and the richer server-only event-card source. Both stay
+ * on exactly the same public, non-deleted occurrence set and order; only the fields returned from the database differ.
  */
-export async function findPublishedWorkshops(
+async function findPublishedWorkshopRows<Row>(
     supabase: SupabaseClient,
+    columns: string,
     eventType?: EventType,
-): Promise<readonly WorkshopSummaryRow[]> {
-    const { rows, errorMessage } = await loadAllSupabaseRows<WorkshopSummaryRow>((fromIndex, toIndex) => {
-        return loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
+): Promise<{ readonly rows: readonly Row[] | null; readonly errorMessage: string | null }> {
+    return loadAllSupabaseRows<Row>(async (fromIndex, toIndex) => {
+        const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
             let publishedWorkshopQuery = supabase
                 .from(WORKSHOP_TABLE_NAME)
-                .select(WORKSHOP_SUMMARY_COLUMNS)
+                .select(columns)
                 .eq('room_kind', 'workshop')
                 .eq('is_published', true);
 
@@ -1044,10 +1134,52 @@ export async function findPublishedWorkshops(
                 .order('id', { ascending: false })
                 .range(fromIndex, toIndex);
         });
+
+        // `columns` is selected from one of this module's fixed column lists. PostgREST cannot infer a dynamic string
+        // as a row shape, while this generic helper is precisely what keeps those two fixed reads DRY.
+        return { data: data as readonly Row[] | null, error };
     });
+}
+
+/**
+ * Lists every published term for the persistent community room, or every published term of one kind of event when a
+ * kind is named. Drafts stay private, while past terms stay available as useful community history.
+ *
+ * Note: The very same query answers both questions, so a page which lists the terms of one event and a page which
+ *       lists all of them can never disagree about which terms are published.
+ */
+export async function findPublishedWorkshops(
+    supabase: SupabaseClient,
+    eventType?: EventType,
+): Promise<readonly WorkshopSummaryRow[]> {
+    const { rows, errorMessage } = await findPublishedWorkshopRows<WorkshopSummaryRow>(
+        supabase,
+        WORKSHOP_SUMMARY_COLUMNS,
+        eventType,
+    );
 
     if (rows === null) {
         console.error('Failed to load published workshops:', errorMessage ?? 'Unknown database error');
+        return [];
+    }
+
+    return rows;
+}
+
+/**
+ * Lists the same published terms as `findPublishedWorkshops`, with the private source fields that the server reduces
+ * into richer community event-card details before the response reaches a browser.
+ */
+export async function findPublishedWorkshopEventCardRows(
+    supabase: SupabaseClient,
+): Promise<readonly WorkshopEventCardRow[]> {
+    const { rows, errorMessage } = await findPublishedWorkshopRows<WorkshopEventCardRow>(
+        supabase,
+        WORKSHOP_EVENT_CARD_COLUMNS,
+    );
+
+    if (rows === null) {
+        console.error('Failed to load published workshop card sources:', errorMessage ?? 'Unknown database error');
         return [];
     }
 
@@ -1060,17 +1192,17 @@ export async function findPublishedWorkshops(
  */
 export async function findPublishedCommunity(supabase: SupabaseClient): Promise<WorkshopRow | null> {
     const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
-            let workshopQuery = supabase
-                .from(WORKSHOP_TABLE_NAME)
-                .select('*')
-                .eq('room_kind', 'community')
-                .eq('is_published', true);
+        let workshopQuery = supabase
+            .from(WORKSHOP_TABLE_NAME)
+            .select('*')
+            .eq('room_kind', 'community')
+            .eq('is_published', true);
 
-            if (isActiveStatusFilterEnabled) {
-                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
-            }
+        if (isActiveStatusFilterEnabled) {
+            workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+        }
 
-            return workshopQuery.maybeSingle();
+        return workshopQuery.maybeSingle();
     });
 
     if (error) {
@@ -1083,13 +1215,13 @@ export async function findPublishedCommunity(supabase: SupabaseClient): Promise<
 
 export async function findWorkshopById(supabase: SupabaseClient, workshopId: string): Promise<WorkshopRow | null> {
     const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
-            let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('id', workshopId);
+        let workshopQuery = supabase.from(WORKSHOP_TABLE_NAME).select('*').eq('id', workshopId);
 
-            if (isActiveStatusFilterEnabled) {
-                workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
-            }
+        if (isActiveStatusFilterEnabled) {
+            workshopQuery = workshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
+        }
 
-            return workshopQuery.maybeSingle();
+        return workshopQuery.maybeSingle();
     });
     if (error) {
         console.error(`Failed to load workshop "${workshopId}":`, error.message);

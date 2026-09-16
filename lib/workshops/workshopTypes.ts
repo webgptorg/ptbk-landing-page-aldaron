@@ -32,6 +32,42 @@ export type WorkshopSubmissionStatus = (typeof WORKSHOP_SUBMISSION_STATUS_VALUES
 export type WorkshopCommentStatus = WorkshopSubmissionStatus;
 export type WorkshopCommentSort = 'recent' | 'upvotes';
 
+/**
+ * The anonymous public shape of all star ratings written after one workshop.
+ *
+ * Note: Textual feedback and participant identity stay out of this projection. A public term card needs only the
+ *       reception of the workshop as a whole.
+ */
+export type WorkshopFeedbackSummary = {
+    readonly averageRating: number;
+    readonly ratingCount: number;
+};
+
+/**
+ * The visual public information of the project a workshop is about.
+ *
+ * Note: The connection still belongs to the workshop repository setting. This is only the compact metadata a card can
+ *       show without having to expose its branch selection or live room state.
+ */
+export type WorkshopProjectPreview = {
+    readonly title: string;
+    readonly description: string;
+    readonly previewImageUrl: string | null;
+    readonly repositoryName: string;
+};
+
+/**
+ * Supplementary public information one rich event mini card can show.
+ *
+ * Note: It is deliberately a projection rather than `WorkshopDetails`: no card receives a recording identifier, a
+ *       feedback response, or participant data merely to show an aggregate rating, project preview, and replay length.
+ */
+export type WorkshopEventCardDetails = {
+    readonly feedback: WorkshopFeedbackSummary | null;
+    readonly project: WorkshopProjectPreview | null;
+    readonly recordingDurationSeconds: number | null;
+};
+
 export type WorkshopSummary = {
     readonly id: string;
     readonly kind: WorkshopKind;
@@ -57,6 +93,19 @@ export type WorkshopSummary = {
      *       listing terms only ever asks which kind of event it wants to list.
      */
     readonly event: EventDetails | null;
+
+    /**
+     * The optional richer projection used by event mini cards. General summaries such as a calendar feed deliberately
+     * leave it out, so they do not perform or serialize card-only reads.
+     */
+    readonly eventCardDetails?: WorkshopEventCardDetails;
+};
+
+/**
+ * A summary that was explicitly loaded for a rich event mini card.
+ */
+export type WorkshopEventCardSummary = WorkshopSummary & {
+    readonly eventCardDetails: WorkshopEventCardDetails;
 };
 
 /**
@@ -158,19 +207,19 @@ export type WorkshopParticipant = {
 
 export type WorkshopAdminParticipant = WorkshopParticipant &
     AdminContactJoin & {
-    readonly lastSeenAt: string;
-    readonly activeDurationSeconds: number;
-    readonly commentCount: number;
-    readonly reactionCount: number;
-    readonly upvoteCount: number;
+        readonly lastSeenAt: string;
+        readonly activeDurationSeconds: number;
+        readonly commentCount: number;
+        readonly reactionCount: number;
+        readonly upvoteCount: number;
 
-    /**
-     * Present when the participant is listed inside the community administration. A community membership belongs to
-     * their e-mail address rather than to this particular room session, so ordinary workshop participant data does
-     * not fetch or expose it.
-     */
-    readonly communityMembershipStatus?: CommunityMembershipStatus;
-};
+        /**
+         * Present when the participant is listed inside the community administration. A community membership belongs to
+         * their e-mail address rather than to this particular room session, so ordinary workshop participant data does
+         * not fetch or expose it.
+         */
+        readonly communityMembershipStatus?: CommunityMembershipStatus;
+    };
 
 /**
  * One server-paged slice of participants, keeping large workshops responsive in the administration.

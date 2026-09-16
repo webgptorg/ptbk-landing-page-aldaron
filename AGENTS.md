@@ -76,8 +76,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   written; it asks for nothing and sends visitors to the media-kit form.
 - `/cs/komunita` is the permanent Czech community room. It has chat, polls,
   projects, materials, and published terms, but no schedule, stage, or live
-  updates. Terms show event kind, format/place, price, and status. Where a term
-  stands in time is decided once, in `lib/workshops/workshopPhase.ts`, as one of
+  updates. Terms show event kind, format/place, price, and status; wherever their
+  shared mini card is drawn, it may also show its anonymous star-rating aggregate
+  and a preview of its connected project, while an ended term may show the length
+  of its replay after the configured recording start offset. Where a term stands in
+  time is decided
+  once, in `lib/workshops/workshopPhase.ts`, as one of
   four phases: upcoming, ongoing, freshly past while it ended within the last
   `FRESHLY_PAST_WORKSHOP_HOURS`, and past. Every list, badge, and calendar colour
   reads that one answer, and everything which opens after a workshop — the

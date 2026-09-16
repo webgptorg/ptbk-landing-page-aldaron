@@ -1,0 +1,99 @@
+import { formatGithubRepositoryName } from '@/lib/github/githubRepository';
+import { scrapePublicWebPagePreview } from '@/lib/network/publicWebPagePreview';
+import { fetchYoutubeVideoDurationSeconds } from '@/lib/youtube/fetchYoutubeVideoDuration';
+import { WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
+import { getWorkshopRecordingDurationSeconds } from '@/lib/workshops/workshopRecordingDuration';
+import type {
+    WorkshopEventCardDetails,
+    WorkshopFeedbackSummary,
+    WorkshopProjectPreview,
+} from '@/lib/workshops/workshopTypes';
+import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
+
+export type WorkshopEventCardDetailsSource = {
+    readonly youtubeVideoId: string | null;
+    readonly recordingStartOffsetSeconds: number;
+    readonly repository: WorkshopRepository | null;
+    readonly isRecordingAvailable: boolean;
+};
+
+function createRepositoryProjectPreview(repository: WorkshopRepository): WorkshopProjectPreview {
+    const repositoryName = formatGithubRepositoryName(repository);
+
+    return {
+        title: repositoryName,
+        description: '',
+        previewImageUrl: null,
+        repositoryName,
+    };
+}
+
+/**
+ * Resolves the public metadata of a project's deployed application when it has one.
+ *
+ * Note: The repository remains a useful preview even when its deployment cannot be reached or has no Open Graph
+ *       metadata. A card therefore never depends on another project's server being online.
+ */
+async function createWorkshopProjectPreview(
+    repository: WorkshopRepository | null,
+): Promise<WorkshopProjectPreview | null> {
+    if (repository === null) {
+        return null;
+    }
+
+    const repositoryPreview = createRepositoryProjectPreview(repository);
+    if (repository.deploymentUrl === null) {
+        return repositoryPreview;
+    }
+
+    try {
+        const deploymentPreview = await scrapePublicWebPagePreview(repository.deploymentUrl, {
+            revalidateSeconds: WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS,
+        });
+        return {
+            ...repositoryPreview,
+            title: deploymentPreview.title,
+            description: deploymentPreview.description,
+            previewImageUrl: deploymentPreview.previewImageUrl,
+        };
+    } catch {
+        return repositoryPreview;
+    }
+}
+
+/**
+ * Resolves the replay length without returning the video identifier a paid recording gate protects.
+ */
+async function loadWorkshopRecordingDurationSeconds(source: WorkshopEventCardDetailsSource): Promise<number | null> {
+    if (!source.isRecordingAvailable || source.youtubeVideoId === null) {
+        return null;
+    }
+
+    try {
+        const totalVideoDurationSeconds = await fetchYoutubeVideoDurationSeconds({
+            videoId: source.youtubeVideoId,
+            revalidateSeconds: WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS,
+        });
+        return getWorkshopRecordingDurationSeconds(totalVideoDurationSeconds, source.recordingStartOffsetSeconds);
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Builds the safe, compact projection used by every community event mini card.
+ *
+ * Note: This is intentionally separate from `WorkshopDetails`: a card receives an aggregate rating, project metadata
+ *       and a calculated duration, never feedback prose, participant identity, the gated YouTube ID, or room settings.
+ */
+export async function createWorkshopEventCardDetails(
+    source: WorkshopEventCardDetailsSource,
+    feedback: WorkshopFeedbackSummary | null,
+): Promise<WorkshopEventCardDetails> {
+    const [project, recordingDurationSeconds] = await Promise.all([
+        createWorkshopProjectPreview(source.repository),
+        loadWorkshopRecordingDurationSeconds(source),
+    ]);
+
+    return { feedback, project, recordingDurationSeconds };
+}

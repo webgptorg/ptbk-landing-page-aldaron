@@ -1,5 +1,15 @@
 # Current preversion
 
+- Made the compact cards of the published terms in `/cs/komunita` tell more of the story of an event without giving
+  the calendar and the card-list two versions of it: the same card is shown below a selected calendar day, below a
+  month, and in the `Karty` view, and can now show the anonymous average of the star ratings with its count, a visual
+  preview of the project the workshop followed, and the real replay length. That length is the total public YouTube
+  duration less the start offset an administrator set to remove the waiting room, so `1:30:00` with a `75`-second
+  offset is named `1:28:45` rather than pretending the whole live stream is replay. Ratings are reduced before the
+  browser receives them — no response, author, or e-mail is published — and the raw recording identifier stays on the
+  server as well. A missing rating, project, deploy-preview, video, or public duration simply leaves that small part
+  off the card; the ordinary event link, calendar subscription, and membership gate keep exactly their former jobs.
+
 - A term which has only just been held is no longer one more term of the history. Where an event stands in time is now
   one of four things instead of three — it is still ahead, it runs right now, it is freshly past while less than a day
   has gone by since the end recorded for it, or it is past — and that is answered in the single place which already

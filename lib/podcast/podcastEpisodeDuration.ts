@@ -25,12 +25,12 @@ export function parsePodcastEpisodeDuration(rawDuration: string | null): number 
 }
 
 /**
- * Writes a length of a recording the way a listener reads it before deciding to press play
+ * Writes a media length the way somebody reads it before deciding to press play.
  *
  * @param durationInSeconds length of the recording
  * @returns length written as `1:05:30` or as `35:34`
  */
-export function formatPodcastEpisodeDuration(durationInSeconds: number): string {
+export function formatMediaDuration(durationInSeconds: number): string {
     const wholeSeconds = Math.max(0, Math.floor(durationInSeconds));
     const seconds = wholeSeconds % SECONDS_PER_MINUTE;
     const wholeMinutes = Math.floor(wholeSeconds / SECONDS_PER_MINUTE);
@@ -43,4 +43,11 @@ export function formatPodcastEpisodeDuration(durationInSeconds: number): string 
     }
 
     return `${hours}:${String(minutes).padStart(2, '0')}:${paddedSeconds}`;
+}
+
+/**
+ * The podcast name remains for existing callers, while video cards use the media-wide formatter above.
+ */
+export function formatPodcastEpisodeDuration(durationInSeconds: number): string {
+    return formatMediaDuration(durationInSeconds);
 }

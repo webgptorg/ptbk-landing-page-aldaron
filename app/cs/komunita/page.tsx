@@ -1,7 +1,7 @@
 import { CommunityParticipantPage } from '@/businesses/community/CommunityParticipantPage';
 import { COMMUNITY_METADATA } from '@/businesses/community/communityMetadata';
 import { readWorkshopParticipantIdentity } from '@/lib/workshops/workshopParticipantLink';
-import { loadPublishedCommunity, loadPublishedWorkshopSummaries } from '@/lib/workshops/workshopPublic';
+import { loadPublishedCommunity, loadPublishedWorkshopEventCardSummaries } from '@/lib/workshops/workshopPublic';
 import { notFound } from 'next/navigation';
 
 type CommunityRouteProps = {
@@ -22,7 +22,7 @@ export default async function CzechCommunityRoute({ searchParams }: CommunityRou
     const resolvedSearchParams = await searchParams;
     const [community, workshops] = await Promise.all([
         loadPublishedCommunity(),
-        loadPublishedWorkshopSummaries(),
+        loadPublishedWorkshopEventCardSummaries(),
     ]);
     if (community === null) {
         notFound();

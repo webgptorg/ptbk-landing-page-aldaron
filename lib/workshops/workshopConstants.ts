@@ -39,6 +39,14 @@ export const FRESHLY_PAST_WORKSHOP_HOURS = 24;
 export const MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS = 2_147_483_647;
 
 /**
+ * How long the community can reuse public metadata from a workshop project and YouTube replay.
+ *
+ * Note: This keeps a list of historic terms from asking every linked project host and YouTube again on each visit,
+ * while an administrator's changed deployment still reaches the card during the same day.
+ */
+export const WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS = 60 * 60;
+
+/**
  * How many reactions a single workshop may offer at once
  *
  * Note: The database guards the very same number, so both of them are changed together.

@@ -84,6 +84,23 @@ const PAST_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-07-10T20:30:00+02:00',
 };
 
+const RICH_PAST_WORKSHOP: WorkshopSummary = {
+    ...PAST_WORKSHOP,
+    id: 'rich-past-workshop-id',
+    slug: 'production-ai-2026-07-11',
+    title: 'Produkční kód s AI agenty s projektem',
+    eventCardDetails: {
+        feedback: { averageRating: 4.5, ratingCount: 2 },
+        project: {
+            title: 'Automatizační dashboard',
+            description: 'Projekt, který během workshopu vznikl.',
+            previewImageUrl: 'https://projects.example.com/dashboard-preview.png',
+            repositoryName: 'promptbook/automation-dashboard',
+        },
+        recordingDurationSeconds: 5_325,
+    },
+};
+
 const EXTERNAL_CONFERENCE_URL = 'https://konference.example.com/program';
 
 const EXTERNAL_CONFERENCE: WorkshopSummary = {
@@ -194,6 +211,23 @@ describe('workshop links panel', () => {
         expect(ongoingCard?.textContent).toContain('Probíhá');
         expect(upcomingCard?.textContent).toContain('Nadchází');
         expect(pastCard?.textContent).toContain('Proběhlo');
+    });
+
+    it('shows anonymous ratings, the created-project preview, and the replay length on the same mini card', () => {
+        renderWorkshopLinksPanel([RICH_PAST_WORKSHOP]);
+        showCardsView();
+
+        const card = screen.getByRole('link', { name: /Produkční kód s AI agenty s projektem/ });
+
+        expect(card.textContent).toContain('4,5 / 5');
+        expect(card.textContent).toContain('2 hodnocení');
+        expect(card.textContent).toContain('Záznam 1:28:45');
+        expect(card.textContent).toContain('Projekt workshopu');
+        expect(card.textContent).toContain('Automatizační dashboard');
+        expect(card.textContent).toContain('promptbook/automation-dashboard');
+        expect(
+            within(card).getByRole('img', { name: 'Náhled projektu Automatizační dashboard' }).getAttribute('src'),
+        ).toBe('https://projects.example.com/dashboard-preview.png');
     });
 
     it('sets a term which has only just been held apart from the history it would otherwise close', () => {
