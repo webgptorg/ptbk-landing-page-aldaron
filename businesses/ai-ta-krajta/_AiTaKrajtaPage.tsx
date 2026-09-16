@@ -11,7 +11,7 @@ import { AiTaKrajtaPageStateProvider } from '@/businesses/ai-ta-krajta/AiTaKrajt
 import { AiTaKrajtaPeopleSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaPeopleSection';
 import { PromptbookCoderBadge } from '@/components/promptbook-coder/PromptbookCoderBadge';
 
-const CODER_BADGE_OBSTACLE_SELECTOR = '[data-ai-ta-krajta-mini-player], .cookie-consent__panel';
+const CODER_BADGE_OBSTACLE_SELECTOR = '[data-ai-ta-krajta-mini-player], [data-cookie-consent-panel]';
 const CODER_BADGE_PLAYMATE_SELECTOR = '[data-ai-ta-krajta-terrarium]';
 
 /**

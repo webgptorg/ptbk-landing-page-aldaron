@@ -11,6 +11,10 @@ const config: Config = {
     ],
     theme: {
         extend: {
+            // Full-height heroes and connection forms use the space above the shared consent bar.
+            minHeight: {
+                screen: 'calc(100vh - var(--cookie-consent-height, 0px))',
+            },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
             },

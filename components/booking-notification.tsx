@@ -48,7 +48,9 @@ export function BookingNotification({ language = 'cs' }: { language?: HomepageLa
                     animate={{ opacity: 1, y: 0, x: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
-                    className="fixed bottom-6 left-6 z-50 max-w-sm"
+                    className="fixed left-6 z-40 max-w-[calc(100%-3rem)] sm:max-w-sm"
+                    style={{ bottom: 'calc(var(--cookie-consent-height, 0px) + 1.5rem)' }}
+                    data-booking-notification
                 >
                     <div className="bg-white rounded-xl shadow-2xl shadow-black/10 border border-gray-100 px-5 py-4 flex items-start gap-3">
                         {/* Pulse dot */}

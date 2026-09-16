@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -11,9 +10,15 @@ import {
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import type { CookieConsentAppearance } from '@/lib/legal/cookieConsentAppearance';
 import { getCookieConsentContent } from '@/lib/legal/cookieConsentContent';
-import { ONLY_NECESSARY_COOKIES_ALLOWED, saveCookiePreferences } from '@/lib/legal/cookieConsentStorage';
-import { useState, type ReactNode } from 'react';
+import {
+    ONLY_NECESSARY_COOKIES_ALLOWED,
+    readCookiePreferences,
+    saveCookiePreferences,
+} from '@/lib/legal/cookieConsentStorage';
+import { useEffect, useState, type ReactNode } from 'react';
+import styles from './cookie-consent.module.css';
 
 /**
  * One switchable kind of cookies, with the switch on its right
@@ -30,10 +35,10 @@ function CookieCategoryRow({
     children: ReactNode;
 }) {
     return (
-        <div className="flex items-center justify-between">
+        <div className={styles.category}>
             <label htmlFor={id}>
                 <strong>{title}</strong>
-                <p className="text-sm text-gray-500">{description}</p>
+                <p className={styles.description}>{description}</p>
             </label>
             {children}
         </div>
@@ -42,17 +47,25 @@ function CookieCategoryRow({
 
 export function CookieSettingsModal({
     language,
-    open,
+    appearance,
+    isOpen,
     onOpenChange,
     onSave,
+    onCloseAutoFocus,
 }: {
     language: SupportedHomepageLanguage;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
+    appearance: CookieConsentAppearance;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
     onSave?: () => void;
+    onCloseAutoFocus: () => void;
 }) {
     const content = getCookieConsentContent(language);
     const [preferences, setPreferences] = useState(ONLY_NECESSARY_COOKIES_ALLOWED);
+
+    useEffect(() => {
+        if (isOpen) setPreferences(readCookiePreferences());
+    }, [isOpen]);
 
     const handleSave = () => {
         saveCookiePreferences(preferences);
@@ -61,11 +74,20 @@ export function CookieSettingsModal({
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent
+                className={`${styles.surface} ${styles.settings}`}
+                data-theme={appearance.theme}
+                style={appearance.style}
+                lang={language}
+                onCloseAutoFocus={(event) => {
+                    event.preventDefault();
+                    onCloseAutoFocus();
+                }}
+            >
                 <DialogHeader>
-                    <DialogTitle>{content.settingsTitle}</DialogTitle>
-                    <DialogDescription>{content.settingsDescription}</DialogDescription>
+                    <DialogTitle className={styles.settingsTitle}>{content.settingsTitle}</DialogTitle>
+                    <DialogDescription className={styles.description}>{content.settingsDescription}</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <CookieCategoryRow
@@ -105,7 +127,9 @@ export function CookieSettingsModal({
                     </CookieCategoryRow>
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleSave}>{content.saveButton}</Button>
+                    <button type="button" className={`${styles.button} ${styles.acceptButton}`} onClick={handleSave}>
+                        {content.saveButton}
+                    </button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

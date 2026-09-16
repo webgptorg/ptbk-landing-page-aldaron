@@ -17,6 +17,7 @@ type CookieConsentContent = {
     readonly privacyNotePrefix: string;
     readonly privacyPolicyLinkText: string;
     readonly customizeButton: string;
+    readonly necessaryOnlyButton: string;
     readonly acceptAllButton: string;
     readonly settingsTitle: string;
     readonly settingsDescription: string;
@@ -33,10 +34,11 @@ const COOKIE_CONSENT_CONTENTS: Readonly<Record<SupportedHomepageLanguage, Cookie
     cs: {
         barTitle: 'Cookies',
         barDescription:
-            'Cookies používáme, aby web fungoval, abychom rozuměli návštěvnosti a měřili účinnost reklamy. Tlačítkem „Přijmout vše“ nám k tomu dáte souhlas.',
+            'Cookies zajišťují chod webu. S vaším souhlasem nám také pomáhají rozumět návštěvnosti a měřit účinnost reklamy.',
         privacyNotePrefix: 'Podrobnosti najdete v ',
         privacyPolicyLinkText: 'zásadách ochrany osobních údajů',
         customizeButton: 'Nastavit',
+        necessaryOnlyButton: 'Pouze nutné',
         acceptAllButton: 'Přijmout vše',
         settingsTitle: 'Nastavení cookies',
         settingsDescription:
@@ -58,10 +60,11 @@ const COOKIE_CONSENT_CONTENTS: Readonly<Record<SupportedHomepageLanguage, Cookie
     en: {
         barTitle: 'Cookies',
         barDescription:
-            'We use cookies to keep the website working, to understand its traffic, and to measure the effectiveness of our advertising. The "Accept all" button gives us your consent.',
+            'Cookies keep this website working. With your consent, they also help us understand visits and measure advertising effectiveness.',
         privacyNotePrefix: 'The details are in our ',
         privacyPolicyLinkText: 'privacy policy',
         customizeButton: 'Customize',
+        necessaryOnlyButton: 'Only necessary',
         acceptAllButton: 'Accept all',
         settingsTitle: 'Cookie settings',
         settingsDescription:
