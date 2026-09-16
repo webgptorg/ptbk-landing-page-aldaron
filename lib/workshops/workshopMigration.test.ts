@@ -87,6 +87,14 @@ const WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL = readFileSync(
     WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_PATH,
     'utf8',
 );
+const WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-1900-workshop-repository-multiple-deployments.sql',
+);
+const WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL = readFileSync(
+    WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_PATH,
+    'utf8',
+);
 const WORKSHOP_PRESENTATION_MIGRATION_PATH = path.resolve(
     process.cwd(),
     'migrations/2026-09-1500-workshop-presentation.sql',
@@ -781,6 +789,27 @@ describe('workshop database migration', () => {
     it('keeps branch selection and deployment tied to a connected repository after migration', () => {
         expect(WORKSHOP_REPOSITORY_MULTIPLE_BRANCHES_MIGRATION_SQL).toContain(
             'OR (github_repository_branches IS NULL AND deployment_url IS NULL)',
+        );
+    });
+
+    it('migrates the one deployment address into an ordered deployment array', () => {
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'ADD COLUMN IF NOT EXISTS deployment_urls text[]',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'SET deployment_urls = ARRAY[deployment_url]',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'DROP COLUMN IF EXISTS deployment_url',
+        );
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'cardinality(deployment_urls) BETWEEN 1 AND 50',
+        );
+    });
+
+    it('keeps every deployment tied to a connected repository after migration', () => {
+        expect(WORKSHOP_REPOSITORY_MULTIPLE_DEPLOYMENTS_MIGRATION_SQL).toContain(
+            'OR (github_repository_branches IS NULL AND deployment_urls IS NULL)',
         );
     });
 

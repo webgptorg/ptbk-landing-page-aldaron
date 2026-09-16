@@ -80,7 +80,7 @@ export type WorkshopRepositoryWriteValues = {
     readonly url: string;
     /** `null` follows the default branch; strings may use `*` to match branches. */
     readonly branch: string | readonly string[] | null;
-    readonly deploymentUrl: string | null;
+    readonly deploymentUrls: readonly string[];
 };
 
 /**

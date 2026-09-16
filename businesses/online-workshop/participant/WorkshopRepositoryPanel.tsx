@@ -33,6 +33,10 @@ function formatNewCommitCount(commitCount: number): string {
     return formatCzechCountedNoun(commitCount, ['nový commit', 'nové commity', 'nových commitů']);
 }
 
+function getDeploymentLinkLabel(deploymentCount: number, deploymentIndex: number): string {
+    return deploymentCount === 1 ? 'Živá aplikace' : `Živá aplikace ${deploymentIndex + 1}`;
+}
+
 /**
  * The project one workshop is about, together with what is being committed in it while the workshop runs
  *
@@ -78,17 +82,21 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                         <Github className="h-3.5 w-3.5" aria-hidden="true" /> Repozitář
                         <ExternalLink className="h-3 w-3" aria-hidden="true" />
                     </a>
-                    {repository.deploymentUrl !== null && (
+                    {repository.deploymentUrls.map((deploymentUrl, deploymentIndex) => (
                         <a
-                            href={repository.deploymentUrl}
+                            key={deploymentUrl}
+                            href={deploymentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
+                            title={deploymentUrl}
+                            aria-label={`${getDeploymentLinkLabel(repository.deploymentUrls.length, deploymentIndex)}: ${deploymentUrl}`}
                             className="inline-flex items-center gap-1.5 rounded-full bg-cyan-300 px-3 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-200"
                         >
-                            <Rocket className="h-3.5 w-3.5" aria-hidden="true" /> Živá aplikace
+                            <Rocket className="h-3.5 w-3.5" aria-hidden="true" />
+                            {getDeploymentLinkLabel(repository.deploymentUrls.length, deploymentIndex)}
                             <ExternalLink className="h-3 w-3" aria-hidden="true" />
                         </a>
-                    )}
+                    ))}
                 </div>
             </div>
 

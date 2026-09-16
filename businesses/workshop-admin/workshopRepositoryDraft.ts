@@ -6,7 +6,8 @@ import {
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 
 /**
- * The project of one term as an administrator writes it, which is three lines of text until it is saved
+ * The project of one term as an administrator writes it, which is a repository address, branch patterns, and
+ * deployment addresses until it is saved
  *
  * Note: The form keeps written text rather than a read repository, so an address which is still being typed stays
  *       exactly as it was typed instead of disappearing the moment it cannot be read yet.
@@ -15,13 +16,14 @@ export type WorkshopRepositoryDraft = {
     readonly repositoryUrl: string;
     /** Branch patterns separated by lines or commas; an empty value follows the repository default branch. */
     readonly branch: string;
-    readonly deploymentUrl: string;
+    /** Deployment addresses separated by lines; an empty value leaves the project without a published deployment. */
+    readonly deploymentUrls: string;
 };
 
 export const EMPTY_WORKSHOP_REPOSITORY_DRAFT: WorkshopRepositoryDraft = {
     repositoryUrl: '',
     branch: '',
-    deploymentUrl: '',
+    deploymentUrls: '',
 };
 
 /**
@@ -35,7 +37,7 @@ export function createWorkshopRepositoryDraft(repository: WorkshopRepository | n
     return {
         repositoryUrl: createGithubRepositoryUrl(repository),
         branch: getGithubBranchSelectionPatterns(repository.branch).join('\n'),
-        deploymentUrl: repository.deploymentUrl ?? '',
+        deploymentUrls: repository.deploymentUrls.join('\n'),
     };
 }
 
@@ -44,6 +46,13 @@ function readWrittenBranches(branchValue: string): readonly string[] {
         .split(/[,\r\n]/)
         .map((branch) => branch.trim())
         .filter((branch) => branch !== '');
+}
+
+function readWrittenDeploymentUrls(deploymentUrlsValue: string): readonly string[] {
+    return deploymentUrlsValue
+        .split(/\r?\n/)
+        .map((deploymentUrl) => deploymentUrl.trim())
+        .filter((deploymentUrl) => deploymentUrl !== '');
 }
 
 /**
@@ -65,6 +74,6 @@ export function createWorkshopRepositoryWriteValues(
     return {
         url: repositoryUrl,
         branch: branches.length === 0 ? null : branches.length === 1 ? branches[0] : branches,
-        deploymentUrl: draft.deploymentUrl.trim() || null,
+        deploymentUrls: readWrittenDeploymentUrls(draft.deploymentUrls),
     };
 }

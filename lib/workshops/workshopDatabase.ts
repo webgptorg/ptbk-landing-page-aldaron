@@ -105,13 +105,15 @@ export type WorkshopRow = {
     readonly presentation_url?: string | null;
 
     /**
-     * The project this term is about, written as `owner/name`, together with the selected branch array and the address
-     * the project runs at, all of which a term without a connected project leaves empty
+     * The project this term is about, written as `owner/name`, together with the selected branch array and the
+     * addresses the project runs at, all of which a term without a connected project leaves empty
      */
     readonly github_repository?: string | null;
     readonly github_repository_branches?: readonly string[] | null;
     /** Kept only so old in-memory rows can still be mapped while the branch migration is rolled out. */
     readonly github_repository_branch?: string | null;
+    readonly deployment_urls?: readonly string[] | null;
+    /** Kept only so old in-memory rows can still be mapped while the deployment migration is rolled out. */
     readonly deployment_url?: string | null;
     readonly is_published: boolean;
 
@@ -181,7 +183,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
         | 'recording_start_offset_seconds'
         | 'github_repository'
         | 'github_repository_branches'
-        | 'deployment_url'
+        | 'deployment_urls'
     >;
 
 /**
@@ -191,7 +193,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
 export const WORKSHOP_SUMMARY_COLUMNS =
     'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
 
-const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_url`;
+const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_urls`;
 
 type WorkshopContentRow = {
     readonly id: string;
@@ -481,7 +483,11 @@ export function createWorkshopDatabaseUnavailableResponse(): NextResponse {
 export function mapWorkshopRepository(
     row: Pick<
         WorkshopRow,
-        'github_repository' | 'github_repository_branches' | 'github_repository_branch' | 'deployment_url'
+        | 'github_repository'
+        | 'github_repository_branches'
+        | 'github_repository_branch'
+        | 'deployment_urls'
+        | 'deployment_url'
     >,
 ): WorkshopRepository | null {
     return createWorkshopRepositoryOrNull({
@@ -490,7 +496,8 @@ export function mapWorkshopRepository(
             row.github_repository_branches === undefined
                 ? (row.github_repository_branch ?? null)
                 : row.github_repository_branches,
-        deploymentUrl: row.deployment_url ?? null,
+        deploymentUrls:
+            row.deployment_urls ?? (row.deployment_url === undefined || row.deployment_url === null ? [] : [row.deployment_url]),
     });
 }
 

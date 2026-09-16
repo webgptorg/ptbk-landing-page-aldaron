@@ -21,7 +21,12 @@ const WORKSHOP: WorkshopDetails = {
     recordingStartOffsetSeconds: 75,
     previewYoutubeVideoId: 'M7lc1UVf-VE',
     presentationUrl: null,
-    repository: { owner: 'hejny', name: 'promptbook', branch: 'main', deploymentUrl: 'https://workshop.example/app' },
+    repository: {
+        owner: 'hejny',
+        name: 'promptbook',
+        branch: 'main',
+        deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
+    },
     isPublished: true,
     allowedReactions: ['👍', '❤️'],
     disabledPanels: [],
@@ -95,7 +100,9 @@ describe('workshop settings form', () => {
         expect(screen.queryByText(REPOSITORY_LABEL)).not.toBeNull();
         expect(screen.queryByDisplayValue('https://github.com/hejny/promptbook')).not.toBeNull();
         expect(screen.queryByDisplayValue('main')).not.toBeNull();
-        expect(screen.queryByDisplayValue('https://workshop.example/app')).not.toBeNull();
+        expect((document.getElementById('workshop-repository-deployment-urls') as HTMLTextAreaElement).value).toBe(
+            'https://workshop.example/app\nhttps://preview.workshop.example/app',
+        );
     });
 
     it('leaves a permanent room without a project it could be about', () => {
@@ -284,7 +291,7 @@ describe('workshop settings form', () => {
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
                         branch: 'produkce',
-                        deploymentUrl: 'https://workshop.example/app',
+                        deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
                     },
                 }),
             ),
@@ -305,7 +312,7 @@ describe('workshop settings form', () => {
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
                         branch: ['main', 'client-*', 'feature/*'],
-                        deploymentUrl: 'https://workshop.example/app',
+                        deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
                     },
                 }),
             ),
@@ -324,8 +331,30 @@ describe('workshop settings form', () => {
                     repository: {
                         url: 'https://github.com/hejny/promptbook',
                         branch: '*',
-                        deploymentUrl: 'https://workshop.example/app',
+                        deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
                     },
+                }),
+            ),
+        );
+    });
+
+    it('saves every deployment address in its displayed order', async () => {
+        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+
+        fireEvent.change(document.getElementById('workshop-repository-deployment-urls') as HTMLTextAreaElement, {
+            target: { value: ' https://staging.workshop.example/app \n\nhttps://workshop.example/app#top ' },
+        });
+        submit();
+
+        await waitFor(() =>
+            expect(onSave).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    repository: expect.objectContaining({
+                        deploymentUrls: [
+                            'https://staging.workshop.example/app',
+                            'https://workshop.example/app#top',
+                        ],
+                    }),
                 }),
             ),
         );

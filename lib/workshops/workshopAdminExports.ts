@@ -100,7 +100,10 @@ function serializeWorkshopSettingsAsCsv(workshop: WorkshopDetails): string {
                       },
                       {
                           header: 'URL nasazení',
-                          getValue: (item: WorkshopDetails) => item.repository?.deploymentUrl ?? null,
+                          getValue: (item: WorkshopDetails) => {
+                              const deploymentUrls = item.repository?.deploymentUrls ?? [];
+                              return deploymentUrls.length === 0 ? null : deploymentUrls.join('\n');
+                          },
                       },
                   ]
                 : []),

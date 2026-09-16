@@ -2,18 +2,18 @@ import { createWorkshopRepositoryOrNull } from '@/lib/workshops/workshopReposito
 import { describe, expect, it } from 'vitest';
 
 describe('the stored project of a workshop', () => {
-    it('is read as the repository, the branch which is followed, and where the project runs', () => {
+    it('is read as the repository, the branch which is followed, and every place the project runs', () => {
         expect(
             createWorkshopRepositoryOrNull({
                 repository: 'hejny/promptbook',
                 branch: 'main',
-                deploymentUrl: 'https://workshop.example/app',
+                deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app#top'],
             }),
         ).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: 'main',
-            deploymentUrl: 'https://workshop.example/app',
+            deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
         });
     });
 
@@ -22,22 +22,22 @@ describe('the stored project of a workshop', () => {
             createWorkshopRepositoryOrNull({
                 repository: 'hejny/promptbook',
                 branch: ['main', 'feature/*'],
-                deploymentUrl: null,
+                deploymentUrls: [],
             }),
         ).toEqual({
             owner: 'hejny',
             name: 'promptbook',
             branch: ['main', 'feature/*'],
-            deploymentUrl: null,
+            deploymentUrls: [],
         });
         expect(
-            createWorkshopRepositoryOrNull({ repository: 'hejny/promptbook', branch: [], deploymentUrl: null }),
-        ).toEqual({ owner: 'hejny', name: 'promptbook', branch: '*', deploymentUrl: null });
+            createWorkshopRepositoryOrNull({ repository: 'hejny/promptbook', branch: [], deploymentUrls: [] }),
+        ).toEqual({ owner: 'hejny', name: 'promptbook', branch: '*', deploymentUrls: [] });
     });
 
     it('is no project at all for a room which is about none', () => {
         expect(
-            createWorkshopRepositoryOrNull({ repository: null, branch: null, deploymentUrl: null }),
+            createWorkshopRepositoryOrNull({ repository: null, branch: null, deploymentUrls: [] }),
         ).toBeNull();
     });
 
@@ -46,18 +46,27 @@ describe('the stored project of a workshop', () => {
             createWorkshopRepositoryOrNull({
                 repository: 'not a repository',
                 branch: 'main',
-                deploymentUrl: 'https://workshop.example/app',
+                deploymentUrls: ['https://workshop.example/app'],
             }),
         ).toBeNull();
     });
 
-    it('keeps the repository while leaving out a branch or a deployment which cannot be read', () => {
+    it('keeps the repository while leaving out a branch or deployment which cannot be read', () => {
         expect(
             createWorkshopRepositoryOrNull({
                 repository: 'https://github.com/hejny/promptbook',
                 branch: 'main..next',
-                deploymentUrl: 'javascript:alert(1)',
+                deploymentUrls: [
+                    'javascript:alert(1)',
+                    'https://workshop.example/app#top',
+                    'https://workshop.example/app',
+                ],
             }),
-        ).toEqual({ owner: 'hejny', name: 'promptbook', branch: null, deploymentUrl: null });
+        ).toEqual({
+            owner: 'hejny',
+            name: 'promptbook',
+            branch: null,
+            deploymentUrls: ['https://workshop.example/app'],
+        });
     });
 });

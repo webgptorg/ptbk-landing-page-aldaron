@@ -1,5 +1,12 @@
 # Current preversion
 
+- A workshop project can now publish more than one deployment URL from `/admin/workshops`. The administrator enters
+  one public address per line; an existing single address is retained as the first entry when the database migrates.
+  `/cs/online-workshop/participant?workshop=` gives participants a separate, safe link to every running application,
+  while the first address remains the deterministic source of the compact project preview on `/cs/komunita`. The
+  project connection remains one value, so changing or clearing its repository still changes or clears every branch
+  pattern and deployment together; settings CSV exports retain each address as well.
+
 - An administrator in `/admin/workshops` or a moderator in
   `/cs/online-workshop/participant?workshop=` can now turn any chat comment into an immediately available material.
   The source comment remains in the chat untouched; the new material keeps its complete Markdown body and names its

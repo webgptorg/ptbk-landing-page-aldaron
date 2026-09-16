@@ -75,7 +75,7 @@ Od začátku workshopu přibylo 2 commity.
 
 ---
 
-[ ]
+[!] failed after an hour by Developer on OpenAI Codex `gpt-5.6-terra`
 
 [✨🤌] Allow multiple deployments for the project connected to the workshop.
 
@@ -83,3 +83,4 @@ Od začátku workshopu přibylo 2 commity.
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

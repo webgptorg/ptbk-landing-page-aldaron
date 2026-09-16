@@ -9,7 +9,7 @@ const REPOSITORY: WorkshopRepository = {
     owner: 'hejny',
     name: 'promptbook',
     branch: ['main', 'client-*', 'feature/*'],
-    deploymentUrl: 'https://workshop.example/app',
+    deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
 };
 
 describe('the workshop repository administration draft', () => {
@@ -19,12 +19,12 @@ describe('the workshop repository administration draft', () => {
         expect(draft).toEqual({
             repositoryUrl: 'https://github.com/hejny/promptbook',
             branch: 'main\nclient-*\nfeature/*',
-            deploymentUrl: 'https://workshop.example/app',
+            deploymentUrls: 'https://workshop.example/app\nhttps://preview.workshop.example/app',
         });
         expect(createWorkshopRepositoryWriteValues(draft)).toEqual({
             url: 'https://github.com/hejny/promptbook',
             branch: ['main', 'client-*', 'feature/*'],
-            deploymentUrl: 'https://workshop.example/app',
+            deploymentUrls: ['https://workshop.example/app', 'https://preview.workshop.example/app'],
         });
     });
 
@@ -33,16 +33,16 @@ describe('the workshop repository administration draft', () => {
             createWorkshopRepositoryWriteValues({
                 repositoryUrl: 'hejny/promptbook',
                 branch: '*',
-                deploymentUrl: '',
+                deploymentUrls: '',
             }),
-        ).toEqual({ url: 'hejny/promptbook', branch: '*', deploymentUrl: null });
+        ).toEqual({ url: 'hejny/promptbook', branch: '*', deploymentUrls: [] });
         expect(
             createWorkshopRepositoryWriteValues({
                 repositoryUrl: 'hejny/promptbook',
                 branch: '',
-                deploymentUrl: '',
+                deploymentUrls: '',
             }),
-        ).toEqual({ url: 'hejny/promptbook', branch: null, deploymentUrl: null });
+        ).toEqual({ url: 'hejny/promptbook', branch: null, deploymentUrls: [] });
     });
 
     it('shows old all-branches records as the editable wildcard pattern', () => {
