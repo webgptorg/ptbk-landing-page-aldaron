@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
+    autoApproveWorkshopSubmissionMock,
     broadcastWorkshopEventMock,
     getAuthenticatedWorkshopRequestMock,
     getCrossSiteResponseOrNullMock,
@@ -12,6 +13,7 @@ const {
     loadWorkshopPollsMock,
     saveWorkshopPollVoteMock,
 } = vi.hoisted(() => ({
+    autoApproveWorkshopSubmissionMock: vi.fn(),
     broadcastWorkshopEventMock: vi.fn(),
     getAuthenticatedWorkshopRequestMock: vi.fn(),
     getCrossSiteResponseOrNullMock: vi.fn(),
@@ -20,6 +22,10 @@ const {
     isWorkshopPollVisibleInRoomMock: vi.fn(),
     loadWorkshopPollsMock: vi.fn(),
     saveWorkshopPollVoteMock: vi.fn(),
+}));
+
+vi.mock('@/lib/workshops/workshopAutoApproval', () => ({
+    autoApproveWorkshopSubmission: autoApproveWorkshopSubmissionMock,
 }));
 
 vi.mock('@/lib/api/getCrossSiteResponseOrNull', () => ({
@@ -84,6 +90,7 @@ function createRequest(body: unknown = { optionId: SELECTED_OPTION_ID }): NextRe
 
 describe('workshop-attached community poll voting endpoint', () => {
     beforeEach(() => {
+        autoApproveWorkshopSubmissionMock.mockReset().mockResolvedValue(false);
         broadcastWorkshopEventMock.mockReset();
         getAuthenticatedWorkshopRequestMock.mockReset();
         getCrossSiteResponseOrNullMock.mockReset();
@@ -119,6 +126,7 @@ describe('workshop-attached community poll voting endpoint', () => {
             { optionId: SELECTED_OPTION_ID },
         );
         expect(loadWorkshopPollsMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT);
+        expect(autoApproveWorkshopSubmissionMock).not.toHaveBeenCalled();
         expect(broadcastWorkshopEventMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, { kind: 'state-changed' });
     });
 
@@ -147,7 +155,28 @@ describe('workshop-attached community poll voting endpoint', () => {
 
         expect(response.status).toBe(404);
         expect(loadWorkshopPollsMock).not.toHaveBeenCalled();
+        expect(autoApproveWorkshopSubmissionMock).not.toHaveBeenCalled();
         expect(broadcastWorkshopEventMock).not.toHaveBeenCalled();
+    });
+
+    it.each([true, false])('reviews the persisted member answer and preserves its vote (approval: %s)', async (isApproved) => {
+        const writtenOption = { ...POLL.options[0]!, label: 'Uložená odpověď', isCreatedByParticipant: true, status: 'pending' as const };
+        loadWorkshopPollsMock.mockResolvedValue({ polls: [{ ...POLL, options: [writtenOption] }], errorMessage: null });
+        autoApproveWorkshopSubmissionMock.mockResolvedValue(isApproved);
+
+        const response = await POST(createRequest({ otherOptionLabel: 'Nová odpověď' }), ROUTE_CONTEXT);
+
+        expect(response.status).toBe(200);
+        expect(autoApproveWorkshopSubmissionMock).toHaveBeenCalledWith(SUPABASE, PARTICIPANT, {
+            kind: 'poll-option',
+            id: writtenOption.id,
+            status: 'pending',
+            content: { question: POLL.question, label: writtenOption.label },
+        });
+        expect(await response.json()).toMatchObject({
+            poll: { options: [{ ...writtenOption, status: isApproved ? 'approved' : 'pending' }] },
+        });
+        expect(broadcastWorkshopEventMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, { kind: 'state-changed' });
     });
 
     it('keeps a concurrently closed poll closed for an attached workshop too', async () => {

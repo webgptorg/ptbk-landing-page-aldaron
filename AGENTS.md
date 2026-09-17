@@ -156,7 +156,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   every room can vote for it; later poll edits keep member-written answers.
   Such an answer goes through the very moderation a chat message does, by the
   one shared submission policy in `lib/workshops/workshopSubmissionStatus.ts`:
-  it is pending until a moderator decides about it, while a trusted member and a
+  it is pending until the shared AI review or a moderator approves it, while a trusted member and a
   moderator have theirs approved as they write it. The vote of its writer is
   counted at once either way, but until the answer is approved only its writer
   and the moderators of the room owning the poll receive it or its vote, and a
@@ -181,7 +181,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Stripe webhooks update completed, cancelled, failed, and late payments. With no
   Stripe key, hide membership; with test keys, identify the test payment gate.
 - Community projects use a URL-first metadata wizard. Ordinary submissions await
-  moderation; trusted members and moderators are approved immediately. Pending
+  AI or manual moderation; trusted members and moderators are approved immediately. Pending
   projects remain visible to their author and moderators.
 - A live workshop room has countdown, YouTube stage, reactions, watching count,
   moderated chat, timed materials, and attached poll aggregates. An open-ended
@@ -219,6 +219,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   offset as hours, minutes and seconds, while it stays stored, exported and read
   in seconds; it applies only to that paid replay and never to the countdown or
   live stream.
+- Pending chat messages, member-written poll answers, and community projects use
+  `lib/workshops/workshopAutoApproval.ts` for optional AI approval after saving.
+  `WORKSHOP_AUTO_APPROVAL_API_KEY` enables it; the model and HTTPS base URL are
+  configurable. Only clearly suitable content is approved; uncertainty, missing
+  configuration, invalid output, and an eight-second timeout leave it pending.
+  The database approves only unchanged pending content from a currently unbanned
+  author and privately records the item, model, and time. AI never rejects, edits,
+  grants trust, or replaces a human decision. It reviews text and URL metadata,
+  without fetching linked pages or preview images. Moderator-created materials
+  require no review, and old pending submissions are not bulk-processed.
 - Trusted participants remain invisible and their messages are auto-approved.
   Moderators see pending messages, can approve/reject/correct/pin them, and can
   trust or silence authors. An administrator in `/admin/workshops` and a moderator

@@ -1,5 +1,6 @@
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
+import { autoApproveWorkshopSubmission } from '@/lib/workshops/workshopAutoApproval';
 import {
     loadWorkshopPolls,
     saveWorkshopPollVote,
@@ -76,9 +77,34 @@ export async function POST(request: NextRequest, context: WorkshopPollVoteRouteC
     if (errorMessage !== null) {
         return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
-    const updatedPoll = polls.find((currentPoll) => currentPoll.id === pollId);
+    let updatedPoll = polls.find((currentPoll) => currentPoll.id === pollId);
     if (updatedPoll === undefined) {
         return NextResponse.json({ error: 'Poll could not be loaded' }, { status: 500 });
+    }
+
+    // Existing prepared options and ordinary votes require no review. Use the saved answer, never request text.
+    const writtenOption = 'otherOptionLabel' in parsedResult.data
+        ? updatedPoll.options.find((option) => option.isCreatedByParticipant && option.isVotedByParticipant)
+        : undefined;
+    if (writtenOption !== undefined) {
+        const isAutomaticallyApproved = await autoApproveWorkshopSubmission(
+            authenticatedRequest.supabase,
+            authenticatedRequest.participant,
+            {
+                kind: 'poll-option',
+                id: writtenOption.id,
+                status: writtenOption.status,
+                content: { question: updatedPoll.question, label: writtenOption.label },
+            },
+        );
+        if (isAutomaticallyApproved) {
+            updatedPoll = {
+                ...updatedPoll,
+                options: updatedPoll.options.map((option) =>
+                    option.id === writtenOption.id ? { ...option, status: 'approved' } : option,
+                ),
+            };
+        }
     }
 
     await broadcastWorkshopEvent(authenticatedRequest.supabase, authenticatedRequest.workshopRow, {

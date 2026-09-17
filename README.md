@@ -89,6 +89,37 @@ NEXT_PUBLIC_SKIP_WAITLIST_TOKEN=
 
 `NEXT_PUBLIC_` variables are included in the browser bundle. Never place database passwords, service-role keys, or administrator credentials in them. With no `ADMIN_PASSWORD`, the administration remains closed.
 
+### Automatic submission approval
+
+Chat in workshop/community rooms (including project discussions), member-written poll answers, and community project
+submissions share one server-side AI review. Apply the database migrations, then set this private variable to enable it:
+
+```dotenv
+WORKSHOP_AUTO_APPROVAL_API_KEY=YOUR_OPENAI_API_KEY
+
+# Optional; defaults shown
+WORKSHOP_AUTO_APPROVAL_MODEL=gpt-4.1-mini-2025-04-14
+WORKSHOP_AUTO_APPROVAL_BASE_URL=https://api.openai.com/v1
+```
+
+An alternative HTTPS endpoint must support the same Chat Completions request and strict JSON schema response format.
+The default model supports [structured outputs](https://developers.openai.com/api/docs/models/gpt-4.1-mini);
+responses are also validated locally, including [refusals and incomplete output](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+Only pending contributions are reviewed, after successful persistence and the existing authentication/validation.
+Trusted members and moderators still publish immediately, and banned participants cannot gain AI approval. The reviewer
+can approve clearly suitable text or leave it for a human; it never rejects, edits, pins, or changes participant trust.
+Only the contribution text/URLs and, for poll answers, the question are sent to the configured provider. Participant
+names, e-mails and session data are not added to the request, although a member's text may itself contain personal data.
+Project preview URLs are included as metadata; linked pages and images are not fetched or visually reviewed by the AI.
+
+Each review has an eight-second timeout and no retries. Missing configuration, unavailable AI, or uncertain/invalid
+responses leave the saved contribution pending in the existing moderator queue. Removing the key disables AI review.
+Existing pending items are not bulk-processed. Concurrent edits, moderation decisions, deletion, or an author ban prevent
+approval of the stale submission. Successful approvals record only the item kind/id, configured model and time in the
+private `workshop_submission_auto_approvals` table. Existing visibility, poll votes, refreshes and manual moderation remain
+the source of truth. This feature introduces no participant-facing AI configuration.
+
 ## Database and migrations
 
 The application applies pending migrations automatically when a Node.js server starts. You can also run them directly:

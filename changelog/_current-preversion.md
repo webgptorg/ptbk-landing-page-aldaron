@@ -1,5 +1,14 @@
 # Current preversion
 
+- Added a shared AI approval mechanism for chat in `/cs/online-workshop/participant?workshop=` and `/cs/komunita`,
+  member-written poll answers, community projects, and project discussions. New submissions are saved first, then
+  clearly suitable text can be approved automatically; uncertain content and unavailable AI stay in the existing
+  manual queue. Trusted members and moderators retain immediate approval, and banned authors cannot gain AI approval.
+  One atomic database operation protects concurrent human decisions, edits and deletions and privately records AI
+  approvals. The reviewer never rejects content or changes trust. Server configuration, the eight-second timeout,
+  provider setup, and the scope of text/URL review are documented in `README.md`; without a configured key, moderation
+  continues as before. Existing moderator-created materials need no approval and are outside the review queue.
+
 - Replaced the centered cookie popup on every page with a shallow desktop strip
   and an inset mobile panel. The banner and its settings now use
   light, workshop, or podcast colors together, with clearer button hierarchy,

@@ -13,6 +13,7 @@ import { scrapeCommunityProjectPreview } from '@/lib/community-projects/communit
 import { normalizeCommunityProjectUrl } from '@/lib/community-projects/communityProjectUrl';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { communityProjectCreateSchema } from '@/lib/community-projects/communityProjectSchemas';
+import { autoApproveWorkshopSubmission } from '@/lib/workshops/workshopAutoApproval';
 import { NextRequest, NextResponse } from 'next/server';
 
 const MAXIMAL_COMMUNITY_PROJECT_HOME_COUNT = 5;
@@ -113,5 +114,25 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Projekt byl uložen, ale nepodařilo se ho načíst.' }, { status: 500 });
     }
 
-    return NextResponse.json({ project: loadedProject.project }, { status: 201 });
+    const project = loadedProject.project;
+    const isAutomaticallyApproved = await autoApproveWorkshopSubmission(
+        authenticatedRequest.supabase,
+        authenticatedRequest.participant,
+        {
+            kind: 'project',
+            id: project.id,
+            status: project.status,
+            content: {
+                url: project.url,
+                title: project.title,
+                description: project.description,
+                previewImageUrl: project.previewImageUrl,
+            },
+        },
+    );
+
+    return NextResponse.json(
+        { project: isAutomaticallyApproved ? { ...project, status: 'approved' } : project },
+        { status: 201 },
+    );
 }

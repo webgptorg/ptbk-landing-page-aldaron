@@ -75,8 +75,8 @@ export function CommunityProjectModeration() {
                 <div>
                     <h2 className="text-xl font-bold text-slate-950">Moderace projektů</h2>
                     <p className="mt-1 max-w-2xl text-sm text-slate-500">
-                        Stejná fronta jako u chatu: běžný projekt čeká, důvěryhodný člen nebo moderátor jej zveřejní
-                        rovnou.
+                        Stejná kontrola jako u chatu: projekty čekající na schválení posoudíte zde. Důvěryhodný člen
+                        nebo moderátor je zveřejní rovnou.
                     </p>
                 </div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
