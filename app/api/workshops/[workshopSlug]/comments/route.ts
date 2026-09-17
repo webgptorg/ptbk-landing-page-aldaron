@@ -21,6 +21,9 @@ import {
 } from '@/lib/workshops/workshopRequest';
 import { workshopCommentSchema } from '@/lib/workshops/workshopSchemas';
 import { NextRequest, NextResponse } from 'next/server';
+import { scheduleWorkshopAgentWork } from '@/lib/workshops/agents/scheduleWorkshopAgentWork';
+
+export const maxDuration = 60;
 
 const COMMENT_RATE_LIMIT_ERROR = 'WORKSHOP_COMMENT_RATE_LIMITED';
 
@@ -152,6 +155,7 @@ export async function POST(request: NextRequest, context: WorkshopCommentsRouteC
     });
 
     if (commentRow.status === 'approved') {
+        scheduleWorkshopAgentWork(authenticatedRequest.workshopRow.id);
         await broadcastWorkshopEvent(authenticatedRequest.supabase, authenticatedRequest.workshopRow, {
             kind: 'state-changed',
         });

@@ -5,6 +5,7 @@ import type { WorkshopCommentStatus } from '@/lib/workshops/workshopTypes';
 import { createWorkshopCommentUpdateDatabaseValues, getWorkshopCommentPinChange } from '@/lib/workshops/workshopValues';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { z } from 'zod';
+import { scheduleWorkshopAgentWork } from './agents/scheduleWorkshopAgentWork';
 
 type WorkshopCommentUpdateValues = z.infer<typeof workshopCommentUpdateSchema>;
 
@@ -93,5 +94,6 @@ export async function moderateWorkshopComment(
         }
     }
 
+    if (data.status === 'approved') scheduleWorkshopAgentWork(workshopId);
     return { comment: { commentId: data.id, status: data.status, body: data.body }, errorMessage: null };
 }

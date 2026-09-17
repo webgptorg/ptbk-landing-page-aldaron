@@ -4,6 +4,8 @@ import type { WorkshopKind } from '@/lib/workshops/workshopTypes';
  * What a room of one kind is, so that a screen asks for the capability it needs instead of naming the kind itself
  */
 export type WorkshopKindCapabilities = {
+    /** Whether Book agents can take part in this room's chat. */
+    readonly isAgentsOffered: boolean;
     /**
      * Whether exactly one room of this kind exists, so nothing offers a choice between rooms or the creation of another
      */
@@ -97,6 +99,7 @@ export type WorkshopKindCapabilities = {
  */
 const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, WorkshopKindCapabilities>> = {
     workshop: {
+        isAgentsOffered: true,
         isSingleton: false,
         isSlugFixed: false,
         isScheduled: true,
@@ -112,6 +115,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isRealtime: true,
     },
     community: {
+        isAgentsOffered: true,
         isSingleton: true,
         isSlugFixed: true,
         isScheduled: false,
@@ -127,6 +131,7 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
         isRealtime: false,
     },
     project: {
+        isAgentsOffered: false,
         isSingleton: false,
         isSlugFixed: true,
         isScheduled: false,

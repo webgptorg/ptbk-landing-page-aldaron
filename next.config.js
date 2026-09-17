@@ -28,7 +28,7 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
     images: { unoptimized: true },
-    serverExternalPackages: ['pg'],
+    serverExternalPackages: ['pg', '@promptbook/node'],
     outputFileTracingIncludes: {
         '/*': ['./migrations/**/*.sql'],
     },

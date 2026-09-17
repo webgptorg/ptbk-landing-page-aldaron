@@ -15,6 +15,7 @@ describe('workshop kind capabilities', () => {
 
     it('keeps a workshop occurrence the live event it always was', () => {
         expect(getWorkshopKindCapabilities('workshop')).toEqual({
+            isAgentsOffered: true,
             isSingleton: false,
             isSlugFixed: false,
             isScheduled: true,
@@ -33,6 +34,7 @@ describe('workshop kind capabilities', () => {
 
     it('makes the community one calm permanent room without a schedule, a stage, or live updates', () => {
         expect(getWorkshopKindCapabilities('community')).toEqual({
+            isAgentsOffered: true,
             isSingleton: true,
             isSlugFixed: true,
             isScheduled: false,
@@ -51,6 +53,7 @@ describe('workshop kind capabilities', () => {
 
     it('makes every project a calm discussion room with its address controlled by the project record', () => {
         expect(getWorkshopKindCapabilities('project')).toEqual({
+            isAgentsOffered: false,
             isSingleton: false,
             isSlugFixed: true,
             isScheduled: false,

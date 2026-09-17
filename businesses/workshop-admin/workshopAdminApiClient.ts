@@ -1,4 +1,5 @@
 import type { EventDetails } from '@/lib/events/event';
+import type { WorkshopAgentAdminState, WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
 import type { EventLocationKind } from '@/lib/events/eventLocation';
 import type { EventType } from '@/lib/events/eventTypes';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
@@ -183,8 +184,38 @@ async function requestAdminJson<ResponseBody>(url: string, requestOptions?: Requ
     return body;
 }
 
-function createJsonMutation(method: 'POST' | 'PATCH', body: unknown): RequestInit {
+function createJsonMutation(method: 'POST' | 'PATCH' | 'DELETE', body: unknown): RequestInit {
     return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+}
+
+function createWorkshopAgentUrl(workshopId: string, suffix = ''): string {
+    return createAdminApiUrl(`/${encodeURIComponent(workshopId)}/agents${suffix}`);
+}
+
+export function fetchAdminWorkshopAgents(workshopId: string): Promise<WorkshopAgentAdminState> {
+    return requestAdminJson(createWorkshopAgentUrl(workshopId));
+}
+
+export function saveAdminWorkshopAgent(workshopId: string, agentId: string | null, values: WorkshopAgentWriteValues): Promise<{ readonly agentId: string }> {
+    return requestAdminJson(
+        createWorkshopAgentUrl(workshopId, agentId === null ? '' : `/${encodeURIComponent(agentId)}`),
+        createJsonMutation(agentId === null ? 'POST' : 'PATCH', values),
+    );
+}
+
+export function changeAdminWorkshopAgentAudioSession(workshopId: string, sessionId: string, isStarting: boolean): Promise<unknown> {
+    return requestAdminJson(createWorkshopAgentUrl(workshopId, '/audio-session'), {
+        ...createJsonMutation(isStarting ? 'POST' : 'DELETE', { sessionId }),
+        keepalive: !isStarting,
+    });
+}
+
+export function sendAdminWorkshopAgentAudio(workshopId: string, sessionId: string, sequence: number, audio: Blob, signal: AbortSignal): Promise<{ readonly transcript: string | null }> {
+    const form = new FormData();
+    form.append('audio', audio, 'workshop-audio');
+    form.append('sessionId', sessionId);
+    form.append('sequence', String(sequence));
+    return requestAdminJson(createWorkshopAgentUrl(workshopId, '/audio'), { method: 'POST', body: form, signal });
 }
 
 export async function fetchAdminWorkshopList(

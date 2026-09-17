@@ -1,5 +1,17 @@
 # Current preversion
 
+- Added reusable Book agents to workshop and community chat. The shared Agents tab in `/admin/workshops` and
+  `/admin/community` edits personalities with Promptbook `BookEditor`, enables each agent per room, and shows recent
+  activity. `LiteAgent` from `@promptbook/node` uses server-side `OPENAI_API_KEY` and each agent's source Book to reply
+  to approved participant, artificial and agent comments. A durable queue, per-agent cooldowns, leases and a two-turn
+  limit prevent duplicate replies and unbounded agent conversations. Replies use the existing chat, threads, links and
+  moderation; administration and CSV exports distinguish all three origins and retain agent/run identifiers.
+  Live workshops can share stream-tab audio or a presenter microphone from the Agents tab. Private rolling
+  transcripts supply timely questions; stopping capture, ending the event or disabling an agent prevents stale
+  questions. A restarted capture excludes previous sessions' speech, and publication locks the active session against
+  a concurrent stop. Books, transcripts and execution records remain private. Added migrations, isolated PostgreSQL tests,
+  browser-capture tests, and setup instructions in `README.md`.
+
 - Added follow-up actions to the ended stage of `/cs/online-workshop/participant?workshop=`:
   non-paying attendees can buy membership through the existing popup even when no recording exists,
   and everyone gets the next upcoming workshop, the next paid workshop, and an extra community button.

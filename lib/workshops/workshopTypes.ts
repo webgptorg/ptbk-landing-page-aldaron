@@ -631,6 +631,9 @@ export type WorkshopCommentReference = {
 };
 
 export type WorkshopAdminComment = Omit<WorkshopComment, 'isUpvotedByParticipant'> & {
+    readonly origin: import('./workshopCommentOrigin').WorkshopCommentOrigin;
+    readonly agentId: string | null;
+    readonly agentJobId: string | null;
     readonly participantId: string | null;
     readonly realUpvoteCount: number;
     readonly artificialUpvoteCount: number;

@@ -193,6 +193,9 @@ export function serializeWorkshopAdminCommentsAsCsv(comments: readonly WorkshopA
     return serializeRowsAsCsv(comments, [
             { header: 'Čas', getValue: (comment) => comment.createdAt },
             { header: 'Autor', getValue: (comment) => comment.authorName },
+            { header: 'Původ', getValue: (comment) => comment.origin },
+            { header: 'ID agenta', getValue: (comment) => comment.agentId },
+            { header: 'ID běhu agenta', getValue: (comment) => comment.agentJobId },
             { header: 'ID účastníka', getValue: (comment) => comment.participantId },
             { header: 'Stav', getValue: (comment) => comment.status },
             { header: 'Komentář', getValue: (comment) => comment.body },

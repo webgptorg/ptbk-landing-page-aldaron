@@ -120,6 +120,71 @@ approval of the stale submission. Successful approvals record only the item kind
 private `workshop_submission_auto_approvals` table. Existing visibility, poll votes, refreshes and manual moderation remain
 the source of truth. This feature introduces no participant-facing AI configuration.
 
+### Book agents in workshop and community chat
+
+Apply the pending migrations through `npm run migrate-database`, including the Book-agent schema and live-session
+publication migration. The **Agenti** tab in
+`/admin/workshops` and `/admin/community` creates reusable personalities using `BookEditor` from
+[`@promptbook/components`](https://github.com/webgptorg/promptbook). A definition's name, source Book and global enabled
+switch are shared. Reply/listening switches and cooldowns apply only to the selected room. New definitions are assigned
+only to the room where they were created; select an existing agent in another room to enable it there. Turning both
+room switches off removes its participation while preserving its history.
+
+```dotenv
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+
+# Optional: override the model declared in source Books (normally leave unset)
+# WORKSHOP_AGENT_MODEL=gpt-4.1-mini
+
+# Optional speech-to-text model; default shown
+WORKSHOP_AGENT_TRANSCRIPTION_MODEL=gpt-4o-mini-transcribe
+
+# Optional scheduler credential for hosts that suspend idle processes
+# WORKSHOP_AGENT_CRON_SECRET=YOUR_RANDOM_SECRET
+# WORKSHOP_AGENT_BACKGROUND_WORKER=false
+```
+
+The server creates a fresh `LiteAgent` from `@promptbook/node` for each reply, using the saved source Book and its
+personality, goals, rules and model. Context includes the room description, approved chat names/text and recent live
+speech; it excludes participant email/session records, pending messages and paid materials. There is no fallback
+personality or model call when the key is missing. Books are private, administrator-controlled agent configuration.
+
+Only newly approved comments trigger replies, through the same database trigger for human moderation, automatic
+approval, trusted participants, artificial comments and agent output. Old comments are not backfilled. At most two
+agents answer a human/artificial message, and one other agent may respond to each reply, stopping after two agent
+turns. Per-agent cooldowns, a single in-flight generation per room, leases and unique reply keys bound activity and
+prevent duplicates. An agent can return `[SKIP]`. Calls time out after 25 seconds and failed jobs retry at most three
+times; comment jobs expire after 30 minutes and live-question jobs after two minutes. Publication rechecks the Book,
+assignment, room, source text, moderation and author ban. Bots have no participant session, votes or membership access.
+
+Participant chat uses the existing rendering and moderation controls. Admin comment badges and CSV exports distinguish
+`user`, `artificial` and `agent`, with agent/run identifiers. Books, private transcripts and execution snapshots are
+stored in service-role-only tables. The legacy `is_artificial` flag remains true for both synthetic origins, so existing
+link handling and analytics continue to work.
+
+For live questions, enable listening on an agent during an ongoing workshop, then click **Sdílet zvuk workshopu**
+and select the browser tab playing the stream with **Share tab audio** checked. Alternatively choose **Použít mikrofon**
+on the presenter's device. Use a browser supporting tab-audio capture, such as desktop Chrome/Edge. The admin page and
+its Agents tab must remain open; navigating away or pressing Stop ends capture. Only audio is uploaded, in independently
+decodable 15-second segments. OpenAI's [transcription endpoint](https://developers.openai.com/api/docs/guides/speech-to-text)
+produces a private rolling context for questions; audio itself is never stored. Transcripts remain in the private
+database history, with only the last five minutes from the current, unexpired capture supplied to an active live room.
+Restarting capture never inherits the previous session's speech. One capture session per room and
+deduplicated sequence numbers prevent duplicate transcription. Stopping capture, replacing the session, ending the
+workshop or disabling listening prevents an in-flight live question from publishing. Publication locks the capture
+session so a concurrent Stop cannot slip between its validity check and the saved question. This does not automatically
+extract audio from the cross-origin YouTube iframe; the presenter explicitly selects the live audio source.
+
+Persistent Node.js servers poll the durable queue every five seconds; authenticated room requests also schedule work
+with Next.js `after()`. On hosts that suspend idle processes, configure a scheduler to `POST /api/workshop-agents/run`
+with `Authorization: Bearer <WORKSHOP_AGENT_CRON_SECRET>` at the desired cadence (e.g. every minute). Each call handles
+up to two jobs and needs a 60-second execution budget; the audio upload route allows 90 seconds for transcription and
+follow-up work. `WORKSHOP_AGENT_BACKGROUND_WORKER=false` disables only the persistent timer. The entire feature stays
+inactive without `OPENAI_API_KEY`, and project discussions and externally organized events do not offer agents.
+
+Queue integration tests run the actual migration/functions in an isolated in-memory PostgreSQL (PGlite), without
+connecting to `DATABASE_URL` or making billable model calls. Audio and model tests use mocked providers.
+
 ## Database and migrations
 
 The application applies pending migrations automatically when a Node.js server starts. You can also run them directly:

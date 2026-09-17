@@ -7,6 +7,9 @@ import { broadcastWorkshopEvent } from '@/lib/workshops/workshopRealtime';
 import { workshopArtificialCommentSchema } from '@/lib/workshops/workshopSchemas';
 import { createWorkshopArtificialCommentDatabaseValues } from '@/lib/workshops/workshopValues';
 import { NextRequest, NextResponse } from 'next/server';
+import { scheduleWorkshopAgentWork } from '@/lib/workshops/agents/scheduleWorkshopAgentWork';
+
+export const maxDuration = 60;
 
 type AdminWorkshopCommentsRouteContext = {
     readonly params: Promise<{ readonly workshopId: string }>;
@@ -59,5 +62,6 @@ export async function POST(request: NextRequest, context: AdminWorkshopCommentsR
     }
 
     await broadcastWorkshopEvent(workshopData.supabase, workshopData.workshopRow, { kind: 'state-changed' });
+    scheduleWorkshopAgentWork(workshopId);
     return NextResponse.json({ commentId: data.id }, { status: 201 });
 }

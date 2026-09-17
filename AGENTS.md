@@ -193,6 +193,19 @@ use cases, and audiences. Keep these rules current when behavior changes.
   term runs until its recorded end; its stage does not end automatically. Admins
   can select, replace, clear, or create the displayed comment through the same
   private realtime channel used by reactions.
+- Workshop and community chat can use reusable Book agents, administered in their shared Agents tab with
+  `BookEditor` from `@promptbook/components`. `LiteAgent` from `@promptbook/node` uses `OPENAI_API_KEY`; definitions
+  are shared while replies, listening and cooldowns are enabled per room. Only newly approved comments enqueue
+  replies, including artificial and other agent messages, with at most two agent turns. A durable database queue
+  owns leases, deduplication and rechecks of moderation, agent settings and room state before publication.
+  Public messages use the existing chat rendering; admin projections and exports distinguish `user`, `artificial`
+  and `agent` origins with agent/run provenance. Agents have no participant sessions or membership access.
+  Live questions require an administrator's active stream-tab or microphone capture in the Agents tab; audio is
+  transcribed in short standalone segments and never saved. Private transcripts feed the agents only during an
+  ongoing workshop and only from its current, unexpired capture session. Stopping capture or ending the workshop
+  prevents its pending live questions from publishing; publication locks that session against a concurrent stop.
+  Project rooms and externally organized events offer no agents. Persistent servers run the queue in the background;
+  serverless hosts can use the authenticated scheduler route documented in `README.md`.
 - A term can be about a project. The connection is one value — GitHub repository,
   the default branch, and one or more branch patterns such as `main`, `client-*`,
   `feature/*`, or `*` for all branches, plus any number of public deployment

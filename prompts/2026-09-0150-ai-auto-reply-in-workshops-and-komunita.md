@@ -1,4 +1,4 @@
-[ ] `astra`
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.7994 25 minutes; Testing 16 minutes
 
 [✨🍪] You should be able to define agents / avatars which will automatically reply to comments on the workshop and community.
 
@@ -22,3 +22,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

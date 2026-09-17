@@ -10,6 +10,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const COMMENT: WorkshopAdminComment = {
     id: 'question',
     participantId: 'participant',
+    origin: 'user',
+    agentId: null,
+    agentJobId: null,
     authorName: 'Jana Nováková',
     body: 'Jak nasadit agenta do prdukce?',
     status: 'pending',
@@ -24,6 +27,18 @@ const COMMENT: WorkshopAdminComment = {
     parentComment: null,
     isPinned: false,
 };
+
+it('distinguishes real, artificial and agent messages in administration', () => {
+    const { unmount } = renderModeration(vi.fn(), [
+        COMMENT,
+        { ...COMMENT, id: 'artificial', origin: 'artificial', isArtificial: true, participantId: null },
+        { ...COMMENT, id: 'agent', origin: 'agent', isArtificial: true, participantId: null, agentId: 'book-agent', agentJobId: 'agent-run' },
+    ]);
+    expect(screen.getByText('Účastník')).not.toBeNull();
+    expect(screen.getByText('Umělý komentář')).not.toBeNull();
+    expect(screen.getByText('AI agent').getAttribute('title')).toContain('book-agent');
+    unmount();
+});
 const PINNED_COMMENT: WorkshopCommentReference = {
     id: 'pinned-question',
     authorName: 'Karel Novák',

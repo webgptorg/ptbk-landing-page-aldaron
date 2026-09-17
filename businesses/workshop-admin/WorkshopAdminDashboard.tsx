@@ -43,6 +43,7 @@ import { WorkshopAttachedPollList } from '@/businesses/workshop-admin/WorkshopAt
 import { WorkshopAdminRefreshButton } from '@/businesses/workshop-admin/WorkshopAdminRefreshButton';
 import { WorkshopArtificialComment } from '@/businesses/workshop-admin/WorkshopArtificialComment';
 import { WorkshopArtificialReaction } from '@/businesses/workshop-admin/WorkshopArtificialReaction';
+import { WorkshopAgentAdmin } from '@/businesses/workshop-admin/agents/WorkshopAgentAdmin';
 import { WorkshopCommentModeration } from '@/businesses/workshop-admin/WorkshopCommentModeration';
 import { WorkshopContentAdmin } from '@/businesses/workshop-admin/WorkshopContentAdmin';
 import { WorkshopEventLinks } from '@/businesses/workshop-admin/WorkshopEventLinks';
@@ -81,6 +82,7 @@ import type {
 import {
     BarChart3,
     BookOpenText,
+    Bot,
     MessageCircle,
     Radio,
     RefreshCw,
@@ -107,6 +109,7 @@ const WORKSHOP_ADMIN_SECTION_DEFINITIONS: readonly WorkshopAdminSectionDefinitio
     { value: 'overview', label: 'Přehled', icon: BarChart3 },
     { value: 'participants', label: 'Účastníci', icon: Users },
     { value: 'comments', label: 'Komentáře', icon: MessageCircle },
+    { value: 'agents', label: 'Agenti', icon: Bot },
     { value: 'reactions', label: 'Reakce', icon: Radio },
     { value: 'content', label: 'Obsah', icon: BookOpenText },
     { value: 'polls', label: 'Ankety', icon: BarChart3 },
@@ -198,6 +201,7 @@ export function WorkshopAdminDashboard({
         isScheduled: isRoomScheduled,
         isStageOffered,
         isPollsOffered,
+        isAgentsOffered,
     } = getWorkshopKindCapabilities(workshopKind);
     const isRoomSelectionOffered = !isSingleton;
     const [viewState, changeViewState] = useUrlSynchronizedViewState<WorkshopAdminViewState>({
@@ -225,6 +229,7 @@ export function WorkshopAdminDashboard({
             ({ value }) =>
                 (value !== 'feedback' || workshopKind === 'workshop') &&
                 (value !== 'polls' || isPollSectionOffered) &&
+                (value !== 'agents' || (isAgentsOffered && !snapshot?.workshop.event?.externalUrl)) &&
                 value !== 'memberships',
         ),
         ...additionalSections.map(({ content: _content, ...sectionDefinition }) => sectionDefinition),
@@ -772,6 +777,10 @@ export function WorkshopAdminDashboard({
                                     />
                                 </TabsContent>
                             )}
+
+                            <TabsContent value="agents" className="space-y-4">
+                                <WorkshopAgentAdmin key={snapshot.workshop.id} workshop={snapshot.workshop} />
+                            </TabsContent>
 
                             <TabsContent value="settings" className="space-y-4">
                                 <div className="flex justify-end">

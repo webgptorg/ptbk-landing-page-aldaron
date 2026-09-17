@@ -88,6 +88,7 @@ import type { WorkshopAdminParticipantQuery } from '@/lib/workshops/workshopAdmi
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { getWorkshopCommentProvenance, type WorkshopCommentOrigin } from './workshopCommentOrigin';
 
 export type WorkshopRow = {
     readonly id: string;
@@ -247,6 +248,9 @@ const WORKSHOP_FEEDBACK_RATING_COLUMNS = 'workshop_id, rating';
 type WorkshopFeedbackParticipantRow = Pick<WorkshopAdminParticipantRow, 'id' | 'fullname' | 'email'>;
 
 export type WorkshopCommentRow = {
+    readonly origin?: WorkshopCommentOrigin;
+    readonly agent_id?: string | null;
+    readonly agent_job_id?: string | null;
     readonly id: string;
     readonly participant_id: string | null;
     readonly parent_comment_id: string | null;
@@ -263,7 +267,7 @@ export type WorkshopCommentRow = {
  * Everything a `WorkshopCommentRow` needs, so that a new comment field is selected everywhere at once
  */
 export const WORKSHOP_COMMENT_COLUMNS =
-    'id, participant_id, parent_comment_id, author_name, body, status, upvote_count, artificial_upvote_count, is_artificial, created_at';
+    'id, participant_id, parent_comment_id, author_name, body, status, upvote_count, artificial_upvote_count, is_artificial, origin, agent_id, agent_job_id, created_at';
 
 type WorkshopCommentAuthorRow = {
     readonly id: string;
@@ -2179,6 +2183,7 @@ export async function loadWorkshopAdminCommentsForExport(
     return {
         comments: rows.map((row): WorkshopAdminComment => ({
             ...mapWorkshopCommentRow(row, false, roomContext),
+            ...getWorkshopCommentProvenance(row),
             participantId: row.participant_id,
             isArtificial: row.is_artificial,
             realUpvoteCount: row.upvote_count,
@@ -2898,6 +2903,7 @@ export async function loadWorkshopAdminSnapshot(
     };
     const comments = commentRows.map((row): WorkshopAdminComment => ({
         ...mapWorkshopCommentRow(row, false, roomContext),
+        ...getWorkshopCommentProvenance(row),
         participantId: row.participant_id,
         isArtificial: row.is_artificial,
         realUpvoteCount: row.upvote_count,

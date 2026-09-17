@@ -176,6 +176,7 @@ export function createWorkshopArtificialCommentDatabaseValues(values: WorkshopAr
         body: values.body,
         status: 'approved',
         is_artificial: true,
+        origin: 'artificial',
         moderated_at: new Date().toISOString(),
     };
 }

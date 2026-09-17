@@ -1,5 +1,7 @@
 'use client';
 
+import { WORKSHOP_COMMENT_ORIGIN_LABELS } from '@/lib/workshops/workshopCommentOrigin';
+
 import { WorkshopCommentEditor } from '@/businesses/workshop-admin/WorkshopCommentEditor';
 import { WorkshopPinnedComment } from '@/businesses/workshop-admin/WorkshopPinnedComment';
 import { WorkshopStageCommentControls } from '@/businesses/workshop-admin/WorkshopStageCommentControls';
@@ -196,11 +198,12 @@ export function WorkshopCommentModeration({
                                             <Send className="h-3 w-3" /> Na stage
                                         </span>
                                     )}
-                                    {comment.isArtificial && (
-                                        <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">
-                                            Umělý komentář
-                                        </span>
-                                    )}
+                                    <span
+                                        className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800"
+                                        title={comment.agentId ? `Agent: ${comment.agentId}\nBěh: ${comment.agentJobId}` : undefined}
+                                    >
+                                        {WORKSHOP_COMMENT_ORIGIN_LABELS[comment.origin]}
+                                    </span>
                                     <span
                                         className={`rounded-full px-2.5 py-1 text-xs font-semibold ${comment.status === 'pending' ? 'bg-amber-100 text-amber-800' : comment.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}
                                     >
