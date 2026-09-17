@@ -1,4 +1,4 @@
-[ ] `astra`
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.3951 17 minutes; Testing 12 minutes
 
 [✨🧪] After the workshop has ended, there should be multiple things added to the follow-up / wrap-up
 
@@ -14,3 +14,4 @@
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
 ![alt text](prompts/screenshots/2026-09-0140-next-event-and-comunity.png)
+

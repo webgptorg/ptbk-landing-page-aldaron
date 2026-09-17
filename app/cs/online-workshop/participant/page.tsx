@@ -5,7 +5,7 @@ import {
     readWorkshopParticipantIdentity,
     readWorkshopSlug,
 } from '@/lib/workshops/workshopParticipantLink';
-import { loadPublishedEventSummaries, loadSelectedPublishedWorkshop } from '@/lib/workshops/workshopPublic';
+import { loadPublishedWorkshopSummaries, loadSelectedPublishedWorkshop } from '@/lib/workshops/workshopPublic';
 import { notFound } from 'next/navigation';
 
 type OnlineWorkshopParticipantRouteProps = {
@@ -26,11 +26,10 @@ export default async function OnlineWorkshopParticipantRoute({ searchParams }: O
         resolvedSearchParams.fullname,
     );
 
-    // Note: The term of the address decides which room is opened, while every published term of this very event is
-    //       what the waiting room offers instead of it.
+    // The waiting room picks from online terms; the wrap-up also recommends paid workshops from the same schedule.
     const [openedWorkshop, workshops] = await Promise.all([
         loadSelectedPublishedWorkshop(readWorkshopSlug(resolvedSearchParams.workshop), ONLINE_WORKSHOP_EVENT_TYPE),
-        loadPublishedEventSummaries(ONLINE_WORKSHOP_EVENT_TYPE),
+        loadPublishedWorkshopSummaries(),
     ]);
     if (openedWorkshop === null) {
         notFound();

@@ -23,7 +23,7 @@ import type {
 } from '@/lib/workshops/workshopTypes';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowDownLeft, ArrowLeft, Maximize, Play, Radio, Volume2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 const CLOCK_TICK_MILLISECONDS = 1000;
 
@@ -61,6 +61,8 @@ type WorkshopStageProps = {
      */
     readonly paidMembersOnlyVideo?: WorkshopPaidMembersVideo | null;
     readonly onSaveFeedback?: (values: WorkshopFeedbackValues) => Promise<boolean>;
+    /** Follow-up destinations, mounted only when the stage shows the ended workshop's wrap-up. */
+    readonly wrapUpNavigation?: ReactNode;
 };
 
 function getRemainingSegments(remainingMilliseconds: number) {
@@ -96,6 +98,7 @@ export function WorkshopStage({
     stageComment = null,
     paidMembersOnlyVideo = null,
     onSaveFeedback = refuseStandaloneFeedbackSave,
+    wrapUpNavigation,
 }: WorkshopStageProps) {
     const isReducedMotionPreferred = useReducedMotion() === true;
     const serverClockOffset = useMemo(() => Date.parse(serverTime) - Date.now(), [serverTime]);
@@ -198,6 +201,7 @@ export function WorkshopStage({
                     paidMembersOnlyVideo={paidMembersOnlyVideo}
                     onSaveFeedback={onSaveFeedback}
                     onRewatchVideo={isVideoRewatchOffered ? () => setIsVideoRewatchShown(true) : undefined}
+                    navigation={wrapUpNavigation}
                 />
             ) : (
                 <div

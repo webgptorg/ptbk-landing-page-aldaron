@@ -680,10 +680,27 @@ describe('online workshop participant room', () => {
         expect(container.querySelector('iframe')?.getAttribute('src')).toContain(
             'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
         );
+        const wrapUpNavigation = screen.getByRole('navigation', { name: 'Kam po workshopu' });
+        expect(wrapUpNavigation.closest('section')?.contains(unlockButton)).toBe(true);
+        expect(within(wrapUpNavigation).getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')).toBe(
+            '/cs/komunita?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
+        );
+        expect(screen.getAllByRole('link', { name: /Vstoupit do komunity/ })).toHaveLength(2);
 
         fireEvent.click(unlockButton);
 
         expect(await screen.findByRole('dialog', { name: 'Placené členství komunity' })).toBeDefined();
+    });
+
+    it('keeps the extra community action in the ended stage for paying attendees', async () => {
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
+        renderParticipantRoom(ENDED_WORKSHOP_WITHOUT_ITS_RECORDING);
+
+        await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
+        const wrapUpNavigation = screen.getByRole('navigation', { name: 'Kam po workshopu' });
+        expect(within(wrapUpNavigation).getByRole('link', { name: /Vstoupit do komunity/ })).not.toBeNull();
+        expect(screen.getAllByRole('link', { name: /Vstoupit do komunity/ })).toHaveLength(2);
+        expect(screen.queryByRole('button', { name: 'Koupit placené členství' })).toBeNull();
     });
 
     it('says the recording is for paid members even when no teaser of it was published', async () => {

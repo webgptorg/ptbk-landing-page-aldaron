@@ -1,7 +1,7 @@
 'use client';
 
 import { WorkshopFeedback } from '@/businesses/online-workshop/participant/WorkshopFeedback';
-import { WorkshopPaidMembersVideoNotice } from '@/businesses/online-workshop/participant/WorkshopPaidMembersVideoNotice';
+import { WorkshopWrapUpMembershipOffer } from '@/businesses/online-workshop/participant/WorkshopWrapUpMembershipOffer';
 import { WorkshopWrapUpPdfDownload } from '@/businesses/online-workshop/participant/WorkshopWrapUpPdfDownload';
 import type { WorkshopFeedbackValues } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import type {
@@ -11,6 +11,7 @@ import type {
     WorkshopPaidMembersVideo,
 } from '@/lib/workshops/workshopTypes';
 import { ArrowDown, BookOpenText, PartyPopper, Play } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 type WorkshopWrapUpProps = {
     readonly workshop: Pick<
@@ -35,6 +36,7 @@ type WorkshopWrapUpProps = {
      * same screen for everybody and only gains the button which plays the video again.
      */
     readonly onRewatchVideo?: () => void;
+    readonly navigation?: ReactNode;
 };
 
 /**
@@ -49,6 +51,7 @@ export function WorkshopWrapUp({
     paidMembersOnlyVideo = null,
     onSaveFeedback,
     onRewatchVideo,
+    navigation,
 }: WorkshopWrapUpProps) {
     return (
         <div className="relative px-5 py-7 sm:px-8 sm:py-10">
@@ -75,11 +78,9 @@ export function WorkshopWrapUp({
                     </button>
                 )}
 
-                {paidMembersOnlyVideo !== null && (
-                    <div className="mt-5">
-                        <WorkshopPaidMembersVideoNotice paidMembersOnlyVideo={paidMembersOnlyVideo} />
-                    </div>
-                )}
+                <WorkshopWrapUpMembershipOffer paidMembersOnlyVideo={paidMembersOnlyVideo} />
+
+                {navigation}
 
                 <WorkshopWrapUpPdfDownload workshop={workshop} contentBlocks={contentBlocks} />
 

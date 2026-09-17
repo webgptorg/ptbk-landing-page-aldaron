@@ -1,5 +1,12 @@
 # Current preversion
 
+- Added follow-up actions to the ended stage of `/cs/online-workshop/participant?workshop=`:
+  non-paying attendees can buy membership through the existing popup even when no recording exists,
+  and everyone gets the next upcoming workshop, the next paid workshop, and an extra community button.
+  Recommendations use published future terms and the shared event cards; room links preserve the attendee's
+  identity. A term recommended in both roles appears once, and missing future terms show a short notice.
+  Replay, feedback, PDF and material access stay available.
+
 - Added a shared AI approval mechanism for chat in `/cs/online-workshop/participant?workshop=` and `/cs/komunita`,
   member-written poll answers, community projects, and project discussions. New submissions are saved first, then
   clearly suitable text can be approved automatically; uncertain content and unavailable AI stay in the existing

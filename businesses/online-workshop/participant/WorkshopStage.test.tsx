@@ -396,6 +396,54 @@ describe('workshop stage', () => {
         expect(screen.getByText('Záznam workshopu je pro placené členy')).not.toBeNull();
     });
 
+    it('offers membership without a recording and mounts follow-up navigation only after the recorded end', () => {
+        vi.useFakeTimers();
+        try {
+            const reactionSource = createReactionSource();
+            const openMembershipModal = vi.fn();
+            membershipRoomMock.membershipRoom = { membership: FREE_MEMBERSHIP, openMembershipModal };
+            render(
+                <WorkshopStage
+                    workshop={WORKSHOP}
+                    serverTime="2026-08-20T20:29:59+02:00"
+                    subscribeToReactions={reactionSource.subscribeToReactions}
+                    wrapUpNavigation={<nav aria-label="Kam po workshopu">Další setkání</nav>}
+                />,
+            );
+
+            expect(screen.queryByRole('button', { name: 'Koupit placené členství' })).toBeNull();
+            expect(screen.queryByRole('navigation', { name: 'Kam po workshopu' })).toBeNull();
+
+            act(() => vi.advanceTimersByTime(1_000));
+
+            expect(screen.getByRole('navigation', { name: 'Kam po workshopu' })).not.toBeNull();
+            fireEvent.click(screen.getByRole('button', { name: 'Koupit placené členství' }));
+            expect(openMembershipModal).toHaveBeenCalledOnce();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it.each([
+        { label: 'paid', membership: PAID_MEMBERSHIP },
+        { label: 'still loading', membership: null },
+        { label: 'payments unavailable', membership: { ...FREE_MEMBERSHIP, isPurchaseOffered: false } },
+    ])('keeps follow-up navigation without a purchase offer when membership is $label', ({ membership }) => {
+        const reactionSource = createReactionSource();
+        membershipRoomMock.membershipRoom = { membership, openMembershipModal: vi.fn() };
+        render(
+            <WorkshopStage
+                workshop={WORKSHOP}
+                serverTime="2026-08-21T20:31:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+                wrapUpNavigation={<nav aria-label="Kam po workshopu">Další setkání</nav>}
+            />,
+        );
+
+        expect(screen.queryByRole('button', { name: 'Koupit placené členství' })).toBeNull();
+        expect(screen.getByRole('navigation', { name: 'Kam po workshopu' })).not.toBeNull();
+    });
+
     it('plays the published teaser of the withheld video and opens the membership which unlocks the whole of it', () => {
         const reactionSource = createReactionSource();
         const openMembershipModal = vi.fn();

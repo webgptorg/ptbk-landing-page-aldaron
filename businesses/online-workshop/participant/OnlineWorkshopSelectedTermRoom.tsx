@@ -1,13 +1,14 @@
 'use client';
 
 import {
+    ONLINE_WORKSHOP_EVENT_TYPE,
     ONLINE_WORKSHOP_HOST_FULLNAME,
     ONLINE_WORKSHOP_PARTICIPANT_PATH,
 } from '@/businesses/online-workshop/config';
 import { createOnlineWorkshopConnectionDetails } from '@/businesses/online-workshop/onlineWorkshopTerms';
 import { OnlineWorkshopParticipantPage } from '@/businesses/online-workshop/participant/OnlineWorkshopParticipantPage';
 import { OnlineWorkshopRoomTermPicker } from '@/businesses/online-workshop/participant/OnlineWorkshopRoomTermPicker';
-import type { EventOccurrence } from '@/lib/events/eventOccurrence';
+import { selectEventOccurrences, type EventOccurrence } from '@/lib/events/eventOccurrence';
 import { createWorkshopSelectionPath } from '@/lib/workshops/workshopParticipantLink';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { useState } from 'react';
@@ -27,9 +28,9 @@ type OnlineWorkshopSelectedTermRoomProps = {
     readonly openedWorkshop: WorkshopSummary;
 
     /**
-     * Every published term of the online workshop, which is what a participant picks from
+     * Published event terms for the wrap-up. Only online workshops are offered in the waiting-room picker.
      */
-    readonly workshops: readonly EventOccurrence[];
+    readonly workshops: readonly WorkshopSummary[];
 
     /**
      * Moment the server built this page at, which places every offered term in time
@@ -63,12 +64,15 @@ export function OnlineWorkshopSelectedTermRoom({
     initialFullname,
 }: OnlineWorkshopSelectedTermRoomProps) {
     const [pickedWorkshopSlug, setPickedWorkshopSlug] = useState(openedWorkshop.slug);
+    const onlineWorkshops = selectEventOccurrences(workshops).filter(
+        (workshop) => workshop.event.type === ONLINE_WORKSHOP_EVENT_TYPE,
+    );
 
     // Note: A term which is not among the published ones leaves the room exactly where the address put it, so an
     //       address opening a term this list does not carry still enters that very term.
     const selectedWorkshop =
-        workshops.find((workshop) => workshop.slug === pickedWorkshopSlug) ?? openedWorkshop;
-    const isChoiceOffered = workshops.length >= MINIMAL_PICKED_ONLINE_WORKSHOP_COUNT;
+        onlineWorkshops.find((workshop) => workshop.slug === pickedWorkshopSlug) ?? openedWorkshop;
+    const isChoiceOffered = onlineWorkshops.length >= MINIMAL_PICKED_ONLINE_WORKSHOP_COUNT;
 
     const pickWorkshop = (workshop: EventOccurrence) => {
         setPickedWorkshopSlug(workshop.slug);
@@ -85,10 +89,11 @@ export function OnlineWorkshopSelectedTermRoom({
             }}
             initialEmail={initialEmail}
             initialFullname={initialFullname}
+            followUpWorkshops={workshops}
             connectionTermPicker={
                 isChoiceOffered ? (
                     <OnlineWorkshopRoomTermPicker
-                        terms={workshops}
+                        terms={onlineWorkshops}
                         selectedTermSlug={selectedWorkshop.slug}
                         onSelectTerm={pickWorkshop}
                         currentTime={currentTime}

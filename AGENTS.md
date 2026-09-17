@@ -28,6 +28,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   end, its participant wrap-up offers a locally generated PDF using only the
   attendee-visible description, key takeaways and shared materials; it creates
   no administrative setting or database record.
+  The ended stage also offers membership to non-paying attendees, the next
+  published upcoming workshop and next paid workshop, and an extra community
+  button. These reuse the room's membership popup, event cards and identity
+  hand-off; event recommendations exclude externally organized events and show
+  one card when the next workshop is also the next paid one.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
   the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as

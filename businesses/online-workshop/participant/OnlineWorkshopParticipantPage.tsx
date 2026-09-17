@@ -19,6 +19,7 @@ import { WorkshopRepositoryPanel } from '@/businesses/online-workshop/participan
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
 import { WorkshopServerConnectionStatus } from '@/businesses/online-workshop/participant/WorkshopServerConnectionStatus';
 import { WorkshopWatchingBadge } from '@/businesses/online-workshop/participant/WorkshopWatchingBadge';
+import { WorkshopWrapUpNavigation } from '@/businesses/online-workshop/participant/WorkshopWrapUpNavigation';
 import { useWorkshopParticipantOfflineSupport } from '@/businesses/online-workshop/participant/useWorkshopParticipantOfflineSupport';
 import { useWorkshopParticipant } from '@/businesses/online-workshop/participant/useWorkshopParticipant';
 import { useWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
@@ -81,6 +82,8 @@ type OnlineWorkshopParticipantPageProps = {
     readonly roomSubtitle?: string;
     readonly isWorkshopSelectionInUrl?: boolean;
     readonly workshopNavigation?: WorkshopNavigationDetails;
+    /** Published terms recommended in the stage after this workshop ends. */
+    readonly followUpWorkshops?: readonly WorkshopSummary[];
     readonly materialsTitle?: string;
     readonly unavailableConnectionMessage?: string;
 
@@ -127,6 +130,7 @@ export function OnlineWorkshopParticipantPage({
     roomSubtitle = 'Online workshop · Promptbook',
     isWorkshopSelectionInUrl = true,
     workshopNavigation,
+    followUpWorkshops = [],
     materialsTitle,
     unavailableConnectionMessage = 'Připojení k workshopu se nepodařilo ověřit.',
     participantHeaderSupplement,
@@ -380,6 +384,16 @@ export function OnlineWorkshopParticipantPage({
                             stageComment={state.stageComment}
                             paidMembersOnlyVideo={state.paidMembersOnlyVideo}
                             onSaveFeedback={controller.saveFeedback}
+                            wrapUpNavigation={
+                                roomCapabilities.isCommunityInvitationOffered ? (
+                                    <WorkshopWrapUpNavigation
+                                        workshops={followUpWorkshops}
+                                        participantIdentity={state.participant}
+                                        currentWorkshopSlug={state.workshop.slug}
+                                        serverTime={state.serverTime}
+                                    />
+                                ) : undefined
+                            }
                         />
                     )}
                     {calendarDetails !== null && (

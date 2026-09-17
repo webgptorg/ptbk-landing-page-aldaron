@@ -139,6 +139,20 @@ afterEach(() => {
 });
 
 describe('online workshop waiting room', () => {
+    it('keeps paid events out of the connection picker when loading the shared follow-up schedule', () => {
+        const paidWorkshop: EventOccurrence = {
+            ...NEAREST_UPCOMING_WORKSHOP,
+            id: 'paid-workshop',
+            slug: 'paid-workshop',
+            title: 'Placené školení',
+            event: { ...DEFAULT_EVENT_DETAILS, type: 'ai-supervize-mini', priceCzk: 4900 },
+        };
+        renderWaitingRoom(NEAREST_UPCOMING_WORKSHOP, [...PUBLISHED_WORKSHOPS, paidWorkshop]);
+
+        expect(screen.queryByRole('button', { name: /Placené školení/ })).toBeNull();
+        expect(screen.getByRole('button', { name: new RegExp(LATER_UPCOMING_WORKSHOP.title) })).not.toBeNull();
+    });
+
     it('offers every workshop which runs now or is still ahead, and keeps the finished ones one click away', () => {
         renderWaitingRoom(LATER_UPCOMING_WORKSHOP);
 
