@@ -10,7 +10,7 @@ import {
 } from '@/lib/community-projects/communityProjectTypes';
 import { runDatabaseTransaction, type DatabaseTransaction } from '@/lib/database/runDatabaseTransaction';
 import { WORKSHOP_PARTICIPANT_TABLE_NAME, WORKSHOP_TABLE_NAME } from '@/lib/workshops/workshopConstants';
-import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopParticipantInteraction';
+import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
 import { createWorkshopSessionToken, hashWorkshopSessionToken } from '@/lib/workshops/workshopSession';
 import type { WorkshopSubmissionStatus } from '@/lib/workshops/workshopTypes';
 import { randomUUID } from 'node:crypto';

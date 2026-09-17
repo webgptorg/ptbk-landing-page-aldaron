@@ -1,3 +1,4 @@
+import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import type { WorkshopRepositoryProgress } from '@/lib/workshops/workshopRepositoryProgress';
 import type {
     WorkshopComment,
@@ -192,6 +193,30 @@ export async function voteOnWorkshopPoll(
             credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(voteValues),
+        },
+    );
+    return readResponseJson(response);
+}
+
+/**
+ * Decides about one member-written poll answer as the moderator of the room which administers that poll
+ */
+export async function moderateWorkshopPollOption(
+    workshopSlug: string,
+    pollId: string,
+    optionId: string,
+    values: WorkshopPollOptionModerationValues,
+): Promise<{ readonly pollId: string; readonly optionId: string }> {
+    const response = await fetch(
+        getWorkshopApiUrl(
+            workshopSlug,
+            `polls/${encodeURIComponent(pollId)}/options/${encodeURIComponent(optionId)}`,
+        ),
+        {
+            method: 'PATCH',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(values),
         },
     );
     return readResponseJson(response);

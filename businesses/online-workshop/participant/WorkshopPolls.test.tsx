@@ -4,7 +4,7 @@
 
 import { WorkshopPolls } from '@/businesses/online-workshop/participant/WorkshopPolls';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
-import type { WorkshopPoll, WorkshopSummary } from '@/lib/workshops/workshopTypes';
+import type { WorkshopPoll, WorkshopPollOption, WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,10 +17,36 @@ const POLL: WorkshopPoll = {
     createdAt: '2026-08-24T10:00:00.000Z',
     updatedAt: '2026-08-24T10:00:00.000Z',
     options: [
-        { id: 'option-1', label: 'Testování', sortOrder: 0, voteCount: 3, isVotedByParticipant: true },
-        { id: 'option-2', label: 'Nasazování', sortOrder: 1, voteCount: 1, isVotedByParticipant: false },
+        {
+            id: 'option-1',
+            label: 'Testování',
+            sortOrder: 0,
+            voteCount: 3,
+            isVotedByParticipant: true,
+            isCreatedByParticipant: false,
+            status: 'approved',
+        },
+        {
+            id: 'option-2',
+            label: 'Nasazování',
+            sortOrder: 1,
+            voteCount: 1,
+            isVotedByParticipant: false,
+            isCreatedByParticipant: false,
+            status: 'approved',
+        },
     ],
     attachedWorkshops: [],
+};
+
+const PENDING_MEMBER_OPTION: WorkshopPollOption = {
+    id: 'option-3',
+    label: 'Bezpečnost',
+    sortOrder: 2,
+    voteCount: 1,
+    isVotedByParticipant: true,
+    isCreatedByParticipant: true,
+    status: 'pending',
 };
 
 const ATTACHED_WORKSHOP: WorkshopSummary = {
@@ -102,6 +128,42 @@ describe('community polls', () => {
             expect(onVote).toHaveBeenCalledWith('poll-1', { otherOptionLabel: 'Bezpečnost' }),
         );
         await waitFor(() => expect((otherOptionInput as HTMLInputElement).value).toBe(''));
+    });
+
+    it('marks an answer waiting for approval and warns before another one is written', () => {
+        render(
+            <WorkshopPolls
+                polls={[{ ...POLL, isOtherOptionEnabled: true, options: [...POLL.options, PENDING_MEMBER_OPTION] }]}
+                isInteractionBanned={false}
+                isOwnOtherOptionApprovalRequired
+                onVote={vi.fn().mockResolvedValue(true)}
+            />,
+        );
+
+        expect(screen.getByText('Čeká na schválení')).not.toBeNull();
+        expect(
+            screen.getByText('Váš hlas se započítá hned, ostatní uvidí vaši odpověď až po schválení.'),
+        ).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'Schválit vlastní odpověď Bezpečnost' })).toBeNull();
+    });
+
+    it('lets a moderator of the room decide about a waiting answer without leaving the poll', async () => {
+        const onModerateOption = vi.fn().mockResolvedValue(true);
+        render(
+            <WorkshopPolls
+                polls={[{ ...POLL, isOtherOptionEnabled: true, options: [...POLL.options, PENDING_MEMBER_OPTION] }]}
+                isInteractionBanned={false}
+                onVote={vi.fn().mockResolvedValue(true)}
+                onModerateOption={onModerateOption}
+            />,
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Schválit vlastní odpověď Bezpečnost' }));
+
+        await waitFor(() =>
+            expect(onModerateOption).toHaveBeenCalledWith('poll-1', 'option-3', { status: 'approved' }),
+        );
+        expect(screen.queryByRole('button', { name: 'Schválit vlastní odpověď Testování' })).toBeNull();
     });
 
     it('does not show badges for the poll occurrences it is attached to', () => {

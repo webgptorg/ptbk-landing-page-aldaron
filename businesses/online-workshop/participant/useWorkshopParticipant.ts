@@ -13,6 +13,7 @@ import {
     fetchWorkshopState,
     moderateWorkshopAuthor,
     moderateWorkshopComment,
+    moderateWorkshopPollOption,
     reportWorkshopPresence,
     saveWorkshopFeedback,
     sendWorkshopReaction,
@@ -43,6 +44,7 @@ import {
 } from '@/lib/workshops/workshopClientState';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { sortWorkshopComments } from '@/lib/workshops/workshopCommentValues';
+import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import type {
     SubscribeToWorkshopRepositoryCommits,
     WorkshopRepositoryCommitListener,
@@ -103,6 +105,16 @@ type WorkshopParticipantController = {
      * choice.
      */
     readonly voteOnPoll: (pollId: string, voteValues: WorkshopPollVoteValues) => Promise<boolean>;
+
+    /**
+     * Decides about one answer a member wrote into a poll, which only a moderator of the room owning that poll is
+     * offered
+     */
+    readonly moderatePollOption: (
+        pollId: string,
+        optionId: string,
+        values: WorkshopPollOptionModerationValues,
+    ) => Promise<boolean>;
 
     /**
      * Moderates one message of the chat, which only a moderator of the room is offered
@@ -788,6 +800,26 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         [workshopSlug],
     );
 
+    const moderatePollOption = useCallback(
+        async (pollId: string, optionId: string, values: WorkshopPollOptionModerationValues): Promise<boolean> => {
+            setErrorMessage(null);
+            try {
+                await moderateWorkshopPollOption(workshopSlug, pollId, optionId, values);
+                await refresh();
+                trackGoogleAnalyticsEvent('workshop_poll_option_moderated', {
+                    workshop_slug: workshopSlug,
+                    poll_id: pollId,
+                    option_status: values.status,
+                });
+                return true;
+            } catch (error) {
+                setErrorMessage(getCzechApiErrorMessage(error));
+                return false;
+            }
+        },
+        [refresh, workshopSlug],
+    );
+
     /**
      * Note: A moderated message and a moderated author both change what the whole room sees, so the room is loaded
      *       again instead of guessing the result of the decision which was just made.
@@ -916,6 +948,7 @@ export function useWorkshopParticipant(workshopSlug: string): WorkshopParticipan
         submitComment,
         upvoteComment,
         voteOnPoll,
+        moderatePollOption,
         moderateComment,
         convertCommentToMaterial,
         moderateAuthor,

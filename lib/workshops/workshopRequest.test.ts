@@ -1,7 +1,5 @@
-import {
-    getWorkshopParticipantSubmissionStatus,
-    getWorkshopInteractionBanResponseOrNull,
-} from '@/lib/workshops/workshopParticipantInteraction';
+import { getWorkshopInteractionBanResponseOrNull } from '@/lib/workshops/workshopParticipantInteraction';
+import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
 import type { WorkshopParticipant } from '@/lib/workshops/workshopTypes';
 import { describe, expect, it } from 'vitest';
 

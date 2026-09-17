@@ -4,7 +4,11 @@
 
 import { WorkshopPollAdmin } from '@/businesses/workshop-admin/WorkshopPollAdmin';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
-import type { WorkshopAdminPoll, WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
+import type {
+    WorkshopAdminPoll,
+    WorkshopAdminPollOption,
+    WorkshopAdminSummary,
+} from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,6 +30,9 @@ const POLL: WorkshopAdminPoll = {
             artificialVoteCount: 3,
             isVotedByParticipant: false,
             isCreatedByParticipant: false,
+            status: 'approved',
+            author: null,
+            createdAt: '2026-08-24T10:00:00.000Z',
         },
         {
             id: 'option-2',
@@ -36,9 +43,32 @@ const POLL: WorkshopAdminPoll = {
             artificialVoteCount: 0,
             isVotedByParticipant: false,
             isCreatedByParticipant: false,
+            status: 'approved',
+            author: null,
+            createdAt: '2026-08-24T10:00:00.000Z',
         },
     ],
     attachedWorkshops: [],
+};
+
+const MEMBER_WRITTEN_OPTION: WorkshopAdminPollOption = {
+    id: 'member-option',
+    label: 'Bezpečnost',
+    sortOrder: 2,
+    voteCount: 1,
+    realVoteCount: 1,
+    artificialVoteCount: 0,
+    isVotedByParticipant: false,
+    isCreatedByParticipant: true,
+    status: 'pending',
+    author: { participantId: 'participant-1', fullname: 'Jana Nováková', email: 'jana@example.com' },
+    createdAt: '2026-08-25T09:30:00.000Z',
+};
+
+const POLL_WITH_MEMBER_WRITTEN_OPTION: WorkshopAdminPoll = {
+    ...POLL,
+    isOtherOptionEnabled: true,
+    options: [...POLL.options, MEMBER_WRITTEN_OPTION],
 };
 
 const ATTACHABLE_WORKSHOP: WorkshopAdminSummary = {
@@ -62,6 +92,8 @@ function createProps() {
         onUpdate: vi.fn().mockResolvedValue(true),
         onDelete: vi.fn().mockResolvedValue(undefined),
         onAdjustArtificialVotes: vi.fn().mockResolvedValue(true),
+        onModerateOption: vi.fn().mockResolvedValue(true),
+        onDeleteOption: vi.fn().mockResolvedValue(undefined),
     };
 }
 
@@ -280,30 +312,7 @@ describe('community poll administration', () => {
 
     it('keeps member-written answers out of the prepared-answer editor', async () => {
         const props = createProps();
-        render(
-            <WorkshopPollAdmin
-                polls={[
-                    {
-                        ...POLL,
-                        isOtherOptionEnabled: true,
-                        options: [
-                            ...POLL.options,
-                            {
-                                id: 'member-option',
-                                label: 'Bezpečnost',
-                                sortOrder: 2,
-                                voteCount: 1,
-                                realVoteCount: 1,
-                                artificialVoteCount: 0,
-                                isVotedByParticipant: false,
-                                isCreatedByParticipant: true,
-                            },
-                        ],
-                    },
-                ]}
-                {...props}
-            />,
-        );
+        render(<WorkshopPollAdmin polls={[POLL_WITH_MEMBER_WRITTEN_OPTION]} {...props} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Upravit' }));
         expect(screen.queryByDisplayValue('Bezpečnost')).toBeNull();
@@ -321,5 +330,48 @@ describe('community poll administration', () => {
                 }),
             ),
         );
+    });
+
+    it('names the member who wrote an answer and decides about it where its votes are read', async () => {
+        const props = createProps();
+        render(<WorkshopPollAdmin polls={[POLL_WITH_MEMBER_WRITTEN_OPTION]} {...props} />);
+
+        expect(screen.getByText('Napsal člen: Jana Nováková · jana@example.com')).not.toBeNull();
+        expect(screen.getByText('Čeká na schválení')).not.toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Schválit vlastní odpověď Bezpečnost' }));
+
+        await waitFor(() =>
+            expect(props.onModerateOption).toHaveBeenCalledWith('poll-1', 'member-option', { status: 'approved' }),
+        );
+    });
+
+    it('corrects the wording of a member-written answer without touching the prepared choices', async () => {
+        const props = createProps();
+        render(<WorkshopPollAdmin polls={[POLL_WITH_MEMBER_WRITTEN_OPTION]} {...props} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Upravit vlastní odpověď Bezpečnost' }));
+        fireEvent.change(screen.getByLabelText('Text vlastní odpovědi Bezpečnost'), {
+            target: { value: ' Bezpečnost agentů ' },
+        });
+        fireEvent.click(screen.getByRole('button', { name: 'Uložit text' }));
+
+        await waitFor(() =>
+            expect(props.onModerateOption).toHaveBeenCalledWith('poll-1', 'member-option', {
+                label: 'Bezpečnost agentů',
+            }),
+        );
+        expect(props.onUpdate).not.toHaveBeenCalled();
+    });
+
+    it('removes a member-written answer only after confirmation', async () => {
+        const props = createProps();
+        vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+        render(<WorkshopPollAdmin polls={[POLL_WITH_MEMBER_WRITTEN_OPTION]} {...props} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Smazat vlastní odpověď Bezpečnost' }));
+
+        await waitFor(() => expect(props.onDeleteOption).toHaveBeenCalledWith('poll-1', 'member-option'));
+        expect(props.onDelete).not.toHaveBeenCalled();
     });
 });

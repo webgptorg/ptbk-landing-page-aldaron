@@ -191,11 +191,32 @@ const ATTACHED_COMMUNITY_POLL: WorkshopPoll = {
     createdAt: '2026-08-21T19:00:00+02:00',
     updatedAt: '2026-08-21T19:00:00+02:00',
     options: [
-        { id: 'option-1', label: 'Praktické tipy', sortOrder: 0, voteCount: 7, isVotedByParticipant: false },
-        { id: 'option-2', label: 'Nové nápady', sortOrder: 1, voteCount: 4, isVotedByParticipant: false },
+        {
+            id: 'option-1',
+            label: 'Praktické tipy',
+            sortOrder: 0,
+            voteCount: 7,
+            isVotedByParticipant: false,
+            isCreatedByParticipant: false,
+            status: 'approved',
+        },
+        {
+            id: 'option-2',
+            label: 'Nové nápady',
+            sortOrder: 1,
+            voteCount: 4,
+            isVotedByParticipant: false,
+            isCreatedByParticipant: false,
+            status: 'approved',
+        },
     ],
     attachedWorkshops: [],
 };
+
+/**
+ * What the room says before a member writes an answer which has to wait for a moderator
+ */
+const OTHER_OPTION_APPROVAL_NOTE = 'Váš hlas se započítá hned, ostatní uvidí vaši odpověď až po schválení.';
 
 /**
  * The workshops a permanent room such as the community leads to
@@ -229,6 +250,7 @@ function renderParticipantRoom(
     polls: readonly WorkshopPoll[] = [],
     paidMembersOnlyContentPreviews: readonly WorkshopContentPreview[] = [],
     paidMembersOnlyVideo: WorkshopPaidMembersVideo | null = null,
+    participantOverrides: Partial<WorkshopPublicState['participant']> = {},
 ) {
     const state: WorkshopPublicState = {
         serverTime: '2026-08-21T19:30:00+02:00',
@@ -241,6 +263,7 @@ function renderParticipantRoom(
             isInteractionBanned: false,
             isTrusted: true,
             isModerator: false,
+            ...participantOverrides,
         },
         watchingParticipantCount: 3,
         contentBlocks: [],
@@ -274,6 +297,7 @@ function renderParticipantRoom(
         submitComment: async () => true,
         upvoteComment: async () => undefined,
         voteOnPoll: async () => true,
+        moderatePollOption: async () => true,
         moderateComment: async () => true,
         convertCommentToMaterial: async () => true,
         moderateAuthor: async () => true,
@@ -460,6 +484,31 @@ describe('online workshop participant room', () => {
         expect(screen.getByText('Co si z workshopu odnášíte?')).not.toBeNull();
         expect(screen.getByText('7 · 64 %')).not.toBeNull();
         expect(screen.getByRole('button', { name: /Praktické tipy/ }).hasAttribute('disabled')).toBe(false);
+    });
+
+    it('promises an immediate vote only to a member whose own answer really waits for approval', () => {
+        const pollsWithOtherOption = [{ ...ATTACHED_COMMUNITY_POLL, isOtherOptionEnabled: true }];
+
+        // An ordinary member writes an answer which waits for a moderator, so the room says so before they write it.
+        const ordinaryMemberRoom = renderParticipantRoom(
+            WORKSHOP,
+            undefined,
+            false,
+            undefined,
+            pollsWithOtherOption,
+            [],
+            null,
+            { isTrusted: false },
+        );
+        expect(screen.getByText(OTHER_OPTION_APPROVAL_NOTE)).not.toBeNull();
+        ordinaryMemberRoom.unmount();
+
+        // A member whose interactions were taken away writes nothing at all, so they are promised no vote either.
+        renderParticipantRoom(WORKSHOP, undefined, false, undefined, pollsWithOtherOption, [], null, {
+            isTrusted: false,
+            isInteractionBanned: true,
+        });
+        expect(screen.queryByText(OTHER_OPTION_APPROVAL_NOTE)).toBeNull();
     });
 
     it('closes a workshop occurrence with the poll attached to it, below the materials it was held for', async () => {

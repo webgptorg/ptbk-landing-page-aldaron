@@ -1,5 +1,24 @@
 # Current preversion
 
+- Put the answers members write into a community poll through the very same moderation a chat message goes through. An
+  `Other` answer written in `/cs/komunita` or in an attached `/cs/online-workshop/participant?workshop=` is no longer
+  public the moment it is written: it waits for a decision, while a trusted member and a moderator have theirs approved
+  as they write it, because a chat message, a shared project and now a poll answer are all decided by one shared
+  submission policy rather than by a rule each surface wrote for itself. The member who wrote the answer keeps seeing
+  it, marked `Čeká na schválení`, and their vote is counted for them straight away, so waiting for a moderator never
+  costs anybody their own choice; everybody else receives neither the answer nor its vote until it is approved, which
+  keeps a poll's total honest without a second counting rule. A rejected answer leaves the poll for everybody including
+  its writer, exactly as a rejected message leaves the chat. Deciding about an answer is offered where the decision
+  belongs: a moderator of the room which owns the poll approves or rejects it from the poll itself, by the same quiet
+  buttons which moderate a chat message, while a moderator of an occurrence the poll is merely about reads the same
+  answers every other member does, because a poll is administered by its community rather than by whichever room it is
+  attached to. `/admin/workshops` and `/admin/community` additionally say who wrote each answer, with the name and
+  normalized e-mail they connected with and the moment they wrote it, and can reword it, reject it, or remove it
+  together with the votes cast for it. A prepared choice of the administration is untouched by all of this: it is still
+  edited as part of its question, stays public, and is never attributed to a member. An answer written before this
+  change keeps being public, and its writer is recovered from the first vote it ever received, which is the vote the
+  writing itself cast.
+
 - Let an administrator write the start of a paid replay on a clock. The stage settings of `/admin/workshops` now ask
   for `Začít záznam od` in its own `Hodiny`, `Minuty` and `Sekundy` boxes instead of in one number of seconds, so the
   moment the workshop itself begins at is written as `0 : 1 : 15` rather than counted out as `75`. Nothing about the

@@ -39,6 +39,11 @@ import { loadWorkshopQueryWithActiveStatus } from '@/lib/workshops/workshopActiv
 import { isWorkshopPanelOffered, normalizeWorkshopDisabledPanels } from '@/lib/workshops/workshopPanels';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { normalizeWorkshopParticipantEmail } from '@/lib/workshops/workshopParticipantEmail';
+import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
+import {
+    isWorkshopPollOptionReadableBy,
+    type WorkshopPollOptionReader,
+} from '@/lib/workshops/workshopPollOptionVisibility';
 import { selectWorkshopContentForMember } from '@/lib/workshops/workshopPaidMembersContent';
 import { selectWorkshopVideoForMember } from '@/lib/workshops/workshopPaidMembersVideo';
 import { createWorkshopRepositoryOrNull } from '@/lib/workshops/workshopRepository';
@@ -71,10 +76,12 @@ import type {
     WorkshopParticipantTimelineEvent,
     WorkshopPoll,
     WorkshopPollOption,
+    WorkshopPollOptionAuthor,
     WorkshopPollVoteValues,
     WorkshopPublicState,
     WorkshopReaction,
     WorkshopReactionCount,
+    WorkshopSubmissionStatus,
     WorkshopSummary,
 } from '@/lib/workshops/workshopTypes';
 import type { WorkshopAdminParticipantQuery } from '@/lib/workshops/workshopAdminParticipantQuery';
@@ -411,9 +418,15 @@ type WorkshopPollOptionRow = {
     readonly sort_order: number;
     readonly artificial_vote_count: number;
     readonly is_created_by_participant: boolean;
+    readonly status: WorkshopSubmissionStatus;
+    readonly author_participant_id: string | null;
+    readonly author_name: string | null;
+    readonly author_email: string | null;
+    readonly created_at: string;
 };
 
-const WORKSHOP_POLL_OPTION_COLUMNS = 'id, poll_id, label, sort_order, artificial_vote_count, is_created_by_participant';
+const WORKSHOP_POLL_OPTION_COLUMNS =
+    'id, poll_id, label, sort_order, artificial_vote_count, is_created_by_participant, status, author_participant_id, author_name, author_email, created_at';
 
 type WorkshopPollVoteCountRow = {
     readonly option_id: string;
@@ -908,7 +921,18 @@ function mapWorkshopPollOptionRow(
         sortOrder: row.sort_order,
         voteCount: realVoteCount + getNonNegativeWholeNumber(row.artificial_vote_count),
         isVotedByParticipant: selectedOptionIds.has(row.id),
+        isCreatedByParticipant: row.is_created_by_participant,
+        status: row.status,
     };
+}
+
+/**
+ * Who wrote one member-written answer, which only the administration of the poll is ever told
+ */
+function mapWorkshopPollOptionAuthor(row: WorkshopPollOptionRow): WorkshopPollOptionAuthor | null {
+    return row.author_email === null
+        ? null
+        : { participantId: row.author_participant_id, fullname: row.author_name, email: row.author_email };
 }
 
 function mapWorkshopAdminPollOptionRow(
@@ -922,7 +946,8 @@ function mapWorkshopAdminPollOptionRow(
         ...mapWorkshopPollOptionRow(row, voteCountByOptionId, selectedOptionIds),
         realVoteCount,
         artificialVoteCount,
-        isCreatedByParticipant: row.is_created_by_participant,
+        author: mapWorkshopPollOptionAuthor(row),
+        createdAt: row.created_at,
     };
 }
 
@@ -966,16 +991,27 @@ const WORKSHOP_POLL_VOTE_ERROR_KIND_BY_DATABASE_MESSAGE: Readonly<
 };
 
 /**
+ * Everything one vote needs to know about the member casting it: who they are and, when they write their own answer,
+ * whether that answer is public at once or waits for a moderator
+ */
+type WorkshopPollVoter = Pick<
+    WorkshopParticipant,
+    'id' | 'email' | 'fullname' | 'isTrusted' | 'isModerator' | 'isInteractionBanned'
+>;
+
+/**
  * Persists one shared community-poll choice from the room a member currently entered.
  *
  * Note: The database owns the cross-room authorization and locks the poll with the write, so an attached workshop
  *       cannot create a second poll vote, a member-written answer and its first vote cannot split apart, and an
  *       administrator cannot close a poll halfway through either choice.
+ * Note: A written answer waits for the very same moderation a chat message waits for, so the one shared submission
+ *       policy decides it here as well and a trusted member or a moderator writes an answer which is public at once.
  */
 export async function saveWorkshopPollVote(
     supabase: SupabaseClient,
     workshopRow: Pick<WorkshopRow, 'id'>,
-    participant: Pick<WorkshopParticipant, 'id' | 'email'>,
+    participant: WorkshopPollVoter,
     pollId: string,
     voteValues: WorkshopPollVoteValues,
 ): Promise<WorkshopPollVoteSaveResult> {
@@ -984,7 +1020,9 @@ export async function saveWorkshopPollVote(
         target_poll_id: pollId,
         target_option_id: 'optionId' in voteValues ? voteValues.optionId : null,
         target_other_option_label: 'otherOptionLabel' in voteValues ? voteValues.otherOptionLabel : null,
+        target_other_option_status: getWorkshopParticipantSubmissionStatus(participant),
         target_participant_id: participant.id,
+        target_voter_name: participant.fullname,
         target_voter_email: normalizeWorkshopParticipantEmail(participant.email),
     });
     if (error === null) {
@@ -1421,6 +1459,11 @@ type LoadedWorkshopPolls<Poll extends WorkshopPoll = WorkshopPoll> = {
     readonly errorMessage: string | null;
 };
 
+/**
+ * The member a room reads its polls for: their one e-mail-owned vote, and whether they moderate the room
+ */
+type WorkshopPollReader = Pick<WorkshopParticipant, 'email' | 'isModerator' | 'isInteractionBanned'>;
+
 type LoadedWorkshopPollRows = {
     readonly pollRows: readonly WorkshopPollRow[];
     readonly optionRowsByPollId: ReadonlyMap<string, readonly WorkshopPollOptionRow[]>;
@@ -1430,6 +1473,12 @@ type LoadedWorkshopPollRows = {
 };
 
 type WorkshopPollLoadScope = {
+    /**
+     * Who is reading these polls, or `null` for the administration, which reads every answer of every poll including
+     * the ones waiting for its own decision
+     */
+    readonly reader: WorkshopPollOptionReader | null;
+
     /**
      * Whether this is the member view of the polls, which sees neither a hidden poll nor an unpublished occurrence a
      * poll is about
@@ -1548,6 +1597,25 @@ async function loadWorkshopAttachedPollIds(
     };
 }
 
+/**
+ * The answers of the given polls which this scope may read
+ *
+ * Note: A rejected answer never leaves the database for a room at all, while which of the waiting ones a member
+ *       receives is the one shared visibility rule rather than a second condition written into a query.
+ */
+function selectReadableWorkshopPollOptionRows(
+    optionRows: readonly WorkshopPollOptionRow[],
+    reader: WorkshopPollOptionReader | null,
+): readonly WorkshopPollOptionRow[] {
+    if (reader === null) {
+        return optionRows;
+    }
+
+    return optionRows.filter((optionRow) =>
+        isWorkshopPollOptionReadableBy({ status: optionRow.status, authorEmail: optionRow.author_email }, reader),
+    );
+}
+
 async function loadWorkshopPollRows(
     supabase: SupabaseClient,
     workshopRow: WorkshopRow,
@@ -1586,12 +1654,14 @@ async function loadWorkshopPollRows(
         return { loadedPollRows: EMPTY_LOADED_WORKSHOP_POLL_ROWS, errorMessage: null };
     }
 
+    const optionQuery = supabase
+        .from(WORKSHOP_POLL_OPTION_TABLE_NAME)
+        .select(WORKSHOP_POLL_OPTION_COLUMNS)
+        .in('poll_id', pollIds)
+        .order('sort_order', { ascending: true });
+
     const [optionsResult, voteCountsResult, selectedVotesResult, attachedWorkshopsResult] = await Promise.all([
-        supabase
-            .from(WORKSHOP_POLL_OPTION_TABLE_NAME)
-            .select(WORKSHOP_POLL_OPTION_COLUMNS)
-            .in('poll_id', pollIds)
-            .order('sort_order', { ascending: true }),
+        scope.reader === null ? optionQuery : optionQuery.neq('status', 'rejected'),
         supabase.rpc('get_workshop_poll_option_vote_counts', { target_poll_ids: pollIds }),
         voterEmail === null
             ? Promise.resolve({ data: [] as readonly WorkshopParticipantPollVoteRow[], error: null })
@@ -1611,7 +1681,10 @@ async function loadWorkshopPollRows(
     }
 
     const optionRowsByPollId = new Map<string, WorkshopPollOptionRow[]>();
-    for (const optionRow of (optionsResult.data ?? []) as readonly WorkshopPollOptionRow[]) {
+    for (const optionRow of selectReadableWorkshopPollOptionRows(
+        (optionsResult.data ?? []) as readonly WorkshopPollOptionRow[],
+        scope.reader,
+    )) {
         const optionRows = optionRowsByPollId.get(optionRow.poll_id) ?? [];
         optionRows.push(optionRow);
         optionRowsByPollId.set(optionRow.poll_id, optionRows);
@@ -1663,22 +1736,36 @@ function mapLoadedWorkshopPolls<Option extends WorkshopPollOption>(
  * participant-specific lookup contains only that participant's own selection, so no room response can infer who
  * anybody else voted for. One normalized e-mail identity has the same selection in the community and in every
  * attached workshop, while the poll itself remains owned and administered by the community.
+ *
+ * Note: A member-written answer which is still waiting for moderation only reaches the member who wrote it and the
+ *       moderators of the room owning the poll, so nobody else receives it or the vote already cast for it.
  */
 export async function loadWorkshopPolls(
     supabase: SupabaseClient,
     workshopRow: WorkshopRow,
-    voterEmail: string | null,
+    participant: WorkshopPollReader | null,
 ): Promise<LoadedWorkshopPolls> {
     if (!isWorkshopPollVisibleInRoom(workshopRow.room_kind)) {
         return { polls: [], errorMessage: null };
     }
 
-    const isAttachedToRoom = getWorkshopKindCapabilities(workshopRow.room_kind).isAttachedCommunityPollsShown;
-    const normalizedVoterEmail = voterEmail === null ? null : normalizeWorkshopParticipantEmail(voterEmail);
+    const roomCapabilities = getWorkshopKindCapabilities(workshopRow.room_kind);
+    const normalizedVoterEmail =
+        participant === null ? null : normalizeWorkshopParticipantEmail(participant.email);
 
     const { loadedPollRows, errorMessage } = await loadWorkshopPollRows(supabase, workshopRow, normalizedVoterEmail, {
+        reader: {
+            normalizedVoterEmail,
+            // Note: A poll is administered by the room which owns it, so only a moderator standing in that very room
+            //       is shown the answers waiting for a decision. An occurrence the poll is merely about shows its
+            //       moderators the same answers every other member reads.
+            isModerating:
+                roomCapabilities.isPollsOffered &&
+                participant !== null &&
+                isWorkshopParticipantModerating(participant),
+        },
         isMemberVisibleOnly: true,
-        isAttachedToRoom,
+        isAttachedToRoom: roomCapabilities.isAttachedCommunityPollsShown,
         maximalPollCount: MAXIMAL_VISIBLE_WORKSHOP_POLL_COUNT,
     });
     if (loadedPollRows === null) {
@@ -1704,6 +1791,7 @@ export async function loadWorkshopAdminPolls(
     }
 
     const { loadedPollRows, errorMessage } = await loadWorkshopPollRows(supabase, workshopRow, null, {
+        reader: null,
         isMemberVisibleOnly: false,
         isAttachedToRoom: false,
         maximalPollCount: MAXIMAL_ADMIN_WORKSHOP_POLL_COUNT,
@@ -1733,6 +1821,7 @@ export async function loadWorkshopAttachedAdminPolls(
     }
 
     const { loadedPollRows, errorMessage } = await loadWorkshopPollRows(supabase, workshopRow, null, {
+        reader: null,
         isMemberVisibleOnly: false,
         isAttachedToRoom: true,
         maximalPollCount: MAXIMAL_ADMIN_WORKSHOP_POLL_COUNT,
@@ -2509,7 +2598,7 @@ export async function loadWorkshopPublicState(
         isStageOffered && workshopRow.stage_comment_id !== null
             ? loadWorkshopCommentReference(supabase, workshopRow.id, workshopRow.stage_comment_id)
             : Promise.resolve({ comment: null, errorMessage: null }),
-        loadWorkshopPolls(supabase, workshopRow, participant.email),
+        loadWorkshopPolls(supabase, workshopRow, participant),
     ]);
 
     const stateQueryError =

@@ -14,6 +14,8 @@ function createPollOption(values: Partial<WorkshopPollOption> & { readonly label
         sortOrder: 0,
         voteCount: 0,
         isVotedByParticipant: false,
+        isCreatedByParticipant: false,
+        status: 'approved',
         ...values,
     };
 }

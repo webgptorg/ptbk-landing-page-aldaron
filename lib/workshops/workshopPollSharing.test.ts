@@ -47,7 +47,21 @@ const COMMUNITY_ROW: WorkshopRow = {
 const POLL_ID = 'poll-id';
 const SELECTED_OPTION_ID = 'selected-option-id';
 const OTHER_OPTION_ID = 'other-option-id';
+const WAITING_OPTION_ID = 'waiting-option-id';
 const MEMBER_EMAIL = 'jana@example.com';
+const OTHER_MEMBER_EMAIL = 'petr@example.com';
+
+/**
+ * The member reading a room, as the poll loader and the vote writer know them
+ */
+const MEMBER = {
+    id: 'workshop-participant-id',
+    fullname: 'Jana Nováková',
+    email: MEMBER_EMAIL,
+    isTrusted: false,
+    isModerator: false,
+    isInteractionBanned: false,
+};
 
 type InMemoryQueryClient = {
     readonly from: (tableName: string) => {
@@ -91,6 +105,11 @@ async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_RO
         sort_order: 0,
         artificial_vote_count: 0,
         is_created_by_participant: false,
+        status: 'approved',
+        author_participant_id: null,
+        author_name: null,
+        author_email: null,
+        created_at: '2026-09-01T10:00:00.000Z',
     });
     await insertInMemoryRow(supabase, 'workshop_poll_options', {
         id: OTHER_OPTION_ID,
@@ -99,6 +118,25 @@ async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_RO
         sort_order: 1,
         artificial_vote_count: 0,
         is_created_by_participant: true,
+        status: 'approved',
+        author_participant_id: 'community-participant-id',
+        author_name: 'Jana Nováková',
+        author_email: MEMBER_EMAIL,
+        created_at: '2026-09-02T10:00:00.000Z',
+    });
+    // An answer somebody else is still waiting for a decision about, which nobody but its writer may read
+    await insertInMemoryRow(supabase, 'workshop_poll_options', {
+        id: WAITING_OPTION_ID,
+        poll_id: POLL_ID,
+        label: 'Bezpečnost',
+        sort_order: 2,
+        artificial_vote_count: 0,
+        is_created_by_participant: true,
+        status: 'pending',
+        author_participant_id: 'other-participant-id',
+        author_name: 'Petr Novák',
+        author_email: OTHER_MEMBER_EMAIL,
+        created_at: '2026-09-03T10:00:00.000Z',
     });
     await insertInMemoryRow(supabase, 'workshop_poll_votes', {
         id: 'vote-id',
@@ -143,8 +181,8 @@ describe('shared community poll votes', () => {
         const supabase = await createAttachedPollSupabase();
 
         const [communityPollResult, workshopPollResult] = await Promise.all([
-            loadWorkshopPolls(supabase, COMMUNITY_ROW, MEMBER_EMAIL.toUpperCase()),
-            loadWorkshopPolls(supabase, WORKSHOP_ROW, MEMBER_EMAIL),
+            loadWorkshopPolls(supabase, COMMUNITY_ROW, { ...MEMBER, email: MEMBER_EMAIL.toUpperCase() }),
+            loadWorkshopPolls(supabase, WORKSHOP_ROW, MEMBER),
         ]);
 
         expect(communityPollResult.errorMessage).toBeNull();
@@ -170,17 +208,46 @@ describe('shared community poll votes', () => {
         ]);
     });
 
+    it('never shows an answer waiting for a decision to anybody but its writer', async () => {
+        const supabase = await createAttachedPollSupabase();
+
+        const [writerPollResult, otherMemberPollResult, moderatorPollResult] = await Promise.all([
+            loadWorkshopPolls(supabase, COMMUNITY_ROW, { ...MEMBER, email: OTHER_MEMBER_EMAIL }),
+            loadWorkshopPolls(supabase, COMMUNITY_ROW, MEMBER),
+            loadWorkshopPolls(supabase, COMMUNITY_ROW, { ...MEMBER, isModerator: true }),
+        ]);
+
+        const getOptionIds = (polls: Awaited<ReturnType<typeof loadWorkshopPolls>>['polls']) =>
+            polls[0]?.options.map((option) => option.id);
+
+        expect(getOptionIds(writerPollResult.polls)).toEqual([
+            SELECTED_OPTION_ID,
+            OTHER_OPTION_ID,
+            WAITING_OPTION_ID,
+        ]);
+        expect(getOptionIds(otherMemberPollResult.polls)).toEqual([SELECTED_OPTION_ID, OTHER_OPTION_ID]);
+        expect(getOptionIds(moderatorPollResult.polls)).toEqual([
+            SELECTED_OPTION_ID,
+            OTHER_OPTION_ID,
+            WAITING_OPTION_ID,
+        ]);
+    });
+
+    it('leaves an answer waiting for a decision out of an attached workshop even for its moderator', async () => {
+        const supabase = await createAttachedPollSupabase();
+
+        const result = await loadWorkshopPolls(supabase, WORKSHOP_ROW, { ...MEMBER, isModerator: true });
+
+        expect(result.polls[0]?.options.map((option) => option.id)).toEqual([SELECTED_OPTION_ID, OTHER_OPTION_ID]);
+    });
+
     it('passes the verified e-mail and current participant to the one shared vote procedure', async () => {
         const rpc = vi.fn().mockResolvedValue({ error: null });
         const supabase = { rpc } as unknown as SupabaseClient;
 
-        const result = await saveWorkshopPollVote(
-            supabase,
-            WORKSHOP_ROW,
-            { id: 'workshop-participant-id', email: MEMBER_EMAIL },
-            POLL_ID,
-            { optionId: SELECTED_OPTION_ID },
-        );
+        const result = await saveWorkshopPollVote(supabase, WORKSHOP_ROW, MEMBER, POLL_ID, {
+            optionId: SELECTED_OPTION_ID,
+        });
 
         expect(result).toEqual({ isSuccessful: true });
         expect(rpc).toHaveBeenCalledWith('set_community_workshop_poll_vote', {
@@ -188,7 +255,9 @@ describe('shared community poll votes', () => {
             target_poll_id: POLL_ID,
             target_option_id: SELECTED_OPTION_ID,
             target_other_option_label: null,
+            target_other_option_status: 'pending',
             target_participant_id: 'workshop-participant-id',
+            target_voter_name: 'Jana Nováková',
             target_voter_email: MEMBER_EMAIL,
         });
     });
@@ -197,13 +266,9 @@ describe('shared community poll votes', () => {
         const rpc = vi.fn().mockResolvedValue({ error: null });
         const supabase = { rpc } as unknown as SupabaseClient;
 
-        const result = await saveWorkshopPollVote(
-            supabase,
-            WORKSHOP_ROW,
-            { id: 'workshop-participant-id', email: MEMBER_EMAIL },
-            POLL_ID,
-            { otherOptionLabel: 'Bezpečnost' },
-        );
+        const result = await saveWorkshopPollVote(supabase, WORKSHOP_ROW, MEMBER, POLL_ID, {
+            otherOptionLabel: 'Bezpečnost',
+        });
 
         expect(result).toEqual({ isSuccessful: true });
         expect(rpc).toHaveBeenCalledWith('set_community_workshop_poll_vote', {
@@ -211,9 +276,29 @@ describe('shared community poll votes', () => {
             target_poll_id: POLL_ID,
             target_option_id: null,
             target_other_option_label: 'Bezpečnost',
+            target_other_option_status: 'pending',
             target_participant_id: 'workshop-participant-id',
+            target_voter_name: 'Jana Nováková',
             target_voter_email: MEMBER_EMAIL,
         });
+    });
+
+    it('has a trusted member write an answer which is public at once, exactly as their chat message is', async () => {
+        const rpc = vi.fn().mockResolvedValue({ error: null });
+        const supabase = { rpc } as unknown as SupabaseClient;
+
+        await saveWorkshopPollVote(
+            supabase,
+            WORKSHOP_ROW,
+            { ...MEMBER, isTrusted: true },
+            POLL_ID,
+            { otherOptionLabel: 'Bezpečnost' },
+        );
+
+        expect(rpc).toHaveBeenCalledWith(
+            'set_community_workshop_poll_vote',
+            expect.objectContaining({ target_other_option_status: 'approved' }),
+        );
     });
 
     it('shows the same shared aggregate to the community and attached-workshop administrations', async () => {

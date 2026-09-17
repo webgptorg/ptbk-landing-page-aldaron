@@ -15,6 +15,7 @@ import {
     deleteAdminWorkshopContent,
     deleteAdminWorkshopParticipant,
     deleteAdminWorkshopPoll,
+    deleteAdminWorkshopPollOption,
     editAdminWorkshopCommentBody,
     fetchAdminWorkshopList,
     fetchAdminWorkshopSnapshot,
@@ -23,6 +24,7 @@ import {
     sendAdminWorkshopArtificialReaction,
     setAdminWorkshopStageComment,
     updateAdminWorkshopPoll,
+    updateAdminWorkshopPollOption,
     updateAdminWorkshop,
     updateAdminWorkshopContent,
     updateAdminWorkshopParticipantInteractionBan,
@@ -69,6 +71,7 @@ import {
     type WorkshopAdminViewState,
 } from '@/lib/workshops/workshopAdminViewState';
 import type { WorkshopOverviewGraphState } from '@/lib/workshops/workshopOverviewGraphState';
+import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import type {
     WorkshopAdminSnapshot,
     WorkshopAdminSummary,
@@ -437,6 +440,19 @@ export function WorkshopAdminDashboard({
                       artificialVoteAdjustment,
                   ),
               );
+    const handleModeratePollOption = (
+        pollId: string,
+        optionId: string,
+        values: WorkshopPollOptionModerationValues,
+    ) =>
+        snapshot === null
+            ? Promise.resolve(false)
+            : runAndReload(() => updateAdminWorkshopPollOption(snapshot.workshop.id, pollId, optionId, values));
+    const handleDeletePollOption = async (pollId: string, optionId: string) => {
+        if (snapshot !== null) {
+            await runAndReload(() => deleteAdminWorkshopPollOption(snapshot.workshop.id, pollId, optionId));
+        }
+    };
     const handleModerateComment = async (commentId: string, status: Exclude<WorkshopCommentStatus, 'pending'>) => {
         if (snapshot !== null) {
             await runAndReload(() => moderateAdminWorkshopComment(snapshot.workshop.id, commentId, status));
@@ -736,6 +752,8 @@ export function WorkshopAdminDashboard({
                                             onUpdate={handleUpdatePoll}
                                             onDelete={handleDeletePoll}
                                             onAdjustArtificialVotes={handleAdjustArtificialPollVotes}
+                                            onModerateOption={handleModeratePollOption}
+                                            onDeleteOption={handleDeletePollOption}
                                         />
                                     ) : (
                                         <WorkshopAttachedPollList

@@ -5,10 +5,11 @@ import type {
     WorkshopPollOptionWriteValues,
     WorkshopPollUpdateValues,
 } from '@/businesses/workshop-admin/workshopAdminApiClient';
+import { WorkshopPollOptionAdmin } from '@/businesses/workshop-admin/WorkshopPollOptionAdmin';
 import { WorkshopPollWorkshopPicker } from '@/businesses/workshop-admin/WorkshopPollWorkshopPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT } from '@/lib/workshops/workshopConstants';
+import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import { getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
 import type { WorkshopAdminPoll, WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
 import {
@@ -55,6 +56,16 @@ type WorkshopPollAdminProps = {
         optionId: string,
         artificialVoteAdjustment: number,
     ) => Promise<boolean>;
+
+    /**
+     * Decides about one answer a member wrote, or corrects its wording
+     */
+    readonly onModerateOption: (
+        pollId: string,
+        optionId: string,
+        values: WorkshopPollOptionModerationValues,
+    ) => Promise<boolean>;
+    readonly onDeleteOption: (pollId: string, optionId: string) => Promise<void>;
 };
 
 type WorkshopPollFormProps = {
@@ -344,15 +355,22 @@ export function WorkshopPollAdmin({
     onUpdate,
     onDelete,
     onAdjustArtificialVotes,
+    onModerateOption,
+    onDeleteOption,
 }: WorkshopPollAdminProps) {
     const [editingPollId, setEditingPollId] = useState<string | null>(null);
     const [processingPollIds, setProcessingPollIds] = useState<ReadonlySet<string>>(new Set());
-    const [artificialVoteAdjustments, setArtificialVoteAdjustments] = useState<Readonly<Record<string, string>>>({});
 
-    const runPollAction = async (pollId: string, action: () => Promise<unknown>) => {
+    /**
+     * Runs one change of a poll while the whole poll says it is busy, and hands its answer back to whoever asked
+     */
+    const runPollAction = async <ActionResult,>(
+        pollId: string,
+        action: () => Promise<ActionResult>,
+    ): Promise<ActionResult> => {
         setProcessingPollIds((currentPollIds) => new Set(currentPollIds).add(pollId));
         try {
-            await action();
+            return await action();
         } finally {
             setProcessingPollIds((currentPollIds) => {
                 const nextPollIds = new Set(currentPollIds);
@@ -360,21 +378,6 @@ export function WorkshopPollAdmin({
                 return nextPollIds;
             });
         }
-    };
-
-    const handleArtificialVoteAdjustment = async (pollId: string, optionId: string) => {
-        const adjustmentKey = `${pollId}:${optionId}`;
-        const artificialVoteAdjustment = Number(artificialVoteAdjustments[adjustmentKey] ?? '');
-        if (!Number.isSafeInteger(artificialVoteAdjustment) || artificialVoteAdjustment === 0) {
-            return;
-        }
-
-        await runPollAction(pollId, async () => {
-            const isAdjusted = await onAdjustArtificialVotes(pollId, optionId, artificialVoteAdjustment);
-            if (isAdjusted) {
-                setArtificialVoteAdjustments((currentAdjustments) => ({ ...currentAdjustments, [adjustmentKey]: '' }));
-            }
-        });
     };
 
     const handleDelete = (poll: WorkshopAdminPoll) => {
@@ -397,7 +400,9 @@ export function WorkshopPollAdmin({
                     <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
                         Členové vidí pouze zveřejněné ankety a jejich součty. Každou otázku, možnost, viditelnost i
                         stav hlasování můžete kdykoli změnit. Pro anketu s připravenými hlasy ji nejdřív vytvořte
-                        skrytou, doplňte umělé hlasy a potom ji zveřejněte.
+                        skrytou, doplňte umělé hlasy a potom ji zveřejněte. Vlastní odpovědi členů čekají na schválení
+                        stejně jako komentáře v chatu — u každé vidíte, kdo ji napsal, a můžete ji schválit, zamítnout,
+                        upravit i smazat.
                     </p>
                 </div>
             </div>
@@ -476,58 +481,24 @@ export function WorkshopPollAdmin({
                                 </div>
 
                                 <ol className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
-                                    {poll.options.map((option) => {
-                                        const adjustmentKey = `${poll.id}:${option.id}`;
-                                        const artificialVoteAdjustment = Number(artificialVoteAdjustments[adjustmentKey] ?? '');
-                                        const isArtificialVoteAdjustmentValid =
-                                            Number.isSafeInteger(artificialVoteAdjustment) &&
-                                            artificialVoteAdjustment !== 0 &&
-                                            Math.abs(artificialVoteAdjustment) <= MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT;
-                                        return (
-                                            <li key={option.id} className="rounded-lg border border-slate-100 bg-white p-3">
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <span className="min-w-0 break-words font-medium text-slate-700">{option.label}</span>
-                                                    <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-500">
-                                                        {option.voteCount} hlasů
-                                                    </span>
-                                                </div>
-                                                <p className="mt-1 text-xs text-slate-500">
-                                                    Skutečné: {option.realVoteCount} · Umělé: {option.artificialVoteCount}
-                                                    {option.isCreatedByParticipant ? ' · Napsal člen' : ''}
-                                                </p>
-                                                <div className="mt-3 flex flex-wrap items-end gap-2">
-                                                    <label className="text-xs font-medium text-violet-950">
-                                                        Umělá změna hlasů
-                                                        <Input
-                                                            type="number"
-                                                            step="1"
-                                                            min={-MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
-                                                            max={MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
-                                                            value={artificialVoteAdjustments[adjustmentKey] ?? ''}
-                                                            onChange={(event) =>
-                                                                setArtificialVoteAdjustments((currentAdjustments) => ({
-                                                                    ...currentAdjustments,
-                                                                    [adjustmentKey]: event.target.value,
-                                                                }))
-                                                            }
-                                                            className="mt-1 h-8 w-32 bg-white"
-                                                            placeholder="+1"
-                                                            aria-label={`Umělá změna hlasů pro ${option.label}`}
-                                                        />
-                                                    </label>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        disabled={isProcessing || !isArtificialVoteAdjustmentValid}
-                                                        onClick={() => void handleArtificialVoteAdjustment(poll.id, option.id)}
-                                                    >
-                                                        Použít
-                                                    </Button>
-                                                </div>
-                                            </li>
-                                        );
-                                    })}
+                                    {poll.options.map((option) => (
+                                        <WorkshopPollOptionAdmin
+                                            key={option.id}
+                                            option={option}
+                                            isProcessing={isProcessing}
+                                            onAdjustArtificialVotes={(optionId, artificialVoteAdjustment) =>
+                                                runPollAction(poll.id, () =>
+                                                    onAdjustArtificialVotes(poll.id, optionId, artificialVoteAdjustment),
+                                                )
+                                            }
+                                            onModerate={(optionId, values) =>
+                                                runPollAction(poll.id, () => onModerateOption(poll.id, optionId, values))
+                                            }
+                                            onDelete={(optionId) =>
+                                                runPollAction(poll.id, () => onDeleteOption(poll.id, optionId))
+                                            }
+                                        />
+                                    ))}
                                 </ol>
 
                                 {isEditing && (

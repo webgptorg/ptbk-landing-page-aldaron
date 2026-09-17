@@ -1,11 +1,13 @@
 'use client';
 
+import { WorkshopPollOptionModeration } from '@/businesses/online-workshop/participant/WorkshopPollOptionModeration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import { getWorkshopPollOptionVotePercentage, getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
 import type { WorkshopPoll, WorkshopPollVoteValues } from '@/lib/workshops/workshopTypes';
-import { Check } from 'lucide-react';
+import { Check, Clock3 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 type WorkshopPollsProps = {
@@ -15,18 +17,43 @@ type WorkshopPollsProps = {
     readonly className?: string;
     readonly polls: readonly WorkshopPoll[];
     readonly isInteractionBanned: boolean;
+
+    /**
+     * Whether an answer this member writes waits for a moderator before the rest of the room can read it
+     */
+    readonly isOwnOtherOptionApprovalRequired?: boolean;
+
     /**
      * Records the one e-mail-owned vote shared by the community and every workshop occurrence the poll is attached to.
      */
     readonly onVote?: (pollId: string, voteValues: WorkshopPollVoteValues) => Promise<boolean>;
+
+    /**
+     * Decides about one answer waiting for moderation, which only a moderator of the room owning the poll is offered
+     */
+    readonly onModerateOption?: (
+        pollId: string,
+        optionId: string,
+        values: WorkshopPollOptionModerationValues,
+    ) => Promise<boolean>;
 };
 
 /**
  * The member-facing side of a room poll. It accepts only the aggregated poll state, therefore it cannot accidentally
  * reveal who voted for an option; a member knows solely whether the highlighted choice is their own, whichever room
  * they used to make it.
+ *
+ * Note: An answer which still waits for moderation only ever reaches the member who wrote it and the moderators of the
+ *       room, so it is marked as waiting rather than quietly counted among the public results.
  */
-export function WorkshopPolls({ className, polls, isInteractionBanned, onVote }: WorkshopPollsProps) {
+export function WorkshopPolls({
+    className,
+    polls,
+    isInteractionBanned,
+    isOwnOtherOptionApprovalRequired = false,
+    onVote,
+    onModerateOption,
+}: WorkshopPollsProps) {
     const [votingPollId, setVotingPollId] = useState<string | null>(null);
     const [otherOptionLabels, setOtherOptionLabels] = useState<Readonly<Record<string, string>>>({});
 
@@ -92,46 +119,64 @@ export function WorkshopPolls({ className, polls, isInteractionBanned, onVote }:
                             {poll.options.map((option) => {
                                 const percentage = getWorkshopPollOptionVotePercentage(option, totalVoteCount);
                                 const isSelected = option.isVotedByParticipant;
+                                const isWaitingForApproval = option.status === 'pending';
 
                                 return (
-                                    <Button
-                                        key={option.id}
-                                        type="button"
-                                        variant="ghost"
-                                        disabled={!isVoteAvailable || isVoting}
-                                        aria-pressed={isSelected}
-                                        onClick={() => void handleVote(poll.id, { optionId: option.id })}
-                                        className={`relative flex h-auto w-full overflow-hidden rounded-xl border px-4 py-3 text-left transition ${
-                                            isSelected
-                                                ? 'border-cyan-300/80 bg-cyan-300/[0.17] text-white hover:bg-cyan-300/[0.20]'
-                                                : 'border-white/[0.10] bg-slate-950/30 text-slate-100 hover:border-cyan-300/35 hover:bg-white/[0.07]'
-                                        }`}
-                                    >
-                                        <span
-                                            aria-hidden="true"
-                                            className={`absolute inset-y-0 left-0 bg-cyan-300/[0.10] transition-[width] ${
-                                                isSelected ? 'bg-cyan-300/[0.20]' : ''
+                                    <div key={option.id}>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            disabled={!isVoteAvailable || isVoting}
+                                            aria-pressed={isSelected}
+                                            onClick={() => void handleVote(poll.id, { optionId: option.id })}
+                                            className={`relative flex h-auto w-full overflow-hidden rounded-xl border px-4 py-3 text-left transition ${
+                                                isSelected
+                                                    ? 'border-cyan-300/80 bg-cyan-300/[0.17] text-white hover:bg-cyan-300/[0.20]'
+                                                    : 'border-white/[0.10] bg-slate-950/30 text-slate-100 hover:border-cyan-300/35 hover:bg-white/[0.07]'
                                             }`}
-                                            style={{ width: `${percentage}%` }}
-                                        />
-                                        <span className="relative flex min-w-0 flex-1 items-center gap-3">
+                                        >
                                             <span
-                                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
-                                                    isSelected
-                                                        ? 'border-cyan-200 bg-cyan-300 text-slate-950'
-                                                        : 'border-slate-500 text-transparent'
+                                                aria-hidden="true"
+                                                className={`absolute inset-y-0 left-0 bg-cyan-300/[0.10] transition-[width] ${
+                                                    isSelected ? 'bg-cyan-300/[0.20]' : ''
                                                 }`}
-                                            >
-                                                <Check className="h-3.5 w-3.5" />
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                            <span className="relative flex min-w-0 flex-1 items-center gap-3">
+                                                <span
+                                                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                                                        isSelected
+                                                            ? 'border-cyan-200 bg-cyan-300 text-slate-950'
+                                                            : 'border-slate-500 text-transparent'
+                                                    }`}
+                                                >
+                                                    <Check className="h-3.5 w-3.5" />
+                                                </span>
+                                                <span className="min-w-0 flex-1 break-words font-medium">
+                                                    {option.label}
+                                                </span>
+                                                {/* Note: An answer which the room does not see yet is marked for the
+                                                          one who wrote it and for the moderator who decides about it.
+                                                          Nobody else ever receives it. */}
+                                                {isWaitingForApproval && (
+                                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-300/10 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
+                                                        <Clock3 className="h-3 w-3" /> Čeká na schválení
+                                                    </span>
+                                                )}
+                                                <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">
+                                                    {option.voteCount} · {percentage} %
+                                                </span>
                                             </span>
-                                            <span className="min-w-0 flex-1 break-words font-medium">
-                                                {option.label}
-                                            </span>
-                                            <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">
-                                                {option.voteCount} · {percentage} %
-                                            </span>
-                                        </span>
-                                    </Button>
+                                        </Button>
+                                        {onModerateOption !== undefined && option.isCreatedByParticipant && (
+                                            <WorkshopPollOptionModeration
+                                                option={option}
+                                                onModerateOption={(optionId, values) =>
+                                                    onModerateOption(poll.id, optionId, values)
+                                                }
+                                            />
+                                        )}
+                                    </div>
                                 );
                             })}
 
@@ -169,6 +214,11 @@ export function WorkshopPolls({ className, polls, isInteractionBanned, onVote }:
                                             Přidat a hlasovat
                                         </Button>
                                     </div>
+                                    {isOwnOtherOptionApprovalRequired && (
+                                        <p className="mt-2 text-xs leading-5 text-slate-400">
+                                            Váš hlas se započítá hned, ostatní uvidí vaši odpověď až po schválení.
+                                        </p>
+                                    )}
                                 </form>
                             )}
                         </div>

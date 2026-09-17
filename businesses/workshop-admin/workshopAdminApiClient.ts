@@ -20,6 +20,7 @@ import {
     type WorkshopAdminParticipantQuery,
 } from '@/lib/workshops/workshopAdminParticipantQuery';
 import type { WorkshopAdminExportKind } from '@/lib/workshops/workshopAdminExports';
+import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 
 /**
  * The settings of a room as its administration writes them
@@ -343,6 +344,41 @@ export async function deleteAdminWorkshopPoll(workshopId: string, pollId: string
     );
 }
 
+/**
+ * Where one single answer of one poll is administered, which both its moderation and its artificial votes are under
+ */
+function createAdminWorkshopPollOptionUrl(workshopId: string, pollId: string, optionId: string): string {
+    return createAdminApiUrl(
+        `/${encodeURIComponent(workshopId)}/polls/${encodeURIComponent(pollId)}/options/${encodeURIComponent(optionId)}`,
+    );
+}
+
+/**
+ * Decides about one answer a member wrote into a poll, or corrects its wording, see `workshopPollOptionUpdateSchema`
+ */
+export async function updateAdminWorkshopPollOption(
+    workshopId: string,
+    pollId: string,
+    optionId: string,
+    values: WorkshopPollOptionModerationValues,
+): Promise<void> {
+    await requestAdminJson(
+        createAdminWorkshopPollOptionUrl(workshopId, pollId, optionId),
+        createJsonMutation('PATCH', values),
+    );
+}
+
+/**
+ * Removes one answer a member wrote into a poll together with the votes cast for it.
+ */
+export async function deleteAdminWorkshopPollOption(
+    workshopId: string,
+    pollId: string,
+    optionId: string,
+): Promise<void> {
+    await requestAdminJson(createAdminWorkshopPollOptionUrl(workshopId, pollId, optionId), { method: 'DELETE' });
+}
+
 export async function adjustAdminWorkshopPollOptionArtificialVotes(
     workshopId: string,
     pollId: string,
@@ -350,9 +386,7 @@ export async function adjustAdminWorkshopPollOptionArtificialVotes(
     artificialVoteAdjustment: number,
 ): Promise<void> {
     await requestAdminJson(
-        createAdminApiUrl(
-            `/${encodeURIComponent(workshopId)}/polls/${encodeURIComponent(pollId)}/options/${encodeURIComponent(optionId)}/artificial-votes`,
-        ),
+        `${createAdminWorkshopPollOptionUrl(workshopId, pollId, optionId)}/artificial-votes`,
         createJsonMutation('POST', { artificialVoteAdjustment }),
     );
 }

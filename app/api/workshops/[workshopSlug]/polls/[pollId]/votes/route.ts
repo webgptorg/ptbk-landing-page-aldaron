@@ -71,7 +71,7 @@ export async function POST(request: NextRequest, context: WorkshopPollVoteRouteC
     const { polls, errorMessage } = await loadWorkshopPolls(
         authenticatedRequest.supabase,
         authenticatedRequest.workshopRow,
-        authenticatedRequest.participant.email,
+        authenticatedRequest.participant,
     );
     if (errorMessage !== null) {
         return NextResponse.json({ error: errorMessage }, { status: 500 });

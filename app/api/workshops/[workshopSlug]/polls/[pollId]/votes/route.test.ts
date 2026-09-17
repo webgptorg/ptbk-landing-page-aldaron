@@ -66,6 +66,8 @@ const POLL: WorkshopPoll = {
             sortOrder: 0,
             voteCount: 1,
             isVotedByParticipant: true,
+            isCreatedByParticipant: false,
+            status: 'approved',
         },
     ],
     attachedWorkshops: [],
@@ -116,7 +118,7 @@ describe('workshop-attached community poll voting endpoint', () => {
             POLL_ID,
             { optionId: SELECTED_OPTION_ID },
         );
-        expect(loadWorkshopPollsMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT.email);
+        expect(loadWorkshopPollsMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT);
         expect(broadcastWorkshopEventMock).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, { kind: 'state-changed' });
     });
 

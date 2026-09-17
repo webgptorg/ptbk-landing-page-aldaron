@@ -10,7 +10,7 @@
 
 ---
 
-[ ]
+[x] by Developer on Claude Code `claude-opus-5` thinking `max`, interrupted, continued by Developer on Qwen Code `qwen3.8-max` thinking `max`
 
 [✨🪱] Custom options in the polls submitted by users should require approval
 
@@ -24,3 +24,5 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+
+

@@ -492,22 +492,46 @@ export type WorkshopPollOption = {
     readonly sortOrder: number;
     readonly voteCount: number;
     readonly isVotedByParticipant: boolean;
-};
-
-/**
- * The administrative view additionally separates the member votes from the explicitly seeded aggregate. The member
- * room deliberately keeps receiving only `WorkshopPollOption`, so an artificial starting count does not expose its
- * origin to the people taking part in the poll.
- */
-export type WorkshopAdminPollOption = WorkshopPollOption & {
-    readonly realVoteCount: number;
-    readonly artificialVoteCount: number;
 
     /**
      * A member wrote this answer through the poll's optional other-answer field. It stays out of the ordinary editor,
      * so an administrator changing prepared choices cannot accidentally remove what members already contributed.
      */
     readonly isCreatedByParticipant: boolean;
+
+    /**
+     * Where a member-written answer stands in the moderation lifecycle every participant submission shares
+     *
+     * Note: A prepared choice of the administration is the poll speaking and is therefore always approved. A waiting
+     *       answer only ever reaches the member who wrote it and the moderators of the room which owns the poll, so
+     *       nobody else can read it or count its vote before it is approved.
+     */
+    readonly status: WorkshopSubmissionStatus;
+};
+
+/**
+ * Who wrote one member-written answer, as far as the administration of the poll may know them
+ *
+ * Note: The normalized e-mail is the durable identity, because it is what owns the vote across the community and every
+ *       attached occurrence. The room-local participant may already have been removed, and an answer written before
+ *       answers named their writer may know nobody at all.
+ */
+export type WorkshopPollOptionAuthor = {
+    readonly participantId: string | null;
+    readonly fullname: string | null;
+    readonly email: string;
+};
+
+/**
+ * The administrative view additionally separates the member votes from the explicitly seeded aggregate, and names who
+ * wrote a member-written answer. The member room deliberately keeps receiving only `WorkshopPollOption`, so neither an
+ * artificial starting count nor the identity behind an answer is exposed to the people taking part in the poll.
+ */
+export type WorkshopAdminPollOption = WorkshopPollOption & {
+    readonly realVoteCount: number;
+    readonly artificialVoteCount: number;
+    readonly author: WorkshopPollOptionAuthor | null;
+    readonly createdAt: string;
 };
 
 /**

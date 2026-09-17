@@ -14,8 +14,24 @@ const POLL: WorkshopPoll = {
     createdAt: '2026-08-24T10:00:00.000Z',
     updatedAt: '2026-08-24T10:00:00.000Z',
     options: [
-        { id: 'option-1', label: 'Testování', sortOrder: 0, voteCount: 3, isVotedByParticipant: true },
-        { id: 'option-2', label: 'Nasazování', sortOrder: 1, voteCount: 1, isVotedByParticipant: false },
+        {
+            id: 'option-1',
+            label: 'Testování',
+            sortOrder: 0,
+            voteCount: 3,
+            isVotedByParticipant: true,
+            isCreatedByParticipant: false,
+            status: 'approved',
+        },
+        {
+            id: 'option-2',
+            label: 'Nasazování',
+            sortOrder: 1,
+            voteCount: 1,
+            isVotedByParticipant: false,
+            isCreatedByParticipant: false,
+            status: 'approved',
+        },
     ],
     attachedWorkshops: [],
 };

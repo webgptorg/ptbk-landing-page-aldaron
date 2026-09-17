@@ -26,6 +26,7 @@ import { WorkshopLinksPanel } from '@/components/workshops/WorkshopLinksPanel';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { isWorkshopPanelOffered, type WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
+import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
 import { WORKSHOP_SEARCH_PARAMETER_NAME } from '@/lib/workshops/workshopParticipantLink';
 import { getWorkshopPollPlacement } from '@/lib/workshops/workshopPollPlacement';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
@@ -280,13 +281,20 @@ export function OnlineWorkshopParticipantPage({
     /*
      * Note: The polls of the room are written once and put where the kind of this room keeps them, so the place a
      *       member reads them from can never offer a different poll or a different vote than the other one would.
+     * Note: A poll is administered by the room which owns it, so only a moderator standing in that very room decides
+     *       about the answers members wrote into it. Whether this member's own answer has to wait is the one shared
+     *       submission policy, the very same one which decides about their chat messages.
      */
     const pollsPanel = isWorkshopPollVisible ? (
         <WorkshopPolls
             className="mt-4 first:mt-0"
             polls={state.polls}
             isInteractionBanned={state.participant.isInteractionBanned}
+            isOwnOtherOptionApprovalRequired={getWorkshopParticipantSubmissionStatus(state.participant) === 'pending'}
             onVote={controller.voteOnPoll}
+            onModerateOption={
+                isModerating && roomCapabilities.isPollsOffered ? controller.moderatePollOption : undefined
+            }
         />
     ) : null;
     const pollPlacement = getWorkshopPollPlacement(state.workshop.kind);

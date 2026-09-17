@@ -279,6 +279,22 @@ export const workshopPollVoteSchema = z.union([
     z.object({ otherOptionLabel: workshopPollOptionSchema }).strict(),
 ]);
 
+/**
+ * Every change a moderation can make to one member-written answer: the decision about it and its wording
+ *
+ * Note: Which of the two a given role may write is decided by `workshopModeration`, so the request itself is the same
+ *       one wherever it comes from.
+ */
+export const workshopPollOptionUpdateSchema = z
+    .object({
+        status: z.enum(['approved', 'rejected']).optional(),
+        label: workshopPollOptionSchema.optional(),
+    })
+    .refine(
+        (value) => value.status !== undefined || value.label !== undefined,
+        'At least one poll option field is required',
+    );
+
 export const workshopPollOptionArtificialVoteSchema = z.object({
     artificialVoteAdjustment: z
         .number()

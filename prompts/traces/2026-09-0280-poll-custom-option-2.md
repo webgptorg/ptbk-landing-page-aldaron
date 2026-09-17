@@ -1,9 +1,72 @@
+# Run trace of `prompts/2026-09-0280-poll-custom-option.md#12`
+
+-   **Prompt:** Custom options in the polls submitted by users should require approval
+-   **Prompt section:** 2 of 2
+-   **Outcome:** Succeeded
+-   **Runner:** Developer on Qwen Code `qwen3.8-max` thinking `max`
+-   **Attempts:** 1
+-   **Steps:** Implementation <$0.01 31 minutes
+-   **Started:** 2026-09-16T23:17:58.058Z
+-   **Finished:** 2026-09-16T23:49:23.855Z
+-   **Duration:** 31 minutes
+
+## Runtime log
+
+```text
+=== runner shell started at 2026-09-16T23:17:58.326Z ===
+Script path: /c/Users/me/work/promptbook-experiments-and-landing-pages/aldaron/.promptbook/coder-prompts/2026-09-0280-poll-custom-option-2.sh
+
+--- raw input ---
+qwen -y -m qwen3.8-max -p "$(cat <<'QWEN_CODE_PROMPT'
+
+## Your Task
+
+Custom options in the polls submitted by users should require approval
+
+- The approval should work in exactly the same way as the chat comments.
+    - Moderators and trusted users should have their options auto-approved.
+- Also, in administration, admins should be able to see which user created the option.
+- Vote is automatically counted for the user who created the option but until it is approved, it may not be visible to other users.
+- You should be also able to manage theese custom options in the administration panel and allow to edit / delete them
+    - ![alt text](prompts/screenshots/2026-09-0280-poll-custom-option.png)
+- You are working with page `/cs/online-workshop/participant?workshop=` and `/cs/komunita`
+- Keep in mind the DRY _(don't repeat yourself)_ principle.
+- Do a analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](./changelog/_current-preversion.md)
+
+## Your Behavior
+
+You are Developer
+
+### Rules
+
+-   Keep in mind the DRY _(don't repeat yourself)_ principle.
+-   Keep in mind the SOLID principles.
+-   Do a proper analysis of the current functionality before you start implementing.
+-   Keep small responsibilities of functions and classes, avoid creating big functions or classes that do many things.
+-   Constants should always be `UPPER_SNAKE_CASE`.
+-   Boolean variables should always be prefixed with `is`, for example `isUserChatJobLeaseExpired` or `IS_DEBUG_MODE`.
+-   Do not use abbreviations, for example use `isExpired` instead of `isExp`, `translateMessage` instead of `t`, etc.
+It is fine to use well-known abbreviations, for example `id`, `url`, `html`, etc.
+
+### Prompt suffix
+-   Keep in mind the DRY _(don't repeat yourself)_ principle.
+-   Keep in mind the SOLID principles.
+-   Do a proper analysis of the current functionality before you start implementing.
+-   Keep small responsibilities of functions and classes, avoid creating big functions or classes that do many things.
+-   Constants should always be `UPPER_SNAKE_CASE`.
+-   Boolean variables should always be prefixed with `is`, for example `isUserChatJobLeaseExpired` or `IS_DEBUG_MODE`.
+-   Do not use abbreviations, for example use `isExpired` instead of `isExp`, `translateMessage` instead of `t`, etc.
+It is fine to use well-known abbreviations, for example `id`, `url`, `html`, etc.
+
 ## Context
+
+### Context
 
 This repository contains Promptbook landing pages for different businesses,
 use cases, and audiences. Keep these rules current when behavior changes.
 
-### Public routes
+#### Public routes
 
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
@@ -126,7 +189,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `/terms`, `/dekujeme`, `/branding`, and the routes under `/k`, `/old`, and
   `/test`.
 
-### Shared community and workshop behavior
+#### Shared community and workshop behavior
 
 - Rooms lead to each other in both directions, through one identity hand-off. The
   community lists the terms and opens the room of each; an invited workshop room
@@ -147,14 +210,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
   administrator can enable an Other answer: a member-written response becomes
   one shared, anonymous option and receives that member's vote atomically, so
   every room can vote for it; later poll edits keep member-written answers.
-  Such an answer goes through the very moderation a chat message does, by the
-  one shared submission policy in `lib/workshops/workshopSubmissionStatus.ts`:
-  it is pending until a moderator decides about it, while a trusted member and a
-  moderator have theirs approved as they write it. The vote of its writer is
-  counted at once either way, but until the answer is approved only its writer
-  and the moderators of the room owning the poll receive it or its vote, and a
-  rejected answer is gone for everybody. Who may read one answer is decided
-  once, in `lib/workshops/workshopPollOptionVisibility.ts`.
   Workshops may display and accept votes, but the community owns administration.
   Where a room puts its polls is decided once, in
   `lib/workshops/workshopPollPlacement.ts`: the community, which decides in its
@@ -230,7 +285,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   show member first names only. If the room cannot be read, show less content,
   not an error. Landing-page reactions are estimates based on recent room data.
 
-### Administration and data rules
+#### Administration and data rules
 
 - Event kinds are defined once in `lib/events/eventTypes.ts`; adding one should
   not require database migration or page-specific duplication. Terms ask for kind,
@@ -247,11 +302,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   and shown only by `/admin/contacts`; counting reads nothing but their notes.
   The registration actions in workshop administration carry that same term filter
   into the contacts list and its exports.
-- Workshop polls are read-only in workshop administration, except for the
-  answers members wrote into them: an administrator approves, rejects, rewords,
-  or deletes one together with the votes cast for it, and reads it named by the
-  author who wrote it, while a moderator of the room owning the poll only
-  decides about it from the room itself. Creating a new event
+- Workshop polls are read-only in workshop administration. Creating a new event
   publishes it by default; duplicating an event keeps it published unless the
   source is unpublished. Duplicating a workshop preserves its connections to
   the already existing attached polls; it creates no polls, options, votes, or room history. Stage settings contain
@@ -272,7 +323,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in GET parameters. Editing changes only shortcode, destinations, note, and
   landing page; deletion also deletes recorded clicks.
 
-### Database and verification
+#### Database and verification
 
 - Put database changes in `migrations/*.sql`. Startup and
   `npm run migrate-database` run `_initialize.sql`, then migrations in filename
@@ -283,3 +334,52 @@ use cases, and audiences. Keep these rules current when behavior changes.
   headroom belongs in `playwright.config.ts`, not individual tests. E2E tests are
   independent and each archives one recording in `tests/e2e/videos/`, retaining
   only recent runs.
+
+QWEN_CODE_PROMPT
+)"
+
+--- raw output ---
+Warning: running headless with --yolo / approval-mode=yolo and no sandbox. All tool calls (shell, write, edit) auto-execute at this process's privilege level. Enable a sandbox via --sandbox / QWEN_SANDBOX, or set QWEN_CODE_SUPPRESS_YOLO_WARNING=1 to silence this notice.
+All checks green. Here's my report.
+
+## Analysis: the work was already ~90% staged
+
+The repo contained a nearly complete implementation from an interrupted session. Rather than rewrite it, I verified it end-to-end and closed the gaps.
+
+**Already implemented (verified correct):**
+
+| Layer | What it does |
+|---|---|
+| `migrations/2026-09-2000-community-poll-option-approval.sql` | Adds `status` + `author_participant_id/name/email`; CHECK constraints; backfills authors of pre-existing answers from their earliest vote; rewrites `set_community_workshop_poll_vote` (8 args) and adds `moderate_`/`delete_community_workshop_poll_option` |
+| `lib/workshops/workshopPollOptionVisibility.ts` | One rule for who may read an answer |
+| `lib/workshops/workshopSubmissionStatus.ts` | `getWorkshopParticipantSubmissionStatus` **moved here** from `workshopParticipantInteraction.ts` so chat, projects and poll options share one policy (DRY) |
+| `lib/workshops/workshopModeration.ts` | `isPollOptionModerationOffered` (moderator ✓) vs `isPollOptionEditingOffered` (admin only) |
+| API routes | Room `PATCH`, admin `PATCH`/`DELETE` |
+| UI | `WorkshopModerationAction` extracted from chat moderation and reused; `WorkshopPollOptionAdmin` extracted from `WorkshopPollAdmin`; `Čeká na schválení` badge |
+
+Both target pages are covered — `/cs/komunita` renders `OnlineWorkshopParticipantPage` via `CommunityParticipantPage`. The database enforces `room_kind = 'community'`, so an occurrence a poll is merely attached to cannot moderate it.
+
+## What I added
+
+1. **Changelog entry** — was missing entirely (a required deliverable).
+2. **`AGENTS.md`** — two rules had become false: *"a member-written response becomes one shared, anonymous option"* (no longer immediate) and *"Workshop polls are read-only in workshop administration"*.
+3. **Migration test** in `workshopMigration.test.ts` — every other poll migration has one; this one didn't.
+4. **Bug fix.** `isOwnOtherOptionApprovalRequired` was computed as `!== 'approved'`. Since a banned member's status is `rejected`, they were shown *"Váš hlas se započítá hned…"* — a promise of an immediate vote to someone who cannot vote at all, sitting next to the ban notice. Changed to `=== 'pending'`, added a regression test, and **confirmed it fails against the old code** (`expected <p> to be null`) before restoring the fix.
+
+## Verification
+
+- `tsc --noEmit` → exit 0
+- `npm run lint` → clean (one pre-existing `<img>` warning in an unrelated file)
+- `npx vitest run` → **206 files / 1341 tests passed** (1339 before my 2 additions)
+- Prettier: my added lines are clean; the remaining warnings are pre-existing (changelog line 279, page lines 328/341, test line 529)
+
+Two caveats, stated plainly:
+
+- One full-suite run showed **2 flaky failures** in `OnlineWorkshopParticipantPage.test.tsx`. They pass in isolation (28/28) and on re-run (206/206) — timing-sensitive under parallel load, not caused by my changes.
+- I did **not** run `npm run test-e2e` (needs a dev server + database), and the **migration is not yet applied** — that happens on startup or via `npm run migrate-database`. I also left `prompts/2026-09-0280-poll-custom-option.md` alone since its `[^]` progress marker appears harness-managed.
+
+Nothing is committed — all changes are in the working tree awaiting your review.
+
+=== runner shell finished at 2026-09-16T23:49:23.843Z ===
+Status: succeeded
+```

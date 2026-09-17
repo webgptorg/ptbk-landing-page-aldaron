@@ -137,6 +137,14 @@ const COMMUNITY_POLL_OTHER_OPTION_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-1700-community-poll-other-options.sql',
 );
 const COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL = readFileSync(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_PATH, 'utf8');
+const COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-2000-community-poll-option-approval.sql',
+);
+const COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL = readFileSync(
+    COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_PATH,
+    'utf8',
+);
 const COMMUNITY_PROJECT_MIGRATION_PATH = path.resolve(process.cwd(), 'migrations/2026-08-2800-community-projects.sql');
 const COMMUNITY_PROJECT_MIGRATION_SQL = readFileSync(COMMUNITY_PROJECT_MIGRATION_PATH, 'utf8');
 const COMMUNITY_PROJECT_BACKEND_MIGRATION_PATH = path.resolve(
@@ -604,6 +612,64 @@ describe('workshop database migration', () => {
         );
         expect(COMMUNITY_POLL_OTHER_OPTION_MIGRATION_SQL).toContain(
             'ON CONFLICT (poll_id, voter_email) DO UPDATE',
+        );
+    });
+
+    it('puts a member-written answer through moderation while its writer keeps their vote', () => {
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            "ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'approved'",
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain('ADD COLUMN IF NOT EXISTS author_email text');
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            "CHECK (status IN ('pending', 'approved', 'rejected'))",
+        );
+        // An answer written before this migration was public the moment it was written, so its writer is recovered
+        // from the very vote the writing itself cast rather than being lost to the new rule.
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'ORDER BY poll_vote.option_id, poll_vote.created_at ASC, poll_vote.id ASC',
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'AND poll_option.is_created_by_participant\n  AND poll_option.author_email IS NULL;',
+        );
+        // A prepared choice of the administration is the poll itself speaking, so it stays public and unattributed.
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'ADD CONSTRAINT workshop_poll_options_prepared_is_unattributed CHECK',
+        );
+        // Nothing but a waiting or an immediately public answer may be written, so a forged request cannot smuggle an
+        // already rejected answer into the poll.
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            "IF target_other_option_status IS NULL OR target_other_option_status NOT IN ('pending', 'approved') THEN",
+        );
+        // Only its own writer reaches an answer which still waits, both when a repeated wording is reused and when a
+        // stale identifier is voted for.
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            "OR (poll_option.status = 'pending' AND poll_option.author_email = normalized_voter_email)",
+        );
+        // The writer's vote is recorded in the same transaction either way, so their decision is never lost.
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain('ON CONFLICT (poll_id, voter_email) DO UPDATE');
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'CREATE OR REPLACE FUNCTION public.moderate_community_workshop_poll_option',
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'CREATE OR REPLACE FUNCTION public.delete_community_workshop_poll_option',
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'AND poll_option.is_created_by_participant\n    FOR UPDATE OF poll_option;',
+        );
+        // A rejected answer is out of the poll, so it can no longer block the wording which replaces it.
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain("AND other_option.status <> 'rejected'");
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain("AND participant_option.status <> 'rejected'");
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'CREATE INDEX IF NOT EXISTS workshop_poll_options_status_idx',
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'GRANT EXECUTE ON FUNCTION public.moderate_community_workshop_poll_option(uuid, uuid, uuid, text, text)',
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'GRANT EXECUTE ON FUNCTION public.delete_community_workshop_poll_option(uuid, uuid, uuid)',
+        );
+        expect(COMMUNITY_POLL_OPTION_APPROVAL_MIGRATION_SQL).toContain(
+            'GRANT EXECUTE ON FUNCTION public.set_community_workshop_poll_vote(uuid, uuid, uuid, text, text, uuid, text, text)',
         );
     });
 

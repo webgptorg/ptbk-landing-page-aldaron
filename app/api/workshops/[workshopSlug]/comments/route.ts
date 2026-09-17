@@ -10,10 +10,8 @@ import {
 import { areWorkshopCommentLinksEnabled } from '@/lib/workshops/workshopCommentLinks';
 import { materializeWorkshopCommentShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
-import {
-    getDisabledWorkshopPanelResponseOrNull,
-    getWorkshopParticipantSubmissionStatus,
-} from '@/lib/workshops/workshopParticipantInteraction';
+import { getDisabledWorkshopPanelResponseOrNull } from '@/lib/workshops/workshopParticipantInteraction';
+import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
 import { broadcastWorkshopEvent } from '@/lib/workshops/workshopRealtime';
 import {
     getAuthenticatedWorkshopRequest,

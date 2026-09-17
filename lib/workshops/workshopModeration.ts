@@ -32,6 +32,19 @@ export type WorkshopModerationCapabilities = {
     readonly isCommentMaterialConversionOffered: boolean;
 
     /**
+     * Whether this role decides that a member-written poll answer is shown to the whole room or taken out of it again
+     */
+    readonly isPollOptionModerationOffered: boolean;
+
+    /**
+     * Whether this role corrects the wording of a member-written poll answer or removes it altogether
+     *
+     * Note: Only the administration does. A poll belongs to the community which administers it, so the wording of its
+     *       answers is changed where the poll itself is changed rather than from whichever room happens to show it.
+     */
+    readonly isPollOptionEditingOffered: boolean;
+
+    /**
      * Whether this role has the messages of a participant approved as they are written from now on
      */
     readonly isTrustingOffered: boolean;
@@ -64,6 +77,8 @@ const WORKSHOP_MODERATION_CAPABILITY_DEFINITIONS: Readonly<
         isCommentEditingOffered: true,
         isCommentPinningOffered: true,
         isCommentMaterialConversionOffered: true,
+        isPollOptionModerationOffered: true,
+        isPollOptionEditingOffered: true,
         isTrustingOffered: true,
         isInteractionBanningOffered: true,
         isModeratorAppointmentOffered: true,
@@ -73,6 +88,8 @@ const WORKSHOP_MODERATION_CAPABILITY_DEFINITIONS: Readonly<
         isCommentEditingOffered: true,
         isCommentPinningOffered: true,
         isCommentMaterialConversionOffered: true,
+        isPollOptionModerationOffered: true,
+        isPollOptionEditingOffered: false,
         isTrustingOffered: true,
         isInteractionBanningOffered: true,
         isModeratorAppointmentOffered: false,
@@ -93,7 +110,9 @@ export function getWorkshopModerationCapabilities(
  * Note: A moderator whose interactions were taken away moderates nothing anymore, so a ban stops a moderator the same
  *       way it stops everybody else.
  */
-export function isWorkshopParticipantModerating(participant: WorkshopParticipant): boolean {
+export function isWorkshopParticipantModerating(
+    participant: Pick<WorkshopParticipant, 'isModerator' | 'isInteractionBanned'>,
+): boolean {
     return participant.isModerator && !participant.isInteractionBanned;
 }
 
@@ -112,22 +131,50 @@ export function isWorkshopParticipantModeratedBy(
 }
 
 /**
+ * The unoffered fields which were really written, so only what somebody actually asked for is ever refused
+ */
+function getWrittenFieldNames(
+    unofferedFieldNames: readonly string[],
+    values: Readonly<Record<string, unknown>>,
+): readonly string[] {
+    return unofferedFieldNames.filter((fieldName) => values[fieldName] !== undefined);
+}
+
+/**
  * The written comment fields which this moderating role may not change
- *
- * Note: A field left out of the request is never refused, so only what somebody really asked for is judged.
  */
 export function getUnofferedWorkshopCommentModerationFieldNames(
     moderationRole: WorkshopModerationRole,
     values: Readonly<Record<string, unknown>>,
 ): readonly string[] {
     const capabilities = getWorkshopModerationCapabilities(moderationRole);
-    const unofferedFieldNames = [
-        ...(capabilities.isCommentModerationOffered ? [] : ['status']),
-        ...(capabilities.isCommentEditingOffered ? [] : ['body']),
-        ...(capabilities.isCommentPinningOffered ? [] : ['isPinned']),
-    ];
 
-    return unofferedFieldNames.filter((fieldName) => values[fieldName] !== undefined);
+    return getWrittenFieldNames(
+        [
+            ...(capabilities.isCommentModerationOffered ? [] : ['status']),
+            ...(capabilities.isCommentEditingOffered ? [] : ['body']),
+            ...(capabilities.isCommentPinningOffered ? [] : ['isPinned']),
+        ],
+        values,
+    );
+}
+
+/**
+ * The written fields of a member-written poll answer which this moderating role may not change
+ */
+export function getUnofferedWorkshopPollOptionModerationFieldNames(
+    moderationRole: WorkshopModerationRole,
+    values: Readonly<Record<string, unknown>>,
+): readonly string[] {
+    const capabilities = getWorkshopModerationCapabilities(moderationRole);
+
+    return getWrittenFieldNames(
+        [
+            ...(capabilities.isPollOptionModerationOffered ? [] : ['status']),
+            ...(capabilities.isPollOptionEditingOffered ? [] : ['label']),
+        ],
+        values,
+    );
 }
 
 /**
@@ -138,11 +185,13 @@ export function getUnofferedWorkshopParticipantModerationFieldNames(
     values: Readonly<Record<string, unknown>>,
 ): readonly string[] {
     const capabilities = getWorkshopModerationCapabilities(moderationRole);
-    const unofferedFieldNames = [
-        ...(capabilities.isTrustingOffered ? [] : ['isTrusted']),
-        ...(capabilities.isInteractionBanningOffered ? [] : ['isInteractionBanned']),
-        ...(capabilities.isModeratorAppointmentOffered ? [] : ['isModerator']),
-    ];
 
-    return unofferedFieldNames.filter((fieldName) => values[fieldName] !== undefined);
+    return getWrittenFieldNames(
+        [
+            ...(capabilities.isTrustingOffered ? [] : ['isTrusted']),
+            ...(capabilities.isInteractionBanningOffered ? [] : ['isInteractionBanned']),
+            ...(capabilities.isModeratorAppointmentOffered ? [] : ['isModerator']),
+        ],
+        values,
+    );
 }
