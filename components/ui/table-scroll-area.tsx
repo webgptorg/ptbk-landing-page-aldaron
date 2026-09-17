@@ -61,6 +61,7 @@ export function TableScrollArea({
                         aria-label={horizontalScrollLabel}
                         tabIndex={0}
                         data-admin-fixed-horizontal-scrollbar
+                        data-fixed-bottom-control
                     >
                         <div
                             aria-hidden="true"

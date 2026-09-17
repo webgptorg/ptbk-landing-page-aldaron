@@ -1,13 +1,13 @@
 'use client';
 
-import { useRef } from 'react';
+import { useFixedControlClearance } from '@/hooks/useFixedControlClearance';
+import { useRef, type CSSProperties } from 'react';
 import {
     DEFAULT_PROMPTBOOK_CODER_POSE,
     PROMPTBOOK_CODER_URL,
     type PromptbookCoderPose,
 } from './promptbookCoderAnimation';
 import styles from './PromptbookCoderBadge.module.css';
-import { useCoderBadgeClearance } from './useCoderBadgeClearance';
 import { usePromptbookCoderAnimation } from './usePromptbookCoderAnimation';
 
 /** The footer and the animated terminal draw exactly the same independently movable body parts. */
@@ -48,7 +48,7 @@ export function PromptbookCoderBadge({
 }) {
     const badgeReference = useRef<HTMLAnchorElement>(null);
     const frame = usePromptbookCoderAnimation(badgeReference, playmateSelector);
-    useCoderBadgeClearance(badgeReference, obstacleSelector);
+    const { clearance } = useFixedControlClearance(badgeReference, obstacleSelector);
 
     return (
         <a
@@ -60,6 +60,7 @@ export function PromptbookCoderBadge({
             // Note: we dont want to obstruct the view with a title tooltip
             // title="Promptbook coder"
             className={`${styles.terminal} ${styles.floating}`}
+            style={{ '--coder-obstacle-inset': `${clearance}px` } as CSSProperties}
             data-promptbook-coder-badge
             data-mood={frame.command === null ? frame.mood : 'boot'}
         >

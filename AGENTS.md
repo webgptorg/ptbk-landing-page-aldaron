@@ -128,6 +128,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Shared community and workshop behavior
 
+- The global cookie banner shares its page palette with its settings dialog, uses
+  a shallow bottom strip on desktop and an inset panel on phones, and reserves its
+  measured height so the end of each page stays reachable. Fixed bottom controls
+  such as the podcast player and admin table scrollbar opt into clearance through
+  `data-fixed-bottom-control`; the banner, booking notice, and coder badge measure
+  their neighbors through `hooks/useFixedControlClearance.ts`.
+
 - Rooms lead to each other in both directions, through one identity hand-off. The
   community lists the terms and opens the room of each; an invited workshop room
   places its community link beside its materials as a special material for every

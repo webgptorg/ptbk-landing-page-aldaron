@@ -154,7 +154,11 @@ export function AiTaKrajtaMiniPlayer() {
     };
 
     return (
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#1a201c]/95 backdrop-blur-md">
+        <div
+            className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#1a201c]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
+            data-ai-ta-krajta-mini-player
+            data-fixed-bottom-control
+        >
             <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
                 <div className="flex items-center gap-3 sm:gap-4">
                     <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#303832] p-1.5 sm:flex">

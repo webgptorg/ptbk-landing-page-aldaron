@@ -11,9 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { PODCAST_COOKIE_CONSENT_STYLE, type CookieConsentTheme } from '@/lib/legal/cookieConsentAppearance';
 import { getCookieConsentContent } from '@/lib/legal/cookieConsentContent';
 import { ONLY_NECESSARY_COOKIES_ALLOWED, saveCookiePreferences } from '@/lib/legal/cookieConsentStorage';
 import { useState, type ReactNode } from 'react';
+import styles from './cookie-consent.module.css';
 
 /**
  * One switchable kind of cookies, with the switch on its right
@@ -30,10 +32,10 @@ function CookieCategoryRow({
     children: ReactNode;
 }) {
     return (
-        <div className="flex items-center justify-between">
+        <div className={styles.category}>
             <label htmlFor={id}>
                 <strong>{title}</strong>
-                <p className="text-sm text-gray-500">{description}</p>
+                <p className={styles.description}>{description}</p>
             </label>
             {children}
         </div>
@@ -42,13 +44,15 @@ function CookieCategoryRow({
 
 export function CookieSettingsModal({
     language,
-    open,
+    theme,
+    isOpen,
     onOpenChange,
     onSave,
 }: {
     language: SupportedHomepageLanguage;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
+    theme: CookieConsentTheme;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
     onSave?: () => void;
 }) {
     const content = getCookieConsentContent(language);
@@ -61,19 +65,23 @@ export function CookieSettingsModal({
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
-                <DialogHeader>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent
+                className={`${styles.appearance} ${styles.dialog}`}
+                data-theme={theme}
+                style={theme === 'podcast' ? PODCAST_COOKIE_CONSENT_STYLE : undefined}
+            >
+                <DialogHeader className={styles.dialogHeader}>
                     <DialogTitle>{content.settingsTitle}</DialogTitle>
-                    <DialogDescription>{content.settingsDescription}</DialogDescription>
+                    <DialogDescription className={styles.description}>{content.settingsDescription}</DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className={styles.categories}>
                     <CookieCategoryRow
                         id="necessary-cookies"
                         title={content.necessaryCategory.title}
                         description={content.necessaryCategory.description}
                     >
-                        <Switch id="necessary-cookies" checked disabled />
+                        <Switch id="necessary-cookies" className={styles.switch} checked disabled />
                     </CookieCategoryRow>
 
                     <CookieCategoryRow
@@ -83,6 +91,7 @@ export function CookieSettingsModal({
                     >
                         <Switch
                             id="analytics-cookies"
+                            className={styles.switch}
                             checked={preferences.isAnalyticsAllowed}
                             onCheckedChange={(isAllowed) =>
                                 setPreferences((previous) => ({ ...previous, isAnalyticsAllowed: isAllowed }))
@@ -97,6 +106,7 @@ export function CookieSettingsModal({
                     >
                         <Switch
                             id="marketing-cookies"
+                            className={styles.switch}
                             checked={preferences.isMarketingAllowed}
                             onCheckedChange={(isAllowed) =>
                                 setPreferences((previous) => ({ ...previous, isMarketingAllowed: isAllowed }))
@@ -105,7 +115,9 @@ export function CookieSettingsModal({
                     </CookieCategoryRow>
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleSave}>{content.saveButton}</Button>
+                    <Button type="button" className={`${styles.action} ${styles.primary}`} onClick={handleSave}>
+                        {content.saveButton}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

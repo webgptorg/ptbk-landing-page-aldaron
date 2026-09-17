@@ -1,17 +1,20 @@
 'use client';
 
 import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { useFixedControlClearance } from '@/hooks/useFixedControlClearance';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const STORAGE_KEY = 'promptbook_notif_shown';
 
 export function BookingNotification({ language = 'cs' }: { language?: HomepageLanguage }) {
     const { bookingNotification } = getHomepageContent(language);
     const notifications = bookingNotification.notifications;
-    const [visible, setVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [notification, setNotification] = useState(notifications[0]);
+    const notificationReference = useRef<HTMLDivElement>(null);
+    const { clearance } = useFixedControlClearance(notificationReference, '.cookie-consent__panel', isVisible);
 
     useEffect(() => {
         // Check if already shown this session
@@ -26,7 +29,7 @@ export function BookingNotification({ language = 'cs' }: { language?: HomepageLa
 
         // Show after 6 seconds
         const showTimer = setTimeout(() => {
-            setVisible(true);
+            setIsVisible(true);
             sessionStorage.setItem(STORAGE_KEY, 'true');
         }, 6000);
 
@@ -35,20 +38,23 @@ export function BookingNotification({ language = 'cs' }: { language?: HomepageLa
 
     // Auto-dismiss after 8 seconds
     useEffect(() => {
-        if (!visible) return;
-        const hideTimer = setTimeout(() => setVisible(false), 8000);
+        if (!isVisible) return;
+        const hideTimer = setTimeout(() => setIsVisible(false), 8000);
         return () => clearTimeout(hideTimer);
-    }, [visible]);
+    }, [isVisible]);
 
     return (
         <AnimatePresence>
-            {visible && (
+            {isVisible && (
                 <motion.div
+                    ref={notificationReference}
+                    data-booking-notification
                     initial={{ opacity: 0, y: 30, x: 0 }}
                     animate={{ opacity: 1, y: 0, x: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
-                    className="fixed bottom-6 left-6 z-50 max-w-sm"
+                    className="fixed left-6 right-6 z-40 max-w-sm"
+                    style={{ bottom: `calc(${clearance}px + max(1.5rem, env(safe-area-inset-bottom)))` }}
                 >
                     <div className="bg-white rounded-xl shadow-2xl shadow-black/10 border border-gray-100 px-5 py-4 flex items-start gap-3">
                         {/* Pulse dot */}
@@ -66,7 +72,7 @@ export function BookingNotification({ language = 'cs' }: { language?: HomepageLa
 
                         {/* Close button */}
                         <button
-                            onClick={() => setVisible(false)}
+                            onClick={() => setIsVisible(false)}
                             className="shrink-0 text-gray-300 hover:text-gray-500 transition-colors mt-0.5"
                         >
                             <X className="w-4 h-4" />

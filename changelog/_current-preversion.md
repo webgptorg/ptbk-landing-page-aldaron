@@ -1,5 +1,14 @@
 # Current preversion
 
+- Replaced the centered cookie popup on every page with a shallow desktop strip
+  and an inset mobile panel. The banner and its settings now use
+  light, workshop, or podcast colors together, with clearer button hierarchy,
+  keyboard focus, and scrollable settings on short screens. One shared measurement
+  hook keeps the banner, podcast player, coder badge, booking notice, and admin
+  table scrollbar clear of each other as they appear or resize; reserved space
+  keeps footer links reachable. Existing Czech/English copy, saved choices, and
+  the privacy page's cookie settings link remain available across all pages.
+
 - Put the answers members write into a community poll through the very same moderation a chat message goes through. An
   `Other` answer written in `/cs/komunita` or in an attached `/cs/online-workshop/participant?workshop=` is no longer
   public the moment it is written: it waits for a decision, while a trusted member and a moderator have theirs approved
