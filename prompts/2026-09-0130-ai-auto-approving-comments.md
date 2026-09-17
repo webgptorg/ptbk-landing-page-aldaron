@@ -1,4 +1,4 @@
-[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.0932 a minute; Testing 15 minutes
+[ ] `astra`
 
 [✨🎧] There should be a mechanism for auto-approving the comments.
 
@@ -7,4 +7,3 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
-
