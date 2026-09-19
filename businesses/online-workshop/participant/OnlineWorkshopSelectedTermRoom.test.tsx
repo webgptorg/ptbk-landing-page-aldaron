@@ -167,6 +167,14 @@ describe('online workshop waiting room', () => {
         expect(screen.getByRole('button', { name: new RegExp(PAST_WORKSHOP.title) })).toBeDefined();
     });
 
+    it('marks a term starting during the next seven days in the waiting-room picker', () => {
+        renderWaitingRoom(LATER_UPCOMING_WORKSHOP);
+
+        expect(
+            screen.getByRole('button', { name: new RegExp(NEAREST_UPCOMING_WORKSHOP.title) }).textContent,
+        ).toContain('Do týdne');
+    });
+
     it('names the workshop which has only just been held in the open, rather than filing it into the history', () => {
         renderWaitingRoom(LATER_UPCOMING_WORKSHOP, [...PUBLISHED_WORKSHOPS, FRESHLY_PAST_WORKSHOP]);
 

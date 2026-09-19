@@ -65,7 +65,11 @@ export function OnlineWorkshopRoomTermPicker({
         () => groupWorkshopsByPhase(terms, Date.parse(currentTime)),
         [currentTime, terms],
     );
-    const currentTerms = [...termsByPhase.ongoing, ...termsByPhase.upcoming];
+    const currentTerms = [
+        ...termsByPhase.ongoing,
+        ...termsByPhase['upcoming-next-week'],
+        ...termsByPhase.upcoming,
+    ];
     const freshlyPastTerms = termsByPhase['freshly-past'];
     const { past: pastTerms } = termsByPhase;
     const isSelectedTermPast = pastTerms.some((term) => term.slug === selectedTermSlug);

@@ -26,7 +26,8 @@ export type EventListing = {
     readonly link: string;
 
     /**
-     * Whether this term is still ahead, running right now, only just over, or already history
+     * Whether this term is running right now, only just over, starts within the next week, is further ahead, or is
+     * already history
      */
     readonly phase: WorkshopPhase;
 
@@ -56,7 +57,8 @@ type EventListingOptions = {
 };
 
 /**
- * The terms a room lists, ordered by what matters most to a member: what runs now, what comes next, then the history
+ * The terms a room lists, ordered by what matters most to a member: what runs now, what has just ended, what starts
+ * within a week, what comes later, then the history.
  *
  * Note: A term the application cannot lead anywhere is deliberately left out instead of being offered as a link which
  *       would open a different event.

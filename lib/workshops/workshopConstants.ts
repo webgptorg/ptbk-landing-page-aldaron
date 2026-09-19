@@ -34,6 +34,15 @@ export const DEFAULT_WORKSHOP_DURATION_MINUTES = 60;
 export const FRESHLY_PAST_WORKSHOP_HOURS = 24;
 
 /**
+ * How long before its start an occurrence is called imminent rather than merely upcoming.
+ *
+ * Note: This is a rolling seven-day window measured from the moment a list is built, rather than a calendar week.
+ *       Someone reading the schedule on Friday should therefore see a workshop next Thursday in exactly the same
+ *       special category as somebody reading it on Monday sees a workshop the following Monday.
+ */
+export const UPCOMING_NEXT_WEEK_WORKSHOP_HOURS = 7 * 24;
+
+/**
  * The greatest whole-second position PostgreSQL can safely store in the recording offset's integer column.
  */
 export const MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS = 2_147_483_647;

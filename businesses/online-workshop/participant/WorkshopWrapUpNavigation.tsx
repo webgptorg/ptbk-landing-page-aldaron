@@ -6,6 +6,7 @@ import { createEventListings } from '@/lib/events/eventListing';
 import { isEventFree } from '@/lib/events/eventPrice';
 import { isExternalEventType } from '@/lib/events/eventTypes';
 import type { WorkshopParticipantIdentity } from '@/lib/workshops/workshopParticipantLink';
+import { isWorkshopPhaseUpcoming } from '@/lib/workshops/workshopPhase';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { ArrowUpRight, Users } from 'lucide-react';
 import Link from 'next/link';
@@ -34,7 +35,7 @@ export function WorkshopWrapUpNavigation({
         participantIdentity,
         currentTimeMilliseconds: Date.parse(serverTime),
         timeZone: WORKSHOP_TIME_ZONE,
-    }).filter((listing) => listing.phase === 'upcoming' && !isExternalEventType(listing.event.type));
+    }).filter((listing) => isWorkshopPhaseUpcoming(listing.phase) && !isExternalEventType(listing.event.type));
     const nextWorkshop = upcomingWorkshops[0];
     const nextPaidWorkshop = upcomingWorkshops.find((listing) => !isEventFree(listing.event.priceCzk));
     const isNextWorkshopPaid = nextWorkshop !== undefined && nextWorkshop === nextPaidWorkshop;

@@ -2,6 +2,7 @@
 
 import { WorkshopSelectorCard } from '@/businesses/workshop-admin/WorkshopSelectorCard';
 import { Input } from '@/components/ui/input';
+import { getWorkshopPhaseAppearance } from '@/components/workshops/workshopPhaseAppearance';
 import {
     getWorkshopPhase,
     groupWorkshopsByPhase,
@@ -25,6 +26,16 @@ const CZECH_LOCALE = 'cs-CZ';
 const WORKSHOP_CARD_GRID_CLASS_NAME = 'grid grid-cols-1 gap-1.5 xl:grid-cols-2';
 const WORKSHOP_LIST_CLASS_NAME =
     'mt-3 space-y-3 lg:max-h-[min(34rem,calc(100dvh-31rem))] lg:overflow-y-auto lg:pr-1';
+const WORKSHOP_HISTORY_CATEGORY_LABEL = 'Historie';
+
+/**
+ * The administration names an active category with the same label as its badge, so a term cannot be called one thing
+ * in the selector and another in its card. History is the one exception because it is a disclosure of the past,
+ * rather than another past-term badge.
+ */
+function getWorkshopPhaseCategoryLabel(phase: WorkshopPhase): string {
+    return phase === 'past' ? WORKSHOP_HISTORY_CATEGORY_LABEL : getWorkshopPhaseAppearance(phase).label;
+}
 
 function normalizeWorkshopSearchQuery(searchQuery: string): string {
     return searchQuery
@@ -40,30 +51,6 @@ function isWorkshopMatchingSearchQuery(workshop: WorkshopAdminSummary, normalize
     }
 
     return normalizeWorkshopSearchQuery(`${workshop.title} ${workshop.slug}`).includes(normalizedSearchQuery);
-}
-
-/**
- * Whether a term of this phase is one the administration is still busy with rather than one of its history
- *
- * Note: A term which has only just been held is the one an administrator has the most to do with — its participants
- *       are being read, its comments moderated, its recording published — so it waits in the open where they left it
- *       instead of being looked for among everything which was ever held. That it is over is untouched: it still says
- *       `Právě proběhlo`, and everything which opens only after a workshop still reads it as finished.
- * Note: This is the one answer to which terms the administration leads with, so the list it draws and the history it
- *       unfolds for a selected term cannot disagree about where that term is to be found.
- */
-function isCurrentWorkshopPhase(phase: WorkshopPhase): boolean {
-    return phase !== 'past';
-}
-
-/**
- * The terms of the chosen phases, ranked as those phases themselves are ranked
- */
-function selectWorkshopsOfPhases(
-    workshopsByPhase: Readonly<Record<WorkshopPhase, readonly WorkshopAdminSummary[]>>,
-    isPhaseSelected: (phase: WorkshopPhase) => boolean,
-): readonly WorkshopAdminSummary[] {
-    return WORKSHOP_PHASE_VALUES.filter(isPhaseSelected).flatMap((phase) => workshopsByPhase[phase]);
 }
 
 type WorkshopSelectorCardGridProps = {
@@ -99,8 +86,9 @@ function WorkshopSelectorCardGrid({
 }
 
 /**
- * Offers every occurrence as a card, ordered so that a running room leads the list, the prepared terms and the ones
- * which have only just been held follow it, and the history closes it.
+ * Offers every occurrence as a card in the five shared time categories. An administrator gets the workshop that is
+ * running first, the one they are wrapping up next, then the terms to prepare soon and later, while the old archive
+ * remains available on demand.
  */
 export function WorkshopSelectorCardList({
     label,
@@ -119,11 +107,10 @@ export function WorkshopSelectorCardList({
         return workshops.filter((workshop) => isWorkshopMatchingSearchQuery(workshop, normalizedSearchQuery));
     }, [normalizedSearchQuery, workshops]);
     const matchingWorkshopsByPhase = useMemo(() => groupWorkshopsByPhase(matchingWorkshops), [matchingWorkshops]);
-    const currentWorkshops = selectWorkshopsOfPhases(matchingWorkshopsByPhase, isCurrentWorkshopPhase);
-    const pastWorkshops = selectWorkshopsOfPhases(matchingWorkshopsByPhase, (phase) => !isCurrentWorkshopPhase(phase));
+    const pastWorkshops = matchingWorkshopsByPhase.past;
     const selectedWorkshop = workshops.find((workshop) => workshop.id === selectedWorkshopId);
     const isSelectedWorkshopInHistory =
-        selectedWorkshop !== undefined && !isCurrentWorkshopPhase(getWorkshopPhase(selectedWorkshop));
+        selectedWorkshop !== undefined && getWorkshopPhase(selectedWorkshop) === 'past';
     const isSearchQueryPresent = normalizedSearchQuery.length > 0;
     const isPastWorkshopsVisible = isPastWorkshopsExpanded || isSelectedWorkshopInHistory || isSearchQueryPresent;
 
@@ -163,24 +150,30 @@ export function WorkshopSelectorCardList({
                         </p>
                     ) : (
                         <div className={WORKSHOP_LIST_CLASS_NAME}>
-                            {currentWorkshops.length > 0 && (
-                                <section aria-labelledby={`${pastWorkshopsListId}-current`}>
-                                    <h3
-                                        id={`${pastWorkshopsListId}-current`}
-                                        className="px-1 text-xs font-semibold uppercase tracking-wider text-slate-500"
-                                    >
-                                        Aktuální a nadcházející ({currentWorkshops.length})
-                                    </h3>
-                                    <div className="mt-1.5">
-                                        <WorkshopSelectorCardGrid
-                                            accessibleLabel="Seznam workshopů"
-                                            workshops={currentWorkshops}
-                                            selectedWorkshopId={selectedWorkshopId}
-                                            onSelect={onSelect}
-                                        />
-                                    </div>
-                                </section>
-                            )}
+                            {WORKSHOP_PHASE_VALUES.filter((phase) => phase !== 'past').map((phase) => {
+                                const workshopsInPhase = matchingWorkshopsByPhase[phase];
+                                const phaseCategoryLabel = getWorkshopPhaseCategoryLabel(phase);
+                                const phaseSectionId = `${pastWorkshopsListId}-${phase}`;
+
+                                return workshopsInPhase.length === 0 ? null : (
+                                    <section key={phase} aria-labelledby={phaseSectionId}>
+                                        <h3
+                                            id={phaseSectionId}
+                                            className="px-1 text-xs font-semibold uppercase tracking-wider text-slate-500"
+                                        >
+                                            {phaseCategoryLabel} ({workshopsInPhase.length})
+                                        </h3>
+                                        <div className="mt-1.5">
+                                            <WorkshopSelectorCardGrid
+                                                accessibleLabel={`Seznam workshopů: ${phaseCategoryLabel}`}
+                                                workshops={workshopsInPhase}
+                                                selectedWorkshopId={selectedWorkshopId}
+                                                onSelect={onSelect}
+                                            />
+                                        </div>
+                                    </section>
+                                );
+                            })}
 
                             {pastWorkshops.length > 0 && (
                                 <section>
@@ -191,7 +184,7 @@ export function WorkshopSelectorCardList({
                                         onClick={() => setIsPastWorkshopsExpanded((isExpanded) => !isExpanded)}
                                         className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors hover:text-slate-800"
                                     >
-                                        Historie ({pastWorkshops.length})
+                                        {WORKSHOP_HISTORY_CATEGORY_LABEL} ({pastWorkshops.length})
                                         <ChevronDown
                                             className={`h-4 w-4 shrink-0 transition-transform ${isPastWorkshopsVisible ? 'rotate-180' : ''}`}
                                             aria-hidden="true"

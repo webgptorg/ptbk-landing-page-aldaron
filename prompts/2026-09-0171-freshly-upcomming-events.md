@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on OpenAI Codex `gpt-5.6-terra` thinking `max` (ChatGPT account) - Implementation ~$0.6403 23 minutes; Testing 18 minutes
 
 [✨🌷] When the event is upcomming in next week, it should have special badge and be in separate category in admin
 
@@ -12,3 +12,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

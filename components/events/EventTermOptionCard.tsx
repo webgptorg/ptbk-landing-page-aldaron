@@ -1,8 +1,10 @@
+import { WorkshopPhaseBadge } from '@/components/workshops/WorkshopPhaseBadge';
 import { formatEventFormat } from '@/lib/events/eventLocation';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
 import { formatEventPrice } from '@/lib/events/eventPrice';
 import { cn } from '@/lib/utils';
 import { formatCzechWorkshopRelativeDay, formatCzechWorkshopTimeRange } from '@/lib/workshops/workshopDate';
+import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
 import type { LucideIcon } from 'lucide-react';
 
 /**
@@ -173,6 +175,8 @@ export function EventTermOptionCard({
 }: EventTermOptionCardProps) {
     const appearanceClassNames = EVENT_TERM_OPTION_CARD_APPEARANCES[appearance];
     const densityClassNames = EVENT_TERM_OPTION_CARD_DENSITIES[density];
+    const phase = getWorkshopPhase(occurrence, Date.parse(currentTime));
+    const isWorkshopStartingWithinNextWeek = phase === 'upcoming-next-week';
 
     return (
         <button
@@ -185,9 +189,24 @@ export function EventTermOptionCard({
                 isSelected ? appearanceClassNames.selectedCard : appearanceClassNames.card,
             )}
         >
-            <span className={cn('block font-bold', densityClassNames.heading, appearanceClassNames.heading)}>
-                {formatCzechWorkshopRelativeDay(occurrence.startsAt, currentTime)} ·{' '}
-                {formatCzechWorkshopTimeRange(occurrence.startsAt, occurrence.endsAt)}
+            <span
+                className={cn(
+                    'flex flex-wrap items-center gap-2 font-bold',
+                    densityClassNames.heading,
+                    appearanceClassNames.heading,
+                )}
+            >
+                <span>
+                    {formatCzechWorkshopRelativeDay(occurrence.startsAt, currentTime)} ·{' '}
+                    {formatCzechWorkshopTimeRange(occurrence.startsAt, occurrence.endsAt)}
+                </span>
+                {isWorkshopStartingWithinNextWeek && (
+                    <WorkshopPhaseBadge
+                        phase={phase}
+                        tone={appearance}
+                        className={density === 'compact' ? '!px-2 !py-0.5 !text-[11px]' : undefined}
+                    />
+                )}
             </span>
             {isTopicShown && (
                 <>

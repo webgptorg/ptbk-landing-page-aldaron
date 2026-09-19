@@ -1,5 +1,12 @@
 # Current preversion
 
+- Added a fifth shared time state for event terms: a published term that begins within the next seven rolling days is
+  now marked `Do týdne`. The violet badge and calendar colour appear consistently in `/cs/komunita` and the term
+  picker of `/cs/online-workshop/participant?workshop=`, while `/admin/workshops` gives ongoing, freshly past,
+  next-seven-day, later upcoming, and historical terms their own ordered categories. The shared future-term helper
+  keeps these imminent terms eligible for the post-workshop recommendation too, so highlighting a near event never
+  makes it disappear as the next workshop.
+
 - Added reusable Book agents to workshop and community chat. The shared Agents tab in `/admin/workshops` and
   `/admin/community` edits personalities with Promptbook `BookEditor`, enables each agent per room, and shows recent
   activity. `LiteAgent` from `@promptbook/node` uses server-side `OPENAI_API_KEY` and each agent's source Book to reply
