@@ -24,15 +24,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   with: running and upcoming ones first, then the ones which ended within the
   last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,
-  without losing the name and e-mail already typed. Once a term has its recorded
-  end, its participant wrap-up offers a locally generated PDF using only the
-  attendee-visible description, key takeaways and shared materials; it creates
-  no administrative setting or database record.
-  The ended stage also offers membership to non-paying attendees, the next
-  published upcoming workshop and next paid workshop, and an extra community
-  button. These reuse the room's membership popup, event cards and identity
-  hand-off; event recommendations exclude externally organized events and show
-  one card when the next workshop is also the next paid one.
+  without losing the name and e-mail already typed.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
   the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as

@@ -379,7 +379,6 @@ export function OnlineWorkshopParticipantPage({
                             repository={state.workshop.repository}
                             subscribeToRepositoryCommits={subscribeToRepositoryCommits}
                             feedback={state.feedback}
-                            contentBlocks={state.contentBlocks}
                             followUpContentBlock={followUpContentBlock}
                             stageComment={state.stageComment}
                             paidMembersOnlyVideo={state.paidMembersOnlyVideo}
