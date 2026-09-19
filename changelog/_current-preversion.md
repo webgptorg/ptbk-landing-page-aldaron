@@ -1,5 +1,10 @@
 # Current preversion
 
+- Improved the shared event mini cards on `/cs/komunita`: removed star ratings and their unused feedback queries,
+  enlarged project previews with a wide image, readable title and description, and a repository fallback. Ended
+  workshops show a replay-length badge using the total video duration minus the configured recording start offset.
+  The calendar and card list use the same component and keep their existing destinations and participant hand-off.
+
 - Added a downloadable Czech wrap-up PDF to the ended stage of `/cs/online-workshop/participant?workshop=`.
   It includes the workshop description, key points extracted from existing descriptions and materials, full readable
   materials with clickable links, and any presentation, repository, and deployments. The download refreshes the

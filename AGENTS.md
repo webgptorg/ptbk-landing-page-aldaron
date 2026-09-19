@@ -80,9 +80,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/cs/komunita` is the permanent Czech community room. It has chat, polls,
   projects, materials, and published terms, but no schedule, stage, or live
   updates. Terms show event kind, format/place, price, and status; wherever their
-  shared mini card is drawn, it may also show its anonymous star-rating aggregate
-  and a preview of its connected project, while an ended term may show the length
-  of its replay after the configured recording start offset. Where a term stands in
+  shared mini card is drawn, it shows no star ratings and may show a wide preview
+  of its connected project with its title, description, and repository. An ended
+  term may show the video length minus the configured recording start offset as
+  a replay badge. Card data includes no feedback. Where a term stands in
   time is decided
   once, in `lib/workshops/workshopPhase.ts`, as one of
   five phases: ongoing, freshly past while it ended within the last

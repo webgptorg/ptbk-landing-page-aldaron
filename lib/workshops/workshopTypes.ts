@@ -33,17 +33,6 @@ export type WorkshopCommentStatus = WorkshopSubmissionStatus;
 export type WorkshopCommentSort = 'recent' | 'upvotes';
 
 /**
- * The anonymous public shape of all star ratings written after one workshop.
- *
- * Note: Textual feedback and participant identity stay out of this projection. A public term card needs only the
- *       reception of the workshop as a whole.
- */
-export type WorkshopFeedbackSummary = {
-    readonly averageRating: number;
-    readonly ratingCount: number;
-};
-
-/**
  * The visual public information of the project a workshop is about.
  *
  * Note: The connection still belongs to the workshop repository setting. This is only the compact metadata a card can
@@ -60,10 +49,9 @@ export type WorkshopProjectPreview = {
  * Supplementary public information one rich event mini card can show.
  *
  * Note: It is deliberately a projection rather than `WorkshopDetails`: no card receives a recording identifier, a
- *       feedback response, or participant data merely to show an aggregate rating, project preview, and replay length.
+ *       feedback response, or participant data merely to show a project preview and replay length.
  */
 export type WorkshopEventCardDetails = {
-    readonly feedback: WorkshopFeedbackSummary | null;
     readonly project: WorkshopProjectPreview | null;
     readonly recordingDurationSeconds: number | null;
 };

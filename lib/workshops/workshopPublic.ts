@@ -10,7 +10,6 @@ import {
     findUpcomingPublishedWorkshops,
     findWorkshopBySlug,
     getWorkshopDatabaseOrNull,
-    loadWorkshopFeedbackSummaries,
     mapWorkshopRow,
     mapWorkshopRepository,
     mapWorkshopSummaryRow,
@@ -109,8 +108,8 @@ export async function loadPublishedWorkshopSummaries(): Promise<readonly Worksho
  * Lists the published terms of the community with the additional, browser-safe data its mini cards can show.
  *
  * Note: The normal summary loader stays lightweight for the ICS feed and other consumers. This one keeps card-only
- *       reads in one server-side place, aggregates feedback before serialization, and never sends a gated recording
- *       identifier or raw feedback response to the community browser.
+ *       reads in one server-side place and never sends a gated recording identifier or feedback to the community
+ *       browser.
  */
 export async function loadPublishedWorkshopEventCardSummaries(): Promise<readonly WorkshopEventCardSummary[]> {
     const supabase = getWorkshopDatabaseOrNull();
@@ -119,33 +118,21 @@ export async function loadPublishedWorkshopEventCardSummaries(): Promise<readonl
     }
 
     const workshopRows = await findPublishedWorkshopEventCardRows(supabase);
-    const feedbackResult = await loadWorkshopFeedbackSummaries(
-        supabase,
-        workshopRows.map((workshopRow) => workshopRow.id),
-    );
-    if (feedbackResult.errorMessage !== null) {
-        console.error('Failed to load published workshop feedback summaries:', feedbackResult.errorMessage);
-    }
-
-    const feedbackSummaryByWorkshopId = feedbackResult.feedbackSummaryByWorkshopId ?? new Map();
     const currentTimeMilliseconds = Date.now();
 
     return Promise.all(
         workshopRows.map(async (workshopRow) => {
-            const eventCardDetails = await createWorkshopEventCardDetails(
-                {
-                    youtubeVideoId: workshopRow.youtube_video_id,
-                    recordingStartOffsetSeconds: workshopRow.recording_start_offset_seconds,
-                    repository: mapWorkshopRepository(workshopRow),
-                    isRecordingAvailable: isWorkshopPhasePast(
-                        getWorkshopPhase(
-                            { startsAt: workshopRow.starts_at, endsAt: workshopRow.ends_at },
-                            currentTimeMilliseconds,
-                        ),
+            const eventCardDetails = await createWorkshopEventCardDetails({
+                youtubeVideoId: workshopRow.youtube_video_id,
+                recordingStartOffsetSeconds: workshopRow.recording_start_offset_seconds,
+                repository: mapWorkshopRepository(workshopRow),
+                isRecordingAvailable: isWorkshopPhasePast(
+                    getWorkshopPhase(
+                        { startsAt: workshopRow.starts_at, endsAt: workshopRow.ends_at },
+                        currentTimeMilliseconds,
                     ),
-                },
-                feedbackSummaryByWorkshopId.get(workshopRow.id) ?? null,
-            );
+                ),
+            });
 
             return { ...mapWorkshopSummaryRow(workshopRow), eventCardDetails };
         }),

@@ -7,16 +7,11 @@ import type { EventListing } from '@/lib/events/eventListing';
 import { formatEventFormat } from '@/lib/events/eventLocation';
 import { formatEventPrice } from '@/lib/events/eventPrice';
 import { getEventTypeDefinition, isExternalEventType } from '@/lib/events/eventTypes';
-import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
 import { formatMediaDuration } from '@/lib/podcast/podcastEpisodeDuration';
 import { isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
-import type { WorkshopFeedbackSummary, WorkshopProjectPreview } from '@/lib/workshops/workshopTypes';
-import { ArrowUpRight, CalendarDays, Clock3, ExternalLink, Github, Star } from 'lucide-react';
+import type { WorkshopProjectPreview } from '@/lib/workshops/workshopTypes';
+import { ArrowUpRight, CalendarDays, CirclePlay, ExternalLink, Github } from 'lucide-react';
 import Link from 'next/link';
-
-const WORKSHOP_RATING_STAR_COUNT = 5;
-const CZECH_WORKSHOP_RATING_FORMAT = new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 1 });
-const CZECH_WORKSHOP_RATING_COUNT_FORMS = ['hodnocení', 'hodnocení', 'hodnocení'] as const;
 
 type WorkshopEventCardProps = {
     readonly listing: EventListing;
@@ -57,39 +52,6 @@ function formatEventListingDateTime(
     return `${formatCzechRelativeDayPrefix(listing.dayKey, todayDayKey)}${dateLabel} · ${timeLabel}`;
 }
 
-function getFilledWorkshopRatingStarCount(averageRating: number): number {
-    return Math.min(WORKSHOP_RATING_STAR_COUNT, Math.max(0, Math.round(averageRating)));
-}
-
-/**
- * The anonymous reception of a workshop, reduced to a compact star row so a card never exposes private written
- * feedback or the participant who wrote it.
- */
-function WorkshopEventCardFeedback({ feedback }: { readonly feedback: WorkshopFeedbackSummary }) {
-    const formattedAverageRating = CZECH_WORKSHOP_RATING_FORMAT.format(feedback.averageRating);
-    const formattedRatingCount = formatCzechCountedNoun(feedback.ratingCount, CZECH_WORKSHOP_RATING_COUNT_FORMS);
-    const filledStarCount = getFilledWorkshopRatingStarCount(feedback.averageRating);
-
-    return (
-        <span
-            aria-label={`Hodnocení ${formattedAverageRating} z 5 od ${formattedRatingCount}`}
-            className="inline-flex items-center gap-1 text-xs font-medium text-amber-200"
-        >
-            <span className="inline-flex items-center" aria-hidden="true">
-                {Array.from({ length: WORKSHOP_RATING_STAR_COUNT }, (_, starIndex) => (
-                    <Star
-                        key={starIndex}
-                        className="h-3.5 w-3.5"
-                        fill={starIndex < filledStarCount ? 'currentColor' : 'none'}
-                    />
-                ))}
-            </span>
-            <span>{formattedAverageRating} / 5</span>
-            <span className="text-slate-400">· {formattedRatingCount}</span>
-        </span>
-    );
-}
-
 /**
  * The length somebody can replay, after the start of a recorded stream has been skipped.
  */
@@ -99,8 +61,9 @@ function WorkshopEventCardRecordingDuration({
     readonly recordingDurationSeconds: number;
 }) {
     return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-cyan-100">
-            <Clock3 className="h-3.5 w-3.5" aria-hidden="true" /> Záznam {formatMediaDuration(recordingDurationSeconds)}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-300/10 px-2.5 py-1 text-xs font-medium tabular-nums text-cyan-100">
+            <CirclePlay className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            Záznam {formatMediaDuration(recordingDurationSeconds)}
         </span>
     );
 }
@@ -110,31 +73,39 @@ function WorkshopEventCardRecordingDuration({
  * card interaction still opens the term while the project is recognized before a member enters it.
  */
 function WorkshopEventCardProjectPreview({ project }: { readonly project: WorkshopProjectPreview }) {
+    const isRepositoryTitle = project.title === project.repositoryName;
+
     return (
-        <span className="mt-3 flex overflow-hidden rounded-lg border border-white/10 bg-slate-950/35">
-            <span className="flex aspect-[4/3] w-24 shrink-0 overflow-hidden bg-slate-900 sm:w-28">
+        <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-slate-950/50">
+            <div className="relative aspect-[2/1] overflow-hidden bg-slate-900">
                 <PublicWebPagePreviewImage
                     imageUrl={project.previewImageUrl}
                     alt={`Náhled projektu ${project.title}`}
                     fallbackLabel="Náhled projektu není k dispozici"
-                    fallback={<Github className="h-7 w-7 text-cyan-200/80" aria-hidden="true" />}
+                    fallback={<Github className="mt-6 h-9 w-9 text-cyan-200/80" aria-hidden="true" />}
+                    className="object-top motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.025] motion-safe:group-focus-visible:scale-[1.025]"
                 />
-            </span>
-            <span className="min-w-0 px-3 py-2.5">
-                <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-200/80">
-                    <Github className="h-3.5 w-3.5" aria-hidden="true" /> Projekt workshopu
+                <span className="absolute left-3 top-3 rounded-full border border-white/15 bg-slate-950/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-cyan-100">
+                    Projekt workshopu
                 </span>
-                <span className="mt-1 block line-clamp-1 text-xs font-semibold text-slate-100">{project.title}</span>
+            </div>
+            <div className="min-w-0 p-3">
+                <span className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-100">
+                    {project.title}
+                </span>
                 {project.description !== '' && (
-                    <span className="mt-1 block line-clamp-2 text-[11px] leading-4 text-slate-400">
+                    <span className="mt-1 line-clamp-2 break-words text-xs font-normal leading-5 text-slate-400">
                         {project.description}
                     </span>
                 )}
-                <span className="mt-1 block truncate font-mono text-[10px] text-slate-500">
-                    {project.repositoryName}
-                </span>
-            </span>
-        </span>
+                {!isRepositoryTitle && (
+                    <span className="mt-2 flex min-w-0 items-center gap-1.5 text-slate-400">
+                        <Github className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate font-mono text-[11px]">{project.repositoryName}</span>
+                    </span>
+                )}
+            </div>
+        </div>
     );
 }
 
@@ -147,7 +118,6 @@ function WorkshopEventCardProjectPreview({ project }: { readonly project: Worksh
 export function WorkshopEventCard({ listing, locale, timeZone, todayDayKey }: WorkshopEventCardProps) {
     const { workshop, event, link, phase } = listing;
     const eventCardDetails = workshop.eventCardDetails;
-    const feedback = eventCardDetails?.feedback ?? null;
     const project = eventCardDetails?.project ?? null;
     const recordingDurationSeconds = eventCardDetails?.recordingDurationSeconds ?? null;
     const isRecordingDurationShown = isWorkshopPhasePast(phase) && recordingDurationSeconds !== null;
@@ -161,35 +131,30 @@ export function WorkshopEventCard({ listing, locale, timeZone, todayDayKey }: Wo
         <Button
             asChild
             variant="outline"
-            className="h-auto w-full justify-between whitespace-normal border-white/10 bg-white/[0.035] p-4 text-left text-slate-100 hover:border-cyan-200/50 hover:bg-cyan-300/10 hover:text-white"
+            className="group h-full w-full items-start whitespace-normal rounded-xl border-white/10 bg-white/[0.035] p-4 text-left text-slate-100 hover:border-cyan-200/50 hover:bg-cyan-300/10 hover:text-white focus-visible:ring-cyan-200"
         >
             <Link href={link} {...(isEventHeldExternally ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-2">
-                        <span className="break-words font-semibold">{workshop.title}</span>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                        <span className="min-w-0 break-words font-semibold leading-6">{workshop.title}</span>
+                        <EventLinkIcon className="mt-1 h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                         <WorkshopPhaseBadge phase={phase} tone="dark" />
-                    </span>
-                    <span className="mt-1 flex items-center gap-1.5 text-xs font-normal text-slate-400">
+                        {isRecordingDurationShown && (
+                            <WorkshopEventCardRecordingDuration recordingDurationSeconds={recordingDurationSeconds} />
+                        )}
+                    </div>
+                    <span className="mt-3 flex items-center gap-1.5 text-xs font-normal text-slate-400">
                         <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         {formatEventListingDateTime(listing, todayDayKey, locale, timeZone)}
                     </span>
-                    <span className="mt-1 block break-words text-xs font-normal text-slate-500">
+                    <span className="mt-1 block break-words text-xs font-normal leading-5 text-slate-400">
                         {getEventTypeDefinition(event.type).label} · {formatEventFormat(event)} ·{' '}
                         {formatEventPrice(event.priceCzk)}
                     </span>
-                    {(feedback !== null || isRecordingDurationShown) && (
-                        <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                            {feedback !== null && <WorkshopEventCardFeedback feedback={feedback} />}
-                            {isRecordingDurationShown && (
-                                <WorkshopEventCardRecordingDuration
-                                    recordingDurationSeconds={recordingDurationSeconds}
-                                />
-                            )}
-                        </span>
-                    )}
                     {project !== null && <WorkshopEventCardProjectPreview project={project} />}
-                </span>
-                <EventLinkIcon className="ml-3 h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                </div>
             </Link>
         </Button>
     );

@@ -34,7 +34,10 @@ export function WorkshopEventCardList({
     className,
 }: WorkshopEventCardListProps) {
     return (
-        <ul aria-label={WORKSHOP_EVENT_CARD_LIST_LABEL} className={classNames('grid gap-3 sm:grid-cols-2', className)}>
+        <ul
+            aria-label={WORKSHOP_EVENT_CARD_LIST_LABEL}
+            className={classNames('grid grid-cols-1 gap-3 sm:grid-cols-2', className)}
+        >
             {listings.map((listing) => (
                 <li key={listing.workshop.id}>
                     <WorkshopEventCard

@@ -4,11 +4,7 @@ import { fetchYoutubeVideoDurationSeconds } from '@/lib/youtube/fetchYoutubeVide
 import { WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
 import { getPrimaryWorkshopDeploymentUrl } from '@/lib/workshops/workshopDeployments';
 import { getWorkshopRecordingDurationSeconds } from '@/lib/workshops/workshopRecordingDuration';
-import type {
-    WorkshopEventCardDetails,
-    WorkshopFeedbackSummary,
-    WorkshopProjectPreview,
-} from '@/lib/workshops/workshopTypes';
+import type { WorkshopEventCardDetails, WorkshopProjectPreview } from '@/lib/workshops/workshopTypes';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 
 export type WorkshopEventCardDetailsSource = {
@@ -87,17 +83,16 @@ async function loadWorkshopRecordingDurationSeconds(source: WorkshopEventCardDet
 /**
  * Builds the safe, compact projection used by every community event mini card.
  *
- * Note: This is intentionally separate from `WorkshopDetails`: a card receives an aggregate rating, project metadata
- *       and a calculated duration, never feedback prose, participant identity, the gated YouTube ID, or room settings.
+ * Note: This is intentionally separate from `WorkshopDetails`: a card receives project metadata and a calculated
+ *       duration, never feedback, participant identity, the gated YouTube ID, or room settings.
  */
 export async function createWorkshopEventCardDetails(
     source: WorkshopEventCardDetailsSource,
-    feedback: WorkshopFeedbackSummary | null,
 ): Promise<WorkshopEventCardDetails> {
     const [project, recordingDurationSeconds] = await Promise.all([
         createWorkshopProjectPreview(source.repository),
         loadWorkshopRecordingDurationSeconds(source),
     ]);
 
-    return { feedback, project, recordingDurationSeconds };
+    return { project, recordingDurationSeconds };
 }

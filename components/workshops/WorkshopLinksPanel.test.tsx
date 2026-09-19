@@ -90,7 +90,6 @@ const RICH_PAST_WORKSHOP: WorkshopSummary = {
     slug: 'production-ai-2026-07-11',
     title: 'Produkční kód s AI agenty s projektem',
     eventCardDetails: {
-        feedback: { averageRating: 4.5, ratingCount: 2 },
         project: {
             title: 'Automatizační dashboard',
             description: 'Projekt, který během workshopu vznikl.',
@@ -228,14 +227,14 @@ describe('workshop links panel', () => {
         expect(upcomingCard?.textContent).toContain('Nadchází');
     });
 
-    it('shows anonymous ratings, the created-project preview, and the replay length on the same mini card', () => {
+    it('shows the created-project preview and replay length without review feedback on the mini card', () => {
         renderWorkshopLinksPanel([RICH_PAST_WORKSHOP]);
         showCardsView();
 
         const card = screen.getByRole('link', { name: /Produkční kód s AI agenty s projektem/ });
 
-        expect(card.textContent).toContain('4,5 / 5');
-        expect(card.textContent).toContain('2 hodnocení');
+        expect(card.textContent).not.toMatch(/hodnocení|\/ 5/i);
+        expect(within(card).queryByLabelText(/hodnocení/i)).toBeNull();
         expect(card.textContent).toContain('Záznam 1:28:45');
         expect(card.textContent).toContain('Projekt workshopu');
         expect(card.textContent).toContain('Automatizační dashboard');

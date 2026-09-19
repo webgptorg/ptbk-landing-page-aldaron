@@ -34,7 +34,6 @@ import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/
 import { materializeWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { materializeWorkshopCommentShortLinks } from '@/lib/workshops/workshopMaterialLinks';
 import { areWorkshopCommentLinksEnabled } from '@/lib/workshops/workshopCommentLinks';
-import { createWorkshopFeedbackSummary } from '@/lib/workshops/workshopFeedbackSummary';
 import { loadWorkshopQueryWithActiveStatus } from '@/lib/workshops/workshopActiveStatusQuery';
 import { isWorkshopPanelOffered, normalizeWorkshopDisabledPanels } from '@/lib/workshops/workshopPanels';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
@@ -70,7 +69,6 @@ import type {
     WorkshopContentBlock,
     WorkshopDetails,
     WorkshopFeedback,
-    WorkshopFeedbackSummary,
     WorkshopKind,
     WorkshopParticipant,
     WorkshopParticipantTimelineEvent,
@@ -239,11 +237,6 @@ export type WorkshopFeedbackRow = {
 
 const WORKSHOP_FEEDBACK_COLUMNS =
     'id, workshop_id, participant_id, rating, what_was_good, what_was_bad, note, created_at, updated_at';
-
-/** The anonymous fields a public event card needs from feedback records. */
-type WorkshopFeedbackRatingRow = Pick<WorkshopFeedbackRow, 'workshop_id' | 'rating'>;
-
-const WORKSHOP_FEEDBACK_RATING_COLUMNS = 'workshop_id, rating';
 
 type WorkshopFeedbackParticipantRow = Pick<WorkshopAdminParticipantRow, 'id' | 'fullname' | 'email'>;
 
@@ -622,60 +615,6 @@ export function mapWorkshopFeedbackRow(row: WorkshopFeedbackRow): WorkshopFeedba
         createdAt: row.created_at,
         updatedAt: row.updated_at,
     };
-}
-
-/**
- * Reads the public, anonymous rating totals for several terms in batched queries rather than making every mini card
- * ask for feedback on its own.
- */
-export async function loadWorkshopFeedbackSummaries(
-    supabase: SupabaseClient,
-    workshopIds: readonly string[],
-): Promise<{
-    readonly feedbackSummaryByWorkshopId: ReadonlyMap<string, WorkshopFeedbackSummary> | null;
-    readonly errorMessage: string | null;
-}> {
-    const distinctWorkshopIds = Array.from(new Set(workshopIds));
-    const feedbackRows: WorkshopFeedbackRatingRow[] = [];
-
-    // The selected workshop IDs are batched for PostgREST, while each batch is independently paged because one very
-    // popular term can have more feedback rows than one response carries.
-    for (let fromIndex = 0; fromIndex < distinctWorkshopIds.length; fromIndex += SUPABASE_ROW_PAGE_SIZE) {
-        const pageWorkshopIds = distinctWorkshopIds.slice(fromIndex, fromIndex + SUPABASE_ROW_PAGE_SIZE);
-        const feedbackResult = await loadAllSupabaseRows<WorkshopFeedbackRatingRow>(
-            (pageFromIndex, pageToIndex) =>
-                supabase
-                    .from(WORKSHOP_FEEDBACK_TABLE_NAME)
-                    .select(WORKSHOP_FEEDBACK_RATING_COLUMNS)
-                    .in('workshop_id', pageWorkshopIds)
-                    .order('workshop_id', { ascending: true })
-                    .order('id', { ascending: true })
-                    .range(pageFromIndex, pageToIndex),
-            'the feedback ratings of published workshops',
-        );
-        if (feedbackResult.rows === null) {
-            return { feedbackSummaryByWorkshopId: null, errorMessage: feedbackResult.errorMessage };
-        }
-
-        feedbackRows.push(...feedbackResult.rows);
-    }
-
-    const ratingsByWorkshopId = new Map<string, number[]>();
-    feedbackRows.forEach((feedback) => {
-        const ratings = ratingsByWorkshopId.get(feedback.workshop_id) ?? [];
-        ratings.push(Number(feedback.rating));
-        ratingsByWorkshopId.set(feedback.workshop_id, ratings);
-    });
-
-    const feedbackSummaryByWorkshopId = new Map<string, WorkshopFeedbackSummary>();
-    ratingsByWorkshopId.forEach((ratings, workshopId) => {
-        const feedbackSummary = createWorkshopFeedbackSummary(ratings);
-        if (feedbackSummary !== null) {
-            feedbackSummaryByWorkshopId.set(workshopId, feedbackSummary);
-        }
-    });
-
-    return { feedbackSummaryByWorkshopId, errorMessage: null };
 }
 
 function mapWorkshopAdminFeedbackRow(
