@@ -1,4 +1,8 @@
-import { DEFAULT_WORKSHOP_DURATION_MINUTES, FRESHLY_PAST_WORKSHOP_HOURS } from '@/lib/workshops/workshopConstants';
+import {
+    DEFAULT_WORKSHOP_DURATION_MINUTES,
+    FRESHLY_PAST_WORKSHOP_HOURS,
+    UPCOMING_NEXT_WEEK_WORKSHOP_HOURS,
+} from '@/lib/workshops/workshopConstants';
 
 const MILLISECONDS_PER_MINUTE = 60 * 1000;
 const MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
@@ -9,10 +13,12 @@ const MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
  * Note: An occurrence which has only just been held is a phase of its own rather than the beginning of the history,
  *       because what a member does with a workshop of yesterday evening — its room, its recording, its materials — has
  *       nothing to do with what they do with a workshop of last spring.
+ * Note: An occurrence which starts during the next seven days is also a phase of its own, so a schedule can call
+ *       attention to the terms somebody still has time to plan for without each surface calculating that window again.
  * Note: This order is what ranks the phases wherever they are listed, coloured, or grouped, so a phase is placed among
  *       the others only here.
  */
-export const WORKSHOP_PHASE_VALUES = ['ongoing', 'upcoming', 'freshly-past', 'past'] as const;
+export const WORKSHOP_PHASE_VALUES = ['ongoing', 'freshly-past', 'upcoming-next-week', 'upcoming', 'past'] as const;
 
 export type WorkshopPhase = (typeof WORKSHOP_PHASE_VALUES)[number];
 
@@ -25,6 +31,17 @@ export type WorkshopPhase = (typeof WORKSHOP_PHASE_VALUES)[number];
  */
 export function isWorkshopPhasePast(phase: WorkshopPhase): boolean {
     return phase === 'freshly-past' || phase === 'past';
+}
+
+/**
+ * Whether an occurrence of this phase has not started yet, whether it starts soon or later.
+ *
+ * Note: Follow-up recommendations need one answer to this question. A term within the next week remains the next
+ *       workshop just as much as a term next month does, even though the schedule gives the nearer one a special
+ *       badge.
+ */
+export function isWorkshopPhaseUpcoming(phase: WorkshopPhase): boolean {
+    return phase === 'upcoming-next-week' || phase === 'upcoming';
 }
 
 /**
@@ -81,7 +98,21 @@ export function getWorkshopExpectedEndsAtMilliseconds(occurrence: WorkshopOccurr
 }
 
 /**
- * Decides whether an occurrence is still ahead, running right now, only just over, or already history
+ * Whether a future occurrence starts in the rolling window the schedule calls the next week.
+ */
+function isWorkshopStartingWithinNextWeek(
+    startsAtMilliseconds: number,
+    currentTimeMilliseconds: number,
+): boolean {
+    return (
+        startsAtMilliseconds > currentTimeMilliseconds &&
+        startsAtMilliseconds <= currentTimeMilliseconds + UPCOMING_NEXT_WEEK_WORKSHOP_HOURS * MILLISECONDS_PER_HOUR
+    );
+}
+
+/**
+ * Decides whether an occurrence is still ahead but imminent, further ahead, running right now, only just over, or
+ * already history.
  *
  * Note: An occurrence whose end is open never becomes past by itself. It keeps running — and keeps its stage on —
  *       until an administrator records the end of it.
@@ -94,7 +125,12 @@ export function getWorkshopPhase(
     occurrence: WorkshopOccurrenceTiming,
     currentTimeMilliseconds = Date.now(),
 ): WorkshopPhase {
-    if (Date.parse(occurrence.startsAt) > currentTimeMilliseconds) {
+    const startsAtMilliseconds = Date.parse(occurrence.startsAt);
+    if (isWorkshopStartingWithinNextWeek(startsAtMilliseconds, currentTimeMilliseconds)) {
+        return 'upcoming-next-week';
+    }
+
+    if (startsAtMilliseconds > currentTimeMilliseconds) {
         return 'upcoming';
     }
 
@@ -170,8 +206,9 @@ export function groupWorkshopsByPhase<TWorkshop extends WorkshopOccurrenceTiming
 ): Readonly<Record<WorkshopPhase, readonly TWorkshop[]>> {
     const workshopsByPhase: Record<WorkshopPhase, TWorkshop[]> = {
         ongoing: [],
-        upcoming: [],
         'freshly-past': [],
+        'upcoming-next-week': [],
+        upcoming: [],
         past: [],
     };
 

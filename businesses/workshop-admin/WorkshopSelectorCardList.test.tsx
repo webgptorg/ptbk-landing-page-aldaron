@@ -35,6 +35,14 @@ const UPCOMING_WORKSHOP: WorkshopAdminSummary = {
     participantCount: 3,
     registeredParticipantCount: 1,
 };
+const UPCOMING_NEXT_WEEK_WORKSHOP: WorkshopAdminSummary = {
+    ...UPCOMING_WORKSHOP,
+    id: 'upcoming-next-week-workshop-id',
+    slug: 'produkcni-kod-2026-08-24',
+    title: 'Produkční kód s AI agenty tento týden',
+    startsAt: '2026-08-24T19:00:00+02:00',
+    endsAt: '2026-08-24T20:30:00+02:00',
+};
 const FRESHLY_PAST_WORKSHOP: WorkshopAdminSummary = {
     id: 'freshly-past-workshop-id',
     kind: 'workshop',
@@ -114,18 +122,28 @@ describe('workshop selector card list', () => {
         ]);
     });
 
-    it('keeps a workshop which has only just been held among the current terms rather than in the history', () => {
-        renderWorkshopSelectorCardList([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, UPCOMING_WORKSHOP, ONGOING_WORKSHOP]);
-
-        expect(screen.getByRole('heading', { name: 'Aktuální a nadcházející (3)' })).not.toBeNull();
-        expect(getWorkshopCards().map((workshopCard) => workshopCard.textContent)).toEqual([
-            expect.stringContaining(ONGOING_WORKSHOP.title),
-            expect.stringContaining(UPCOMING_WORKSHOP.title),
-            expect.stringContaining(FRESHLY_PAST_WORKSHOP.title),
+    it('keeps each non-historical phase in its own administration category', () => {
+        renderWorkshopSelectorCardList([
+            PAST_WORKSHOP,
+            FRESHLY_PAST_WORKSHOP,
+            UPCOMING_WORKSHOP,
+            UPCOMING_NEXT_WEEK_WORKSHOP,
+            ONGOING_WORKSHOP,
         ]);
 
-        // A term which has only just been held is still shown as finished; only where it is listed has changed.
-        expect(getWorkshopCards()[2].textContent).toContain('Právě proběhlo');
+        expect(screen.getByRole('heading', { name: 'Probíhá (1)' })).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Právě proběhlo (1)' })).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Do týdne (1)' })).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Nadchází (1)' })).not.toBeNull();
+        expect(getWorkshopCards().map((workshopCard) => workshopCard.textContent)).toEqual([
+            expect.stringContaining(ONGOING_WORKSHOP.title),
+            expect.stringContaining(FRESHLY_PAST_WORKSHOP.title),
+            expect.stringContaining(UPCOMING_NEXT_WEEK_WORKSHOP.title),
+            expect.stringContaining(UPCOMING_WORKSHOP.title),
+        ]);
+
+        expect(getWorkshopCards()[1].textContent).toContain('Právě proběhlo');
+        expect(getWorkshopCards()[2].textContent).toContain('Do týdne');
         expect(screen.getByRole('button', { name: 'Historie (1)' }).getAttribute('aria-expanded')).toBe('false');
     });
 
@@ -226,7 +244,7 @@ describe('workshop selector card list', () => {
     it('uses the wider administration picker for a compact two-column workshop grid', () => {
         renderWorkshopSelectorCardList([ONGOING_WORKSHOP, UPCOMING_WORKSHOP]);
 
-        expect(screen.getByLabelText('Seznam workshopů').className).toContain('xl:grid-cols-2');
+        expect(screen.getByLabelText('Seznam workshopů: Probíhá').className).toContain('xl:grid-cols-2');
     });
 
     it('explains an empty administration instead of listing nothing at all', () => {

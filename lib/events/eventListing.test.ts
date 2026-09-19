@@ -31,6 +31,14 @@ const UPCOMING_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-10-08T20:30:00+02:00',
 };
 
+const UPCOMING_NEXT_WEEK_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'upcoming-next-week-workshop-id',
+    slug: 'production-ai-2026-09-13',
+    startsAt: '2026-09-13T19:00:00+02:00',
+    endsAt: '2026-09-13T20:30:00+02:00',
+};
+
 const FRESHLY_PAST_WORKSHOP: WorkshopSummary = {
     ...ONGOING_WORKSHOP,
     id: 'freshly-past-workshop-id',
@@ -66,14 +74,27 @@ function createListings(workshops: readonly WorkshopSummary[]) {
 }
 
 describe('event listings', () => {
-    it('leads with the running term, then what is ahead, then what has only just been held, and closes with the history', () => {
-        const listings = createListings([PAST_WORKSHOP, UPCOMING_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP]);
+    it('leads with the running term, its wrap-up, the next week, later terms, and the history', () => {
+        const listings = createListings([
+            PAST_WORKSHOP,
+            UPCOMING_WORKSHOP,
+            UPCOMING_NEXT_WEEK_WORKSHOP,
+            FRESHLY_PAST_WORKSHOP,
+            ONGOING_WORKSHOP,
+        ]);
 
-        expect(listings.map((listing) => listing.phase)).toEqual(['ongoing', 'upcoming', 'freshly-past', 'past']);
+        expect(listings.map((listing) => listing.phase)).toEqual([
+            'ongoing',
+            'freshly-past',
+            'upcoming-next-week',
+            'upcoming',
+            'past',
+        ]);
         expect(listings.map((listing) => listing.dayKey)).toEqual([
             '2026-09-10',
-            '2026-10-08',
             '2026-09-09',
+            '2026-09-13',
+            '2026-10-08',
             '2026-07-10',
         ]);
     });

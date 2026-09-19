@@ -21,8 +21,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
   full-load conversion page; `/participant` is the live room. Its waiting room
   offers every published term as the same term cards the landing page registers
-  with: running and upcoming ones first, then the ones which ended within the
-  last day, and the older finished ones behind a disclosure.
+  with: running and upcoming ones first, with a special `Do týdne` badge for a
+  term beginning within the next seven rolling days, then the ones which ended
+  within the last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,
   without losing the name and e-mail already typed.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
@@ -79,10 +80,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   of its replay after the configured recording start offset. Where a term stands in
   time is decided
   once, in `lib/workshops/workshopPhase.ts`, as one of
-  four phases: upcoming, ongoing, freshly past while it ended within the last
-  `FRESHLY_PAST_WORKSHOP_HOURS`, and past. Every list, badge, and calendar colour
-  reads that one answer, and everything which opens after a workshop — the
-  wrap-up, the feedback, the recording — treats freshly past as over. A term with a
+  five phases: ongoing, freshly past while it ended within the last
+  `FRESHLY_PAST_WORKSHOP_HOURS`, upcoming within the next seven rolling days,
+  other upcoming, and past. Every list, badge, and calendar colour reads that one
+  answer, and everything which opens after a workshop — the wrap-up, the feedback,
+  the recording — treats freshly past as over. A term with a
   live room links there; a term of an event held elsewhere opens its organizer's
   address in a new tab; otherwise it links to its landing page. The calendar
   opens on the member's month, can filter by day, and uses the same terms and
@@ -108,9 +110,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   nothing about registrations at all. The registration block opens the exact
   filtered `/admin/contacts` list and its shared CSV, vCard, and Book exports;
   it never creates a second contact table or serializer in workshop administration.
-  Its term picker leads with the ongoing, upcoming, and freshly past terms
-  together, because a term which has only just been held is still being wrapped
-  up; only past terms stay behind its history disclosure.
+  Its term picker gives ongoing, freshly past, next-seven-day, and later upcoming
+  terms their own categories, because a term which has only just been held is
+  still being wrapped up and one beginning soon needs preparation; only past terms
+  stay behind its history disclosure.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,

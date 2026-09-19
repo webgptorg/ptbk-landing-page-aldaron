@@ -5,6 +5,7 @@ import {
     getWorkshopPhase,
     isWorkshopEndOpen,
     isWorkshopPhasePast,
+    isWorkshopPhaseUpcoming,
     sortWorkshopsByPhase,
     type WorkshopOccurrenceTiming,
 } from '@/lib/workshops/workshopPhase';
@@ -36,6 +37,10 @@ const UPCOMING_WORKSHOP: WorkshopOccurrenceTiming = {
     startsAt: '2026-09-10T19:00:00+02:00',
     endsAt: '2026-09-10T20:30:00+02:00',
 };
+const UPCOMING_NEXT_WEEK_WORKSHOP: WorkshopOccurrenceTiming = {
+    startsAt: '2026-08-24T19:00:00+02:00',
+    endsAt: '2026-08-24T20:30:00+02:00',
+};
 const LATER_UPCOMING_WORKSHOP: WorkshopOccurrenceTiming = {
     startsAt: '2026-10-10T19:00:00+02:00',
     endsAt: '2026-10-10T20:30:00+02:00',
@@ -48,6 +53,7 @@ const OPEN_ENDED_WORKSHOP: WorkshopOccurrenceTiming = {
 describe('workshop phase', () => {
     it('places an occurrence against the given moment', () => {
         expect(getWorkshopPhase(UPCOMING_WORKSHOP, CURRENT_TIME_MILLISECONDS)).toBe('upcoming');
+        expect(getWorkshopPhase(UPCOMING_NEXT_WEEK_WORKSHOP, CURRENT_TIME_MILLISECONDS)).toBe('upcoming-next-week');
         expect(getWorkshopPhase(ONGOING_WORKSHOP, CURRENT_TIME_MILLISECONDS)).toBe('ongoing');
         expect(getWorkshopPhase(FRESHLY_PAST_WORKSHOP, CURRENT_TIME_MILLISECONDS)).toBe('freshly-past');
         expect(getWorkshopPhase(PAST_WORKSHOP, CURRENT_TIME_MILLISECONDS)).toBe('past');
@@ -63,7 +69,30 @@ describe('workshop phase', () => {
         expect(isWorkshopPhasePast('freshly-past')).toBe(true);
         expect(isWorkshopPhasePast('past')).toBe(true);
         expect(isWorkshopPhasePast('ongoing')).toBe(false);
+        expect(isWorkshopPhasePast('upcoming-next-week')).toBe(false);
         expect(isWorkshopPhasePast('upcoming')).toBe(false);
+    });
+
+    it('keeps a term starting within seven rolling days separate from a later upcoming term', () => {
+        const workshopAtNextWeekBoundary: WorkshopOccurrenceTiming = {
+            startsAt: '2026-08-28T19:30:00+02:00',
+            endsAt: '2026-08-28T20:30:00+02:00',
+        };
+        const workshopAfterNextWeekBoundary: WorkshopOccurrenceTiming = {
+            ...workshopAtNextWeekBoundary,
+            startsAt: '2026-08-28T19:30:00.001+02:00',
+        };
+
+        expect(getWorkshopPhase(workshopAtNextWeekBoundary, CURRENT_TIME_MILLISECONDS)).toBe('upcoming-next-week');
+        expect(getWorkshopPhase(workshopAfterNextWeekBoundary, CURRENT_TIME_MILLISECONDS)).toBe('upcoming');
+    });
+
+    it('counts both kinds of future term among the workshops which are still ahead', () => {
+        expect(isWorkshopPhaseUpcoming('upcoming-next-week')).toBe(true);
+        expect(isWorkshopPhaseUpcoming('upcoming')).toBe(true);
+        expect(isWorkshopPhaseUpcoming('ongoing')).toBe(false);
+        expect(isWorkshopPhaseUpcoming('freshly-past')).toBe(false);
+        expect(isWorkshopPhaseUpcoming('past')).toBe(false);
     });
 
     it('never calls an occurrence whose end is left open freshly past, however long ago it started', () => {
@@ -76,7 +105,9 @@ describe('workshop phase', () => {
         expect(getWorkshopPhase(OPEN_ENDED_WORKSHOP, CURRENT_TIME_MILLISECONDS)).toBe('ongoing');
         expect(getWorkshopPhase(OPEN_ENDED_WORKSHOP, Date.parse('2026-08-21T20:30:00+02:00'))).toBe('ongoing');
         expect(getWorkshopPhase(OPEN_ENDED_WORKSHOP, Date.parse('2026-12-24T18:00:00+01:00'))).toBe('ongoing');
-        expect(getWorkshopPhase(OPEN_ENDED_WORKSHOP, Date.parse('2026-08-21T18:59:59+02:00'))).toBe('upcoming');
+        expect(getWorkshopPhase(OPEN_ENDED_WORKSHOP, Date.parse('2026-08-21T18:59:59+02:00'))).toBe(
+            'upcoming-next-week',
+        );
     });
 
     it('ends a workshop as soon as the administration records the moment it was ended', () => {
@@ -100,15 +131,17 @@ describe('workshop phase', () => {
         );
     });
 
-    it('keeps an occurrence ongoing until its very end and upcoming until its very start', () => {
+    it('keeps an occurrence ongoing until its very end and imminent until its very start', () => {
         expect(getWorkshopPhase(ONGOING_WORKSHOP, Date.parse('2026-08-21T19:00:00+02:00'))).toBe('ongoing');
-        expect(getWorkshopPhase(ONGOING_WORKSHOP, Date.parse('2026-08-21T18:59:59+02:00'))).toBe('upcoming');
+        expect(getWorkshopPhase(ONGOING_WORKSHOP, Date.parse('2026-08-21T18:59:59+02:00'))).toBe(
+            'upcoming-next-week',
+        );
         expect(getWorkshopPhase(ONGOING_WORKSHOP, Date.parse('2026-08-21T20:30:00+02:00'))).toBe('freshly-past');
     });
 });
 
 describe('workshop phase ordering', () => {
-    it('lists what runs now first, then what starts soonest, then what has only just been held, and finally the history', () => {
+    it('lists what runs now, needs wrap-up, starts within a week, starts later, and is history in that order', () => {
         const sortedWorkshops = sortWorkshopsByPhase(
             [
                 OLDER_PAST_WORKSHOP,
@@ -116,6 +149,7 @@ describe('workshop phase ordering', () => {
                 PAST_WORKSHOP,
                 FRESHLY_PAST_WORKSHOP,
                 UPCOMING_WORKSHOP,
+                UPCOMING_NEXT_WEEK_WORKSHOP,
                 ONGOING_WORKSHOP,
             ],
             CURRENT_TIME_MILLISECONDS,
@@ -123,9 +157,10 @@ describe('workshop phase ordering', () => {
 
         expect(sortedWorkshops).toEqual([
             ONGOING_WORKSHOP,
+            FRESHLY_PAST_WORKSHOP,
+            UPCOMING_NEXT_WEEK_WORKSHOP,
             UPCOMING_WORKSHOP,
             LATER_UPCOMING_WORKSHOP,
-            FRESHLY_PAST_WORKSHOP,
             PAST_WORKSHOP,
             OLDER_PAST_WORKSHOP,
         ]);
@@ -147,6 +182,7 @@ describe('workshop phase ordering', () => {
                 PAST_WORKSHOP,
                 FRESHLY_PAST_WORKSHOP,
                 UPCOMING_WORKSHOP,
+                UPCOMING_NEXT_WEEK_WORKSHOP,
                 ONGOING_WORKSHOP,
             ],
             CURRENT_TIME_MILLISECONDS,
@@ -154,15 +190,17 @@ describe('workshop phase ordering', () => {
 
         expect(workshopsByPhase).toEqual({
             ongoing: [ONGOING_WORKSHOP],
-            upcoming: [UPCOMING_WORKSHOP, LATER_UPCOMING_WORKSHOP],
             'freshly-past': [FRESHLY_PAST_WORKSHOP],
+            'upcoming-next-week': [UPCOMING_NEXT_WEEK_WORKSHOP],
+            upcoming: [UPCOMING_WORKSHOP, LATER_UPCOMING_WORKSHOP],
             past: [PAST_WORKSHOP, OLDER_PAST_WORKSHOP],
         });
     });
 
     it('lets the most pressing phase speak for a group of occurrences', () => {
         expect(getMostProminentWorkshopPhase(['past', 'upcoming', 'ongoing'])).toBe('ongoing');
-        expect(getMostProminentWorkshopPhase(['past', 'freshly-past', 'upcoming'])).toBe('upcoming');
+        expect(getMostProminentWorkshopPhase(['past', 'upcoming', 'upcoming-next-week'])).toBe('upcoming-next-week');
+        expect(getMostProminentWorkshopPhase(['past', 'freshly-past', 'upcoming'])).toBe('freshly-past');
         expect(getMostProminentWorkshopPhase(['past', 'freshly-past'])).toBe('freshly-past');
         expect(getMostProminentWorkshopPhase(['past'])).toBe('past');
         expect(getMostProminentWorkshopPhase([])).toBe('past');

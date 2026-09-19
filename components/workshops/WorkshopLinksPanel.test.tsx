@@ -213,6 +213,21 @@ describe('workshop links panel', () => {
         expect(pastCard?.textContent).toContain('Proběhlo');
     });
 
+    it('gives a term in the next seven days its own badge and calendar colour', () => {
+        renderWorkshopLinksPanel([ONGOING_WORKSHOP, TOMORROW_WORKSHOP, UPCOMING_WORKSHOP]);
+
+        expect(findCalendarDay('2026-09-11').className).toContain(
+            getWorkshopPhaseAppearance('upcoming-next-week').calendarDayClassName,
+        );
+        expect(screen.getAllByText('Do týdne')).toHaveLength(2);
+
+        showCardsView();
+
+        const [, upcomingNextWeekCard, upcomingCard] = findTermLinks();
+        expect(upcomingNextWeekCard?.textContent).toContain('Do týdne');
+        expect(upcomingCard?.textContent).toContain('Nadchází');
+    });
+
     it('shows anonymous ratings, the created-project preview, and the replay length on the same mini card', () => {
         renderWorkshopLinksPanel([RICH_PAST_WORKSHOP]);
         showCardsView();
@@ -234,12 +249,12 @@ describe('workshop links panel', () => {
         renderWorkshopLinksPanel([PAST_WORKSHOP, FRESHLY_PAST_WORKSHOP, ONGOING_WORKSHOP, UPCOMING_WORKSHOP]);
         showCardsView();
 
-        const [ongoingCard, upcomingCard, freshlyPastCard, pastCard] = findTermLinks();
+        const [ongoingCard, freshlyPastCard, upcomingCard, pastCard] = findTermLinks();
 
         expect(ongoingCard?.textContent).toContain(ONGOING_WORKSHOP.title);
-        expect(upcomingCard?.textContent).toContain(UPCOMING_WORKSHOP.title);
         expect(freshlyPastCard?.textContent).toContain(FRESHLY_PAST_WORKSHOP.title);
         expect(freshlyPastCard?.textContent).toContain('Právě proběhlo');
+        expect(upcomingCard?.textContent).toContain(UPCOMING_WORKSHOP.title);
         expect(pastCard?.textContent).toContain(PAST_WORKSHOP.title);
         expect(pastCard?.textContent).toContain('Proběhlo');
     });
