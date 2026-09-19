@@ -16,9 +16,8 @@
 
 [✨👌] Enhance the mini card for workshop events
 
-- @@@@@
-- Show the star review feedback.
-- Preview the created project.
+- Do not Show the star review feedback.
+- Preview the created project. (but make it looking better)
 - Show the video length (subtract the starting time from total video length)
 - You are working with page `/cs/komunita`
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
