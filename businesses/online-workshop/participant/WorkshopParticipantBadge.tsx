@@ -45,11 +45,11 @@ type WorkshopParticipantBadgeProps = {
     readonly onDisconnect?: () => Promise<boolean>;
 };
 
-const BADGE_CLASS_NAME = `${WORKSHOP_ROOM_BADGE_CLASS_NAME} border-emerald-300/15 bg-emerald-300/[0.06] text-emerald-200`;
+const BADGE_CLASS_NAME = `${WORKSHOP_ROOM_BADGE_CLASS_NAME} border-room-success/15 bg-room-success/[0.06] text-room-success`;
 const BADGE_ACTION_CLASS_NAME =
-    'shrink-0 rounded-full p-1.5 text-emerald-200/70 transition hover:bg-emerald-300/10 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-40';
+    'shrink-0 rounded-full p-1.5 text-room-success/70 transition hover:bg-room-success/10 hover:text-room-success disabled:cursor-not-allowed disabled:opacity-40';
 const BADGE_LEAVING_ACTION_CLASS_NAME =
-    'shrink-0 rounded-full p-1.5 text-emerald-200/70 transition hover:bg-rose-300/10 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-40';
+    'shrink-0 rounded-full p-1.5 text-room-success/70 transition hover:bg-room-danger/10 hover:text-room-danger disabled:cursor-not-allowed disabled:opacity-40';
 const BADGE_ANSWER_CLASS_NAME =
     'shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40';
 
@@ -103,7 +103,7 @@ function WorkshopParticipantRenameForm({
                 placeholder="Jana Nováková"
                 aria-label="Vaše jméno"
                 aria-invalid={!isEditedFullnameValid}
-                className="h-8 w-full min-w-0 rounded-full border-white/15 bg-white/5 px-3 text-xs text-white placeholder:text-slate-600 sm:w-56"
+                className="h-8 w-full min-w-0 rounded-full border-room-border/15 bg-room-overlay/5 px-3 text-xs text-room-heading placeholder:text-room-subtle sm:w-56"
             />
             <button
                 type="submit"
@@ -163,7 +163,7 @@ function WorkshopParticipantDisconnectConfirmation({
                 onClick={() => void handleDisconnect()}
                 disabled={isDisconnecting}
                 autoFocus
-                className={`${BADGE_ANSWER_CLASS_NAME} bg-rose-300/15 text-rose-200 hover:bg-rose-300/25 hover:text-rose-100`}
+                className={`${BADGE_ANSWER_CLASS_NAME} bg-room-danger/15 text-room-danger hover:bg-room-danger/25 hover:text-room-danger`}
             >
                 {isDisconnecting ? 'Odhlašuji…' : 'Ano, odhlásit'}
             </button>
@@ -171,7 +171,7 @@ function WorkshopParticipantDisconnectConfirmation({
                 type="button"
                 onClick={onClose}
                 disabled={isDisconnecting}
-                className={`${BADGE_ANSWER_CLASS_NAME} text-emerald-200/70 hover:bg-emerald-300/10 hover:text-emerald-100`}
+                className={`${BADGE_ANSWER_CLASS_NAME} text-room-success/70 hover:bg-room-success/10 hover:text-room-success`}
             >
                 Zrušit
             </button>
@@ -220,11 +220,11 @@ export function WorkshopParticipantBadge({
             <Radio className="h-3.5 w-3.5 shrink-0" />
             <span className="min-w-0 break-words text-center">Připojen/a jako {fullname}</span>
             {isModerating && (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-violet-300/10 px-2 py-0.5 text-[11px] font-semibold text-violet-200">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-room-upcoming/10 px-2 py-0.5 text-[11px] font-semibold text-room-upcoming">
                     <ShieldCheck className="h-3 w-3" /> Moderátor
                 </span>
             )}
-            {isRefreshing && <RefreshCw className="h-3 w-3 shrink-0 animate-spin text-slate-500" />}
+            {isRefreshing && <RefreshCw className="h-3 w-3 shrink-0 animate-spin text-room-subtle" />}
             {isRenameOffered && (
                 <button
                     type="button"

@@ -11,7 +11,14 @@ const GRAPH_LANE_WIDTH_PIXELS = 20;
 const GRAPH_LEFT_PADDING_PIXELS = 14;
 const GRAPH_MINIMAL_WIDTH_PIXELS = 42;
 const GRAPH_NODE_RADIUS_PIXELS = 5;
-const GRAPH_COLORS = ['#7aebff', '#c084fc', '#fbbf24', '#34d399', '#fb7185', '#f472b6'] as const;
+const GRAPH_COLORS = [
+    'rgb(var(--room-accent))',
+    'rgb(var(--room-upcoming))',
+    'rgb(var(--room-warning))',
+    'rgb(var(--room-success))',
+    'rgb(var(--room-danger))',
+    'rgb(var(--room-graph-pink))',
+] as const;
 
 type WorkshopRepositoryGraphProps = {
     readonly repository: GithubRepository;
@@ -77,7 +84,7 @@ export function WorkshopRepositoryGraph({
     return (
         <div aria-label="Graf commitů vybraných větví" className="space-y-3">
             {branches.length > 0 && (
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-300" aria-label="Vybrané větve">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-room-text" aria-label="Vybrané větve">
                     {branches.map((branch, branchIndex) => (
                         <span key={branch.name} className="inline-flex items-center gap-1.5">
                             <span
@@ -90,7 +97,7 @@ export function WorkshopRepositoryGraph({
                     ))}
                 </div>
             )}
-            <div className="overflow-x-auto rounded-xl border border-white/[0.08] bg-slate-950/20">
+            <div className="overflow-x-auto rounded-xl border border-room-border/[0.08] bg-room-inset/20">
                 <div className="relative min-w-[30rem]" style={{ minHeight: graphHeight }}>
                     <svg
                         aria-hidden="true"
@@ -123,7 +130,7 @@ export function WorkshopRepositoryGraph({
                                 cy={rowIndex * GRAPH_ROW_HEIGHT_PIXELS + GRAPH_ROW_HEIGHT_PIXELS / 2}
                                 r={GRAPH_NODE_RADIUS_PIXELS}
                                 fill={getGraphColor(row.laneIndex)}
-                                stroke="#081a24"
+                                stroke="rgb(var(--room-surface))"
                                 strokeWidth="3"
                             />
                         ))}

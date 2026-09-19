@@ -36,7 +36,7 @@ export function SubscribeToCalendarLinks({ calendarFeedUrl, className }: Subscri
                 rel="noopener noreferrer"
                 className={classNames(
                     SUBSCRIBE_TO_CALENDAR_LINK_CLASS_NAME,
-                    'border-cyan-200/30 bg-cyan-300/10 text-cyan-100 hover:border-cyan-200/60 hover:bg-cyan-300/20 hover:text-white',
+                    'border-room-accent/30 bg-room-accent/10 text-room-accent hover:border-room-accent/60 hover:bg-room-accent/20 hover:text-room-heading',
                 )}
             >
                 <CalendarPlus className="h-3.5 w-3.5" aria-hidden="true" />
@@ -46,7 +46,7 @@ export function SubscribeToCalendarLinks({ calendarFeedUrl, className }: Subscri
                 href={webcalUrl}
                 className={classNames(
                     SUBSCRIBE_TO_CALENDAR_LINK_CLASS_NAME,
-                    'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10 hover:text-white',
+                    'border-room-border/10 bg-room-overlay/5 text-room-text hover:border-room-border/20 hover:bg-room-overlay/10 hover:text-room-heading',
                 )}
             >
                 <Rss className="h-3.5 w-3.5" aria-hidden="true" />

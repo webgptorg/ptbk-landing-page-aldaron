@@ -32,15 +32,15 @@ export function WorkshopStageComment({ stageComment }: WorkshopStageCommentProps
             aria-live="polite"
             initial={isReducedMotionPreferred ? false : { opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="pointer-events-none absolute left-3 right-3 top-3 z-20 rounded-2xl border border-cyan-200/50 bg-slate-950/95 p-3 shadow-2xl backdrop-blur sm:left-6 sm:right-32 sm:top-5 sm:max-w-2xl sm:p-4"
+            className="pointer-events-none absolute left-3 right-3 top-3 z-20 rounded-2xl border border-room-accent/50 bg-room-inset/95 p-3 shadow-2xl backdrop-blur sm:left-6 sm:right-32 sm:top-5 sm:max-w-2xl sm:p-4"
         >
-            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">
+            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-room-accent">
                 <MessageCircleQuestion className="h-3.5 w-3.5" aria-hidden="true" /> Otázka na stage
             </p>
-            <p className="mt-2 text-sm font-semibold text-white">{stageComment.authorName}</p>
+            <p className="mt-2 text-sm font-semibold text-room-heading">{stageComment.authorName}</p>
             <WorkshopCommentMarkdown
                 content={stageComment.body}
-                className="mt-1 max-h-32 overflow-hidden whitespace-pre-wrap break-words text-sm leading-6 text-slate-100 sm:max-h-40 sm:text-base"
+                className="mt-1 max-h-32 overflow-hidden whitespace-pre-wrap break-words text-sm leading-6 text-room-heading sm:max-h-40 sm:text-base"
             />
         </motion.aside>
     );

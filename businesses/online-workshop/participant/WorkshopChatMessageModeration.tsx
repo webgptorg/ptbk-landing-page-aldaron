@@ -69,9 +69,9 @@ export function WorkshopChatMessageModeration({
     };
 
     return (
-        <div className="mt-3 border-t border-white/[0.07] pt-3">
+        <div className="mt-3 border-t border-room-border/[0.07] pt-3">
             <div className="flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 pr-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-300/70">
+                <span className="inline-flex items-center gap-1 pr-1 text-[11px] font-semibold uppercase tracking-wide text-room-accent/70">
                     <ShieldCheck className="h-3 w-3" /> Moderace
                 </span>
                 {comment.status !== 'approved' && (

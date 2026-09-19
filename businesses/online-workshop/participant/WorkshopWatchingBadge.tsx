@@ -22,7 +22,7 @@ export function WorkshopWatchingBadge({ watchingParticipantCount }: WorkshopWatc
 
     return (
         <div
-            className={`${WORKSHOP_ROOM_BADGE_CLASS_NAME} border-cyan-300/15 bg-cyan-300/[0.06] px-3 py-1.5 text-cyan-200`}
+            className={`${WORKSHOP_ROOM_BADGE_CLASS_NAME} border-room-accent/15 bg-room-accent/[0.06] px-3 py-1.5 text-room-accent`}
         >
             <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span className="min-w-0 break-words text-center">

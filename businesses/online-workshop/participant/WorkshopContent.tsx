@@ -11,6 +11,7 @@ import {
 } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
 import { motion, useReducedMotion } from 'framer-motion';
+import { useTheme } from 'next-themes';
 import { Clock3, Crown, ExternalLink, Lock, Sparkles } from 'lucide-react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
@@ -122,7 +123,7 @@ function WorkshopMaterialQrCodes({ materialLinks }: { readonly materialLinks: re
                     />
                     {materialLinks.length > 1 && (
                         <figcaption
-                            className="mt-2 truncate text-center text-xs font-semibold leading-5 text-slate-400"
+                            className="mt-2 truncate text-center text-xs font-semibold leading-5 text-room-muted"
                             title={materialLink.label}
                         >
                             {materialLink.label}
@@ -138,6 +139,7 @@ function WorkshopMaterialBody({
     bodyMarkdown,
     callToActionLabel = MATERIAL_CALL_TO_ACTION_LABEL,
 }: WorkshopMaterialBodyProps) {
+    const { resolvedTheme, forcedTheme } = useTheme();
     const materialBodyReference = useRef<HTMLDivElement>(null);
     const [materialLinks, setMaterialLinks] = useState<readonly WorkshopMaterialLink[]>([]);
     const singleMaterialLink = materialLinks.length === 1 ? materialLinks[0] : null;
@@ -175,8 +177,8 @@ function WorkshopMaterialBody({
             <div ref={materialBodyReference} className="min-w-0 break-words">
                 <MarkdownContent
                     content={bodyMarkdown}
-                    theme="DARK"
-                    className="max-w-none leading-7 text-slate-200 [--chat-md-link-color:#f1f5f9] [&_a]:font-semibold [&_code]:break-words [&_code]:text-cyan-100 [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
+                    theme={(forcedTheme ?? resolvedTheme) === 'light' ? 'LIGHT' : 'DARK'}
+                    className="max-w-none leading-7 text-room-text [--chat-md-link-color:rgb(var(--room-accent))] [&_a]:font-semibold [&_code]:break-words [&_code]:text-room-accent [&_h1]:text-room-heading [&_h2]:text-room-heading [&_h3]:text-room-heading [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
                 />
                 {singleMaterialLink && (
                     <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -186,7 +188,7 @@ function WorkshopMaterialBody({
                             rel="noopener noreferrer"
                             data-workshop-material-call-to-action
                             aria-label={`${callToActionLabel}: ${singleMaterialLink.label}`}
-                            className="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-300/10 transition hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07151d]"
+                            className="inline-flex items-center gap-2 rounded-full bg-room-action px-5 py-2.5 text-sm font-bold text-room-action-foreground shadow-lg shadow-cyan-300/10 transition hover:bg-room-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent focus-visible:ring-offset-2 focus-visible:ring-offset-room-background"
                         >
                             {callToActionLabel}
                             <ExternalLink className="h-4 w-4" aria-hidden="true" />
@@ -222,28 +224,28 @@ export function WorkshopMaterialCard({
             initial={isNewlyUnlocked && !isReducedMotionPreferred ? { opacity: 0, y: 24, scale: 0.97 } : false}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: isReducedMotionPreferred ? 0 : 0.55, ease: 'easeOut' }}
-            className={`relative scroll-mt-5 overflow-hidden rounded-2xl border bg-white/[0.045] p-5 text-slate-200 shadow-lg transition-colors sm:p-8 ${isNewlyUnlocked ? 'border-cyan-300/60 pt-16 shadow-cyan-300/10 sm:pt-8' : isFollowUp || isPaidMembersOnly ? 'border-amber-300/60 shadow-amber-300/10' : 'border-white/10'}`}
+            className={`relative scroll-mt-5 overflow-hidden rounded-2xl border bg-room-overlay/[0.045] p-5 text-room-text shadow-lg transition-colors sm:p-8 ${isNewlyUnlocked ? 'border-room-accent/60 pt-16 shadow-cyan-300/10 sm:pt-8' : isFollowUp || isPaidMembersOnly ? 'border-room-warning/60 shadow-amber-300/10' : 'border-room-border/10'}`}
         >
             {isNewlyUnlocked && (
-                <span className="absolute right-4 top-4 rounded-full bg-cyan-300 px-3 py-1 text-xs font-bold text-slate-950 shadow-lg">
+                <span className="absolute right-4 top-4 rounded-full bg-room-action px-3 py-1 text-xs font-bold text-room-action-foreground shadow-lg">
                     Právě odemčeno
                 </span>
             )}
             {(isFollowUp || isPaidMembersOnly) && (
                 <div className="mb-4 flex flex-wrap gap-2">
                     {isFollowUp && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-100">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-room-warning/30 bg-room-warning/10 px-3 py-1 text-xs font-bold text-room-warning">
                             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Navazující materiál
                         </span>
                     )}
                     {isPaidMembersOnly && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-100">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-room-warning/30 bg-room-warning/10 px-3 py-1 text-xs font-bold text-room-warning">
                             <Crown className="h-3.5 w-3.5" aria-hidden="true" /> Pro placené členy
                         </span>
                     )}
                 </div>
             )}
-            {contentBlock.title && <h3 className="mb-5 text-xl font-bold text-white">{contentBlock.title}</h3>}
+            {contentBlock.title && <h3 className="mb-5 text-xl font-bold text-room-heading">{contentBlock.title}</h3>}
             <WorkshopMaterialBody bodyMarkdown={contentBlock.bodyMarkdown} callToActionLabel={callToActionLabel} />
         </motion.article>
     );
@@ -276,8 +278,8 @@ function WorkshopPaidMembersContentNotice({
                     <ul aria-label="Náhled materiálů pro placené členy" className="space-y-2">
                         {namedContentPreviews.map((contentPreview) => (
                             <li key={contentPreview.id} className="flex items-start gap-2">
-                                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-200/70" aria-hidden="true" />
-                                <span className="min-w-0 break-words text-sm font-semibold leading-6 text-amber-50">
+                                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-room-warning/70" aria-hidden="true" />
+                                <span className="min-w-0 break-words text-sm font-semibold leading-6 text-room-warning">
                                     {contentPreview.title}
                                 </span>
                             </li>
@@ -321,8 +323,8 @@ export function WorkshopContent({
     return (
         <section className="mt-8" aria-labelledby="workshop-materials-title">
             <div className="mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-cyan-300" />
-                <h2 id="workshop-materials-title" className="text-xl font-bold text-white">
+                <Sparkles className="h-5 w-5 text-room-accent" />
+                <h2 id="workshop-materials-title" className="text-xl font-bold text-room-heading">
                     {title}
                 </h2>
             </div>
@@ -345,8 +347,8 @@ export function WorkshopContent({
                 ))}
 
                 {nextContentUnlockAt && (
-                    <div className="flex items-start gap-3 rounded-xl border border-dashed border-cyan-300/20 bg-cyan-300/[0.04] px-5 py-4 text-sm text-slate-400">
-                        <Clock3 className="h-5 w-5 shrink-0 text-cyan-300" />
+                    <div className="flex items-start gap-3 rounded-xl border border-dashed border-room-accent/20 bg-room-accent/[0.04] px-5 py-4 text-sm text-room-muted">
+                        <Clock3 className="h-5 w-5 shrink-0 text-room-accent" />
                         <span className="min-w-0">
                             Další materiál se automaticky odemkne{' '}
                             {CZECH_DATE_TIME_FORMAT.format(new Date(nextContentUnlockAt))}.

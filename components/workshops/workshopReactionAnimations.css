@@ -63,10 +63,10 @@
 
 .workshop-reaction-appearance--code .workshop-reaction__body {
     padding: 0.25em 0.5em;
-    border: 1px solid rgba(122, 235, 255, 0.35);
+    border: 1px solid rgb(var(--room-accent) / 0.35);
     border-radius: 0.5rem;
-    background: rgba(8, 26, 36, 0.88);
-    color: #7aebff;
+    background: rgb(var(--room-surface) / 0.88);
+    color: rgb(var(--room-accent));
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-weight: 700;
 }
@@ -865,7 +865,7 @@
     right: -0.1em;
     top: 0.2em;
     font-size: 0.9em;
-    color: #7aebff;
+    color: rgb(var(--room-accent));
     animation-name: workshop-reaction-decoration-caret;
     animation-duration: 900ms;
     animation-iteration-count: infinite;

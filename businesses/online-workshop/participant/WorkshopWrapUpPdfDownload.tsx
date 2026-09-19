@@ -44,7 +44,7 @@ export function WorkshopWrapUpPdfDownload({ workshopSlug }: WorkshopWrapUpPdfDow
                 onClick={() => void downloadWrapUp()}
                 disabled={isDownloading}
                 aria-busy={isDownloading}
-                className="inline-flex items-center gap-2 rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-bold text-cyan-100 transition hover:border-cyan-200/60 hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-full border border-room-accent/30 bg-room-accent/10 px-5 py-2.5 text-sm font-bold text-room-accent transition hover:border-room-accent/60 hover:bg-room-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent disabled:cursor-wait disabled:opacity-60"
             >
                 {isDownloading ? (
                     <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -53,9 +53,9 @@ export function WorkshopWrapUpPdfDownload({ workshopSlug }: WorkshopWrapUpPdfDow
                 )}
                 {isDownloading ? 'Připravuji PDF…' : 'Stáhnout shrnutí v PDF'}
             </button>
-            <p className="mt-2 text-xs leading-5 text-slate-400">Shrnutí, hlavní poznatky a materiály z workshopu.</p>
+            <p className="mt-2 text-xs leading-5 text-room-muted">Shrnutí, hlavní poznatky a materiály z workshopu.</p>
             {errorMessage !== null && (
-                <p role="alert" className="mt-2 text-sm text-rose-200">
+                <p role="alert" className="mt-2 text-sm text-room-danger">
                     {errorMessage}
                 </p>
             )}

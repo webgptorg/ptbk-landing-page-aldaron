@@ -1,5 +1,6 @@
 'use client';
 
+import { WorkshopRoomThemeProvider } from '@/components/workshops/WorkshopRoomThemeProvider';
 import { isThirdPartyTrackingAllowed, removeSensitiveTrackingParameters } from '@/lib/tracking/trackingExclusions';
 import LogRocket from 'logrocket';
 import { usePathname } from 'next/navigation';
@@ -36,5 +37,5 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
         hasInitializedLogRocket = true;
     }, [pathname]);
 
-    return <>{children}</>;
+    return <WorkshopRoomThemeProvider>{children}</WorkshopRoomThemeProvider>;
 }

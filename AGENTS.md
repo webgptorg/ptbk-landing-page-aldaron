@@ -137,6 +137,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Shared community and workshop behavior
 
+- Community and workshop participant rooms, including waiting rooms and community project views, share light,
+  dark, and device appearance through `WorkshopRoomThemeProvider` and `workshopRoomTheme.css`. The browser remembers
+  the choice across rooms and tabs; changing it preserves form and room state. Room palette tokens also reach
+  portalled membership/project dialogs and cookie controls. Public landing pages and administration keep their own
+  appearance.
+
 - The global cookie banner shares its page palette with its settings dialog, uses
   a shallow bottom strip on desktop and an inset panel on phones, and reserves its
   measured height so the end of each page stays reachable. Fixed bottom controls
@@ -320,5 +326,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `npm run test-types` must build before `tsc` to refresh `.next/types`.
 - `npm run test-e2e` uses the Next.js development server; first-request compile
   headroom belongs in `playwright.config.ts`, not individual tests. E2E tests are
-  independent and each archives one recording in `tests/e2e/videos/`, retaining
-  only recent runs.
+  independent and retry once in a fresh browser context for transient failures;
+  failed-attempt traces remain available. Each attempt archives one recording in
+  `tests/e2e/videos/`, retaining only recent runs.

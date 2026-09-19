@@ -121,11 +121,11 @@ export function WorkshopFeedback({ feedback, onSave }: WorkshopFeedbackProps) {
 
     if (rating === null) {
         return (
-            <section aria-labelledby="workshop-feedback-title" className="rounded-2xl border border-white/10 bg-slate-950/30 p-5">
-                <h3 id="workshop-feedback-title" className="text-lg font-bold text-white">
+            <section aria-labelledby="workshop-feedback-title" className="rounded-2xl border border-room-border/10 bg-room-inset/30 p-5">
+                <h3 id="workshop-feedback-title" className="text-lg font-bold text-room-heading">
                     Jak byste workshop ohodnotili?
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-slate-400">Stačí vybrat počet hvězd. Na další otázky se můžete vyjádřit dobrovolně.</p>
+                <p className="mt-1 text-sm leading-6 text-room-muted">Stačí vybrat počet hvězd. Na další otázky se můžete vyjádřit dobrovolně.</p>
                 <div
                     role="group"
                     aria-label="Hodnocení workshopu"
@@ -145,10 +145,10 @@ export function WorkshopFeedback({ feedback, onSave }: WorkshopFeedbackProps) {
                                 onBlur={() => setHoveredRating(null)}
                                 onClick={() => void selectRating(starRating)}
                                 aria-label={`Ohodnotit workshop ${starRating} z 5 hvězd`}
-                                className={`rounded-xl border bg-white/[0.04] p-2.5 transition disabled:cursor-wait disabled:opacity-60 ${
+                                className={`rounded-xl border bg-room-overlay/[0.04] p-2.5 transition disabled:cursor-wait disabled:opacity-60 ${
                                     isHighlighted
-                                        ? 'border-amber-200/70 bg-amber-200/10 text-amber-200'
-                                        : 'border-white/10 text-slate-500 hover:border-amber-200/70 hover:bg-amber-200/10'
+                                        ? 'border-room-warning/70 bg-room-warning/10 text-room-warning'
+                                        : 'border-room-border/10 text-room-subtle hover:border-room-warning/70 hover:bg-room-warning/10'
                                 }`}
                             >
                                 <Star className={`h-7 w-7 ${isHighlighted ? 'fill-current' : ''}`} aria-hidden="true" />
@@ -162,11 +162,11 @@ export function WorkshopFeedback({ feedback, onSave }: WorkshopFeedbackProps) {
 
     if (questionKey === null) {
         return (
-            <section className="flex items-start gap-3 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.08] p-5 text-emerald-50">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden="true" />
+            <section className="flex items-start gap-3 rounded-2xl border border-room-success/20 bg-room-success/[0.08] p-5 text-room-success">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-room-success" aria-hidden="true" />
                 <div>
                     <h3 className="font-bold">Děkujeme za zpětnou vazbu.</h3>
-                    <p className="mt-1 text-sm leading-6 text-emerald-100/75">Vaše odpovědi nám pomohou připravit další workshop lépe.</p>
+                    <p className="mt-1 text-sm leading-6 text-room-success/75">Vaše odpovědi nám pomohou připravit další workshop lépe.</p>
                 </div>
             </section>
         );
@@ -177,21 +177,21 @@ export function WorkshopFeedback({ feedback, onSave }: WorkshopFeedbackProps) {
     const continueLabel = answers[questionKey].trim() === '' ? 'Přeskočit' : isLastQuestion ? 'Odeslat odpověď' : 'Pokračovat';
 
     return (
-        <section aria-labelledby="workshop-feedback-title" className="rounded-2xl border border-white/10 bg-slate-950/30 p-5">
-            <div className="flex items-center gap-1 text-amber-200" aria-label={`Hodnocení ${rating} z 5 hvězd`}>
+        <section aria-labelledby="workshop-feedback-title" className="rounded-2xl border border-room-border/10 bg-room-inset/30 p-5">
+            <div className="flex items-center gap-1 text-room-warning" aria-label={`Hodnocení ${rating} z 5 hvězd`}>
                 {[1, 2, 3, 4, 5].map((starRating) => (
                     <Star
                         key={starRating}
-                        className={`h-4 w-4 ${starRating <= rating ? 'fill-current' : 'text-slate-600'}`}
+                        className={`h-4 w-4 ${starRating <= rating ? 'fill-current' : 'text-room-subtle'}`}
                         aria-hidden="true"
                     />
                 ))}
-                <span className="ml-1 text-xs font-semibold text-slate-400">{rating}/5</span>
+                <span className="ml-1 text-xs font-semibold text-room-muted">{rating}/5</span>
             </div>
-            <h3 id="workshop-feedback-title" className="mt-3 text-lg font-bold text-white">
+            <h3 id="workshop-feedback-title" className="mt-3 text-lg font-bold text-room-heading">
                 {question.title}
             </h3>
-            <p className="mt-1 text-sm leading-6 text-slate-400">{question.description}</p>
+            <p className="mt-1 text-sm leading-6 text-room-muted">{question.description}</p>
             <Textarea
                 value={answers[questionKey]}
                 onChange={(event) =>
@@ -200,14 +200,14 @@ export function WorkshopFeedback({ feedback, onSave }: WorkshopFeedbackProps) {
                 placeholder={question.placeholder}
                 maxLength={5000}
                 disabled={isSaving}
-                className="mt-4 min-h-28 border-white/10 bg-white/[0.05] text-slate-100 placeholder:text-slate-500"
+                className="mt-4 min-h-28 border-room-border/10 bg-room-overlay/[0.05] text-room-heading placeholder:text-room-subtle"
             />
             <div className="mt-4 flex justify-end">
                 <button
                     type="button"
                     disabled={isSaving}
                     onClick={() => void continueFeedback()}
-                    className="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-wait disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-full bg-room-action px-4 py-2 text-sm font-bold text-room-action-foreground transition hover:bg-room-action-hover disabled:cursor-wait disabled:opacity-60"
                 >
                     {isSaving ? 'Ukládám…' : continueLabel} <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </button>

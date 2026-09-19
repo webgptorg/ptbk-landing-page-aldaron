@@ -154,7 +154,7 @@ function renderShortcodeLinkMarkdown(content: string): readonly ReactNode[] {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-cyan-200 underline decoration-cyan-300/50 underline-offset-2 transition hover:text-white"
+                className="font-semibold text-room-accent underline decoration-room-accent/50 underline-offset-2 transition hover:text-room-heading"
             >
                 {label}
             </a>,

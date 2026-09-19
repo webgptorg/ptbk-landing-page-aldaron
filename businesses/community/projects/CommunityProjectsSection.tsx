@@ -138,28 +138,28 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
     };
 
     return (
-        <section aria-labelledby="community-projects-title" className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4 sm:p-5">
+        <section aria-labelledby="community-projects-title" className="mt-5 rounded-2xl border border-room-border/[0.08] bg-room-overlay/[0.025] p-4 sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">Tvoříme spolu</p>
-                    <h2 id="community-projects-title" className="mt-1 text-xl font-bold text-white">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-room-accent">Tvoříme spolu</p>
+                    <h2 id="community-projects-title" className="mt-1 text-xl font-bold text-room-heading">
                         {CZECH_COMMUNITY_ROOM_COPY.projectsTitle}
                     </h2>
-                    <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
+                    <p className="mt-1 max-w-2xl text-sm leading-6 text-room-muted">
                         Podívejte se, co členové vytvořili, podpořte nejlepší nápady a přidejte vlastní tvorbu.
                     </p>
                 </div>
                 <button
                     type="button"
                     onClick={() => setIsCreationOpen(true)}
-                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-200"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-room-action px-4 py-2 text-sm font-bold text-room-action-foreground transition hover:bg-room-action-hover"
                 >
                     <Plus className="h-4 w-4" /> Sdílet projekt
                 </button>
             </div>
 
             {errorMessage !== null && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.08] px-3 py-2.5 text-sm text-rose-100">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-room-danger/20 bg-room-danger/[0.08] px-3 py-2.5 text-sm text-room-danger">
                     <span>{errorMessage}</span>
                     <button type="button" onClick={() => void loadProjects()} className="font-semibold underline underline-offset-4">
                         Zkusit znovu
@@ -168,8 +168,8 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
             )}
 
             {isLoading ? (
-                <div className="flex min-h-48 items-center justify-center text-sm text-slate-400">
-                    <LoaderCircle className="mr-2 h-5 w-5 animate-spin text-cyan-300" /> Načítám projekty…
+                <div className="flex min-h-48 items-center justify-center text-sm text-room-muted">
+                    <LoaderCircle className="mr-2 h-5 w-5 animate-spin text-room-accent" /> Načítám projekty…
                 </div>
             ) : (
                 <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -185,20 +185,20 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
                         />
                     ))}
                     {projects.length === 0 && (
-                        <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-slate-950/25 px-5 text-center md:col-span-3">
-                            <Sparkles className="h-7 w-7 text-cyan-300" />
-                            <p className="mt-3 font-semibold text-slate-100">Zatím tu žádný projekt není.</p>
-                            <p className="mt-1 text-sm text-slate-400">Buďte první, kdo komunitě ukáže svou tvorbu.</p>
+                        <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-room-border/15 bg-room-inset/25 px-5 text-center md:col-span-3">
+                            <Sparkles className="h-7 w-7 text-room-accent" />
+                            <p className="mt-3 font-semibold text-room-heading">Zatím tu žádný projekt není.</p>
+                            <p className="mt-1 text-sm text-room-muted">Buďte první, kdo komunitě ukáže svou tvorbu.</p>
                         </div>
                     )}
                     {isLimited && (
                         <Link
                             href={COMMUNITY_PROJECTS_PATH}
-                            className="group flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-cyan-300/35 bg-cyan-300/[0.04] px-5 text-center transition hover:border-cyan-200 hover:bg-cyan-300/[0.09]"
+                            className="group flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-room-accent/35 bg-room-accent/[0.04] px-5 text-center transition hover:border-room-accent hover:bg-room-accent/[0.09]"
                         >
-                            <FolderOpen className="h-8 w-8 text-cyan-200 transition group-hover:scale-110" />
-                            <span className="mt-3 font-bold text-cyan-100">Další projekty</span>
-                            <span className="mt-1 text-sm text-slate-400">Otevřít všechny projekty komunity</span>
+                            <FolderOpen className="h-8 w-8 text-room-accent transition group-hover:scale-110" />
+                            <span className="mt-3 font-bold text-room-accent">Další projekty</span>
+                            <span className="mt-1 text-sm text-room-muted">Otevřít všechny projekty komunity</span>
                         </Link>
                     )}
                 </div>

@@ -75,34 +75,34 @@ export function WorkshopChat({
     return (
         <aside
             className={cn(
-                'flex h-[min(70dvh,38rem)] min-h-[28rem] min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a1c26] shadow-2xl',
+                'flex h-[min(70dvh,38rem)] min-h-[28rem] min-w-0 flex-col overflow-hidden rounded-2xl border border-room-border/10 bg-room-surface shadow-2xl',
                 'lg:sticky lg:top-5 lg:h-[calc(100dvh-6.5rem)] lg:min-h-0',
                 !isEnabled && WORKSHOP_FADED_PANEL_CLASS_NAME,
                 className,
             )}
         >
-            <header className="border-b border-white/10 px-5 py-4">
+            <header className="border-b border-room-border/10 px-5 py-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    <MessageCircle className="h-5 w-5 text-cyan-300" />
-                    <h2 className="font-bold text-white">Živý chat</h2>
+                    <MessageCircle className="h-5 w-5 text-room-accent" />
+                    <h2 className="font-bold text-room-heading">Živý chat</h2>
                     {interactivity.isModerationOffered && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-violet-300/10 px-2 py-0.5 text-[11px] font-semibold text-violet-200">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-room-upcoming/10 px-2 py-0.5 text-[11px] font-semibold text-room-upcoming">
                             <ShieldCheck className="h-3 w-3" /> Moderujete tuto místnost
                         </span>
                     )}
                 </div>
-                <div className="mt-3 flex rounded-lg bg-white/5 p-1 text-xs">
+                <div className="mt-3 flex rounded-lg bg-room-overlay/5 p-1 text-xs">
                     <button
                         type="button"
                         onClick={() => onChangeSort('recent')}
-                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 transition ${commentSort === 'recent' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 transition ${commentSort === 'recent' ? 'bg-room-overlay/10 text-room-heading' : 'text-room-subtle hover:text-room-text'}`}
                     >
                         <Clock3 className="h-3.5 w-3.5" /> Nejnovější
                     </button>
                     <button
                         type="button"
                         onClick={() => onChangeSort('upvotes')}
-                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 transition ${commentSort === 'upvotes' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 transition ${commentSort === 'upvotes' ? 'bg-room-overlay/10 text-room-heading' : 'text-room-subtle hover:text-room-text'}`}
                     >
                         <ThumbsUp className="h-3.5 w-3.5" /> Nejvíce hlasů
                     </button>
@@ -112,8 +112,8 @@ export function WorkshopChat({
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
                 {threads.length === 0 ? (
                     <div className="flex h-full min-h-48 flex-col items-center justify-center px-6 text-center">
-                        <MessageCircle className="h-8 w-8 text-slate-700" />
-                        <p className="mt-3 text-sm text-slate-500">Zatím je tu klid. Položte první otázku.</p>
+                        <MessageCircle className="h-8 w-8 text-room-subtle" />
+                        <p className="mt-3 text-sm text-room-subtle">Zatím je tu klid. Položte první otázku.</p>
                     </div>
                 ) : (
                     threads.map((thread) => (
@@ -131,13 +131,13 @@ export function WorkshopChat({
 
             {interactivity.isWritingOffered ? (
                 <WorkshopChatComposer
-                    className="border-t border-white/10 p-4"
+                    className="border-t border-room-border/10 p-4"
                     label="Nová zpráva do chatu"
                     placeholder="Napište otázku nebo komentář…"
                     onSubmit={(body) => onSubmitComment({ body, parentCommentId: null })}
                 />
             ) : (
-                <p className="flex items-center justify-center gap-2 border-t border-white/10 px-4 py-4 text-sm text-slate-500">
+                <p className="flex items-center justify-center gap-2 border-t border-room-border/10 px-4 py-4 text-sm text-room-subtle">
                     <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> Chat je teď jen pro čtení.
                 </p>
             )}

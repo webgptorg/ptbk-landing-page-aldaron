@@ -52,29 +52,29 @@ export function WorkshopChatMessage({
         <article className={cn('min-w-0', className)}>
             <div className="mb-2 flex flex-wrap items-center gap-1.5 empty:mb-0">
                 {comment.isPinned && (
-                    <span className={cn(MESSAGE_MARK_CLASS_NAME, 'bg-cyan-300/10 text-cyan-200')}>
+                    <span className={cn(MESSAGE_MARK_CLASS_NAME, 'bg-room-accent/10 text-room-accent')}>
                         <Pin className="h-3 w-3" /> Připnuto
                     </span>
                 )}
                 {/* Note: A message which is not in the chat yet is marked for the one who wrote it and for the
                           moderator who decides about it. Nobody else ever receives it. */}
                 {comment.status === 'pending' && (
-                    <span className={cn(MESSAGE_MARK_CLASS_NAME, 'bg-amber-300/10 text-amber-200')}>
+                    <span className={cn(MESSAGE_MARK_CLASS_NAME, 'bg-room-warning/10 text-room-warning')}>
                         <Clock3 className="h-3 w-3" /> Čeká na schválení
                     </span>
                 )}
             </div>
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <p className="flex flex-wrap items-center gap-1.5 break-words text-sm font-semibold text-slate-100">
+                    <p className="flex flex-wrap items-center gap-1.5 break-words text-sm font-semibold text-room-heading">
                         {comment.authorName}
                         {comment.isAuthorModerator && (
-                            <span className={cn(MESSAGE_MARK_CLASS_NAME, 'bg-violet-300/10 text-violet-200')}>
+                            <span className={cn(MESSAGE_MARK_CLASS_NAME, 'bg-room-upcoming/10 text-room-upcoming')}>
                                 <ShieldCheck className="h-3 w-3" /> Moderátor
                             </span>
                         )}
                     </p>
-                    <time className="text-[11px] text-slate-600" dateTime={comment.createdAt}>
+                    <time className="text-[11px] text-room-subtle" dateTime={comment.createdAt}>
                         {CZECH_TIME_FORMAT.format(new Date(comment.createdAt))}
                     </time>
                 </div>
@@ -87,7 +87,7 @@ export function WorkshopChatMessage({
                         isUpvoting
                     }
                     onClick={() => void handleUpvote()}
-                    className={`inline-flex min-w-12 items-center justify-center gap-1 rounded-full border px-2.5 py-1 text-xs transition ${comment.isUpvotedByParticipant ? 'border-cyan-300/30 bg-cyan-300/10 text-cyan-200' : 'border-white/10 text-slate-500 hover:border-cyan-300/30 hover:text-cyan-200'} disabled:cursor-default`}
+                    className={`inline-flex min-w-12 items-center justify-center gap-1 rounded-full border px-2.5 py-1 text-xs transition ${comment.isUpvotedByParticipant ? 'border-room-accent/30 bg-room-accent/10 text-room-accent' : 'border-room-border/10 text-room-subtle hover:border-room-accent/30 hover:text-room-accent'} disabled:cursor-default`}
                     aria-label={`Hlasovat pro komentář od ${comment.authorName}`}
                 >
                     <ThumbsUp className="h-3 w-3" /> {comment.upvoteCount}
@@ -96,7 +96,7 @@ export function WorkshopChatMessage({
             <WorkshopCommentMarkdown
                 content={comment.body}
                 isLinksEnabled={areWorkshopCommentLinksEnabled(comment)}
-                className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-300"
+                className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-room-text"
             />
             {moderation !== null && (
                 <WorkshopChatMessageModeration

@@ -30,9 +30,9 @@ const ADD_TO_CALENDAR_STYLE_BY_TONE: Readonly<Record<AddToCalendarTone, AddToCal
     },
     dark: {
         googleCalendarClassName:
-            'h-11 rounded-full bg-cyan-300 px-5 text-sm font-bold text-slate-950 hover:bg-cyan-200',
+            'h-11 rounded-full bg-room-action px-5 text-sm font-bold text-room-action-foreground hover:bg-room-action-hover',
         icalendarClassName:
-            'h-11 rounded-full border-white/15 bg-white/5 px-5 text-sm font-semibold text-white hover:bg-white/10 hover:text-white',
+            'h-11 rounded-full border-room-border/15 bg-room-overlay/5 px-5 text-sm font-semibold text-room-heading hover:bg-room-overlay/10 hover:text-room-heading',
         iconClassName: 'mr-2 h-4 w-4',
     },
 };

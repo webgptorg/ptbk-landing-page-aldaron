@@ -22,6 +22,17 @@
     color-scheme: dark;
 }
 
+.appearance[data-theme='room'] {
+    --cookie-surface: rgb(var(--room-surface));
+    --cookie-text: rgb(var(--room-heading));
+    --cookie-muted: rgb(var(--room-muted));
+    --cookie-border: rgb(var(--room-border) / 0.15);
+    --cookie-accent: rgb(var(--room-action));
+    --cookie-accent-text: rgb(var(--room-action-foreground));
+    --cookie-hover: rgb(var(--room-overlay) / 0.05);
+    color-scheme: var(--room-color-scheme);
+}
+
 .layout {
     --cookie-edge: 0.75rem;
     --cookie-bottom-gap: max(var(--cookie-edge), env(safe-area-inset-bottom));

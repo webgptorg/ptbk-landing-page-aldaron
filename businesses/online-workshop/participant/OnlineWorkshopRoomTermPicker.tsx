@@ -87,19 +87,19 @@ export function OnlineWorkshopRoomTermPicker({
         onSelectTerm,
         currentTime,
         isTopicShown: true,
-        appearance: 'dark',
+        appearance: 'room',
         density: 'compact',
     } as const;
 
     return (
         <fieldset className="min-w-0">
-            <legend className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+            <legend className="text-xs font-semibold uppercase tracking-[0.14em] text-room-muted">
                 {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.legend}
             </legend>
-            <p className="mt-1 text-xs leading-5 text-slate-500">{ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.description}</p>
+            <p className="mt-1 text-xs leading-5 text-room-subtle">{ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.description}</p>
 
             {currentTerms.length === 0 ? (
-                <p className="mt-3 rounded-lg border border-dashed border-white/15 bg-white/[0.025] px-3 py-3 text-xs text-slate-400">
+                <p className="mt-3 rounded-lg border border-dashed border-room-border/15 bg-room-overlay/[0.025] px-3 py-3 text-xs text-room-muted">
                     {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.noCurrentTermsMessage}
                 </p>
             ) : (
@@ -114,7 +114,7 @@ export function OnlineWorkshopRoomTermPicker({
 
             {freshlyPastTerms.length > 0 && (
                 <>
-                    <p className="mt-3 px-1 text-xs font-semibold text-amber-200">
+                    <p className="mt-3 px-1 text-xs font-semibold text-room-warning">
                         {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.freshlyPastTermsLabel} ({freshlyPastTerms.length})
                     </p>
                     <EventTermOptionList
@@ -134,7 +134,7 @@ export function OnlineWorkshopRoomTermPicker({
                         aria-controls={pastTermsListId}
                         aria-expanded={isPastTermsShown}
                         onClick={() => setIsPastTermsShown((isShown) => !isShown)}
-                        className="mt-3 flex w-full items-center justify-between gap-3 rounded-lg px-1 py-1.5 text-left text-xs font-semibold text-slate-500 transition-colors hover:text-slate-300"
+                        className="mt-3 flex w-full items-center justify-between gap-3 rounded-lg px-1 py-1.5 text-left text-xs font-semibold text-room-subtle transition-colors hover:text-room-text"
                     >
                         {ONLINE_WORKSHOP_ROOM_TERM_PICKER_COPY.pastTermsLabel} ({pastTerms.length})
                         <ChevronDown

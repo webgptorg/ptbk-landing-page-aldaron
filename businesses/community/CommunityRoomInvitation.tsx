@@ -24,28 +24,28 @@ export function CommunityRoomInvitation({ participantIdentity }: CommunityRoomIn
     return (
         <article
             aria-labelledby={COMMUNITY_ROOM_INVITATION_TITLE_ID}
-            className="relative scroll-mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] p-5 text-slate-200 shadow-lg sm:p-8"
+            className="relative scroll-mt-5 overflow-hidden rounded-2xl border border-room-border/10 bg-room-overlay/[0.045] p-5 text-room-text shadow-lg sm:p-8"
         >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10 text-cyan-200">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-room-accent/10 text-room-accent">
                         <Users className="h-5 w-5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">
+                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-room-accent">
                             {CZECH_COMMUNITY_INVITATION_COPY.eyebrow}
                         </p>
-                        <h3 id={COMMUNITY_ROOM_INVITATION_TITLE_ID} className="mt-1 text-xl font-bold text-white">
+                        <h3 id={COMMUNITY_ROOM_INVITATION_TITLE_ID} className="mt-1 text-xl font-bold text-room-heading">
                             {CZECH_COMMUNITY_INVITATION_COPY.title}
                         </h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                        <p className="mt-2 text-sm leading-6 text-room-muted">
                             {CZECH_COMMUNITY_INVITATION_COPY.description}
                         </p>
                         <ul className="mt-3 flex flex-wrap gap-2">
                             {CZECH_COMMUNITY_INVITATION_COPY.sectionTitles.map((sectionTitle) => (
                                 <li
                                     key={sectionTitle}
-                                    className="rounded-full border border-white/10 bg-slate-950/40 px-2.5 py-1 text-xs text-slate-300"
+                                    className="rounded-full border border-room-border/10 bg-room-inset/40 px-2.5 py-1 text-xs text-room-text"
                                 >
                                     {sectionTitle}
                                 </li>
@@ -55,7 +55,7 @@ export function CommunityRoomInvitation({ participantIdentity }: CommunityRoomIn
                 </div>
                 <Link
                     href={createCommunityRoomLink(participantIdentity)}
-                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-cyan-300 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06131b]"
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-room-action px-5 py-2.5 text-sm font-bold text-room-action-foreground transition hover:bg-room-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent focus-visible:ring-offset-2 focus-visible:ring-offset-room-background"
                 >
                     {CZECH_COMMUNITY_INVITATION_COPY.linkLabel}
                     <ArrowUpRight className="h-4 w-4" aria-hidden="true" />

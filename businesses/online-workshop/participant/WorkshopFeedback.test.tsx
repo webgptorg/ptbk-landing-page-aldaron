@@ -19,14 +19,14 @@ describe('workshop wrap-up feedback', () => {
 
         fireEvent.mouseEnter(thirdStar);
 
-        expect(firstStar.className).toContain('text-amber-200');
-        expect(thirdStar.className).toContain('text-amber-200');
-        expect(fourthStar.className).toContain('text-slate-500');
+        expect(firstStar.className).toContain('text-room-warning');
+        expect(thirdStar.className).toContain('text-room-warning');
+        expect(fourthStar.className).toContain('text-room-subtle');
 
         fireEvent.mouseLeave(screen.getByRole('group', { name: 'Hodnocení workshopu' }));
 
-        expect(firstStar.className).toContain('text-slate-500');
-        expect(thirdStar.className).toContain('text-slate-500');
+        expect(firstStar.className).toContain('text-room-subtle');
+        expect(thirdStar.className).toContain('text-room-subtle');
     });
 
     it('asks for improvement first after a lower score and persists each answered step', async () => {

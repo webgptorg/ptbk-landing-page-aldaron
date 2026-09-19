@@ -51,7 +51,7 @@ type WorkshopCalendarMonthProps = {
  */
 function WorkshopCalendarLegend() {
     return (
-        <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-400">
+        <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-room-muted">
             {WORKSHOP_PHASE_VALUES.map((phase) => {
                 const { label, markClassName } = getWorkshopPhaseAppearance(phase);
 
@@ -109,18 +109,18 @@ export function WorkshopCalendarMonth({ listings, locale, timeZone, todayDayKey 
                     type="button"
                     aria-label={CALENDAR_MONTH_COPY.previousMonthLabel}
                     onClick={() => showMonth(shiftCalendarMonthKey(shownMonthKey, -1))}
-                    className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-cyan-200/50 hover:text-white"
+                    className="rounded-lg border border-room-border/10 bg-room-overlay/5 p-2 text-room-text transition hover:border-room-accent/50 hover:text-room-heading"
                 >
                     <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <div className="flex min-w-0 flex-col items-center">
-                    <span className="truncate text-sm font-bold capitalize text-white">
+                    <span className="truncate text-sm font-bold capitalize text-room-heading">
                         {formatCalendarMonthTitle(shownMonthKey, locale)}
                     </span>
                     <button
                         type="button"
                         onClick={() => showMonth(getCalendarMonthKey(todayDayKey))}
-                        className="text-[11px] font-semibold text-cyan-200 transition hover:text-cyan-100"
+                        className="text-[11px] font-semibold text-room-accent transition hover:text-room-accent"
                     >
                         {CALENDAR_MONTH_COPY.todayLabel}
                     </button>
@@ -129,13 +129,13 @@ export function WorkshopCalendarMonth({ listings, locale, timeZone, todayDayKey 
                     type="button"
                     aria-label={CALENDAR_MONTH_COPY.nextMonthLabel}
                     onClick={() => showMonth(shiftCalendarMonthKey(shownMonthKey, 1))}
-                    className="rounded-lg border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-cyan-200/50 hover:text-white"
+                    className="rounded-lg border border-room-border/10 bg-room-overlay/5 p-2 text-room-text transition hover:border-room-accent/50 hover:text-room-heading"
                 >
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </button>
             </div>
 
-            <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase text-slate-500">
+            <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase text-room-subtle">
                 {weekDayLabels.map((weekDayLabel) => (
                     <span key={weekDayLabel}>{weekDayLabel}</span>
                 ))}
@@ -161,12 +161,12 @@ export function WorkshopCalendarMonth({ listings, locale, timeZone, todayDayKey 
             <WorkshopCalendarLegend />
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-bold capitalize text-white">{shownListingsTitle}</h3>
+                <h3 className="text-sm font-bold capitalize text-room-heading">{shownListingsTitle}</h3>
                 {selectedDayKey !== null && (
                     <button
                         type="button"
                         onClick={() => setSelectedDayKey(null)}
-                        className="text-xs font-semibold text-cyan-200 transition hover:text-cyan-100"
+                        className="text-xs font-semibold text-room-accent transition hover:text-room-accent"
                     >
                         {CALENDAR_MONTH_COPY.wholeMonthLabel}
                     </button>
@@ -174,7 +174,7 @@ export function WorkshopCalendarMonth({ listings, locale, timeZone, todayDayKey 
             </div>
 
             {shownListings.length === 0 ? (
-                <p className="mt-2 rounded-xl border border-dashed border-white/15 bg-white/[0.025] px-4 py-4 text-sm text-slate-400">
+                <p className="mt-2 rounded-xl border border-dashed border-room-border/15 bg-room-overlay/[0.025] px-4 py-4 text-sm text-room-muted">
                     {CALENDAR_MONTH_COPY.emptyMonthMessage}
                 </p>
             ) : (

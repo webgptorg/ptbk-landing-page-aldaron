@@ -43,11 +43,11 @@ export function CommunityProjectCard({
     const isApproved = project.status === 'approved';
 
     return (
-        <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0b202b] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:border-cyan-300/35 hover:shadow-cyan-950/30">
+        <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-room-border/10 bg-room-surface shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:border-room-accent/35 hover:shadow-cyan-950/30">
             {isApproved ? (
                 <Link
                     href={createCommunityProjectPath(project.id)}
-                    className="block aspect-[16/9] overflow-hidden bg-slate-900"
+                    className="block aspect-[16/9] overflow-hidden bg-room-hover"
                 >
                     <CommunityProjectPreviewImage
                         imageUrl={project.previewImageUrl}
@@ -56,33 +56,33 @@ export function CommunityProjectCard({
                     />
                 </Link>
             ) : (
-                <div className="aspect-[16/9] overflow-hidden bg-slate-900">
+                <div className="aspect-[16/9] overflow-hidden bg-room-hover">
                     <CommunityProjectPreviewImage imageUrl={project.previewImageUrl} title={project.title} />
                 </div>
             )}
             <div className="flex min-w-0 flex-1 flex-col p-4">
-                <p className="truncate text-xs font-medium text-cyan-200/80">{getProjectHost(project.url)}</p>
+                <p className="truncate text-xs font-medium text-room-accent/80">{getProjectHost(project.url)}</p>
                 {isApproved ? (
                     <Link
                         href={createCommunityProjectPath(project.id)}
-                        className="mt-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                        className="mt-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-room-accent"
                     >
-                        <h3 className="line-clamp-2 text-base font-bold leading-snug text-white transition group-hover:text-cyan-200">
+                        <h3 className="line-clamp-2 text-base font-bold leading-snug text-room-heading transition group-hover:text-room-accent">
                             {project.title}
                         </h3>
                     </Link>
                 ) : (
-                    <h3 className="mt-1.5 line-clamp-2 text-base font-bold leading-snug text-white">{project.title}</h3>
+                    <h3 className="mt-1.5 line-clamp-2 text-base font-bold leading-snug text-room-heading">{project.title}</h3>
                 )}
                 {project.status === 'pending' && (
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-200">
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-room-warning">
                         <Clock3 className="h-3.5 w-3.5" /> Čeká na schválení
                     </p>
                 )}
-                <p className="mt-2 line-clamp-3 text-sm leading-5 text-slate-400">
+                <p className="mt-2 line-clamp-3 text-sm leading-5 text-room-muted">
                     {project.description || 'Autor zatím nepřidal popis projektu.'}
                 </p>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-room-border/10 pt-3">
                     <CommunityProjectVoting
                         upvoteCount={project.upvoteCount}
                         downvoteCount={project.downvoteCount}
@@ -91,11 +91,11 @@ export function CommunityProjectCard({
                         isVotingOffered={isApproved}
                         onVote={(vote) => onVote(project.id, vote)}
                     />
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 text-xs text-room-muted">
                         {isApproved && (
                             <Link
                                 href={createCommunityProjectPath(project.id)}
-                                className="inline-flex items-center gap-1 rounded-md px-1 py-1 text-slate-300 hover:text-cyan-200"
+                                className="inline-flex items-center gap-1 rounded-md px-1 py-1 text-room-text hover:text-room-accent"
                             >
                                 <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" /> Diskuze
                             </Link>
@@ -104,21 +104,21 @@ export function CommunityProjectCard({
                             href={project.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md px-1 py-1 text-slate-300 hover:text-cyan-200"
+                            className="inline-flex items-center gap-1 rounded-md px-1 py-1 text-room-text hover:text-room-accent"
                         >
                             <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /> Otevřít
                         </a>
                     </div>
                 </div>
-                <p className="mt-3 text-xs text-slate-500">Sdílí {project.authorName}</p>
+                <p className="mt-3 text-xs text-room-subtle">Sdílí {project.authorName}</p>
                 {isModerationOffered && (
-                    <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-room-border/10 pt-3">
                         {project.status !== 'approved' && (
                             <button
                                 type="button"
                                 disabled={isModerating}
                                 onClick={() => void onModerate(project.id, 'approved')}
-                                className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 px-2.5 py-1 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/10 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 rounded-full border border-room-success/30 px-2.5 py-1 text-xs font-semibold text-room-success transition hover:bg-room-success/10 disabled:opacity-50"
                             >
                                 <Check className="h-3.5 w-3.5" /> Schválit
                             </button>
@@ -128,7 +128,7 @@ export function CommunityProjectCard({
                                 type="button"
                                 disabled={isModerating}
                                 onClick={() => void onModerate(project.id, 'rejected')}
-                                className="inline-flex items-center gap-1 rounded-full border border-rose-300/30 px-2.5 py-1 text-xs font-semibold text-rose-100 transition hover:bg-rose-300/10 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 rounded-full border border-room-danger/30 px-2.5 py-1 text-xs font-semibold text-room-danger transition hover:bg-room-danger/10 disabled:opacity-50"
                             >
                                 <X className="h-3.5 w-3.5" /> Zamítnout
                             </button>

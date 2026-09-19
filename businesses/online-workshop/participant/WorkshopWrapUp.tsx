@@ -50,14 +50,14 @@ export function WorkshopWrapUp({
     return (
         <div className="relative px-5 py-7 sm:px-8 sm:py-10">
             <div className="mx-auto max-w-2xl">
-                <div className="flex items-center gap-2 text-cyan-200">
+                <div className="flex items-center gap-2 text-room-accent">
                     <PartyPopper className="h-5 w-5" aria-hidden="true" />
                     <span className="text-xs font-bold uppercase tracking-[0.16em]">Workshop je u konce</span>
                 </div>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-room-heading sm:text-4xl">
                     Děkujeme, že jste byli u toho!
                 </h2>
-                <p className="mt-3 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+                <p className="mt-3 max-w-xl text-sm leading-7 text-room-text sm:text-base">
                     Budeme rádi za krátkou zpětnou vazbu. Zabere jen chvilku a pomůže nám připravit další setkání ještě
                     lépe.
                 </p>
@@ -66,7 +66,7 @@ export function WorkshopWrapUp({
                     <button
                         type="button"
                         onClick={onRewatchVideo}
-                        className="mt-5 inline-flex items-center gap-2 rounded-full bg-amber-300 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-300/10 transition hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081a24]"
+                        className="mt-5 inline-flex items-center gap-2 rounded-full bg-room-warning px-5 py-2.5 text-sm font-bold text-room-action-foreground shadow-lg shadow-amber-300/10 transition hover:bg-room-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-warning focus-visible:ring-offset-2 focus-visible:ring-offset-room-surface"
                     >
                         <Play className="h-4 w-4" aria-hidden="true" /> Přehrát video znovu
                     </button>
@@ -85,18 +85,18 @@ export function WorkshopWrapUp({
                 {followUpContentBlock !== null && (
                     <a
                         href={`#workshop-material-${followUpContentBlock.id}`}
-                        className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-200/25 bg-amber-300/[0.08] p-4 text-left transition hover:border-amber-200/60 hover:bg-amber-300/[0.13]"
+                        className="mt-5 flex items-start gap-3 rounded-2xl border border-room-warning/25 bg-room-warning/[0.08] p-4 text-left transition hover:border-room-warning/60 hover:bg-room-warning/[0.13]"
                     >
-                        <BookOpenText className="mt-0.5 h-5 w-5 shrink-0 text-amber-200" aria-hidden="true" />
+                        <BookOpenText className="mt-0.5 h-5 w-5 shrink-0 text-room-warning" aria-hidden="true" />
                         <span className="min-w-0 flex-1">
-                            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-amber-200">
+                            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-room-warning">
                                 Navazující materiál
                             </span>
-                            <span className="mt-1 block text-sm font-bold text-white">
+                            <span className="mt-1 block text-sm font-bold text-room-heading">
                                 {followUpContentBlock.title || 'Otevřít doporučený materiál z workshopu'}
                             </span>
                         </span>
-                        <ArrowDown className="mt-2 h-4 w-4 shrink-0 text-amber-100" aria-hidden="true" />
+                        <ArrowDown className="mt-2 h-4 w-4 shrink-0 text-room-warning" aria-hidden="true" />
                     </a>
                 )}
             </div>

@@ -23,7 +23,7 @@ export function CommunityMembershipTestModeNote({ isPaymentInTestMode }: Communi
     }
 
     return (
-        <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-300/25 bg-amber-300/[0.08] px-3 py-2.5 text-xs leading-5 text-amber-100">
+        <p className="mt-4 flex items-start gap-2 rounded-xl border border-room-warning/25 bg-room-warning/[0.08] px-3 py-2.5 text-xs leading-5 text-room-warning">
             <FlaskConical className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             <span>
                 Testovací režim platební brány – žádné peníze se nestrhnou. Zaplaťte kartou{' '}

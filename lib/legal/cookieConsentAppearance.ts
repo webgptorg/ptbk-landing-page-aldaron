@@ -1,7 +1,8 @@
 import { AI_TA_KRAJTA_COLORS, AI_TA_KRAJTA_PATH } from '@/businesses/ai-ta-krajta/config';
+import { isWorkshopRoomPath } from '@/lib/workshops/workshopRoomTheme';
 import type { CSSProperties } from 'react';
 
-export type CookieConsentTheme = 'light' | 'dark' | 'podcast';
+export type CookieConsentTheme = 'light' | 'dark' | 'podcast' | 'room';
 
 const DARK_COOKIE_CONSENT_PATHS = ['/ai-supervize', '/ai-supervize-mini', '/cs/online-workshop', '/cs/komunita'];
 
@@ -17,5 +18,6 @@ export function getCookieConsentTheme(pathname: string | null): CookieConsentThe
     const isWithinPath = (path: string) => normalizedPathname === path || normalizedPathname.startsWith(`${path}/`);
 
     if (isWithinPath(AI_TA_KRAJTA_PATH)) return 'podcast';
+    if (isWorkshopRoomPath(normalizedPathname)) return 'room';
     return DARK_COOKIE_CONSENT_PATHS.some(isWithinPath) ? 'dark' : 'light';
 }

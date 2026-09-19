@@ -1,9 +1,9 @@
 import type { WorkshopPhase } from '@/lib/workshops/workshopPhase';
 
 /**
- * Backgrounds a phase is drawn on: the light administration and the dark room a member reads
+ * Backgrounds a phase is drawn on: the light administration and a room following the member's theme.
  */
-export type WorkshopPhaseTone = 'light' | 'dark';
+export type WorkshopPhaseTone = 'light' | 'room';
 
 /**
  * How one phase names itself and which colour says so
@@ -44,10 +44,10 @@ const WORKSHOP_PHASE_APPEARANCES: Readonly<Record<WorkshopPhase, WorkshopPhaseAp
         label: 'Probíhá',
         badgeClassNameByTone: {
             light: 'bg-emerald-100 text-emerald-800',
-            dark: 'bg-emerald-400/15 text-emerald-200 ring-1 ring-inset ring-emerald-300/40',
+            room: 'bg-room-success/15 text-room-success ring-1 ring-inset ring-room-success/40',
         },
-        calendarDayClassName: 'border-emerald-300/50 bg-emerald-400/15 text-emerald-50',
-        markClassName: 'bg-emerald-300',
+        calendarDayClassName: 'border-room-success/50 bg-room-success/15 text-room-success',
+        markClassName: 'bg-room-success',
     },
     // Note: A term which has only just been held is neither what is happening nor what is long over, and it is drawn
     //       as exactly that: warm enough to be noticed among the history, quiet enough never to be mistaken for a
@@ -56,10 +56,10 @@ const WORKSHOP_PHASE_APPEARANCES: Readonly<Record<WorkshopPhase, WorkshopPhaseAp
         label: 'Právě proběhlo',
         badgeClassNameByTone: {
             light: 'bg-amber-100 text-amber-800',
-            dark: 'bg-amber-300/15 text-amber-100 ring-1 ring-inset ring-amber-300/40',
+            room: 'bg-room-warning/15 text-room-warning ring-1 ring-inset ring-room-warning/40',
         },
-        calendarDayClassName: 'border-amber-300/40 bg-amber-300/10 text-amber-50',
-        markClassName: 'bg-amber-300',
+        calendarDayClassName: 'border-room-warning/40 bg-room-warning/10 text-room-warning',
+        markClassName: 'bg-room-warning',
     },
     // Note: This stays distinct from the ordinary upcoming cyan so the special badge is useful even when a reader
     //       cannot infer a date at a glance.
@@ -67,28 +67,28 @@ const WORKSHOP_PHASE_APPEARANCES: Readonly<Record<WorkshopPhase, WorkshopPhaseAp
         label: 'Do týdne',
         badgeClassNameByTone: {
             light: 'bg-violet-100 text-violet-800',
-            dark: 'bg-violet-300/15 text-violet-100 ring-1 ring-inset ring-violet-300/40',
+            room: 'bg-room-upcoming/15 text-room-upcoming ring-1 ring-inset ring-room-upcoming/40',
         },
-        calendarDayClassName: 'border-violet-300/40 bg-violet-300/10 text-violet-50',
-        markClassName: 'bg-violet-300',
+        calendarDayClassName: 'border-room-upcoming/40 bg-room-upcoming/10 text-room-upcoming',
+        markClassName: 'bg-room-upcoming',
     },
     upcoming: {
         label: 'Nadchází',
         badgeClassNameByTone: {
             light: 'bg-cyan-100 text-cyan-800',
-            dark: 'bg-cyan-300/15 text-cyan-100 ring-1 ring-inset ring-cyan-300/40',
+            room: 'bg-room-accent/15 text-room-accent ring-1 ring-inset ring-room-accent/40',
         },
-        calendarDayClassName: 'border-cyan-300/40 bg-cyan-300/10 text-cyan-50',
-        markClassName: 'bg-cyan-300',
+        calendarDayClassName: 'border-room-accent/40 bg-room-accent/10 text-room-accent',
+        markClassName: 'bg-room-action',
     },
     past: {
         label: 'Proběhlo',
         badgeClassNameByTone: {
             light: 'bg-slate-100 text-slate-500',
-            dark: 'bg-white/5 text-slate-400 ring-1 ring-inset ring-white/10',
+            room: 'bg-room-overlay/5 text-room-muted ring-1 ring-inset ring-room-border/10',
         },
-        calendarDayClassName: 'border-slate-300/25 bg-slate-300/10 text-slate-300',
-        markClassName: 'bg-slate-400',
+        calendarDayClassName: 'border-room-muted/25 bg-room-muted/10 text-room-text',
+        markClassName: 'bg-room-muted',
     },
 };
 

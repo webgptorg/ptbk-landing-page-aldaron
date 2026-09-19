@@ -1,5 +1,14 @@
 # Current preversion
 
+- Added light and dark modes to `/cs/komunita` and `/cs/online-workshop/participant`, including their waiting rooms
+  and shared project views. One accessible appearance control follows the device setting by default and remembers an
+  explicit choice across visits, tabs, and rooms. Shared palette tokens cover chat, polls, calendars, event cards,
+  materials and Markdown, project and membership dialogs, and cookie controls without duplicating the room UI.
+  Switching appearance preserves typed names, e-mails, chat drafts, and the connected session.
+
+- Allowed one isolated E2E retry for transient development-server or external-database failures. Each retry runs
+  the complete test with its original assertions; failed-attempt traces remain available for diagnosis.
+
 - Improved the shared event mini cards on `/cs/komunita`: removed star ratings and their unused feedback queries,
   enlarged project previews with a wide image, readable title and description, and a repository fallback. Ended
   workshops show a replay-length badge using the total video duration minus the configured recording start offset.

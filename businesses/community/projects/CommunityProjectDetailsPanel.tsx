@@ -20,31 +20,31 @@ function getProjectHost(url: string): string {
  */
 export function CommunityProjectDetailsPanel({ project }: CommunityProjectDetailsPanelProps) {
     return (
-        <section className="overflow-hidden rounded-2xl border border-white/[0.09] bg-[#0b202b] shadow-xl shadow-black/10">
-            <div className="aspect-[16/8] bg-slate-950">
+        <section className="overflow-hidden rounded-2xl border border-room-border/[0.09] bg-room-surface shadow-xl shadow-black/10">
+            <div className="aspect-[16/8] bg-room-inset">
                 <CommunityProjectPreviewImage imageUrl={project.previewImageUrl} title={project.title} />
             </div>
             <div className="p-5 sm:p-6">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-cyan-200">{getProjectHost(project.url)}</p>
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">{project.title}</h1>
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-300">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-room-accent">{getProjectHost(project.url)}</p>
+                <h1 className="mt-2 text-2xl font-bold tracking-tight text-room-heading sm:text-3xl">{project.title}</h1>
+                <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-room-text">
                     {project.description || 'Autor zatím nepřidal podrobnější popis projektu.'}
                 </p>
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
-                    <span className="inline-flex items-center gap-2 text-sm text-slate-400">
-                        <UserRound className="h-4 w-4 text-cyan-200" /> Sdílí {project.authorName}
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-room-border/10 pt-4">
+                    <span className="inline-flex items-center gap-2 text-sm text-room-muted">
+                        <UserRound className="h-4 w-4 text-room-accent" /> Sdílí {project.authorName}
                     </span>
                     <a
                         href={project.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-200"
+                        className="inline-flex items-center gap-2 rounded-full bg-room-action px-4 py-2 text-sm font-bold text-room-action-foreground transition hover:bg-room-action-hover"
                     >
                         <ExternalLink className="h-4 w-4" /> Otevřít projekt
                     </a>
                 </div>
-                <p className="mt-5 flex items-center gap-2 text-sm text-slate-400">
-                    <MessageCircle className="h-4 w-4 text-cyan-300" /> Diskuze je vpravo; autor projektu ji moderuje.
+                <p className="mt-5 flex items-center gap-2 text-sm text-room-muted">
+                    <MessageCircle className="h-4 w-4 text-room-accent" /> Diskuze je vpravo; autor projektu ji moderuje.
                 </p>
             </div>
         </section>

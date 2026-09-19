@@ -4,6 +4,7 @@ import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { connectToCommunityProjectDiscussion } from '@/businesses/community/projects/communityProjectsApi';
 import { CommunityProjectDetailsPanel } from '@/businesses/community/projects/CommunityProjectDetailsPanel';
 import { OnlineWorkshopParticipantPage } from '@/businesses/online-workshop/participant/OnlineWorkshopParticipantPage';
+import { WorkshopRoomWaitingShell } from '@/components/workshops/WorkshopRoomWaitingShell';
 import type { CommunityProject } from '@/lib/community-projects/communityProjectTypes';
 import { ArrowLeft, LoaderCircle, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
@@ -23,10 +24,10 @@ function CommunityProjectDiscussionAccess({
     readonly onConnect: () => Promise<void>;
 }) {
     return (
-        <main className="flex min-h-screen items-center justify-center bg-[#07151d] px-6 text-slate-200">
-            <div className="max-w-md rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center shadow-2xl">
-                <h1 className="text-2xl font-bold text-white">Diskuze projektu je pro členy komunity</h1>
-                <p className="mt-3 text-sm leading-6 text-slate-400">
+        <main className="flex min-h-[calc(100svh-4.5rem)] items-center justify-center bg-room-background px-6 text-room-text">
+            <div className="max-w-md rounded-2xl border border-room-border/10 bg-room-overlay/[0.04] p-8 text-center shadow-2xl">
+                <h1 className="text-2xl font-bold text-room-heading">Diskuze projektu je pro členy komunity</h1>
+                <p className="mt-3 text-sm leading-6 text-room-muted">
                     {errorMessage ?? 'Ověřujeme vaše připojení do komunity.'}
                 </p>
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -34,14 +35,14 @@ function CommunityProjectDiscussionAccess({
                         type="button"
                         onClick={() => void onConnect()}
                         disabled={isConnecting}
-                        className="inline-flex items-center gap-2 rounded-full bg-cyan-300 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-200 disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-full bg-room-action px-5 py-2.5 text-sm font-bold text-room-action-foreground hover:bg-room-action-hover disabled:opacity-60"
                     >
                         {isConnecting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                         Ověřit připojení
                     </button>
                     <Link
                         href={COMMUNITY_PATH}
-                        className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-bold text-slate-100 hover:bg-white/10"
+                        className="inline-flex items-center gap-2 rounded-full border border-room-border/15 px-5 py-2.5 text-sm font-bold text-room-heading hover:bg-room-overlay/10"
                     >
                         <ArrowLeft className="h-4 w-4" /> Otevřít komunitu
                     </Link>
@@ -82,7 +83,11 @@ export function CommunityProjectDiscussionPage({ project }: CommunityProjectDisc
     }, [connect]);
 
     if (!isConnected) {
-        return <CommunityProjectDiscussionAccess errorMessage={errorMessage} isConnecting={isConnecting} onConnect={connect} />;
+        return (
+            <WorkshopRoomWaitingShell>
+                <CommunityProjectDiscussionAccess errorMessage={errorMessage} isConnecting={isConnecting} onConnect={connect} />
+            </WorkshopRoomWaitingShell>
+        );
     }
 
     return (

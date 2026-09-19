@@ -50,7 +50,7 @@ function StripeSubscriptionPortalButton({
             variant="outline"
             disabled={isMembershipCancellationChanging || isMembershipPortalOpening}
             onClick={() => void onOpenMembershipPortal()}
-            className="rounded-full border-cyan-300/35 bg-transparent text-cyan-100 hover:bg-cyan-300/10 hover:text-cyan-50"
+            className="rounded-full border-room-accent/35 bg-transparent text-room-accent hover:bg-room-accent/10 hover:text-room-accent"
         >
             {isMembershipPortalOpening ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
@@ -93,12 +93,12 @@ export function CommunityMembershipSubscriptionManagement({
 
     if (membership.isCancellationScheduled) {
         return (
-            <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.08] p-4">
+            <section className="mt-5 rounded-2xl border border-room-warning/25 bg-room-warning/[0.08] p-4">
                 <div className="flex items-start gap-3">
-                    <CalendarClock className="mt-0.5 h-5 w-5 shrink-0 text-amber-200" aria-hidden="true" />
+                    <CalendarClock className="mt-0.5 h-5 w-5 shrink-0 text-room-warning" aria-hidden="true" />
                     <div>
-                        <h3 className="font-semibold text-amber-50">Ukončení je naplánované</h3>
-                        <p className="mt-1 text-sm leading-6 text-amber-100/85">
+                        <h3 className="font-semibold text-room-warning">Ukončení je naplánované</h3>
+                        <p className="mt-1 text-sm leading-6 text-room-warning/85">
                             Další platbu už nestrhneme. Placené výhody vám zůstanou {paidAccessEndDescription}; potom
                             se členství automaticky přepne na Free členství.
                         </p>
@@ -108,7 +108,7 @@ export function CommunityMembershipSubscriptionManagement({
                 {errorMessage !== null && (
                     <p
                         role="alert"
-                        className="mt-4 rounded-xl border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-sm text-rose-100"
+                        className="mt-4 rounded-xl border border-room-danger/25 bg-room-danger/10 px-3 py-2 text-sm text-room-danger"
                     >
                         {errorMessage}
                     </p>
@@ -119,7 +119,7 @@ export function CommunityMembershipSubscriptionManagement({
                         type="button"
                         disabled={isMembershipManagementChanging}
                         onClick={() => void onReactivate()}
-                        className="rounded-full bg-amber-200 font-bold text-slate-950 hover:bg-amber-100"
+                        className="rounded-full bg-room-warning font-bold text-room-action-foreground hover:bg-room-warning"
                     >
                         {isMembershipCancellationChanging ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
@@ -139,9 +139,9 @@ export function CommunityMembershipSubscriptionManagement({
     }
 
     return (
-        <section className="mt-5 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-            <h3 className="font-semibold text-white">Správa členství</h3>
-            <p className="mt-1 text-sm leading-6 text-slate-300">
+        <section className="mt-5 rounded-2xl border border-room-border/10 bg-room-inset/40 p-4">
+            <h3 className="font-semibold text-room-heading">Správa členství</h3>
+            <p className="mt-1 text-sm leading-6 text-room-text">
                 Členství se obnovuje každý měsíc. Když jeho obnovení zrušíte, placené výhody vám zůstanou{' '}
                 {paidAccessEndDescription}.
             </p>
@@ -149,7 +149,7 @@ export function CommunityMembershipSubscriptionManagement({
             {errorMessage !== null && (
                 <p
                     role="alert"
-                    className="mt-4 rounded-xl border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-sm text-rose-100"
+                    className="mt-4 rounded-xl border border-room-danger/25 bg-room-danger/10 px-3 py-2 text-sm text-room-danger"
                 >
                     {errorMessage}
                 </p>
@@ -169,29 +169,29 @@ export function CommunityMembershipSubscriptionManagement({
                         type="button"
                         variant="outline"
                         disabled={isMembershipManagementChanging}
-                        className="mt-3 rounded-full border-rose-300/35 bg-transparent text-rose-100 hover:bg-rose-300/10 hover:text-rose-50"
+                        className="mt-3 rounded-full border-room-danger/35 bg-transparent text-room-danger hover:bg-room-danger/10 hover:text-room-danger"
                     >
                         Zrušit placené členství
                     </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="border-white/10 bg-[#0a1d27] text-slate-100 sm:rounded-2xl">
+                <AlertDialogContent className="workshop-room border-room-border/10 bg-room-surface text-room-heading sm:rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Opravdu chcete zrušit placené členství?</AlertDialogTitle>
-                        <AlertDialogDescription className="leading-6 text-slate-300">
+                        <AlertDialogTitle className="text-room-heading">Opravdu chcete zrušit placené členství?</AlertDialogTitle>
+                        <AlertDialogDescription className="leading-6 text-room-text">
                             Další platbu už nestrhneme. Placené výhody vám přesto zůstanou {paidAccessEndDescription}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel
                             disabled={isMembershipManagementChanging}
-                            className="border-white/20 bg-transparent text-slate-200 hover:bg-white/10 hover:text-white"
+                            className="border-room-border/20 bg-transparent text-room-text hover:bg-room-overlay/10 hover:text-room-heading"
                         >
                             Nechat aktivní
                         </AlertDialogCancel>
                         <AlertDialogAction
                             disabled={isMembershipManagementChanging}
                             onClick={(event) => void handleCancellationConfirmation(event)}
-                            className="bg-rose-500 text-white hover:bg-rose-400"
+                            className="bg-room-danger text-room-action-foreground hover:bg-room-danger/90"
                         >
                             {isMembershipCancellationChanging && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />

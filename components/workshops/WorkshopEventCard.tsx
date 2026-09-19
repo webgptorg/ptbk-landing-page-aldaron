@@ -61,7 +61,7 @@ function WorkshopEventCardRecordingDuration({
     readonly recordingDurationSeconds: number;
 }) {
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-300/10 px-2.5 py-1 text-xs font-medium tabular-nums text-cyan-100">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-room-accent/10 px-2.5 py-1 text-xs font-medium tabular-nums text-room-accent">
             <CirclePlay className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Záznam {formatMediaDuration(recordingDurationSeconds)}
         </span>
@@ -76,30 +76,30 @@ function WorkshopEventCardProjectPreview({ project }: { readonly project: Worksh
     const isRepositoryTitle = project.title === project.repositoryName;
 
     return (
-        <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-slate-950/50">
-            <div className="relative aspect-[2/1] overflow-hidden bg-slate-900">
+        <div className="mt-4 overflow-hidden rounded-lg border border-room-border/10 bg-room-inset/50">
+            <div className="relative aspect-[2/1] overflow-hidden bg-room-hover">
                 <PublicWebPagePreviewImage
                     imageUrl={project.previewImageUrl}
                     alt={`Náhled projektu ${project.title}`}
                     fallbackLabel="Náhled projektu není k dispozici"
-                    fallback={<Github className="mt-6 h-9 w-9 text-cyan-200/80" aria-hidden="true" />}
+                    fallback={<Github className="mt-6 h-9 w-9 text-room-accent/80" aria-hidden="true" />}
                     className="object-top motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.025] motion-safe:group-focus-visible:scale-[1.025]"
                 />
-                <span className="absolute left-3 top-3 rounded-full border border-white/15 bg-slate-950/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-cyan-100">
+                <span className="absolute left-3 top-3 rounded-full border border-room-border/15 bg-room-inset/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-room-accent">
                     Projekt workshopu
                 </span>
             </div>
             <div className="min-w-0 p-3">
-                <span className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-100">
+                <span className="line-clamp-2 break-words text-sm font-semibold leading-5 text-room-heading">
                     {project.title}
                 </span>
                 {project.description !== '' && (
-                    <span className="mt-1 line-clamp-2 break-words text-xs font-normal leading-5 text-slate-400">
+                    <span className="mt-1 line-clamp-2 break-words text-xs font-normal leading-5 text-room-muted">
                         {project.description}
                     </span>
                 )}
                 {!isRepositoryTitle && (
-                    <span className="mt-2 flex min-w-0 items-center gap-1.5 text-slate-400">
+                    <span className="mt-2 flex min-w-0 items-center gap-1.5 text-room-muted">
                         <Github className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         <span className="truncate font-mono text-[11px]">{project.repositoryName}</span>
                     </span>
@@ -131,25 +131,25 @@ export function WorkshopEventCard({ listing, locale, timeZone, todayDayKey }: Wo
         <Button
             asChild
             variant="outline"
-            className="group h-full w-full items-start whitespace-normal rounded-xl border-white/10 bg-white/[0.035] p-4 text-left text-slate-100 hover:border-cyan-200/50 hover:bg-cyan-300/10 hover:text-white focus-visible:ring-cyan-200"
+            className="group h-full w-full items-start whitespace-normal rounded-xl border-room-border/10 bg-room-overlay/[0.035] p-4 text-left text-room-heading hover:border-room-accent/50 hover:bg-room-accent/10 hover:text-room-heading focus-visible:ring-room-accent"
         >
             <Link href={link} {...(isEventHeldExternally ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                 <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
                         <span className="min-w-0 break-words font-semibold leading-6">{workshop.title}</span>
-                        <EventLinkIcon className="mt-1 h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                        <EventLinkIcon className="mt-1 h-4 w-4 shrink-0 text-room-accent" aria-hidden="true" />
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <WorkshopPhaseBadge phase={phase} tone="dark" />
+                        <WorkshopPhaseBadge phase={phase} tone="room" />
                         {isRecordingDurationShown && (
                             <WorkshopEventCardRecordingDuration recordingDurationSeconds={recordingDurationSeconds} />
                         )}
                     </div>
-                    <span className="mt-3 flex items-center gap-1.5 text-xs font-normal text-slate-400">
+                    <span className="mt-3 flex items-center gap-1.5 text-xs font-normal text-room-muted">
                         <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         {formatEventListingDateTime(listing, todayDayKey, locale, timeZone)}
                     </span>
-                    <span className="mt-1 block break-words text-xs font-normal leading-5 text-slate-400">
+                    <span className="mt-1 block break-words text-xs font-normal leading-5 text-room-muted">
                         {getEventTypeDefinition(event.type).label} · {formatEventFormat(event)} ·{' '}
                         {formatEventPrice(event.priceCzk)}
                     </span>

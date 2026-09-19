@@ -67,15 +67,15 @@ export function WorkshopCalendarInvitation({
     };
 
     return (
-        <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4 sm:p-5">
+        <section className="mt-4 rounded-2xl border border-room-border/10 bg-room-overlay/[0.035] p-4 sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10 text-cyan-200">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-room-accent/10 text-room-accent">
                         <CalendarPlus className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
-                        <h2 className="text-sm font-bold text-white">Ať vám workshop neuteče</h2>
-                        <p className="mt-1 text-xs leading-5 text-slate-400">
+                        <h2 className="text-sm font-bold text-room-heading">Ať vám workshop neuteče</h2>
+                        <p className="mt-1 text-xs leading-5 text-room-muted">
                             Uložte si termín do kalendáře. V události najdete i odkaz zpět do této místnosti.
                         </p>
                     </div>

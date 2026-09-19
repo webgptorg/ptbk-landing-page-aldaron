@@ -1,0 +1,57 @@
+/* Semantic room colors also reach body portals. Elsewhere the provider keeps the
+   original dark defaults for shared room cards embedded in marketing pages. */
+:root {
+    --room-background: 6 19 27;
+    --room-surface: 8 26 36;
+    --room-header: 7 24 32;
+    --room-inset: 2 6 23;
+    --room-hover: 15 23 42;
+    --room-overlay: 255 255 255;
+    --room-border: 255 255 255;
+    --room-heading: 248 250 252;
+    --room-text: 226 232 240;
+    --room-muted: 148 163 184;
+    --room-subtle: 148 163 184;
+    --room-accent: 165 243 252;
+    --room-action: 103 232 249;
+    --room-action-hover: 165 243 252;
+    --room-action-foreground: 2 6 23;
+    --room-success: 167 243 208;
+    --room-warning: 253 230 138;
+    --room-danger: 253 164 175;
+    --room-upcoming: 196 181 253;
+    --room-graph-pink: 244 114 182;
+    --room-color-scheme: dark;
+    --room-focus-ring: 188 86% 53%;
+}
+
+:root[data-room-theme='light'] {
+    --room-background: 244 248 250;
+    --room-surface: 255 255 255;
+    --room-header: 255 255 255;
+    --room-inset: 241 245 249;
+    --room-hover: 226 232 240;
+    --room-overlay: 15 23 42;
+    --room-border: 15 23 42;
+    --room-heading: 15 23 42;
+    --room-text: 51 65 85;
+    --room-muted: 71 85 105;
+    --room-subtle: 82 97 118;
+    --room-accent: 21 94 117;
+    --room-action: 14 116 144;
+    --room-action-hover: 21 94 117;
+    --room-action-foreground: 255 255 255;
+    --room-success: 6 95 70;
+    --room-warning: 146 64 14;
+    --room-danger: 159 18 57;
+    --room-upcoming: 109 40 217;
+    --room-graph-pink: 190 24 93;
+    --room-color-scheme: light;
+    --room-focus-ring: 192 82% 31%;
+}
+
+/* Native controls use the palette only in rooms and their portalled dialogs. */
+.workshop-room {
+    color-scheme: var(--room-color-scheme);
+    --ring: var(--room-focus-ring);
+}

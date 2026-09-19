@@ -31,7 +31,7 @@ export function WorkshopPollOptionModeration({ option, onModerateOption }: Works
 
     return (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 pr-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-300/70">
+            <span className="inline-flex items-center gap-1 pr-1 text-[11px] font-semibold uppercase tracking-wide text-room-accent/70">
                 <ShieldCheck className="h-3 w-3" /> Moderace
             </span>
             {option.status !== 'approved' && (

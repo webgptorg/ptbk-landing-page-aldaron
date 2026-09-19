@@ -7,13 +7,13 @@ import { formatCzechWorkshopDay } from '@/lib/workshops/workshopDate';
 import { ArrowUpRight, CalendarClock, Crown, Sparkles } from 'lucide-react';
 
 const FREE_COMMUNITY_MEMBERSHIP_BADGE_CLASS_NAME =
-    'border-cyan-300/20 bg-cyan-300/[0.08] px-3 py-1.5 text-cyan-100 transition hover:border-cyan-200/40 hover:bg-cyan-300/[0.14] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#071820]';
+    'border-room-accent/20 bg-room-accent/[0.08] px-3 py-1.5 text-room-accent transition hover:border-room-accent/40 hover:bg-room-accent/[0.14] hover:text-room-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent focus-visible:ring-offset-2 focus-visible:ring-offset-room-header';
 
 const PAID_COMMUNITY_MEMBERSHIP_BADGE_CLASS_NAME =
-    'border-amber-300/25 bg-amber-300/[0.1] px-3 py-1.5 text-amber-100 transition hover:border-amber-200/45 hover:bg-amber-300/[0.15] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#071820]';
+    'border-room-warning/25 bg-room-warning/[0.1] px-3 py-1.5 text-room-warning transition hover:border-room-warning/45 hover:bg-room-warning/[0.15] hover:text-room-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-warning focus-visible:ring-offset-2 focus-visible:ring-offset-room-header';
 
 const CANCELLATION_SCHEDULED_COMMUNITY_MEMBERSHIP_BADGE_CLASS_NAME =
-    'border-rose-300/25 bg-rose-300/[0.1] px-3 py-1.5 text-rose-100 transition hover:border-rose-200/45 hover:bg-rose-300/[0.15] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#071820]';
+    'border-room-danger/25 bg-room-danger/[0.1] px-3 py-1.5 text-room-danger transition hover:border-room-danger/45 hover:bg-room-danger/[0.15] hover:text-room-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-danger focus-visible:ring-offset-2 focus-visible:ring-offset-room-header';
 
 function createCancellationScheduledMembershipLabel(currentPeriodEndsAt: string | null): string {
     return currentPeriodEndsAt === null

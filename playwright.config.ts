@@ -24,6 +24,9 @@ export default defineConfig({
     outputDir: './tests/e2e/.artifacts',
     fullyParallel: false,
     workers: 1,
+    // A cold development server or the configured external database can fail transiently. Retry the whole test in
+    // a fresh browser context once; keep its assertions and failed-attempt trace, and still fail persistent errors.
+    retries: 1,
     // The Next.js development server compiles a page or an API endpoint the first time a test reaches it, so the first
     // test which visits a page or submits into an endpoint pays for that compilation on top of its own work. The
     // budget of one test is therefore that compilation headroom rather than the time its assertions need.

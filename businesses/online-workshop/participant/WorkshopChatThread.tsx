@@ -53,8 +53,8 @@ export function WorkshopChatThread({
             className={cn(
                 'min-w-0 rounded-xl border p-4',
                 isWorkshopCommentThreadPinned(thread)
-                    ? 'border-cyan-300/30 bg-cyan-300/[0.07]'
-                    : 'border-white/[0.07] bg-white/[0.035]',
+                    ? 'border-room-accent/30 bg-room-accent/[0.07]'
+                    : 'border-room-border/[0.07] bg-room-overlay/[0.035]',
             )}
         >
             <WorkshopChatMessage
@@ -65,7 +65,7 @@ export function WorkshopChatThread({
             />
 
             {replies.length > 0 && (
-                <div className="mt-4 space-y-4 border-l border-white/10 pl-4">
+                <div className="mt-4 space-y-4 border-l border-room-border/10 pl-4">
                     {replies.map((reply) => (
                         <WorkshopChatMessage
                             key={reply.id}
@@ -81,7 +81,7 @@ export function WorkshopChatThread({
             {isReplyOffered &&
                 (isReplyFormOpen ? (
                     <WorkshopChatComposer
-                        className="mt-4 border-l border-white/10 pl-4"
+                        className="mt-4 border-l border-room-border/10 pl-4"
                         label={`Odpověď na komentář od ${comment.authorName}`}
                         placeholder="Napište odpověď…"
                         isCompact
@@ -94,7 +94,7 @@ export function WorkshopChatThread({
                         type="button"
                         onClick={() => setIsReplyFormOpen(true)}
                         aria-label={`Odpovědět na komentář od ${comment.authorName}`}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-xs text-slate-500 transition hover:border-cyan-300/30 hover:text-cyan-200"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-room-border/10 px-2.5 py-1 text-xs text-room-subtle transition hover:border-room-accent/30 hover:text-room-accent"
                     >
                         <Reply className="h-3 w-3" /> Odpovědět
                     </button>

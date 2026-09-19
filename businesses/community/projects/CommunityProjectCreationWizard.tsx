@@ -104,13 +104,13 @@ export function CommunityProjectCreationWizard({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[calc(100vh-2rem)] max-w-xl overflow-y-auto border-white/10 bg-[#0a1d27] p-0 text-slate-100">
-                <div className="border-b border-white/10 px-6 py-5">
+            <DialogContent className="workshop-room max-h-[calc(100vh-2rem)] max-w-xl overflow-y-auto border-room-border/10 bg-room-surface p-0 text-room-heading">
+                <div className="border-b border-room-border/10 px-6 py-5">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-xl text-white">
-                            <Sparkles className="h-5 w-5 text-cyan-300" /> Sdílet projekt
+                        <DialogTitle className="flex items-center gap-2 text-xl text-room-heading">
+                            <Sparkles className="h-5 w-5 text-room-accent" /> Sdílet projekt
                         </DialogTitle>
-                        <DialogDescription className="text-slate-400">
+                        <DialogDescription className="text-room-muted">
                             {step === 'url'
                                 ? '1 / 2 · Vložte odkaz. Název, popis a náhled načteme ze stránky.'
                                 : '2 / 2 · Zkontrolujte údaje, které se objeví na kartě projektu.'}
@@ -121,7 +121,7 @@ export function CommunityProjectCreationWizard({
                 {step === 'url' ? (
                     <form onSubmit={(event) => void handlePreview(event)} className="space-y-5 px-6 pb-6">
                         <div className="space-y-2">
-                            <Label htmlFor="community-project-url" className="text-slate-200">
+                            <Label htmlFor="community-project-url" className="text-room-text">
                                 URL projektu
                             </Label>
                             <Input
@@ -133,14 +133,14 @@ export function CommunityProjectCreationWizard({
                                 value={url}
                                 onChange={(event) => setUrl(event.target.value)}
                                 placeholder="https://muj-projekt.cz"
-                                className="border-white/15 bg-slate-950/70 text-white placeholder:text-slate-600"
+                                className="border-room-border/15 bg-room-inset/70 text-room-heading placeholder:text-room-subtle"
                             />
-                            <p className="text-xs leading-5 text-slate-500">
+                            <p className="text-xs leading-5 text-room-subtle">
                                 Načteme veřejný Open Graph náhled. Nezadávejte adresy interních systémů.
                             </p>
                         </div>
                         {errorMessage !== null && (
-                            <p role="alert" className="rounded-lg border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-sm text-rose-100">
+                            <p role="alert" className="rounded-lg border border-room-danger/25 bg-room-danger/10 px-3 py-2 text-sm text-room-danger">
                                 {errorMessage}
                             </p>
                         )}
@@ -148,7 +148,7 @@ export function CommunityProjectCreationWizard({
                             <Button
                                 type="submit"
                                 disabled={isPreviewLoading || url.trim() === ''}
-                                className="gap-2 bg-cyan-300 text-slate-950 hover:bg-cyan-200"
+                                className="gap-2 bg-room-action text-room-action-foreground hover:bg-room-action-hover"
                             >
                                 {isPreviewLoading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
                                 Načíst náhled <ArrowRight className="h-4 w-4" />
@@ -158,15 +158,15 @@ export function CommunityProjectCreationWizard({
                 ) : (
                     <form onSubmit={(event) => void handleSave(event)} className="space-y-5 px-6 pb-6">
                         {preview !== null && (
-                            <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/60">
+                            <div className="overflow-hidden rounded-xl border border-room-border/10 bg-room-inset/60">
                                 <div className="aspect-[16/7]">
                                     <CommunityProjectPreviewImage imageUrl={preview.previewImageUrl} title={title || preview.title} />
                                 </div>
-                                <p className="truncate px-3 py-2 text-xs text-cyan-200/80">{preview.url}</p>
+                                <p className="truncate px-3 py-2 text-xs text-room-accent/80">{preview.url}</p>
                             </div>
                         )}
                         <div className="space-y-2">
-                            <Label htmlFor="community-project-title" className="text-slate-200">
+                            <Label htmlFor="community-project-title" className="text-room-text">
                                 Název
                             </Label>
                             <Input
@@ -175,11 +175,11 @@ export function CommunityProjectCreationWizard({
                                 maxLength={200}
                                 value={title}
                                 onChange={(event) => setTitle(event.target.value)}
-                                className="border-white/15 bg-slate-950/70 text-white"
+                                className="border-room-border/15 bg-room-inset/70 text-room-heading"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="community-project-description" className="text-slate-200">
+                            <Label htmlFor="community-project-description" className="text-room-text">
                                 Popis
                             </Label>
                             <Textarea
@@ -187,11 +187,11 @@ export function CommunityProjectCreationWizard({
                                 maxLength={2000}
                                 value={description}
                                 onChange={(event) => setDescription(event.target.value)}
-                                className="min-h-28 border-white/15 bg-slate-950/70 text-white"
+                                className="min-h-28 border-room-border/15 bg-room-inset/70 text-room-heading"
                             />
                         </div>
                         {errorMessage !== null && (
-                            <p role="alert" className="rounded-lg border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-sm text-rose-100">
+                            <p role="alert" className="rounded-lg border border-room-danger/25 bg-room-danger/10 px-3 py-2 text-sm text-room-danger">
                                 {errorMessage}
                             </p>
                         )}
@@ -201,14 +201,14 @@ export function CommunityProjectCreationWizard({
                                 variant="ghost"
                                 disabled={isSaving}
                                 onClick={() => setStep('url')}
-                                className="gap-2 text-slate-300 hover:bg-white/10 hover:text-white"
+                                className="gap-2 text-room-text hover:bg-room-overlay/10 hover:text-room-heading"
                             >
                                 <ArrowLeft className="h-4 w-4" /> Změnit URL
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isSaving || title.trim() === ''}
-                                className="gap-2 bg-cyan-300 text-slate-950 hover:bg-cyan-200"
+                                className="gap-2 bg-room-action text-room-action-foreground hover:bg-room-action-hover"
                             >
                                 {isSaving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                                 Sdílet projekt

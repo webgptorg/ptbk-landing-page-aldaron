@@ -11,7 +11,7 @@ type WorkshopModerationActionProps = {
 };
 
 const MODERATION_ACTION_CLASS_NAME =
-    'inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-xs text-slate-400 transition hover:border-cyan-300/30 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40';
+    'inline-flex items-center gap-1.5 rounded-full border border-room-border/10 px-2.5 py-1 text-xs text-room-muted transition hover:border-room-accent/30 hover:text-room-accent disabled:cursor-not-allowed disabled:opacity-40';
 
 /**
  * One decision a moderator makes inside the room, written the same way wherever it is offered

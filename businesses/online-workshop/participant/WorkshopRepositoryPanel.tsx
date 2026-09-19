@@ -63,21 +63,21 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
     return (
         <article
             aria-label="Projekt workshopu"
-            className="relative scroll-mt-5 overflow-hidden rounded-2xl border border-white/10 bg-[#081a24] shadow-lg"
+            className="relative scroll-mt-5 overflow-hidden rounded-2xl border border-room-border/10 bg-room-surface shadow-lg"
         >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-room-border/[0.08] px-5 py-4">
                 <div className="min-w-0">
-                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-room-accent">
                         <Github className="h-4 w-4" aria-hidden="true" /> Projekt workshopu
                     </p>
-                    <h3 className="mt-2 break-all font-mono text-lg font-bold leading-6 text-white">
+                    <h3 className="mt-2 break-all font-mono text-lg font-bold leading-6 text-room-heading">
                         {repositoryName}
                     </h3>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     {newCommitShas.size > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-300/10 px-2.5 py-1 text-xs font-bold text-amber-200">
-                            <span className="h-2 w-2 animate-pulse rounded-full bg-amber-300" aria-hidden="true" />
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-room-warning/40 bg-room-warning/10 px-2.5 py-1 text-xs font-bold text-room-warning">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-room-warning" aria-hidden="true" />
                             {formatNewCommitCount(newCommitShas.size)}
                         </span>
                     )}
@@ -85,7 +85,7 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                         href={createGithubRepositoryUrl(repository)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-slate-950/40 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-cyan-200/70 hover:bg-slate-900"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-room-border/15 bg-room-inset/40 px-3 py-1.5 text-xs font-semibold text-room-text transition hover:border-room-accent/70 hover:bg-room-hover"
                     >
                         <Github className="h-3.5 w-3.5" aria-hidden="true" /> Repozitář
                         <ExternalLink className="h-3 w-3" aria-hidden="true" />
@@ -97,7 +97,7 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                             title={deploymentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-cyan-300 px-3 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-200"
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-room-action px-3 py-1.5 text-xs font-bold text-room-action-foreground transition hover:bg-room-action-hover"
                         >
                             <Rocket className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                             <span className="truncate">
@@ -111,11 +111,11 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
 
             <div className="space-y-3 px-5 py-4">
                 {!isProgressRead ? (
-                    <p className="flex items-center gap-2 text-sm text-slate-400">
+                    <p className="flex items-center gap-2 text-sm text-room-muted">
                         <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> Načítám commity…
                     </p>
                 ) : progress === null ? (
-                    <p className="text-sm leading-6 text-slate-400">
+                    <p className="text-sm leading-6 text-room-muted">
                         Commity repozitáře se teď nepodařilo načíst. Odkaz na projekt funguje dál a commity se objeví,
                         jakmile bude repozitář znovu dostupný.
                     </p>
@@ -147,7 +147,7 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                             href={createGithubCommitsUrlForBranchSelection(repository, repository.branch)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-200 underline underline-offset-4 hover:text-cyan-100"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-room-accent underline underline-offset-4 hover:text-room-accent"
                         >
                             Všechny commity na GitHubu <ExternalLink className="h-3 w-3" aria-hidden="true" />
                         </a>

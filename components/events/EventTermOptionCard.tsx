@@ -8,10 +8,9 @@ import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
 import type { LucideIcon } from 'lucide-react';
 
 /**
- * The two surfaces a term of an event is offered on: the bright landing page of that event and the dark room a
- * participant connects to
+ * The landing page keeps its fixed palette; the participant room follows its shared theme.
  */
-export const EVENT_TERM_APPEARANCES = ['light', 'dark'] as const;
+export const EVENT_TERM_APPEARANCES = ['light', 'room'] as const;
 
 export type EventTermAppearance = (typeof EVENT_TERM_APPEARANCES)[number];
 
@@ -48,16 +47,16 @@ const EVENT_TERM_OPTION_CARD_APPEARANCES: Readonly<
         note: 'text-slate-600',
         noteIcon: 'text-cyan-600',
     },
-    dark: {
-        card: 'border-white/10 bg-white/[0.04] hover:border-cyan-300/40',
-        selectedCard: 'border-cyan-300/70 bg-cyan-300/10 ring-2 ring-cyan-300/20',
-        heading: 'text-white',
-        title: 'text-white',
-        description: 'text-slate-300',
-        formatBadge: 'bg-white/10 text-slate-200',
-        price: 'text-slate-200',
-        note: 'text-slate-300',
-        noteIcon: 'text-cyan-300',
+    room: {
+        card: 'border-room-border/10 bg-room-overlay/[0.04] hover:border-room-accent/40',
+        selectedCard: 'border-room-accent/70 bg-room-accent/10 ring-2 ring-room-accent/20',
+        heading: 'text-room-heading',
+        title: 'text-room-heading',
+        description: 'text-room-text',
+        formatBadge: 'bg-room-overlay/10 text-room-text',
+        price: 'text-room-text',
+        note: 'text-room-text',
+        noteIcon: 'text-room-accent',
     },
 };
 

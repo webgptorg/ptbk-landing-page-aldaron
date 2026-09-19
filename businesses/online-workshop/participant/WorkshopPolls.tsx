@@ -109,10 +109,10 @@ export function WorkshopPolls({
                 return (
                     <article
                         key={poll.id}
-                        className="overflow-hidden rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-cyan-300/[0.10] to-slate-950/20 shadow-lg shadow-cyan-950/10"
+                        className="overflow-hidden rounded-2xl border border-room-accent/20 bg-gradient-to-br from-room-accent/[0.10] to-room-inset/20 shadow-lg shadow-cyan-950/10"
                     >
-                        <div className="border-b border-white/[0.08] px-5 py-4">
-                            <h2 className="text-lg font-bold leading-6 text-white">{poll.question}</h2>
+                        <div className="border-b border-room-border/[0.08] px-5 py-4">
+                            <h2 className="text-lg font-bold leading-6 text-room-heading">{poll.question}</h2>
                         </div>
 
                         <div className="space-y-2.5 p-4">
@@ -131,14 +131,14 @@ export function WorkshopPolls({
                                             onClick={() => void handleVote(poll.id, { optionId: option.id })}
                                             className={`relative flex h-auto w-full overflow-hidden rounded-xl border px-4 py-3 text-left transition ${
                                                 isSelected
-                                                    ? 'border-cyan-300/80 bg-cyan-300/[0.17] text-white hover:bg-cyan-300/[0.20]'
-                                                    : 'border-white/[0.10] bg-slate-950/30 text-slate-100 hover:border-cyan-300/35 hover:bg-white/[0.07]'
+                                                    ? 'border-room-accent/80 bg-room-accent/[0.17] text-room-heading hover:bg-room-accent/[0.20]'
+                                                    : 'border-room-border/[0.10] bg-room-inset/30 text-room-heading hover:border-room-accent/35 hover:bg-room-overlay/[0.07]'
                                             }`}
                                         >
                                             <span
                                                 aria-hidden="true"
-                                                className={`absolute inset-y-0 left-0 bg-cyan-300/[0.10] transition-[width] ${
-                                                    isSelected ? 'bg-cyan-300/[0.20]' : ''
+                                                className={`absolute inset-y-0 left-0 bg-room-accent/[0.10] transition-[width] ${
+                                                    isSelected ? 'bg-room-accent/[0.20]' : ''
                                                 }`}
                                                 style={{ width: `${percentage}%` }}
                                             />
@@ -146,8 +146,8 @@ export function WorkshopPolls({
                                                 <span
                                                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                                                         isSelected
-                                                            ? 'border-cyan-200 bg-cyan-300 text-slate-950'
-                                                            : 'border-slate-500 text-transparent'
+                                                            ? 'border-room-accent bg-room-action text-room-action-foreground'
+                                                            : 'border-room-muted text-transparent'
                                                     }`}
                                                 >
                                                     <Check className="h-3.5 w-3.5" />
@@ -159,11 +159,11 @@ export function WorkshopPolls({
                                                           one who wrote it and for the moderator who decides about it.
                                                           Nobody else ever receives it. */}
                                                 {isWaitingForApproval && (
-                                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-300/10 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
+                                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-room-warning/10 px-2 py-0.5 text-[11px] font-semibold text-room-warning">
                                                         <Clock3 className="h-3 w-3" /> Čeká na schválení
                                                     </span>
                                                 )}
-                                                <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">
+                                                <span className="shrink-0 text-xs font-semibold tabular-nums text-room-text">
                                                     {option.voteCount} · {percentage} %
                                                 </span>
                                             </span>
@@ -182,11 +182,11 @@ export function WorkshopPolls({
 
                             {poll.isOtherOptionEnabled && (
                                 <form
-                                    className="mt-3 rounded-xl border border-dashed border-cyan-300/35 bg-slate-950/20 p-3"
+                                    className="mt-3 rounded-xl border border-dashed border-room-accent/35 bg-room-inset/20 p-3"
                                     onSubmit={(event) => void handleOtherOptionSubmit(event, poll.id, isVoteAvailable)}
                                 >
                                     <label
-                                        className="block text-sm font-medium text-slate-100"
+                                        className="block text-sm font-medium text-room-heading"
                                         htmlFor={`poll-${poll.id}-other-option`}
                                     >
                                         Jiná odpověď
@@ -204,7 +204,7 @@ export function WorkshopPolls({
                                             disabled={!isVoteAvailable || isVoting}
                                             maxLength={200}
                                             placeholder="Napište vlastní odpověď"
-                                            className="border-white/[0.14] bg-slate-950/40 text-white placeholder:text-slate-400"
+                                            className="border-room-border/[0.14] bg-room-inset/40 text-room-heading placeholder:text-room-muted"
                                         />
                                         <Button
                                             type="submit"
@@ -215,7 +215,7 @@ export function WorkshopPolls({
                                         </Button>
                                     </div>
                                     {isOwnOtherOptionApprovalRequired && (
-                                        <p className="mt-2 text-xs leading-5 text-slate-400">
+                                        <p className="mt-2 text-xs leading-5 text-room-muted">
                                             Váš hlas se započítá hned, ostatní uvidí vaši odpověď až po schválení.
                                         </p>
                                     )}
@@ -224,7 +224,7 @@ export function WorkshopPolls({
                         </div>
 
                         {!poll.isClosed && interactionAvailabilityMessage !== null && (
-                            <p className="px-5 pb-4 text-xs leading-5 text-slate-400">
+                            <p className="px-5 pb-4 text-xs leading-5 text-room-muted">
                                 {interactionAvailabilityMessage}
                             </p>
                         )}

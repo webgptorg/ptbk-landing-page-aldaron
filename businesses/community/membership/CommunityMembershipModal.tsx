@@ -86,30 +86,30 @@ export function CommunityMembershipModal() {
 
     return (
         <Dialog open={membershipRoom.isMembershipModalOpen} onOpenChange={membershipRoom.setIsMembershipModalOpen}>
-            <DialogContent className="max-h-[calc(100vh-2rem)] max-w-4xl gap-0 overflow-y-auto rounded-[2rem] border-cyan-100/15 bg-[#061923] p-0 text-slate-100 shadow-[0_32px_100px_rgba(2,16,24,0.7)] [&>button]:right-5 [&>button]:top-5 [&>button]:z-20 [&>button]:rounded-full [&>button]:text-slate-300 [&>button]:hover:bg-white/10 [&>button]:hover:text-white">
+            <DialogContent className="workshop-room max-h-[calc(100vh-2rem)] max-w-4xl gap-0 overflow-y-auto rounded-[2rem] border-room-accent/15 bg-room-surface p-0 text-room-heading shadow-[0_32px_100px_rgba(2,16,24,0.7)] [&>button]:right-5 [&>button]:top-5 [&>button]:z-20 [&>button]:rounded-full [&>button]:text-room-text [&>button]:hover:bg-room-overlay/10 [&>button]:hover:text-room-heading">
                 <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute -left-28 -top-36 h-80 w-80 rounded-full bg-cyan-300/[0.08] blur-3xl" />
-                    <div className="absolute -right-24 top-32 h-72 w-72 rounded-full bg-sky-300/[0.06] blur-3xl" />
+                    <div className="absolute -left-28 -top-36 h-80 w-80 rounded-full bg-room-accent/[0.08] blur-3xl" />
+                    <div className="absolute -right-24 top-32 h-72 w-72 rounded-full bg-room-accent/[0.06] blur-3xl" />
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(180,245,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(180,245,255,0.025)_1px,transparent_1px)] bg-[size:32px_32px]" />
                 </div>
 
-                <div className="relative border-b border-white/10 bg-white/[0.015] px-5 py-5 pr-12 sm:px-7 sm:py-6">
+                <div className="relative border-b border-room-border/10 bg-room-overlay/[0.015] px-5 py-5 pr-12 sm:px-7 sm:py-6">
                     <DialogHeader className="gap-2">
                         <div className="flex items-center gap-2.5">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-100/15 bg-cyan-200/10 text-cyan-100 shadow-inner shadow-cyan-100/10">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-room-accent/15 bg-room-accent/10 text-room-accent shadow-inner shadow-cyan-100/10">
                                 <Sparkles className="h-4 w-4" aria-hidden="true" />
                             </span>
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">Členství</p>
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-room-accent">Členství</p>
                         </div>
-                        <DialogTitle className="flex items-center gap-2 text-2xl tracking-tight text-white">
-                            <Crown className="h-5 w-5 text-amber-200" aria-hidden="true" />
+                        <DialogTitle className="flex items-center gap-2 text-2xl tracking-tight text-room-heading">
+                            <Crown className="h-5 w-5 text-room-warning" aria-hidden="true" />
                             {isPaid
                                 ? isCancellationScheduled
                                     ? 'Placené členství končí'
                                     : 'Placené členství je aktivní'
                                 : 'Placené členství komunity'}
                         </DialogTitle>
-                        <DialogDescription className="max-w-2xl leading-6 text-slate-400">
+                        <DialogDescription className="max-w-2xl leading-6 text-room-muted">
                             {isPaid && membership !== null
                                 ? createPaidMembershipDescription(membership)
                                 : 'Živé webináře zůstávají zdarma. Placené členství přidává záznamy, archiv, praktické materiály a přednost pro vaše dotazy.'}
@@ -122,8 +122,8 @@ export function CommunityMembershipModal() {
                         role="status"
                         className={`relative mx-5 mt-5 flex flex-wrap items-start justify-between gap-3 rounded-2xl border px-4 py-3 text-sm shadow-lg shadow-slate-950/10 sm:mx-7 ${
                             purchaseOutcome === 'cancelled'
-                                ? 'border-amber-300/25 bg-amber-300/[0.08] text-amber-100'
-                                : 'border-emerald-300/25 bg-emerald-300/[0.09] text-emerald-100'
+                                ? 'border-room-warning/25 bg-room-warning/[0.08] text-room-warning'
+                                : 'border-room-success/25 bg-room-success/[0.09] text-room-success'
                         }`}
                     >
                         <span className="flex min-w-0 items-start gap-2">
@@ -139,7 +139,7 @@ export function CommunityMembershipModal() {
                         <button
                             type="button"
                             onClick={membershipRoom.dismissPurchaseOutcome}
-                            className="shrink-0 rounded-full p-1 transition hover:bg-white/10"
+                            className="shrink-0 rounded-full p-1 transition hover:bg-room-overlay/10"
                             aria-label="Skrýt zprávu o platbě"
                         >
                             <X className="h-4 w-4" />
@@ -149,8 +149,8 @@ export function CommunityMembershipModal() {
 
                 <div className="relative px-5 pb-5 pt-5 sm:px-7 sm:pb-7">
                     {isMembershipLoading && membership === null && (
-                        <div className="flex min-h-24 items-center justify-center text-sm text-slate-400">
-                            <LoaderCircle className="mr-2 h-5 w-5 animate-spin text-cyan-300" /> Načítám členství…
+                        <div className="flex min-h-24 items-center justify-center text-sm text-room-muted">
+                            <LoaderCircle className="mr-2 h-5 w-5 animate-spin text-room-accent" /> Načítám členství…
                         </div>
                     )}
 
@@ -178,7 +178,7 @@ export function CommunityMembershipModal() {
                     {!isMembershipLoading && !isMembershipDetailsShown && errorMessage !== null && (
                         <p
                             role="alert"
-                            className="rounded-xl border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-sm text-rose-100"
+                            className="rounded-xl border border-room-danger/25 bg-room-danger/10 px-3 py-2 text-sm text-room-danger"
                         >
                             {errorMessage}
                         </p>

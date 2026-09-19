@@ -42,7 +42,7 @@ export function PublicWebPagePreviewImage({
     return (
         <div
             role="img"
-            className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-cyan-400/20 via-slate-900 to-violet-500/20 ${className}`}
+            className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-room-accent/20 via-room-hover to-room-upcoming/20 ${className}`}
             aria-label={fallbackLabel}
         >
             {fallback}

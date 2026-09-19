@@ -80,7 +80,7 @@ export function WorkshopChatComposer({
                 autoFocus={isAutoFocused}
                 maxLength={MAXIMAL_WORKSHOP_COMMENT_LENGTH}
                 className={cn(
-                    'resize-none border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-600 focus-visible:ring-cyan-300/50',
+                    'resize-none border-room-border/10 bg-room-overlay/[0.04] text-sm text-room-heading placeholder:text-room-subtle focus-visible:ring-room-accent/50',
                     isCompact ? 'min-h-16' : 'min-h-24',
                 )}
             />
@@ -90,7 +90,7 @@ export function WorkshopChatComposer({
                     isCompact ? 'sm:justify-end' : 'sm:justify-between',
                 )}
             >
-                {!isCompact && <p className="text-[11px] text-slate-600">{MARKDOWN_FORMATTING_HINT}</p>}
+                {!isCompact && <p className="text-[11px] text-room-subtle">{MARKDOWN_FORMATTING_HINT}</p>}
                 <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                     {onCancel && (
                         <Button
@@ -98,7 +98,7 @@ export function WorkshopChatComposer({
                             size="sm"
                             variant="ghost"
                             onClick={onCancel}
-                            className="rounded-full text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                            className="rounded-full text-room-muted hover:bg-room-overlay/5 hover:text-room-text"
                         >
                             Zrušit
                         </Button>
@@ -107,7 +107,7 @@ export function WorkshopChatComposer({
                         type="submit"
                         size="sm"
                         disabled={isSubmitting || !commentBody.trim()}
-                        className="w-full rounded-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 sm:w-auto"
+                        className="w-full rounded-full bg-room-action text-room-action-foreground hover:bg-room-action-hover sm:w-auto"
                     >
                         <Send className="mr-1.5 h-3.5 w-3.5" />{' '}
                         {isSubmitting ? submitLabels.pending : submitLabels.idle}

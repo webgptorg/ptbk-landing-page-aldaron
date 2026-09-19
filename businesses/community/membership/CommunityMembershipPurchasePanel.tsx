@@ -122,20 +122,20 @@ function CommunityMembershipFeatureCard({ featureId }: { readonly featureId: Com
     const FeatureIcon = getPaidMembershipFeatureIcon(featureId);
 
     return (
-        <li className="group relative min-h-28 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/[0.34] p-4 shadow-sm shadow-slate-950/20 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-100/35 hover:bg-white/[0.08] hover:shadow-lg hover:shadow-cyan-950/20">
+        <li className="group relative min-h-28 overflow-hidden rounded-2xl border border-room-border/10 bg-room-inset/[0.34] p-4 shadow-sm shadow-slate-950/20 transition duration-300 hover:-translate-y-0.5 hover:border-room-accent/35 hover:bg-room-overlay/[0.08] hover:shadow-lg hover:shadow-cyan-950/20">
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-6 -top-8 h-20 w-20 rounded-full bg-cyan-200/[0.06] blur-2xl transition group-hover:bg-cyan-200/[0.12]"
+                className="pointer-events-none absolute -right-6 -top-8 h-20 w-20 rounded-full bg-room-accent/[0.06] blur-2xl transition group-hover:bg-room-accent/[0.12]"
             />
             <div className="relative flex items-start justify-between gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-100/15 bg-cyan-200/10 text-cyan-100 shadow-inner shadow-cyan-100/10">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-room-accent/15 bg-room-accent/10 text-room-accent shadow-inner shadow-cyan-100/10">
                     <FeatureIcon className="h-[1.1rem] w-[1.1rem]" aria-hidden="true" />
                 </span>
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-cyan-100/20 bg-cyan-200/10 text-cyan-100">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-room-accent/20 bg-room-accent/10 text-room-accent">
                     <Check className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
             </div>
-            <p className="relative mt-4 pr-2 text-sm font-semibold leading-5 text-slate-100">{feature.label}</p>
+            <p className="relative mt-4 pr-2 text-sm font-semibold leading-5 text-room-heading">{feature.label}</p>
         </li>
     );
 }
@@ -146,23 +146,23 @@ function CommunityMembershipFeatureGrid() {
     return (
         <section
             aria-labelledby={COMMUNITY_MEMBERSHIP_BENEFITS_TITLE_ID}
-            className="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/20 bg-gradient-to-br from-cyan-300/[0.16] via-[#0c2a37] to-[#061923] p-4 shadow-2xl shadow-cyan-950/30 sm:p-5"
+            className="relative overflow-hidden rounded-[1.75rem] border border-room-accent/20 bg-gradient-to-br from-room-accent/[0.16] via-room-surface to-room-surface p-4 shadow-2xl shadow-cyan-950/30 sm:p-5"
         >
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-cyan-100/[0.12] blur-3xl"
+                className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-room-accent/[0.12] blur-3xl"
             />
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(176,244,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(176,244,255,0.06)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_42%)]" />
             <div className="relative">
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-room-border/10 pb-4">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-cyan-100">Členství zahrnuje</p>
-                        <h3 id={COMMUNITY_MEMBERSHIP_BENEFITS_TITLE_ID} className="mt-1 text-xl font-bold tracking-tight text-white">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-room-accent">Členství zahrnuje</p>
+                        <h3 id={COMMUNITY_MEMBERSHIP_BENEFITS_TITLE_ID} className="mt-1 text-xl font-bold tracking-tight text-room-heading">
                             Vše, co využijete i po vysílání
                         </h3>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-100/20 bg-cyan-200/10 px-3 py-1.5 text-xs font-semibold text-cyan-50 shadow-sm shadow-cyan-950/20">
-                        <Crown className="h-3.5 w-3.5 text-amber-200" aria-hidden="true" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-room-accent/20 bg-room-accent/10 px-3 py-1.5 text-xs font-semibold text-room-accent shadow-sm shadow-cyan-950/20">
+                        <Crown className="h-3.5 w-3.5 text-room-warning" aria-hidden="true" />
                         {featureIds.length} výhod v ceně
                     </span>
                 </div>
@@ -227,22 +227,22 @@ export function CommunityMembershipPurchasePanel({
         <form onSubmit={handleSubmit} className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]" noValidate>
             <CommunityMembershipFeatureGrid />
 
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-cyan-100/20 bg-gradient-to-b from-[#092632] to-[#05141d] p-4 shadow-2xl shadow-slate-950/40 sm:p-5">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-room-accent/20 bg-gradient-to-b from-room-surface to-room-background p-4 shadow-2xl shadow-slate-950/40 sm:p-5">
                 <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-cyan-300/[0.12] blur-3xl"
+                    className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-room-accent/[0.12] blur-3xl"
                 />
-                <div aria-hidden="true" className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/70 to-transparent" />
+                <div aria-hidden="true" className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-room-accent/70 to-transparent" />
                 <div className="relative">
-                    <div className="overflow-hidden rounded-2xl border border-cyan-100/15 bg-gradient-to-br from-cyan-100/[0.09] to-white/[0.025] p-4 shadow-lg shadow-cyan-950/20">
+                    <div className="overflow-hidden rounded-2xl border border-room-accent/15 bg-gradient-to-br from-room-accent/[0.09] to-room-overlay/[0.025] p-4 shadow-lg shadow-cyan-950/20">
                         <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-cyan-100">
-                                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-amber-100/20 bg-amber-200/10 text-amber-100 shadow-inner shadow-amber-100/10">
+                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-room-accent">
+                                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-room-warning/20 bg-room-warning/10 text-room-warning shadow-inner shadow-amber-100/10">
                                     <Crown className="h-4 w-4" aria-hidden="true" />
                                 </span>
                                 Placené členství
                             </div>
-                            <span className="rounded-full border border-cyan-100/15 bg-slate-950/20 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-cyan-100/80">
+                            <span className="rounded-full border border-room-accent/15 bg-room-inset/20 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-room-accent/80">
                                 Měsíční
                             </span>
                         </div>
@@ -251,10 +251,10 @@ export function CommunityMembershipPurchasePanel({
                             planId={CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID}
                             billingPeriod={CURRENT_PAID_COMMUNITY_MEMBERSHIP_BILLING_PERIOD}
                             activeDiscount={discountCodeValidation.activeDiscount}
-                            appearance="dark"
+                            appearance="room"
                         />
-                        <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-xs font-medium text-cyan-50/80">
-                            <Check className="h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                        <div className="mt-4 flex items-center gap-2 border-t border-room-border/10 pt-3 text-xs font-medium text-room-accent/80">
+                            <Check className="h-4 w-4 shrink-0 text-room-accent" aria-hidden="true" />
                             {isCoveredByDiscountCode
                                 ? 'Přístup ke všem výhodám hned po aktivaci'
                                 : 'Přístup ke všem výhodám hned po platbě'}
@@ -265,22 +265,22 @@ export function CommunityMembershipPurchasePanel({
                         <DiscountCodeField
                             inputId="community-room-membership-discount-code"
                             validation={discountCodeValidation}
-                            appearance="dark"
+                            appearance="room"
                         />
                     </div>
 
-                    <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3.5 text-sm leading-6 text-slate-300 transition hover:border-cyan-100/20 hover:bg-white/[0.05]">
+                    <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-room-border/10 bg-room-overlay/[0.035] p-3.5 text-sm leading-6 text-room-text transition hover:border-room-accent/20 hover:bg-room-overlay/[0.05]">
                         <Checkbox
                             checked={areTermsAccepted}
                             onCheckedChange={(checked) => setAreTermsAccepted(checked === true)}
-                            className="mt-1 border-white/25 data-[state=checked]:border-cyan-300 data-[state=checked]:bg-cyan-300 data-[state=checked]:text-slate-950"
+                            className="mt-1 border-room-border/25 data-[state=checked]:border-room-accent data-[state=checked]:bg-room-action data-[state=checked]:text-room-action-foreground"
                             aria-label="Souhlasím s obchodními podmínkami"
                         />
                         <span>
                             Souhlasím s{' '}
                             <Link
                                 href={getLegalLink('termsAndConditions', 'cs').href}
-                                className="font-semibold text-cyan-200 underline underline-offset-4"
+                                className="font-semibold text-room-accent underline underline-offset-4"
                             >
                                 obchodními podmínkami
                             </Link>{' '}
@@ -288,7 +288,7 @@ export function CommunityMembershipPurchasePanel({
                         </span>
                     </label>
                     {isValidationShown && (!areTermsAccepted || !isDiscountCodeReady) && (
-                        <p className="mt-1 text-xs text-rose-300">
+                        <p className="mt-1 text-xs text-room-danger">
                             {areTermsAccepted
                                 ? COMMUNITY_MEMBERSHIP_MESSAGES.discountCodeNotUsable
                                 : COMMUNITY_MEMBERSHIP_MESSAGES.termsNotAccepted}
@@ -298,7 +298,7 @@ export function CommunityMembershipPurchasePanel({
                     {errorMessage !== null && (
                         <p
                             role="alert"
-                            className="mt-4 rounded-xl border border-rose-400/25 bg-rose-400/10 px-3 py-2 text-sm text-rose-100"
+                            className="mt-4 rounded-xl border border-room-danger/25 bg-room-danger/10 px-3 py-2 text-sm text-room-danger"
                         >
                             {errorMessage}
                         </p>
@@ -307,7 +307,7 @@ export function CommunityMembershipPurchasePanel({
                     <Button
                         type="submit"
                         disabled={isPurchaseStarting || discountCodeValidation.isValidationPending}
-                        className="mt-4 h-12 w-full rounded-full border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-cyan-200 to-sky-300 text-base font-bold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:from-cyan-200 hover:via-cyan-100 hover:to-sky-200 hover:shadow-cyan-300/30"
+                        className="mt-4 h-12 w-full rounded-full border border-room-accent/35 bg-gradient-to-r from-room-action via-room-action-hover to-room-action text-base font-bold text-room-action-foreground shadow-lg shadow-cyan-400/20 transition hover:-translate-y-0.5 hover:from-room-action-hover hover:via-room-action-hover hover:to-room-action hover:shadow-cyan-300/30"
                     >
                         {isPurchaseStarting ? (
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -316,8 +316,8 @@ export function CommunityMembershipPurchasePanel({
                         )}
                         {isPurchaseStarting ? purchaseAction.startedLabel : purchaseAction.label}
                     </Button>
-                    <p className="mt-3 flex gap-2 text-xs leading-5 text-slate-400">
-                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                    <p className="mt-3 flex gap-2 text-xs leading-5 text-room-muted">
+                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-room-accent" aria-hidden="true" />
                         {purchaseAction.assurance}
                     </p>
 

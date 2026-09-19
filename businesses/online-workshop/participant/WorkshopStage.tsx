@@ -157,17 +157,17 @@ export function WorkshopStage({
     const handleVideoFullscreen = () => requestVideoFullscreen(videoFrameReference.current);
 
     return (
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#081a24] shadow-2xl">
+        <section className="relative overflow-hidden rounded-2xl border border-room-border/10 bg-room-surface shadow-2xl">
             {isWorkshopPast && isVideoRewatchShown && workshop.youtubeVideoId !== null ? (
                 <div>
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
-                        <span className="inline-flex items-center gap-2 text-sm font-bold text-white">
-                            <Play className="h-4 w-4 text-amber-300" aria-hidden="true" /> Video z workshopu
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-room-border/10 px-5 py-3">
+                        <span className="inline-flex items-center gap-2 text-sm font-bold text-room-heading">
+                            <Play className="h-4 w-4 text-room-warning" aria-hidden="true" /> Video z workshopu
                         </span>
                         <button
                             type="button"
                             onClick={() => setIsVideoRewatchShown(false)}
-                            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-slate-950/60 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-cyan-200/70 hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+                            className="inline-flex items-center gap-2 rounded-full border border-room-border/20 bg-room-inset/60 px-3 py-1.5 text-xs font-semibold text-room-text transition hover:border-room-accent/70 hover:bg-room-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent"
                         >
                             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Zpět na závěrečné shrnutí
                         </button>
@@ -224,33 +224,33 @@ export function WorkshopStage({
                         />
                     ) : isWorkshopOngoing ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(48,168,189,.24),transparent_52%)] px-8 text-center">
-                            <Radio className="h-11 w-11 animate-pulse text-cyan-300" />
-                            <h2 className="mt-5 text-2xl font-bold text-white">Stream právě připravujeme</h2>
-                            <p className="mt-2 max-w-md text-sm text-slate-400">
+                            <Radio className="h-11 w-11 animate-pulse text-room-accent" />
+                            <h2 className="mt-5 text-2xl font-bold text-room-heading">Stream právě připravujeme</h2>
+                            <p className="mt-2 max-w-md text-sm text-room-muted">
                                 Video se zde objeví automaticky, jakmile administrátor vloží YouTube stream.
                             </p>
                         </div>
                     ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(122,235,255,.16),transparent_42%)] px-4 py-5 text-center sm:px-5">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[11px] font-semibold uppercase leading-5 tracking-[0.16em] text-cyan-200 sm:text-xs sm:tracking-[0.18em]">
-                                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" /> Začínáme za
+                            <span className="inline-flex items-center gap-2 rounded-full border border-room-accent/20 bg-room-accent/10 px-3 py-1 text-[11px] font-semibold uppercase leading-5 tracking-[0.16em] text-room-accent sm:text-xs sm:tracking-[0.18em]">
+                                <span className="h-2 w-2 animate-pulse rounded-full bg-room-action" /> Začínáme za
                             </span>
                             <div className="mt-5 grid w-full max-w-[19rem] grid-cols-2 gap-2 sm:mt-7 sm:w-auto sm:max-w-none sm:grid-cols-4 sm:gap-4">
                                 {countdownSegments.map((segment) => (
                                     <div
                                         key={segment.label}
-                                        className="min-w-0 rounded-xl border border-white/10 bg-white/5 px-2 py-2.5 text-center sm:min-w-[82px] sm:px-4 sm:py-4"
+                                        className="min-w-0 rounded-xl border border-room-border/10 bg-room-overlay/5 px-2 py-2.5 text-center sm:min-w-[82px] sm:px-4 sm:py-4"
                                     >
-                                        <div className="font-mono text-3xl font-bold tabular-nums text-white sm:text-4xl">
+                                        <div className="font-mono text-3xl font-bold tabular-nums text-room-heading sm:text-4xl">
                                             {String(segment.value).padStart(2, '0')}
                                         </div>
-                                        <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500 sm:text-xs">
+                                        <div className="mt-1 text-[10px] uppercase tracking-wider text-room-subtle sm:text-xs">
                                             {segment.label}
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <p className="mt-4 w-full max-w-[25rem] px-2 text-sm leading-6 text-slate-400 sm:mt-6">
+                            <p className="mt-4 w-full max-w-[25rem] px-2 text-sm leading-6 text-room-muted sm:mt-6">
                                 Stránku nemusíte obnovovat. Stream se spustí automaticky.
                             </p>
                         </div>
@@ -273,7 +273,7 @@ export function WorkshopStage({
                     type="button"
                     onClick={handleVideoFullscreen}
                     aria-label="Přehrát video na celé obrazovce"
-                    className="absolute right-3 top-3 z-20 inline-flex items-center gap-2 rounded-full border border-white/20 bg-slate-950/90 px-3 py-2 text-xs font-semibold text-white shadow-lg transition hover:border-cyan-200/70 hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 sm:right-5 sm:top-5"
+                    className="absolute right-3 top-3 z-20 inline-flex items-center gap-2 rounded-full border border-room-border/20 bg-room-inset/90 px-3 py-2 text-xs font-semibold text-room-heading shadow-lg transition hover:border-room-accent/70 hover:bg-room-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent sm:right-5 sm:top-5"
                 >
                     <Maximize className="h-4 w-4" aria-hidden="true" />
                     <span className="hidden sm:inline">Celá obrazovka</span>
@@ -284,19 +284,19 @@ export function WorkshopStage({
                 <motion.div
                     initial={isReducedMotionPreferred ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="absolute bottom-3 left-3 right-3 z-20 rounded-2xl border border-cyan-200/40 bg-slate-950/95 p-3 shadow-2xl backdrop-blur sm:bottom-5 sm:left-6 sm:right-auto sm:max-w-xs sm:p-4"
+                    className="absolute bottom-3 left-3 right-3 z-20 rounded-2xl border border-room-accent/40 bg-room-inset/95 p-3 shadow-2xl backdrop-blur sm:bottom-5 sm:left-6 sm:right-auto sm:max-w-xs sm:p-4"
                 >
                     <div className="flex items-start gap-3">
-                        <ArrowDownLeft className="mt-1 h-8 w-8 shrink-0 animate-bounce text-cyan-300" aria-hidden="true" />
+                        <ArrowDownLeft className="mt-1 h-8 w-8 shrink-0 animate-bounce text-room-accent" aria-hidden="true" />
                         <div>
-                            <p className="text-sm font-bold text-white">Zapněte si zvuk</p>
-                            <p className="mt-1 text-xs leading-5 text-slate-300">
+                            <p className="text-sm font-bold text-room-heading">Zapněte si zvuk</p>
+                            <p className="mt-1 text-xs leading-5 text-room-text">
                                 Klikněte na tlačítko níže – stream se kvůli automatickému spuštění otevírá ztlumený.
                             </p>
                             <button
                                 type="button"
                                 onClick={handleVideoUnmute}
-                                className="mt-3 inline-flex items-center gap-2 rounded-full bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-200"
+                                className="mt-3 inline-flex items-center gap-2 rounded-full bg-room-action px-4 py-2 text-sm font-bold text-room-action-foreground transition hover:bg-room-action-hover"
                             >
                                 <Volume2 className="h-4 w-4" /> Zapnout zvuk
                             </button>

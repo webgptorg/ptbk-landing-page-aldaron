@@ -1,11 +1,10 @@
 /**
- * The two kinds of surface a form of this application is filled in on: the light public pages, and the dark rooms
- * members read.
+ * A form can keep the public page palette or follow the participant room's theme.
  *
  * Note: A form which is offered in both places is written once and told which surface it is on, so the same field
  *       never exists twice merely because one page is dark.
  */
-export type FormSurfaceAppearance = 'light' | 'dark';
+export type FormSurfaceAppearance = 'light' | 'room';
 
 type FormSurfaceClassNames = {
     readonly label: string;
@@ -25,12 +24,12 @@ export const FORM_SURFACE_CLASS_NAMES: Readonly<Record<FormSurfaceAppearance, Fo
         mutedText: 'text-slate-500',
         strikethroughText: 'text-slate-400 decoration-slate-400/80',
     },
-    dark: {
-        label: 'text-slate-200',
-        input: 'border-white/15 bg-slate-950/70 text-white placeholder:text-slate-600',
-        hint: 'text-slate-400',
-        heading: 'text-white',
-        mutedText: 'text-slate-400',
-        strikethroughText: 'text-slate-500 decoration-slate-500/80',
+    room: {
+        label: 'text-room-text',
+        input: 'border-room-border/15 bg-room-inset/70 text-room-heading placeholder:text-room-subtle',
+        hint: 'text-room-muted',
+        heading: 'text-room-heading',
+        mutedText: 'text-room-muted',
+        strikethroughText: 'text-room-subtle decoration-room-muted/80',
     },
 };

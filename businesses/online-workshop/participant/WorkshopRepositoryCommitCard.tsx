@@ -42,32 +42,32 @@ export function WorkshopRepositoryCommitCard({
             className={cn(
                 'flex min-w-0 items-start gap-3 rounded-xl border px-3.5 py-2.5 transition',
                 isNew
-                    ? 'border-amber-300/40 bg-amber-300/[0.08] hover:border-amber-200/70'
-                    : 'border-white/[0.08] bg-slate-950/30 hover:border-cyan-300/35 hover:bg-white/[0.05]',
+                    ? 'border-room-warning/40 bg-room-warning/[0.08] hover:border-room-warning/70'
+                    : 'border-room-border/[0.08] bg-room-inset/30 hover:border-room-accent/35 hover:bg-room-overlay/[0.05]',
                 className,
             )}
         >
             <GitCommitHorizontal
-                className={`mt-0.5 h-4 w-4 shrink-0 ${isNew ? 'text-amber-300' : 'text-cyan-300'}`}
+                className={`mt-0.5 h-4 w-4 shrink-0 ${isNew ? 'text-room-warning' : 'text-room-accent'}`}
                 aria-hidden="true"
             />
             <span className="min-w-0 flex-1">
-                <span className="block break-words text-sm font-medium leading-5 text-slate-100">{commit.message}</span>
-                <span className="mt-1 block text-xs text-slate-400">
+                <span className="block break-words text-sm font-medium leading-5 text-room-heading">{commit.message}</span>
+                <span className="mt-1 block text-xs text-room-muted">
                     <span className="font-mono">{commit.sha.slice(0, SHORT_COMMIT_SHA_LENGTH)}</span>
                     {commit.authorName !== null && ` · ${commit.authorName}`} ·{' '}
                     {CZECH_COMMIT_TIME_FORMAT.format(new Date(commit.committedAt))}
                     {isBranchGraph && commit.branchNames !== undefined && commit.branchNames.length > 0 && (
-                        <span className="text-cyan-200/80"> · {commit.branchNames.join(', ')}</span>
+                        <span className="text-room-accent/80"> · {commit.branchNames.join(', ')}</span>
                     )}
                 </span>
             </span>
             {isNew && (
-                <span className="shrink-0 rounded-full bg-amber-300 px-2 py-0.5 text-[11px] font-bold text-slate-950">
+                <span className="shrink-0 rounded-full bg-room-warning px-2 py-0.5 text-[11px] font-bold text-room-action-foreground">
                     Nový
                 </span>
             )}
-            <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" aria-hidden="true" />
+            <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-room-subtle" aria-hidden="true" />
         </a>
     );
 }

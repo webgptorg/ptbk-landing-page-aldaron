@@ -61,7 +61,7 @@ export function WorkshopWrapUpNavigation({
         <nav aria-label="Kam po workshopu" className="mt-6 space-y-5">
             <Link
                 href={createCommunityRoomLink(participantIdentity)}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-cyan-200/40 bg-cyan-300/10 px-5 py-2.5 text-sm font-bold text-cyan-100 transition hover:border-cyan-200/70 hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081a24]"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-room-accent/40 bg-room-accent/10 px-5 py-2.5 text-sm font-bold text-room-accent transition hover:border-room-accent/70 hover:bg-room-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent focus-visible:ring-offset-2 focus-visible:ring-offset-room-surface"
             >
                 <Users className="h-4 w-4" aria-hidden="true" />
                 {CZECH_COMMUNITY_INVITATION_COPY.linkLabel}
@@ -70,9 +70,9 @@ export function WorkshopWrapUpNavigation({
             <div className={`grid gap-4 ${recommendations.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                 {recommendations.map(({ label, listing, emptyMessage }) => (
                     <div key={label} className="min-w-0">
-                        <h3 className="mb-2 text-sm font-bold text-white">{label}</h3>
+                        <h3 className="mb-2 text-sm font-bold text-room-heading">{label}</h3>
                         {listing === undefined ? (
-                            <p className="text-sm leading-6 text-slate-400">{emptyMessage}</p>
+                            <p className="text-sm leading-6 text-room-muted">{emptyMessage}</p>
                         ) : (
                             <WorkshopEventCard
                                 listing={listing}

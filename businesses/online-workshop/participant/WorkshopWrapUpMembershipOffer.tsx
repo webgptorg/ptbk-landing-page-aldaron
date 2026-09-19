@@ -38,7 +38,7 @@ export function WorkshopWrapUpMembershipOffer({ paidMembersOnlyVideo }: Workshop
                 unlockedLabel={PAID_MEMBERS_VIDEO_PREVIEW_LABEL}
                 unlockedContent={
                     previewYoutubeVideoId === null ? undefined : (
-                        <div className="relative aspect-video overflow-hidden rounded-xl border border-amber-200/20 bg-slate-950">
+                        <div className="relative aspect-video overflow-hidden rounded-xl border border-room-warning/20 bg-room-inset">
                             <iframe
                                 className="absolute inset-0 h-full w-full"
                                 src={createYoutubeEmbedUrl(previewYoutubeVideoId, {

@@ -261,7 +261,7 @@ describe('workshop materials', () => {
         expect(screen.queryByText('Otevřít v telefonu')).toBeNull();
     });
 
-    it('keeps multiple material links as light underlined links without a call to action', async () => {
+    it('keeps multiple material links underlined in the room palette without a call to action', async () => {
         const contentBlockWithMultipleLinks: WorkshopContentBlock = {
             ...CONTENT_BLOCK,
             bodyMarkdown: '[První materiál](https://example.com/one) a [druhý materiál](https://example.com/two)',
@@ -271,7 +271,7 @@ describe('workshop materials', () => {
         await waitFor(() => expect(container.querySelectorAll('a')).toHaveLength(2));
 
         expect(screen.queryByRole('link', { name: /Otevřít materiál/ })).toBeNull();
-        expect(screen.getByTestId('markdown-content').className).toContain('[--chat-md-link-color:#f1f5f9]');
+        expect(screen.getByTestId('markdown-content').className).toContain('[--chat-md-link-color:rgb(var(--room-accent))]');
     });
 
     it('keeps every link of a multi-link material available through its own QR code', async () => {

@@ -81,17 +81,17 @@ export function WorkshopLinksPanel({
     const todayDayKey = createCalendarDayKey(serverTime, timeZone);
 
     return (
-        <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4 sm:p-5">
+        <section className="mt-4 rounded-2xl border border-room-border/10 bg-room-overlay/[0.035] p-4 sm:p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 flex-col gap-1">
-                    <h2 className="text-lg font-bold text-white">{title}</h2>
-                    <p className="text-sm leading-6 text-slate-400">{description}</p>
+                    <h2 className="text-lg font-bold text-room-heading">{title}</h2>
+                    <p className="text-sm leading-6 text-room-muted">{description}</p>
                 </div>
                 {listings.length > 0 && (
                     <div
                         role="group"
                         aria-label={WORKSHOP_LINKS_PANEL_COPY.viewSwitchLabel}
-                        className="flex shrink-0 rounded-lg bg-white/5 p-1 text-xs"
+                        className="flex shrink-0 rounded-lg bg-room-overlay/5 p-1 text-xs"
                     >
                         {WORKSHOP_LINKS_VIEWS.map(({ id, label, icon: ViewIcon }) => (
                             <button
@@ -99,7 +99,7 @@ export function WorkshopLinksPanel({
                                 type="button"
                                 aria-pressed={shownView === id}
                                 onClick={() => setShownView(id)}
-                                className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 font-semibold transition ${shownView === id ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 font-semibold transition ${shownView === id ? 'bg-room-overlay/10 text-room-heading' : 'text-room-subtle hover:text-room-text'}`}
                             >
                                 <ViewIcon className="h-3.5 w-3.5" aria-hidden="true" />
                                 {label}
@@ -114,7 +114,7 @@ export function WorkshopLinksPanel({
             )}
 
             {listings.length === 0 ? (
-                <p className="mt-5 rounded-xl border border-dashed border-white/15 bg-white/[0.025] px-4 py-5 text-sm text-slate-400">
+                <p className="mt-5 rounded-xl border border-dashed border-room-border/15 bg-room-overlay/[0.025] px-4 py-5 text-sm text-room-muted">
                     {emptyMessage}
                 </p>
             ) : shownView === 'calendar' ? (

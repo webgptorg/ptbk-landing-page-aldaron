@@ -62,7 +62,7 @@ export function WorkshopCalendarDay({
     const dayPhaseClassName = isDayFull
         ? getWorkshopPhaseAppearance(getMostProminentWorkshopPhase(listings.map((listing) => listing.phase)))
               .calendarDayClassName
-        : 'border-white/5 text-slate-500';
+        : 'border-room-border/5 text-room-subtle';
     const namedListings = listings.slice(0, NAMED_DAY_LISTING_COUNT);
     const unnamedListingCount = listings.length - namedListings.length;
 
@@ -80,15 +80,15 @@ export function WorkshopCalendarDay({
                 // Note: A day of the neighbouring month stands back, but a term held on it is still readable, because
                 //       the last days before a month and the first days after it are exactly where a member looks.
                 !isInShownMonth && (isDayFull ? 'opacity-75' : 'opacity-40'),
-                isDayFull && 'hover:border-cyan-200/60 hover:bg-cyan-300/15',
-                isSelected && 'ring-2 ring-cyan-300',
-                isToday && !isSelected && 'ring-1 ring-cyan-200/60',
+                isDayFull && 'hover:border-room-accent/60 hover:bg-room-accent/15',
+                isSelected && 'ring-2 ring-room-accent',
+                isToday && !isSelected && 'ring-1 ring-room-accent/60',
             )}
         >
             <span
                 className={classNames(
                     'text-[11px] font-semibold leading-none sm:text-xs',
-                    isToday ? 'text-cyan-100' : 'text-inherit',
+                    isToday ? 'text-room-accent' : 'text-inherit',
                 )}
             >
                 {getCalendarDayNumber(dayKey)}

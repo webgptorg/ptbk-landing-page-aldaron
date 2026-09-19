@@ -22,9 +22,9 @@ export function CommunityProjectPreviewImage({ imageUrl, title, className = '' }
             fallbackLabel="Náhled projektu není k dispozici"
             fallback={
                 imageUrl === null ? (
-                    <Sparkles className="h-9 w-9 text-cyan-200/80" />
+                    <Sparkles className="h-9 w-9 text-room-accent/80" />
                 ) : (
-                    <ImageOff className="h-9 w-9 text-slate-300/70" />
+                    <ImageOff className="h-9 w-9 text-room-text/70" />
                 )
             }
         />
