@@ -1,6 +1,6 @@
 [ ]
 
-[✨🍲] foo
+[✨🍲] In the admin, there are a lot of artificial options that should be hidden.
 
 - @@@@@@@@
 - You are working with page `/cs/@@@`
