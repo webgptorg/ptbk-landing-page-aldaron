@@ -3,10 +3,10 @@
 import { WorkshopFeedback } from '@/businesses/online-workshop/participant/WorkshopFeedback';
 import { WorkshopWrapUpMembershipOffer } from '@/businesses/online-workshop/participant/WorkshopWrapUpMembershipOffer';
 import { WorkshopWrapUpPdfDownload } from '@/businesses/online-workshop/participant/WorkshopWrapUpPdfDownload';
+import { WorkshopPaidMembersVideoNotice } from '@/businesses/online-workshop/participant/WorkshopPaidMembersVideoNotice';
 import type { WorkshopFeedbackValues } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import type {
     WorkshopContentBlock,
-    WorkshopDetails,
     WorkshopFeedback as WorkshopFeedbackValue,
     WorkshopPaidMembersVideo,
 } from '@/lib/workshops/workshopTypes';
@@ -14,11 +14,6 @@ import { ArrowDown, BookOpenText, PartyPopper, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type WorkshopWrapUpProps = {
-    readonly workshop: Pick<
-        WorkshopDetails,
-        'slug' | 'title' | 'description' | 'startsAt' | 'endsAt' | 'presentationUrl'
-    >;
-    readonly contentBlocks: readonly WorkshopContentBlock[];
     readonly feedback: WorkshopFeedbackValue | null;
     readonly followUpContentBlock: WorkshopContentBlock | null;
     readonly onSaveFeedback: (values: WorkshopFeedbackValues) => Promise<boolean>;
@@ -44,8 +39,6 @@ type WorkshopWrapUpProps = {
  * directly to that same record so the stage does not invent a second material model or a second tracking path.
  */
 export function WorkshopWrapUp({
-    workshop,
-    contentBlocks,
     feedback,
     followUpContentBlock,
     paidMembersOnlyVideo = null,
@@ -81,8 +74,6 @@ export function WorkshopWrapUp({
                 <WorkshopWrapUpMembershipOffer paidMembersOnlyVideo={paidMembersOnlyVideo} />
 
                 {navigation}
-
-                <WorkshopWrapUpPdfDownload workshop={workshop} contentBlocks={contentBlocks} />
 
                 <div className="mt-6">
                     <WorkshopFeedback feedback={feedback} onSave={onSaveFeedback} />

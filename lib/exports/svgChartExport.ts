@@ -6,8 +6,6 @@
  *       raster and the printable file both start from.
  */
 
-import { createPicturePdf } from '@/lib/exports/pdfPictures';
-
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
 /**
@@ -153,21 +151,121 @@ export async function renderChartAsPngBlob(svgElement: SVGSVGElement, options: S
 }
 
 /**
+ * Where one part of the written document begins, counted in bytes from its very beginning
+ */
+function getByteLength(chunks: readonly Uint8Array[]): number {
+    return chunks.reduce((totalLength, chunk) => totalLength + chunk.length, 0);
+}
+
+function encodeAsciiText(text: string): Uint8Array {
+    return new TextEncoder().encode(text);
+}
+
+function formatCrossReferenceEntry(objectOffset: number): string {
+    return `${objectOffset.toString().padStart(10, '0')} 00000 n \n`;
+}
+
+/**
+ * Write a text of a document as the numbers of its letters, announced by the mark which says they are UTF-16
+ *
+ * Note: A reader which was handed the plain letters would read a Czech name written in them as a different word
+ *       altogether, and a bracket in a name would end the name in the middle of itself.
+ */
+function formatPdfTextString(text: string): string {
+    const characterCodes = ['FEFF'];
+
+    for (const character of text) {
+        const codePoint = character.codePointAt(0) ?? 0;
+
+        if (codePoint > 0xffff) {
+            const surrogateOffset = codePoint - 0x10000;
+            characterCodes.push((0xd800 + (surrogateOffset >> 10)).toString(16).padStart(4, '0'));
+            characterCodes.push((0xdc00 + (surrogateOffset & 0x3ff)).toString(16).padStart(4, '0'));
+        } else {
+            characterCodes.push(codePoint.toString(16).padStart(4, '0'));
+        }
+    }
+
+    return `<${characterCodes.join('').toUpperCase()}>`;
+}
+
+/**
+ * How large the picture is on the printed page, and where it sits, so that it keeps its shape inside the margins
+ */
+function getPdfPicturePlacement(pictureSize: ChartPictureSize): {
+    readonly width: number;
+    readonly height: number;
+    readonly offsetX: number;
+    readonly offsetY: number;
+} {
+    const availableWidth = PDF_PAGE_WIDTH_POINTS - 2 * PDF_PAGE_MARGIN_POINTS;
+    const availableHeight = PDF_PAGE_HEIGHT_POINTS - 2 * PDF_PAGE_MARGIN_POINTS;
+    const scale = Math.min(availableWidth / pictureSize.width, availableHeight / pictureSize.height);
+    const width = pictureSize.width * scale;
+    const height = pictureSize.height * scale;
+
+    return {
+        width,
+        height,
+        offsetX: (PDF_PAGE_WIDTH_POINTS - width) / 2,
+        offsetY: (PDF_PAGE_HEIGHT_POINTS - height) / 2,
+    };
+}
+
+/**
  * Write the smallest possible document which shows one picture on one page
  *
  * Note: The picture is carried as the very bytes a browser compressed it into, which a PDF reader understands as
  *       `DCTDecode`. Nothing else has to be encoded, so a printable file costs no library at all.
  */
 export function createSinglePicturePdf(pictureBytes: Uint8Array, pictureSize: ChartPictureSize, title: string): Blob {
-    return createPicturePdf(
-        [{ bytes: pictureBytes, ...pictureSize }],
-        {
-            width: PDF_PAGE_WIDTH_POINTS,
-            height: PDF_PAGE_HEIGHT_POINTS,
-            margin: PDF_PAGE_MARGIN_POINTS,
-        },
-        title,
+    const placement = getPdfPicturePlacement(pictureSize);
+    const contentStream =
+        `q\n${placement.width.toFixed(2)} 0 0 ${placement.height.toFixed(2)} ` +
+        `${placement.offsetX.toFixed(2)} ${placement.offsetY.toFixed(2)} cm\n/Im0 Do\nQ\n`;
+
+    const objectBodies: readonly string[] = [
+        '<< /Type /Catalog /Pages 2 0 R >>',
+        '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_PAGE_WIDTH_POINTS} ${PDF_PAGE_HEIGHT_POINTS}] ` +
+            '/Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>',
+        `<< /Length ${encodeAsciiText(contentStream).length} >>\nstream\n${contentStream}endstream`,
+    ];
+
+    const chunks: Uint8Array[] = [encodeAsciiText('%PDF-1.4\n')];
+    const objectOffsets: number[] = [];
+
+    objectBodies.forEach((objectBody, objectIndex) => {
+        objectOffsets.push(getByteLength(chunks));
+        chunks.push(encodeAsciiText(`${objectIndex + 1} 0 obj\n${objectBody}\nendobj\n`));
+    });
+
+    objectOffsets.push(getByteLength(chunks));
+    chunks.push(
+        encodeAsciiText(
+            '5 0 obj\n<< /Type /XObject /Subtype /Image ' +
+                `/Width ${pictureSize.width} /Height ${pictureSize.height} ` +
+                `/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pictureBytes.length} >>\n` +
+                'stream\n',
+        ),
+        pictureBytes,
+        encodeAsciiText('\nendstream\nendobj\n'),
     );
+
+    objectOffsets.push(getByteLength(chunks));
+    chunks.push(encodeAsciiText(`6 0 obj\n<< /Title ${formatPdfTextString(title)} >>\nendobj\n`));
+
+    const crossReferenceOffset = getByteLength(chunks);
+    chunks.push(
+        encodeAsciiText(
+            `xref\n0 ${objectOffsets.length + 1}\n0000000000 65535 f \n` +
+                objectOffsets.map(formatCrossReferenceEntry).join('') +
+                `trailer\n<< /Size ${objectOffsets.length + 1} /Root 1 0 R /Info 6 0 R >>\n` +
+                `startxref\n${crossReferenceOffset}\n%%EOF\n`,
+        ),
+    );
+
+    return new Blob(chunks as BlobPart[], { type: 'application/pdf' });
 }
 
 export async function renderChartAsPdfBlob(svgElement: SVGSVGElement, options: SvgChartExportOptions): Promise<Blob> {
