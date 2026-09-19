@@ -192,6 +192,7 @@ export function WorkshopStage({
                 </div>
             ) : isWorkshopPast ? (
                 <WorkshopWrapUp
+                    workshopSlug={workshop.slug}
                     feedback={feedback}
                     followUpContentBlock={followUpContentBlock}
                     paidMembersOnlyVideo={paidMembersOnlyVideo}

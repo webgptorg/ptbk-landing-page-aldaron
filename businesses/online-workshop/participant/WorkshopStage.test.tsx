@@ -161,6 +161,19 @@ afterEach(() => {
 });
 
 describe('workshop stage', () => {
+    it('offers the PDF only after the recorded end, including newly ended workshops', () => {
+        const reactionSource = createReactionSource();
+        const props = { workshop: WORKSHOP, subscribeToReactions: reactionSource.subscribeToReactions };
+        const { rerender } = render(<WorkshopStage {...props} serverTime="2026-08-20T18:00:00+02:00" />);
+        expect(screen.queryByRole('button', { name: 'Stáhnout shrnutí v PDF' })).toBeNull();
+        rerender(<WorkshopStage {...props} serverTime="2026-08-20T19:30:00+02:00" />);
+        expect(screen.queryByRole('button', { name: 'Stáhnout shrnutí v PDF' })).toBeNull();
+        rerender(<WorkshopStage {...props} serverTime="2026-08-20T20:30:00+02:00" />);
+        expect(screen.getByRole('button', { name: 'Stáhnout shrnutí v PDF' })).toBeTruthy();
+        rerender(<WorkshopStage {...props} workshop={{ ...WORKSHOP, endsAt: null }} serverTime="2026-08-21T20:30:00+02:00" />);
+        expect(screen.queryByRole('button', { name: 'Stáhnout shrnutí v PDF' })).toBeNull();
+    });
+
     it('sends a reaction of the room over the stage', async () => {
         const reactionSource = createReactionSource();
         const { container } = render(

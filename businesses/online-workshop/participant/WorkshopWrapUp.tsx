@@ -3,7 +3,6 @@
 import { WorkshopFeedback } from '@/businesses/online-workshop/participant/WorkshopFeedback';
 import { WorkshopWrapUpMembershipOffer } from '@/businesses/online-workshop/participant/WorkshopWrapUpMembershipOffer';
 import { WorkshopWrapUpPdfDownload } from '@/businesses/online-workshop/participant/WorkshopWrapUpPdfDownload';
-import { WorkshopPaidMembersVideoNotice } from '@/businesses/online-workshop/participant/WorkshopPaidMembersVideoNotice';
 import type { WorkshopFeedbackValues } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import type {
     WorkshopContentBlock,
@@ -14,6 +13,7 @@ import { ArrowDown, BookOpenText, PartyPopper, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type WorkshopWrapUpProps = {
+    readonly workshopSlug: string;
     readonly feedback: WorkshopFeedbackValue | null;
     readonly followUpContentBlock: WorkshopContentBlock | null;
     readonly onSaveFeedback: (values: WorkshopFeedbackValues) => Promise<boolean>;
@@ -39,6 +39,7 @@ type WorkshopWrapUpProps = {
  * directly to that same record so the stage does not invent a second material model or a second tracking path.
  */
 export function WorkshopWrapUp({
+    workshopSlug,
     feedback,
     followUpContentBlock,
     paidMembersOnlyVideo = null,
@@ -70,6 +71,8 @@ export function WorkshopWrapUp({
                         <Play className="h-4 w-4" aria-hidden="true" /> Přehrát video znovu
                     </button>
                 )}
+
+                <WorkshopWrapUpPdfDownload key={workshopSlug} workshopSlug={workshopSlug} />
 
                 <WorkshopWrapUpMembershipOffer paidMembersOnlyVideo={paidMembersOnlyVideo} />
 

@@ -1,5 +1,12 @@
 # Current preversion
 
+- Added a downloadable Czech wrap-up PDF to the ended stage of `/cs/online-workshop/participant?workshop=`.
+  It includes the workshop description, key points extracted from existing descriptions and materials, full readable
+  materials with clickable links, and any presentation, repository, and deployments. The download refreshes the
+  existing authenticated room state, preserving publication, unlock, and membership rules and refusing workshops
+  that have not ended or have been reopened. PDFs support Czech text and multiple pages and are generated in the
+  browser on demand, with no new administration, database fields, or saved documents.
+
 - Added a quiet display-settings switch to `/admin/workshops` and `/admin/community` for screen sharing. Artificial
   controls stay hidden by default: prepared chat comments and reactions, synthetic viewer counts, and artificial
   comment and poll-vote adjustments no longer appear among ordinary moderation controls. The switch is one compact
@@ -157,12 +164,6 @@
   anonymous option and receives that member's shared e-mail-owned vote at the same time. Everyone can then vote for
   it from either room; duplicate wording reuses the existing option, and later administration edits keep member-written
   answers intact.
-
-- After an online workshop has its recorded end, `/cs/online-workshop/participant?workshop=` now offers its attendee a
-  downloadable, paginated wrap-up PDF. It uses the same participant-visible workshop description, takeaways already
-  authored in material titles, headings and lists, and material text/links the room already unlocked for that person;
-  the public presentation is included too. The PDF is created locally only when requested, so it adds no admin setting,
-  database record, or new source of material access.
 
 - Added a configurable start offset in seconds to the stage settings of `/admin/workshops`. After an online workshop
   ends, `/cs/online-workshop/participant?workshop=` now opens the paid member replay at that position, so the same

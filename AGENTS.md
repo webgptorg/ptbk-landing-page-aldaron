@@ -26,6 +26,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   within the last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,
   without losing the name and e-mail already typed.
+  After the recorded end, its wrap-up offers a PDF generated in the browser from a fresh authenticated room response.
+  The recap uses the existing description and material text for its summary and key points, includes accessible
+  materials and public presentation/project links, and preserves the room's publication, unlock and membership rules.
+  It stores no document and adds no administration or database fields; chat, feedback and participant identity are
+  excluded from the export.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
   the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as
