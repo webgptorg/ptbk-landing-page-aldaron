@@ -121,7 +121,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Its term picker gives ongoing, freshly past, next-seven-day, and later upcoming
   terms their own categories, because a term which has only just been held is
   still being wrapped up and one beginning soon needs preparation; only past terms
-  stay behind its history disclosure.
+  stay behind its history disclosure. Its unobtrusive display-settings control
+  keeps every artificial activity tool — prepared chat comments, reaction and
+  vote adjustments, and the artificial watching count — out of a shared screen
+  by default; `artopts=on` reveals them and `artopts=off` keeps them hidden.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,

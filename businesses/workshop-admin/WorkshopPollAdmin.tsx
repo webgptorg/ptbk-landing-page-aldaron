@@ -56,6 +56,7 @@ type WorkshopPollAdminProps = {
         optionId: string,
         artificialVoteAdjustment: number,
     ) => Promise<boolean>;
+    readonly isArtificialOptionsShown: boolean;
 
     /**
      * Decides about one answer a member wrote, or corrects its wording
@@ -355,6 +356,7 @@ export function WorkshopPollAdmin({
     onUpdate,
     onDelete,
     onAdjustArtificialVotes,
+    isArtificialOptionsShown,
     onModerateOption,
     onDeleteOption,
 }: WorkshopPollAdminProps) {
@@ -383,7 +385,7 @@ export function WorkshopPollAdmin({
     const handleDelete = (poll: WorkshopAdminPoll) => {
         if (
             window.confirm(
-                `Opravdu trvale smazat anketu „${poll.question}“? Smažou se také všechny její skutečné i umělé hlasy.`,
+                `Opravdu trvale smazat anketu „${poll.question}“? Smažou se také všechny její ${isArtificialOptionsShown ? 'skutečné i umělé ' : ''}hlasy.`,
             )
         ) {
             void runPollAction(poll.id, () => onDelete(poll.id));
@@ -399,10 +401,12 @@ export function WorkshopPollAdmin({
                     </h2>
                     <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
                         Členové vidí pouze zveřejněné ankety a jejich součty. Každou otázku, možnost, viditelnost i
-                        stav hlasování můžete kdykoli změnit. Pro anketu s připravenými hlasy ji nejdřív vytvořte
-                        skrytou, doplňte umělé hlasy a potom ji zveřejněte. Vlastní odpovědi členů čekají na schválení
-                        stejně jako komentáře v chatu — u každé vidíte, kdo ji napsal, a můžete ji schválit, zamítnout,
-                        upravit i smazat.
+                        stav hlasování můžete kdykoli změnit.
+                        {isArtificialOptionsShown && (
+                            <> Pro anketu s připravenými hlasy ji nejdřív vytvořte skrytou, doplňte umělé hlasy a potom ji zveřejněte.</>
+                        )}{' '}
+                        Vlastní odpovědi členů čekají na schválení stejně jako komentáře v chatu — u každé vidíte,
+                        kdo ji napsal, a můžete ji schválit, zamítnout, upravit i smazat.
                     </p>
                 </div>
             </div>
@@ -491,6 +495,7 @@ export function WorkshopPollAdmin({
                                                     onAdjustArtificialVotes(poll.id, optionId, artificialVoteAdjustment),
                                                 )
                                             }
+                                            isArtificialOptionsShown={isArtificialOptionsShown}
                                             onModerate={(optionId, values) =>
                                                 runPollAction(poll.id, () => onModerateOption(poll.id, optionId, values))
                                             }

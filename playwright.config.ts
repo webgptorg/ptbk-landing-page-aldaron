@@ -9,6 +9,12 @@ import { defineConfig } from '@playwright/test';
  */
 const E2E_COLD_COMPILATION_TEST_TIMEOUT_MS = 180_000;
 
+/**
+ * A browser assertion can be the first request for a lazily loaded client-side editor. Keep its cold compilation
+ * allowance next to the suite-wide test allowance instead of making individual tests depend on implementation timing.
+ */
+const E2E_COLD_COMPONENT_EXPECT_TIMEOUT_MS = 30_000;
+
 const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4009';
 const usesExternalServer = process.env.E2E_BASE_URL !== undefined;
 const usesIsolatedInMemorySupabase = !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -23,7 +29,7 @@ export default defineConfig({
     // budget of one test is therefore that compilation headroom rather than the time its assertions need.
     timeout: E2E_COLD_COMPILATION_TEST_TIMEOUT_MS,
     expect: {
-        timeout: 10_000,
+        timeout: E2E_COLD_COMPONENT_EXPECT_TIMEOUT_MS,
     },
     reporter: 'list',
     globalTeardown: './tests/e2e/globalTeardown.ts',

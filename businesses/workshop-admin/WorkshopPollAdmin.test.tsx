@@ -92,6 +92,7 @@ function createProps() {
         onUpdate: vi.fn().mockResolvedValue(true),
         onDelete: vi.fn().mockResolvedValue(undefined),
         onAdjustArtificialVotes: vi.fn().mockResolvedValue(true),
+        isArtificialOptionsShown: true,
         onModerateOption: vi.fn().mockResolvedValue(true),
         onDeleteOption: vi.fn().mockResolvedValue(undefined),
     };
@@ -272,6 +273,15 @@ describe('community poll administration', () => {
 
         fireEvent.change(screen.getByLabelText('Umělá změna hlasů pro Testování'), { target: { value: '1000001' } });
         expect(screen.getAllByRole('button', { name: 'Použít' })[0].hasAttribute('disabled')).toBe(true);
+    });
+
+    it('keeps artificial vote totals and controls out of a shared-screen view', () => {
+        const props = { ...createProps(), isArtificialOptionsShown: false };
+        render(<WorkshopPollAdmin polls={[POLL]} {...props} />);
+
+        expect(screen.queryByText('Skutečné: 2 · Umělé: 3')).toBeNull();
+        expect(screen.queryByLabelText('Umělá změna hlasů pro Testování')).toBeNull();
+        expect(screen.queryByText(/doplňte umělé hlasy/)).toBeNull();
     });
 
     it('edits question and options, then deletes a poll only after confirmation', async () => {

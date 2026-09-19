@@ -29,6 +29,15 @@ export type UrlViewParameter<TViewState, TValue> = UrlViewValueCodec<TValue> & {
 
     readonly readValue: (viewState: TViewState) => TValue;
     readonly writeValue: (viewState: TViewState, value: TValue) => TViewState;
+
+    /**
+     * Whether the parameter remains in a shared link when its value is the default one.
+     *
+     * Most view settings can omit their default value and stay readable. A deliberate display choice sometimes needs
+     * to say its default explicitly, however, so a recipient can distinguish an intentional setting from an older
+     * link which did not carry the setting yet.
+     */
+    readonly isDefaultValueIncluded?: boolean;
 };
 
 /**
@@ -130,8 +139,9 @@ export function parseUrlViewState<TViewState>(
 /**
  * Write a view into the query parameters of the link which can be shared
  *
- * Note: The parameters which do not describe the view are kept as they are and the values which are the default ones
- *       are left out, so that the shared link stays as short as possible
+ * Note: The parameters which do not describe the view are kept as they are and default values are ordinarily left
+ *       out, so that the shared link stays as short as possible. A parameter can explicitly retain its default when
+ *       the shared link needs to record that choice.
  *
  * @returns New query parameters, the given ones are never mutated
  */
@@ -147,8 +157,9 @@ export function serializeUrlViewState<TViewState>(
         const value = parameter.readValue(viewState);
         const defaultValue = parameter.readValue(defaultViewState);
         const isDefaultValue = parameter.areValuesEqual?.(value, defaultValue) ?? value === defaultValue;
+        const isDefaultValueIncluded = parameter.isDefaultValueIncluded ?? false;
 
-        if (isDefaultValue) {
+        if (isDefaultValue && !isDefaultValueIncluded) {
             newSearchParams.delete(parameter.parameterName);
         } else {
             newSearchParams.set(parameter.parameterName, parameter.serializeValue(value));

@@ -30,6 +30,7 @@ type WorkshopCommentModerationProps = {
     readonly onChangePin: (commentId: string, isPinned: boolean) => Promise<boolean>;
     readonly onSetStageComment?: ((commentId: string | null) => Promise<boolean>) | null;
     readonly onAdjustArtificialUpvotes: (commentId: string, artificialUpvoteAdjustment: number) => Promise<boolean>;
+    readonly isArtificialOptionsShown: boolean;
     readonly onDelete: (commentId: string) => Promise<void>;
 };
 
@@ -56,6 +57,7 @@ export function WorkshopCommentModeration({
     onChangePin,
     onSetStageComment = null,
     onAdjustArtificialUpvotes,
+    isArtificialOptionsShown,
     onDelete,
 }: WorkshopCommentModerationProps) {
     const [processingCommentIds, setProcessingCommentIds] = useState<ReadonlySet<string>>(new Set());
@@ -198,12 +200,18 @@ export function WorkshopCommentModeration({
                                             <Send className="h-3 w-3" /> Na stage
                                         </span>
                                     )}
-                                    <span
-                                        className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800"
-                                        title={comment.agentId ? `Agent: ${comment.agentId}\nBěh: ${comment.agentJobId}` : undefined}
-                                    >
-                                        {WORKSHOP_COMMENT_ORIGIN_LABELS[comment.origin]}
-                                    </span>
+                                    {(isArtificialOptionsShown || comment.origin !== 'artificial') && (
+                                        <span
+                                            className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800"
+                                            title={
+                                                comment.agentId
+                                                    ? `Agent: ${comment.agentId}\nBěh: ${comment.agentJobId}`
+                                                    : undefined
+                                            }
+                                        >
+                                            {WORKSHOP_COMMENT_ORIGIN_LABELS[comment.origin]}
+                                        </span>
+                                    )}
                                     <span
                                         className={`rounded-full px-2.5 py-1 text-xs font-semibold ${comment.status === 'pending' ? 'bg-amber-100 text-amber-800' : comment.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}
                                     >
@@ -235,41 +243,44 @@ export function WorkshopCommentModeration({
                                     className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700"
                                 />
                             )}
-                            <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50/50 p-3">
-                                <p className="text-xs text-slate-600">
-                                    Skutečné hlasy: {comment.realUpvoteCount} · Umělá změna hlasů:{' '}
-                                    {formatSignedNumber(comment.artificialUpvoteCount)} · Zobrazeno: {comment.upvoteCount}
-                                </p>
-                                <div className="mt-3 flex flex-wrap items-end gap-2">
-                                    <label className="text-xs font-medium text-violet-950">
-                                        Umělá změna hlasů (např. +5 nebo -2)
-                                        <Input
-                                            type="number"
-                                            step="1"
-                                            min={-MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
-                                            max={MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
-                                            value={artificialUpvoteAdjustments[comment.id] ?? ''}
-                                            onChange={(event) =>
-                                                setArtificialUpvoteAdjustments((currentAdjustments) => ({
-                                                    ...currentAdjustments,
-                                                    [comment.id]: event.target.value,
-                                                }))
-                                            }
-                                            className="mt-1 h-9 w-44 bg-white"
-                                            placeholder="+1"
-                                        />
-                                    </label>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={isProcessing || !isArtificialUpvoteAdjustmentValid}
-                                        onClick={() => void handleArtificialUpvoteAdjustment(comment.id)}
-                                    >
-                                        Použít umělou změnu
-                                    </Button>
+                            {isArtificialOptionsShown && (
+                                <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50/50 p-3">
+                                    <p className="text-xs text-slate-600">
+                                        Skutečné hlasy: {comment.realUpvoteCount} · Umělá změna hlasů:{' '}
+                                        {formatSignedNumber(comment.artificialUpvoteCount)} · Zobrazeno:{' '}
+                                        {comment.upvoteCount}
+                                    </p>
+                                    <div className="mt-3 flex flex-wrap items-end gap-2">
+                                        <label className="text-xs font-medium text-violet-950">
+                                            Umělá změna hlasů (např. +5 nebo -2)
+                                            <Input
+                                                type="number"
+                                                step="1"
+                                                min={-MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
+                                                max={MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
+                                                value={artificialUpvoteAdjustments[comment.id] ?? ''}
+                                                onChange={(event) =>
+                                                    setArtificialUpvoteAdjustments((currentAdjustments) => ({
+                                                        ...currentAdjustments,
+                                                        [comment.id]: event.target.value,
+                                                    }))
+                                                }
+                                                className="mt-1 h-9 w-44 bg-white"
+                                                placeholder="+1"
+                                            />
+                                        </label>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isProcessing || !isArtificialUpvoteAdjustmentValid}
+                                            onClick={() => void handleArtificialUpvoteAdjustment(comment.id)}
+                                        >
+                                            Použít umělou změnu
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                             <div className="mt-4 flex flex-wrap justify-end gap-2">
                                 {!isBeingEdited && (
                                     <Button

@@ -15,8 +15,8 @@ describe('workshopAdminViewState', () => {
         expect(parseWorkshopAdminViewState(new URLSearchParams())).toEqual(DEFAULT_WORKSHOP_ADMIN_VIEW_STATE);
     });
 
-    it('writes nothing into the link of the view it opens with', () => {
-        expect(serializeViewState(DEFAULT_WORKSHOP_ADMIN_VIEW_STATE)).toBe('');
+    it('writes the default safe display choice into the link of the view it opens with', () => {
+        expect(serializeViewState(DEFAULT_WORKSHOP_ADMIN_VIEW_STATE)).toBe('artopts=off');
     });
 
     it('carries the room and the section which were chosen', () => {
@@ -24,7 +24,7 @@ describe('workshopAdminViewState', () => {
 
         expect(viewState.workshopSlug).toBe('srpnovy-workshop');
         expect(viewState.section).toBe('comments');
-        expect(serializeViewState(viewState)).toBe('workshop=srpnovy-workshop&tab=comments');
+        expect(serializeViewState(viewState)).toBe('workshop=srpnovy-workshop&tab=comments&artopts=off');
     });
 
     it('keeps the community paid-membership section in a shareable dashboard link', () => {
@@ -32,7 +32,7 @@ describe('workshopAdminViewState', () => {
 
         expect(viewState.section).toBe('memberships');
         expect(serializeWorkshopAdminViewState(viewState, new URLSearchParams('member=jana%40example.com')).toString()).toBe(
-            'member=jana%40example.com&tab=memberships',
+            'member=jana%40example.com&tab=memberships&artopts=off',
         );
     });
 
@@ -54,20 +54,23 @@ describe('workshopAdminViewState', () => {
         expect(viewState.graph.zoomToMilliseconds).toBe(Date.parse('2026-08-23T11:00:00.000Z'));
     });
 
-    it('writes the graph back exactly as it was read, so that a shared link stays the same link', () => {
+    it('keeps the graph while adding the explicit safe display choice to a shared link', () => {
         const search =
             'workshop=srpnovy-workshop&series=watchingParticipants%2Ccomments&reaction=%F0%9F%91%8D' +
             '&from=2026-08-23T10%3A00%3A00.000Z&to=2026-08-23T11%3A00%3A00.000Z';
         const viewState = parseWorkshopAdminViewState(new URLSearchParams(search));
 
-        expect(serializeViewState(viewState)).toBe(search);
+        expect(serializeViewState(viewState)).toBe(
+            'workshop=srpnovy-workshop&artopts=off&series=watchingParticipants%2Ccomments&reaction=%F0%9F%91%8D' +
+                '&from=2026-08-23T10%3A00%3A00.000Z&to=2026-08-23T11%3A00%3A00.000Z',
+        );
     });
 
     it('keeps the zoom of the workshop itself out of the link', () => {
         const viewState = parseWorkshopAdminViewState(new URLSearchParams('from=nonsense&to=also-nonsense'));
 
         expect(viewState.graph.zoomFromMilliseconds).toBeNull();
-        expect(serializeViewState(viewState)).toBe('');
+        expect(serializeViewState(viewState)).toBe('artopts=off');
     });
 
     it('carries the metrics an administrator wrote, and their names', () => {
@@ -77,7 +80,7 @@ describe('workshopAdminViewState', () => {
 
         expect(viewState.graph.customMetrics).toEqual([{ label: 'Pomoc', pattern: 'pomoc|help' }]);
         expect(serializeViewState(viewState)).toBe(
-            `metrics=${encodeURIComponent('[{"label":"Pomoc","pattern":"pomoc|help"}]')}`,
+            `artopts=off&metrics=${encodeURIComponent('[{"label":"Pomoc","pattern":"pomoc|help"}]')}`,
         );
     });
 
@@ -100,5 +103,16 @@ describe('workshopAdminViewState', () => {
 
         expect(searchParams.get('utm_source')).toBe('newsletter');
         expect(searchParams.get('tab')).toBe('settings');
+        expect(searchParams.get('artopts')).toBe('off');
+    });
+
+    it('reads and writes the artificial-controls display choice explicitly', () => {
+        const shownViewState = parseWorkshopAdminViewState(new URLSearchParams('artopts=on'));
+        const hiddenViewState = parseWorkshopAdminViewState(new URLSearchParams('artopts=off'));
+
+        expect(shownViewState.isArtificialOptionsShown).toBe(true);
+        expect(hiddenViewState.isArtificialOptionsShown).toBe(false);
+        expect(serializeViewState(shownViewState)).toBe('artopts=on');
+        expect(serializeViewState(hiddenViewState)).toBe('artopts=off');
     });
 });

@@ -18,6 +18,7 @@ type WorkshopPollOptionAdminProps = {
     readonly option: WorkshopAdminPollOption;
     readonly isProcessing: boolean;
     readonly onAdjustArtificialVotes: (optionId: string, artificialVoteAdjustment: number) => Promise<boolean>;
+    readonly isArtificialOptionsShown: boolean;
     readonly onModerate: (optionId: string, values: WorkshopPollOptionModerationValues) => Promise<boolean>;
     readonly onDelete: (optionId: string) => Promise<void>;
 };
@@ -56,6 +57,7 @@ export function WorkshopPollOptionAdmin({
     option,
     isProcessing,
     onAdjustArtificialVotes,
+    isArtificialOptionsShown,
     onModerate,
     onDelete,
 }: WorkshopPollOptionAdminProps) {
@@ -111,9 +113,11 @@ export function WorkshopPollOptionAdmin({
                     {option.voteCount} hlasů
                 </span>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
-                Skutečné: {option.realVoteCount} · Umělé: {option.artificialVoteCount}
-            </p>
+            {isArtificialOptionsShown && (
+                <p className="mt-1 text-xs text-slate-500">
+                    Skutečné: {option.realVoteCount} · Umělé: {option.artificialVoteCount}
+                </p>
+            )}
 
             {option.isCreatedByParticipant && (
                 <div className="mt-2 rounded-lg border border-amber-100 bg-amber-50/50 p-2.5">
@@ -211,31 +215,33 @@ export function WorkshopPollOptionAdmin({
                 </div>
             )}
 
-            <div className="mt-3 flex flex-wrap items-end gap-2">
-                <label className="text-xs font-medium text-violet-950">
-                    Umělá změna hlasů
-                    <Input
-                        type="number"
-                        step="1"
-                        min={-MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
-                        max={MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
-                        value={artificialVoteAdjustmentText}
-                        onChange={(event) => setArtificialVoteAdjustmentText(event.target.value)}
-                        className="mt-1 h-8 w-32 bg-white"
-                        placeholder="+1"
-                        aria-label={`Umělá změna hlasů pro ${option.label}`}
-                    />
-                </label>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={isProcessing || !isArtificialVoteAdjustmentValid}
-                    onClick={() => void handleArtificialVoteAdjustment()}
-                >
-                    Použít
-                </Button>
-            </div>
+            {isArtificialOptionsShown && (
+                <div className="mt-3 flex flex-wrap items-end gap-2">
+                    <label className="text-xs font-medium text-violet-950">
+                        Umělá změna hlasů
+                        <Input
+                            type="number"
+                            step="1"
+                            min={-MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
+                            max={MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
+                            value={artificialVoteAdjustmentText}
+                            onChange={(event) => setArtificialVoteAdjustmentText(event.target.value)}
+                            className="mt-1 h-8 w-32 bg-white"
+                            placeholder="+1"
+                            aria-label={`Umělá změna hlasů pro ${option.label}`}
+                        />
+                    </label>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isProcessing || !isArtificialVoteAdjustmentValid}
+                        onClick={() => void handleArtificialVoteAdjustment()}
+                    >
+                        Použít
+                    </Button>
+                </div>
+            )}
         </li>
     );
 }

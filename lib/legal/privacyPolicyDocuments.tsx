@@ -87,7 +87,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 paragraphs: [
                     'Nutné cookies zajišťují základní fungování webu a ukládáme je vždy. Analytické a marketingové cookies ukládáme jen s vaším souhlasem, který nám dáte v cookies liště.',
                     <>
-                        Svoji volbu můžete kdykoli změnit v <Link href={COOKIE_SETTINGS_HASH}>nastavení cookies</Link>{' '}
+                        Svoji volbu můžete kdykoli změnit v <a href={COOKIE_SETTINGS_HASH}>nastavení cookies</a>{' '}
                         nebo smazáním cookies ve svém prohlížeči.
                     </>,
                 ],
@@ -212,7 +212,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'Necessary cookies keep the website working and are always stored. Analytics and marketing cookies are stored only with the consent you give in the cookie bar.',
                     <>
                         You can change your choice at any time in the{' '}
-                        <Link href={COOKIE_SETTINGS_HASH}>cookie settings</Link> or by deleting the cookies in your
+                        <a href={COOKIE_SETTINGS_HASH}>cookie settings</a> or by deleting the cookies in your
                         browser.
                     </>,
                 ],

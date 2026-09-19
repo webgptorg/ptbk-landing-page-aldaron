@@ -1,5 +1,11 @@
 # Current preversion
 
+- Added a quiet display-settings switch to `/admin/workshops` and `/admin/community` for screen sharing. Artificial
+  controls stay hidden by default: prepared chat comments and reactions, synthetic viewer counts, and artificial
+  comment and poll-vote adjustments no longer appear among ordinary moderation controls. The switch is one compact
+  settings icon away and keeps its intentional state in the shareable address as `artopts=on` or `artopts=off`; it
+  changes no stored room data.
+
 - Added a fifth shared time state for event terms: a published term that begins within the next seven rolling days is
   now marked `Do týdne`. The violet badge and calendar colour appear consistently in `/cs/komunita` and the term
   picker of `/cs/online-workshop/participant?workshop=`, while `/admin/workshops` gives ongoing, freshly past,

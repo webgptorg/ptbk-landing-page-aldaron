@@ -7,10 +7,27 @@ import type { BookEditorProps } from '@promptbook/components';
 import dynamic from 'next/dynamic';
 import { useState, type FormEvent } from 'react';
 
-const BOOK_EDITOR = dynamic(() => import('@promptbook/components').then((components) => components.BookEditor), {
+let bookEditorModulePromise: Promise<typeof import('@promptbook/components')> | null = null;
+
+function loadBookEditorModule() {
+    bookEditorModulePromise ??= import('@promptbook/components');
+    return bookEditorModulePromise;
+}
+
+const BOOK_EDITOR = dynamic(() => loadBookEditorModule().then((components) => components.BookEditor), {
     ssr: false,
     loading: () => <p className="p-4 text-sm text-slate-500">Načítám editor Book…</p>,
 });
+
+/**
+ * Starts fetching the sizeable rich editor while the Agents section itself is opening.
+ *
+ * The editor remains lazy for every other administration view, but a person who has already chosen Agents should
+ * not have to wait for its bundle only after choosing to create an agent.
+ */
+export function preloadWorkshopAgentBookEditor(): void {
+    void loadBookEditorModule().catch(() => undefined);
+}
 
 type WorkshopAgentEditorProps = {
     readonly initialValues: WorkshopAgentWriteValues | null;

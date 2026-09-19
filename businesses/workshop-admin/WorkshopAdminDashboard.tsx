@@ -42,8 +42,10 @@ import { WorkshopActivityGraph } from '@/businesses/workshop-admin/WorkshopActiv
 import { WorkshopAttachedPollList } from '@/businesses/workshop-admin/WorkshopAttachedPollList';
 import { WorkshopAdminRefreshButton } from '@/businesses/workshop-admin/WorkshopAdminRefreshButton';
 import { WorkshopArtificialComment } from '@/businesses/workshop-admin/WorkshopArtificialComment';
+import { WorkshopArtificialOptionsToggle } from '@/businesses/workshop-admin/WorkshopArtificialOptionsToggle';
 import { WorkshopArtificialReaction } from '@/businesses/workshop-admin/WorkshopArtificialReaction';
 import { WorkshopAgentAdmin } from '@/businesses/workshop-admin/agents/WorkshopAgentAdmin';
+import { preloadWorkshopAgentBookEditor } from '@/businesses/workshop-admin/agents/WorkshopAgentEditor';
 import { WorkshopCommentModeration } from '@/businesses/workshop-admin/WorkshopCommentModeration';
 import { WorkshopContentAdmin } from '@/businesses/workshop-admin/WorkshopContentAdmin';
 import { WorkshopEventLinks } from '@/businesses/workshop-admin/WorkshopEventLinks';
@@ -237,6 +239,13 @@ export function WorkshopAdminDashboard({
     const selectedSection = sectionDefinitions.some(({ value }) => value === viewState.section)
         ? viewState.section
         : 'overview';
+    const isArtificialOptionsShown = viewState.isArtificialOptionsShown;
+
+    useEffect(() => {
+        if (selectedSection === 'agents') {
+            preloadWorkshopAgentBookEditor();
+        }
+    }, [selectedSection]);
 
     // Note: Which room is open is decided by the link alone, so opening a shared address and picking a room from the
     //       list are one and the same thing. A link which names no room, or a room which is not there any more, opens
@@ -544,6 +553,9 @@ export function WorkshopAdminDashboard({
         }
     };
 
+    const handleArtificialOptionsShownChange = (isArtificialOptionsShown: boolean) =>
+        changeViewState((previousViewState) => ({ ...previousViewState, isArtificialOptionsShown }));
+
     const handleGraphStateChange = useCallback(
         (changeGraphState: (previousGraphState: WorkshopOverviewGraphState) => WorkshopOverviewGraphState) =>
             changeViewState((previousViewState) => ({
@@ -600,11 +612,15 @@ export function WorkshopAdminDashboard({
             )}
 
             <div className="min-w-0 space-y-6">
-                {!isRoomSelectionOffered && (
-                    <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                    <WorkshopArtificialOptionsToggle
+                        isArtificialOptionsShown={isArtificialOptionsShown}
+                        onChangeArtificialOptionsShown={handleArtificialOptionsShownChange}
+                    />
+                    {!isRoomSelectionOffered && (
                         <WorkshopAdminRefreshButton onRefresh={handleRefresh} />
-                    </div>
-                )}
+                    )}
+                </div>
                 {errorMessage !== null && (
                     <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         {errorMessage}
@@ -701,12 +717,15 @@ export function WorkshopAdminDashboard({
                                     onChangePin={handleChangeCommentPin}
                                     onSetStageComment={isStageOffered ? handleSetStageComment : null}
                                     onAdjustArtificialUpvotes={handleAdjustArtificialUpvotes}
+                                    isArtificialOptionsShown={isArtificialOptionsShown}
                                     onDelete={handleDeleteComment}
                                 />
-                                <WorkshopArtificialComment
-                                    onCreate={handleCreateArtificialComment}
-                                    isStageOffered={isStageOffered}
-                                />
+                                {isArtificialOptionsShown && (
+                                    <WorkshopArtificialComment
+                                        onCreate={handleCreateArtificialComment}
+                                        isStageOffered={isStageOffered}
+                                    />
+                                )}
                             </TabsContent>
 
                             <TabsContent value="reactions" className="space-y-4">
@@ -721,12 +740,14 @@ export function WorkshopAdminDashboard({
                                     workshopId={snapshot.workshop.id}
                                     refreshVersion={snapshotRefreshVersion}
                                 />
-                                <WorkshopArtificialReaction
-                                    reactionCount={snapshot.reactionCount}
-                                    artificialReactionCount={snapshot.artificialReactionCount}
-                                    onSend={handleSendArtificialReaction}
-                                    onClear={handleClearReactions}
-                                />
+                                {isArtificialOptionsShown && (
+                                    <WorkshopArtificialReaction
+                                        reactionCount={snapshot.reactionCount}
+                                        artificialReactionCount={snapshot.artificialReactionCount}
+                                        onSend={handleSendArtificialReaction}
+                                        onClear={handleClearReactions}
+                                    />
+                                )}
                             </TabsContent>
 
                             <TabsContent value="content" className="space-y-4">
@@ -757,6 +778,7 @@ export function WorkshopAdminDashboard({
                                             onUpdate={handleUpdatePoll}
                                             onDelete={handleDeletePoll}
                                             onAdjustArtificialVotes={handleAdjustArtificialPollVotes}
+                                            isArtificialOptionsShown={isArtificialOptionsShown}
                                             onModerateOption={handleModeratePollOption}
                                             onDeleteOption={handleDeletePollOption}
                                         />
@@ -794,6 +816,7 @@ export function WorkshopAdminDashboard({
                                     workshop={snapshot.workshop}
                                     onSave={handleSaveWorkshop}
                                     subjectLabel={subjectLabel}
+                                    isArtificialOptionsShown={isArtificialOptionsShown}
                                 />
                             </TabsContent>
 

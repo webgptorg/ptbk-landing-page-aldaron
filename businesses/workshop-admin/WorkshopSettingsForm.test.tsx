@@ -75,8 +75,18 @@ function readRecordingStartOffsetParts() {
     return { hours: readPart('Hodiny'), minutes: readPart('Minuty'), seconds: readPart('Sekundy') };
 }
 
-function renderWorkshopSettingsForm(workshop: WorkshopDetails, onSave = vi.fn().mockResolvedValue(true)) {
-    const { container } = render(<WorkshopSettingsForm workshop={workshop} onSave={onSave} />);
+function renderWorkshopSettingsForm(
+    workshop: WorkshopDetails,
+    onSave = vi.fn().mockResolvedValue(true),
+    isArtificialOptionsShown = true,
+) {
+    const { container } = render(
+        <WorkshopSettingsForm
+            workshop={workshop}
+            onSave={onSave}
+            isArtificialOptionsShown={isArtificialOptionsShown}
+        />,
+    );
 
     return {
         onSave,
@@ -87,6 +97,12 @@ function renderWorkshopSettingsForm(workshop: WorkshopDetails, onSave = vi.fn().
 afterEach(cleanup);
 
 describe('workshop settings form', () => {
+    it('keeps the artificial watching-count field out of a shared-screen view', () => {
+        renderWorkshopSettingsForm(WORKSHOP, vi.fn(), false);
+
+        expect(screen.queryByText('Umělý počet sledujících')).toBeNull();
+    });
+
     it('offers a workshop occurrence its schedule, its stage, and its reactions', () => {
         renderWorkshopSettingsForm(WORKSHOP);
 

@@ -55,6 +55,7 @@ function renderModeration(
     onChangePin: (commentId: string, isPinned: boolean) => Promise<boolean> = vi.fn(),
     pinnedComment: WorkshopCommentReference | null = null,
     onConvertToMaterial: (commentId: string) => Promise<boolean> = vi.fn(),
+    isArtificialOptionsShown = true,
 ) {
     return render(
         <WorkshopCommentModeration
@@ -67,6 +68,7 @@ function renderModeration(
             onEditBody={onEditBody}
             onChangePin={onChangePin}
             onAdjustArtificialUpvotes={vi.fn()}
+            isArtificialOptionsShown={isArtificialOptionsShown}
             onDelete={vi.fn()}
         />,
     );
@@ -108,6 +110,7 @@ describe('workshop comment moderation', () => {
                 onEditBody={vi.fn()}
                 onChangePin={vi.fn()}
                 onAdjustArtificialUpvotes={vi.fn()}
+                isArtificialOptionsShown={true}
                 onDelete={vi.fn()}
             />,
         );
@@ -160,6 +163,7 @@ describe('workshop comment moderation', () => {
                 onChangePin={vi.fn()}
                 onSetStageComment={onSetStageComment}
                 onAdjustArtificialUpvotes={vi.fn()}
+                isArtificialOptionsShown={true}
                 onDelete={vi.fn()}
             />,
         );
@@ -189,5 +193,19 @@ describe('workshop comment moderation', () => {
 
         expect(screen.queryByRole('textbox', { name: EDITOR_LABEL })).toBeNull();
         expect(screen.getByText(COMMENT.body)).not.toBeNull();
+    });
+
+    it('keeps artificial comment markers and vote adjustments out of a shared-screen view', () => {
+        renderModeration(
+            vi.fn(),
+            [{ ...COMMENT, origin: 'artificial', isArtificial: true, participantId: null }],
+            vi.fn(),
+            null,
+            vi.fn(),
+            false,
+        );
+
+        expect(screen.queryByText('Umělý komentář')).toBeNull();
+        expect(screen.queryByText(/Umělá změna hlasů/)).toBeNull();
     });
 });

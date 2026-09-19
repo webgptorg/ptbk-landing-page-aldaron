@@ -44,6 +44,7 @@ type WorkshopSettingsFormProps = {
     readonly workshop: WorkshopDetails;
     readonly onSave: (values: WorkshopWriteValues) => Promise<boolean>;
     readonly subjectLabel?: string;
+    readonly isArtificialOptionsShown: boolean;
 };
 
 /**
@@ -56,7 +57,12 @@ function parseWorkshopReactions(reactionText: string): readonly string[] {
     return reactionText.trim().split(/\s+/).filter(Boolean);
 }
 
-export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'workshopu' }: WorkshopSettingsFormProps) {
+export function WorkshopSettingsForm({
+    workshop,
+    onSave,
+    subjectLabel = 'workshopu',
+    isArtificialOptionsShown,
+}: WorkshopSettingsFormProps) {
     const roomCapabilities = getWorkshopKindCapabilities(workshop.kind);
     // Note: The only room of its kind was given its address once and for all, so its administration does not ask for
     //       one at all rather than showing a field which cannot be used for anything.
@@ -243,7 +249,7 @@ export function WorkshopSettingsForm({ workshop, onSave, subjectLabel = 'worksho
                         </div>
                     </>
                 )}
-                {isWatchingCountSettingOffered && (
+                {isArtificialOptionsShown && isWatchingCountSettingOffered && (
                     <label className="text-sm font-medium text-slate-700">
                         Umělý počet sledujících
                         <Input
