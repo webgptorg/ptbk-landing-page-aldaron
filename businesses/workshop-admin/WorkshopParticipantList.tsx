@@ -14,6 +14,7 @@ import { WorkshopParticipantFilters } from '@/businesses/workshop-admin/Workshop
 import { WorkshopParticipantPagination } from '@/businesses/workshop-admin/WorkshopParticipantPagination';
 import { WorkshopParticipantTimeline } from '@/businesses/workshop-admin/WorkshopParticipantTimeline';
 import { AdminContactDetails } from '@/components/admin/AdminContactDetails';
+import { WorkshopPendingSubmissionCount } from '@/components/workshops/WorkshopPendingSubmissionCount';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
@@ -417,6 +418,11 @@ export function WorkshopParticipantList({
                                             </TableCell>
                                             <TableCell className="min-w-36 align-top">
                                                 <div className="flex flex-col items-start gap-1">
+                                                    <WorkshopPendingSubmissionCount
+                                                        count={participant.pendingSubmissionCount}
+                                                        authorName={participant.fullname}
+                                                        className="text-xs text-slate-600"
+                                                    />
                                                     {participant.isModerator && (
                                                         <span className="rounded-full bg-violet-100 px-2 py-1 text-xs font-semibold text-violet-800">
                                                             Moderátor

@@ -1,5 +1,11 @@
 # Current preversion
 
+- Granting trust or moderator status now approves all pending submissions by that room participant: chat messages,
+  custom poll answers (including shared polls), and community projects. Promotion and approval commit together;
+  rejected submissions stay rejected and interaction bans still block automatic approval. Moderators on
+  `/cs/online-workshop/participant` and `/cs/komunita`, and administrators in the participant list, see each author's
+  complete pending count. The shared project gallery refreshes with the room after approval.
+
 - Added light and dark modes to `/cs/komunita` and `/cs/online-workshop/participant`, including their waiting rooms
   and shared project views. One accessible appearance control follows the device setting by default and remembers an
   explicit choice across visits, tabs, and rooms. Shared palette tokens cover chat, polls, calendars, event cards,

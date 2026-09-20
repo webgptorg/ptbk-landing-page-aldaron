@@ -25,6 +25,7 @@ import { useWorkshopParticipant } from '@/businesses/online-workshop/participant
 import { useWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
 import { WorkshopLinksPanel } from '@/components/workshops/WorkshopLinksPanel';
 import { WorkshopRoomThemeControl } from '@/components/workshops/WorkshopRoomThemeControl';
+import { WORKSHOP_ROOM_REFRESH_CONTEXT } from '@/components/workshops/WorkshopRoomRefreshContext';
 import { WorkshopRoomWaitingShell } from '@/components/workshops/WorkshopRoomWaitingShell';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
@@ -427,7 +428,9 @@ export function OnlineWorkshopParticipantPage({
                             calendarFeedUrl={workshopNavigation.calendarFeedUrl}
                         />
                     )}
-                    {mainContentAfterWorkshopNavigation}
+                    <WORKSHOP_ROOM_REFRESH_CONTEXT.Provider value={state.serverTime}>
+                        {mainContentAfterWorkshopNavigation}
+                    </WORKSHOP_ROOM_REFRESH_CONTEXT.Provider>
                     {isPanelOffered('reactions') && (
                         <WorkshopReactions
                             emojis={state.workshop.allowedReactions}

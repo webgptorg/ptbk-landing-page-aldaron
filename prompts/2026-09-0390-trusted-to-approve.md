@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.4073 19 minutes; Testing 14 minutes
 
 [✨😂] When I turn some user as trusted or moderator, automatically approve all things waiting
 
@@ -8,3 +8,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

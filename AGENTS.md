@@ -258,6 +258,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   without fetching linked pages or preview images. Moderator-created materials
   require no review, and old pending submissions are not bulk-processed.
 - Trusted participants remain invisible and their messages are auto-approved.
+  Granting trust or moderator status also approves every pending submission by that room-local participant — chat,
+  member-written poll answers, and community projects — in the same database transaction. Rejected items stay
+  rejected; a ban blocks this approval until it is lifted. The private pending-submission view supplies both this
+  approval and the complete per-person counts in room moderation and administrative participant lists. Community
+  project cards refresh with the room without resetting the submission form.
   Moderators see pending messages, can approve/reject/correct/pin them, and can
   trust or silence authors. An administrator in `/admin/workshops` and a moderator
   in a workshop room can also turn any comment into an ordinary, immediately

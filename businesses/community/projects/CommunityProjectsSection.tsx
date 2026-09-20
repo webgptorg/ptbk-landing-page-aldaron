@@ -10,6 +10,7 @@ import {
 } from '@/businesses/community/projects/communityProjectsApi';
 import { CommunityProjectCard } from '@/businesses/community/projects/CommunityProjectCard';
 import { CommunityProjectCreationWizard } from '@/businesses/community/projects/CommunityProjectCreationWizard';
+import { useWorkshopRoomRefreshTime } from '@/components/workshops/WorkshopRoomRefreshContext';
 import type {
     CommunityProject,
     CommunityProjectModerationStatus,
@@ -17,7 +18,7 @@ import type {
 } from '@/lib/community-projects/communityProjectTypes';
 import { FolderOpen, LoaderCircle, Plus, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const COMMUNITY_HOME_PROJECT_COUNT = 5;
 
@@ -60,6 +61,8 @@ function getCommunityProjectsErrorMessage(error: unknown): string {
  * limit, so vote updates and the creation wizard never grow a second implementation for `/cs/komunita/projects`.
  */
 export function CommunityProjectsSection({ isLimited }: CommunityProjectsSectionProps) {
+    const roomRefreshTime = useWorkshopRoomRefreshTime();
+    const projectLoadSequenceReference = useRef(0);
     const [projects, setProjects] = useState<readonly CommunityProject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreationOpen, setIsCreationOpen] = useState(false);
@@ -69,28 +72,32 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const loadProjects = useCallback(async () => {
-        setIsLoading(true);
-        setErrorMessage(null);
+        const loadSequence = ++projectLoadSequenceReference.current;
         try {
             const loadedProjects = await fetchCommunityProjects(isLimited ? COMMUNITY_HOME_PROJECT_COUNT : null);
+            if (loadSequence !== projectLoadSequenceReference.current) return;
             setProjects(sortCommunityProjects(loadedProjects.projects));
             setIsModerationOffered(loadedProjects.isModerationOffered);
+            setErrorMessage(null);
         } catch (error) {
+            if (loadSequence !== projectLoadSequenceReference.current) return;
             setErrorMessage(getCommunityProjectsErrorMessage(error));
         } finally {
-            setIsLoading(false);
+            if (loadSequence === projectLoadSequenceReference.current) setIsLoading(false);
         }
     }, [isLimited]);
 
     useEffect(() => {
         void loadProjects();
-    }, [loadProjects]);
+        return () => { projectLoadSequenceReference.current += 1; };
+    }, [loadProjects, roomRefreshTime]);
 
     const handleVote = async (projectId: string, vote: CommunityProjectVote) => {
         setIsVotingProjectId(projectId);
         setErrorMessage(null);
         try {
             const savedVote = await voteOnCommunityProject(projectId, vote);
+            projectLoadSequenceReference.current += 1;
             setProjects((currentProjects) =>
                 sortCommunityProjects(
                     currentProjects.map((project) =>
@@ -113,6 +120,8 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
     };
 
     const handleProjectCreated = (project: CommunityProject) => {
+        projectLoadSequenceReference.current += 1;
+        setIsLoading(false);
         setProjects((currentProjects) =>
             limitCommunityProjectsForHome([project, ...currentProjects], isLimited),
         );
@@ -123,6 +132,7 @@ export function CommunityProjectsSection({ isLimited }: CommunityProjectsSection
         setErrorMessage(null);
         try {
             await moderateCommunityProject(projectId, status);
+            projectLoadSequenceReference.current += 1;
             setProjects((currentProjects) =>
                 status === 'rejected'
                     ? currentProjects.filter((project) => project.id !== projectId)
