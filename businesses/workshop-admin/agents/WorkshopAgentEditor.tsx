@@ -63,8 +63,7 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
     };
 
     return (
-        <form ref={autosave.formRef} onSubmit={submit} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="text-lg font-semibold">{initialValues === null ? 'Nový agent' : 'Upravit agenta'}</h3>
+        <form ref={autosave.formRef} onSubmit={submit} className="space-y-5">
             <p className="text-sm text-slate-500">Jméno a Book jsou společné pro všechny místnosti. Book určuje osobnost, názory, cíle a pravidla agenta.</p>
             <label className="block text-sm font-medium">
                 Jméno v chatu

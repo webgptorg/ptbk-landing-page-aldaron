@@ -157,10 +157,9 @@ export function WorkshopSettingsForm({
     };
 
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form ref={autosave.formRef} onSubmit={handleSubmit} aria-label={`Nastavení ${subjectLabel}`} className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-950">Nastavení {subjectLabel}</h2>
                     <p className="mt-1 text-xs text-slate-400">
                         {isSlugOffered
                             ? 'URL místnosti a odkazů můžete upravit níže.'

@@ -1,5 +1,9 @@
+'use client';
+
 import type { WorkshopContentWriteValues } from '@/businesses/workshop-admin/workshopAdminApiClient';
 import { WorkshopContentEditor } from '@/businesses/workshop-admin/WorkshopContentEditor';
+import { formatWorkshopAdminDateTime } from '@/businesses/workshop-admin/workshopAdminFormatting';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import type { WorkshopContentBlock } from '@/lib/workshops/workshopTypes';
 
 type WorkshopContentAdminProps = {
@@ -29,21 +33,40 @@ export function WorkshopContentAdmin({
             </p>
             <div className="mt-6 space-y-4">
                 {contentBlocks.map((contentBlock) => (
-                    <WorkshopContentEditor
-                        key={contentBlock.id}
-                        contentBlock={contentBlock}
-                        defaultUnlockAt={defaultUnlockAt}
-                        defaultSortOrder={contentBlock.sortOrder}
-                        onSave={(values) => onUpdate(contentBlock.id, values)}
-                        onDelete={() => onDelete(contentBlock.id)}
-                    />
+                    <article key={contentBlock.id} className="rounded-xl border border-slate-200 p-4">
+                        <h3 className="font-semibold text-slate-950">{contentBlock.title || 'Materiál bez nadpisu'}</h3>
+                        <p className="mt-1 text-xs text-slate-500">
+                            {contentBlock.isPublished ? 'Publikovaný' : 'Nezveřejněný'} · Odemknout {formatWorkshopAdminDateTime(contentBlock.unlockAt)}
+                            {contentBlock.isPaidMembersOnly ? ' · Jen pro placené členy' : ''}
+                            {contentBlock.isFollowUp ? ' · Navazující materiál' : ''}
+                        </p>
+                        <p className="my-3 line-clamp-3 whitespace-pre-wrap break-words text-sm text-slate-600">{contentBlock.bodyMarkdown}</p>
+                        <AdminEditorButton label="Upravit materiál" title={contentBlock.title || 'Upravit materiál'} buttonProps={{ size: 'sm' }}>
+                            <WorkshopContentEditor
+                                key={contentBlock.id}
+                                contentBlock={contentBlock}
+                                defaultUnlockAt={defaultUnlockAt}
+                                defaultSortOrder={contentBlock.sortOrder}
+                                onSave={(values) => onUpdate(contentBlock.id, values)}
+                                onDelete={() => onDelete(contentBlock.id)}
+                            />
+                        </AdminEditorButton>
+                    </article>
                 ))}
-                <WorkshopContentEditor
-                    contentBlock={null}
-                    defaultUnlockAt={defaultUnlockAt}
-                    defaultSortOrder={contentBlocks.length * 10}
-                    onSave={onCreate}
-                />
+                <AdminEditorButton label="Přidat obsah" title="Nový materiál">
+                    {(closeEditor) => (
+                        <WorkshopContentEditor
+                            contentBlock={null}
+                            defaultUnlockAt={defaultUnlockAt}
+                            defaultSortOrder={contentBlocks.length * 10}
+                            onSave={async (values) => {
+                                const isCreated = await onCreate(values);
+                                if (isCreated) closeEditor();
+                                return isCreated;
+                            }}
+                        />
+                    )}
+                </AdminEditorButton>
             </div>
         </section>
     );

@@ -7,6 +7,8 @@ import { WORKSHOP_COMMENT_ORIGIN_LABELS } from '@/lib/workshops/workshopCommentO
 import { WorkshopCommentEditor } from '@/businesses/workshop-admin/WorkshopCommentEditor';
 import { WorkshopPinnedComment } from '@/businesses/workshop-admin/WorkshopPinnedComment';
 import { WorkshopStageCommentControls } from '@/businesses/workshop-admin/WorkshopStageCommentControls';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { WorkshopCommentMarkdown } from '@/components/workshop-comment-markdown';
@@ -227,19 +229,20 @@ export function WorkshopCommentModeration({
                                     />
                                 </div>
                             )}
-                            {isBeingEdited ? (
-                                <WorkshopCommentEditor
-                                    label={`Text komentáře od ${comment.authorName}`}
-                                    initialBody={comment.body}
-                                    onCancel={() => setEditedCommentId(null)}
-                                    onSave={(body) => handleEditBody(comment.id, body)}
-                                />
-                            ) : (
-                                <WorkshopCommentMarkdown
-                                    content={comment.body}
-                                    className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700"
-                                />
+                            {isBeingEdited && (
+                                <AdminEditorDialog isOpen onClose={() => setEditedCommentId(null)} title={`Upravit komentář od ${comment.authorName}`}>
+                                    <WorkshopCommentEditor key={comment.id}
+                                        label={`Text komentáře od ${comment.authorName}`}
+                                        initialBody={comment.body}
+                                        onCancel={() => setEditedCommentId(null)}
+                                        onSave={(body) => handleEditBody(comment.id, body)}
+                                    />
+                                </AdminEditorDialog>
                             )}
+                            <WorkshopCommentMarkdown
+                                content={comment.body}
+                                className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700"
+                            />
                             {isArtificialOptionsShown && (
                                 <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50/50 p-3">
                                     <p className="text-xs text-slate-600">
@@ -247,50 +250,50 @@ export function WorkshopCommentModeration({
                                         {formatSignedNumber(comment.artificialUpvoteCount)} · Zobrazeno:{' '}
                                         {comment.upvoteCount}
                                     </p>
-                                    <div className="mt-3 flex flex-wrap items-end gap-2">
-                                        <label className="text-xs font-medium text-violet-950">
-                                            Umělá změna hlasů (např. +5 nebo -2)
-                                            <Input
-                                                type="number"
-                                                step="1"
-                                                min={-MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
-                                                max={MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
-                                                value={artificialUpvoteAdjustments[comment.id] ?? ''}
-                                                onChange={(event) =>
-                                                    setArtificialUpvoteAdjustments((currentAdjustments) => ({
-                                                        ...currentAdjustments,
-                                                        [comment.id]: event.target.value,
-                                                    }))
-                                                }
-                                                className="mt-1 h-9 w-44 bg-white"
-                                                placeholder="+1"
-                                            />
-                                        </label>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={isProcessing || !isArtificialUpvoteAdjustmentValid}
-                                            onClick={() => void handleArtificialUpvoteAdjustment(comment.id)}
-                                        >
-                                            Použít umělou změnu
-                                        </Button>
-                                    </div>
+                                    <AdminEditorButton label="Upravit umělé hlasy" title={`Umělé hlasy komentáře od ${comment.authorName}`} buttonProps={{ size: 'sm', className: 'mt-3' }}>
+                                        <div className="mt-3 flex flex-wrap items-end gap-2">
+                                            <label className="text-xs font-medium text-violet-950">
+                                                Umělá změna hlasů (např. +5 nebo -2)
+                                                <Input
+                                                    type="number"
+                                                    step="1"
+                                                    min={-MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
+                                                    max={MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
+                                                    value={artificialUpvoteAdjustments[comment.id] ?? ''}
+                                                    onChange={(event) =>
+                                                        setArtificialUpvoteAdjustments((currentAdjustments) => ({
+                                                            ...currentAdjustments,
+                                                            [comment.id]: event.target.value,
+                                                        }))
+                                                    }
+                                                    className="mt-1 h-9 w-44 bg-white"
+                                                    placeholder="+1"
+                                                />
+                                            </label>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={isProcessing || !isArtificialUpvoteAdjustmentValid}
+                                                onClick={() => void handleArtificialUpvoteAdjustment(comment.id)}
+                                            >
+                                                Použít umělou změnu
+                                            </Button>
+                                        </div>
+                                    </AdminEditorButton>
                                 </div>
                             )}
                             <div className="mt-4 flex flex-wrap justify-end gap-2">
-                                {!isBeingEdited && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={isProcessing}
-                                        onClick={() => void runAfterAdminSaves(() => setEditedCommentId(comment.id))}
-                                        aria-label={`Upravit komentář od ${comment.authorName}`}
-                                    >
-                                        <Pencil className="mr-1.5 h-4 w-4" /> Upravit
-                                    </Button>
-                                )}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isProcessing}
+                                    onClick={() => void runAfterAdminSaves(() => setEditedCommentId(comment.id))}
+                                    aria-label={`Upravit komentář od ${comment.authorName}`}
+                                >
+                                    <Pencil className="mr-1.5 h-4 w-4" /> Upravit
+                                </Button>
                                 {isCommentMaterialConversionOffered && (
                                     <Button
                                         type="button"

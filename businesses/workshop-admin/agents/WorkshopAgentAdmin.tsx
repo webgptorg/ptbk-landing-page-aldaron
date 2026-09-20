@@ -4,6 +4,7 @@ import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 
 import { fetchAdminWorkshopAgents, saveAdminWorkshopAgent } from '@/businesses/workshop-admin/workshopAdminApiClient';
 import { Button } from '@/components/ui/button';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import type { WorkshopAgentAdminState, WorkshopAgentDefinition, WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
@@ -72,11 +73,13 @@ export function WorkshopAgentAdmin({ workshop }: { readonly workshop: WorkshopDe
                     <span className="mt-1 block text-sm text-slate-500">{!agent.isEnabled ? 'Vypnutý ve všech místnostech' : [agent.isReplyEnabled ? 'Odpovídá v chatu' : '', agent.isListening ? 'Naslouchá workshopu' : ''].filter(Boolean).join(' · ') || 'V této místnosti se nezapojuje'}</span>
                 </button>)}
             </div>}
-            {isEditing && <WorkshopAgentEditor key={editedAgent?.id ?? 'new'} initialValues={editedAgent === null ? null : {
-                name: editedAgent.name, bookSource: editedAgent.bookSource, isEnabled: editedAgent.isEnabled,
-                isReplyEnabled: editedAgent.isReplyEnabled, isListening: editedAgent.isListening,
-                replyCooldownSeconds: editedAgent.replyCooldownSeconds, questionIntervalSeconds: editedAgent.questionIntervalSeconds,
-            }} isListeningOffered={isListeningOffered} isSaving={isSaving} onSave={save} onCancel={() => setIsEditing(false)} />}
+            <AdminEditorDialog isOpen={isEditing} onClose={() => setIsEditing(false)} title={editedAgent === null ? 'Nový agent' : `Upravit agenta: ${editedAgent.name}`} className="max-w-5xl" errorMessage={errorMessage}>
+                {isEditing && <WorkshopAgentEditor key={editedAgent?.id ?? 'new'} initialValues={editedAgent === null ? null : {
+                    name: editedAgent.name, bookSource: editedAgent.bookSource, isEnabled: editedAgent.isEnabled,
+                    isReplyEnabled: editedAgent.isReplyEnabled, isListening: editedAgent.isListening,
+                    replyCooldownSeconds: editedAgent.replyCooldownSeconds, questionIntervalSeconds: editedAgent.questionIntervalSeconds,
+                }} isListeningOffered={isListeningOffered} isSaving={isSaving} onSave={save} onCancel={() => setIsEditing(false)} />}
+            </AdminEditorDialog>
             {isListeningOffered && <WorkshopAgentListening workshop={workshop} isConfigured={state?.isConfigured ?? false}
                 isListeningEnabled={state?.agents.some((agent) => agent.isEnabled && agent.isListening) ?? false} />}
             {state !== null && state.runs.length > 0 && <div className="rounded-2xl border border-slate-200 bg-white p-5">

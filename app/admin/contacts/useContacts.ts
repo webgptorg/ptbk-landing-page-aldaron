@@ -1,7 +1,7 @@
 'use client';
 
 import type { AdminJoinedContact } from '@/lib/admin/adminContactJoin';
-import type { ContactChanges, ContactDraft, ContactTextValues } from '@/lib/contacts/Contact';
+import type { ContactChanges, ContactDraft } from '@/lib/contacts/Contact';
 import {
     createContact,
     deleteContact as deleteContactRequest,
@@ -16,7 +16,7 @@ type UseContactsResult = {
     readonly errorMessage: string | null;
     readonly changeContact: (contactId: number, contactChanges: ContactChanges) => void;
     readonly addContact: (contactDraft: ContactDraft) => Promise<boolean>;
-    readonly editContact: (contactId: number, contactValues: ContactTextValues) => Promise<boolean>;
+    readonly editContact: (contactId: number, contactValues: ContactChanges) => Promise<boolean>;
     readonly deleteContact: (contactId: number) => Promise<boolean>;
 };
 
@@ -105,7 +105,7 @@ export function useContacts(): UseContactsResult {
     );
 
     const editContact = useCallback(
-        async (contactId: number, contactValues: ContactTextValues): Promise<boolean> => {
+        async (contactId: number, contactValues: ContactChanges): Promise<boolean> => {
             changeContact(contactId, contactValues);
             const isSaved = await flushContactChanges(contactId);
             if (isSaved) setErrorMessage(null);

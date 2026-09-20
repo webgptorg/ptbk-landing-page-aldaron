@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~.02 30 minutes; Testing 15 minutes
 
 [✨😫] In the admin, use the popup modals
 
@@ -9,3 +9,4 @@
     - Reuse the same pattern, code and components across entire admin.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

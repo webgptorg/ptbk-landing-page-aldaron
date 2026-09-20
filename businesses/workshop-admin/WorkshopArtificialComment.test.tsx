@@ -13,6 +13,8 @@ describe('artificial workshop comments', () => {
         const onCreate = vi.fn().mockResolvedValue(true);
         render(<WorkshopArtificialComment onCreate={onCreate} isStageOffered />);
 
+        fireEvent.click(screen.getByRole('button', { name: 'Přidat umělý komentář' }));
+
         fireEvent.change(screen.getByLabelText('Zobrazené jméno autora'), {
             target: { value: 'Moderátor' },
         });
@@ -31,6 +33,7 @@ describe('artificial workshop comments', () => {
 
     it('does not offer a stage action in a room without a stage', () => {
         render(<WorkshopArtificialComment onCreate={vi.fn()} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Přidat umělý komentář' }));
 
         expect(screen.queryByRole('button', { name: 'Přidat a poslat na stage' })).toBeNull();
     });

@@ -62,6 +62,7 @@ test('deploys a workshop project and saves its ready URL through the existing se
 
     const parameters = serializeWorkshopAdminViewState({ ...DEFAULT_WORKSHOP_ADMIN_VIEW_STATE, section: 'settings' }, new URLSearchParams());
     await page.goto(`/admin/workshops?${parameters}`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: 'Upravit nastavení', exact: true }).click();
     const deploymentField = page.getByLabel('URL nasazení projektu');
     const deployButton = page.getByRole('button', { name: 'Nasadit na Vercel', exact: true });
     await deploymentField.fill('https://manual.example.com/');

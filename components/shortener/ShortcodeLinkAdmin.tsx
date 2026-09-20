@@ -9,6 +9,8 @@ import { useShortcodeLinkAdminViewState } from '@/components/shortener/useShortc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { UrlShortener } from '@/components/url-shortener';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import {
     createPublicShortcodeLinkUrl,
     getShortcodeLinkCreationLabel,
@@ -239,15 +241,19 @@ export function ShortcodeLinkAdmin() {
 
     return (
         <div className="mx-auto max-w-6xl space-y-10 px-6 py-10">
-            <UrlShortener onShortcodeLinkCreated={() => void loadShortcodeLinks()} />
+            <AdminEditorButton label="New short link" title="New short link">
+                <UrlShortener onShortcodeLinkCreated={() => void loadShortcodeLinks()} />
+            </AdminEditorButton>
 
             {editedShortcodeLink !== null && (
-                <ShortcodeLinkEditForm
-                    key={editedShortcodeLink.id}
-                    shortcodeLink={editedShortcodeLink}
-                    onSave={handleSave}
-                    onCancelEditing={() => setEditedShortcodeLink(null)}
-                />
+                <AdminEditorDialog isOpen onClose={() => setEditedShortcodeLink(null)} title={`Edit short link: ${editedShortcodeLink.shortcode}`} errorMessage={errorMessage}>
+                    <ShortcodeLinkEditForm
+                        key={editedShortcodeLink.id}
+                        shortcodeLink={editedShortcodeLink}
+                        onSave={handleSave}
+                        onCancelEditing={() => setEditedShortcodeLink(null)}
+                    />
+                </AdminEditorDialog>
             )}
 
             {selectedShortcodeLink !== undefined && (
@@ -397,7 +403,7 @@ export function ShortcodeLinkAdmin() {
                     <p className="m-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</p>
                 )}
 
-                {isLoadingShortcodeLinks ? (
+                {isLoadingShortcodeLinks && shortcodeLinks.length === 0 ? (
                     <div className="flex items-center justify-center gap-3 px-6 py-16 text-sm text-slate-500">
                         <Loader2 className="h-5 w-5 animate-spin" /> Loading the short links…
                     </div>

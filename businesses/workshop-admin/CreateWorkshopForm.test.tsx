@@ -37,15 +37,15 @@ afterEach(() => {
 describe('create workshop form', () => {
     it('opens a selected workshop with its publication state and creates it through the normal callback', async () => {
         const onCreate = vi.fn().mockResolvedValue(true);
-        const { container } = render(<CreateWorkshopForm onCreate={onCreate} workshopToDuplicate={WORKSHOP} />);
+        render(<CreateWorkshopForm onCreate={onCreate} workshopToDuplicate={WORKSHOP} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Duplikovat workshop' }));
 
-        expect(screen.getByText('Kopie workshopu')).not.toBeNull();
+        expect(screen.getByRole('dialog', { name: 'Kopie workshopu' })).not.toBeNull();
         expect(screen.getByDisplayValue(WORKSHOP.title)).not.toBeNull();
         expect(screen.getByDisplayValue('production-ai-workshop-2026-09-copy')).not.toBeNull();
 
-        fireEvent.submit(container.querySelector('form') as HTMLFormElement);
+        fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
 
         await waitFor(() =>
             expect(onCreate).toHaveBeenCalledWith(
@@ -63,26 +63,27 @@ describe('create workshop form', () => {
                 }),
             ),
         );
-        await waitFor(() => expect(screen.queryByText('Kopie workshopu')).toBeNull());
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Kopie workshopu' })).toBeNull());
     });
 
     it('keeps an unpublished source unpublished when it is duplicated', async () => {
         const onCreate = vi.fn().mockResolvedValue(true);
-        const { container } = render(
+        render(
             <CreateWorkshopForm onCreate={onCreate} workshopToDuplicate={{ ...WORKSHOP, isPublished: false }} />,
         );
 
         fireEvent.click(screen.getByRole('button', { name: 'Duplikovat workshop' }));
-        fireEvent.submit(container.querySelector('form') as HTMLFormElement);
+        fireEvent.submit(screen.getByRole('dialog').querySelector('form') as HTMLFormElement);
 
         await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ isPublished: false })));
     });
 
-    it('resets a dismissed duplicate back to a blank new workshop', () => {
+    it('resets a dismissed duplicate back to a blank new workshop', async () => {
         render(<CreateWorkshopForm onCreate={vi.fn().mockResolvedValue(true)} workshopToDuplicate={WORKSHOP} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Duplikovat workshop' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Zavřít' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         fireEvent.click(screen.getByRole('button', { name: 'Nový workshop' }));
 
         expect((screen.getByPlaceholderText('Název') as HTMLInputElement).value).toBe('');

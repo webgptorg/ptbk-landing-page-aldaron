@@ -122,7 +122,7 @@ export function WorkshopContentEditor({
                     </Button>
                 )}
             </div>
-            <div className="mt-4 grid gap-4 md:grid-cols-[1fr_190px_100px_auto_auto_auto]">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <label className="text-xs font-medium text-slate-600">
                     Nadpis
                     <Input

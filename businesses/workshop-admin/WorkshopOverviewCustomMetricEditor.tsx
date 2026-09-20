@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -87,43 +88,45 @@ export function WorkshopOverviewCustomMetricEditor({
             )}
 
             {isAnotherMetricAllowed ? (
-                <div className="mt-3 flex flex-wrap items-start gap-2">
-                    <Input
-                        value={label}
-                        onChange={(changeEvent) => setLabel(changeEvent.target.value)}
-                        placeholder="Název čáry"
-                        className="w-40 bg-white"
-                        aria-label="Název vlastní metriky"
-                    />
-                    <div>
+                <AdminEditorButton label="Nová metrika" title="Nová metrika z komentářů" buttonProps={{ className: 'mt-3', size: 'sm' }}>
+                    <div className="mt-3 flex flex-wrap items-start gap-2">
                         <Input
-                            value={pattern}
-                            onChange={(changeEvent) => setPattern(changeEvent.target.value)}
-                            onKeyDown={(keyEvent) => {
-                                if (keyEvent.key === 'Enter') {
-                                    keyEvent.preventDefault();
-                                    addCustomMetric();
-                                }
-                            }}
-                            placeholder="Regulární výraz"
-                            aria-label="Regulární výraz vlastní metriky"
-                            aria-invalid={!isPatternValid}
-                            className={`w-56 bg-white ${isPatternValid ? '' : 'border-rose-400'}`}
+                            value={label}
+                            onChange={(changeEvent) => setLabel(changeEvent.target.value)}
+                            placeholder="Název čáry"
+                            className="w-40 bg-white"
+                            aria-label="Název vlastní metriky"
                         />
-                        {!isPatternValid && (
-                            <p className="mt-1 text-xs text-rose-600">Tento regulární výraz zatím nedává smysl.</p>
-                        )}
+                        <div>
+                            <Input
+                                value={pattern}
+                                onChange={(changeEvent) => setPattern(changeEvent.target.value)}
+                                onKeyDown={(keyEvent) => {
+                                    if (keyEvent.key === 'Enter') {
+                                        keyEvent.preventDefault();
+                                        addCustomMetric();
+                                    }
+                                }}
+                                placeholder="Regulární výraz"
+                                aria-label="Regulární výraz vlastní metriky"
+                                aria-invalid={!isPatternValid}
+                                className={`w-56 bg-white ${isPatternValid ? '' : 'border-rose-400'}`}
+                            />
+                            {!isPatternValid && (
+                                <p className="mt-1 text-xs text-rose-600">Tento regulární výraz zatím nedává smysl.</p>
+                            )}
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!isPatternWritten || !isPatternValid}
+                            onClick={addCustomMetric}
+                        >
+                            <Plus className="mr-1.5 h-4 w-4" /> Přidat metriku
+                        </Button>
                     </div>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={!isPatternWritten || !isPatternValid}
-                        onClick={addCustomMetric}
-                    >
-                        <Plus className="mr-1.5 h-4 w-4" /> Přidat metriku
-                    </Button>
-                </div>
+                </AdminEditorButton>
             ) : (
                 <p className="mt-3 text-xs text-slate-500">
                     Graf unese {MAXIMAL_WORKSHOP_OVERVIEW_CUSTOM_METRIC_COUNT} vlastní metriky najednou, aby se jejich

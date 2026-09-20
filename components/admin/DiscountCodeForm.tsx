@@ -158,12 +158,9 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
     };
 
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form ref={autosave.formRef} onSubmit={handleSubmit} className="space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-950">
-                        {isEditing ? 'Upravit slevový kód' : 'Nový slevový kód'}
-                    </h2>
                     <p className="mt-1 max-w-2xl text-sm text-slate-500">
                         Kód se při uložení sjednotí na velká písmena a podtržítka. Každá hvězdička zastoupí libovolně
                         dlouhou, i prázdnou část kódu: <code>SUMMER*</code> najde začátky, <code>*SUMMER</code> konce a

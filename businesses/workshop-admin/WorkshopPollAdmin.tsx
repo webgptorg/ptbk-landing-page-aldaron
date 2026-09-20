@@ -1,5 +1,7 @@
 'use client';
 
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
@@ -249,8 +251,7 @@ function WorkshopPollForm({
     };
 
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} className="rounded-xl border border-dashed border-cyan-300 bg-cyan-50/50 p-5">
-            <h3 className="font-semibold text-slate-950">{title}</h3>
+        <form ref={autosave.formRef} onSubmit={handleSubmit} aria-label={title} className="space-y-5">
             <label className="mt-4 block text-sm font-medium text-slate-700">
                 Otázka
                 <Input
@@ -529,8 +530,8 @@ export function WorkshopPollAdmin({
                                 </ol>
 
                                 {isEditing && (
-                                    <div className="mt-4">
-                                        <WorkshopPollForm
+                                    <AdminEditorDialog isOpen onClose={() => setEditingPollId(null)} title="Upravit anketu">
+                                        <WorkshopPollForm key={poll.id}
                                             title="Upravit anketu"
                                             submitLabel="Uložit změny"
                                             attachableWorkshops={attachableWorkshops}
@@ -538,21 +539,19 @@ export function WorkshopPollAdmin({
                                             onSubmit={(values) => onUpdate(poll.id, values)}
                                             onCancel={() => setEditingPollId(null)}
                                         />
-                                    </div>
+                                    </AdminEditorDialog>
                                 )}
 
                                 <div className="mt-4 flex flex-wrap justify-end gap-2">
-                                    {!isEditing && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={isProcessing}
-                                            onClick={() => void runAfterAdminSaves(() => setEditingPollId(poll.id))}
-                                        >
-                                            <Pencil className="mr-1.5 h-4 w-4" /> Upravit
-                                        </Button>
-                                    )}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isProcessing}
+                                        onClick={() => void runAfterAdminSaves(() => setEditingPollId(poll.id))}
+                                    >
+                                        <Pencil className="mr-1.5 h-4 w-4" /> Upravit
+                                    </Button>
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -571,21 +570,27 @@ export function WorkshopPollAdmin({
             </div>
 
             <div className="mt-6">
-                <WorkshopPollForm
-                    title="Nová anketa"
-                    submitLabel="Vytvořit anketu"
-                    attachableWorkshops={attachableWorkshops}
-                    onSubmit={(values) =>
-                        onCreate({
-                            question: values.question,
-                            options: values.options.map((option) => option.label),
-                            isClosed: values.isClosed,
-                            isVisible: values.isVisible,
-                            isOtherOptionEnabled: values.isOtherOptionEnabled,
-                            attachedWorkshopIds: values.attachedWorkshopIds,
-                        })
-                    }
-                />
+                <AdminEditorButton label="Nová anketa" title="Nová anketa">
+                    {(closeEditor) => (
+                        <WorkshopPollForm
+                            title="Nová anketa"
+                            submitLabel="Vytvořit anketu"
+                            attachableWorkshops={attachableWorkshops}
+                            onSubmit={async (values) => {
+                                const isCreated = await onCreate({
+                                    question: values.question,
+                                    options: values.options.map((option) => option.label),
+                                    isClosed: values.isClosed,
+                                    isVisible: values.isVisible,
+                                    isOtherOptionEnabled: values.isOtherOptionEnabled,
+                                    attachedWorkshopIds: values.attachedWorkshopIds,
+                                });
+                                if (isCreated) closeEditor();
+                                return isCreated;
+                            }}
+                        />
+                    )}
+                </AdminEditorButton>
             </div>
         </section>
     );

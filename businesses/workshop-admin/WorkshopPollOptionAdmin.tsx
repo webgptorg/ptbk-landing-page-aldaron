@@ -1,5 +1,7 @@
 'use client';
 
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
@@ -135,33 +137,35 @@ export function WorkshopPollOptionAdmin({
                     <p className="mt-1 text-xs text-slate-400">{formatWorkshopAdminDateTime(option.createdAt)}</p>
 
                     {editedLabel !== null && (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <Input
-                                value={editedLabel}
-                                onChange={(event) => setEditedLabel(event.target.value)}
-                                maxLength={200}
-                                className="h-8 w-full max-w-sm bg-white"
-                                aria-label={`Text vlastní odpovědi ${option.label}`}
-                            />
-                            <Button
-                                type="button"
-                                size="sm"
-                                disabled={isProcessing}
-                                onClick={() => void handleLabelSave()}
-                            >
-                                Uložit text
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                disabled={isProcessing}
-                                onClick={() => void runAfterAdminSaves(() => setEditedLabel(null))}
-                            >
-                                Zavřít
-                            </Button>
-                            <AdminAutosaveStatus {...autosave} />
-                        </div>
+                        <AdminEditorDialog isOpen onClose={() => setEditedLabel(null)} title="Upravit vlastní odpověď">
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <Input
+                                    value={editedLabel}
+                                    onChange={(event) => setEditedLabel(event.target.value)}
+                                    maxLength={200}
+                                    className="h-8 w-full max-w-sm bg-white"
+                                    aria-label={`Text vlastní odpovědi ${option.label}`}
+                                />
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    disabled={isProcessing}
+                                    onClick={() => void handleLabelSave()}
+                                >
+                                    Uložit text
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isProcessing}
+                                    onClick={() => void runAfterAdminSaves(() => setEditedLabel(null))}
+                                >
+                                    Zavřít
+                                </Button>
+                                <AdminAutosaveStatus {...autosave} />
+                            </div>
+                        </AdminEditorDialog>
                     )}
 
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -218,31 +222,33 @@ export function WorkshopPollOptionAdmin({
             )}
 
             {isArtificialOptionsShown && (
-                <div className="mt-3 flex flex-wrap items-end gap-2">
-                    <label className="text-xs font-medium text-violet-950">
-                        Umělá změna hlasů
-                        <Input
-                            type="number"
-                            step="1"
-                            min={-MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
-                            max={MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
-                            value={artificialVoteAdjustmentText}
-                            onChange={(event) => setArtificialVoteAdjustmentText(event.target.value)}
-                            className="mt-1 h-8 w-32 bg-white"
-                            placeholder="+1"
-                            aria-label={`Umělá změna hlasů pro ${option.label}`}
-                        />
-                    </label>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isProcessing || !isArtificialVoteAdjustmentValid}
-                        onClick={() => void handleArtificialVoteAdjustment()}
-                    >
-                        Použít
-                    </Button>
-                </div>
+                <AdminEditorButton label="Upravit umělé hlasy" title={`Umělé hlasy: ${option.label}`} buttonProps={{ size: 'sm', className: 'mt-3' }}>
+                    <div className="mt-3 flex flex-wrap items-end gap-2">
+                        <label className="text-xs font-medium text-violet-950">
+                            Umělá změna hlasů
+                            <Input
+                                type="number"
+                                step="1"
+                                min={-MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
+                                max={MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT}
+                                value={artificialVoteAdjustmentText}
+                                onChange={(event) => setArtificialVoteAdjustmentText(event.target.value)}
+                                className="mt-1 h-8 w-32 bg-white"
+                                placeholder="+1"
+                                aria-label={`Umělá změna hlasů pro ${option.label}`}
+                            />
+                        </label>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isProcessing || !isArtificialVoteAdjustmentValid}
+                            onClick={() => void handleArtificialVoteAdjustment()}
+                        >
+                            Použít
+                        </Button>
+                    </div>
+                </AdminEditorButton>
             )}
         </li>
     );

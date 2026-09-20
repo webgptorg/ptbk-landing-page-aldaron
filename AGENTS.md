@@ -294,6 +294,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Administration and data rules
 
+- Admin creation and editing use the shared `AdminEditorDialog` (and `AdminEditorButton` for a local trigger).
+  Lists show summaries and edit actions; contact notes and contacted status are edited in the contact dialog.
+  The dialog contains request errors, traps and restores focus, and scrolls within the viewport. Closing with its
+  button or Escape flushes pending saves and keeps invalid or failed drafts open; backdrop clicks preserve the editor.
+  Search, filters, and immediate moderation actions stay in their lists. New records still require explicit creation.
+
 - Existing records in `/admin` autosave through `useAdminAutosave` and the shared `AdminSaveQueue`.
   Raw drafts remain dirty through validation failures and failed requests; writes are debounced and serialized,
   and polling must not replace an editor's draft. Editors stay open after autosave. Pending writes protect

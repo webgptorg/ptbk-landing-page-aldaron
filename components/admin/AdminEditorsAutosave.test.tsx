@@ -30,7 +30,7 @@ it('saves contact dialog edits without closing the dialog', async () => {
         saveButtonLabel="Save" isAutosaveEnabled onSaveContact={onSaveContact} onContactSaved={onContactSaved} />);
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'new@example.com' } });
     await saveChanges();
-    expect(onSaveContact).toHaveBeenCalledWith({ email: 'new@example.com' });
+    expect(onSaveContact).toHaveBeenCalledWith({ email: 'new@example.com' }, false);
     expect(onContactSaved).not.toHaveBeenCalled();
 });
 

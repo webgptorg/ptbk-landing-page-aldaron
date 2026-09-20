@@ -2,6 +2,7 @@
 
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 
+import { AdminEditorDialog, AdminEditorErrorProvider } from '@/components/admin/AdminEditorDialog';
 import { Button } from '@/components/ui/button';
 import { useResizableColumnWidths } from '@/hooks/useResizableColumnWidths';
 import type { Contact, ContactDraft } from '@/lib/contacts/Contact';
@@ -32,7 +33,7 @@ const CONTACT_COLUMN_WIDTHS_STORAGE_KEY = 'admin-contacts-column-widths';
  * Dashboard which shows, filters, sorts and exports the gathered contacts and leads
  */
 export default function AdminContactsComponent() {
-    const { contacts, isLoading, errorMessage, changeContact, addContact, editContact, deleteContact } = useContacts();
+    const { contacts, isLoading, errorMessage, addContact, editContact, deleteContact } = useContacts();
 
     const {
         filter,
@@ -70,7 +71,7 @@ export default function AdminContactsComponent() {
         [contactsPerPage, currentPage, filteredAndSortedContacts],
     );
 
-    // An inline edit can make the final contact on a page stop matching the active filter and a shared link can point
+    // An edit can make the final contact on a page stop matching the active filter and a shared link can point
     // to a page which the filter does not reach anymore
     //
     // Note: The page is only kept valid once the contacts are loaded, otherwise a shared page number would be thrown
@@ -86,6 +87,7 @@ export default function AdminContactsComponent() {
     const handleAddContact = useCallback((contactDraft: ContactDraft) => addContact(contactDraft), [addContact]);
 
     return (
+        <AdminEditorErrorProvider value={errorMessage}>
         <div className="p-8">
             <h1 className="mb-4 text-2xl font-bold">Contacts & Leads Dashboard</h1>
 
@@ -119,9 +121,9 @@ export default function AdminContactsComponent() {
                 </Button>
             </div>
 
-            {isAddFormOpen && (
-                <AddContactForm onAddContact={handleAddContact} onContactAdded={() => setIsAddFormOpen(false)} />
-            )}
+            <AdminEditorDialog isOpen={isAddFormOpen} onClose={() => setIsAddFormOpen(false)} title="Add New Contact">
+                {isAddFormOpen && <AddContactForm onAddContact={handleAddContact} onContactAdded={() => setIsAddFormOpen(false)} />}
+            </AdminEditorDialog>
 
             {editedContact !== null && (
                 <EditContactDialog
@@ -141,7 +143,6 @@ export default function AdminContactsComponent() {
                         sortState={sortState}
                         onToggleSort={toggleSort}
                         onStartColumnResize={startResizing}
-                        onChangeContact={changeContact}
                         onEditContact={(contact) => void runAfterAdminSaves(() => setEditedContact(contact))}
                         onDeleteContact={deleteContact}
                     />
@@ -154,5 +155,6 @@ export default function AdminContactsComponent() {
                 </>
             )}
         </div>
+        </AdminEditorErrorProvider>
     );
 }

@@ -1,5 +1,11 @@
 # Current preversion
 
+- Replaced inline admin creation and editing with shared, accessible popup dialogs across contacts, short links,
+  discount codes, workshop/community settings, materials, polls and member answers, chat corrections, Book agents,
+  artificial activity, and custom chart metrics. Lists now show summaries with explicit New/Edit actions; contact
+  notes and contacted status use the same contact editor. Dialogs contain request errors, keep long forms scrollable
+  on smaller screens, restore keyboard focus, and wait for autosave before closing while retaining invalid or failed drafts.
+
 - Added shared autosaving throughout `/admin` for existing workshop/community settings, materials, polls and answers,
   chat corrections, Book agents, contacts, discount codes, and short links. Edits are debounced and saved in order;
   background refreshes and older responses preserve newer typing. Pending or failed edits trigger the browser's

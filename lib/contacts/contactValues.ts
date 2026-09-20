@@ -87,7 +87,7 @@ export function getContactSortValue(contact: Contact, columnKey: ContactColumnKe
     const rawValue = getContactRawValue(contact, columnKey);
     const { cellKind } = getContactColumnDefinition(columnKey);
 
-    if (cellKind === 'CONTACTED_SWITCH' || cellKind === 'BOOLEAN') {
+    if (cellKind === 'CONTACTED_STATUS' || cellKind === 'BOOLEAN') {
         // Note: A missing flag means "not set", which has the same ordering as an explicit `false`.
         return rawValue === true ? 1 : 0;
     }

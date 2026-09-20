@@ -72,10 +72,9 @@ export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }
     };
 
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} className="rounded-2xl border border-cyan-200 bg-white p-6 shadow-sm">
+        <form ref={autosave.formRef} onSubmit={handleSubmit} className="space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-950">Edit short link</h2>
                     <p className="mt-1 text-sm text-slate-500">
                         Renaming the shortcode changes the public address, so links already handed out stop working.
                     </p>

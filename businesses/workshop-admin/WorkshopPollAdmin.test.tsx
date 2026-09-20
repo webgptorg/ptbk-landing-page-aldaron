@@ -116,7 +116,7 @@ describe('community poll administration', () => {
         props.onUpdate.mockImplementationOnce(() => new Promise((resolve) => { finishFirstSave = resolve; }));
         render(<WorkshopPollAdmin polls={[POLL]} {...props} />);
         fireEvent.click(screen.getByRole('button', { name: 'Upravit' }));
-        const editForm = screen.getByText('Upravit anketu').closest('form')!;
+        const editForm = screen.getByRole('dialog', { name: 'Upravit anketu' }).querySelector('form')!;
         fireEvent.click(within(editForm).getByRole('button', { name: 'Přidat možnost' }));
         const newChoice = within(editForm).getByPlaceholderText('Možnost 3');
         fireEvent.change(newChoice, { target: { value: 'New choice' } });
@@ -137,6 +137,7 @@ describe('community poll administration', () => {
     it('sends a trimmed question, choices, and default settings through the shared admin callback', async () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Nová anketa' }));
 
         fireEvent.change(screen.getByPlaceholderText(/Kterému tématu/), {
             target: { value: ' Kterému tématu se máme věnovat? ' },
@@ -160,6 +161,7 @@ describe('community poll administration', () => {
     it('does not submit duplicate choices that would make a poll ambiguous', () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Nová anketa' }));
 
         fireEvent.change(screen.getByPlaceholderText(/Kterému tématu/), { target: { value: 'Téma?' } });
         fireEvent.change(screen.getByPlaceholderText('Možnost 1'), { target: { value: 'Testování' } });
@@ -173,6 +175,7 @@ describe('community poll administration', () => {
     it('lets an administrator enable member-written other answers', async () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Nová anketa' }));
 
         fireEvent.change(screen.getByPlaceholderText(/Kterému tématu/), { target: { value: 'Téma?' } });
         fireEvent.change(screen.getByPlaceholderText('Možnost 1'), { target: { value: 'Testování' } });
@@ -192,6 +195,7 @@ describe('community poll administration', () => {
     it('attaches the chosen workshop occurrences to a new poll', async () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Nová anketa' }));
 
         fireEvent.change(screen.getByPlaceholderText(/Kterému tématu/), { target: { value: 'Téma?' } });
         fireEvent.change(screen.getByPlaceholderText('Možnost 1'), { target: { value: 'Testování' } });
@@ -235,6 +239,7 @@ describe('community poll administration', () => {
     it('can create a hidden, closed poll before its artificial starting votes are published', async () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Nová anketa' }));
 
         fireEvent.change(screen.getByPlaceholderText(/Kterému tématu/), { target: { value: 'Téma?' } });
         fireEvent.change(screen.getByPlaceholderText('Možnost 1'), { target: { value: 'Testování' } });
@@ -296,6 +301,7 @@ describe('community poll administration', () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[POLL]} {...props} />);
 
+        fireEvent.click(screen.getAllByRole('button', { name: 'Upravit umělé hlasy' })[0]);
         fireEvent.change(screen.getByLabelText('Umělá změna hlasů pro Testování'), { target: { value: '5' } });
         fireEvent.click(screen.getAllByRole('button', { name: 'Použít' })[0]);
 
@@ -333,7 +339,7 @@ describe('community poll administration', () => {
             target: { value: 'Jaké téma příště?' },
         });
         fireEvent.change(screen.getByDisplayValue('Testování'), { target: { value: 'Architektura' } });
-        const editForm = screen.getByText('Upravit anketu').closest('form');
+        const editForm = screen.getByRole('dialog', { name: 'Upravit anketu' }).querySelector('form');
         if (editForm === null) {
             throw new Error('The poll editor is missing');
         }
@@ -354,6 +360,8 @@ describe('community poll administration', () => {
             }),
         );
 
+        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         fireEvent.click(screen.getByRole('button', { name: 'Smazat' }));
 
         await waitFor(() => expect(props.onDelete).toHaveBeenCalledWith('poll-1'));
