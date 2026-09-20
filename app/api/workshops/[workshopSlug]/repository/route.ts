@@ -3,6 +3,7 @@ import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabil
 import { watchWorkshopRepository } from '@/lib/workshops/workshopRepositoryMonitor';
 import { getAuthenticatedWorkshopRequest, isAuthenticatedWorkshopRequest } from '@/lib/workshops/workshopRequest';
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchWorkshopRepositoryHistory } from '@/lib/workshops/fetchWorkshopRepositoryHistory';
 
 type WorkshopRepositoryRouteContext = {
     readonly params: Promise<{ readonly workshopSlug: string }>;
@@ -29,6 +30,20 @@ export async function GET(request: NextRequest, context: WorkshopRepositoryRoute
         return NextResponse.json({ error: 'Workshop repository not found' }, { status: 404 });
     }
 
+    if (request.nextUrl.searchParams.has('page')) {
+        const page = Number(request.nextUrl.searchParams.get('page'));
+        if (!Number.isSafeInteger(page) || page < 1) {
+            return NextResponse.json({ error: 'Invalid history page' }, { status: 400 });
+        }
+        try {
+            const progress = await fetchWorkshopRepositoryHistory(workshop.repository, {
+                page, isExpanded: request.nextUrl.searchParams.get('expanded') === 'true',
+            });
+            return NextResponse.json({ progress }, { headers: { 'Cache-Control': 'no-store' } });
+        } catch {
+            return NextResponse.json({ error: 'Historii commitů se nepodařilo načíst.' }, { status: 502 });
+        }
+    }
     const progress = await watchWorkshopRepository({
         repository: workshop.repository,
         room: {

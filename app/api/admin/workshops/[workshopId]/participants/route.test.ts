@@ -43,6 +43,7 @@ vi.mock('@/lib/workshops/workshopDatabase', () => ({
 import { GET } from './route';
 
 const PARTICIPANT: WorkshopAdminParticipant = {
+    pendingSubmissionCount: 0,
     id: 'participant-1',
     fullname: 'Jana Nováková',
     email: 'jana@example.com',

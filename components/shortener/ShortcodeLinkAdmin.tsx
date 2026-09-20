@@ -1,5 +1,7 @@
 'use client';
 
+import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { ShortcodeLinkClickTable } from '@/components/shortener/ShortcodeLinkClickTable';
 import { ShortcodeLinkEditForm } from '@/components/shortener/ShortcodeLinkEditForm';
 import { ShortcodeLinkTable } from '@/components/shortener/ShortcodeLinkTable';
@@ -7,6 +9,8 @@ import { useShortcodeLinkAdminViewState } from '@/components/shortener/useShortc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { UrlShortener } from '@/components/url-shortener';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import {
     createPublicShortcodeLinkUrl,
     getShortcodeLinkCreationLabel,
@@ -191,8 +195,8 @@ export function ShortcodeLinkAdmin() {
 
         try {
             await updateAdminShortcodeLink(editedShortcodeLink.id, values);
-            setEditedShortcodeLink(null);
-            return loadShortcodeLinks();
+            await loadShortcodeLinks();
+            return true;
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : SHORTCODE_LINK_SAVING_ERROR_MESSAGE);
             return false;
@@ -206,6 +210,7 @@ export function ShortcodeLinkAdmin() {
         if (!isDeletionConfirmed) {
             return;
         }
+        if (!(await flushAdminSaves())) return;
 
         setDeletedShortcodeLinkId(shortcodeLink.id);
         try {
@@ -236,14 +241,19 @@ export function ShortcodeLinkAdmin() {
 
     return (
         <div className="mx-auto max-w-6xl space-y-10 px-6 py-10">
-            <UrlShortener onShortcodeLinkCreated={() => void loadShortcodeLinks()} />
+            <AdminEditorButton label="New short link" title="New short link">
+                <UrlShortener onShortcodeLinkCreated={() => void loadShortcodeLinks()} />
+            </AdminEditorButton>
 
             {editedShortcodeLink !== null && (
-                <ShortcodeLinkEditForm
-                    shortcodeLink={editedShortcodeLink}
-                    onSave={handleSave}
-                    onCancelEditing={() => setEditedShortcodeLink(null)}
-                />
+                <AdminEditorDialog isOpen onClose={() => setEditedShortcodeLink(null)} title={`Edit short link: ${editedShortcodeLink.shortcode}`} errorMessage={errorMessage}>
+                    <ShortcodeLinkEditForm
+                        key={editedShortcodeLink.id}
+                        shortcodeLink={editedShortcodeLink}
+                        onSave={handleSave}
+                        onCancelEditing={() => setEditedShortcodeLink(null)}
+                    />
+                </AdminEditorDialog>
             )}
 
             {selectedShortcodeLink !== undefined && (
@@ -393,7 +403,7 @@ export function ShortcodeLinkAdmin() {
                     <p className="m-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</p>
                 )}
 
-                {isLoadingShortcodeLinks ? (
+                {isLoadingShortcodeLinks && shortcodeLinks.length === 0 ? (
                     <div className="flex items-center justify-center gap-3 px-6 py-16 text-sm text-slate-500">
                         <Loader2 className="h-5 w-5 animate-spin" /> Loading the short links…
                     </div>
@@ -408,7 +418,7 @@ export function ShortcodeLinkAdmin() {
                         shortcodeLinks={shownShortcodeLinks}
                         editedShortcodeLinkId={editedShortcodeLink?.id ?? null}
                         deletedShortcodeLinkId={deletedShortcodeLinkId}
-                        onEdit={setEditedShortcodeLink}
+                        onEdit={(link) => void runAfterAdminSaves(() => setEditedShortcodeLink(link))}
                         onDelete={(shortcodeLink) => void handleDelete(shortcodeLink)}
                         onShowClicks={(shortcodeLink) =>
                             changeShortcodeLinkAdminViewState({ selectedShortcodeLinkId: shortcodeLink.id })

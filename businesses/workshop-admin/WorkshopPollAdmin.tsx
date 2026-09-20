@@ -1,5 +1,11 @@
 'use client';
 
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
+import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import type {
     WorkshopPollCreateValues,
     WorkshopPollOptionWriteValues,
@@ -27,10 +33,16 @@ import {
     Trash2,
     Vote,
 } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 
 const MINIMAL_OPTION_COUNT = 2;
 const MAXIMAL_OPTION_COUNT = 8;
+
+type WorkshopPollDraftOption = WorkshopPollOptionWriteValues & { readonly draftId: string };
+
+function createPollDraftOptions(options: readonly WorkshopPollOptionWriteValues[]): readonly WorkshopPollDraftOption[] {
+    return options.map((option) => ({ ...option, draftId: option.id ?? crypto.randomUUID() }));
+}
 
 type WorkshopPollFormValues = {
     readonly question: string;
@@ -49,7 +61,7 @@ type WorkshopPollAdminProps = {
      */
     readonly attachableWorkshops: readonly WorkshopAdminSummary[];
     readonly onCreate: (values: WorkshopPollCreateValues) => Promise<boolean>;
-    readonly onUpdate: (pollId: string, values: WorkshopPollUpdateValues) => Promise<boolean>;
+    readonly onUpdate: (pollId: string, values: WorkshopPollUpdateValues) => Promise<readonly WorkshopPollOptionWriteValues[] | false>;
     readonly onDelete: (pollId: string) => Promise<void>;
     readonly onAdjustArtificialVotes: (
         pollId: string,
@@ -74,9 +86,8 @@ type WorkshopPollFormProps = {
     readonly submitLabel: string;
     readonly attachableWorkshops: readonly WorkshopAdminSummary[];
     readonly initialValues?: WorkshopPollFormValues;
-    readonly onSubmit: (values: WorkshopPollFormValues) => Promise<boolean>;
+    readonly onSubmit: (values: WorkshopPollFormValues) => Promise<boolean | readonly WorkshopPollOptionWriteValues[]>;
     readonly onCancel?: () => void;
-    readonly onSaved?: () => void;
 };
 
 const INITIAL_POLL_FORM_VALUES: WorkshopPollFormValues = {
@@ -148,11 +159,11 @@ function WorkshopPollForm({
     initialValues,
     onSubmit,
     onCancel,
-    onSaved,
 }: WorkshopPollFormProps) {
     const initialFormValues = initialValues ?? INITIAL_POLL_FORM_VALUES;
     const [question, setQuestion] = useState(initialFormValues.question);
-    const [options, setOptions] = useState<readonly WorkshopPollOptionWriteValues[]>(initialFormValues.options);
+    const [options, setOptions] = useState(() => createPollDraftOptions(initialFormValues.options));
+    const savedOptionIdsReference = useRef(new Map<string, string>());
     const [isClosed, setIsClosed] = useState(initialFormValues.isClosed);
     const [isVisible, setIsVisible] = useState(initialFormValues.isVisible);
     const [isOtherOptionEnabled, setIsOtherOptionEnabled] = useState(initialFormValues.isOtherOptionEnabled);
@@ -160,7 +171,7 @@ function WorkshopPollForm({
         initialFormValues.attachedWorkshopIds,
     );
     const [formError, setFormError] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     const changeOption = (optionIndex: number, nextLabel: string) =>
         setOptions((currentOptions) =>
@@ -189,18 +200,17 @@ function WorkshopPollForm({
 
     const resetForm = () => {
         setQuestion(INITIAL_POLL_FORM_VALUES.question);
-        setOptions(INITIAL_POLL_FORM_VALUES.options);
+        setOptions(createPollDraftOptions(INITIAL_POLL_FORM_VALUES.options));
         setIsClosed(INITIAL_POLL_FORM_VALUES.isClosed);
         setIsVisible(INITIAL_POLL_FORM_VALUES.isVisible);
         setIsOtherOptionEnabled(INITIAL_POLL_FORM_VALUES.isOtherOptionEnabled);
         setAttachedWorkshopIds(INITIAL_POLL_FORM_VALUES.attachedWorkshopIds);
     };
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const saveValues = async () => {
         const validated = getValidatedPollFormValues(
             question,
-            options,
+            options.map((option) => ({ ...option, id: option.id ?? savedOptionIdsReference.current.get(option.draftId) })),
             isClosed,
             isVisible,
             isOtherOptionEnabled,
@@ -208,28 +218,40 @@ function WorkshopPollForm({
         );
         if (validated.values === null) {
             setFormError(validated.error);
-            return;
+            return false;
         }
 
         setFormError(null);
-        setIsSaving(true);
-        try {
-            const isSaved = await onSubmit(validated.values);
-            if (isSaved) {
-                if (onSaved !== undefined) {
-                    onSaved();
-                } else {
-                    resetForm();
-                }
-            }
-        } finally {
-            setIsSaving(false);
+        const savedOptions = await onSubmit(validated.values);
+        if (savedOptions === false) return false;
+        if (savedOptions !== true) {
+            // Structural controls wait during a save. IDs can be matched to the sent order while newer text stays intact.
+            savedOptions.forEach((option, optionIndex) => {
+                if (option.id !== undefined) savedOptionIdsReference.current.set(options[optionIndex].draftId, option.id);
+            });
         }
+        if (initialValues === undefined) resetForm();
+        return true;
+    };
+
+    const isEditing = initialValues !== undefined;
+    const autosave = useAdminAutosave({
+        value: { question, options, isClosed, isVisible, isOtherOptionEnabled, attachedWorkshopIds },
+        onSave: saveValues, isEnabled: isEditing,
+    });
+    const isSaving = isCreating || autosave.isSaving;
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isEditing) {
+            await autosave.saveNow();
+            return;
+        }
+        setIsCreating(true);
+        try { await saveValues(); } finally { setIsCreating(false); }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="rounded-xl border border-dashed border-cyan-300 bg-cyan-50/50 p-5">
-            <h3 className="font-semibold text-slate-950">{title}</h3>
+        <form ref={autosave.formRef} onSubmit={handleSubmit} aria-label={title} className="space-y-5">
             <label className="mt-4 block text-sm font-medium text-slate-700">
                 Otázka
                 <Input
@@ -243,7 +265,7 @@ function WorkshopPollForm({
             <div className="mt-4 space-y-2">
                 <p className="text-sm font-medium text-slate-700">Možnosti</p>
                 {options.map((option, optionIndex) => (
-                    <div key={option.id ?? optionIndex} className="flex items-center gap-2">
+                    <div key={option.draftId} className="flex items-center gap-2">
                         <Input
                             value={option.label}
                             onChange={(event) => changeOption(optionIndex, event.target.value)}
@@ -324,23 +346,24 @@ function WorkshopPollForm({
                     type="button"
                     variant="outline"
                     disabled={isSaving || options.length >= MAXIMAL_OPTION_COUNT}
-                    onClick={() => setOptions((currentOptions) => [...currentOptions, { label: '' }])}
+                    onClick={() => setOptions((currentOptions) => [...currentOptions, ...createPollDraftOptions([{ label: '' }])])}
                 >
                     <CirclePlus className="mr-2 h-4 w-4" /> Přidat možnost
                 </Button>
                 <div className="flex flex-wrap gap-2">
                     {onCancel !== undefined && (
-                        <Button type="button" variant="outline" disabled={isSaving} onClick={onCancel}>
-                            Zrušit
+                        <Button type="button" variant="outline" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>
+                            Zavřít
                         </Button>
                     )}
                     <Button type="submit" disabled={isSaving}>
-                        {onSaved === undefined ? <Send className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isEditing ? <Save className="mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}
                         {isSaving ? 'Ukládám…' : submitLabel}
                     </Button>
                 </div>
             </div>
             {formError !== null && <p className="mt-3 text-sm text-red-700">{formError}</p>}
+            {isEditing && <div className="mt-3"><AdminAutosaveStatus {...autosave} /></div>}
         </form>
     );
 }
@@ -388,7 +411,7 @@ export function WorkshopPollAdmin({
                 `Opravdu trvale smazat anketu „${poll.question}“? Smažou se také všechny její ${isArtificialOptionsShown ? 'skutečné i umělé ' : ''}hlasy.`,
             )
         ) {
-            void runPollAction(poll.id, () => onDelete(poll.id));
+            void runAfterAdminSaves(() => { void runPollAction(poll.id, () => onDelete(poll.id)); });
         }
     };
 
@@ -437,7 +460,7 @@ export function WorkshopPollAdmin({
                                             type="button"
                                             variant="outline"
                                             size="sm"
-                                            disabled={isProcessing}
+                                            disabled={isProcessing || isEditing}
                                             onClick={() =>
                                                 void runPollAction(poll.id, () =>
                                                     onUpdate(
@@ -461,7 +484,7 @@ export function WorkshopPollAdmin({
                                             type="button"
                                             variant="outline"
                                             size="sm"
-                                            disabled={isProcessing}
+                                            disabled={isProcessing || isEditing}
                                             onClick={() =>
                                                 void runPollAction(poll.id, () =>
                                                     onUpdate(
@@ -507,31 +530,28 @@ export function WorkshopPollAdmin({
                                 </ol>
 
                                 {isEditing && (
-                                    <div className="mt-4">
-                                        <WorkshopPollForm
+                                    <AdminEditorDialog isOpen onClose={() => setEditingPollId(null)} title="Upravit anketu">
+                                        <WorkshopPollForm key={poll.id}
                                             title="Upravit anketu"
                                             submitLabel="Uložit změny"
                                             attachableWorkshops={attachableWorkshops}
                                             initialValues={createPollUpdateValues(poll)}
                                             onSubmit={(values) => onUpdate(poll.id, values)}
                                             onCancel={() => setEditingPollId(null)}
-                                            onSaved={() => setEditingPollId(null)}
                                         />
-                                    </div>
+                                    </AdminEditorDialog>
                                 )}
 
                                 <div className="mt-4 flex flex-wrap justify-end gap-2">
-                                    {!isEditing && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={isProcessing}
-                                            onClick={() => setEditingPollId(poll.id)}
-                                        >
-                                            <Pencil className="mr-1.5 h-4 w-4" /> Upravit
-                                        </Button>
-                                    )}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isProcessing}
+                                        onClick={() => void runAfterAdminSaves(() => setEditingPollId(poll.id))}
+                                    >
+                                        <Pencil className="mr-1.5 h-4 w-4" /> Upravit
+                                    </Button>
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -550,21 +570,27 @@ export function WorkshopPollAdmin({
             </div>
 
             <div className="mt-6">
-                <WorkshopPollForm
-                    title="Nová anketa"
-                    submitLabel="Vytvořit anketu"
-                    attachableWorkshops={attachableWorkshops}
-                    onSubmit={(values) =>
-                        onCreate({
-                            question: values.question,
-                            options: values.options.map((option) => option.label),
-                            isClosed: values.isClosed,
-                            isVisible: values.isVisible,
-                            isOtherOptionEnabled: values.isOtherOptionEnabled,
-                            attachedWorkshopIds: values.attachedWorkshopIds,
-                        })
-                    }
-                />
+                <AdminEditorButton label="Nová anketa" title="Nová anketa">
+                    {(closeEditor) => (
+                        <WorkshopPollForm
+                            title="Nová anketa"
+                            submitLabel="Vytvořit anketu"
+                            attachableWorkshops={attachableWorkshops}
+                            onSubmit={async (values) => {
+                                const isCreated = await onCreate({
+                                    question: values.question,
+                                    options: values.options.map((option) => option.label),
+                                    isClosed: values.isClosed,
+                                    isVisible: values.isVisible,
+                                    isOtherOptionEnabled: values.isOtherOptionEnabled,
+                                    attachedWorkshopIds: values.attachedWorkshopIds,
+                                });
+                                if (isCreated) closeEditor();
+                                return isCreated;
+                            }}
+                        />
+                    )}
+                </AdminEditorButton>
             </div>
         </section>
     );

@@ -45,7 +45,7 @@ export type WorkshopModerationCapabilities = {
     readonly isPollOptionEditingOffered: boolean;
 
     /**
-     * Whether this role has the messages of a participant approved as they are written from now on
+     * Whether this role approves a participant's pending submissions and has future submissions approved as written
      */
     readonly isTrustingOffered: boolean;
 

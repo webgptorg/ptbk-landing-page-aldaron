@@ -1,5 +1,53 @@
 # Current preversion
 
+- Added `/admin/recording-studio` to the shared admin menu and dashboard. Multiple cameras, screen shares (with
+  available shared audio), and optional separate microphones start and stop together, with per-track sizes,
+  elapsed time, and an estimate of remaining browser storage time. Recording chunks persist locally in IndexedDB;
+  a source failure or storage limit stops the whole take, interrupted takes can be recovered, and a browser-wide
+  lock prevents another studio tab from changing an active recording. Saved recordings have shared autosaved
+  trimming and previews, explicit deletion, and ZIP64 downloads containing untouched source files and timing
+  metadata, optionally with separately trimmed copies for the editor. Large archives stream to disk where supported;
+  trimming runs locally using browser codecs and temporary files. Admin navigation waits for active recording and
+  export; reopening the studio waits for its previous instance to release local storage. No recording is uploaded
+  to the server.
+
+- Replaced inline admin creation and editing with shared, accessible popup dialogs across contacts, short links,
+  discount codes, workshop/community settings, materials, polls and member answers, chat corrections, Book agents,
+  artificial activity, and custom chart metrics. Lists now show summaries with explicit New/Edit actions; contact
+  notes and contacted status use the same contact editor. Dialogs contain request errors, keep long forms scrollable
+  on smaller screens, restore keyboard focus, and wait for autosave before closing while retaining invalid or failed drafts.
+
+- Added shared autosaving throughout `/admin` for existing workshop/community settings, materials, polls and answers,
+  chat corrections, Book agents, contacts, discount codes, and short links. Edits are debounced and saved in order;
+  background refreshes and older responses preserve newer typing. Pending or failed edits trigger the browser's
+  close/reload warning, while admin links, editor switches, and sign-out wait for saving. Validation and request
+  errors retain the draft with retry controls; new records and destructive actions keep their explicit buttons.
+  Immediate admin writes also protect the window while their requests are in progress.
+  Newer edits continue saving if an earlier request fails, incomplete discount dates stay protected, and contact
+  refreshes retain local changes. Unlocking materials uses their current draft; repeated poll saves preserve the
+  generated IDs and votes of newly added choices.
+
+- Added **Nasadit na Vercel** to project settings in `/admin/workshops` when a GitHub repository has no deployment URL.
+  The authenticated server integration imports the original repository, reuses one Vercel project per repository,
+  and deploys its production branch with future Git pushes connected. Administration shows progress and errors,
+  supports resuming status checks, and fills in the assigned production URL only after a successful build. The existing
+  settings save, validation, room links and previews handle the result; manual URLs and changed projects are preserved.
+  Documented private `VERCEL_TOKEN` / optional `VERCEL_TEAM_ID` setup; no database migration is needed.
+
+- Added independent starting and ending commit IDs to workshop project settings in `/admin/workshops`, with commit
+  message, author and date previews and separate date-based autofill buttons. The participant project graph opens on
+  the inclusive range and highlights it, with expansion and pagination for history outside it. Missing bounds leave
+  their respective side open. All views and lookups retain the selected branch patterns; unrelated branches stay
+  hidden. Commit IDs are validated and normalized on save, and the range is copied or cleared with its repository.
+  Concurrent autofill preserves both bounds, changing the branch selection discards pending history responses, and
+  temporary GitHub failures retain the loaded graph without announcing historical commits as new.
+
+- Granting trust or moderator status now approves all pending submissions by that room participant: chat messages,
+  custom poll answers (including shared polls), and community projects. Promotion and approval commit together;
+  rejected submissions stay rejected and interaction bans still block automatic approval. Moderators on
+  `/cs/online-workshop/participant` and `/cs/komunita`, and administrators in the participant list, see each author's
+  complete pending count. The shared project gallery refreshes with the room after approval.
+
 - Added light and dark modes to `/cs/komunita` and `/cs/online-workshop/participant`, including their waiting rooms
   and shared project views. One accessible appearance control follows the device setting by default and remembers an
   explicit choice across visits, tabs, and rooms. Shared palette tokens cover chat, polls, calendars, event cards,

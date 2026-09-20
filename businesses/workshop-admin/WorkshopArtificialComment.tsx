@@ -1,6 +1,7 @@
 'use client';
 
 import type { WorkshopArtificialCommentValues } from '@/businesses/workshop-admin/workshopAdminApiClient';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -60,48 +61,50 @@ export function WorkshopArtificialComment({ onCreate, isStageOffered = false }: 
                 Komentář zůstane v databázi i administraci výslovně označený jako umělý. Můžete jej rovnou poslat i
                 nad živé vysílání.
             </p>
-            <form onSubmit={handleCreate} className="mt-5 max-w-2xl rounded-xl border border-violet-200 bg-white p-5">
-                <label className="block text-xs font-medium text-slate-600">
-                    Zobrazené jméno autora
-                    <Input
-                        value={authorName}
-                        onChange={(event) => setAuthorName(event.target.value)}
-                        className="mt-1 bg-white"
-                        maxLength={MAXIMAL_WORKSHOP_PARTICIPANT_FULLNAME_LENGTH}
-                        placeholder="Například Petra z týmu"
-                        required
-                    />
-                </label>
-                <label className="mt-4 block text-xs font-medium text-slate-600">
-                    Text komentáře
-                    <Textarea
-                        value={commentBody}
-                        onChange={(event) => setCommentBody(event.target.value)}
-                        className="mt-1 min-h-28 bg-white"
-                        maxLength={MAXIMAL_WORKSHOP_COMMENT_LENGTH}
-                        placeholder="Přidejte otázku nebo komentář do živého chatu…"
-                        required
-                    />
-                </label>
-                <div className="mt-4 flex flex-wrap gap-2">
-                    <Button type="submit" size="sm" disabled={isCreatingComment}>
-                        <MessageCirclePlus className="mr-2 h-4 w-4" />
-                        {isCreatingComment ? 'Přidávám…' : 'Přidat do chatu'}
-                    </Button>
-                    {isStageOffered && (
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={isCreatingComment}
-                            onClick={() => void createComment(true)}
-                        >
-                            <Send className="mr-2 h-4 w-4" />
-                            {isCreatingComment ? 'Posílám…' : 'Přidat a poslat na stage'}
+            <AdminEditorButton label="Přidat umělý komentář" title="Přidat umělý komentář" buttonProps={{ className: 'mt-4' }}>
+                <form onSubmit={handleCreate} className="mt-5 max-w-2xl rounded-xl border border-violet-200 bg-white p-5">
+                    <label className="block text-xs font-medium text-slate-600">
+                        Zobrazené jméno autora
+                        <Input
+                            value={authorName}
+                            onChange={(event) => setAuthorName(event.target.value)}
+                            className="mt-1 bg-white"
+                            maxLength={MAXIMAL_WORKSHOP_PARTICIPANT_FULLNAME_LENGTH}
+                            placeholder="Například Petra z týmu"
+                            required
+                        />
+                    </label>
+                    <label className="mt-4 block text-xs font-medium text-slate-600">
+                        Text komentáře
+                        <Textarea
+                            value={commentBody}
+                            onChange={(event) => setCommentBody(event.target.value)}
+                            className="mt-1 min-h-28 bg-white"
+                            maxLength={MAXIMAL_WORKSHOP_COMMENT_LENGTH}
+                            placeholder="Přidejte otázku nebo komentář do živého chatu…"
+                            required
+                        />
+                    </label>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        <Button type="submit" size="sm" disabled={isCreatingComment}>
+                            <MessageCirclePlus className="mr-2 h-4 w-4" />
+                            {isCreatingComment ? 'Přidávám…' : 'Přidat do chatu'}
                         </Button>
-                    )}
-                </div>
-            </form>
+                        {isStageOffered && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={isCreatingComment}
+                                onClick={() => void createComment(true)}
+                            >
+                                <Send className="mr-2 h-4 w-4" />
+                                {isCreatingComment ? 'Posílám…' : 'Přidat a poslat na stage'}
+                            </Button>
+                        )}
+                    </div>
+                </form>
+            </AdminEditorButton>
         </section>
     );
 }

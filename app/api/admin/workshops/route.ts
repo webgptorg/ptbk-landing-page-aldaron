@@ -14,6 +14,7 @@ import { workshopCreateSchema } from '@/lib/workshops/workshopSchemas';
 import { isWorkshopKind, type WorkshopKind } from '@/lib/workshops/workshopTypes';
 import { createWorkshopDatabaseValues } from '@/lib/workshops/workshopValues';
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveWorkshopRepositoryCommitBounds } from '@/lib/workshops/fetchWorkshopRepositoryCommitRange';
 
 export async function GET(request: NextRequest) {
     const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
@@ -69,6 +70,14 @@ export async function POST(request: NextRequest) {
         }
         if (sourceWorkshop.room_kind !== 'workshop') {
             return NextResponse.json({ error: 'Only workshop occurrences can be duplicated' }, { status: 400 });
+        }
+    }
+
+    if (parsedResult.data.repository !== null) {
+        try {
+            parsedResult.data.repository = await resolveWorkshopRepositoryCommitBounds(parsedResult.data.repository);
+        } catch (error) {
+            return NextResponse.json({ error: error instanceof Error ? error.message : 'Invalid commit range' }, { status: 422 });
         }
     }
 

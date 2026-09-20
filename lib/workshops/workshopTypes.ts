@@ -198,6 +198,8 @@ export type WorkshopAdminParticipant = WorkshopParticipant &
         readonly lastSeenAt: string;
         readonly activeDurationSeconds: number;
         readonly commentCount: number;
+        /** All pending submissions by this room participant, or null when their count could not be loaded. */
+        readonly pendingSubmissionCount: number | null;
         readonly reactionCount: number;
         readonly upvoteCount: number;
 
@@ -401,6 +403,8 @@ export type WorkshopAdminFeedback = WorkshopFeedback &
  */
 export type WorkshopCommentAuthor = {
     readonly participantId: string;
+    /** Private moderation count, including comments outside the visible chat, poll answers, and projects. */
+    readonly pendingSubmissionCount: number | null;
     readonly isTrusted: boolean;
     readonly isInteractionBanned: boolean;
     readonly isModerator: boolean;

@@ -31,6 +31,7 @@ const WORKSHOP: WorkshopDetails = {
 };
 
 const PARTICIPANT: WorkshopAdminParticipant = {
+    pendingSubmissionCount: 0,
     id: 'participant-id',
     fullname: 'Jana Nováková',
     email: 'jana@example.com',

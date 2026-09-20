@@ -7,12 +7,16 @@ const {
     findWorkshopByIdMock,
     getUnauthorizedResponseOrNullMock,
     getWorkshopDatabaseOrNullMock,
+    mapWorkshopRepositoryMock,
+    resolveCommitBoundsMock,
 } = vi.hoisted(() => ({
     broadcastWorkshopEventMock: vi.fn(),
     createWorkshopDatabaseUnavailableResponseMock: vi.fn(),
     findWorkshopByIdMock: vi.fn(),
     getUnauthorizedResponseOrNullMock: vi.fn(),
     getWorkshopDatabaseOrNullMock: vi.fn(),
+    mapWorkshopRepositoryMock: vi.fn(),
+    resolveCommitBoundsMock: vi.fn(),
 }));
 
 vi.mock('@/lib/admin/adminApiGuard', () => ({
@@ -22,12 +26,16 @@ vi.mock('@/lib/workshops/workshopDatabase', () => ({
     createWorkshopDatabaseUnavailableResponse: createWorkshopDatabaseUnavailableResponseMock,
     findWorkshopById: findWorkshopByIdMock,
     getWorkshopDatabaseOrNull: getWorkshopDatabaseOrNullMock,
+    mapWorkshopRepository: mapWorkshopRepositoryMock,
+    mapWorkshopRow: (row: unknown) => row,
 }));
 vi.mock('@/lib/workshops/workshopRealtime', () => ({
     broadcastWorkshopEvent: broadcastWorkshopEventMock,
 }));
 
-import { DELETE } from './route';
+vi.mock('@/lib/workshops/fetchWorkshopRepositoryCommitRange', () => ({ resolveWorkshopRepositoryCommitBounds: resolveCommitBoundsMock }));
+
+import { DELETE, PATCH } from './route';
 
 const WORKSHOP_ID = '5a7eb2ad-2583-4e98-9640-50bc773b5fde';
 const WORKSHOP_ROW = { id: WORKSHOP_ID, room_kind: 'workshop', slug: 'production-ai-workshop-2026-09' };
@@ -47,6 +55,50 @@ function createSoftDeleteDatabase() {
 
     return { from, update, filterByWorkshopId, filterByActiveStatus, select, maybeSingle };
 }
+
+describe('saving workshop commit ranges', () => {
+    const REPOSITORY = { owner: 'example', name: 'workshop', branch: 'main', deploymentUrls: [], startCommit: 'a'.repeat(40) };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        getUnauthorizedResponseOrNullMock.mockReturnValue(null);
+        mapWorkshopRepositoryMock.mockReturnValue(REPOSITORY);
+        findWorkshopByIdMock.mockResolvedValue({ ...WORKSHOP_ROW, starts_at: '2026-09-01T10:00:00Z', ends_at: null });
+    });
+
+    function createUpdateRequest(startCommit: string) {
+        return new NextRequest(`https://example.com/api/admin/workshops/${WORKSHOP_ID}`, { method: 'PATCH',
+            body: JSON.stringify({ title: 'Updated workshop', repository: { url: 'example/workshop', branch: 'main', startCommit } }) });
+    }
+
+    function createUpdateDatabase() {
+        const update = vi.fn(() => ({ eq: () => ({ select: () => ({ maybeSingle: async () => ({ data: WORKSHOP_ROW, error: null }) }) }) }));
+        getWorkshopDatabaseOrNullMock.mockReturnValue({ from: () => ({ update }) });
+        return update;
+    }
+
+    it('can save unrelated settings without depending on GitHub for unchanged bounds', async () => {
+        const update = createUpdateDatabase();
+        expect((await PATCH(createUpdateRequest(REPOSITORY.startCommit), ROUTE_CONTEXT)).status).toBe(200);
+        expect(resolveCommitBoundsMock).not.toHaveBeenCalled();
+        expect(update).toHaveBeenCalledWith(expect.objectContaining({ github_repository_start_commit: REPOSITORY.startCommit }));
+    });
+
+    it('stores the canonical ID after a changed boundary was validated', async () => {
+        const update = createUpdateDatabase();
+        resolveCommitBoundsMock.mockResolvedValue(REPOSITORY);
+        expect((await PATCH(createUpdateRequest('aaaaaaa'), ROUTE_CONTEXT)).status).toBe(200);
+        expect(resolveCommitBoundsMock).toHaveBeenCalledOnce();
+        expect(update).toHaveBeenCalledWith(expect.objectContaining({ github_repository_start_commit: REPOSITORY.startCommit }));
+    });
+
+    it('does not write a boundary which is invalid or outside the selected branches', async () => {
+        const update = createUpdateDatabase();
+        resolveCommitBoundsMock.mockRejectedValue(new Error('Commit outside selected branches'));
+        expect((await PATCH(createUpdateRequest('bbbbbbb'), ROUTE_CONTEXT)).status).toBe(422);
+        expect(update).not.toHaveBeenCalled();
+    });
+});
 
 describe('admin workshop deletion', () => {
     beforeEach(() => {

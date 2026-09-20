@@ -1,9 +1,11 @@
 import { parseGithubCommitFeed, type GithubCommit } from '@/lib/github/githubCommitFeed';
-import { parseGithubApiCommitList, parseGithubBranchList } from '@/lib/github/githubCommitApi';
+import { parseGithubApiCommit, parseGithubApiCommitList, parseGithubBranchList } from '@/lib/github/githubCommitApi';
 import {
     createGithubApiBranchesUrl,
     createGithubApiCommitsUrl,
     createGithubCommitFeedUrl,
+    createGithubApiRepositoryUrl,
+    extractGithubBranchName,
     type GithubBranch,
     type GithubRepository,
 } from '@/lib/github/githubRepository';
@@ -19,6 +21,7 @@ const GITHUB_USER_AGENT = 'Promptbook Workshop Repository/1.0';
 const GITHUB_API_ACCEPTED_MEDIA_TYPES = 'application/vnd.github+json, application/json;q=0.9';
 const GITHUB_API_BRANCH_PAGE_SIZE = 100;
 const GITHUB_API_BRANCH_REQUEST_BATCH_SIZE = 6;
+export const GITHUB_COMMIT_HISTORY_PAGE_SIZE = 100;
 
 export type FetchGithubRepositoryOptions = {
     readonly repository: GithubRepository;
@@ -96,8 +99,9 @@ export async function fetchGithubRepositoryBranches(
             createGithubApiBranchesUrl(options.repository, page, GITHUB_API_BRANCH_PAGE_SIZE),
             options.revalidateSeconds,
         );
-        if (branchPayload === null) {
-            break;
+        if (!Array.isArray(branchPayload)) {
+            // A wildcard cannot safely mean only the pages which happened to load.
+            return [];
         }
 
         const pageBranches = parseGithubBranchList(branchPayload);
@@ -107,7 +111,7 @@ export async function fetchGithubRepositoryBranches(
             }
         });
 
-        if (pageBranches.length < GITHUB_API_BRANCH_PAGE_SIZE) {
+        if (branchPayload.length < GITHUB_API_BRANCH_PAGE_SIZE) {
             break;
         }
     }
@@ -168,4 +172,59 @@ export async function fetchGithubRepositoryBranchHistories(
     }
 
     return histories;
+}
+
+export type GithubCommitPage = {
+    readonly commits: readonly GithubCommit[];
+    readonly isMoreAvailable: boolean;
+};
+
+/** Pages a selected branch, optionally around an old workshop instead of only its current tip. */
+export async function fetchGithubRepositoryCommitPage(
+    options: FetchGithubBranchCommitsOptions & {
+        readonly page: number;
+        readonly since?: string;
+        readonly until?: string;
+    },
+): Promise<GithubCommitPage | null> {
+    const url = new URL(createGithubApiCommitsUrl(
+        options.repository, options.branch, options.page, GITHUB_COMMIT_HISTORY_PAGE_SIZE,
+    ));
+    if (options.since !== undefined) url.searchParams.set('since', options.since);
+    if (options.until !== undefined) url.searchParams.set('until', options.until);
+    const payload = await fetchGithubApiJson(url.toString(), options.revalidateSeconds);
+    if (!Array.isArray(payload)) return null;
+    return {
+        commits: parseGithubApiCommitList(payload, options.branch),
+        isMoreAvailable: payload.length === GITHUB_COMMIT_HISTORY_PAGE_SIZE,
+    };
+}
+
+export async function fetchGithubRepositoryCommit(
+    options: FetchGithubRepositoryOptions & { readonly commitId: string },
+): Promise<GithubCommit | null> {
+    const payload = await fetchGithubApiJson(
+        `${createGithubApiRepositoryUrl(options.repository)}/commits/${encodeURIComponent(options.commitId)}`,
+        options.revalidateSeconds,
+    );
+    return parseGithubApiCommit(payload);
+}
+
+export async function fetchGithubRepositoryDefaultBranch(options: FetchGithubRepositoryOptions): Promise<string | null> {
+    const payload = await fetchGithubApiJson(createGithubApiRepositoryUrl(options.repository), options.revalidateSeconds);
+    if (typeof payload !== 'object' || payload === null || !('default_branch' in payload)) return null;
+    return extractGithubBranchName(typeof payload.default_branch === 'string' ? payload.default_branch : null);
+}
+
+/** A commit belongs to a selected branch when it is reachable from that branch's tip, not just when it is the tip. */
+export async function isGithubCommitOnBranch(
+    options: FetchGithubBranchCommitsOptions & { readonly commitId: string },
+): Promise<boolean> {
+    const comparison = `${encodeURIComponent(options.commitId)}...${encodeURIComponent(options.branch)}`;
+    const payload = await fetchGithubApiJson(
+        `${createGithubApiRepositoryUrl(options.repository)}/compare/${comparison}?per_page=1`,
+        options.revalidateSeconds,
+    );
+    return typeof payload === 'object' && payload !== null && 'status' in payload
+        && (payload.status === 'ahead' || payload.status === 'identical');
 }

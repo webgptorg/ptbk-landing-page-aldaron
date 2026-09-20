@@ -3,6 +3,7 @@ import type {
     CommunityProjectModerationStatus,
 } from '@/lib/community-projects/communityProjectTypes';
 import type { WorkshopSubmissionStatus } from '@/lib/workshops/workshopTypes';
+import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 
 const ADMIN_COMMUNITY_PROJECTS_API_PATH = '/api/admin/community/projects';
 
@@ -26,10 +27,9 @@ export async function moderateAdminCommunityProject(
     projectId: string,
     status: CommunityProjectModerationStatus,
 ): Promise<void> {
-    const response = await fetch(`${ADMIN_COMMUNITY_PROJECTS_API_PATH}/${encodeURIComponent(projectId)}`, {
+    await requestAdminJson(`${ADMIN_COMMUNITY_PROJECTS_API_PATH}/${encodeURIComponent(projectId)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
     });
-    await readAdminCommunityProjectResponse(response);
 }

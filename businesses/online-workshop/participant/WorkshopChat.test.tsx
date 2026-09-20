@@ -51,6 +51,7 @@ const MODERATED_QUESTION: WorkshopComment = {
     body: 'Tahle zpráva čeká na moderátora.',
     moderatedAuthor: {
         participantId: 'jana',
+        pendingSubmissionCount: 7,
         isTrusted: false,
         isInteractionBanned: false,
         isModerator: false,
@@ -275,12 +276,28 @@ describe('workshop chat', () => {
         const onModerateAuthor = vi.fn().mockResolvedValue(true);
         renderChat(vi.fn(), { comments: [MODERATED_QUESTION], isModerating: true, onModerateAuthor });
 
+        expect(screen.getByText('Čeká na schválení: 7')).not.toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Důvěřovat účastníkovi Jana Nováková' }));
         await waitFor(() => expect(onModerateAuthor).toHaveBeenNthCalledWith(1, 'jana', { isTrusted: true }));
 
         fireEvent.click(screen.getByRole('button', { name: 'Zakázat interakce účastníkovi Jana Nováková' }));
 
         await waitFor(() => expect(onModerateAuthor).toHaveBeenNthCalledWith(2, 'jana', { isInteractionBanned: true }));
+    });
+
+    it('keeps the author pending total out of ordinary chat and shows the refreshed zero to moderators', () => {
+        renderChat(vi.fn(), { comments: [MODERATED_QUESTION] });
+        expect(screen.queryByText('Čeká na schválení: 7')).toBeNull();
+        cleanup();
+        renderChat(vi.fn(), {
+            comments: [{
+                ...MODERATED_QUESTION,
+                status: 'approved',
+                moderatedAuthor: { ...MODERATED_QUESTION.moderatedAuthor!, isTrusted: true, pendingSubmissionCount: 0 },
+            }],
+            isModerating: true,
+        });
+        expect(screen.getByText('Čeká na schválení: 0')).not.toBeNull();
     });
 
     it('leaves the author of another moderator to the administration alone', () => {

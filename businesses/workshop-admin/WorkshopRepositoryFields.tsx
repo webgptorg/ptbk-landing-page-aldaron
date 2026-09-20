@@ -1,13 +1,20 @@
 'use client';
 
+import type { Dispatch, SetStateAction } from 'react';
 import type { WorkshopRepositoryDraft } from '@/businesses/workshop-admin/workshopRepositoryDraft';
+import { createWorkshopRepositoryWriteValues } from '@/businesses/workshop-admin/workshopRepositoryDraft';
+import { WorkshopRepositoryCommitField } from '@/businesses/workshop-admin/WorkshopRepositoryCommitField';
+import { WorkshopRepositoryDeploymentControl } from '@/businesses/workshop-admin/WorkshopRepositoryDeploymentControl';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { extractGithubRepository, formatGithubRepositoryName } from '@/lib/github/githubRepository';
 
 type WorkshopRepositoryFieldsProps = {
     readonly repository: WorkshopRepositoryDraft;
-    readonly onChange: (repository: WorkshopRepositoryDraft) => void;
+    readonly onChange: Dispatch<SetStateAction<WorkshopRepositoryDraft>>;
+    readonly startsAt: string | null;
+    readonly endsAt: string | null;
+    readonly isDisabled?: boolean;
 };
 
 /**
@@ -16,8 +23,9 @@ type WorkshopRepositoryFieldsProps = {
  * Note: The repository is read here exactly as the server reads it when it is saved, so an administrator sees which
  *       project they connected before they save it, and sees nothing while what they wrote names no project yet.
  */
-export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepositoryFieldsProps) {
+export function WorkshopRepositoryFields({ repository, onChange, startsAt, endsAt, isDisabled = false }: WorkshopRepositoryFieldsProps) {
     const connectedRepository = extractGithubRepository(repository.repositoryUrl);
+    const repositoryWriteValues = createWorkshopRepositoryWriteValues(repository);
 
     return (
         <>
@@ -25,9 +33,10 @@ export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepos
                 GitHub repozitář projektu
                 <Input
                     value={repository.repositoryUrl}
-                    onChange={(changeEvent) =>
-                        onChange({ ...repository, repositoryUrl: changeEvent.target.value })
-                    }
+                    onChange={(changeEvent) => {
+                        const repositoryUrl = changeEvent.target.value;
+                        onChange((previous) => ({ ...previous, repositoryUrl, startCommit: '', endCommit: '' }));
+                    }}
                     className="mt-2 font-mono"
                     placeholder="https://github.com/hejny/promptbook"
                 />
@@ -47,7 +56,10 @@ export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepos
                 <Textarea
                     id="workshop-repository-branches"
                     value={repository.branch}
-                    onChange={(changeEvent) => onChange({ ...repository, branch: changeEvent.target.value })}
+                    onChange={(changeEvent) => {
+                        const branch = changeEvent.target.value;
+                        onChange((previous) => ({ ...previous, branch }));
+                    }}
                     className="mt-2 font-mono"
                     placeholder="main, client-*, feature/* nebo *"
                     rows={3}
@@ -63,7 +75,10 @@ export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepos
                 <Textarea
                     id="workshop-repository-deployments"
                     value={repository.deploymentUrls}
-                    onChange={(changeEvent) => onChange({ ...repository, deploymentUrls: changeEvent.target.value })}
+                    onChange={(changeEvent) => {
+                        const deploymentUrls = changeEvent.target.value;
+                        onChange((previous) => ({ ...previous, deploymentUrls }));
+                    }}
                     className="mt-2 font-mono"
                     placeholder="https://…"
                     rows={3}
@@ -72,6 +87,32 @@ export function WorkshopRepositoryFields({ repository, onChange }: WorkshopRepos
                     Nepovinné. Každé nasazení na vlastní řádek; účastníci dostanou odkaz na každé z nich. Náhled v
                     kartě termínu se bere z prvního.
                 </span>
+                {connectedRepository !== null && repository.deploymentUrls.trim() === '' && (
+                    <WorkshopRepositoryDeploymentControl
+                        key={repository.repositoryUrl}
+                        repositoryUrl={repository.repositoryUrl}
+                        isDisabled={isDisabled}
+                        onDeployed={(deploymentUrl) => onChange((previous) =>
+                            previous.repositoryUrl === repository.repositoryUrl && previous.deploymentUrls.trim() === ''
+                                ? { ...previous, deploymentUrls: deploymentUrl }
+                                : previous,
+                        )}
+                    />
+                )}
+            </div>
+            <div className="md:col-span-2">
+                <p className="mb-3 text-sm text-slate-500">
+                    Rozsah zahrnuje oba hraniční commity a commity mezi jejich daty ve vybraných větvích.
+                    Účastníci jej uvidí zvýrazněný a mohou rozbalit historii mimo něj.
+                </p>
+                <div className="grid gap-3 md:grid-cols-2">
+                    <WorkshopRepositoryCommitField repository={repositoryWriteValues}
+                        boundary="start" commitId={repository.startCommit} date={startsAt}
+                        onChange={(startCommit) => onChange((previous) => ({ ...previous, startCommit }))} />
+                    <WorkshopRepositoryCommitField repository={repositoryWriteValues}
+                        boundary="end" commitId={repository.endCommit} date={endsAt}
+                        onChange={(endCommit) => onChange((previous) => ({ ...previous, endCommit }))} />
+                </div>
             </div>
         </>
     );

@@ -1,6 +1,9 @@
 'use client';
 
+import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { DiscountCodeForm } from '@/components/admin/DiscountCodeForm';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { Button } from '@/components/ui/button';
 import { TableScrollArea } from '@/components/ui/table-scroll-area';
 import {
@@ -84,6 +87,7 @@ function getSubscriptionDiscountSummary(discountCode: DiscountCode): string {
 export function DiscountCodeAdmin() {
     const [discountCodes, setDiscountCodes] = useState<readonly DiscountCode[]>([]);
     const [editingDiscountCode, setEditingDiscountCode] = useState<DiscountCode | null>(null);
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isDeletingDiscountCodeId, setIsDeletingDiscountCodeId] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -116,8 +120,9 @@ export function DiscountCodeAdmin() {
                 await updateAdminDiscountCode(editingDiscountCode.id, values);
             }
 
-            setEditingDiscountCode(null);
-            return loadDiscountCodes();
+            await loadDiscountCodes();
+            if (editingDiscountCode === null) setIsEditorOpen(false);
+            return true;
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Slevový kód se nepodařilo uložit.');
             return false;
@@ -129,6 +134,7 @@ export function DiscountCodeAdmin() {
         if (!isDeletionConfirmed) {
             return;
         }
+        if (!(await flushAdminSaves())) return;
 
         setIsDeletingDiscountCodeId(discountCode.id);
         try {
@@ -162,11 +168,15 @@ export function DiscountCodeAdmin() {
                 </div>
             </section>
 
-            <DiscountCodeForm
-                discountCode={editingDiscountCode}
-                onSave={handleSave}
-                onCancelEditing={() => setEditingDiscountCode(null)}
-            />
+            <Button type="button" onClick={() => { setEditingDiscountCode(null); setIsEditorOpen(true); }}>Nový slevový kód</Button>
+            <AdminEditorDialog isOpen={isEditorOpen} onClose={() => setIsEditorOpen(false)} title={editingDiscountCode === null ? 'Nový slevový kód' : `Upravit slevový kód: ${editingDiscountCode.code}`} errorMessage={errorMessage}>
+                {isEditorOpen && <DiscountCodeForm
+                    key={editingDiscountCode?.id ?? 'new'}
+                    discountCode={editingDiscountCode}
+                    onSave={handleSave}
+                    onCancelEditing={() => setIsEditorOpen(false)}
+                />}
+            </AdminEditorDialog>
 
             <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-6 py-5">
@@ -191,7 +201,7 @@ export function DiscountCodeAdmin() {
                     <p className="m-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</p>
                 )}
 
-                {isLoading ? (
+                {isLoading && discountCodes.length === 0 ? (
                     <div className="flex items-center justify-center gap-3 px-6 py-16 text-sm text-slate-500">
                         <Loader2 className="h-5 w-5 animate-spin" /> Načítám slevové kódy…
                     </div>
@@ -285,7 +295,7 @@ export function DiscountCodeAdmin() {
                                                         variant="outline"
                                                         size="sm"
                                                         disabled={isDeleting}
-                                                        onClick={() => setEditingDiscountCode(discountCode)}
+                                                        onClick={() => void runAfterAdminSaves(() => { setEditingDiscountCode(discountCode); setIsEditorOpen(true); })}
                                                     >
                                                         <Pencil className="mr-1.5 h-4 w-4" /> Upravit
                                                     </Button>

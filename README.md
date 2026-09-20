@@ -35,8 +35,39 @@ This is a production Next.js application, not a collection of static marketing p
 | Homepages | `/` redirects by `Accept-Language`; `/cs` is the Czech source of truth and `/en` is its localized variant. |
 | Audience pages | `/pro-mesta`, `/for-agro`, `/for-industry`, `/ai-supervize`, `/ai-supervize-mini`, and related campaign routes. |
 | Workshops and community | `/cs/online-workshop`, `/cs/online-workshop/participant`, `/cs/komunita`, and `/cs/komunita/projects`. |
-| Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |
+| Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/recording-studio`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |
 | Public short links | `/<shortcode>` resolves a managed short link; `/shortener` leads to its administration. |
+
+## Local recording studio
+
+`/admin/recording-studio` uses the existing admin login. Add each camera or screen share separately; a microphone
+can be added as its own audio file. Camera previews are muted, cameras capture video only, and screen audio is
+included when the browser's share picker supplies it. All sources start and stop in the same JavaScript turn.
+This is software synchronization, not hardware genlock; the editor's manifest records measured start-call offsets.
+
+Recordings stay in IndexedDB in the same browser profile, device, and site origin. Nothing is sent to the server.
+Chunks and their metadata commit atomically; incomplete takes retain successfully saved chunks after reopening.
+One browser tab holds the studio lock, including while recovering, editing, exporting, or deleting takes. Ending a
+source or failing to save a chunk stops every recorder. Normal admin navigation and sign-out wait for recording or
+export to finish, and closing/reloading during capture shows the existing browser warning.
+
+Use a current desktop Chrome or Edge over HTTPS (localhost also works). Device limits, codecs, and screen/audio
+capture depend on the browser and operating system. The displayed free capacity is **browser quota**, not a reading
+of physical free disk space. Remaining time estimates use all tracks' configured bitrates initially and measured
+saved bytes after capture starts, reserving 64 MiB for final chunks. Persistence is requested when recording begins;
+the browser can decline it, clear site data, or run out of disk sooner. Download takes you want to keep.
+
+The shared editor saves one trim range in seconds, applied to every track on the session timeline. ZIP exports
+always contain unchanged `originals/` and `recording.json` (source names, dimensions, sizes, offsets, and trim range).
+**ZIP s ořezem** also produces `trimmed/` copies using Mediabunny and browser codecs, preserving the source dimensions
+and audio; trimming can re-encode, so originals remain the highest-quality material. A browser unable to process
+every embedded track refuses trimmed export instead of silently dropping audio. **Originály ZIP** remains available.
+Conversion uses temporary files in the origin-private filesystem, requiring room for one trimmed track at a time;
+temporary files are removed after processing or on the next studio visit following an interrupted export.
+
+ZIP64 archives stream directly to the chosen file when the browser offers the save-file picker, so large archives
+need no full-memory buffer. Other browsers use a download fallback capped at 256 MiB to avoid exhausting memory.
+The studio adds no environment variables, uploads, server APIs, or database migrations.
 
 ## Technology
 
@@ -88,6 +119,34 @@ NEXT_PUBLIC_SKIP_WAITLIST_TOKEN=
 ```
 
 `NEXT_PUBLIC_` variables are included in the browser bundle. Never place database passwords, service-role keys, or administrator credentials in them. With no `ADMIN_PASSWORD`, the administration remains closed.
+
+### Workshop project deployment on Vercel
+
+In `/admin/workshops`, the project settings offer **Nasadit na Vercel** when a valid GitHub repository is entered and
+the deployment URL field is empty. Configure these private server variables:
+
+```dotenv
+VERCEL_TOKEN=YOUR_VERCEL_ACCESS_TOKEN
+# Optional: the team that owns the workshop deployments
+VERCEL_TEAM_ID=team_...
+```
+
+The token must be able to create projects and deployments in that account, and its Vercel GitHub integration must have
+access to the repository. The action imports the original repository and starts a production deployment using
+[Vercel's project API](https://vercel.com/docs/rest-api/projects/create-a-new-project) and
+[deployment API](https://vercel.com/docs/rest-api/deployments/create-a-new-deployment). Each repository has a stable
+project name, shared across workshop terms and retries. Existing projects must still be linked to that repository.
+
+Vercel deploys its project's production branch (the repository's default branch on initial import), including subsequent
+pushes. The workshop's branch patterns and commit bounds continue to control the displayed history independently.
+Vercel uses the repository's build configuration; projects needing secrets or a monorepo root must be configured in
+Vercel. Build failures link to the deployment inspector, and status checks can be resumed after a connection failure.
+
+Once the build is ready and its production alias is assigned, the form fills in that public URL. Shared admin autosave
+saves it through the existing repository/deployment validation and makes it available to participants. A manual URL,
+repository change or room switch discards the previous form's pending result; it does not cancel the remote build.
+No workshop schema or database migration is needed. The landing application's environment variables are never sent to
+the workshop deployment. Missing credentials leave manual deployment URLs available.
 
 ### Automatic submission approval
 

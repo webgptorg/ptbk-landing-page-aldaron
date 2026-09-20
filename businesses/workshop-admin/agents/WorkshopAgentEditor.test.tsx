@@ -3,13 +3,23 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_WORKSHOP_AGENT_VALUES } from '@/lib/workshops/agents/workshopAgentTypes';
 import { WorkshopAgentEditor } from './WorkshopAgentEditor';
+import { settleAdminSavesForTest } from '@/lib/admin/adminAutosaveTestUtilities';
 
 vi.mock('next/dynamic', () => ({ default: () => function BookEditor({ value, onChange }: { value: string; onChange: (value: string) => void }) {
     return <textarea aria-label="Book" value={value} onChange={(event) => onChange(event.target.value)} />;
 } }));
 
 describe('Book agent editor', () => {
-    afterEach(cleanup);
+    afterEach(async () => { cleanup(); await settleAdminSavesForTest(); });
+
+    it('autosaves an existing Book without closing its editor', async () => {
+        const onSave = vi.fn().mockResolvedValue(true);
+        const onCancel = vi.fn();
+        render(<WorkshopAgentEditor initialValues={DEFAULT_WORKSHOP_AGENT_VALUES} isListeningOffered isSaving={false} onSave={onSave} onCancel={onCancel} />);
+        fireEvent.change(screen.getByLabelText('Book'), { target: { value: 'Pavel\nPERSONA Ptej se na důkazy' } });
+        await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ bookSource: 'Pavel\nPERSONA Ptej se na důkazy' })));
+        expect(onCancel).not.toHaveBeenCalled();
+    });
 
     it('saves the edited Book and room behavior together', async () => {
         const onSave = vi.fn().mockResolvedValue(undefined);

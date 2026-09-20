@@ -27,6 +27,7 @@ import {
 import { extractGithubBranchSelection, extractGithubRepository } from '@/lib/github/githubRepository';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
+import { GITHUB_COMMIT_SHA_PATTERN } from '@/lib/github/githubCommitSha';
 import { isEventLocationKind, type EventLocationKind } from '@/lib/events/eventLocation';
 import { isEventType, isExternalEventType, type EventType } from '@/lib/events/eventTypes';
 import {
@@ -138,15 +139,21 @@ const workshopRepositoryDeploymentUrlsSchema = z
         (deploymentUrls) => new Set(deploymentUrls).size === deploymentUrls.length,
         'Workshop deployments must be unique',
     );
-const workshopRepositoryWriteSchema = z
+const WORKSHOP_REPOSITORY_COMMIT_SCHEMA = z.string().trim()
+    .regex(GITHUB_COMMIT_SHA_PATTERN, 'Zadejte ID commitu (7 až 40 hexadecimálních znaků).')
+    .transform((value) => value.toLowerCase()).nullish();
+
+export const workshopRepositoryWriteSchema = z
     .object({
         url: z.string().trim().max(MAXIMAL_WORKSHOP_PUBLIC_URL_LENGTH),
         branch: z
             .union([workshopRepositoryBranchPatternSchema, workshopRepositoryBranchesSchema, z.null()])
             .default(null),
         deploymentUrls: workshopRepositoryDeploymentUrlsSchema.default([]),
+        startCommit: WORKSHOP_REPOSITORY_COMMIT_SCHEMA,
+        endCommit: WORKSHOP_REPOSITORY_COMMIT_SCHEMA,
     })
-    .transform((values, context) => {
+    .transform((values, context): WorkshopRepository => {
         const repository = extractGithubRepository(values.url);
         if (repository === null) {
             context.addIssue({
@@ -170,7 +177,11 @@ const workshopRepositoryWriteSchema = z
             return z.NEVER;
         }
 
-        return { ...repository, branch, deploymentUrls: values.deploymentUrls } satisfies WorkshopRepository;
+        return {
+            ...repository, branch, deploymentUrls: values.deploymentUrls,
+            ...(values.startCommit == null ? {} : { startCommit: values.startCommit }),
+            ...(values.endCommit == null ? {} : { endCommit: values.endCommit }),
+        } satisfies WorkshopRepository;
     });
 
 const nullableWorkshopRepositorySchema = z.union([workshopRepositoryWriteSchema, z.null()]);

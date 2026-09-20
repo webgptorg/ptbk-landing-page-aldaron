@@ -24,7 +24,7 @@ describe('the public GitHub commit API parser', () => {
             sha: COMMIT_SHA,
             message: 'Add the graph',
             authorName: 'Pavol Hejný',
-            committedAt: '2026-09-12T12:00:00.000Z',
+            committedAt: '2026-09-12T12:01:00.000Z',
             parentShas: [PARENT_SHA],
             branchNames: ['feature/rooms'],
         });

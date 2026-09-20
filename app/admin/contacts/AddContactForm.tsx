@@ -16,15 +16,12 @@ export function AddContactForm(props: AddContactFormProps) {
     const { onAddContact, onContactAdded } = props;
 
     return (
-        <div className="mb-6 rounded-lg border bg-muted/30 p-4">
-            <h2 className="mb-4 text-xl font-semibold">Add New Contact</h2>
-            <ContactForm
-                fieldNames={CONTACT_DRAFT_FIELD_NAMES}
-                initialContactValues={EMPTY_CONTACT_DRAFT}
-                saveButtonLabel="Save Contact"
-                onSaveContact={onAddContact}
-                onContactSaved={onContactAdded}
-            />
-        </div>
+        <ContactForm
+            fieldNames={CONTACT_DRAFT_FIELD_NAMES}
+            initialContactValues={EMPTY_CONTACT_DRAFT}
+            saveButtonLabel="Save Contact"
+            onSaveContact={onAddContact}
+            onContactSaved={onContactAdded}
+        />
     );
 }

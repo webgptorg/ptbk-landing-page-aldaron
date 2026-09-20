@@ -1,5 +1,7 @@
 'use client';
 
+import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { CreateWorkshopForm } from '@/businesses/workshop-admin/CreateWorkshopForm';
 import {
     adjustAdminWorkshopCommentArtificialUpvotes,
@@ -65,6 +67,8 @@ import {
     REGISTERED_PARTICIPANT_COUNT_TITLE,
 } from '@/businesses/workshop-admin/workshopAudienceLabels';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorErrorProvider } from '@/components/admin/AdminEditorDialog';
 import { useUrlSynchronizedViewState } from '@/hooks/useUrlSynchronizedViewState';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopAdminSection, type WorkshopAdminSection } from '@/lib/workshops/workshopAdminSections';
@@ -287,7 +291,7 @@ export function WorkshopAdminDashboard({
     }, [isPollsOffered]);
 
     const selectWorkshopBySlug = useCallback(
-        (workshopSlug: string) => changeViewState((previousViewState) => ({ ...previousViewState, workshopSlug })),
+        (workshopSlug: string) => void runAfterAdminSaves(() => changeViewState((previousViewState) => ({ ...previousViewState, workshopSlug }))),
         [changeViewState],
     );
 
@@ -356,6 +360,7 @@ export function WorkshopAdminDashboard({
     };
 
     const handleDeleteWorkshop = async (workshopId: string): Promise<boolean> => {
+        if (!(await flushAdminSaves())) return false;
         try {
             await deleteAdminWorkshop(workshopId);
 
@@ -391,10 +396,22 @@ export function WorkshopAdminDashboard({
         }
     };
 
-    const handleSaveWorkshop = (values: WorkshopWriteValues) =>
-        snapshot === null
-            ? Promise.resolve(false)
-            : runAndReload(() => updateAdminWorkshop(snapshot.workshop.id, values));
+    const handleSaveWorkshop = async (values: WorkshopWriteValues) => {
+        if (snapshot === null) return false;
+        try {
+            const workshop = await updateAdminWorkshop(snapshot.workshop.id, values);
+            // Renaming the selected slug must not make the picker fall back to another room during refresh.
+            setWorkshops((current) => current.map((summary) => summary.id === workshop.id ? { ...summary, ...workshop } : summary));
+            if (workshop.slug !== snapshot.workshop.slug) {
+                changeViewState((current) => ({ ...current, workshopSlug: workshop.slug }), { isImmediate: true });
+            }
+            await Promise.all([loadSnapshot(), loadWorkshopList()]);
+            return true;
+        } catch (error) {
+            setErrorMessage((error as Error).message);
+            return false;
+        }
+    };
     const handleCreateContent = (values: WorkshopContentWriteValues) =>
         snapshot === null
             ? Promise.resolve(false)
@@ -408,36 +425,21 @@ export function WorkshopAdminDashboard({
             await runAndReload(() => deleteAdminWorkshopContent(snapshot.workshop.id, contentId));
         }
     };
-    const handleUnlockContentNow = (contentId: string) => {
-        if (snapshot === null) {
-            return Promise.resolve(false);
-        }
-
-        const contentBlock = snapshot.contentBlocks.find((currentContentBlock) => currentContentBlock.id === contentId);
-        if (contentBlock === undefined) {
-            return Promise.resolve(false);
-        }
-
-        return runAndReload(() =>
-            updateAdminWorkshopContent(snapshot.workshop.id, contentId, {
-                title: contentBlock.title,
-                bodyMarkdown: contentBlock.bodyMarkdown,
-                unlockAt: new Date().toISOString(),
-                sortOrder: contentBlock.sortOrder,
-                isPublished: true,
-                isFollowUp: contentBlock.isFollowUp,
-                isPaidMembersOnly: contentBlock.isPaidMembersOnly,
-            }),
-        );
-    };
     const handleCreatePoll = (values: WorkshopPollCreateValues) =>
         snapshot === null
             ? Promise.resolve(false)
             : runAndReload(() => createAdminWorkshopPoll(snapshot.workshop.id, values));
-    const handleUpdatePoll = (pollId: string, values: WorkshopPollUpdateValues) =>
-        snapshot === null
-            ? Promise.resolve(false)
-            : runAndReload(() => updateAdminWorkshopPoll(snapshot.workshop.id, pollId, values));
+    const handleUpdatePoll = async (pollId: string, values: WorkshopPollUpdateValues) => {
+        if (snapshot === null) return false;
+        try {
+            const options = await updateAdminWorkshopPoll(snapshot.workshop.id, pollId, values);
+            await Promise.all([loadSnapshot(), loadWorkshopList()]);
+            return options;
+        } catch (error) {
+            setErrorMessage((error as Error).message);
+            return false;
+        }
+    };
     const handleDeletePoll = async (pollId: string) => {
         if (snapshot !== null) {
             await runAndReload(() => deleteAdminWorkshopPoll(snapshot.workshop.id, pollId));
@@ -549,7 +551,7 @@ export function WorkshopAdminDashboard({
 
     const handleSectionChange = (value: string) => {
         if (isWorkshopAdminSection(value)) {
-            changeViewState((previousViewState) => ({ ...previousViewState, section: value }));
+            void runAfterAdminSaves(() => changeViewState((previousViewState) => ({ ...previousViewState, section: value })));
         }
     };
 
@@ -581,6 +583,7 @@ export function WorkshopAdminDashboard({
             : createWorkshopOverviewStatistics(snapshot, selectedWorkshop?.registeredParticipantCount ?? null);
 
     return (
+        <AdminEditorErrorProvider value={errorMessage}>
         <div
             className={`mx-auto grid max-w-7xl gap-6 px-6 py-8 ${isRoomSelectionOffered ? 'lg:grid-cols-[22rem_minmax(0,1fr)] xl:grid-cols-[28rem_minmax(0,1fr)]' : ''}`}
         >
@@ -759,12 +762,12 @@ export function WorkshopAdminDashboard({
                                     />
                                 </div>
                                 <WorkshopContentAdmin
+                                    key={snapshot.workshop.id}
                                     defaultUnlockAt={scheduleStartsAt ?? currentUnlockAt}
                                     contentBlocks={snapshot.contentBlocks}
                                     onCreate={handleCreateContent}
                                     onUpdate={handleUpdateContent}
                                     onDelete={handleDeleteContent}
-                                    onUnlockNow={handleUnlockContentNow}
                                 />
                             </TabsContent>
 
@@ -812,12 +815,19 @@ export function WorkshopAdminDashboard({
                                         label="Exportovat nastavení CSV"
                                     />
                                 </div>
-                                <WorkshopSettingsForm
-                                    workshop={snapshot.workshop}
-                                    onSave={handleSaveWorkshop}
-                                    subjectLabel={subjectLabel}
-                                    isArtificialOptionsShown={isArtificialOptionsShown}
-                                />
+                                <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                                    <h2 className="text-xl font-bold text-slate-950">Nastavení {subjectLabel}</h2>
+                                    <p className="my-3 text-sm text-slate-600">{snapshot.workshop.title} · {snapshot.workshop.isPublished ? 'Publikovaný' : 'Nezveřejněný'}</p>
+                                    <AdminEditorButton key={snapshot.workshop.id} label="Upravit nastavení" title={`Nastavení ${subjectLabel}`} className="max-w-5xl">
+                                        <WorkshopSettingsForm
+                                            key={snapshot.workshop.id}
+                                            workshop={snapshot.workshop}
+                                            onSave={handleSaveWorkshop}
+                                            subjectLabel={subjectLabel}
+                                            isArtificialOptionsShown={isArtificialOptionsShown}
+                                        />
+                                    </AdminEditorButton>
+                                </section>
                             </TabsContent>
 
                             {additionalSections.map((section) => (
@@ -830,5 +840,6 @@ export function WorkshopAdminDashboard({
                 )}
             </div>
         </div>
+        </AdminEditorErrorProvider>
     );
 }

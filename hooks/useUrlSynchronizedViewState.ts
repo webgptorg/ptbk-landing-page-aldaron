@@ -16,7 +16,7 @@ type UseUrlSynchronizedViewStateOptions<TViewState> = {
 
 type UseUrlSynchronizedViewStateResult<TViewState> = readonly [
     TViewState,
-    (changeViewState: (previousViewState: TViewState) => TViewState) => void,
+    (changeViewState: (previousViewState: TViewState) => TViewState, options?: { readonly isImmediate?: boolean }) => void,
 ];
 
 /**
@@ -47,6 +47,16 @@ export function useUrlSynchronizedViewState<TViewState>({
     const viewStateReference = useRef(viewState);
     const lastObservedSearchParametersTextReference = useRef(searchParametersText);
     const isLocalViewStateChangePendingReference = useRef(false);
+
+    const writeViewStateToUrl = useCallback((currentViewState: TViewState) => {
+        const currentSearchParams = new URLSearchParams(window.location.search);
+        const newSearchParams = serializeViewState(currentViewState, currentSearchParams);
+        if (newSearchParams.toString() !== currentSearchParams.toString()) {
+            window.history.replaceState(null, '', buildUrlWithSearchParams(newSearchParams));
+        }
+        lastObservedSearchParametersTextReference.current = newSearchParams.toString();
+        isLocalViewStateChangePendingReference.current = false;
+    }, [serializeViewState]);
 
     useEffect(() => {
         viewStateReference.current = viewState;
@@ -90,29 +100,24 @@ export function useUrlSynchronizedViewState<TViewState>({
                 return;
             }
 
-            const newSearchParams = serializeViewState(viewState, currentSearchParams);
-
-            if (newSearchParams.toString() === currentSearchParams.toString()) {
-                isLocalViewStateChangePendingReference.current = false;
-                return;
-            }
-
             // Note: The entry in the history is replaced and not pushed, so that the back button leaves the dashboard
             //       instead of walking back through every single change of the view
-            window.history.replaceState(null, '', buildUrlWithSearchParams(newSearchParams));
-            lastObservedSearchParametersTextReference.current = newSearchParams.toString();
-            isLocalViewStateChangePendingReference.current = false;
+            writeViewStateToUrl(viewState);
         }, URL_VIEW_STATE_DEBOUNCE_MILLISECONDS);
 
         return () => clearTimeout(urlUpdateTimeout);
-    }, [parseViewState, serializeViewState, viewState]);
+    }, [parseViewState, viewState, writeViewStateToUrl]);
 
     const changeViewState = useCallback(
-        (getNewViewState: (previousViewState: TViewState) => TViewState) => {
+        (getNewViewState: (previousViewState: TViewState) => TViewState, options?: { readonly isImmediate?: boolean }) => {
             isLocalViewStateChangePendingReference.current = true;
-            setViewState(getNewViewState);
+            const newViewState = getNewViewState(viewStateReference.current);
+            viewStateReference.current = newViewState;
+            setViewState(newViewState);
+            // A save may finish immediately before navigation. Its URL change must finish before the router leaves.
+            if (options?.isImmediate) writeViewStateToUrl(newViewState);
         },
-        [],
+        [writeViewStateToUrl],
     );
 
     return [viewState, changeViewState];

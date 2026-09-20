@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const PARTICIPANT_TIMELINE: WorkshopAdminParticipantTimeline = {
     participant: {
+        pendingSubmissionCount: 0,
         id: 'participant-id',
         fullname: 'Jana Nováková',
         email: 'jana@example.com',

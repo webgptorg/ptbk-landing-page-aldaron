@@ -77,11 +77,15 @@ describe('workshop admin values', () => {
         ).toEqual({
             github_repository: 'hejny/promptbook',
             github_repository_branches: ['main'],
+            github_repository_start_commit: null,
+            github_repository_end_commit: null,
             deployment_urls: ['https://workshop.example/app', 'https://staging.workshop.example/app'],
         });
         expect(createWorkshopUpdateDatabaseValues({ repository: null })).toEqual({
             github_repository: null,
             github_repository_branches: null,
+            github_repository_start_commit: null,
+            github_repository_end_commit: null,
             deployment_urls: null,
         });
     });
@@ -99,6 +103,8 @@ describe('workshop admin values', () => {
         ).toEqual({
             github_repository: 'hejny/promptbook',
             github_repository_branches: ['main', 'feature/*'],
+            github_repository_start_commit: null,
+            github_repository_end_commit: null,
             deployment_urls: null,
         });
         expect(
@@ -108,6 +114,8 @@ describe('workshop admin values', () => {
         ).toEqual({
             github_repository: 'hejny/promptbook',
             github_repository_branches: ['*'],
+            github_repository_start_commit: null,
+            github_repository_end_commit: null,
             deployment_urls: null,
         });
     });

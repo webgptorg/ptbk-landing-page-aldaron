@@ -20,9 +20,9 @@ export type ContactColumnCellKind =
     | 'MULTILINE_TEXT'
 
     /**
-     * Switch which marks the contact as (not) contacted
+     * Contacted status which opens the contact editor
      */
-    | 'CONTACTED_SWITCH'
+    | 'CONTACTED_STATUS'
 
     /**
      * Read-only boolean value
@@ -30,7 +30,7 @@ export type ContactColumnCellKind =
     | 'BOOLEAN'
 
     /**
-     * Textarea with our internal note about the contact
+     * Internal note preview which opens the contact editor
      */
     | 'EDITABLE_NOTE';
 
@@ -94,7 +94,7 @@ export const CONTACT_COLUMN_DEFINITIONS: readonly ContactColumnDefinition[] = [
     { key: 'email', label: 'Email', cellKind: 'TEXT', linkKind: 'EMAIL', defaultWidth: 200 },
     { key: 'phone', label: 'Phone', cellKind: 'TEXT', linkKind: 'PHONE', defaultWidth: 120 },
     { key: 'userNote', label: 'User Note', cellKind: 'MULTILINE_TEXT', defaultWidth: 200 },
-    { key: 'isContacted', label: 'Is Contacted', cellKind: 'CONTACTED_SWITCH', defaultWidth: 100 },
+    { key: 'isContacted', label: 'Is Contacted', cellKind: 'CONTACTED_STATUS', defaultWidth: 100 },
     { key: 'isWaitlisted', label: 'Waitlisted', cellKind: 'BOOLEAN', defaultWidth: 100 },
     { key: 'ourNote', label: 'Our Note', cellKind: 'EDITABLE_NOTE', defaultWidth: 250 },
     { key: 'userAgent', label: 'User Agent', cellKind: 'MULTILINE_TEXT', defaultWidth: 300 },

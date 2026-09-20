@@ -4,7 +4,7 @@ import { AdminContactDetails } from '@/components/admin/AdminContactDetails';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { AdminJoinedContact } from '@/lib/admin/adminContactJoin';
-import type { Contact, ContactChanges, ContactColumnKey } from '@/lib/contacts/Contact';
+import type { Contact, ContactColumnKey } from '@/lib/contacts/Contact';
 import {
     CONTACT_ACTIONS_COLUMN_WIDTH,
     CONTACT_COLUMN_DEFINITIONS,
@@ -23,7 +23,6 @@ type ContactsTableProps = {
     readonly sortState: ContactsSortState;
     readonly onToggleSort: (columnKey: ContactColumnKey) => void;
     readonly onStartColumnResize: (columnKey: string, pointerEvent: PointerEvent) => void;
-    readonly onChangeContact: (contactId: number, contactChanges: ContactChanges) => void;
     readonly onEditContact: (contact: Contact) => void;
     readonly onDeleteContact: (contactId: number) => Promise<boolean>;
 };
@@ -40,7 +39,6 @@ export function ContactsTable(props: ContactsTableProps) {
         sortState,
         onToggleSort,
         onStartColumnResize,
-        onChangeContact,
         onEditContact,
         onDeleteContact,
     } = props;
@@ -104,7 +102,7 @@ export function ContactsTable(props: ContactsTableProps) {
                                         <ContactsTableCell
                                             contact={contact}
                                             column={column}
-                                            onChangeContact={onChangeContact}
+                                            onEditContact={onEditContact}
                                         />
                                     </TableCell>
                                 ))}

@@ -1,0 +1,189 @@
+
+> promptbook-landing-page@0.1.0 test-types
+> npm run build && tsc
+
+
+> promptbook-landing-page@0.1.0 build
+> next build
+
+   ▲ Next.js 15.2.6
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/82) ...
+BenefitsSection rendered
+IntegrationsSection rendered
+BenefitsSection rendered
+IntegrationsSection rendered
+BenefitsSection rendered
+   Generating static pages (20/82) 
+   Generating static pages (40/82) 
+BenefitsSection rendered
+IntegrationsSection rendered
+BenefitsSection rendered
+IntegrationsSection rendered
+   Generating static pages (61/82) 
+ ✓ Generating static pages (82/82)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                                                  Size  First Load JS  Revalidate  Expire
+┌ ƒ /                                                                                       400 B         102 kB
+├ ○ /_not-found                                                                             400 B         102 kB
+├ ƒ /[shortcode]                                                                          2.31 kB         142 kB
+├ ƒ /admin                                                                                  175 B         105 kB
+├ ƒ /admin/community                                                                      7.78 kB         367 kB
+├ ƒ /admin/contacts                                                                       24.9 kB         200 kB
+├ ƒ /admin/discount-codes                                                                 8.35 kB         138 kB
+├ ƒ /admin/login                                                                            400 B         102 kB
+├ ƒ /admin/recording-studio                                                               89.7 kB         219 kB
+├ ƒ /admin/shortener                                                                      49.5 kB         193 kB
+├ ƒ /admin/workshops                                                                        220 B         360 kB
+├ ○ /ai-supervize                                                                           16 kB         239 kB
+├ ƒ /ai-supervize-mini                                                                    17.2 kB         233 kB
+├ ○ /ai-supervize-mini/opengraph-image                                                      400 B         102 kB
+├ ƒ /ai-supervize-mini/participant                                                        2.51 kB         139 kB
+├ ○ /ai-supervize/opengraph-image                                                           400 B         102 kB
+├ ○ /ai-ta-krajta                                                                         19.6 kB         146 kB          1h      1y
+├ ○ /ai-ta-krajta/branding                                                                  204 B         122 kB
+├ ○ /ai-ta-krajta/logo.png                                                                  400 B         102 kB
+├ ○ /ai-ta-krajta/logo.svg                                                                  400 B         102 kB
+├ ○ /ai-ta-krajta/manifest.webmanifest                                                      400 B         102 kB
+├ ○ /ai-ta-krajta/media-kit                                                               3.63 kB         125 kB
+├ ○ /ai-ta-krajta/opengraph-image                                                           400 B         102 kB
+├ ƒ /api/admin/community/memberships                                                        400 B         102 kB
+├ ƒ /api/admin/community/projects                                                           400 B         102 kB
+├ ƒ /api/admin/community/projects/[projectId]                                               400 B         102 kB
+├ ƒ /api/admin/discount-codes                                                               400 B         102 kB
+├ ƒ /api/admin/discount-codes/[discountCodeId]                                              400 B         102 kB
+├ ƒ /api/admin/session                                                                      400 B         102 kB
+├ ƒ /api/admin/session/sign-out                                                             400 B         102 kB
+├ ƒ /api/admin/shortener                                                                    400 B         102 kB
+├ ƒ /api/admin/shortener/[shortcodeLinkId]                                                  400 B         102 kB
+├ ƒ /api/admin/shortener/[shortcodeLinkId]/clicks                                           400 B         102 kB
+├ ƒ /api/admin/workshops                                                                    400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]                                                       400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/agents                                                400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/agents/[agentId]                                      400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/agents/audio                                          400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/agents/audio-session                                  400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/analytics                                             400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/artificial-reactions                                  400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/comments                                              400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/comments/[commentId]                                  400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/comments/[commentId]/artificial-upvotes               400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/comments/[commentId]/material                         400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/content                                               400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/content/[contentId]                                   400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/exports/[exportKind]                                  400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/feedback                                              400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/participants                                          400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/participants/[participantId]                          400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/participants/[participantId]/timeline                 400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/polls                                                 400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/polls/[pollId]                                        400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/polls/[pollId]/options/[optionId]                     400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/polls/[pollId]/options/[optionId]/artificial-votes    400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/reactions                                             400 B         102 kB
+├ ƒ /api/admin/workshops/[workshopId]/stage-comment                                         400 B         102 kB
+├ ƒ /api/admin/workshops/repository/commit                                                  400 B         102 kB
+├ ƒ /api/admin/workshops/repository/deployment                                              400 B         102 kB
+├ ƒ /api/ai-supervize-mini/registration                                                     400 B         102 kB
+├ ƒ /api/ai-ta-krajta/episodes/search                                                       400 B         102 kB
+├ ƒ /api/community/membership/registration                                                  400 B         102 kB
+├ ƒ /api/contacts                                                                           400 B         102 kB
+├ ƒ /api/contacts/export/[formatId]                                                         400 B         102 kB
+├ ƒ /api/discount-codes/validate                                                            400 B         102 kB
+├ ƒ /api/stripe/webhook                                                                     400 B         102 kB
+├ ƒ /api/track-click                                                                        400 B         102 kB
+├ ƒ /api/waitlist                                                                           400 B         102 kB
+├ ƒ /api/workshop-agents/run                                                                400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/comments                                                  400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/comments/[commentId]                                      400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/comments/[commentId]/material                             400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/comments/[commentId]/upvotes                              400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/connect                                                   400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/feedback                                                  400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/membership                                                400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/membership/cancellation                                   400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/membership/checkout                                       400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/membership/checkout/confirmation                          400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/membership/portal                                         400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/participant                                               400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/participants/[participantId]                              400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/polls/[pollId]/options/[optionId]                         400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/polls/[pollId]/votes                                      400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/presence                                                  400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/reactions                                                 400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/repository                                                400 B         102 kB
+├ ƒ /api/workshops/[workshopSlug]/state                                                     400 B         102 kB
+├ ƒ /api/workshops/komunita/projects                                                        400 B         102 kB
+├ ƒ /api/workshops/komunita/projects/[projectId]                                            400 B         102 kB
+├ ƒ /api/workshops/komunita/projects/[projectId]/connect                                    400 B         102 kB
+├ ƒ /api/workshops/komunita/projects/[projectId]/vote                                       400 B         102 kB
+├ ƒ /api/workshops/komunita/projects/preview                                                400 B         102 kB
+├ ○ /branding                                                                             4.74 kB         141 kB
+├ ○ /contact                                                                              2.54 kB         164 kB
+├ ○ /cs                                                                                     172 B         241 kB
+├ ƒ /cs/komunita                                                                            230 B         302 kB
+├ ƒ /cs/komunita/calendar.ics                                                               400 B         102 kB
+├ ƒ /cs/komunita/clenstvi                                                                 13.1 kB         155 kB
+├ ○ /cs/komunita/clenstvi/opengraph-image                                                   400 B         102 kB
+├ ○ /cs/komunita/opengraph-image                                                            400 B         102 kB
+├ ƒ /cs/komunita/projects                                                                 6.76 kB         141 kB
+├ ƒ /cs/komunita/projects/[projectId]                                                     2.94 kB         299 kB
+├ ○ /cs/obchodni-podminky                                                                 2.52 kB         139 kB
+├ ○ /cs/ochrana-osobnich-udaju                                                            2.52 kB         139 kB
+├ ƒ /cs/online-workshop                                                                   13.2 kB         246 kB
+├ ƒ /cs/online-workshop/dekujeme                                                          4.46 kB         152 kB
+├ ○ /cs/online-workshop/opengraph-image                                                     400 B         102 kB
+├ ƒ /cs/online-workshop/participant                                                       3.05 kB         299 kB
+├ ○ /cs/online-workshop/participant/opengraph-image                                         400 B         102 kB
+├ ○ /cs/opengraph-image                                                                     400 B         102 kB
+├ ○ /cs/pavol                                                                               158 B         203 kB
+├ ○ /cs/pavol/opengraph-image                                                               400 B         102 kB
+├ ○ /data-deletion                                                                        2.51 kB         139 kB
+├ ○ /dekujeme                                                                             4.23 kB         151 kB
+├ ○ /en                                                                                     172 B         241 kB
+├ ○ /en/opengraph-image                                                                     400 B         102 kB
+├ ○ /en/pavol                                                                               158 B         203 kB
+├ ○ /en/pavol/opengraph-image                                                               400 B         102 kB
+├ ○ /en/privacy-policy                                                                    2.52 kB         139 kB
+├ ○ /en/terms-and-conditions                                                              2.52 kB         139 kB
+├ ○ /for-agro                                                                             7.31 kB         268 kB
+├ ○ /for-agro/opengraph-image                                                               400 B         102 kB
+├ ○ /for-industry                                                                         7.92 kB         269 kB
+├ ○ /for-industry/opengraph-image                                                           400 B         102 kB
+├ ○ /hackathon-factory                                                                      15 kB         252 kB
+├ ○ /hackathon-factory/opengraph-image                                                      400 B         102 kB
+├ ƒ /k/[...shortFileUrlParts]                                                               400 B         102 kB
+├ ○ /manifest.webmanifest                                                                   400 B         102 kB
+├ ○ /old                                                                                  17.9 kB         246 kB
+├ ○ /opengraph-image                                                                        400 B         102 kB
+├ ƒ /pavol                                                                                  400 B         102 kB
+├ ƒ /privacy                                                                                400 B         102 kB
+├ ƒ /pro-firmy                                                                              400 B         102 kB
+├ ○ /pro-mesta                                                                            6.39 kB         267 kB
+├ ○ /pro-mesta/opengraph-image                                                              400 B         102 kB
+├ ○ /robots.txt                                                                             400 B         102 kB
+├ ○ /shortener                                                                              400 B         102 kB
+├ ○ /sitemap.xml                                                                            400 B         102 kB
+├ ƒ /skoleni                                                                                400 B         102 kB
+├ ƒ /terms                                                                                  400 B         102 kB
+└ ○ /test/hopko                                                                           4.62 kB         106 kB
++ First Load JS shared by all                                                              102 kB
+  ├ chunks/1684-da5c21b68f3b188c.js                                                       45.8 kB
+  ├ chunks/4bd1b696-cf2681237822a0c6.js                                                   53.3 kB
+  └ other shared chunks (total)                                                           2.65 kB
+
+
+ƒ Middleware                                                                              30.9 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+lib/recording-studio/recordingStudioExport.ts(45,38): error TS2802: Type 'ArrayIterator<[number, RecordingTrack]>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.

@@ -1,10 +1,14 @@
 'use client';
 
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { WORKSHOP_COMMENT_ORIGIN_LABELS } from '@/lib/workshops/workshopCommentOrigin';
 
 import { WorkshopCommentEditor } from '@/businesses/workshop-admin/WorkshopCommentEditor';
 import { WorkshopPinnedComment } from '@/businesses/workshop-admin/WorkshopPinnedComment';
 import { WorkshopStageCommentControls } from '@/businesses/workshop-admin/WorkshopStageCommentControls';
+import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
+import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { WorkshopCommentMarkdown } from '@/components/workshop-comment-markdown';
@@ -66,10 +70,10 @@ export function WorkshopCommentModeration({
     const isStageCommentControlsOffered = onSetStageComment !== null;
     const isCommentMaterialConversionOffered = getWorkshopModerationCapabilities('admin').isCommentMaterialConversionOffered;
 
-    const runCommentAction = async (commentId: string, action: () => Promise<unknown>) => {
+    const runCommentAction = async <ActionResult,>(commentId: string, action: () => Promise<ActionResult>) => {
         setProcessingCommentIds((currentIds) => new Set(currentIds).add(commentId));
         try {
-            await action();
+            return await action();
         } finally {
             setProcessingCommentIds((currentIds) => {
                 const nextIds = new Set(currentIds);
@@ -85,12 +89,7 @@ export function WorkshopCommentModeration({
     const handleConvertToMaterial = (commentId: string) => runCommentAction(commentId, () => onConvertToMaterial(commentId));
 
     const handleEditBody = (commentId: string, body: string) =>
-        runCommentAction(commentId, async () => {
-            const isEdited = await onEditBody(commentId, body);
-            if (isEdited) {
-                setEditedCommentId(null);
-            }
-        });
+        runCommentAction(commentId, () => onEditBody(commentId, body));
 
     const handleChangePin = (commentId: string, isPinned: boolean) =>
         runCommentAction(commentId, () => onChangePin(commentId, isPinned));
@@ -125,7 +124,7 @@ export function WorkshopCommentModeration({
             `Opravdu trvale smazat komentář od ${comment.authorName}? Smažou se také všechny jeho hlasy.`,
         );
         if (isDeletionConfirmed) {
-            void runCommentAction(comment.id, () => onDelete(comment.id));
+            void runAfterAdminSaves(() => { void runCommentAction(comment.id, () => onDelete(comment.id)); });
         }
     };
 
@@ -140,7 +139,7 @@ export function WorkshopCommentModeration({
                     Stav komentářů
                     <select
                         value={commentStatus}
-                        onChange={(event) => onChangeCommentStatus(event.target.value as WorkshopCommentStatus)}
+                        onChange={(event) => { const status = event.target.value as WorkshopCommentStatus; void runAfterAdminSaves(() => onChangeCommentStatus(status)); }}
                         className="mt-1 block h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium normal-case tracking-normal text-slate-800"
                     >
                         {(Object.keys(COMMENT_STATUS_LABELS) as WorkshopCommentStatus[]).map((status) => (
@@ -230,19 +229,20 @@ export function WorkshopCommentModeration({
                                     />
                                 </div>
                             )}
-                            {isBeingEdited ? (
-                                <WorkshopCommentEditor
-                                    label={`Text komentáře od ${comment.authorName}`}
-                                    initialBody={comment.body}
-                                    onCancel={() => setEditedCommentId(null)}
-                                    onSave={(body) => handleEditBody(comment.id, body)}
-                                />
-                            ) : (
-                                <WorkshopCommentMarkdown
-                                    content={comment.body}
-                                    className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700"
-                                />
+                            {isBeingEdited && (
+                                <AdminEditorDialog isOpen onClose={() => setEditedCommentId(null)} title={`Upravit komentář od ${comment.authorName}`}>
+                                    <WorkshopCommentEditor key={comment.id}
+                                        label={`Text komentáře od ${comment.authorName}`}
+                                        initialBody={comment.body}
+                                        onCancel={() => setEditedCommentId(null)}
+                                        onSave={(body) => handleEditBody(comment.id, body)}
+                                    />
+                                </AdminEditorDialog>
                             )}
+                            <WorkshopCommentMarkdown
+                                content={comment.body}
+                                className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700"
+                            />
                             {isArtificialOptionsShown && (
                                 <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50/50 p-3">
                                     <p className="text-xs text-slate-600">
@@ -250,50 +250,50 @@ export function WorkshopCommentModeration({
                                         {formatSignedNumber(comment.artificialUpvoteCount)} · Zobrazeno:{' '}
                                         {comment.upvoteCount}
                                     </p>
-                                    <div className="mt-3 flex flex-wrap items-end gap-2">
-                                        <label className="text-xs font-medium text-violet-950">
-                                            Umělá změna hlasů (např. +5 nebo -2)
-                                            <Input
-                                                type="number"
-                                                step="1"
-                                                min={-MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
-                                                max={MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
-                                                value={artificialUpvoteAdjustments[comment.id] ?? ''}
-                                                onChange={(event) =>
-                                                    setArtificialUpvoteAdjustments((currentAdjustments) => ({
-                                                        ...currentAdjustments,
-                                                        [comment.id]: event.target.value,
-                                                    }))
-                                                }
-                                                className="mt-1 h-9 w-44 bg-white"
-                                                placeholder="+1"
-                                            />
-                                        </label>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={isProcessing || !isArtificialUpvoteAdjustmentValid}
-                                            onClick={() => void handleArtificialUpvoteAdjustment(comment.id)}
-                                        >
-                                            Použít umělou změnu
-                                        </Button>
-                                    </div>
+                                    <AdminEditorButton label="Upravit umělé hlasy" title={`Umělé hlasy komentáře od ${comment.authorName}`} buttonProps={{ size: 'sm', className: 'mt-3' }}>
+                                        <div className="mt-3 flex flex-wrap items-end gap-2">
+                                            <label className="text-xs font-medium text-violet-950">
+                                                Umělá změna hlasů (např. +5 nebo -2)
+                                                <Input
+                                                    type="number"
+                                                    step="1"
+                                                    min={-MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
+                                                    max={MAXIMAL_ARTIFICIAL_UPVOTE_ADJUSTMENT}
+                                                    value={artificialUpvoteAdjustments[comment.id] ?? ''}
+                                                    onChange={(event) =>
+                                                        setArtificialUpvoteAdjustments((currentAdjustments) => ({
+                                                            ...currentAdjustments,
+                                                            [comment.id]: event.target.value,
+                                                        }))
+                                                    }
+                                                    className="mt-1 h-9 w-44 bg-white"
+                                                    placeholder="+1"
+                                                />
+                                            </label>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={isProcessing || !isArtificialUpvoteAdjustmentValid}
+                                                onClick={() => void handleArtificialUpvoteAdjustment(comment.id)}
+                                            >
+                                                Použít umělou změnu
+                                            </Button>
+                                        </div>
+                                    </AdminEditorButton>
                                 </div>
                             )}
                             <div className="mt-4 flex flex-wrap justify-end gap-2">
-                                {!isBeingEdited && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={isProcessing}
-                                        onClick={() => setEditedCommentId(comment.id)}
-                                        aria-label={`Upravit komentář od ${comment.authorName}`}
-                                    >
-                                        <Pencil className="mr-1.5 h-4 w-4" /> Upravit
-                                    </Button>
-                                )}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isProcessing}
+                                    onClick={() => void runAfterAdminSaves(() => setEditedCommentId(comment.id))}
+                                    aria-label={`Upravit komentář od ${comment.authorName}`}
+                                >
+                                    <Pencil className="mr-1.5 h-4 w-4" /> Upravit
+                                </Button>
                                 {isCommentMaterialConversionOffered && (
                                     <Button
                                         type="button"

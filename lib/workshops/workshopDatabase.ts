@@ -116,6 +116,8 @@ export type WorkshopRow = {
      */
     readonly github_repository?: string | null;
     readonly github_repository_branches?: readonly string[] | null;
+    readonly github_repository_start_commit?: string | null;
+    readonly github_repository_end_commit?: string | null;
     /** Kept only so old in-memory rows can still be mapped while the branch migration is rolled out. */
     readonly github_repository_branch?: string | null;
     readonly deployment_urls?: readonly string[] | null;
@@ -511,6 +513,8 @@ export function mapWorkshopRepository(
         | 'github_repository'
         | 'github_repository_branches'
         | 'github_repository_branch'
+        | 'github_repository_start_commit'
+        | 'github_repository_end_commit'
         | 'deployment_urls'
         | 'deployment_url'
     >,
@@ -522,6 +526,8 @@ export function mapWorkshopRepository(
                 ? (row.github_repository_branch ?? null)
                 : row.github_repository_branches,
         deploymentUrls: readWorkshopRowDeploymentUrls(row),
+        startCommit: row.github_repository_start_commit,
+        endCommit: row.github_repository_end_commit,
     });
 }
 
@@ -658,9 +664,13 @@ export function mapWorkshopCommentRow(
     };
 }
 
-function mapWorkshopCommentAuthorRow(row: WorkshopCommentAuthorRow): WorkshopCommentAuthor {
+function mapWorkshopCommentAuthorRow(
+    row: WorkshopCommentAuthorRow,
+    pendingSubmissionCount: number | null,
+): WorkshopCommentAuthor {
     return {
         participantId: row.id,
+        pendingSubmissionCount,
         isTrusted: row.is_trusted,
         isInteractionBanned: row.is_interaction_banned,
         isModerator: row.is_moderator,
@@ -673,6 +683,7 @@ function mapWorkshopCommentAuthorRow(row: WorkshopCommentAuthorRow): WorkshopCom
 export function createWorkshopCommentAuthor(participant: WorkshopParticipant): WorkshopCommentAuthor {
     return {
         participantId: participant.id,
+        pendingSubmissionCount: null,
         isTrusted: participant.isTrusted,
         isInteractionBanned: participant.isInteractionBanned,
         isModerator: participant.isModerator,
@@ -691,6 +702,7 @@ async function loadWorkshopCommentAuthors(
     supabase: SupabaseClient,
     workshopId: string,
     commentRows: readonly WorkshopCommentRow[],
+    isPendingSubmissionCountIncluded = false,
 ): Promise<ReadonlyMap<string, WorkshopCommentAuthor>> {
     const authorParticipantIds = commentRows
         .map((commentRow) => commentRow.participant_id)
@@ -710,7 +722,34 @@ async function loadWorkshopCommentAuthors(
         return new Map();
     }
 
-    return new Map(rows.map((row) => [row.id, mapWorkshopCommentAuthorRow(row)] as const));
+    const pendingCounts = isPendingSubmissionCountIncluded
+        ? await loadWorkshopPendingSubmissionCounts(supabase, workshopId, rows.map((row) => row.id))
+        : null;
+    return new Map(
+        rows.map((row) => [row.id, mapWorkshopCommentAuthorRow(row, pendingCounts?.get(row.id) ?? null)]),
+    );
+}
+
+/** Reads the same pending set the promotion trigger approves, only for the requested room participants. */
+export async function loadWorkshopPendingSubmissionCounts(
+    supabase: SupabaseClient,
+    workshopId: string,
+    participantIds: readonly string[],
+): Promise<ReadonlyMap<string, number> | null> {
+    const { rows, errorMessage } = await loadWorkshopRowsByIds<{
+        readonly participant_id: string;
+        readonly pending_submission_count: number | string;
+    }>(participantIds, (pageParticipantIds) =>
+        supabase.rpc('get_workshop_pending_submission_counts', {
+            target_workshop_id: workshopId,
+            target_participant_ids: pageParticipantIds,
+        }),
+    );
+    if (rows === null) {
+        console.error('Failed to count pending participant submissions:', errorMessage);
+        return null;
+    }
+    return new Map(rows.map((row) => [row.participant_id, getNonNegativeWholeNumber(row.pending_submission_count)]));
 }
 
 function mapWorkshopCommentReferenceRow(row: WorkshopCommentReferenceRow): WorkshopCommentReference {
@@ -745,6 +784,7 @@ export async function loadWorkshopCommentReference(
 export function mapWorkshopAdminParticipantRow(
     row: WorkshopAdminParticipantRow,
     activityTotals: WorkshopParticipantActivityTotalsRow | undefined,
+    pendingSubmissionCount: number | null = null,
 ): WorkshopAdminParticipant {
     return {
         id: row.id,
@@ -757,13 +797,17 @@ export function mapWorkshopAdminParticipantRow(
         isModerator: row.is_moderator,
         activeDurationSeconds: getNonNegativeWholeNumber(row.active_duration_seconds),
         commentCount: getNonNegativeWholeNumber(activityTotals?.comment_count),
+        pendingSubmissionCount,
         reactionCount: getNonNegativeWholeNumber(activityTotals?.reaction_count),
         upvoteCount: getNonNegativeWholeNumber(activityTotals?.upvote_count),
     };
 }
 
-function mapWorkshopAdminParticipantPageRow(row: WorkshopAdminParticipantPageRow): WorkshopAdminParticipant {
-    return mapWorkshopAdminParticipantRow(row, row);
+function mapWorkshopAdminParticipantPageRow(
+    row: WorkshopAdminParticipantPageRow,
+    pendingSubmissionCount: number | null,
+): WorkshopAdminParticipant {
+    return mapWorkshopAdminParticipantRow(row, row, pendingSubmissionCount);
 }
 
 /**
@@ -1819,9 +1863,14 @@ export async function loadWorkshopAdminParticipantPage(
     }
 
     const participantRows = (data ?? []) as WorkshopAdminParticipantPageRow[];
+    const pendingCounts = await loadWorkshopPendingSubmissionCounts(
+        supabase, workshopId, participantRows.map((row) => row.id),
+    );
     return {
         page: {
-            participants: participantRows.map(mapWorkshopAdminParticipantPageRow),
+            participants: participantRows.map((row) =>
+                mapWorkshopAdminParticipantPageRow(row, pendingCounts?.get(row.id) ?? null),
+            ),
             totalCount: getNonNegativeWholeNumber(participantRows[0]?.total_count),
         },
         errorMessage: null,
@@ -1841,7 +1890,7 @@ export async function loadWorkshopAdminParticipantTimeline(
     workshopRow: WorkshopRow,
     participantId: string,
 ): Promise<{ readonly timeline: WorkshopAdminParticipantTimeline | null; readonly errorMessage: string | null }> {
-    const [participantResult, commentsResult, reactionsResult, upvotesResult] = await Promise.all([
+    const [participantResult, commentsResult, reactionsResult, upvotesResult, pendingCounts] = await Promise.all([
         supabase
             .from(WORKSHOP_PARTICIPANT_TABLE_NAME)
             .select(WORKSHOP_ADMIN_PARTICIPANT_COLUMNS)
@@ -1878,6 +1927,7 @@ export async function loadWorkshopAdminParticipantTimeline(
                 .order('id', { ascending: true })
                 .range(fromIndex, toIndex),
         ),
+        loadWorkshopPendingSubmissionCounts(supabase, workshopRow.id, [participantId]),
     ]);
 
     const firstErrorMessage =
@@ -1950,12 +2000,16 @@ export async function loadWorkshopAdminParticipantTimeline(
 
     return {
         timeline: {
-            participant: mapWorkshopAdminParticipantRow(participant, {
-                participant_id: participant.id,
-                comment_count: commentRows.length,
-                reaction_count: reactionRows.length,
-                upvote_count: upvoteRows.length,
-            }),
+            participant: mapWorkshopAdminParticipantRow(
+                participant,
+                {
+                    participant_id: participant.id,
+                    comment_count: commentRows.length,
+                    reaction_count: reactionRows.length,
+                    upvote_count: upvoteRows.length,
+                },
+                pendingCounts?.get(participantId) ?? null,
+            ),
             events,
         },
         errorMessage: null,
@@ -2633,7 +2687,9 @@ export async function loadWorkshopPublicState(
         upvotedCommentIds = new Set((upvoteRows ?? []).map(({ comment_id }) => comment_id as string));
     }
 
-    const authorByParticipantId = await loadWorkshopCommentAuthors(supabase, workshopRow.id, commentRows);
+    const authorByParticipantId = await loadWorkshopCommentAuthors(
+        supabase, workshopRow.id, commentRows, isModerationOffered,
+    );
     const roomContext: WorkshopCommentRoomContext = {
         pinnedCommentId: workshopRow.pinned_comment_id,
         authorByParticipantId,
@@ -2831,7 +2887,7 @@ export async function loadWorkshopAdminSnapshot(
     const commentRows = (commentsResult.data ?? []) as WorkshopCommentRow[];
     const [answeredCommentById, authorByParticipantId] = await Promise.all([
         loadAnsweredWorkshopComments(supabase, workshopRow.id, commentRows),
-        loadWorkshopCommentAuthors(supabase, workshopRow.id, commentRows),
+        loadWorkshopCommentAuthors(supabase, workshopRow.id, commentRows, true),
     ]);
 
     // Note: The administration moderates every room, so it reads the authors of the listed messages as they are.

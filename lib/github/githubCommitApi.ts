@@ -1,7 +1,6 @@
 import { extractGithubBranchName, type GithubBranch } from '@/lib/github/githubRepository';
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
-
-const GITHUB_COMMIT_SHA_PATTERN = /^[0-9a-f]{7,40}$/i;
+import { normalizeGithubCommitSha } from '@/lib/github/githubCommitSha';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -12,8 +11,7 @@ function readString(value: unknown): string | null {
 }
 
 function readGithubCommitSha(value: unknown): string | null {
-    const sha = readString(value);
-    return sha !== null && GITHUB_COMMIT_SHA_PATTERN.test(sha) ? sha.toLowerCase() : null;
+    return normalizeGithubCommitSha(readString(value));
 }
 
 function readGithubCommitDate(value: unknown): string {
@@ -59,7 +57,7 @@ function readGithubCommitParentShas(commitPayload: Record<string, unknown>): rea
 /**
  * Reads the small part of one GitHub REST commit response which the participant room can safely show
  */
-export function parseGithubApiCommit(value: unknown, branchName: string): GithubCommit | null {
+export function parseGithubApiCommit(value: unknown, branchName?: string): GithubCommit | null {
     if (!isRecord(value)) {
         return null;
     }
@@ -78,9 +76,9 @@ export function parseGithubApiCommit(value: unknown, branchName: string): Github
         sha,
         message,
         authorName: readGithubCommitAuthorName(value),
-        committedAt: readGithubCommitDate(commitAuthor?.date ?? commitCommitter?.date),
+        committedAt: readGithubCommitDate(commitCommitter?.date ?? commitAuthor?.date),
         parentShas: readGithubCommitParentShas(value),
-        branchNames: [branchName],
+        ...(branchName === undefined ? {} : { branchNames: [branchName] }),
     };
 }
 

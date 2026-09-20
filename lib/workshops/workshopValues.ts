@@ -34,6 +34,8 @@ function createWorkshopRepositoryDatabaseValues(repository: WorkshopRepository |
     return {
         github_repository: repository === null ? null : formatGithubRepositoryName(repository),
         github_repository_branches: repository === null ? null : serializeGithubBranchSelection(repository.branch),
+        github_repository_start_commit: repository?.startCommit ?? null,
+        github_repository_end_commit: repository?.endCommit ?? null,
         deployment_urls: deploymentUrls.length === 0 ? null : deploymentUrls,
     };
 }

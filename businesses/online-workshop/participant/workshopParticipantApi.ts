@@ -145,8 +145,10 @@ export async function fetchWorkshopState(
  */
 export async function fetchWorkshopRepositoryProgress(
     workshopSlug: string,
+    history?: { readonly page: number; readonly isExpanded: boolean },
 ): Promise<{ readonly progress: WorkshopRepositoryProgress | null }> {
-    const response = await fetch(getWorkshopApiUrl(workshopSlug, 'repository'), {
+    const query = history === undefined ? '' : `?page=${history.page}&expanded=${history.isExpanded}`;
+    const response = await fetch(`${getWorkshopApiUrl(workshopSlug, 'repository')}${query}`, {
         credentials: 'same-origin',
         cache: 'no-store',
     });

@@ -3,7 +3,7 @@
  */
 
 import { useUrlSynchronizedViewState } from '@/hooks/useUrlSynchronizedViewState';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
@@ -41,9 +41,35 @@ beforeEach(() => {
 
 afterEach(() => {
     cleanup();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
 });
 
 describe('useUrlSynchronizedViewState', () => {
+    it('commits an immediate saved view before navigation without a delayed history write', async () => {
+        vi.useFakeTimers();
+        const { result } = renderHook(() => useUrlSynchronizedViewState({
+            parseViewState: parseTestViewState, serializeViewState: serializeTestViewState,
+        }));
+        act(() => result.current[1](() => ({ section: 'memberships' }), { isImmediate: true }));
+        expect(window.location.search).toBe('?tab=memberships');
+        const replaceState = vi.spyOn(window.history, 'replaceState');
+        await act(async () => { await vi.advanceTimersByTimeAsync(1_000); });
+        expect(replaceState).not.toHaveBeenCalled();
+    });
+
+    it('still debounces ordinary view edits and keeps the latest local selection', async () => {
+        vi.useFakeTimers();
+        const { result } = renderHook(() => useUrlSynchronizedViewState({
+            parseViewState: parseTestViewState, serializeViewState: serializeTestViewState,
+        }));
+        act(() => result.current[1](() => ({ section: 'memberships' })));
+        expect(window.location.search).toBe('?tab=participants');
+        expect(result.current[0].section).toBe('memberships');
+        await act(async () => { await vi.advanceTimersByTimeAsync(1_000); });
+        expect(window.location.search).toBe('?tab=memberships');
+    });
+
     it('follows a same-page navigation that changes a URL-backed view value', async () => {
         const renderedHarness = render(<UrlSynchronizedViewStateHarness />);
 

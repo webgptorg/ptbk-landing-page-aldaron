@@ -5,8 +5,10 @@ import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { GithubRepository } from '@/lib/github/githubRepository';
 import type { WorkshopRepositoryBranch } from '@/lib/workshops/workshopRepositoryProgress';
 import { createWorkshopRepositoryGraphRows } from '@/lib/workshops/workshopRepositoryGraph';
+import { isCommitInWorkshopRepositoryRange, type WorkshopRepositoryCommitRange } from '@/lib/workshops/workshopRepositoryCommitRange';
+import { cn } from '@/lib/utils';
 
-const GRAPH_ROW_HEIGHT_PIXELS = 68;
+const GRAPH_ROW_HEIGHT_PIXELS = 76;
 const GRAPH_LANE_WIDTH_PIXELS = 20;
 const GRAPH_LEFT_PADDING_PIXELS = 14;
 const GRAPH_MINIMAL_WIDTH_PIXELS = 42;
@@ -25,6 +27,7 @@ type WorkshopRepositoryGraphProps = {
     readonly commits: readonly GithubCommit[];
     readonly branches: readonly WorkshopRepositoryBranch[];
     readonly newCommitShas: ReadonlySet<string>;
+    readonly range?: WorkshopRepositoryCommitRange;
 };
 
 function getGraphLaneX(laneIndex: number): number {
@@ -72,6 +75,7 @@ export function WorkshopRepositoryGraph({
     commits,
     branches,
     newCommitShas,
+    range,
 }: WorkshopRepositoryGraphProps) {
     const graphRows = createWorkshopRepositoryGraphRows(commits, createGraphBranchHeadShas(branches, commits));
     const maximalLaneCount = Math.max(...graphRows.map((row) => row.laneCount), 1);
@@ -80,6 +84,8 @@ export function WorkshopRepositoryGraph({
         GRAPH_LEFT_PADDING_PIXELS + maximalLaneCount * GRAPH_LANE_WIDTH_PIXELS,
     );
     const graphHeight = graphRows.length * GRAPH_ROW_HEIGHT_PIXELS;
+    const highlightedCommitShas = new Set(commits.filter((commit) => range !== undefined
+        && isCommitInWorkshopRepositoryRange(commit, range)).map((commit) => commit.sha));
 
     return (
         <div aria-label="Graf commitů vybraných větví" className="space-y-3">
@@ -136,21 +142,29 @@ export function WorkshopRepositoryGraph({
                         ))}
                     </svg>
                     <ol className="relative m-0 list-none p-0">
-                        {graphRows.map((row) => (
+                        {graphRows.map((row, rowIndex) => {
+                            const isInRange = highlightedCommitShas.has(row.commit.sha);
+                            const isRangeTop = isInRange && !highlightedCommitShas.has(graphRows[rowIndex - 1]?.commit.sha ?? '');
+                            const isRangeBottom = isInRange && !highlightedCommitShas.has(graphRows[rowIndex + 1]?.commit.sha ?? '');
+                            return (
                             <li
                                 key={row.commit.sha}
-                                className="flex items-center"
-                                style={{ minHeight: GRAPH_ROW_HEIGHT_PIXELS, paddingLeft: graphWidth + 8 }}
+                                className={cn('flex items-center',
+                                    isInRange && 'border-x-2 border-room-accent/50 bg-room-accent/[0.08]',
+                                    isRangeTop && 'rounded-t-lg border-t-2', isRangeBottom && 'rounded-b-lg border-b-2')}
+                                style={{ height: GRAPH_ROW_HEIGHT_PIXELS, paddingLeft: graphWidth + 8 }}
                             >
                                 <WorkshopRepositoryCommitCard
                                     repository={repository}
                                     commit={row.commit}
                                     isNew={newCommitShas.has(row.commit.sha)}
+                                    isInRange={isInRange}
                                     isBranchGraph
                                     className="my-1 mr-3 w-full"
                                 />
                             </li>
-                        ))}
+                            );
+                        })}
                     </ol>
                 </div>
             </div>

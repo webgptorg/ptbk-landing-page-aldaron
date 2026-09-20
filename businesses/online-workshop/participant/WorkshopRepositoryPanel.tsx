@@ -15,6 +15,8 @@ import { formatWorkshopDeploymentName } from '@/lib/workshops/workshopDeployment
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { WorkshopRepositoryBranch } from '@/lib/workshops/workshopRepositoryProgress';
 import { ExternalLink, Github, RefreshCw, Rocket } from 'lucide-react';
+import { isCommitInWorkshopRepositoryRange } from '@/lib/workshops/workshopRepositoryCommitRange';
+import { formatGithubCommitDate } from '@/lib/github/formatGithubCommitDate';
 
 type WorkshopRepositoryPanelProps = {
     /**
@@ -24,7 +26,8 @@ type WorkshopRepositoryPanelProps = {
     readonly progressController: Pick<
         WorkshopRepositoryProgressController,
         'progress' | 'isProgressRead' | 'newCommitShas'
-    >;
+    > & Partial<Pick<WorkshopRepositoryProgressController,
+        'isExpanded' | 'toggleExpanded' | 'loadMore' | 'isLoadingHistory' | 'historyError' | 'isMoreHistoryAvailable'>>;
 };
 
 /**
@@ -56,6 +59,10 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
     const { progress, isProgressRead, newCommitShas } = progressController;
     const repositoryName = formatGithubRepositoryName(repository);
     const isMultipleBranchSelection = isGithubMultipleBranchesSelection(repository.branch);
+    const range = progress?.range;
+    const isRangeConfigured = range !== undefined && (range.start !== null || range.end !== null);
+    const visibleCommits = progress?.commits.filter((commit) => !isRangeConfigured || progressController.isExpanded
+        || isCommitInWorkshopRepositoryRange(commit, range)) ?? [];
     const graphBranches: readonly WorkshopRepositoryBranch[] =
         progress?.branches ??
         getGithubBranchSelectionPatterns(repository.branch).map((branchName) => ({ name: branchName, headSha: null }));
@@ -121,17 +128,28 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                     </p>
                 ) : (
                     <>
-                        {progress.commits.length > 0 && (
-                            isMultipleBranchSelection ? (
+                        {isRangeConfigured && (
+                            <div className="rounded-xl border border-room-accent/40 bg-room-accent/10 p-3" aria-label="Rozsah commitů workshopu">
+                                <h4 className="text-sm font-bold text-room-accent">Commity workshopu</h4>
+                                <p className="mt-1 text-xs text-room-muted">
+                                    {range.start === null ? 'Bez omezení začátku' : `Od ${range.start.sha.slice(0, 7)} · ${formatGithubCommitDate(range.start.committedAt)}`}
+                                    {' — '}
+                                    {range.end === null ? 'bez omezení konce' : `do ${range.end.sha.slice(0, 7)} · ${formatGithubCommitDate(range.end.committedAt)}`}
+                                </p>
+                            </div>
+                        )}
+                        {visibleCommits.length > 0 ? (
+                            isMultipleBranchSelection || isRangeConfigured ? (
                                 <WorkshopRepositoryGraph
                                     repository={repository}
-                                    commits={progress.commits}
+                                    commits={visibleCommits}
                                     branches={graphBranches}
                                     newCommitShas={newCommitShas}
+                                    range={isRangeConfigured ? range : undefined}
                                 />
                             ) : (
                                 <ol className="space-y-2">
-                                    {progress.commits.map((commit) => (
+                                    {visibleCommits.map((commit) => (
                                         <li key={commit.sha}>
                                             <WorkshopRepositoryCommitCard
                                                 repository={repository}
@@ -142,7 +160,24 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                                     ))}
                                 </ol>
                             )
-                        )}
+                        ) : <p className="text-sm text-room-muted">V tomto rozsahu nejsou žádné commity vybraných větví.</p>}
+                        <div className="flex flex-wrap gap-3 text-xs font-semibold text-room-accent">
+                            {isRangeConfigured && progressController.toggleExpanded !== undefined && (
+                                <button type="button" onClick={progressController.toggleExpanded}
+                                    aria-expanded={progressController.isExpanded ?? false}
+                                    disabled={progressController.isLoadingHistory}
+                                    className="rounded-lg border border-room-accent/30 px-3 py-2 disabled:opacity-50">
+                                    {progressController.isExpanded ? 'Zobrazit jen rozsah workshopu' : 'Rozbalit graf mimo rozsah workshopu'}
+                                </button>
+                            )}
+                            {progressController.isMoreHistoryAvailable && (
+                                <button type="button" onClick={progressController.loadMore} disabled={progressController.isLoadingHistory}
+                                    className="rounded-lg border border-room-border/20 px-3 py-2 disabled:opacity-50">
+                                    {progressController.isLoadingHistory ? 'Načítám historii…' : 'Načíst další commity'}
+                                </button>
+                            )}
+                        </div>
+                        {progressController.historyError && <p role="alert" className="text-sm text-room-danger">{progressController.historyError}</p>}
                         <a
                             href={createGithubCommitsUrlForBranchSelection(repository, repository.branch)}
                             target="_blank"

@@ -1,4 +1,4 @@
-import { requestJson } from '@/lib/api/requestJson';
+import { requestAdminJson as requestJson } from '@/lib/admin/requestAdminJson';
 import type {
     ShortcodeLink,
     ShortcodeLinkClick,

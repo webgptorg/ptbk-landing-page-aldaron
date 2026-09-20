@@ -1,6 +1,8 @@
 import { WORKSHOP_PARTICIPANT_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import type { workshopParticipantUpdateSchema } from '@/lib/workshops/workshopSchemas';
 import { createWorkshopParticipantUpdateDatabaseValues } from '@/lib/workshops/workshopValues';
+import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
+import { scheduleWorkshopAgentWork } from '@/lib/workshops/agents/scheduleWorkshopAgentWork';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { z } from 'zod';
 
@@ -68,6 +70,8 @@ export async function findModeratedWorkshopParticipant(
  * Note: The administration and a moderator of the room write exactly the same state, only what each of them may write
  *       differs, so both of them come here and the difference stays in `workshopModeration` alone.
  * Note: The participant is looked for inside its own workshop, so no request can moderate somebody of another room.
+ * Note: The database promotion trigger approves their pending submissions in this very transaction. Newly approved
+ *       comments use the existing durable agent queue, just as individually approved comments do.
  */
 export async function updateModeratedWorkshopParticipant(
     supabase: SupabaseClient,
@@ -87,8 +91,13 @@ export async function updateModeratedWorkshopParticipant(
         return { participant: null, errorMessage: error.message };
     }
 
+    const participant = data === null ? null : mapModeratedWorkshopParticipantRow(data as ModeratedWorkshopParticipantRow);
+    if (participant !== null && getWorkshopParticipantSubmissionStatus(participant) === 'approved') {
+        scheduleWorkshopAgentWork(workshopId);
+    }
+
     return {
-        participant: data === null ? null : mapModeratedWorkshopParticipantRow(data as ModeratedWorkshopParticipantRow),
+        participant,
         errorMessage: null,
     };
 }

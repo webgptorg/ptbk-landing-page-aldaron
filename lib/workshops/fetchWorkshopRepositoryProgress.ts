@@ -1,11 +1,8 @@
 import {
-    fetchGithubRepositoryBranches,
     fetchGithubRepositoryBranchHistories,
     fetchGithubRepositoryCommits,
 } from '@/lib/github/fetchGithubRepository';
 import {
-    doesGithubBranchNameMatchSelection,
-    doesGithubBranchSelectionUseWildcard,
     getGithubBranchSelectionPatterns,
     isGithubMultipleBranchesSelection,
 } from '@/lib/github/githubRepository';
@@ -15,11 +12,11 @@ import {
 } from '@/lib/workshops/workshopConstants';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import {
-    createWorkshopRepositoryBranch,
     mergeWorkshopRepositoryBranchHistories,
-    type WorkshopRepositoryBranch,
     type WorkshopRepositoryProgress,
 } from '@/lib/workshops/workshopRepositoryProgress';
+import { resolveWorkshopRepositoryBranches } from '@/lib/workshops/resolveWorkshopRepositoryBranches';
+import { fetchWorkshopRepositoryHistory } from '@/lib/workshops/fetchWorkshopRepositoryHistory';
 
 /**
  * Reads the newest commits of the project of one workshop
@@ -32,6 +29,9 @@ import {
 export async function fetchWorkshopRepositoryProgress(
     repository: WorkshopRepository,
 ): Promise<WorkshopRepositoryProgress | null> {
+    if (repository.startCommit !== undefined || repository.endCommit !== undefined) {
+        return fetchWorkshopRepositoryHistory(repository, { page: 1, isExpanded: false });
+    }
     if (isGithubMultipleBranchesSelection(repository.branch)) {
         return fetchMultipleWorkshopRepositoryBranchProgress(repository);
     }
@@ -48,6 +48,7 @@ export async function fetchWorkshopRepositoryProgress(
 
     return {
         commits: allCommits.slice(0, MAXIMAL_WORKSHOP_REPOSITORY_COMMIT_COUNT),
+        nextPage: 1,
     };
 }
 
@@ -75,26 +76,5 @@ async function fetchMultipleWorkshopRepositoryBranchProgress(
         })),
     );
 
-    return progress.commits.length === 0 ? null : progress;
-}
-
-/**
- * Resolves a workshop's literal branch names directly and expands wildcard patterns from GitHub's current branch list.
- */
-async function resolveWorkshopRepositoryBranches(
-    repository: WorkshopRepository,
-): Promise<readonly WorkshopRepositoryBranch[]> {
-    const branchPatterns = getGithubBranchSelectionPatterns(repository.branch);
-
-    if (!doesGithubBranchSelectionUseWildcard(repository.branch)) {
-        return branchPatterns.map((branchName) => createWorkshopRepositoryBranch({ name: branchName, headSha: null }));
-    }
-
-    const availableBranches = await fetchGithubRepositoryBranches({
-        repository,
-        revalidateSeconds: WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS,
-    });
-    return availableBranches
-        .filter((branch) => doesGithubBranchNameMatchSelection(branch.name, repository.branch))
-        .map((branch) => createWorkshopRepositoryBranch(branch));
+    return progress.commits.length === 0 ? null : { ...progress, nextPage: 1 };
 }

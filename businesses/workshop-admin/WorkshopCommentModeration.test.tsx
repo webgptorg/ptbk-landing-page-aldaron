@@ -3,6 +3,7 @@
  */
 
 import { WorkshopCommentModeration } from '@/businesses/workshop-admin/WorkshopCommentModeration';
+import { settleAdminSavesForTest } from '@/lib/admin/adminAutosaveTestUtilities';
 import type { WorkshopAdminComment, WorkshopCommentReference } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -80,8 +81,9 @@ function writeCorrection(body: string) {
 }
 
 describe('workshop comment moderation', () => {
-    afterEach(() => {
+    afterEach(async () => {
         cleanup();
+        await settleAdminSavesForTest();
     });
 
     it('saves the corrected text of a message which is already in the chat', async () => {
@@ -91,8 +93,8 @@ describe('workshop comment moderation', () => {
         writeCorrection(CORRECTED_BODY);
         fireEvent.click(screen.getByRole('button', { name: 'Uložit text' }));
 
-        expect(onEditBody).toHaveBeenCalledWith('question', CORRECTED_BODY);
-        await waitFor(() => expect(screen.queryByRole('textbox', { name: EDITOR_LABEL })).toBeNull());
+        await waitFor(() => expect(onEditBody).toHaveBeenCalledWith('question', CORRECTED_BODY));
+        expect(screen.getByRole('textbox', { name: EDITOR_LABEL })).toHaveProperty('value', CORRECTED_BODY);
     });
 
     it('keeps the correction being written while the admin panel reloads the comments', () => {
@@ -185,13 +187,15 @@ describe('workshop comment moderation', () => {
         expect(onChangePin).toHaveBeenCalledWith(PINNED_COMMENT.id, false);
     });
 
-    it('gives up a correction on cancel and shows the message as the room sees it', () => {
-        renderModeration(vi.fn().mockResolvedValue(true));
+    it('saves a pending correction before closing its editor', async () => {
+        const onEditBody = vi.fn().mockResolvedValue(true);
+        renderModeration(onEditBody);
 
         writeCorrection(CORRECTED_BODY);
-        fireEvent.click(screen.getByRole('button', { name: 'Zrušit' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Zavřít' }));
 
-        expect(screen.queryByRole('textbox', { name: EDITOR_LABEL })).toBeNull();
+        await waitFor(() => expect(screen.queryByRole('textbox', { name: EDITOR_LABEL })).toBeNull());
+        expect(onEditBody).toHaveBeenCalledWith('question', CORRECTED_BODY);
         expect(screen.getByText(COMMENT.body)).not.toBeNull();
     });
 

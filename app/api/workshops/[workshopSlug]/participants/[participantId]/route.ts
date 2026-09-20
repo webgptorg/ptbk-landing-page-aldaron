@@ -79,7 +79,7 @@ export async function PATCH(request: NextRequest, context: WorkshopParticipantMo
         return NextResponse.json({ error: 'Účastník nebyl nalezen.' }, { status: 404 });
     }
 
-    // A trusted author has the messages they write from now on approved, so the room is told to load itself again.
+    // Promotion also approves pending submissions, so refresh their statuses and the author's pending count together.
     await broadcastWorkshopEvent(moderatingRequest.supabase, moderatingRequest.workshopRow, {
         kind: 'state-changed',
     });

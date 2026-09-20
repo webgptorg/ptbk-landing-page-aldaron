@@ -125,6 +125,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   by default; `artopts=on` reveals them and `artopts=off` keeps them hidden.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
+- `/admin/recording-studio` records any number of available cameras, screen shares,
+  and optional microphones as separate local tracks. One capture coordinator starts
+  and stops them on a shared clock; losing a source or a storage write stops the take.
+  IndexedDB commits each chunk together with its counters, and an exclusive browser
+  lock protects recording, recovery, editing and deletion across tabs. Size and
+  remaining-time estimates use browser quota and the combined recording bitrate,
+  keeping a storage reserve. Saved takes survive reload; unfinished ones expose only
+  persisted chunks. The shared admin editor autosaves one trim range for every track.
+  ZIP64 exports preserve originals and timing metadata and can include actual trimmed
+  copies; trimming uses browser codecs and temporary local files, never an upload.
+  Capture and export reuse admin navigation/sign-out/reload protection. No server or
+  database storage is added.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
   by `/[shortcode]`; `/shortener` redirects to the admin page.
@@ -233,6 +245,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   leaves the room naming its project. A project deployed once is opened as the live
   application of the workshop; several deployments are each named by their own
   address, and the first of them is the one a term card is previewed from.
+  With a repository and no deployment URL, administration offers direct Vercel deployment using private `VERCEL_TOKEN`
+  and optional `VERCEL_TEAM_ID`. One Vercel project per repository stays connected to its original GitHub source and
+  deploys its production branch (initially the default branch), independently of the workshop's history selection.
+  Administration polls the build and fills in its assigned production alias only when ready; the ordinary settings
+  save publishes that URL. Manual URLs, a changed repository, and switching rooms discard stale pending results.
+  This adds no workshop data fields; setup and retry behavior are documented in `README.md`.
+  The connection can also carry independent starting and ending commit IDs. Administration previews each commit's
+  message, author and Prague date, and can fill each bound separately from the workshop time (first commit at or after
+  the start, last at or before the end). Bounds are inclusive by commit time across the selected branches. The room
+  initially shows and highlights that range; expanding and paging its graph reveals history outside it while retaining
+  the highlight. An omitted bound leaves that side open; two omitted bounds leave the history unfiltered. Every lookup,
+  autofill and history page uses the same branch selection, and commits belonging only to other branches stay hidden.
 - A workshop can carry one public presentation URL for a PDF, PowerPoint file, or
   GitHub Markdown page. The room renders it beside ordinary materials through the
   shared material card, primary action, and QR code, for every participant without
@@ -258,6 +282,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   without fetching linked pages or preview images. Moderator-created materials
   require no review, and old pending submissions are not bulk-processed.
 - Trusted participants remain invisible and their messages are auto-approved.
+  Granting trust or moderator status also approves every pending submission by that room-local participant — chat,
+  member-written poll answers, and community projects — in the same database transaction. Rejected items stay
+  rejected; a ban blocks this approval until it is lifted. The private pending-submission view supplies both this
+  approval and the complete per-person counts in room moderation and administrative participant lists. Community
+  project cards refresh with the room without resetting the submission form.
   Moderators see pending messages, can approve/reject/correct/pin them, and can
   trust or silence authors. An administrator in `/admin/workshops` and a moderator
   in a workshop room can also turn any comment into an ordinary, immediately
@@ -276,6 +305,21 @@ use cases, and audiences. Keep these rules current when behavior changes.
   not an error. Landing-page reactions are estimates based on recent room data.
 
 ### Administration and data rules
+
+- Admin creation and editing use the shared `AdminEditorDialog` (and `AdminEditorButton` for a local trigger).
+  Lists show summaries and edit actions; contact notes and contacted status are edited in the contact dialog.
+  The dialog contains request errors, traps and restores focus, and scrolls within the viewport. Closing with its
+  button or Escape flushes pending saves and keeps invalid or failed drafts open; backdrop clicks preserve the editor.
+  Search, filters, and immediate moderation actions stay in their lists. New records still require explicit creation.
+
+- Existing records in `/admin` autosave through `useAdminAutosave` and the shared `AdminSaveQueue`.
+  Raw drafts remain dirty through validation failures and failed requests; writes are debounced and serialized,
+  and polling must not replace an editor's draft. Editors stay open after autosave. Pending writes protect
+  close/reload with the browser's native warning; admin links, section/record switches, and sign-out flush saves
+  before leaving. Explicit API mutations share `requestAdminJson`/`protectAdminMutation` for in-flight protection.
+  Creation and destructive actions remain explicit. Keep record editors keyed by their stable database identity.
+  Immediate material unlocking shares its draft save. Poll updates return generated prepared-choice IDs; the editor
+  carries them into subsequent saves while preserving newer text, so autosaving never recreates a saved choice.
 
 - Event kinds are defined once in `lib/events/eventTypes.ts`; adding one should
   not require database migration or page-specific duplication. Terms ask for kind,

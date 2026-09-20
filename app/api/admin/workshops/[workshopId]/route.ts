@@ -6,6 +6,7 @@ import {
     findWorkshopById,
     getWorkshopDatabaseOrNull,
     loadWorkshopAdminSnapshot,
+    mapWorkshopRepository,
     mapWorkshopRow,
     type WorkshopRow,
 } from '@/lib/workshops/workshopDatabase';
@@ -15,6 +16,8 @@ import { isWorkshopCommentStatus } from '@/lib/workshops/workshopCommentStatus';
 import { workshopUpdateSchema } from '@/lib/workshops/workshopSchemas';
 import { createWorkshopUpdateDatabaseValues } from '@/lib/workshops/workshopValues';
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveWorkshopRepositoryCommitBounds } from '@/lib/workshops/fetchWorkshopRepositoryCommitRange';
+import { createWorkshopRepositorySelectionKey } from '@/lib/workshops/workshopRepository';
 
 type AdminWorkshopRouteContext = {
     readonly params: Promise<{ readonly workshopId: string }>;
@@ -95,6 +98,15 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopRouteCon
     const endsAt = parsedResult.data.endsAt === undefined ? existingWorkshop.ends_at : parsedResult.data.endsAt;
     if (endsAt !== null && Date.parse(endsAt) <= Date.parse(startsAt)) {
         return NextResponse.json({ error: 'Workshop end must be after its start' }, { status: 400 });
+    }
+
+    if (parsedResult.data.repository != null && createWorkshopRepositorySelectionKey(parsedResult.data.repository)
+        !== createWorkshopRepositorySelectionKey(mapWorkshopRepository(existingWorkshop))) {
+        try {
+            parsedResult.data.repository = await resolveWorkshopRepositoryCommitBounds(parsedResult.data.repository);
+        } catch (error) {
+            return NextResponse.json({ error: error instanceof Error ? error.message : 'Invalid commit range' }, { status: 422 });
+        }
     }
 
     const { data, error } = await supabase
