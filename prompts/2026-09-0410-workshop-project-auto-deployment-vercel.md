@@ -10,3 +10,18 @@
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
+---
+
+[ ]
+
+[✨🐭] When the deployment on Vercel fails, provide some useful error messages and guidance to the user.
+
+- Now it just tells "Nasazení se nezdařilo nebo bylo zastaveno. Zkontrolujte sestavení ve Vercelu a zkuste to znovu."
+
+![alt text](prompts/screenshots/2026-09-0410-workshop-project-auto-deployment-vercel.png)
+
+
+---
+
+
+@@@@@@@on domain ptbk.io
