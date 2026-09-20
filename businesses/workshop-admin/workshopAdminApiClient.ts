@@ -76,6 +76,8 @@ export type WorkshopWriteValues = {
  * The project of one term as its administration writes it, before the server reads the repository out of it
  */
 export type WorkshopRepositoryWriteValues = {
+    readonly startCommit?: string | null;
+    readonly endCommit?: string | null;
     /**
      * The repository, written either as its address or as `owner/name`
      */

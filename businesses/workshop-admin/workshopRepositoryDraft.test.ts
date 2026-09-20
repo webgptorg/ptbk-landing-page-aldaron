@@ -1,4 +1,5 @@
 import {
+    EMPTY_WORKSHOP_REPOSITORY_DRAFT,
     createWorkshopRepositoryDraft,
     createWorkshopRepositoryWriteValues,
 } from '@/businesses/workshop-admin/workshopRepositoryDraft';
@@ -17,6 +18,7 @@ describe('the workshop repository administration draft', () => {
         const draft = createWorkshopRepositoryDraft(REPOSITORY);
 
         expect(draft).toEqual({
+            ...EMPTY_WORKSHOP_REPOSITORY_DRAFT,
             repositoryUrl: 'https://github.com/hejny/promptbook',
             branch: 'main\nclient-*\nfeature/*',
             deploymentUrls: 'https://workshop.example/app\nhttps://staging.workshop.example/app',
@@ -31,6 +33,7 @@ describe('the workshop repository administration draft', () => {
     it('writes an asterisk for all branches and leaves the default branch empty', () => {
         expect(
             createWorkshopRepositoryWriteValues({
+                ...EMPTY_WORKSHOP_REPOSITORY_DRAFT,
                 repositoryUrl: 'hejny/promptbook',
                 branch: '*',
                 deploymentUrls: '',
@@ -38,6 +41,7 @@ describe('the workshop repository administration draft', () => {
         ).toEqual({ url: 'hejny/promptbook', branch: '*', deploymentUrls: [] });
         expect(
             createWorkshopRepositoryWriteValues({
+                ...EMPTY_WORKSHOP_REPOSITORY_DRAFT,
                 repositoryUrl: 'hejny/promptbook',
                 branch: '',
                 deploymentUrls: '',
@@ -48,6 +52,7 @@ describe('the workshop repository administration draft', () => {
     it('keeps a comma of a written deployment address, which only whitespace separates', () => {
         expect(
             createWorkshopRepositoryWriteValues({
+                ...EMPTY_WORKSHOP_REPOSITORY_DRAFT,
                 repositoryUrl: 'hejny/promptbook',
                 branch: '',
                 deploymentUrls: '  https://workshop.example/app?tags=a,b \n\n https://staging.workshop.example/  ',
@@ -68,6 +73,7 @@ describe('the workshop repository administration draft', () => {
     it('drops every deployment together with the repository which was cleared', () => {
         expect(
             createWorkshopRepositoryWriteValues({
+                ...EMPTY_WORKSHOP_REPOSITORY_DRAFT,
                 repositoryUrl: '   ',
                 branch: 'main',
                 deploymentUrls: 'https://workshop.example/app',

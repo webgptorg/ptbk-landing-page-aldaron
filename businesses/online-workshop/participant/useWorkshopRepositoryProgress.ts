@@ -9,6 +9,8 @@ import {
 } from '@/lib/workshops/workshopRepositoryProgress';
 import { WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useWorkshopRepositoryHistory } from '@/businesses/online-workshop/participant/useWorkshopRepositoryHistory';
+import { createWorkshopRepositorySelectionKey, type WorkshopRepository } from '@/lib/workshops/workshopRepository';
 
 /**
  * How often an open room asks what has been committed in the project of the workshop
@@ -18,7 +20,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  */
 const WORKSHOP_REPOSITORY_REFRESH_INTERVAL_MILLISECONDS = WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS * 1_000;
 
-export type WorkshopRepositoryProgressController = {
+export type WorkshopRepositoryProgressController = ReturnType<typeof useWorkshopRepositoryHistory> & {
     /**
      * How far the project has come, `null` while it is still being read or while GitHub could not be read at all
      */
@@ -50,6 +52,7 @@ export type WorkshopRepositoryProgressController = {
 export function useWorkshopRepositoryProgress(
     workshopSlug: string,
     isEnabled = true,
+    repository: WorkshopRepository | null = null,
 ): WorkshopRepositoryProgressController {
     const [progress, setProgress] = useState<WorkshopRepositoryProgress | null>(null);
     const [isProgressRead, setIsProgressRead] = useState(false);
@@ -59,6 +62,8 @@ export function useWorkshopRepositoryProgress(
      * Every commit this room has already read, which is nothing at all until it has read the repository once
      */
     const knownCommitShasRef = useRef<Set<string> | null>(null);
+    const repositoryKey = createWorkshopRepositorySelectionKey(repository);
+    const history = useWorkshopRepositoryHistory(workshopSlug, repositoryKey, progress);
 
     useEffect(() => {
         let isCurrentWorkshop = true;
@@ -111,7 +116,7 @@ export function useWorkshopRepositoryProgress(
             isReadingProgress = true;
             try {
                 const { progress: readProgress } = await fetchWorkshopRepositoryProgress(workshopSlug);
-                if (!isCurrentWorkshop) {
+                if (!isCurrentWorkshop || readProgress === null) {
                     return;
                 }
 
@@ -138,7 +143,7 @@ export function useWorkshopRepositoryProgress(
             isCurrentWorkshop = false;
             window.clearInterval(intervalId);
         };
-    }, [isEnabled, workshopSlug]);
+    }, [isEnabled, workshopSlug, repositoryKey]);
 
     const subscribeToNewCommits = useCallback<SubscribeToWorkshopRepositoryCommits>((listener) => {
         commitListenersRef.current.add(listener);
@@ -147,5 +152,5 @@ export function useWorkshopRepositoryProgress(
         };
     }, []);
 
-    return { progress, isProgressRead, newCommitShas, subscribeToNewCommits };
+    return { ...history, isProgressRead, newCommitShas, subscribeToNewCommits };
 }

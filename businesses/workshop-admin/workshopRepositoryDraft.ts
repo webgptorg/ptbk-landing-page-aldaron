@@ -17,12 +17,16 @@ export type WorkshopRepositoryDraft = {
     readonly branch: string;
     /** One address of a deployment per line; an empty value means the project is published nowhere. */
     readonly deploymentUrls: string;
+    readonly startCommit: string;
+    readonly endCommit: string;
 };
 
 export const EMPTY_WORKSHOP_REPOSITORY_DRAFT: WorkshopRepositoryDraft = {
     repositoryUrl: '',
     branch: '',
     deploymentUrls: '',
+    startCommit: '',
+    endCommit: '',
 };
 
 /**
@@ -37,6 +41,8 @@ export function createWorkshopRepositoryDraft(repository: WorkshopRepository | n
         repositoryUrl: createGithubRepositoryUrl(repository),
         branch: getGithubBranchSelectionPatterns(repository.branch).join('\n'),
         deploymentUrls: repository.deploymentUrls.join('\n'),
+        startCommit: repository.startCommit ?? '',
+        endCommit: repository.endCommit ?? '',
     };
 }
 
@@ -79,5 +85,7 @@ export function createWorkshopRepositoryWriteValues(
         url: repositoryUrl,
         branch: branches.length === 0 ? null : branches.length === 1 ? branches[0] : branches,
         deploymentUrls: readWrittenValues(draft.deploymentUrls, DEPLOYMENT_URL_SEPARATOR_PATTERN),
+        ...(draft.startCommit.trim() === '' ? {} : { startCommit: draft.startCommit.trim() }),
+        ...(draft.endCommit.trim() === '' ? {} : { endCommit: draft.endCommit.trim() }),
     };
 }

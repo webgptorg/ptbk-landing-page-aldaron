@@ -1,6 +1,7 @@
 import {
     extractGithubBranchSelection,
     extractGithubRepository,
+    getGithubBranchSelectionPatterns,
     type GithubBranchSelection,
     type GithubRepository,
 } from '@/lib/github/githubRepository';
@@ -8,6 +9,7 @@ import {
     normalizeWorkshopDeploymentUrls,
     type WorkshopDeploymentUrls,
 } from '@/lib/workshops/workshopDeployments';
+import { normalizeGithubCommitSha } from '@/lib/github/githubCommitSha';
 
 /**
  * The project one workshop is about
@@ -28,7 +30,20 @@ export type WorkshopRepository = GithubRepository & {
      * Where the project of the workshop runs, empty when it is published nowhere
      */
     readonly deploymentUrls: WorkshopDeploymentUrls;
+    /** Inclusive commit-time bounds, independently absent for an open start or end. */
+    readonly startCommit?: string;
+    readonly endCommit?: string;
 };
+
+/** Stable identity for caches and browser state; deployments do not change the followed history. */
+export function createWorkshopRepositorySelectionKey(repository: WorkshopRepository | null): string {
+    if (repository === null) return '';
+    return JSON.stringify([
+        repository.owner, repository.name,
+        repository.branch === null ? null : [...getGithubBranchSelectionPatterns(repository.branch)].sort(),
+        repository.startCommit ?? null, repository.endCommit ?? null,
+    ]);
+}
 
 /**
  * The stored connection of one room to a project, as far as it can be trusted
@@ -41,6 +56,8 @@ export function createWorkshopRepositoryOrNull(values: {
     readonly repository: string | null;
     readonly branch: string | readonly string[] | null;
     readonly deploymentUrls: readonly string[] | null;
+    readonly startCommit?: string | null;
+    readonly endCommit?: string | null;
 }): WorkshopRepository | null {
     const repository = extractGithubRepository(values.repository);
     if (repository === null) {
@@ -50,9 +67,13 @@ export function createWorkshopRepositoryOrNull(values: {
         return null;
     }
 
+    const startCommit = normalizeGithubCommitSha(values.startCommit);
+    const endCommit = normalizeGithubCommitSha(values.endCommit);
     return {
         ...repository,
         branch: extractGithubBranchSelection(values.branch),
         deploymentUrls: normalizeWorkshopDeploymentUrls(values.deploymentUrls),
+        ...(startCommit === null ? {} : { startCommit }),
+        ...(endCommit === null ? {} : { endCommit }),
     };
 }

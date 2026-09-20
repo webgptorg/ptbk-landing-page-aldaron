@@ -233,6 +233,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   leaves the room naming its project. A project deployed once is opened as the live
   application of the workshop; several deployments are each named by their own
   address, and the first of them is the one a term card is previewed from.
+  The connection can also carry independent starting and ending commit IDs. Administration previews each commit's
+  message, author and Prague date, and can fill each bound separately from the workshop time (first commit at or after
+  the start, last at or before the end). Bounds are inclusive by commit time across the selected branches. The room
+  initially shows and highlights that range; expanding and paging its graph reveals history outside it while retaining
+  the highlight. An omitted bound leaves that side open; two omitted bounds leave the history unfiltered. Every lookup,
+  autofill and history page uses the same branch selection, and commits belonging only to other branches stay hidden.
 - A workshop can carry one public presentation URL for a PDF, PowerPoint file, or
   GitHub Markdown page. The room renders it beside ordinary materials through the
   shared material card, primary action, and QR code, for every participant without

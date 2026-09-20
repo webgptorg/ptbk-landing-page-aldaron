@@ -1,6 +1,6 @@
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { WorkshopRepositoryProgress } from '@/lib/workshops/workshopRepositoryProgress';
-import { WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
+import { MAXIMAL_WORKSHOP_REPOSITORY_MONITOR_COMMIT_COUNT, WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { fetchWorkshopRepositoryProgressMock, broadcastWorkshopEventMock } = vi.hoisted(() => ({
@@ -84,6 +84,17 @@ describe('workshop repository monitor', () => {
         expect(fetchWorkshopRepositoryProgressMock).toHaveBeenCalledOnce();
     });
 
+    it('keeps ranges separate when two workshops follow the same repository and branches', async () => {
+        fetchWorkshopRepositoryProgressMock.mockResolvedValueOnce(OLD_PROGRESS).mockResolvedValueOnce(NEW_PROGRESS);
+        const repository = { ...REPOSITORY, name: 'independent-ranges' };
+        expect(await watchWorkshopRepository({ repository: { ...repository, startCommit: 'a'.repeat(40) },
+            room: createRoom('range-first'), supabase: {} as never })).toEqual(OLD_PROGRESS);
+        expect(await watchWorkshopRepository({ repository: { ...repository, endCommit: 'b'.repeat(40) },
+            room: createRoom('range-second'), supabase: {} as never })).toEqual(NEW_PROGRESS);
+        expect(fetchWorkshopRepositoryProgressMock).toHaveBeenCalledTimes(2);
+        expect(broadcastWorkshopEventMock).not.toHaveBeenCalled();
+    });
+
     it('broadcasts a commit to every active room after the shared read finds it', async () => {
         fetchWorkshopRepositoryProgressMock.mockResolvedValueOnce(OLD_PROGRESS).mockResolvedValueOnce(NEW_PROGRESS);
 
@@ -113,5 +124,24 @@ describe('workshop repository monitor', () => {
             createRoom('second-room'),
             { kind: 'repository-commit', commit: NEW_PROGRESS.commits[0] },
         );
+    });
+
+    it('does not repeatedly announce a multi-branch range larger than its recent-commit cache', async () => {
+        const progress: WorkshopRepositoryProgress = {
+            commits: Array.from({ length: MAXIMAL_WORKSHOP_REPOSITORY_MONITOR_COMMIT_COUNT + 1 }, (_, index) => ({
+                ...OLD_PROGRESS.commits[0], sha: `range-commit-${index}`,
+            })),
+        };
+        const options = {
+            repository: { ...REPOSITORY, name: 'large-range', startCommit: 'a'.repeat(40) },
+            room: createRoom('large-range-room'), supabase: {} as never,
+        };
+        fetchWorkshopRepositoryProgressMock.mockResolvedValue(progress);
+        await watchWorkshopRepository(options);
+
+        await vi.advanceTimersByTimeAsync(WORKSHOP_REPOSITORY_COMMIT_REVALIDATE_SECONDS * 1_000 + 1);
+        await watchWorkshopRepository(options);
+
+        expect(broadcastWorkshopEventMock).not.toHaveBeenCalled();
     });
 });

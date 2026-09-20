@@ -1,5 +1,6 @@
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { GithubBranch } from '@/lib/github/githubRepository';
+import type { WorkshopRepositoryCommitRange } from '@/lib/workshops/workshopRepositoryCommitRange';
 
 export type WorkshopRepositoryCommitListener = (commit: GithubCommit) => void;
 
@@ -17,6 +18,9 @@ export type WorkshopRepositoryBranch = GithubBranch;
  *       repository feed could not be read at all and the room says so instead of claiming that nothing was committed.
  */
 export type WorkshopRepositoryProgress = {
+    readonly range?: WorkshopRepositoryCommitRange;
+    /** An explicit null means the selected history has been exhausted. */
+    readonly nextPage?: number | null;
     /**
      * The newest commits of the followed branch, newest first
      */
@@ -25,6 +29,21 @@ export type WorkshopRepositoryProgress = {
     /** The branches whose histories were merged, present when more than the default branch was requested. */
     readonly branches?: readonly WorkshopRepositoryBranch[];
 };
+
+/** Combines fetched pages without losing shared branch labels or duplicating commits. */
+export function mergeWorkshopRepositoryProgress(
+    first: WorkshopRepositoryProgress | null,
+    second: WorkshopRepositoryProgress | null,
+): WorkshopRepositoryProgress | null {
+    if (first === null) return second;
+    if (second === null) return first;
+    const branches = new Map([...(first.branches ?? []), ...(second.branches ?? [])].map((branch) => [branch.name, branch]));
+    return {
+        ...first, ...second,
+        commits: mergeWorkshopRepositoryCommitLists([first.commits, second.commits]),
+        branches: Array.from(branches.values()),
+    };
+}
 
 export type WorkshopRepositoryBranchHistory = {
     readonly branch: WorkshopRepositoryBranch;
@@ -50,25 +69,29 @@ function mergeGithubCommits(firstCommit: GithubCommit, secondCommit: GithubCommi
 export function mergeWorkshopRepositoryBranchHistories(
     histories: readonly WorkshopRepositoryBranchHistory[],
 ): { readonly commits: readonly GithubCommit[]; readonly branches: readonly WorkshopRepositoryBranch[] } {
+    return {
+        commits: mergeWorkshopRepositoryCommitLists(histories.map((history) => history.commits)),
+        branches: histories.map((history) => history.branch),
+    };
+}
+
+/** Both branch histories and successive pages share the same commit identity and ordering rules. */
+function mergeWorkshopRepositoryCommitLists(commitLists: readonly (readonly GithubCommit[])[]): readonly GithubCommit[] {
     const commitBySha = new Map<string, GithubCommit>();
 
-    histories.forEach((history) => {
-        history.commits.forEach((commit) => {
+    commitLists.forEach((commits) => {
+        commits.forEach((commit) => {
             const knownCommit = commitBySha.get(commit.sha);
             commitBySha.set(commit.sha, knownCommit === undefined ? commit : mergeGithubCommits(knownCommit, commit));
         });
     });
 
-    const commits = Array.from(commitBySha.values())
+    return Array.from(commitBySha.values())
         .sort((firstCommit, secondCommit) => {
             const committedAtComparison = secondCommit.committedAt.localeCompare(firstCommit.committedAt);
             return committedAtComparison === 0 ? firstCommit.sha.localeCompare(secondCommit.sha) : committedAtComparison;
         });
 
-    return {
-        commits,
-        branches: histories.map((history) => history.branch),
-    };
 }
 
 /**

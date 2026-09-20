@@ -116,6 +116,8 @@ export type WorkshopRow = {
      */
     readonly github_repository?: string | null;
     readonly github_repository_branches?: readonly string[] | null;
+    readonly github_repository_start_commit?: string | null;
+    readonly github_repository_end_commit?: string | null;
     /** Kept only so old in-memory rows can still be mapped while the branch migration is rolled out. */
     readonly github_repository_branch?: string | null;
     readonly deployment_urls?: readonly string[] | null;
@@ -511,6 +513,8 @@ export function mapWorkshopRepository(
         | 'github_repository'
         | 'github_repository_branches'
         | 'github_repository_branch'
+        | 'github_repository_start_commit'
+        | 'github_repository_end_commit'
         | 'deployment_urls'
         | 'deployment_url'
     >,
@@ -522,6 +526,8 @@ export function mapWorkshopRepository(
                 ? (row.github_repository_branch ?? null)
                 : row.github_repository_branches,
         deploymentUrls: readWorkshopRowDeploymentUrls(row),
+        startCommit: row.github_repository_start_commit,
+        endCommit: row.github_repository_end_commit,
     });
 }
 

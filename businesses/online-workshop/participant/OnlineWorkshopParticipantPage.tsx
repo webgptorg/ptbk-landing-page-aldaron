@@ -148,7 +148,9 @@ export function OnlineWorkshopParticipantPage({
         controller.state !== null &&
         getWorkshopKindCapabilities(controller.state.workshop.kind).isRepositoryOffered &&
         controller.state.workshop.repository !== null;
-    const repositoryProgressController = useWorkshopRepositoryProgress(workshopSlug, isRepositoryProgressEnabled);
+    const repositoryProgressController = useWorkshopRepositoryProgress(
+        workshopSlug, isRepositoryProgressEnabled, controller.state?.workshop.repository ?? null,
+    );
     const subscribeToRepositoryCommits = useCallback<SubscribeToWorkshopRepositoryCommits>(
         (listener) => {
             const unsubscribeFromRealtime = controller.subscribeToRepositoryCommits?.(listener) ?? (() => undefined);

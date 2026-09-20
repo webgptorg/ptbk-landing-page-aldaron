@@ -1,5 +1,13 @@
 # Current preversion
 
+- Added independent starting and ending commit IDs to workshop project settings in `/admin/workshops`, with commit
+  message, author and date previews and separate date-based autofill buttons. The participant project graph opens on
+  the inclusive range and highlights it, with expansion and pagination for history outside it. Missing bounds leave
+  their respective side open. All views and lookups retain the selected branch patterns; unrelated branches stay
+  hidden. Commit IDs are validated and normalized on save, and the range is copied or cleared with its repository.
+  Concurrent autofill preserves both bounds, changing the branch selection discards pending history responses, and
+  temporary GitHub failures retain the loaded graph without announcing historical commits as new.
+
 - Granting trust or moderator status now approves all pending submissions by that room participant: chat messages,
   custom poll answers (including shared polls), and community projects. Promotion and approval commit together;
   rejected submissions stay rejected and interaction bans still block automatic approval. Moderators on

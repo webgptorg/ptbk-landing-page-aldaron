@@ -292,7 +292,7 @@ export function createGithubCommitFeedUrl(repository: GithubRepository, branch: 
     return `${createGithubCommitsUrl(repository, branch)}.atom`;
 }
 
-function createGithubApiRepositoryUrl(repository: GithubRepository): string {
+export function createGithubApiRepositoryUrl(repository: GithubRepository): string {
     return `${GITHUB_API_URL}${GITHUB_API_REPOSITORY_PATH_PREFIX}/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.name)}`;
 }
 

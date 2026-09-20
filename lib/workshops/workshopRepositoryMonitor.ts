@@ -1,9 +1,5 @@
 import { fetchWorkshopRepositoryProgress } from '@/lib/workshops/fetchWorkshopRepositoryProgress';
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
-import {
-    getGithubBranchSelectionPatterns,
-    type GithubRepository,
-} from '@/lib/github/githubRepository';
 import { broadcastWorkshopEvent } from '@/lib/workshops/workshopRealtime';
 import {
     MAXIMAL_WORKSHOP_REPOSITORY_MONITOR_COMMIT_COUNT,
@@ -15,7 +11,7 @@ import {
     type WorkshopRepositoryProgress,
 } from '@/lib/workshops/workshopRepositoryProgress';
 import type { WorkshopKind } from '@/lib/workshops/workshopTypes';
-import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
+import { createWorkshopRepositorySelectionKey, type WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /** The room details needed to send a server-authored event to one workshop room */
@@ -51,14 +47,8 @@ type WorkshopRepositoryMonitor = {
 
 const repositoryMonitorsByKey = new Map<string, WorkshopRepositoryMonitor>();
 
-function createWorkshopRepositoryMonitorKey(repository: WorkshopRepository): string {
-    const branchPatterns = [...getGithubBranchSelectionPatterns(repository.branch)].sort().join(',');
-    const isDefaultBranchSelected = repository.branch === null;
-    return `${repository.owner}/${repository.name}|${isDefaultBranchSelected ? 'default' : branchPatterns}`;
-}
-
 function getOrCreateWorkshopRepositoryMonitor(repository: WorkshopRepository): WorkshopRepositoryMonitor {
-    const key = createWorkshopRepositoryMonitorKey(repository);
+    const key = createWorkshopRepositorySelectionKey(repository);
     const existingMonitor = repositoryMonitorsByKey.get(key);
     if (existingMonitor !== undefined) {
         return existingMonitor;
@@ -137,17 +127,20 @@ async function updateWorkshopRepositoryMonitor(
     monitor: WorkshopRepositoryMonitor,
     progress: WorkshopRepositoryProgress | null,
 ): Promise<WorkshopRepositoryProgress | null> {
-    const newCommits =
-        progress === null || !monitor.isProgressBaselineEstablished
-            ? []
-            : selectNewWorkshopRepositoryCommits(monitor.knownCommitShas, progress.commits);
+    if (progress === null) return monitor.progress;
 
-    if (progress !== null) {
-        if (!monitor.isProgressBaselineEstablished) {
-            monitor.isProgressBaselineEstablished = true;
-        }
-        rememberCommitShas(monitor, progress.commits);
-    }
+    // A multi-branch range can exceed the recent-ID cache. Its still-visible commits remain part of the baseline.
+    const knownCommitShas = new Set([
+        ...Array.from(monitor.knownCommitShas),
+        ...(monitor.progress?.commits.map((commit) => commit.sha) ?? []),
+    ]);
+    const newCommits =
+        !monitor.isProgressBaselineEstablished
+            ? []
+            : selectNewWorkshopRepositoryCommits(knownCommitShas, progress.commits);
+
+    monitor.isProgressBaselineEstablished = true;
+    rememberCommitShas(monitor, progress.commits);
     monitor.progress = progress;
 
     if (newCommits.length > 0) {
@@ -222,6 +215,9 @@ export async function watchWorkshopRepository(
     options: WorkshopRepositoryMonitorOptions,
 ): Promise<WorkshopRepositoryProgress | null> {
     const monitor = getOrCreateWorkshopRepositoryMonitor(options.repository);
+    repositoryMonitorsByKey.forEach((otherMonitor) => {
+        if (otherMonitor !== monitor) otherMonitor.targetsByRoomSlug.delete(options.room.slug);
+    });
     removeExpiredWorkshopRepositoryMonitorTargets(monitor);
     monitor.targetsByRoomSlug.set(options.room.slug, {
         room: options.room,
