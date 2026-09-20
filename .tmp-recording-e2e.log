@@ -1,0 +1,129 @@
+
+> promptbook-landing-page@0.1.0 test-e2e
+> playwright test tests/e2e/recording-studio.spec.ts
+
+[WebServer] (node:31628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:48020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:35848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] Database migrations skipped: DATABASE_URL is not configured.
+
+Running 3 tests using 1 worker
+
+(node:39548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests\e2e\recording-studio.spec.ts:75:5 › requires admin authentication for the recording studio (19.1s)
+  ✓  2 tests\e2e\recording-studio.spec.ts:80:5 › records separate sources, restores them, trims every track and exports playable editor material (15.6s)
+  ✘  3 tests\e2e\recording-studio.spec.ts:133:5 › stops the whole take on disconnect and prevents a second tab from changing it (9.2s)
+(node:41476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  4 tests\e2e\recording-studio.spec.ts:133:5 › stops the whole take on disconnect and prevents a second tab from changing it (retry #1) (9.9s)
+Saved 6 E2E video(s) to tests/e2e/videos/.
+Removed the E2E video(s) of 1 outdated run(s) from tests/e2e/videos/.
+
+
+  1) tests\e2e\recording-studio.spec.ts:133:5 › stops the whole take on disconnect and prevents a second tab from changing it 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "jiné kartě"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Studio už je otevřené v jiné kartě. Zavřete ji a …</p> aka getByText('Studio už je otevřené v jiné')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" with timeout 30000ms
+      - waiting for getByRole('alert')
+
+
+      139 |     const secondPage = await page.context().newPage();
+      140 |     await secondPage.goto('/admin/recording-studio');
+    > 141 |     await expect(secondPage.getByRole('alert')).toContainText('jiné kartě');
+          |                                                 ^
+      142 |     await secondPage.close();
+      143 |     await page.evaluate(() => {
+      144 |         const streams = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams;
+        at C:\Users\me\work\promptbook-experiments-and-landing-pages\aldaron\tests\e2e\recording-studio.spec.ts:141:49
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\video-1.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #4: video (video/webm) ──────────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\error-context.md
+
+    attachment #6: trace (application/zip) ─────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\trace.zip
+    Usage:
+
+        npx playwright show-trace tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "jiné kartě"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Studio už je otevřené v jiné kartě. Zavřete ji a …</p> aka getByText('Studio už je otevřené v jiné')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" with timeout 30000ms
+      - waiting for getByRole('alert')
+
+
+      139 |     const secondPage = await page.context().newPage();
+      140 |     await secondPage.goto('/admin/recording-studio');
+    > 141 |     await expect(secondPage.getByRole('alert')).toContainText('jiné kartě');
+          |                                                 ^
+      142 |     await secondPage.close();
+      143 |     await page.evaluate(() => {
+      144 |         const streams = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams;
+        at C:\Users\me\work\promptbook-experiments-and-landing-pages\aldaron\tests\e2e\recording-studio.spec.ts:141:49
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #4: video (video/webm) ──────────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\video-1.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\error-context.md
+
+    attachment #6: trace (application/zip) ─────────────────────────────────────────────────────────
+    tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\trace.zip
+    Usage:
+
+        npx playwright show-trace tests\e2e\.artifacts\recording-studio-stops-the-39a4e-second-tab-from-changing-it-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\recording-studio.spec.ts:133:5 › stops the whole take on disconnect and prevents a second tab from changing it 
+  2 passed (1.5m)

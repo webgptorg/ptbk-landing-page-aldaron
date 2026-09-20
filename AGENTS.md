@@ -125,6 +125,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   by default; `artopts=on` reveals them and `artopts=off` keeps them hidden.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
+- `/admin/recording-studio` records any number of available cameras, screen shares,
+  and optional microphones as separate local tracks. One capture coordinator starts
+  and stops them on a shared clock; losing a source or a storage write stops the take.
+  IndexedDB commits each chunk together with its counters, and an exclusive browser
+  lock protects recording, recovery, editing and deletion across tabs. Size and
+  remaining-time estimates use browser quota and the combined recording bitrate,
+  keeping a storage reserve. Saved takes survive reload; unfinished ones expose only
+  persisted chunks. The shared admin editor autosaves one trim range for every track.
+  ZIP64 exports preserve originals and timing metadata and can include actual trimmed
+  copies; trimming uses browser codecs and temporary local files, never an upload.
+  Capture and export reuse admin navigation/sign-out/reload protection. No server or
+  database storage is added.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
   by `/[shortcode]`; `/shortener` redirects to the admin page.

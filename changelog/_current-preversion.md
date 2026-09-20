@@ -1,5 +1,16 @@
 # Current preversion
 
+- Added `/admin/recording-studio` to the shared admin menu and dashboard. Multiple cameras, screen shares (with
+  available shared audio), and optional separate microphones start and stop together, with per-track sizes,
+  elapsed time, and an estimate of remaining browser storage time. Recording chunks persist locally in IndexedDB;
+  a source failure or storage limit stops the whole take, interrupted takes can be recovered, and a browser-wide
+  lock prevents another studio tab from changing an active recording. Saved recordings have shared autosaved
+  trimming and previews, explicit deletion, and ZIP64 downloads containing untouched source files and timing
+  metadata, optionally with separately trimmed copies for the editor. Large archives stream to disk where supported;
+  trimming runs locally using browser codecs and temporary files. Admin navigation waits for active recording and
+  export; reopening the studio waits for its previous instance to release local storage. No recording is uploaded
+  to the server.
+
 - Replaced inline admin creation and editing with shared, accessible popup dialogs across contacts, short links,
   discount codes, workshop/community settings, materials, polls and member answers, chat corrections, Book agents,
   artificial activity, and custom chart metrics. Lists now show summaries with explicit New/Edit actions; contact

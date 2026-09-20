@@ -35,8 +35,39 @@ This is a production Next.js application, not a collection of static marketing p
 | Homepages | `/` redirects by `Accept-Language`; `/cs` is the Czech source of truth and `/en` is its localized variant. |
 | Audience pages | `/pro-mesta`, `/for-agro`, `/for-industry`, `/ai-supervize`, `/ai-supervize-mini`, and related campaign routes. |
 | Workshops and community | `/cs/online-workshop`, `/cs/online-workshop/participant`, `/cs/komunita`, and `/cs/komunita/projects`. |
-| Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |
+| Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/recording-studio`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |
 | Public short links | `/<shortcode>` resolves a managed short link; `/shortener` leads to its administration. |
+
+## Local recording studio
+
+`/admin/recording-studio` uses the existing admin login. Add each camera or screen share separately; a microphone
+can be added as its own audio file. Camera previews are muted, cameras capture video only, and screen audio is
+included when the browser's share picker supplies it. All sources start and stop in the same JavaScript turn.
+This is software synchronization, not hardware genlock; the editor's manifest records measured start-call offsets.
+
+Recordings stay in IndexedDB in the same browser profile, device, and site origin. Nothing is sent to the server.
+Chunks and their metadata commit atomically; incomplete takes retain successfully saved chunks after reopening.
+One browser tab holds the studio lock, including while recovering, editing, exporting, or deleting takes. Ending a
+source or failing to save a chunk stops every recorder. Normal admin navigation and sign-out wait for recording or
+export to finish, and closing/reloading during capture shows the existing browser warning.
+
+Use a current desktop Chrome or Edge over HTTPS (localhost also works). Device limits, codecs, and screen/audio
+capture depend on the browser and operating system. The displayed free capacity is **browser quota**, not a reading
+of physical free disk space. Remaining time estimates use all tracks' configured bitrates initially and measured
+saved bytes after capture starts, reserving 64 MiB for final chunks. Persistence is requested when recording begins;
+the browser can decline it, clear site data, or run out of disk sooner. Download takes you want to keep.
+
+The shared editor saves one trim range in seconds, applied to every track on the session timeline. ZIP exports
+always contain unchanged `originals/` and `recording.json` (source names, dimensions, sizes, offsets, and trim range).
+**ZIP s ořezem** also produces `trimmed/` copies using Mediabunny and browser codecs, preserving the source dimensions
+and audio; trimming can re-encode, so originals remain the highest-quality material. A browser unable to process
+every embedded track refuses trimmed export instead of silently dropping audio. **Originály ZIP** remains available.
+Conversion uses temporary files in the origin-private filesystem, requiring room for one trimmed track at a time;
+temporary files are removed after processing or on the next studio visit following an interrupted export.
+
+ZIP64 archives stream directly to the chosen file when the browser offers the save-file picker, so large archives
+need no full-memory buffer. Other browsers use a download fallback capped at 256 MiB to avoid exhausting memory.
+The studio adds no environment variables, uploads, server APIs, or database migrations.
 
 ## Technology
 
