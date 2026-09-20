@@ -1,6 +1,6 @@
 import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
-import { WORKSHOP_POLL_TABLE_NAME } from '@/lib/workshops/workshopConstants';
+import { WORKSHOP_POLL_OPTION_TABLE_NAME, WORKSHOP_POLL_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import { getAdminWorkshopDataOrResponse } from '@/lib/workshops/workshopAdminRequest';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { getWorkshopPollAttachmentErrorResponseOrNull } from '@/lib/workshops/workshopPollAttachmentErrors';
@@ -66,7 +66,17 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopPollRout
     }
 
     await broadcastWorkshopEvent(workshopData.supabase, workshopData.workshopRow, { kind: 'state-changed' });
-    return NextResponse.json({ pollId: updatedPollId });
+    // Return generated choice IDs so the next autosave retains their votes.
+    const { data: options, error: optionsError } = await workshopData.supabase
+        .from(WORKSHOP_POLL_OPTION_TABLE_NAME)
+        .select('id,label')
+        .eq('poll_id', updatedPollId)
+        .eq('is_created_by_participant', false)
+        .order('sort_order', { ascending: true });
+    if (optionsError !== null) {
+        return NextResponse.json({ error: 'Saved poll choices could not be loaded' }, { status: 500 });
+    }
+    return NextResponse.json({ pollId: updatedPollId, options });
 }
 
 export async function DELETE(request: NextRequest, context: AdminWorkshopPollRouteContext) {

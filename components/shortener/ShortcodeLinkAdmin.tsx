@@ -1,5 +1,7 @@
 'use client';
 
+import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { ShortcodeLinkClickTable } from '@/components/shortener/ShortcodeLinkClickTable';
 import { ShortcodeLinkEditForm } from '@/components/shortener/ShortcodeLinkEditForm';
 import { ShortcodeLinkTable } from '@/components/shortener/ShortcodeLinkTable';
@@ -191,8 +193,8 @@ export function ShortcodeLinkAdmin() {
 
         try {
             await updateAdminShortcodeLink(editedShortcodeLink.id, values);
-            setEditedShortcodeLink(null);
-            return loadShortcodeLinks();
+            await loadShortcodeLinks();
+            return true;
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : SHORTCODE_LINK_SAVING_ERROR_MESSAGE);
             return false;
@@ -206,6 +208,7 @@ export function ShortcodeLinkAdmin() {
         if (!isDeletionConfirmed) {
             return;
         }
+        if (!(await flushAdminSaves())) return;
 
         setDeletedShortcodeLinkId(shortcodeLink.id);
         try {
@@ -240,6 +243,7 @@ export function ShortcodeLinkAdmin() {
 
             {editedShortcodeLink !== null && (
                 <ShortcodeLinkEditForm
+                    key={editedShortcodeLink.id}
                     shortcodeLink={editedShortcodeLink}
                     onSave={handleSave}
                     onCancelEditing={() => setEditedShortcodeLink(null)}
@@ -408,7 +412,7 @@ export function ShortcodeLinkAdmin() {
                         shortcodeLinks={shownShortcodeLinks}
                         editedShortcodeLinkId={editedShortcodeLink?.id ?? null}
                         deletedShortcodeLinkId={deletedShortcodeLinkId}
-                        onEdit={setEditedShortcodeLink}
+                        onEdit={(link) => void runAfterAdminSaves(() => setEditedShortcodeLink(link))}
                         onDelete={(shortcodeLink) => void handleDelete(shortcodeLink)}
                         onShowClicks={(shortcodeLink) =>
                             changeShortcodeLinkAdminViewState({ selectedShortcodeLinkId: shortcodeLink.id })

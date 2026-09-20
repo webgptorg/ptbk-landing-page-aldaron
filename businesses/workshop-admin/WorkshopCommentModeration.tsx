@@ -1,5 +1,7 @@
 'use client';
 
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { WORKSHOP_COMMENT_ORIGIN_LABELS } from '@/lib/workshops/workshopCommentOrigin';
 
 import { WorkshopCommentEditor } from '@/businesses/workshop-admin/WorkshopCommentEditor';
@@ -66,10 +68,10 @@ export function WorkshopCommentModeration({
     const isStageCommentControlsOffered = onSetStageComment !== null;
     const isCommentMaterialConversionOffered = getWorkshopModerationCapabilities('admin').isCommentMaterialConversionOffered;
 
-    const runCommentAction = async (commentId: string, action: () => Promise<unknown>) => {
+    const runCommentAction = async <ActionResult,>(commentId: string, action: () => Promise<ActionResult>) => {
         setProcessingCommentIds((currentIds) => new Set(currentIds).add(commentId));
         try {
-            await action();
+            return await action();
         } finally {
             setProcessingCommentIds((currentIds) => {
                 const nextIds = new Set(currentIds);
@@ -85,12 +87,7 @@ export function WorkshopCommentModeration({
     const handleConvertToMaterial = (commentId: string) => runCommentAction(commentId, () => onConvertToMaterial(commentId));
 
     const handleEditBody = (commentId: string, body: string) =>
-        runCommentAction(commentId, async () => {
-            const isEdited = await onEditBody(commentId, body);
-            if (isEdited) {
-                setEditedCommentId(null);
-            }
-        });
+        runCommentAction(commentId, () => onEditBody(commentId, body));
 
     const handleChangePin = (commentId: string, isPinned: boolean) =>
         runCommentAction(commentId, () => onChangePin(commentId, isPinned));
@@ -125,7 +122,7 @@ export function WorkshopCommentModeration({
             `Opravdu trvale smazat komentář od ${comment.authorName}? Smažou se také všechny jeho hlasy.`,
         );
         if (isDeletionConfirmed) {
-            void runCommentAction(comment.id, () => onDelete(comment.id));
+            void runAfterAdminSaves(() => { void runCommentAction(comment.id, () => onDelete(comment.id)); });
         }
     };
 
@@ -140,7 +137,7 @@ export function WorkshopCommentModeration({
                     Stav komentářů
                     <select
                         value={commentStatus}
-                        onChange={(event) => onChangeCommentStatus(event.target.value as WorkshopCommentStatus)}
+                        onChange={(event) => { const status = event.target.value as WorkshopCommentStatus; void runAfterAdminSaves(() => onChangeCommentStatus(status)); }}
                         className="mt-1 block h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium normal-case tracking-normal text-slate-800"
                     >
                         {(Object.keys(COMMENT_STATUS_LABELS) as WorkshopCommentStatus[]).map((status) => (
@@ -288,7 +285,7 @@ export function WorkshopCommentModeration({
                                         variant="outline"
                                         size="sm"
                                         disabled={isProcessing}
-                                        onClick={() => setEditedCommentId(comment.id)}
+                                        onClick={() => void runAfterAdminSaves(() => setEditedCommentId(comment.id))}
                                         aria-label={`Upravit komentář od ${comment.authorName}`}
                                     >
                                         <Pencil className="mr-1.5 h-4 w-4" /> Upravit

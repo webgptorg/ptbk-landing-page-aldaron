@@ -1,5 +1,7 @@
 'use client';
 
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { Button } from '@/components/ui/button';
 import { useResizableColumnWidths } from '@/hooks/useResizableColumnWidths';
 import type { Contact, ContactDraft } from '@/lib/contacts/Contact';
@@ -140,7 +142,7 @@ export default function AdminContactsComponent() {
                         onToggleSort={toggleSort}
                         onStartColumnResize={startResizing}
                         onChangeContact={changeContact}
-                        onEditContact={setEditedContact}
+                        onEditContact={(contact) => void runAfterAdminSaves(() => setEditedContact(contact))}
                         onDeleteContact={deleteContact}
                     />
                     <ContactsPagination

@@ -1,5 +1,9 @@
 'use client';
 
+import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { formatWorkshopAdminDateTime } from '@/businesses/workshop-admin/workshopAdminFormatting';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -83,17 +87,14 @@ export function WorkshopPollOptionAdmin({
         }
     };
 
-    const handleLabelSave = async () => {
+    const saveLabel = async () => {
         const label = (editedLabel ?? '').trim();
-        if (label === '' || label === option.label) {
-            setEditedLabel(null);
-            return;
-        }
-
-        const isModerated = await onModerate(option.id, { label });
-        if (isModerated) {
-            setEditedLabel(null);
-        }
+        if (label === '') throw new Error('Vyplňte text odpovědi.');
+        return onModerate(option.id, { label });
+    };
+    const autosave = useAdminAutosave({ value: editedLabel ?? option.label, onSave: saveLabel, isEnabled: editedLabel !== null });
+    const handleLabelSave = async () => {
+        if (await autosave.saveNow()) setEditedLabel(null);
     };
 
     const handleDelete = () => {
@@ -101,7 +102,7 @@ export function WorkshopPollOptionAdmin({
             `Opravdu trvale smazat vlastní odpověď „${option.label}“? Smažou se také všechny její hlasy.`,
         );
         if (isDeletionConfirmed) {
-            void onDelete(option.id);
+            void runAfterAdminSaves(() => { void onDelete(option.id); });
         }
     };
 
@@ -155,10 +156,11 @@ export function WorkshopPollOptionAdmin({
                                 variant="outline"
                                 size="sm"
                                 disabled={isProcessing}
-                                onClick={() => setEditedLabel(null)}
+                                onClick={() => void runAfterAdminSaves(() => setEditedLabel(null))}
                             >
-                                Zrušit
+                                Zavřít
                             </Button>
+                            <AdminAutosaveStatus {...autosave} />
                         </div>
                     )}
 

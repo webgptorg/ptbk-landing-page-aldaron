@@ -1,12 +1,12 @@
 import { WORKSHOP_VERCEL_DEPLOYMENT_SCHEMA, type WorkshopVercelDeployment } from '@/lib/workshops/workshopVercelDeployment';
+import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 
 const WORKSHOP_DEPLOYMENT_API_PATH = '/api/admin/workshops/repository/deployment';
 
 async function requestWorkshopDeployment(url: string, options: RequestInit): Promise<WorkshopVercelDeployment> {
-    const response = await fetch(url, { ...options, credentials: 'same-origin', cache: 'no-store' });
-    const result = await response.json() as { readonly deployment?: unknown; readonly error?: string };
+    const result = await requestAdminJson<{ readonly deployment?: unknown; readonly error?: string }>(url, { ...options, credentials: 'same-origin' });
     const parsed = WORKSHOP_VERCEL_DEPLOYMENT_SCHEMA.safeParse(result.deployment);
-    if (!response.ok || !parsed.success) {
+    if (!parsed.success) {
         throw new Error(result.error ?? 'Nasazení se nepodařilo načíst. Zkuste akci znovu.');
     }
     return parsed.data;

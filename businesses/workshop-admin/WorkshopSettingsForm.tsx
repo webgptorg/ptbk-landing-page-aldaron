@@ -14,6 +14,8 @@ import {
 } from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { WorkshopReactionAnimationPreview } from '@/businesses/workshop-admin/WorkshopReactionAnimationPreview';
 import { DurationPicker } from '@/components/admin/DurationPicker';
+import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,9 +31,9 @@ import { Save } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 
 /**
- * Which of the two ways of saving the room is running, so each button says what it is doing
+ * An explicit end action retains its exact timestamp through the shared settings save.
  */
-type WorkshopSettingsSave = 'settings' | WorkshopEndSaveAction;
+type WorkshopSelectedEnd = { readonly action: WorkshopEndSaveAction; readonly value: string | null };
 
 /**
  * Names the hour, minute and second parts the recording offset is written in, and what all three of them are called
@@ -57,6 +59,20 @@ function parseWorkshopReactions(reactionText: string): readonly string[] {
     return reactionText.trim().split(/\s+/).filter(Boolean);
 }
 
+function createWorkshopSettingsDraft(workshop: WorkshopDetails) {
+    return {
+        slug: workshop.slug, title: workshop.title, description: workshop.description,
+        startsAt: toDateTimeLocalValue(workshop.startsAt), endsAt: toDateTimeLocalValue(workshop.endsAt),
+        selectedEnd: null as WorkshopSelectedEnd | null,
+        eventDetails: workshop.event ?? DEFAULT_EVENT_DETAILS,
+        youtubeVideoId: workshop.youtubeVideoId ?? '', recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
+        previewYoutubeVideoId: workshop.previewYoutubeVideoId ?? '', presentationUrl: workshop.presentationUrl ?? '',
+        repositoryDraft: createWorkshopRepositoryDraft(workshop.repository), reactionText: workshop.allowedReactions.join(' '),
+        disabledPanels: workshop.disabledPanels, artificialWatchingParticipantCount: workshop.artificialWatchingParticipantCount ?? 0,
+        isPublished: workshop.isPublished,
+    };
+}
+
 export function WorkshopSettingsForm({
     workshop,
     onSave,
@@ -69,30 +85,13 @@ export function WorkshopSettingsForm({
     const isSlugOffered = !roomCapabilities.isSlugFixed;
     const isReactionSettingOffered = isWorkshopPanelOfferedByKind(workshop.kind, 'reactions');
     const isWatchingCountSettingOffered = isWorkshopPanelOfferedByKind(workshop.kind, 'watching-count');
-    const [slug, setSlug] = useState(workshop.slug);
-    const [title, setTitle] = useState(workshop.title);
-    const [description, setDescription] = useState(workshop.description);
-    const [startsAt, setStartsAt] = useState(() => toDateTimeLocalValue(workshop.startsAt));
-    const [endsAt, setEndsAt] = useState(() => toDateTimeLocalValue(workshop.endsAt));
-    const [eventDetails, setEventDetails] = useState(() => workshop.event ?? DEFAULT_EVENT_DETAILS);
-    const [youtubeVideoId, setYoutubeVideoId] = useState(workshop.youtubeVideoId ?? '');
-    const [recordingStartOffsetSeconds, setRecordingStartOffsetSeconds] = useState(workshop.recordingStartOffsetSeconds);
-    const [previewYoutubeVideoId, setPreviewYoutubeVideoId] = useState(workshop.previewYoutubeVideoId ?? '');
-    const [presentationUrl, setPresentationUrl] = useState(workshop.presentationUrl ?? '');
-    const [repositoryDraft, setRepositoryDraft] = useState(() => createWorkshopRepositoryDraft(workshop.repository));
-    const [reactionText, setReactionText] = useState(workshop.allowedReactions.join(' '));
-    const [disabledPanels, setDisabledPanels] = useState(workshop.disabledPanels);
-    const [artificialWatchingParticipantCount, setArtificialWatchingParticipantCount] = useState(
-        workshop.artificialWatchingParticipantCount ?? 0,
-    );
-    const [isPublished, setIsPublished] = useState(workshop.isPublished);
-
-    // Note: Both the settings and the ending of a workshop are one and the same save, so the form says which of them
-    //       is running rather than letting a second one start beside it.
-    const [runningSave, setRunningSave] = useState<WorkshopSettingsSave | null>(null);
-    const isSaving = runningSave !== null;
+    const [draft, setDraft] = useState(() => createWorkshopSettingsDraft(workshop));
+    const { slug, title, description, startsAt, endsAt, selectedEnd, eventDetails, youtubeVideoId,
+        recordingStartOffsetSeconds, previewYoutubeVideoId, presentationUrl, repositoryDraft, reactionText,
+        disabledPanels, artificialWatchingParticipantCount, isPublished } = draft;
+    const changeDraft = (changes: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...changes }));
     const startsAtIso = fromDateTimeLocalValue(startsAt);
-    const endsAtIso = fromDateTimeLocalValue(endsAt);
+    const endsAtIso = selectedEnd === null ? fromDateTimeLocalValue(endsAt) : selectedEnd.value;
     const isWorkshopEndOpen = endsAtIso === null;
 
     // Note: Ending a workshop right now is only valid after it has started. The other end choices remain useful for
@@ -103,38 +102,19 @@ export function WorkshopSettingsForm({
         isWorkshopEndOpen &&
         getWorkshopPhase({ startsAt: startsAtIso, endsAt: endsAtIso }) === 'ongoing';
 
-    useEffect(() => {
-        setSlug(workshop.slug);
-        setTitle(workshop.title);
-        setDescription(workshop.description);
-        setStartsAt(toDateTimeLocalValue(workshop.startsAt));
-        setEndsAt(toDateTimeLocalValue(workshop.endsAt));
-        setEventDetails(workshop.event ?? DEFAULT_EVENT_DETAILS);
-        setYoutubeVideoId(workshop.youtubeVideoId ?? '');
-        setRecordingStartOffsetSeconds(workshop.recordingStartOffsetSeconds);
-        setPreviewYoutubeVideoId(workshop.previewYoutubeVideoId ?? '');
-        setPresentationUrl(workshop.presentationUrl ?? '');
-        setRepositoryDraft(createWorkshopRepositoryDraft(workshop.repository));
-        setReactionText(workshop.allowedReactions.join(' '));
-        setDisabledPanels(workshop.disabledPanels);
-        setArtificialWatchingParticipantCount(workshop.artificialWatchingParticipantCount ?? 0);
-        setIsPublished(workshop.isPublished);
-    }, [workshop]);
-
     /**
      * Saves everything the form holds, with the end it is told to write
      *
      * Note: Ending a workshop is nothing but this very save with the current moment as its end, so both ways of
      *       writing an end reach the room through the same request.
      */
-    const saveWorkshop = async (save: WorkshopSettingsSave, endsAtIso: string | null) => {
+    const saveWorkshop = async () => {
         const startsAtIso = fromDateTimeLocalValue(startsAt);
         if (!title.trim() || (isSlugOffered && !slug.trim()) || (roomCapabilities.isScheduled && !startsAtIso)) {
-            return;
+            return false;
         }
 
-        setRunningSave(save);
-        await onSave({
+        return onSave({
             title,
             description,
             isPublished,
@@ -156,16 +136,28 @@ export function WorkshopSettingsForm({
                 : {}),
             ...(isReactionSettingOffered ? { allowedReactions: parseWorkshopReactions(reactionText) } : {}),
         });
-        setRunningSave(null);
     };
+
+    // The keyed editor owns its draft. Polling and responses to older saves cannot replace newer typing.
+    const autosave = useAdminAutosave({
+        value: draft,
+        onSave: saveWorkshop,
+    });
+    const { acceptSavedValue } = autosave;
+    useEffect(() => {
+        const refreshedDraft = createWorkshopSettingsDraft(workshop);
+        if (acceptSavedValue(refreshedDraft)) setDraft(refreshedDraft);
+    }, [workshop, acceptSavedValue]);
+    const isSaving = autosave.isSaving;
+    const runningSave = isSaving ? selectedEnd?.action ?? 'settings' : null;
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        void saveWorkshop('settings', endsAtIso);
+        void autosave.saveNow();
     };
 
     return (
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form ref={autosave.formRef} onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 className="text-xl font-bold text-slate-950">Nastavení {subjectLabel}</h2>
@@ -179,7 +171,7 @@ export function WorkshopSettingsForm({
                     <input
                         type="checkbox"
                         checked={isPublished}
-                        onChange={(event) => setIsPublished(event.target.checked)}
+                        onChange={(event) => changeDraft({ isPublished: event.target.checked })}
                         className="h-4 w-4 rounded"
                     />{' '}
                     Publikovaný
@@ -192,7 +184,7 @@ export function WorkshopSettingsForm({
                         URL slug
                         <Input
                             value={slug}
-                            onChange={(event) => setSlug(event.target.value)}
+                            onChange={(event) => changeDraft({ slug: event.target.value })}
                             className="mt-2 font-mono"
                             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
                             required
@@ -204,13 +196,13 @@ export function WorkshopSettingsForm({
                 )}
                 <label className="text-sm font-medium text-slate-700 md:col-span-2">
                     Název
-                    <Input value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2" required />
+                    <Input value={title} onChange={(event) => changeDraft({ title: event.target.value })} className="mt-2" required />
                 </label>
                 <label className="text-sm font-medium text-slate-700 md:col-span-2">
                     Popis
                     <Textarea
                         value={description}
-                        onChange={(event) => setDescription(event.target.value)}
+                        onChange={(event) => changeDraft({ description: event.target.value })}
                         className="mt-2"
                     />
                 </label>
@@ -221,7 +213,7 @@ export function WorkshopSettingsForm({
                             <Input
                                 type="datetime-local"
                                 value={startsAt}
-                                onChange={(event) => setStartsAt(event.target.value)}
+                                onChange={(event) => changeDraft({ startsAt: event.target.value })}
                                 className="mt-2"
                                 required
                             />
@@ -232,7 +224,7 @@ export function WorkshopSettingsForm({
                                 <Input
                                     type="datetime-local"
                                     value={endsAt}
-                                    onChange={(event) => setEndsAt(event.target.value)}
+                                    onChange={(event) => { changeDraft({ selectedEnd: null, endsAt: event.target.value }); }}
                                     className="mt-2"
                                 />
                             </label>
@@ -242,9 +234,9 @@ export function WorkshopSettingsForm({
                                 isWorkshopEndableNow={isWorkshopEndableNow}
                                 isSaving={isSaving}
                                 runningSaveAction={runningSave === 'settings' ? null : runningSave}
-                                onSaveEnd={(saveAction, selectedEndsAt) =>
-                                    void saveWorkshop(saveAction, selectedEndsAt)
-                                }
+                                onSaveEnd={(action, value) => {
+                                    changeDraft({ endsAt: toDateTimeLocalValue(value), selectedEnd: { action, value } });
+                                }}
                             />
                         </div>
                     </>
@@ -259,7 +251,7 @@ export function WorkshopSettingsForm({
                             step={1}
                             value={artificialWatchingParticipantCount}
                             onChange={(event) =>
-                                setArtificialWatchingParticipantCount(Math.max(0, Number(event.target.value) || 0))
+                                changeDraft({ artificialWatchingParticipantCount: Math.max(0, Number(event.target.value) || 0) })
                             }
                             className="mt-2"
                         />
@@ -269,14 +261,14 @@ export function WorkshopSettingsForm({
                         </span>
                     </label>
                 )}
-                {roomCapabilities.isEvent && <WorkshopEventFields event={eventDetails} onChange={setEventDetails} />}
+                {roomCapabilities.isEvent && <WorkshopEventFields event={eventDetails} onChange={(eventDetails) => changeDraft({ eventDetails })} />}
                 {roomCapabilities.isStageOffered && (
                     <>
                         <label className="text-sm font-medium text-slate-700">
                             YouTube URL nebo video ID
                             <Input
                                 value={youtubeVideoId}
-                                onChange={(event) => setYoutubeVideoId(event.target.value)}
+                                onChange={(event) => changeDraft({ youtubeVideoId: event.target.value })}
                                 className="mt-2 font-mono"
                                 placeholder="https://youtube.com/live/…"
                             />
@@ -285,7 +277,7 @@ export function WorkshopSettingsForm({
                             YouTube URL nebo video ID ukázky
                             <Input
                                 value={previewYoutubeVideoId}
-                                onChange={(event) => setPreviewYoutubeVideoId(event.target.value)}
+                                onChange={(event) => changeDraft({ previewYoutubeVideoId: event.target.value })}
                                 className="mt-2 font-mono"
                                 placeholder="https://youtube.com/watch?v=…"
                             />
@@ -300,7 +292,7 @@ export function WorkshopSettingsForm({
                                 id={RECORDING_START_OFFSET_FIELD_ID}
                                 labelledById={RECORDING_START_OFFSET_LABEL_ID}
                                 durationInSeconds={recordingStartOffsetSeconds}
-                                onChange={setRecordingStartOffsetSeconds}
+                                onChange={(recordingStartOffsetSeconds) => changeDraft({ recordingStartOffsetSeconds })}
                                 maximalDurationInSeconds={MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS}
                                 className="mt-2"
                             />
@@ -322,7 +314,7 @@ export function WorkshopSettingsForm({
                             id="workshop-presentation-url"
                             type="url"
                             value={presentationUrl}
-                            onChange={(event) => setPresentationUrl(event.target.value)}
+                            onChange={(event) => changeDraft({ presentationUrl: event.target.value })}
                             className="mt-2"
                             placeholder="https://…/prezentace.pdf"
                         />
@@ -333,8 +325,9 @@ export function WorkshopSettingsForm({
                     </label>
                 )}
                 {roomCapabilities.isRepositoryOffered && (
-                    <WorkshopRepositoryFields key={workshop.id} repository={repositoryDraft} onChange={setRepositoryDraft}
-                        startsAt={startsAtIso} endsAt={endsAtIso} isDisabled={isSaving} />
+                    <WorkshopRepositoryFields key={workshop.id} repository={repositoryDraft} onChange={(change) => setDraft((current) => ({ ...current,
+                        repositoryDraft: typeof change === 'function' ? change(current.repositoryDraft) : change }))}
+                        startsAt={startsAtIso} endsAt={endsAtIso} />
                 )}
                 {isReactionSettingOffered && (
                     <>
@@ -342,7 +335,7 @@ export function WorkshopSettingsForm({
                             Reakce oddělené mezerou
                             <Input
                                 value={reactionText}
-                                onChange={(event) => setReactionText(event.target.value)}
+                                onChange={(event) => changeDraft({ reactionText: event.target.value })}
                                 className="mt-2"
                             />
                         </label>
@@ -355,12 +348,13 @@ export function WorkshopSettingsForm({
                     <WorkshopPanelSettings
                         workshopKind={workshop.kind}
                         disabledPanels={disabledPanels}
-                        onChange={setDisabledPanels}
+                        onChange={(disabledPanels) => changeDraft({ disabledPanels })}
                     />
                 </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                <AdminAutosaveStatus {...autosave} />
                 <Button type="submit" disabled={isSaving}>
                     <Save className="mr-2 h-4 w-4" />
                     {runningSave === 'settings' ? 'Ukládám…' : 'Uložit nastavení'}

@@ -1,5 +1,7 @@
 'use client';
 
+import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { CreateWorkshopForm } from '@/businesses/workshop-admin/CreateWorkshopForm';
 import {
     adjustAdminWorkshopCommentArtificialUpvotes,
@@ -287,7 +289,7 @@ export function WorkshopAdminDashboard({
     }, [isPollsOffered]);
 
     const selectWorkshopBySlug = useCallback(
-        (workshopSlug: string) => changeViewState((previousViewState) => ({ ...previousViewState, workshopSlug })),
+        (workshopSlug: string) => void runAfterAdminSaves(() => changeViewState((previousViewState) => ({ ...previousViewState, workshopSlug }))),
         [changeViewState],
     );
 
@@ -356,6 +358,7 @@ export function WorkshopAdminDashboard({
     };
 
     const handleDeleteWorkshop = async (workshopId: string): Promise<boolean> => {
+        if (!(await flushAdminSaves())) return false;
         try {
             await deleteAdminWorkshop(workshopId);
 
@@ -391,10 +394,22 @@ export function WorkshopAdminDashboard({
         }
     };
 
-    const handleSaveWorkshop = (values: WorkshopWriteValues) =>
-        snapshot === null
-            ? Promise.resolve(false)
-            : runAndReload(() => updateAdminWorkshop(snapshot.workshop.id, values));
+    const handleSaveWorkshop = async (values: WorkshopWriteValues) => {
+        if (snapshot === null) return false;
+        try {
+            const workshop = await updateAdminWorkshop(snapshot.workshop.id, values);
+            // Renaming the selected slug must not make the picker fall back to another room during refresh.
+            setWorkshops((current) => current.map((summary) => summary.id === workshop.id ? { ...summary, ...workshop } : summary));
+            if (workshop.slug !== snapshot.workshop.slug) {
+                changeViewState((current) => ({ ...current, workshopSlug: workshop.slug }), { isImmediate: true });
+            }
+            await Promise.all([loadSnapshot(), loadWorkshopList()]);
+            return true;
+        } catch (error) {
+            setErrorMessage((error as Error).message);
+            return false;
+        }
+    };
     const handleCreateContent = (values: WorkshopContentWriteValues) =>
         snapshot === null
             ? Promise.resolve(false)
@@ -408,36 +423,21 @@ export function WorkshopAdminDashboard({
             await runAndReload(() => deleteAdminWorkshopContent(snapshot.workshop.id, contentId));
         }
     };
-    const handleUnlockContentNow = (contentId: string) => {
-        if (snapshot === null) {
-            return Promise.resolve(false);
-        }
-
-        const contentBlock = snapshot.contentBlocks.find((currentContentBlock) => currentContentBlock.id === contentId);
-        if (contentBlock === undefined) {
-            return Promise.resolve(false);
-        }
-
-        return runAndReload(() =>
-            updateAdminWorkshopContent(snapshot.workshop.id, contentId, {
-                title: contentBlock.title,
-                bodyMarkdown: contentBlock.bodyMarkdown,
-                unlockAt: new Date().toISOString(),
-                sortOrder: contentBlock.sortOrder,
-                isPublished: true,
-                isFollowUp: contentBlock.isFollowUp,
-                isPaidMembersOnly: contentBlock.isPaidMembersOnly,
-            }),
-        );
-    };
     const handleCreatePoll = (values: WorkshopPollCreateValues) =>
         snapshot === null
             ? Promise.resolve(false)
             : runAndReload(() => createAdminWorkshopPoll(snapshot.workshop.id, values));
-    const handleUpdatePoll = (pollId: string, values: WorkshopPollUpdateValues) =>
-        snapshot === null
-            ? Promise.resolve(false)
-            : runAndReload(() => updateAdminWorkshopPoll(snapshot.workshop.id, pollId, values));
+    const handleUpdatePoll = async (pollId: string, values: WorkshopPollUpdateValues) => {
+        if (snapshot === null) return false;
+        try {
+            const options = await updateAdminWorkshopPoll(snapshot.workshop.id, pollId, values);
+            await Promise.all([loadSnapshot(), loadWorkshopList()]);
+            return options;
+        } catch (error) {
+            setErrorMessage((error as Error).message);
+            return false;
+        }
+    };
     const handleDeletePoll = async (pollId: string) => {
         if (snapshot !== null) {
             await runAndReload(() => deleteAdminWorkshopPoll(snapshot.workshop.id, pollId));
@@ -549,7 +549,7 @@ export function WorkshopAdminDashboard({
 
     const handleSectionChange = (value: string) => {
         if (isWorkshopAdminSection(value)) {
-            changeViewState((previousViewState) => ({ ...previousViewState, section: value }));
+            void runAfterAdminSaves(() => changeViewState((previousViewState) => ({ ...previousViewState, section: value })));
         }
     };
 
@@ -764,7 +764,6 @@ export function WorkshopAdminDashboard({
                                     onCreate={handleCreateContent}
                                     onUpdate={handleUpdateContent}
                                     onDelete={handleDeleteContent}
-                                    onUnlockNow={handleUnlockContentNow}
                                 />
                             </TabsContent>
 
@@ -813,6 +812,7 @@ export function WorkshopAdminDashboard({
                                     />
                                 </div>
                                 <WorkshopSettingsForm
+                                    key={snapshot.workshop.id}
                                     workshop={snapshot.workshop}
                                     onSave={handleSaveWorkshop}
                                     subjectLabel={subjectLabel}

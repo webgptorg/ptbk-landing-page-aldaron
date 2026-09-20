@@ -71,8 +71,6 @@ test('deploys a workshop project and saves its ready URL through the existing se
     await expect(page.getByRole('button', { name: 'Nasazuji na Vercel…' })).toBeDisabled();
     await expect(deploymentField).toHaveValue(DEPLOYMENT_URL);
     expect(starts).toEqual([{ repository: { url: 'https://github.com/example/workshop', deploymentUrls: [] } }]);
-    expect(writes).toHaveLength(0);
-    await page.getByRole('button', { name: 'Uložit nastavení', exact: true }).click();
     await expect.poll(() => writes.length).toBe(1);
     expect(writes[0].repository).toEqual({ url: 'https://github.com/example/workshop', branch: ['main', 'client-*'],
         deploymentUrls: [DEPLOYMENT_URL] });

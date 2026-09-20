@@ -1,4 +1,5 @@
 import type { AdminJoinedContact } from '@/lib/admin/adminContactJoin';
+import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import type { Contact, ContactChanges, ContactDraft } from './Contact';
 import { appendSearchParameters } from '@/lib/api/appendSearchParameters';
 
@@ -34,14 +35,15 @@ async function sendContactsApiMutation<ResponsePayload>(
     method: ContactMutationMethod,
     contactValues: unknown,
 ): Promise<ResponsePayload> {
-    const response = await fetch(buildContactsApiUrl(), {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactValues),
+    return protectAdminMutation(async () => {
+        const response = await fetch(buildContactsApiUrl(), {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(contactValues),
+        });
+        await assertResponseIsOk(response);
+        return (await response.json()) as ResponsePayload;
     });
-    await assertResponseIsOk(response);
-
-    return (await response.json()) as ResponsePayload;
 }
 
 /**

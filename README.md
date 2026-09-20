@@ -111,7 +111,7 @@ pushes. The workshop's branch patterns and commit bounds continue to control the
 Vercel uses the repository's build configuration; projects needing secrets or a monorepo root must be configured in
 Vercel. Build failures link to the deployment inspector, and status checks can be resumed after a connection failure.
 
-Once the build is ready and its production alias is assigned, the form fills in that public URL. **Uložit nastavení**
+Once the build is ready and its production alias is assigned, the form fills in that public URL. Shared admin autosave
 saves it through the existing repository/deployment validation and makes it available to participants. A manual URL,
 repository change or room switch discards the previous form's pending result; it does not cancel the remote build.
 No workshop schema or database migration is needed. The landing application's environment variables are never sent to

@@ -1,4 +1,4 @@
-import { requestJson } from '@/lib/api/requestJson';
+import { requestAdminJson as requestJson } from '@/lib/admin/requestAdminJson';
 import type { DiscountCode, DiscountCodeValues } from '@/lib/discounts/discountCode';
 import { ADMIN_DISCOUNT_CODES_API_PATH } from '@/lib/discounts/discountCodeConstants';
 

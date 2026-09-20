@@ -1,5 +1,9 @@
 'use client';
 
+import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
@@ -15,7 +19,7 @@ import {
 } from '@/lib/discounts/discountCodeConstants';
 import { COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID, DISCOUNT_PLACES } from '@/lib/discounts/discountPlaces';
 import { Save, X } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 
 const DEFAULT_DISCOUNT_PERCENT = 10;
 const DEFAULT_DISCOUNT_VALIDITY_MILLISECONDS = 24 * 60 * 60 * 1000;
@@ -78,18 +82,13 @@ function toggleDiscountPlaceId(
  */
 export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: DiscountCodeFormProps) {
     const [values, setValues] = useState<DiscountCodeValues>(() => createDiscountCodeValues(discountCode));
+    const [startsAtText, setStartsAtText] = useState(() => toDateTimeLocalValue(values.startsAt));
+    const [endsAtText, setEndsAtText] = useState(() => toDateTimeLocalValue(values.endsAt));
     const [isValidForAllPlaces, setIsValidForAllPlaces] = useState(() =>
         isDiscountCodeValidForAllPlaces(createDiscountCodeValues(discountCode)),
     );
-    const [isSaving, setIsSaving] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const editedValues = createDiscountCodeValues(discountCode);
-        setValues(editedValues);
-        setIsValidForAllPlaces(isDiscountCodeValidForAllPlaces(editedValues));
-        setValidationError(null);
-    }, [discountCode]);
 
     const isEditing = discountCode !== null;
     const isUseCountLimited = values.maximumUseCount !== null;
@@ -101,22 +100,20 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
         setValues((currentValues) => ({ ...currentValues, [field]: value }));
     };
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        const startsAt = fromDateTimeLocalValue(toDateTimeLocalValue(values.startsAt));
-        const endsAt = fromDateTimeLocalValue(toDateTimeLocalValue(values.endsAt));
+    const saveValues = async () => {
+        const startsAt = fromDateTimeLocalValue(startsAtText);
+        const endsAt = fromDateTimeLocalValue(endsAtText);
         if (startsAt === null || endsAt === null || !values.code.trim()) {
             setValidationError('Vyplňte kód a obě data platnosti.');
-            return;
+            return false;
         }
         if (Date.parse(endsAt) < Date.parse(startsAt)) {
             setValidationError('Konec platnosti musí být po začátku platnosti.');
-            return;
+            return false;
         }
         if (!isValidForAllPlaces && values.placeIds.length === 0) {
             setValidationError('Vyberte alespoň jedno místo, kde kód platí, nebo zvolte všechna místa.');
-            return;
+            return false;
         }
         if (
             values.subscriptionDiscountDurationMonths !== null &&
@@ -127,28 +124,41 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
             setValidationError(
                 `Dočasná sleva předplatného musí trvat 1 až ${MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT} měsíců.`,
             );
-            return;
+            return false;
         }
 
         setValidationError(null);
-        setIsSaving(true);
         const isSaved = await onSave({
             ...values,
             startsAt,
             endsAt,
             placeIds: isValidForAllPlaces ? [] : values.placeIds,
         });
-        setIsSaving(false);
 
         if (isSaved && !isEditing) {
             const newValues = createNewDiscountCodeValues();
             setValues(newValues);
+            setStartsAtText(toDateTimeLocalValue(newValues.startsAt));
+            setEndsAtText(toDateTimeLocalValue(newValues.endsAt));
             setIsValidForAllPlaces(true);
         }
+        return isSaved;
+    };
+
+    const autosave = useAdminAutosave({ value: { values, startsAtText, endsAtText, isValidForAllPlaces }, onSave: saveValues, isEnabled: isEditing });
+    const isSaving = isCreating || autosave.isSaving;
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isEditing) {
+            await autosave.saveNow();
+            return;
+        }
+        setIsCreating(true);
+        try { await saveValues(); } finally { setIsCreating(false); }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form ref={autosave.formRef} onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 className="text-xl font-bold text-slate-950">
@@ -162,8 +172,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     </p>
                 </div>
                 {isEditing && (
-                    <Button type="button" variant="outline" size="sm" onClick={onCancelEditing} disabled={isSaving}>
-                        <X className="mr-2 h-4 w-4" /> Zrušit úpravy
+                    <Button type="button" variant="outline" size="sm" onClick={() => void runAfterAdminSaves(onCancelEditing)} disabled={isSaving}>
+                        <X className="mr-2 h-4 w-4" /> Zavřít úpravy
                     </Button>
                 )}
             </div>
@@ -198,13 +208,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     Začátek platnosti
                     <Input
                         type="datetime-local"
-                        value={toDateTimeLocalValue(values.startsAt)}
-                        onChange={(event) => {
-                            const startsAt = fromDateTimeLocalValue(event.target.value);
-                            if (startsAt !== null) {
-                                updateValue('startsAt', startsAt);
-                            }
-                        }}
+                        value={startsAtText}
+                        onChange={(event) => setStartsAtText(event.target.value)}
                         className="mt-2"
                         required
                     />
@@ -213,13 +218,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     Konec platnosti
                     <Input
                         type="datetime-local"
-                        value={toDateTimeLocalValue(values.endsAt)}
-                        onChange={(event) => {
-                            const endsAt = fromDateTimeLocalValue(event.target.value);
-                            if (endsAt !== null) {
-                                updateValue('endsAt', endsAt);
-                            }
-                        }}
+                        value={endsAtText}
+                        onChange={(event) => setEndsAtText(event.target.value)}
                         className="mt-2"
                         required
                     />
@@ -413,7 +413,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                 <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{validationError}</p>
             )}
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                {isEditing && <AdminAutosaveStatus {...autosave} />}
                 <Button type="submit" disabled={isSaving}>
                     <Save className="mr-2 h-4 w-4" />
                     {isSaving ? 'Ukládám…' : isEditing ? 'Uložit změny' : 'Vytvořit slevový kód'}

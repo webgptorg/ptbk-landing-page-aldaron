@@ -9,7 +9,10 @@ import type {
     WorkshopAdminPollOption,
     WorkshopAdminSummary,
 } from '@/lib/workshops/workshopTypes';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { ADMIN_AUTOSAVE_DELAY_MILLISECONDS } from '@/lib/admin/AdminSaveQueue';
+import { settleAdminSavesForTest } from '@/lib/admin/adminAutosaveTestUtilities';
+import type { WorkshopPollOptionWriteValues } from './workshopAdminApiClient';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const POLL: WorkshopAdminPoll = {
@@ -98,12 +101,39 @@ function createProps() {
     };
 }
 
-afterEach(() => {
+afterEach(async () => {
     cleanup();
+    await settleAdminSavesForTest();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
 });
 
 describe('community poll administration', () => {
+    it('keeps a newly saved choice ID when its text changes during the first autosave', async () => {
+        vi.useFakeTimers();
+        const props = createProps();
+        let finishFirstSave!: (options: readonly WorkshopPollOptionWriteValues[]) => void;
+        props.onUpdate.mockImplementationOnce(() => new Promise((resolve) => { finishFirstSave = resolve; }));
+        render(<WorkshopPollAdmin polls={[POLL]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Upravit' }));
+        const editForm = screen.getByText('Upravit anketu').closest('form')!;
+        fireEvent.click(within(editForm).getByRole('button', { name: 'Přidat možnost' }));
+        const newChoice = within(editForm).getByPlaceholderText('Možnost 3');
+        fireEvent.change(newChoice, { target: { value: 'New choice' } });
+        await act(async () => { await vi.advanceTimersByTimeAsync(ADMIN_AUTOSAVE_DELAY_MILLISECONDS); });
+        expect(props.onUpdate).toHaveBeenCalledTimes(1);
+        fireEvent.change(newChoice, { target: { value: 'Edited while saving' } });
+        await act(async () => finishFirstSave([
+            ...POLL.options.map(({ id, label }) => ({ id, label })), { id: 'saved-choice-id', label: 'New choice' },
+        ]));
+        expect(props.onUpdate).toHaveBeenCalledTimes(2);
+        expect(props.onUpdate).toHaveBeenLastCalledWith(POLL.id, expect.objectContaining({
+            options: expect.arrayContaining([{ id: 'saved-choice-id', label: 'Edited while saving' }]),
+        }));
+        expect(newChoice).toHaveProperty('value', 'Edited while saving');
+        expect(within(editForm).getByRole('button', { name: 'Uložit změny' })).not.toBeNull();
+    });
+
     it('sends a trimmed question, choices, and default settings through the shared admin callback', async () => {
         const props = createProps();
         render(<WorkshopPollAdmin polls={[]} {...props} />);
@@ -282,6 +312,15 @@ describe('community poll administration', () => {
         expect(screen.queryByText('Skutečné: 2 · Umělé: 3')).toBeNull();
         expect(screen.queryByLabelText('Umělá změna hlasů pro Testování')).toBeNull();
         expect(screen.queryByText(/doplňte umělé hlasy/)).toBeNull();
+    });
+
+    it('autosaves an edited question and keeps its editor open', async () => {
+        const props = createProps();
+        render(<WorkshopPollAdmin polls={[POLL]} {...props} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Upravit' }));
+        fireEvent.change(screen.getByDisplayValue(POLL.question), { target: { value: 'Automatically saved question' } });
+        await waitFor(() => expect(props.onUpdate).toHaveBeenCalledWith(POLL.id, expect.objectContaining({ question: 'Automatically saved question' })));
+        expect(screen.getByDisplayValue('Automatically saved question')).not.toBeNull();
     });
 
     it('edits question and options, then deletes a poll only after confirmation', async () => {

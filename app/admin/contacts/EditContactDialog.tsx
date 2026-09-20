@@ -1,5 +1,7 @@
 'use client';
 
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
     CONTACT_EDITABLE_TEXT_FIELD_NAMES,
@@ -26,7 +28,7 @@ export function EditContactDialog(props: EditContactDialogProps) {
             open
             onOpenChange={(isOpen) => {
                 if (!isOpen) {
-                    onClose();
+                    void runAfterAdminSaves(onClose);
                 }
             }}
         >
@@ -39,6 +41,7 @@ export function EditContactDialog(props: EditContactDialogProps) {
                     </DialogDescription>
                 </DialogHeader>
                 <ContactForm
+                    isAutosaveEnabled
                     key={contact.id}
                     fieldNames={CONTACT_EDITABLE_TEXT_FIELD_NAMES}
                     initialContactValues={pickContactTextValues(contact, CONTACT_EDITABLE_TEXT_FIELD_NAMES)}

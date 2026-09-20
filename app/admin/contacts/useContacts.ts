@@ -6,7 +6,6 @@ import {
     createContact,
     deleteContact as deleteContactRequest,
     fetchContacts,
-    updateContact,
 } from '@/lib/contacts/contactsApiClient';
 import { useCallback, useEffect, useState } from 'react';
 import { useDebouncedContactSaver } from './useDebouncedContactSaver';
@@ -31,14 +30,14 @@ export function useContacts(): UseContactsResult {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { saveContactChanges, takePendingContactChanges } = useDebouncedContactSaver(setErrorMessage);
+    const { saveContactChanges, flushContactChanges, getContactChanges } = useDebouncedContactSaver(setErrorMessage);
 
     const reloadContacts = useCallback(async (): Promise<boolean> => {
         setIsLoading(true);
 
         try {
             const loadedContacts = await fetchContacts();
-            setContacts(loadedContacts);
+            setContacts(loadedContacts.map((contact) => ({ ...contact, ...getContactChanges(contact.id) })));
             setErrorMessage(null);
             return true;
         } catch (error) {
@@ -47,7 +46,7 @@ export function useContacts(): UseContactsResult {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [getContactChanges]);
 
     useEffect(() => {
         let isLoadingActive = true;
@@ -95,7 +94,8 @@ export function useContacts(): UseContactsResult {
         async (contactDraft: ContactDraft): Promise<boolean> => {
             try {
                 await createContact(contactDraft);
-                return reloadContacts();
+                await reloadContacts();
+                return true;
             } catch (error) {
                 setErrorMessage((error as Error).message);
                 return false;
@@ -106,28 +106,18 @@ export function useContacts(): UseContactsResult {
 
     const editContact = useCallback(
         async (contactId: number, contactValues: ContactTextValues): Promise<boolean> => {
-            // The dialog holds the newest text of every field, a delayed change of the same contact must not undo it
-            // afterwards, so it is saved together with the dialog instead of on its own.
-            const pendingContactChanges = takePendingContactChanges(contactId);
-
-            try {
-                await updateContact(contactId, {
-                    ...pendingContactChanges,
-                    ...contactValues,
-                });
-                return reloadContacts();
-            } catch (error) {
-                setErrorMessage((error as Error).message);
-                return false;
-            }
+            changeContact(contactId, contactValues);
+            const isSaved = await flushContactChanges(contactId);
+            if (isSaved) setErrorMessage(null);
+            return isSaved;
         },
-        [reloadContacts, takePendingContactChanges],
+        [changeContact, flushContactChanges],
     );
 
     const deleteContact = useCallback(
         async (contactId: number): Promise<boolean> => {
-            // A delayed update must not run after the contact row was removed, so its changes are dropped.
-            takePendingContactChanges(contactId);
+            // Finish any update first; a delayed write must not run after deletion.
+            if (!(await flushContactChanges(contactId))) return false;
 
             try {
                 await deleteContactRequest(contactId);
@@ -137,7 +127,7 @@ export function useContacts(): UseContactsResult {
                 return false;
             }
         },
-        [reloadContacts, takePendingContactChanges],
+        [reloadContacts, flushContactChanges],
     );
 
     return { contacts, isLoading, errorMessage, changeContact, addContact, editContact, deleteContact };

@@ -55,9 +55,7 @@ test('edits independent commit bounds in workshop settings', async ({ page, base
     await page.getByRole('button', { name: 'Doplnit podle konce workshopu' }).click();
     await expect(page.getByLabel('Koncový commit')).toHaveValue(COMMITS[1].sha);
     await expect(page.getByText(COMMITS[1].message)).toBeVisible();
-    await page.getByRole('button', { name: 'Uložit nastavení', exact: true }).click();
-    await expect.poll(() => writes.length).toBe(1);
-    expect(writes[0].repository).toMatchObject({ startCommit: COMMITS[0].sha, endCommit: COMMITS[1].sha, branch: ['main', 'client-*'] });
+    await expect.poll(() => writes.at(-1)?.repository).toMatchObject({ startCommit: COMMITS[0].sha, endCommit: COMMITS[1].sha, branch: ['main', 'client-*'] });
 });
 
 test('opens on the highlighted workshop range and expands its branch graph', async ({ page }) => {

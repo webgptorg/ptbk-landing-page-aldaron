@@ -1,5 +1,7 @@
 'use client';
 
+import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { DiscountCodeForm } from '@/components/admin/DiscountCodeForm';
 import { Button } from '@/components/ui/button';
 import { TableScrollArea } from '@/components/ui/table-scroll-area';
@@ -116,8 +118,8 @@ export function DiscountCodeAdmin() {
                 await updateAdminDiscountCode(editingDiscountCode.id, values);
             }
 
-            setEditingDiscountCode(null);
-            return loadDiscountCodes();
+            await loadDiscountCodes();
+            return true;
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Slevový kód se nepodařilo uložit.');
             return false;
@@ -129,6 +131,7 @@ export function DiscountCodeAdmin() {
         if (!isDeletionConfirmed) {
             return;
         }
+        if (!(await flushAdminSaves())) return;
 
         setIsDeletingDiscountCodeId(discountCode.id);
         try {
@@ -163,6 +166,7 @@ export function DiscountCodeAdmin() {
             </section>
 
             <DiscountCodeForm
+                key={editingDiscountCode?.id ?? 'new'}
                 discountCode={editingDiscountCode}
                 onSave={handleSave}
                 onCancelEditing={() => setEditingDiscountCode(null)}
@@ -285,7 +289,7 @@ export function DiscountCodeAdmin() {
                                                         variant="outline"
                                                         size="sm"
                                                         disabled={isDeleting}
-                                                        onClick={() => setEditingDiscountCode(discountCode)}
+                                                        onClick={() => void runAfterAdminSaves(() => setEditingDiscountCode(discountCode))}
                                                     >
                                                         <Pencil className="mr-1.5 h-4 w-4" /> Upravit
                                                     </Button>

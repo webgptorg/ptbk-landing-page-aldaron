@@ -1,5 +1,9 @@
 'use client';
 
+import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,16 +45,19 @@ type ContactFormProps<FieldName extends ContactEditableTextFieldName> = {
     readonly onSaveContact: (contactValues: ContactTextValues<FieldName>) => Promise<boolean>;
     readonly onContactSaved?: () => void;
     readonly onCancel?: () => void;
+    readonly isAutosaveEnabled?: boolean;
 };
 
 /**
  * Fields shared by the add-contact panel and the edit-contact dialog, only the ones the caller asks for
  */
 export function ContactForm<FieldName extends ContactEditableTextFieldName>(props: ContactFormProps<FieldName>) {
-    const { fieldNames, initialContactValues, saveButtonLabel, onSaveContact, onContactSaved, onCancel } = props;
+    const { fieldNames, initialContactValues, saveButtonLabel, onSaveContact, onContactSaved, onCancel, isAutosaveEnabled = false } = props;
 
     const [contactValues, setContactValues] = useState<ContactTextValues<FieldName>>(initialContactValues);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const autosave = useAdminAutosave({ value: contactValues, onSave: () => onSaveContact(contactValues), isEnabled: isAutosaveEnabled });
+    const isSaving = isCreating || autosave.isSaving;
 
     const shownFieldControls = CONTACT_FORM_FIELD_CONTROLS.filter(
         (fieldControl): fieldControl is ContactFormFieldControl & { readonly fieldName: FieldName } =>
@@ -63,13 +70,13 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
 
     const handleSaveContact = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setIsSaving(true);
+        setIsCreating(!isAutosaveEnabled);
 
         let isSaved = false;
         try {
-            isSaved = await onSaveContact(contactValues);
+            isSaved = await (isAutosaveEnabled ? autosave.saveNow() : onSaveContact(contactValues));
         } finally {
-            setIsSaving(false);
+            setIsCreating(false);
         }
 
         if (isSaved) {
@@ -78,7 +85,7 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
     };
 
     return (
-        <form onSubmit={handleSaveContact}>
+        <form ref={autosave.formRef} onSubmit={handleSaveContact}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {shownFieldControls.map((fieldControl) => (
                     <label
@@ -109,11 +116,12 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
                     {isSaving ? 'Saving...' : saveButtonLabel}
                 </Button>
                 {onCancel !== undefined && (
-                    <Button type="button" variant="outline" disabled={isSaving} onClick={onCancel}>
-                        Cancel
+                    <Button type="button" variant="outline" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>
+                        {isAutosaveEnabled ? 'Close' : 'Cancel'}
                     </Button>
                 )}
             </div>
+            {isAutosaveEnabled && <div className="mt-3"><AdminAutosaveStatus {...autosave} /></div>}
         </form>
     );
 }

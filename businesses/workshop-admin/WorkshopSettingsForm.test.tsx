@@ -5,7 +5,8 @@
 import { WorkshopSettingsForm } from '@/businesses/workshop-admin/WorkshopSettingsForm';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { settleAdminSavesForTest } from '@/lib/admin/adminAutosaveTestUtilities';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const WORKSHOP: WorkshopDetails = {
@@ -94,9 +95,32 @@ function renderWorkshopSettingsForm(
     };
 }
 
-afterEach(cleanup);
+afterEach(async () => { cleanup(); await settleAdminSavesForTest(); });
 
 describe('workshop settings form', () => {
+    it('autosaves a checkbox and text together without a submit and preserves newer typing during refresh', async () => {
+        let finishSave!: (isSaved: boolean) => void;
+        const onSave = vi.fn().mockImplementationOnce(() => new Promise<boolean>((resolve) => { finishSave = resolve; })).mockResolvedValue(true);
+        const { rerender } = render(<WorkshopSettingsForm workshop={WORKSHOP} onSave={onSave} isArtificialOptionsShown={false} />);
+        fireEvent.change(screen.getByLabelText('Název'), { target: { value: 'First title' } });
+        fireEvent.click(screen.getByLabelText('Publikovaný'));
+        await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ title: 'First title', isPublished: false })));
+        fireEvent.change(screen.getByLabelText('Název'), { target: { value: 'Latest title' } });
+        rerender(<WorkshopSettingsForm workshop={{ ...WORKSHOP, title: 'First title', isPublished: false }} onSave={onSave} isArtificialOptionsShown={false} />);
+        expect(screen.getByLabelText('Název')).toHaveProperty('value', 'Latest title');
+        await act(async () => finishSave(true));
+        await waitFor(() => expect(onSave).toHaveBeenLastCalledWith(expect.objectContaining({ title: 'Latest title', isPublished: false })));
+        expect(onSave).toHaveBeenCalledTimes(2);
+    });
+
+    it('autosaves the permanent community without adding event-only settings', async () => {
+        const { onSave } = renderWorkshopSettingsForm(COMMUNITY);
+        fireEvent.change(screen.getByLabelText('Popis'), { target: { value: 'New community description' } });
+        await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
+        expect(onSave.mock.calls[0][0]).toEqual(expect.objectContaining({ description: 'New community description' }));
+        expect(onSave.mock.calls[0][0]).not.toHaveProperty('startsAt');
+    });
+
     it('keeps the artificial watching-count field out of a shared-screen view', () => {
         renderWorkshopSettingsForm(WORKSHOP, vi.fn(), false);
 

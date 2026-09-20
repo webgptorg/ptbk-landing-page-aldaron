@@ -1,5 +1,15 @@
 # Current preversion
 
+- Added shared autosaving throughout `/admin` for existing workshop/community settings, materials, polls and answers,
+  chat corrections, Book agents, contacts, discount codes, and short links. Edits are debounced and saved in order;
+  background refreshes and older responses preserve newer typing. Pending or failed edits trigger the browser's
+  close/reload warning, while admin links, editor switches, and sign-out wait for saving. Validation and request
+  errors retain the draft with retry controls; new records and destructive actions keep their explicit buttons.
+  Immediate admin writes also protect the window while their requests are in progress.
+  Newer edits continue saving if an earlier request fails, incomplete discount dates stay protected, and contact
+  refreshes retain local changes. Unlocking materials uses their current draft; repeated poll saves preserve the
+  generated IDs and votes of newly added choices.
+
 - Added **Nasadit na Vercel** to project settings in `/admin/workshops` when a GitHub repository has no deployment URL.
   The authenticated server integration imports the original repository, reuses one Vercel project per repository,
   and deploys its production branch with future Git pushes connected. Administration shows progress and errors,

@@ -294,6 +294,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Administration and data rules
 
+- Existing records in `/admin` autosave through `useAdminAutosave` and the shared `AdminSaveQueue`.
+  Raw drafts remain dirty through validation failures and failed requests; writes are debounced and serialized,
+  and polling must not replace an editor's draft. Editors stay open after autosave. Pending writes protect
+  close/reload with the browser's native warning; admin links, section/record switches, and sign-out flush saves
+  before leaving. Explicit API mutations share `requestAdminJson`/`protectAdminMutation` for in-flight protection.
+  Creation and destructive actions remain explicit. Keep record editors keyed by their stable database identity.
+  Immediate material unlocking shares its draft save. Poll updates return generated prepared-choice IDs; the editor
+  carries them into subsequent saves while preserving newer text, so autosaving never recreates a saved choice.
+
 - Event kinds are defined once in `lib/events/eventTypes.ts`; adding one should
   not require database migration or page-specific duplication. Terms ask for kind,
   online/place format, price, and capacity. Each kind also names where its landing

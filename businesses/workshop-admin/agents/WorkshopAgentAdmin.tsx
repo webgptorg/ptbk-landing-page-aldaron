@@ -1,5 +1,7 @@
 'use client';
 
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { fetchAdminWorkshopAgents, saveAdminWorkshopAgent } from '@/businesses/workshop-admin/workshopAdminApiClient';
 import { Button } from '@/components/ui/button';
 import type { WorkshopAgentAdminState, WorkshopAgentDefinition, WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
@@ -39,10 +41,12 @@ export function WorkshopAgentAdmin({ workshop }: { readonly workshop: WorkshopDe
         setErrorMessage(null);
         try {
             await saveAdminWorkshopAgent(workshop.id, editedAgent?.id ?? null, values);
-            setIsEditing(false);
+            if (editedAgent === null) setIsEditing(false);
             await refresh();
+            return true;
         } catch (error) {
             setErrorMessage((error as Error).message);
+            return false;
         } finally {
             setIsSaving(false);
         }
@@ -55,14 +59,14 @@ export function WorkshopAgentAdmin({ workshop }: { readonly workshop: WorkshopDe
                     <h2 className="text-xl font-bold text-slate-950">Agenti v diskusi</h2>
                     <p className="mt-1 max-w-2xl text-sm text-slate-500">Vyberte osobnosti, které se zapojí do této místnosti. Každá odpovídá podle svého Booku; může také reagovat na jiné agenty.</p>
                 </div>
-                <Button disabled={isSaving} onClick={() => { setEditedAgent(null); setIsEditing(true); }}>Nový agent</Button>
+                <Button disabled={isSaving} onClick={() => void runAfterAdminSaves(() => { setEditedAgent(null); setIsEditing(true); })}>Nový agent</Button>
             </div>
             {errorMessage && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{errorMessage}</p>}
             {state !== null && !state.isConfigured && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Agenty můžete připravit. Odpovídat začnou po nastavení OPENAI_API_KEY na serveru.</p>}
             {state === null ? <p className="text-sm text-slate-500">Načítám agenty…</p> : <div className="grid gap-3 sm:grid-cols-2">
                 {state.agents.length === 0 && <p className="text-sm text-slate-500">Zatím nemáte žádného agenta. Vytvořte prvního a napište jeho Book.</p>}
                 {state.agents.map((agent) => <button type="button" key={agent.id} disabled={isSaving}
-                    onClick={() => { setEditedAgent(agent); setIsEditing(true); }}
+                    onClick={() => void runAfterAdminSaves(() => { setEditedAgent(agent); setIsEditing(true); })}
                     className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-cyan-500 focus-visible:outline-cyan-600">
                     <span className="block font-semibold">{agent.name}</span>
                     <span className="mt-1 block text-sm text-slate-500">{!agent.isEnabled ? 'Vypnutý ve všech místnostech' : [agent.isReplyEnabled ? 'Odpovídá v chatu' : '', agent.isListening ? 'Naslouchá workshopu' : ''].filter(Boolean).join(' · ') || 'V této místnosti se nezapojuje'}</span>

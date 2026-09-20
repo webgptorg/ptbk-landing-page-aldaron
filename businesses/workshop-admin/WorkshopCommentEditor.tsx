@@ -1,5 +1,9 @@
 'use client';
 
+import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MAXIMAL_WORKSHOP_COMMENT_LENGTH } from '@/lib/workshops/workshopConstants';
@@ -14,7 +18,7 @@ type WorkshopCommentEditorProps = {
     /**
      * Saves the corrected text, the editor stays open with the draft when it does not reach the database
      */
-    readonly onSave: (body: string) => Promise<void>;
+    readonly onSave: (body: string) => Promise<boolean>;
 };
 
 /**
@@ -25,7 +29,8 @@ type WorkshopCommentEditorProps = {
  */
 export function WorkshopCommentEditor({ label, initialBody, onCancel, onSave }: WorkshopCommentEditorProps) {
     const [body, setBody] = useState(initialBody);
-    const [isSaving, setIsSaving] = useState(false);
+    const autosave = useAdminAutosave({ value: body, onSave: () => body.trim() ? onSave(body) : Promise.resolve(false) });
+    const isSaving = autosave.isSaving;
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -33,13 +38,11 @@ export function WorkshopCommentEditor({ label, initialBody, onCancel, onSave }: 
             return;
         }
 
-        setIsSaving(true);
-        await onSave(body);
-        setIsSaving(false);
+        await autosave.saveNow();
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mt-3 rounded-lg border border-cyan-200 bg-cyan-50/40 p-3">
+        <form ref={autosave.formRef} onSubmit={handleSubmit} className="mt-3 rounded-lg border border-cyan-200 bg-cyan-50/40 p-3">
             <Textarea
                 value={body}
                 onChange={(event) => setBody(event.target.value)}
@@ -50,13 +53,14 @@ export function WorkshopCommentEditor({ label, initialBody, onCancel, onSave }: 
                 required
             />
             <div className="mt-3 flex flex-wrap justify-end gap-2">
-                <Button type="button" variant="ghost" size="sm" disabled={isSaving} onClick={onCancel}>
-                    Zrušit
+                <Button type="button" variant="ghost" size="sm" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>
+                    Zavřít
                 </Button>
                 <Button type="submit" size="sm" disabled={isSaving || !body.trim()}>
                     <Save className="mr-1.5 h-4 w-4" /> {isSaving ? 'Ukládám…' : 'Uložit text'}
                 </Button>
             </div>
+            <AdminAutosaveStatus {...autosave} />
         </form>
     );
 }

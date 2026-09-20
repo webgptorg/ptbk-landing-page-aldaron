@@ -1,4 +1,5 @@
 import type { EventDetails } from '@/lib/events/event';
+import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import type { WorkshopAgentAdminState, WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
 import type { EventLocationKind } from '@/lib/events/eventLocation';
 import type { EventType } from '@/lib/events/eventTypes';
@@ -172,18 +173,6 @@ function createAdminApiUrl(
     additionalParameters: Readonly<Record<string, string | undefined>> = {},
 ): string {
     return appendSearchParameters(`/api/admin/workshops${path}`, additionalParameters);
-}
-
-/**
- * Note: The session of the administration is a cookie, so every request carries it on its own
- */
-async function requestAdminJson<ResponseBody>(url: string, requestOptions?: RequestInit): Promise<ResponseBody> {
-    const response = await fetch(url, { ...requestOptions, cache: 'no-store' });
-    const body = (await response.json().catch(() => ({}))) as ResponseBody & { readonly error?: unknown };
-    if (!response.ok) {
-        throw new Error(typeof body.error === 'string' ? body.error : 'Admin request failed');
-    }
-    return body;
 }
 
 function createJsonMutation(method: 'POST' | 'PATCH' | 'DELETE', body: unknown): RequestInit {
@@ -362,12 +351,12 @@ export async function updateAdminWorkshopPoll(
     workshopId: string,
     pollId: string,
     values: WorkshopPollUpdateValues,
-): Promise<string> {
-    const result = await requestAdminJson<{ readonly pollId: string }>(
+): Promise<readonly WorkshopPollOptionWriteValues[]> {
+    const result = await requestAdminJson<{ readonly options: readonly WorkshopPollOptionWriteValues[] }>(
         createAdminApiUrl(`/${encodeURIComponent(workshopId)}/polls/${encodeURIComponent(pollId)}`),
         createJsonMutation('PATCH', values),
     );
-    return result.pollId;
+    return result.options;
 }
 
 export async function deleteAdminWorkshopPoll(workshopId: string, pollId: string): Promise<void> {
