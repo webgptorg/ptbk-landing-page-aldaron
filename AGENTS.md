@@ -233,6 +233,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   leaves the room naming its project. A project deployed once is opened as the live
   application of the workshop; several deployments are each named by their own
   address, and the first of them is the one a term card is previewed from.
+  With a repository and no deployment URL, administration offers direct Vercel deployment using private `VERCEL_TOKEN`
+  and optional `VERCEL_TEAM_ID`. One Vercel project per repository stays connected to its original GitHub source and
+  deploys its production branch (initially the default branch), independently of the workshop's history selection.
+  Administration polls the build and fills in its assigned production alias only when ready; the ordinary settings
+  save publishes that URL. Manual URLs, a changed repository, and switching rooms discard stale pending results.
+  This adds no workshop data fields; setup and retry behavior are documented in `README.md`.
   The connection can also carry independent starting and ending commit IDs. Administration previews each commit's
   message, author and Prague date, and can fill each bound separately from the workshop time (first commit at or after
   the start, last at or before the end). Bounds are inclusive by commit time across the selected branches. The room

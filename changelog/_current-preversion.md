@@ -1,5 +1,12 @@
 # Current preversion
 
+- Added **Nasadit na Vercel** to project settings in `/admin/workshops` when a GitHub repository has no deployment URL.
+  The authenticated server integration imports the original repository, reuses one Vercel project per repository,
+  and deploys its production branch with future Git pushes connected. Administration shows progress and errors,
+  supports resuming status checks, and fills in the assigned production URL only after a successful build. The existing
+  settings save, validation, room links and previews handle the result; manual URLs and changed projects are preserved.
+  Documented private `VERCEL_TOKEN` / optional `VERCEL_TEAM_ID` setup; no database migration is needed.
+
 - Added independent starting and ending commit IDs to workshop project settings in `/admin/workshops`, with commit
   message, author and date previews and separate date-based autofill buttons. The participant project graph opens on
   the inclusive range and highlights it, with expansion and pagination for history outside it. Missing bounds leave

@@ -333,8 +333,8 @@ export function WorkshopSettingsForm({
                     </label>
                 )}
                 {roomCapabilities.isRepositoryOffered && (
-                    <WorkshopRepositoryFields repository={repositoryDraft} onChange={setRepositoryDraft}
-                        startsAt={startsAtIso} endsAt={endsAtIso} />
+                    <WorkshopRepositoryFields key={workshop.id} repository={repositoryDraft} onChange={setRepositoryDraft}
+                        startsAt={startsAtIso} endsAt={endsAtIso} isDisabled={isSaving} />
                 )}
                 {isReactionSettingOffered && (
                     <>

@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { WorkshopRepositoryDraft } from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { createWorkshopRepositoryWriteValues } from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { WorkshopRepositoryCommitField } from '@/businesses/workshop-admin/WorkshopRepositoryCommitField';
+import { WorkshopRepositoryDeploymentControl } from '@/businesses/workshop-admin/WorkshopRepositoryDeploymentControl';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { extractGithubRepository, formatGithubRepositoryName } from '@/lib/github/githubRepository';
@@ -13,6 +14,7 @@ type WorkshopRepositoryFieldsProps = {
     readonly onChange: Dispatch<SetStateAction<WorkshopRepositoryDraft>>;
     readonly startsAt: string | null;
     readonly endsAt: string | null;
+    readonly isDisabled?: boolean;
 };
 
 /**
@@ -21,7 +23,7 @@ type WorkshopRepositoryFieldsProps = {
  * Note: The repository is read here exactly as the server reads it when it is saved, so an administrator sees which
  *       project they connected before they save it, and sees nothing while what they wrote names no project yet.
  */
-export function WorkshopRepositoryFields({ repository, onChange, startsAt, endsAt }: WorkshopRepositoryFieldsProps) {
+export function WorkshopRepositoryFields({ repository, onChange, startsAt, endsAt, isDisabled = false }: WorkshopRepositoryFieldsProps) {
     const connectedRepository = extractGithubRepository(repository.repositoryUrl);
     const repositoryWriteValues = createWorkshopRepositoryWriteValues(repository);
 
@@ -85,6 +87,18 @@ export function WorkshopRepositoryFields({ repository, onChange, startsAt, endsA
                     Nepovinné. Každé nasazení na vlastní řádek; účastníci dostanou odkaz na každé z nich. Náhled v
                     kartě termínu se bere z prvního.
                 </span>
+                {connectedRepository !== null && repository.deploymentUrls.trim() === '' && (
+                    <WorkshopRepositoryDeploymentControl
+                        key={repository.repositoryUrl}
+                        repositoryUrl={repository.repositoryUrl}
+                        isDisabled={isDisabled}
+                        onDeployed={(deploymentUrl) => onChange((previous) =>
+                            previous.repositoryUrl === repository.repositoryUrl && previous.deploymentUrls.trim() === ''
+                                ? { ...previous, deploymentUrls: deploymentUrl }
+                                : previous,
+                        )}
+                    />
+                )}
             </div>
             <div className="md:col-span-2">
                 <p className="mb-3 text-sm text-slate-500">

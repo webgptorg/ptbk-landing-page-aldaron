@@ -89,6 +89,34 @@ NEXT_PUBLIC_SKIP_WAITLIST_TOKEN=
 
 `NEXT_PUBLIC_` variables are included in the browser bundle. Never place database passwords, service-role keys, or administrator credentials in them. With no `ADMIN_PASSWORD`, the administration remains closed.
 
+### Workshop project deployment on Vercel
+
+In `/admin/workshops`, the project settings offer **Nasadit na Vercel** when a valid GitHub repository is entered and
+the deployment URL field is empty. Configure these private server variables:
+
+```dotenv
+VERCEL_TOKEN=YOUR_VERCEL_ACCESS_TOKEN
+# Optional: the team that owns the workshop deployments
+VERCEL_TEAM_ID=team_...
+```
+
+The token must be able to create projects and deployments in that account, and its Vercel GitHub integration must have
+access to the repository. The action imports the original repository and starts a production deployment using
+[Vercel's project API](https://vercel.com/docs/rest-api/projects/create-a-new-project) and
+[deployment API](https://vercel.com/docs/rest-api/deployments/create-a-new-deployment). Each repository has a stable
+project name, shared across workshop terms and retries. Existing projects must still be linked to that repository.
+
+Vercel deploys its project's production branch (the repository's default branch on initial import), including subsequent
+pushes. The workshop's branch patterns and commit bounds continue to control the displayed history independently.
+Vercel uses the repository's build configuration; projects needing secrets or a monorepo root must be configured in
+Vercel. Build failures link to the deployment inspector, and status checks can be resumed after a connection failure.
+
+Once the build is ready and its production alias is assigned, the form fills in that public URL. **Uložit nastavení**
+saves it through the existing repository/deployment validation and makes it available to participants. A manual URL,
+repository change or room switch discards the previous form's pending result; it does not cancel the remote build.
+No workshop schema or database migration is needed. The landing application's environment variables are never sent to
+the workshop deployment. Missing credentials leave manual deployment URLs available.
+
 ### Automatic submission approval
 
 Chat in workshop/community rooms (including project discussions), member-written poll answers, and community project
