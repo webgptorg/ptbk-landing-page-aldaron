@@ -16,7 +16,7 @@ function createPerson(id: string): AiTaKrajtaPerson {
         name: id,
         headline: 'Mluví do mikrofonu.',
         url: null,
-        portraitFileName: 'someone-portrait.png',
+        photoFileName: null,
         mentionPatterns: [],
         episodeNumbers: [],
     };
