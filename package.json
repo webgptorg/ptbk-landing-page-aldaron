@@ -7,7 +7,6 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "generate-logo": "tsx scripts/generate-promptbook-logo.ts",
         "test": "vitest run",
         "test-e2e": "playwright test",
         "test-e2e:headed": "playwright test --headed",

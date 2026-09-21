@@ -1,10 +1,9 @@
 'use client';
 
 import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
-import { PromptbookLogo } from '@/components/promptbook-logo';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, FileText, Shield } from 'lucide-react';
+import { ArrowRight, FileText, Shield, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CompletedBubble, TypewriterBubble } from './ui/ChatBubbles';
 
@@ -98,11 +97,9 @@ export function HeroSection({ language = 'cs' }: { language?: HomepageLanguage }
                         className="space-y-8"
                     >
                         <div className="space-y-7">
-                            <div className="flex items-center gap-5">
-                                <PromptbookLogo size={96} className="h-20 w-20 sm:h-24 sm:w-24" isPriority />
-                                <span className="max-w-56 text-[13px] font-medium text-gray-500 tracking-wide uppercase">
-                                    {hero.eyebrow}
-                                </span>
+                            <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm border border-gray-200/60 px-4 py-2 rounded-full text-[13px] font-medium text-gray-500 tracking-wide uppercase">
+                                <Sparkles className="w-3.5 h-3.5 text-promptbook-blue-dark" />
+                                {hero.eyebrow}
                             </div>
 
                             <h1
