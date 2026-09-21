@@ -47,11 +47,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   estimates. The fixed mini-player, newest-episode header button, person/search/
   episode/play/archive/collaboration filters, and section hash are shareable as
   query/hash state; the snake game is local state. Person clicks filter episodes.
-  Everyone in the roster shows a portrait, cut by
-  `scripts/_cutAiTaKrajtaPeoplePortraits.mjs` out of the episode cover the show
-  itself published them on, or out of the picture they publish of themselves when
-  no cover carries them; the roster names only the file, and a person without one
-  keeps the initials on the brand gradient. The one people list is drawn anew
+  Everyone in the roster has a 320-pixel square transparent PNG in
+  `public/people/ai-ta-krajta`, normalized from the show's covers or a published
+  personal portrait. `aiTaKrajtaPortraits.md` records the sources and cutout workflow;
+  `scripts/_cutAiTaKrajtaPeoplePortraits.mjs` prepares source crops, not final cutouts.
+  The shared avatar puts every portrait over a stable, subtly varied neutral gradient.
+  Card and episode buttons highlight it on hover and keyboard focus, with a small
+  zoom only when reduced motion is not requested. A future person without a photo
+  keeps initials on that same background. The one people list is drawn anew
   for every visit, weighted by how many episodes of the archive name each
   person, so somebody heard often comes up high far more often than someone in
   one díl without the list ever becoming a ranking. The draw is local state and

@@ -1,9 +1,10 @@
 /**
- * Cuts a square portrait of every person of AI ta Krajta out of a picture that person is published in, and writes
- * them into `public/people/`, where `businesses/ai-ta-krajta/aiTaKrajtaPeople.ts` names them by file.
+ * Prepares square source photos for AI ta Krajta portraits and writes them into `public/people/`.
+ * These JPEGs retain their original backgrounds; the page uses separately reviewed transparent PNG cutouts in
+ * `public/people/ai-ta-krajta/`. See `businesses/ai-ta-krajta/aiTaKrajtaPortraits.md` for that final step.
  *
  * Almost every portrait is cut from the cover picture of an episode the person sat in, because the show photographs
- * its own line-up against one background and therefore already owns a picture of everyone. Whoever the show never put
+ * its own line-up against one background. Whoever the show never put
  * on a cover is cut from the portrait they publish of themselves instead; `sourceNote` says which is which.
  *
  * Nothing here runs at build time, and the cut files are committed. Run it again after replacing a source, with

@@ -1,9 +1,9 @@
 import { normalizeAiTaKrajtaSearchText } from '@/businesses/ai-ta-krajta/aiTaKrajtaTextSearch';
 
 /**
- * Folder of `public` which every portrait this page draws is kept in, shared with the rest of the site
+ * Normalized transparent portraits, kept separate from source photos used elsewhere on the site.
  */
-const PERSON_PHOTO_DIRECTORY_PATH = '/people';
+const PERSON_PHOTO_DIRECTORY_PATH = '/people/ai-ta-krajta';
 
 export type AiTaKrajtaPerson = {
     /**
@@ -24,9 +24,9 @@ export type AiTaKrajtaPerson = {
     readonly url: string | null;
 
     /**
-     * File of `public/people` the portrait of the person is drawn from, `null` when the page draws their initials
+     * File of `public/people/ai-ta-krajta` the portrait is drawn from, `null` when the page draws their initials.
      *
-     * Note: `scripts/_cutAiTaKrajtaPeoplePortraits.mjs` cuts these files and records where each of them comes from.
+     * Sources and the transparent-cutout workflow are recorded in `aiTaKrajtaPortraits.md` beside this roster.
      */
     readonly photoFileName: string | null;
 
@@ -62,7 +62,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Pavol Hejný',
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
         url: 'https://www.ptbk.io/pavol',
-        photoFileName: 'pavol-hejny-transparent-square.png',
+        photoFileName: 'pavol-hejny.png',
         // Note: `pavlem` is the same ending as the one a description uses before the surname of a Pavel it talks
         //       about, as in `speciálním hostem Pavlem Ungrem`. The comma and the conjunction are what say that the
         //       sentence is listing who sat at the microphone, the same way `petrem,` does for Petr Glaser.
@@ -74,7 +74,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Jiří Jahn',
         headline: 'Řeší, co z AI firma reálně použije. Tahá debatu k praktickým otázkám.',
         url: 'https://www.ptbk.io/jirka',
-        photoFileName: 'jiri-jahn-transparent-square.png',
+        photoFileName: 'jiri-jahn.png',
         mentionPatterns: ['jirka', 'jirkou', 'jirkovi', 'jiří jahn', 'jiřím jahnem'],
         episodeNumbers: [],
     },
@@ -83,7 +83,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Petr Glaser',
         headline: 'Vývojář, píše bleeding.dev. Testuje nové modely dřív, než se o nich začne psát.',
         url: 'https://bleeding.dev/',
-        photoFileName: 'petr-glaser.jpg',
+        photoFileName: 'petr-glaser.png',
         // Note: Plain `petrem` would also catch the díl with Petrem Brzkem, so the patterns keep the comma and the
         //       conjunction which the descriptions write when they list who sat at the microphone.
         mentionPatterns: ['glaser', 'petrem,', 'petrem a '],
@@ -94,7 +94,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Patrik Braborec',
         headline: 'Součást klasické sestavy podcastu. Drží díly pohromadě a hlídá, aby debata nesklouzla do hype.',
         url: null,
-        photoFileName: 'patrik-braborec.jpg',
+        photoFileName: 'patrik-braborec.png',
         mentionPatterns: ['patrik', 'patrikem', 'braborec'],
         episodeNumbers: [],
     },
@@ -103,7 +103,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Jacek Soubusta',
         headline: 'Data a nástroje kolem AI. Umí veřejně přiznat, že vlastní MCP server spláchl do záchodu.',
         url: null,
-        photoFileName: 'jacek-soubusta.jpg',
+        photoFileName: 'jacek-soubusta.png',
         mentionPatterns: ['jacek', 'jackem', 'soubust'],
         episodeNumbers: [],
     },
@@ -112,7 +112,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Šimon Podhajský',
         headline: 'Přednášel na AI Engineer o read-only AI a kognitivních výparech. Nejskeptičtější hlas u stolu.',
         url: null,
-        photoFileName: 'simon-podhajsky.jpg',
+        photoFileName: 'simon-podhajsky.png',
         mentionPatterns: ['šimon', 'šimonov', 'podhajsk'],
         episodeNumbers: [],
     },
@@ -121,7 +121,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Roman Baranovič',
         headline: 'Expert na digitální transformaci školství. Vrací se do dílů o AI ve školách.',
         url: 'https://narnia.sk/employees/roman-baranovic-2/',
-        photoFileName: 'roman-baranovic.jpg',
+        photoFileName: 'roman-baranovic.png',
         mentionPatterns: ['baranovi'],
         episodeNumbers: [],
     },
@@ -130,7 +130,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Katka Fajmanová',
         headline: 'Architektura a interpretabilita modelů. Díl o tom, co se děje uvnitř sítě.',
         url: null,
-        photoFileName: 'katka-fajmanova.jpg',
+        photoFileName: 'katka-fajmanova.png',
         mentionPatterns: ['fajman'],
         episodeNumbers: [],
     },
@@ -139,7 +139,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Prokop Simek',
         headline: 'Šéf DX Heroes, prvního sponzora podcastu. V IT je 13 let napříč vývojem, marketingem a byznysem.',
         url: 'https://prokopsimek.cz/en',
-        photoFileName: 'prokop-simek.jpg',
+        photoFileName: 'prokop-simek.png',
         mentionPatterns: ['prokop'],
         episodeNumbers: [],
     },
@@ -148,7 +148,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Matyáš Křeček',
         headline: 'I on je z DX Heroes. Pomáhá firmám zavést AI do celého vývojového procesu, dřív sám vyvíjel.',
         url: 'https://cz.linkedin.com/in/matyas-krecek',
-        photoFileName: 'matyas-krecek.jpg',
+        photoFileName: 'matyas-krecek.png',
         mentionPatterns: ['matyáš', 'křečk'],
         episodeNumbers: [],
     },
@@ -157,7 +157,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Tomáš Koblížek',
         headline: 'Analytický filozof, spoluautor knihy Dezinformace a Hate Speech.',
         url: null,
-        photoFileName: 'tomas-koblizek.jpg',
+        photoFileName: 'tomas-koblizek.png',
         mentionPatterns: ['koblíž'],
         episodeNumbers: [],
     },
@@ -166,7 +166,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Adam Zvada',
         headline: 'Prodal Steer Code firmě Expo. Mluvil o agent engineeringu a orchestraci agentů.',
         url: null,
-        photoFileName: 'adam-zvada.jpg',
+        photoFileName: 'adam-zvada.png',
         mentionPatterns: ['zvad'],
         episodeNumbers: [],
     },
@@ -175,7 +175,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Lukáš Caha',
         headline: 'Zakladatel Youklidu. Ukázal, že se dá růst i tak, že AI hype ignorujete.',
         url: 'https://youklid.cz/',
-        photoFileName: 'lukas-caha.jpg',
+        photoFileName: 'lukas-caha.png',
         mentionPatterns: ['caha', 'cahou', 'youklid'],
         episodeNumbers: [],
     },
@@ -184,7 +184,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Richard Mládek',
         headline: 'Staví autonomní kódovací agenty ovládané přes Telegram. Díl o AI psychóze z produktivity.',
         url: null,
-        photoFileName: 'richard-mladek.jpg',
+        photoFileName: 'richard-mladek.png',
         mentionPatterns: ['mládek', 'mládk'],
         episodeNumbers: [],
     },
@@ -193,7 +193,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Dalibor Krejčí',
         headline: 'Česká odnož hnutí PAUSE AI. Přišel obhájit moratorium na vývoj pokročilých modelů.',
         url: null,
-        photoFileName: 'dalibor-krejci.jpg',
+        photoFileName: 'dalibor-krejci.png',
         mentionPatterns: ['dalibor', 'krejčí', 'krejčího'],
         episodeNumbers: [],
     },
@@ -202,7 +202,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Petr Brzek',
         headline: 'Macaly, český AI startup. Díl o tom, co drží second time founders nad vodou.',
         url: null,
-        photoFileName: 'petr-brzek.jpg',
+        photoFileName: 'petr-brzek.png',
         // Note: Only the instrumental case, because that is how a description says that the show talked with him.
         //       The nominative also appears in a díl which only mentions him as an example.
         mentionPatterns: ['brzkem'],
@@ -213,8 +213,8 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Petr Šimeček',
         headline: 'V Googlu dělal časové řady a predikci návštěvnosti. Host dílu o tom, jak se do Googlu dostat.',
         url: 'https://about.me/petr',
-        // Note: The cover of díl #6 carries only the three regular hosts, so there is no picture of him to cut.
-        photoFileName: null,
+        // Note: Díl #6 has no guest portrait on its cover; his published conference portrait supplies this cutout.
+        photoFileName: 'petr-simecek.png',
         mentionPatterns: ['šimeček'],
         episodeNumbers: [],
     },
@@ -223,7 +223,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Tomáš Kroupa',
         headline: 'CTO Agent ID, který hlídá AI agenty deterministickými limity a auditovatelností.',
         url: 'https://cz.linkedin.com/in/tom-kroupa',
-        photoFileName: 'tomas-kroupa.jpg',
+        photoFileName: 'tomas-kroupa.png',
         mentionPatterns: ['kroup'],
         episodeNumbers: [],
     },
@@ -232,7 +232,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Ondřej Sukač',
         headline: 'Spoluzakladatel Galenia, které bourá jazykové bariéry ve zdravotnictví. Studuje právo v Brně.',
         url: 'https://cz.linkedin.com/in/ondrej-sukac',
-        photoFileName: 'ondrej-sukac.jpg',
+        photoFileName: 'ondrej-sukac.png',
         mentionPatterns: ['sukač'],
         episodeNumbers: [],
     },
@@ -241,7 +241,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Tomáš Mikolov',
         headline: 'Spoluzakladatel BottleCap AI. V Googlu zažil doby, kdy se stavěly základy dnešních modelů.',
         url: 'https://bottlecapai.com/',
-        photoFileName: 'tomas-mikolov.jpg',
+        photoFileName: 'tomas-mikolov.png',
         // Note: No `mikolov` pattern, because the show talks about him in later díly he never sat in - a description
         //       which only quotes what BottleCap AI or he himself published is not a person at the microphone.
         mentionPatterns: [],
@@ -252,7 +252,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Jan Cienciala',
         headline: 'V AI týmu CloudTalku dělá research a prototypy, které kolegové dotáhnou do produkce.',
         url: 'https://cz.linkedin.com/in/cienciala',
-        photoFileName: 'jan-cienciala.jpg',
+        photoFileName: 'jan-cienciala.png',
         // Note: The transcript of díl #24 hears him as `Činčala`; he spells his own surname without háčky.
         mentionPatterns: ['ciencial', 'činčal'],
         episodeNumbers: [],
@@ -262,7 +262,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Lenka Šefčáková',
         headline: 'V CloudTalku vyvíjí a prototypuje jejich AI funkce, třeba detekci hlasové schránky.',
         url: 'https://sk.linkedin.com/in/lenkasefcakova',
-        photoFileName: 'lenka-sefcakova.jpg',
+        photoFileName: 'lenka-sefcakova.png',
         mentionPatterns: ['šefčák'],
         episodeNumbers: [],
     },
@@ -271,7 +271,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Pavel Ungr',
         headline: 'SEO konzultant s dvacetiletou praxí. Říkal, jak zviditelnit web v ChatGPT, Geminu i u Googlu.',
         url: 'https://www.pavelungr.cz/',
-        photoFileName: 'pavel-ungr.jpg',
+        photoFileName: 'pavel-ungr.png',
         mentionPatterns: ['ungr'],
         episodeNumbers: [],
     },
@@ -280,7 +280,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Matouš Havlena',
         headline: 'Spoluzakladatel a CTO Apoca, s IBM Research dělá aplikovaný výzkum. Host dílu o emocích v LLM.',
         url: 'https://www.havlena.com/about',
-        photoFileName: 'matous-havlena.jpg',
+        photoFileName: 'matous-havlena.png',
         mentionPatterns: ['havlen'],
         episodeNumbers: [],
     },
@@ -289,7 +289,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Ondra',
         headline: 'CTO startupu, který se snaží pomocí AI zlepšit život mladým lidem a pomoct jim s administrativou.',
         url: null,
-        photoFileName: 'ondra.jpg',
+        photoFileName: 'ondra.png',
         // Note: The show never says his surname, so nothing here may match on a first name: `Ondra` is also what the
         //       host of díl #21 calls Ondřej Sukač. The díl he sat in is what attributes him.
         mentionPatterns: [],

@@ -16,6 +16,15 @@ const AVATAR_SIZE_IN_PIXELS = {
 export type AiTaKrajtaAvatarSize = keyof typeof AVATAR_SIZE_IN_PIXELS;
 
 /**
+ * Quiet backgrounds for the transparent portraits, with a stable variation for each person.
+ */
+const PORTRAIT_BACKGROUND_COLORS = [
+    ['#e3e1dc', '#b9c3bc'],
+    ['#e0e2e3', '#bdc4ca'],
+    ['#e6e0d8', '#c5bfb8'],
+] as const;
+
+/**
  * The two letters standing in for a photograph nobody has taken yet
  */
 function getInitials(name: string): string {
@@ -27,19 +36,21 @@ function getInitials(name: string): string {
 }
 
 /**
- * Turns the name into a stable angle of the gradient, so that two people next to each other never look identical
+ * Keeps each person's neutral background the same in cards and episode credits, even when the roster is shuffled.
  */
-function getGradientAngleInDegrees(name: string): number {
-    const nameCode = Array.from(name).reduce((code, letter) => code + letter.charCodeAt(0), 0);
+function getPortraitBackground(personId: string): string {
+    const nameCode = Array.from(personId).reduce((code, letter) => code + letter.charCodeAt(0), 0);
+    const [lightColor, shadeColor] = PORTRAIT_BACKGROUND_COLORS[nameCode % PORTRAIT_BACKGROUND_COLORS.length];
+    const angleInDegrees = 120 + (nameCode % 60);
 
-    return nameCode % 360;
+    return `linear-gradient(${angleInDegrees}deg, ${lightColor}, ${shadeColor})`;
 }
 
 /**
  * Round portrait of one person, shown next to an episode and on their card
  *
- * Note: The show has a picture of everyone it has introduced by name so far. Somebody it has none of keeps the
- *       initials on a branded gradient, which is a portrait of its own rather than a fallback which looks broken.
+ * Portrait files contain only the person. The same neutral backdrop and interaction treatment are shared by both
+ * sizes; a future person without a photograph keeps readable initials on that backdrop.
  */
 export function AiTaKrajtaPersonAvatar({
     person,
@@ -58,24 +69,25 @@ export function AiTaKrajtaPersonAvatar({
         <span
             className={cn(
                 'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full',
+                'ring-1 ring-white/15 transition-shadow duration-300 group-hover/portrait:ring-white/50 group-focus-visible/portrait:ring-white/70 motion-reduce:transition-none',
                 isLarge ? 'text-2xl font-semibold' : 'text-[11px] font-bold',
                 className,
             )}
             style={{
                 width: sizeInPixels,
                 height: sizeInPixels,
-                background: `linear-gradient(${getGradientAngleInDegrees(person.name)}deg, ${AI_TA_KRAJTA_COLORS.CORAL}, ${AI_TA_KRAJTA_COLORS.INDIGO})`,
+                background: getPortraitBackground(person.id),
             }}
         >
             {photoPath === null ? (
-                <span className="text-white drop-shadow-sm">{getInitials(person.name)}</span>
+                <span style={{ color: AI_TA_KRAJTA_COLORS.MOSS_DEEP }}>{getInitials(person.name)}</span>
             ) : (
                 <Image
                     src={photoPath}
                     alt={person.name}
                     width={sizeInPixels}
                     height={sizeInPixels}
-                    className="h-full w-full object-cover object-top"
+                    className="h-full w-full object-contain object-bottom motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-safe:group-hover/portrait:scale-[1.04] motion-safe:group-focus-visible/portrait:scale-[1.04]"
                 />
             )}
         </span>

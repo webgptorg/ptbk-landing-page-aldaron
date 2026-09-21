@@ -41,7 +41,7 @@ export function AiTaKrajtaPersonCard({
                 type="button"
                 onClick={onSelect}
                 aria-pressed={isSelected}
-                className="text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-[#ff6b6b]"
+                className="group/portrait text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-[#ff6b6b]"
             >
                 <AiTaKrajtaPersonAvatar person={person} size="large" />
 

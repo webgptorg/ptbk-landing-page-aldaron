@@ -251,7 +251,7 @@ export function AiTaKrajtaEpisodeCard({
                                             onClick={() => onPersonClick(person.id)}
                                             title={`Filtrovat díly s ${person.name}`}
                                             className={cn(
-                                                'block rounded-full ring-2 transition-transform hover:z-10 hover:scale-110',
+                                                'group/portrait relative block rounded-full ring-2 hover:z-10 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-white/70',
                                                 selectedPersonId === person.id
                                                     ? 'ring-[#ff6b6b]'
                                                     : 'ring-[#232a25] hover:ring-white/40',
