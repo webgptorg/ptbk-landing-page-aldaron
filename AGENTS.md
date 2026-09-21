@@ -314,7 +314,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Administration and data rules
 
-- Admin creation and editing use the shared `AdminEditorDialog` (and `AdminEditorButton` for a local trigger).
+- Workshop and community settings render their shared `WorkshopSettingsForm` directly in the Settings tab,
+  with autosave and navigation protection. Other admin creation and editing use the shared `AdminEditorDialog`
+  (and `AdminEditorButton` for a local trigger).
   Lists show summaries and edit actions; contact notes and contacted status are edited in the contact dialog.
   The dialog contains request errors, traps and restores focus, and scrolls within the viewport. Closing with its
   button or Escape flushes pending saves and keeps invalid or failed drafts open; backdrop clicks preserve the editor.

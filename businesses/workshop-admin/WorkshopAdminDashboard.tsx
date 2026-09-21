@@ -67,7 +67,6 @@ import {
     REGISTERED_PARTICIPANT_COUNT_TITLE,
 } from '@/businesses/workshop-admin/workshopAudienceLabels';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { AdminEditorErrorProvider } from '@/components/admin/AdminEditorDialog';
 import { useUrlSynchronizedViewState } from '@/hooks/useUrlSynchronizedViewState';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
@@ -625,7 +624,7 @@ export function WorkshopAdminDashboard({
                     )}
                 </div>
                 {errorMessage !== null && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         {errorMessage}
                     </div>
                 )}
@@ -815,18 +814,15 @@ export function WorkshopAdminDashboard({
                                         label="Exportovat nastavení CSV"
                                     />
                                 </div>
-                                <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                                    <h2 className="text-xl font-bold text-slate-950">Nastavení {subjectLabel}</h2>
-                                    <p className="my-3 text-sm text-slate-600">{snapshot.workshop.title} · {snapshot.workshop.isPublished ? 'Publikovaný' : 'Nezveřejněný'}</p>
-                                    <AdminEditorButton key={snapshot.workshop.id} label="Upravit nastavení" title={`Nastavení ${subjectLabel}`} className="max-w-5xl">
-                                        <WorkshopSettingsForm
-                                            key={snapshot.workshop.id}
-                                            workshop={snapshot.workshop}
-                                            onSave={handleSaveWorkshop}
-                                            subjectLabel={subjectLabel}
-                                            isArtificialOptionsShown={isArtificialOptionsShown}
-                                        />
-                                    </AdminEditorButton>
+                                <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+                                    <h2 className="mb-4 text-xl font-bold text-slate-950">Nastavení {subjectLabel}</h2>
+                                    <WorkshopSettingsForm
+                                        key={snapshot.workshop.id}
+                                        workshop={snapshot.workshop}
+                                        onSave={handleSaveWorkshop}
+                                        subjectLabel={subjectLabel}
+                                        isArtificialOptionsShown={isArtificialOptionsShown}
+                                    />
                                 </section>
                             </TabsContent>
 

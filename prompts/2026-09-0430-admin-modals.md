@@ -12,9 +12,10 @@
 
 ---
 
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.2682 7 minutes; Testing 6 minutes
 
 [✨😫] In admin do not use popup modal in some places
 
 - In theese places popup modal does not make sence:
     - https://www.ptbk.io/admin/workshops?artopts=off&tab=settings - "Upravit Nastavení" - it should be just on the page, maybe the subsetting should be under popup modals.
+

@@ -48,7 +48,6 @@ test('edits independent commit bounds in workshop settings', async ({ page, base
     });
     const parameters = serializeWorkshopAdminViewState({ ...DEFAULT_WORKSHOP_ADMIN_VIEW_STATE, section: 'settings' }, new URLSearchParams());
     await page.goto(`/admin/workshops?${parameters}`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: 'Upravit nastavení', exact: true }).click();
     await page.getByRole('button', { name: 'Doplnit podle začátku workshopu' }).click();
     await expect(page.getByLabel('Počáteční commit')).toHaveValue(COMMITS[0].sha);
     await expect(page.getByLabel('Koncový commit')).toHaveValue('');

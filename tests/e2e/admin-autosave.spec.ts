@@ -43,7 +43,9 @@ async function openAdminSettings(page: Page, baseURL: string | undefined, before
     });
     const parameters = serializeWorkshopAdminViewState({ ...DEFAULT_WORKSHOP_ADMIN_VIEW_STATE, section: 'settings' }, new URLSearchParams());
     await page.goto(`/admin/workshops?${parameters}`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: 'Upravit nastavení', exact: true }).click();
+    await expect(page.getByRole('form', { name: 'Nastavení workshopu', exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Upravit nastavení', exact: true })).toHaveCount(0);
     return { state, writes };
 }
 
@@ -77,12 +79,9 @@ test('autosaves edits in order, protects reload while pending, and waits before 
     await expect(page.getByText('Změny se ukládají automaticky.', { exact: true })).toBeVisible();
     expect(writes.map((write) => write.title)).toEqual(['First edit', 'Latest edit']);
     await page.reload();
-    await page.getByRole('button', { name: 'Upravit nastavení', exact: true }).click();
     await expect(title).toHaveValue('Latest edit');
     await title.fill('Saved before leaving');
     await page.getByLabel(/^URL slug/).fill('renamed-autosave-test');
-    await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
-    await expect(page.getByRole('dialog')).toHaveCount(0);
     await page.getByRole('link', { name: 'Slevové kódy', exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/discount-codes/);
     expect(writes.at(-1)?.title).toBe('Saved before leaving');
@@ -92,17 +91,18 @@ test('autosaves edits in order, protects reload while pending, and waits before 
 
 test('retains a failed edit and retries it without leaving the settings', async ({ page, baseURL }) => {
     let isSaveAllowed = false;
-    await openAdminSettings(page, baseURL, async () => isSaveAllowed ? null : 'Temporary save failure');
+    const { writes } = await openAdminSettings(page, baseURL, async () => isSaveAllowed ? null : 'Temporary save failure');
     const title = page.getByLabel('Název', { exact: true });
     await title.fill('Keep this edit');
-    await expect(page.getByRole('dialog').getByText('Temporary save failure', { exact: true })).toBeVisible();
-    await page.keyboard.press('Escape');
+    await expect(page.getByRole('alert').filter({ hasText: 'Temporary save failure' })).toBeVisible();
+    await page.getByRole('tab', { name: 'Obsah', exact: true }).click();
+    await expect.poll(() => writes.length).toBe(2);
+    await expect(page.getByRole('tab', { name: 'Nastavení', exact: true })).toHaveAttribute('data-state', 'active');
     await expect(title).toHaveValue('Keep this edit');
     isSaveAllowed = true;
     await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).last().click();
     await expect(page.getByText('Změny se ukládají automaticky.', { exact: true })).toBeVisible();
     await page.reload();
-    await page.getByRole('button', { name: 'Upravit nastavení', exact: true }).click();
     await expect(title).toHaveValue('Keep this edit');
 });
 
@@ -116,21 +116,19 @@ test('keeps invalid settings open and saves corrected settings before signing ou
     });
     const title = page.getByLabel('Název', { exact: true });
     await title.fill('');
-    await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+    await page.getByRole('button', { name: 'Odhlásit se', exact: true }).click();
     await expect(page.getByText('Změny nejsou uložené. Zkontrolujte vyplněná pole.')).toBeVisible();
     expect(signOutRequests).toEqual([]);
     expect(writes).toEqual([]);
     await title.fill('Saved before sign-out');
     try {
-        await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+        await page.getByRole('button', { name: 'Odhlásit se', exact: true }).click();
         await expect.poll(() => writes.length).toBe(1);
         expect(signOutRequests).toEqual([]);
         await expect(title).toHaveValue('Saved before sign-out');
     } finally {
         releaseSave();
     }
-    await expect(page.getByRole('dialog')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Odhlásit se', exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/login/);
     expect(state.snapshot.workshop.title).toBe('Saved before sign-out');
     expect(signOutRequests).toEqual(['POST']);

@@ -71,7 +71,6 @@ for (const isFirstBuildFailing of [false, true]) {
 
         const parameters = serializeWorkshopAdminViewState({ ...DEFAULT_WORKSHOP_ADMIN_VIEW_STATE, section: 'settings' }, new URLSearchParams());
         await page.goto(`/admin/workshops?${parameters}`, { waitUntil: 'domcontentloaded' });
-        await page.getByRole('button', { name: 'Upravit nastavení', exact: true }).click();
         const deploymentField = page.getByLabel('URL nasazení projektu');
         const deployButton = page.getByRole('button', { name: 'Nasadit na Vercel', exact: true });
         await deploymentField.fill('https://manual.example.com/');
@@ -80,7 +79,7 @@ for (const isFirstBuildFailing of [false, true]) {
         await deployButton.click();
         await expect(page.getByRole('button', { name: 'Nasazuji na Vercel…' })).toBeDisabled();
         if (isFirstBuildFailing) {
-            const failurePanel = page.getByRole('alert');
+            const failurePanel = page.getByRole('form', { name: 'Nastavení workshopu', exact: true }).getByRole('alert');
             await expect(failurePanel).toContainText('Command "npm run build" exited with 1');
             await expect(failurePanel).toContainText('Opravte chybu kompilace nebo typů');
             await expect(failurePanel).toContainText('BUILD_FAILED');
