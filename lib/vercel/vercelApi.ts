@@ -43,11 +43,15 @@ export async function requestVercel<Schema extends z.ZodTypeAny>(
 
     if (!response.ok) {
         // Provider responses may contain private account details; return only actionable, known messages.
-        const message = response.status === 401 || response.status === 403
-            ? 'Ověřte VERCEL_TOKEN, VERCEL_TEAM_ID a přístup Vercelu k repozitáři na GitHubu.'
-            : response.status === 429
-              ? 'Vercel nyní omezuje počet požadavků. Zkuste akci znovu za chvíli.'
-              : `Vercel požadavek odmítl (HTTP ${response.status}). Zkontrolujte projekt a jeho nastavení ve Vercelu.`;
+        const message = response.status === 401
+            ? 'Vercel odmítl přístupový token (HTTP 401). Ověřte platnost VERCEL_TOKEN na serveru a případně jej obnovte.'
+            : response.status === 403
+              ? 'Vercel nepovolil přístup (HTTP 403). Ověřte oprávnění VERCEL_TOKEN pro zvolený VERCEL_TEAM_ID a přístup integrace Vercelu k repozitáři na GitHubu.'
+              : response.status === 429
+                ? 'Vercel nyní omezuje počet požadavků. Zkuste akci znovu za chvíli.'
+                : response.status >= 500
+                  ? `Vercel vrátil chybu serveru (HTTP ${response.status}). Zkuste akci znovu za chvíli; pokud chyba trvá, ověřte stav služby na vercel-status.com.`
+                  : `Vercel požadavek odmítl (HTTP ${response.status}). Zkontrolujte projekt a jeho nastavení ve Vercelu.`;
         throw new VercelApiError(message, response.status);
     }
 

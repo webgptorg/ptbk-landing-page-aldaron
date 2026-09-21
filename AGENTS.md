@@ -255,6 +255,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   deploys its production branch (initially the default branch), independently of the workshop's history selection.
   Administration polls the build and fills in its assigned production alias only when ready; the ordinary settings
   save publishes that URL. Manual URLs, a changed repository, and switching rooms discard stale pending results.
+  Deployment failures show the reported reason and code, targeted recovery steps, and an optional bounded build-log
+  excerpt with credentials redacted. Canceled, blocked, and alias-assignment failures have distinct guidance; missing
+  diagnostics keep fallback checks and the Vercel link available. Only authenticated administration receives them.
   This adds no workshop data fields; setup and retry behavior are documented in `README.md`.
   The connection can also carry independent starting and ending commit IDs. Administration previews each commit's
   message, author and Prague date, and can fill each bound separately from the workshop time (first commit at or after

@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { formatGithubRepositoryName, type GithubRepository } from '@/lib/github/githubRepository';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import { requestVercel, VercelApiError } from '@/lib/vercel/vercelApi';
-import { WORKSHOP_VERCEL_DEPLOYMENT_SCHEMA, type WorkshopVercelDeployment } from '@/lib/workshops/workshopVercelDeployment';
+import { getVercelBuildLogExcerpt, sanitizeVercelDiagnostic } from '@/lib/vercel/vercelDeploymentDiagnostics';
+import { isWorkshopVercelDeploymentFailed, WORKSHOP_VERCEL_DEPLOYMENT_SCHEMA, type WorkshopVercelDeployment } from '@/lib/workshops/workshopVercelDeployment';
 
 const VERCEL_PROJECT_SCHEMA = z.object({
     id: z.string().min(1),
@@ -20,7 +21,9 @@ const VERCEL_DEPLOYMENT_SCHEMA = z.object({
     readyState: WORKSHOP_VERCEL_DEPLOYMENT_SCHEMA.shape.state,
     alias: z.array(z.string()).default([]),
     aliasAssigned: z.boolean().default(false),
-    aliasError: z.object({ code: z.string() }).nullish(),
+    aliasError: z.object({ code: z.string().nullish().catch(null), message: z.string().nullish().catch(null) }).nullish(),
+    errorCode: z.string().nullish().catch(null),
+    errorMessage: z.string().nullish().catch(null),
     inspectorUrl: z.string().nullish(),
 });
 const VERCEL_CREATED_DEPLOYMENT_SCHEMA = VERCEL_DEPLOYMENT_SCHEMA.pick({ id: true });
@@ -94,10 +97,20 @@ export async function getWorkshopVercelDeployment(deploymentId: string): Promise
         ? deployment.alias.map((alias) => normalizePublicWebPageUrl(`https://${alias}`)).filter((url) => url !== null)
         : [];
 
-    return {
+    const result: WorkshopVercelDeployment = {
         id: deployment.id,
         state,
         deploymentUrl: deploymentUrls[0] ?? null,
         inspectorUrl: readVercelInspectorUrl(deployment.inspectorUrl),
     };
+    if (isWorkshopVercelDeploymentFailed(result)) {
+        const isAliasError = deployment.aliasError != null;
+        result.failure = {
+            stage: isAliasError ? 'alias' : 'build',
+            code: sanitizeVercelDiagnostic(isAliasError ? deployment.aliasError?.code : deployment.errorCode),
+            message: sanitizeVercelDiagnostic(isAliasError ? deployment.aliasError?.message : deployment.errorMessage),
+            buildLog: state === 'ERROR' && !isAliasError ? await getVercelBuildLogExcerpt(deployment.id) : null,
+        };
+    }
+    return result;
 }

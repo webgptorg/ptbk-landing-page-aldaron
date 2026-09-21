@@ -91,10 +91,65 @@ describe('workshop Vercel deployment', () => {
     it('handles build, cancellation and alias failures without offering their URL', async () => {
         for (const readyState of ['BUILDING', 'ERROR', 'CANCELED', 'BLOCKED']) {
             respond({ ...DEPLOYMENT, readyState, alias: ['workshop.example.com'], aliasAssigned: true });
+            if (readyState === 'ERROR') respond(null);
             expect((await getWorkshopVercelDeployment(DEPLOYMENT.id)).deploymentUrl).toBeNull();
         }
         respond({ ...DEPLOYMENT, readyState: 'READY', aliasError: { code: 'alias_failed' } });
         expect((await getWorkshopVercelDeployment(DEPLOYMENT.id)).state).toBe('ERROR');
+    });
+
+    it('returns the reported failure and a chronological build-log excerpt without provider credentials or metadata', async () => {
+        respond({ ...DEPLOYMENT, readyState: 'ERROR', errorCode: 'BUILD_FAILED',
+            errorMessage: 'Command "npm run build" exited with 1', env: { PRIVATE_VALUE: 'not-for-the-browser' } });
+        respond([
+            { type: 'stderr', payload: { text: '\u001b[31mError: Command "npm run build" exited with 1\u001b[0m' } },
+            { type: 'stderr', payload: { text: 'Type error: src/app/page.tsx:12\nAPI_KEY=build-secret-value' } },
+            { type: 'stdout', payload: { text: 'Connecting with test-vercel-token to team_workshops' } },
+            { type: 'deployment-state', payload: { text: 'PRIVATE_EVENT_METADATA' } },
+        ]);
+        const result = await getWorkshopVercelDeployment(DEPLOYMENT.id);
+        expect(result).toMatchObject({ state: 'ERROR', deploymentUrl: null, inspectorUrl: DEPLOYMENT.inspectorUrl,
+            failure: { stage: 'build', code: 'BUILD_FAILED', message: 'Command "npm run build" exited with 1',
+                buildLog: 'Connecting with [skryto] to [skryto]\nType error: src/app/page.tsx:12\nAPI_KEY=[skryto]\nError: Command "npm run build" exited with 1' } });
+        for (const secret of ['test-vercel-token', 'team_workshops', 'build-secret-value', 'PRIVATE_EVENT_METADATA', 'not-for-the-browser', DEPLOYMENT.token]) {
+            expect(JSON.stringify(result)).not.toContain(secret);
+        }
+        const [url, options] = fetchMock.mock.calls[1];
+        expect(url.pathname).toBe(`/v3/deployments/${DEPLOYMENT.id}/events`);
+        expect(Object.fromEntries(url.searchParams)).toEqual({ direction: 'backward', follow: '0', builds: '1', limit: '50', teamId: 'team_workshops' });
+        expect(options.headers.Authorization).toBe('Bearer test-vercel-token');
+        expect(options.cache).toBe('no-store');
+    });
+
+    it.each(['unavailable', 'malformed', 'empty'])('preserves the failure reason when build logs are %s', async (condition) => {
+        respond({ ...DEPLOYMENT, readyState: 'ERROR', errorCode: 'BUILD_FAILED', errorMessage: 'Missing required environment variable DATABASE_URL' });
+        if (condition === 'unavailable') fetchMock.mockRejectedValueOnce(new Error('PRIVATE_LOG_ERROR'));
+        if (condition === 'malformed') respond({ unexpected: 'PRIVATE_LOG_RESPONSE' });
+        if (condition === 'empty') respond(null);
+        expect(await getWorkshopVercelDeployment(DEPLOYMENT.id)).toMatchObject({ state: 'ERROR', deploymentUrl: null,
+            failure: { code: 'BUILD_FAILED', message: 'Missing required environment variable DATABASE_URL', buildLog: null } });
+    });
+
+    it('keeps alias failures separate from stale build errors and does not fetch build logs', async () => {
+        respond({ ...DEPLOYMENT, readyState: 'READY', aliasAssigned: true, alias: ['workshop.example.com'],
+            errorMessage: 'Old build failure', aliasError: { code: 'alias_in_use', message: 'Domain belongs to another project' } });
+        expect(await getWorkshopVercelDeployment(DEPLOYMENT.id)).toMatchObject({ state: 'ERROR', deploymentUrl: null,
+            failure: { stage: 'alias', code: 'alias_in_use', message: 'Domain belongs to another project', buildLog: null } });
+        expect(fetchMock).toHaveBeenCalledOnce();
+    });
+
+    it.each(['CANCELED', 'BLOCKED'])('retains the %s reason without requesting build logs', async (readyState) => {
+        respond({ ...DEPLOYMENT, readyState, errorMessage: 'Reported reason' });
+        expect(await getWorkshopVercelDeployment(DEPLOYMENT.id)).toMatchObject({ state: readyState,
+            failure: { code: null, message: 'Reported reason', buildLog: null } });
+        expect(fetchMock).toHaveBeenCalledOnce();
+    });
+
+    it('tolerates missing or malformed optional diagnostics without losing a terminal failure', async () => {
+        respond({ ...DEPLOYMENT, readyState: 'ERROR', errorCode: 123, errorMessage: { private: 'value' } });
+        respond([]);
+        expect(await getWorkshopVercelDeployment(DEPLOYMENT.id)).toMatchObject({ state: 'ERROR',
+            failure: { code: null, message: null, buildLog: null } });
     });
 
     it('refuses unsafe returned URLs and invalid provider responses', async () => {

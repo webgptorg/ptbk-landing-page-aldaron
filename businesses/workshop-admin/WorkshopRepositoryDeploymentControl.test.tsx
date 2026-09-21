@@ -26,7 +26,7 @@ function deploymentField() {
 }
 
 async function startDeployment() {
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Nasadit na Vercel' })));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: /^(Nasadit na Vercel|Zkusit nasazení znovu)$/ })));
 }
 
 beforeEach(() => {
@@ -108,5 +108,59 @@ describe('Vercel control in the existing workshop project fields', () => {
         await startDeployment();
         expect(startMock).toHaveBeenCalledTimes(2);
         expect(deploymentField().value).toBe(READY.deploymentUrl);
+    });
+
+    it('shows the reported build error, relevant guidance and expandable logs after polling fails', async () => {
+        statusMock.mockResolvedValueOnce({ ...BUILDING, state: 'ERROR', failure: {
+            stage: 'build', code: 'BUILD_FAILED', message: 'Command "npm run build" exited with 1',
+            buildLog: 'src/app/page.tsx:12\nType error: Type string is not assignable to number.',
+        } });
+        render(<Fields />);
+        await startDeployment();
+        await act(async () => vi.advanceTimersByTimeAsync(WORKSHOP_VERCEL_DEPLOYMENT_POLL_INTERVAL_MILLISECONDS));
+        const alert = screen.getByRole('alert');
+        expect(alert.textContent).toContain('Command "npm run build" exited with 1');
+        expect(alert.textContent).toContain('BUILD_FAILED');
+        expect(alert.textContent).toContain('Opravte chybu kompilace nebo typů');
+        expect(alert.textContent).toContain(BUILDING.id);
+        expect(alert.querySelector('details')?.open).toBe(false);
+        expect(alert.querySelector('pre')?.textContent).toContain('src/app/page.tsx:12');
+        expect(screen.getByRole('link', { name: /Otevřít nasazení/ }).getAttribute('href')).toBe(BUILDING.inspectorUrl);
+        expect(deploymentField().value).toBe('');
+
+        // A retry clears the failed build's diagnostics before the next request finishes.
+        startMock.mockImplementationOnce(() => new Promise(() => {}));
+        await startDeployment();
+        expect(screen.queryByRole('alert')).toBeNull();
+        expect(screen.queryByRole('link', { name: /Otevřít nasazení/ })).toBeNull();
+        expect(startMock).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+        ['CANCELED', 'build', 'Nasazení bylo zrušeno.', 'novější nasazení'],
+        ['BLOCKED', 'build', 'Vercel nasazení zablokoval.', 'odstraňte blokaci'],
+        ['ERROR', 'alias', 'Nepodařilo se přiřadit veřejnou adresu', 'Settings → Domains'],
+    ])('explains %s failures at the %s stage', async (state, stage, title, guidance) => {
+        startMock.mockResolvedValueOnce({ ...BUILDING, state, failure: {
+            stage, code: 'provider_code', message: 'Reported provider reason', buildLog: null,
+        } });
+        render(<Fields />);
+        await startDeployment();
+        expect(screen.getByRole('alert').textContent).toContain(title);
+        expect(screen.getByRole('alert').textContent).toContain(guidance);
+        expect(screen.getByRole('alert').textContent).toContain('Reported provider reason');
+        expect(screen.getByRole('button', { name: 'Zkusit nasazení znovu' })).toBeTruthy();
+        expect(deploymentField().value).toBe('');
+    });
+
+    it('keeps fallback checks and a dashboard link available without diagnostics or an inspector URL', async () => {
+        startMock.mockResolvedValueOnce({ ...BUILDING, state: 'ERROR', inspectorUrl: null });
+        render(<Fields />);
+        await startDeployment();
+        expect(screen.getByRole('alert').textContent).toContain('Vercel neposkytl podrobný důvod');
+        expect(screen.getByRole('alert').textContent).toContain('Root Directory');
+        expect(screen.getByRole('alert').textContent).toContain('Environment Variables');
+        expect(screen.getByRole('alert').textContent).toContain('Výpis sestavení zde není k dispozici');
+        expect(screen.getByRole('link', { name: /Otevřít přehled/ }).getAttribute('href')).toBe('https://vercel.com/dashboard');
     });
 });

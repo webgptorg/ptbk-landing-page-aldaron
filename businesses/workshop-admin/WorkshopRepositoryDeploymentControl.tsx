@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ExternalLink, Loader2, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WorkshopRepositoryDeploymentFailure } from '@/businesses/workshop-admin/WorkshopRepositoryDeploymentFailure';
 import { fetchWorkshopRepositoryDeployment, startWorkshopRepositoryDeployment } from '@/businesses/workshop-admin/workshopRepositoryDeploymentApi';
 import {
     isWorkshopVercelDeploymentFailed,
@@ -40,6 +41,8 @@ export function WorkshopRepositoryDeploymentControl({
     const [isDeploying, setIsDeploying] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const activeRequest = useRef<AbortController | null>(null);
+    const isDeploymentFailed = deployment !== null && isWorkshopVercelDeploymentFailed(deployment);
+    const isResumable = deployment !== null && !isDeploymentFailed;
 
     useEffect(() => () => activeRequest.current?.abort(), []);
 
@@ -49,17 +52,18 @@ export function WorkshopRepositoryDeploymentControl({
         activeRequest.current = controller;
         setIsDeploying(true);
         setErrorMessage(null);
+        if (!isResumable) setDeployment(null);
         const startedAt = Date.now();
         try {
             // A failed status request resumes the known build; it never starts another build just to check it.
-            let currentDeployment = deployment !== null && !isWorkshopVercelDeploymentFailed(deployment)
+            let currentDeployment = isResumable
                 ? await fetchWorkshopRepositoryDeployment(deployment.id, controller.signal)
                 : await startWorkshopRepositoryDeployment(repositoryUrl, controller.signal);
 
             while (!controller.signal.aborted) {
                 setDeployment(currentDeployment);
                 if (isWorkshopVercelDeploymentFailed(currentDeployment)) {
-                    throw new Error('Nasazení se nezdařilo nebo bylo zastaveno. Zkontrolujte sestavení ve Vercelu a zkuste to znovu.');
+                    return;
                 }
                 if (currentDeployment.state === 'READY' && currentDeployment.deploymentUrl !== null) {
                     onDeployed(currentDeployment.deploymentUrl);
@@ -81,13 +85,13 @@ export function WorkshopRepositoryDeploymentControl({
         }
     };
 
-    const isResumable = deployment !== null && !isWorkshopVercelDeploymentFailed(deployment);
     return (
         <div className="mt-3 space-y-2">
             <Button type="button" variant="outline" size="sm" disabled={isDisabled || isDeploying}
                 onClick={() => void deploy()}>
                 {isDeploying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Rocket className="mr-2 h-4 w-4" />}
-                {isDeploying ? 'Nasazuji na Vercel…' : isResumable ? 'Ověřit stav nasazení' : 'Nasadit na Vercel'}
+                {isDeploying ? 'Nasazuji na Vercel…' : isResumable ? 'Ověřit stav nasazení'
+                    : isDeploymentFailed ? 'Zkusit nasazení znovu' : 'Nasadit na Vercel'}
             </Button>
             <p className="text-xs font-normal text-slate-500">
                 Nasadí produkční větev Vercelu, u nového projektu výchozí větev repozitáře. Další změny v této větvi
@@ -99,9 +103,14 @@ export function WorkshopRepositoryDeploymentControl({
                     ? 'Čekám na přiřazení veřejné adresy…' : 'Vercel připravuje nasazení. Může to trvat několik minut.'}
             </p>}
             {errorMessage !== null && <p role="alert" className="text-xs font-normal text-red-700">{errorMessage}</p>}
+            {!isDeploying && isDeploymentFailed && <WorkshopRepositoryDeploymentFailure deployment={deployment} />}
             {deployment?.inspectorUrl && <a href={deployment.inspectorUrl} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-cyan-700 underline">
                 Otevřít nasazení ve Vercelu <ExternalLink className="h-3 w-3" />
+            </a>}
+            {isDeploymentFailed && !deployment?.inspectorUrl && <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-cyan-700 underline">
+                Otevřít přehled projektů ve Vercelu <ExternalLink className="h-3 w-3" />
             </a>}
         </div>
     );

@@ -140,7 +140,14 @@ project name, shared across workshop terms and retries. Existing projects must s
 Vercel deploys its project's production branch (the repository's default branch on initial import), including subsequent
 pushes. The workshop's branch patterns and commit bounds continue to control the displayed history independently.
 Vercel uses the repository's build configuration; projects needing secrets or a monorepo root must be configured in
-Vercel. Build failures link to the deployment inspector, and status checks can be resumed after a connection failure.
+Vercel. Failed deployments show Vercel's reported error code and message, distinguish canceled/blocked builds and
+production-address assignment failures, and offer Czech recovery steps for the reported problem. Build errors include
+an expandable excerpt of the last 30 log lines (at most 6,000 characters), fetched only after failure through Vercel's
+[build events API](https://vercel.com/docs/rest-api/deployments/get-deployment-events). Diagnostics strip terminal
+formatting, configured Vercel credentials and recognizable secret assignments before reaching the signed-in admin;
+other provider metadata is omitted. Missing logs or error details leave fallback checks and the Vercel inspector
+(or project dashboard) available. Fix the reported problem before retrying; status checks can be resumed after a
+connection failure without starting another build.
 
 Once the build is ready and its production alias is assigned, the form fills in that public URL. Shared admin autosave
 saves it through the existing repository/deployment validation and makes it available to participants. A manual URL,
