@@ -69,6 +69,16 @@ ZIP64 archives stream directly to the chosen file when the browser offers the sa
 need no full-memory buffer. Other browsers use a download fallback capped at 256 MiB to avoid exhausting memory.
 The studio adds no environment variables, uploads, server APIs, or database migrations.
 
+## Promptbook logo
+
+The shared `PromptbookLogo` component uses a static 3D SVG, with a blue material for light surfaces and a white
+material for dark ones. The same artwork is available on `/branding` as SVG and transparent 256/1024-pixel PNGs,
+alongside the original flat logos. It needs no animation or WebGL runtime.
+
+Edit the measured outlines, extrusion and lighting in `scripts/generate-promptbook-logo.ts`, then run
+`npm run generate-logo` and commit the exports in `public/logo/`. Their public paths are shared through
+`lib/branding/promptbookLogoAssets.ts`; the generator is an explicit development step, not part of page rendering.
+
 ## Technology
 
 - **Next.js 15** App Router, React, and TypeScript

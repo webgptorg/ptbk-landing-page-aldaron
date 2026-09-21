@@ -2,6 +2,7 @@
 
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
+import { PromptbookLogo } from '@/components/promptbook-logo';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import React, { useState, type FormEvent, type ReactNode } from 'react';
 
-const promptbookLogo = '/logo/promptbook-logo-blue-transparent-256.png'; // <- TODO: import promptbookLogo from '@/public/logo/promptbook-logo-blue-transparent-256.png';
 const NEWSLETTER_FOOTER_PLACE_NAME = 'newsletter-footer';
 
 type FooterLanguage = 'cs' | 'en';
@@ -299,12 +299,10 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="flex flex-col items-center lg:items-start gap-4">
                             <div className="flex items-center gap-3">
-                                <Image
-                                    src={promptbookLogo}
+                                <PromptbookLogo
+                                    tone="white"
                                     alt="Promptbook"
-                                    width={32}
-                                    height={32}
-                                    className="h-8 w-8 filter brightness-0 invert"
+                                    className="h-8 w-8"
                                 />
                                 <span className="text-xl font-bold text-white">Promptbook</span>
                             </div>
