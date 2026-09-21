@@ -1,5 +1,11 @@
 # Current preversion
 
+- Workshop project previews on `/cs/komunita` and `/cs/online-workshop/participant` now share the first deployment's
+  image, title, description and address. Missing metadata or broken images retain the application's identity instead
+  of a generic GitHub preview; projects without a deployment keep the repository fallback. The participant preview
+  opens the deployed app alongside the existing repository and deployment links, and loads independently of chat and
+  commits. Late responses from previously selected rooms or projects are discarded; community cards still open the workshop.
+
 - Redesigned the workshop wrap-up PDF for sharing and A4 printing with the Promptbook logo, locally embedded
   Inter/Outfit fonts, a light room palette, numbered sections and running headers/footers. It now includes a QR code
   and readable ad hoc short link back to the workshop room, a project preview with all deployment links, and a

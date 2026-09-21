@@ -178,7 +178,7 @@ describe('workshop wrap-up PDF', () => {
                 repositoryProgress: { commits, branches: [{ name: 'main', headSha: commits[0].sha }], nextPage: 2,
                     range: { start: commits[23], end: commits[0] } },
                 projectPreviewImage: `data:image/png;base64,${(await readFile('public/logo/og-image.png')).toString('base64')}`,
-                projectPreview: { title: 'Skutečný náhled projektu', description: 'Popis aplikace.', repositoryName: 'example/workshop', previewImageUrl: null },
+                projectPreview: { title: 'Skutečný náhled projektu', description: 'Popis aplikace.', repositoryName: 'example/workshop', previewImageUrl: null, deploymentUrl: 'https://example.com/demo' },
             },
         );
         expect(JSON.stringify(definition)).toContain('Skutečný náhled projektu');

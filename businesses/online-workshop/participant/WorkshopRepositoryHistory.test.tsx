@@ -22,7 +22,7 @@ const PROGRESS: WorkshopRepositoryProgress = { commits: COMMITS.slice(1, 3), ran
 function Panel({ repository = REPOSITORY }: { repository?: WorkshopRepository }) {
     const controller = useWorkshopRepositoryProgress('workshop', true, repository);
     useEffect(() => controller.subscribeToNewCommits(notificationMock), [controller.subscribeToNewCommits]);
-    return <WorkshopRepositoryPanel repository={repository} progressController={controller} />;
+    return <WorkshopRepositoryPanel workshopSlug="workshop" repository={repository} progressController={controller} />;
 }
 
 beforeEach(() => {

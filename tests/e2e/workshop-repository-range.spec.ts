@@ -8,6 +8,12 @@ import type { WorkshopAdminSnapshot, WorkshopDetails, WorkshopPublicState } from
 const ROOM_ID = '11111111-1111-4111-8111-111111111111';
 const STARTS_AT = '2026-09-01T10:00:00.000Z';
 const ENDS_AT = '2026-09-01T11:00:00.000Z';
+const DEPLOYMENT_URL = 'https://workshop.example.com/';
+const PROJECT_PREVIEW = {
+    title: 'Aplikace vytvořená na workshopu', description: 'Ukázka nasazeného projektu.',
+    previewImageUrl: 'https://workshop.example.com/preview.png',
+    repositoryName: 'example/workshop', deploymentUrl: DEPLOYMENT_URL,
+};
 const COMMITS = [
     { sha: 'a'.repeat(40), message: 'Prepare the workshop project', committedAt: STARTS_AT, authorName: 'Alice', branchNames: ['main'] },
     { sha: 'b'.repeat(40), message: 'Complete the workshop feature', committedAt: ENDS_AT, authorName: 'Bob', branchNames: ['client-demo'] },
@@ -58,15 +64,17 @@ test('edits independent commit bounds in workshop settings', async ({ page, base
     await expect.poll(() => writes.at(-1)?.repository).toMatchObject({ startCommit: COMMITS[0].sha, endCommit: COMMITS[1].sha, branch: ['main', 'client-*'] });
 });
 
-test('opens on the highlighted workshop range and expands its branch graph', async ({ page }) => {
+test('previews the deployed app while browsing the highlighted workshop range', async ({ page }, testInfo) => {
     const browserErrors: string[] = [];
     page.on('pageerror', (error) => browserErrors.push(error.message));
+    await page.route(PROJECT_PREVIEW.previewImageUrl, (route) => route.fulfill({ path: 'public/logo/og-image.png' }));
     await page.route('**/api/**', async (route) => {
         const address = new URL(route.request().url());
         if (address.pathname.endsWith('/state')) {
             const state: WorkshopPublicState = {
                 serverTime: ENDS_AT, workshop: { ...WORKSHOP, slug: address.pathname.split('/')[3],
-                    repository: { ...WORKSHOP.repository!, startCommit: COMMITS[0].sha, endCommit: COMMITS[1].sha } },
+                    repository: { ...WORKSHOP.repository!, deploymentUrls: [DEPLOYMENT_URL],
+                        startCommit: COMMITS[0].sha, endCommit: COMMITS[1].sha } },
                 participant: { id: 'participant', fullname: 'Workshop participant', email: 'participant@example.com', connectedAt: STARTS_AT,
                     isTrusted: false, isModerator: false, isInteractionBanned: false },
                 contentBlocks: [], paidMembersOnlyContentPreviews: [], paidMembersOnlyVideo: null, nextContentUnlockAt: null,
@@ -74,6 +82,7 @@ test('opens on the highlighted workshop range and expands its branch graph', asy
             };
             return route.fulfill({ json: state });
         }
+        if (address.pathname.endsWith('/repository/preview')) return route.fulfill({ json: { preview: PROJECT_PREVIEW } });
         if (address.pathname.endsWith('/repository')) return route.fulfill({ json: { progress: {
             commits: address.searchParams.get('expanded') === 'true' ? [...COMMITS].reverse() : COMMITS.slice(0, 2).reverse(),
             branches: [{ name: 'main', headSha: COMMITS[2].sha }, { name: 'client-demo', headSha: COMMITS[1].sha }],
@@ -85,6 +94,12 @@ test('opens on the highlighted workshop range and expands its branch graph', asy
     const response = await page.goto('/cs/online-workshop/participant', { waitUntil: 'domcontentloaded' });
     test.skip(response?.status() === 404, 'The configured test database has no published online workshop.');
     const project = page.getByRole('article', { name: 'Projekt workshopu' });
+    const previewLink = project.getByRole('link', { name: `Otevřít aplikaci ${PROJECT_PREVIEW.title}` });
+    await expect(previewLink).toHaveAttribute('href', DEPLOYMENT_URL);
+    await expect(previewLink.getByRole('img')).toHaveAttribute('src', PROJECT_PREVIEW.previewImageUrl);
+    await expect.poll(() => previewLink.getByRole('img').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    await expect(project.getByRole('link', { name: 'Repozitář' })).toHaveAttribute('href', 'https://github.com/example/workshop');
+    await project.screenshot({ path: testInfo.outputPath('deployment-preview-desktop.png') });
     await expect(project.getByText(COMMITS[0].message)).toBeVisible();
     await expect(project.getByText(COMMITS[2].message)).toHaveCount(0);
     await project.getByRole('button', { name: 'Rozbalit graf mimo rozsah workshopu' }).click();
@@ -93,5 +108,9 @@ test('opens on the highlighted workshop range and expands its branch graph', asy
     await expect(project.getByLabel('Vybrané větve')).toContainText('client-demo');
     await project.getByRole('button', { name: 'Zobrazit jen rozsah workshopu' }).click();
     await expect(project.getByText(COMMITS[2].message)).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(previewLink).toBeVisible();
+    expect((await previewLink.boundingBox())!.width).toBeLessThan(390);
+    await project.screenshot({ path: testInfo.outputPath('deployment-preview-mobile.png') });
     expect(browserErrors).toEqual([]);
 });

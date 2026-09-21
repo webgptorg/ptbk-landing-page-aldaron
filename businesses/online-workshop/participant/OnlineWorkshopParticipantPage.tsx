@@ -267,6 +267,7 @@ export function OnlineWorkshopParticipantPage({
                       id: 'repository',
                       content: (
                           <WorkshopRepositoryPanel
+                              workshopSlug={workshopSlug}
                               repository={connectedRepository}
                               progressController={repositoryProgressController}
                           />

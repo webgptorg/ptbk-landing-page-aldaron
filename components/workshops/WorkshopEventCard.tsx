@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { PublicWebPagePreviewImage } from '@/components/public-web-page-preview-image';
 import { WorkshopPhaseBadge } from '@/components/workshops/WorkshopPhaseBadge';
+import { WorkshopProjectPreviewCard } from '@/components/workshops/WorkshopProjectPreviewCard';
 import type { CalendarDayKey } from '@/lib/calendar/calendarMonth';
 import { formatCzechRelativeDayPrefix } from '@/lib/calendar/czechRelativeDay';
 import type { EventListing } from '@/lib/events/eventListing';
@@ -9,8 +9,7 @@ import { formatEventPrice } from '@/lib/events/eventPrice';
 import { getEventTypeDefinition, isExternalEventType } from '@/lib/events/eventTypes';
 import { formatMediaDuration } from '@/lib/podcast/podcastEpisodeDuration';
 import { isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
-import type { WorkshopProjectPreview } from '@/lib/workshops/workshopTypes';
-import { ArrowUpRight, CalendarDays, CirclePlay, ExternalLink, Github } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, CirclePlay, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 type WorkshopEventCardProps = {
@@ -69,47 +68,6 @@ function WorkshopEventCardRecordingDuration({
 }
 
 /**
- * A visual glimpse of the deployed project a workshop followed. It remains part of the term link, so the established
- * card interaction still opens the term while the project is recognized before a member enters it.
- */
-function WorkshopEventCardProjectPreview({ project }: { readonly project: WorkshopProjectPreview }) {
-    const isRepositoryTitle = project.title === project.repositoryName;
-
-    return (
-        <div className="mt-4 overflow-hidden rounded-lg border border-room-border/10 bg-room-inset/50">
-            <div className="relative aspect-[2/1] overflow-hidden bg-room-hover">
-                <PublicWebPagePreviewImage
-                    imageUrl={project.previewImageUrl}
-                    alt={`Náhled projektu ${project.title}`}
-                    fallbackLabel="Náhled projektu není k dispozici"
-                    fallback={<Github className="mt-6 h-9 w-9 text-room-accent/80" aria-hidden="true" />}
-                    className="object-top motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.025] motion-safe:group-focus-visible:scale-[1.025]"
-                />
-                <span className="absolute left-3 top-3 rounded-full border border-room-border/15 bg-room-inset/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-room-accent">
-                    Projekt workshopu
-                </span>
-            </div>
-            <div className="min-w-0 p-3">
-                <span className="line-clamp-2 break-words text-sm font-semibold leading-5 text-room-heading">
-                    {project.title}
-                </span>
-                {project.description !== '' && (
-                    <span className="mt-1 line-clamp-2 break-words text-xs font-normal leading-5 text-room-muted">
-                        {project.description}
-                    </span>
-                )}
-                {!isRepositoryTitle && (
-                    <span className="mt-2 flex min-w-0 items-center gap-1.5 text-room-muted">
-                        <Github className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        <span className="truncate font-mono text-[11px]">{project.repositoryName}</span>
-                    </span>
-                )}
-            </div>
-        </div>
-    );
-}
-
-/**
  * One listed term as a card leading to it, which says when it is held, what it is, and where it stands in time
  *
  * Note: The list of cards and the day of a calendar show a term with this very same card, so a member reads the same
@@ -153,7 +111,9 @@ export function WorkshopEventCard({ listing, locale, timeZone, todayDayKey }: Wo
                         {getEventTypeDefinition(event.type).label} · {formatEventFormat(event)} ·{' '}
                         {formatEventPrice(event.priceCzk)}
                     </span>
-                    {project !== null && <WorkshopEventCardProjectPreview project={project} />}
+                    {project !== null && (
+                        <div className="mt-4"><WorkshopProjectPreviewCard project={project} /></div>
+                    )}
                 </div>
             </Link>
         </Button>

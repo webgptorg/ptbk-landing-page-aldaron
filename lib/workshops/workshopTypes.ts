@@ -43,6 +43,8 @@ export type WorkshopProjectPreview = {
     readonly description: string;
     readonly previewImageUrl: string | null;
     readonly repositoryName: string;
+    /** The first configured deployment, retained even when its metadata cannot be read. */
+    readonly deploymentUrl: string | null;
 };
 
 /**

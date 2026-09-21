@@ -95,6 +95,7 @@ const RICH_PAST_WORKSHOP: WorkshopSummary = {
             description: 'Projekt, který během workshopu vznikl.',
             previewImageUrl: 'https://projects.example.com/dashboard-preview.png',
             repositoryName: 'promptbook/automation-dashboard',
+            deploymentUrl: 'https://projects.example.com/dashboard',
         },
         recordingDurationSeconds: 5_325,
     },
@@ -239,6 +240,8 @@ describe('workshop links panel', () => {
         expect(card.textContent).toContain('Projekt workshopu');
         expect(card.textContent).toContain('Automatizační dashboard');
         expect(card.textContent).toContain('promptbook/automation-dashboard');
+        expect(card.textContent).toContain('projects.example.com/dashboard');
+        expect(card.getAttribute('href')).toContain(`/cs/online-workshop/participant?workshop=${RICH_PAST_WORKSHOP.slug}`);
         expect(
             within(card).getByRole('img', { name: 'Náhled projektu Automatizační dashboard' }).getAttribute('src'),
         ).toBe('https://projects.example.com/dashboard-preview.png');

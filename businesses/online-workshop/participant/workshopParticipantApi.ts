@@ -10,6 +10,7 @@ import type {
     WorkshopParticipant,
     WorkshopPoll,
     WorkshopPollVoteValues,
+    WorkshopProjectPreview,
     WorkshopPublicState,
     WorkshopReaction,
 } from '@/lib/workshops/workshopTypes';
@@ -160,6 +161,19 @@ export async function fetchWorkshopRepositoryProgress(
     const response = await fetch(`${getWorkshopApiUrl(workshopSlug, 'repository')}${query}`, {
         credentials: 'same-origin',
         cache: 'no-store',
+    });
+    return readResponseJson(response);
+}
+
+/** Reads the same deployment metadata the community event card uses, independently of live room polling. */
+export async function fetchWorkshopProjectPreview(
+    workshopSlug: string,
+    signal: AbortSignal,
+): Promise<{ readonly preview: WorkshopProjectPreview | null }> {
+    const response = await fetch(getWorkshopApiUrl(workshopSlug, 'repository/preview'), {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal,
     });
     return readResponseJson(response);
 }

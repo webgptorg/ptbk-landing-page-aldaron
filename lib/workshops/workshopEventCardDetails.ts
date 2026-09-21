@@ -1,8 +1,7 @@
-import { formatGithubRepositoryName } from '@/lib/github/githubRepository';
 import { scrapePublicWebPagePreview } from '@/lib/network/publicWebPagePreview';
 import { fetchYoutubeVideoDurationSeconds } from '@/lib/youtube/fetchYoutubeVideoDuration';
 import { WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS } from '@/lib/workshops/workshopConstants';
-import { getPrimaryWorkshopDeploymentUrl } from '@/lib/workshops/workshopDeployments';
+import { createWorkshopProjectPreviewFallback } from '@/lib/workshops/workshopProjectPreview';
 import { getWorkshopRecordingDurationSeconds } from '@/lib/workshops/workshopRecordingDuration';
 import type { WorkshopEventCardDetails, WorkshopProjectPreview } from '@/lib/workshops/workshopTypes';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
@@ -14,22 +13,11 @@ export type WorkshopEventCardDetailsSource = {
     readonly isRecordingAvailable: boolean;
 };
 
-function createRepositoryProjectPreview(repository: WorkshopRepository): WorkshopProjectPreview {
-    const repositoryName = formatGithubRepositoryName(repository);
-
-    return {
-        title: repositoryName,
-        description: '',
-        previewImageUrl: null,
-        repositoryName,
-    };
-}
-
 /**
  * Resolves the public metadata of a project's deployed application when it has one.
  *
- * Note: The repository remains a useful preview even when its deployment cannot be reached or has no Open Graph
- *       metadata. A card therefore never depends on another project's server being online. A project deployed in
+ * Note: The deployment address remains visible when its metadata cannot be read; only a project without a deployment
+ *       falls back to its repository. A card never depends on another project's server being online. A project deployed in
  *       several places is previewed by the first of them, so one card costs one request however many addresses the
  *       project runs at.
  */
@@ -40,24 +28,23 @@ export async function createWorkshopProjectPreview(
         return null;
     }
 
-    const repositoryPreview = createRepositoryProjectPreview(repository);
-    const primaryDeploymentUrl = getPrimaryWorkshopDeploymentUrl(repository.deploymentUrls);
-    if (primaryDeploymentUrl === null) {
-        return repositoryPreview;
+    const fallbackPreview = createWorkshopProjectPreviewFallback(repository);
+    if (fallbackPreview.deploymentUrl === null) {
+        return fallbackPreview;
     }
 
     try {
-        const deploymentPreview = await scrapePublicWebPagePreview(primaryDeploymentUrl, {
+        const deploymentPreview = await scrapePublicWebPagePreview(fallbackPreview.deploymentUrl, {
             revalidateSeconds: WORKSHOP_EVENT_CARD_EXTERNAL_DETAILS_REVALIDATE_SECONDS,
         });
         return {
-            ...repositoryPreview,
-            title: deploymentPreview.title,
+            ...fallbackPreview,
+            title: deploymentPreview.title || fallbackPreview.title,
             description: deploymentPreview.description,
             previewImageUrl: deploymentPreview.previewImageUrl,
         };
     } catch {
-        return repositoryPreview;
+        return fallbackPreview;
     }
 }
 

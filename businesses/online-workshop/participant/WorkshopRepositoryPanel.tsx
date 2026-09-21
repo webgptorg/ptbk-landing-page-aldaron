@@ -2,6 +2,8 @@
 
 import { WorkshopRepositoryCommitCard } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitCard';
 import { WorkshopRepositoryGraph } from '@/businesses/online-workshop/participant/WorkshopRepositoryGraph';
+import { useWorkshopProjectPreview } from '@/businesses/online-workshop/participant/useWorkshopProjectPreview';
+import { WorkshopProjectPreviewCard } from '@/components/workshops/WorkshopProjectPreviewCard';
 import type { WorkshopRepositoryProgressController } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
 import {
     createGithubCommitsUrlForBranchSelection,
@@ -19,6 +21,7 @@ import { isCommitInWorkshopRepositoryRange } from '@/lib/workshops/workshopRepos
 import { formatGithubCommitDate } from '@/lib/github/formatGithubCommitDate';
 
 type WorkshopRepositoryPanelProps = {
+    readonly workshopSlug: string;
     /**
      * The project this workshop is about, as its administration connected it
      */
@@ -55,7 +58,8 @@ function formatWorkshopDeploymentLabel(deploymentUrl: string, deploymentCount: n
  *       see `useWorkshopRepositoryProgress`. That is why the repository and its links are shown even when GitHub
  *       cannot be reached.
  */
-export function WorkshopRepositoryPanel({ repository, progressController }: WorkshopRepositoryPanelProps) {
+export function WorkshopRepositoryPanel({ workshopSlug, repository, progressController }: WorkshopRepositoryPanelProps) {
+    const projectPreview = useWorkshopProjectPreview(workshopSlug, repository);
     const { progress, isProgressRead, newCommitShas } = progressController;
     const repositoryName = formatGithubRepositoryName(repository);
     const isMultipleBranchSelection = isGithubMultipleBranchesSelection(repository.branch);
@@ -115,6 +119,18 @@ export function WorkshopRepositoryPanel({ repository, progressController }: Work
                     ))}
                 </div>
             </div>
+
+            {projectPreview.deploymentUrl !== null && (
+                <a
+                    href={projectPreview.deploymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Otevřít aplikaci ${projectPreview.title}`}
+                    className="group mx-5 mt-4 block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent"
+                >
+                    <WorkshopProjectPreviewCard project={projectPreview} />
+                </a>
+            )}
 
             <div className="space-y-3 px-5 py-4">
                 {!isProgressRead ? (

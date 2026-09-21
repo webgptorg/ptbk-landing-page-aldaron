@@ -50,7 +50,7 @@ test('downloads the branded recap in the browser with local fonts, project previ
             const result: WorkshopWrapUpExport = {
                 source: selectWorkshopWrapUpSource(createState(workshopSlug)),
                 roomUrl: createWorkshopWrapUpRoomUrl(workshopSlug), shortUrl: SHORT_URL,
-                projectPreview: { title: 'Projekt z workshopu', description: 'Nasazená aplikace.', previewImageUrl: null, repositoryName: 'example/workshop' },
+                projectPreview: { title: 'Projekt z workshopu', description: 'Nasazená aplikace.', previewImageUrl: null, repositoryName: 'example/workshop', deploymentUrl: 'https://example.com' },
                 projectPreviewImage: `data:image/png;base64,${preview.toString('base64')}`,
                 repositoryProgress: {
                     commits: [{ sha: 'a'.repeat(40), message: 'První funkční aplikace', authorName: 'Pavol Hejný', committedAt: ENDS_AT, branchNames: ['main'] }],

@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.3339 10 minutes; Testing 8 minutes
 
 [✨💣] When previewing the workshop project, prefer previewing the actual deployment of the workshop project not just generic github
 

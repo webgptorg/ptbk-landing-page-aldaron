@@ -414,7 +414,7 @@ describe('online workshop participant room', () => {
 
         await screen.findByRole('button', { name: 'Free členství. Otevřít možnosti členství' });
 
-        expect(screen.getByText('hejny/promptbook')).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'hejny/promptbook' })).not.toBeNull();
         expect(screen.getByText('Přidat panel repozitáře')).not.toBeNull();
         expect(screen.getByText('Nový')).not.toBeNull();
         expect(screen.getByRole('link', { name: /Živá aplikace/ }).getAttribute('href')).toBe(

@@ -249,7 +249,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   server and cached through the revalidation window; an unreadable feed still
   leaves the room naming its project. A project deployed once is opened as the live
   application of the workshop; several deployments are each named by their own
-  address, and the first of them is the one a term card is previewed from.
+  address, and the first of them is the one a term card and the participant project panel are previewed from.
+  Both reuse the deployment's image, title and description through the shared project preview; missing metadata or
+  a broken image keeps the deployment address visible, with repository-only previews reserved for undeployed projects.
+  The participant preview opens that deployment and loads independently of room state and commits, through an
+  authenticated endpoint using the stored project. Changing rooms, repositories or the primary deployment discards
+  stale previews. Community term cards keep their workshop destination.
   With a repository and no deployment URL, administration offers direct Vercel deployment using private `VERCEL_TOKEN`
   and optional `VERCEL_TEAM_ID`. One Vercel project per repository stays connected to its original GitHub source and
   deploys its production branch (initially the default branch), independently of the workshop's history selection.
