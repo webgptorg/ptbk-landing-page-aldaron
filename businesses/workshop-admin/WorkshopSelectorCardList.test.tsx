@@ -133,7 +133,7 @@ describe('workshop selector card list', () => {
 
         expect(screen.getByRole('heading', { name: 'Probíhá (1)' })).not.toBeNull();
         expect(screen.getByRole('heading', { name: 'Právě proběhlo (1)' })).not.toBeNull();
-        expect(screen.getByRole('heading', { name: 'Do týdne (1)' })).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Tento týden (1)' })).not.toBeNull();
         expect(screen.getByRole('heading', { name: 'Nadchází (1)' })).not.toBeNull();
         expect(getWorkshopCards().map((workshopCard) => workshopCard.textContent)).toEqual([
             expect.stringContaining(ONGOING_WORKSHOP.title),
@@ -143,7 +143,7 @@ describe('workshop selector card list', () => {
         ]);
 
         expect(getWorkshopCards()[1].textContent).toContain('Právě proběhlo');
-        expect(getWorkshopCards()[2].textContent).toContain('Do týdne');
+        expect(getWorkshopCards()[2].textContent).toContain('Tento týden');
         expect(screen.getByRole('button', { name: 'Historie (1)' }).getAttribute('aria-expanded')).toBe('false');
     });
 

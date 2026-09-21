@@ -64,7 +64,7 @@ const WORKSHOP_PHASE_APPEARANCES: Readonly<Record<WorkshopPhase, WorkshopPhaseAp
     // Note: This stays distinct from the ordinary upcoming cyan so the special badge is useful even when a reader
     //       cannot infer a date at a glance.
     'upcoming-next-week': {
-        label: 'Do týdne',
+        label: 'Tento týden',
         badgeClassNameByTone: {
             light: 'bg-violet-100 text-violet-800',
             room: 'bg-room-upcoming/15 text-room-upcoming ring-1 ring-inset ring-room-upcoming/40',

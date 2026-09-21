@@ -15,6 +15,8 @@
 
 ---
 
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.1240 2 minutes; Testing 6 minutes
 [✨🌷] Change the "Do týdne" badge to "Tento týden"
 
 ![alt text](prompts/screenshots/2026-09-0171-freshly-upcomming-events.png)
+

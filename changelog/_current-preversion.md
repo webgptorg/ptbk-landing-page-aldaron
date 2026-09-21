@@ -76,7 +76,7 @@
   changes no stored room data.
 
 - Added a fifth shared time state for event terms: a published term that begins within the next seven rolling days is
-  now marked `Do týdne`. The violet badge and calendar colour appear consistently in `/cs/komunita` and the term
+  now marked `Tento týden`. The violet badge and calendar colour appear consistently in `/cs/komunita` and the term
   picker of `/cs/online-workshop/participant?workshop=`, while `/admin/workshops` gives ongoing, freshly past,
   next-seven-day, later upcoming, and historical terms their own ordered categories. The shared future-term helper
   keeps these imminent terms eligible for the post-workshop recommendation too, so highlighting a near event never

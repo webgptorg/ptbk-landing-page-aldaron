@@ -21,7 +21,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
   full-load conversion page; `/participant` is the live room. Its waiting room
   offers every published term as the same term cards the landing page registers
-  with: running and upcoming ones first, with a special `Do týdne` badge for a
+  with: running and upcoming ones first, with a special `Tento týden` badge for a
   term beginning within the next seven rolling days, then the ones which ended
   within the last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,

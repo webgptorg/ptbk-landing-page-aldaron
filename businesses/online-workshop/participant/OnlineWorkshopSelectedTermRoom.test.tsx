@@ -172,7 +172,7 @@ describe('online workshop waiting room', () => {
 
         expect(
             screen.getByRole('button', { name: new RegExp(NEAREST_UPCOMING_WORKSHOP.title) }).textContent,
-        ).toContain('Do týdne');
+        ).toContain('Tento týden');
     });
 
     it('names the workshop which has only just been held in the open, rather than filing it into the history', () => {

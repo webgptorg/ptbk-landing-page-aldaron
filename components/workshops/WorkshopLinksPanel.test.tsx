@@ -218,12 +218,12 @@ describe('workshop links panel', () => {
         expect(findCalendarDay('2026-09-11').className).toContain(
             getWorkshopPhaseAppearance('upcoming-next-week').calendarDayClassName,
         );
-        expect(screen.getAllByText('Do týdne')).toHaveLength(2);
+        expect(screen.getAllByText('Tento týden')).toHaveLength(2);
 
         showCardsView();
 
         const [, upcomingNextWeekCard, upcomingCard] = findTermLinks();
-        expect(upcomingNextWeekCard?.textContent).toContain('Do týdne');
+        expect(upcomingNextWeekCard?.textContent).toContain('Tento týden');
         expect(upcomingCard?.textContent).toContain('Nadchází');
     });
 
