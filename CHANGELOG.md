@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fixed recording-studio E2E capture on hosts where the physical audio output clock stalls. Synthetic screen and
+  microphone audio now use a silent Web Audio output and finish resuming before the source is returned, so all five
+  sources produce real media for the existing recording, ZIP, trimming, and playback checks.
+
 - Let administrators choose whether a community-membership discount code remains permanent or applies only to a
   selected number of monthly renewals. Stripe now receives the matching coupon, so a temporary reduction ends at the
   full subscription price without an application-side timer; existing codes remain permanent.

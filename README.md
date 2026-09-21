@@ -69,6 +69,9 @@ ZIP64 archives stream directly to the chosen file when the browser offers the sa
 need no full-memory buffer. Other browsers use a download fallback capped at 256 MiB to avoid exhausting memory.
 The studio adds no environment variables, uploads, server APIs, or database migrations.
 
+Its E2E tests supply canvas video and synthesized audio with a silent Web Audio output, so they need no physical
+camera, microphone, or working speaker device. Recording, storage, codecs, trimming, and ZIP exports remain real.
+
 ## Technology
 
 - **Next.js 15** App Router, React, and TypeScript

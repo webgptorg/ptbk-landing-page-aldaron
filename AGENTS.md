@@ -392,3 +392,5 @@ use cases, and audiences. Keep these rules current when behavior changes.
   independent and retry once in a fresh browser context for transient failures;
   failed-attempt traces remain available. Each attempt archives one recording in
   `tests/e2e/videos/`, retaining only recent runs.
+- Recording-studio E2E sources use canvas video and synthesized audio with a silent Web Audio output, independent
+  of physical audio-device clocks. Keep recording, storage, codecs, trimming, and ZIP exports real in these tests.

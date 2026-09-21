@@ -15,7 +15,7 @@ async function openStudio(page: Page, baseURL: string | undefined) {
         // Only replace physical devices/the permission picker. Recording, storage, codecs and ZIP are real.
         const streams: MediaStream[] = [];
         Object.assign(window, { studioTestStreams: streams });
-        const createStream = (isVideo: boolean, isAudio: boolean) => {
+        const createStream = async (isVideo: boolean, isAudio: boolean) => {
             const stream = new MediaStream();
             if (isVideo) {
                 const canvas = document.createElement('canvas');
@@ -34,15 +34,17 @@ async function openStudio(page: Page, baseURL: string | undefined) {
                 stream.addTrack(videoTrack);
             }
             if (isAudio) {
-                const context = new AudioContext();
+                // Render real audio without a physical output device, whose clock may stall on a headless host.
+                const AUDIO_CONTEXT_OPTIONS: AudioContextOptions & { sinkId: { type: 'none' } } = { sinkId: { type: 'none' } };
+                const context = new AudioContext(AUDIO_CONTEXT_OPTIONS);
                 const oscillator = context.createOscillator();
                 const destination = context.createMediaStreamDestination();
                 oscillator.connect(destination); oscillator.start();
                 stream.addTrack(destination.stream.getAudioTracks()[0]);
-                void context.resume();
+                await context.resume();
             }
             streams.push(stream);
-            return Promise.resolve(stream);
+            return stream;
         };
         Object.defineProperties(navigator.mediaDevices, {
             getUserMedia: { value: (constraints: MediaStreamConstraints) => createStream(Boolean(constraints.video), Boolean(constraints.audio)) },
