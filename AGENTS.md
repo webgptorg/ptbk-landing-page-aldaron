@@ -128,6 +128,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   keeps every artificial activity tool — prepared chat comments, reaction and
   vote adjustments, and the artificial watching count — out of a shared screen
   by default; `artopts=on` reveals them and `artopts=off` keeps them hidden.
+- `/admin/workshops?tab=subtitles` manages private Czech, English and mixed-language video subtitle tracks.
+  Tracks store plain text with original-video timestamps, source video/file and provenance independently of room
+  responses. Admins can import SRT/WebVTT, try existing YouTube captions (authored before automatic), or generate
+  subtitles from an original recording through OpenAI. Browser media decoding sends bounded audio chunks and adds
+  their positions once; recording offsets do not alter stored times. Generation produces a reviewable draft, creation
+  is explicit, and existing tracks use the shared autosaved editor. Changed source videos are labelled, imports never
+  overwrite existing tracks, and no participant endpoint or public database role exposes subtitles.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
 - `/admin/recording-studio` records any number of available cameras, screen shares,

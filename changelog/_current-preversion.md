@@ -1,5 +1,12 @@
 # Current preversion
 
+- Added the **Titulky** tab at `/admin/workshops?tab=subtitles` with private Czech, English and mixed-language tracks.
+  Admins can fetch available YouTube captions, generate timed subtitles from an uploaded video/audio recording,
+  import or edit SRT/WebVTT, and download either format. Long recordings are decoded in the browser and transcribed
+  in bounded audio chunks using the existing private OpenAI key; generated drafts are reviewed before explicit creation.
+  Existing tracks autosave through the shared editor, keep original-video timing and source information, and remain
+  separate from participant responses. Added a private subtitle-table migration and documented setup and limitations.
+
 - Workshop project previews on `/cs/komunita` and `/cs/online-workshop/participant` now share the first deployment's
   image, title, description and address. Missing metadata or broken images retain the application's identity instead
   of a generic GitHub preview; projects without a deployment keep the repository fallback. The participant preview

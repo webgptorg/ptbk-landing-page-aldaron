@@ -12,6 +12,7 @@ export const WORKSHOP_ADMIN_SECTION_VALUES = [
     'agents',
     'reactions',
     'content',
+    'subtitles',
     'polls',
     'feedback',
     'settings',

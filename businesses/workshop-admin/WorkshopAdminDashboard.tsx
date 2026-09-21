@@ -59,6 +59,7 @@ import { WorkshopReactionSummary } from '@/businesses/workshop-admin/WorkshopRea
 import { WorkshopRegistrationContacts } from '@/businesses/workshop-admin/WorkshopRegistrationContacts';
 import { WorkshopSelectorCardList } from '@/businesses/workshop-admin/WorkshopSelectorCardList';
 import { WorkshopSettingsForm } from '@/businesses/workshop-admin/WorkshopSettingsForm';
+import { WorkshopSubtitleAdmin } from '@/businesses/workshop-admin/subtitles/WorkshopSubtitleAdmin';
 import { mergeWorkshopAdminSnapshot } from '@/businesses/workshop-admin/workshopAdminSnapshot';
 import {
     PARTICIPANT_COUNT_LABEL,
@@ -92,6 +93,7 @@ import {
     Radio,
     RefreshCw,
     Settings2,
+    Subtitles,
     Star,
     UserPlus,
     Users,
@@ -117,6 +119,7 @@ const WORKSHOP_ADMIN_SECTION_DEFINITIONS: readonly WorkshopAdminSectionDefinitio
     { value: 'agents', label: 'Agenti', icon: Bot },
     { value: 'reactions', label: 'Reakce', icon: Radio },
     { value: 'content', label: 'Obsah', icon: BookOpenText },
+    { value: 'subtitles', label: 'Titulky', icon: Subtitles },
     { value: 'polls', label: 'Ankety', icon: BarChart3 },
     { value: 'feedback', label: 'Zpětná vazba', icon: Star },
     { value: 'settings', label: 'Nastavení', icon: Settings2 },
@@ -235,6 +238,7 @@ export function WorkshopAdminDashboard({
                 (value !== 'feedback' || workshopKind === 'workshop') &&
                 (value !== 'polls' || isPollSectionOffered) &&
                 (value !== 'agents' || (isAgentsOffered && !snapshot?.workshop.event?.externalUrl)) &&
+                (value !== 'subtitles' || (isStageOffered && !snapshot?.workshop.event?.externalUrl)) &&
                 value !== 'memberships',
         ),
         ...additionalSections.map(({ content: _content, ...sectionDefinition }) => sectionDefinition),
@@ -805,6 +809,10 @@ export function WorkshopAdminDashboard({
                             <TabsContent value="agents" className="space-y-4">
                                 <WorkshopAgentAdmin key={snapshot.workshop.id} workshop={snapshot.workshop} />
                             </TabsContent>
+
+                            {isStageOffered && !snapshot.workshop.event?.externalUrl && <TabsContent value="subtitles">
+                                <WorkshopSubtitleAdmin key={snapshot.workshop.id} workshop={snapshot.workshop} />
+                            </TabsContent>}
 
                             <TabsContent value="settings" className="space-y-4">
                                 <div className="flex justify-end">

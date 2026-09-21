@@ -3,6 +3,7 @@ import {
     WORKSHOP_AGENT_ASSIGNMENT_TABLE_NAME, WORKSHOP_AGENT_TABLE_NAME,
 } from './workshopAgentTypes';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { requestOpenAiAudioTranscription } from '@/lib/audio/openAiAudioTranscription';
 
 const TRANSCRIPTION_TIMEOUT_MILLISECONDS = 20_000;
 const DEFAULT_TRANSCRIPTION_MODEL = 'gpt-4o-mini-transcribe';
@@ -31,17 +32,11 @@ export async function transcribeWorkshopAgentAudio(file: File): Promise<string |
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey || !isWorkshopAgentAudioFileValid(file)) throw new Error('Invalid audio transcription request');
     const mimeType = file.type.split(';')[0]!;
-    const form = new FormData();
-    form.append('file', file, `workshop.${AUDIO_FILE_EXTENSIONS[mimeType]}`);
-    form.append('model', process.env.WORKSHOP_AGENT_TRANSCRIPTION_MODEL?.trim() || DEFAULT_TRANSCRIPTION_MODEL);
-    form.append('response_format', 'json');
-    form.append('language', 'cs');
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST', headers: { Authorization: `Bearer ${apiKey}` }, body: form,
-        signal: AbortSignal.timeout(TRANSCRIPTION_TIMEOUT_MILLISECONDS),
+    const result = await requestOpenAiAudioTranscription({
+        file, filename: `workshop.${AUDIO_FILE_EXTENSIONS[mimeType]}`,
+        model: process.env.WORKSHOP_AGENT_TRANSCRIPTION_MODEL?.trim() || DEFAULT_TRANSCRIPTION_MODEL,
+        responseFormat: 'json', language: 'cs', timeoutMilliseconds: TRANSCRIPTION_TIMEOUT_MILLISECONDS,
     });
-    if (!response.ok) throw new Error('Audio transcription failed');
-    const result: unknown = await response.json();
     if (!result || typeof result !== 'object' || !('text' in result) || typeof result.text !== 'string' || result.text.length > 6000) {
         throw new Error('Invalid audio transcription');
     }

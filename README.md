@@ -251,6 +251,29 @@ inactive without `OPENAI_API_KEY`, and project discussions and externally organi
 Queue integration tests run the actual migration/functions in an isolated in-memory PostgreSQL (PGlite), without
 connecting to `DATABASE_URL` or making billable model calls. Audio and model tests use mocked providers.
 
+## Workshop video subtitles
+
+Open `/admin/workshops?tab=subtitles`, select a workshop, and use **Přidat titulky**. Each independent track can be
+Czech, English or mixed Czech/English. Import an SRT/WebVTT file, paste timed subtitles, or load the selected language
+from the workshop's YouTube video. Authored captions take precedence over automatic captions. The public mobile player
+response is tried first, with the watch page as a fallback. This integration needs no API key, but YouTube may block
+server requests, withhold tracks or return empty captions;
+the editor reports this and keeps file import and transcription available. It does not translate missing languages.
+
+**Vygenerovat titulky z nahrávky** uses the existing private `OPENAI_API_KEY` and the
+[OpenAI transcription endpoint](https://developers.openai.com/api/docs/guides/speech-to-text) with `whisper-1`,
+which supports segment timestamps. Choose the original video/audio file including its intro. The existing Mediabunny
+browser decoder extracts its primary audio track into 90-second mono WAV chunks below 3 MB; audio goes to OpenAI,
+never into database or file storage. Chrome/Edge and a decodable audio codec are required; WAV is a useful fallback.
+The transcription route needs a 90-second execution budget per chunk. Keep the page open until it finishes or cancel
+the operation; failures leave existing tracks unchanged. Mixed-language transcription omits a forced language hint.
+
+Review the generated draft and explicitly add it. Existing tracks autosave in the shared admin dialog and download
+as UTF-8 WebVTT or SRT. Times always refer to the original recording, independent of its playback start offset.
+Changing a workshop's video retains old tracks with a warning. Subtitles live in the new private `workshop_subtitles`
+table (migration `2026-09-2600-workshop-subtitles.sql`), are not copied when duplicating a term, and are not exposed by
+participant APIs or public database roles. They are separate from the ephemeral live transcripts used by Book agents.
+
 ## Database and migrations
 
 The application applies pending migrations automatically when a Node.js server starts. You can also run them directly:
