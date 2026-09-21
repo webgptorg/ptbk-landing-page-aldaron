@@ -1,6 +1,7 @@
 'use client';
 
 import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { PromptbookLogo } from '@/components/promptbook-logo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -8,7 +9,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-const promptbookLogo = '/logo/promptbook-logo-blue-transparent-128.png'; // <- TODO: import promptbookLogo from '@/public/logo/promptbook-logo-blue-transparent-128.png';
 
 type HeaderAction = {
     label: ReactNode;
@@ -158,12 +158,10 @@ export function Header({
                             className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
                         >
                             {brandLogo ?? (
-                                <Image
-                                    src={promptbookLogo}
-                                    alt="Promptbook"
-                                    width={32}
-                                    height={32}
+                                <PromptbookLogo
+                                    alt=""
                                     className={cn('h-8 w-8', brandContext && 'hidden sm:block')}
+                                    isPriority
                                 />
                             )}
                             {brandName ?? (

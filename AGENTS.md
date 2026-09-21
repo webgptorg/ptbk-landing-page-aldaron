@@ -8,6 +8,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
 - `/en` is its English localization.
+- Promptbook's shared headers, footers, homepage chat preview, and participant-room header use the static 3D
+  mark through `components/promptbook-logo.tsx`. Its web-sized transparent renders and downloadable 1024-pixel
+  PNG are named in `lib/branding/promptbookLogoAssets.ts`; `/branding` previews it alongside the flat variants.
+  `public/logo/promptbook-logo-3d.md` records its source and generation prompt. Flat artwork remains available
+  for print, favicons, and high-contrast uses; custom page identities keep their own marks.
 - `/pro-mesta`, `/pro-firmy`, `/for-agro`, `/for-industry`, `/ai-supervize`,
   `/hackathon-factory`, and `/pavol` are specialized landing pages. `/pavol`
   redirects to `/cs/pavol` or `/en/pavol`; the localized pages are Pavol Hejny's

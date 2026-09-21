@@ -1,7 +1,9 @@
 import { BrandingComponentsDemo } from '@/components/branding-components-demo';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
+import { PromptbookLogo } from '@/components/promptbook-logo';
 import { buttonVariants } from '@/components/ui/button';
+import { PROMPTBOOK_LOGO_3D_DOWNLOAD_PATH, PROMPTBOOK_LOGO_3D_PREVIEWS } from '@/lib/branding/promptbookLogoAssets';
 import { BRANDING_METADATA } from '@/lib/metadata/site-page-definitions';
 import { cn } from '@/lib/utils';
 import { ArrowUpRight, Download, Palette, ShieldCheck, Type } from 'lucide-react';
@@ -11,7 +13,16 @@ import Link from 'next/link';
 
 export const metadata: Metadata = BRANDING_METADATA;
 
-const logoCollections = [
+const LOGO_COLLECTIONS = [
+    {
+        title: '3D logo',
+        description:
+            'The dimensional blue mark used on our website. Use it in presentations and digital materials with room for its beveled edges to show.',
+        previewSrc: PROMPTBOOK_LOGO_3D_PREVIEWS[1].src,
+        previewAlt: 'Promptbook 3D logo with a transparent background',
+        previewClassName: 'border border-slate-200 bg-white',
+        downloads: [{ label: '1024 PNG', href: PROMPTBOOK_LOGO_3D_DOWNLOAD_PATH }],
+    },
     {
         title: 'Primary logo',
         description: 'Use this transparent blue version on light backgrounds, in documents, and on partner pages.',
@@ -46,7 +57,7 @@ const logoCollections = [
     },
 ] as const;
 
-const colorTokens = [
+const COLOR_TOKENS = [
     { name: 'Promptbook Blue', hex: '#7AEBFF', className: 'bg-[#7AEBFF]' },
     { name: 'Promptbook Blue Dark', hex: '#30A8BD', className: 'bg-[#30A8BD]' },
     { name: 'Promptbook Green', hex: '#7AFFEB', className: 'bg-[#7AFFEB]' },
@@ -55,15 +66,17 @@ const colorTokens = [
     { name: 'Light Gray', hex: '#F3F4F6', className: 'bg-[#F3F4F6]' },
 ] as const;
 
-const usageRules = [
+const USAGE_RULES = [
     {
         title: 'Choose the right contrast',
-        description: 'Put the transparent blue mark on light surfaces. Use the white mark on dark ones.',
+        description:
+            'Use a background that keeps the whole mark visible. The flat white version gives the strongest contrast on dark surfaces.',
         icon: ShieldCheck,
     },
     {
         title: 'Keep the mark intact',
-        description: 'Do not stretch, recolor, rotate, outline, or decorate the Promptbook logo.',
+        description:
+            'Use the supplied artwork without stretching, recoloring, rotating, or adding effects. The 3D version already includes its lighting and depth.',
         icon: Palette,
     },
     {
@@ -73,7 +86,7 @@ const usageRules = [
     },
 ] as const;
 
-const voiceExamples = [
+const VOICE_EXAMPLES = [
     { language: 'EN', text: 'Create AI that truly understands your business.' },
     { language: 'CS', text: 'Vytvořte AI, která skutečně rozumí vaší firmě.' },
 ] as const;
@@ -105,14 +118,14 @@ export default function BrandingPage() {
 
                                 <div className="mt-8 flex flex-wrap gap-3">
                                     <a
-                                        href="/logo/promptbook-logo-blue-transparent-1024.png"
+                                        href={PROMPTBOOK_LOGO_3D_DOWNLOAD_PATH}
                                         download
                                         className={cn(
                                             buttonVariants({ size: 'lg' }),
                                             'rounded-full bg-slate-950 px-6 text-white hover:bg-slate-800',
                                         )}
                                     >
-                                        Download the primary logo
+                                        Download the 3D logo
                                         <Download className="ml-2 h-4 w-4" />
                                     </a>
 
@@ -131,7 +144,9 @@ export default function BrandingPage() {
                                 <div className="mt-10 grid gap-4 sm:grid-cols-3">
                                     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                         <p className="text-sm font-medium text-slate-500">Logo files</p>
-                                        <p className="mt-2 text-2xl font-semibold text-slate-950">3 logo versions</p>
+                                        <p className="mt-2 text-2xl font-semibold text-slate-950">
+                                            {LOGO_COLLECTIONS.length} logo versions
+                                        </p>
                                     </div>
                                     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                         <p className="text-sm font-medium text-slate-500">Typefaces</p>
@@ -147,12 +162,11 @@ export default function BrandingPage() {
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.18)] sm:col-span-2">
                                     <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-8">
-                                        <Image
-                                            src="/logo/promptbook-logo-blue-transparent-1024.png"
-                                            alt="Promptbook logo on light background"
-                                            width={240}
-                                            height={240}
-                                            className="h-24 w-24"
+                                        <PromptbookLogo
+                                            size={256}
+                                            alt="Promptbook logo in 3D"
+                                            className="mx-auto h-auto w-full max-w-64"
+                                            isPriority
                                         />
 
                                         <p className="mt-8 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -181,7 +195,7 @@ export default function BrandingPage() {
                                 <div className="rounded-[28px] border border-cyan-100 bg-cyan-50 p-6 shadow-[0_30px_80px_-30px_rgba(8,145,178,0.28)]">
                                     <p className="text-sm uppercase tracking-[0.18em] text-cyan-800">Tone of voice</p>
                                     <div className="mt-4 space-y-3">
-                                        {voiceExamples.map((example) => (
+                                        {VOICE_EXAMPLES.map((example) => (
                                             <div key={example.language} className="rounded-2xl bg-white/80 p-4">
                                                 <p className="text-xs font-semibold tracking-[0.18em] text-cyan-900">
                                                     {example.language}
@@ -246,7 +260,7 @@ export default function BrandingPage() {
                             </div>
 
                             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                                {colorTokens.map((color) => (
+                                {COLOR_TOKENS.map((color) => (
                                     <div key={color.hex} className="rounded-2xl border border-slate-200 bg-white p-4">
                                         <div className={cn('h-16 rounded-xl', color.className)} />
                                         <p className="mt-4 text-sm font-semibold text-slate-950">{color.name}</p>
@@ -268,12 +282,13 @@ export default function BrandingPage() {
                                 Pick the logo that fits the background.
                             </h2>
                             <p className="mt-4 text-base leading-7 text-slate-600">
-                                These are the current Promptbook PNG exports.
+                                Download the 3D mark or one of the flat versions as a PNG. Transparent files keep
+                                the background and the spaces inside the mark clear.
                             </p>
                         </div>
 
-                        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-                            {logoCollections.map((asset) => (
+                        <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                            {LOGO_COLLECTIONS.map((asset) => (
                                 <article
                                     key={asset.title}
                                     className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm"
@@ -326,7 +341,7 @@ export default function BrandingPage() {
                     </div>
 
                     <div className="mt-10 grid gap-6 md:grid-cols-3">
-                        {usageRules.map((rule) => (
+                        {USAGE_RULES.map((rule) => (
                             <article
                                 key={rule.title}
                                 className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm"
