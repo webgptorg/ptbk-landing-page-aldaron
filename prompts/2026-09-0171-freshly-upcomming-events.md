@@ -20,3 +20,11 @@
 
 ![alt text](prompts/screenshots/2026-09-0171-freshly-upcomming-events.png)
 
+---
+
+[ ]
+
+[✨🌷] Alongside the "Tento týden" badge add "Dneska" and "Zítra" badges
+
+![alt text](prompts/screenshots/2026-09-0171-freshly-upcomming-events-1.png)
+![alt text](prompts/screenshots/2026-09-0171-freshly-upcomming-events-2.png)
