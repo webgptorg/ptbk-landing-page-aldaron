@@ -1,5 +1,6 @@
+const promptbookLogo = '/logo/promptbook-logo-blue-transparent-128.png'; // <- TODO: import promptbookLogo from '@/public/logo/promptbook-logo-blue-transparent-128.png';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
-import { PromptbookLogo } from '@/components/promptbook-logo';
+import Image from 'next/image';
 import Link from 'next/link';
 
 /**
@@ -14,7 +15,13 @@ export function MinimalFooter() {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     {/* Logo + Copyright */}
                     <div className="flex items-center gap-3">
-                        <PromptbookLogo size={38} alt="" className="w-[38px] h-[38px]" />
+                        <Image
+                            src={promptbookLogo}
+                            alt="Promptbook"
+                            width={38}
+                            height={38}
+                            className="w-[38px] h-[38px]"
+                        />
                         <span className="text-xl text-gray-900">
                             Prompt<b>book</b>
                         </span>

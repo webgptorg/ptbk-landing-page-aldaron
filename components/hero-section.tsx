@@ -1,7 +1,6 @@
 'use client';
 
 import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
-import { PromptbookLogo } from '@/components/promptbook-logo';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, FileText, Shield, Sparkles } from 'lucide-react';
@@ -166,8 +165,10 @@ export function HeroSection({ language = 'cs' }: { language?: HomepageLanguage }
                             {/* Chat Header */}
                             <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                                 <div className="flex items-center gap-3">
-                                    <PromptbookLogo size={48} alt="" className="h-12 w-12" isPriority />
-                                    <span className="text-sm font-medium text-gray-600">{hero.chatTitle}</span>
+                                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                    <span className="ml-3 text-sm font-medium text-gray-600">{hero.chatTitle}</span>
                                 </div>
                             </div>
 

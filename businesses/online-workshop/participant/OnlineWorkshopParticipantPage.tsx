@@ -23,7 +23,6 @@ import { WorkshopWrapUpNavigation } from '@/businesses/online-workshop/participa
 import { useWorkshopParticipantOfflineSupport } from '@/businesses/online-workshop/participant/useWorkshopParticipantOfflineSupport';
 import { useWorkshopParticipant } from '@/businesses/online-workshop/participant/useWorkshopParticipant';
 import { useWorkshopRepositoryProgress } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
-import { PromptbookLogo } from '@/components/promptbook-logo';
 import { WorkshopLinksPanel } from '@/components/workshops/WorkshopLinksPanel';
 import { WorkshopRoomThemeControl } from '@/components/workshops/WorkshopRoomThemeControl';
 import { WORKSHOP_ROOM_REFRESH_CONTEXT } from '@/components/workshops/WorkshopRoomRefreshContext';
@@ -38,6 +37,7 @@ import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/works
 import type { WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { RefreshCw, Radio } from 'lucide-react';
+import Image from 'next/image';
 import { useCallback, useEffect, type ReactNode } from 'react';
 
 /**
@@ -322,7 +322,13 @@ export function OnlineWorkshopParticipantPage({
             <header className="border-b border-room-border/[0.07] bg-room-header/90 backdrop-blur">
                 <div className="mx-auto flex max-w-[1500px] flex-col items-stretch gap-3 px-4 py-3.5 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
                     <div className="flex min-w-0 flex-1 items-center gap-3 lg:min-w-48">
-                        <PromptbookLogo size={36} className="h-9 w-9 rounded-md bg-white p-1" isPriority />
+                        <Image
+                            src="/logo/promptbook-logo-blue-white-256.png"
+                            alt="Promptbook"
+                            width={36}
+                            height={36}
+                            className="h-9 w-9 rounded-lg"
+                        />
                         <div className="min-w-0">
                             <p className="break-words text-sm font-bold text-room-heading">{state.workshop.title}</p>
                             <p className="hidden text-xs text-room-subtle sm:block">{roomSubtitle}</p>
