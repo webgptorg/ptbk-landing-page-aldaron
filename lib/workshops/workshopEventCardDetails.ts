@@ -33,7 +33,7 @@ function createRepositoryProjectPreview(repository: WorkshopRepository): Worksho
  *       several places is previewed by the first of them, so one card costs one request however many addresses the
  *       project runs at.
  */
-async function createWorkshopProjectPreview(
+export async function createWorkshopProjectPreview(
     repository: WorkshopRepository | null,
 ): Promise<WorkshopProjectPreview | null> {
     if (repository === null) {

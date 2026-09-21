@@ -4,7 +4,7 @@ import { WorkshopRepositoryCommitCard } from '@/businesses/online-workshop/parti
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { GithubRepository } from '@/lib/github/githubRepository';
 import type { WorkshopRepositoryBranch } from '@/lib/workshops/workshopRepositoryProgress';
-import { createWorkshopRepositoryGraphRows } from '@/lib/workshops/workshopRepositoryGraph';
+import { createWorkshopRepositoryGraphRows, createWorkshopRepositoryGraphBranchHeadShas } from '@/lib/workshops/workshopRepositoryGraph';
 import { isCommitInWorkshopRepositoryRange, type WorkshopRepositoryCommitRange } from '@/lib/workshops/workshopRepositoryCommitRange';
 import { cn } from '@/lib/utils';
 
@@ -38,20 +38,6 @@ function getGraphColor(laneIndex: number): string {
     return GRAPH_COLORS[laneIndex % GRAPH_COLORS.length];
 }
 
-function createGraphBranchHeadShas(
-    branches: readonly WorkshopRepositoryBranch[],
-    commits: readonly GithubCommit[],
-): readonly string[] {
-    return branches.flatMap((branch, branchIndex) => {
-        if (branch.headSha !== null) {
-            return [branch.headSha];
-        }
-
-        const namedCommit = commits.find((commit) => commit.branchNames?.includes(branch.name));
-        return namedCommit === undefined ? (commits[branchIndex] === undefined ? [] : [commits[branchIndex]!.sha]) : [namedCommit.sha];
-    });
-}
-
 function createGraphEdgePath(
     fromLaneIndex: number,
     toLaneIndex: number,
@@ -77,7 +63,7 @@ export function WorkshopRepositoryGraph({
     newCommitShas,
     range,
 }: WorkshopRepositoryGraphProps) {
-    const graphRows = createWorkshopRepositoryGraphRows(commits, createGraphBranchHeadShas(branches, commits));
+    const graphRows = createWorkshopRepositoryGraphRows(commits, createWorkshopRepositoryGraphBranchHeadShas(branches, commits));
     const maximalLaneCount = Math.max(...graphRows.map((row) => row.laneCount), 1);
     const graphWidth = Math.max(
         GRAPH_MINIMAL_WIDTH_PIXELS,

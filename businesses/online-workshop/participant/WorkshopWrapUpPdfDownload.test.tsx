@@ -12,7 +12,7 @@ const MOCKS = vi.hoisted(() => ({
 }));
 
 vi.mock('@/businesses/online-workshop/participant/workshopParticipantApi', () => ({
-    fetchWorkshopState: MOCKS.fetchState,
+    prepareWorkshopWrapUp: MOCKS.fetchState,
 }));
 vi.mock('@/lib/workshops/workshopWrapUpPdf', () => ({
     createWorkshopWrapUpPdfDefinition: MOCKS.createDefinition,
@@ -43,7 +43,7 @@ describe('wrap-up download', () => {
         const button = screen.getByRole('button', { name: 'Stáhnout shrnutí v PDF' });
         fireEvent.click(button);
         fireEvent.click(button);
-        expect(MOCKS.fetchState).toHaveBeenCalledExactlyOnceWith('chosen-workshop', 'recent');
+        expect(MOCKS.fetchState).toHaveBeenCalledExactlyOnceWith('chosen-workshop');
         expect((button as HTMLButtonElement).disabled).toBe(true);
         expect(MOCKS.downloadFile).not.toHaveBeenCalled();
         resolveState(state);
@@ -51,7 +51,7 @@ describe('wrap-up download', () => {
         await waitFor(() =>
             expect(MOCKS.downloadFile).toHaveBeenCalledWith({ fileName: 'chosen-workshop-shrnuti.pdf', blob }),
         );
-        expect(MOCKS.createDefinition).toHaveBeenCalledWith(state, window.location.origin);
+        expect(MOCKS.createDefinition).toHaveBeenCalledWith(state);
         expect(MOCKS.renderPdf).toHaveBeenCalledWith(definition);
         expect((button as HTMLButtonElement).disabled).toBe(false);
     });

@@ -29,6 +29,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   After the recorded end, its wrap-up offers a PDF generated in the browser from a fresh authenticated room response.
   The recap uses the existing description and material text for its summary and key points, includes accessible
   materials and public presentation/project links, and preserves the room's publication, unlock and membership rules.
+  Its printable A4 design uses the Promptbook logo, local Inter/Outfit fonts and the room's light palette. An
+  authenticated export request creates an ad hoc short link for its room QR code, without carrying participant
+  identity. Project previews reuse event-card metadata, with bounded public-image loading; the printed Git graph
+  reuses the room's selected branches, inclusive range and lane layout, and labels any further history as available
+  in the room. Missing external previews or history leave the recap and project links available.
   It stores no document and adds no administration or database fields; chat, feedback and participant identity are
   excluded from the export.
 - `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and

@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchWorkshopState } from '@/businesses/online-workshop/participant/workshopParticipantApi';
+import { prepareWorkshopWrapUp } from '@/businesses/online-workshop/participant/workshopParticipantApi';
 import { downloadBlobFile } from '@/lib/downloadBlobFile';
 import { Download, LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -21,11 +21,11 @@ export function WorkshopWrapUpPdfDownload({ workshopSlug }: WorkshopWrapUpPdfDow
         setIsDownloading(true);
         setErrorMessage(null);
         try {
-            const [state, pdfExport] = await Promise.all([
-                fetchWorkshopState(workshopSlug, 'recent'),
+            const [exportData, pdfExport] = await Promise.all([
+                prepareWorkshopWrapUp(workshopSlug),
                 import('@/lib/workshops/workshopWrapUpPdf'),
             ]);
-            const definition = pdfExport.createWorkshopWrapUpPdfDefinition(state, window.location.origin);
+            const definition = pdfExport.createWorkshopWrapUpPdfDefinition(exportData);
             const blob = await pdfExport.renderWorkshopWrapUpPdf(definition);
             downloadBlobFile({ fileName: `${workshopSlug}-shrnuti.pdf`, blob });
         } catch {
@@ -53,7 +53,7 @@ export function WorkshopWrapUpPdfDownload({ workshopSlug }: WorkshopWrapUpPdfDow
                 )}
                 {isDownloading ? 'Připravuji PDF…' : 'Stáhnout shrnutí v PDF'}
             </button>
-            <p className="mt-2 text-xs leading-5 text-room-muted">Shrnutí, hlavní poznatky a materiály z workshopu.</p>
+            <p className="mt-2 text-xs leading-5 text-room-muted">Shrnutí, materiály a projekt v PDF pro sdílení i tisk na A4.</p>
             {errorMessage !== null && (
                 <p role="alert" className="mt-2 text-sm text-room-danger">
                     {errorMessage}

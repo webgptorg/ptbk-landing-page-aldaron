@@ -1,5 +1,13 @@
 # Current preversion
 
+- Redesigned the workshop wrap-up PDF for sharing and A4 printing with the Promptbook logo, locally embedded
+  Inter/Outfit fonts, a light room palette, numbered sections and running headers/footers. It now includes a QR code
+  and readable ad hoc short link back to the workshop room, a project preview with all deployment links, and a
+  paginated vector Git graph using the same branch selection, commit bounds and lane layout as the materials panel.
+  Export preparation remains authenticated and uses the existing material-access projection; private room data is
+  excluded. External preview/history failures retain the recap and project links, and longer histories are labelled
+  with a link to continue in the room. No document is stored or workshop database field added.
+
 - Added `/admin/recording-studio` to the shared admin menu and dashboard. Multiple cameras, screen shares (with
   available shared audio), and optional separate microphones start and stop together, with per-track sizes,
   elapsed time, and an estimate of remaining browser storage time. Recording chunks persist locally in IndexedDB;

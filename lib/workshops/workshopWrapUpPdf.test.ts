@@ -1,12 +1,24 @@
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
 import { selectWorkshopContentForMember } from '@/lib/workshops/workshopPaidMembersContent';
 import {
-    createWorkshopWrapUpPdfDefinition,
+    createWorkshopWrapUpPdfDefinition as createDefinition,
     renderWorkshopWrapUpPdf,
     type WorkshopWrapUpSource,
 } from '@/lib/workshops/workshopWrapUpPdf';
-import type { WorkshopContentBlock } from '@/lib/workshops/workshopTypes';
-import { describe, expect, it } from 'vitest';
+import type { WorkshopContentBlock, WorkshopPublicState } from '@/lib/workshops/workshopTypes';
+import { createWorkshopWrapUpRoomUrl, type WorkshopWrapUpExport } from '@/lib/workshops/workshopWrapUpExport';
+import { readFile } from 'node:fs/promises';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+function createWorkshopWrapUpPdfDefinition(source: WorkshopWrapUpSource, siteOrigin: string, additions: Partial<WorkshopWrapUpExport> = {}) {
+    return createDefinition({
+        source, roomUrl: createWorkshopWrapUpRoomUrl(source.workshop.slug, siteOrigin),
+        shortUrl: 'https://ptbk.io/wrapup-test', repositoryProgress: null, projectPreview: null, projectPreviewImage: null,
+        ...additions,
+    });
+}
+
+afterEach(() => vi.unstubAllGlobals());
 
 const MATERIAL: WorkshopContentBlock = {
     id: 'material',
@@ -22,7 +34,7 @@ const MATERIAL: WorkshopContentBlock = {
     linkClickCount: 0,
 };
 
-const SOURCE: WorkshopWrapUpSource = {
+const SOURCE: Pick<WorkshopPublicState, 'workshop' | 'contentBlocks' | 'serverTime'> = {
     workshop: {
         id: 'workshop',
         slug: 'test-workshop',
@@ -60,14 +72,16 @@ describe('workshop wrap-up PDF', () => {
         expect(document).toContain('Praktické programování s AI agenty.');
         expect(document).toContain('Ověřujte výsledky agenta testy.');
         expect(document).toContain('Zadávejte malé úkoly.');
-        expect(definition.content).toContainEqual({ ul: ['Ověřujte výsledky agenta testy.', 'Zadávejte malé úkoly.'] });
+        expect(definition.defaultStyle?.font).toBe('Inter');
+        expect(definition.pageSize).toBe('A4');
+        expect(document).toContain('"qr":"https://ptbk.io/wrapup-test"');
         for (const link of [
             'https://example.com/demo',
             'https://example.com/presentation.pdf',
             'https://github.com/example/workshop',
             'https://example.com/app',
             'https://example.com/preview',
-            'https://example.com/cs/online-workshop/participant?workshop=test-workshop',
+            'https://ptbk.io/wrapup-test',
         ]) {
             expect(document).toContain(`"link":"${link}"`);
         }
@@ -79,6 +93,7 @@ describe('workshop wrap-up PDF', () => {
         ['ongoing', { serverTime: '2026-09-19T10:30:00Z' }],
         ['reopened', { workshop: { ...SOURCE.workshop, endsAt: null } }],
         ['community', { workshop: { ...SOURCE.workshop, kind: 'community' as const } }],
+        ['unpublished', { workshop: { ...SOURCE.workshop, isPublished: false } }],
     ])('refuses a %s room even if an old browser still shows the download', (_label, changes) => {
         expect(() => createWorkshopWrapUpPdfDefinition({ ...SOURCE, ...changes }, 'https://example.com')).toThrow(
             'po skončení',
@@ -142,6 +157,12 @@ describe('workshop wrap-up PDF', () => {
     });
 
     it('renders a real multipage PDF with embedded Unicode fonts and clickable links', async () => {
+        vi.stubGlobal('fetch', vi.fn(async (path: string) => new Response(await readFile(`public${path}`))));
+        const commits = Array.from({ length: 24 }, (_, index) => ({
+            sha: index.toString(16).padStart(40, '0'), message: `Český commit ${index}`, authorName: 'Pavol Hejný',
+            committedAt: new Date(Date.parse(SOURCE.workshop.startsAt) + (24 - index) * 60_000).toISOString(),
+            parentShas: index === 23 ? [] : [(index + 1).toString(16).padStart(40, '0')], branchNames: ['main'],
+        }));
         const definition = createWorkshopWrapUpPdfDefinition(
             {
                 ...SOURCE,
@@ -153,7 +174,15 @@ describe('workshop wrap-up PDF', () => {
                 ],
             },
             'https://example.com',
+            {
+                repositoryProgress: { commits, branches: [{ name: 'main', headSha: commits[0].sha }], nextPage: 2,
+                    range: { start: commits[23], end: commits[0] } },
+                projectPreviewImage: `data:image/png;base64,${(await readFile('public/logo/og-image.png')).toString('base64')}`,
+                projectPreview: { title: 'Skutečný náhled projektu', description: 'Popis aplikace.', repositoryName: 'example/workshop', previewImageUrl: null },
+            },
         );
+        expect(JSON.stringify(definition)).toContain('Skutečný náhled projektu');
+        expect(JSON.stringify(definition)).toContain('další commity najdete v místnosti');
         const blob = await renderWorkshopWrapUpPdf(definition);
         const bytes = Buffer.from(await blob.arrayBuffer()).toString('latin1');
         expect(blob.type).toBe('application/pdf');
@@ -162,6 +191,8 @@ describe('workshop wrap-up PDF', () => {
         expect(bytes).toContain('/FontFile2');
         expect(bytes).toContain('/ToUnicode');
         expect(bytes).toContain('/URI (https://example.com/demo)');
+        for (const commit of commits) expect(bytes).toContain(`/URI (https://github.com/example/workshop/commit/${commit.sha})`);
+        expect(bytes).toContain('/Subtype /Image');
         expect(bytes.trimEnd().endsWith('%%EOF')).toBe(true);
     });
 });

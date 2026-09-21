@@ -1,5 +1,6 @@
 import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import type { WorkshopRepositoryProgress } from '@/lib/workshops/workshopRepositoryProgress';
+import type { WorkshopWrapUpExport } from '@/lib/workshops/workshopWrapUpExport';
 import type {
     WorkshopComment,
     WorkshopCommentSort,
@@ -133,6 +134,14 @@ export async function fetchWorkshopState(
     const response = await fetch(`${getWorkshopApiUrl(workshopSlug, 'state')}?${searchParameters}`, {
         credentials: 'same-origin',
         cache: 'no-store',
+    });
+    return readResponseJson(response);
+}
+
+/** Refreshes authorized recap data and creates its room short link only when a download is requested. */
+export async function prepareWorkshopWrapUp(workshopSlug: string): Promise<WorkshopWrapUpExport> {
+    const response = await fetch(getWorkshopApiUrl(workshopSlug, 'wrap-up'), {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store',
     });
     return readResponseJson(response);
 }

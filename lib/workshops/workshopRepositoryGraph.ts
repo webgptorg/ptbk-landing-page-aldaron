@@ -1,4 +1,17 @@
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
+import type { GithubBranch } from '@/lib/github/githubRepository';
+
+/** The room and its printed graph seed the same lanes, including feeds without explicit branch tips. */
+export function createWorkshopRepositoryGraphBranchHeadShas(
+    branches: readonly GithubBranch[],
+    commits: readonly GithubCommit[],
+): readonly string[] {
+    return branches.flatMap((branch, branchIndex) => {
+        if (branch.headSha !== null) return [branch.headSha];
+        const namedCommit = commits.find((commit) => commit.branchNames?.includes(branch.name)) ?? commits[branchIndex];
+        return namedCommit === undefined ? [] : [namedCommit.sha];
+    });
+}
 
 export type WorkshopRepositoryGraphConnection = {
     readonly fromLaneIndex: number;

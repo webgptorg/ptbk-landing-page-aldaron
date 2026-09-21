@@ -208,15 +208,14 @@ async function assertPublicWebPageUrl(url: string): Promise<void> {
     }
 }
 
-async function readPublicWebPageHtml(response: Response): Promise<string> {
+async function readPublicWebPageBytes(response: Response, maximalBytes: number): Promise<Buffer> {
     const reader = response.body?.getReader();
     if (reader === undefined) {
-        return '';
+        return Buffer.alloc(0);
     }
 
-    const decoder = new TextDecoder();
     let byteCount = 0;
-    let html = '';
+    const chunks: Uint8Array[] = [];
 
     while (true) {
         const readResult = await reader.read();
@@ -225,21 +224,30 @@ async function readPublicWebPageHtml(response: Response): Promise<string> {
         }
 
         byteCount += readResult.value.byteLength;
-        if (byteCount > MAXIMAL_PUBLIC_WEB_PAGE_HTML_BYTES) {
+        if (byteCount > maximalBytes) {
             await reader.cancel();
             throw new PublicWebPagePreviewError('Page is too large to preview');
         }
 
-        html += decoder.decode(readResult.value, { stream: true });
+        chunks.push(readResult.value);
     }
 
-    return html + decoder.decode();
+    return Buffer.concat(chunks);
 }
 
-async function fetchPublicWebPageHtml(
+/** HTML and its preview image share public-address checks, redirect limits and bounded, timed reads. */
+export async function fetchPublicWebPageResource(
     initialUrl: string,
-    revalidateSeconds: number | undefined,
-): Promise<{ readonly html: string; readonly url: string }> {
+    options: {
+        readonly accept: string;
+        readonly contentTypePattern: RegExp;
+        readonly maximalBytes: number;
+        readonly revalidateSeconds?: number;
+    },
+): Promise<{ readonly bytes: Buffer; readonly url: string }> {
+    if (normalizePublicWebPageUrl(initialUrl) === null) {
+        throw new PublicWebPagePreviewError('Page URL is invalid');
+    }
     let currentUrl = initialUrl;
 
     for (let redirectCount = 0; redirectCount <= MAXIMAL_PUBLIC_WEB_PAGE_REDIRECT_COUNT; redirectCount += 1) {
@@ -247,49 +255,52 @@ async function fetchPublicWebPageHtml(
 
         const abortController = new AbortController();
         const timeoutId = setTimeout(() => abortController.abort(), PUBLIC_WEB_PAGE_REQUEST_TIMEOUT_MILLISECONDS);
-        let response: Response;
         try {
-            response = await fetch(currentUrl, {
+            const response = await fetch(currentUrl, {
                 method: 'GET',
                 redirect: 'manual',
                 signal: abortController.signal,
                 headers: {
-                    Accept: 'text/html,application/xhtml+xml',
+                    Accept: options.accept,
                     'User-Agent': PUBLIC_WEB_PAGE_USER_AGENT,
                 },
-                ...(revalidateSeconds === undefined ? {} : { next: { revalidate: revalidateSeconds } }),
+                ...(options.revalidateSeconds === undefined ? {} : { next: { revalidate: options.revalidateSeconds } }),
             });
-        } catch {
+
+            if (response.status >= 300 && response.status < 400) {
+                await response.body?.cancel();
+                const redirectLocation = response.headers.get('location');
+                if (redirectLocation === null || redirectCount === MAXIMAL_PUBLIC_WEB_PAGE_REDIRECT_COUNT) {
+                    throw new PublicWebPagePreviewError('Page redirects too many times');
+                }
+
+                const redirectedUrl = normalizePublicWebPageUrl(new URL(redirectLocation, currentUrl).toString());
+                if (redirectedUrl === null) {
+                    throw new PublicWebPagePreviewError('Page redirects to an unsupported URL');
+                }
+
+                currentUrl = redirectedUrl;
+                continue;
+            }
+
+            if (!response.ok) {
+                await response.body?.cancel();
+                throw new PublicWebPagePreviewError('Page could not be loaded');
+            }
+
+            const contentType = response.headers.get('content-type') ?? '';
+            if (!options.contentTypePattern.test(contentType)) {
+                await response.body?.cancel();
+                throw new PublicWebPagePreviewError('Unsupported preview content type');
+            }
+
+            return { bytes: await readPublicWebPageBytes(response, options.maximalBytes), url: currentUrl };
+        } catch (error) {
+            if (error instanceof PublicWebPagePreviewError) throw error;
             throw new PublicWebPagePreviewError('Page could not be loaded');
         } finally {
             clearTimeout(timeoutId);
         }
-
-        if (response.status >= 300 && response.status < 400) {
-            const redirectLocation = response.headers.get('location');
-            if (redirectLocation === null || redirectCount === MAXIMAL_PUBLIC_WEB_PAGE_REDIRECT_COUNT) {
-                throw new PublicWebPagePreviewError('Page redirects too many times');
-            }
-
-            const redirectedUrl = normalizePublicWebPageUrl(new URL(redirectLocation, currentUrl).toString());
-            if (redirectedUrl === null) {
-                throw new PublicWebPagePreviewError('Page redirects to an unsupported URL');
-            }
-
-            currentUrl = redirectedUrl;
-            continue;
-        }
-
-        if (!response.ok) {
-            throw new PublicWebPagePreviewError('Page could not be loaded');
-        }
-
-        const contentType = response.headers.get('content-type') ?? '';
-        if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
-            throw new PublicWebPagePreviewError('Page URL does not point to an HTML page');
-        }
-
-        return { html: await readPublicWebPageHtml(response), url: currentUrl };
     }
 
     throw new PublicWebPagePreviewError('Page redirects too many times');
@@ -310,6 +321,11 @@ export async function scrapePublicWebPagePreview(
         throw new PublicWebPagePreviewError('Page URL is invalid');
     }
 
-    const { html, url } = await fetchPublicWebPageHtml(normalizedUrl, revalidateSeconds);
-    return extractPublicWebPagePreview(html, url);
+    const { bytes, url } = await fetchPublicWebPageResource(normalizedUrl, {
+        accept: 'text/html,application/xhtml+xml',
+        contentTypePattern: /text\/html|application\/xhtml\+xml/i,
+        maximalBytes: MAXIMAL_PUBLIC_WEB_PAGE_HTML_BYTES,
+        revalidateSeconds,
+    });
+    return extractPublicWebPagePreview(bytes.toString('utf8'), url);
 }
