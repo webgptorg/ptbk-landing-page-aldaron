@@ -54,6 +54,15 @@ const TOMORROW_WORKSHOP: WorkshopSummary = {
     endsAt: '2026-09-11T20:30:00+02:00',
 };
 
+const TODAY_WORKSHOP: WorkshopSummary = {
+    ...ONGOING_WORKSHOP,
+    id: 'today-workshop-id',
+    slug: 'production-ai-2026-09-10-evening',
+    title: 'Večerní workshop dnes',
+    startsAt: '2026-09-10T21:00:00+02:00',
+    endsAt: '2026-09-10T22:00:00+02:00',
+};
+
 const THIS_WEEK_WORKSHOP: WorkshopSummary = {
     ...ONGOING_WORKSHOP,
     id: 'this-week-workshop-id',
@@ -213,17 +222,27 @@ describe('workshop links panel', () => {
         expect(pastCard?.textContent).toContain('Proběhlo');
     });
 
-    it('gives a term in the next seven days its own badge and calendar colour', () => {
-        renderWorkshopLinksPanel([ONGOING_WORKSHOP, TOMORROW_WORKSHOP, UPCOMING_WORKSHOP]);
+    it('distinguishes today, tomorrow, and the rest of the next seven days on cards and the calendar', () => {
+        renderWorkshopLinksPanel([THIS_WEEK_WORKSHOP, TOMORROW_WORKSHOP, TODAY_WORKSHOP, UPCOMING_WORKSHOP]);
 
+        expect(findCalendarDay('2026-09-10').className).toContain(
+            getWorkshopPhaseAppearance('upcoming-today').calendarDayClassName,
+        );
         expect(findCalendarDay('2026-09-11').className).toContain(
+            getWorkshopPhaseAppearance('upcoming-tomorrow').calendarDayClassName,
+        );
+        expect(findCalendarDay('2026-09-12').className).toContain(
             getWorkshopPhaseAppearance('upcoming-next-week').calendarDayClassName,
         );
+        expect(screen.getAllByText('Dneska')).toHaveLength(2);
+        expect(screen.getAllByText('Zítra')).toHaveLength(2);
         expect(screen.getAllByText('Tento týden')).toHaveLength(2);
 
         showCardsView();
 
-        const [, upcomingNextWeekCard, upcomingCard] = findTermLinks();
+        const [todayCard, tomorrowCard, upcomingNextWeekCard, upcomingCard] = findTermLinks();
+        expect(todayCard?.textContent).toContain('Dneska');
+        expect(tomorrowCard?.textContent).toContain('Zítra');
         expect(upcomingNextWeekCard?.textContent).toContain('Tento týden');
         expect(upcomingCard?.textContent).toContain('Nadchází');
     });

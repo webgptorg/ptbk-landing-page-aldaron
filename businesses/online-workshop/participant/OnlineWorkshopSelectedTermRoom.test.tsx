@@ -79,6 +79,13 @@ const NEAREST_UPCOMING_WORKSHOP = createOnlineWorkshopTerm({
     endsAt: '2026-09-11T11:00:00+02:00',
 });
 
+const TODAY_WORKSHOP = createOnlineWorkshopTerm({
+    slug: 'online-workshop-dnes-2026-09-10',
+    title: 'Dnešní workshop',
+    startsAt: '2026-09-10T19:00:00+02:00',
+    endsAt: '2026-09-10T20:00:00+02:00',
+});
+
 const LATER_UPCOMING_WORKSHOP = createOnlineWorkshopTerm({
     slug: 'online-workshop-kontext-projektu-2026-09-14',
     title: 'Kontext projektu a agenti',
@@ -167,12 +174,23 @@ describe('online workshop waiting room', () => {
         expect(screen.getByRole('button', { name: new RegExp(PAST_WORKSHOP.title) })).toBeDefined();
     });
 
-    it('marks a term starting during the next seven days in the waiting-room picker', () => {
-        renderWaitingRoom(LATER_UPCOMING_WORKSHOP);
+    it('keeps today and tomorrow selectable with their own badges before the other next-week terms', () => {
+        renderWaitingRoom(LATER_UPCOMING_WORKSHOP, [...PUBLISHED_WORKSHOPS, TODAY_WORKSHOP]);
 
         expect(
+            screen.getByRole('button', { name: new RegExp(TODAY_WORKSHOP.title) }).textContent,
+        ).toContain('Dneska');
+        expect(
             screen.getByRole('button', { name: new RegExp(NEAREST_UPCOMING_WORKSHOP.title) }).textContent,
+        ).toContain('Zítra');
+        expect(
+            screen.getByRole('button', { name: new RegExp(LATER_UPCOMING_WORKSHOP.title) }).textContent,
         ).toContain('Tento týden');
+
+        fireEvent.click(screen.getByRole('button', { name: new RegExp(TODAY_WORKSHOP.title) }));
+
+        expect(getOpenedWorkshopSlug()).toBe(TODAY_WORKSHOP.slug);
+        expect(window.location.search).toBe(`?workshop=${TODAY_WORKSHOP.slug}`);
     });
 
     it('names the workshop which has only just been held in the open, rather than filing it into the history', () => {

@@ -22,9 +22,10 @@
 
 ---
 
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.2721 6 minutes; Testing 5 minutes
 
 [✨🌷] Alongside the "Tento týden" badge add "Dneska" and "Zítra" badges
 
 ![alt text](prompts/screenshots/2026-09-0171-freshly-upcomming-events-1.png)
 ![alt text](prompts/screenshots/2026-09-0171-freshly-upcomming-events-2.png)
+

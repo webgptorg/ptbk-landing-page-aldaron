@@ -21,8 +21,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   but all use one registration form. `/cs/online-workshop/dekujeme` is the
   full-load conversion page; `/participant` is the live room. Its waiting room
   offers every published term as the same term cards the landing page registers
-  with: running and upcoming ones first, with a special `Tento týden` badge for a
-  term beginning within the next seven rolling days, then the ones which ended
+  with: running and upcoming ones first, with `Dneska` and `Zítra` badges for terms
+  beginning today or tomorrow in Prague and `Tento týden` for the remaining terms
+  beginning within the next seven rolling days, then the ones which ended
   within the last day, and the older finished ones behind a disclosure.
   Picking one changes the room being connected to and the `workshop` parameter,
   without losing the name and e-mail already typed.
@@ -91,8 +92,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   a replay badge. Card data includes no feedback. Where a term stands in
   time is decided
   once, in `lib/workshops/workshopPhase.ts`, as one of
-  five phases: ongoing, freshly past while it ended within the last
-  `FRESHLY_PAST_WORKSHOP_HOURS`, upcoming within the next seven rolling days,
+  seven phases: ongoing, freshly past while it ended within the last
+  `FRESHLY_PAST_WORKSHOP_HOURS`, upcoming today or tomorrow by Prague calendar date,
+  other upcoming within the next seven rolling days,
   other upcoming, and past. Every list, badge, and calendar colour reads that one
   answer, and everything which opens after a workshop — the wrap-up, the feedback,
   the recording — treats freshly past as over. A term with a
@@ -121,7 +123,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   nothing about registrations at all. The registration block opens the exact
   filtered `/admin/contacts` list and its shared CSV, vCard, and Book exports;
   it never creates a second contact table or serializer in workshop administration.
-  Its term picker gives ongoing, freshly past, next-seven-day, and later upcoming
+  Its term picker gives ongoing, freshly past, today, tomorrow, next-seven-day, and later upcoming
   terms their own categories, because a term which has only just been held is
   still being wrapped up and one beginning soon needs preparation; only past terms
   stay behind its history disclosure. Its unobtrusive display-settings control

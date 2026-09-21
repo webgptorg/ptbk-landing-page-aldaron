@@ -43,6 +43,22 @@ const UPCOMING_NEXT_WEEK_WORKSHOP: WorkshopAdminSummary = {
     startsAt: '2026-08-24T19:00:00+02:00',
     endsAt: '2026-08-24T20:30:00+02:00',
 };
+const UPCOMING_TODAY_WORKSHOP: WorkshopAdminSummary = {
+    ...UPCOMING_WORKSHOP,
+    id: 'upcoming-today-workshop-id',
+    slug: 'produkcni-kod-2026-08-21-evening',
+    title: 'Večerní workshop dnes',
+    startsAt: '2026-08-21T21:00:00+02:00',
+    endsAt: '2026-08-21T22:00:00+02:00',
+};
+const UPCOMING_TOMORROW_WORKSHOP: WorkshopAdminSummary = {
+    ...UPCOMING_WORKSHOP,
+    id: 'upcoming-tomorrow-workshop-id',
+    slug: 'produkcni-kod-2026-08-22',
+    title: 'Workshop zítra',
+    startsAt: '2026-08-22T19:00:00+02:00',
+    endsAt: '2026-08-22T20:30:00+02:00',
+};
 const FRESHLY_PAST_WORKSHOP: WorkshopAdminSummary = {
     id: 'freshly-past-workshop-id',
     kind: 'workshop',
@@ -128,22 +144,30 @@ describe('workshop selector card list', () => {
             FRESHLY_PAST_WORKSHOP,
             UPCOMING_WORKSHOP,
             UPCOMING_NEXT_WEEK_WORKSHOP,
+            UPCOMING_TOMORROW_WORKSHOP,
+            UPCOMING_TODAY_WORKSHOP,
             ONGOING_WORKSHOP,
         ]);
 
         expect(screen.getByRole('heading', { name: 'Probíhá (1)' })).not.toBeNull();
         expect(screen.getByRole('heading', { name: 'Právě proběhlo (1)' })).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Dneska (1)' })).not.toBeNull();
+        expect(screen.getByRole('heading', { name: 'Zítra (1)' })).not.toBeNull();
         expect(screen.getByRole('heading', { name: 'Tento týden (1)' })).not.toBeNull();
         expect(screen.getByRole('heading', { name: 'Nadchází (1)' })).not.toBeNull();
         expect(getWorkshopCards().map((workshopCard) => workshopCard.textContent)).toEqual([
             expect.stringContaining(ONGOING_WORKSHOP.title),
             expect.stringContaining(FRESHLY_PAST_WORKSHOP.title),
+            expect.stringContaining(UPCOMING_TODAY_WORKSHOP.title),
+            expect.stringContaining(UPCOMING_TOMORROW_WORKSHOP.title),
             expect.stringContaining(UPCOMING_NEXT_WEEK_WORKSHOP.title),
             expect.stringContaining(UPCOMING_WORKSHOP.title),
         ]);
 
         expect(getWorkshopCards()[1].textContent).toContain('Právě proběhlo');
-        expect(getWorkshopCards()[2].textContent).toContain('Tento týden');
+        expect(getWorkshopCards()[2].textContent).toContain('Dneska');
+        expect(getWorkshopCards()[3].textContent).toContain('Zítra');
+        expect(getWorkshopCards()[4].textContent).toContain('Tento týden');
         expect(screen.getByRole('button', { name: 'Historie (1)' }).getAttribute('aria-expanded')).toBe('false');
     });
 

@@ -1,5 +1,9 @@
 # Current preversion
 
+- Added `Dneska` and `Zítra` event badges ahead of `Tento týden`, based on Prague calendar dates. Shared cards,
+  calendars, landing-page term choices, and the admin picker use the same phases and theme-aware colours. Terms
+  still switch to `Probíhá` at their start and remain eligible for waiting-room choices and follow-up recommendations.
+
 - Added the **Titulky** tab at `/admin/workshops?tab=subtitles` with private Czech, English and mixed-language tracks.
   Admins can fetch available YouTube captions, generate timed subtitles from an uploaded video/audio recording,
   import or edit SRT/WebVTT, and download either format. Long recordings are decoded in the browser and transcribed

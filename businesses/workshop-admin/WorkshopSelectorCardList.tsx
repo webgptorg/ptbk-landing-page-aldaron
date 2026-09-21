@@ -86,7 +86,7 @@ function WorkshopSelectorCardGrid({
 }
 
 /**
- * Offers every occurrence as a card in the five shared time categories. An administrator gets the workshop that is
+ * Offers every occurrence as a card in the shared time categories. An administrator gets the workshop that is
  * running first, the one they are wrapping up next, then the terms to prepare soon and later, while the old archive
  * remains available on demand.
  */

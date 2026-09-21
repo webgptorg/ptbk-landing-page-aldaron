@@ -34,8 +34,8 @@ export type WorkshopPhaseAppearance = {
  * The one description of how every phase looks, wherever a term is listed
  *
  * Note: A list of cards and a calendar of the same terms say the very same thing with the very same colour - green
- *       runs right now, amber has only just been held, violet starts within a week, cyan is further ahead, and grey is
- *       history - because both of them read their colours here instead of choosing their own.
+ *       runs right now, amber has only just been held, orange starts today, blue tomorrow, violet within a week, cyan
+ *       further ahead, and grey is history - because both read their colours here instead of choosing their own.
  * Note: These colours live beside the components which wear them rather than among the rules of the application,
  *       because only the directories of the components are read for the styles the application is built with.
  */
@@ -60,6 +60,24 @@ const WORKSHOP_PHASE_APPEARANCES: Readonly<Record<WorkshopPhase, WorkshopPhaseAp
         },
         calendarDayClassName: 'border-room-warning/40 bg-room-warning/10 text-room-warning',
         markClassName: 'bg-room-warning',
+    },
+    'upcoming-today': {
+        label: 'Dneska',
+        badgeClassNameByTone: {
+            light: 'bg-orange-100 text-orange-800',
+            room: 'bg-room-upcoming-today/15 text-room-upcoming-today ring-1 ring-inset ring-room-upcoming-today/40',
+        },
+        calendarDayClassName: 'border-room-upcoming-today/40 bg-room-upcoming-today/10 text-room-upcoming-today',
+        markClassName: 'bg-room-upcoming-today',
+    },
+    'upcoming-tomorrow': {
+        label: 'Zítra',
+        badgeClassNameByTone: {
+            light: 'bg-blue-100 text-blue-800',
+            room: 'bg-room-upcoming-tomorrow/15 text-room-upcoming-tomorrow ring-1 ring-inset ring-room-upcoming-tomorrow/40',
+        },
+        calendarDayClassName: 'border-room-upcoming-tomorrow/40 bg-room-upcoming-tomorrow/10 text-room-upcoming-tomorrow',
+        markClassName: 'bg-room-upcoming-tomorrow',
     },
     // Note: This stays distinct from the ordinary upcoming cyan so the special badge is useful even when a reader
     //       cannot infer a date at a glance.

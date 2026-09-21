@@ -19,6 +19,8 @@
     --room-success: 167 243 208;
     --room-warning: 253 230 138;
     --room-danger: 253 164 175;
+    --room-upcoming-today: 253 186 116;
+    --room-upcoming-tomorrow: 147 197 253;
     --room-upcoming: 196 181 253;
     --room-graph-pink: 244 114 182;
     --room-color-scheme: dark;
@@ -44,6 +46,8 @@
     --room-success: 6 95 70;
     --room-warning: 146 64 14;
     --room-danger: 159 18 57;
+    --room-upcoming-today: 154 52 18;
+    --room-upcoming-tomorrow: 30 64 175;
     --room-upcoming: 109 40 217;
     --room-graph-pink: 190 24 93;
     --room-color-scheme: light;

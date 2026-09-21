@@ -3,7 +3,7 @@
 import { createOnlineWorkshopTermNoteText } from '@/businesses/online-workshop/onlineWorkshopTerms';
 import { EventTermOptionList } from '@/components/events/EventTermOptionList';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
-import { groupWorkshopsByPhase } from '@/lib/workshops/workshopPhase';
+import { groupWorkshopsByPhase, isWorkshopPhaseUpcoming, WORKSHOP_PHASE_VALUES } from '@/lib/workshops/workshopPhase';
 import { ChevronDown, Clock, History, Sparkles } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 
@@ -65,11 +65,8 @@ export function OnlineWorkshopRoomTermPicker({
         () => groupWorkshopsByPhase(terms, Date.parse(currentTime)),
         [currentTime, terms],
     );
-    const currentTerms = [
-        ...termsByPhase.ongoing,
-        ...termsByPhase['upcoming-next-week'],
-        ...termsByPhase.upcoming,
-    ];
+    const currentTerms = WORKSHOP_PHASE_VALUES.filter((phase) => phase === 'ongoing' || isWorkshopPhaseUpcoming(phase))
+        .flatMap((phase) => termsByPhase[phase]);
     const freshlyPastTerms = termsByPhase['freshly-past'];
     const { past: pastTerms } = termsByPhase;
     const isSelectedTermPast = pastTerms.some((term) => term.slug === selectedTermSlug);

@@ -1,3 +1,5 @@
+import { createCalendarDayKey } from '@/lib/calendar/calendarMonth';
+import { getRelativeCalendarDay } from '@/lib/calendar/czechRelativeDay';
 import {
     DEFAULT_WORKSHOP_DURATION_MINUTES,
     FRESHLY_PAST_WORKSHOP_HOURS,
@@ -6,6 +8,7 @@ import {
 
 const MILLISECONDS_PER_MINUTE = 60 * 1000;
 const MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
+const WORKSHOP_TIME_ZONE = 'Europe/Prague';
 
 /**
  * Where one occurrence currently stands in time, named from the most pressing phase to the least
@@ -15,10 +18,19 @@ const MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE;
  *       nothing to do with what they do with a workshop of last spring.
  * Note: An occurrence which starts during the next seven days is also a phase of its own, so a schedule can call
  *       attention to the terms somebody still has time to plan for without each surface calculating that window again.
+ *       Today and tomorrow take precedence within that window, using Prague calendar days rather than elapsed hours.
  * Note: This order is what ranks the phases wherever they are listed, coloured, or grouped, so a phase is placed among
  *       the others only here.
  */
-export const WORKSHOP_PHASE_VALUES = ['ongoing', 'freshly-past', 'upcoming-next-week', 'upcoming', 'past'] as const;
+export const WORKSHOP_PHASE_VALUES = [
+    'ongoing',
+    'freshly-past',
+    'upcoming-today',
+    'upcoming-tomorrow',
+    'upcoming-next-week',
+    'upcoming',
+    'past',
+] as const;
 
 export type WorkshopPhase = (typeof WORKSHOP_PHASE_VALUES)[number];
 
@@ -41,7 +53,12 @@ export function isWorkshopPhasePast(phase: WorkshopPhase): boolean {
  *       badge.
  */
 export function isWorkshopPhaseUpcoming(phase: WorkshopPhase): boolean {
-    return phase === 'upcoming-next-week' || phase === 'upcoming';
+    return (
+        phase === 'upcoming-today' ||
+        phase === 'upcoming-tomorrow' ||
+        phase === 'upcoming-next-week' ||
+        phase === 'upcoming'
+    );
 }
 
 /**
@@ -127,6 +144,17 @@ export function getWorkshopPhase(
 ): WorkshopPhase {
     const startsAtMilliseconds = Date.parse(occurrence.startsAt);
     if (isWorkshopStartingWithinNextWeek(startsAtMilliseconds, currentTimeMilliseconds)) {
+        const relativeDay = getRelativeCalendarDay(
+            createCalendarDayKey(occurrence.startsAt, WORKSHOP_TIME_ZONE),
+            createCalendarDayKey(new Date(currentTimeMilliseconds).toISOString(), WORKSHOP_TIME_ZONE),
+        );
+        if (relativeDay === 'today') {
+            return 'upcoming-today';
+        }
+        if (relativeDay === 'tomorrow') {
+            return 'upcoming-tomorrow';
+        }
+
         return 'upcoming-next-week';
     }
 
@@ -207,6 +235,8 @@ export function groupWorkshopsByPhase<TWorkshop extends WorkshopOccurrenceTiming
     const workshopsByPhase: Record<WorkshopPhase, TWorkshop[]> = {
         ongoing: [],
         'freshly-past': [],
+        'upcoming-today': [],
+        'upcoming-tomorrow': [],
         'upcoming-next-week': [],
         upcoming: [],
         past: [],

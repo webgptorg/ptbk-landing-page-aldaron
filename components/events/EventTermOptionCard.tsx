@@ -4,7 +4,7 @@ import type { EventOccurrence } from '@/lib/events/eventOccurrence';
 import { formatEventPrice } from '@/lib/events/eventPrice';
 import { cn } from '@/lib/utils';
 import { formatCzechWorkshopRelativeDay, formatCzechWorkshopTimeRange } from '@/lib/workshops/workshopDate';
-import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import { getWorkshopPhase, isWorkshopPhaseUpcoming } from '@/lib/workshops/workshopPhase';
 import type { LucideIcon } from 'lucide-react';
 
 /**
@@ -175,7 +175,7 @@ export function EventTermOptionCard({
     const appearanceClassNames = EVENT_TERM_OPTION_CARD_APPEARANCES[appearance];
     const densityClassNames = EVENT_TERM_OPTION_CARD_DENSITIES[density];
     const phase = getWorkshopPhase(occurrence, Date.parse(currentTime));
-    const isWorkshopStartingWithinNextWeek = phase === 'upcoming-next-week';
+    const isWorkshopStartingSoon = isWorkshopPhaseUpcoming(phase) && phase !== 'upcoming';
 
     return (
         <button
@@ -199,7 +199,7 @@ export function EventTermOptionCard({
                     {formatCzechWorkshopRelativeDay(occurrence.startsAt, currentTime)} ·{' '}
                     {formatCzechWorkshopTimeRange(occurrence.startsAt, occurrence.endsAt)}
                 </span>
-                {isWorkshopStartingWithinNextWeek && (
+                {isWorkshopStartingSoon && (
                     <WorkshopPhaseBadge
                         phase={phase}
                         tone={appearance}

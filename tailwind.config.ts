@@ -51,6 +51,8 @@ const config: Config = {
                     success: 'rgb(var(--room-success) / <alpha-value>)',
                     warning: 'rgb(var(--room-warning) / <alpha-value>)',
                     danger: 'rgb(var(--room-danger) / <alpha-value>)',
+                    'upcoming-today': 'rgb(var(--room-upcoming-today) / <alpha-value>)',
+                    'upcoming-tomorrow': 'rgb(var(--room-upcoming-tomorrow) / <alpha-value>)',
                     upcoming: 'rgb(var(--room-upcoming) / <alpha-value>)',
                 },
                 background: 'hsl(var(--background))',
