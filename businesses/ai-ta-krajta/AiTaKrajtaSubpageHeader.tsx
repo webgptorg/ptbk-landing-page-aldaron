@@ -1,5 +1,9 @@
 import { AiTaKrajtaMark } from '@/businesses/ai-ta-krajta/AiTaKrajtaMark';
-import { AI_TA_KRAJTA_NAME, AI_TA_KRAJTA_PATH, type AiTaKrajtaSubpage } from '@/businesses/ai-ta-krajta/config';
+import {
+    AI_TA_KRAJTA_NAME,
+    AI_TA_KRAJTA_PATH,
+    type AiTaKrajtaSubpage,
+} from '@/businesses/ai-ta-krajta/config';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 

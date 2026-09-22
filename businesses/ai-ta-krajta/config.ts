@@ -1,9 +1,13 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import {
+    CUSTOM_DOMAIN_ROUTES,
+    getCustomDomainPublicPathForSourcePath,
+} from '@/lib/domains/customDomainRouting';
 
 /**
- * Public route of the podcast page
+ * Internal route which renders the podcast page before the custom-domain middleware exposes it at its root.
  */
-export const AI_TA_KRAJTA_PATH = '/ai-ta-krajta';
+export const AI_TA_KRAJTA_PATH = CUSTOM_DOMAIN_ROUTES.AI_TA_KRAJTA.sourcePath;
 
 /**
  * Public page which explains the podcast and every way of working with it
@@ -14,6 +18,22 @@ export const AI_TA_KRAJTA_MEDIA_KIT_PATH = AI_TA_KRAJTA_PATH + '/media-kit';
  * Public page which hands out the logo of the show and says how to draw and write it
  */
 export const AI_TA_KRAJTA_BRANDING_PATH = AI_TA_KRAJTA_PATH + '/branding';
+
+/**
+ * Rewrites an internal podcast route into the relative path visitors use on ai-ta-krajta.cz.
+ *
+ * The fallback leaves an unknown route untouched if this module is ever reused without its domain configuration.
+ */
+export function getAiTaKrajtaPublicPath(sourcePath: string): string {
+    try {
+        const sourceUrl = new URL(sourcePath, 'https://source-route.invalid');
+        const publicPath = getCustomDomainPublicPathForSourcePath(sourceUrl.pathname);
+
+        return publicPath === null ? sourcePath : `${publicPath}${sourceUrl.search}${sourceUrl.hash}`;
+    } catch {
+        return sourcePath;
+    }
+}
 
 /**
  * Section of the media kit which contains the one shared contact form

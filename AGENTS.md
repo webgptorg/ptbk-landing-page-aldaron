@@ -10,8 +10,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/en` is its English localization.
 - `/pro-mesta`, `/pro-firmy`, `/for-agro`, `/for-industry`, `/ai-supervize`,
   `/hackathon-factory`, and `/pavol` are specialized landing pages. `/pavol`
-  redirects to `/cs/pavol` or `/en/pavol`; the localized pages are Pavol Hejny's
-  personal pages.
+  redirects to `/cs/pavol` or `/en/pavol`; the localized source paths permanently
+  redirect to `pavolhejny.cz` and `pavolhejny.com` respectively, where Pavol Hejny's
+  personal pages are served.
 - `/ai-supervize-mini` is the Czech one-day AI Supervize page. Published terms,
   prices, capacities, places, FAQs, registration, and participant information
   come from `/admin/workshops`; with no published term it shows a notice.
@@ -37,7 +38,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in the room. Missing external previews or history leave the recap and project links available.
   It stores no document and adds no administration or database fields; chat, feedback and participant identity are
   excluded from the export.
-- `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
+- `ai-ta-krajta.cz` is the public address of the podcast; its root is internally
+  served by `/ai-ta-krajta`, which permanently redirects when requested on
+  `ptbk.io`. Its `/media-kit`, `/branding`, icon, manifest and social-preview paths
+  are likewise mapped to the existing nested routes. It reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
   the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as
   `application/rss+xml`.

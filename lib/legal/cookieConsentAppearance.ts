@@ -1,4 +1,5 @@
 import { AI_TA_KRAJTA_COLORS, AI_TA_KRAJTA_PATH } from '@/businesses/ai-ta-krajta/config';
+import { isCustomDomainHostnameForSourcePath } from '@/lib/domains/customDomainRouting';
 import { isWorkshopRoomPath } from '@/lib/workshops/workshopRoomTheme';
 import type { CSSProperties } from 'react';
 
@@ -13,11 +14,13 @@ export const PODCAST_COOKIE_CONSENT_STYLE = {
     '--cookie-accent-text': AI_TA_KRAJTA_COLORS.MOSS_DEEP,
 } as CSSProperties;
 
-export function getCookieConsentTheme(pathname: string | null): CookieConsentTheme {
+export function getCookieConsentTheme(pathname: string | null, hostname: string | null = null): CookieConsentTheme {
     const normalizedPathname = pathname?.toLowerCase().replace(/\/+$/, '') ?? '';
     const isWithinPath = (path: string) => normalizedPathname === path || normalizedPathname.startsWith(`${path}/`);
 
-    if (isWithinPath(AI_TA_KRAJTA_PATH)) return 'podcast';
+    if (isWithinPath(AI_TA_KRAJTA_PATH) || isCustomDomainHostnameForSourcePath(hostname, AI_TA_KRAJTA_PATH)) {
+        return 'podcast';
+    }
     if (isWorkshopRoomPath(normalizedPathname)) return 'room';
     return DARK_COOKIE_CONSENT_PATHS.some(isWithinPath) ? 'dark' : 'light';
 }

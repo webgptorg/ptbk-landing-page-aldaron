@@ -1,6 +1,7 @@
 import {
     AI_TA_KRAJTA_VIEW_PARAMETER_NAMES,
     createAiTaKrajtaEpisodePath,
+    createAiTaKrajtaEpisodePublicUrl,
     DEFAULT_AI_TA_KRAJTA_VIEW_STATE,
     parseAiTaKrajtaViewState,
     serializeAiTaKrajtaViewState,
@@ -75,5 +76,9 @@ describe('aiTaKrajtaViewState', () => {
         ).toBe('64');
         expect(viewState.playingEpisodeSlug).toBe('64');
         expect(viewState.isPlaying).toBe(true);
+    });
+
+    it('builds copied episode links on the custom domain', () => {
+        expect(createAiTaKrajtaEpisodePublicUrl('64')).toBe('https://ai-ta-krajta.cz/?episode=64&playing=1');
     });
 });

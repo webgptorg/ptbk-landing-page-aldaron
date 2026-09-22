@@ -31,4 +31,10 @@ describe('getLanguageFromPathname', () => {
         expect(getLanguageFromPathname('/')).toBe('en');
         expect(getLanguageFromPathname(null)).toBe('en');
     });
+
+    it('uses the custom-domain mapping when a route has no language prefix', () => {
+        expect(getLanguageFromPathname('/', 'ai-ta-krajta.cz')).toBe('cs');
+        expect(getLanguageFromPathname('/', 'pavolhejny.cz')).toBe('cs');
+        expect(getLanguageFromPathname('/', 'pavolhejny.com')).toBe('en');
+    });
 });

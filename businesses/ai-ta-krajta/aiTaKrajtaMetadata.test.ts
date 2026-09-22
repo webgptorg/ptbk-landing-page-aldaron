@@ -5,10 +5,7 @@ import {
     createAiTaKrajtaStructuredData,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMetadata';
 import {
-    AI_TA_KRAJTA_APP_ICONS,
     AI_TA_KRAJTA_BRAND_NAME,
-    AI_TA_KRAJTA_MANIFEST_PATH,
-    AI_TA_KRAJTA_PATH,
     AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
     AI_TA_KRAJTA_RSS_FEED_PLATFORM,
     AI_TA_KRAJTA_THEME_COLOR,
@@ -21,12 +18,12 @@ describe('AI ta Krajta metadata', () => {
         expect(AI_TA_KRAJTA_METADATA).toMatchObject({
             title: `${AI_TA_KRAJTA_BRAND_NAME} | Český podcast o umělé inteligenci`,
             applicationName: AI_TA_KRAJTA_BRAND_NAME,
-            authors: [{ name: AI_TA_KRAJTA_BRAND_NAME, url: 'https://ptbk.io/ai-ta-krajta' }],
+            authors: [{ name: AI_TA_KRAJTA_BRAND_NAME, url: 'https://ai-ta-krajta.cz/' }],
             creator: AI_TA_KRAJTA_BRAND_NAME,
             publisher: AI_TA_KRAJTA_BRAND_NAME,
-            manifest: AI_TA_KRAJTA_MANIFEST_PATH,
+            manifest: 'https://ai-ta-krajta.cz/manifest.webmanifest',
             alternates: {
-                canonical: AI_TA_KRAJTA_PATH,
+                canonical: 'https://ai-ta-krajta.cz/',
                 types: {
                     [AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE]: [
                         {
@@ -37,8 +34,11 @@ describe('AI ta Krajta metadata', () => {
                 },
             },
             icons: {
-                icon: [{ url: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path }, { url: AI_TA_KRAJTA_APP_ICONS.RASTER.path }],
-                apple: [{ url: AI_TA_KRAJTA_APP_ICONS.RASTER.path }],
+                icon: [
+                    { url: 'https://ai-ta-krajta.cz/logo.svg' },
+                    { url: 'https://ai-ta-krajta.cz/logo.png' },
+                ],
+                apple: [{ url: 'https://ai-ta-krajta.cz/logo.png' }],
             },
             openGraph: {
                 siteName: AI_TA_KRAJTA_BRAND_NAME,
@@ -56,13 +56,13 @@ describe('AI ta Krajta metadata', () => {
         expect(createAiTaKrajtaManifest()).toMatchObject({
             name: AI_TA_KRAJTA_BRAND_NAME,
             short_name: AI_TA_KRAJTA_BRAND_NAME,
-            start_url: AI_TA_KRAJTA_PATH,
+            start_url: '/',
             background_color: AI_TA_KRAJTA_THEME_COLOR,
             theme_color: AI_TA_KRAJTA_THEME_COLOR,
             icons: [
-                { src: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path, purpose: 'any' },
-                { src: AI_TA_KRAJTA_APP_ICONS.RASTER.path, purpose: 'any' },
-                { src: AI_TA_KRAJTA_APP_ICONS.RASTER.path, purpose: 'maskable' },
+                { src: '/logo.svg', purpose: 'any' },
+                { src: '/logo.png', purpose: 'any' },
+                { src: '/logo.png', purpose: 'maskable' },
             ],
         });
     });

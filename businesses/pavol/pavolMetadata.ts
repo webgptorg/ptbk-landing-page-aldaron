@@ -4,6 +4,7 @@ import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { SocialPreviewImageOptions } from '@/lib/metadata/social-preview-image';
 import type { SocialPreviewPaletteSeed } from '@/lib/metadata/social-preview-palette';
+import { createAbsoluteUrl } from '@/lib/metadata/site-config';
 import { createPersonStructuredData, type StructuredDataNode } from '@/lib/metadata/structured-data';
 import type { Metadata } from 'next';
 
@@ -30,10 +31,12 @@ const PAVOL_SOCIAL_URLS: readonly string[] = [
 /**
  * Paths of the personal page in every language it is published in
  */
-const PAVOL_LANGUAGE_ALTERNATES: Readonly<Record<SupportedHomepageLanguage, string>> = {
+export const PAVOL_LANGUAGE_PATHS: Readonly<Record<SupportedHomepageLanguage, string>> = {
     cs: '/cs/pavol',
     en: '/en/pavol',
 };
+
+const PAVOL_ICON_PATH = '/logo/pavol-hejny-ph.svg';
 
 /**
  * Warmer palette which sets the personal page apart from the product pages
@@ -47,7 +50,7 @@ const PAVOL_PALETTE_SEED: SocialPreviewPaletteSeed = {
 
 export const PAVOL_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguage, PageMetadataDefinition>> = {
     cs: {
-        path: PAVOL_LANGUAGE_ALTERNATES.cs,
+        path: PAVOL_LANGUAGE_PATHS.cs,
         language: 'cs',
         title: 'Pavol Hejný | AI konzultace, vývoj a workshopy',
         socialTitle: 'Pavol Hejný',
@@ -56,13 +59,13 @@ export const PAVOL_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguage, 
         socialDescription: 'AI konzultace, vývoj a workshopy pro firmy a týmy.',
         socialPreviewImageAlt: 'Pavol Hejný - AI konzultace, vývoj a workshopy',
         keywords: ['Pavol Hejný', 'AI konzultace', 'AI workshopy', 'přednášky', 'vývoj', 'Promptbook'],
-        languageAlternates: PAVOL_LANGUAGE_ALTERNATES,
+        languageAlternates: PAVOL_LANGUAGE_PATHS,
         openGraphType: 'profile',
         isSocialPreviewImageGenerated: true,
         sitemapPriority: 0.8,
     },
     en: {
-        path: PAVOL_LANGUAGE_ALTERNATES.en,
+        path: PAVOL_LANGUAGE_PATHS.en,
         language: 'en',
         title: 'Pavol Hejný | AI consulting, software development, and workshops',
         socialTitle: 'Pavol Hejný',
@@ -71,7 +74,7 @@ export const PAVOL_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguage, 
         socialDescription: 'AI consulting, software development, and workshops for companies and teams.',
         socialPreviewImageAlt: 'Pavol Hejný - AI consulting, software development, and workshops',
         keywords: ['Pavol Hejný', 'AI consulting', 'AI workshops', 'talks', 'development', 'Promptbook'],
-        languageAlternates: PAVOL_LANGUAGE_ALTERNATES,
+        languageAlternates: PAVOL_LANGUAGE_PATHS,
         openGraphType: 'profile',
         isSocialPreviewImageGenerated: true,
         sitemapPriority: 0.8,
@@ -86,12 +89,25 @@ export const PAVOL_METADATA: Readonly<Record<SupportedHomepageLanguage, Metadata
 /**
  * Personal branding of the page, which replaces the Promptbook favicon
  */
-export const PAVOL_LAYOUT_METADATA: Metadata = {
-    icons: {
-        icon: [{ url: '/logo/pavol-hejny-ph.svg', type: 'image/svg+xml' }],
-        shortcut: ['/logo/pavol-hejny-ph.svg'],
-    },
+export const PAVOL_LAYOUT_METADATA: Readonly<Record<SupportedHomepageLanguage, Metadata>> = {
+    cs: createPavolLayoutMetadata('cs'),
+    en: createPavolLayoutMetadata('en'),
 };
+
+/**
+ * Gives each localized personal site an icon URL on the same custom hostname rather than inheriting ptbk.io's
+ * metadata base.
+ */
+function createPavolLayoutMetadata(language: SupportedHomepageLanguage): Metadata {
+    const iconUrl = new URL(PAVOL_ICON_PATH, createAbsoluteUrl(PAVOL_LANGUAGE_PATHS[language])).toString();
+
+    return {
+        icons: {
+            icon: [{ url: iconUrl, type: 'image/svg+xml' }],
+            shortcut: [iconUrl],
+        },
+    };
+}
 
 export const PAVOL_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(PAVOL_PAGE_DEFINITIONS.cs, {

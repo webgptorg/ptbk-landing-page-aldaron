@@ -7,6 +7,7 @@ import { pavolProjects, type PavolProject } from '@/businesses/pavol/config-proj
 import { pavolTestimonials } from '@/businesses/pavol/config-testimonials';
 import { pavolContainerClassName } from '@/businesses/pavol/layout';
 import { pavolPageContent } from '@/businesses/pavol/pavolContent';
+import { PAVOL_LANGUAGE_PATHS } from '@/businesses/pavol/pavolMetadata';
 import { Header } from '@/components/header';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { TestimonialsSection } from '@/components/testimonials-section';
@@ -14,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { createAbsoluteUrl } from '@/lib/metadata/site-config';
 import { subscribeToWaitlist } from '@/lib/subscription/subscribeToWaitlist';
 import { cn } from '@/lib/utils';
 import pavolHejny from '@/public/people/pavol-hejny-transparent.png';
@@ -245,13 +247,13 @@ export function PavolPage({ language }: { language: SupportedHomepageLanguage })
             ariaLabel: content.header.languageSwitcherLabel,
             items: [
                 {
-                    href: '/cs/pavol',
+                    href: createAbsoluteUrl(PAVOL_LANGUAGE_PATHS.cs),
                     label: 'Čeština',
                     iconSrc: '/locale-flags/cs.svg',
                     isActive: isCzech,
                 },
                 {
-                    href: '/en/pavol',
+                    href: createAbsoluteUrl(PAVOL_LANGUAGE_PATHS.en),
                     label: 'English',
                     iconSrc: '/locale-flags/en.svg',
                     isActive: !isCzech,
