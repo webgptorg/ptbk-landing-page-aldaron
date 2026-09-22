@@ -5,8 +5,12 @@ export const PRIMARY_SITE_URL = 'https://ptbk.io';
 
 /**
  * Hostnames which serve the main Promptbook site and must send legacy branded paths to their own domains.
+ *
+ * Note: `normalizeHostname` already folds a leading `www.` into its bare apex, so the `www.` host is covered here
+ *       without being listed. Every independently branded domain relies on that same folding instead of repeating a
+ *       `www.` entry of its own.
  */
-export const PRIMARY_SITE_HOSTNAMES: readonly string[] = ['ptbk.io', 'www.ptbk.io'];
+export const PRIMARY_SITE_HOSTNAMES: readonly string[] = ['ptbk.io'];
 
 /**
  * Internal route which renders the AI ta Krajta site.
@@ -83,12 +87,19 @@ export const PUBLIC_DOMAIN_ROUTES: readonly PublicDomainRoute[] = [
 ];
 
 /**
- * Removes a port, a trailing DNS dot, and letter-case differences from a host before comparing it.
+ * Removes a port, a trailing DNS dot, a leading `www.`, and letter-case differences from a host before comparing it.
+ *
+ * A `www.` host is universally an alias of its bare apex, so folding it away here lets one apex hostname stand for both
+ * forms everywhere — the primary Promptbook hosts and every independently branded domain alike. Without it, a visitor
+ * who types `www.ai-ta-krajta.cz` would match no branded route and be dropped onto the Promptbook homepage.
  */
 export function normalizeHostname(hostname: string): string {
     const hostnameWithoutPort = hostname.trim().replace(/:\d+$/, '');
 
-    return hostnameWithoutPort.replace(/\.$/, '').toLowerCase();
+    return hostnameWithoutPort
+        .replace(/\.$/, '')
+        .toLowerCase()
+        .replace(/^www\./, '');
 }
 
 /**

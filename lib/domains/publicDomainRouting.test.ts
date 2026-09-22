@@ -8,6 +8,7 @@ import {
     getPublicDomainRouteByInternalPathname,
     getPublicPathname,
     isPrimarySiteHostname,
+    normalizeHostname,
 } from '@/lib/domains/publicDomainRouting';
 import { describe, expect, it } from 'vitest';
 
@@ -52,5 +53,12 @@ describe('public domain routing', () => {
         expect(isPrimarySiteHostname('ptbk.io')).toBe(true);
         expect(isPrimarySiteHostname('WWW.PTBK.IO.')).toBe(true);
         expect(isPrimarySiteHostname('localhost')).toBe(false);
+    });
+
+    it('folds a www. host into its apex for both primary and branded domains', () => {
+        expect(normalizeHostname('WWW.AI-TA-KRAJTA.CZ')).toBe('ai-ta-krajta.cz');
+        expect(isPrimarySiteHostname('www.ptbk.io')).toBe(true);
+        expect(getPublicDomainRouteByHostname('www.pavolhejny.cz')).toBe(getPublicDomainRouteByHostname('pavolhejny.cz'));
+        expect(getPublicDomainRouteByHostname('www.pavolhejny.cz')?.internalPath).toBe(PAVOL_CZECH_INTERNAL_PATH);
     });
 });

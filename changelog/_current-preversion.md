@@ -5,7 +5,10 @@
   `https://pavolhejny.cz/` and `https://pavolhejny.com/`. One shared domain-route map rewrites those concise domain
   roots to the existing app routes, permanently redirects the former `ptbk.io` paths (including podcast subpages),
   preserves query strings, and keeps the custom domains' metadata, structured-data links, social cards, and sitemap
-  URLs canonical.
+  URLs canonical. Each branded site answers on both its bare apex and its `www.` alias, so a visitor who types
+  `www.ai-ta-krajta.cz`, `www.pavolhejny.cz`, or `www.pavolhejny.com` reaches the branded page instead of being
+  dropped onto the Promptbook homepage; `www.` is folded into the apex in one shared place for the primary and every
+  branded host alike.
 
 - Added per-host episode-appearance factors to the `/ai-ta-krajta` roster draw. Hosts retain the ordinary 1×
   contribution from their episode appearances, while Katka Fajmanová receives 1.7×, Tomáš Mikolov 5×, and Pavol Hejný

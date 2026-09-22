@@ -39,6 +39,21 @@ describe('domain middleware', () => {
         expect(response.headers.get('x-middleware-rewrite')).toBe('https://ai-ta-krajta.cz/ai-ta-krajta');
     });
 
+    it('serves a branded site on its www. host exactly as on the apex, rather than dropping it on the homepage', () => {
+        const podcastResponse = middleware(createRequest('https://www.ai-ta-krajta.cz/'));
+        const pavolEnglishResponse = middleware(createRequest('https://www.pavolhejny.com/'));
+
+        expect(podcastResponse.headers.get('x-middleware-rewrite')).toBe('https://www.ai-ta-krajta.cz/ai-ta-krajta');
+        expect(pavolEnglishResponse.headers.get('x-middleware-rewrite')).toBe('https://www.pavolhejny.com/en/pavol');
+    });
+
+    it('redirects legacy paths from the www. primary host too', () => {
+        const response = middleware(createRequest('https://www.ptbk.io/ai-ta-krajta'));
+
+        expect(response.status).toBe(308);
+        expect(response.headers.get('location')).toBe('https://ai-ta-krajta.cz/');
+    });
+
     it('rewrites a branded subpage but leaves its ordinary static assets alone', () => {
         const mediaKitResponse = middleware(createRequest('https://ai-ta-krajta.cz/media-kit'));
         const imageResponse = middleware(createRequest('https://ai-ta-krajta.cz/people/ai-ta-krajta/pavol.png'));
