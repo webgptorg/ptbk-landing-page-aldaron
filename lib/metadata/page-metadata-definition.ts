@@ -34,7 +34,8 @@ export type PageMetadataBrand = {
  */
 export type PageMetadataDefinition = {
     /**
-     * Site-relative path of the page, for example `/pro-mesta`
+     * Existing application path of the page, for example `/pro-mesta`. A route with its own domain is converted to
+     * that domain's public URL by the shared domain routing map.
      */
     readonly path: string;
 

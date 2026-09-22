@@ -1,9 +1,10 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { AI_TA_KRAJTA_INTERNAL_PATH } from '@/lib/domains/publicDomainRouting';
 
 /**
  * Public route of the podcast page
  */
-export const AI_TA_KRAJTA_PATH = '/ai-ta-krajta';
+export const AI_TA_KRAJTA_PATH = AI_TA_KRAJTA_INTERNAL_PATH;
 
 /**
  * Public page which explains the podcast and every way of working with it

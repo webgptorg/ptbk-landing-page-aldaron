@@ -19,11 +19,11 @@ describe('createPageMetadata', () => {
         const metadata = createPageMetadata(TRANSLATED_PAGE);
 
         expect(metadata.alternates).toMatchObject({
-            canonical: '/cs/example',
+            canonical: 'https://ptbk.io/cs/example',
             languages: {
-                cs: '/cs/example',
-                en: '/en/example',
-                'x-default': '/en/example',
+                cs: 'https://ptbk.io/cs/example',
+                en: 'https://ptbk.io/en/example',
+                'x-default': 'https://ptbk.io/en/example',
             },
         });
         expect(metadata.openGraph).toMatchObject({
@@ -32,7 +32,7 @@ describe('createPageMetadata', () => {
             url: 'https://ptbk.io/cs/example',
             images: [
                 {
-                    url: '/cs/example/opengraph-image',
+                    url: 'https://ptbk.io/cs/example/opengraph-image',
                     width: 1200,
                     height: 630,
                 },

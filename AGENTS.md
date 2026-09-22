@@ -10,8 +10,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/en` is its English localization.
 - `/pro-mesta`, `/pro-firmy`, `/for-agro`, `/for-industry`, `/ai-supervize`,
   `/hackathon-factory`, and `/pavol` are specialized landing pages. `/pavol`
-  redirects to `/cs/pavol` or `/en/pavol`; the localized pages are Pavol Hejny's
-  personal pages.
+  redirects to `/cs/pavol` or `/en/pavol`; those legacy Promptbook paths then
+  permanently redirect to Pavol Hejny's Czech `https://pavolhejny.cz/` and English
+  `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
+  rewrite to the existing localized routes.
 - `/ai-supervize-mini` is the Czech one-day AI Supervize page. Published terms,
   prices, capacities, places, FAQs, registration, and participant information
   come from `/admin/workshops`; with no published term it shows a notice.
@@ -37,7 +39,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in the room. Missing external previews or history leave the recap and project links available.
   It stores no document and adds no administration or database fields; chat, feedback and participant identity are
   excluded from the export.
-- `/ai-ta-krajta` reads episodes hourly from podcast RSS and YouTube feeds and
+- `/ai-ta-krajta` permanently redirects from `ptbk.io` to `https://ai-ta-krajta.cz/`,
+  whose root rewrites to the existing podcast route; its legacy children likewise
+  retain their suffixes on the podcast domain. It reads episodes hourly from podcast RSS and YouTube feeds and
   merges their host rosters with `businesses/ai-ta-krajta/aiTaKrajtaEpisodes.json`. Its shared platform list exposes
   the publisher's direct RSS feed for custom podcast applications, and page metadata advertises it as
   `application/rss+xml`.
@@ -75,8 +79,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   ASCII octopus in response to pointer, focus, scrolling, and the snake terrarium.
   It stays still for reduced motion and pauses its clock in hidden tabs. The
   badge and the shared footer credit link to `https://coder.ptbk.io/`.
-- `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` are the two pages beside
-  the podcast. They are named once, in `AI_TA_KRAJTA_SUBPAGES`, which the footer
+- `/ai-ta-krajta/media-kit` and `/ai-ta-krajta/branding` permanently redirect from
+  `ptbk.io` to `/media-kit` and `/branding` on `ai-ta-krajta.cz`. They are the two pages beside
+  the podcast, named once in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page
   differently than the page names itself. Both wear the same compact header,
   section heading and footer as each other. The brand kit hands out the logo the

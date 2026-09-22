@@ -1,4 +1,5 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { PAVOL_CZECH_INTERNAL_PATH, PAVOL_ENGLISH_INTERNAL_PATH } from '@/lib/domains/publicDomainRouting';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
@@ -31,8 +32,8 @@ const PAVOL_SOCIAL_URLS: readonly string[] = [
  * Paths of the personal page in every language it is published in
  */
 const PAVOL_LANGUAGE_ALTERNATES: Readonly<Record<SupportedHomepageLanguage, string>> = {
-    cs: '/cs/pavol',
-    en: '/en/pavol',
+    cs: PAVOL_CZECH_INTERNAL_PATH,
+    en: PAVOL_ENGLISH_INTERNAL_PATH,
 };
 
 /**

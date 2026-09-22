@@ -1,5 +1,12 @@
 # Current preversion
 
+- Configured the independently branded sites for their own canonical domains: AI ta Krajta now lives at
+  `https://ai-ta-krajta.cz/`, while Pavol Hejný's Czech and English pages live at
+  `https://pavolhejny.cz/` and `https://pavolhejny.com/`. One shared domain-route map rewrites those concise domain
+  roots to the existing app routes, permanently redirects the former `ptbk.io` paths (including podcast subpages),
+  preserves query strings, and keeps the custom domains' metadata, structured-data links, social cards, and sitemap
+  URLs canonical.
+
 - Added per-host episode-appearance factors to the `/ai-ta-krajta` roster draw. Hosts retain the ordinary 1×
   contribution from their episode appearances, while Katka Fajmanová receives 1.7×, Tomáš Mikolov 5×, and Pavol Hejný
   0.8× before weighted ordering.

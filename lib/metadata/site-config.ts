@@ -1,9 +1,10 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { PRIMARY_SITE_URL, createPublicUrl } from '@/lib/domains/publicDomainRouting';
 
 /**
- * Canonical origin of the site, used for every absolute url in metadata, sitemap and structured data
+ * Canonical origin of the main Promptbook site, used by pages which do not own an independent domain.
  */
-export const SITE_URL = 'https://ptbk.io';
+export const SITE_URL = PRIMARY_SITE_URL;
 
 /**
  * Brand name presented in `og:site_name`, page title templates and structured data
@@ -88,11 +89,13 @@ export const ORGANIZATION_SOCIAL_URLS: readonly string[] = [
 ];
 
 /**
- * Turns a site-relative path into an absolute url
+ * Turns an application path into its canonical public URL.
+ *
+ * Independently branded routes are placed at the root of their own domain, while all other paths remain on `ptbk.io`.
  *
  * @param path site-relative path such as `/pro-mesta`
  * @returns absolute url such as `https://ptbk.io/pro-mesta`
  */
 export function createAbsoluteUrl(path: string): string {
-    return new URL(path, SITE_URL).toString();
+    return createPublicUrl(path);
 }

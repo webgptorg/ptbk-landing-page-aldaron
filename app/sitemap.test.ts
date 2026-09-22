@@ -7,6 +7,9 @@ describe('sitemap', () => {
         const entries = sitemap();
 
         expect(entries).toHaveLength(INDEXED_PAGE_METADATA_DEFINITIONS.length);
+        expect(entries.map((entry) => entry.url)).toContain('https://ai-ta-krajta.cz/');
+        expect(entries.map((entry) => entry.url)).toContain('https://pavolhejny.cz/');
+        expect(entries.map((entry) => entry.url)).toContain('https://pavolhejny.com/');
         expect(entries.map((entry) => entry.url)).not.toContain('https://ptbk.io/cs/komunita');
         expect(entries.map((entry) => entry.url)).not.toContain('https://ptbk.io/cs/online-workshop/participant');
     });

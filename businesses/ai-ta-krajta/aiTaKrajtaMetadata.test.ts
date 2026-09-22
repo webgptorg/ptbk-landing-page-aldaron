@@ -21,12 +21,12 @@ describe('AI ta Krajta metadata', () => {
         expect(AI_TA_KRAJTA_METADATA).toMatchObject({
             title: `${AI_TA_KRAJTA_BRAND_NAME} | Český podcast o umělé inteligenci`,
             applicationName: AI_TA_KRAJTA_BRAND_NAME,
-            authors: [{ name: AI_TA_KRAJTA_BRAND_NAME, url: 'https://ptbk.io/ai-ta-krajta' }],
+            authors: [{ name: AI_TA_KRAJTA_BRAND_NAME, url: 'https://ai-ta-krajta.cz/' }],
             creator: AI_TA_KRAJTA_BRAND_NAME,
             publisher: AI_TA_KRAJTA_BRAND_NAME,
             manifest: AI_TA_KRAJTA_MANIFEST_PATH,
             alternates: {
-                canonical: AI_TA_KRAJTA_PATH,
+                canonical: 'https://ai-ta-krajta.cz/',
                 types: {
                     [AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE]: [
                         {

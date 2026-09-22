@@ -63,8 +63,10 @@ function resolveLanguageAlternates(definition: PageMetadataDefinition): Record<s
         return undefined;
     }
 
-    const languageAlternates: Record<string, string> = { ...definition.languageAlternates };
-    const defaultLanguageAlternate = definition.languageAlternates.en ?? definition.languageAlternates.cs;
+    const languageAlternates = Object.fromEntries(
+        Object.entries(definition.languageAlternates).map(([language, path]) => [language, createAbsoluteUrl(path)]),
+    );
+    const defaultLanguageAlternate = languageAlternates.en ?? languageAlternates.cs;
 
     if (defaultLanguageAlternate) {
         languageAlternates['x-default'] = defaultLanguageAlternate;
@@ -93,7 +95,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
     const socialHandle = definition.brand?.socialHandle ?? SITE_TWITTER_HANDLE;
 
     const socialPreviewImage = {
-        url: socialPreviewImagePath,
+        url: createAbsoluteUrl(socialPreviewImagePath),
         // A custom source image may have arbitrary dimensions. Only advertise
         // dimensions for the cards this application renders itself.
         ...(definition.socialPreviewImagePath
@@ -118,7 +120,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
         description: definition.description,
         ...(definition.keywords ? { keywords: [...definition.keywords] } : {}),
         alternates: {
-            canonical: definition.path,
+            canonical: createAbsoluteUrl(definition.path),
             languages: resolveLanguageAlternates(definition),
         },
         openGraph: {

@@ -123,6 +123,13 @@ NEXT_PUBLIC_SKIP_WAITLIST_TOKEN=
 
 `NEXT_PUBLIC_` variables are included in the browser bundle. Never place database passwords, service-role keys, or administrator credentials in them. With no `ADMIN_PASSWORD`, the administration remains closed.
 
+### Branded domains
+
+Attach `ai-ta-krajta.cz`, `pavolhejny.cz`, and `pavolhejny.com` to the same production deployment as `ptbk.io`.
+The application routes their roots to the existing AI ta Krajta, Czech Pavol Hejný, and English Pavol Hejný pages;
+the old `ptbk.io/ai-ta-krajta`, `ptbk.io/cs/pavol`, and `ptbk.io/en/pavol` addresses permanently redirect to them.
+DNS and the hosting provider's domain attachment remain deployment configuration, not application secrets.
+
 ### Workshop project deployment on Vercel
 
 In `/admin/workshops`, the project settings offer **Nasadit na Vercel** when a valid GitHub repository is entered and
