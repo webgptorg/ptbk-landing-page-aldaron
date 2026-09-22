@@ -14,6 +14,14 @@ export type AiTaKrajtaPerson = {
     readonly name: string;
 
     /**
+     * Multiplier of this person's credited episode appearances when the roster is drawn
+     *
+     * Note: Omitting it keeps the ordinary factor of one. It affects only the chance of a person appearing near the
+     *       front of the roster; episode counts themselves stay exact.
+     */
+    readonly factor?: number;
+
+    /**
      * What the person does, in one line and only as far as the episodes of the show actually say it
      */
     readonly headline: string;
@@ -60,6 +68,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'pavol-hejny',
         name: 'Pavol Hejný',
+        factor: 0.8,
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
         url: 'https://www.ptbk.io/pavol',
         photoFileName: 'pavol-hejny.png',
@@ -128,6 +137,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'katka-fajmanova',
         name: 'Katka Fajmanová',
+        factor: 1.7,
         headline: 'Architektura a interpretabilita modelů. Díl o tom, co se děje uvnitř sítě.',
         url: null,
         photoFileName: 'katka-fajmanova.png',
@@ -239,6 +249,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'tomas-mikolov',
         name: 'Tomáš Mikolov',
+        factor: 5,
         headline: 'Spoluzakladatel BottleCap AI. V Googlu zažil doby, kdy se stavěly základy dnešních modelů.',
         url: 'https://bottlecapai.com/',
         photoFileName: 'tomas-mikolov.png',

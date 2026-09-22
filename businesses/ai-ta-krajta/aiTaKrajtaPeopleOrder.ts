@@ -11,10 +11,24 @@ import { shuffleByWeight } from '@/lib/random/shuffleByWeight';
 const BASE_PERSON_WEIGHT = 1;
 
 /**
+ * Multiplier used for a person whose roster entry does not set one
+ */
+const DEFAULT_PERSON_FACTOR = 1;
+
+/**
+ * Multiplier of a person's credited episode appearances when drawing the roster
+ */
+function getPersonFactor(person: AiTaKrajtaPerson): number {
+    return person.factor ?? DEFAULT_PERSON_FACTOR;
+}
+
+/**
  * How much of the front of the list one person has a chance at, which is how often the show has them on
  */
 function getPersonWeight(person: AiTaKrajtaPerson, episodeCountByPersonId: ReadonlyMap<string, number>): number {
-    return BASE_PERSON_WEIGHT + (episodeCountByPersonId.get(person.id) ?? 0);
+    const episodeCount = episodeCountByPersonId.get(person.id) ?? 0;
+
+    return BASE_PERSON_WEIGHT + episodeCount * getPersonFactor(person);
 }
 
 /**

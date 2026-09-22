@@ -1,5 +1,10 @@
 # Current preversion
 
+- Added per-host episode-appearance factors to the `/ai-ta-krajta` roster draw. Hosts retain the ordinary 1×
+  contribution from their episode appearances, while Katka Fajmanová receives 1.7×, Tomáš Mikolov 5×, and Pavol Hejný
+  0.8× before weighted ordering.
+  The shared calculation affects both the hydration-safe initial order and each visitor's fresh randomized draw.
+
 - Added `Dneska` and `Zítra` event badges ahead of `Tento týden`, based on Prague calendar dates. Shared cards,
   calendars, landing-page term choices, and the admin picker use the same phases and theme-aware colours. Terms
   still switch to `Probíhá` at their start and remain eligible for waiting-room choices and follow-up recommendations.

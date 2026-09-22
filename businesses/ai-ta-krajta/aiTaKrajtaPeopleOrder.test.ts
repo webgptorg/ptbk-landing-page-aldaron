@@ -10,10 +10,11 @@ import { describe, expect, it } from 'vitest';
  */
 const DRAW_COUNT = 500;
 
-function createPerson(id: string): AiTaKrajtaPerson {
+function createPerson(id: string, factor?: number): AiTaKrajtaPerson {
     return {
         id,
         name: id,
+        factor,
         headline: 'Mluví do mikrofonu.',
         url: null,
         photoFileName: null,
@@ -68,6 +69,26 @@ describe('orderAiTaKrajtaPeopleByAppearances', () => {
         expect(ordered.map((person) => person.id)).toEqual(PEOPLE.map((person) => person.id));
     });
 
+    it('multiplies credited episode appearances by a person factor', () => {
+        const people = [createPerson('boosted-contributor', 5), createPerson('frequent-contributor')];
+        const episodeCountByPersonId = new Map([
+            ['boosted-contributor', 1],
+            ['frequent-contributor', 4],
+        ]);
+
+        const ordered = orderAiTaKrajtaPeopleByAppearances(people, episodeCountByPersonId);
+
+        expect(ordered.map((person) => person.id)).toEqual(['boosted-contributor', 'frequent-contributor']);
+    });
+
+    it('does not apply a person factor to the base chance without credited appearances', () => {
+        const people = [createPerson('ordinary-contributor'), createPerson('boosted-contributor', 5)];
+
+        const ordered = orderAiTaKrajtaPeopleByAppearances(people, new Map());
+
+        expect(ordered.map((person) => person.id)).toEqual(['ordinary-contributor', 'boosted-contributor']);
+    });
+
     it('leaves the roster it was given alone', () => {
         orderAiTaKrajtaPeopleByAppearances(PEOPLE, EPISODE_COUNT_BY_PERSON_ID);
 
@@ -100,6 +121,24 @@ describe('shuffleAiTaKrajtaPeopleByAppearances', () => {
         // Note: Leaning towards somebody is not a ranking of them, so even the most frequently named person has to be
         //       overtaken now and then.
         expect(frequentContributorTopCount).toBeLessThan(DRAW_COUNT);
+    });
+
+    it('uses a person factor when drawing the weighted order', () => {
+        const people = [createPerson('boosted-contributor', 5), createPerson('ordinary-contributor')];
+        const episodeCountByPersonId = new Map([
+            ['boosted-contributor', 1],
+            ['ordinary-contributor', 1],
+        ]);
+        const randomNumbers = [0.1, 0.2];
+        let nextRandomNumberIndex = 0;
+
+        const shuffled = shuffleAiTaKrajtaPeopleByAppearances(
+            people,
+            episodeCountByPersonId,
+            () => randomNumbers[nextRandomNumberIndex++]!,
+        );
+
+        expect(shuffled.map((person) => person.id)).toEqual(['boosted-contributor', 'ordinary-contributor']);
     });
 
     it('moves even somebody the archive never names around the list', () => {

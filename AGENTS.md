@@ -57,8 +57,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   zoom only when reduced motion is not requested. A future person without a photo
   keeps initials on that same background. The one people list is drawn anew
   for every visit, weighted by how many episodes of the archive name each
-  person, so somebody heard often comes up high far more often than someone in
-  one díl without the list ever becoming a ranking. The draw is local state and
+  person after their roster factor is applied (one by default), so somebody heard
+  often comes up high far more often than someone in one díl without the list ever becoming a ranking. The draw is local state and
   is made in the browser; the page itself is built in the order the draw leans
   towards, from the most often named person to the least often named one, so the
   browser hydrates into the list it was sent.

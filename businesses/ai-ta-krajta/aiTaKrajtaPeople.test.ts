@@ -33,6 +33,18 @@ describe('getAiTaKrajtaPersonPhotoPath', () => {
 });
 
 describe('AI_TA_KRAJTA_PEOPLE', () => {
+    it('sets the requested episode-appearance factors', () => {
+        const factoredPeople = AI_TA_KRAJTA_PEOPLE.filter((person) => person.factor !== undefined).map(
+            ({ id, factor }) => ({ id, factor }),
+        );
+
+        expect(factoredPeople).toEqual([
+            { id: 'pavol-hejny', factor: 0.8 },
+            { id: 'katka-fajmanova', factor: 1.7 },
+            { id: 'tomas-mikolov', factor: 5 },
+        ]);
+    });
+
     // Note: A portrait which is only named and never cut breaks in the browser and nowhere else, which is why the
     //       roster is read against `public` here rather than trusted.
     it.each(AI_TA_KRAJTA_PEOPLE)(
