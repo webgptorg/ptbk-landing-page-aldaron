@@ -4,7 +4,7 @@ import { AiTaKrajtaMark } from '@/businesses/ai-ta-krajta/AiTaKrajtaMark';
 import { useAiTaKrajtaPageState } from '@/businesses/ai-ta-krajta/AiTaKrajtaPageState';
 import { getAiTaKrajtaEpisodePeople } from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodePeople';
 import { AiTaKrajtaPersonAvatar } from '@/businesses/ai-ta-krajta/AiTaKrajtaPersonAvatar';
-import { createAiTaKrajtaEpisodePublicUrl } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
+import { createAiTaKrajtaEpisodePath } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
 import { formatPodcastEpisodeDuration } from '@/lib/podcast/podcastEpisodeDuration';
 import { getPodcastEpisodeResumePositionInSeconds } from '@/lib/podcast/podcastPlaybackProgress';
 import { cn } from '@/lib/utils';
@@ -146,7 +146,9 @@ export function AiTaKrajtaMiniPlayer() {
     };
 
     const handleCopyLink = async () => {
-        await navigator.clipboard.writeText(createAiTaKrajtaEpisodePublicUrl(playingEpisode.slug));
+        await navigator.clipboard.writeText(
+            new URL(createAiTaKrajtaEpisodePath(playingEpisode.slug), window.location.origin).toString(),
+        );
         setIsLinkCopied(true);
         window.setTimeout(() => setIsLinkCopied(false), COPIED_CONFIRMATION_IN_MILLISECONDS);
     };

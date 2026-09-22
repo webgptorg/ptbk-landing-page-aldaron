@@ -1,5 +1,5 @@
 import type { AiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
-import { createAiTaKrajtaEpisodePublicUrl } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
+import { createAiTaKrajtaEpisodePath } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
 import {
     AI_TA_KRAJTA_APP_ICONS,
     AI_TA_KRAJTA_BRAND_NAME,
@@ -15,7 +15,6 @@ import {
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
     AI_TA_KRAJTA_THEME_COLOR,
     AI_TA_KRAJTA_X_HANDLE,
-    getAiTaKrajtaPublicPath,
 } from '@/businesses/ai-ta-krajta/config';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
@@ -150,12 +149,12 @@ export const AI_TA_KRAJTA_METADATA: Metadata = {
         // Note: A browser which cannot draw the scalable icon falls back to the raster one below it.
         icon: [
             {
-                url: createAbsoluteUrl(AI_TA_KRAJTA_APP_ICONS.SCALABLE.path),
+                url: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
                 sizes: AI_TA_KRAJTA_APP_ICONS.SCALABLE.sizes,
                 type: AI_TA_KRAJTA_APP_ICONS.SCALABLE.type,
             },
             {
-                url: createAbsoluteUrl(AI_TA_KRAJTA_APP_ICONS.RASTER.path),
+                url: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
                 sizes: AI_TA_KRAJTA_APP_ICONS.RASTER.sizes,
                 type: AI_TA_KRAJTA_APP_ICONS.RASTER.type,
             },
@@ -164,13 +163,13 @@ export const AI_TA_KRAJTA_METADATA: Metadata = {
         // Note: iOS ignores a scalable touch icon and rounds the raster one itself.
         apple: [
             {
-                url: createAbsoluteUrl(AI_TA_KRAJTA_APP_ICONS.RASTER.path),
+                url: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
                 sizes: AI_TA_KRAJTA_APP_ICONS.RASTER.sizes,
                 type: AI_TA_KRAJTA_APP_ICONS.RASTER.type,
             },
         ],
     },
-    manifest: createAbsoluteUrl(AI_TA_KRAJTA_MANIFEST_PATH),
+    manifest: AI_TA_KRAJTA_MANIFEST_PATH,
     appleWebApp: {
         capable: true,
         title: AI_TA_KRAJTA_BRAND_NAME,
@@ -214,19 +213,19 @@ export function createAiTaKrajtaManifest(): MetadataRoute.Manifest {
         name: AI_TA_KRAJTA_BRAND_NAME,
         short_name: AI_TA_KRAJTA_BRAND_NAME,
         description: AI_TA_KRAJTA_PAGE_DEFINITION.description,
-        start_url: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_PATH),
+        start_url: AI_TA_KRAJTA_PATH,
         display: 'standalone',
         background_color: AI_TA_KRAJTA_THEME_COLOR,
         theme_color: AI_TA_KRAJTA_THEME_COLOR,
         icons: [
             {
-                src: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_APP_ICONS.SCALABLE.path),
+                src: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
                 sizes: AI_TA_KRAJTA_APP_ICONS.SCALABLE.sizes,
                 type: AI_TA_KRAJTA_APP_ICONS.SCALABLE.type,
                 purpose: 'any',
             },
             {
-                src: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_APP_ICONS.RASTER.path),
+                src: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
                 sizes: AI_TA_KRAJTA_APP_ICONS.RASTER.sizes,
                 type: AI_TA_KRAJTA_APP_ICONS.RASTER.type,
                 purpose: 'any',
@@ -235,7 +234,7 @@ export function createAiTaKrajtaManifest(): MetadataRoute.Manifest {
                 // Note: The raster icon fills its whole tile, so a launcher which cuts its own shape out of an icon
                 //       has something to cut into and the snake still sits inside the safe area of that cut. A
                 //       launcher reads the very same file for both purposes, which is why it is offered twice.
-                src: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_APP_ICONS.RASTER.path),
+                src: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
                 sizes: AI_TA_KRAJTA_APP_ICONS.RASTER.sizes,
                 type: AI_TA_KRAJTA_APP_ICONS.RASTER.type,
                 purpose: 'maskable',
@@ -300,7 +299,7 @@ export function createAiTaKrajtaStructuredData(episodes: readonly AiTaKrajtaEpis
             channelUrls: AI_TA_KRAJTA_SOCIAL_URLS,
             episodes: episodes.slice(0, STRUCTURED_DATA_EPISODE_COUNT).map((episode) => ({
                 name: episode.title,
-                url: createAiTaKrajtaEpisodePublicUrl(episode.slug),
+                url: createAbsoluteUrl(createAiTaKrajtaEpisodePath(episode.slug)),
                 audioUrl: episode.audioUrl,
                 videoUrl: episode.videoUrl,
                 publishedAt: episode.publishedAt,

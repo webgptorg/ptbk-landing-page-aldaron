@@ -63,13 +63,11 @@ function resolveLanguageAlternates(definition: PageMetadataDefinition): Record<s
         return undefined;
     }
 
-    const languageAlternates = Object.fromEntries(
-        Object.entries(definition.languageAlternates).map(([language, path]) => [language, createAbsoluteUrl(path)]),
-    );
+    const languageAlternates: Record<string, string> = { ...definition.languageAlternates };
     const defaultLanguageAlternate = definition.languageAlternates.en ?? definition.languageAlternates.cs;
 
     if (defaultLanguageAlternate) {
-        languageAlternates['x-default'] = createAbsoluteUrl(defaultLanguageAlternate);
+        languageAlternates['x-default'] = defaultLanguageAlternate;
     }
 
     return languageAlternates;
@@ -89,14 +87,13 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
     const socialDescription = definition.socialDescription ?? definition.description;
     const socialPreviewImageAlt = definition.socialPreviewImageAlt ?? socialTitle;
     const socialPreviewImagePath = resolveSocialPreviewImagePath(definition);
-    const canonicalUrl = createAbsoluteUrl(definition.path);
     const isIndexed = definition.isIndexed ?? true;
     const openGraphAlternateLocales = resolveOpenGraphAlternateLocales(definition);
     const brandName = definition.brand?.name ?? SITE_NAME;
     const socialHandle = definition.brand?.socialHandle ?? SITE_TWITTER_HANDLE;
 
     const socialPreviewImage = {
-        url: createAbsoluteUrl(socialPreviewImagePath),
+        url: socialPreviewImagePath,
         // A custom source image may have arbitrary dimensions. Only advertise
         // dimensions for the cards this application renders itself.
         ...(definition.socialPreviewImagePath
@@ -112,7 +109,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
         ...(definition.brand
             ? {
                   applicationName: definition.brand.name,
-                  authors: [{ name: definition.brand.name, url: canonicalUrl }],
+                  authors: [{ name: definition.brand.name, url: createAbsoluteUrl(definition.path) }],
                   creator: definition.brand.name,
                   publisher: definition.brand.name,
               }
@@ -121,7 +118,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
         description: definition.description,
         ...(definition.keywords ? { keywords: [...definition.keywords] } : {}),
         alternates: {
-            canonical: canonicalUrl,
+            canonical: definition.path,
             languages: resolveLanguageAlternates(definition),
         },
         openGraph: {
@@ -131,7 +128,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
             ...(openGraphAlternateLocales ? { alternateLocale: [...openGraphAlternateLocales] } : {}),
             title: socialTitle,
             description: socialDescription,
-            url: canonicalUrl,
+            url: createAbsoluteUrl(definition.path),
             images: [socialPreviewImage],
         },
         twitter: {

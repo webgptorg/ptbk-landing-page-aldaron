@@ -56,7 +56,7 @@ describe('shortcode landing-page metadata', () => {
         expect(metadata).toMatchObject({
             title: 'Safe link | Promptbook',
             description: 'A short, useful destination.',
-            alternates: { canonical: 'https://ptbk.io/safe-link' },
+            alternates: { canonical: '/safe-link' },
             robots: { index: false, follow: false },
             openGraph: {
                 title: 'Safe link',

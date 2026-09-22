@@ -1,8 +1,7 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-import { createCustomDomainUrlForSourcePath } from '@/lib/domains/customDomainRouting';
 
 /**
- * Canonical origin of the Promptbook site, used by pages which do not have a dedicated domain.
+ * Canonical origin of the site, used for every absolute url in metadata, sitemap and structured data
  */
 export const SITE_URL = 'https://ptbk.io';
 
@@ -89,14 +88,11 @@ export const ORGANIZATION_SOCIAL_URLS: readonly string[] = [
 ];
 
 /**
- * Turns an internal site-relative path into its canonical public URL.
+ * Turns a site-relative path into an absolute url
  *
- * A page which owns a custom hostname is mapped there; every other page stays on ptbk.io. This is shared by metadata,
- * sitemap and structured data, so none of those independent representations can advertise the retired source URL.
- *
- * @param path internal site-relative path such as `/pro-mesta`
- * @returns absolute canonical URL such as `https://ptbk.io/pro-mesta`
+ * @param path site-relative path such as `/pro-mesta`
+ * @returns absolute url such as `https://ptbk.io/pro-mesta`
  */
 export function createAbsoluteUrl(path: string): string {
-    return createCustomDomainUrlForSourcePath(path) ?? new URL(path, SITE_URL).toString();
+    return new URL(path, SITE_URL).toString();
 }

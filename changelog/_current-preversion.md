@@ -1,12 +1,5 @@
 # Current preversion
 
-- Moved the AI ta Krajta podcast to `ai-ta-krajta.cz` and Pavol Hejný's Czech and English personal pages to
-  `pavolhejny.cz` and `pavolhejny.com`. The former `ptbk.io` routes now permanently redirect while preserving query
-  parameters; custom hostnames rewrite to the existing pages, media kit/brand-kit assets, manifests and social
-  previews without duplicating routes. Canonical metadata, language alternates, structured data and sitemap entries
-  now use the same central domain mapping. Added `DOMAINS.md` with the required Vercel and Cloudflare setup and
-  verification steps.
-
 - Added per-host episode-appearance factors to the `/ai-ta-krajta` roster draw. Hosts retain the ordinary 1×
   contribution from their episode appearances, while Katka Fajmanová receives 1.7×, Tomáš Mikolov 5×, and Pavol Hejný
   0.8× before weighted ordering.

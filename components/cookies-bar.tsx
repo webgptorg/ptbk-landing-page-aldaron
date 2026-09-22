@@ -47,10 +47,9 @@ export function CookiesBar() {
 /** Mount the measurements with the visible panel, so a saved choice leaves no observers or reserved space. */
 function CookieConsentPanel({ onDismiss }: { readonly onDismiss: () => void }) {
     const pathname = usePathname();
-    const hostname = typeof window === 'undefined' ? null : window.location.hostname;
-    const language = getLanguageFromPathname(pathname, hostname);
+    const language = getLanguageFromPathname(pathname);
     const content = getCookieConsentContent(language);
-    const theme = getCookieConsentTheme(pathname, hostname);
+    const theme = getCookieConsentTheme(pathname);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const panelReference = useRef<HTMLElement>(null);
     const { height, clearance } = useFixedControlClearance(panelReference, '[data-fixed-bottom-control]');

@@ -1,4 +1,3 @@
-import { findCustomDomainRouteByHostname } from '@/lib/domains/customDomainRouting';
 import { fallbackHomepageLanguage, type SupportedHomepageLanguage } from '@/lib/homepage-language';
 
 /**
@@ -50,19 +49,9 @@ function isPathnameWithinPath(pathname: string, path: string): boolean {
  *       such as the cookie bar. A component which already knows its language must use that one instead.
  *
  * @param pathname pathname of the current page, `null` when it is not known yet
- * @param hostname hostname of the current page when a client component knows it
  * @returns language of the page, falling back to the language of the site
  */
-export function getLanguageFromPathname(
-    pathname: string | null,
-    hostname: string | null = null,
-): SupportedHomepageLanguage {
-    const customDomainRoute = findCustomDomainRouteByHostname(hostname);
-
-    if (customDomainRoute !== null) {
-        return customDomainRoute.language;
-    }
-
+export function getLanguageFromPathname(pathname: string | null): SupportedHomepageLanguage {
     if (!pathname) {
         return fallbackHomepageLanguage;
     }

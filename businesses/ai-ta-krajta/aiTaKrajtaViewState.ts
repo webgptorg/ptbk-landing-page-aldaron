@@ -1,6 +1,5 @@
 import { getAiTaKrajtaPersonById } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
 import { AI_TA_KRAJTA_PATH } from '@/businesses/ai-ta-krajta/config';
-import { createAbsoluteUrl } from '@/lib/metadata/site-config';
 import {
     defineUrlViewParameter,
     FLAG_VALUE_CODEC,
@@ -161,11 +160,4 @@ export function createAiTaKrajtaEpisodePath(episodeSlug: string): string {
     );
 
     return `${AI_TA_KRAJTA_PATH}?${searchParams.toString()}`;
-}
-
-/**
- * Builds the canonical custom-domain link a listener can copy from the player.
- */
-export function createAiTaKrajtaEpisodePublicUrl(episodeSlug: string): string {
-    return createAbsoluteUrl(createAiTaKrajtaEpisodePath(episodeSlug));
 }

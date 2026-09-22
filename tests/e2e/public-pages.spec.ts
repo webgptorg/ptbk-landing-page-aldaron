@@ -10,9 +10,7 @@ import {
     AI_TA_KRAJTA_PATH,
     AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
     AI_TA_KRAJTA_RSS_FEED_PLATFORM,
-    getAiTaKrajtaPublicPath,
 } from '@/businesses/ai-ta-krajta/config';
-import { createAbsoluteUrl } from '@/lib/metadata/site-config';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 /**
@@ -201,9 +199,9 @@ test('AI ta Krajta owns its metadata, icon and installable manifest and credits 
             };
         },
         {
-            scalableIconPath: createAbsoluteUrl(AI_TA_KRAJTA_APP_ICONS.SCALABLE.path),
-            rasterIconPath: createAbsoluteUrl(AI_TA_KRAJTA_APP_ICONS.RASTER.path),
-            manifestPath: createAbsoluteUrl(AI_TA_KRAJTA_MANIFEST_PATH),
+            scalableIconPath: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path,
+            rasterIconPath: AI_TA_KRAJTA_APP_ICONS.RASTER.path,
+            manifestPath: AI_TA_KRAJTA_MANIFEST_PATH,
             rssFeedMediaType: AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
             rssFeedUrl: AI_TA_KRAJTA_RSS_FEED_PLATFORM.url,
             rssFeedLabel: AI_TA_KRAJTA_RSS_FEED_PLATFORM.label,
@@ -231,9 +229,9 @@ test('AI ta Krajta owns its metadata, icon and installable manifest and credits 
         name: AI_TA_KRAJTA_BRAND_NAME,
         short_name: AI_TA_KRAJTA_BRAND_NAME,
         icons: [
-            { src: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_APP_ICONS.SCALABLE.path), purpose: 'any' },
-            { src: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_APP_ICONS.RASTER.path), purpose: 'any' },
-            { src: getAiTaKrajtaPublicPath(AI_TA_KRAJTA_APP_ICONS.RASTER.path), purpose: 'maskable' },
+            { src: AI_TA_KRAJTA_APP_ICONS.SCALABLE.path, purpose: 'any' },
+            { src: AI_TA_KRAJTA_APP_ICONS.RASTER.path, purpose: 'any' },
+            { src: AI_TA_KRAJTA_APP_ICONS.RASTER.path, purpose: 'maskable' },
         ],
     });
 

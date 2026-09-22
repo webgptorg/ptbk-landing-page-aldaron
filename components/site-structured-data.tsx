@@ -1,7 +1,6 @@
 'use client';
 
 import { AI_TA_KRAJTA_PATH } from '@/businesses/ai-ta-krajta/config';
-import { isCustomDomainHostnameForSourcePath } from '@/lib/domains/customDomainRouting';
 import { serializeStructuredDataNode } from '@/lib/metadata/serialize-structured-data';
 import { createOrganizationStructuredData, createWebSiteStructuredData } from '@/lib/metadata/structured-data';
 import { usePathname } from 'next/navigation';
@@ -16,9 +15,7 @@ const SITE_STRUCTURED_DATA = [createOrganizationStructuredData(), createWebSiteS
  */
 export function SiteStructuredData() {
     const pathname = usePathname();
-    const hostname = typeof window === 'undefined' ? null : window.location.hostname;
-    const isAiTaKrajtaPage =
-        pathname === AI_TA_KRAJTA_PATH || isCustomDomainHostnameForSourcePath(hostname, AI_TA_KRAJTA_PATH);
+    const isAiTaKrajtaPage = pathname === AI_TA_KRAJTA_PATH;
 
     if (isAiTaKrajtaPage) {
         return null;
