@@ -64,6 +64,25 @@ describe('domain middleware', () => {
         expect(imageResponse.headers.get('x-middleware-rewrite')).toBeNull();
     });
 
+    it('sends a non-branded page on a branded domain to its single canonical home on the primary site', () => {
+        const localeResponse = middleware(createRequest('https://ai-ta-krajta.cz/cs'));
+        const deepResponse = middleware(createRequest('https://www.pavolhejny.com/for-industry?utm_source=x'));
+
+        expect(localeResponse.status).toBe(308);
+        expect(localeResponse.headers.get('location')).toBe('https://ptbk.io/cs');
+        expect(deepResponse.status).toBe(308);
+        expect(deepResponse.headers.get('location')).toBe('https://ptbk.io/for-industry?utm_source=x');
+    });
+
+    it('keeps serving shared static assets and build output on a branded domain instead of redirecting them away', () => {
+        const assetResponse = middleware(createRequest('https://ai-ta-krajta.cz/logo/pavol-hejny-ph.svg'));
+        const buildChunkResponse = middleware(createRequest('https://ai-ta-krajta.cz/_next/data/app.json'));
+
+        expect(assetResponse.headers.get('location')).toBeNull();
+        expect(assetResponse.headers.get('x-middleware-rewrite')).toBeNull();
+        expect(buildChunkResponse.headers.get('location')).toBeNull();
+    });
+
     it('normalizes an accidentally used internal path on a branded domain', () => {
         const response = middleware(createRequest('https://pavolhejny.cz/en/pavol'));
 

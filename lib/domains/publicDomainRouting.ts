@@ -165,6 +165,28 @@ export function getInternalPathname(publicDomainRoute: PublicDomainRoute, public
 }
 
 /**
+ * Tells whether a path reached on a branded domain must be served from this shared deployment rather than redirected
+ * to the primary site.
+ *
+ * Build output under `/_next/` and any static file — which always carries a file extension in its last segment — are
+ * loaded by the branded pages themselves and therefore have to resolve on the branded host. Every other path is an
+ * ordinary Promptbook page whose one canonical home is the primary site, so it is sent there instead of being mirrored
+ * on the branded domain.
+ *
+ * Note: `/api/*`, `/_next/static/*`, `/_next/image/*` and `favicon.ico` never reach this check because the middleware
+ *       matcher already excludes them; `/_next/` build chunks and public static files (`/logo/…`, `/people/…`) do.
+ */
+export function isSharedDeploymentAssetPath(pathname: string): boolean {
+    if (pathname.startsWith('/_next/')) {
+        return true;
+    }
+
+    const lastPathSegment = pathname.slice(pathname.lastIndexOf('/') + 1);
+
+    return lastPathSegment.includes('.');
+}
+
+/**
  * Turns an internal application path into its canonical public URL whenever that page owns an independent domain.
  * Paths that remain part of Promptbook keep the main site's canonical origin.
  */

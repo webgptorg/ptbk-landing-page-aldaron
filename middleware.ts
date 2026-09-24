@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+    PRIMARY_SITE_URL,
     getInternalPathname,
     getPublicDomainRouteByHostname,
     getPublicDomainRouteByInternalPathname,
     getPublicPathname,
     isPrimarySiteHostname,
+    isSharedDeploymentAssetPath,
     normalizeHostname,
 } from './lib/domains/publicDomainRouting';
 import { getPreferredHomepageLanguage } from './lib/homepage-language';
@@ -58,6 +60,17 @@ export function middleware(request: NextRequest) {
             rewriteUrl.pathname = internalPathname;
 
             return NextResponse.rewrite(rewriteUrl);
+        }
+
+        // A branded domain hosts only its own pages. Any other page belongs to the main Promptbook site and has its
+        // single canonical home there, so it is sent to `ptbk.io` instead of quietly mirroring the whole application
+        // on the branded domain. Shared build output, APIs and static files still resolve here, because the branded
+        // pages load them from this same deployment.
+        if (!isSharedDeploymentAssetPath(request.nextUrl.pathname)) {
+            const primarySiteUrl = new URL(request.nextUrl.pathname, PRIMARY_SITE_URL);
+            primarySiteUrl.search = request.nextUrl.search;
+
+            return NextResponse.redirect(primarySiteUrl, 308);
         }
     }
 

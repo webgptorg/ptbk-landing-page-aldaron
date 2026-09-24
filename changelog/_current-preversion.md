@@ -8,7 +8,10 @@
   URLs canonical. Each branded site answers on both its bare apex and its `www.` alias, so a visitor who types
   `www.ai-ta-krajta.cz`, `www.pavolhejny.cz`, or `www.pavolhejny.com` reaches the branded page instead of being
   dropped onto the Promptbook homepage; `www.` is folded into the apex in one shared place for the primary and every
-  branded host alike.
+  branded host alike. A branded domain now hosts only its own pages: any other Promptbook page reached on a branded
+  host — `ai-ta-krajta.cz/cs`, `pavolhejny.cz/cs/komunita` and the like — permanently redirects to its single
+  canonical home on `ptbk.io` with its query string intact, instead of mirroring the whole application on the branded
+  domain, while the shared build output, APIs and static files the branded pages load keep resolving on the branded host.
 
 - Added per-host episode-appearance factors to the `/ai-ta-krajta` roster draw. Hosts retain the ordinary 1×
   contribution from their episode appearances, while Katka Fajmanová receives 1.7×, Tomáš Mikolov 5×, and Pavol Hejný

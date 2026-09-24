@@ -8,6 +8,7 @@ import {
     getPublicDomainRouteByInternalPathname,
     getPublicPathname,
     isPrimarySiteHostname,
+    isSharedDeploymentAssetPath,
     normalizeHostname,
 } from '@/lib/domains/publicDomainRouting';
 import { describe, expect, it } from 'vitest';
@@ -60,5 +61,14 @@ describe('public domain routing', () => {
         expect(isPrimarySiteHostname('www.ptbk.io')).toBe(true);
         expect(getPublicDomainRouteByHostname('www.pavolhejny.cz')).toBe(getPublicDomainRouteByHostname('pavolhejny.cz'));
         expect(getPublicDomainRouteByHostname('www.pavolhejny.cz')?.internalPath).toBe(PAVOL_CZECH_INTERNAL_PATH);
+    });
+
+    it('treats build output and static files as shared assets, but ordinary pages as redirectable', () => {
+        expect(isSharedDeploymentAssetPath('/_next/static/chunks/main.js')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/logo/pavol-hejny-ph.svg')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/people/ai-ta-krajta/pavol.png')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/cs')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/cs/komunita')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/pro-mesta')).toBe(false);
     });
 });
