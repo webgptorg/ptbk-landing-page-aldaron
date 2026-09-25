@@ -25,7 +25,14 @@ export type ScrapePublicWebPagePreviewOptions = {
     readonly revalidateSeconds?: number;
 };
 
-export class PublicWebPagePreviewError extends Error {}
+export class PublicWebPagePreviewError extends Error {
+    public constructor(
+        message: string,
+        public readonly kind: 'invalid' | 'disallowed' | 'unavailable' = 'unavailable',
+    ) {
+        super(message);
+    }
+}
 
 type HtmlAttributes = Readonly<Record<string, string>>;
 
@@ -104,7 +111,7 @@ function resolvePreviewImageUrl(value: string | null, pageUrl: string): string |
 export function extractPublicWebPagePreview(html: string, pageUrl: string): PublicWebPagePreview {
     const normalizedUrl = normalizePublicWebPageUrl(pageUrl);
     if (normalizedUrl === null) {
-        throw new PublicWebPagePreviewError('Page URL is invalid');
+        throw new PublicWebPagePreviewError('Page URL is invalid', 'invalid');
     }
 
     const fallbackTitle = new URL(normalizedUrl).hostname;
@@ -183,12 +190,12 @@ async function assertPublicWebPageUrl(url: string): Promise<void> {
     const parsedUrl = new URL(url);
     const hostname = getHostnameWithoutIpv6Brackets(parsedUrl.hostname);
     if (hostname.toLowerCase() === 'localhost') {
-        throw new PublicWebPagePreviewError('Page URL must be publicly reachable');
+        throw new PublicWebPagePreviewError('Page URL must be publicly reachable', 'disallowed');
     }
 
     if (isIP(hostname) !== 0) {
         if (isPrivateIpAddress(hostname)) {
-            throw new PublicWebPagePreviewError('Page URL must be publicly reachable');
+            throw new PublicWebPagePreviewError('Page URL must be publicly reachable', 'disallowed');
         }
         return;
     }
@@ -204,7 +211,7 @@ async function assertPublicWebPageUrl(url: string): Promise<void> {
         addressRecords.length === 0 ||
         addressRecords.some((addressRecord) => isPrivateIpAddress(addressRecord.address))
     ) {
-        throw new PublicWebPagePreviewError('Page URL must be publicly reachable');
+        throw new PublicWebPagePreviewError('Page URL must be publicly reachable', 'disallowed');
     }
 }
 
@@ -246,7 +253,7 @@ export async function fetchPublicWebPageResource(
     },
 ): Promise<{ readonly bytes: Buffer; readonly url: string }> {
     if (normalizePublicWebPageUrl(initialUrl) === null) {
-        throw new PublicWebPagePreviewError('Page URL is invalid');
+        throw new PublicWebPagePreviewError('Page URL is invalid', 'invalid');
     }
     let currentUrl = initialUrl;
 
@@ -274,9 +281,14 @@ export async function fetchPublicWebPageResource(
                     throw new PublicWebPagePreviewError('Page redirects too many times');
                 }
 
-                const redirectedUrl = normalizePublicWebPageUrl(new URL(redirectLocation, currentUrl).toString());
+                let redirectedUrl: string | null;
+                try {
+                    redirectedUrl = normalizePublicWebPageUrl(new URL(redirectLocation, currentUrl).toString());
+                } catch {
+                    throw new PublicWebPagePreviewError('Page redirects to an unsupported URL', 'disallowed');
+                }
                 if (redirectedUrl === null) {
-                    throw new PublicWebPagePreviewError('Page redirects to an unsupported URL');
+                    throw new PublicWebPagePreviewError('Page redirects to an unsupported URL', 'disallowed');
                 }
 
                 currentUrl = redirectedUrl;
@@ -318,7 +330,7 @@ export async function scrapePublicWebPagePreview(
 ): Promise<PublicWebPagePreview> {
     const normalizedUrl = normalizePublicWebPageUrl(value);
     if (normalizedUrl === null) {
-        throw new PublicWebPagePreviewError('Page URL is invalid');
+        throw new PublicWebPagePreviewError('Page URL is invalid', 'invalid');
     }
 
     const { bytes, url } = await fetchPublicWebPageResource(normalizedUrl, {

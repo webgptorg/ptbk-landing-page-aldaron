@@ -144,6 +144,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   keeps every artificial activity tool — prepared chat comments, reaction and
   vote adjustments, and the artificial watching count — out of a shared screen
   by default; `artopts=on` reveals them and `artopts=off` keeps them hidden.
+  Its content tab offers the full Markdown material editor and a quick link dialog.
+  The latter previews up to twelve public HTTP(S) links through the shared safe
+  scraper, then explicitly creates one ordinary material per distinct URL in input
+  order. It keeps the submitted query and fragment, uses the full editor's
+  publication, unlock and access defaults, appends after the greatest actual
+  material order, and retries failures with stable creation IDs. The ordinary
+  material creation path still owns short links and live room refresh.
 - `/admin/workshops?tab=subtitles` manages private Czech, English and mixed-language video subtitle tracks.
   Tracks store plain text with original-video timestamps, source video/file and provenance independently of room
   responses. Admins can import SRT/WebVTT, try existing YouTube captions (authored before automatic), or generate

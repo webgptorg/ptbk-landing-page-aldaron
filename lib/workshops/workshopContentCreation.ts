@@ -22,12 +22,33 @@ export async function createWorkshopContent(
     workshopRow: WorkshopRow,
     values: WorkshopContentCreateValues,
 ): Promise<{ readonly contentBlock: WorkshopContentBlock | null; readonly errorMessage: string | null }> {
-    const { data, error } = await supabase
+    const { data: insertedData, error } = await supabase
         .from(WORKSHOP_CONTENT_TABLE_NAME)
-        .insert({ workshop_id: workshopRow.id, ...createWorkshopContentDatabaseValues(values) })
+        .insert({
+            workshop_id: workshopRow.id,
+            ...createWorkshopContentDatabaseValues(values),
+            ...(values.idempotencyKey === undefined ? {} : { id: values.idempotencyKey }),
+        })
         .select(WORKSHOP_CONTENT_COLUMNS)
         .single();
-    if (error || data === null) {
+    let data = insertedData;
+    if (error?.code === '23505' && values.idempotencyKey !== undefined) {
+        // A request can finish after the browser has lost its response. The same
+        // client ID retrieves that ordinary material instead of creating another.
+        const existingResult = await supabase
+            .from(WORKSHOP_CONTENT_TABLE_NAME)
+            .select(WORKSHOP_CONTENT_COLUMNS)
+            .eq('id', values.idempotencyKey)
+            .eq('workshop_id', workshopRow.id)
+            .maybeSingle();
+        if (existingResult.error) {
+            return { contentBlock: null, errorMessage: existingResult.error.message };
+        }
+        data = existingResult.data;
+    } else if (error) {
+        return { contentBlock: null, errorMessage: error.message };
+    }
+    if (data === null) {
         return { contentBlock: null, errorMessage: error?.message ?? 'Content was not returned' };
     }
 

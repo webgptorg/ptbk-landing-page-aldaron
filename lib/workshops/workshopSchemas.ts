@@ -544,7 +544,10 @@ const workshopContentFieldsSchema = z.object({
     isPaidMembersOnly: z.boolean(),
 });
 
-export const workshopContentCreateSchema = workshopContentFieldsSchema;
+export const workshopContentCreateSchema = workshopContentFieldsSchema.extend({
+    /** A client-generated material ID makes a retried explicit creation safe after a lost response. */
+    idempotencyKey: z.string().uuid().optional(),
+});
 export const workshopContentUpdateSchema = workshopContentFieldsSchema
     .partial()
     .refine((value) => Object.keys(value).length > 0, 'At least one content field is required');

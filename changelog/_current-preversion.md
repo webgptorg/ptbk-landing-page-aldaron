@@ -1,5 +1,13 @@
 # Current preversion
 
+- Workshop material administration now offers **Přidat materiál** for Markdown and **Přidat odkaz** for a quick
+  URL batch. Each valid, distinct URL becomes its own ordinary, editable material with a title from the shared safe
+  page preview or a clear domain fallback; the original query and fragment remain in its tracked link. The dialog
+  reports invalid, repeated and already used destinations, shows publication and access defaults, and creates only
+  on confirmation. Batches append after the largest stored material order, keep per-item failures for retry, and use
+  stable creation IDs to avoid duplicate records after a lost response. The existing short-link and live-room paths
+  handle every new material.
+
 - Isolated Promptbook, AI ta Krajta, and Pavol Hejný's Czech and English sites on the four configured
   domains and their `www.` aliases within the existing deployment. Unknown, Promptbook-only, foreign-brand,
   short-link, and unknown file-looking page paths on a branded domain now return that site's localized,

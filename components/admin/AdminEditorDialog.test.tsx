@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { AdminEditorButton } from './AdminEditorButton';
+import { AdminEditorDialog } from './AdminEditorDialog';
 import { WorkshopCommentEditor } from '@/businesses/workshop-admin/WorkshopCommentEditor';
 import { settleAdminSavesForTest } from '@/lib/admin/adminAutosaveTestUtilities';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -60,4 +61,23 @@ it('waits for an in-flight save and newer typing before closing the dialog', asy
     await act(async () => finishSave(true));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(onSave.mock.calls.map(([body]) => body)).toEqual(['First edit', 'Latest edit']);
+});
+
+it('keeps an explicit batch visible while its creation is running', async () => {
+    const onClose = vi.fn();
+    let isCreating = true;
+    const dialog = render(<AdminEditorDialog isOpen title="Přidat odkazy" onClose={onClose} canClose={() => !isCreating}>
+        <p>Rozpracovaná dávka</p>
+    </AdminEditorDialog>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByText('Rozpracovaná dávka')).toBeTruthy();
+
+    isCreating = false;
+    dialog.rerender(<AdminEditorDialog isOpen title="Přidat odkazy" onClose={onClose} canClose={() => !isCreating}>
+        <p>Rozpracovaná dávka</p>
+    </AdminEditorDialog>);
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
 });

@@ -12,6 +12,8 @@ export const AdminEditorErrorProvider = ADMIN_EDITOR_ERROR_CONTEXT.Provider;
 export type AdminEditorDialogProps = {
     readonly isOpen: boolean;
     readonly onClose: () => void;
+    /** An explicit batch can keep its draft visible until every item has reported a result. */
+    readonly canClose?: () => boolean;
     readonly title: string;
     readonly description?: string;
     readonly errorMessage?: string | null;
@@ -39,7 +41,7 @@ function restoreEditorFocus(opener: HTMLElement | null): void {
     else main.setAttribute('tabindex', previousTabIndex);
 }
 
-function OpenAdminEditorDialog({ onClose, title, description, errorMessage, className, children }: AdminEditorDialogProps) {
+function OpenAdminEditorDialog({ onClose, canClose, title, description, errorMessage, className, children }: AdminEditorDialogProps) {
     const dashboardErrorMessage = useContext(ADMIN_EDITOR_ERROR_CONTEXT);
     // Capture before a child's autoFocus runs, including editors opened without a Radix DialogTrigger.
     const openerReference = useRef<HTMLElement | null>(
@@ -51,10 +53,10 @@ function OpenAdminEditorDialog({ onClose, title, description, errorMessage, clas
     const isUnsavedNoticeShown = isCloseBlocked && getPendingAdminSaves().length > 0;
 
     const closeEditor = async () => {
-        if (isClosingReference.current) return;
+        if (isClosingReference.current || (canClose && !canClose())) return;
         isClosingReference.current = true;
         try {
-            if (await flushAdminSaves()) onClose();
+            if (await flushAdminSaves() && (!canClose || canClose())) onClose();
             else setIsCloseBlocked(true);
         } finally {
             isClosingReference.current = false;

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
+import { createWorkshopContentDefaults } from '@/lib/workshops/workshopContentDefaults';
 import type { WorkshopContentBlock } from '@/lib/workshops/workshopTypes';
 import { MousePointerClick, Save, Trash2, Unlock } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -21,13 +22,15 @@ type WorkshopContentEditorProps = {
 };
 
 function createContentDraft(contentBlock: WorkshopContentBlock | null, defaultUnlockAt: string, defaultSortOrder: number) {
+    const defaults = createWorkshopContentDefaults(defaultUnlockAt, defaultSortOrder);
     return {
         title: contentBlock?.title ?? '', bodyMarkdown: contentBlock?.bodyMarkdown ?? '',
-        unlockAt: toDateTimeLocalValue(contentBlock?.unlockAt ?? defaultUnlockAt),
+        unlockAt: toDateTimeLocalValue(contentBlock?.unlockAt ?? defaults.unlockAt),
         unlockAtOverride: null as string | null,
-        sortOrder: contentBlock?.sortOrder ?? defaultSortOrder,
-        isPublished: contentBlock?.isPublished ?? true, isFollowUp: contentBlock?.isFollowUp ?? false,
-        isPaidMembersOnly: contentBlock?.isPaidMembersOnly ?? false,
+        sortOrder: contentBlock?.sortOrder ?? defaults.sortOrder,
+        isPublished: contentBlock?.isPublished ?? defaults.isPublished,
+        isFollowUp: contentBlock?.isFollowUp ?? defaults.isFollowUp,
+        isPaidMembersOnly: contentBlock?.isPaidMembersOnly ?? defaults.isPaidMembersOnly,
     };
 }
 
@@ -207,7 +210,7 @@ export function WorkshopContentEditor({
                 )}
                 <Button type="submit" size="sm" disabled={isSaving}>
                     <Save className="mr-2 h-4 w-4" />
-                    {isSaving ? 'Ukládám…' : contentBlock === null ? 'Přidat obsah' : 'Uložit'}
+                    {isSaving ? 'Ukládám…' : contentBlock === null ? 'Přidat materiál' : 'Uložit'}
                 </Button>
             </div>
             {contentBlock !== null && <div className="mt-3"><AdminAutosaveStatus {...autosave} /></div>}

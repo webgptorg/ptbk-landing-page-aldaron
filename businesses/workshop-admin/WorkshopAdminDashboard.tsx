@@ -419,6 +419,17 @@ export function WorkshopAdminDashboard({
         snapshot === null
             ? Promise.resolve(false)
             : runAndReload(() => createAdminWorkshopContent(snapshot.workshop.id, values));
+    const handleCreateQuickLinkContent = async (values: WorkshopContentWriteValues) => {
+        if (snapshot === null) throw new Error('Workshop není načtený.');
+        const contentBlock = await createAdminWorkshopContent(snapshot.workshop.id, values);
+        setSnapshot((currentSnapshot) => {
+            if (currentSnapshot?.workshop.id !== snapshot.workshop.id) return currentSnapshot;
+            const contentBlocks = [...currentSnapshot.contentBlocks.filter((existing) => existing.id !== contentBlock.id), contentBlock]
+                .sort((first, second) => first.sortOrder - second.sortOrder || first.unlockAt.localeCompare(second.unlockAt));
+            return { ...currentSnapshot, contentBlocks };
+        });
+        return contentBlock;
+    };
     const handleUpdateContent = (contentId: string, values: WorkshopContentWriteValues) =>
         snapshot === null
             ? Promise.resolve(false)
@@ -766,9 +777,11 @@ export function WorkshopAdminDashboard({
                                 </div>
                                 <WorkshopContentAdmin
                                     key={snapshot.workshop.id}
+                                    workshopId={snapshot.workshop.id}
                                     defaultUnlockAt={scheduleStartsAt ?? currentUnlockAt}
                                     contentBlocks={snapshot.contentBlocks}
                                     onCreate={handleCreateContent}
+                                    onCreateQuickLink={handleCreateQuickLinkContent}
                                     onUpdate={handleUpdateContent}
                                     onDelete={handleDeleteContent}
                                 />

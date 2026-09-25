@@ -5,6 +5,7 @@ import {
 } from '@/lib/shortener/shortcodeLink';
 import { SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
 import { fetchPublicWebPageTitle } from '@/lib/network/publicWebPagePreview';
+import { escapeWorkshopMarkdownLinkTitle } from '@/lib/workshops/workshopMarkdownLink';
 import {
     WORKSHOP_COMMENT_SHORTCODE_LINK_TABLE_NAME,
     WORKSHOP_CONTENT_SHORTCODE_LINK_TABLE_NAME,
@@ -404,12 +405,8 @@ function getWorkshopShortcodeLinkDestinationsRequiringTitle(bodyMarkdown: string
     );
 }
 
-function escapeMarkdownLinkTitle(title: string): string {
-    return title.replace(/[\\\[\]]/g, '\\$&');
-}
-
 function createMarkdownShortcodeLink(title: string, shortUrl: string): string {
-    return `[${escapeMarkdownLinkTitle(title)}](${shortUrl})`;
+    return `[${escapeWorkshopMarkdownLinkTitle(title)}](${shortUrl})`;
 }
 
 function getWorkshopShortcodeLinkFallbackTitle(destinationUrl: string): string {

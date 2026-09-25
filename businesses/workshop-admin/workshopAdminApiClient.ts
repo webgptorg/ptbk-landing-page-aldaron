@@ -130,6 +130,14 @@ export type WorkshopContentWriteValues = {
     readonly isPublished: boolean;
     readonly isFollowUp: boolean;
     readonly isPaidMembersOnly: boolean;
+    readonly idempotencyKey?: string;
+};
+
+export type WorkshopQuickLinkPreview = {
+    readonly title: string;
+    readonly state: 'ready' | 'fallback';
+    readonly message: string | null;
+    readonly isExisting: boolean;
 };
 
 export type WorkshopPollCreateValues = {
@@ -315,6 +323,16 @@ export async function createAdminWorkshopContent(
         createJsonMutation('POST', values),
     );
     return result.contentBlock;
+}
+
+export function fetchAdminWorkshopQuickLinkPreview(
+    workshopId: string,
+    destination: string,
+    signal: AbortSignal,
+): Promise<WorkshopQuickLinkPreview> {
+    const url = createAdminApiUrl(`/${encodeURIComponent(workshopId)}/content/link-preview`);
+    const searchParameters = new URLSearchParams({ url: destination });
+    return requestAdminJson<WorkshopQuickLinkPreview>(`${url}?${searchParameters}`, { signal });
 }
 
 export async function updateAdminWorkshopContent(

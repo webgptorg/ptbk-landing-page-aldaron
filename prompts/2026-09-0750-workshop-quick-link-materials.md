@@ -1,4 +1,4 @@
-[ ] !!!
+[x] by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation ~$0.4680 26 minutes; Testing 18 minutes
 
 [✨🔗] Add workshop link materials quickly, including multiple URLs and automatically fetched titles
 
@@ -36,3 +36,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle, especially for scraping titles, creating materials and generating short links.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+
