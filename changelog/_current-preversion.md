@@ -1,5 +1,11 @@
 # Current preversion
 
+- Workshop and community participant administration now shows complete room-level counts for trusted people,
+  untrusted people, and moderators. **Důvěřovat všem** reviews the exact eligible room participants in a confirmation
+  dialog, then grants trust atomically only if that set is unchanged. The existing promotion trigger approves pending
+  submissions while preserving bans and rejected content. A separate, default-off setting can automatically trust only
+  newly created participant identities in that room; turning it off does not revoke earlier trust.
+
 - Workshop material administration now offers **Přidat materiál** for Markdown and **Přidat odkaz** for a quick
   URL batch. Each valid, distinct URL becomes its own ordinary, editable material with a title from the shared safe
   page preview or a clear domain fallback; the original query and fragment remain in its tracked link. The dialog

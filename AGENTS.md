@@ -325,6 +325,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   without fetching linked pages or preview images. Moderator-created materials
   require no review, and old pending submissions are not bulk-processed.
 - Trusted participants remain invisible and their messages are auto-approved.
+  The participant lists in workshop and community administration show three exclusive, complete room counts:
+  moderators, trusted non-moderators, and untrusted non-moderators. Their explicit bulk-trust action confirms a
+  server-reviewed eligible set and updates that room atomically; a changed set requires a fresh confirmation.
+  The separate automatic-trust setting defaults off for every new or duplicated room and is applied only when a new
+  participant identity is inserted. Reconnects and later setting changes never rewrite an existing trust decision.
   Granting trust or moderator status also approves every pending submission by that room-local participant — chat,
   member-written poll answers, and community projects — in the same database transaction. Rejected items stay
   rejected; a ban blocks this approval until it is lifted. The private pending-submission view supplies both this

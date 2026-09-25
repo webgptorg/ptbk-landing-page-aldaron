@@ -702,7 +702,9 @@ export function WorkshopAdminDashboard({
                             <TabsContent value="participants" className="space-y-6">
                                 {selectedWorkshop !== null && <WorkshopRegistrationContacts workshop={selectedWorkshop} />}
                                 <WorkshopParticipantList
+                                    key={snapshot.workshop.id}
                                     workshopId={snapshot.workshop.id}
+                                    roomTitle={snapshot.workshop.title}
                                     workshopStartsAt={scheduleStartsAt}
                                     workshopEndsAt={snapshot.workshop.endsAt}
                                     refreshVersion={snapshotRefreshVersion}

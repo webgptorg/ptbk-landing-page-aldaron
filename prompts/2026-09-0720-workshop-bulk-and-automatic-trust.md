@@ -1,4 +1,4 @@
-[ ] !!
+[x] by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation $2.20 21 minutes; Testing 18 minutes
 
 [✨🤝] Trust all existing workshop participants, optionally trust new arrivals automatically, and show role counts
 
@@ -37,3 +37,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

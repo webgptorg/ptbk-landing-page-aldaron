@@ -13,6 +13,7 @@ import { WorkshopExportButton } from '@/businesses/workshop-admin/WorkshopExport
 import { WorkshopParticipantFilters } from '@/businesses/workshop-admin/WorkshopParticipantFilters';
 import { WorkshopParticipantPagination } from '@/businesses/workshop-admin/WorkshopParticipantPagination';
 import { WorkshopParticipantTimeline } from '@/businesses/workshop-admin/WorkshopParticipantTimeline';
+import { WorkshopParticipantTrustControls } from '@/businesses/workshop-admin/WorkshopParticipantTrustControls';
 import { AdminContactDetails } from '@/components/admin/AdminContactDetails';
 import { WorkshopPendingSubmissionCount } from '@/components/workshops/WorkshopPendingSubmissionCount';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 
 type WorkshopParticipantListProps = {
     readonly workshopId: string;
+    readonly roomTitle: string;
 
     /**
      * Start of the schedule an attendance is measured against, or `null` in a room which has no schedule
@@ -84,6 +86,7 @@ function getParticipantPageCount(totalCount: number, pageSize: number): number {
  */
 export function WorkshopParticipantList({
     workshopId,
+    roomTitle,
     workshopStartsAt,
     workshopEndsAt,
     refreshVersion,
@@ -315,6 +318,13 @@ export function WorkshopParticipantList({
                         />
                     </div>
                 </div>
+
+                <WorkshopParticipantTrustControls
+                    workshopId={workshopId}
+                    roomTitle={roomTitle}
+                    refreshVersion={refreshVersion}
+                    onParticipantsChanged={loadParticipantPage}
+                />
 
                 <div className="mt-6">
                     <WorkshopParticipantFilters query={participantQuery} onChange={changeParticipantQuery} />

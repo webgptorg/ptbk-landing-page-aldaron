@@ -22,6 +22,10 @@ import {
     type WorkshopAdminParticipantQuery,
 } from '@/lib/workshops/workshopAdminParticipantQuery';
 import type { WorkshopAdminExportKind } from '@/lib/workshops/workshopAdminExports';
+import type {
+    WorkshopParticipantBulkTrustResult,
+    WorkshopParticipantTrustSummary,
+} from '@/lib/workshops/workshopParticipantTrustPolicy';
 import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 
 /**
@@ -245,6 +249,36 @@ export async function fetchAdminWorkshopParticipantPage(
 ): Promise<WorkshopAdminParticipantPage> {
     const queryParameters = Object.fromEntries(serializeWorkshopAdminParticipantQuery(query).entries());
     return requestAdminJson(createAdminApiUrl(`/${encodeURIComponent(workshopId)}/participants`, queryParameters));
+}
+
+function createAdminWorkshopParticipantTrustUrl(workshopId: string): string {
+    return createAdminApiUrl(`/${encodeURIComponent(workshopId)}/participants/trust`);
+}
+
+export async function fetchAdminWorkshopParticipantTrustSummary(
+    workshopId: string,
+): Promise<WorkshopParticipantTrustSummary> {
+    return requestAdminJson(createAdminWorkshopParticipantTrustUrl(workshopId));
+}
+
+export async function saveAdminWorkshopAutomaticParticipantTrust(
+    workshopId: string,
+    isAutomaticTrustEnabled: boolean,
+): Promise<WorkshopParticipantTrustSummary> {
+    return requestAdminJson(
+        createAdminWorkshopParticipantTrustUrl(workshopId),
+        createJsonMutation('PATCH', { isAutomaticTrustEnabled }),
+    );
+}
+
+export async function trustAllAdminWorkshopParticipants(
+    workshopId: string,
+    eligibilityToken: string,
+): Promise<WorkshopParticipantBulkTrustResult> {
+    return requestAdminJson(
+        createAdminWorkshopParticipantTrustUrl(workshopId),
+        createJsonMutation('POST', { eligibilityToken }),
+    );
 }
 
 export async function fetchAdminWorkshopParticipantTimeline(
