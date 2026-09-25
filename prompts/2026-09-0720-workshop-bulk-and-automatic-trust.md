@@ -1,4 +1,4 @@
-[ ]
+[ ] !!
 
 [✨🤝] Trust all existing workshop participants, optionally trust new arrivals automatically, and show role counts
 

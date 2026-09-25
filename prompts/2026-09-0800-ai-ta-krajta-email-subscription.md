@@ -1,4 +1,4 @@
-[ ]
+[ ] !
 
 [✨📬] Let listeners subscribe to AI ta Krajta by email and collect them in the existing contacts inbox
 

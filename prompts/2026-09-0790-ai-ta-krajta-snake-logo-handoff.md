@@ -2,7 +2,6 @@
 
 [✨🎨] Make the snake emerge from the existing logo without even a small visual shape change
 
-- Priority: LOW. This is visual polish, below functional fixes such as the wall/corner flicker in `2026-09-0780-ai-ta-krajta-snake-wall-flicker.md`. Keep it a separate task.
 - Clicking the AI ta Krajta logo already starts a snake game, but the owner can still see a slight mismatch between the static logo snake and the snake at the beginning of the game.
 - The existing STATIC LOGO is the visual source of truth. It is the brand's snake; the game must start from it, not the other way around.
     - Do not redraw or simplify the logo to match the current game renderer.
