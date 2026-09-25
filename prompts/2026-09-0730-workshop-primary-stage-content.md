@@ -1,0 +1,48 @@
+[ ]
+
+[✨🎭] Choose video, presentation or repository as a workshop's primary stage content
+
+- The participant application is also used at physical workshops, where a video-first stage is often inappropriate. Add a per-event setting in `/admin/workshops?tab=settings` for the primary stage content.
+- The only choices are `Video`, `Prezentace` and `Repozitář`.
+    - `Materiály` is NOT a stage option. Ordinary materials always remain supplementary.
+    - Default to video, including existing events and data without the new setting, so unchanged events retain their current behavior.
+    - The choice is independent of whether the event is online or in person. Do not add a stage to room kinds that currently have none, such as the permanent community.
+    - Keep the configured video, presentation and repository when changing the selection; switching primary content must not erase the other sources.
+- Preserve the event lifecycle.
+    - Before the event starts, the main stage shows the existing countdown regardless of the selected content type.
+    - While it is ongoing, the stage shows the selected primary content.
+    - After it ends, the default screen is the existing wrap-up, not an indefinitely running live stage. Keep feedback, follow-up material, navigation and recap behavior.
+    - Reuse the existing workshop phase logic, including open-ended events, manually recorded ends, freshly past events and reopened events. Do not create a second timing policy.
+- Render the chosen content meaningfully in the main stage.
+    - Video retains the existing live player, controls and recording behavior.
+    - Presentation uses the workshop's existing presentation URL and supported PDF, PowerPoint and GitHub Markdown sources. Reuse available presentation/material preview capabilities. When a source cannot be embedded, provide a clear preview/open/download fallback, not a broken frame or an unrelated video placeholder.
+    - Repository uses the connected workshop project and the existing repository panel: repository/deployment links, selected branches, commit range and live history. Do not replace this with an unrelated repository copy or an iframe-only GitHub page.
+    - Missing or temporarily unavailable primary content produces a type-specific empty/error state, with an admin configuration warning. Do not silently fall back to video or require a video URL for an in-person event.
+    - Keep the stage usable on mobile; presentation and repository layouts need not inherit a video-only fixed aspect ratio if it makes their content unusable.
+- Keep all other configured sources available in materials without duplicating the primary source there.
+    - Video primary: presentation and repository are supplementary materials.
+    - Presentation primary: video and repository are supplementary materials.
+    - Repository primary: video and presentation are supplementary materials.
+    - Only show sources that exist and that the current participant may access. Reuse the special-material mechanism, not new ordinary material records every time the setting changes.
+    - Preserve ordinary materials, their order, unlock times, publication and membership rules. The primary/secondary placement must not duplicate sources or lose their links.
+- Make the wrap-up content-aware.
+    - Its main action refers to the selected source: replay video, open presentation or explore repository, with a way back to the same wrap-up.
+    - Do not offer to replay a nonexistent video, call a presentation a recording, or show a video-teaser pitch as the primary action for a repository-led workshop.
+    - Preserve existing access policy rather than creating a new paywall: presentation and repository are currently public to room participants. Paid recordings remain server-gated; non-paying participants receive only the existing teaser/offer when available.
+    - The same video gating applies when video is supplementary. Moving it into materials must never expose the full recording or its protected identifiers to non-members.
+    - Do not invent presentation/repository teasers or premium tiers. A separately available recording may still have its correctly labelled secondary membership offer.
+- Preserve live administration updates.
+    - Saving a primary-content change during a workshop must update all connected participants through the existing realtime/refresh mechanism, without manual reload or rejoining.
+    - Update primary stage and supplementary placement together. Rapid changes must settle on the latest saved state, and newly joining participants must see that state too.
+    - Preserve participant identity, chat drafts, polls, reactions, displayed comments and repository updates. A video removed from the active stage must not keep playing invisibly in the background.
+- Start with `businesses/workshop-admin/WorkshopSettingsForm.tsx`, `businesses/online-workshop/participant/WorkshopStage.tsx`, `WorkshopWrapUp.tsx`, `OnlineWorkshopParticipantPage.tsx`, `WorkshopPresentationMaterial.tsx`, `WorkshopRepositoryPanel.tsx`, `lib/workshops/workshopSpecialMaterials.ts`, `workshopPhase.ts` and the existing server-side content/video access selection.
+    - Read the existing repository, presentation and wrap-up PRDs, especially `2026-09-0040-workshop-repository.md`, `2026-09-0110-presentation-as-special-material.md` and `2026-09-0240-wrap-up-pdf.md`.
+    - Coordinate shared material rendering with `2026-09-0770-workshop-material-link-preview-qr-cards.md` without duplicating it.
+- Acceptance criteria:
+    - Cover all three source types before, during and after the event, including missing sources and events with no video.
+    - An existing video-led event remains equivalent to its current behavior.
+    - Test paid and free participants both on the primary stage and in supplementary materials, including server responses that must not expose a paid recording.
+    - Use two connected participant sessions to verify live switching in every direction, no duplicated materials, no background audio and no lost participant state.
+- Keep in mind the DRY _(don't repeat yourself)_ principle. Share source placement, access and lifecycle decisions instead of branching independently in each screen.
+- Do an analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](../changelog/_current-preversion.md).
