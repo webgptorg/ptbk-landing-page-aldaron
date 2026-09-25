@@ -1,36 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-    PRIMARY_SITE_URL,
     getInternalPathname,
+    getPublicRequestHostname,
     getPublicDomainRouteByHostname,
     getPublicDomainRouteByInternalPathname,
     getPublicPathname,
     isPrimarySiteHostname,
     isSharedDeploymentAssetPath,
-    normalizeHostname,
+    type PublicDomainRoute,
 } from './lib/domains/publicDomainRouting';
+import { createPublicDomainNotFoundHtml } from './lib/domains/publicDomainNotFound';
+import { createPublicDomainRobotsText, createPublicDomainSitemapXml } from './lib/domains/publicDomainMetadata';
 import { getPreferredHomepageLanguage } from './lib/homepage-language';
-
-/**
- * Reads the public hostname before an internal reverse-proxy address can replace it.
- */
-function getRequestHostname(request: NextRequest): string {
-    const forwardedHostname = request.headers.get('x-forwarded-host')?.split(',')[0];
-    const hostname = forwardedHostname ?? request.headers.get('host') ?? request.nextUrl.hostname;
-
-    return normalizeHostname(hostname);
-}
 
 /**
  * Builds a redirect to an independently branded site's public URL while retaining the browser's query parameters.
  */
-function createPublicDomainRedirectResponse(request: NextRequest) {
-    const publicDomainRoute = getPublicDomainRouteByInternalPathname(request.nextUrl.pathname);
-
-    if (!publicDomainRoute) {
-        return undefined;
-    }
-
+function createPublicDomainRedirectResponse(request: NextRequest, publicDomainRoute: PublicDomainRoute) {
     const redirectUrl = new URL(getPublicPathname(publicDomainRoute, request.nextUrl.pathname), publicDomainRoute.origin);
     redirectUrl.search = request.nextUrl.search;
 
@@ -38,21 +24,23 @@ function createPublicDomainRedirectResponse(request: NextRequest) {
 }
 
 export function middleware(request: NextRequest) {
-    const requestHostname = getRequestHostname(request);
+    const requestHostname = getPublicRequestHostname(request.headers, request.nextUrl.hostname);
     const publicDomainRoute = getPublicDomainRouteByHostname(requestHostname);
-
-    // Legacy branded paths always have one public home. This also makes a link to the other Pavol language move to
-    // that language's domain instead of treating it as a path below the current one.
-    if (isPrimarySiteHostname(requestHostname) || publicDomainRoute) {
-        const publicDomainRedirectResponse = createPublicDomainRedirectResponse(request);
-
-        if (publicDomainRedirectResponse) {
-            return publicDomainRedirectResponse;
-        }
-    }
 
     // A custom domain keeps its concise public path in the address bar while Next renders the existing nested route.
     if (publicDomainRoute) {
+        if (request.nextUrl.pathname === '/robots.txt') {
+            return new NextResponse(createPublicDomainRobotsText(publicDomainRoute), {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+            });
+        }
+
+        if (request.nextUrl.pathname === '/sitemap.xml') {
+            return new NextResponse(createPublicDomainSitemapXml(publicDomainRoute), {
+                headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+            });
+        }
+
         const internalPathname = getInternalPathname(publicDomainRoute, request.nextUrl.pathname);
 
         if (internalPathname) {
@@ -62,16 +50,42 @@ export function middleware(request: NextRequest) {
             return NextResponse.rewrite(rewriteUrl);
         }
 
-        // A branded domain hosts only its own pages. Any other page belongs to the main Promptbook site and has its
-        // single canonical home there, so it is sent to `ptbk.io` instead of quietly mirroring the whole application
-        // on the branded domain. Shared build output, APIs and static files still resolve here, because the branded
-        // pages load them from this same deployment.
-        if (!isSharedDeploymentAssetPath(request.nextUrl.pathname)) {
-            const primarySiteUrl = new URL(request.nextUrl.pathname, PRIMARY_SITE_URL);
-            primarySiteUrl.search = request.nextUrl.search;
+        const legacyDomainRoute = getPublicDomainRouteByInternalPathname(request.nextUrl.pathname);
 
-            return NextResponse.redirect(primarySiteUrl, 308);
+        // Old nested links to this same site normalize to its public path. An old path owned by a different site
+        // must never become a cross-site redirect when requested on this domain.
+        if (legacyDomainRoute?.hostname === publicDomainRoute.hostname) {
+            return createPublicDomainRedirectResponse(request, publicDomainRoute);
         }
+
+        if (isSharedDeploymentAssetPath(request.nextUrl.pathname)) {
+            return NextResponse.next();
+        }
+
+        return new NextResponse(createPublicDomainNotFoundHtml(publicDomainRoute), {
+            status: 404,
+            headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Cache-Control': 'no-store',
+                'X-Robots-Tag': 'noindex, nofollow',
+            },
+        });
+    }
+
+    if (isPrimarySiteHostname(requestHostname)) {
+        const legacyDomainRoute = getPublicDomainRouteByInternalPathname(request.nextUrl.pathname);
+
+        if (legacyDomainRoute) {
+            return createPublicDomainRedirectResponse(request, legacyDomainRoute);
+        }
+    }
+
+    if (request.nextUrl.pathname === '/pavol') {
+        const language = getPreferredHomepageLanguage(request.headers.get('accept-language'));
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = `/${language}/pavol`;
+
+        return NextResponse.redirect(redirectUrl);
     }
 
     if (request.nextUrl.pathname !== '/') {

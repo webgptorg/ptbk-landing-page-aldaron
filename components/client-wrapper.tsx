@@ -1,6 +1,7 @@
 'use client';
 
 import { WorkshopRoomThemeProvider } from '@/components/workshops/WorkshopRoomThemeProvider';
+import { PublicSiteNavigationProvider } from '@/components/public-site-navigation-provider';
 import { isThirdPartyTrackingAllowed, removeSensitiveTrackingParameters } from '@/lib/tracking/trackingExclusions';
 import LogRocket from 'logrocket';
 import { usePathname } from 'next/navigation';
@@ -8,7 +9,7 @@ import { useEffect } from 'react';
 
 let hasInitializedLogRocket = false;
 
-export function ClientWrapper({ children }: { children: React.ReactNode }) {
+export function ClientWrapper({ children, publicHostname }: { children: React.ReactNode; publicHostname: string }) {
     const pathname = usePathname();
 
     useEffect(() => {
@@ -37,5 +38,9 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
         hasInitializedLogRocket = true;
     }, [pathname]);
 
-    return <WorkshopRoomThemeProvider>{children}</WorkshopRoomThemeProvider>;
+    return (
+        <PublicSiteNavigationProvider hostname={publicHostname}>
+            <WorkshopRoomThemeProvider>{children}</WorkshopRoomThemeProvider>
+        </PublicSiteNavigationProvider>
+    );
 }

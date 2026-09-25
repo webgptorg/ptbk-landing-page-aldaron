@@ -6,7 +6,7 @@ import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-defini
 import type { SocialPreviewImageOptions } from '@/lib/metadata/social-preview-image';
 import type { SocialPreviewPaletteSeed } from '@/lib/metadata/social-preview-palette';
 import { createPersonStructuredData, type StructuredDataNode } from '@/lib/metadata/structured-data';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 /**
  * Name of the person the page is about
@@ -50,6 +50,7 @@ export const PAVOL_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguage, 
     cs: {
         path: PAVOL_LANGUAGE_ALTERNATES.cs,
         language: 'cs',
+        brand: { name: PAVOL_NAME },
         title: 'Pavol Hejný | AI konzultace, vývoj a workshopy',
         socialTitle: 'Pavol Hejný',
         description:
@@ -65,6 +66,7 @@ export const PAVOL_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguage, 
     en: {
         path: PAVOL_LANGUAGE_ALTERNATES.en,
         language: 'en',
+        brand: { name: PAVOL_NAME },
         title: 'Pavol Hejný | AI consulting, software development, and workshops',
         socialTitle: 'Pavol Hejný',
         description:
@@ -88,11 +90,15 @@ export const PAVOL_METADATA: Readonly<Record<SupportedHomepageLanguage, Metadata
  * Personal branding of the page, which replaces the Promptbook favicon
  */
 export const PAVOL_LAYOUT_METADATA: Metadata = {
+    manifest: null,
+    other: { 'msapplication-TileColor': '#fffaf5' },
     icons: {
         icon: [{ url: '/logo/pavol-hejny-ph.svg', type: 'image/svg+xml' }],
         shortcut: ['/logo/pavol-hejny-ph.svg'],
     },
 };
+
+export const PAVOL_VIEWPORT: Viewport = { themeColor: '#fffaf5', colorScheme: 'light' };
 
 export const PAVOL_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(PAVOL_PAGE_DEFINITIONS.cs, {

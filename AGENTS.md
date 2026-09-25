@@ -5,6 +5,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- The four configured public domains (`ptbk.io`, `ai-ta-krajta.cz`, `pavolhejny.cz`, and
+  `pavolhejny.com`, including `www.` aliases) share one build but serve only their own pages.
+  The three branded domains answer unknown, Promptbook-only, foreign-branded, and unknown
+  file-looking page paths with their own localized HTML and HTTP 404 at the requested URL.
+  Their own robots files and sitemaps list only their pages; Promptbook's sitemap lists only
+  Promptbook pages. Shared build output, known public assets and used APIs remain available,
+  with admin APIs still authenticated. Only the primary domain redirects the legacy branded
+  paths across sites; a same-brand nested path normalizes to that brand's public path.
+  Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
 - `/en` is its English localization.

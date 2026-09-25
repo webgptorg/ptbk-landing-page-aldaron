@@ -2,6 +2,7 @@ import {
     AI_TA_KRAJTA_INTERNAL_PATH,
     PAVOL_CZECH_INTERNAL_PATH,
     PAVOL_ENGLISH_INTERNAL_PATH,
+    createPublicNavigationUrl,
     createPublicUrl,
     getInternalPathname,
     getPublicDomainRouteByHostname,
@@ -12,6 +13,23 @@ import {
     normalizeHostname,
 } from '@/lib/domains/publicDomainRouting';
 import { describe, expect, it } from 'vitest';
+import { SHARED_PUBLIC_ASSET_PATHS } from '@/lib/domains/sharedPublicAssetPaths';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+function listPublicAssetPaths(directory: string, relativeDirectory = ''): string[] {
+    return readdirSync(join(directory, relativeDirectory), { withFileTypes: true }).flatMap((entry) => {
+        if (entry.name.startsWith('.')) {
+            return [];
+        }
+
+        const relativePath = join(relativeDirectory, entry.name);
+
+        return entry.isDirectory()
+            ? listPublicAssetPaths(directory, relativePath)
+            : [`/${relativePath.replace(/\\/g, '/')}`];
+    });
+}
 
 describe('public domain routing', () => {
     it('maps every legacy path to exactly one canonical branded URL', () => {
@@ -27,6 +45,23 @@ describe('public domain routing', () => {
     it('keeps ordinary Promptbook pages and third-party URLs unchanged', () => {
         expect(createPublicUrl('/cs/online-workshop')).toBe('https://ptbk.io/cs/online-workshop');
         expect(createPublicUrl('https://example.com/image.png')).toBe('https://example.com/image.png');
+    });
+
+    it('keeps same-site links on local or alias hosts and makes cross-site navigation canonical', () => {
+        expect(createPublicNavigationUrl('/cs/ochrana-osobnich-udaju', '127.0.0.1')).toBe(
+            '/cs/ochrana-osobnich-udaju',
+        );
+        expect(createPublicNavigationUrl('/cs/ochrana-osobnich-udaju', 'www.ptbk.io')).toBe(
+            '/cs/ochrana-osobnich-udaju',
+        );
+        expect(createPublicNavigationUrl('/cs/ochrana-osobnich-udaju', 'www.ai-ta-krajta.cz')).toBe(
+            'https://ptbk.io/cs/ochrana-osobnich-udaju',
+        );
+        expect(createPublicNavigationUrl(`${AI_TA_KRAJTA_INTERNAL_PATH}/media-kit?kind=press#kontakt`, 'ai-ta-krajta.cz'))
+            .toBe('/media-kit?kind=press#kontakt');
+        expect(createPublicNavigationUrl(PAVOL_ENGLISH_INTERNAL_PATH, 'www.pavolhejny.cz')).toBe(
+            'https://pavolhejny.com/',
+        );
     });
 
     it('rewrites only the custom-domain paths which have an application route', () => {
@@ -63,12 +98,21 @@ describe('public domain routing', () => {
         expect(getPublicDomainRouteByHostname('www.pavolhejny.cz')?.internalPath).toBe(PAVOL_CZECH_INTERNAL_PATH);
     });
 
-    it('treats build output and static files as shared assets, but ordinary pages as redirectable', () => {
+    it('shares build output and known static locations without treating every dotted page as an asset', () => {
         expect(isSharedDeploymentAssetPath('/_next/static/chunks/main.js')).toBe(true);
         expect(isSharedDeploymentAssetPath('/logo/pavol-hejny-ph.svg')).toBe(true);
-        expect(isSharedDeploymentAssetPath('/people/ai-ta-krajta/pavol.png')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/people/ai-ta-krajta/pavol-hejny.png')).toBe(true);
         expect(isSharedDeploymentAssetPath('/cs')).toBe(false);
         expect(isSharedDeploymentAssetPath('/cs/komunita')).toBe(false);
         expect(isSharedDeploymentAssetPath('/pro-mesta')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/cs/online-workshop.pdf')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/unknown.html')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/sitemap.xml')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/people/unknown-person.png')).toBe(false);
+        expect(isSharedDeploymentAssetPath('/pavol/cs')).toBe(false);
+    });
+
+    it('keeps the shared asset allowlist in step with the public directory', () => {
+        expect([...SHARED_PUBLIC_ASSET_PATHS].sort()).toEqual(listPublicAssetPaths(join(process.cwd(), 'public')).sort());
     });
 });

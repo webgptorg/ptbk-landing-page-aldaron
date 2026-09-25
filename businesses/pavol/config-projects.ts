@@ -1,4 +1,5 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { createPublicUrl } from '@/lib/domains/publicDomainRouting';
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, ExternalLink, FileText, Github } from 'lucide-react';
 
@@ -34,7 +35,7 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
             title: 'Promptbook',
             description:
                 'Ekosystém AI agentů, kteří si drží cíle, pravidla, znalosti a firemní kontext.',
-            links: [{ href: '/', label: 'Otevřít Promptbook', icon: ArrowRight }],
+            links: [{ href: createPublicUrl('/'), label: 'Otevřít Promptbook', icon: ArrowRight }],
         },
         {
             logos: [{ src: collboardLogo, className: 'h-7 w-7' }],
@@ -51,7 +52,7 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
             title: 'AI Supervize',
             description:
                 'Praktický rámec pro firmy a týmy, které chtějí mít při vývoji s AI méně chaosu a lépe hlídat kvalitu.',
-            links: [{ href: '/ai-supervize', label: 'AI Supervize', icon: ArrowRight }],
+            links: [{ href: createPublicUrl('/ai-supervize'), label: 'AI Supervize', icon: ArrowRight }],
         },
         {
             icon: Github,
@@ -74,7 +75,7 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
             title: 'Promptbook',
             description:
                 'AI agents that keep track of goals, rules, knowledge, and company context.',
-            links: [{ href: '/', label: 'Open Promptbook', icon: ArrowRight }],
+            links: [{ href: createPublicUrl('/'), label: 'Open Promptbook', icon: ArrowRight }],
         },
         {
             logos: [{ src: collboardLogo, className: 'h-7 w-7' }],
@@ -91,7 +92,7 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
             title: 'AI Supervize',
             description:
                 'A practical framework for companies and teams that want less chaos and tighter quality control when developing with AI.',
-            links: [{ href: '/ai-supervize', label: 'AI Supervize', icon: ArrowRight }],
+            links: [{ href: createPublicUrl('/ai-supervize'), label: 'AI Supervize', icon: ArrowRight }],
         },
         {
             icon: Github,

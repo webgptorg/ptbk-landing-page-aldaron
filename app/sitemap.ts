@@ -1,6 +1,7 @@
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import { createAbsoluteUrl } from '@/lib/metadata/site-config';
+import { PRIMARY_SITE_URL } from '@/lib/domains/publicDomainRouting';
 import type { MetadataRoute } from 'next';
 
 export const dynamic = 'force-static';
@@ -52,5 +53,7 @@ function createSitemapEntry(definition: PageMetadataDefinition): MetadataRoute.S
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-    return INDEXED_PAGE_METADATA_DEFINITIONS.map(createSitemapEntry);
+    return INDEXED_PAGE_METADATA_DEFINITIONS.filter(
+        (definition) => new URL(createAbsoluteUrl(definition.path)).origin === PRIMARY_SITE_URL,
+    ).map(createSitemapEntry);
 }

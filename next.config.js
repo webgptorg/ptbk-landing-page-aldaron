@@ -15,6 +15,12 @@ const IS_COMPILED_ROUTE_KEPT_FOR_WHOLE_RUN = process.env.E2E_KEEP_COMPILED_ROUTE
  */
 const KEPT_COMPILED_ROUTE_MAXIMAL_INACTIVE_AGE_MS = 24 * 60 * 60 * 1000;
 
+const PUBLIC_DOMAIN_HOSTS = require('./lib/domains/publicDomainHosts.json');
+const PUBLIC_DEVELOPMENT_ORIGINS = Object.values(PUBLIC_DOMAIN_HOSTS).flatMap((hostname) => [
+    hostname,
+    `www.${hostname}`,
+]);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     eslint: {
@@ -59,6 +65,7 @@ const nextConfig = {
     },
     allowedDevOrigins: [
         '127.0.0.1',
+        ...PUBLIC_DEVELOPMENT_ORIGINS,
         '*.macaly.dev',
         '*.macaly.app',
         '*.macaly-app.com',

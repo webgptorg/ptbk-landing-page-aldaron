@@ -1,4 +1,4 @@
-[ ] !!!!
+[x] (2 attempts) by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation $3.25 41 minutes; Testing 23 minutes; Fixing ~$0.2559 27 minutes; Testing 19 minutes
 
 [✨🧱] Keep the public domains isolated and show the correct site's 404 instead of falling through to Promptbook
 
@@ -33,3 +33,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Keep ownership and canonical-domain rules in one shared place.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

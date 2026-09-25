@@ -1,4 +1,5 @@
 import { normalizeAiTaKrajtaSearchText } from '@/businesses/ai-ta-krajta/aiTaKrajtaTextSearch';
+import { PAVOL_CZECH_INTERNAL_PATH, createPublicUrl } from '@/lib/domains/publicDomainRouting';
 
 /**
  * Normalized transparent portraits, kept separate from source photos used elsewhere on the site.
@@ -70,7 +71,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
         name: 'Pavol Hejný',
         factor: 0.8,
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
-        url: 'https://www.ptbk.io/pavol',
+        url: createPublicUrl(PAVOL_CZECH_INTERNAL_PATH),
         photoFileName: 'pavol-hejny.png',
         // Note: `pavlem` is the same ending as the one a description uses before the surname of a Pavel it talks
         //       about, as in `speciálním hostem Pavlem Ungrem`. The comma and the conjunction are what say that the

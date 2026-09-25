@@ -41,7 +41,11 @@ function ChatbotInner() {
     return <GenericChatbot />;
 }
 
-export function Chatbot() {
+export function Chatbot({ isBrandedSite = false }: { readonly isBrandedSite?: boolean }) {
+    if (isBrandedSite) {
+        return null;
+    }
+
     return (
         <Suspense>
             <ChatbotInner />

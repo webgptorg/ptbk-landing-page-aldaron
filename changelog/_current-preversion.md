@@ -1,5 +1,16 @@
 # Current preversion
 
+- Isolated Promptbook, AI ta Krajta, and Pavol Hejný's Czech and English sites on the four configured
+  domains and their `www.` aliases within the existing deployment. Unknown, Promptbook-only, foreign-brand,
+  short-link, and unknown file-looking page paths on a branded domain now return that site's localized,
+  fully rendered HTTP 404 at the original URL. Legacy cross-site redirects still work from `ptbk.io`,
+  including podcast children, the `/pavol` language entry, trailing slashes and query strings.
+  Each site's robots file and sitemap describe only its own pages. Shared assets and contact APIs remain
+  available; admin pages stay outside the branded sites and admin APIs retain their authentication.
+  Updated personal language and project links, podcast profile and legal links to canonical destinations,
+  while same-site legal links stay on local and preview hosts. Added browser-level domain, status, metadata,
+  asset, API, and navigation coverage.
+
 - Configured the independently branded sites for their own canonical domains: AI ta Krajta now lives at
   `https://ai-ta-krajta.cz/`, while Pavol Hejný's Czech and English pages live at
   `https://pavolhejny.cz/` and `https://pavolhejny.com/`. One shared domain-route map rewrites those concise domain
@@ -8,10 +19,7 @@
   URLs canonical. Each branded site answers on both its bare apex and its `www.` alias, so a visitor who types
   `www.ai-ta-krajta.cz`, `www.pavolhejny.cz`, or `www.pavolhejny.com` reaches the branded page instead of being
   dropped onto the Promptbook homepage; `www.` is folded into the apex in one shared place for the primary and every
-  branded host alike. A branded domain now hosts only its own pages: any other Promptbook page reached on a branded
-  host — `ai-ta-krajta.cz/cs`, `pavolhejny.cz/cs/komunita` and the like — permanently redirects to its single
-  canonical home on `ptbk.io` with its query string intact, instead of mirroring the whole application on the branded
-  domain, while the shared build output, APIs and static files the branded pages load keep resolving on the branded host.
+  branded host alike. Shared build output, APIs and static files resolve on the branded host.
 
 - Added per-host episode-appearance factors to the `/ai-ta-krajta` roster draw. Hosts retain the ordinary 1×
   contribution from their episode appearances, while Katka Fajmanová receives 1.7×, Tomáš Mikolov 5×, and Pavol Hejný

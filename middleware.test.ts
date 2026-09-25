@@ -24,6 +24,15 @@ describe('domain middleware', () => {
         expect(englishResponse.headers.get('location')).toBe('https://pavolhejny.com/');
     });
 
+    it('keeps the language-selection entry point and its query on the primary host', () => {
+        const response = middleware(
+            createRequest('https://ptbk.io/pavol?from=footer', { 'accept-language': 'en-US,en;q=0.9' }),
+        );
+
+        expect(response.status).toBe(307);
+        expect(response.headers.get('location')).toBe('https://ptbk.io/en/pavol?from=footer');
+    });
+
     it('uses the forwarded public host when a reverse proxy supplies an internal URL', () => {
         const response = middleware(
             createRequest('http://internal.example.test/ai-ta-krajta', { 'x-forwarded-host': 'ptbk.io' }),
@@ -56,7 +65,7 @@ describe('domain middleware', () => {
 
     it('rewrites a branded subpage but leaves its ordinary static assets alone', () => {
         const mediaKitResponse = middleware(createRequest('https://ai-ta-krajta.cz/media-kit'));
-        const imageResponse = middleware(createRequest('https://ai-ta-krajta.cz/people/ai-ta-krajta/pavol.png'));
+        const imageResponse = middleware(createRequest('https://ai-ta-krajta.cz/people/ai-ta-krajta/pavol-hejny.png'));
 
         expect(mediaKitResponse.headers.get('x-middleware-rewrite')).toBe(
             'https://ai-ta-krajta.cz/ai-ta-krajta/media-kit',
@@ -64,14 +73,19 @@ describe('domain middleware', () => {
         expect(imageResponse.headers.get('x-middleware-rewrite')).toBeNull();
     });
 
-    it('sends a non-branded page on a branded domain to its single canonical home on the primary site', () => {
+    it('returns each requested site’s own 404 for foreign and unknown pages without redirecting', async () => {
         const localeResponse = middleware(createRequest('https://ai-ta-krajta.cz/cs'));
         const deepResponse = middleware(createRequest('https://www.pavolhejny.com/for-industry?utm_source=x'));
+        const foreignLegacyResponse = middleware(createRequest('https://ai-ta-krajta.cz/cs/pavol'));
 
-        expect(localeResponse.status).toBe(308);
-        expect(localeResponse.headers.get('location')).toBe('https://ptbk.io/cs');
-        expect(deepResponse.status).toBe(308);
-        expect(deepResponse.headers.get('location')).toBe('https://ptbk.io/for-industry?utm_source=x');
+        for (const response of [localeResponse, deepResponse, foreignLegacyResponse]) {
+            expect(response.status).toBe(404);
+            expect(response.headers.get('location')).toBeNull();
+            expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+        }
+        expect(await localeResponse.text()).toContain('Stránka nenalezena');
+        expect(await deepResponse.text()).toContain('Page not found');
+        expect(await foreignLegacyResponse.text()).toContain('AI ta Krajta');
     });
 
     it('keeps serving shared static assets and build output on a branded domain instead of redirecting them away', () => {
@@ -83,11 +97,19 @@ describe('domain middleware', () => {
         expect(buildChunkResponse.headers.get('location')).toBeNull();
     });
 
-    it('normalizes an accidentally used internal path on a branded domain', () => {
-        const response = middleware(createRequest('https://pavolhejny.cz/en/pavol'));
+    it('normalizes only the same site’s own old nested path on its domain', () => {
+        const response = middleware(createRequest('https://pavolhejny.cz/cs/pavol/?source=old'));
 
         expect(response.status).toBe(308);
-        expect(response.headers.get('location')).toBe('https://pavolhejny.com/');
+        expect(response.headers.get('location')).toBe('https://pavolhejny.cz/?source=old');
+    });
+
+    it('does not allow a file-looking page or short-link path to bypass the domain boundary', () => {
+        const fileResponse = middleware(createRequest('https://ai-ta-krajta.cz/cs/online-workshop.pdf'));
+        const shortLinkResponse = middleware(createRequest('https://pavolhejny.com/a-shortcode'));
+
+        expect(fileResponse.status).toBe(404);
+        expect(shortLinkResponse.status).toBe(404);
     });
 
     it('keeps the language redirect on unbranded roots for development and other hostnames', () => {

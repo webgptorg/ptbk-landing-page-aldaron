@@ -1,3 +1,6 @@
+'use client';
+
+import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getLegalLinks } from '@/lib/legal/legalLinks';
 import { cn } from '@/lib/utils';
@@ -20,12 +23,26 @@ export function LegalFooterLinks({
     return (
         <ul className={cn('flex flex-wrap items-center gap-x-6 gap-y-2', className)}>
             {getLegalLinks(language).map((link) => (
-                <li key={link.href}>
-                    <Link href={link.href} className={cn('transition-colors', linkClassName)}>
-                        {link.text}
-                    </Link>
-                </li>
+                <LegalFooterLink key={link.href} href={link.href} text={link.text} linkClassName={linkClassName} />
             ))}
         </ul>
+    );
+}
+
+function LegalFooterLink({
+    href,
+    text,
+    linkClassName,
+}: {
+    readonly href: string;
+    readonly text: string;
+    readonly linkClassName?: string;
+}) {
+    return (
+        <li>
+            <Link href={usePublicNavigationUrl(href)} className={cn('transition-colors', linkClassName)}>
+                {text}
+            </Link>
+        </li>
     );
 }

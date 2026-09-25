@@ -1,7 +1,10 @@
+import { SHARED_PUBLIC_ASSET_PATHS } from './sharedPublicAssetPaths';
+import PUBLIC_DOMAIN_HOSTS from './publicDomainHosts.json';
+
 /**
  * Canonical origin of the main Promptbook site.
  */
-export const PRIMARY_SITE_URL = 'https://ptbk.io';
+export const PRIMARY_SITE_URL = `https://${PUBLIC_DOMAIN_HOSTS.primary}`;
 
 /**
  * Hostnames which serve the main Promptbook site and must send legacy branded paths to their own domains.
@@ -10,7 +13,7 @@ export const PRIMARY_SITE_URL = 'https://ptbk.io';
  *       without being listed. Every independently branded domain relies on that same folding instead of repeating a
  *       `www.` entry of its own.
  */
-export const PRIMARY_SITE_HOSTNAMES: readonly string[] = ['ptbk.io'];
+export const PRIMARY_SITE_HOSTNAMES: readonly string[] = [PUBLIC_DOMAIN_HOSTS.primary];
 
 /**
  * Internal route which renders the AI ta Krajta site.
@@ -46,20 +49,39 @@ export type PublicDomainRoute = {
      * Static assets and APIs deliberately stay outside this list: they already exist at the application root and
      * should keep resolving from the custom hostname without being rewritten into the page route.
      */
-    readonly publicPathSuffixes: readonly string[];
+    readonly publicPathSuffixes: readonly {
+        readonly path: string;
+        readonly isIndexed?: boolean;
+    }[];
+
+    /** Copy and navigation for this site's standalone 404 document. */
+    readonly notFound: {
+        readonly language: 'cs' | 'en';
+        readonly appearance: 'podcast' | 'personal';
+        readonly siteName: string;
+        readonly logoPath: string;
+        readonly title: string;
+        readonly description: string;
+        readonly homeLabel: string;
+        readonly navigationLabel: string;
+        readonly navigation: readonly { readonly label: string; readonly internalPath: string }[];
+    };
 };
 
-const AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES: readonly string[] = [
-    '',
-    '/media-kit',
-    '/branding',
-    '/opengraph-image',
-    '/manifest.webmanifest',
-    '/logo.svg',
-    '/logo.png',
+const AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes'] = [
+    { path: '', isIndexed: true },
+    { path: '/media-kit', isIndexed: true },
+    { path: '/branding', isIndexed: true },
+    { path: '/opengraph-image' },
+    { path: '/manifest.webmanifest' },
+    { path: '/logo.svg' },
+    { path: '/logo.png' },
 ];
 
-const PAVOL_PUBLIC_PATH_SUFFIXES: readonly string[] = ['', '/opengraph-image'];
+const PAVOL_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes'] = [
+    { path: '', isIndexed: true },
+    { path: '/opengraph-image' },
+];
 
 /**
  * Every independently branded site. This is the sole mapping used for incoming custom-domain rewrites, outgoing
@@ -67,22 +89,69 @@ const PAVOL_PUBLIC_PATH_SUFFIXES: readonly string[] = ['', '/opengraph-image'];
  */
 export const PUBLIC_DOMAIN_ROUTES: readonly PublicDomainRoute[] = [
     {
-        hostname: 'ai-ta-krajta.cz',
-        origin: 'https://ai-ta-krajta.cz',
+        hostname: PUBLIC_DOMAIN_HOSTS.podcast,
+        origin: `https://${PUBLIC_DOMAIN_HOSTS.podcast}`,
         internalPath: AI_TA_KRAJTA_INTERNAL_PATH,
         publicPathSuffixes: AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES,
+        notFound: {
+            language: 'cs',
+            appearance: 'podcast',
+            siteName: 'AI ta Krajta',
+            logoPath: '/logo.svg',
+            title: 'Stránka nenalezena',
+            description: 'Tahle stránka na webu AI ta Krajta není. Vraťte se k podcastu a vyberte si další díl.',
+            homeLabel: 'Zpět k podcastu',
+            navigationLabel: 'Stránky podcastu',
+            navigation: [
+                { label: 'Podcast', internalPath: AI_TA_KRAJTA_INTERNAL_PATH },
+                { label: 'Media kit', internalPath: `${AI_TA_KRAJTA_INTERNAL_PATH}/media-kit` },
+                { label: 'Brand kit', internalPath: `${AI_TA_KRAJTA_INTERNAL_PATH}/branding` },
+            ],
+        },
     },
     {
-        hostname: 'pavolhejny.cz',
-        origin: 'https://pavolhejny.cz',
+        hostname: PUBLIC_DOMAIN_HOSTS.pavolCzech,
+        origin: `https://${PUBLIC_DOMAIN_HOSTS.pavolCzech}`,
         internalPath: PAVOL_CZECH_INTERNAL_PATH,
         publicPathSuffixes: PAVOL_PUBLIC_PATH_SUFFIXES,
+        notFound: {
+            language: 'cs',
+            appearance: 'personal',
+            siteName: 'Pavol Hejný',
+            logoPath: '/logo/pavol-hejny-ph.svg',
+            title: 'Stránka nenalezena',
+            description: 'Tahle stránka na osobním webu Pavola Hejného není. Vraťte se na úvodní stránku.',
+            homeLabel: 'Zpět na úvod',
+            navigationLabel: 'Osobní web',
+            navigation: [
+                { label: 'Úvod', internalPath: PAVOL_CZECH_INTERNAL_PATH },
+                { label: 'Služby', internalPath: `${PAVOL_CZECH_INTERNAL_PATH}#services` },
+                { label: 'Projekty', internalPath: `${PAVOL_CZECH_INTERNAL_PATH}#projects` },
+                { label: 'English', internalPath: PAVOL_ENGLISH_INTERNAL_PATH },
+            ],
+        },
     },
     {
-        hostname: 'pavolhejny.com',
-        origin: 'https://pavolhejny.com',
+        hostname: PUBLIC_DOMAIN_HOSTS.pavolEnglish,
+        origin: `https://${PUBLIC_DOMAIN_HOSTS.pavolEnglish}`,
         internalPath: PAVOL_ENGLISH_INTERNAL_PATH,
         publicPathSuffixes: PAVOL_PUBLIC_PATH_SUFFIXES,
+        notFound: {
+            language: 'en',
+            appearance: 'personal',
+            siteName: 'Pavol Hejný',
+            logoPath: '/logo/pavol-hejny-ph.svg',
+            title: 'Page not found',
+            description: "This page is not on Pavol Hejný's personal site. Return to the homepage.",
+            homeLabel: 'Back to home',
+            navigationLabel: 'Personal site',
+            navigation: [
+                { label: 'Home', internalPath: PAVOL_ENGLISH_INTERNAL_PATH },
+                { label: 'Services', internalPath: `${PAVOL_ENGLISH_INTERNAL_PATH}#services` },
+                { label: 'Projects', internalPath: `${PAVOL_ENGLISH_INTERNAL_PATH}#projects` },
+                { label: 'Čeština', internalPath: PAVOL_CZECH_INTERNAL_PATH },
+            ],
+        },
     },
 ];
 
@@ -100,6 +169,13 @@ export function normalizeHostname(hostname: string): string {
         .replace(/\.$/, '')
         .toLowerCase()
         .replace(/^www\./, '');
+}
+
+/** Read the visitor-facing host before a reverse proxy substitutes its internal address. */
+export function getPublicRequestHostname(requestHeaders: Pick<Headers, 'get'>, fallbackHostname = ''): string {
+    const forwardedHostname = requestHeaders.get('x-forwarded-host')?.split(',')[0];
+
+    return normalizeHostname(forwardedHostname ?? requestHeaders.get('host') ?? fallbackHostname);
 }
 
 /**
@@ -154,36 +230,28 @@ export function getInternalPathname(publicDomainRoute: PublicDomainRoute, public
     const normalizedPublicPathname =
         publicPathname.length > 1 ? publicPathname.replace(/\/+$/, '') : publicPathname;
     const publicPathSuffix = publicDomainRoute.publicPathSuffixes.find(
-        (candidatePublicPathSuffix) => normalizedPublicPathname === `/${candidatePublicPathSuffix.replace(/^\//, '')}`,
+        (candidatePublicPathSuffix) => normalizedPublicPathname === `/${candidatePublicPathSuffix.path.replace(/^\//, '')}`,
     );
 
     if (publicPathSuffix === undefined) {
         return undefined;
     }
 
-    return `${publicDomainRoute.internalPath}${publicPathSuffix}`;
+    return `${publicDomainRoute.internalPath}${publicPathSuffix.path}`;
 }
 
+const SHARED_PUBLIC_ASSET_PATH_SET = new Set(SHARED_PUBLIC_ASSET_PATHS);
+
 /**
- * Tells whether a path reached on a branded domain must be served from this shared deployment rather than redirected
- * to the primary site.
- *
- * Build output under `/_next/` and any static file — which always carries a file extension in its last segment — are
- * loaded by the branded pages themselves and therefore have to resolve on the branded host. Every other path is an
- * ordinary Promptbook page whose one canonical home is the primary site, so it is sent there instead of being mirrored
- * on the branded domain.
- *
- * Note: `/api/*`, `/_next/static/*`, `/_next/image/*` and `favicon.ico` never reach this check because the middleware
- *       matcher already excludes them; `/_next/` build chunks and public static files (`/logo/…`, `/people/…`) do.
+ * Build output and known public-file locations are shared by all three sites.
+ * APIs, including the contact form endpoint and authenticated admin APIs, bypass the middleware matcher.
  */
 export function isSharedDeploymentAssetPath(pathname: string): boolean {
     if (pathname.startsWith('/_next/')) {
         return true;
     }
 
-    const lastPathSegment = pathname.slice(pathname.lastIndexOf('/') + 1);
-
-    return lastPathSegment.includes('.');
+    return SHARED_PUBLIC_ASSET_PATH_SET.has(pathname);
 }
 
 /**
@@ -207,4 +275,19 @@ export function createPublicUrl(path: string): string {
         `${getPublicPathname(publicDomainRoute, inputUrl.pathname)}${inputUrl.search}${inputUrl.hash}`,
         publicDomainRoute.origin,
     ).toString();
+}
+
+/**
+ * Keeps navigation within the current site on its current host, including local and preview hosts.
+ * A link which crosses into another public site uses that site's canonical absolute URL.
+ */
+export function createPublicNavigationUrl(path: string, requestHostname: string): string {
+    const publicUrl = new URL(createPublicUrl(path));
+    const currentDomainRoute = getPublicDomainRouteByHostname(requestHostname);
+    const destinationDomainRoute = getPublicDomainRouteByHostname(publicUrl.hostname);
+    const isSameSite = currentDomainRoute
+        ? destinationDomainRoute?.hostname === currentDomainRoute.hostname
+        : isPrimarySiteHostname(publicUrl.hostname);
+
+    return isSameSite ? `${publicUrl.pathname}${publicUrl.search}${publicUrl.hash}` : publicUrl.toString();
 }

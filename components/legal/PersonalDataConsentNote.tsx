@@ -1,3 +1,6 @@
+'use client';
+
+import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import { getPersonalDataConsentNote, type AddressForm } from '@/lib/legal/personalDataConsentNotes';
@@ -29,12 +32,13 @@ export function PersonalDataConsentNote({
     children?: ReactNode;
 }) {
     const { prefix, privacyPolicyLinkText } = getPersonalDataConsentNote(language, addressForm);
+    const privacyPolicyUrl = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
 
     return (
         <p className={cn('text-xs leading-relaxed text-slate-400', className)}>
             {prefix}
             <Link
-                href={getLegalPagePath('privacyPolicy', language)}
+                href={privacyPolicyUrl}
                 className={cn('underline underline-offset-4 hover:no-underline', linkClassName ?? 'text-cyan-700')}
             >
                 {privacyPolicyLinkText}

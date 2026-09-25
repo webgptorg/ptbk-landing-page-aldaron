@@ -5,9 +5,9 @@ import { pavolMediaAppearances, pavolMediaMoreHref, type PavolMediaAppearance } 
 import { pavolNumbers } from '@/businesses/pavol/config-numbers';
 import { pavolProjects, type PavolProject } from '@/businesses/pavol/config-projects';
 import { pavolTestimonials } from '@/businesses/pavol/config-testimonials';
-import { pavolContainerClassName } from '@/businesses/pavol/layout';
+import { pavolContainerClassName, PAVOL_SITE_STYLE } from '@/businesses/pavol/layout';
 import { pavolPageContent } from '@/businesses/pavol/pavolContent';
-import { Header } from '@/components/header';
+import { PavolHeader } from '@/businesses/pavol/PavolHeader';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { TestimonialsSection } from '@/components/testimonials-section';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, ChevronRight, Globe2, Send } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 
 type ContactFormState = {
     name: string;
@@ -227,8 +227,6 @@ export function PavolPage({ language }: { language: SupportedHomepageLanguage })
     const highlightedMedia = media.filter((appearance) => appearance.importance === 'highlight');
     const restMedia = media.filter((appearance) => appearance.importance === 'rest');
     const testimonials = pavolTestimonials[language];
-    const isCzech = language === 'cs';
-
     const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null);
     const [formState, setFormState] = useState<ContactFormState>({
         name: '',
@@ -239,27 +237,6 @@ export function PavolPage({ language }: { language: SupportedHomepageLanguage })
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-
-    const languageSwitcher = useMemo(
-        () => ({
-            ariaLabel: content.header.languageSwitcherLabel,
-            items: [
-                {
-                    href: '/cs/pavol',
-                    label: 'Čeština',
-                    iconSrc: '/locale-flags/cs.svg',
-                    isActive: isCzech,
-                },
-                {
-                    href: '/en/pavol',
-                    label: 'English',
-                    iconSrc: '/locale-flags/en.svg',
-                    isActive: !isCzech,
-                },
-            ],
-        }),
-        [content.header.languageSwitcherLabel, isCzech],
-    );
 
     const handleServiceClick = (serviceId: string, prefillMessage: string) => {
         setSelectedInquiryId(serviceId);
@@ -316,38 +293,9 @@ export function PavolPage({ language }: { language: SupportedHomepageLanguage })
     return (
         <main
             className="min-h-screen bg-[#fffaf5] text-slate-900"
-            style={
-                {
-                    ['--pavol-ink' as string]: '#102033',
-                    ['--pavol-accent' as string]: '#0f8c9d',
-                    ['--pavol-warm' as string]: '#f5eee2',
-                    ['--pavol-gold' as string]: '#d39b3d',
-                } as CSSProperties
-            }
+            style={PAVOL_SITE_STYLE}
         >
-            <Header
-                language={language}
-                brandHref={`/${language}/pavol`}
-                brandLogo={
-                    <Image
-                        src="/logo/pavol-hejny-ph.svg"
-                        alt="Pavol Hejný"
-                        width={32}
-                        height={32}
-                        className="h-8 w-8"
-                    />
-                }
-                brandName={<span className="text-xl font-semibold text-[var(--pavol-ink)]">Pavol Hejný</span>}
-                hideCenterContent
-                navItems={content.header.navItems}
-                languageSwitcher={languageSwitcher}
-                containerClassName={pavolContainerClassName}
-                primaryAction={{
-                    label: content.header.primaryAction,
-                    href: '#contact',
-                    mobileLabel: isCzech ? 'Kontakt' : 'Contact',
-                }}
-            />
+            <PavolHeader language={language} />
 
             <section
                 className="relative overflow-hidden bg-white pt-28 sm:pt-32"

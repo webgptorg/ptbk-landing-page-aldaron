@@ -65,6 +65,7 @@ test('cookie choices persist and the privacy link reopens settings after client 
     await page.goto('/ai-ta-krajta', { waitUntil: 'domcontentloaded' });
     const panel = page.locator(COOKIE_PANEL_SELECTOR);
     await expect(panel).toHaveCSS('background-color', 'rgb(26, 32, 28)');
+    await expect(panel.getByRole('link')).toHaveAttribute('href', '/cs/ochrana-osobnich-udaju');
     await panel.getByRole('link').click();
     await expect(page).toHaveURL('/cs/ochrana-osobnich-udaju');
     await expect(panel).toHaveCSS('background-color', 'rgb(255, 255, 255)');

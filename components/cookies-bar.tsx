@@ -7,6 +7,8 @@ import { getCookieConsentContent } from '@/lib/legal/cookieConsentContent';
 import { ALL_COOKIES_ALLOWED, isCookieChoiceMade, saveCookiePreferences } from '@/lib/legal/cookieConsentStorage';
 import { COOKIE_SETTINGS_HASH } from '@/lib/legal/cookieSettingsHash';
 import { getLegalPagePath } from '@/lib/legal/legalPagePaths';
+import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { Cookie } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -15,7 +17,13 @@ import styles from './cookie-consent.module.css';
 import { CookieSettingsModal } from './cookie-settings-modal';
 import { Button } from './ui/button';
 
-export function CookiesBar() {
+export function CookiesBar({
+    brandedLanguage,
+    isPodcastDomain = false,
+}: {
+    readonly brandedLanguage?: SupportedHomepageLanguage;
+    readonly isPodcastDomain?: boolean;
+} = {}) {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -41,15 +49,30 @@ export function CookiesBar() {
         return null;
     }
 
-    return <CookieConsentPanel onDismiss={() => setIsVisible(false)} />;
+    return (
+        <CookieConsentPanel
+            onDismiss={() => setIsVisible(false)}
+            brandedLanguage={brandedLanguage}
+            isPodcastDomain={isPodcastDomain}
+        />
+    );
 }
 
 /** Mount the measurements with the visible panel, so a saved choice leaves no observers or reserved space. */
-function CookieConsentPanel({ onDismiss }: { readonly onDismiss: () => void }) {
+function CookieConsentPanel({
+    onDismiss,
+    brandedLanguage,
+    isPodcastDomain,
+}: {
+    readonly onDismiss: () => void;
+    readonly brandedLanguage?: SupportedHomepageLanguage;
+    readonly isPodcastDomain: boolean;
+}) {
     const pathname = usePathname();
-    const language = getLanguageFromPathname(pathname);
+    const language = brandedLanguage ?? getLanguageFromPathname(pathname);
     const content = getCookieConsentContent(language);
-    const theme = getCookieConsentTheme(pathname);
+    const privacyPolicyUrl = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
+    const theme = isPodcastDomain ? 'podcast' : getCookieConsentTheme(pathname);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const panelReference = useRef<HTMLElement>(null);
     const { height, clearance } = useFixedControlClearance(panelReference, '[data-fixed-bottom-control]');
@@ -87,7 +110,9 @@ function CookieConsentPanel({ onDismiss }: { readonly onDismiss: () => void }) {
                     </p>
                     <p className={styles.privacy}>
                         {content.privacyNotePrefix}
-                        <Link href={getLegalPagePath('privacyPolicy', language)}>{content.privacyPolicyLinkText}</Link>.
+                        <Link href={privacyPolicyUrl}>
+                            {content.privacyPolicyLinkText}
+                        </Link>.
                     </p>
                 </div>
                 <div className={styles.actions}>

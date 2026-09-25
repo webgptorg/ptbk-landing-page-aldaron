@@ -92,7 +92,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
     const isIndexed = definition.isIndexed ?? true;
     const openGraphAlternateLocales = resolveOpenGraphAlternateLocales(definition);
     const brandName = definition.brand?.name ?? SITE_NAME;
-    const socialHandle = definition.brand?.socialHandle ?? SITE_TWITTER_HANDLE;
+    const socialHandle = definition.brand ? definition.brand.socialHandle : SITE_TWITTER_HANDLE;
 
     const socialPreviewImage = {
         url: createAbsoluteUrl(socialPreviewImagePath),
@@ -135,8 +135,7 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
         },
         twitter: {
             card: 'summary_large_image',
-            site: socialHandle,
-            creator: socialHandle,
+            ...(socialHandle ? { site: socialHandle, creator: socialHandle } : {}),
             title: socialTitle,
             description: socialDescription,
             images: [socialPreviewImage],
