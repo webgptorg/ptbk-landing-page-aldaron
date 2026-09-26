@@ -6,6 +6,7 @@ import {
     workshopCommentUpdateSchema,
     workshopConnectionSchema,
     workshopContentCreateSchema,
+    workshopContentReorderSchema,
     workshopContentUpdateSchema,
     workshopCreateSchema,
     workshopParticipantRenameSchema,
@@ -559,5 +560,18 @@ describe('workshop request validation', () => {
             activeDurationSeconds: 30,
             isActivelyAttending: false,
         });
+    });
+});
+
+describe('workshop material reorder validation', () => {
+    it('accepts stable material IDs once each and rejects duplicates or malformed IDs', () => {
+        const contentIds = [
+            '1a3277c7-4853-41b2-bf0f-73bd0a092b82',
+            '32328e68-10a5-4a22-bd56-503e3ef3a58a',
+        ];
+
+        expect(workshopContentReorderSchema.safeParse({ contentIds }).success).toBe(true);
+        expect(workshopContentReorderSchema.safeParse({ contentIds: [contentIds[0], contentIds[0]] }).success).toBe(false);
+        expect(workshopContentReorderSchema.safeParse({ contentIds: ['not-a-uuid'] }).success).toBe(false);
     });
 });

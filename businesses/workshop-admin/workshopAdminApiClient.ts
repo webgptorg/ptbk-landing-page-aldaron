@@ -139,6 +139,13 @@ export type WorkshopContentWriteValues = {
     readonly idempotencyKey?: string;
 };
 
+export type WorkshopContentUpdateValues = Partial<Omit<WorkshopContentWriteValues, 'idempotencyKey'>>;
+
+export type WorkshopContentOrderResult = {
+    readonly contentIds: readonly string[];
+    readonly wasReconciled: boolean;
+};
+
 export type WorkshopQuickLinkPreview = {
     readonly title: string;
     readonly state: 'ready' | 'fallback';
@@ -374,13 +381,23 @@ export function fetchAdminWorkshopQuickLinkPreview(
 export async function updateAdminWorkshopContent(
     workshopId: string,
     contentId: string,
-    values: WorkshopContentWriteValues,
+    values: WorkshopContentUpdateValues,
 ): Promise<WorkshopContentBlock> {
     const result = await requestAdminJson<{ readonly contentBlock: WorkshopContentBlock }>(
         createAdminApiUrl(`/${encodeURIComponent(workshopId)}/content/${encodeURIComponent(contentId)}`),
         createJsonMutation('PATCH', values),
     );
     return result.contentBlock;
+}
+
+export async function reorderAdminWorkshopContent(
+    workshopId: string,
+    contentIds: readonly string[],
+): Promise<WorkshopContentOrderResult> {
+    return requestAdminJson<WorkshopContentOrderResult>(
+        createAdminApiUrl(`/${encodeURIComponent(workshopId)}/content/order`),
+        createJsonMutation('PATCH', { contentIds }),
+    );
 }
 
 export async function deleteAdminWorkshopContent(workshopId: string, contentId: string): Promise<void> {

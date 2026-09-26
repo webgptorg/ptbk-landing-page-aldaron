@@ -97,4 +97,16 @@ it('refreshes clean material fields without writing, and preserves a dirty mater
     expect(screen.getByLabelText('Nadpis')).toHaveProperty('value', 'My draft');
     await saveChanges();
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ title: 'My draft', isPaidMembersOnly: true }));
+    expect(onSave.mock.calls.at(-1)?.[0]).not.toHaveProperty('sortOrder');
+});
+
+it('keeps the numeric material order available as an advanced manual autosave field', async () => {
+    const onSave = vi.fn().mockResolvedValue(true);
+    render(<WorkshopContentEditor contentBlock={MATERIAL} defaultUnlockAt={TIMESTAMP} defaultSortOrder={0} onSave={onSave} />);
+
+    fireEvent.click(screen.getByText('Pokročilé možnosti'));
+    fireEvent.change(screen.getByRole('spinbutton', { name: /Pořadí/ }), { target: { value: '37' } });
+    await saveChanges();
+
+    expect(onSave).toHaveBeenCalledWith({ sortOrder: 37 });
 });

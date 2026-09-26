@@ -150,7 +150,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   order. It keeps the submitted query and fragment, uses the full editor's
   publication, unlock and access defaults, appends after the greatest actual
   material order, and retries failures with stable creation IDs. The ordinary
-  material creation path still owns short links and live room refresh.
+  material creation path still owns short links and live room refresh. Ordinary
+  material cards reorder by a dedicated mouse/touch handle or keyboard-accessible
+  move controls and autosave through the shared admin queue; the numeric order
+  stays in the editor as an advanced manual option. An authorized workshop-scoped
+  transaction reindexes only material IDs, preserves content fields, reconciles
+  concurrent additions and deletions, and emits one room refresh after commit.
+  Virtual special-material placements remain governed separately.
 - `/admin/workshops?tab=subtitles` manages private Czech, English and mixed-language video subtitle tracks.
   Tracks store plain text with original-video timestamps, source video/file and provenance independently of room
   responses. Admins can import SRT/WebVTT, try existing YouTube captions (authored before automatic), or generate

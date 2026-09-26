@@ -39,6 +39,7 @@ describe('quick workshop link materials', () => {
 
     it('appends after the largest actual order, including sparse orders and a batch', () => {
         expect(getWorkshopMaterialAppendSortOrders([], 1)).toEqual([0]);
+        expect(getWorkshopMaterialAppendSortOrders([{ sortOrder: 0 }, { sortOrder: 1 }], 2)).toEqual([11, 21]);
         expect(getWorkshopMaterialAppendSortOrders([{ sortOrder: 10 }, { sortOrder: 70 }], 3)).toEqual([80, 90, 100]);
         expect(getWorkshopMaterialAppendSortOrders([{ sortOrder: 99_998 }], 2)).toEqual([99_999, 100_000]);
         expect(getWorkshopMaterialAppendSortOrders([{ sortOrder: 100_000 }], 1)).toBeNull();

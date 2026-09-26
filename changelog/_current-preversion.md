@@ -1,5 +1,7 @@
 # Current preversion
 
+- Workshop material cards in `/admin/workshops?tab=content` now reorder from a dedicated mouse/touch drag handle or keyboard-accessible move controls and save automatically through the shared admin save queue. Focus stays with the moved material. The numeric order remains available under advanced editor options. A workshop-scoped database transaction locks and reindexes only material IDs, preserves content fields, reconciles concurrent additions and deletions, and broadcasts one room refresh after the complete order is committed.
+
 - Standardized admin editing around the existing shared autosave queue. Workshop materials, settings, polls, member
   answers, chat corrections, agents, subtitles, contacts, discount codes, short links, and recording trims no longer
   show a normal Save button; edit forms stay open and report waiting, saving, saved, validation, or request-failure

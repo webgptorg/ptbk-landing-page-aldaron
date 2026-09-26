@@ -1,4 +1,4 @@
-[ ] !!
+[x] by Developer on OpenAI Codex `gpt-6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.8089 an hour; Testing 20 minutes
 
 [✨↕️] Reorder workshop materials with drag and drop and save the order automatically
 
@@ -34,3 +34,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Reuse existing interaction dependencies and admin persistence infrastructure where suitable.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

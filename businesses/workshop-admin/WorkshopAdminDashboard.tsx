@@ -23,6 +23,7 @@ import {
     fetchAdminWorkshopSnapshot,
     moderateAdminWorkshopComment,
     pinAdminWorkshopComment,
+    reorderAdminWorkshopContent,
     sendAdminWorkshopArtificialReaction,
     setAdminWorkshopStageComment,
     updateAdminWorkshopPoll,
@@ -35,6 +36,7 @@ import {
     type WorkshopArtificialCommentValues,
     type WorkshopArtificialReactionValues,
     type WorkshopContentWriteValues,
+    type WorkshopContentUpdateValues,
     type WorkshopCreateValues,
     type WorkshopPollCreateValues,
     type WorkshopPollUpdateValues,
@@ -228,6 +230,7 @@ export function WorkshopAdminDashboard({
     const [isSnapshotLoading, setIsSnapshotLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const snapshotLoadSequenceReference = useRef(0);
+    const contentOrderMutationSequenceReference = useRef(0);
     // Note: A room either administers polls of its own, or is the subject of polls the community administers. Both of
     //       them are read in the very same section, so an administrator looks for a poll in one place.
     const isAttachedPollSectionOffered = !isPollsOffered && (snapshot?.attachedPolls.length ?? 0) > 0;
@@ -300,6 +303,7 @@ export function WorkshopAdminDashboard({
 
     const loadSnapshot = useCallback(async () => {
         const snapshotLoadSequence = ++snapshotLoadSequenceReference.current;
+        const contentOrderMutationSequence = contentOrderMutationSequenceReference.current;
         if (!selectedWorkshopId) {
             setSnapshot(null);
             setIsSnapshotLoading(false);
@@ -316,7 +320,8 @@ export function WorkshopAdminDashboard({
                 commentStatus,
                 selectedSection === 'comments',
             );
-            if (snapshotLoadSequence !== snapshotLoadSequenceReference.current) {
+            if (snapshotLoadSequence !== snapshotLoadSequenceReference.current ||
+                contentOrderMutationSequence !== contentOrderMutationSequenceReference.current) {
                 return;
             }
 
@@ -324,7 +329,8 @@ export function WorkshopAdminDashboard({
             setSnapshotRefreshVersion((currentVersion) => currentVersion + 1);
             setErrorMessage(null);
         } catch (error) {
-            if (snapshotLoadSequence === snapshotLoadSequenceReference.current) {
+            if (snapshotLoadSequence === snapshotLoadSequenceReference.current &&
+                contentOrderMutationSequence === contentOrderMutationSequenceReference.current) {
                 setErrorMessage((error as Error).message);
             }
         } finally {
@@ -425,15 +431,41 @@ export function WorkshopAdminDashboard({
         setSnapshot((currentSnapshot) => {
             if (currentSnapshot?.workshop.id !== snapshot.workshop.id) return currentSnapshot;
             const contentBlocks = [...currentSnapshot.contentBlocks.filter((existing) => existing.id !== contentBlock.id), contentBlock]
-                .sort((first, second) => first.sortOrder - second.sortOrder || first.unlockAt.localeCompare(second.unlockAt));
+                .sort((first, second) => first.sortOrder - second.sortOrder || first.unlockAt.localeCompare(second.unlockAt) || first.id.localeCompare(second.id));
             return { ...currentSnapshot, contentBlocks };
         });
         return contentBlock;
     };
-    const handleUpdateContent = (contentId: string, values: WorkshopContentWriteValues) =>
+    const handleUpdateContent = (contentId: string, values: WorkshopContentUpdateValues) =>
         snapshot === null
             ? Promise.resolve(false)
             : runAndReload(() => updateAdminWorkshopContent(snapshot.workshop.id, contentId, values));
+    const handleReorderContent = async (contentIds: readonly string[]) => {
+        if (snapshot === null) throw new Error('Workshop není načtený.');
+        const workshopId = snapshot.workshop.id;
+        contentOrderMutationSequenceReference.current += 1;
+        try {
+            const result = await reorderAdminWorkshopContent(workshopId, contentIds);
+            contentOrderMutationSequenceReference.current += 1;
+            setSnapshot((currentSnapshot) => {
+                if (currentSnapshot?.workshop.id !== workshopId) return currentSnapshot;
+                const sortOrderById = new Map(result.contentIds.map((contentId, index) => [contentId, index]));
+                const contentBlocks = currentSnapshot.contentBlocks
+                    .map((contentBlock) => ({
+                        ...contentBlock,
+                        sortOrder: sortOrderById.get(contentBlock.id) ?? contentBlock.sortOrder,
+                    }))
+                    .sort((first, second) => first.sortOrder - second.sortOrder || first.unlockAt.localeCompare(second.unlockAt) || first.id.localeCompare(second.id));
+                return { ...currentSnapshot, contentBlocks };
+            });
+            await loadSnapshot();
+            return result;
+        } catch (error) {
+            contentOrderMutationSequenceReference.current += 1;
+            await loadSnapshot();
+            throw error;
+        }
+    };
     const handleDeleteContent = async (contentId: string) => {
         if (snapshot !== null) {
             await runAndReload(() => deleteAdminWorkshopContent(snapshot.workshop.id, contentId));
@@ -786,6 +818,7 @@ export function WorkshopAdminDashboard({
                                     onCreateQuickLink={handleCreateQuickLinkContent}
                                     onUpdate={handleUpdateContent}
                                     onDelete={handleDeleteContent}
+                                    onReorder={handleReorderContent}
                                 />
                             </TabsContent>
 

@@ -4,7 +4,10 @@ import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
-import type { WorkshopContentWriteValues } from '@/businesses/workshop-admin/workshopAdminApiClient';
+import type {
+    WorkshopContentUpdateValues,
+    WorkshopContentWriteValues,
+} from '@/businesses/workshop-admin/workshopAdminApiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,7 +21,7 @@ type WorkshopContentEditorProps = {
     readonly contentBlock: WorkshopContentBlock | null;
     readonly defaultUnlockAt: string;
     readonly defaultSortOrder: number;
-    readonly onSave: (values: WorkshopContentWriteValues) => Promise<boolean>;
+    readonly onSave: (values: WorkshopContentWriteValues | WorkshopContentUpdateValues) => Promise<boolean>;
     readonly onDelete?: () => Promise<void>;
 };
 
@@ -49,6 +52,7 @@ export function WorkshopContentEditor({
     const [isDeleting, setIsDeleting] = useState(false);
     const [creationErrorMessage, setCreationErrorMessage] = useState<string | null>(null);
     const [operationErrorMessage, setOperationErrorMessage] = useState<string | null>(null);
+    const [isSortOrderManuallyEdited, setIsSortOrderManuallyEdited] = useState(false);
     const isCreatingReference = useRef(false);
     const isDeletingReference = useRef(false);
 
@@ -57,7 +61,7 @@ export function WorkshopContentEditor({
         if (!unlockAtIso) throw new AdminSaveValidationError('Vyberte čas odemknutí materiálu.');
         if (!bodyMarkdown.trim()) throw new AdminSaveValidationError('Vyplňte obsah materiálu.');
 
-        const isSaved = await onSave({
+        const values: WorkshopContentWriteValues = {
             title,
             bodyMarkdown,
             unlockAt: unlockAtIso,
@@ -65,8 +69,21 @@ export function WorkshopContentEditor({
             isPublished,
             isFollowUp,
             isPaidMembersOnly,
-        });
-        return isSaved;
+        };
+        if (contentBlock === null) return onSave(values);
+
+        // Existing editors submit only fields the administrator changed. A stale draft which did not touch the
+        // advanced order field must never undo a concurrent drag reorder.
+        const updateValues: WorkshopContentUpdateValues = {
+            ...(title !== contentBlock.title ? { title } : {}),
+            ...(bodyMarkdown !== contentBlock.bodyMarkdown ? { bodyMarkdown } : {}),
+            ...(unlockAtIso !== contentBlock.unlockAt ? { unlockAt: unlockAtIso } : {}),
+            ...(isSortOrderManuallyEdited && sortOrder !== contentBlock.sortOrder ? { sortOrder } : {}),
+            ...(isPublished !== contentBlock.isPublished ? { isPublished } : {}),
+            ...(isFollowUp !== contentBlock.isFollowUp ? { isFollowUp } : {}),
+            ...(isPaidMembersOnly !== contentBlock.isPaidMembersOnly ? { isPaidMembersOnly } : {}),
+        };
+        return Object.keys(updateValues).length === 0 ? true : onSave(updateValues);
     };
 
     const autosave = useAdminAutosave({
@@ -78,7 +95,10 @@ export function WorkshopContentEditor({
     useEffect(() => {
         if (contentBlock === null) return;
         const refreshedDraft = createContentDraft(contentBlock, defaultUnlockAt, defaultSortOrder);
-        if (acceptSavedValue(refreshedDraft)) setDraft(refreshedDraft);
+        if (acceptSavedValue(refreshedDraft)) {
+            setDraft(refreshedDraft);
+            setIsSortOrderManuallyEdited(false);
+        }
     }, [contentBlock, defaultUnlockAt, defaultSortOrder, acceptSavedValue]);
     const isSaving = isCreating || autosave.isSaving;
     const isUnlocking = isSaving && unlockAtOverride !== null;
@@ -174,16 +194,6 @@ export function WorkshopContentEditor({
                         required
                     />
                 </label>
-                <label className="text-xs font-medium text-slate-600">
-                    Pořadí
-                    <Input
-                        type="number"
-                        value={sortOrder}
-                        disabled={isDeleting || (contentBlock === null && isCreating)}
-                        onChange={(event) => changeDraft({ sortOrder: Number(event.target.value) })}
-                        className="mt-1 bg-white"
-                    />
-                </label>
                 <label className="flex items-end gap-2 pb-2 text-sm text-slate-700">
                     <input
                         type="checkbox"
@@ -218,6 +228,23 @@ export function WorkshopContentEditor({
                     zůstává jen placeným členům.
                 </p>
             )}
+            <details className="mt-4 rounded-md border border-slate-200 bg-white px-3 py-2">
+                <summary className="cursor-pointer text-sm font-medium text-slate-600">Pokročilé možnosti</summary>
+                <label className="mt-3 block max-w-xs text-xs font-medium text-slate-600">
+                    Pořadí
+                    <Input
+                        type="number"
+                        value={sortOrder}
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
+                        onChange={(event) => {
+                            setIsSortOrderManuallyEdited(true);
+                            changeDraft({ sortOrder: Number(event.target.value) });
+                        }}
+                        className="mt-1 bg-white"
+                    />
+                    Ruční číselné pořadí zůstává dostupné a určuje stejné pořadí jako tažení.
+                </label>
+            </details>
             {(contentBlock === null ? creationErrorMessage : operationErrorMessage) && <p role="alert" className="mt-3 text-sm text-red-700">{contentBlock === null ? creationErrorMessage : operationErrorMessage}</p>}
             <label className="mt-4 block text-xs font-medium text-slate-600">
                 Markdown

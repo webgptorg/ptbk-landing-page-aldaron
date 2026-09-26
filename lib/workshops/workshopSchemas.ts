@@ -555,6 +555,14 @@ export const workshopContentUpdateSchema = workshopContentFieldsSchema
     .partial()
     .refine((value) => Object.keys(value).length > 0, 'At least one content field is required');
 
+export const workshopContentReorderSchema = z.object({
+    contentIds: z.array(z.string().uuid()).max(100_001),
+}).superRefine(({ contentIds }, context) => {
+    if (new Set(contentIds).size !== contentIds.length) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: 'Material IDs must be unique', path: ['contentIds'] });
+    }
+});
+
 /**
  * A participant can first submit a rating and then update each optional answer on its own request.
  */

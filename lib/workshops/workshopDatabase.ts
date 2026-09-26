@@ -2296,7 +2296,8 @@ export async function loadWorkshopAdminContentForExport(
             .select(WORKSHOP_CONTENT_COLUMNS)
             .eq('workshop_id', workshopId)
             .order('sort_order', { ascending: true })
-            .order('unlock_at', { ascending: true }),
+            .order('unlock_at', { ascending: true })
+            .order('id', { ascending: true }),
         supabase.rpc('get_workshop_content_link_click_totals', { target_workshop_id: workshopId }),
     ]);
     const firstError = contentResult.error ?? contentLinkClickTotalsResult.error;
@@ -2543,7 +2544,8 @@ export async function loadWorkshopPublicState(
         .eq('is_published', true)
         .lte('unlock_at', contentVisibilityCutoff)
         .order('sort_order', { ascending: true })
-        .order('unlock_at', { ascending: true });
+        .order('unlock_at', { ascending: true })
+        .order('id', { ascending: true });
     const futureFollowUpContentQuery = supabase
         .from(WORKSHOP_CONTENT_TABLE_NAME)
         .select(WORKSHOP_CONTENT_COLUMNS)
@@ -2833,7 +2835,8 @@ export async function loadWorkshopAdminSnapshot(
             .select(WORKSHOP_CONTENT_COLUMNS)
             .eq('workshop_id', workshopRow.id)
             .order('sort_order', { ascending: true })
-            .order('unlock_at', { ascending: true }),
+            .order('unlock_at', { ascending: true })
+            .order('id', { ascending: true }),
         options.isCommentsIncluded
             ? supabase
                   .from(WORKSHOP_COMMENT_TABLE_NAME)
