@@ -43,6 +43,7 @@ export function WorkshopPresentationMaterial({ presentationUrl }: WorkshopPresen
             contentBlock={presentationMaterial}
             callToActionLabel={WORKSHOP_PRESENTATION_CALL_TO_ACTION_LABEL}
             ariaLabel="Prezentace workshopu"
+            previewKind="presentation"
         />
     );
 }

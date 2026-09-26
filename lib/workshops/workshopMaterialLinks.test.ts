@@ -2,6 +2,7 @@ import {
     createWorkshopMaterialTrackingUrl,
     getWorkshopMaterialLinkDestinations,
     getWorkshopMaterialShortcodeSourceApp,
+    loadWorkshopMaterialTrackedDestination,
     materializeWorkshopCommentShortLinks,
     materializeWorkshopMaterialShortLinks,
     replaceWorkshopMaterialLinkDestinations,
@@ -29,6 +30,92 @@ afterEach(() => {
 });
 
 describe('workshop material tracking links', () => {
+    it('reads the destination for one persisted QR through its material mapping without touching click history', async () => {
+        const mappingSelect = vi.fn(() => ({
+            eq: vi.fn(async () => ({
+                data: [
+                    { destination_url: 'https://example.com/guide', shortcode_link_id: 91 },
+                    { destination_url: 'https://example.com/other', shortcode_link_id: 92 },
+                ],
+                error: null,
+            })),
+        }));
+        const shortcodeSelect = vi.fn(() => ({
+            in: vi.fn(async () => ({
+                data: [
+                    { id: 91, shortcode: 'tracked-material', url: ['https://example.com/guide?utm_content=material-1'] },
+                    { id: 92, shortcode: 'another-material', url: ['https://example.com/other'] },
+                ],
+                error: null,
+            })),
+        }));
+        const from = vi.fn((tableName: string) => {
+            if (tableName === 'workshop_content_shortcode_links') return { select: mappingSelect };
+            if (tableName === 'ShortcodeLink') return { select: shortcodeSelect };
+            throw new Error(`Unexpected table ${tableName}`);
+        });
+
+        const result = await loadWorkshopMaterialTrackedDestination(
+            { from } as unknown as SupabaseClient,
+            'material-1',
+            'https://ptbk.io/tracked-material',
+            '[Read the guide](https://example.com/guide)',
+        );
+
+        expect(result).toEqual({
+            destinationUrl: 'https://example.com/guide?utm_content=material-1',
+            errorMessage: null,
+        });
+        expect(from.mock.calls.map(([tableName]) => tableName)).toEqual([
+            'workshop_content_shortcode_links',
+            'ShortcodeLink',
+        ]);
+    });
+
+    it('does not resolve a short link owned by another material', async () => {
+        const mappingSelect = vi.fn(() => ({
+            eq: vi.fn(async () => ({
+                data: [{ destination_url: 'https://example.com/other', shortcode_link_id: 92 }],
+                error: null,
+            })),
+        }));
+        const shortcodeSelect = vi.fn(() => ({
+            in: vi.fn(async () => ({ data: [{ id: 92, shortcode: 'another-material', url: ['https://example.com/other'] }], error: null })),
+        }));
+        const from = vi.fn((tableName: string) =>
+            tableName === 'workshop_content_shortcode_links' ? { select: mappingSelect } : { select: shortcodeSelect },
+        );
+
+        const result = await loadWorkshopMaterialTrackedDestination(
+            { from } as unknown as SupabaseClient,
+            'material-1',
+            'https://ptbk.io/not-owned',
+            '[Current link](https://example.com/current)',
+        );
+
+        expect(result).toEqual({ destinationUrl: null, errorMessage: null });
+    });
+
+    it('does not resolve a stale short link whose source URL was removed from the material', async () => {
+        const mappingSelect = vi.fn(() => ({
+            eq: vi.fn(async () => ({
+                data: [{ destination_url: 'https://example.com/removed', shortcode_link_id: 92 }],
+                error: null,
+            })),
+        }));
+        const from = vi.fn(() => ({ select: mappingSelect }));
+
+        const result = await loadWorkshopMaterialTrackedDestination(
+            { from } as unknown as SupabaseClient,
+            'material-1',
+            'https://ptbk.io/removed-link',
+            '[Current link](https://example.com/current)',
+        );
+
+        expect(result).toEqual({ destinationUrl: null, errorMessage: null });
+        expect(from).toHaveBeenCalledTimes(1);
+    });
+
     it('adds stable workshop UTM parameters without losing existing query parameters', () => {
         const trackingUrl = createWorkshopMaterialTrackingUrl(
             'https://example.com/material?download=1&utm_source=old-source',

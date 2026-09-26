@@ -1,6 +1,7 @@
 'use client';
 
 import { WorkshopMaterialCard, type WorkshopMaterialCardContent } from '@/businesses/online-workshop/participant/WorkshopContent';
+import { createWorkshopVideoMaterialUrl } from '@/lib/workshops/workshopVideoMaterialUrl';
 
 const WORKSHOP_VIDEO_MATERIAL_ID = 'workshop-video';
 const WORKSHOP_VIDEO_MATERIAL_TITLE = 'Video z workshopu';
@@ -13,8 +14,7 @@ type WorkshopVideoMaterialProps = {
 };
 
 function createWorkshopVideoMarkdown(videoId: string, recordingStartOffsetSeconds: number): string {
-    const startTime = recordingStartOffsetSeconds > 0 ? `&t=${recordingStartOffsetSeconds}s` : '';
-    const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}${startTime}`;
+    const watchUrl = createWorkshopVideoMaterialUrl(videoId, recordingStartOffsetSeconds);
     return `[Otevřít video z workshopu](<${watchUrl}>)`;
 }
 
@@ -33,6 +33,7 @@ export function WorkshopVideoMaterial({ videoId, recordingStartOffsetSeconds = 0
             contentBlock={contentBlock}
             callToActionLabel="Otevřít video"
             ariaLabel="Video workshopu"
+            previewKind="video"
         />
     );
 }

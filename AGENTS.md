@@ -48,6 +48,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in the room. Missing external previews or history leave the recap and project links available.
   It stores no document and adds no administration or database fields; chat, feedback and participant identity are
   excluded from the export.
+  Each link in a readable material starts as a preview card with available page image, title, concise description, and
+  destination domain. Its QR control flips that card to the existing persisted QR URL; only one QR face is open in the
+  material list. Preview and image requests use an authenticated room endpoint which checks publication, unlock and
+  membership access, resolves stored short-link targets read-only, and reuses `publicWebPagePreview.ts` and its bounded
+  public-image loader. Neither loading nor flipping a preview follows a tracked redirect or creates a short link.
+  Missing metadata and broken images leave Markdown links, open actions and QR codes usable. Presentation and video
+  special-material cards use the same rendering while retaining their room-specific access rules.
 - `/ai-ta-krajta` permanently redirects from `ptbk.io` to `https://ai-ta-krajta.cz/`,
   whose root rewrites to the existing podcast route; its legacy children likewise
   retain their suffixes on the podcast domain. It reads episodes hourly from podcast RSS and YouTube feeds and
@@ -319,8 +326,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   autofill and history page uses the same branch selection, and commits belonging only to other branches stay hidden.
 - A workshop can carry one public presentation URL for a PDF, PowerPoint file, or
   GitHub Markdown page. The room renders it beside ordinary materials through the
-  shared material card, primary action, and QR code, for every participant without
-  making it timed or membership-gated content.
+  shared material card, primary action, preview card and flip-to-show QR code, for every participant without making
+  it timed or membership-gated content.
 - Paid-only materials are decided on the server in one pass. Members receive
   unlocked material; others receive only the published titles as an offer. An
   untitled item is not named, items are not named before their unlock time, and a

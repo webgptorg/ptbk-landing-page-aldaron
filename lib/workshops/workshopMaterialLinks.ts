@@ -3,7 +3,10 @@ import {
     createPublicShortcodeLinkUrl,
     type ShortcodeLinkSourceApp,
 } from '@/lib/shortener/shortcodeLink';
-import { SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
+import {
+    SHORTCODE_LINK_PUBLIC_BASE_URL,
+    SHORTCODE_LINK_TABLE_NAME,
+} from '@/lib/shortener/shortcodeLinkConstants';
 import { fetchPublicWebPageTitle } from '@/lib/network/publicWebPagePreview';
 import { escapeWorkshopMarkdownLinkTitle } from '@/lib/workshops/workshopMarkdownLink';
 import {
@@ -392,6 +395,80 @@ export function getWorkshopShortcodeLinkDestinations(bodyMarkdown: string): read
 
 export function getWorkshopMaterialLinkDestinations(bodyMarkdown: string): readonly string[] {
     return getWorkshopShortcodeLinkDestinations(bodyMarkdown);
+}
+
+/**
+ * Reads the already persisted target behind one material short link without visiting its public redirect route.
+ * The redirect route records clicks, so previews must join the material mapping directly to its short-link row.
+ */
+export async function loadWorkshopMaterialTrackedDestination(
+    supabase: SupabaseClient,
+    contentBlockId: string,
+    shortUrl: string,
+    currentBodyMarkdown: string,
+): Promise<{ readonly destinationUrl: string | null; readonly errorMessage: string | null }> {
+    let requestedUrl: URL;
+    try {
+        requestedUrl = new URL(shortUrl);
+    } catch {
+        return { destinationUrl: null, errorMessage: null };
+    }
+
+    if (
+        requestedUrl.username !== '' ||
+        requestedUrl.password !== '' ||
+        requestedUrl.origin !== new URL(SHORTCODE_LINK_PUBLIC_BASE_URL).origin
+    ) {
+        return { destinationUrl: null, errorMessage: null };
+    }
+
+    const { data: mappingData, error: mappingError } = await supabase
+        .from(WORKSHOP_CONTENT_SHORTCODE_LINK_TABLE_NAME)
+        .select('destination_url, shortcode_link_id')
+        .eq('content_block_id', contentBlockId);
+    if (mappingError) {
+        return { destinationUrl: null, errorMessage: mappingError.message };
+    }
+
+    const currentDestinations = new Set(getWorkshopMaterialLinkDestinations(currentBodyMarkdown));
+    const shortcodeLinkIds = Array.from(
+        new Set(
+            ((mappingData ?? []) as readonly {
+                readonly destination_url: string;
+                readonly shortcode_link_id: number | string;
+            }[])
+                .filter((mapping) => currentDestinations.has(mapping.destination_url))
+                .map((mapping) => getShortcodeLinkId(mapping.shortcode_link_id))
+                .filter((shortcodeLinkId): shortcodeLinkId is number => shortcodeLinkId !== null),
+        ),
+    );
+    if (shortcodeLinkIds.length === 0) {
+        return { destinationUrl: null, errorMessage: null };
+    }
+
+    const { data: shortcodeLinkData, error: shortcodeLinkError } = await supabase
+        .from(SHORTCODE_LINK_TABLE_NAME)
+        .select('id, shortcode, url')
+        .in('id', shortcodeLinkIds);
+    if (shortcodeLinkError) {
+        return { destinationUrl: null, errorMessage: shortcodeLinkError.message };
+    }
+
+    const requestedPath = requestedUrl.origin + requestedUrl.pathname;
+    const matchingShortcodeLink = ((shortcodeLinkData ?? []) as readonly {
+        readonly id: number | string;
+        readonly shortcode: string;
+        readonly url: readonly string[] | null;
+    }[]).find((shortcodeLink) =>
+        shortcodeLinkIds.includes(Number(shortcodeLink.id)) &&
+        createPublicShortcodeLinkUrl(shortcodeLink.shortcode) === requestedPath,
+    );
+    const destinationUrls = matchingShortcodeLink?.url;
+    if (destinationUrls === null || destinationUrls === undefined || destinationUrls.length !== 1) {
+        return { destinationUrl: null, errorMessage: null };
+    }
+
+    return { destinationUrl: destinationUrls[0] ?? null, errorMessage: null };
 }
 
 function getWorkshopShortcodeLinkDestinationsRequiringTitle(bodyMarkdown: string): readonly string[] {

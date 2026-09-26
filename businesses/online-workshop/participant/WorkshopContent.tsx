@@ -3,19 +3,26 @@
 import { CommunityPaidMembersNotice } from '@/businesses/community/membership/CommunityPaidMembersNotice';
 import { useCommunityMembershipPurchaseOffer } from '@/businesses/community/membership/useCommunityMembershipPurchaseOffer';
 import { useIsPaidCommunityMember } from '@/businesses/community/membership/useIsPaidCommunityMember';
+import { WorkshopMaterialLinkPreviewCard } from '@/businesses/online-workshop/participant/WorkshopMaterialLinkPreviewCard';
+import {
+    createWorkshopMaterialQrCardId,
+    WorkshopMaterialPreviewProvider,
+    useWorkshopMaterialPreviewContext,
+} from '@/businesses/online-workshop/participant/WorkshopMaterialPreviewContext';
 import { MarkdownContent } from '@/components/markdown-content';
-import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import {
     selectWorkshopSpecialMaterialsByPlacement,
     type WorkshopSpecialMaterial,
 } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopContentBlock, WorkshopContentPreview } from '@/lib/workshops/workshopTypes';
+import type { WorkshopMaterialPreviewKind } from '@/lib/workshops/workshopMaterialPreviewTypes';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { Clock3, Crown, ExternalLink, Lock, Sparkles } from 'lucide-react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
 type WorkshopContentProps = {
+    readonly workshopSlug: string;
     readonly contentBlocks: readonly WorkshopContentBlock[];
     readonly nextContentUnlockAt: string | null;
     readonly newlyUnlockedContentBlockIds: ReadonlySet<string>;
@@ -41,7 +48,9 @@ type WorkshopContentProps = {
 };
 
 type WorkshopMaterialBodyProps = {
+    readonly contentBlockId: string;
     readonly bodyMarkdown: string;
+    readonly previewKind: WorkshopMaterialPreviewKind;
     readonly callToActionLabel?: string;
 };
 
@@ -58,9 +67,11 @@ type WorkshopMaterialCardProps = {
     readonly isNewlyUnlocked?: boolean;
     readonly callToActionLabel?: string;
     readonly ariaLabel?: string;
+    readonly previewKind?: WorkshopMaterialPreviewKind;
 };
 
 type WorkshopMaterialLink = {
+    readonly cardId: string;
     readonly href: string;
     readonly label: string;
 };
@@ -72,7 +83,6 @@ const CZECH_DATE_TIME_FORMAT = new Intl.DateTimeFormat('cs-CZ', {
 });
 const MATERIAL_CALL_TO_ACTION_LABEL = 'Otevřít materiál';
 const MATERIAL_LINK_SELECTOR = 'a[href]:not([data-workshop-material-call-to-action])';
-const MATERIAL_QR_CODE_SIZE = 144;
 
 function configureMaterialLink(linkElement: HTMLAnchorElement): void {
     // The server has already replaced the href with a persisted short link.
@@ -82,11 +92,21 @@ function configureMaterialLink(linkElement: HTMLAnchorElement): void {
     linkElement.rel = 'noopener noreferrer';
 }
 
-function getWorkshopMaterialLinks(linkElements: readonly HTMLAnchorElement[]): readonly WorkshopMaterialLink[] {
-    return linkElements.map((linkElement) => ({
-        href: linkElement.href,
-        label: linkElement.textContent?.trim() || MATERIAL_CALL_TO_ACTION_LABEL,
-    }));
+function getWorkshopMaterialLinks(
+    materialId: string,
+    linkElements: readonly HTMLAnchorElement[],
+): readonly WorkshopMaterialLink[] {
+    const duplicateCountByHref = new Map<string, number>();
+    return linkElements.map((linkElement) => {
+        const href = linkElement.href;
+        const duplicateIndex = duplicateCountByHref.get(href) ?? 0;
+        duplicateCountByHref.set(href, duplicateIndex + 1);
+        return {
+            cardId: createWorkshopMaterialQrCardId(materialId, href, duplicateIndex),
+            href,
+            label: linkElement.textContent?.trim() || MATERIAL_CALL_TO_ACTION_LABEL,
+        };
+    });
 }
 
 function areWorkshopMaterialLinkListsEqual(
@@ -96,52 +116,25 @@ function areWorkshopMaterialLinkListsEqual(
     return (
         currentMaterialLinks.length === nextMaterialLinks.length &&
         currentMaterialLinks.every(
-        (currentMaterialLink, index) =>
-            currentMaterialLink.href === nextMaterialLinks[index]?.href &&
-            currentMaterialLink.label === nextMaterialLinks[index]?.label,
+            (currentMaterialLink, index) =>
+                currentMaterialLink.href === nextMaterialLinks[index]?.href &&
+                currentMaterialLink.label === nextMaterialLinks[index]?.label &&
+                currentMaterialLink.cardId === nextMaterialLinks[index]?.cardId,
         )
     );
 }
 
-/**
- * Every QR code carries the persisted short link already present in a material. On a desktop it gives the person
- * reading the room the same tracked destination on their phone without sending mobile layouts through an extra panel.
- */
-function WorkshopMaterialQrCodes({ materialLinks }: { readonly materialLinks: readonly WorkshopMaterialLink[] }) {
-    return (
-        <aside aria-label="QR kódy materiálů" className="hidden shrink-0 lg:flex lg:flex-col lg:items-center lg:gap-4">
-            {materialLinks.map((materialLink, index) => (
-                <figure
-                    key={`${materialLink.href}-${index}`}
-                    aria-label={`QR kód materiálu: ${materialLink.label}`}
-                    className="w-44"
-                >
-                    <PromptbookQrCode
-                        value={materialLink.href}
-                        size={MATERIAL_QR_CODE_SIZE}
-                        className="mx-auto overflow-hidden rounded-xl bg-white shadow-lg shadow-cyan-300/10"
-                    />
-                    {materialLinks.length > 1 && (
-                        <figcaption
-                            className="mt-2 truncate text-center text-xs font-semibold leading-5 text-room-muted"
-                            title={materialLink.label}
-                        >
-                            {materialLink.label}
-                        </figcaption>
-                    )}
-                </figure>
-            ))}
-        </aside>
-    );
-}
-
 function WorkshopMaterialBody({
+    contentBlockId,
     bodyMarkdown,
+    previewKind,
     callToActionLabel = MATERIAL_CALL_TO_ACTION_LABEL,
 }: WorkshopMaterialBodyProps) {
     const { resolvedTheme, forcedTheme } = useTheme();
     const materialBodyReference = useRef<HTMLDivElement>(null);
     const [materialLinks, setMaterialLinks] = useState<readonly WorkshopMaterialLink[]>([]);
+    const materialPreviewContext = useWorkshopMaterialPreviewContext();
+    const registrationId = `${previewKind}:${contentBlockId}`;
     const singleMaterialLink = materialLinks.length === 1 ? materialLinks[0] : null;
 
     useEffect(() => {
@@ -158,7 +151,7 @@ function WorkshopMaterialBody({
                 configureMaterialLink(linkElement);
             });
 
-            const nextMaterialLinks = getWorkshopMaterialLinks(linkElements);
+            const nextMaterialLinks = getWorkshopMaterialLinks(registrationId, linkElements);
             setMaterialLinks((currentMaterialLinks) =>
                 areWorkshopMaterialLinkListsEqual(currentMaterialLinks, nextMaterialLinks)
                     ? currentMaterialLinks
@@ -170,10 +163,23 @@ function WorkshopMaterialBody({
         const observer = new MutationObserver(configureMaterialLinks);
         observer.observe(materialBodyElement, { childList: true, subtree: true });
         return () => observer.disconnect();
-    }, [bodyMarkdown]);
+    }, [bodyMarkdown, registrationId]);
+
+    useEffect(() => {
+        if (materialPreviewContext === null) return;
+        materialPreviewContext.updateMaterialQrCardIds(
+            registrationId,
+            materialLinks.map((materialLink) => materialLink.cardId),
+        );
+    }, [materialLinks, materialPreviewContext?.updateMaterialQrCardIds, registrationId]);
+
+    useEffect(
+        () => () => materialPreviewContext?.unregisterMaterialQrCards(registrationId),
+        [materialPreviewContext?.unregisterMaterialQrCards, registrationId],
+    );
 
     return (
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-8">
+        <div className="min-w-0">
             <div ref={materialBodyReference} className="min-w-0 break-words">
                 <MarkdownContent
                     content={bodyMarkdown}
@@ -196,7 +202,20 @@ function WorkshopMaterialBody({
                     </div>
                 )}
             </div>
-            {materialLinks.length > 0 && <WorkshopMaterialQrCodes materialLinks={materialLinks} />}
+            {materialLinks.length > 0 && (
+                <div aria-label="Náhledy odkazů v materiálu" className="mt-5 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                    {materialLinks.map((materialLink) => (
+                        <WorkshopMaterialLinkPreviewCard
+                            key={materialLink.cardId}
+                            materialId={contentBlockId}
+                            cardId={materialLink.cardId}
+                            kind={previewKind}
+                            href={materialLink.href}
+                            label={materialLink.label}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -212,6 +231,7 @@ export function WorkshopMaterialCard({
     isNewlyUnlocked = false,
     callToActionLabel,
     ariaLabel,
+    previewKind = 'material',
 }: WorkshopMaterialCardProps) {
     const isReducedMotionPreferred = useReducedMotion() === true;
     const isFollowUp = contentBlock.isFollowUp;
@@ -246,7 +266,12 @@ export function WorkshopMaterialCard({
                 </div>
             )}
             {contentBlock.title && <h3 className="mb-5 text-xl font-bold text-room-heading">{contentBlock.title}</h3>}
-            <WorkshopMaterialBody bodyMarkdown={contentBlock.bodyMarkdown} callToActionLabel={callToActionLabel} />
+            <WorkshopMaterialBody
+                contentBlockId={contentBlock.id}
+                bodyMarkdown={contentBlock.bodyMarkdown}
+                previewKind={previewKind}
+                callToActionLabel={callToActionLabel}
+            />
         </motion.article>
     );
 }
@@ -292,6 +317,7 @@ function WorkshopPaidMembersContentNotice({
 }
 
 export function WorkshopContent({
+    workshopSlug,
     contentBlocks,
     nextContentUnlockAt,
     newlyUnlockedContentBlockIds,
@@ -329,40 +355,42 @@ export function WorkshopContent({
                 </h2>
             </div>
 
-            <div className="space-y-4">
-                {specialMaterialsBeforeContentBlocks.map((specialMaterial) => (
-                    <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
-                ))}
+            <WorkshopMaterialPreviewProvider key={workshopSlug} workshopSlug={workshopSlug}>
+                <div className="space-y-4">
+                    {specialMaterialsBeforeContentBlocks.map((specialMaterial) => (
+                        <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
+                    ))}
 
-                {contentBlocks.map((contentBlock) => (
-                    <WorkshopMaterialCard
+                    {contentBlocks.map((contentBlock) => (
+                        <WorkshopMaterialCard
                             key={contentBlock.id}
-                                contentBlock={contentBlock}
-                        isNewlyUnlocked={newlyUnlockedContentBlockIds.has(contentBlock.id)}
-                            />
-                ))}
+                            contentBlock={contentBlock}
+                            isNewlyUnlocked={newlyUnlockedContentBlockIds.has(contentBlock.id)}
+                        />
+                    ))}
 
-                {specialMaterialsAfterContentBlocks.map((specialMaterial) => (
-                    <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
-                ))}
+                    {specialMaterialsAfterContentBlocks.map((specialMaterial) => (
+                        <Fragment key={specialMaterial.id}>{specialMaterial.content}</Fragment>
+                    ))}
 
-                {nextContentUnlockAt && (
-                    <div className="flex items-start gap-3 rounded-xl border border-dashed border-room-accent/20 bg-room-accent/[0.04] px-5 py-4 text-sm text-room-muted">
-                        <Clock3 className="h-5 w-5 shrink-0 text-room-accent" />
-                        <span className="min-w-0">
-                            Další materiál se automaticky odemkne{' '}
-                            {CZECH_DATE_TIME_FORMAT.format(new Date(nextContentUnlockAt))}.
-                        </span>
-                    </div>
-                )}
+                    {nextContentUnlockAt && (
+                        <div className="flex items-start gap-3 rounded-xl border border-dashed border-room-accent/20 bg-room-accent/[0.04] px-5 py-4 text-sm text-room-muted">
+                            <Clock3 className="h-5 w-5 shrink-0 text-room-accent" />
+                            <span className="min-w-0">
+                                Další materiál se automaticky odemkne{' '}
+                                {CZECH_DATE_TIME_FORMAT.format(new Date(nextContentUnlockAt))}.
+                            </span>
+                        </div>
+                    )}
 
-                {isPaidMembersContentNoticeShown && membershipPurchaseOffer !== null && (
-                    <WorkshopPaidMembersContentNotice
-                        contentPreviews={paidMembersOnlyContentPreviews}
-                        onUnlockPaidMaterials={membershipPurchaseOffer.openMembershipModal}
-                    />
-                )}
-            </div>
+                    {isPaidMembersContentNoticeShown && membershipPurchaseOffer !== null && (
+                        <WorkshopPaidMembersContentNotice
+                            contentPreviews={paidMembersOnlyContentPreviews}
+                            onUnlockPaidMaterials={membershipPurchaseOffer.openMembershipModal}
+                        />
+                    )}
+                </div>
+            </WorkshopMaterialPreviewProvider>
         </section>
     );
 }
