@@ -4,6 +4,7 @@ import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 
 import { formatWorkshopAdminDateTime } from '@/businesses/workshop-admin/workshopAdminFormatting';
@@ -18,7 +19,7 @@ import type {
     WorkshopSubmissionStatus,
 } from '@/lib/workshops/workshopTypes';
 import { Check, Pencil, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 type WorkshopPollOptionAdminProps = {
     readonly option: WorkshopAdminPollOption;
@@ -40,6 +41,36 @@ const POLL_OPTION_STATUS_CLASS_NAMES: Readonly<Record<WorkshopSubmissionStatus, 
     approved: 'bg-emerald-100 text-emerald-800',
     rejected: 'bg-slate-100 text-slate-500',
 };
+
+type WorkshopPollOptionLabelEditorProps = {
+    readonly option: WorkshopAdminPollOption;
+    readonly onModerate: WorkshopPollOptionAdminProps['onModerate'];
+};
+
+function WorkshopPollOptionLabelEditor({ option, onModerate }: WorkshopPollOptionLabelEditorProps) {
+    const [label, setLabel] = useState(option.label);
+    const autosave = useAdminAutosave({
+        value: label,
+        onSave: () => {
+            const normalizedLabel = label.trim();
+            if (normalizedLabel === '') throw new AdminSaveValidationError('Vyplňte text odpovědi.');
+            return onModerate(option.id, { label: normalizedLabel });
+        },
+    });
+
+    return (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Input
+                value={label}
+                onChange={(event) => setLabel(event.target.value)}
+                maxLength={200}
+                className="h-8 w-full max-w-sm bg-white"
+                aria-label={`Text vlastní odpovědi ${option.label}`}
+            />
+            <AdminAutosaveStatus {...autosave} />
+        </div>
+    );
+}
 
 /**
  * Names the member who wrote one answer, as fully as the answer still remembers them
@@ -68,7 +99,8 @@ export function WorkshopPollOptionAdmin({
     onDelete,
 }: WorkshopPollOptionAdminProps) {
     const [artificialVoteAdjustmentText, setArtificialVoteAdjustmentText] = useState('');
-    const [editedLabel, setEditedLabel] = useState<string | null>(null);
+    const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
+    const isDeletingReference = useRef(false);
     const isPollOptionEditingOffered = getWorkshopModerationCapabilities('admin').isPollOptionEditingOffered;
 
     const artificialVoteAdjustment = Number(artificialVoteAdjustmentText);
@@ -89,22 +121,18 @@ export function WorkshopPollOptionAdmin({
         }
     };
 
-    const saveLabel = async () => {
-        const label = (editedLabel ?? '').trim();
-        if (label === '') throw new Error('Vyplňte text odpovědi.');
-        return onModerate(option.id, { label });
-    };
-    const autosave = useAdminAutosave({ value: editedLabel ?? option.label, onSave: saveLabel, isEnabled: editedLabel !== null });
-    const handleLabelSave = async () => {
-        if (await autosave.saveNow()) setEditedLabel(null);
-    };
-
     const handleDelete = () => {
+        if (isDeletingReference.current) return;
         const isDeletionConfirmed = window.confirm(
             `Opravdu trvale smazat vlastní odpověď „${option.label}“? Smažou se také všechny její hlasy.`,
         );
         if (isDeletionConfirmed) {
-            void runAfterAdminSaves(() => { void onDelete(option.id); });
+            isDeletingReference.current = true;
+            void runAfterAdminSaves(() => {
+                void onDelete(option.id).finally(() => { isDeletingReference.current = false; });
+            }).then((isActionStarted) => {
+                if (!isActionStarted) isDeletingReference.current = false;
+            });
         }
     };
 
@@ -136,35 +164,9 @@ export function WorkshopPollOptionAdmin({
                     </div>
                     <p className="mt-1 text-xs text-slate-400">{formatWorkshopAdminDateTime(option.createdAt)}</p>
 
-                    {editedLabel !== null && (
-                        <AdminEditorDialog isOpen onClose={() => setEditedLabel(null)} title="Upravit vlastní odpověď">
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                                <Input
-                                    value={editedLabel}
-                                    onChange={(event) => setEditedLabel(event.target.value)}
-                                    maxLength={200}
-                                    className="h-8 w-full max-w-sm bg-white"
-                                    aria-label={`Text vlastní odpovědi ${option.label}`}
-                                />
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    disabled={isProcessing}
-                                    onClick={() => void handleLabelSave()}
-                                >
-                                    Uložit text
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={isProcessing}
-                                    onClick={() => void runAfterAdminSaves(() => setEditedLabel(null))}
-                                >
-                                    Zavřít
-                                </Button>
-                                <AdminAutosaveStatus {...autosave} />
-                            </div>
+                    {isLabelDialogOpen && (
+                        <AdminEditorDialog isOpen onClose={() => setIsLabelDialogOpen(false)} title="Upravit vlastní odpověď">
+                            <WorkshopPollOptionLabelEditor option={option} onModerate={onModerate} />
                         </AdminEditorDialog>
                     )}
 
@@ -192,13 +194,13 @@ export function WorkshopPollOptionAdmin({
                                 <X className="mr-1.5 h-4 w-4" /> Zamítnout
                             </Button>
                         )}
-                        {isPollOptionEditingOffered && editedLabel === null && (
+                        {isPollOptionEditingOffered && !isLabelDialogOpen && (
                             <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
                                 disabled={isProcessing}
-                                onClick={() => setEditedLabel(option.label)}
+                                onClick={() => setIsLabelDialogOpen(true)}
                                 aria-label={`Upravit vlastní odpověď ${option.label}`}
                             >
                                 <Pencil className="mr-1.5 h-4 w-4" /> Upravit

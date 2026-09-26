@@ -7,8 +7,9 @@ import { generateShortcode } from '@/lib/shortener/generateShortcode';
 import { createPublicShortcodeLinkUrl, type ShortcodeLink } from '@/lib/shortener/shortcodeLink';
 import { createAdminShortcodeLink } from '@/lib/shortener/shortcodeLinkAdminApiClient';
 import { isAbsoluteUrl } from '@/lib/shortener/isAbsoluteUrl';
+import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { titleToName } from '@promptbook/utils';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const SHORTCODE_PREVIEW_COUNT = 5;
 
@@ -74,6 +75,7 @@ export function UrlShortener(props: UrlShortenerProps) {
     const [useUtm, setUseUtm] = useState(false);
     const [previewShortcodes, setPreviewShortcodes] = useState(() => createShortcodePreviews(''));
     const [selectedShortcode, setSelectedShortcode] = useState(previewShortcodes[0]);
+    const [isShortcodeSelectedByUser, setIsShortcodeSelectedByUser] = useState(false);
     const [customPrefix, setCustomPrefix] = useState('');
     const [utmParams, setUtmParams] = useState({
         source: '',
@@ -82,6 +84,11 @@ export function UrlShortener(props: UrlShortenerProps) {
         term: '',
         content: '',
     });
+    const isCreatingReference = useRef(false);
+    const { acceptDraftValue } = useAdminDraftProtection({
+        urls, displayText, isShortener, useUtm, customPrefix, utmParams,
+        selectedShortcode: isShortcodeSelectedByUser ? selectedShortcode : null,
+    }, onShortcodeLinkCreated !== undefined);
 
     const regenerateShortcodes = useCallback(() => {
         const newShortcodes = createShortcodePreviews(customPrefix);
@@ -121,6 +128,7 @@ export function UrlShortener(props: UrlShortenerProps) {
     };
 
     const handleCreateLink = async () => {
+        if (isCreatingReference.current) return;
         const validUrls = urls.filter((url) => url.trim());
 
         if (validUrls.length === 0) {
@@ -128,6 +136,7 @@ export function UrlShortener(props: UrlShortenerProps) {
             return;
         }
 
+        isCreatingReference.current = true;
         let text = displayText.trim();
 
         try {
@@ -163,7 +172,6 @@ export function UrlShortener(props: UrlShortenerProps) {
                     text,
                     shortcode: createdShortcodeLink.shortcode,
                 });
-
                 // Regenerate shortcodes after successful creation
                 regenerateShortcodes();
                 onShortcodeLinkCreated?.(createdShortcodeLink);
@@ -171,9 +179,20 @@ export function UrlShortener(props: UrlShortenerProps) {
                 // Regular link wrapping - use first URL
                 setCreatedLink({ url: processedUrls[0] || '', text, shortcode: null });
             }
+            setIsShortcodeSelectedByUser(false);
+            acceptDraftValue({
+                urls,
+                displayText,
+                isShortener,
+                useUtm,
+                customPrefix,
+                utmParams,
+                selectedShortcode: null,
+            });
         } catch (e) {
             setError(e instanceof Error ? e.message : 'An error occurred');
         } finally {
+            isCreatingReference.current = false;
             setIsLoading(false);
         }
     };
@@ -301,7 +320,8 @@ export function UrlShortener(props: UrlShortenerProps) {
                             <div className="flex items-center space-x-2">
                                 <select
                                     value={selectedShortcode}
-                                    onChange={(e) => setSelectedShortcode(e.target.value)}
+                                    disabled={isLoading}
+                                    onChange={(e) => { setSelectedShortcode(e.target.value); setIsShortcodeSelectedByUser(true); }}
                                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                 >
                                     {previewShortcodes.map((code) => (

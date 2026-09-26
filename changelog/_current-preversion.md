@@ -1,5 +1,20 @@
 # Current preversion
 
+- Standardized admin editing around the existing shared autosave queue. Workshop materials, settings, polls, member
+  answers, chat corrections, agents, subtitles, contacts, discount codes, short links, and recording trims no longer
+  show a normal Save button; edit forms stay open and report waiting, saving, saved, validation, or request-failure
+  status, with retry only after a failure. Existing-record close actions are labelled clearly and flush before closing.
+  New workshop, material, poll, agent, subtitle, contact, discount-code, quick-link, short-link, and artificial-activity
+  drafts remain local until their explicit create action succeeds. Modified drafts now receive browser unload protection
+  and an explicit discard confirmation on controlled navigation, without turning close into creation. Material and
+  subtitle deletion settle pending edits first; workshop, poll, short-link, and discount-code deletions reject duplicate
+  requests while pending. Creation forms also guard repeated submissions. Validation errors have their own status and
+  do not offer a futile retry; failed requests retain a retry action. Dialog closes flush that editor's autosaves,
+  nested editors and active explicit operations. Discard prompts cover only drafts owned by that dialog and its nested
+  editors, so unrelated drafts do not block a clean close.
+  Workshop and discount-code creation fields lock during submission to preserve the submitted draft. Workshop settings
+  remain inline on their page.
+
 - Workshop settings now choose whether video, presentation, or the connected repository leads the stage. The choice
   defaults to video, preserves every configured source, and follows the existing countdown, recorded-end, and wrap-up
   phases. Other accessible sources stay in the shared special-material list exactly once; supplementary recordings

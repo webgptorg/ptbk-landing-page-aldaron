@@ -33,7 +33,7 @@ import {
     updateAdminShortcodeLink,
 } from '@/lib/shortener/shortcodeLinkAdminApiClient';
 import { Loader2 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const SHORTCODE_LINK_LOADING_ERROR_MESSAGE = 'The short links could not be loaded';
 const SHORTCODE_LINK_CLICKS_LOADING_ERROR_MESSAGE = 'The short-link clicks could not be loaded';
@@ -122,6 +122,7 @@ export function ShortcodeLinkAdmin() {
     const [isClicksLoading, setIsClicksLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [clicksErrorMessage, setClicksErrorMessage] = useState<string | null>(null);
+    const deletingShortcodeLinkIdReference = useRef<number | null>(null);
 
     const loadShortcodeLinks = useCallback(async (): Promise<boolean> => {
         setIsLoadingShortcodeLinks(true);
@@ -204,16 +205,17 @@ export function ShortcodeLinkAdmin() {
     };
 
     const handleDelete = async (shortcodeLink: ShortcodeLink) => {
+        if (deletingShortcodeLinkIdReference.current !== null) return;
         const isDeletionConfirmed = window.confirm(
             `Delete ${createPublicShortcodeLinkUrl(shortcodeLink.shortcode)} for good, together with the clicks measured on it?`,
         );
         if (!isDeletionConfirmed) {
             return;
         }
-        if (!(await flushAdminSaves())) return;
-
+        deletingShortcodeLinkIdReference.current = shortcodeLink.id;
         setDeletedShortcodeLinkId(shortcodeLink.id);
         try {
+            if (!(await flushAdminSaves())) return;
             await deleteAdminShortcodeLink(shortcodeLink.id);
             if (editedShortcodeLink?.id === shortcodeLink.id) {
                 setEditedShortcodeLink(null);
@@ -225,6 +227,7 @@ export function ShortcodeLinkAdmin() {
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : SHORTCODE_LINK_DELETION_ERROR_MESSAGE);
         } finally {
+            deletingShortcodeLinkIdReference.current = null;
             setDeletedShortcodeLinkId(null);
         }
     };

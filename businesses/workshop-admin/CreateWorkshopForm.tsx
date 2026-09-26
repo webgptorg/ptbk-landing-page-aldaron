@@ -11,9 +11,11 @@ import { WorkshopEventFields } from '@/businesses/workshop-admin/WorkshopEventFi
 import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
+import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
 import { Copy, Plus } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 
 type CreateWorkshopFormProps = {
     readonly onCreate: (values: WorkshopCreateValues) => Promise<boolean>;
@@ -32,17 +34,23 @@ export function CreateWorkshopForm({
     const [isSaving, setIsSaving] = useState(false);
     const [draft, setDraft] = useState(createNewWorkshopDraft);
     const [isDuplicating, setIsDuplicating] = useState(false);
+    const isSubmittingReference = useRef(false);
     const duplicateDraft =
         workshopToDuplicate === null ? null : createWorkshopDuplicateDraft(workshopToDuplicate, existingWorkshopSlugs);
 
     const resetDraft = () => {
-        setDraft(createNewWorkshopDraft());
+        const nextDraft = createNewWorkshopDraft();
+        setDraft(nextDraft);
         setIsDuplicating(false);
     };
 
     const openNewWorkshop = () => {
-        resetDraft();
-        setIsOpen(true);
+        void runAfterAdminSaves(() => {
+            const nextDraft = createNewWorkshopDraft();
+            setDraft(nextDraft);
+            setIsDuplicating(false);
+            setIsOpen(true);
+        });
     };
 
     const openWorkshopDuplicate = () => {
@@ -50,9 +58,11 @@ export function CreateWorkshopForm({
             return;
         }
 
-        setDraft(duplicateDraft);
-        setIsDuplicating(true);
-        setIsOpen(true);
+        void runAfterAdminSaves(() => {
+            setDraft(duplicateDraft);
+            setIsDuplicating(true);
+            setIsOpen(true);
+        });
     };
 
     const closeForm = () => {
@@ -62,11 +72,13 @@ export function CreateWorkshopForm({
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        if (isSubmittingReference.current) return;
         const values = createWorkshopCreateValues(draft);
         if (values === null) {
             return;
         }
 
+        isSubmittingReference.current = true;
         setIsSaving(true);
         try {
             const isCreated = await onCreate(values);
@@ -74,6 +86,7 @@ export function CreateWorkshopForm({
                 closeForm();
             }
         } finally {
+            isSubmittingReference.current = false;
             setIsSaving(false);
         }
     };
@@ -94,53 +107,56 @@ export function CreateWorkshopForm({
                 )}
             </div>
             <AdminEditorDialog isOpen={isOpen} onClose={closeForm} title={isDuplicating ? 'Kopie workshopu' : 'Nový workshop'}>
+                <WorkshopDraftProtection draftValue={{ draft, isDuplicating }} />
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {isDuplicating && (
-                        <p className="text-sm text-slate-500">
-                            Zkontrolujte termín a URL. Kopie přebírá zveřejnění zdrojového workshopu; připojené ankety
-                            zůstávají společné s původním termínem, účastníci ani historie se nepřenášejí.
-                        </p>
-                    )}
-                    <Input
-                        value={draft.title}
-                        onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, title: event.target.value }))}
-                        placeholder="Název"
-                        required
-                    />
-                    <Input
-                        value={draft.slug}
-                        onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, slug: event.target.value }))}
-                        placeholder="slug-workshopu"
-                        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-                        required
-                    />
-                    <label className="block text-xs font-medium text-slate-600">
-                        Začátek
+                    <fieldset disabled={isSaving} className="space-y-4 border-0 p-0">
+                        {isDuplicating && (
+                            <p className="text-sm text-slate-500">
+                                Zkontrolujte termín a URL. Kopie přebírá zveřejnění zdrojového workshopu; připojené ankety
+                                zůstávají společné s původním termínem, účastníci ani historie se nepřenášejí.
+                            </p>
+                        )}
                         <Input
-                            type="datetime-local"
-                            value={draft.startsAt}
-                            onChange={(event) =>
-                                setDraft((currentDraft) => ({ ...currentDraft, startsAt: event.target.value }))
-                            }
-                            className="mt-1"
+                            value={draft.title}
+                            onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, title: event.target.value }))}
+                            placeholder="Název"
                             required
                         />
-                    </label>
-                    <label className="block text-xs font-medium text-slate-600">
-                        Konec
                         <Input
-                            type="datetime-local"
-                            value={draft.endsAt}
-                            onChange={(changeEvent) =>
-                                setDraft((currentDraft) => ({ ...currentDraft, endsAt: changeEvent.target.value }))
-                            }
-                            className="mt-1"
+                            value={draft.slug}
+                            onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, slug: event.target.value }))}
+                            placeholder="slug-workshopu"
+                            pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                            required
                         />
-                    </label>
-                    <WorkshopEventFields
-                        event={draft.event}
-                        onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, event }))}
-                    />
+                        <label className="block text-xs font-medium text-slate-600">
+                            Začátek
+                            <Input
+                                type="datetime-local"
+                                value={draft.startsAt}
+                                onChange={(event) =>
+                                    setDraft((currentDraft) => ({ ...currentDraft, startsAt: event.target.value }))
+                                }
+                                className="mt-1"
+                                required
+                            />
+                        </label>
+                        <label className="block text-xs font-medium text-slate-600">
+                            Konec
+                            <Input
+                                type="datetime-local"
+                                value={draft.endsAt}
+                                onChange={(changeEvent) =>
+                                    setDraft((currentDraft) => ({ ...currentDraft, endsAt: changeEvent.target.value }))
+                                }
+                                className="mt-1"
+                            />
+                        </label>
+                        <WorkshopEventFields
+                            event={draft.event}
+                            onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, event }))}
+                        />
+                    </fieldset>
                     <Button type="submit" size="sm" className="w-full" disabled={isSaving}>
                         {isSaving ? 'Vytvářím…' : isDuplicating ? 'Vytvořit kopii' : 'Vytvořit'}
                     </Button>
@@ -148,4 +164,9 @@ export function CreateWorkshopForm({
             </AdminEditorDialog>
         </>
     );
+}
+
+function WorkshopDraftProtection({ draftValue }: { readonly draftValue: unknown }) {
+    useAdminDraftProtection(draftValue);
+    return null;
 }

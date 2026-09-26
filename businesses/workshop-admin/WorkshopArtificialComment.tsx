@@ -5,12 +5,13 @@ import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import {
     MAXIMAL_WORKSHOP_COMMENT_LENGTH,
     MAXIMAL_WORKSHOP_PARTICIPANT_FULLNAME_LENGTH,
 } from '@/lib/workshops/workshopConstants';
 import { MessageCirclePlus, Send } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 
 type WorkshopArtificialCommentProps = {
     /**
@@ -29,29 +30,6 @@ type WorkshopArtificialCommentProps = {
  * Keeps artificial comments alongside comment moderation, instead of mixing them into the reactions administration.
  */
 export function WorkshopArtificialComment({ onCreate, isStageOffered = false }: WorkshopArtificialCommentProps) {
-    const [authorName, setAuthorName] = useState('');
-    const [commentBody, setCommentBody] = useState('');
-    const [isCreatingComment, setIsCreatingComment] = useState(false);
-
-    const createComment = async (isSentToStage: boolean) => {
-        if (!authorName.trim() || !commentBody.trim()) {
-            return;
-        }
-
-        setIsCreatingComment(true);
-        const isCreated = await onCreate({ authorName, body: commentBody }, isSentToStage);
-        setIsCreatingComment(false);
-        if (isCreated) {
-            setAuthorName('');
-            setCommentBody('');
-        }
-    };
-
-    const handleCreate = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        void createComment(false);
-    };
-
     return (
         <section className="rounded-2xl border border-dashed border-violet-300 bg-violet-50/50 p-6 shadow-sm">
             <h2 className="flex items-center gap-2 text-xl font-bold text-slate-950">
@@ -62,11 +40,58 @@ export function WorkshopArtificialComment({ onCreate, isStageOffered = false }: 
                 nad živé vysílání.
             </p>
             <AdminEditorButton label="Přidat umělý komentář" title="Přidat umělý komentář" buttonProps={{ className: 'mt-4' }}>
+                <WorkshopArtificialCommentForm onCreate={onCreate} isStageOffered={isStageOffered} />
+            </AdminEditorButton>
+        </section>
+    );
+}
+
+function WorkshopArtificialCommentForm({ onCreate, isStageOffered }: {
+    readonly onCreate: WorkshopArtificialCommentProps['onCreate'];
+    readonly isStageOffered: boolean;
+}) {
+    const [authorName, setAuthorName] = useState('');
+    const [commentBody, setCommentBody] = useState('');
+    const [isCreatingComment, setIsCreatingComment] = useState(false);
+    const [creationErrorMessage, setCreationErrorMessage] = useState<string | null>(null);
+    const isCreatingReference = useRef(false);
+    const draftProtection = useAdminDraftProtection({ authorName, commentBody });
+
+    const createComment = async (isSentToStage: boolean) => {
+        if (isCreatingReference.current || !authorName.trim() || !commentBody.trim()) {
+            return;
+        }
+
+        isCreatingReference.current = true;
+        setIsCreatingComment(true);
+        setCreationErrorMessage(null);
+        try {
+            const isCreated = await onCreate({ authorName, body: commentBody }, isSentToStage);
+            if (isCreated) {
+                setAuthorName('');
+                setCommentBody('');
+                draftProtection.acceptDraftValue({ authorName: '', commentBody: '' });
+            } else setCreationErrorMessage('Komentář se nepodařilo přidat. Zkontrolujte formulář a zkuste to znovu.');
+        } catch (error) {
+            setCreationErrorMessage(error instanceof Error ? error.message : 'Komentář se nepodařilo přidat. Zkuste to znovu.');
+        } finally {
+            isCreatingReference.current = false;
+            setIsCreatingComment(false);
+        }
+    };
+
+    const handleCreate = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        void createComment(false);
+    };
+
+    return (
                 <form onSubmit={handleCreate} className="mt-5 max-w-2xl rounded-xl border border-violet-200 bg-white p-5">
                     <label className="block text-xs font-medium text-slate-600">
                         Zobrazené jméno autora
                         <Input
                             value={authorName}
+                            disabled={isCreatingComment}
                             onChange={(event) => setAuthorName(event.target.value)}
                             className="mt-1 bg-white"
                             maxLength={MAXIMAL_WORKSHOP_PARTICIPANT_FULLNAME_LENGTH}
@@ -78,6 +103,7 @@ export function WorkshopArtificialComment({ onCreate, isStageOffered = false }: 
                         Text komentáře
                         <Textarea
                             value={commentBody}
+                            disabled={isCreatingComment}
                             onChange={(event) => setCommentBody(event.target.value)}
                             className="mt-1 min-h-28 bg-white"
                             maxLength={MAXIMAL_WORKSHOP_COMMENT_LENGTH}
@@ -103,8 +129,7 @@ export function WorkshopArtificialComment({ onCreate, isStageOffered = false }: 
                             </Button>
                         )}
                     </div>
+                    {creationErrorMessage && <p role="alert" className="mt-3 text-sm text-red-700">{creationErrorMessage}</p>}
                 </form>
-            </AdminEditorButton>
-        </section>
     );
 }

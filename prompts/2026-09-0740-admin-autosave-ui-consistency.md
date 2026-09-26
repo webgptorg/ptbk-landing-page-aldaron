@@ -1,4 +1,4 @@
-[ ] !!
+[x] (2 attempts) by Developer on OpenAI Codex `gpt-6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.9973 43 minutes; Testing an hour; Fixing ~$0.8089 40 minutes; Testing 20 minutes
 
 [✨💾] Make admin editing consistent: autosave existing records, explicitly create new records, and remove redundant Save buttons
 
@@ -34,3 +34,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

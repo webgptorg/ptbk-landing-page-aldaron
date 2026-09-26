@@ -82,7 +82,7 @@ describe('create workshop form', () => {
         render(<CreateWorkshopForm onCreate={vi.fn().mockResolvedValue(true)} workshopToDuplicate={WORKSHOP} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Duplikovat workshop' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Zavřít' }));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         fireEvent.click(screen.getByRole('button', { name: 'Nový workshop' }));
 

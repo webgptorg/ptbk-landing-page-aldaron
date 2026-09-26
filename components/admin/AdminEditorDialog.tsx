@@ -1,9 +1,18 @@
 'use client';
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { flushAdminSaves, getAdminSaveRevision, getAdminServerSaveRevision, getPendingAdminSaves, subscribeToAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { ADMIN_DRAFT_PROTECTION_SCOPE_CONTEXT, ADMIN_EDITOR_CLOSE_REQUEST_CONTEXT } from '@/components/admin/AdminEditorContext';
+import {
+    type AdminDraftProtectionScope,
+    confirmDiscardPendingAdminDrafts,
+    flushAdminSaves,
+    getAdminSaveRevision,
+    getAdminServerSaveRevision,
+    getPendingAdminSaves,
+    subscribeToAdminSaves,
+} from '@/lib/admin/adminPendingSaves';
 import { cn } from '@/lib/utils';
-import { createContext, useContext, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 /** Makes request errors from an administration dashboard visible inside its active editor. */
 const ADMIN_EDITOR_ERROR_CONTEXT = createContext<string | null>(null);
@@ -43,31 +52,53 @@ function restoreEditorFocus(opener: HTMLElement | null): void {
 
 function OpenAdminEditorDialog({ onClose, canClose, title, description, errorMessage, className, children }: AdminEditorDialogProps) {
     const dashboardErrorMessage = useContext(ADMIN_EDITOR_ERROR_CONTEXT);
+    const parentDraftProtectionScope = useContext(ADMIN_DRAFT_PROTECTION_SCOPE_CONTEXT);
     // Capture before a child's autoFocus runs, including editors opened without a Radix DialogTrigger.
     const openerReference = useRef<HTMLElement | null>(
         typeof document !== 'undefined' && document.activeElement instanceof HTMLElement ? document.activeElement : null,
     );
     const isClosingReference = useRef(false);
+    const [draftProtectionScope] = useState<AdminDraftProtectionScope>(() => ({ parent: parentDraftProtectionScope }));
     const [isCloseBlocked, setIsCloseBlocked] = useState(false);
+    const [isOperationCloseBlocked, setIsOperationCloseBlocked] = useState(false);
     useSyncExternalStore(subscribeToAdminSaves, getAdminSaveRevision, getAdminServerSaveRevision);
-    const isUnsavedNoticeShown = isCloseBlocked && getPendingAdminSaves().length > 0;
+    const pendingDialogSaves = getPendingAdminSaves(draftProtectionScope);
+    const isUnsavedNoticeShown = isCloseBlocked && pendingDialogSaves.length > 0;
+    const saveError = pendingDialogSaves.find((queue) => queue.getSnapshot().errorMessage !== null)?.getSnapshot();
+    useEffect(() => {
+        if (pendingDialogSaves.length === 0) setIsCloseBlocked(false);
+    }, [pendingDialogSaves.length]);
 
-    const closeEditor = async () => {
-        if (isClosingReference.current || (canClose && !canClose())) return;
+    const closeEditor = useCallback(async () => {
+        if (isClosingReference.current) return;
+        if (canClose && !canClose()) {
+            setIsOperationCloseBlocked(true);
+            return;
+        }
         isClosingReference.current = true;
         try {
-            if (await flushAdminSaves() && (!canClose || canClose())) onClose();
-            else setIsCloseBlocked(true);
+            if (!(await flushAdminSaves(draftProtectionScope))) {
+                setIsCloseBlocked(true);
+                return;
+            }
+            if (canClose && !canClose()) {
+                setIsOperationCloseBlocked(true);
+                return;
+            }
+            setIsOperationCloseBlocked(false);
+            if (confirmDiscardPendingAdminDrafts(draftProtectionScope)) onClose();
         } finally {
             isClosingReference.current = false;
         }
-    };
+    }, [canClose, draftProtectionScope, onClose]);
+    const requestClose = useCallback(() => { void closeEditor(); }, [closeEditor]);
     const visibleErrorMessage = errorMessage ?? dashboardErrorMessage;
 
     return (
-        <Dialog open onOpenChange={(isNextOpen) => { if (!isNextOpen) void closeEditor(); }}>
+        <Dialog open onOpenChange={(isNextOpen) => { if (!isNextOpen) requestClose(); }}>
             <DialogContent
                 className={cn('max-h-[calc(100dvh-2rem)] max-w-3xl grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden bg-white p-0 text-slate-950', className)}
+                closeLabel="Zavřít"
                 {...(!description ? { 'aria-describedby': undefined } : {})}
                 onCloseAutoFocus={(event) => {
                     event.preventDefault();
@@ -81,8 +112,18 @@ function OpenAdminEditorDialog({ onClose, canClose, title, description, errorMes
                 </DialogHeader>
                 <div className="min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">
                     {visibleErrorMessage && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{visibleErrorMessage}</p>}
-                    {isUnsavedNoticeShown && <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Změny ještě nejsou uložené. Opravte pole nebo zkuste uložení znovu a poté zavřete okno.</p>}
-                    {children}
+                    {isUnsavedNoticeShown && <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                        Změny nejsou uložené{saveError?.errorMessage ? `: ${saveError.errorMessage}` : '.'}{' '}
+                        {saveError?.errorKind === 'validation'
+                            ? 'Opravte vyznačená pole; okno zůstane otevřené.'
+                            : 'Použijte opakování u stavu ukládání; okno zůstane otevřené.'}
+                    </p>}
+                    {isOperationCloseBlocked && canClose && !canClose() && <p role="status" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Probíhá ukládání nebo vytváření. Počkejte na dokončení a potom okno zavřete.</p>}
+                    <ADMIN_DRAFT_PROTECTION_SCOPE_CONTEXT.Provider value={draftProtectionScope}>
+                        <ADMIN_EDITOR_CLOSE_REQUEST_CONTEXT.Provider value={requestClose}>
+                            {children}
+                        </ADMIN_EDITOR_CLOSE_REQUEST_CONTEXT.Provider>
+                    </ADMIN_DRAFT_PROTECTION_SCOPE_CONTEXT.Provider>
                 </div>
             </DialogContent>
         </Dialog>

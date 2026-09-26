@@ -2,6 +2,7 @@
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
 import type { WorkshopContentWriteValues } from '@/businesses/workshop-admin/workshopAdminApiClient';
 import { Button } from '@/components/ui/button';
@@ -10,8 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
 import { createWorkshopContentDefaults } from '@/lib/workshops/workshopContentDefaults';
 import type { WorkshopContentBlock } from '@/lib/workshops/workshopTypes';
-import { MousePointerClick, Save, Trash2, Unlock } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
+import { MousePointerClick, Trash2, Unlock } from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 type WorkshopContentEditorProps = {
     readonly contentBlock: WorkshopContentBlock | null;
@@ -46,12 +47,15 @@ export function WorkshopContentEditor({
     const changeDraft = (changes: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...changes }));
     const [isCreating, setIsCreating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [creationErrorMessage, setCreationErrorMessage] = useState<string | null>(null);
+    const [operationErrorMessage, setOperationErrorMessage] = useState<string | null>(null);
+    const isCreatingReference = useRef(false);
+    const isDeletingReference = useRef(false);
 
     const saveValues = async () => {
         const unlockAtIso = unlockAtOverride ?? fromDateTimeLocalValue(unlockAt);
-        if (!unlockAtIso || !bodyMarkdown.trim()) {
-            return false;
-        }
+        if (!unlockAtIso) throw new AdminSaveValidationError('Vyberte čas odemknutí materiálu.');
+        if (!bodyMarkdown.trim()) throw new AdminSaveValidationError('Vyplňte obsah materiálu.');
 
         const isSaved = await onSave({
             title,
@@ -62,9 +66,6 @@ export function WorkshopContentEditor({
             isFollowUp,
             isPaidMembersOnly,
         });
-        if (isSaved && contentBlock === null) {
-            changeDraft({ title: '', bodyMarkdown: '' });
-        }
         return isSaved;
     };
 
@@ -83,19 +84,45 @@ export function WorkshopContentEditor({
     const isUnlocking = isSaving && unlockAtOverride !== null;
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (contentBlock !== null) { await autosave.saveNow(); return; }
+        if (contentBlock !== null || isCreatingReference.current) return;
+        setCreationErrorMessage(null);
+        isCreatingReference.current = true;
         setIsCreating(true);
-        try { await saveValues(); } finally { setIsCreating(false); }
+        try {
+            const isCreated = await saveValues();
+            if (isCreated) {
+                const resetDraft = { ...draft, title: '', bodyMarkdown: '' };
+                setDraft(resetDraft);
+                autosave.acceptDraftValue(resetDraft);
+            }
+            else setCreationErrorMessage('Materiál se nepodařilo přidat. Zkuste to znovu.');
+        } catch (error) {
+            setCreationErrorMessage(error instanceof Error ? error.message : 'Materiál se nepodařilo přidat. Zkuste to znovu.');
+        } finally {
+            isCreatingReference.current = false;
+            setIsCreating(false);
+        }
     };
 
     const handleDelete = async () => {
-        if (!onDelete || !window.confirm('Opravdu tento obsah odstranit? Účastníkům okamžitě zmizí.')) {
+        if (!onDelete || isDeletingReference.current || !window.confirm('Opravdu tento obsah odstranit? Účastníkům okamžitě zmizí.')) {
             return;
         }
-        if (autosave.isDirty && !(await autosave.saveNow())) return;
+        isDeletingReference.current = true;
         setIsDeleting(true);
-        await onDelete();
-        setIsDeleting(false);
+        setOperationErrorMessage(null);
+        try {
+            if ((autosave.isDirty || autosave.isSaving) && !(await autosave.saveNow())) {
+                setOperationErrorMessage('Změny materiálu se nepodařilo uložit, proto jej nemažu. Opravte chybu nebo zkuste uložení znovu.');
+                return;
+            }
+            await onDelete();
+        } catch (error) {
+            setOperationErrorMessage(error instanceof Error ? error.message : 'Materiál se nepodařilo smazat. Zkuste to znovu.');
+        } finally {
+            isDeletingReference.current = false;
+            setIsDeleting(false);
+        }
     };
 
     const handleUnlockNow = () => {
@@ -118,7 +145,7 @@ export function WorkshopContentEditor({
                         type="button"
                         variant="secondary"
                         size="sm"
-                        disabled={isSaving}
+                        disabled={isSaving || isDeleting}
                         onClick={handleUnlockNow}
                     >
                         <Unlock className="mr-2 h-4 w-4" /> {isUnlocking ? 'Odemkám…' : 'Odemknout hned'}
@@ -130,6 +157,7 @@ export function WorkshopContentEditor({
                     Nadpis
                     <Input
                         value={title}
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
                         onChange={(event) => changeDraft({ title: event.target.value })}
                         className="mt-1 bg-white"
                         placeholder="Volitelný nadpis"
@@ -140,6 +168,7 @@ export function WorkshopContentEditor({
                     <Input
                         type="datetime-local"
                         value={unlockAt}
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
                         onChange={(event) => changeDraft({ unlockAt: event.target.value, unlockAtOverride: null })}
                         className="mt-1 bg-white"
                         required
@@ -150,6 +179,7 @@ export function WorkshopContentEditor({
                     <Input
                         type="number"
                         value={sortOrder}
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
                         onChange={(event) => changeDraft({ sortOrder: Number(event.target.value) })}
                         className="mt-1 bg-white"
                     />
@@ -157,6 +187,7 @@ export function WorkshopContentEditor({
                 <label className="flex items-end gap-2 pb-2 text-sm text-slate-700">
                     <input
                         type="checkbox"
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
                         checked={isPublished}
                         onChange={(event) => changeDraft({ isPublished: event.target.checked })}
                     />{' '}
@@ -165,6 +196,7 @@ export function WorkshopContentEditor({
                 <label className="flex items-end gap-2 pb-2 text-sm font-medium text-cyan-800">
                     <input
                         type="checkbox"
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
                         checked={isFollowUp}
                         onChange={(event) => changeDraft({ isFollowUp: event.target.checked })}
                     />{' '}
@@ -173,6 +205,7 @@ export function WorkshopContentEditor({
                 <label className="flex items-end gap-2 pb-2 text-sm font-medium text-amber-700">
                     <input
                         type="checkbox"
+                        disabled={isDeleting || (contentBlock === null && isCreating)}
                         checked={isPaidMembersOnly}
                         onChange={(event) => changeDraft({ isPaidMembersOnly: event.target.checked })}
                     />{' '}
@@ -185,10 +218,12 @@ export function WorkshopContentEditor({
                     zůstává jen placeným členům.
                 </p>
             )}
+            {(contentBlock === null ? creationErrorMessage : operationErrorMessage) && <p role="alert" className="mt-3 text-sm text-red-700">{contentBlock === null ? creationErrorMessage : operationErrorMessage}</p>}
             <label className="mt-4 block text-xs font-medium text-slate-600">
                 Markdown
                 <Textarea
                     value={bodyMarkdown}
+                    disabled={isDeleting || (contentBlock === null && isCreating)}
                     onChange={(event) => changeDraft({ bodyMarkdown: event.target.value })}
                     className="mt-1 min-h-40 bg-white font-mono text-xs"
                     placeholder={'## Materiály\n\n- [Odkaz](https://...)'}
@@ -208,10 +243,9 @@ export function WorkshopContentEditor({
                         {isDeleting ? 'Mažu…' : 'Smazat'}
                     </Button>
                 )}
-                <Button type="submit" size="sm" disabled={isSaving}>
-                    <Save className="mr-2 h-4 w-4" />
-                    {isSaving ? 'Ukládám…' : contentBlock === null ? 'Přidat materiál' : 'Uložit'}
-                </Button>
+                {contentBlock === null && <Button type="submit" size="sm" disabled={isSaving}>
+                    {isSaving ? 'Přidávám…' : 'Přidat materiál'}
+                </Button>}
             </div>
             {contentBlock !== null && <div className="mt-3"><AdminAutosaveStatus {...autosave} /></div>}
         </form>

@@ -3,6 +3,7 @@
 import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import {
     createWorkshopOverviewCustomMetricMatcher,
     type WorkshopOverviewCustomMetric,
@@ -26,25 +27,7 @@ export function WorkshopOverviewCustomMetricEditor({
     customMetrics,
     onChange,
 }: WorkshopOverviewCustomMetricEditorProps) {
-    const [label, setLabel] = useState('');
-    const [pattern, setPattern] = useState('');
-
-    const isPatternWritten = pattern.trim() !== '';
-    const isPatternValid = !isPatternWritten || createWorkshopOverviewCustomMetricMatcher(pattern) !== null;
     const isAnotherMetricAllowed = customMetrics.length < MAXIMAL_WORKSHOP_OVERVIEW_CUSTOM_METRIC_COUNT;
-
-    const addCustomMetric = () => {
-        if (!isPatternWritten || !isPatternValid || !isAnotherMetricAllowed) {
-            return;
-        }
-
-        onChange([
-            ...customMetrics,
-            { label: label.trim() === '' ? pattern.trim() : label.trim(), pattern: pattern.trim() },
-        ]);
-        setLabel('');
-        setPattern('');
-    };
 
     return (
         <section className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -89,6 +72,37 @@ export function WorkshopOverviewCustomMetricEditor({
 
             {isAnotherMetricAllowed ? (
                 <AdminEditorButton label="Nová metrika" title="Nová metrika z komentářů" buttonProps={{ className: 'mt-3', size: 'sm' }}>
+                    <WorkshopOverviewCustomMetricDraftForm onAdd={(metric) => onChange([...customMetrics, metric])} />
+                </AdminEditorButton>
+            ) : (
+                <p className="mt-3 text-xs text-slate-500">
+                    Graf unese {MAXIMAL_WORKSHOP_OVERVIEW_CUSTOM_METRIC_COUNT} vlastní metriky najednou, aby se jejich
+                    barvy daly rozeznat. Odeberte jednu, chcete-li přidat jinou.
+                </p>
+            )}
+        </section>
+    );
+}
+
+function WorkshopOverviewCustomMetricDraftForm({ onAdd }: {
+    readonly onAdd: (metric: WorkshopOverviewCustomMetric) => void;
+}) {
+    const [label, setLabel] = useState('');
+    const [pattern, setPattern] = useState('');
+    const draftProtection = useAdminDraftProtection({ label, pattern });
+
+    const isPatternWritten = pattern.trim() !== '';
+    const isPatternValid = !isPatternWritten || createWorkshopOverviewCustomMetricMatcher(pattern) !== null;
+    const addCustomMetric = () => {
+        if (!isPatternWritten || !isPatternValid) return;
+        const resetDraft = { label: '', pattern: '' };
+        onAdd({ label: label.trim() === '' ? pattern.trim() : label.trim(), pattern: pattern.trim() });
+        setLabel(resetDraft.label);
+        setPattern(resetDraft.pattern);
+        draftProtection.acceptDraftValue(resetDraft);
+    };
+
+    return (
                     <div className="mt-3 flex flex-wrap items-start gap-2">
                         <Input
                             value={label}
@@ -126,13 +140,5 @@ export function WorkshopOverviewCustomMetricEditor({
                             <Plus className="mr-1.5 h-4 w-4" /> Přidat metriku
                         </Button>
                     </div>
-                </AdminEditorButton>
-            ) : (
-                <p className="mt-3 text-xs text-slate-500">
-                    Graf unese {MAXIMAL_WORKSHOP_OVERVIEW_CUSTOM_METRIC_COUNT} vlastní metriky najednou, aby se jejich
-                    barvy daly rozeznat. Odeberte jednu, chcete-li přidat jinou.
-                </p>
-            )}
-        </section>
     );
 }

@@ -11,7 +11,7 @@ export async function protectAdminMutation<Result>(mutation: () => Promise<Resul
         await request.catch(() => undefined);
         return true;
     });
-    const unregister = registerAdminSaveQueue(queue);
+    const unregister = registerAdminSaveQueue(queue, null, true);
     const protection = queue.flush();
     try {
         return await request;

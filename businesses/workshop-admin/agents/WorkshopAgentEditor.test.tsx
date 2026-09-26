@@ -22,12 +22,12 @@ describe('Book agent editor', () => {
     });
 
     it('saves the edited Book and room behavior together', async () => {
-        const onSave = vi.fn().mockResolvedValue(undefined);
+        const onSave = vi.fn().mockResolvedValue(true);
         render(<WorkshopAgentEditor initialValues={null} isListeningOffered isSaving={false} onSave={onSave} onCancel={vi.fn()} />);
         fireEvent.change(screen.getByLabelText('Jméno v chatu'), { target: { value: 'Skeptický Pavel' } });
         fireEvent.change(screen.getByLabelText('Book'), { target: { value: 'Pavel\nPERSONA Ptej se na důkazy' } });
         fireEvent.click(screen.getByLabelText('Naslouchat živému workshopu a pokládat otázky'));
-        fireEvent.click(screen.getByRole('button', { name: 'Uložit agenta' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Vytvořit agenta' }));
         await waitFor(() => expect(onSave).toHaveBeenCalledWith({ ...DEFAULT_WORKSHOP_AGENT_VALUES, name: 'Skeptický Pavel', bookSource: 'Pavel\nPERSONA Ptej se na důkazy', isListening: true }));
     });
 

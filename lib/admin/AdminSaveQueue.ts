@@ -1,10 +1,18 @@
 export const ADMIN_AUTOSAVE_DELAY_MILLISECONDS = 600;
 export const ADMIN_SAVE_ERROR_MESSAGE = 'Změny se nepodařilo uložit. Zkuste uložení znovu.';
 
+export class AdminSaveValidationError extends Error {
+    public constructor(message: string) {
+        super(message);
+        this.name = 'AdminSaveValidationError';
+    }
+}
+
 export type AdminSaveState = {
     readonly isDirty: boolean;
     readonly isSaving: boolean;
     readonly errorMessage: string | null;
+    readonly errorKind: 'validation' | 'save' | null;
 };
 
 type AdminSaveOperation = () => Promise<boolean>;
@@ -17,7 +25,7 @@ export class AdminSaveQueue {
     private timeout: ReturnType<typeof setTimeout> | null = null;
     private runningSave: Promise<boolean> | null = null;
     private readonly listeners = new Set<() => void>();
-    private state: AdminSaveState = { isDirty: false, isSaving: false, errorMessage: null };
+    private state: AdminSaveState = { isDirty: false, isSaving: false, errorMessage: null, errorKind: null };
 
     public constructor(initialKey: string) {
         this.savedKey = initialKey;
@@ -44,20 +52,20 @@ export class AdminSaveQueue {
         if (key === this.draftKey) return;
         this.draftKey = key;
         this.clearTimeout();
-        this.publish({ isDirty: this.runningSave !== null || key !== this.savedKey, errorMessage: null });
+        this.publish({ isDirty: this.runningSave !== null || key !== this.savedKey, errorMessage: null, errorKind: null });
         if (this.state.isDirty && this.runningSave === null) {
             this.timeout = setTimeout(() => void this.flush(), ADMIN_AUTOSAVE_DELAY_MILLISECONDS);
         }
     }
 
-    /** Also used by explicit Save buttons and by navigation before disposing an editor. */
+    /** Forces the latest draft to settle before a controlled navigation or close disposes its editor. */
     public flush = (isForced = false): Promise<boolean> => {
         this.clearTimeout();
         if (this.runningSave !== null) return this.runningSave;
         if (!this.state.isDirty && !isForced) return Promise.resolve(true);
 
         // Defer execution until runningSave is assigned, including when validation fails synchronously.
-        this.publish({ isDirty: true, isSaving: true, errorMessage: null });
+        this.publish({ isDirty: true, isSaving: true, errorMessage: null, errorKind: null });
         this.runningSave = Promise.resolve().then(() => this.saveLatest()).finally(() => {
             this.runningSave = null;
             this.publish({ isSaving: false });
@@ -76,14 +84,18 @@ export class AdminSaveQueue {
             } catch (error) {
                 // A newer draft still deserves its own attempt when an older request fails.
                 if (this.draftKey !== savingKey) continue;
-                this.publish({ isDirty: true, errorMessage: error instanceof Error ? error.message : ADMIN_SAVE_ERROR_MESSAGE });
+                this.publish({
+                    isDirty: true,
+                    errorMessage: error instanceof Error ? error.message : ADMIN_SAVE_ERROR_MESSAGE,
+                    errorKind: error instanceof AdminSaveValidationError ? 'validation' : 'save',
+                });
                 return false;
             }
             // Edits made during the request are still dirty, including a revert to the old saved value.
             if (this.draftKey === this.savedKey) break;
         }
 
-        this.publish({ isDirty: false, errorMessage: null });
+        this.publish({ isDirty: false, errorMessage: null, errorKind: null });
         return true;
     }
 

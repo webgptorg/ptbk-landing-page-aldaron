@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
 import { Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 type DeleteWorkshopButtonProps = {
     readonly workshop: Pick<WorkshopDetails, 'id' | 'title'>;
@@ -20,17 +20,21 @@ function createWorkshopDeletionConfirmation(workshopTitle: string): string {
  */
 export function DeleteWorkshopButton({ workshop, onDelete }: DeleteWorkshopButtonProps) {
     const [isDeleting, setIsDeleting] = useState(false);
+    const isDeletingReference = useRef(false);
 
     const handleDelete = async () => {
+        if (isDeletingReference.current) return;
         const isDeletionConfirmed = window.confirm(createWorkshopDeletionConfirmation(workshop.title));
         if (!isDeletionConfirmed) {
             return;
         }
 
+        isDeletingReference.current = true;
         setIsDeleting(true);
         try {
             await onDelete(workshop.id);
         } finally {
+            isDeletingReference.current = false;
             setIsDeleting(false);
         }
     };

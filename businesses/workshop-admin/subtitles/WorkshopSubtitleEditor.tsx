@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
+import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { parseSubtitleFile, serializeSubtitleFile } from '@/lib/workshops/subtitles/workshopSubtitleFormat';
 import { MAXIMAL_SUBTITLE_FILE_BYTES, SUBTITLE_LANGUAGE_LABELS, type SubtitleLanguage, type WorkshopSubtitleDraft, type WorkshopSubtitleTrack } from '@/lib/workshops/subtitles/workshopSubtitleTypes';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { WorkshopSubtitleGeneration } from './WorkshopSubtitleGeneration';
 
 export function WorkshopSubtitleEditor({ workshopId, videoId, track, isTranscriptionConfigured, onSave, onDelete }: {
@@ -25,12 +27,27 @@ export function WorkshopSubtitleEditor({ workshopId, videoId, track, isTranscrip
     const [isBusy, setIsBusy] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const isCreatingReference = useRef(false);
+    const isDeletingReference = useRef(false);
     const saveDraft = async () => {
         setErrorMessage(null);
-        try { return await onSave({ ...source, language, cues: parseSubtitleFile(text) }); }
+        let cues: ReturnType<typeof parseSubtitleFile>;
+        try {
+            cues = parseSubtitleFile(text);
+        } catch (error) {
+            const validationMessage = error instanceof Error ? error.message : 'Zkontrolujte formát titulků.';
+            setErrorMessage(validationMessage);
+            if (track !== null) throw new AdminSaveValidationError(validationMessage);
+            return false;
+        }
+        try {
+            const isSaved = await onSave({ ...source, language, cues });
+            if (isSaved && track === null) autosave.acceptDraftValue();
+            return isSaved;
+        }
         catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Titulky se nepodařilo uložit.'); return false; }
     };
-    const autosave = useAdminAutosave({ value: { language, text }, isEnabled: track !== null, onSave: saveDraft });
+    const autosave = useAdminAutosave({ value: { language, text, source }, isEnabled: track !== null, onSave: saveDraft });
     const importFile = async (file: File | undefined) => {
         if (!file) return;
         setErrorMessage(null);
@@ -43,9 +60,14 @@ export function WorkshopSubtitleEditor({ workshopId, videoId, track, isTranscrip
 
     return <form ref={autosave.formRef} className="space-y-4" onSubmit={async (event) => {
         event.preventDefault();
-        if (track) { await autosave.saveNow(); return; }
+        if (track || isCreatingReference.current) return;
+        isCreatingReference.current = true;
         setIsCreating(true);
-        try { await saveDraft(); } finally { setIsCreating(false); }
+        try { await saveDraft(); }
+        finally {
+            isCreatingReference.current = false;
+            setIsCreating(false);
+        }
     }}>
         <label className="block text-sm font-medium">Jazyk titulků
             <select className="mt-1 block w-full rounded-md border border-slate-300 bg-white p-2" value={language} disabled={isBusy || isCreating}
@@ -70,13 +92,28 @@ export function WorkshopSubtitleEditor({ workshopId, videoId, track, isTranscrip
         {track && <AdminAutosaveStatus {...autosave} />}
         <div className="flex justify-end gap-2">
             {onDelete && <Button type="button" variant="destructive" disabled={isBusy} onClick={async () => {
-                if (!window.confirm('Opravdu smazat tuto stopu titulků?')) return;
-                if (autosave.isDirty && !(await autosave.saveNow())) return;
+                if (isDeletingReference.current || !window.confirm('Opravdu smazat tuto stopu titulků?')) return;
+                isDeletingReference.current = true;
                 setIsBusy(true);
-                try { await onDelete(); } catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Titulky se nepodařilo smazat.'); }
-                finally { setIsBusy(false); }
+                setErrorMessage(null);
+                try {
+                    if ((autosave.isDirty || autosave.isSaving) && !(await autosave.saveNow())) {
+                        setErrorMessage('Změny titulků se nepodařilo uložit, proto stopu nemažu. Opravte chybu nebo zkuste uložení znovu.');
+                        return;
+                    }
+                    if (!(await flushAdminSaves())) {
+                        setErrorMessage('Ostatní změny administrace se nepodařilo uložit, proto stopu titulků nemažu. Opravte chybu v editoru a zkuste znovu.');
+                        return;
+                    }
+                    await onDelete();
+                } catch (error) {
+                    setErrorMessage(error instanceof Error ? error.message : 'Titulky se nepodařilo smazat.');
+                } finally {
+                    isDeletingReference.current = false;
+                    setIsBusy(false);
+                }
             }}>Smazat titulky</Button>}
-            <Button type="submit" disabled={isBusy || isCreating || autosave.isSaving}>{track ? 'Uložit titulky' : 'Přidat titulky'}</Button>
+            {track === null && <Button type="submit" disabled={isBusy || isCreating || autosave.isSaving}>{isCreating ? 'Přidávám…' : 'Přidat titulky'}</Button>}
         </div>
     </form>;
 }

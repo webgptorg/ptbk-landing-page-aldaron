@@ -1,15 +1,16 @@
 'use client';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
-import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DEFAULT_WORKSHOP_AGENT_VALUES, WORKSHOP_AGENT_WRITE_SCHEMA, type WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
 import type { BookEditorProps } from '@promptbook/components';
 import dynamic from 'next/dynamic';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 
 let bookEditorModulePromise: Promise<typeof import('@promptbook/components')> | null = null;
 
@@ -45,21 +46,29 @@ type WorkshopAgentEditorProps = {
 export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSaving, onSave, onCancel }: WorkshopAgentEditorProps) {
     const [values, setValues] = useState<WorkshopAgentWriteValues>(() => initialValues ?? { ...DEFAULT_WORKSHOP_AGENT_VALUES });
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const isCreatingReference = useRef(false);
+    const requestClose = useAdminEditorClose(onCancel);
 
     const saveValues = async () => {
         const parsed = WORKSHOP_AGENT_WRITE_SCHEMA.safeParse(values);
         if (!parsed.success) {
-            setErrorMessage('Vyplňte jméno a Book. Interval odpovědí musí být 15–3 600 sekund, interval otázek 60–3 600 sekund.');
+            const validationMessage = 'Vyplňte jméno a Book. Interval odpovědí musí být 15–3 600 sekund, interval otázek 60–3 600 sekund.';
+            setErrorMessage(validationMessage);
+            if (initialValues !== null) throw new AdminSaveValidationError(validationMessage);
             return false;
         }
         setErrorMessage(null);
-        return onSave(parsed.data);
+        const isSaved = await onSave(parsed.data);
+        if (isSaved && initialValues === null) autosave.acceptDraftValue();
+        return isSaved;
     };
     const autosave = useAdminAutosave({ value: values, onSave: saveValues, isEnabled: initialValues !== null });
     const submit = async (event: FormEvent) => {
         event.preventDefault();
-        if (initialValues !== null) await autosave.saveNow();
-        else await saveValues();
+        if (initialValues !== null || isCreatingReference.current) return;
+        isCreatingReference.current = true;
+        try { await saveValues(); }
+        finally { isCreatingReference.current = false; }
     };
 
     return (
@@ -74,7 +83,7 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
                 Agent je zapnutý (ve všech místnostech)
             </label>
             <div role="group" aria-label="Zdrojový Book agenta">
-                {/* The editor accepts incomplete drafts; validation belongs to Save, not each keystroke. */}
+                {/* Incomplete drafts stay local for new agents; existing agents validate through autosave. */}
                 <BOOK_EDITOR value={values.bookSource as BookEditorProps['value']} onChange={(bookSource) => setValues((current) => ({ ...current, bookSource }))}
                     height="420px" isReadonly={initialValues === null && isSaving} isUploadButtonShown={false} isCameraButtonShown={false} />
             </div>
@@ -101,8 +110,8 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
             </fieldset>
             {errorMessage && <p role="alert" className="text-sm text-red-700">{errorMessage}</p>}
             <div className="flex gap-2">
-                <Button type="submit" disabled={isSaving}>{isSaving ? 'Ukládám…' : 'Uložit agenta'}</Button>
-                <Button type="button" variant="outline" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>Zavřít</Button>
+                {initialValues === null && <Button type="submit" disabled={isSaving}>{isSaving ? 'Vytvářím…' : 'Vytvořit agenta'}</Button>}
+                <Button type="button" variant="outline" disabled={isSaving} onClick={requestClose}>Zavřít</Button>
             </div>
             {initialValues !== null && <AdminAutosaveStatus {...autosave} />}
         </form>

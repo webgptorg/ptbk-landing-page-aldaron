@@ -91,7 +91,6 @@ describe('workshop comment moderation', () => {
         renderModeration(onEditBody);
 
         writeCorrection(CORRECTED_BODY);
-        fireEvent.click(screen.getByRole('button', { name: 'Uložit text' }));
 
         await waitFor(() => expect(onEditBody).toHaveBeenCalledWith('question', CORRECTED_BODY));
         expect(screen.getByRole('textbox', { name: EDITOR_LABEL })).toHaveProperty('value', CORRECTED_BODY);
@@ -125,7 +124,6 @@ describe('workshop comment moderation', () => {
         renderModeration(onEditBody);
 
         writeCorrection(CORRECTED_BODY);
-        fireEvent.click(screen.getByRole('button', { name: 'Uložit text' }));
 
         await waitFor(() => expect(onEditBody).toHaveBeenCalledTimes(1));
         expect(screen.getByRole('textbox', { name: EDITOR_LABEL })).toHaveProperty('value', CORRECTED_BODY);
@@ -192,7 +190,7 @@ describe('workshop comment moderation', () => {
         renderModeration(onEditBody);
 
         writeCorrection(CORRECTED_BODY);
-        fireEvent.click(screen.getByRole('button', { name: 'Zavřít' }));
+        fireEvent.click(screen.getAllByRole('button', { name: 'Zavřít' })[0]);
 
         await waitFor(() => expect(screen.queryByRole('textbox', { name: EDITOR_LABEL })).toBeNull());
         expect(onEditBody).toHaveBeenCalledWith('question', CORRECTED_BODY);

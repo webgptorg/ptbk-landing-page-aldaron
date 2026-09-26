@@ -1,8 +1,9 @@
 'use client';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
-import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +19,8 @@ import {
     MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT,
 } from '@/lib/discounts/discountCodeConstants';
 import { COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID, DISCOUNT_PLACES } from '@/lib/discounts/discountPlaces';
-import { Save, X } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { X } from 'lucide-react';
+import { useRef, useState, type FormEvent } from 'react';
 
 const DEFAULT_DISCOUNT_PERCENT = 10;
 const DEFAULT_DISCOUNT_VALIDITY_MILLISECONDS = 24 * 60 * 60 * 1000;
@@ -89,6 +90,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
     );
     const [isCreating, setIsCreating] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
+    const isCreatingReference = useRef(false);
+    const requestClose = useAdminEditorClose(onCancelEditing);
 
     const isEditing = discountCode !== null;
     const isUseCountLimited = values.maximumUseCount !== null;
@@ -101,19 +104,21 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
     };
 
     const saveValues = async () => {
+        const rejectInvalidDraft = (message: string): false => {
+            setValidationError(message);
+            if (discountCode !== null) throw new AdminSaveValidationError(message);
+            return false;
+        };
         const startsAt = fromDateTimeLocalValue(startsAtText);
         const endsAt = fromDateTimeLocalValue(endsAtText);
         if (startsAt === null || endsAt === null || !values.code.trim()) {
-            setValidationError('Vyplňte kód a obě data platnosti.');
-            return false;
+            return rejectInvalidDraft('Vyplňte kód a obě data platnosti.');
         }
         if (Date.parse(endsAt) < Date.parse(startsAt)) {
-            setValidationError('Konec platnosti musí být po začátku platnosti.');
-            return false;
+            return rejectInvalidDraft('Konec platnosti musí být po začátku platnosti.');
         }
         if (!isValidForAllPlaces && values.placeIds.length === 0) {
-            setValidationError('Vyberte alespoň jedno místo, kde kód platí, nebo zvolte všechna místa.');
-            return false;
+            return rejectInvalidDraft('Vyberte alespoň jedno místo, kde kód platí, nebo zvolte všechna místa.');
         }
         if (
             values.subscriptionDiscountDurationMonths !== null &&
@@ -121,10 +126,9 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                 values.subscriptionDiscountDurationMonths < 1 ||
                 values.subscriptionDiscountDurationMonths > MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT)
         ) {
-            setValidationError(
+            return rejectInvalidDraft(
                 `Dočasná sleva předplatného musí trvat 1 až ${MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT} měsíců.`,
             );
-            return false;
         }
 
         setValidationError(null);
@@ -149,12 +153,14 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
     const isSaving = isCreating || autosave.isSaving;
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (isEditing) {
-            await autosave.saveNow();
-            return;
-        }
+        if (isEditing || isCreatingReference.current) return;
+        isCreatingReference.current = true;
         setIsCreating(true);
-        try { await saveValues(); } finally { setIsCreating(false); }
+        try { await saveValues(); }
+        finally {
+            isCreatingReference.current = false;
+            setIsCreating(false);
+        }
     };
 
     return (
@@ -169,13 +175,14 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     </p>
                 </div>
                 {isEditing && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => void runAfterAdminSaves(onCancelEditing)} disabled={isSaving}>
+                    <Button type="button" variant="outline" size="sm" onClick={requestClose} disabled={isSaving}>
                         <X className="mr-2 h-4 w-4" /> Zavřít úpravy
                     </Button>
                 )}
             </div>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <fieldset disabled={isCreating} className="mt-6 min-w-0 space-y-5 border-0 p-0">
+            <div className="grid gap-5 md:grid-cols-2">
                 <label className="text-sm font-medium text-slate-700">
                     Slevový kód
                     <Input
@@ -409,13 +416,13 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
             {validationError !== null && (
                 <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{validationError}</p>
             )}
+            </fieldset>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 {isEditing && <AdminAutosaveStatus {...autosave} />}
-                <Button type="submit" disabled={isSaving}>
-                    <Save className="mr-2 h-4 w-4" />
-                    {isSaving ? 'Ukládám…' : isEditing ? 'Uložit změny' : 'Vytvořit slevový kód'}
-                </Button>
+                {!isEditing && <Button type="submit" disabled={isSaving}>
+                    {isSaving ? 'Vytvářím…' : 'Vytvořit slevový kód'}
+                </Button>}
             </div>
         </form>
     );

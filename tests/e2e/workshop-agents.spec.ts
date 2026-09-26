@@ -74,7 +74,7 @@ for (const kind of ['workshop', 'community'] as const) {
         } else {
             await page.getByLabel('Naslouchat živému workshopu a pokládat otázky').check();
         }
-        await page.getByRole('button', { name: 'Uložit agenta', exact: true }).click();
+        await page.getByRole('button', { name: 'Vytvořit agenta', exact: true }).click();
         await expect(page.getByRole('button', { name: /Zvídavá testerka/ })).toBeVisible();
         expect(agents).toEqual([{
             ...DEFAULT_WORKSHOP_AGENT_VALUES, id: AGENT_ID, name: 'Zvídavá testerka',

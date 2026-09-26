@@ -1,14 +1,14 @@
 'use client';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
-import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MAXIMAL_WORKSHOP_COMMENT_LENGTH } from '@/lib/workshops/workshopConstants';
-import { Save } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 
 type WorkshopCommentEditorProps = {
     readonly label: string;
@@ -29,20 +29,13 @@ type WorkshopCommentEditorProps = {
  */
 export function WorkshopCommentEditor({ label, initialBody, onCancel, onSave }: WorkshopCommentEditorProps) {
     const [body, setBody] = useState(initialBody);
-    const autosave = useAdminAutosave({ value: body, onSave: () => body.trim() ? onSave(body) : Promise.resolve(false) });
-    const isSaving = autosave.isSaving;
-
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!body.trim()) {
-            return;
-        }
-
-        await autosave.saveNow();
-    };
-
+    const requestClose = useAdminEditorClose(onCancel);
+    const autosave = useAdminAutosave({ value: body, onSave: () => {
+        if (!body.trim()) throw new AdminSaveValidationError('Text komentáře nesmí být prázdný.');
+        return onSave(body);
+    } });
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} className="mt-3 rounded-lg border border-cyan-200 bg-cyan-50/40 p-3">
+        <form ref={autosave.formRef} onSubmit={(event) => event.preventDefault()} className="mt-3 rounded-lg border border-cyan-200 bg-cyan-50/40 p-3">
             <Textarea
                 value={body}
                 onChange={(event) => setBody(event.target.value)}
@@ -53,11 +46,8 @@ export function WorkshopCommentEditor({ label, initialBody, onCancel, onSave }: 
                 required
             />
             <div className="mt-3 flex flex-wrap justify-end gap-2">
-                <Button type="button" variant="ghost" size="sm" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>
+                <Button type="button" variant="ghost" size="sm" onClick={requestClose}>
                     Zavřít
-                </Button>
-                <Button type="submit" size="sm" disabled={isSaving || !body.trim()}>
-                    <Save className="mr-1.5 h-4 w-4" /> {isSaving ? 'Ukládám…' : 'Uložit text'}
                 </Button>
             </div>
             <AdminAutosaveStatus {...autosave} />

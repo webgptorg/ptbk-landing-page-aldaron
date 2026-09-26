@@ -114,7 +114,7 @@ export default function AdminContactsComponent() {
                     Reset column widths
                 </Button>
                 <Button
-                    onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+                    onClick={() => void runAfterAdminSaves(() => setIsAddFormOpen(!isAddFormOpen))}
                     variant={isAddFormOpen ? 'outline' : 'default'}
                 >
                     {isAddFormOpen ? 'Cancel' : 'Add Contact'}

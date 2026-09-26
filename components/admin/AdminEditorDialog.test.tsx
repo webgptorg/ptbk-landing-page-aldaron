@@ -20,6 +20,10 @@ function Editor({ onSave }: { readonly onSave: (body: string) => Promise<boolean
     );
 }
 
+function clickDialogClose(): void {
+    fireEvent.click(screen.getAllByRole('button', { name: 'Zavřít' })[0]);
+}
+
 it('keeps invalid and failed drafts in the dialog when Escape or Close is used, then restores focus after saving', async () => {
     const onSave = vi.fn().mockResolvedValue(false);
     render(<Editor onSave={onSave} />);
@@ -32,16 +36,16 @@ it('keeps invalid and failed drafts in the dialog when Escape or Close is used, 
 
     fireEvent.change(field, { target: { value: '' } });
     fireEvent.keyDown(field, { key: 'Escape' });
-    await screen.findByText(/Změny ještě nejsou uložené/);
+    await screen.findByText(/Změny nejsou uložené/);
     expect(onSave).not.toHaveBeenCalled();
 
     fireEvent.change(field, { target: { value: 'Keep this draft' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    clickDialogClose();
     await waitFor(() => expect(onSave).toHaveBeenCalledWith('Keep this draft'));
     expect(screen.getByRole('textbox')).toHaveProperty('value', 'Keep this draft');
 
     onSave.mockResolvedValue(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    clickDialogClose();
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(opener));
 });
@@ -53,10 +57,9 @@ it('waits for an in-flight save and newer typing before closing the dialog', asy
     render(<Editor onSave={onSave} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit comment' }));
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'First edit' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Uložit text' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Latest edit' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    clickDialogClose();
     expect(screen.getByRole('dialog')).not.toBeNull();
     await act(async () => finishSave(true));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -70,7 +73,7 @@ it('keeps an explicit batch visible while its creation is running', async () => 
         <p>Rozpracovaná dávka</p>
     </AdminEditorDialog>);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    clickDialogClose();
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByText('Rozpracovaná dávka')).toBeTruthy();
 
@@ -78,6 +81,6 @@ it('keeps an explicit batch visible while its creation is running', async () => 
     dialog.rerender(<AdminEditorDialog isOpen title="Přidat odkazy" onClose={onClose} canClose={() => !isCreating}>
         <p>Rozpracovaná dávka</p>
     </AdminEditorDialog>);
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    clickDialogClose();
     await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
 });

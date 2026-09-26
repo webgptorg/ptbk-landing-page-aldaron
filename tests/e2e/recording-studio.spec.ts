@@ -114,14 +114,14 @@ test('records separate sources, restores them, trims every track and exports pla
     await page.getByLabel('Název záznamu', { exact: true }).fill('Synchronized editing take');
     await page.getByLabel('Začátek (sekundy)', { exact: true }).fill('0.5');
     await page.getByLabel('Konec (sekundy)', { exact: true }).fill('2.5');
-    await expect(page.getByRole('dialog').getByText('Změny se ukládají automaticky.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('Čeká na uložení…', { exact: true })).toBeVisible();
     const preview = page.getByRole('dialog').locator('video').first();
     await preview.evaluate(async (video: HTMLVideoElement) => { video.muted = true; await video.play(); });
     await expect.poll(() => preview.evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThan(0.65);
     await expect.poll(() => preview.evaluate((video: HTMLVideoElement) => video.paused)).toBe(true);
     expect(await preview.evaluate((video: HTMLVideoElement) => video.currentTime)).toBeLessThan(2.8);
     await page.screenshot({ path: testInfo.outputPath('recording-studio-editor.png') });
-    await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Zavřít', exact: true }).click();
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Synchronized editing take', exact: true })).toBeVisible();
     const trimmedDownload = page.waitForEvent('download');

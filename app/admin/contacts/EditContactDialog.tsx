@@ -29,9 +29,7 @@ export function EditContactDialog(props: EditContactDialogProps) {
                 key={contact.id}
                 fieldNames={CONTACT_EDITABLE_TEXT_FIELD_NAMES}
                 initialContactValues={pickContactTextValues(contact, CONTACT_EDITABLE_TEXT_FIELD_NAMES)}
-                saveButtonLabel="Save Changes"
                 onSaveContact={(contactValues, isContacted) => onEditContact(contact.id, { ...contactValues, isContacted })}
-                onContactSaved={onClose}
                 onCancel={onClose}
             />
         </AdminEditorDialog>

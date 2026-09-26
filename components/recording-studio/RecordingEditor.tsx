@@ -67,7 +67,7 @@ export function RecordingEditor({ recording, onChange }: {
         onSave: async () => { onChange(await editStudioRecording(recording, title, trim)); return true; },
     });
     return (
-        <form ref={autosave.formRef} className="space-y-6" onSubmit={(event) => { event.preventDefault(); void autosave.saveNow(); }}>
+        <form ref={autosave.formRef} className="space-y-6" onSubmit={(event) => event.preventDefault()}>
             <label className="block text-sm font-medium">Název záznamu
                 <input value={title} required maxLength={160} onChange={(event) => setTitle(event.target.value)} className="mt-2 w-full rounded-lg border p-3" />
             </label>

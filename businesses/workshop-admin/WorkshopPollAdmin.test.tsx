@@ -131,7 +131,7 @@ describe('community poll administration', () => {
             options: expect.arrayContaining([{ id: 'saved-choice-id', label: 'Edited while saving' }]),
         }));
         expect(newChoice).toHaveProperty('value', 'Edited while saving');
-        expect(within(editForm).getByRole('button', { name: 'Uložit změny' })).not.toBeNull();
+        expect(within(editForm).getByRole('status')).not.toBeNull();
     });
 
     it('sends a trimmed question, choices, and default settings through the shared admin callback', async () => {
@@ -344,8 +344,6 @@ describe('community poll administration', () => {
             throw new Error('The poll editor is missing');
         }
         fireEvent.click(within(editForm).getByLabelText('Posunout možnost 2 výše'));
-        fireEvent.click(screen.getByRole('button', { name: 'Uložit změny' }));
-
         await waitFor(() =>
             expect(props.onUpdate).toHaveBeenCalledWith('poll-1', {
                 question: 'Jaké téma příště?',
@@ -360,7 +358,7 @@ describe('community poll administration', () => {
             }),
         );
 
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+        fireEvent.click(screen.getAllByRole('button', { name: 'Zavřít' })[0]);
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         fireEvent.click(screen.getByRole('button', { name: 'Smazat' }));
 
@@ -373,20 +371,7 @@ describe('community poll administration', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Upravit' }));
         expect(screen.queryByDisplayValue('Bezpečnost')).toBeNull();
-        fireEvent.click(screen.getByRole('button', { name: 'Uložit změny' }));
-
-        await waitFor(() =>
-            expect(props.onUpdate).toHaveBeenCalledWith(
-                'poll-1',
-                expect.objectContaining({
-                    isOtherOptionEnabled: true,
-                    options: [
-                        { id: 'option-1', label: 'Testování' },
-                        { id: 'option-2', label: 'Nasazování' },
-                    ],
-                }),
-            ),
-        );
+        expect(props.onUpdate).not.toHaveBeenCalled();
     });
 
     it('names the member who wrote an answer and decides about it where its votes are read', async () => {
@@ -411,7 +396,6 @@ describe('community poll administration', () => {
         fireEvent.change(screen.getByLabelText('Text vlastní odpovědi Bezpečnost'), {
             target: { value: ' Bezpečnost agentů ' },
         });
-        fireEvent.click(screen.getByRole('button', { name: 'Uložit text' }));
 
         await waitFor(() =>
             expect(props.onModerateOption).toHaveBeenCalledWith('poll-1', 'member-option', {

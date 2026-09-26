@@ -19,7 +19,7 @@ export function AddContactForm(props: AddContactFormProps) {
         <ContactForm
             fieldNames={CONTACT_DRAFT_FIELD_NAMES}
             initialContactValues={EMPTY_CONTACT_DRAFT}
-            saveButtonLabel="Save Contact"
+            saveButtonLabel="Create Contact"
             onSaveContact={onAddContact}
             onContactSaved={onContactAdded}
         />

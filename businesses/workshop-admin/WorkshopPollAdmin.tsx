@@ -3,8 +3,10 @@
 import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
 import type {
     WorkshopPollCreateValues,
@@ -28,7 +30,6 @@ import {
     LockOpen,
     Minus,
     Pencil,
-    Save,
     Send,
     Trash2,
     Vote,
@@ -83,7 +84,6 @@ type WorkshopPollAdminProps = {
 
 type WorkshopPollFormProps = {
     readonly title: string;
-    readonly submitLabel: string;
     readonly attachableWorkshops: readonly WorkshopAdminSummary[];
     readonly initialValues?: WorkshopPollFormValues;
     readonly onSubmit: (values: WorkshopPollFormValues) => Promise<boolean | readonly WorkshopPollOptionWriteValues[]>;
@@ -154,13 +154,13 @@ function getValidatedPollFormValues(
  */
 function WorkshopPollForm({
     title,
-    submitLabel,
     attachableWorkshops,
     initialValues,
     onSubmit,
     onCancel,
 }: WorkshopPollFormProps) {
     const initialFormValues = initialValues ?? INITIAL_POLL_FORM_VALUES;
+    const isEditing = initialValues !== undefined;
     const [question, setQuestion] = useState(initialFormValues.question);
     const [options, setOptions] = useState(() => createPollDraftOptions(initialFormValues.options));
     const savedOptionIdsReference = useRef(new Map<string, string>());
@@ -172,6 +172,8 @@ function WorkshopPollForm({
     );
     const [formError, setFormError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
+    const isCreatingReference = useRef(false);
+    const requestClose = useAdminEditorClose(onCancel ?? (() => undefined));
 
     const changeOption = (optionIndex: number, nextLabel: string) =>
         setOptions((currentOptions) =>
@@ -198,15 +200,6 @@ function WorkshopPollForm({
             return nextOptions;
         });
 
-    const resetForm = () => {
-        setQuestion(INITIAL_POLL_FORM_VALUES.question);
-        setOptions(createPollDraftOptions(INITIAL_POLL_FORM_VALUES.options));
-        setIsClosed(INITIAL_POLL_FORM_VALUES.isClosed);
-        setIsVisible(INITIAL_POLL_FORM_VALUES.isVisible);
-        setIsOtherOptionEnabled(INITIAL_POLL_FORM_VALUES.isOtherOptionEnabled);
-        setAttachedWorkshopIds(INITIAL_POLL_FORM_VALUES.attachedWorkshopIds);
-    };
-
     const saveValues = async () => {
         const validated = getValidatedPollFormValues(
             question,
@@ -218,6 +211,7 @@ function WorkshopPollForm({
         );
         if (validated.values === null) {
             setFormError(validated.error);
+            if (isEditing) throw new AdminSaveValidationError(validated.error ?? 'Opravte odpovědi ankety.');
             return false;
         }
 
@@ -230,11 +224,9 @@ function WorkshopPollForm({
                 if (option.id !== undefined) savedOptionIdsReference.current.set(options[optionIndex].draftId, option.id);
             });
         }
-        if (initialValues === undefined) resetForm();
         return true;
     };
 
-    const isEditing = initialValues !== undefined;
     const autosave = useAdminAutosave({
         value: { question, options, isClosed, isVisible, isOtherOptionEnabled, attachedWorkshopIds },
         onSave: saveValues, isEnabled: isEditing,
@@ -242,12 +234,14 @@ function WorkshopPollForm({
     const isSaving = isCreating || autosave.isSaving;
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (isEditing) {
-            await autosave.saveNow();
-            return;
-        }
+        if (isEditing || isCreatingReference.current) return;
+        isCreatingReference.current = true;
         setIsCreating(true);
-        try { await saveValues(); } finally { setIsCreating(false); }
+        try { await saveValues(); }
+        finally {
+            isCreatingReference.current = false;
+            setIsCreating(false);
+        }
     };
 
     return (
@@ -256,6 +250,7 @@ function WorkshopPollForm({
                 Otázka
                 <Input
                     value={question}
+                    disabled={isCreating}
                     onChange={(event) => setQuestion(event.target.value)}
                     maxLength={500}
                     placeholder="Například: Kterému tématu se máme věnovat příště?"
@@ -268,6 +263,7 @@ function WorkshopPollForm({
                     <div key={option.draftId} className="flex items-center gap-2">
                         <Input
                             value={option.label}
+                            disabled={isCreating}
                             onChange={(event) => changeOption(optionIndex, event.target.value)}
                             maxLength={200}
                             placeholder={`Možnost ${optionIndex + 1}`}
@@ -311,6 +307,7 @@ function WorkshopPollForm({
                     <input
                         type="checkbox"
                         checked={isVisible}
+                        disabled={isCreating}
                         onChange={(event) => setIsVisible(event.target.checked)}
                         className="h-4 w-4 accent-cyan-600"
                     />
@@ -320,6 +317,7 @@ function WorkshopPollForm({
                     <input
                         type="checkbox"
                         checked={!isClosed}
+                        disabled={isCreating}
                         onChange={(event) => setIsClosed(!event.target.checked)}
                         className="h-4 w-4 accent-cyan-600"
                     />
@@ -329,6 +327,7 @@ function WorkshopPollForm({
                     <input
                         type="checkbox"
                         checked={isOtherOptionEnabled}
+                        disabled={isCreating}
                         onChange={(event) => setIsOtherOptionEnabled(event.target.checked)}
                         className="h-4 w-4 accent-cyan-600"
                     />
@@ -352,14 +351,14 @@ function WorkshopPollForm({
                 </Button>
                 <div className="flex flex-wrap gap-2">
                     {onCancel !== undefined && (
-                        <Button type="button" variant="outline" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>
+                        <Button type="button" variant="outline" disabled={isSaving} onClick={requestClose}>
                             Zavřít
                         </Button>
                     )}
-                    <Button type="submit" disabled={isSaving}>
-                        {isEditing ? <Save className="mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}
-                        {isSaving ? 'Ukládám…' : submitLabel}
-                    </Button>
+                    {!isEditing && <Button type="submit" disabled={isSaving}>
+                        <Send className="mr-2 h-4 w-4" />
+                        {isSaving ? 'Vytvářím…' : 'Vytvořit anketu'}
+                    </Button>}
                 </div>
             </div>
             {formError !== null && <p className="mt-3 text-sm text-red-700">{formError}</p>}
@@ -385,6 +384,7 @@ export function WorkshopPollAdmin({
 }: WorkshopPollAdminProps) {
     const [editingPollId, setEditingPollId] = useState<string | null>(null);
     const [processingPollIds, setProcessingPollIds] = useState<ReadonlySet<string>>(new Set());
+    const deletingPollIdsReference = useRef(new Set<string>());
 
     /**
      * Runs one change of a poll while the whole poll says it is busy, and hands its answer back to whoever asked
@@ -406,12 +406,27 @@ export function WorkshopPollAdmin({
     };
 
     const handleDelete = (poll: WorkshopAdminPoll) => {
+        if (deletingPollIdsReference.current.has(poll.id)) return;
         if (
             window.confirm(
                 `Opravdu trvale smazat anketu „${poll.question}“? Smažou se také všechny její ${isArtificialOptionsShown ? 'skutečné i umělé ' : ''}hlasy.`,
             )
         ) {
-            void runAfterAdminSaves(() => { void runPollAction(poll.id, () => onDelete(poll.id)); });
+            deletingPollIdsReference.current.add(poll.id);
+            setProcessingPollIds((currentPollIds) => new Set(currentPollIds).add(poll.id));
+            const releaseDeletion = () => {
+                deletingPollIdsReference.current.delete(poll.id);
+                setProcessingPollIds((currentPollIds) => {
+                    const nextPollIds = new Set(currentPollIds);
+                    nextPollIds.delete(poll.id);
+                    return nextPollIds;
+                });
+            };
+            void runAfterAdminSaves(() => {
+                void onDelete(poll.id).finally(releaseDeletion);
+            }).then((isActionStarted) => {
+                if (!isActionStarted) releaseDeletion();
+            });
         }
     };
 
@@ -533,7 +548,6 @@ export function WorkshopPollAdmin({
                                     <AdminEditorDialog isOpen onClose={() => setEditingPollId(null)} title="Upravit anketu">
                                         <WorkshopPollForm key={poll.id}
                                             title="Upravit anketu"
-                                            submitLabel="Uložit změny"
                                             attachableWorkshops={attachableWorkshops}
                                             initialValues={createPollUpdateValues(poll)}
                                             onSubmit={(values) => onUpdate(poll.id, values)}
@@ -574,7 +588,6 @@ export function WorkshopPollAdmin({
                     {(closeEditor) => (
                         <WorkshopPollForm
                             title="Nová anketa"
-                            submitLabel="Vytvořit anketu"
                             attachableWorkshops={attachableWorkshops}
                             onSubmit={async (values) => {
                                 const isCreated = await onCreate({

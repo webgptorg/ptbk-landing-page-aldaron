@@ -1,8 +1,8 @@
 'use client';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
-import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { ContactEditableTextFieldName, ContactTextValues } from '@/lib/contacts/Contact';
 import { getContactColumnDefinition } from '@/lib/contacts/contactColumnDefinitions';
 import type { FormEvent } from 'react';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 /**
  * How one contact field is filled in
@@ -41,7 +41,7 @@ const CONTACT_FORM_FIELD_CONTROLS: readonly ContactFormFieldControl[] = [
 type ContactFormProps<FieldName extends ContactEditableTextFieldName> = {
     readonly fieldNames: readonly FieldName[];
     readonly initialContactValues: ContactTextValues<FieldName>;
-    readonly saveButtonLabel: string;
+    readonly saveButtonLabel?: string;
     readonly onSaveContact: (contactValues: ContactTextValues<FieldName>, isContacted: boolean) => Promise<boolean>;
     readonly onContactSaved?: () => void;
     readonly onCancel?: () => void;
@@ -59,7 +59,9 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
     const [contactValues, setContactValues] = useState<ContactTextValues<FieldName>>(initialContactValues);
     const [isContacted, setIsContacted] = useState(initialIsContacted ?? false);
     const [isCreating, setIsCreating] = useState(false);
+    const isCreatingReference = useRef(false);
     const autosave = useAdminAutosave({ value: { contactValues, isContacted }, onSave: () => onSaveContact(contactValues, isContacted), isEnabled: isAutosaveEnabled });
+    const requestClose = useAdminEditorClose(onCancel ?? (() => undefined));
     const isSaving = isCreating || autosave.isSaving;
 
     const shownFieldControls = CONTACT_FORM_FIELD_CONTROLS.filter(
@@ -73,16 +75,20 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
 
     const handleSaveContact = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setIsCreating(!isAutosaveEnabled);
+        if (isAutosaveEnabled || isCreatingReference.current) return;
+        isCreatingReference.current = true;
+        setIsCreating(true);
 
         let isSaved = false;
         try {
-            isSaved = await (isAutosaveEnabled ? autosave.saveNow() : onSaveContact(contactValues, isContacted));
+            isSaved = await onSaveContact(contactValues, isContacted);
         } finally {
+            isCreatingReference.current = false;
             setIsCreating(false);
         }
 
         if (isSaved) {
+            if (!isAutosaveEnabled) autosave.acceptDraftValue();
             onContactSaved?.();
         }
     };
@@ -104,6 +110,7 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
                                 className="w-full"
                                 value={contactValues[fieldControl.fieldName]}
                                 onChange={(event) => changeContactValue(fieldControl.fieldName, event.target.value)}
+                                disabled={!isAutosaveEnabled && isCreating}
                             />
                         ) : (
                             <Input
@@ -111,6 +118,7 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
                                 type={fieldControl.inputType}
                                 value={contactValues[fieldControl.fieldName]}
                                 onChange={(event) => changeContactValue(fieldControl.fieldName, event.target.value)}
+                                disabled={!isAutosaveEnabled && isCreating}
                             />
                         )}
                     </label>
@@ -118,16 +126,16 @@ export function ContactForm<FieldName extends ContactEditableTextFieldName>(prop
             </div>
             {initialIsContacted !== undefined && (
                 <label className="mt-4 flex items-center gap-2 text-sm font-medium">
-                    <input type="checkbox" checked={isContacted} onChange={(event) => setIsContacted(event.target.checked)} /> Contacted
+                    <input type="checkbox" checked={isContacted} onChange={(event) => setIsContacted(event.target.checked)} disabled={!isAutosaveEnabled && isCreating} /> Contacted
                 </label>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
-                <Button type="submit" disabled={isSaving}>
-                    {isSaving ? 'Saving...' : saveButtonLabel}
-                </Button>
+                {!isAutosaveEnabled && <Button type="submit" disabled={isSaving}>
+                    {isSaving ? 'Creating…' : saveButtonLabel ?? 'Vytvořit'}
+                </Button>}
                 {onCancel !== undefined && (
-                    <Button type="button" variant="outline" disabled={isSaving} onClick={() => void runAfterAdminSaves(onCancel)}>
-                        {isAutosaveEnabled ? 'Close' : 'Cancel'}
+                    <Button type="button" variant="outline" disabled={isSaving} onClick={requestClose}>
+                        {isAutosaveEnabled ? 'Zavřít' : 'Zrušit'}
                     </Button>
                 )}
             </div>

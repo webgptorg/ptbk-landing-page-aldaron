@@ -76,7 +76,7 @@ test('autosaves edits in order, protects reload while pending, and waits before 
         releaseFirstSave();
     }
     await expect.poll(() => writes.length).toBe(2);
-    await expect(page.getByText('Změny se ukládají automaticky.', { exact: true })).toBeVisible();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
     expect(writes.map((write) => write.title)).toEqual(['First edit', 'Latest edit']);
     await page.reload();
     await expect(title).toHaveValue('Latest edit');
@@ -101,7 +101,7 @@ test('retains a failed edit and retries it without leaving the settings', async 
     await expect(title).toHaveValue('Keep this edit');
     isSaveAllowed = true;
     await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).last().click();
-    await expect(page.getByText('Změny se ukládají automaticky.', { exact: true })).toBeVisible();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
     await page.reload();
     await expect(title).toHaveValue('Keep this edit');
 });
@@ -117,7 +117,7 @@ test('keeps invalid settings open and saves corrected settings before signing ou
     const title = page.getByLabel('Název', { exact: true });
     await title.fill('');
     await page.getByRole('button', { name: 'Odhlásit se', exact: true }).click();
-    await expect(page.getByText('Změny nejsou uložené. Zkontrolujte vyplněná pole.')).toBeVisible();
+    await expect(page.getByRole('alert').filter({ hasText: 'Opravte vyznačená pole před uložením změn.' })).toBeVisible();
     expect(signOutRequests).toEqual([]);
     expect(writes).toEqual([]);
     await title.fill('Saved before sign-out');

@@ -28,7 +28,7 @@ import {
     getDiscountPlaceLabel,
 } from '@/lib/discounts/discountPlaces';
 import { Loader2, Pencil, TicketPercent, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const CZECH_DATE_TIME_FORMAT = new Intl.DateTimeFormat('cs-CZ', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -91,6 +91,7 @@ export function DiscountCodeAdmin() {
     const [isLoading, setIsLoading] = useState(true);
     const [isDeletingDiscountCodeId, setIsDeletingDiscountCodeId] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const deletingDiscountCodeIdReference = useRef<string | null>(null);
 
     const loadDiscountCodes = useCallback(async (): Promise<boolean> => {
         setIsLoading(true);
@@ -130,14 +131,16 @@ export function DiscountCodeAdmin() {
     };
 
     const handleDelete = async (discountCode: DiscountCode) => {
+        if (deletingDiscountCodeIdReference.current !== null) return;
         const isDeletionConfirmed = window.confirm(`Opravdu chcete trvale smazat slevový kód ${discountCode.code}?`);
         if (!isDeletionConfirmed) {
             return;
         }
-        if (!(await flushAdminSaves())) return;
 
+        deletingDiscountCodeIdReference.current = discountCode.id;
         setIsDeletingDiscountCodeId(discountCode.id);
         try {
+            if (!(await flushAdminSaves())) return;
             await deleteAdminDiscountCode(discountCode.id);
             if (editingDiscountCode?.id === discountCode.id) {
                 setEditingDiscountCode(null);
@@ -146,6 +149,7 @@ export function DiscountCodeAdmin() {
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Slevový kód se nepodařilo smazat.');
         } finally {
+            deletingDiscountCodeIdReference.current = null;
             setIsDeletingDiscountCodeId(null);
         }
     };
@@ -168,7 +172,7 @@ export function DiscountCodeAdmin() {
                 </div>
             </section>
 
-            <Button type="button" onClick={() => { setEditingDiscountCode(null); setIsEditorOpen(true); }}>Nový slevový kód</Button>
+            <Button type="button" onClick={() => void runAfterAdminSaves(() => { setEditingDiscountCode(null); setIsEditorOpen(true); })}>Nový slevový kód</Button>
             <AdminEditorDialog isOpen={isEditorOpen} onClose={() => setIsEditorOpen(false)} title={editingDiscountCode === null ? 'Nový slevový kód' : `Upravit slevový kód: ${editingDiscountCode.code}`} errorMessage={errorMessage}>
                 {isEditorOpen && <DiscountCodeForm
                     key={editingDiscountCode?.id ?? 'new'}

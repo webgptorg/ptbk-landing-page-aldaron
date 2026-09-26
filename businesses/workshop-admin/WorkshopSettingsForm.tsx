@@ -16,7 +16,7 @@ import { WorkshopReactionAnimationPreview } from '@/businesses/workshop-admin/Wo
 import { DurationPicker } from '@/components/admin/DurationPicker';
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
-import { Button } from '@/components/ui/button';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
@@ -32,8 +32,7 @@ import {
     type WorkshopPrimaryStageContent,
 } from '@/lib/workshops/workshopPrimaryStageContent';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
-import { Save } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * An explicit end action retains its exact timestamp through the shared settings save.
@@ -116,9 +115,9 @@ export function WorkshopSettingsForm({
      */
     const saveWorkshop = async () => {
         const startsAtIso = fromDateTimeLocalValue(startsAt);
-        if (!title.trim() || (isSlugOffered && !slug.trim()) || (roomCapabilities.isScheduled && !startsAtIso)) {
-            return false;
-        }
+        if (!title.trim()) throw new AdminSaveValidationError('Název místnosti nesmí být prázdný.');
+        if (isSlugOffered && !slug.trim()) throw new AdminSaveValidationError('Adresa místnosti nesmí být prázdná.');
+        if (roomCapabilities.isScheduled && !startsAtIso) throw new AdminSaveValidationError('Vyberte platný začátek workshopu.');
 
         return onSave({
             title,
@@ -158,13 +157,8 @@ export function WorkshopSettingsForm({
     const isSaving = autosave.isSaving;
     const runningSave = isSaving ? selectedEnd?.action ?? 'settings' : null;
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        void autosave.saveNow();
-    };
-
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} aria-label={`Nastavení ${subjectLabel}`} className="space-y-5">
+        <form ref={autosave.formRef} onSubmit={(event) => event.preventDefault()} aria-label={`Nastavení ${subjectLabel}`} className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <p className="mt-1 text-xs text-slate-400">
@@ -377,10 +371,6 @@ export function WorkshopSettingsForm({
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 <AdminAutosaveStatus {...autosave} />
-                <Button type="submit" disabled={isSaving}>
-                    <Save className="mr-2 h-4 w-4" />
-                    {runningSave === 'settings' ? 'Ukládám…' : 'Uložit nastavení'}
-                </Button>
             </div>
         </form>
     );

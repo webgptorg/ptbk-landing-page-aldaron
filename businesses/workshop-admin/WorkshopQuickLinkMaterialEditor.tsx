@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { JsonRequestError } from '@/lib/api/requestJson';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
+import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { createWorkshopContentDefaults } from '@/lib/workshops/workshopContentDefaults';
 import {
     createWorkshopQuickLinkMarkdown,
@@ -84,6 +85,10 @@ export function WorkshopQuickLinkMaterialEditor({
     const isBatchTooLarge = inputRows.filter((row) => row.issue === null).length > MAXIMAL_WORKSHOP_QUICK_LINK_COUNT;
     const isInputInvalid = inputRows.some((row) => row.issue === 'invalid');
     const destinationSignature = entries.map((entry) => `${entry.id}:${entry.destination}`).join('\n');
+    useAdminDraftProtection({
+        input,
+        entries: entries.map(({ id, destination, titleCorrection }) => ({ id, destination, titleCorrection })),
+    });
 
     const changeInput = (value: string) => {
         setInput(value);

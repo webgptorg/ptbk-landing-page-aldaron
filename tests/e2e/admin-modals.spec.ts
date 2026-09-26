@@ -59,7 +59,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 720 
         await expect.poll(() => contacts[0].isContacted).toBe(true);
         await expect.poll(() => contacts[0].ourNote).toBe('Note edited in a modal');
         await page.screenshot({ path: testInfo.outputPath('contact-editor.png') });
-        await dialog.getByRole('button', { name: 'Close', exact: true }).last().click();
+        await dialog.getByRole('button', { name: 'Zavřít', exact: true }).last().click();
         await expect(dialog).toHaveCount(0);
         await expect(opener).toBeFocused();
 
@@ -68,7 +68,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 720 
         await creation.getByLabel('Full Name', { exact: true }).fill('New Contact');
         await creation.getByLabel('Email', { exact: true }).fill('new@example.com');
         expect(contacts).toHaveLength(1);
-        await creation.getByRole('button', { name: 'Save Contact', exact: true }).click();
+        await creation.getByRole('button', { name: 'Create Contact', exact: true }).click();
         await expect(creation).toHaveCount(0);
         expect(contacts).toHaveLength(2);
     });

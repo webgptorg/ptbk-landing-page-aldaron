@@ -1,8 +1,9 @@
 'use client';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
-import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
 import { ShortcodeLinkUrlListInput } from '@/components/shortener/ShortcodeLinkUrlListInput';
 import { Button } from '@/components/ui/button';
@@ -14,8 +15,8 @@ import {
     type ShortcodeLink,
     type ShortcodeLinkValues,
 } from '@/lib/shortener/shortcodeLink';
-import { Save, X } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { X } from 'lucide-react';
+import { useState } from 'react';
 
 const LANDING_PAGE_PLACEHOLDER = '# Title\n> Description shown when the link is shared\n\n[Go to link](#url)';
 
@@ -41,6 +42,7 @@ function createShortcodeLinkValues(shortcodeLink: ShortcodeLink): ShortcodeLinkV
 export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }: ShortcodeLinkEditFormProps) {
     const [values, setValues] = useState<ShortcodeLinkValues>(() => createShortcodeLinkValues(shortcodeLink));
     const [validationError, setValidationError] = useState<string | null>(null);
+    const requestClose = useAdminEditorClose(onCancelEditing);
 
     const updateValue = <TField extends keyof ShortcodeLinkValues>(
         field: TField,
@@ -52,12 +54,14 @@ export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }
     const saveValues = async () => {
         const filledUrls = values.urls.map((url) => url.trim()).filter((url) => url !== '');
         if (filledUrls.length === 0) {
-            setValidationError('Please enter at least one URL');
-            return false;
+            const errorMessage = 'Please enter at least one URL';
+            setValidationError(errorMessage);
+            throw new AdminSaveValidationError(errorMessage);
         }
         if (!filledUrls.every(isAbsoluteUrl)) {
-            setValidationError('Every URL must be a valid absolute URL');
-            return false;
+            const errorMessage = 'Every URL must be a valid absolute URL';
+            setValidationError(errorMessage);
+            throw new AdminSaveValidationError(errorMessage);
         }
 
         setValidationError(null);
@@ -66,20 +70,15 @@ export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }
 
     const autosave = useAdminAutosave({ value: values, onSave: saveValues });
     const isSaving = autosave.isSaving;
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        void autosave.saveNow();
-    };
-
     return (
-        <form ref={autosave.formRef} onSubmit={handleSubmit} className="space-y-5">
+        <form ref={autosave.formRef} onSubmit={(event) => event.preventDefault()} className="space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <p className="mt-1 text-sm text-slate-500">
                         Renaming the shortcode changes the public address, so links already handed out stop working.
                     </p>
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={() => void runAfterAdminSaves(onCancelEditing)} disabled={isSaving}>
+                <Button type="button" variant="outline" size="sm" onClick={requestClose} disabled={isSaving}>
                     <X className="mr-2 h-4 w-4" /> Close
                 </Button>
             </div>
@@ -141,10 +140,6 @@ export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 <AdminAutosaveStatus {...autosave} />
-                <Button type="submit" disabled={isSaving}>
-                    <Save className="mr-2 h-4 w-4" />
-                    {isSaving ? 'Saving…' : 'Save changes'}
-                </Button>
             </div>
         </form>
     );

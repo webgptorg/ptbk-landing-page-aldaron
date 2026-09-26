@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { getRecordingErrorMessage } from '@/lib/recording-studio/recordingStudioDevices';
 import type { RecordingSourceKind } from '@/lib/recording-studio/recordingStudioTypes';
 import { useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ export function RecordingSourcePicker({ onAdd, onClose }: {
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
     const [isAdding, setIsAdding] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    useAdminDraftProtection({ kind, deviceId });
     useEffect(() => {
         void navigator.mediaDevices.enumerateDevices().then(setDevices).catch(() => undefined);
     }, []);
