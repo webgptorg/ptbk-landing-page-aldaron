@@ -82,8 +82,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   is made in the browser; the page itself is built in the order the draw leans
   towards, from the most often named person to the least often named one, so the
   browser hydrates into the list it was sent.
-  Collaboration submissions use `/admin/contacts`. Its tab icon is the page's
-  own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are
+  Collaboration submissions use `/admin/contacts`. The homepage also offers an
+  email-only request for AI ta Krajta episode and show updates through
+  `/api/waitlist`, with its own contact source and purpose note. The source
+  filter and exports retain that source alongside any collaboration history for
+  the same email; this collects requests without sending campaigns. Privacy
+  links point to the canonical Promptbook legal page. The podcast tab icon uses
+  the page's own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are
   rounded and transparent, while the raster fills its square. That drawing is
   traced off the cover artwork of the show and recorded once in
   `businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork.ts`, together with the

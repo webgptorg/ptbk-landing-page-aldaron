@@ -47,6 +47,10 @@ export type ContactOriginSelection = ContactAppNameSelection | ContactPlaceNameS
  */
 export const EMPTY_CONTACT_ORIGIN_SELECTIONS: readonly ContactOriginSelection[] = [];
 
+type ContactWithAdminContactGroup = Contact & {
+    readonly contactGroup?: { readonly contacts: readonly Contact[] } | null;
+};
+
 /**
  * Compares names in the order users expect, including numbers and diacritics
  */
@@ -59,6 +63,15 @@ function normalizeContactOriginName(originName: ContactOriginName): ContactOrigi
     const normalizedOriginName = originName?.trim();
 
     return normalizedOriginName === '' || normalizedOriginName === undefined ? null : normalizedOriginName;
+}
+
+/**
+ * Read every stored contact source behind an identity merged for administration
+ */
+function getContactOriginSourceContacts(contact: Contact): readonly Contact[] {
+    const sourceContacts = (contact as ContactWithAdminContactGroup).contactGroup?.contacts;
+
+    return sourceContacts === undefined || sourceContacts.length === 0 ? [contact] : sourceContacts;
 }
 
 /**
@@ -97,11 +110,13 @@ export function getContactOriginGroups(contacts: readonly Contact[]): ContactOri
     const placeNamesByAppName = new Map<ContactOriginName, Set<ContactOriginName>>();
 
     for (const contact of contacts) {
-        const { appName, placeName } = getContactOrigin(contact);
-        const placeNames = placeNamesByAppName.get(appName) ?? new Set<ContactOriginName>();
+        for (const sourceContact of getContactOriginSourceContacts(contact)) {
+            const { appName, placeName } = getContactOrigin(sourceContact);
+            const placeNames = placeNamesByAppName.get(appName) ?? new Set<ContactOriginName>();
 
-        placeNames.add(placeName);
-        placeNamesByAppName.set(appName, placeNames);
+            placeNames.add(placeName);
+            placeNamesByAppName.set(appName, placeNames);
+        }
     }
 
     return Array.from(placeNamesByAppName, ([appName, placeNames]) => ({
@@ -297,11 +312,13 @@ export function matchesContactOriginSelections(
         return true;
     }
 
-    const contactOrigin = getContactOrigin(contact);
+    return getContactOriginSourceContacts(contact).some((sourceContact) => {
+        const contactOrigin = getContactOrigin(sourceContact);
 
-    return selections.some(
-        (selection) =>
-            selection.appName === contactOrigin.appName &&
-            (isContactAppNameSelection(selection) || selection.placeName === contactOrigin.placeName),
-    );
+        return selections.some(
+            (selection) =>
+                selection.appName === contactOrigin.appName &&
+                (isContactAppNameSelection(selection) || selection.placeName === contactOrigin.placeName),
+        );
+    });
 }

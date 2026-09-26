@@ -428,3 +428,14 @@ export function createAiTaKrajtaMediaKitCollaborationPath(
  * Name under which requests from this page arrive in the shared contacts inbox at `/admin/contacts`
  */
 export const AI_TA_KRAJTA_COLLABORATION_PLACE_NAME = 'AiTaKrajtaSpoluprace';
+
+/**
+ * Name under which requests for AI ta Krajta email updates arrive in the shared contacts inbox
+ */
+export const AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME = 'AiTaKrajtaEmailSubscription';
+
+/**
+ * Private contact note which records the exact email-update request, without enrolling unrelated contacts
+ */
+export const AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE =
+    'Žádost o e-mailové novinky a nové díly podcastu AI ta Krajta.';

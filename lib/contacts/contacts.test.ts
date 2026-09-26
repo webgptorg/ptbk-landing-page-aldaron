@@ -28,9 +28,13 @@ import {
     parseContactsPerPage,
 } from './paginateContacts';
 import { getContactLink } from './contactLinks';
-import { serializeContactsAsCsv } from './serializeContactsAsCsv';
+import { serializeAdminJoinedContactsAsCsv, serializeContactsAsCsv } from './serializeContactsAsCsv';
 import { serializeContactsAsVcard } from './serializeContactsAsVcard';
 import { DEFAULT_CONTACTS_SORT_STATE, sortContacts, toggleContactsSortState } from './sortContacts';
+import {
+    AI_TA_KRAJTA_COLLABORATION_PLACE_NAME,
+    AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
+} from '@/businesses/ai-ta-krajta/config';
 import type { WorkshopRegistrationTerm } from '@/lib/workshops/workshopRegistrations';
 
 /**
@@ -307,6 +311,59 @@ describe('contact origins', () => {
             { appName: 'Podcast', placeNames: ['Episode page'] },
             { appName: null, placeNames: ['Imported'] },
         ]);
+    });
+
+    it('filters and exports every source in a grouped identity without losing collaboration history', () => {
+        const newerCollaborationContact = buildContact({
+            id: 21,
+            email: 'listener@example.com',
+            userNote: 'Zájem o partnerství',
+            appName: 'Landing page',
+            placeName: AI_TA_KRAJTA_COLLABORATION_PLACE_NAME,
+        });
+        const olderEmailSubscriptionContact = buildContact({
+            id: 19,
+            email: 'listener@example.com',
+            userNote: 'Žádost o e-mailové novinky a nové díly podcastu AI ta Krajta.',
+            appName: 'Landing page',
+            placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
+        });
+        const groupedContact = {
+            ...newerCollaborationContact,
+            contactGroup: {
+                normalizedEmail: 'listener@example.com',
+                contacts: [newerCollaborationContact, olderEmailSubscriptionContact],
+                workshopParticipations: [],
+                workshopFeedbacks: [],
+            },
+        };
+
+        expect(getContactOriginGroups([groupedContact])).toEqual([
+            {
+                appName: 'Landing page',
+                placeNames: [AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME, AI_TA_KRAJTA_COLLABORATION_PLACE_NAME],
+            },
+        ]);
+
+        const emailSubscriptionContacts = filterContacts([groupedContact], {
+            ...EMPTY_CONTACTS_FILTER,
+            contactOriginSelections: [
+                { appName: 'Landing page', placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME },
+            ],
+        });
+        const collaborationContacts = filterContacts([groupedContact], {
+            ...EMPTY_CONTACTS_FILTER,
+            contactOriginSelections: [
+                { appName: 'Landing page', placeName: AI_TA_KRAJTA_COLLABORATION_PLACE_NAME },
+            ],
+        });
+        const exportedContacts = serializeAdminJoinedContactsAsCsv(emailSubscriptionContacts);
+
+        expect(emailSubscriptionContacts).toHaveLength(1);
+        expect(collaborationContacts).toHaveLength(1);
+        expect(exportedContacts).toContain(AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME);
+        expect(exportedContacts).toContain(AI_TA_KRAJTA_COLLABORATION_PLACE_NAME);
+        expect(exportedContacts).toContain('Zájem o partnerství');
     });
 
     it('normalizes duplicate and overlapping selections before matching or sharing them', () => {
