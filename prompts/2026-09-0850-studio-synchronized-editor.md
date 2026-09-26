@@ -1,0 +1,41 @@
+[ ]
+
+[✨🎞️] Open recordings in a synchronized multi-track preparation editor instead of a collection of independent videos
+
+- Replace the current recording-detail modal's disconnected video players and crop fields with a proper timeline-based workspace. This is a **source-preparation tool for a professional editor**, NOT a final-video compositor.
+- Preserve each source as a separate asset. The end result is a package of synchronized camera, screen and audio files, with edit/timing metadata where needed. Do not flatten sources into one video, burn in a chosen layout, or interpret solo/hidden preview states as permission to discard source files.
+- Analyze the existing recording model, storage, IDs, crop/export code and routes first. Reuse the current studio and the implementation originating from `prompts/2026-09-0440-admin-recording-studio.md`; exact current entry points must be discovered, not invented.
+- Give each recording/project a stable unique ID and a dedicated admin workspace address containing that ID.
+    - Reuse existing stable IDs where available and migrate older records non-destructively. Open/refresh/back navigation must resolve the same recording and saved edit state, not depend on the old modal remaining mounted.
+    - Keep administrative authorization. If media is browser-local, the URL identifies local data; it does not make that media available on another machine. Show an honest missing-local-media state rather than fabricating an empty recording.
+    - Reuse one workspace shell for setup/recording and editing modes. This prompt establishes the editing/timeline foundation; [live monitoring, pause and append](2026-09-0860-studio-monitoring-pause-and-append.md) extend it.
+- Use one session clock, one playhead and one coordinated transport for all sources.
+    - Show a lane for each video/audio source on the same time ruler, with useful names, visual thumbnails/waveforms, zoom/scroll and a current-time display suitable for ten-hour sessions.
+    - Play, pause, seek, scrub and speed changes affect the common session time, not one independent player. Do not expose native controls that let one source play at minute 10 while another plays at minute 5.
+    - Source-local media time must map through recorded offsets/segments to session time. Different recorder startup delays, encoder durations or interruptions must not be silently treated as identical timestamp zero.
+    - A single master transport must coordinate asynchronous seeks/buffering and correct drift. Do not consider calling `play()` on several elements in a loop sufficient evidence of synchronization.
+    - Hide/show and solo controls change monitoring only. Hidden lanes/sources still retain their timeline position and data. Re-showing a source joins the current playhead, not its stale private time.
+    - Separate visual visibility from audio mute/solo. Avoid default echo from previewing both a camera's microphone audio and a duplicate standalone feed; this monitoring choice never deletes the recorded audio.
+    - Missing, short or corrupt source ranges are visibly represented as unavailable at that time. Never slide later content left to conceal a gap or keep displaying a stale frame as if it were current.
+- Implement non-destructive trimming on the shared timeline.
+    - The owner's primary need is time-based cropping/trimming using draggable in/out handles with optional precise numeric input, not a separate start/end field under every independent video.
+    - One session selection applies to ALL exported sources so the prepared files represent the same real-world interval. Prevent per-track edits from introducing unnoticed offsets or independent ripple timing.
+    - Distinguish temporal trim from spatial image crop. Preserve any existing spatial-crop capability, keep it per video source, and do not conflate its rectangle with timeline duration.
+    - Keep original raw media intact; persist an edit recipe with explicit original-to-edited time mapping and undo/reset. Autosave edit metadata with real saving/error feedback; do not silently save giant media copies on every handle movement.
+    - Initial scope requires a common in/out range. Multi-cut ripple editing, transitions, color grading and a full professional NLE are not prerequisites for this task.
+- Export usable separate-source deliverables.
+    - Export one prepared file per source over the same selected interval, preserving each source's audio where present, filenames/IDs and appropriate quality. Also retain access to original recordings and their edit recipe.
+    - Include a versioned manifest describing session identity, source IDs/kinds, source-to-session offsets, selected interval, missing ranges and any processing applied. Define time units and distinguish source/original time from prepared-export time zero.
+    - Match the UI's declared boundaries. Container/keyframe limitations must be handled with supported remux/transcode behavior or disclosed and consistent output timing, not different invisible trim rounding per source.
+    - Never call a metadata-only recipe a successfully trimmed video file. If a supported processing path is unavailable, explain the limitation and provide originals plus the explicit recipe as a labelled fallback.
+    - Stream large outputs or export files individually as appropriate. Avoid constructing one entire ten-hour multi-source archive in RAM; reuse [storage capacity/recovery](2026-09-0810-studio-storage-capacity.md). Support cancellation/retry without destroying originals.
+    - Hidden/solo preview choices do not affect which sources are exported by default. Any intentional exclusion from export is a separate, explicit choice.
+- Acceptance criteria:
+    - With screen, camera+audio and standalone audio, seek to several points including late in a long session; every playable source reflects the same session moment.
+    - Use a known timecode/clap fixture to measure startup alignment, seeking and drift, including differing frame rates and delayed/buffering sources. Set and document a measurable supported tolerance (target at most 100 ms after seek settles), rather than claiming mathematical simultaneity across browser decoders.
+    - Trim a common interval, export all sources and inspect real media durations/content in an external player/editor; confirm common timing, preserved audio and readable metadata.
+    - Test hide/solo/mute, failure/recovery, reload/deep link, legacy recordings, absent local media, long timelines, keyboard interaction and responsive layout.
+    - The reported workflow is macOS; verify there and regression-test supported Windows/other platforms. Unavailable hardware/browser tests must be reported as not run.
+- Keep in mind the DRY _(don't repeat yourself)_ principle. Share the session-time model with recording, source configuration and generated metadata tracks.
+- Do an analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](../changelog/_current-preversion.md).

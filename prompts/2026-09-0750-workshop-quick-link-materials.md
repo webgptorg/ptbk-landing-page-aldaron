@@ -37,3 +37,30 @@
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
 
+
+---
+
+[ ]
+
+[✨🔗] Keep quick-link material content as exactly the original pasted URL
+
+- Follow-up to the implemented quick-link material feature in THIS file. Title scraping and creation of one material per pasted URL already work according to the owner. Make only the small content-generation correction below; do not reimplement that feature.
+- Keep the scraped page title as the material's title, including the current useful fallback/title-edit behavior.
+- The material body supplied to the existing material-creation pipeline must contain ONLY the original URL entered for that material.
+    - No repeated title, Markdown link `[title](url)`, angle-bracket autolink `<url>`, list marker, code fence, explanatory sentence or generated preview markup.
+    - Trim only surrounding whitespace used to separate input lines. Preserve the URL's path, meaningful query string, percent encoding and fragment; do not replace it with a scraper redirect target or canonical URL.
+    - For multiple input links, produce one material per accepted URL in the existing order; each body contains only its own original URL.
+- This intentionally supersedes the earlier requirement in this file to generate a normal Markdown link as content. Preserve the previous prompt's completed status and history; append this as a new independently tracked section rather than rewriting the original specification.
+- Example: after a page at `https://example.com/article?ref=workshop#demo` yields the title `Example article`, the title is `Example article` and the complete generated body is the literal string `https://example.com/article?ref=workshop#demo`.
+- Let the existing downstream link extraction, short-link/tracking, preview and QR components handle presentation. Do not add a second linkification/scraping pass, disable tracking, or turn existing branded preview cards back into plain text.
+    - Verify where raw body generation ends and existing link processing begins. Test exact original-URL equality at that generation boundary; do not bypass the established downstream pipeline merely to force equality after it has intentionally transformed a link.
+    - Ensure bare URLs enter that shared pipeline correctly. Correct a genuine plain-URL handling gap in the shared helper if necessary, rather than wrapping the URL in new Markdown to work around it.
+- No automatic rewrite of previously created or manually edited materials is requested.
+- Acceptance criteria:
+    - A single URL creates the expected scraped title and a raw body equal to the trimmed original URL, with no Markdown wrapper or duplicate title.
+    - Two distinct URLs produce two materials with their own scraped titles and original-URL bodies. Include query strings/fragments and characters that previously required Markdown escaping.
+    - Metadata failure still uses the existing title fallback while retaining the original URL. Existing tracking, previews and QR behavior work with the resulting material.
+    - Full/manual material editing and old material content remain unchanged.
+- Keep in mind the DRY _(don't repeat yourself)_ principle.
+- Do an analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](../changelog/_current-preversion.md).
