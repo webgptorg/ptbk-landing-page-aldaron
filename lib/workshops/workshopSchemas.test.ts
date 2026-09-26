@@ -108,6 +108,16 @@ describe('workshop request validation', () => {
         });
     });
 
+    it('defaults new and existing workshop writes to video and accepts only the three stage source choices', () => {
+        expect(workshopCreateSchema.parse(VALID_WORKSHOP).primaryStageContent).toBe('video');
+        expect(workshopCreateSchema.parse({ ...VALID_WORKSHOP, primaryStageContent: 'presentation' }).primaryStageContent)
+            .toBe('presentation');
+        expect(workshopUpdateSchema.parse({ primaryStageContent: 'repository' })).toEqual({
+            primaryStageContent: 'repository',
+        });
+        expect(workshopUpdateSchema.safeParse({ primaryStageContent: 'materials' }).success).toBe(false);
+    });
+
     it('accepts the attached poll source from an already loaded duplicate form', () => {
         expect(
             workshopCreateSchema.parse({

@@ -184,6 +184,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Shared community and workshop behavior
 
+- Workshop occurrences choose video, presentation, or their connected repository as the primary stage source. Old
+  data defaults to video; the choice never changes which sources are stored. The countdown and wrap-up still follow
+  `workshopPhase.ts`, and other readable sources remain supplementary special materials with recording access chosen
+  by the server. Permanent room kinds which have no stage remain without one.
+
 - Community and workshop participant rooms, including waiting rooms and community project views, share light,
   dark, and device appearance through `WorkshopRoomThemeProvider` and `workshopRoomTheme.css`. The browser remembers
   the choice across rooms and tabs; changing it preserves form and room state. Room palette tokens also reach
@@ -245,9 +250,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - Community projects use a URL-first metadata wizard. Ordinary submissions await
   AI or manual moderation; trusted members and moderators are approved immediately. Pending
   projects remain visible to their author and moderators.
-- A live workshop room has countdown, YouTube stage, reactions, watching count,
-  moderated chat, timed materials, and attached poll aggregates. An open-ended
-  term runs until its recorded end; its stage does not end automatically. Admins
+- A live workshop room has a countdown before it starts and, while it runs, the
+  event's selected primary stage content: video, presentation, or the connected
+  repository. Existing and unset choices mean video. Other configured sources
+  stay in the shared special-material list, with recordings still selected by
+  the server's member access rule. After the recorded end, the stage returns to
+  the wrap-up. Permanent rooms such as the community do not gain a stage. The
+  room also has reactions, watching count, moderated chat, timed materials, and
+  attached poll aggregates. An open-ended term runs until its recorded end; its
+  stage does not end automatically. Admins
   can select, replace, clear, or create the displayed comment through the same
   private realtime channel used by reactions.
 - Workshop and community chat can use reusable Book agents, administered in their shared Agents tab with

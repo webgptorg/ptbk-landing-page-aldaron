@@ -3,6 +3,7 @@
 import { WorkshopWrapUp } from '@/businesses/online-workshop/participant/WorkshopWrapUp';
 import { WorkshopStageComment } from '@/businesses/online-workshop/participant/WorkshopStageComment';
 import { WorkshopRepositoryCommitNotification } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitNotification';
+import { WorkshopPresentationStage } from '@/businesses/online-workshop/participant/WorkshopPresentationStage';
 import { useWorkshopRepositoryCommitNotification } from '@/businesses/online-workshop/participant/useWorkshopRepositoryCommitNotification';
 import type { SubscribeToWorkshopReactions } from '@/businesses/online-workshop/participant/useWorkshopReactionAnimations';
 import type { WorkshopFeedbackValues } from '@/businesses/online-workshop/participant/workshopParticipantApi';
@@ -12,6 +13,11 @@ import { trackGoogleAnalyticsEvent } from '@/lib/tracking/track-google-analytics
 import { createYoutubeEmbedUrl } from '@/lib/youtube/youtubeEmbed';
 import { keepYoutubeVideoSubtitlesHidden, unmuteYoutubeVideo } from '@/lib/youtube/youtubePlayerCommands';
 import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
+import {
+    getWorkshopPrimaryStageContentLabel,
+    normalizeWorkshopPrimaryStageContent,
+    type WorkshopPrimaryStageContent,
+} from '@/lib/workshops/workshopPrimaryStageContent';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import type {
@@ -40,6 +46,8 @@ type WorkshopStageProps = {
 
     /** The project connected to this workshop, if there is one */
     readonly repository?: WorkshopRepository | null;
+    /** The existing project panel, shared between the main stage and supplementary material placement. */
+    readonly repositoryPanel?: ReactNode | null;
 
     /** Offers the stage commits found by the repository monitor or its polling fallback */
     readonly subscribeToRepositoryCommits?: SubscribeToWorkshopRepositoryCommits;
@@ -83,6 +91,53 @@ function requestVideoFullscreen(videoFrame: HTMLIFrameElement | null): void {
     void requestFullscreen.call(videoFrame).catch(() => undefined);
 }
 
+function WorkshopPrimarySourceUnavailable({
+    primaryStageContent,
+    isConfigured = false,
+    fallbackUrl,
+}: {
+    readonly primaryStageContent: WorkshopPrimaryStageContent;
+    readonly isConfigured?: boolean;
+    readonly fallbackUrl?: string;
+}) {
+    const message = primaryStageContent === 'video'
+        ? isConfigured
+            ? { title: 'Video se nepodařilo načíst', description: 'Zkuste video otevřít přímo na YouTube.' }
+            : { title: 'Video zatím není nastavené', description: 'Na hlavní stage se zatím žádné video nepřehrává.' }
+        : primaryStageContent === 'presentation'
+          ? isConfigured
+              ? { title: 'Prezentaci se nepodařilo načíst', description: 'Zkuste ji otevřít přímo z jejího zdroje.' }
+              : { title: 'Prezentace není nastavená', description: 'Na hlavní stage zatím není připojená prezentace.' }
+          : isConfigured
+            ? { title: 'Projekt se nepodařilo načíst', description: 'Odkazy k projektu jsou dostupné v jeho panelu.' }
+            : { title: 'Repozitář není připojený', description: 'Na hlavní stage zatím není připojený projekt workshopu.' };
+
+    return (
+        <div role="status" className="grid min-h-[320px] place-items-center bg-[radial-gradient(circle_at_center,rgba(48,168,189,.12),transparent_55%)] px-6 py-10 text-center sm:min-h-[400px]">
+            <div className="max-w-lg">
+                <Radio className="mx-auto h-10 w-10 text-room-accent" aria-hidden="true" />
+                <h2 className="mt-4 text-2xl font-bold text-room-heading">{message.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-room-muted">{message.description}</p>
+                {fallbackUrl !== undefined && (
+                    <a
+                        href={fallbackUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex rounded-full border border-room-accent/30 bg-room-accent/10 px-4 py-2 text-sm font-semibold text-room-accent hover:bg-room-accent/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent"
+                    >
+                        Otevřít video na YouTube
+                    </a>
+                )}
+                <p className="mt-4 rounded-xl border border-room-warning/30 bg-room-warning/10 px-4 py-3 text-sm leading-6 text-room-warning">
+                    {isConfigured
+                        ? 'Upozornění pro administrátora: zkontrolujte dostupnost připojeného zdroje.'
+                        : 'Upozornění pro administrátora: zkontrolujte nastavení hlavního obsahu workshopu.'}
+                </p>
+            </div>
+        </div>
+    );
+}
+
 const refuseStandaloneFeedbackSave = async (): Promise<boolean> => false;
 
 export function WorkshopStage({
@@ -90,6 +145,7 @@ export function WorkshopStage({
     serverTime,
     subscribeToReactions,
     repository = null,
+    repositoryPanel = null,
     subscribeToRepositoryCommits,
     feedback = null,
     followUpContentBlock = null,
@@ -102,12 +158,22 @@ export function WorkshopStage({
     const serverClockOffset = useMemo(() => Date.parse(serverTime) - Date.now(), [serverTime]);
     const [currentTime, setCurrentTime] = useState(() => Date.now() + serverClockOffset);
     const [isVideoUnmuted, setIsVideoUnmuted] = useState(false);
+    const [isVideoEmbedUnavailable, setIsVideoEmbedUnavailable] = useState(false);
+    const [isPrimarySourceOpen, setIsPrimarySourceOpen] = useState(false);
     const videoFrameReference = useRef<HTMLIFrameElement>(null);
     const { flyingReactions, launchReaction } = useWorkshopReactionStream();
 
     const phase = getWorkshopPhase(workshop, currentTime);
     const isWorkshopOngoing = phase === 'ongoing';
     const isWorkshopPast = isWorkshopPhasePast(phase);
+    const primaryStageContent = normalizeWorkshopPrimaryStageContent(workshop.primaryStageContent);
+    const isVideoPrimary = primaryStageContent === 'video';
+    const isVideoStageActive = isWorkshopOngoing && isVideoPrimary;
+    const isPrimarySourceAvailable = primaryStageContent === 'video'
+        ? workshop.youtubeVideoId !== null || paidMembersOnlyVideo !== null
+        : primaryStageContent === 'presentation'
+          ? workshop.presentationUrl !== null
+          : repository !== null;
     const remainingMilliseconds = Date.parse(workshop.startsAt) - currentTime;
     const newRepositoryCommit = useWorkshopRepositoryCommitNotification({
         workshopSlug: workshop.slug,
@@ -127,6 +193,11 @@ export function WorkshopStage({
         }
     }, [isVideoRewatchOffered]);
 
+    useEffect(() => {
+        setIsPrimarySourceOpen(false);
+        setIsVideoRewatchShown(false);
+    }, [primaryStageContent]);
+
     useEffect(() => subscribeToReactions(launchReaction), [launchReaction, subscribeToReactions]);
 
     useEffect(() => {
@@ -138,17 +209,64 @@ export function WorkshopStage({
         return () => window.clearInterval(intervalId);
     }, [serverClockOffset]);
 
-    useEffect(() => setIsVideoUnmuted(false), [workshop.youtubeVideoId]);
+    useEffect(() => {
+        setIsVideoUnmuted(false);
+        setIsVideoEmbedUnavailable(false);
+    }, [workshop.youtubeVideoId, primaryStageContent]);
 
     useEffect(() => {
-        if (workshop.youtubeVideoId === null || !isWorkshopOngoing) {
+        if (workshop.youtubeVideoId === null || !isVideoStageActive) {
             return;
         }
 
         return keepYoutubeVideoSubtitlesHidden(videoFrameReference.current);
-    }, [workshop.youtubeVideoId, isWorkshopOngoing]);
+    }, [workshop.youtubeVideoId, isVideoStageActive]);
 
     const countdownSegments = getRemainingSegments(remainingMilliseconds);
+    const isVideoRewatchVisible = isVideoRewatchShown && isVideoPrimary && workshop.youtubeVideoId !== null;
+    const isPrimarySourceVisible = isPrimarySourceOpen && !isVideoPrimary;
+    const ongoingPrimaryStageContent = primaryStageContent === 'video' ? (
+        <div className="relative min-w-0 w-full max-w-full min-h-[220px] aspect-video sm:min-h-[260px]">
+            {workshop.youtubeVideoId !== null && !isVideoEmbedUnavailable ? (
+                <iframe
+                    ref={videoFrameReference}
+                    className="absolute inset-0 h-full w-full"
+                    src={createYoutubeEmbedUrl(workshop.youtubeVideoId, {
+                        isAutoplayed: true,
+                        isMuted: true,
+                        isInlinePlayback: true,
+                        isRelatedVideoEnabled: false,
+                        isControlsVisible: false,
+                        isCaptionsEnabled: false,
+                        isJavaScriptApiEnabled: true,
+                    })}
+                    title={workshop.title}
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    onError={() => setIsVideoEmbedUnavailable(true)}
+                />
+            ) : (
+                <WorkshopPrimarySourceUnavailable
+                    primaryStageContent="video"
+                    isConfigured={workshop.youtubeVideoId !== null}
+                    fallbackUrl={workshop.youtubeVideoId === null ? undefined : `https://www.youtube.com/watch?v=${encodeURIComponent(workshop.youtubeVideoId)}`}
+                />
+            )}
+        </div>
+    ) : primaryStageContent === 'presentation' ? (
+        workshop.presentationUrl === null ? (
+            <WorkshopPrimarySourceUnavailable primaryStageContent="presentation" />
+        ) : (
+            <WorkshopPresentationStage presentationUrl={workshop.presentationUrl} />
+        )
+    ) : repositoryPanel ?? <WorkshopPrimarySourceUnavailable primaryStageContent="repository" />;
+    const wrapUpPrimarySourceContent = primaryStageContent === 'presentation'
+        ? workshop.presentationUrl === null ? null : <WorkshopPresentationStage presentationUrl={workshop.presentationUrl} />
+        : primaryStageContent === 'repository' ? repositoryPanel : null;
+    const onOpenPrimarySource = isVideoPrimary
+        ? isVideoRewatchOffered ? () => setIsVideoRewatchShown(true) : undefined
+        : isPrimarySourceAvailable ? () => setIsPrimarySourceOpen(true) : undefined;
     const handleVideoUnmute = () => {
         unmuteYoutubeVideo(videoFrameReference.current);
         setIsVideoUnmuted(true);
@@ -158,8 +276,23 @@ export function WorkshopStage({
 
     return (
         <section className="relative overflow-hidden rounded-2xl border border-room-border/10 bg-room-surface shadow-2xl">
-            {isWorkshopPast && isVideoRewatchShown && workshop.youtubeVideoId !== null ? (
-                <div>
+            {isWorkshopPast ? (
+                <>
+                    <div hidden={isVideoRewatchVisible || isPrimarySourceVisible}>
+                        <WorkshopWrapUp
+                            workshopSlug={workshop.slug}
+                            feedback={feedback}
+                            followUpContentBlock={followUpContentBlock}
+                            paidMembersOnlyVideo={paidMembersOnlyVideo}
+                            primaryStageContent={primaryStageContent}
+                            isPrimarySourceAvailable={isPrimarySourceAvailable}
+                            onSaveFeedback={onSaveFeedback}
+                            onOpenPrimarySource={onOpenPrimarySource}
+                            navigation={wrapUpNavigation}
+                        />
+                    </div>
+                    {isVideoRewatchVisible && workshop.youtubeVideoId !== null && (
+                        <div>
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-room-border/10 px-5 py-3">
                         <span className="inline-flex items-center gap-2 text-sm font-bold text-room-heading">
                             <Play className="h-4 w-4 text-room-warning" aria-hidden="true" /> Video z workshopu
@@ -173,88 +306,80 @@ export function WorkshopStage({
                         </button>
                     </div>
                     <div className="relative aspect-video">
-                        <iframe
-                            className="absolute inset-0 h-full w-full"
-                            src={createYoutubeEmbedUrl(workshop.youtubeVideoId, {
-                                isAutoplayed: true,
-                                isInlinePlayback: true,
-                                isRelatedVideoEnabled: false,
-                                isControlsVisible: true,
-                                isJavaScriptApiEnabled: false,
-                                startAtSeconds: workshop.recordingStartOffsetSeconds,
-                            })}
-                            title={workshop.title}
-                            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allowFullScreen
-                        />
+                        {isVideoEmbedUnavailable ? (
+                            <WorkshopPrimarySourceUnavailable
+                                primaryStageContent="video"
+                                isConfigured
+                                fallbackUrl={`https://www.youtube.com/watch?v=${encodeURIComponent(workshop.youtubeVideoId)}&t=${workshop.recordingStartOffsetSeconds}s`}
+                            />
+                        ) : (
+                            <iframe
+                                className="absolute inset-0 h-full w-full"
+                                src={createYoutubeEmbedUrl(workshop.youtubeVideoId, {
+                                    isAutoplayed: true,
+                                    isInlinePlayback: true,
+                                    isRelatedVideoEnabled: false,
+                                    isControlsVisible: true,
+                                    isJavaScriptApiEnabled: false,
+                                    startAtSeconds: workshop.recordingStartOffsetSeconds,
+                                })}
+                                title={workshop.title}
+                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                allowFullScreen
+                                onError={() => setIsVideoEmbedUnavailable(true)}
+                            />
+                        )}
                     </div>
                 </div>
-            ) : isWorkshopPast ? (
-                <WorkshopWrapUp
-                    workshopSlug={workshop.slug}
-                    feedback={feedback}
-                    followUpContentBlock={followUpContentBlock}
-                    paidMembersOnlyVideo={paidMembersOnlyVideo}
-                    onSaveFeedback={onSaveFeedback}
-                    onRewatchVideo={isVideoRewatchOffered ? () => setIsVideoRewatchShown(true) : undefined}
-                    navigation={wrapUpNavigation}
-                />
-            ) : (
-                <div
-                    className={`relative min-w-0 w-full max-w-full aspect-video ${isWorkshopOngoing ? 'min-h-[220px] sm:min-h-[260px]' : 'min-h-[280px] sm:min-h-[260px]'}`}
-                >
-                    {isWorkshopOngoing && workshop.youtubeVideoId ? (
-                        <iframe
-                            ref={videoFrameReference}
-                            className="absolute inset-0 h-full w-full"
-                            src={createYoutubeEmbedUrl(workshop.youtubeVideoId, {
-                                isAutoplayed: true,
-                                isMuted: true,
-                                isInlinePlayback: true,
-                                isRelatedVideoEnabled: false,
-                                isControlsVisible: false,
-                                isCaptionsEnabled: false,
-                                isJavaScriptApiEnabled: true,
-                            })}
-                            title={workshop.title}
-                            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allowFullScreen
-                        />
-                    ) : isWorkshopOngoing ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(48,168,189,.24),transparent_52%)] px-8 text-center">
-                            <Radio className="h-11 w-11 animate-pulse text-room-accent" />
-                            <h2 className="mt-5 text-2xl font-bold text-room-heading">Stream právě připravujeme</h2>
-                            <p className="mt-2 max-w-md text-sm text-room-muted">
-                                Video se zde objeví automaticky, jakmile administrátor vloží YouTube stream.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(122,235,255,.16),transparent_42%)] px-4 py-5 text-center sm:px-5">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-room-accent/20 bg-room-accent/10 px-3 py-1 text-[11px] font-semibold uppercase leading-5 tracking-[0.16em] text-room-accent sm:text-xs sm:tracking-[0.18em]">
-                                <span className="h-2 w-2 animate-pulse rounded-full bg-room-action" /> Začínáme za
-                            </span>
-                            <div className="mt-5 grid w-full max-w-[19rem] grid-cols-2 gap-2 sm:mt-7 sm:w-auto sm:max-w-none sm:grid-cols-4 sm:gap-4">
-                                {countdownSegments.map((segment) => (
-                                    <div
-                                        key={segment.label}
-                                        className="min-w-0 rounded-xl border border-room-border/10 bg-room-overlay/5 px-2 py-2.5 text-center sm:min-w-[82px] sm:px-4 sm:py-4"
-                                    >
-                                        <div className="font-mono text-3xl font-bold tabular-nums text-room-heading sm:text-4xl">
-                                            {String(segment.value).padStart(2, '0')}
-                                        </div>
-                                        <div className="mt-1 text-[10px] uppercase tracking-wider text-room-subtle sm:text-xs">
-                                            {segment.label}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <p className="mt-4 w-full max-w-[25rem] px-2 text-sm leading-6 text-room-muted sm:mt-6">
-                                Stránku nemusíte obnovovat. Stream se spustí automaticky.
-                            </p>
-                        </div>
                     )}
+                    {isPrimarySourceVisible && (
+                        <div className="min-w-0">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-room-border/10 px-4 py-3 sm:px-6">
+                        <span className="text-sm font-bold text-room-heading">
+                            {getWorkshopPrimaryStageContentLabel(primaryStageContent)} workshopu
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => setIsPrimarySourceOpen(false)}
+                            className="inline-flex items-center gap-2 rounded-full border border-room-border/20 bg-room-inset/60 px-3 py-1.5 text-xs font-semibold text-room-text transition hover:border-room-accent/70 hover:bg-room-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent"
+                        >
+                            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Zpět na závěrečné shrnutí
+                        </button>
+                    </div>
+                    {wrapUpPrimarySourceContent}
+                </div>
+                    )}
+                </>
+            ) : isWorkshopOngoing ? (
+                ongoingPrimaryStageContent
+            ) : (
+                <div className="relative min-w-0 w-full max-w-full min-h-[280px] aspect-video sm:min-h-[260px]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_35%,rgba(122,235,255,.16),transparent_42%)] px-4 py-5 text-center sm:px-5">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-room-accent/20 bg-room-accent/10 px-3 py-1 text-[11px] font-semibold uppercase leading-5 tracking-[0.16em] text-room-accent sm:text-xs sm:tracking-[0.18em]">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-room-action" /> Začínáme za
+                        </span>
+                        <div className="mt-5 grid w-full max-w-[19rem] grid-cols-2 gap-2 sm:mt-7 sm:w-auto sm:max-w-none sm:grid-cols-4 sm:gap-4">
+                            {countdownSegments.map((segment) => (
+                                <div
+                                    key={segment.label}
+                                    className="min-w-0 rounded-xl border border-room-border/10 bg-room-overlay/5 px-2 py-2.5 text-center sm:min-w-[82px] sm:px-4 sm:py-4"
+                                >
+                                    <div className="font-mono text-3xl font-bold tabular-nums text-room-heading sm:text-4xl">
+                                        {String(segment.value).padStart(2, '0')}
+                                    </div>
+                                    <div className="mt-1 text-[10px] uppercase tracking-wider text-room-subtle sm:text-xs">
+                                        {segment.label}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="mt-4 w-full max-w-[25rem] px-2 text-sm leading-6 text-room-muted sm:mt-6">
+                            {isVideoPrimary
+                                ? 'Stránku nemusíte obnovovat. Stream se spustí automaticky.'
+                                : 'Stránku nemusíte obnovovat. Zvolený obsah stage se zobrazí automaticky po začátku workshopu.'}
+                        </p>
+                    </div>
                 </div>
             )}
 
@@ -268,7 +393,7 @@ export function WorkshopStage({
             )}
             {isWorkshopOngoing && <WorkshopStageComment stageComment={stageComment} />}
 
-            {isWorkshopOngoing && workshop.youtubeVideoId && (
+            {isVideoStageActive && workshop.youtubeVideoId && (
                 <button
                     type="button"
                     onClick={handleVideoFullscreen}
@@ -280,7 +405,7 @@ export function WorkshopStage({
                 </button>
             )}
 
-            {isWorkshopOngoing && workshop.youtubeVideoId && !isVideoUnmuted && (
+            {isVideoStageActive && workshop.youtubeVideoId && !isVideoUnmuted && (
                 <motion.div
                     initial={isReducedMotionPreferred ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}

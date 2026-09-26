@@ -4,6 +4,7 @@ import type { EventDetails } from '@/lib/events/event';
 import type { GithubCommit } from '@/lib/github/githubCommitFeed';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
+import type { WorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimaryStageContent';
 
 /**
  * A live room is normally one workshop occurrence. The community uses the same resilient room infrastructure, but
@@ -122,6 +123,9 @@ export type WorkshopDetails = WorkshopSummary & {
     /** Number of artificial viewers added to the live watching badge by an administrator. */
     readonly artificialWatchingParticipantCount?: number;
     readonly youtubeVideoId: string | null;
+
+    /** The configured source shown on the main stage while this scheduled workshop is ongoing. */
+    readonly primaryStageContent?: WorkshopPrimaryStageContent;
 
     /**
      * Where paid members begin an ended workshop's recording, in seconds from the beginning of its stream.

@@ -138,10 +138,15 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository, progressCont
                         <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> Načítám commity…
                     </p>
                 ) : progress === null ? (
-                    <p className="text-sm leading-6 text-room-muted">
-                        Commity repozitáře se teď nepodařilo načíst. Odkaz na projekt funguje dál a commity se objeví,
-                        jakmile bude repozitář znovu dostupný.
-                    </p>
+                    <div role="status" className="space-y-2 text-sm leading-6 text-room-muted">
+                        <p>
+                            Historii repozitáře se teď nepodařilo načíst. Odkazy na projekt fungují dál a commity se
+                            objeví, jakmile bude repozitář znovu dostupný.
+                        </p>
+                        <p className="text-xs text-room-warning">
+                            Pokud potíže přetrvávají, administrátor může zkontrolovat připojení projektu v nastavení workshopu.
+                        </p>
+                    </div>
                 ) : (
                     <>
                         {isRangeConfigured && (

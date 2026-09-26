@@ -14,9 +14,11 @@ import { WorkshopContent } from '@/businesses/online-workshop/participant/Worksh
 import { WorkshopParticipantBadge } from '@/businesses/online-workshop/participant/WorkshopParticipantBadge';
 import { WorkshopPolls } from '@/businesses/online-workshop/participant/WorkshopPolls';
 import { WorkshopPresentationMaterial } from '@/businesses/online-workshop/participant/WorkshopPresentationMaterial';
+import { WorkshopVideoMaterial } from '@/businesses/online-workshop/participant/WorkshopVideoMaterial';
 import { WorkshopReactions } from '@/businesses/online-workshop/participant/WorkshopReactions';
 import { WorkshopRepositoryPanel } from '@/businesses/online-workshop/participant/WorkshopRepositoryPanel';
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
+import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { WorkshopServerConnectionStatus } from '@/businesses/online-workshop/participant/WorkshopServerConnectionStatus';
 import { WorkshopWatchingBadge } from '@/businesses/online-workshop/participant/WorkshopWatchingBadge';
 import { WorkshopWrapUpNavigation } from '@/businesses/online-workshop/participant/WorkshopWrapUpNavigation';
@@ -33,8 +35,9 @@ import { isWorkshopPanelOffered, type WorkshopPanelKey } from '@/lib/workshops/w
 import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
 import { WORKSHOP_SEARCH_PARAMETER_NAME } from '@/lib/workshops/workshopParticipantLink';
 import { getWorkshopPollPlacement } from '@/lib/workshops/workshopPollPlacement';
+import { normalizeWorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimaryStageContent';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
-import type { WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
+import { selectWorkshopSupplementarySources, type WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { RefreshCw, Radio } from 'lucide-react';
 import Image from 'next/image';
@@ -246,34 +249,58 @@ export function OnlineWorkshopParticipantPage({
 
     const { state } = controller;
     const roomCapabilities = getWorkshopKindCapabilities(state.workshop.kind);
+    const isWorkshopPast =
+        roomCapabilities.isStageOffered &&
+        isWorkshopPhasePast(getWorkshopPhase(state.workshop, Date.parse(state.serverTime)));
     const isWorkshopPollVisible = isWorkshopPollVisibleInRoom(state.workshop.kind);
     const isModerating = isWorkshopParticipantModerating(state.participant);
     const followUpContentBlock = state.contentBlocks.find((contentBlock) => contentBlock.isFollowUp) ?? null;
     const connectedRepository = roomCapabilities.isRepositoryOffered ? state.workshop.repository : null;
     const presentationUrl = roomCapabilities.isPresentationOffered ? state.workshop.presentationUrl : null;
-    const specialMaterials: readonly WorkshopSpecialMaterial[] = [
+    const primaryStageContent = normalizeWorkshopPrimaryStageContent(state.workshop.primaryStageContent);
+    const repositoryPanel = connectedRepository === null ? null : (
+        <WorkshopRepositoryPanel
+            workshopSlug={workshopSlug}
+            repository={connectedRepository}
+            progressController={repositoryProgressController}
+        />
+    );
+    const stageSourceMaterials: readonly WorkshopSpecialMaterial[] = [
+        ...(state.workshop.youtubeVideoId !== null
+            ? [
+                  {
+                      id: 'video',
+                      sourceType: 'video' as const,
+                      content: (
+                          <WorkshopVideoMaterial
+                              videoId={state.workshop.youtubeVideoId}
+                              recordingStartOffsetSeconds={isWorkshopPast ? state.workshop.recordingStartOffsetSeconds : 0}
+                          />
+                      ),
+                  },
+              ]
+            : []),
         ...(presentationUrl === null
             ? []
             : [
                   {
                       id: 'presentation',
+                      sourceType: 'presentation' as const,
                       content: <WorkshopPresentationMaterial presentationUrl={presentationUrl} />,
                   },
               ]),
-        ...(connectedRepository === null
+        ...(repositoryPanel === null
             ? []
             : [
                   {
                       id: 'repository',
-                      content: (
-                          <WorkshopRepositoryPanel
-                              workshopSlug={workshopSlug}
-                              repository={connectedRepository}
-                              progressController={repositoryProgressController}
-                          />
-                      ),
+                      sourceType: 'repository' as const,
+                      content: repositoryPanel,
                   },
               ]),
+    ];
+    const specialMaterials: readonly WorkshopSpecialMaterial[] = [
+        ...selectWorkshopSupplementarySources(stageSourceMaterials, primaryStageContent),
         ...(roomCapabilities.isCommunityInvitationOffered
             ? [
                   {
@@ -390,6 +417,7 @@ export function OnlineWorkshopParticipantPage({
                             serverTime={state.serverTime}
                             subscribeToReactions={controller.subscribeToReactions}
                             repository={state.workshop.repository}
+                            repositoryPanel={repositoryPanel}
                             subscribeToRepositoryCommits={subscribeToRepositoryCommits}
                             feedback={state.feedback}
                             followUpContentBlock={followUpContentBlock}

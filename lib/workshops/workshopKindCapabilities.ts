@@ -167,6 +167,7 @@ export function isWorkshopPollVisibleInRoom(workshopKind: WorkshopKind): boolean
 const WORKSHOP_SCHEDULE_FIELD_NAMES = ['startsAt', 'endsAt'] as const;
 const WORKSHOP_STAGE_FIELD_NAMES = [
     'youtubeVideoId',
+    'primaryStageContent',
     'recordingStartOffsetSeconds',
     'previewYoutubeVideoId',
 ] as const;

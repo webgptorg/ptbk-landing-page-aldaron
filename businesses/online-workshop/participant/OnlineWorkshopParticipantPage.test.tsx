@@ -10,6 +10,7 @@ import type {
     WorkshopPaidMembersVideo,
     WorkshopPoll,
     WorkshopPublicState,
+    WorkshopCommentReference,
 } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
@@ -180,6 +181,11 @@ const WORKSHOP_ABOUT_A_PROJECT: WorkshopDetails = {
 const WORKSHOP_WITH_PRESENTATION: WorkshopDetails = {
     ...WORKSHOP,
     presentationUrl: 'https://files.example.com/(production-ai-workshop).pptx',
+};
+
+const WORKSHOP_WITH_ALL_STAGE_SOURCES: WorkshopDetails = {
+    ...WORKSHOP_ABOUT_A_PROJECT,
+    presentationUrl: 'https://files.example.com/production-ai-workshop.pdf',
 };
 
 const ATTACHED_COMMUNITY_POLL: WorkshopPoll = {
@@ -452,6 +458,177 @@ describe('online workshop participant room', () => {
         expect(presentationLink.getAttribute('href')).toBe(WORKSHOP_WITH_PRESENTATION.presentationUrl);
         expect(presentationLink.getAttribute('target')).toBe('_blank');
         expect(presentationLink.getAttribute('rel')).toBe('noopener noreferrer');
+    });
+
+    it.each(['video', 'presentation', 'repository'] as const)(
+        'places every configured source exactly once when %s is primary',
+        async (primaryStageContent) => {
+            const { container } = renderParticipantRoom({
+                ...WORKSHOP_WITH_ALL_STAGE_SOURCES,
+                primaryStageContent,
+            });
+
+            await screen.findByRole('button', { name: 'Free členství. Otevřít možnosti členství' });
+            const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
+            const videoMaterial = screen.queryByLabelText('Video workshopu');
+            const presentationMaterial = screen.queryByLabelText('Prezentace workshopu');
+            const presentationStage = screen.queryByLabelText('Prezentace workshopu na stage');
+            const repositoryPanel = screen.getByLabelText('Projekt workshopu');
+
+            expect(videoMaterial !== null).toBe(primaryStageContent !== 'video');
+            expect(presentationMaterial !== null).toBe(primaryStageContent !== 'presentation');
+            expect(presentationStage !== null).toBe(primaryStageContent === 'presentation');
+            expect(materialsSection?.contains(videoMaterial)).toBe(primaryStageContent !== 'video');
+            expect(materialsSection?.contains(presentationMaterial)).toBe(primaryStageContent !== 'presentation');
+            expect(materialsSection?.contains(repositoryPanel)).toBe(primaryStageContent !== 'repository');
+            expect(screen.getAllByLabelText('Projekt workshopu')).toHaveLength(1);
+            expect(container.querySelectorAll('iframe')).toHaveLength(primaryStageContent === 'video' ? 1 : 0);
+        },
+    );
+
+    it('keeps a withheld supplementary recording out of a free participant state and its materials', async () => {
+        const { container } = renderParticipantRoom(
+            {
+                ...WORKSHOP_WITH_ALL_STAGE_SOURCES,
+                primaryStageContent: 'repository',
+                endsAt: '2026-08-21T19:10:00+02:00',
+                youtubeVideoId: null,
+            },
+            undefined,
+            false,
+            undefined,
+            [],
+            [],
+            { previewYoutubeVideoId: 'M7lc1UVf-VE' },
+        );
+
+        await screen.findByRole('button', { name: 'Free členství. Otevřít možnosti členství' });
+
+        expect(screen.getByRole('button', { name: 'Prozkoumat repozitář' })).not.toBeNull();
+        expect(screen.queryByLabelText('Video workshopu')).toBeNull();
+        expect(screen.getByText('Záznam workshopu je pro placené členy')).not.toBeNull();
+        expect(container.innerHTML).toContain('M7lc1UVf-VE');
+        expect(container.innerHTML).not.toContain('dQw4w9WgXcQ');
+    });
+
+    it('offers an ended supplementary recording to a paying participant as the existing video source', async () => {
+        fetchCommunityMembership.mockResolvedValue(PAID_MEMBERSHIP);
+        const { container } = renderParticipantRoom({
+            ...WORKSHOP_WITH_ALL_STAGE_SOURCES,
+            primaryStageContent: 'repository',
+            endsAt: '2026-08-21T19:10:00+02:00',
+            recordingStartOffsetSeconds: 75,
+        });
+
+        await screen.findByRole('button', { name: 'Placené členství. Otevřít stav členství' });
+
+        const videoMaterial = screen.getByLabelText('Video workshopu');
+        expect(videoMaterial).not.toBeNull();
+        expect(within(videoMaterial).getByRole('link', { name: /Otevřít video/ }).getAttribute('href')).toContain(
+            'dQw4w9WgXcQ&t=75s',
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'Prozkoumat repozitář' }));
+        expect(screen.getByLabelText('Projekt workshopu')).not.toBeNull();
+        expect(container.querySelector('iframe')).toBeNull();
+    });
+
+  it('switches two open participant sessions together without losing their room state', async () => {
+        const participantRoom = renderParticipantRoom(
+            WORKSHOP_WITH_ALL_STAGE_SOURCES,
+            undefined,
+            false,
+            undefined,
+            [ATTACHED_COMMUNITY_POLL],
+        );
+        const controller = participantMocks.controller as { state: WorkshopPublicState };
+        const stageComment: WorkshopCommentReference = {
+            id: 'host-stage-question',
+            authorName: 'Host',
+            body: 'Displayed question stays in the room.',
+        };
+        controller.state = { ...controller.state, stageComment };
+
+        const createSession = (workshop: WorkshopDetails) => (
+            <OnlineWorkshopParticipantPage
+                workshopSlug={workshop.slug}
+                connectionDetails={{
+                    title: workshop.title,
+                    description: workshop.description,
+                    dateLabel: 'Kdykoli online',
+                    durationLabel: 'Stálý přístup',
+                }}
+                calendarDetails={null}
+                initialEmail=""
+                initialFullname=""
+            />
+        );
+        const renderSessions = (workshop: WorkshopDetails) =>
+            participantRoom.rerender(
+                <>
+                    {createSession(workshop)}
+                    {createSession(workshop)}
+                </>,
+            );
+
+        renderSessions(WORKSHOP_WITH_ALL_STAGE_SOURCES);
+        const commentDrafts = (await screen.findAllByRole('textbox')).filter(
+            (field): field is HTMLTextAreaElement => field instanceof HTMLTextAreaElement,
+        );
+        expect(commentDrafts).toHaveLength(2);
+        fireEvent.change(commentDrafts[0], { target: { value: 'Draft in participant one' } });
+        fireEvent.change(commentDrafts[1], { target: { value: 'Draft in participant two' } });
+
+        expect(screen.getAllByLabelText('Video workshopu')).toHaveLength(0);
+        expect(screen.getAllByLabelText('Prezentace workshopu')).toHaveLength(2);
+        expect(screen.getAllByLabelText('Projekt workshopu')).toHaveLength(2);
+        expect(screen.getAllByText('Co si z workshopu odnášíte?')).toHaveLength(2);
+        expect(screen.getAllByText(stageComment.body)).toHaveLength(2);
+        expect(screen.getAllByRole('button', { name: /Reagovat/ })).toHaveLength(2);
+
+        controller.state = {
+            ...controller.state,
+            workshop: { ...controller.state.workshop, primaryStageContent: 'presentation' },
+        };
+        renderSessions({ ...WORKSHOP_WITH_ALL_STAGE_SOURCES, primaryStageContent: 'presentation' });
+
+        expect(screen.getAllByLabelText('Prezentace workshopu na stage')).toHaveLength(2);
+        expect(screen.queryAllByLabelText('Prezentace workshopu')).toHaveLength(0);
+        expect(screen.getAllByLabelText('Video workshopu')).toHaveLength(2);
+        expect(screen.getAllByLabelText('Projekt workshopu')).toHaveLength(2);
+        expect(participantRoom.container.querySelectorAll('iframe')).toHaveLength(0);
+
+        controller.state = {
+            ...controller.state,
+            workshop: { ...controller.state.workshop, primaryStageContent: 'repository' },
+        };
+        renderSessions({ ...WORKSHOP_WITH_ALL_STAGE_SOURCES, primaryStageContent: 'repository' });
+
+        expect(screen.queryAllByLabelText('Prezentace workshopu na stage')).toHaveLength(0);
+        expect(screen.getAllByLabelText('Prezentace workshopu')).toHaveLength(2);
+        expect(screen.getAllByLabelText('Video workshopu')).toHaveLength(2);
+        expect(screen.getAllByLabelText('Projekt workshopu')).toHaveLength(2);
+        expect(participantRoom.container.querySelectorAll('iframe')).toHaveLength(0);
+
+        controller.state = {
+            ...controller.state,
+            workshop: { ...controller.state.workshop, primaryStageContent: 'video' },
+        };
+        renderSessions(WORKSHOP_WITH_ALL_STAGE_SOURCES);
+
+        expect(participantRoom.container.querySelectorAll('iframe')).toHaveLength(2);
+        expect(screen.queryAllByLabelText('Video workshopu')).toHaveLength(0);
+        expect(screen.getAllByLabelText('Prezentace workshopu')).toHaveLength(2);
+        expect(screen.getAllByLabelText('Projekt workshopu')).toHaveLength(2);
+        expect(screen.getAllByText(stageComment.body)).toHaveLength(2);
+        expect(screen.getAllByText('Co si z workshopu odnášíte?')).toHaveLength(2);
+        const preservedCommentDrafts = screen
+            .getAllByRole('textbox')
+            .filter((field): field is HTMLTextAreaElement => field instanceof HTMLTextAreaElement);
+        expect(preservedCommentDrafts.map((field) => field.value)).toEqual([
+            'Draft in participant one',
+            'Draft in participant two',
+        ]);
+        expect(screen.getAllByText('Jana Nováková')).toHaveLength(2);
     });
 
     it('keeps the presentation material available to a paying participant', async () => {

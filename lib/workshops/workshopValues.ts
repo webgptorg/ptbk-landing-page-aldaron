@@ -55,6 +55,7 @@ export function createWorkshopDatabaseValues(values: WorkshopCreateValues) {
         external_url: values.externalUrl,
         artificial_watching_participant_count: values.artificialWatchingParticipantCount,
         youtube_video_id: values.youtubeVideoId,
+        primary_stage_content: values.primaryStageContent,
         recording_start_offset_seconds: values.recordingStartOffsetSeconds,
         preview_youtube_video_id: values.previewYoutubeVideoId,
         presentation_url: values.presentationUrl,
@@ -84,6 +85,7 @@ export function createWorkshopUpdateDatabaseValues(values: WorkshopUpdateValues)
             ? {}
             : { artificial_watching_participant_count: values.artificialWatchingParticipantCount }),
         ...(values.youtubeVideoId === undefined ? {} : { youtube_video_id: values.youtubeVideoId }),
+        ...(values.primaryStageContent === undefined ? {} : { primary_stage_content: values.primaryStageContent }),
         ...(values.recordingStartOffsetSeconds === undefined
             ? {}
             : { recording_start_offset_seconds: values.recordingStartOffsetSeconds }),

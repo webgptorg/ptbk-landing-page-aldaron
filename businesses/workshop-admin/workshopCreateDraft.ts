@@ -12,6 +12,11 @@ import { DEFAULT_EVENT_DETAILS, type EventDetails } from '@/lib/events/event';
 import { DEFAULT_WORKSHOP_REACTIONS, MAXIMAL_WORKSHOP_SLUG_LENGTH } from '@/lib/workshops/workshopConstants';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
+import {
+    DEFAULT_WORKSHOP_PRIMARY_STAGE_CONTENT,
+    normalizeWorkshopPrimaryStageContent,
+    type WorkshopPrimaryStageContent,
+} from '@/lib/workshops/workshopPrimaryStageContent';
 
 const DEFAULT_WORKSHOP_START_DELAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 const DEFAULT_WORKSHOP_DURATION_MILLISECONDS = 90 * 60 * 1000;
@@ -31,6 +36,7 @@ export type WorkshopCreateDraft = {
     readonly endsAt: string;
     readonly event: EventDetails;
     readonly youtubeVideoId: string | null;
+    readonly primaryStageContent?: WorkshopPrimaryStageContent;
     readonly recordingStartOffsetSeconds: number;
     readonly previewYoutubeVideoId: string | null;
     readonly presentationUrl: string | null;
@@ -86,6 +92,7 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
         endsAt: toDateTimeLocalValue(new Date(startsAt + DEFAULT_WORKSHOP_DURATION_MILLISECONDS).toISOString()),
         event: copyEventDetails(DEFAULT_EVENT_DETAILS),
         youtubeVideoId: null,
+        primaryStageContent: DEFAULT_WORKSHOP_PRIMARY_STAGE_CONTENT,
         recordingStartOffsetSeconds: 0,
         previewYoutubeVideoId: null,
         presentationUrl: null,
@@ -120,6 +127,9 @@ export function createWorkshopDuplicateDraft(
         endsAt: toDateTimeLocalValue(workshop.endsAt),
         event: copyEventDetails(workshop.event),
         youtubeVideoId: workshop.youtubeVideoId,
+        ...(workshop.primaryStageContent === undefined
+            ? {}
+            : { primaryStageContent: normalizeWorkshopPrimaryStageContent(workshop.primaryStageContent) }),
         recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId,
         presentationUrl: workshop.presentationUrl,
@@ -143,6 +153,7 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         return null;
     }
 
+    // Older in-memory duplicates may omit this source; the create schema supplies its video default on the server.
     return {
         slug: draft.slug,
         title: draft.title,
@@ -151,6 +162,7 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         endsAt: fromDateTimeLocalValue(draft.endsAt),
         ...createWorkshopEventWriteValues(draft.event),
         youtubeVideoId: draft.youtubeVideoId,
+        ...(draft.primaryStageContent === undefined ? {} : { primaryStageContent: draft.primaryStageContent }),
         recordingStartOffsetSeconds: draft.recordingStartOffsetSeconds,
         previewYoutubeVideoId: draft.previewYoutubeVideoId,
         presentationUrl: draft.presentationUrl,
@@ -164,5 +176,5 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         ...(draft.artificialWatchingParticipantCount === undefined
             ? {}
             : { artificialWatchingParticipantCount: draft.artificialWatchingParticipantCount }),
-    };
+    } as WorkshopCreateValues;
 }

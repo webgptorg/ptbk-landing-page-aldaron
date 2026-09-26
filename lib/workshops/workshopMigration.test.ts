@@ -104,6 +104,14 @@ const WORKSHOP_PRESENTATION_MIGRATION_PATH = path.resolve(
     'migrations/2026-09-1500-workshop-presentation.sql',
 );
 const WORKSHOP_PRESENTATION_MIGRATION_SQL = readFileSync(WORKSHOP_PRESENTATION_MIGRATION_PATH, 'utf8');
+const WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_PATH = path.resolve(
+    process.cwd(),
+    'migrations/2026-09-2701-workshop-primary-stage-content.sql',
+);
+const WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_SQL = readFileSync(
+    WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_PATH,
+    'utf8',
+);
 const WORKSHOP_RECORDING_START_OFFSET_MIGRATION_PATH = path.resolve(
     process.cwd(),
     'migrations/2026-09-1600-workshop-recording-start-offset.sql',
@@ -906,6 +914,17 @@ describe('workshop database migration', () => {
             "presentation_url IS NULL OR presentation_url ~* '^https?://'",
         );
         expect(WORKSHOP_PRESENTATION_MIGRATION_SQL).not.toContain('CREATE TABLE');
+    });
+
+    it('defaults workshop stages to video and allows only the three supported primary sources', () => {
+        expect(WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_SQL).toContain('ALTER TABLE public.workshops');
+        expect(WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_SQL).toContain(
+            "ADD COLUMN IF NOT EXISTS primary_stage_content text NOT NULL DEFAULT 'video'",
+        );
+        expect(WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_SQL).toContain(
+            "CHECK (primary_stage_content IN ('video', 'presentation', 'repository'))",
+        );
+        expect(WORKSHOP_PRIMARY_STAGE_CONTENT_MIGRATION_SQL).not.toContain('CREATE TABLE');
     });
 
     it('stores a non-negative replay start offset beside a workshop without copying its recording', () => {

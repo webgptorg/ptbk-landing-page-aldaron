@@ -26,6 +26,11 @@ import { MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS } from '@/lib/workshops
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopPanelOfferedByKind } from '@/lib/workshops/workshopPanels';
 import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
+import {
+    normalizeWorkshopPrimaryStageContent,
+    WORKSHOP_PRIMARY_STAGE_CONTENT_OPTIONS,
+    type WorkshopPrimaryStageContent,
+} from '@/lib/workshops/workshopPrimaryStageContent';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
 import { Save } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -65,6 +70,7 @@ function createWorkshopSettingsDraft(workshop: WorkshopDetails) {
         startsAt: toDateTimeLocalValue(workshop.startsAt), endsAt: toDateTimeLocalValue(workshop.endsAt),
         selectedEnd: null as WorkshopSelectedEnd | null,
         eventDetails: workshop.event ?? DEFAULT_EVENT_DETAILS,
+        primaryStageContent: normalizeWorkshopPrimaryStageContent(workshop.primaryStageContent),
         youtubeVideoId: workshop.youtubeVideoId ?? '', recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId ?? '', presentationUrl: workshop.presentationUrl ?? '',
         repositoryDraft: createWorkshopRepositoryDraft(workshop.repository), reactionText: workshop.allowedReactions.join(' '),
@@ -86,7 +92,7 @@ export function WorkshopSettingsForm({
     const isReactionSettingOffered = isWorkshopPanelOfferedByKind(workshop.kind, 'reactions');
     const isWatchingCountSettingOffered = isWorkshopPanelOfferedByKind(workshop.kind, 'watching-count');
     const [draft, setDraft] = useState(() => createWorkshopSettingsDraft(workshop));
-    const { slug, title, description, startsAt, endsAt, selectedEnd, eventDetails, youtubeVideoId,
+    const { slug, title, description, startsAt, endsAt, selectedEnd, eventDetails, primaryStageContent, youtubeVideoId,
         recordingStartOffsetSeconds, previewYoutubeVideoId, presentationUrl, repositoryDraft, reactionText,
         disabledPanels, artificialWatchingParticipantCount, isPublished } = draft;
     const changeDraft = (changes: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...changes }));
@@ -125,6 +131,7 @@ export function WorkshopSettingsForm({
             ...(roomCapabilities.isEvent ? createWorkshopEventWriteValues(eventDetails) : {}),
             ...(roomCapabilities.isStageOffered
                 ? {
+                      primaryStageContent,
                       youtubeVideoId: youtubeVideoId.trim() || null,
                       recordingStartOffsetSeconds,
                       previewYoutubeVideoId: previewYoutubeVideoId.trim() || null,
@@ -263,6 +270,22 @@ export function WorkshopSettingsForm({
                 {roomCapabilities.isEvent && <WorkshopEventFields event={eventDetails} onChange={(eventDetails) => changeDraft({ eventDetails })} />}
                 {roomCapabilities.isStageOffered && (
                     <>
+                        <label className="text-sm font-medium text-slate-700">
+                            Hlavní obsah stage
+                            <select
+                                aria-label="Hlavní obsah stage"
+                                value={primaryStageContent}
+                                onChange={(event) => changeDraft({ primaryStageContent: event.target.value as WorkshopPrimaryStageContent })}
+                                className="mt-2 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
+                            >
+                                {WORKSHOP_PRIMARY_STAGE_CONTENT_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
+                            </select>
+                            <span className="mt-1 block text-xs font-normal text-slate-400">
+                                Výběr nemění nastavené zdroje. Materiály a ostatní zdroje zůstávají doplňkové.
+                            </span>
+                        </label>
                         <label className="text-sm font-medium text-slate-700">
                             YouTube URL nebo video ID
                             <Input

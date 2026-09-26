@@ -115,6 +115,7 @@ describe('workshop settings form', () => {
 
     it('autosaves the permanent community without adding event-only settings', async () => {
         const { onSave } = renderWorkshopSettingsForm(COMMUNITY);
+        expect(screen.queryByLabelText('Hlavní obsah stage')).toBeNull();
         fireEvent.change(screen.getByLabelText('Popis'), { target: { value: 'New community description' } });
         await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
         expect(onSave.mock.calls[0][0]).toEqual(expect.objectContaining({ description: 'New community description' }));
@@ -137,6 +138,32 @@ describe('workshop settings form', () => {
         expect(screen.queryByText(PRESENTATION_LABEL)).not.toBeNull();
         expect(screen.queryByText(REACTION_LABEL)).not.toBeNull();
         expect(screen.queryByText('Počet sledujících')).not.toBeNull();
+    });
+
+    it('defaults an existing event to video and preserves all sources when changing its primary stage content', async () => {
+        const presentationUrl = 'https://files.example.com/production-ai-workshop.pdf';
+        const { onSave } = renderWorkshopSettingsForm({ ...WORKSHOP, presentationUrl });
+        const primaryStageContentSelect = screen.getByLabelText('Hlavní obsah stage') as HTMLSelectElement;
+
+        expect(primaryStageContentSelect.value).toBe('video');
+        expect(Array.from(primaryStageContentSelect.options).map((option) => option.value)).toEqual([
+            'video',
+            'presentation',
+            'repository',
+        ]);
+
+        fireEvent.change(primaryStageContentSelect, { target: { value: 'repository' } });
+
+        await waitFor(() =>
+            expect(onSave).toHaveBeenLastCalledWith(
+                expect.objectContaining({
+                    primaryStageContent: 'repository',
+                    youtubeVideoId: WORKSHOP.youtubeVideoId,
+                    presentationUrl,
+                    repository: expect.objectContaining({ deploymentUrls: WORKSHOP.repository?.deploymentUrls }),
+                }),
+            ),
+        );
     });
 
     it('asks a workshop occurrence which project it is about', () => {

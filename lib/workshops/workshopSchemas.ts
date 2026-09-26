@@ -29,6 +29,7 @@ import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
 import { GITHUB_COMMIT_SHA_PATTERN } from '@/lib/github/githubCommitSha';
 import { isEventLocationKind, type EventLocationKind } from '@/lib/events/eventLocation';
+import { WORKSHOP_PRIMARY_STAGE_CONTENT_VALUES } from '@/lib/workshops/workshopPrimaryStageContent';
 import { isEventType, isExternalEventType, type EventType } from '@/lib/events/eventTypes';
 import {
     isWorkshopParticipantFullnameValid,
@@ -473,6 +474,7 @@ export const workshopCreateSchema = z
         externalUrl: nullableEventExternalUrlSchema.default(null),
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.default(0),
         youtubeVideoId: nullableYoutubeVideoIdSchema.default(null),
+        primaryStageContent: z.enum(WORKSHOP_PRIMARY_STAGE_CONTENT_VALUES).default('video'),
         recordingStartOffsetSeconds: WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA.default(0),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.default(null),
         presentationUrl: nullableWorkshopPresentationUrlSchema.default(null),
@@ -516,6 +518,7 @@ export const workshopUpdateSchema = z
         externalUrl: nullableEventExternalUrlSchema.optional(),
         artificialWatchingParticipantCount: artificialWatchingParticipantCountSchema.optional(),
         youtubeVideoId: nullableYoutubeVideoIdSchema.optional(),
+        primaryStageContent: z.enum(WORKSHOP_PRIMARY_STAGE_CONTENT_VALUES).optional(),
         recordingStartOffsetSeconds: WORKSHOP_RECORDING_START_OFFSET_SECONDS_SCHEMA.optional(),
         previewYoutubeVideoId: nullableYoutubeVideoIdSchema.optional(),
         presentationUrl: nullableWorkshopPresentationUrlSchema.optional(),

@@ -213,7 +213,9 @@ describe('workshop stage', () => {
             );
 
             repositoryCommitSource.sendCommit(commit);
-            expect(screen.getByRole('status').textContent).toContain('Nový commit na projektu');
+            expect(screen.getByText('Nový commit na projektu').closest('[role="status"]')?.textContent).toContain(
+                'Nový commit na projektu',
+            );
             expect(screen.getByText(commit.message)).not.toBeNull();
 
             act(() => vi.advanceTimersByTime(9_999));
@@ -228,7 +230,7 @@ describe('workshop stage', () => {
 
     it('shows the question the host selected over the stream', () => {
         const reactionSource = createReactionSource();
-        render(
+        const { container } = render(
             <WorkshopStage
                 workshop={WORKSHOP}
                 serverTime="2026-08-20T19:10:00+02:00"
@@ -237,9 +239,10 @@ describe('workshop stage', () => {
             />,
         );
 
-        expect(screen.getByRole('status').textContent).toContain('Otázka na stage');
-        expect(screen.getByRole('status').textContent).toContain(STAGE_COMMENT.authorName);
-        expect(screen.getByRole('status').textContent).toContain(STAGE_COMMENT.body);
+        const stageCommentStatus = screen.getByText('Otázka na stage').closest('[role="status"]');
+        expect(stageCommentStatus?.textContent).toContain('Otázka na stage');
+        expect(stageCommentStatus?.textContent).toContain(STAGE_COMMENT.authorName);
+        expect(stageCommentStatus?.textContent).toContain(STAGE_COMMENT.body);
     });
 
     it('stops listening once the room leaves the stage', () => {
@@ -278,6 +281,205 @@ describe('workshop stage', () => {
 
         expect(requestFullscreen).toHaveBeenCalledOnce();
     });
+
+    it.each(['video', 'presentation', 'repository'] as const)(
+        'keeps the countdown for a future %s-led workshop',
+        (primaryStageContent) => {
+            const reactionSource = createReactionSource();
+            const workshop = {
+                ...WORKSHOP,
+                primaryStageContent,
+                presentationUrl: primaryStageContent === 'presentation' ? 'https://files.example.com/slides.pdf' : null,
+                repository:
+                    primaryStageContent === 'repository'
+                        ? { owner: 'example', name: 'workshop', branch: 'main', deploymentUrls: [] }
+                        : null,
+            };
+            const { container } = render(
+                <WorkshopStage
+                    workshop={workshop}
+                    serverTime="2026-08-20T18:50:00+02:00"
+                    subscribeToReactions={reactionSource.subscribeToReactions}
+                    repositoryPanel={<article aria-label="Existing repository panel">Repository history</article>}
+                />,
+            );
+
+            expect(container.textContent).toContain('Začínáme za');
+            expect(screen.queryByLabelText('Prezentace workshopu na stage')).toBeNull();
+            expect(screen.queryByLabelText('Existing repository panel')).toBeNull();
+            expect(container.querySelector('iframe')).toBeNull();
+        },
+    );
+
+    it('renders the configured presentation as the ongoing stage without requiring a video', () => {
+        const reactionSource = createReactionSource();
+        const { container } = render(
+            <WorkshopStage
+                workshop={{
+                    ...WORKSHOP,
+                    primaryStageContent: 'presentation',
+                    presentationUrl: 'https://files.example.com/slides.pdf',
+                }}
+                serverTime="2026-08-20T19:10:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+            />,
+        );
+
+        expect(screen.getByLabelText('Prezentace workshopu na stage')).not.toBeNull();
+        expect(screen.getByLabelText('Náhled PDF prezentace').getAttribute('data')).toBe(
+            'https://files.example.com/slides.pdf',
+        );
+        expect(container.querySelector('iframe')).toBeNull();
+        expect(screen.queryByText('Video zatím není nastavené')).toBeNull();
+    });
+
+    it('uses the connected repository panel as the ongoing stage without requiring a video', () => {
+        const reactionSource = createReactionSource();
+        const repositoryPanel = <article aria-label="Existing repository panel">Selected branches and live history</article>;
+        const { container } = render(
+            <WorkshopStage
+                workshop={{
+                    ...WORKSHOP,
+                    primaryStageContent: 'repository',
+                    repository: { owner: 'example', name: 'workshop', branch: ['main', 'client-*'], deploymentUrls: [] },
+                }}
+                serverTime="2026-08-20T19:10:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+                repositoryPanel={repositoryPanel}
+            />,
+        );
+
+        expect(screen.getByLabelText('Existing repository panel').textContent).toContain('Selected branches and live history');
+        expect(container.querySelector('iframe')).toBeNull();
+        expect(screen.queryByText('Video zatím není nastavené')).toBeNull();
+    });
+
+    it.each([
+        ['video', 'Video zatím není nastavené'],
+        ['presentation', 'Prezentace není nastavená'],
+        ['repository', 'Repozitář není připojený'],
+    ] as const)('shows an administrator warning for a missing %s stage source', (primaryStageContent, message) => {
+        const reactionSource = createReactionSource();
+        const { container } = render(
+            <WorkshopStage
+                workshop={{ ...WORKSHOP, primaryStageContent }}
+                serverTime="2026-08-20T19:10:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+            />,
+        );
+
+        expect(screen.getByRole('status').textContent).toContain(message);
+        expect(screen.getByText(/Upozornění pro administrátora/)).not.toBeNull();
+        expect(container.querySelector('iframe')).toBeNull();
+    });
+
+    it('switches primary sources without keeping the previous video iframe mounted', () => {
+        const reactionSource = createReactionSource();
+        const repositoryPanel = <article aria-label="Existing repository panel">Repository history</article>;
+        const baseProps = {
+            serverTime: '2026-08-20T19:10:00+02:00',
+            subscribeToReactions: reactionSource.subscribeToReactions,
+            repositoryPanel,
+        };
+        const { container, rerender } = render(<WorkshopStage {...baseProps} workshop={WORKSHOP_WITH_VIDEO} />);
+
+        expect(container.querySelector('iframe')).not.toBeNull();
+        rerender(
+            <WorkshopStage
+                {...baseProps}
+                workshop={{ ...WORKSHOP_WITH_VIDEO, primaryStageContent: 'presentation', presentationUrl: 'https://files.example.com/slides.pdf' }}
+            />,
+        );
+        expect(container.querySelector('iframe')).toBeNull();
+        expect(screen.getByLabelText('Prezentace workshopu na stage')).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'Zapnout zvuk' })).toBeNull();
+
+        rerender(
+            <WorkshopStage
+                {...baseProps}
+                workshop={{
+                    ...WORKSHOP_WITH_VIDEO,
+                    primaryStageContent: 'repository',
+                    repository: { owner: 'example', name: 'workshop', branch: 'main', deploymentUrls: [] },
+                }}
+            />,
+        );
+        expect(container.querySelector('iframe')).toBeNull();
+        expect(screen.getByLabelText('Existing repository panel')).not.toBeNull();
+
+        rerender(<WorkshopStage {...baseProps} workshop={WORKSHOP_WITH_VIDEO} />);
+        expect(container.querySelector('iframe')).not.toBeNull();
+        expect(screen.queryByLabelText('Existing repository panel')).toBeNull();
+    });
+
+    it('opens and returns from the selected presentation in the ended workshop wrap-up', () => {
+        const reactionSource = createReactionSource();
+        const { container } = render(
+            <WorkshopStage
+                workshop={{
+                    ...WORKSHOP,
+                    primaryStageContent: 'presentation',
+                    presentationUrl: 'https://files.example.com/slides.pdf',
+                }}
+                serverTime="2026-08-20T20:31:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+            />,
+        );
+
+        expect(screen.getByRole('heading', { name: 'Děkujeme, že jste byli u toho!' })).not.toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít prezentaci' }));
+        expect(screen.getByLabelText('Prezentace workshopu na stage')).not.toBeNull();
+        expect(screen.getByRole('button', { name: /Zpět na závěrečné shrnutí/ })).not.toBeNull();
+        expect(container.querySelector('iframe')).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /Zpět na závěrečné shrnutí/ }));
+        expect(screen.getByRole('heading', { name: 'Děkujeme, že jste byli u toho!' })).not.toBeNull();
+    });
+
+    it('opens and returns from the connected repository in the ended workshop wrap-up', () => {
+        const reactionSource = createReactionSource();
+        const repositoryPanel = <article aria-label="Existing repository panel">Selected branches and live history</article>;
+        const { container } = render(
+            <WorkshopStage
+                workshop={{
+                    ...WORKSHOP,
+                    primaryStageContent: 'repository',
+                    repository: { owner: 'example', name: 'workshop', branch: ['main', 'client-*'], deploymentUrls: [] },
+                }}
+                serverTime="2026-08-20T20:31:00+02:00"
+                subscribeToReactions={reactionSource.subscribeToReactions}
+                repositoryPanel={repositoryPanel}
+            />,
+        );
+
+        expect(screen.getByRole('heading', { name: 'Děkujeme, že jste byli u toho!' })).not.toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Prozkoumat repozitář' }));
+        expect(screen.getByLabelText('Existing repository panel').textContent).toContain('Selected branches and live history');
+        expect(screen.getByRole('button', { name: /Zpět na závěrečné shrnutí/ })).not.toBeNull();
+        expect(container.querySelector('iframe')).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /Zpět na závěrečné shrnutí/ }));
+        expect(screen.getByRole('heading', { name: 'Děkujeme, že jste byli u toho!' })).not.toBeNull();
+    });
+
+    it.each(['video', 'presentation', 'repository'] as const)(
+        'keeps the ended %s workshop on its wrap-up when its selected source is missing',
+        (primaryStageContent) => {
+            const reactionSource = createReactionSource();
+            const { container } = render(
+                <WorkshopStage
+                    workshop={{ ...WORKSHOP, primaryStageContent }}
+                    serverTime="2026-08-20T20:31:00+02:00"
+                    subscribeToReactions={reactionSource.subscribeToReactions}
+                />,
+            );
+
+            expect(screen.getByRole('heading', { name: 'Děkujeme, že jste byli u toho!' })).not.toBeNull();
+            expect(screen.getByText(/není dostupný/)).not.toBeNull();
+            expect(screen.queryByRole('button', { name: /Přehrát video znovu|Otevřít prezentaci|Prozkoumat repo/ })).toBeNull();
+            expect(container.querySelector('iframe')).toBeNull();
+        },
+    );
 
     it('takes the subtitles away from the video it plays', () => {
         const reactionSource = createReactionSource();

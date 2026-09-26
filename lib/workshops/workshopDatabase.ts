@@ -84,6 +84,7 @@ import type {
 } from '@/lib/workshops/workshopTypes';
 import type { WorkshopAdminParticipantQuery } from '@/lib/workshops/workshopAdminParticipantQuery';
 import type { WorkshopRepository } from '@/lib/workshops/workshopRepository';
+import { normalizeWorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimaryStageContent';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getWorkshopCommentProvenance, type WorkshopCommentOrigin } from './workshopCommentOrigin';
@@ -97,6 +98,7 @@ export type WorkshopRow = {
     readonly starts_at: string;
     readonly ends_at: string | null;
     readonly youtube_video_id: string | null;
+    readonly primary_stage_content?: string | null;
 
     /** Where an unlocked recording begins, in seconds from the beginning of its stream. */
     readonly recording_start_offset_seconds: number;
@@ -535,6 +537,7 @@ export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
     return {
         ...mapWorkshopSummaryRow(row),
         youtubeVideoId: row.youtube_video_id,
+        primaryStageContent: normalizeWorkshopPrimaryStageContent(row.primary_stage_content),
         recordingStartOffsetSeconds: row.recording_start_offset_seconds,
         previewYoutubeVideoId: row.preview_youtube_video_id,
         // Read defensively as well as validating writes: an old or manually altered row must not hand an unsafe URL

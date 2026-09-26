@@ -1,5 +1,11 @@
 # Current preversion
 
+- Workshop settings now choose whether video, presentation, or the connected repository leads the stage. The choice
+  defaults to video, preserves every configured source, and follows the existing countdown, recorded-end, and wrap-up
+  phases. Other accessible sources stay in the shared special-material list exactly once; supplementary recordings
+  continue to use the server's member-aware video projection. Presentation and repository stage views reuse their
+  existing room components, and live settings saves use the existing room refresh broadcast.
+
 - Workshop and community participant administration now shows complete room-level counts for trusted people,
   untrusted people, and moderators. **Důvěřovat všem** reviews the exact eligible room participants in a confirmation
   dialog, then grants trust atomically only if that set is unchanged. The existing promotion trigger approves pending

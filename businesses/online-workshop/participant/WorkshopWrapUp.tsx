@@ -9,7 +9,11 @@ import type {
     WorkshopFeedback as WorkshopFeedbackValue,
     WorkshopPaidMembersVideo,
 } from '@/lib/workshops/workshopTypes';
-import { ArrowDown, BookOpenText, PartyPopper, Play } from 'lucide-react';
+import {
+    getWorkshopPrimaryStageContentLabel,
+    type WorkshopPrimaryStageContent,
+} from '@/lib/workshops/workshopPrimaryStageContent';
+import { ArrowDown, ArrowUpRight, BookOpenText, PartyPopper, Play, Presentation } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type WorkshopWrapUpProps = {
@@ -26,11 +30,15 @@ type WorkshopWrapUpProps = {
      */
     readonly paidMembersOnlyVideo?: WorkshopPaidMembersVideo | null;
 
+    /** The same configured source participants saw as the ongoing stage. */
+    readonly primaryStageContent: WorkshopPrimaryStageContent;
+    readonly isPrimarySourceAvailable: boolean;
+
     /**
      * Offered only to the members whose membership unlocks the video of the ended workshop, so the wrap-up stays the
      * same screen for everybody and only gains the button which plays the video again.
      */
-    readonly onRewatchVideo?: () => void;
+    readonly onOpenPrimarySource?: () => void;
     readonly navigation?: ReactNode;
 };
 
@@ -43,8 +51,10 @@ export function WorkshopWrapUp({
     feedback,
     followUpContentBlock,
     paidMembersOnlyVideo = null,
+    primaryStageContent,
+    isPrimarySourceAvailable,
     onSaveFeedback,
-    onRewatchVideo,
+    onOpenPrimarySource,
     navigation,
 }: WorkshopWrapUpProps) {
     return (
@@ -62,14 +72,31 @@ export function WorkshopWrapUp({
                     lépe.
                 </p>
 
-                {onRewatchVideo !== undefined && (
+                {onOpenPrimarySource !== undefined && (
                     <button
                         type="button"
-                        onClick={onRewatchVideo}
+                        onClick={onOpenPrimarySource}
                         className="mt-5 inline-flex items-center gap-2 rounded-full bg-room-warning px-5 py-2.5 text-sm font-bold text-room-action-foreground shadow-lg shadow-amber-300/10 transition hover:bg-room-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-warning focus-visible:ring-offset-2 focus-visible:ring-offset-room-surface"
                     >
-                        <Play className="h-4 w-4" aria-hidden="true" /> Přehrát video znovu
+                        {primaryStageContent === 'video' ? (
+                            <Play className="h-4 w-4" aria-hidden="true" />
+                        ) : primaryStageContent === 'presentation' ? (
+                            <Presentation className="h-4 w-4" aria-hidden="true" />
+                        ) : (
+                            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                        )}
+                        {primaryStageContent === 'video'
+                            ? 'Přehrát video znovu'
+                            : primaryStageContent === 'presentation'
+                              ? 'Otevřít prezentaci'
+                              : 'Prozkoumat repozitář'}
                     </button>
+                )}
+
+                {!isPrimarySourceAvailable && (
+                    <p role="status" className="mt-5 rounded-xl border border-room-warning/30 bg-room-warning/10 px-4 py-3 text-sm leading-6 text-room-warning">
+                        Zvolený zdroj „{getWorkshopPrimaryStageContentLabel(primaryStageContent)}“ není dostupný. Administrátor může zkontrolovat nebo doplnit nastavení workshopu.
+                    </p>
                 )}
 
                 <WorkshopWrapUpPdfDownload key={workshopSlug} workshopSlug={workshopSlug} />

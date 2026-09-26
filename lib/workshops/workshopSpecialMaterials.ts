@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { WorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimaryStageContent';
 
 /**
  * Where a card which shares the material list belongs among the ordinary materials
@@ -28,12 +29,22 @@ export type WorkshopSpecialMaterialPlacement =
 export type WorkshopSpecialMaterial = {
     readonly id: string;
     readonly content: ReactNode;
+    /** A configured source is omitted here when that same source is the room's main stage content. */
+    readonly sourceType?: WorkshopPrimaryStageContent;
 
     /**
      * Where this card belongs in the material list, which is after the ordinary materials unless it says otherwise
      */
     readonly placement?: WorkshopSpecialMaterialPlacement;
 };
+
+/** Keeps each configured workshop source in exactly one place: the stage or its supplementary material list. */
+export function selectWorkshopSupplementarySources(
+    specialMaterials: readonly WorkshopSpecialMaterial[],
+    primaryStageContent: WorkshopPrimaryStageContent,
+): readonly WorkshopSpecialMaterial[] {
+    return specialMaterials.filter((specialMaterial) => specialMaterial.sourceType !== primaryStageContent);
+}
 
 /**
  * What decides where a card belongs whose placement depends on the member reading it

@@ -1,4 +1,4 @@
-[ ] !!
+[x] (2 attempts) by Developer on OpenAI Codex `gpt-6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.4170 32 minutes; Testing 2 minutes; Fixing .08 20 minutes; Testing 17 minutes
 
 [✨🎭] Choose video, presentation or repository as a workshop's primary stage content
 
@@ -46,3 +46,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Share source placement, access and lifecycle decisions instead of branching independently in each screen.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

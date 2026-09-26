@@ -4,6 +4,7 @@ import type { WorkshopAgentAdminState, WorkshopAgentWriteValues } from '@/lib/wo
 import type { EventLocationKind } from '@/lib/events/eventLocation';
 import type { EventType } from '@/lib/events/eventTypes';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
+import type { WorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimaryStageContent';
 import type {
     WorkshopAdminAnalytics,
     WorkshopAdminFeedback,
@@ -53,6 +54,7 @@ export type WorkshopWriteValues = {
     /** The address a term of an event held by somebody else leads to, which every other term leaves empty. */
     readonly externalUrl?: string | null;
     readonly youtubeVideoId?: string | null;
+    readonly primaryStageContent?: WorkshopPrimaryStageContent;
 
     /** The number of waiting-room seconds to skip when a paid member replays an ended workshop. */
     readonly recordingStartOffsetSeconds?: number;
