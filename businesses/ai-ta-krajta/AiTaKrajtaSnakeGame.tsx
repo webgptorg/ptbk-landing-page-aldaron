@@ -4,6 +4,7 @@ import {
     advanceSnakeState,
     createSnakeState,
     getSnakeSegments,
+    resizeSnakeState,
     type SnakeBounds,
     type SnakePoint,
     type SnakeState,
@@ -147,10 +148,11 @@ function drawEyes(context: CanvasRenderingContext2D, state: SnakeState, markScal
 function drawSnake(
     context: CanvasRenderingContext2D,
     state: SnakeState,
+    bounds: SnakeBounds,
     markScale: number,
     releaseProgress: number,
 ): void {
-    const centerLine = [state.headPosition, ...getSnakeSegments(state)];
+    const centerLine = [state.headPosition, ...getSnakeSegments(state, bounds)];
 
     context.save();
     context.lineCap = 'round';
@@ -196,6 +198,8 @@ export function AiTaKrajtaSnakeGame({
         }
 
         let bounds: SnakeBounds = { width: canvas.clientWidth, height: canvas.clientHeight };
+        let state: SnakeState;
+        let isSnakeStateInitialized = false;
         let lastFrameTimestamp: number | null = null;
         let gameStartTimestamp: number | null = null;
         let animationFrameId = 0;
@@ -203,8 +207,29 @@ export function AiTaKrajtaSnakeGame({
 
         const resizeCanvas = () => {
             const devicePixelRatio = Math.min(2, window.devicePixelRatio || 1);
+            const nextBounds: SnakeBounds = { width: canvas.clientWidth, height: canvas.clientHeight };
 
-            bounds = { width: canvas.clientWidth, height: canvas.clientHeight };
+            if (
+                isSnakeStateInitialized &&
+                (bounds.width !== nextBounds.width || bounds.height !== nextBounds.height)
+            ) {
+                state = resizeSnakeState(state, bounds, nextBounds);
+
+                if (targetPositionRef.current !== null) {
+                    targetPositionRef.current = {
+                        x:
+                            bounds.width > 0
+                                ? (targetPositionRef.current.x / bounds.width) * nextBounds.width
+                                : nextBounds.width / 2,
+                        y:
+                            bounds.height > 0
+                                ? (targetPositionRef.current.y / bounds.height) * nextBounds.height
+                                : nextBounds.height / 2,
+                    };
+                }
+            }
+
+            bounds = nextBounds;
             canvas.width = Math.max(1, Math.round(bounds.width * devicePixelRatio));
             canvas.height = Math.max(1, Math.round(bounds.height * devicePixelRatio));
             context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
@@ -212,7 +237,8 @@ export function AiTaKrajtaSnakeGame({
 
         resizeCanvas();
         const markScale = getAiTaKrajtaMarkFrameScale(initialMarkFrame);
-        let state = createSnakeState(bounds, Math.random, createAiTaKrajtaSnakeLogoPose(initialMarkFrame));
+        state = createSnakeState(bounds, Math.random, createAiTaKrajtaSnakeLogoPose(initialMarkFrame));
+        isSnakeStateInitialized = true;
 
         const renderFrame = (frameTimestamp: number) => {
             const stepInSeconds = lastFrameTimestamp === null ? 0 : (frameTimestamp - lastFrameTimestamp) / 1000;
@@ -235,7 +261,7 @@ export function AiTaKrajtaSnakeGame({
 
             context.clearRect(0, 0, bounds.width, bounds.height);
             drawFood(context, state, logoReleaseProgress);
-            drawSnake(context, state, markScale, logoReleaseProgress);
+            drawSnake(context, state, bounds, markScale, logoReleaseProgress);
             drawAiTaKrajtaMarkOnCanvas(context, initialMarkFrame, 1 - logoReleaseProgress);
 
             if (!isInitialMarkFrameDrawn) {

@@ -162,6 +162,23 @@ export function createAiTaKrajtaSnakeBodySlices(
 ): readonly AiTaKrajtaSnakeBodySlice[] {
     const lastIndex = centerLine.length - 1;
     const slices: AiTaKrajtaSnakeBodySlice[] = [];
+    const distancesFromNose = Array.from({ length: centerLine.length }, () => 0);
+
+    for (let pointIndex = 1; pointIndex <= lastIndex; pointIndex++) {
+        const previousPoint = centerLine[pointIndex - 1];
+        const point = centerLine[pointIndex];
+
+        if (previousPoint !== undefined && point !== undefined) {
+            distancesFromNose[pointIndex] =
+                (distancesFromNose[pointIndex - 1] ?? 0) + Math.hypot(point.x - previousPoint.x, point.y - previousPoint.y);
+        }
+    }
+
+    const totalBodyLength = distancesFromNose[lastIndex] ?? 0;
+
+    if (totalBodyLength === 0) {
+        return slices;
+    }
 
     for (let pointIndex = lastIndex; pointIndex > 0; pointIndex--) {
         const from = centerLine[pointIndex];
@@ -171,7 +188,7 @@ export function createAiTaKrajtaSnakeBodySlices(
             continue;
         }
 
-        const bodyShape = getBodyShape(pointIndex / lastIndex, releaseProgress);
+        const bodyShape = getBodyShape((distancesFromNose[pointIndex] ?? totalBodyLength) / totalBodyLength, releaseProgress);
 
         slices.push({ from, to, strokeWidth: bodyShape.halfWidth * 2 * markScale, color: bodyShape.color });
     }

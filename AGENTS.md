@@ -89,7 +89,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork.ts`, together with the
   measurements of the animal along its own length. The snake of the minigame
   starts in exactly that shape, in the frame the still logo occupied, and only
-  then eases into the proportions, colours and speed of a game snake.
+  then eases into the proportions, colours and speed of a game snake. Its
+  remembered path includes wall and corner contacts, so the shared body geometry
+  follows repeated rebounds continuously, including while the pointer stays at or
+  beyond a boundary and while the canvas resizes.
   A seven-cell Promptbook coder terminal floats in the bottom-right corner and
   clears the player and cookie controls. It types `$ ptbk`, then animates an
   ASCII octopus in response to pointer, focus, scrolling, and the snake terrarium.

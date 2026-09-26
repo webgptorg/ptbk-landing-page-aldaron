@@ -1,5 +1,11 @@
 # Current preversion
 
+- Fixed the AI ta Krajta snake's body wobbling at walls and corners. The simulation now keeps the path through each
+  reflected contact, and shared body strokes follow that path with width and colour tied to travelled distance.
+  The bounded trail stays stable through repeated steering toward an outside pointer and rescales with the canvas.
+  Added deterministic short- and grown-snake coverage for all walls, all corners, repeated rebounds, body joins and
+  responsive resizing.
+
 - Participant materials now show a compact preview card for every rendered link, with a safe page image, title, useful description, and destination domain when available. Each card flips to its existing `PromptbookQrCode` on request; only one QR face stays open in a material list, and its tracked short URL remains the same as the material's Markdown link and open action. Preview metadata loads lazily through an authenticated, visibility-checked room endpoint, which resolves stored shortcode destinations by read-only database lookup and reuses the shared public-page scraper and protected image loader. It neither visits click-tracked redirects nor creates links. Broken or unavailable previews leave the Markdown, open actions, and QR available; shared presentation and video cards use the same interaction.
 
 - Workshop material cards in `/admin/workshops?tab=content` now reorder from a dedicated mouse/touch drag handle or keyboard-accessible move controls and save automatically through the shared admin save queue. Focus stays with the moved material. The numeric order remains available under advanced editor options. A workshop-scoped database transaction locks and reindexes only material IDs, preserves content fields, reconciles concurrent additions and deletions, and broadcasts one room refresh after the complete order is committed.

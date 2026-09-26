@@ -1,6 +1,15 @@
 import { AI_TA_KRAJTA_MARK_BODY } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
 import { createAiTaKrajtaSnakeBodySlices } from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeBody';
 import { AI_TA_KRAJTA_COLORS } from '@/businesses/ai-ta-krajta/config';
+import {
+    advanceSnakeState,
+    createSnakeState,
+    FIELD_MARGIN_IN_PIXELS,
+    getSnakeSegments,
+    SEGMENT_DISTANCE_IN_PIXELS,
+    TRAIL_POINT_DISTANCE_IN_PIXELS,
+    type SnakePoint,
+} from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeSimulation';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -82,5 +91,58 @@ describe('AI ta Krajta snake body', () => {
         const [largeSlice] = createSlicesFromNose(0, 3);
 
         expect(largeSlice?.strokeWidth).toBeCloseTo((smallSlice?.strokeWidth ?? 0) * 3, 5);
+    });
+
+    it('keeps every painted body slice joined through a corner rebound', () => {
+        const bounds = { width: 900, height: 700 };
+        const wallPoint = {
+            x: bounds.width - FIELD_MARGIN_IN_PIXELS,
+            y: FIELD_MARGIN_IN_PIXELS,
+        };
+        const headPosition = { x: wallPoint.x - 1, y: wallPoint.y + 1 };
+        const headAngleInRadians = -Math.PI / 4;
+        const initialState = createSnakeState(bounds, () => 0.5);
+        const trail = Array.from({ length: 32 }, (_, pointIndex) => {
+            const distanceBehindHead = pointIndex * (SEGMENT_DISTANCE_IN_PIXELS / 2);
+
+            return {
+                x: headPosition.x - Math.cos(headAngleInRadians) * distanceBehindHead,
+                y: headPosition.y - Math.sin(headAngleInRadians) * distanceBehindHead,
+            };
+        });
+        const stateAtCorner = { ...initialState, headPosition, headAngleInRadians, trail };
+        const stateAfterBounce = advanceSnakeState(stateAtCorner, {
+            bounds,
+            targetPosition: { x: bounds.width + 40, y: -40 },
+            stepInSeconds: 1 / 20,
+            createRandomNumber: () => 0.5,
+        });
+        const centerLine: SnakePoint[] = [stateAfterBounce.headPosition, ...getSnakeSegments(stateAfterBounce, bounds)];
+        const slices = createAiTaKrajtaSnakeBodySlices(centerLine, 1, 1);
+
+        expect(stateAfterBounce.trail[1]).toEqual(wallPoint);
+        expect(slices.length).toBeGreaterThan(0);
+
+        for (let sliceIndex = 0; sliceIndex < slices.length; sliceIndex++) {
+            const slice = slices[sliceIndex];
+            const nextSlice = slices[sliceIndex + 1];
+
+            expect(slice).toBeDefined();
+            expect(Number.isFinite(slice?.strokeWidth)).toBe(true);
+            expect(slice?.strokeWidth).toBeGreaterThan(0);
+            expect(Number.isFinite(slice?.from.x)).toBe(true);
+            expect(Number.isFinite(slice?.from.y)).toBe(true);
+            expect(Number.isFinite(slice?.to.x)).toBe(true);
+            expect(Number.isFinite(slice?.to.y)).toBe(true);
+
+            if (slice !== undefined && nextSlice !== undefined) {
+                expect(slice.to).toEqual(nextSlice.from);
+                expect(Math.hypot(slice.to.x - slice.from.x, slice.to.y - slice.from.y)).toBeLessThanOrEqual(
+                    TRAIL_POINT_DISTANCE_IN_PIXELS + 1e-6,
+                );
+                expect(Math.abs(slice.strokeWidth - nextSlice.strokeWidth)).toBeLessThanOrEqual(1);
+                expect(getColorDistance(slice.color, nextSlice.color)).toBeLessThanOrEqual(12);
+            }
+        }
     });
 });

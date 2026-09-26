@@ -1,4 +1,4 @@
-[ ] !
+[x] by Developer on OpenAI Codex `gpt-6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.00 an hour; Testing 19 minutes
 
 [✨🐍] Remove flickering and wobbling when the AI ta Krajta snake hits a wall or corner
 
@@ -25,3 +25,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Keep simulation and shared snake geometry reusable; do not add a separate boundary-only snake renderer.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

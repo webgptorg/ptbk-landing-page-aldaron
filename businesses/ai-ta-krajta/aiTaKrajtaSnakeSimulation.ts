@@ -38,7 +38,7 @@ export type SnakeState = {
     readonly headAngleInRadians: number;
 
     /**
-     * Where the head has been, newest first, one point every `TRAIL_POINT_DISTANCE_IN_PIXELS`
+     * The path the head has travelled, newest first. Wall contacts stay in the path so the body follows the rebound.
      */
     readonly trail: readonly SnakePoint[];
 
@@ -138,6 +138,16 @@ const MINIMUM_FOOD_DISTANCE_IN_PIXELS = 90;
  */
 const MAXIMUM_STEP_IN_SECONDS = 1 / 20;
 
+/**
+ * Keep a small canvas usable without letting an almost zero-width field cause dozens of bounces in one frame
+ */
+const MINIMUM_PLAYABLE_SPAN_IN_PIXELS = 8;
+
+/**
+ * The distance tolerance used to treat two axis contacts as the same corner hit
+ */
+const WALL_CONTACT_DISTANCE_TOLERANCE = 1e-8;
+
 type PlayableFieldBounds = {
     readonly minimumX: number;
     readonly maximumX: number;
@@ -145,9 +155,10 @@ type PlayableFieldBounds = {
     readonly maximumY: number;
 };
 
-type ReflectedCoordinate = {
-    readonly coordinate: number;
-    readonly isDirectionReversed: boolean;
+type ReflectedMovement = {
+    readonly headPosition: SnakePoint;
+    readonly headAngleInRadians: number;
+    readonly path: readonly SnakePoint[];
 };
 
 function getDistance(firstPoint: SnakePoint, secondPoint: SnakePoint): number {
@@ -169,50 +180,131 @@ function clamp(value: number, minimum: number, maximum: number): number {
  * The part of the canvas where the head and tokens can safely move
  */
 function getPlayableFieldBounds(bounds: SnakeBounds): PlayableFieldBounds {
-    const minimumX = FIELD_MARGIN_IN_PIXELS;
-    const minimumY = FIELD_MARGIN_IN_PIXELS;
+    const getAxisBounds = (length: number) => {
+        const safeLength = Number.isFinite(length) ? Math.max(0, length) : 0;
+
+        if (safeLength < MINIMUM_PLAYABLE_SPAN_IN_PIXELS) {
+            return { minimum: safeLength / 2, maximum: safeLength / 2 };
+        }
+
+        const margin = Math.min(FIELD_MARGIN_IN_PIXELS, (safeLength - MINIMUM_PLAYABLE_SPAN_IN_PIXELS) / 2);
+
+        return { minimum: margin, maximum: safeLength - margin };
+    };
+
+    const horizontalBounds = getAxisBounds(bounds.width);
+    const verticalBounds = getAxisBounds(bounds.height);
 
     return {
-        minimumX,
-        maximumX: Math.max(minimumX, bounds.width - FIELD_MARGIN_IN_PIXELS),
-        minimumY,
-        maximumY: Math.max(minimumY, bounds.height - FIELD_MARGIN_IN_PIXELS),
+        minimumX: horizontalBounds.minimum,
+        maximumX: horizontalBounds.maximum,
+        minimumY: verticalBounds.minimum,
+        maximumY: verticalBounds.maximum,
     };
 }
 
 /**
- * Folds a moving coordinate back into the field, keeping the distance it travelled after every wall it crossed
+ * Distance along one direction vector until the next wall, or infinity when this axis cannot hit a wall
  */
-function reflectCoordinate(
-    previousCoordinate: number,
-    nextCoordinate: number,
+function getDistanceToWall(
+    coordinate: number,
+    direction: number,
     minimumCoordinate: number,
     maximumCoordinate: number,
-): ReflectedCoordinate {
-    const playableLength = maximumCoordinate - minimumCoordinate;
-
-    if (playableLength === 0) {
-        return { coordinate: minimumCoordinate, isDirectionReversed: false };
+): number {
+    if (maximumCoordinate <= minimumCoordinate || direction === 0) {
+        return Number.POSITIVE_INFINITY;
     }
 
-    const startingCoordinate = clamp(previousCoordinate, minimumCoordinate, maximumCoordinate);
-    const movementDistance = nextCoordinate - previousCoordinate;
-    const unreflectedCoordinate = startingCoordinate + movementDistance;
-    const distanceFromMinimum = unreflectedCoordinate - minimumCoordinate;
-    const fullTraversalLength = playableLength * 2;
-    const distanceWithinFullTraversal =
-        ((distanceFromMinimum % fullTraversalLength) + fullTraversalLength) % fullTraversalLength;
-    const isOutsideBounds = unreflectedCoordinate < minimumCoordinate || unreflectedCoordinate > maximumCoordinate;
-    const wallCrossingCount = isOutsideBounds
-        ? Math.abs(Math.floor(distanceFromMinimum / playableLength))
-        : 0;
+    if (direction > 0) {
+        return Math.max(0, (maximumCoordinate - coordinate) / direction);
+    }
+
+    return Math.max(0, (minimumCoordinate - coordinate) / direction);
+}
+
+/**
+ * Adds a point only when it contributes real length to the path
+ */
+function appendDistinctPathPoint(path: SnakePoint[], point: SnakePoint): void {
+    const previousPoint = path[path.length - 1];
+
+    if (previousPoint === undefined || getDistance(previousPoint, point) > WALL_CONTACT_DISTANCE_TOLERANCE) {
+        path.push(point);
+    }
+}
+
+/**
+ * Follows the head's actual piecewise-linear route, including each wall or corner contact
+ */
+function traceReflectedMovement(
+    previousHeadPosition: SnakePoint,
+    headAngleInRadians: number,
+    distance: number,
+    bounds: SnakeBounds,
+): ReflectedMovement {
+    const { minimumX, maximumX, minimumY, maximumY } = getPlayableFieldBounds(bounds);
+    const horizontalSpan = maximumX - minimumX;
+    const verticalSpan = maximumY - minimumY;
+    const path: SnakePoint[] = [];
+    let currentPosition = {
+        x: clamp(previousHeadPosition.x, minimumX, maximumX),
+        y: clamp(previousHeadPosition.y, minimumY, maximumY),
+    };
+    let directionX = Math.cos(headAngleInRadians);
+    let directionY = Math.sin(headAngleInRadians);
+    let remainingDistance = distance;
+
+    appendDistinctPathPoint(path, currentPosition);
+
+    while (remainingDistance > WALL_CONTACT_DISTANCE_TOLERANCE) {
+        const horizontalDistance = getDistanceToWall(currentPosition.x, directionX, minimumX, maximumX);
+        const verticalDistance = getDistanceToWall(currentPosition.y, directionY, minimumY, maximumY);
+        const distanceToWall = Math.min(horizontalDistance, verticalDistance);
+
+        if (!Number.isFinite(distanceToWall) || distanceToWall > remainingDistance) {
+            currentPosition = {
+                x: horizontalSpan === 0 ? minimumX : clamp(currentPosition.x + directionX * remainingDistance, minimumX, maximumX),
+                y: verticalSpan === 0 ? minimumY : clamp(currentPosition.y + directionY * remainingDistance, minimumY, maximumY),
+            };
+            appendDistinctPathPoint(path, currentPosition);
+            remainingDistance = 0;
+            break;
+        }
+
+        const isHorizontalContact = horizontalDistance <= distanceToWall + WALL_CONTACT_DISTANCE_TOLERANCE;
+        const isVerticalContact = verticalDistance <= distanceToWall + WALL_CONTACT_DISTANCE_TOLERANCE;
+        const travelDistance = Math.min(remainingDistance, distanceToWall);
+
+        currentPosition = {
+            x: horizontalSpan === 0 ? minimumX : clamp(currentPosition.x + directionX * travelDistance, minimumX, maximumX),
+            y: verticalSpan === 0 ? minimumY : clamp(currentPosition.y + directionY * travelDistance, minimumY, maximumY),
+        };
+
+        if (isHorizontalContact) {
+            currentPosition = { ...currentPosition, x: directionX > 0 ? maximumX : minimumX };
+        }
+
+        if (isVerticalContact) {
+            currentPosition = { ...currentPosition, y: directionY > 0 ? maximumY : minimumY };
+        }
+
+        appendDistinctPathPoint(path, currentPosition);
+        remainingDistance = Math.max(0, remainingDistance - travelDistance);
+
+        if (isHorizontalContact && horizontalSpan > 0) {
+            directionX *= -1;
+        }
+
+        if (isVerticalContact && verticalSpan > 0) {
+            directionY *= -1;
+        }
+    }
 
     return {
-        coordinate:
-            distanceWithinFullTraversal <= playableLength
-                ? minimumCoordinate + distanceWithinFullTraversal
-                : maximumCoordinate - (distanceWithinFullTraversal - playableLength),
-        isDirectionReversed: wallCrossingCount % 2 === 1,
+        headPosition: currentPosition,
+        headAngleInRadians: Math.atan2(directionY, directionX),
+        path,
     };
 }
 
@@ -320,45 +412,121 @@ function getDesiredAngleInRadians(
 }
 
 /**
- * Keeps the head on the field by turning it away from the wall it is about to leave through
+ * Keeps only the part of the remembered path that can still be drawn by the tail
  */
-function reflectOffWalls(
-    previousHeadPosition: SnakePoint,
-    nextHeadPosition: SnakePoint,
-    headAngleInRadians: number,
-    bounds: SnakeBounds,
-): { readonly headPosition: SnakePoint; readonly headAngleInRadians: number } {
-    const { minimumX, maximumX, minimumY, maximumY } = getPlayableFieldBounds(bounds);
-    const horizontalReflection = reflectCoordinate(previousHeadPosition.x, nextHeadPosition.x, minimumX, maximumX);
-    const verticalReflection = reflectCoordinate(previousHeadPosition.y, nextHeadPosition.y, minimumY, maximumY);
-    const angleAfterHorizontalReflection = horizontalReflection.isDirectionReversed
-        ? Math.PI - headAngleInRadians
-        : headAngleInRadians;
-    const reflectedAngle = verticalReflection.isDirectionReversed
-        ? -angleAfterHorizontalReflection
-        : angleAfterHorizontalReflection;
+function trimTrailToBodyLength(trail: readonly SnakePoint[], segmentCount: number): SnakePoint[] {
+    const neededDistance = Math.max(0, segmentCount - 1) * SEGMENT_DISTANCE_IN_PIXELS;
+    const newestPoint = trail[0];
 
-    return {
-        headPosition: {
-            x: horizontalReflection.coordinate,
-            y: verticalReflection.coordinate,
-        },
-        headAngleInRadians: normalizeAngle(reflectedAngle),
-    };
+    if (newestPoint === undefined) {
+        return [];
+    }
+
+    const trimmedTrail = [newestPoint];
+    let rememberedDistance = 0;
+
+    for (let pointIndex = 1; pointIndex < trail.length; pointIndex++) {
+        const previousPoint = trail[pointIndex - 1];
+        const point = trail[pointIndex];
+
+        if (previousPoint === undefined || point === undefined) {
+            continue;
+        }
+
+        const segmentDistance = getDistance(previousPoint, point);
+        const remainingDistance = neededDistance - rememberedDistance;
+
+        if (segmentDistance <= remainingDistance) {
+            trimmedTrail.push(point);
+            rememberedDistance += segmentDistance;
+            continue;
+        }
+
+        if (segmentDistance > 0 && remainingDistance > 0) {
+            const ratio = remainingDistance / segmentDistance;
+
+            trimmedTrail.push({
+                x: previousPoint.x + (point.x - previousPoint.x) * ratio,
+                y: previousPoint.y + (point.y - previousPoint.y) * ratio,
+            });
+        }
+
+        break;
+    }
+
+    return trimmedTrail;
 }
 
 /**
- * Remembers where the head has been, dropping what is already behind the tail
+ * Adds the just-travelled path in reverse order so the newest head position stays at trail index zero
  */
-function extendTrail(trail: readonly SnakePoint[], headPosition: SnakePoint, segmentCount: number): SnakePoint[] {
-    const neededTrailLength = getNeededTrailLength(segmentCount);
-    const newestPoint = trail[0];
+function extendTrail(
+    trail: readonly SnakePoint[],
+    pathFromOldestToNewest: readonly SnakePoint[],
+    segmentCount: number,
+): SnakePoint[] {
+    const newestToOldestMovement = [...pathFromOldestToNewest].reverse();
 
-    if (newestPoint !== undefined && getDistance(newestPoint, headPosition) < TRAIL_POINT_DISTANCE_IN_PIXELS) {
-        return [...trail];
-    }
+    return trimTrailToBodyLength([...newestToOldestMovement, ...trail.slice(1)], segmentCount);
+}
 
-    return [headPosition, ...trail].slice(0, neededTrailLength);
+/**
+ * Rescales a running snake and its food when its CSS-sized field changes dimensions
+ */
+export function resizeSnakeState(
+    state: SnakeState,
+    previousBounds: SnakeBounds,
+    nextBounds: SnakeBounds,
+): SnakeState {
+    const previousField = getPlayableFieldBounds(previousBounds);
+    const nextField = getPlayableFieldBounds(nextBounds);
+    const previousHorizontalSpan = previousField.maximumX - previousField.minimumX;
+    const nextHorizontalSpan = nextField.maximumX - nextField.minimumX;
+    const previousVerticalSpan = previousField.maximumY - previousField.minimumY;
+    const nextVerticalSpan = nextField.maximumY - nextField.minimumY;
+    const horizontalScale = previousHorizontalSpan === 0 ? 1 : nextHorizontalSpan / previousHorizontalSpan;
+    const verticalScale = previousVerticalSpan === 0 ? 1 : nextVerticalSpan / previousVerticalSpan;
+    const resizeCoordinate = (
+        coordinate: number,
+        previousMinimum: number,
+        previousSpan: number,
+        nextMinimum: number,
+        nextSpan: number,
+        scale: number,
+    ) => (previousSpan === 0 ? nextMinimum + nextSpan / 2 : nextMinimum + (coordinate - previousMinimum) * scale);
+    const resizePoint = (point: SnakePoint): SnakePoint => ({
+        x: resizeCoordinate(
+            point.x,
+            previousField.minimumX,
+            previousHorizontalSpan,
+            nextField.minimumX,
+            nextHorizontalSpan,
+            horizontalScale,
+        ),
+        y: resizeCoordinate(
+            point.y,
+            previousField.minimumY,
+            previousVerticalSpan,
+            nextField.minimumY,
+            nextVerticalSpan,
+            verticalScale,
+        ),
+    });
+    const headAngleInRadians =
+        nextHorizontalSpan === 0 && nextVerticalSpan === 0
+            ? state.headAngleInRadians
+            : Math.atan2(
+                  Math.sin(state.headAngleInRadians) * verticalScale,
+                  Math.cos(state.headAngleInRadians) * horizontalScale,
+              );
+
+    return {
+        ...state,
+        headPosition: resizePoint(state.headPosition),
+        headAngleInRadians,
+        trail: state.trail.map(resizePoint),
+        food: state.food.map((food) => ({ ...food, position: resizePoint(food.position) })),
+    };
 }
 
 export type AdvanceSnakeStateOptions = {
@@ -386,17 +554,8 @@ export function advanceSnakeState(state: SnakeState, options: AdvanceSnakeStateO
     const turn = clamp(normalizeAngle(desiredAngle - state.headAngleInRadians), -maximumTurn, maximumTurn);
     const angleAfterTurn = normalizeAngle(state.headAngleInRadians + turn);
     const distance = SPEED_IN_PIXELS_PER_SECOND * stepInSeconds;
-
-    const nextHeadPosition = {
-        x: state.headPosition.x + Math.cos(angleAfterTurn) * distance,
-        y: state.headPosition.y + Math.sin(angleAfterTurn) * distance,
-    };
-    const { headPosition, headAngleInRadians } = reflectOffWalls(
-        state.headPosition,
-        nextHeadPosition,
-        angleAfterTurn,
-        options.bounds,
-    );
+    const movement = traceReflectedMovement(state.headPosition, angleAfterTurn, distance, options.bounds);
+    const { headPosition, headAngleInRadians } = movement;
 
     const eatenFood = state.food.filter(
         (food) => getDistance(food.position, headPosition) <= EATING_DISTANCE_IN_PIXELS,
@@ -415,7 +574,7 @@ export function advanceSnakeState(state: SnakeState, options: AdvanceSnakeStateO
     return {
         headPosition,
         headAngleInRadians,
-        trail: extendTrail(state.trail, headPosition, segmentCount),
+        trail: extendTrail(state.trail, movement.path, segmentCount),
         segmentCount,
         food,
         score: state.score + eatenFood.length,
@@ -424,16 +583,56 @@ export function advanceSnakeState(state: SnakeState, options: AdvanceSnakeStateO
 }
 
 /**
- * Where the body of the snake is drawn, from right behind the head to the tip of the tail
+ * The centre-line samples behind the nose, retaining every exact wall contact between regular spacing points
  */
-export function getSnakeSegments(state: SnakeState): readonly SnakePoint[] {
-    const trailPointsPerSegment = SEGMENT_DISTANCE_IN_PIXELS / TRAIL_POINT_DISTANCE_IN_PIXELS;
+export function getSnakeSegments(state: SnakeState, bounds: SnakeBounds): readonly SnakePoint[] {
+    const trail = trimTrailToBodyLength(state.trail, state.segmentCount);
+    const { minimumX, maximumX, minimumY, maximumY } = getPlayableFieldBounds(bounds);
+    const bodyLength = Math.max(0, state.segmentCount - 1) * SEGMENT_DISTANCE_IN_PIXELS;
     const segments: SnakePoint[] = [];
+    let distanceAlongPath = 0;
+    let nextRegularSampleDistance = TRAIL_POINT_DISTANCE_IN_PIXELS;
 
-    for (let segmentIndex = 0; segmentIndex < state.segmentCount; segmentIndex++) {
-        const trailIndex = Math.round(segmentIndex * trailPointsPerSegment);
+    for (let pointIndex = 1; pointIndex < trail.length; pointIndex++) {
+        const previousPoint = trail[pointIndex - 1];
+        const point = trail[pointIndex];
 
-        segments.push(state.trail[Math.min(trailIndex, state.trail.length - 1)]);
+        if (previousPoint === undefined || point === undefined) {
+            continue;
+        }
+
+        const pathSegmentDistance = getDistance(previousPoint, point);
+        const distanceAtSegmentEnd = distanceAlongPath + pathSegmentDistance;
+
+        while (
+            pathSegmentDistance > 0 &&
+            nextRegularSampleDistance <= distanceAtSegmentEnd + WALL_CONTACT_DISTANCE_TOLERANCE &&
+            nextRegularSampleDistance <= bodyLength
+        ) {
+            const ratio = clamp((nextRegularSampleDistance - distanceAlongPath) / pathSegmentDistance, 0, 1);
+
+            appendDistinctPathPoint(segments, {
+                x: previousPoint.x + (point.x - previousPoint.x) * ratio,
+                y: previousPoint.y + (point.y - previousPoint.y) * ratio,
+            });
+            nextRegularSampleDistance += TRAIL_POINT_DISTANCE_IN_PIXELS;
+        }
+
+        const isWallContactPoint =
+            Math.abs(point.x - minimumX) <= WALL_CONTACT_DISTANCE_TOLERANCE ||
+            Math.abs(point.x - maximumX) <= WALL_CONTACT_DISTANCE_TOLERANCE ||
+            Math.abs(point.y - minimumY) <= WALL_CONTACT_DISTANCE_TOLERANCE ||
+            Math.abs(point.y - maximumY) <= WALL_CONTACT_DISTANCE_TOLERANCE;
+
+        if (isWallContactPoint && distanceAtSegmentEnd <= bodyLength + WALL_CONTACT_DISTANCE_TOLERANCE) {
+            appendDistinctPathPoint(segments, point);
+        }
+
+        distanceAlongPath = distanceAtSegmentEnd;
+
+        if (distanceAlongPath >= bodyLength) {
+            break;
+        }
     }
 
     return segments;
