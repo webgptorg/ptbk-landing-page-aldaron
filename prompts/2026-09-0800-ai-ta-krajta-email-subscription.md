@@ -39,3 +39,9 @@
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
 
+---
+
+
+[ ]
+
+[✨📬] The subscription in AI ta Krajta page should be also in the footer and linked in menu, put the subscription after episodes
