@@ -1,4 +1,4 @@
-[ ]
+[ ] use `gpt-6-astra`
 
 [✨🎞️] Open recordings in a synchronized multi-track preparation editor instead of a collection of independent videos
 

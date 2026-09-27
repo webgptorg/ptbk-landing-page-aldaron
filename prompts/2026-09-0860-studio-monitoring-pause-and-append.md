@@ -1,4 +1,4 @@
-[ ]
+[ ] use `gpt-6-sol`
 
 [✨⏯️] Add configurable live monitoring, synchronized pause/resume and append recording to the shared studio
 

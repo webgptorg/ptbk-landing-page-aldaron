@@ -1,4 +1,4 @@
-[ ]
+[ ] use `gpt-6-sol`
 
 [✨📝] Generate separate subtitle and speech-event tracks from a chosen recorded audio source
 
