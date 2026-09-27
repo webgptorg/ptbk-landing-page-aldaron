@@ -2,6 +2,7 @@
 
 
 import { Button } from '@/components/ui/button';
+import { RecordingDisplayCaptureHelp } from './RecordingDisplayCaptureHelp';
 import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { getRecordingErrorMessage } from '@/lib/recording-studio/recordingStudioDevices';
 import { createRecordingSourceConfiguration, isUnknownLegacyDeviceId } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
@@ -122,6 +123,7 @@ export function RecordingSourcePicker({ onAdd, onClose, initialConfiguration, in
                 {isSavedMicrophoneMissing && microphoneDeviceId && <p role="status" className="text-sm text-amber-800">Původní mikrofon „{initialConfiguration?.microphoneDeviceLabel || 'bez známého názvu'}“ se v dostupném seznamu neukazuje. Studio nepřejde na jiný mikrofon samo; vyberte náhradu, nebo zkuste původní volbu znovu.</p>}
             </>}
             {kind === 'screen' && <>
+                <RecordingDisplayCaptureHelp />
                 <label className="block text-sm font-medium">Preferovaný typ sdílené plochy
                     <select className="mt-2 w-full rounded-lg border p-3" value={displaySurface ?? ''} disabled={isAdding} onChange={(event) => setDisplaySurface((event.target.value || null) as RecordingDisplaySurface | null)}>
                         <option value="">Bez preference</option><option value="window">Okno</option><option value="browser">Karta prohlížeče</option><option value="monitor">Celá obrazovka</option>

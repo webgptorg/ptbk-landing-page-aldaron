@@ -1,5 +1,23 @@
 # Current preversion
 
+- Investigated the missing VS Code window reported on another macOS Space. The studio's shared capture path does not
+  enumerate or filter system windows; its optional `displaySurface` value is a type preference, and the browser/OS
+  owns the chooser. Added contextual Spaces guidance beside manual, restored, and historical screen-source selection,
+  plus an authenticated diagnostic which calls plain `getDisplayMedia({ video: true, audio: false })` and records the
+  browser's track events, selected surface, frame callbacks, permission/window-state details, and observed Space-switch
+  continuity. A muted required video track is now visibly unavailable, blocks Start, and interrupts an active take as
+  incomplete with reconnect guidance; an ended display source asks the administrator to select it again. Whole-display
+  sharing stays explicit and warns that other windows and notifications may be recorded. The investigation note
+  includes current standards/browser documentation, dated historical issue context, and a reproduction matrix. The
+  affected Mac/browser versions, system permission state, same-Space/fullscreen/minimized/hidden/monitor results, and
+  frame continuity are still unverified because the physical Mac was unavailable; neither the same-Space trial nor
+  whole-display continuation is claimed as a verified Space-switch workaround. `npm run test-types`, 31 focused unit
+  tests, and seven focused Playwright cases covering the plain probe, screen-source setup, cancellation, muted-source
+  handling, and restored/historic configurations passed. An earlier full 16-case run had one audio/video marker timing
+  assertion pass only on its automatic retry. Display picker/streams are synthetic and do not prove native macOS or
+  physical Windows picker behavior; a tested Space-switch workaround remains outstanding until the affected Mac is
+  reproduced.
+
 - Saved recordings now keep an immutable source-configuration snapshot, with **Použít tuto konfiguraci zdrojů** in
   their list and editor. Reuse replaces a different browser setup only after confirmation, preserves matching live
   previews, and routes remaining camera, microphone and display sources through the existing per-source reconnect

@@ -2,7 +2,9 @@
 
 import { Button } from '@/components/ui/button';
 import { formatRecordingBytes } from '@/lib/recording-studio/recordingStudioTiming';
+import { isRecordingSourceReady, isRecordingSourceTemporarilyUnavailable } from '@/lib/recording-studio/recordingStudioDevices';
 import type { RecordingSource, RecordingSourceConfiguration, RecordingSourceReadiness } from '@/lib/recording-studio/recordingStudioTypes';
+import { RecordingDisplayCaptureHelp } from './RecordingDisplayCaptureHelp';
 import { ArrowDown, ArrowUp, Mic, Monitor, Video } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -67,6 +69,7 @@ const SOURCE_READINESS_LABELS: Record<RecordingSourceReadiness, string> = {
     ready: 'Připraveno k nahrávání',
     'needs-permission': 'Vyžaduje připojení nebo nové oprávnění',
     disconnected: 'Zdroj je odpojený',
+    'temporarily-unavailable': 'Prohlížeč nebo systém dočasně neposílá obraz či zvuk',
     unavailable: 'Zdroj není dostupný; zkontrolujte výběr',
 };
 
@@ -90,8 +93,13 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
     const [isConnecting, setIsConnecting] = useState(false);
     const audioTracks = source?.stream.getAudioTracks() ?? [];
     const isAudioIncluded = audioTracks.some((track) => track.readyState === 'live');
-    const isSourceLive = Boolean(source?.stream.getTracks().some((track) => track.readyState === 'live'));
-    const isReady = Boolean(source && readiness === 'ready');
+    const isTemporarilyUnavailable = Boolean(source && isRecordingSourceTemporarilyUnavailable(source));
+    const currentReadiness = isTemporarilyUnavailable ? 'temporarily-unavailable' : readiness;
+    const isSourceLive = Boolean(source?.stream.getTracks().some((track) => track.readyState === 'live') && currentReadiness === 'ready');
+    const isReady = Boolean(source && currentReadiness === 'ready' && isRecordingSourceReady(source));
+    const currentErrorMessage = errorMessage ?? (isTemporarilyUnavailable
+        ? 'Prohlížeč nebo systém dočasně neposílá požadovaný obraz či zvuk. Nahrávání zůstává vypnuté; připojte zdroj znovu nebo změňte výběr.'
+        : null);
     const { level: audioLevel, isMuted: isAudioTrackMuted } = useAudioLevel(source?.stream ?? null);
     useEffect(() => {
         const video = videoReference.current;
@@ -110,7 +118,7 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
                     ? <video ref={videoReference} autoPlay muted playsInline className="h-full w-full object-contain" aria-label={`Ztlumený živý náhled: ${configuration.label}`} />
                     : <Icon className="h-12 w-12 text-cyan-300" aria-hidden="true" />}
                 <span className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs font-medium ${isSourceLive ? 'bg-emerald-950/80 text-emerald-100' : 'bg-slate-800 text-slate-200'}`}>
-                    {!configuration.isCaptureEnabled ? 'Vypnuto' : isRecording && isReady ? 'Nahrává' : isSourceLive ? 'Náhled aktivní' : SOURCE_READINESS_LABELS[readiness]}
+                    {!configuration.isCaptureEnabled ? 'Vypnuto' : isRecording && isReady ? 'Nahrává' : isSourceLive ? 'Náhled aktivní' : SOURCE_READINESS_LABELS[currentReadiness]}
                 </span>
             </div>
             <div className="space-y-3 p-4">
@@ -125,7 +133,7 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
                     <input type="checkbox" checked={configuration.isCaptureEnabled} disabled={isBusy} onChange={(event) => onSetCaptureEnabled(event.target.checked)} className="h-4 w-4 accent-cyan-700" />
                     Nahrávat tento zdroj
                 </label>
-                <p role="status" className="text-xs text-slate-600">{configuration.isCaptureEnabled ? SOURCE_READINESS_LABELS[readiness] : 'Tento zdroj je vypnutý a nebude součástí nového záznamu.'}</p>
+                <p role="status" className="text-xs text-slate-600">{configuration.isCaptureEnabled ? SOURCE_READINESS_LABELS[currentReadiness] : 'Tento zdroj je vypnutý a nebude součástí nového záznamu.'}</p>
                 {configuration.kind === 'camera' && configuration.isAudioEnabled
                     ? <>
                         <p className="truncate text-xs text-slate-600" title={microphoneName}>Mikrofon: {microphoneName}</p>
@@ -137,6 +145,7 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
                             ? <p className={`text-xs font-medium ${isAudioTrackMuted ? 'text-amber-800' : 'text-emerald-800'}`}>Zvuková stopa: {isAudioIncluded ? isAudioTrackMuted ? 'přítomna, ale mikrofon dočasně neposílá data' : 'přítomna' : 'čeká na připojení'}</p>
                             : <p className="text-xs text-slate-600">Zvuk obrazovky/karty: {isAudioIncluded ? 'přítomen' : configuration.isAudioEnabled ? 'není dostupný z aktuální volby' : 'nepožadován'}</p>}
                 {configuration.kind === 'screen' && <p className="truncate text-xs text-slate-600" title={configuration.displaySourceLabel ?? undefined}>Předchozí výběr: {configuration.displaySourceLabel ?? 'zvolí se při připojení'}</p>}
+                {configuration.kind === 'screen' && <RecordingDisplayCaptureHelp compact />}
                 {isAudioIncluded && <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs text-slate-600"><span>Živá úroveň zvuku · stopa přítomna</span><span>{audioLevel === null ? 'měřič nedostupný' : `${audioLevel}%`}</span></div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-200" role="meter" aria-label="Úroveň živého zvuku" aria-valuemin={0} aria-valuemax={100} aria-valuenow={audioLevel ?? 0}>
@@ -145,12 +154,12 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
                 </div>}
                 {isVideoSource && source?.stream.getAudioTracks().length ? <p className="text-xs text-slate-500">Náhled obrazu je ztlumený; zvuk se dál ukládá do souboru.</p> : null}
                 {isRecording && source && <p className="text-xs text-slate-500">Uloženo {formatRecordingBytes(byteLength)}</p>}
-                {errorMessage && <p role="alert" className="rounded bg-red-50 p-2 text-xs leading-5 text-red-800">{errorMessage}</p>}
+                {currentErrorMessage && <p role="alert" className="rounded bg-red-50 p-2 text-xs leading-5 text-red-800">{currentErrorMessage}</p>}
                 <div className="flex flex-wrap gap-2">
                     {configuration.isCaptureEnabled && !isReady && <Button type="button" variant="outline" size="sm" disabled={isBusy || isConnecting} onClick={() => {
                         setIsConnecting(true);
                         void onConnect().catch(() => undefined).finally(() => setIsConnecting(false));
-                    }}>{isConnecting ? 'Připojuji…' : readiness === 'needs-permission' ? 'Připojit' : 'Zkusit znovu'}</Button>}
+                    }}>{isConnecting ? 'Připojuji…' : currentReadiness === 'needs-permission' ? 'Připojit' : 'Zkusit znovu'}</Button>}
                     {children}
                     <Button type="button" variant="outline" size="sm" disabled={isBusy} onClick={onRemove}>Odebrat zdroj</Button>
                 </div>

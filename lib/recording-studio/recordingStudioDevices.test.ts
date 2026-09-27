@@ -149,17 +149,32 @@ describe('recording device acquisition', () => {
         expect(mediaDevices.getUserMedia).toHaveBeenCalledOnce();
     });
 
-    it('uses a supported screen-selection hint while preserving the configured label and renewed chooser boundary', async () => {
+    it.each(['browser', 'window', 'monitor'] as const)('preserves the user-selected %s pane preference when supported', async (displaySurface) => {
         const selectedStream = new TestStream([new TestTrack('video', 'Window: slides.pdf', 'display')]) as unknown as MediaStream;
         const mediaDevices = createEnvironment(async () => { throw new Error('A screen source does not use getUserMedia.'); }, async () => selectedStream);
-        const configuration = { ...createRecordingSourceConfiguration('screen', 'Presentation window'), displaySurface: 'window' as const };
+        const configuration = { ...createRecordingSourceConfiguration('screen', 'Presentation window'), displaySurface };
         const source = await acquireRecordingSource(configuration);
         expect(mediaDevices.getDisplayMedia).toHaveBeenCalledOnce();
         expect(mediaDevices.getDisplayMedia).toHaveBeenCalledWith(expect.objectContaining({
-            audio: true, video: expect.objectContaining({ displaySurface: 'window' }),
+            audio: true, video: expect.objectContaining({ displaySurface }),
         }));
         expect(source.label).toBe('Presentation window');
         expect(source.displaySourceLabel).toBe('Window: slides.pdf');
+    });
+
+    it('keeps screen sharing available when optional supported-constraints detection is absent', async () => {
+        const selectedStream = new TestStream([new TestTrack('video', 'Shared browser tab', 'display')]) as unknown as MediaStream;
+        const mediaDevices = createEnvironment(async () => { throw new Error('A screen source does not use getUserMedia.'); }, async () => selectedStream);
+        Object.defineProperty(mediaDevices, 'getSupportedConstraints', { value: undefined });
+        const configuration = { ...createRecordingSourceConfiguration('screen'), displaySurface: 'browser' as const };
+
+        await acquireRecordingSource(configuration);
+
+        expect(mediaDevices.getDisplayMedia).toHaveBeenCalledOnce();
+        expect(mediaDevices.getDisplayMedia).toHaveBeenCalledWith({
+            audio: true,
+            video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+        });
     });
 
     it('marks each required track as part of readiness and classifies cancelled permissions separately', () => {
@@ -173,6 +188,15 @@ describe('recording device acquisition', () => {
         expect(isRecordingSourceReady(source)).toBe(false);
         expect(getRecordingSourceReadiness(new DOMException('', 'AbortError'))).toBe('needs-permission');
         expect(getRecordingSourceReadiness(new DOMException('', 'OverconstrainedError'))).toBe('unavailable');
+    });
+
+    it('does not report a live but muted screen-video track as ready', () => {
+        const source = createSource('camera');
+        const videoTrack = source.stream.getVideoTracks()[0] as unknown as TestTrack;
+        videoTrack.muted = true;
+        expect(isRecordingSourceReady(source)).toBe(false);
+        videoTrack.muted = false;
+        expect(isRecordingSourceReady(source)).toBe(true);
     });
 
     it('explains denied, absent, busy and unsupported input requests separately', () => {

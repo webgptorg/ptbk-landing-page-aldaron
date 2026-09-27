@@ -22,7 +22,7 @@ async function openStudio(page: Page, baseURL: string | undefined) {
         const streams: MediaStream[] = [];
         const mediaRequests: MediaStreamConstraints[] = [];
         const displayRequests: DisplayMediaStreamOptions[] = [];
-        const testSettings = { cameraAudioErrorName: null as string | null, displayErrorName: null as string | null };
+        const testSettings = { cameraAudioErrorName: null as string | null, displayErrorName: null as string | null, displayInitiallyMuted: false };
         const markerPeriodMilliseconds = 700;
         const markerDurationSeconds = 0.24;
         const markerTimeOrigin = performance.now();
@@ -81,7 +81,11 @@ async function openStudio(page: Page, baseURL: string | undefined) {
             getDisplayMedia: { value: (options: DisplayMediaStreamOptions = {}) => {
                 displayRequests.push(options);
                 if (testSettings.displayErrorName) return Promise.reject(new DOMException('Synthetic display capture cancellation', testSettings.displayErrorName));
-                return createStream(true, options.audio !== false);
+                return createStream(true, options.audio !== false).then((stream) => {
+                    const videoTrack = stream.getVideoTracks()[0];
+                    if (testSettings.displayInitiallyMuted) Object.defineProperty(videoTrack, 'muted', { configurable: true, value: true });
+                    return stream;
+                });
             } },
             enumerateDevices: { value: () => Promise.resolve([]) },
         });
@@ -102,6 +106,11 @@ async function openStudio(page: Page, baseURL: string | undefined) {
 async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone', isAudioEnabled = true) {
     await page.getByRole('button', { name: 'Přidat zdroj', exact: true }).click();
     await page.getByLabel('Typ zdroje').selectOption(kind);
+    if (kind === 'screen') {
+        const sourceDialog = page.getByRole('dialog');
+        await expect(sourceDialog.getByText('macOS Spaces: okno může v prohlížeči chybět nebo přestat posílat obraz', { exact: true })).toBeVisible();
+        await expect(sourceDialog.getByRole('link', { name: 'Otevřít základní test výběru a průběžného obrazu' })).toBeVisible();
+    }
     if (kind === 'camera' && !isAudioEnabled) await page.getByLabel('Nahrávat zvuk', { exact: true }).uncheck();
     await page.getByRole('button', { name: 'Připojit zdroj', exact: true }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -206,6 +215,18 @@ async function inspectAudioVideoMarkers(page: Page, bytes: Uint8Array, mimeType:
 test('requires admin authentication for the recording studio', async ({ page }) => {
     await page.goto('/admin/recording-studio');
     await expect(page).toHaveURL(/\/admin\/login\?redirectPath=%2Fadmin%2Frecording-studio/);
+});
+
+test('plain capture diagnostic requests a user-selected display without studio preferences', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await page.goto('/admin/recording-studio/capture-probe');
+    await page.getByRole('button', { name: 'Vybrat zdroj a spustit základní test' }).click();
+    await expect(page.getByText('Stav: live', { exact: true })).toBeVisible();
+    const displayRequests = await page.evaluate(() => (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests);
+    expect(displayRequests).toEqual([{ video: true, audio: false }]);
+    await expect(page.getByText(/Video snímky/)).toBeVisible();
+    await page.getByRole('button', { name: 'Zastavit testovací stream' }).click();
+    await expect(page.getByText('Stav: stopped', { exact: true })).toBeVisible();
 });
 
 test('records separate sources, restores them, trims every track and exports playable editor material', async ({ page, baseURL }, testInfo) => {
@@ -366,6 +387,59 @@ test('blocks Start when a live camera preview loses its required microphone inpu
     await expect(startButton).toBeEnabled();
 });
 
+test('shows a muted display source as temporarily unavailable and requests reconnection', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'screen');
+    const startButton = page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true });
+    await expect(startButton).toBeEnabled();
+    await expect(page.getByText('macOS Spaces: okno může v prohlížeči chybět nebo přestat posílat obraz')).toBeVisible();
+    await page.evaluate(() => {
+        const videoTrack = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[0].getVideoTracks()[0];
+        Object.defineProperty(videoTrack, 'muted', { configurable: true, value: true });
+        videoTrack.dispatchEvent(new Event('mute'));
+    });
+    await expect(startButton).toBeDisabled();
+    await expect(page.getByRole('alert').filter({ hasText: 'dočasně neposílá' }).last()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zkusit znovu', exact: true })).toBeVisible();
+    await page.evaluate(() => {
+        const videoTrack = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[0].getVideoTracks()[0];
+        Object.defineProperty(videoTrack, 'muted', { configurable: true, value: false });
+        videoTrack.dispatchEvent(new Event('unmute'));
+    });
+    await expect(startButton).toBeEnabled();
+});
+
+test('reports a display track that is already muted when selection returns', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { displayInitiallyMuted: boolean } }).studioTestSettings.displayInitiallyMuted = true;
+    });
+    await addSource(page, 'screen');
+
+    await expect(page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true })).toBeDisabled();
+    await expect(page.getByRole('alert').filter({ hasText: 'dočasně neposílá obraz' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zkusit znovu', exact: true })).toBeVisible();
+});
+
+test('keeps the Space guidance available when reusing a historic screen-source configuration', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'screen');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Uvolnit všechna zařízení', exact: true }).click();
+
+    await page.getByRole('button', { name: 'Použít tuto konfiguraci zdrojů', exact: true }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Sdílenou obrazovku nebo okno vyberte znovu' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Připojit', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests)).toHaveLength(1);
+    const historicScreenHelp = page.getByText('macOS Spaces: okno může v prohlížeči chybět nebo přestat posílat obraz', { exact: true });
+    await expect(historicScreenHelp).toBeVisible();
+    await historicScreenHelp.click();
+    await expect(page.getByRole('link', { name: 'Otevřít základní test výběru a průběžného obrazu' })).toBeVisible();
+});
+
 test('restores source preferences after closing and reopening the same browser profile', async ({ browser, baseURL }, testInfo) => {
     test.skip(!process.env.ADMIN_PASSWORD, 'Needs the local test server admin password.');
     const temporaryRoot = resolve(tmpdir());
@@ -410,6 +484,10 @@ test('restores source preferences after closing and reopening the same browser p
             configurations: { id: string; kind: string; isAudioEnabled: boolean; isCaptureEnabled: boolean }[];
         });
         expect(restoredConfigurations.configurations).toEqual(savedSourceIds.configurations);
+        const restoredScreenHelp = page.getByText('macOS Spaces: okno může v prohlížeči chybět nebo přestat posílat obraz', { exact: true });
+        await expect(restoredScreenHelp).toBeVisible();
+        await restoredScreenHelp.click();
+        await expect(page.getByRole('link', { name: 'Otevřít základní test výběru a průběžného obrazu' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true })).toBeDisabled();
     } finally {
         await context?.close();

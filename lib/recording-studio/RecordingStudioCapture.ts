@@ -121,7 +121,14 @@ export class RecordingStudioCapture {
         const audioTrack = source.stream.getAudioTracks().find((track) => track.readyState === 'live');
         const isVideoRequired = source.kind !== 'microphone';
         const isAudioRequired = source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled);
-        if (isVideoRequired && !hasVideo) throw new Error(`Kamera „${source.label}“ už neposkytuje obraz. Připojte ji znovu.`);
+        if (isVideoRequired && !hasVideo) {
+            throw new Error(source.kind === 'screen'
+                ? `Sdílené okno, karta nebo obrazovka „${source.label}“ už neposkytuje obraz. Znovu připojte zdroj a vyberte jej v dialogu prohlížeče.`
+                : `Kamera „${source.label}“ už neposkytuje obraz. Připojte ji znovu.`);
+        }
+        if (isVideoRequired && source.stream.getVideoTracks().some((track) => track.readyState === 'live' && track.muted)) {
+            throw new Error(`Prohlížeč nebo systém dočasně přestal poskytovat obraz ze zdroje „${source.label}“. Záznam nelze bezpečně zahájit; počkejte, až bude zdroj dostupný, a připojte jej znovu.`);
+        }
         if (isAudioRequired && !audioTrack) throw new Error(`Požadovaná zvuková stopa mikrofonu „${source.microphoneLabel || source.label}“ chybí. Připojte mikrofon znovu, vyberte jiný nebo výslovně zvolte video bez zvuku.`);
         if (isAudioRequired && audioTrack?.muted) throw new Error(`Mikrofon „${source.microphoneLabel || source.label}“ právě neposílá zvuk. Připojte ho znovu nebo výslovně zvolte tiché video.`);
     }
@@ -145,8 +152,10 @@ export class RecordingStudioCapture {
             const handleEnded = () => { void this.stop(`Zdroj „${source.label}“ byl odpojen. Všechny stopy byly zastaveny.`); };
             const isRequiredMicrophone = track.kind === 'audio' &&
                 (source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled));
+            const isRequiredVideo = track.kind === 'video' && source.kind !== 'microphone';
             const handleMuted = () => {
                 if (isRequiredMicrophone) void this.stop(`Mikrofon „${source.microphoneLabel || source.label}“ přestal posílat zvuk. Všechny stopy byly zastaveny; uložené části zůstávají dostupné.`);
+                if (isRequiredVideo) void this.stop(`Prohlížeč nebo systém dočasně přestal poskytovat obraz ze zdroje „${source.label}“ (video stopa byla ztlumena). Záznam byl přerušen, nejde o běžnou pauzu; uložené části zůstávají dostupné. Připojte zdroj znovu a potvrďte nový výběr.`);
             };
             track.addEventListener('ended', handleEnded);
             track.addEventListener('mute', handleMuted);

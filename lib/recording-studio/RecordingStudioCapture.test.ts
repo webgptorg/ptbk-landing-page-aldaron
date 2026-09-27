@@ -23,7 +23,7 @@ class TestRecorder {
 }
 
 function makeSource(id: string, isAudioIncluded = false): RecordingSource {
-    const videoTrack = Object.assign(new EventTarget(), { readyState: 'live', label: id, getSettings: () => ({ width: 640, height: 480, frameRate: 30 }) });
+    const videoTrack = Object.assign(new EventTarget(), { kind: 'video', readyState: 'live', muted: false, label: id, getSettings: () => ({ width: 640, height: 480, frameRate: 30 }) });
     const audioTrack = Object.assign(new EventTarget(), { kind: 'audio', readyState: 'live', muted: false, label: 'Fixture microphone', getSettings: () => ({ deviceId: 'fixture-mic' }) });
     const audioTracks = isAudioIncluded ? [audioTrack] : [];
     return {
@@ -96,6 +96,21 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result?.status).toBe('interrupted');
         expect(result?.errorMessage).toContain('přestal posílat zvuk');
         expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
+    });
+
+    it('interrupts a screen recording when the browser temporarily mutes its video track', async () => {
+        const cameraFixture = makeSource('VS Code on another Space');
+        const source: RecordingSource = { ...cameraFixture, kind: 'screen', displaySurface: 'window' };
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([source]);
+        const videoTrack = source.stream.getVideoTracks()[0] as MediaStreamTrack & { muted: boolean };
+        videoTrack.muted = true;
+        videoTrack.dispatchEvent(new Event('mute'));
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('dočasně přestal poskytovat obraz');
+        expect(result?.errorMessage).toContain('nejde o běžnou pauzu');
+        expect(TestRecorder.instances[0].state).toBe('inactive');
     });
 
     it('stops all sources when a device disconnects', async () => {

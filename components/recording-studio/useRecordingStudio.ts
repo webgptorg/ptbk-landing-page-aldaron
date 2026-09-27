@@ -3,7 +3,7 @@
 import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { RecordingStudioCapture } from '@/lib/recording-studio/RecordingStudioCapture';
-import { acquireRecordingSource, getRecordingErrorMessage, getRecordingSourceReadiness, isRecordingSourceReady, matchesRecordingSourceConfiguration, reconcileRecordingSourcesForConfiguration, releaseRecordingSource } from '@/lib/recording-studio/recordingStudioDevices';
+import { acquireRecordingSource, getRecordingErrorMessage, getRecordingSourceReadiness, isRecordingSourceReady, isRecordingSourceTemporarilyUnavailable, matchesRecordingSourceConfiguration, reconcileRecordingSourcesForConfiguration, releaseRecordingSource } from '@/lib/recording-studio/recordingStudioDevices';
 import { clearRecordingSourceConfigurations, loadRecordingSourceConfigurations, saveRecordingSourceConfigurations, toRecordingSourceConfiguration, UNKNOWN_LEGACY_DEVICE_ID, type RecordingSourceConfigurationRestore } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
 import { runWithRecordingStudioLock } from '@/lib/recording-studio/recordingStudioLock';
 import { estimateRecordingStorage, getRecordingStorageErrorMessage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
@@ -20,6 +20,34 @@ function getMutedAudioReadinessMessage(source: RecordingSource, configuration: R
     return configuration.kind === 'camera'
         ? `Mikrofon „${microphoneName}“ dočasně neposílá zvuk. Znovu připojte kameru se zvukem nebo výslovně vypněte Nahrávat zvuk.`
         : `Mikrofon „${microphoneName}“ dočasně neposílá zvuk. Znovu připojte zdroj nebo vyberte jiný mikrofon.`;
+}
+
+function getMutedVideoReadinessMessage(source: RecordingSource): string {
+    return `Prohlížeč nebo systém dočasně neposílá obraz ze zdroje „${source.label}“. Záznam se při tomto přerušení zastaví; připojte zdroj znovu a potvrďte výběr v prohlížeči.`;
+}
+
+function getRecordingSourceReadinessMessage(source: RecordingSource, configuration: RecordingSourceConfiguration): string {
+    const videoTrack = source.stream.getVideoTracks()[0];
+    if (configuration.kind !== 'microphone') {
+        if (videoTrack?.readyState === 'live' && videoTrack.muted) return getMutedVideoReadinessMessage(source);
+        if (!videoTrack || videoTrack.readyState === 'ended') {
+            return configuration.kind === 'screen'
+                ? `Sdílené okno, karta nebo obrazovka „${source.label}“ skončila. Připojte zdroj znovu a vyberte jej v dialogu prohlížeče.`
+                : `Obraz z kamery „${source.label}“ skončil. Připojte kameru znovu nebo změňte výběr.`;
+        }
+    }
+
+    const isAudioRequired = configuration.kind === 'microphone' ||
+        (configuration.kind === 'camera' && configuration.isAudioEnabled);
+    if (isAudioRequired) {
+        const audioTrack = source.stream.getAudioTracks()[0];
+        if (audioTrack?.readyState === 'live' && audioTrack.muted) return getMutedAudioReadinessMessage(source, configuration);
+        if (!audioTrack || audioTrack.readyState === 'ended') {
+            return `Mikrofon „${source.microphoneLabel || source.label}“ skončil. Připojte zdroj znovu nebo vyberte jiný mikrofon.`;
+        }
+    }
+
+    return `Zdroj „${source.label}“ není připraven. Připojte jej znovu nebo změňte výběr.`;
 }
 
 export function useRecordingStudio() {
@@ -264,9 +292,13 @@ export function useRecordingStudio() {
             const updatedConfigurations = current.sourceConfigurations.map((candidate) => candidate.id === source.id ? savedConfiguration : candidate);
             persistSourceConfigurations(updatedConfigurations);
             const isSourceReady = isRecordingSourceReady(source);
-            setSourceReadiness((previous) => ({ ...previous, [source.id]: isSourceReady ? 'ready' : 'unavailable' }));
+            const isTemporarilyUnavailable = isRecordingSourceTemporarilyUnavailable(source);
+            setSourceReadiness((previous) => ({
+                ...previous,
+                [source.id]: isSourceReady ? 'ready' : isTemporarilyUnavailable ? 'temporarily-unavailable' : 'unavailable',
+            }));
             if (!isSourceReady) {
-                setSourceErrors((previous) => ({ ...previous, [source.id]: getMutedAudioReadinessMessage(source, configuration) }));
+                setSourceErrors((previous) => ({ ...previous, [source.id]: getRecordingSourceReadinessMessage(source, configuration) }));
             }
             source.stream.getTracks().forEach((track) => {
                 track.addEventListener('ended', () => {
@@ -274,7 +306,9 @@ export function useRecordingStudio() {
                     releaseRecordingSource(source);
                     current.sources = current.sources.filter((candidate) => candidate.id !== source.id);
                     setSources([...current.sources]);
-                    const message = `Zařízení „${source.label}“ bylo odpojeno. Připojte jej znovu nebo změňte výběr.`;
+                    const message = configuration.kind === 'screen'
+                        ? `Sdílené okno, karta nebo obrazovka „${source.label}“ skončila nebo byla odpojena. Připojte zdroj znovu a vyberte jej v dialogu prohlížeče.`
+                        : `Zařízení „${source.label}“ bylo odpojeno. Připojte jej znovu nebo změňte výběr.`;
                     setSourceErrors((previous) => ({ ...previous, [source.id]: message }));
                     setSourceReadiness((previous) => ({ ...previous, [source.id]: 'disconnected' }));
                     setErrorMessage(message);
@@ -282,20 +316,23 @@ export function useRecordingStudio() {
 
                 const isRequiredAudioTrack = track.kind === 'audio' &&
                     (configuration.kind === 'microphone' || (configuration.kind === 'camera' && configuration.isAudioEnabled));
-                if (isRequiredAudioTrack) {
-                    const updateAudioReadiness = () => {
-                        if (current.isDisposed || current.capture || source.stream.getTracks().some((sourceTrack) => sourceTrack.readyState === 'ended')) return;
-                        const isAudioReady = isRecordingSourceReady(source);
-                        setSourceReadiness((previous) => ({ ...previous, [source.id]: isAudioReady ? 'ready' : 'unavailable' }));
+                const isRequiredVideoTrack = track.kind === 'video' && configuration.kind !== 'microphone';
+                if (isRequiredAudioTrack || isRequiredVideoTrack) {
+                    const updateTrackReadiness = () => {
+                        if (current.isDisposed || source.stream.getTracks().some((sourceTrack) => sourceTrack.readyState === 'ended')) return;
+                        const isSourceReady = isRecordingSourceReady(source);
+                        const isTemporarilyUnavailable = track.muted;
+                        const nextReadiness = isSourceReady ? 'ready' : isTemporarilyUnavailable ? 'temporarily-unavailable' : 'unavailable';
+                        setSourceReadiness((previous) => ({ ...previous, [source.id]: nextReadiness }));
                         setSourceErrors((previous) => {
                             const next = { ...previous };
-                            if (isAudioReady) delete next[source.id];
-                            else next[source.id] = getMutedAudioReadinessMessage(source, configuration);
+                            if (isSourceReady) delete next[source.id];
+                            else next[source.id] = isRequiredVideoTrack ? getMutedVideoReadinessMessage(source) : getMutedAudioReadinessMessage(source, configuration);
                             return next;
                         });
                     };
-                    track.addEventListener('mute', updateAudioReadiness);
-                    track.addEventListener('unmute', updateAudioReadiness);
+                    track.addEventListener('mute', updateTrackReadiness);
+                    track.addEventListener('unmute', updateTrackReadiness);
                 }
             });
             setSources([...current.sources]);
@@ -401,6 +438,9 @@ export function useRecordingStudio() {
                         }
                         if (source && source.stream.getTracks().some((track) => track.readyState === 'ended')) {
                             return [configuration.id, 'disconnected'];
+                        }
+                        if (source && isRecordingSourceTemporarilyUnavailable(source)) {
+                            return [configuration.id, 'temporarily-unavailable'];
                         }
                         return [configuration.id, previous[configuration.id] === 'disconnected' ? 'disconnected' : 'unavailable'];
                     })));

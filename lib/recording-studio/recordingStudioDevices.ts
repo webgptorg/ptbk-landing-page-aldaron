@@ -9,10 +9,17 @@ export function releaseRecordingSource(source: RecordingSource): void {
 export function isRecordingSourceReady(source: RecordingSource): boolean {
     const isVideoRequired = source.kind !== 'microphone';
     const isAudioRequired = source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled);
-    const isVideoReady = !isVideoRequired || source.stream.getVideoTracks().some((track) => track.readyState === 'live');
+    const isVideoReady = !isVideoRequired || source.stream.getVideoTracks().some((track) => track.readyState === 'live' && !track.muted);
     const audioTrack = source.stream.getAudioTracks().find((track) => track.readyState === 'live');
     const isAudioReady = !isAudioRequired || Boolean(audioTrack && !audioTrack.muted);
     return isVideoReady && isAudioReady;
+}
+
+export function isRecordingSourceTemporarilyUnavailable(source: RecordingSource): boolean {
+    const isVideoRequired = source.kind !== 'microphone';
+    const isAudioRequired = source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled);
+    return source.stream.getTracks().some((track) => track.readyState === 'live' && track.muted &&
+        ((track.kind === 'video' && isVideoRequired) || (track.kind === 'audio' && isAudioRequired)));
 }
 
 export function matchesRecordingSourceConfiguration(source: RecordingSource, configuration: RecordingSourceConfiguration): boolean {

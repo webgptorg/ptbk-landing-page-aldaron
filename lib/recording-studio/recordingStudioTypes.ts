@@ -9,7 +9,7 @@ export const RECORDING_STUDIO_LOCK = 'promptbook-recording-studio';
 
 export type RecordingSourceKind = 'camera' | 'screen' | 'microphone';
 export type RecordingDisplaySurface = 'browser' | 'window' | 'monitor';
-export type RecordingSourceReadiness = 'ready' | 'needs-permission' | 'disconnected' | 'unavailable';
+export type RecordingSourceReadiness = 'ready' | 'needs-permission' | 'disconnected' | 'temporarily-unavailable' | 'unavailable';
 
 /** Browser-local, serializable source intent. It never contains permission or live media state. */
 export type RecordingSourceConfiguration = {

@@ -213,7 +213,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   deliberately reconnected, and each display source opens the browser chooser again. Readiness must be checked
   before Start and follows required microphone mute/unmute events; cancellation or a missing device keeps its source
   configuration and never substitutes another device silently. One capture coordinator starts and stops sources on a
-  shared clock; losing a required source or a storage write stops the take.
+  shared clock; losing a required source or a storage write stops the take. A muted required video track is temporarily
+  unavailable, blocks Start, and interrupts an active take as incomplete rather than acting like an intentional pause;
+  reselect the source to reconnect. The display-source picker belongs to the browser/OS: `displaySurface` is a type
+  preference, the app does not enumerate system windows, and saved names cannot force a window or restore its stream.
+  The macOS Spaces help is shown for manually selected, restored, and reused display configurations. It scopes the
+  reported cross-Space behavior to the owner's unspecified Mac/Chrome versions and links to an authenticated plain
+  `getDisplayMedia({ video: true, audio: false })` diagnostic at `/admin/recording-studio/capture-probe`. Whole-display
+  capture remains an explicit user choice with a privacy warning, never an automatic fallback. Native picker behavior
+  and capture continuity across Spaces require physical Mac testing; mocked browser tests do not establish them.
   IndexedDB commits each chunk together with its counters; a feature-detected selected-directory destination
   closes immutable media fragments before its small authoritative checkpoint and stores only handles/metadata in
   IndexedDB. Recovery can reconnect or import that folder without moving its media into origin storage; read-only
