@@ -1,197 +1,318 @@
-import { AI_TA_KRAJTA_MARK_BODY, type AiTaKrajtaMarkPoint } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
-import { AI_TA_KRAJTA_COLORS } from '@/businesses/ai-ta-krajta/config';
+import {
+    AI_TA_KRAJTA_MARK_BODY,
+    AI_TA_KRAJTA_MARK_SHAPES,
+    AI_TA_KRAJTA_MARK_TAIL_JOINT,
+    type AiTaKrajtaMarkPoint,
+    type AiTaKrajtaMarkShape,
+} from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
+import {
+    createAiTaKrajtaSnakeArtworkMesh,
+    drawAiTaKrajtaSnakeArtworkMesh,
+    type AiTaKrajtaArtworkCommand,
+} from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeArtworkMesh';
 
-/**
- * How thick the animal is and what colour it has at one point along its length
- */
-type AiTaKrajtaSnakeBodyShape = {
-    /**
-     * Half of the thickness here, in units of the view box of the mark
-     */
-    readonly halfWidth: number;
-
-    readonly color: string;
+type MeasuredPath = {
+    readonly points: readonly AiTaKrajtaMarkPoint[];
+    readonly distances: readonly number[];
+    readonly length: number;
 };
 
-/**
- * How thick the snake is at its nose and at the tip of its tail once it swims freely, in units of the view box
- *
- * Note: Measured in the units of the mark rather than in pixels, so that a snake which has left the logo stays as
- *       thick as the logo was, whatever size the terrarium happens to be.
- */
-const PLAYING_HEAD_HALF_WIDTH = 8;
-const PLAYING_TAIL_HALF_WIDTH = 2.4;
+type BodyAttachment = {
+    readonly weight: number;
+    readonly boneIndex: number;
+    readonly real: number;
+    readonly imaginary: number;
+};
 
-/**
- * Where along the drawn animal each measured point sits, from zero at the nose to one at the tip of the tail
- */
-const LOGO_BODY_FRACTIONS: readonly number[] = (() => {
+type BoundPoint = {
+    readonly position: AiTaKrajtaMarkPoint;
+    readonly attachments: readonly BodyAttachment[];
+};
+
+type BoundCommand = AiTaKrajtaArtworkCommand<BoundPoint>;
+
+/** Short exact Bezier subdivisions let a curve follow a newly travelled bend, including a wall contact. */
+const MAXIMUM_CURVE_SPAN = 3;
+const BINDING_RADIUS = 5;
+const MINIMUM_LENGTH = 1e-8;
+const MAXIMUM_CLIP_SUBDIVISION_DEPTH = 32;
+const MINIMUM_ATTACHMENT_WEIGHT = 1e-12;
+
+function measurePath(points: readonly AiTaKrajtaMarkPoint[]): MeasuredPath {
     const distances = [0];
-
-    for (let index = 1; index < AI_TA_KRAJTA_MARK_BODY.length; index++) {
-        const previousPoint = AI_TA_KRAJTA_MARK_BODY[index - 1];
-        const point = AI_TA_KRAJTA_MARK_BODY[index];
-
-        distances.push(distances[index - 1] + Math.hypot(point.x - previousPoint.x, point.y - previousPoint.y));
+    for (let index = 1; index < points.length; index++) {
+        const before = points[index - 1];
+        const point = points[index];
+        distances.push(distances[index - 1] + Math.hypot(point.x - before.x, point.y - before.y));
     }
-
-    const length = distances[distances.length - 1];
-
-    return distances.map((distance) => distance / length);
-})();
-
-function clampFraction(value: number): number {
-    return Math.min(1, Math.max(0, value));
+    return { points, distances, length: distances[distances.length - 1] ?? 0 };
 }
 
-/**
- * Reads the three channels out of a `#rrggbb` colour
- */
-function parseColor(color: string): readonly number[] {
-    return [1, 3, 5].map((offset) => parseInt(color.slice(offset, offset + 2), 16));
-}
+const REST_PATH = measurePath(AI_TA_KRAJTA_MARK_BODY);
 
-/**
- * Writes three channels back as a `#rrggbb` colour
- */
-function formatColor(channels: readonly number[]): string {
-    return '#' + channels.map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('');
-}
-
-/**
- * A colour part of the way between two others
- */
-function mixColors(fromColor: string, toColor: string, ratio: number): string {
-    if (fromColor === toColor) {
-        return fromColor;
+/** Arc-length lookup uses the actual trail, including its exact wall/corner vertices. */
+function samplePath(path: MeasuredPath, distance: number): AiTaKrajtaMarkPoint {
+    let lower = 0;
+    let upper = path.points.length - 1;
+    const clampedDistance = Math.max(0, Math.min(path.length, distance));
+    while (upper - lower > 1) {
+        const middle = Math.floor((lower + upper) / 2);
+        if (path.distances[middle] < clampedDistance) lower = middle;
+        else upper = middle;
     }
-
-    const fromChannels = parseColor(fromColor);
-    const toChannels = parseColor(toColor);
-
-    return formatColor(fromChannels.map((channel, index) => channel + (toChannels[index] - channel) * ratio));
+    const before = path.points[lower];
+    const after = path.points[upper];
+    const span = path.distances[upper] - path.distances[lower];
+    const ratio = span > MINIMUM_LENGTH ? (clampedDistance - path.distances[lower]) / span : 0;
+    return { x: before.x + (after.x - before.x) * ratio, y: before.y + (after.y - before.y) * ratio };
 }
 
 /**
- * How the cover artwork draws the animal at a point along its length
+ * Moving least squares fits continuous local transformations to overlapping sections of the measured body.
+ * A wall reflection never normalizes a zero tangent into an instantaneous outline flip. At rest every fitted
+ * transformation is identity, including points off the centre line such as the asymmetric head and tapered tail.
  */
-function getLogoBodyShape(bodyFraction: number): AiTaKrajtaSnakeBodyShape {
-    let index = 1;
+function bindPoint(point: AiTaKrajtaMarkPoint, range: readonly [number, number]): BoundPoint {
+    const squaredDistances = REST_PATH.points.map((center, index) => index >= range[0] && index <= range[1]
+        ? (point.x - center.x) ** 2 + (point.y - center.y) ** 2 : Infinity);
+    const nearestDistance = Math.min(...squaredDistances);
+    const weights = squaredDistances.map((distance) => Math.exp(-(distance - nearestDistance) / (2 * BINDING_RADIUS ** 2)));
+    const totalWeight = weights.reduce((total, weight) => total + weight, 0);
+    const normalizedWeights = weights.map((weight) => weight / totalWeight);
+    const center = REST_PATH.points.reduce((result, point, index) => ({
+        x: result.x + point.x * normalizedWeights[index],
+        y: result.y + point.y * normalizedWeights[index],
+    }), { x: 0, y: 0 });
+    const variance = REST_PATH.points.reduce((total, point, index) =>
+        total + normalizedWeights[index] * ((point.x - center.x) ** 2 + (point.y - center.y) ** 2), 0);
+    const attachments = REST_PATH.points.map((bone, boneIndex) => {
+        const weight = normalizedWeights[boneIndex];
+        return {
+            boneIndex,
+            weight,
+            real: weight * ((point.x - center.x) * (bone.x - center.x) + (point.y - center.y) * (bone.y - center.y)) / variance,
+            imaginary: weight * ((point.y - center.y) * (bone.x - center.x) - (point.x - center.x) * (bone.y - center.y)) / variance,
+        };
+    }).filter((attachment) => attachment.weight > MINIMUM_ATTACHMENT_WEIGHT);
+    return { position: point, attachments };
+}
 
-    while (index < AI_TA_KRAJTA_MARK_BODY.length - 1 && bodyFraction > LOGO_BODY_FRACTIONS[index]) {
-        index++;
+function midpoint(first: AiTaKrajtaMarkPoint, second: AiTaKrajtaMarkPoint): AiTaKrajtaMarkPoint {
+    return { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+}
+
+/** De Casteljau subdivision preserves the source curve exactly; no outline is traced or fitted here. */
+function splitCurve(points: readonly AiTaKrajtaMarkPoint[]): readonly (readonly AiTaKrajtaMarkPoint[])[] {
+    const [start, firstControl, secondControl, end] = points;
+    const first = midpoint(start, firstControl);
+    const middle = midpoint(firstControl, secondControl);
+    const last = midpoint(secondControl, end);
+    const left = midpoint(first, middle);
+    const right = midpoint(middle, last);
+    const center = midpoint(left, right);
+    return [[start, first, left, center], [center, right, last, end]];
+}
+
+function subdivideCurve(points: readonly AiTaKrajtaMarkPoint[]): readonly (readonly AiTaKrajtaMarkPoint[])[] {
+    const span = points.slice(1).reduce((length, point, index) =>
+        length + Math.hypot(point.x - points[index].x, point.y - points[index].y), 0);
+    return span <= MAXIMUM_CURVE_SPAN ? [points] : splitCurve(points).flatMap(subdivideCurve);
+}
+
+/** Clips by subdivision of the actual cubics, without fitting or tracing a replacement outline. */
+function clipTailCurves(
+    curves: readonly (readonly AiTaKrajtaMarkPoint[])[],
+    isRightSide: boolean,
+): readonly (readonly AiTaKrajtaMarkPoint[])[] {
+    const boundary = AI_TA_KRAJTA_MARK_BODY[AI_TA_KRAJTA_MARK_TAIL_JOINT.undersideEndPointIndex].x;
+    const clipped: (readonly AiTaKrajtaMarkPoint[])[] = [];
+    const visit = (curve: readonly AiTaKrajtaMarkPoint[], depth: number) => {
+        const isInside = (point: AiTaKrajtaMarkPoint) => isRightSide ? point.x >= boundary : point.x <= boundary;
+        if (curve.every(isInside)) { clipped.push(curve); return; }
+        if (curve.every((point) => !isInside(point))) return;
+        if (depth >= MAXIMUM_CLIP_SUBDIVISION_DEPTH) { if (isInside(curve[0])) clipped.push(curve); return; }
+        splitCurve(curve).forEach((part) => visit(part, depth + 1));
+    };
+    curves.forEach((curve) => visit(curve, 0));
+    return clipped;
+}
+
+function bindCurves(curves: readonly (readonly AiTaKrajtaMarkPoint[])[], range: readonly [number, number]): BoundCommand[] {
+    if (curves.length === 0) return [];
+    const commands: BoundCommand[] = [{ command: 'M', points: [bindPoint(curves[0][0], range)] }];
+    let position = curves[0][0];
+    for (const curve of curves) {
+        if (Math.hypot(position.x - curve[0].x, position.y - curve[0].y) > MINIMUM_LENGTH) {
+            commands.push({ command: 'L', points: [bindPoint(curve[0], range)] });
+        }
+        commands.push({ command: 'C', points: curve.slice(1).map((point) => bindPoint(point, range)) });
+        position = curve[3];
     }
+    commands.push({ command: 'Z', points: [] });
+    return commands;
+}
 
-    const before = AI_TA_KRAJTA_MARK_BODY[index - 1];
-    const after = AI_TA_KRAJTA_MARK_BODY[index];
-    const span = LOGO_BODY_FRACTIONS[index] - LOGO_BODY_FRACTIONS[index - 1];
-    const ratio = span === 0 ? 0 : clampFraction((bodyFraction - LOGO_BODY_FRACTIONS[index - 1]) / span);
+/** The canonical artwork uses absolute move/cubic/close commands. Fail explicitly if new artwork needs a new command. */
+function readShapeCurves(pathData: string): readonly (readonly AiTaKrajtaMarkPoint[])[] {
+    const tokens = pathData.match(/[a-zA-Z]|-?(?:\d*\.)?\d+(?:e[-+]?\d+)?/g) ?? [];
+    const curves: (readonly AiTaKrajtaMarkPoint[])[] = [];
+    let position = { x: 0, y: 0 };
+    let start = position;
+    let tokenIndex = 0;
+    while (tokenIndex < tokens.length) {
+        const command = tokens[tokenIndex++];
+        const pointCount = command === 'M' ? 1 : command === 'C' ? 3 : command === 'Z' ? 0 : -1;
+        if (pointCount < 0) throw new Error(`Unsupported mark command: ${command}`);
+        const points = Array.from({ length: pointCount }, () => ({
+            x: Number(tokens[tokenIndex++]), y: Number(tokens[tokenIndex++]),
+        }));
+        if (command === 'C') {
+            curves.push(...subdivideCurve([position, ...points]));
+        } else if (command === 'M') {
+            start = points[0];
+        } else if (command === 'Z') {
+            curves.push([position, position, start, start]);
+        }
+        position = points[points.length - 1] ?? position;
+    }
+    return curves;
+}
 
+/** The joint is wholly inside the resting artwork; it is exposed only by the coil's actual movement. */
+function bindHiddenTailJoint(range: readonly [number, number]): BoundCommand[] {
+    const { firstPointIndex, lastPointIndex, maximumHalfWidth } = AI_TA_KRAJTA_MARK_TAIL_JOINT;
+    const joint = AI_TA_KRAJTA_MARK_BODY.slice(firstPointIndex, lastPointIndex + 1);
+    const sides = [-1, 1].map((side) => joint.map((point, index) => {
+        const before = joint[Math.max(0, index - 1)];
+        const after = joint[Math.min(joint.length - 1, index + 1)];
+        const length = Math.hypot(after.x - before.x, after.y - before.y);
+        const radius = Math.min(maximumHalfWidth, point.halfWidth / 2);
+        return {
+            x: point.x - (after.y - before.y) / length * radius * side,
+            y: point.y + (after.x - before.x) / length * radius * side,
+        };
+    }));
+    return [
+        ...[...sides[0], ...sides[1].reverse()].map((point, index) => ({
+            command: index === 0 ? 'M' : 'L', points: [bindPoint(point, range)],
+        })),
+        { command: 'Z', points: [] },
+    ];
+}
+
+function bindShape(shape: AiTaKrajtaMarkShape) {
+    const curves = readShapeCurves(shape.pathData);
+    // The tail drawing includes the thin red underside of the foreground coil. It must stay with that coil when
+    // the tail uncoils, instead of pulling the formerly hidden, wide underpainting out as a fin.
+    const commands = shape.id === 'tail'
+        ? [
+            ...bindCurves(clipTailCurves(curves, false), AI_TA_KRAJTA_MARK_SHAPES[2].bodyPointRange),
+            ...bindCurves(clipTailCurves(curves, true), shape.bodyPointRange),
+            ...bindHiddenTailJoint(shape.bodyPointRange),
+        ]
+        : bindCurves(curves, shape.bodyPointRange);
     return {
-        halfWidth: before.halfWidth + (after.halfWidth - before.halfWidth) * ratio,
-        color: mixColors(before.color, after.color, ratio),
+        shape,
+        mesh: createAiTaKrajtaSnakeArtworkMesh(commands, (point) => point.position),
+        gradientAnchor: bindPoint(REST_PATH.points[shape.bodyPointRange[0]], shape.bodyPointRange),
     };
 }
 
-/**
- * How the game draws the animal at a point along its length, which is an even taper in the colours of the show
- */
-function getPlayingBodyShape(bodyFraction: number): AiTaKrajtaSnakeBodyShape {
-    return {
-        halfWidth: PLAYING_HEAD_HALF_WIDTH - (PLAYING_HEAD_HALF_WIDTH - PLAYING_TAIL_HALF_WIDTH) * bodyFraction,
-        color: mixColors(AI_TA_KRAJTA_COLORS.CORAL, AI_TA_KRAJTA_COLORS.INDIGO, bodyFraction),
-    };
-}
+const BOUND_SHAPES = AI_TA_KRAJTA_MARK_SHAPES.map(bindShape);
 
-/**
- * How thick and what colour the animal is at a point along its length while it wakes up
- *
- * Note: At the first frame this is the drawing, measured off the cover; by the end of the release it is an ordinary
- *       game snake. Nothing jumps in between, which is the point of measuring the drawing in the first place.
- *
- * @param bodyFraction where along the animal this is asked for, zero at the nose and one at the tip of the tail
- * @param releaseProgress how far the logo has been let go, zero while it is still the logo and one once it is loose
- */
-function getBodyShape(bodyFraction: number, releaseProgress: number): AiTaKrajtaSnakeBodyShape {
-    const clampedFraction = clampFraction(bodyFraction);
-    const logoShape = getLogoBodyShape(clampedFraction);
-
-    if (releaseProgress <= 0) {
-        return logoShape;
-    }
-
-    const playingShape = getPlayingBodyShape(clampedFraction);
-    const ratio = clampFraction(releaseProgress);
-
-    return {
-        halfWidth: logoShape.halfWidth + (playingShape.halfWidth - logoShape.halfWidth) * ratio,
-        color: mixColors(logoShape.color, playingShape.color, ratio),
-    };
-}
-
-/**
- * One round-capped stroke the animal is drawn with
- */
-export type AiTaKrajtaSnakeBodySlice = {
-    readonly from: AiTaKrajtaMarkPoint;
-    readonly to: AiTaKrajtaMarkPoint;
-
-    /**
-     * How wide the stroke is drawn, in the units the centre line is given in
-     */
-    readonly strokeWidth: number;
-
-    readonly color: string;
+export type AiTaKrajtaSnakeArtwork = {
+    readonly pathData: string;
+    readonly gradientStart: AiTaKrajtaMarkPoint;
+    readonly gradientEnd: AiTaKrajtaMarkPoint;
 };
 
 /**
- * Cuts the animal into the strokes it is drawn with, from the tip of the tail towards the nose
- *
- * Note: Laid down in that order, a body which crosses itself overlaps the way the cover artwork paints its coil. The
- *       same slices are drawn onto the canvas of the game and rendered by the test which holds the drawing against
- *       the cover, so what is measured there is what a visitor sees.
- *
- * @param centerLine where the body runs, from the nose to the tip of the tail
- * @param markScale how many units of the centre line one unit of the artwork is worth
- * @param releaseProgress how far the logo has been let go, zero while it is still the logo and one once it is loose
+ * Moves the existing filled Bezier outlines, with their existing gradients, by the skeleton's actual displacement.
+ * An unchanged skeleton is the identity transformation at any time: there is no release/morph parameter and no
+ * later renderer switch. The same calculation also lets the artwork grow with the travelled body.
  */
-export function createAiTaKrajtaSnakeBodySlices(
+export function createAiTaKrajtaSnakeArtwork(
     centerLine: readonly AiTaKrajtaMarkPoint[],
-    markScale: number,
-    releaseProgress: number,
-): readonly AiTaKrajtaSnakeBodySlice[] {
-    const lastIndex = centerLine.length - 1;
-    const slices: AiTaKrajtaSnakeBodySlice[] = [];
-    const distancesFromNose = Array.from({ length: centerLine.length }, () => 0);
-
-    for (let pointIndex = 1; pointIndex <= lastIndex; pointIndex++) {
-        const previousPoint = centerLine[pointIndex - 1];
-        const point = centerLine[pointIndex];
-
-        if (previousPoint !== undefined && point !== undefined) {
-            distancesFromNose[pointIndex] =
-                (distancesFromNose[pointIndex - 1] ?? 0) + Math.hypot(point.x - previousPoint.x, point.y - previousPoint.y);
+    artworkScale = 1,
+): readonly AiTaKrajtaSnakeArtwork[] {
+    if (centerLine.length < 2) return [];
+    const path = measurePath(centerLine);
+    const lengthRatio = path.length / REST_PATH.length;
+    const bones = REST_PATH.distances.map((distance) => samplePath(path, distance * lengthRatio));
+    // Growth stretches the length without inflating the head. A responsive resize, however, scales the entire
+    // animal. Keeping that scale separate prevents the first redraw after a resize from narrowing its outline.
+    const widthScale = lengthRatio > MINIMUM_LENGTH ? artworkScale / lengthRatio : 1;
+    const movedPoints = new Map<BoundPoint, AiTaKrajtaMarkPoint>();
+    const movePoint = (point: BoundPoint): AiTaKrajtaMarkPoint => {
+        const cachedPoint = movedPoints.get(point);
+        if (cachedPoint !== undefined) return cachedPoint;
+        const movedPoint = point.attachments.reduce((result, attachment) => {
+            const bone = bones[attachment.boneIndex];
+            const real = attachment.weight + attachment.real * widthScale;
+            const imaginary = attachment.imaginary * widthScale;
+            return {
+                x: result.x + real * bone.x - imaginary * bone.y,
+                y: result.y + real * bone.y + imaginary * bone.x,
+            };
+        }, { x: 0, y: 0 });
+        movedPoints.set(point, movedPoint);
+        return movedPoint;
+    };
+    return BOUND_SHAPES.map(({ shape, mesh, gradientAnchor }) => {
+        const [startIndex, endIndex] = shape.bodyPointRange;
+        const restAnchor = REST_PATH.points[startIndex];
+        const currentAnchor = movePoint(gradientAnchor);
+        let real = 0;
+        let imaginary = 0;
+        let variance = 0;
+        for (let index = startIndex + 1; index <= endIndex; index++) {
+            const restOffsetX = REST_PATH.points[index].x - restAnchor.x;
+            const restOffsetY = REST_PATH.points[index].y - restAnchor.y;
+            const currentOffsetX = bones[index].x - bones[startIndex].x;
+            const currentOffsetY = bones[index].y - bones[startIndex].y;
+            real += restOffsetX * currentOffsetX + restOffsetY * currentOffsetY;
+            imaginary += restOffsetX * currentOffsetY - restOffsetY * currentOffsetX;
+            variance += restOffsetX ** 2 + restOffsetY ** 2;
         }
-    }
+        real /= variance;
+        imaginary /= variance;
+        const moveGradientPoint = (point: AiTaKrajtaMarkPoint): AiTaKrajtaMarkPoint => ({
+            x: currentAnchor.x + real * (point.x - restAnchor.x) - imaginary * (point.y - restAnchor.y),
+            y: currentAnchor.y + real * (point.y - restAnchor.y) + imaginary * (point.x - restAnchor.x),
+        });
+        return {
+            pathData: drawAiTaKrajtaSnakeArtworkMesh(mesh, movePoint),
+            gradientStart: moveGradientPoint({ x: shape.gradient.x1, y: shape.gradient.y1 }),
+            gradientEnd: moveGradientPoint({ x: shape.gradient.x2, y: shape.gradient.y2 }),
+        };
+    });
+}
 
-    const totalBodyLength = distancesFromNose[lastIndex] ?? 0;
-
-    if (totalBodyLength === 0) {
-        return slices;
-    }
-
-    for (let pointIndex = lastIndex; pointIndex > 0; pointIndex--) {
-        const from = centerLine[pointIndex];
-        const to = centerLine[pointIndex - 1];
-
-        if (from === undefined || to === undefined) {
-            continue;
-        }
-
-        const bodyShape = getBodyShape((distancesFromNose[pointIndex] ?? totalBodyLength) / totalBodyLength, releaseProgress);
-
-        slices.push({ from, to, strokeWidth: bodyShape.halfWidth * 2 * markScale, color: bodyShape.color });
-    }
-
-    return slices;
+/** Owns only animation attributes; React and the original SVG keep owning the element and brand definition. */
+export function createAiTaKrajtaSnakeArtworkRenderer(mark: SVGSVGElement) {
+    const paths = Array.from(mark.querySelectorAll('path'));
+    const gradients = Array.from(mark.querySelectorAll('linearGradient'));
+    return {
+        draw(centerLine: readonly AiTaKrajtaMarkPoint[], artworkScale = 1) {
+            const artwork = createAiTaKrajtaSnakeArtwork(centerLine, artworkScale);
+            artwork.forEach((shape, index) => {
+                paths[index].setAttribute('d', shape.pathData);
+                const gradient = gradients[index];
+                gradient.setAttribute('x1', String(shape.gradientStart.x));
+                gradient.setAttribute('y1', String(shape.gradientStart.y));
+                gradient.setAttribute('x2', String(shape.gradientEnd.x));
+                gradient.setAttribute('y2', String(shape.gradientEnd.y));
+            });
+        },
+        reset() {
+            AI_TA_KRAJTA_MARK_SHAPES.forEach((shape, index) => {
+                paths[index].setAttribute('d', shape.pathData);
+                const gradient = gradients[index];
+                gradient.setAttribute('x1', String(shape.gradient.x1));
+                gradient.setAttribute('y1', String(shape.gradient.y1));
+                gradient.setAttribute('x2', String(shape.gradient.x2));
+                gradient.setAttribute('y2', String(shape.gradient.y2));
+            });
+        },
+    };
 }

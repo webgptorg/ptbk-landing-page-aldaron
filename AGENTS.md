@@ -108,8 +108,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   traced off the cover artwork of the show and recorded once in
   `businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork.ts`, together with the
   measurements of the animal along its own length. The snake of the minigame
-  starts in exactly that shape, in the frame the still logo occupied, and only
-  then eases into the proportions, colours and speed of a game snake. Its
+  keeps that same SVG element, canonical filled curves, gradients and shadow throughout play. Its measured body
+  drives the curves only through actual movement and growth. Interior fill patches keep the exact Bezier boundaries
+  and overlap through folds without winding cancellation; activation never crossfades to stroked approximations
+  or changes its stationary silhouette. Only speed, food and eyes ease in. The hidden tail joint and the coil's
+  underside remain attached as it uncoils. Responsive sizing uses the SVG's exact CSS frame and aspect-ratio fit,
+  scales the full outline and eyes together, and accounts for SVG-frame changes independently of field resizing;
+  canvas owns only food and pointer input, at the device's full pixel ratio, behind the SVG body and eyes. Its blank
+  surface is initialized while idle to preserve fractional-pixel compositing, with no game animation scheduled. Its
+  activation and the newest-episode playback controls become enabled only after client initialization, so a slow
+  first load cannot silently drop the initial click. Its
   remembered path includes wall and corner contacts, so the shared body geometry
   follows repeated rebounds continuously, including while the pointer stays at or
   beyond a boundary and while the canvas resizes.

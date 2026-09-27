@@ -6,7 +6,7 @@ import {
     createAiTaKrajtaMarkGradientId,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
 import { cn } from '@/lib/utils';
-import { useId } from 'react';
+import { forwardRef, useId } from 'react';
 
 /**
  * The snake of the show, drawn the way the cover artwork draws it
@@ -14,11 +14,15 @@ import { useId } from 'react';
  * Note: It is a drawing rather than the cover image, so it can sit on any background, scale to a favicon and be the
  *       thing the game in the header uncoils from.
  */
-export function AiTaKrajtaMark({ className }: { readonly className?: string }) {
+export const AiTaKrajtaMark = forwardRef<SVGSVGElement, { readonly className?: string }>(function AiTaKrajtaMark(
+    { className },
+    ref,
+) {
     const documentId = useId();
 
     return (
         <svg
+            ref={ref}
             aria-hidden="true"
             viewBox={`0 0 ${AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE} ${AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE}`}
             fill="none"
@@ -52,4 +56,4 @@ export function AiTaKrajtaMark({ className }: { readonly className?: string }) {
             ))}
         </svg>
     );
-}
+});

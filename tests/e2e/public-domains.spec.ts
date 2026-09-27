@@ -137,8 +137,24 @@ test.describe('isolated public domains', () => {
             }
         });
 
-        await page.goto(localDomainUrl('ai-ta-krajta.cz', '/'), { waitUntil: 'domcontentloaded' });
-        await page.getByRole('button', { name: 'Poslouchat', exact: true }).click();
+        // Keep the server-rendered controls visible before React arrives, as on a slow first visit. A visible
+        // button must become enabled only when its first click can actually be handled.
+        let releaseScripts!: () => void;
+        const scriptsReady = new Promise<void>((resolve) => { releaseScripts = resolve; });
+        await page.route('**/_next/**/*.js*', async (route) => {
+            await scriptsReady;
+            await route.continue();
+        });
+        const listenButton = page.getByRole('button', { name: 'Poslouchat', exact: true });
+        try {
+            await page.goto(localDomainUrl('ai-ta-krajta.cz', '/'), { waitUntil: 'commit' });
+            await expect(listenButton).toBeVisible();
+            await expect(listenButton).toBeDisabled();
+            await expect(page.getByRole('button', { name: 'Spustit minihru s krajtou' })).toBeDisabled();
+        } finally {
+            releaseScripts();
+        }
+        await listenButton.click();
         await expect(page.getByRole('button', { name: 'Zavřít přehrávač' })).toBeVisible();
         expect(blockedAssetUrls).toEqual([]);
     });

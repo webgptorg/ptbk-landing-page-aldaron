@@ -1,5 +1,22 @@
 # Current preversion
 
+- Fixed the AI ta Krajta logo-to-snake handoff. The existing SVG stays in place and its canonical curves move with
+  the measured body; there is no second stroked snake, hold, crossfade or timed silhouette/color correction. The
+  artwork, gradients, shadow and subpixel placement remain unchanged on activation. The canonical fills are
+  partitioned along interior diagonals while retaining their exact Bezier boundaries, so folds overlap instead
+  of canceling their own fill and tearing the uncoiling body. The tail's hidden joint and the coil underside follow
+  their own body sections. Canvas renders food at native pixel density behind the SVG body and eyes; its blank
+  idle surface keeps browser compositing stable at fractional device pixel ratios without running the game clock.
+  Resizing scales the complete silhouette and eyes together, preserves the full travelled tail, and accounts for
+  changes to the SVG frame even when the playing field stays the same size.
+  Activation, steering, scoring and wall reflection behavior remain available. Added aligned image differences and
+  overlays for activation, the first moving frame and the full release at desktop/mobile pixel ratios, including
+  keyboard/touch activation, repeated visits, non-square SVG frames, resizing and the canonical podcast domain.
+  Regression checks compare infinitesimal movement directly to the unchanged static artwork and verify scaling,
+  gradients, connected painted geometry through the full release, and wall/corner continuity.
+  Playback and game activation wait for their client handlers to be ready, preserving the first click on slow loads.
+  Repeat-visit captures reset their controlled clock independently of host time and use true half-opacity overlays.
+
 - Quick-link materials now pass only the trimmed original pasted URL as their body to ordinary material creation,
   preserving URL spelling, percent encoding, query strings and fragments. Scraped titles, fallback titles and title
   corrections remain separate. The shared link extractor recognizes complete standalone URLs containing parentheses,

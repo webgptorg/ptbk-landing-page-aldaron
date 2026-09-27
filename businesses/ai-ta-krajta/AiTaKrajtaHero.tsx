@@ -23,7 +23,7 @@ function AiTaKrajtaFact({ label, value }: { readonly label: string; readonly val
  * The opening of the page, which says what the show is, where it comes out and lets the logo be played with
  */
 export function AiTaKrajtaHero() {
-    const { archive, newestPlayableEpisode, playEpisode } = useAiTaKrajtaPageState();
+    const { archive, newestPlayableEpisode, playEpisode, isPlaybackProgressRestored } = useAiTaKrajtaPageState();
     const { estimatedSubscriberCount, estimatedListeningHours } = archive.statistics;
 
     return (
@@ -58,7 +58,7 @@ export function AiTaKrajtaHero() {
                         <button
                             type="button"
                             onClick={() => newestPlayableEpisode !== null && playEpisode(newestPlayableEpisode)}
-                            disabled={newestPlayableEpisode === null}
+                            disabled={!isPlaybackProgressRestored || newestPlayableEpisode === null}
                             className="inline-flex h-12 items-center gap-2 rounded-full bg-[#ff6b6b] px-6 text-base font-semibold text-[#1a201c] transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Play className="h-5 w-5 fill-current" />

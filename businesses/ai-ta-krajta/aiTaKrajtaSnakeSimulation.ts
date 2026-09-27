@@ -520,11 +520,19 @@ export function resizeSnakeState(
                   Math.cos(state.headAngleInRadians) * horizontalScale,
               );
 
+    const resizedTrail = state.trail.map(resizePoint);
+    const measureTrail = (trail: readonly SnakePoint[]) => trail.slice(1).reduce((length, point, index) =>
+        length + getDistance(trail[index], point), 0);
+    const previousLength = measureTrail(state.trail);
+    const lengthScale = previousLength > 0 ? measureTrail(resizedTrail) / previousLength : 1;
+
     return {
         ...state,
         headPosition: resizePoint(state.headPosition),
         headAngleInRadians,
-        trail: state.trail.map(resizePoint),
+        trail: resizedTrail,
+        // Retain the resized tail on the very next movement instead of trimming it back to its old pixel length.
+        segmentCount: 1 + (state.segmentCount - 1) * lengthScale,
         food: state.food.map((food) => ({ ...food, position: resizePoint(food.position) })),
     };
 }
@@ -561,7 +569,7 @@ export function advanceSnakeState(state: SnakeState, options: AdvanceSnakeStateO
         (food) => getDistance(food.position, headPosition) <= EATING_DISTANCE_IN_PIXELS,
     );
     const segmentCount = Math.min(
-        MAXIMUM_SEGMENT_COUNT,
+        Math.max(MAXIMUM_SEGMENT_COUNT, state.segmentCount),
         state.segmentCount + eatenFood.length * SEGMENT_COUNT_PER_FOOD,
     );
 
