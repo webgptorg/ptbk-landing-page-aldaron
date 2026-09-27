@@ -27,11 +27,13 @@ const SCROLLED_OFFSET_IN_PIXELS = 24;
 export function AiTaKrajtaHeader() {
     const { newestPlayableEpisode, playingEpisode, viewState, playEpisode, setIsPlaying } = useAiTaKrajtaPageState();
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > SCROLLED_OFFSET_IN_PIXELS);
 
         handleScroll();
+        setIsHydrated(true);
         window.addEventListener('scroll', handleScroll, { passive: true });
 
         return () => window.removeEventListener('scroll', handleScroll);
@@ -100,7 +102,7 @@ export function AiTaKrajtaHeader() {
                     <button
                         type="button"
                         onClick={handleListenClick}
-                        disabled={newestPlayableEpisode === null}
+                        disabled={newestPlayableEpisode === null || !isHydrated}
                         className="inline-flex h-10 items-center gap-2 rounded-full bg-[#ff6b6b] px-4 text-sm font-semibold text-[#1a201c] transition-transform hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                     >
                         {isNewestEpisodePlaying ? (

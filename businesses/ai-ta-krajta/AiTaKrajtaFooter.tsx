@@ -84,7 +84,15 @@ export function AiTaKrajtaFooter() {
                             ))}
                             <li>
                                 <Link
-                                    href={AI_TA_KRAJTA_PATH + '#' + AI_TA_KRAJTA_SECTION_IDS.PEOPLE}
+                                    href={'#' + AI_TA_KRAJTA_SECTION_IDS.EMAIL_SUBSCRIPTION}
+                                    className={FOOTER_LINK_CLASS_NAME}
+                                >
+                                    Odebírat
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href={'#' + AI_TA_KRAJTA_SECTION_IDS.PEOPLE}
                                     className={FOOTER_LINK_CLASS_NAME}
                                 >
                                     Kdo v tom jede

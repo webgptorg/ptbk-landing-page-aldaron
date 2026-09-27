@@ -3,6 +3,7 @@
 import {
     AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
     AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
+    AI_TA_KRAJTA_SECTION_IDS,
 } from '@/businesses/ai-ta-krajta/config';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
@@ -68,7 +69,11 @@ export function AiTaKrajtaEmailSubscriptionForm() {
     };
 
     return (
-        <section className="border-y border-white/10 py-6 sm:py-7" aria-labelledby="ai-ta-krajta-email-subscription-heading">
+        <section
+            id={AI_TA_KRAJTA_SECTION_IDS.EMAIL_SUBSCRIPTION}
+            className="scroll-mt-28 border-y border-white/10 py-6 md:scroll-mt-20 sm:py-7"
+            aria-labelledby="ai-ta-krajta-email-subscription-heading"
+        >
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
                 <div className="rounded-2xl border border-[#6b8cff]/25 bg-gradient-to-br from-[#6b8cff]/10 via-white/[0.03] to-[#ff6b6b]/[0.06] p-5 sm:p-6">
                     {isSubmitted ? (

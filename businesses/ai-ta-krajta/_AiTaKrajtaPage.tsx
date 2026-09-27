@@ -31,8 +31,8 @@ export function AiTaKrajtaPage({ archive }: { readonly archive: AiTaKrajtaArchiv
 
                 <main>
                     <AiTaKrajtaHero />
-                    <AiTaKrajtaEmailSubscriptionForm />
                     <AiTaKrajtaEpisodeList />
+                    <AiTaKrajtaEmailSubscriptionForm />
                     <AiTaKrajtaPeopleSection />
                     <AiTaKrajtaCollaborationSection />
                 </main>
