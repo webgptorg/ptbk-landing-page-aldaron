@@ -50,6 +50,7 @@ function RecordingTrackReview({ recordingId, track, trim }: {
             <p className="truncate text-sm font-medium" title={track.label}>{track.label}</p>
             {url ? track.kind === 'microphone' ? <audio {...mediaProps} className="w-full" /> :
                 <video {...mediaProps} playsInline className="aspect-video w-full rounded-lg bg-slate-950" /> : <p className="text-sm text-slate-500">Načítám stopu…</p>}
+            {track.kind === 'camera' && track.isAudioIncluded && <p className="text-xs text-slate-600">Zvuk {track.audioSourceLabel ? `z mikrofonu „${track.audioSourceLabel}“ ` : ''}je součástí tohoto video souboru; přehrává se spolu s obrazem a zůstává v originálu pro další přepis.</p>}
             {errorMessage && <p role="alert" className="text-sm text-amber-800">{errorMessage}</p>}
         </div>
     );

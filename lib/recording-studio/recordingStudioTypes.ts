@@ -9,11 +9,21 @@ export const RECORDING_STUDIO_LOCK = 'promptbook-recording-studio';
 
 export type RecordingSourceKind = 'camera' | 'screen' | 'microphone';
 
-export type RecordingSource = {
+/** Browser-local, serializable source intent. It never contains permission or live media state. */
+export type RecordingSourceConfiguration = {
     readonly id: string;
     readonly kind: RecordingSourceKind;
     readonly label: string;
+    readonly cameraDeviceId: string;
+    readonly cameraDeviceLabel: string | null;
+    readonly microphoneDeviceId: string;
+    readonly microphoneDeviceLabel: string | null;
+    readonly isAudioEnabled: boolean;
+};
+
+export type RecordingSource = RecordingSourceConfiguration & {
     readonly stream: MediaStream;
+    readonly microphoneLabel: string | null;
 };
 
 export type RecordingTrim = {
@@ -34,6 +44,8 @@ export type RecordingTrack = {
     readonly height: number | null;
     readonly frameRate: number | null;
     readonly isAudioIncluded: boolean;
+    /** Missing on older takes. On camera files, the microphone which supplied embedded audio. */
+    readonly audioSourceLabel?: string | null;
 };
 
 export type StudioRecording = {
@@ -45,6 +57,8 @@ export type StudioRecording = {
     readonly tracks: readonly RecordingTrack[];
     readonly trim: RecordingTrim | null;
     readonly errorMessage: string | null;
+    /** Immutable source preferences for this take; absent on older recordings. */
+    readonly sourceConfiguration?: readonly RecordingSourceConfiguration[];
     /** Absent on older takes: IndexedDB. Directory media never passes through origin storage. */
     readonly storageDestination?: { readonly kind: 'directory'; readonly name: string };
     /** End requested on the same capture clock; null means a crash left the tail unknown. */
@@ -56,8 +70,8 @@ export type RecordingArchiveTrack = RecordingTrack & {
     readonly trimmedFile: string | null;
 };
 
-export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds'> & {
-    readonly schemaVersion: 1;
+export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds' | 'sourceConfiguration'> & {
+    readonly schemaVersion: 2;
     readonly isTrimIncluded: boolean;
     readonly tracks: readonly RecordingArchiveTrack[];
     readonly timing: string;

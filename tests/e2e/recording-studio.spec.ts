@@ -19,7 +19,12 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     await page.addInitScript(() => {
         // Only replace physical devices/the permission picker. Recording, storage, codecs and ZIP are real.
         const streams: MediaStream[] = [];
-        Object.assign(window, { studioTestStreams: streams });
+        const mediaRequests: MediaStreamConstraints[] = [];
+        const testSettings = { cameraAudioErrorName: null as string | null };
+        const markerPeriodMilliseconds = 700;
+        const markerDurationSeconds = 0.24;
+        const markerTimeOrigin = performance.now();
+        Object.assign(window, { studioTestStreams: streams, studioTestMediaRequests: mediaRequests, studioTestSettings: testSettings });
         const createStream = async (isVideo: boolean, isAudio: boolean) => {
             const stream = new MediaStream();
             if (isVideo) {
@@ -27,7 +32,8 @@ async function openStudio(page: Page, baseURL: string | undefined) {
                 canvas.width = 320; canvas.height = 180;
                 const context = canvas.getContext('2d')!;
                 const draw = () => {
-                    context.fillStyle = streams.length % 2 ? '#08b' : '#b60';
+                    const isMarkerVisible = (performance.now() - markerTimeOrigin) % markerPeriodMilliseconds < markerDurationSeconds * 1000;
+                    context.fillStyle = isMarkerVisible ? '#fff' : '#102030';
                     context.fillRect(0, 0, 320, 180);
                     context.fillStyle = '#fff'; context.font = '24px sans-serif';
                     context.fillText(String(performance.now()), 20, 90);
@@ -39,20 +45,37 @@ async function openStudio(page: Page, baseURL: string | undefined) {
                 stream.addTrack(videoTrack);
             }
             if (isAudio) {
-                // Render real audio without a physical output device, whose clock may stall on a headless host.
-                const AUDIO_CONTEXT_OPTIONS: AudioContextOptions & { sinkId: { type: 'none' } } = { sinkId: { type: 'none' } };
-                const context = new AudioContext(AUDIO_CONTEXT_OPTIONS);
+                // Render real audio into a captured stream without connecting the fixture oscillator to speakers.
+                const context = new AudioContext();
                 const oscillator = context.createOscillator();
+                const gain = context.createGain();
                 const destination = context.createMediaStreamDestination();
-                oscillator.connect(destination); oscillator.start();
+                gain.gain.value = 0;
+                oscillator.frequency.value = 880;
+                oscillator.connect(gain); gain.connect(destination); oscillator.start();
                 stream.addTrack(destination.stream.getAudioTracks()[0]);
                 await context.resume();
+                const elapsedSeconds = (performance.now() - markerTimeOrigin) / 1000;
+                const audioTimeAtOrigin = context.currentTime - elapsedSeconds;
+                const nextMarkerIndex = Math.max(0, Math.ceil(elapsedSeconds / (markerPeriodMilliseconds / 1000)));
+                for (let markerIndex = nextMarkerIndex; markerIndex < 100; markerIndex += 1) {
+                    const markerTime = audioTimeAtOrigin + markerIndex * markerPeriodMilliseconds / 1000;
+                    if (markerTime < context.currentTime) continue;
+                    gain.gain.setValueAtTime(0.2, markerTime);
+                    gain.gain.setValueAtTime(0, markerTime + markerDurationSeconds);
+                }
             }
             streams.push(stream);
             return stream;
         };
         Object.defineProperties(navigator.mediaDevices, {
-            getUserMedia: { value: (constraints: MediaStreamConstraints) => createStream(Boolean(constraints.video), Boolean(constraints.audio)) },
+            getUserMedia: { value: (constraints: MediaStreamConstraints) => {
+                mediaRequests.push(constraints);
+                if (testSettings.cameraAudioErrorName && Boolean(constraints.video) && Boolean(constraints.audio)) {
+                    return Promise.reject(new DOMException('Synthetic camera/microphone acquisition failure', testSettings.cameraAudioErrorName));
+                }
+                return createStream(Boolean(constraints.video), Boolean(constraints.audio));
+            } },
             getDisplayMedia: { value: () => createStream(true, true) },
             enumerateDevices: { value: () => Promise.resolve([]) },
         });
@@ -60,6 +83,7 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     });
     await page.goto('/admin/recording-studio');
     await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
     // Complete the unrelated cookie choice so a moving bottom panel cannot intercept studio controls.
     const cookiePanel = page.getByRole('region', { name: 'Cookies', exact: true });
     await cookiePanel.getByRole('button').first().click();
@@ -67,11 +91,21 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     await expect(cookiePanel).toHaveCount(0);
 }
 
-async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone') {
+async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone', isAudioEnabled = true) {
     await page.getByRole('button', { name: 'Přidat zdroj', exact: true }).click();
     await page.getByLabel('Typ zdroje').selectOption(kind);
+    if (kind === 'camera' && !isAudioEnabled) await page.getByLabel('Nahrávat zvuk', { exact: true }).uncheck();
     await page.getByRole('button', { name: 'Připojit zdroj', exact: true }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
+}
+
+async function connectPendingSources(page: Page) {
+    const connectButtons = page.getByRole('button', { name: 'Připojit', exact: true });
+    while (await connectButtons.count() > 0) {
+        const sourceCountBeforeConnect = await connectButtons.count();
+        await connectButtons.first().click();
+        await expect(connectButtons).toHaveCount(sourceCountBeforeConnect - 1);
+    }
 }
 
 async function readArchive(pathname: string) {
@@ -83,6 +117,82 @@ async function readArchive(pathname: string) {
     }
     await reader.close();
     return files;
+}
+
+async function inspectAudioVideoMarkers(page: Page, bytes: Uint8Array, mimeType: string) {
+    await page.evaluate(({ data, mediaType }) => {
+        const video = document.createElement('video');
+        video.controls = false;
+        video.playsInline = true;
+        video.muted = false;
+        const encodedBytes = Uint8Array.from(atob(data), (character) => character.charCodeAt(0));
+        video.src = URL.createObjectURL(new Blob([encodedBytes], { type: mediaType }));
+        video.style.width = '320px'; video.style.height = '180px';
+        const canvas = document.createElement('canvas');
+        canvas.width = 1; canvas.height = 1;
+        const canvasContext = canvas.getContext('2d')!;
+        const audioContext = new AudioContext();
+        const audioSource = audioContext.createMediaElementSource(video);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        const silentOutput = audioContext.createGain();
+        silentOutput.gain.value = 0;
+        audioSource.connect(analyser); analyser.connect(silentOutput); silentOutput.connect(audioContext.destination);
+        const samples: { timestamp: number; isVideoMarkerVisible: boolean; audioRms: number }[] = [];
+        const sampleBuffer = new Uint8Array(analyser.fftSize);
+        const controls = document.createElement('button');
+        controls.type = 'button'; controls.textContent = 'Spustit A/V kontrolu markerů';
+        let isComplete = false;
+        let errorMessage: string | null = null;
+        controls.addEventListener('click', () => {
+            void audioContext.resume().then(() => video.play()).catch((error: unknown) => {
+                errorMessage = error instanceof Error ? error.message : 'Playback failed'; isComplete = true;
+            });
+            const sampleFrame = () => {
+                if (!video.paused && !video.ended && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                    canvasContext.drawImage(video, 0, 0, 1, 1);
+                    const isVideoMarkerVisible = canvasContext.getImageData(0, 0, 1, 1).data[0] > 220;
+                    analyser.getByteTimeDomainData(sampleBuffer);
+                    const meanSquare = sampleBuffer.reduce((total, sample) => {
+                        const normalizedSample = (sample - 128) / 128;
+                        return total + normalizedSample * normalizedSample;
+                    }, 0) / sampleBuffer.length;
+                    samples.push({ timestamp: video.currentTime, isVideoMarkerVisible, audioRms: Math.sqrt(meanSquare) });
+                }
+                if (video.ended || errorMessage) { isComplete = true; return; }
+                requestAnimationFrame(sampleFrame);
+            };
+            requestAnimationFrame(sampleFrame);
+        });
+        Object.assign(window, { studioAvMarkerCheck: { video, audioContext, samples, get isComplete() { return isComplete; }, get errorMessage() { return errorMessage; } } });
+        document.body.append(video, controls);
+    }, { data: Buffer.from(bytes).toString('base64'), mediaType: mimeType });
+    await page.getByRole('button', { name: 'Spustit A/V kontrolu markerů', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => (window as unknown as { studioAvMarkerCheck: { isComplete: boolean } }).studioAvMarkerCheck.isComplete)).toBe(true);
+    const result = await page.evaluate(() => {
+        const check = (window as unknown as { studioAvMarkerCheck: { video: HTMLVideoElement; samples: { timestamp: number; isVideoMarkerVisible: boolean; audioRms: number }[]; errorMessage: string | null } }).studioAvMarkerCheck;
+        return { duration: check.video.duration, errorMessage: check.errorMessage, samples: check.samples };
+    });
+    if (result.errorMessage) throw new Error(`A/V marker playback failed: ${result.errorMessage}`);
+    const getPulseStarts = (isActive: (sample: typeof result.samples[number]) => boolean, startSeconds: number, endSeconds: number) => {
+        const windowSamples = result.samples.filter((sample) => sample.timestamp >= startSeconds && sample.timestamp <= endSeconds);
+        return windowSamples.filter((sample, index) => isActive(sample) && (index === 0 || !isActive(windowSamples[index - 1]))).map((sample) => sample.timestamp);
+    };
+    const compareWindows = [
+        [0.25, Math.min(1.25, result.duration / 2)],
+        [Math.max(result.duration - 1.25, result.duration / 2), result.duration - 0.25],
+    ];
+    return compareWindows.map(([startSeconds, endSeconds]) => {
+        const videoStarts = getPulseStarts((sample) => sample.isVideoMarkerVisible, startSeconds, endSeconds);
+        const audioStarts = getPulseStarts((sample) => sample.audioRms > 0.025, startSeconds, endSeconds);
+        const gaps = videoStarts.flatMap((videoStart) => audioStarts.map((audioStart) => Math.abs(videoStart - audioStart)));
+        return {
+            nearestGap: gaps.length ? Math.min(...gaps) : null,
+            videoStarts,
+            audioStarts,
+            sampleCount: result.samples.filter((sample) => sample.timestamp >= startSeconds && sample.timestamp <= endSeconds).length,
+        };
+    });
 }
 
 test('requires admin authentication for the recording studio', async ({ page }) => {
@@ -99,11 +209,20 @@ test('records separate sources, restores them, trims every track and exports pla
     await addSource(page, 'screen');
     await addSource(page, 'screen');
     await addSource(page, 'microphone');
+    await expect(page.getByText('Zvuková stopa: přítomna', { exact: true })).toHaveCount(3);
+    await expect(page.getByRole('meter', { name: 'Úroveň živého zvuku', exact: true })).toHaveCount(5);
+    await expect.poll(async () => page.getByRole('meter', { name: 'Úroveň živého zvuku', exact: true }).evaluateAll((meters) =>
+        meters.some((meter) => Number(meter.getAttribute('aria-valuenow')) > 0),
+    )).toBe(true);
+    const mediaRequests = await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests);
+    expect(mediaRequests.filter((request) => Boolean(request.audio))).toHaveLength(1);
+    expect(mediaRequests[0].audio).toEqual({});
+    expect(mediaRequests[1].audio).toBe(false);
     await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:04');
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
     await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Odebrat zdroj' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Odebrat zdroj' })).toHaveCount(5);
 
     const originalDownload = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Originály ZIP', exact: true }).click();
@@ -138,8 +257,16 @@ test('records separate sources, restores them, trims every track and exports pla
     await page.getByRole('button', { name: 'ZIP s ořezem', exact: true }).click();
     const files = await readArchive((await (await trimmedDownload).path())!);
     const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
+    expect(manifest.schemaVersion).toBe(2);
     expect(manifest.trim).toEqual({ startSeconds: 0.5, endSeconds: 2.5 });
     expect(manifest.tracks).toHaveLength(5);
+    expect(manifest.sourceConfiguration?.[0]).toMatchObject({ kind: 'camera', isAudioEnabled: true });
+    expect(manifest.tracks.slice(0, 2).every((track) => track.kind === 'camera' && track.isAudioIncluded)).toBe(true);
+    const firstCameraTrack = manifest.tracks[0];
+    if (!firstCameraTrack.originalFile) throw new Error('Expected a camera original file.');
+    const alignmentGaps = await inspectAudioVideoMarkers(page, originals.get(firstCameraTrack.originalFile)!, firstCameraTrack.mimeType);
+    expect(alignmentGaps).toHaveLength(2);
+    expect(alignmentGaps.every((window) => window.nearestGap !== null && window.nearestGap <= 0.15), JSON.stringify(alignmentGaps)).toBe(true);
     for (let index = 0; index < manifest.tracks.length; index += 1) {
         const track = manifest.tracks[index];
         if (!track.originalFile || !track.trimmedFile) throw new Error('Expected original and trimmed files for every source.');
@@ -155,7 +282,7 @@ test('records separate sources, restores them, trims every track and exports pla
                 expect(videoTracks[0].displayWidth).toBe(320);
                 expect(videoTracks[0].displayHeight).toBe(180);
             }
-            expect((await input.getAudioTracks()).length).toBe(index < 2 ? 0 : 1);
+            expect((await input.getAudioTracks()).length).toBe(1);
         } finally { input.dispose(); }
     }
     await page.screenshot({ path: testInfo.outputPath('recording-studio-desktop.png'), fullPage: true });
@@ -168,7 +295,50 @@ test('records separate sources, restores them, trims every track and exports pla
     await expect(page.getByRole('heading', { name: 'Synchronized editing take' })).toHaveCount(0);
     await page.reload();
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Připojit', exact: true })).toHaveCount(5);
+    expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
+    await page.getByRole('button', { name: 'Nastavení', exact: true }).first().click();
+    await expect(page.getByLabel('Nahrávat zvuk')).toBeChecked();
+    await page.getByRole('dialog').getByRole('button', { name: 'Zavřít', exact: true }).click();
     expect(errors).toEqual([]);
+});
+
+test('retains a failed camera-plus-microphone request and lets the owner explicitly retry without sound', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { cameraAudioErrorName: string | null } }).studioTestSettings.cameraAudioErrorName = 'NotAllowedError';
+    });
+    await page.getByRole('button', { name: 'Přidat zdroj', exact: true }).click();
+    await expect(page.getByLabel('Nahrávat zvuk')).toBeChecked();
+    await page.getByRole('button', { name: 'Připojit zdroj', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('zamítl přístup ke kameře či mikrofonu');
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { cameraAudioErrorName: string | null } }).studioTestSettings.cameraAudioErrorName = 'NotReadableError';
+    });
+    await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('jiná aplikace');
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { cameraAudioErrorName: string | null } }).studioTestSettings.cameraAudioErrorName = 'NotFoundError';
+    });
+    await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('Kamera nebo mikrofon nejsou dostupné');
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { cameraAudioErrorName: string | null } }).studioTestSettings.cameraAudioErrorName = null;
+    });
+    await page.getByLabel('Nahrávat zvuk').uncheck();
+    await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByText('Záměrně tiché video; mikrofon se nevyžaduje.', { exact: true })).toBeVisible();
+    const mediaRequests = await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests);
+    expect(mediaRequests[0].audio).toEqual({});
+    expect(mediaRequests.at(-1)?.audio).toBe(false);
+    await page.reload();
+    await page.getByRole('button', { name: 'Nastavení', exact: true }).first().click();
+    await expect(page.getByLabel('Nahrávat zvuk')).not.toBeChecked();
+    await page.getByLabel('Typ zdroje').selectOption('screen');
+    await page.getByLabel('Typ zdroje').selectOption('camera');
+    await expect(page.getByLabel('Nahrávat zvuk')).not.toBeChecked();
+    await page.getByRole('dialog').getByRole('button', { name: 'Zavřít', exact: true }).click();
 });
 
 test('stops the whole take on disconnect and prevents a second tab from changing it', async ({ page, baseURL }) => {
@@ -205,7 +375,7 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await reload.catch(() => undefined);
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
-    await addSource(page, 'camera');
+    await connectPendingSources(page);
     await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
     await page.getByRole('link', { name: 'Dashboard', exact: true }).click();

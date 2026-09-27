@@ -4,18 +4,21 @@ import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { RecordingStudioCapture } from '@/lib/recording-studio/RecordingStudioCapture';
 import { acquireRecordingSource, getRecordingErrorMessage, releaseRecordingSource } from '@/lib/recording-studio/recordingStudioDevices';
+import { loadRecordingSourceConfigurations, saveRecordingSourceConfigurations, toRecordingSourceConfiguration } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
 import { runWithRecordingStudioLock } from '@/lib/recording-studio/recordingStudioLock';
 import { estimateRecordingStorage, getRecordingStorageErrorMessage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
 import { chooseRecordingDirectory } from '@/lib/recording-studio/recordingStudioDirectory';
 import { importStudioRecordingDirectory, recoverStudioRecordings, resetRecordingDirectoryCache } from '@/lib/recording-studio/recordingStudioStorage';
 import { RecordingBitrateMeter } from '@/lib/recording-studio/recordingStudioTiming';
 import {
-    type RecordingPersistence, type RecordingSource, type RecordingSourceKind, type StudioRecording,
+    type RecordingPersistence, type RecordingSource, type RecordingSourceConfiguration, type StudioRecording,
 } from '@/lib/recording-studio/recordingStudioTypes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useRecordingStudio() {
     const [sources, setSources] = useState<RecordingSource[]>([]);
+    const [sourceConfigurations, setSourceConfigurations] = useState<RecordingSourceConfiguration[]>([]);
+    const [sourceErrors, setSourceErrors] = useState<Record<string, string>>({});
     const [recordings, setRecordings] = useState<StudioRecording[]>([]);
     const [activeRecording, setActiveRecording] = useState<StudioRecording | null>(null);
     const [storage, setStorage] = useState(UNKNOWN_RECORDING_STORAGE);
@@ -31,7 +34,7 @@ export function useRecordingStudio() {
     const [phase, setPhase] = useState<'loading' | 'idle' | 'starting' | 'recording' | 'stopping' | 'unavailable'>('loading');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
-    const runtime = useRef({ isDisposed: false, isAddingSource: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[] });
+    const runtime = useRef({ isDisposed: false, isAddingSource: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] });
 
     const refreshStorage = useCallback((): Promise<void> => {
         // A deletion/finalization may occur while a poll is in flight. Sample again after that older request.
@@ -48,10 +51,10 @@ export function useRecordingStudio() {
     }, []);
 
     useEffect(() => {
-        const current = { isDisposed: false, isAddingSource: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[] };
+        const current = { isDisposed: false, isAddingSource: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] };
         runtime.current = current;
         if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined' || !window.indexedDB || !navigator.locks) {
-            setErrorMessage('Studio potřebuje HTTPS (nebo localhost), záznam médií a místní úložiště. Otevřete ho v aktuálním Chrome nebo Edge na počítači.');
+            setErrorMessage('Studio potřebuje HTTPS (nebo localhost), snímání médií, MediaRecorder, IndexedDB a zámky prohlížeče. Otevřete ho v podporovaném aktuálním prohlížeči.');
             setPhase('unavailable');
             return;
         }
@@ -67,6 +70,8 @@ export function useRecordingStudio() {
             }
             try {
                 resetRecordingDirectoryCache();
+                current.sourceConfigurations = loadRecordingSourceConfigurations();
+                setSourceConfigurations(current.sourceConfigurations);
                 const recovered = await recoverStudioRecordings();
                 const { clearRecordingExportTemporaryFiles } = await import('@/lib/recording-studio/recordingStudioTrim');
                 await clearRecordingExportTemporaryFiles().catch(() => undefined);
@@ -125,38 +130,88 @@ export function useRecordingStudio() {
         } finally { directoryOperation.current = false; setIsChoosingDirectory(false); }
     };
 
-    const removeSource = (sourceId: string) => {
-        if (runtime.current.capture) return;
-        const source = runtime.current.sources.find((candidate) => candidate.id === sourceId);
-        if (source) releaseRecordingSource(source);
-        runtime.current.sources = runtime.current.sources.filter((candidate) => candidate.id !== sourceId);
-        setSources([...runtime.current.sources]);
+    const persistSourceConfigurations = (configurations: readonly RecordingSourceConfiguration[]) => {
+        runtime.current.sourceConfigurations = [...configurations];
+        setSourceConfigurations([...configurations]);
+        try {
+            saveRecordingSourceConfigurations(configurations);
+        } catch (error) {
+            setErrorMessage(getRecordingErrorMessage(error));
+        }
     };
 
-    const addSource = async (kind: RecordingSourceKind, deviceId: string) => {
+    const removeSource = (sourceId: string) => {
+        if (runtime.current.capture) return;
+        const current = runtime.current;
+        const source = current.sources.find((candidate) => candidate.id === sourceId);
+        if (source) releaseRecordingSource(source);
+        current.sources = current.sources.filter((candidate) => candidate.id !== sourceId);
+        setSources([...current.sources]);
+        setSourceErrors((previous) => { const next = { ...previous }; delete next[sourceId]; return next; });
+        persistSourceConfigurations(current.sourceConfigurations.filter((configuration) => configuration.id !== sourceId));
+    };
+
+    const addSource = async (configuration: RecordingSourceConfiguration) => {
         const current = runtime.current;
         if (current.capture || current.isAddingSource || phase !== 'idle') return;
         current.isAddingSource = true;
         setErrorMessage(null);
+        setSourceErrors((previous) => { const next = { ...previous }; delete next[configuration.id]; return next; });
         try {
-            // Start capture before awaiting any storage operation, retaining the screen-picker gesture.
-            const source = await acquireRecordingSource(kind, deviceId);
+            const previousConfiguration = current.sourceConfigurations.find((candidate) => candidate.id === configuration.id);
+            const previousSource = current.sources.find((candidate) => candidate.id === configuration.id);
+            const isSameConfiguration = previousConfiguration &&
+                previousConfiguration.kind === configuration.kind &&
+                previousConfiguration.cameraDeviceId === configuration.cameraDeviceId &&
+                previousConfiguration.microphoneDeviceId === configuration.microphoneDeviceId &&
+                previousConfiguration.isAudioEnabled === configuration.isAudioEnabled;
+            const nextConfigurations = current.sourceConfigurations.some((candidate) => candidate.id === configuration.id)
+                ? current.sourceConfigurations.map((candidate) => candidate.id === configuration.id ? configuration : candidate)
+                : [...current.sourceConfigurations, configuration];
+            persistSourceConfigurations(nextConfigurations);
+            if (previousSource && isSameConfiguration) return;
+            if (previousSource) {
+                releaseRecordingSource(previousSource);
+                current.sources = current.sources.filter((candidate) => candidate.id !== configuration.id);
+                setSources([...current.sources]);
+            }
+            // Keep the saved intent before requesting permission. A failed or cancelled dialog can be retried or
+            // changed to a different microphone/video-only without losing the requested source card.
+            const source = await acquireRecordingSource(configuration, current.sources);
             if (current.isDisposed) { releaseRecordingSource(source); return; }
             current.sources.push(source);
+            const savedConfiguration = toRecordingSourceConfiguration(source);
+            const updatedConfigurations = current.sourceConfigurations.map((candidate) => candidate.id === source.id ? savedConfiguration : candidate);
+            persistSourceConfigurations(updatedConfigurations);
             source.stream.getTracks().forEach((track) => track.addEventListener('ended', () => {
                 if (current.isDisposed || current.capture) return;
-                removeSource(source.id);
-                setErrorMessage(`Zdroj „${source.label}“ byl odpojen. Přidejte ho znovu.`);
+                releaseRecordingSource(source);
+                current.sources = current.sources.filter((candidate) => candidate.id !== source.id);
+                setSources([...current.sources]);
+                const message = `Zařízení „${source.label}“ bylo odpojeno. Připojte jej znovu nebo změňte výběr.`;
+                setSourceErrors((previous) => ({ ...previous, [source.id]: message }));
+                setErrorMessage(message);
             }, { once: true }));
             setSources([...current.sources]);
+        } catch (error) {
+            const message = getRecordingErrorMessage(error, configuration);
+            setSourceErrors((previous) => ({ ...previous, [configuration.id]: message }));
+            setErrorMessage(message);
+            throw error;
         } finally {
             current.isAddingSource = false;
         }
     };
 
+    const connectSource = async (sourceId: string) => {
+        const configuration = runtime.current.sourceConfigurations.find((candidate) => candidate.id === sourceId);
+        if (!configuration) return;
+        await addSource(configuration);
+    };
+
     const startRecording = () => {
         const current = runtime.current;
-        if (phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current || current.sources.length === 0) return;
+        if (phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current || current.sources.length === 0 || current.sources.length !== current.sourceConfigurations.length) return;
         setErrorMessage(null);
         setElapsedSeconds(0);
         setActiveRecording(null);
@@ -202,7 +257,7 @@ export function useRecordingStudio() {
     };
 
     return {
-        sources, recordings, activeRecording, storage, phase, errorMessage, elapsedSeconds,
+        sources, sourceConfigurations, sourceErrors, recordings, activeRecording, storage, phase, errorMessage, elapsedSeconds,
         directory, isChoosingDirectory, pendingBytes, measuredBytesPerSecond, persistence,
         chooseDirectory,
         useBrowserStorage: () => {
@@ -210,7 +265,7 @@ export function useRecordingStudio() {
             directoryReference.current = null; setDirectory(null); void refreshStorage();
         },
         requestPersistence: async () => { setPersistence(await requestRecordingPersistence()); await refreshStorage(); },
-        addSource, removeSource, startRecording, stopRecording: () => { void runtime.current.capture?.stop(); },
+        addSource, connectSource, removeSource, startRecording, stopRecording: () => { void runtime.current.capture?.stop(); },
         setErrorMessage, refreshStorage,
         updateRecording: (recording: StudioRecording) => setRecordings((previous) => previous.map((item) => item.id === recording.id ? recording : item)),
         removeRecording: (recordingId: string) => setRecordings((previous) => previous.filter((item) => item.id !== recordingId)),

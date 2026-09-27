@@ -14,6 +14,12 @@ export function recordingFileStem(recording: StudioRecording): string {
     return `${recording.title.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70) || 'recording'}-${recording.id.slice(0, 8)}`;
 }
 
+function recordingMediaFileExtension(mimeType: string): string {
+    if (mimeType.includes('mp4')) return 'mp4';
+    if (mimeType.includes('ogg')) return 'ogg';
+    return 'webm';
+}
+
 /** Must be invoked before imports/awaits in the export button's gesture. */
 export function chooseRecordingArchiveDestination(recording: StudioRecording): Promise<FileSystemFileHandle | null> {
     const picker = (window as SaveFilePickerWindow).showSaveFilePicker;
@@ -23,7 +29,7 @@ export function chooseRecordingArchiveDestination(recording: StudioRecording): P
 }
 
 export function recordingOriginalFilename(recording: StudioRecording, track: RecordingTrack): string {
-    return `${recordingFileStem(recording)}-${recording.tracks.indexOf(track) + 1}-${track.kind}.${track.mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+    return `${recordingFileStem(recording)}-${recording.tracks.indexOf(track) + 1}-${track.kind}.${recordingMediaFileExtension(track.mimeType)}`;
 }
 
 export function chooseRecordingOriginalDestination(recording: StudioRecording, track: RecordingTrack): Promise<FileSystemFileHandle | null> {
@@ -45,9 +51,9 @@ export async function exportRecordingOriginal(recording: StudioRecording, track:
 
 function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean): RecordingArchiveManifest {
     return {
-        schemaVersion: 1, id: recording.id, title: recording.title, createdAt: recording.createdAt,
+        schemaVersion: 2, id: recording.id, title: recording.title, createdAt: recording.createdAt,
         status: recording.status, errorMessage: recording.errorMessage, durationSeconds: recording.durationSeconds,
-        trim: recording.trim, isTrimIncluded, tracks,
+        trim: recording.trim, isTrimIncluded, tracks, sourceConfiguration: recording.sourceConfiguration,
         captureEndSeconds: recording.captureEndSeconds, missingRanges: getRecordingMissingRanges(recording),
         timing: 'Seconds on the shared session clock. startOffsetSeconds measures browser start-call offsets, not hardware genlock.',
     };
@@ -86,7 +92,7 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
             signal.throwIfAborted();
             if (track.byteLength === 0) { exportedTracks.push({ ...track, originalFile: null, trimmedFile: null }); continue; }
             const prefix = `${String(index + 1).padStart(2, '0')}-${track.kind}`;
-            const originalFile = `originals/${prefix}.${track.mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+            const originalFile = `originals/${prefix}.${recordingMediaFileExtension(track.mimeType)}`;
             onProgress(`Balení originálu ${index + 1}/${recording.tracks.length}: ${track.label}`);
             const addFile = async (filename: string, content: Blob | ReadableStream<Uint8Array>, size: number) => {
                 bufferedBytes = addRecordingBytes(bufferedBytes, size);
@@ -112,8 +118,8 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
         await archive.add('recording.json', new TextReader(JSON.stringify(manifest, null, 2)), { signal });
         await archive.add('README.txt', new TextReader([
             recording.title, '', 'ORIGINALS: unmodified source files, one file per camera, screen share or microphone.',
-            'Keep embedded screen audio and microphone audio as separate sources when editing.',
-            'recording.json contains source names, dimensions, byte sizes, timing offsets, missingRanges and the shared trim range in seconds. A null missing-range end means unknown.',
+            'A camera file can contain its selected microphone audio. Separate microphone and screen audio remain separate files when they were configured as separate sources.',
+            'recording.json contains source and selected-device preferences, embedded-audio presence, dimensions, byte sizes, timing offsets, missingRanges and the shared trim range in seconds. A null missing-range end means unknown.',
             'All MediaRecorders are started/stopped in one browser turn. This is not hardware frame synchronization.',
             isTrimmed ? 'TRIMMED: copies of every recorded source, cut to the same session range. A trim can re-encode video/audio; originals preserve capture quality.' :
                 'No trimmed copies are included. The original source files and any saved trim decision are preserved.',

@@ -200,8 +200,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
 - `/admin/recording-studio` records any number of available cameras, screen shares,
-  and optional microphones as separate local tracks. One capture coordinator starts
-  and stops them on a shared clock; losing a source or a storage write stops the take.
+  and optional microphones. A newly configured camera defaults to recording its selected
+  system-default or chosen microphone inside the same video file; video-only is an explicit
+  choice. The live camera preview is muted, while a track-presence indicator and live level
+  meter describe the captured microphone. Standalone microphone and screen sources remain
+  available, and an already configured matching microphone is cloned without transferring
+  ownership or adding a second audio track to the camera file. Versioned browser-local source
+  preferences survive recording stops and reloads; restoration never starts capture or requests
+  permission by itself. One capture coordinator starts and stops sources on a shared clock; losing
+  a required source or a storage write stops the take.
   IndexedDB commits each chunk together with its counters; a feature-detected selected-directory destination
   closes immutable media fragments before its small authoritative checkpoint and stores only handles/metadata in
   IndexedDB. Recovery can reconnect or import that folder without moving its media into origin storage; read-only

@@ -59,7 +59,7 @@ describe('recording archive exports', () => {
         const recording = { ...base, status: 'interrupted' as const, captureEndSeconds: null, tracks: base.tracks.map((track) => ({ ...track, byteLength: 12 * 1024 ** 3 })) };
         exportRecordingManifest(recording);
         const manifest = JSON.parse(await DOWNLOADS.download.mock.calls[0][0].blob.text()) as RecordingArchiveManifest;
-        expect(manifest.schemaVersion).toBe(1);
+        expect(manifest.schemaVersion).toBe(2);
         expect(manifest.tracks[1].originalFile).toBe(recordingOriginalFilename(recording, recording.tracks[1]));
         expect(manifest.tracks[1].byteLength).toBe(12 * 1024 ** 3);
         expect(manifest.tracks[1].startOffsetSeconds).toBe(0.002);

@@ -1,5 +1,24 @@
 # Current preversion
 
+- New camera sources now default to `Kamera + mikrofon`: choose a camera and a system-default or separate microphone,
+  with an explicit, enabled-by-default `Nahrávat zvuk` option. Camera and microphone are requested together and stored
+  in the same camera media file; the muted preview stays separate from the captured audio. Existing source intent is
+  retained in a versioned browser-local configuration, so a saved video-only choice stays silent and restored sources
+  require an explicit reconnect. The studio shows microphone identity, audio-track presence and a live level meter,
+  preserves a failed sound-enabled setup for retry or an explicit switch to silent video, and clones an already-open
+  matching microphone track safely when it is also configured as a standalone source. Recording metadata and archive
+  manifests now identify embedded camera audio and its selected microphone. Recorder containers and codecs are chosen
+  from combinations accepted by the active browser, with construction-time fallback; standalone audio remains separate.
+  Verification on Windows 10 Pro build 19045 used Playwright Chromium 151.0.7922.34 and Firefox 153.0: the full
+  Chromium recording-studio suite passed 9/9, the camera export contained audible audio, and 240 ms visual/audio
+  markers stayed within 150 ms at the beginning and end in both engines. Automated capture used generated canvas/audio
+  sources in place of physical devices; browser recording, playback, storage and export remained real. The permission UI
+  distinguishes denied, busy, and absent-device retries before an explicit silent-video choice. Chromium reported WebM VP9/Opus, WebM
+  VP8/Opus, generic WebM, and MP4 H.264/AAC candidates; Firefox reported WebM VP8/Opus and generic WebM, so the
+  recorder falls through to the first supported combination. The bundled Playwright WebKit 26.5 on Windows has no
+  `MediaRecorder` and disables the studio; this does not describe native Safari. The reported macOS device/browser
+  setup was not available in this workspace, so its hardware verification remains outstanding.
+
 - Quick-link materials now pass only the trimmed original pasted URL as their body to ordinary material creation,
   preserving URL spelling, percent encoding, query strings and fragments. Scraped titles, fallback titles and title
   corrections remain separate. The shared link extractor recognizes complete standalone URLs containing parentheses,

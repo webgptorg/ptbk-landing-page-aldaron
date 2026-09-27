@@ -6,16 +6,23 @@ const MAXIMUM_MANIFEST_BYTES = 4 * 1024 * 1024;
 const SAFE_IDENTIFIER = /^[a-zA-Z0-9_-]+$/;
 const NONNEGATIVE_NUMBER = z.number().finite().nonnegative();
 const BYTE_COUNT = NONNEGATIVE_NUMBER.int().max(Number.MAX_SAFE_INTEGER);
+const SOURCE_CONFIGURATION_SCHEMA = z.object({
+    id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string().max(200),
+    cameraDeviceId: z.string(), cameraDeviceLabel: z.string().max(200).nullable(),
+    microphoneDeviceId: z.string(), microphoneDeviceLabel: z.string().max(200).nullable(), isAudioEnabled: z.boolean(),
+});
 const RECORDING_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), title: z.string(), createdAt: z.string().datetime(),
     status: z.enum(['recording', 'complete', 'interrupted']), durationSeconds: NONNEGATIVE_NUMBER,
     errorMessage: z.string().nullable(), trim: z.object({ startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER }).nullable(),
     storageDestination: z.object({ kind: z.literal('directory'), name: z.string() }),
     captureEndSeconds: NONNEGATIVE_NUMBER.nullable().optional(),
+    sourceConfiguration: z.array(SOURCE_CONFIGURATION_SCHEMA).optional(),
     tracks: z.array(z.object({
         id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string(), mimeType: z.string(),
         byteLength: BYTE_COUNT, chunkCount: BYTE_COUNT, startOffsetSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER,
         width: NONNEGATIVE_NUMBER.nullable(), height: NONNEGATIVE_NUMBER.nullable(), frameRate: NONNEGATIVE_NUMBER.nullable(), isAudioIncluded: z.boolean(),
+        audioSourceLabel: z.string().nullable().optional(),
     })),
 });
 

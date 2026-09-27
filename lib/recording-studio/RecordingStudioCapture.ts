@@ -2,13 +2,23 @@ import { getRecordingErrorMessage } from './recordingStudioDevices';
 import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
 import { appendRecordingChunk, createStudioRecording, saveStudioRecording } from './recordingStudioStorage';
 import { addRecordingBytes, getCommonRecordingDuration, getRecordingByteLength } from './recordingStudioTiming';
+import { toRecordingSourceConfiguration } from './recordingStudioSourceConfiguration';
 import {
     RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_CHUNK_MILLISECONDS, RECORDING_DIRECTORY_CHUNK_MILLISECONDS, RECORDING_MAX_PENDING_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
     type RecordingSource, type RecordingTrack, type StudioRecording,
 } from './recordingStudioTypes';
 
-const VIDEO_MIME_TYPES = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
-const AUDIO_MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+const VIDEO_WITH_AUDIO_MIME_TYPES = [
+    'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm',
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4',
+];
+const VIDEO_ONLY_MIME_TYPES = [
+    'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm',
+    'video/mp4;codecs=avc1.42E01E', 'video/mp4',
+];
+const AUDIO_MIME_TYPES = [
+    'audio/webm;codecs=opus', 'audio/webm', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/ogg;codecs=opus',
+];
 
 type CaptureOptions = {
     readonly onProgress: (recording: StudioRecording) => void;
@@ -50,10 +60,12 @@ export class RecordingStudioCapture {
     public async start(sources: readonly RecordingSource[]): Promise<void> {
         try {
             if (sources.length === 0) throw new Error('Nejprve přidejte zdroj.');
+            for (const source of sources) this.validateRequiredTracks(source);
             for (const source of sources) this.entries.push(this.prepareRecorder(source));
             this.recording = {
                 id: crypto.randomUUID(), title: `Záznam ${new Date().toLocaleString('cs-CZ')}`, createdAt: new Date().toISOString(),
                 status: 'recording', durationSeconds: 0, trim: null, errorMessage: null,
+                sourceConfiguration: sources.map(toRecordingSourceConfiguration),
                 tracks: this.entries.map((entry) => this.describeTrack(entry)),
             };
             try { this.recording = await createStudioRecording(this.recording, this.options.directory); }
@@ -64,6 +76,7 @@ export class RecordingStudioCapture {
             // No await between start calls: each recorder receives the same browser event-loop turn.
             for (const entry of this.entries) {
                 if (entry.source.stream.getTracks().some((track) => track.readyState !== 'live')) throw new Error('Jeden ze zdrojů byl odpojen.');
+                this.validateRequiredTracks(entry.source);
                 this.updateTrack(entry.source.id, { startOffsetSeconds: this.elapsedSeconds() });
                 entry.recorder.start(this.options.directory ? RECORDING_DIRECTORY_CHUNK_MILLISECONDS : RECORDING_CHUNK_MILLISECONDS);
                 entry.isStarted = true;
@@ -103,13 +116,23 @@ export class RecordingStudioCapture {
     public get elapsedRecordingSeconds(): number { return this.elapsedSeconds(); }
     public get failureMessage(): string | null { return this.errorMessage; }
 
+    private validateRequiredTracks(source: RecordingSource): void {
+        const hasVideo = source.stream.getVideoTracks().some((track) => track.readyState === 'live');
+        const audioTrack = source.stream.getAudioTracks().find((track) => track.readyState === 'live');
+        const isVideoRequired = source.kind !== 'microphone';
+        const isAudioRequired = source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled);
+        if (isVideoRequired && !hasVideo) throw new Error(`Kamera „${source.label}“ už neposkytuje obraz. Připojte ji znovu.`);
+        if (isAudioRequired && !audioTrack) throw new Error(`Požadovaná zvuková stopa mikrofonu „${source.microphoneLabel || source.label}“ chybí. Připojte mikrofon znovu, vyberte jiný nebo výslovně zvolte video bez zvuku.`);
+        if (isAudioRequired && audioTrack?.muted) throw new Error(`Mikrofon „${source.microphoneLabel || source.label}“ právě neposílá zvuk. Připojte ho znovu nebo výslovně zvolte tiché video.`);
+    }
+
     private prepareRecorder(source: RecordingSource): RecorderEntry {
         const isVideo = source.stream.getVideoTracks().length > 0;
-        const mimeType = (isVideo ? VIDEO_MIME_TYPES : AUDIO_MIME_TYPES).find((candidate) => MediaRecorder.isTypeSupported(candidate));
-        if (!mimeType) throw new Error('Prohlížeč nenabízí podporovaný formát záznamu. Zkuste Chrome nebo Edge.');
-        const recorder = new MediaRecorder(source.stream, {
-            mimeType, videoBitsPerSecond: RECORDING_VIDEO_BITS_PER_SECOND, audioBitsPerSecond: RECORDING_AUDIO_BITS_PER_SECOND,
-        });
+        const isAudioTrackIncluded = source.stream.getAudioTracks().length > 0;
+        const mimeTypes = isVideo
+            ? isAudioTrackIncluded ? VIDEO_WITH_AUDIO_MIME_TYPES : VIDEO_ONLY_MIME_TYPES
+            : AUDIO_MIME_TYPES;
+        const recorder = this.createRecorder(source, mimeTypes);
         let finish!: () => void;
         const stopped = new Promise<void>((resolve) => { finish = resolve; });
         recorder.ondataavailable = (event) => this.enqueueChunk(source.id, event.data);
@@ -120,10 +143,38 @@ export class RecordingStudioCapture {
         };
         for (const track of source.stream.getTracks()) {
             const handleEnded = () => { void this.stop(`Zdroj „${source.label}“ byl odpojen. Všechny stopy byly zastaveny.`); };
+            const isRequiredMicrophone = track.kind === 'audio' &&
+                (source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled));
+            const handleMuted = () => {
+                if (isRequiredMicrophone) void this.stop(`Mikrofon „${source.microphoneLabel || source.label}“ přestal posílat zvuk. Všechny stopy byly zastaveny; uložené části zůstávají dostupné.`);
+            };
             track.addEventListener('ended', handleEnded);
-            this.removeListeners.push(() => track.removeEventListener('ended', handleEnded));
+            track.addEventListener('mute', handleMuted);
+            this.removeListeners.push(() => {
+                track.removeEventListener('ended', handleEnded);
+                track.removeEventListener('mute', handleMuted);
+            });
         }
         return { source, recorder, stopped, finish, isStarted: false };
+    }
+
+    private createRecorder(source: RecordingSource, mimeTypes: readonly string[]): MediaRecorder {
+        for (const mimeType of mimeTypes) {
+            try {
+                if (!MediaRecorder.isTypeSupported(mimeType)) continue;
+                return new MediaRecorder(source.stream, {
+                    mimeType,
+                    ...(source.stream.getVideoTracks().length > 0 ? { videoBitsPerSecond: RECORDING_VIDEO_BITS_PER_SECOND } : {}),
+                    ...(source.stream.getAudioTracks().length > 0 ? { audioBitsPerSecond: RECORDING_AUDIO_BITS_PER_SECOND } : {}),
+                });
+            } catch {
+                // Some engines report support but still reject a codec combination at construction time.
+            }
+        }
+        const isVideo = source.stream.getVideoTracks().length > 0;
+        throw new Error(isVideo
+            ? 'Tento prohlížeč nenabízí ověřený kontejner a kodeky pro tuto video stopu. Zkuste aktuální Safari, Chrome nebo Edge.'
+            : 'Tento prohlížeč nenabízí ověřený zvukový kontejner a kodek. Zkuste aktuální Safari, Chrome nebo Edge.');
     }
 
     private describeTrack({ source, recorder }: RecorderEntry): RecordingTrack {
@@ -133,6 +184,7 @@ export class RecordingStudioCapture {
             byteLength: 0, chunkCount: 0, startOffsetSeconds: 0, durationSeconds: 0,
             width: settings?.width ?? null, height: settings?.height ?? null, frameRate: settings?.frameRate ?? null,
             isAudioIncluded: source.stream.getAudioTracks().length > 0,
+            audioSourceLabel: source.kind === 'camera' && source.stream.getAudioTracks().length > 0 ? source.microphoneLabel : null,
         };
     }
 

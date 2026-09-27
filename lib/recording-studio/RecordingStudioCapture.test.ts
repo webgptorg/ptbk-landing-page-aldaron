@@ -7,9 +7,9 @@ vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.appen
 
 class TestRecorder {
     static readonly instances: TestRecorder[] = [];
-    static isTypeSupported = () => true;
+    static isTypeSupported = (_mimeType: string) => true;
     public state = 'inactive';
-    public mimeType = 'video/webm';
+    public mimeType: string;
     public ondataavailable: ((event: { data: Blob }) => void) | null = null;
     public onstop: (() => void) | null = null;
     public onerror: (() => void) | null = null;
@@ -18,13 +18,20 @@ class TestRecorder {
         this.state = 'inactive';
         queueMicrotask(() => { this.emit('tail'); this.onstop?.(); });
     });
-    public constructor() { TestRecorder.instances.push(this); }
+    public constructor(_stream: MediaStream, options?: MediaRecorderOptions) { this.mimeType = options?.mimeType ?? 'video/webm'; TestRecorder.instances.push(this); }
     public emit(content: string) { this.ondataavailable?.({ data: new Blob([content]) }); }
 }
 
-function makeSource(id: string): RecordingSource {
-    const track = Object.assign(new EventTarget(), { readyState: 'live', getSettings: () => ({ width: 640, height: 480, frameRate: 30 }) });
-    return { id, kind: 'camera', label: id, stream: { getVideoTracks: () => [track], getAudioTracks: () => [], getTracks: () => [track] } as unknown as MediaStream };
+function makeSource(id: string, isAudioIncluded = false): RecordingSource {
+    const videoTrack = Object.assign(new EventTarget(), { readyState: 'live', label: id, getSettings: () => ({ width: 640, height: 480, frameRate: 30 }) });
+    const audioTrack = Object.assign(new EventTarget(), { kind: 'audio', readyState: 'live', muted: false, label: 'Fixture microphone', getSettings: () => ({ deviceId: 'fixture-mic' }) });
+    const audioTracks = isAudioIncluded ? [audioTrack] : [];
+    return {
+        id, kind: 'camera', label: id, cameraDeviceId: '', cameraDeviceLabel: null,
+        microphoneDeviceId: isAudioIncluded ? 'fixture-mic' : '', microphoneDeviceLabel: isAudioIncluded ? 'Fixture microphone' : null,
+        isAudioEnabled: isAudioIncluded, microphoneLabel: isAudioIncluded ? 'Fixture microphone' : null,
+        stream: { getVideoTracks: () => [videoTrack], getAudioTracks: () => audioTracks, getTracks: () => [videoTrack, ...audioTracks] } as unknown as MediaStream,
+    };
 }
 
 describe('multi-source capture barriers and durable failure handling', () => {
@@ -49,6 +56,45 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result.status).toBe('complete');
         expect(result.tracks.map((track) => [track.byteLength, track.chunkCount])).toEqual([[4, 1], [4, 1]]);
         expect(STORAGE.append.mock.calls.map((call) => [call[1], call[2]])).toEqual([['one', 0], ['two', 0]]);
+    });
+
+    it('records a sound-enabled camera into one supported video/audio file and saves audio metadata', async () => {
+        const source = makeSource('camera with microphone', true);
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([source]);
+        expect(TestRecorder.instances[0].mimeType).toBe('video/webm;codecs=vp9,opus');
+        const result = await capture.stop();
+        expect(result?.tracks[0]).toMatchObject({ isAudioIncluded: true, audioSourceLabel: 'Fixture microphone' });
+        expect(result?.sourceConfiguration?.[0]).toMatchObject({ isAudioEnabled: true, microphoneDeviceId: 'fixture-mic' });
+    });
+
+    it('refuses to start a configured camera when its required microphone track is missing', async () => {
+        const source = makeSource('camera with missing microphone', true);
+        source.stream.getAudioTracks = () => [];
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([source]);
+        expect(TestRecorder.instances).toHaveLength(0);
+        expect(await capture.finished).toBeNull();
+        expect(capture.failureMessage).toContain('Požadovaná zvuková stopa mikrofonu');
+    });
+
+    it('falls through to a browser-supported MP4 audio/video codec combination', async () => {
+        vi.spyOn(TestRecorder, 'isTypeSupported').mockImplementation((mimeType) => mimeType === 'video/mp4');
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera with microphone', true)]);
+        expect(TestRecorder.instances[0].mimeType).toBe('video/mp4');
+        await capture.stop();
+    });
+
+    it('stops and preserves the session when a required microphone track is muted', async () => {
+        const source = makeSource('camera with microphone', true);
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([source, makeSource('another camera')]);
+        source.stream.getAudioTracks()[0].dispatchEvent(new Event('mute'));
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('přestal posílat zvuk');
+        expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
     });
 
     it('stops all sources when a device disconnects', async () => {
@@ -78,15 +124,15 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(TestRecorder.instances.every((recorder) => recorder.stop.mock.calls.length === 1)).toBe(true);
     });
 
-    it('releases a partially started batch when a later recorder fails to start', async () => {
+    it('checks every source before starting any recorder when a configured camera is disconnected', async () => {
         const source = makeSource('two');
         Object.defineProperty(source.stream.getTracks()[0], 'readyState', { value: 'ended' });
         const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
         await capture.start([makeSource('one'), source]);
         const result = await capture.finished;
-        expect(result?.status).toBe('interrupted');
-        expect(TestRecorder.instances[0].state).toBe('inactive');
-        expect(TestRecorder.instances[1].start).not.toHaveBeenCalled();
+        expect(result).toBeNull();
+        expect(capture.failureMessage).toContain('už neposkytuje obraz');
+        expect(TestRecorder.instances).toHaveLength(0);
     });
 
     it.each(['NotAllowedError', 'UnknownError', 'NotReadableError'])('stops every source on a storage %s, retaining acknowledged bytes', async (name) => {
