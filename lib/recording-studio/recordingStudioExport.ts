@@ -1,8 +1,8 @@
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js';
 import { downloadBlobFile } from '@/lib/downloadBlobFile';
-import { readRecordingTrack } from './recordingStudioStorage';
-import { getRecordingByteLength, validateRecordingTrim } from './recordingStudioTiming';
-import type { RecordingArchiveManifest, RecordingArchiveTrack, StudioRecording } from './recordingStudioTypes';
+import { readRecordingTrack, streamRecordingTrack } from './recordingStudioStorage';
+import { addRecordingBytes, getRecordingByteLength, getRecordingMissingRanges, validateRecordingTrim } from './recordingStudioTiming';
+import type { RecordingArchiveManifest, RecordingArchiveTrack, RecordingTrack, StudioRecording } from './recordingStudioTypes';
 
 const MAXIMUM_BUFFERED_EXPORT_BYTES = 256 * 1024 * 1024;
 
@@ -22,6 +22,45 @@ export function chooseRecordingArchiveDestination(recording: StudioRecording): P
     }) : Promise.resolve(null);
 }
 
+export function recordingOriginalFilename(recording: StudioRecording, track: RecordingTrack): string {
+    return `${recordingFileStem(recording)}-${recording.tracks.indexOf(track) + 1}-${track.kind}.${track.mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+}
+
+export function chooseRecordingOriginalDestination(recording: StudioRecording, track: RecordingTrack): Promise<FileSystemFileHandle | null> {
+    const picker = (window as SaveFilePickerWindow).showSaveFilePicker;
+    return picker ? picker.call(window, { suggestedName: recordingOriginalFilename(recording, track), types: [] }) : Promise.resolve(null);
+}
+
+export async function exportRecordingOriginal(recording: StudioRecording, track: RecordingTrack, destination: FileSystemFileHandle | null, signal: AbortSignal): Promise<void> {
+    signal.throwIfAborted();
+    if (destination) {
+        await streamRecordingTrack(recording.id, track).pipeTo(await destination.createWritable(), { signal });
+    } else {
+        // Disk-backed Blob references, no byte-sized JS buffer or whole-session ZIP.
+        const blob = await readRecordingTrack(recording.id, track, signal);
+        signal.throwIfAborted();
+        downloadBlobFile({ fileName: recordingOriginalFilename(recording, track), blob });
+    }
+}
+
+function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean): RecordingArchiveManifest {
+    return {
+        schemaVersion: 1, id: recording.id, title: recording.title, createdAt: recording.createdAt,
+        status: recording.status, errorMessage: recording.errorMessage, durationSeconds: recording.durationSeconds,
+        trim: recording.trim, isTrimIncluded, tracks,
+        captureEndSeconds: recording.captureEndSeconds, missingRanges: getRecordingMissingRanges(recording),
+        timing: 'Seconds on the shared session clock. startOffsetSeconds measures browser start-call offsets, not hardware genlock.',
+    };
+}
+
+/** Preserve timing/edit metadata even when a browser can download only the individual large originals. */
+export function exportRecordingManifest(recording: StudioRecording): void {
+    const manifest = createRecordingArchiveManifest(recording, recording.tracks.map((track) => ({
+        ...track, originalFile: track.byteLength > 0 ? recordingOriginalFilename(recording, track) : null, trimmedFile: null,
+    })), false);
+    downloadBlobFile({ fileName: `${recordingFileStem(recording)}.json`, blob: new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }) });
+}
+
 type ArchiveExportOptions = {
     readonly recording: StudioRecording;
     readonly destination: FileSystemFileHandle | null;
@@ -35,7 +74,7 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
     const isTrimmed = isTrimIncluded && recording.trim !== null;
     if (isTrimmed) validateRecordingTrim(recording.trim!, recording.durationSeconds);
     if (!destination && getRecordingByteLength(recording) * (isTrimmed ? 2 : 1) > MAXIMUM_BUFFERED_EXPORT_BYTES) {
-        throw new Error('Pro velký ZIP je potřeba přímé ukládání na disk. Otevřete studio v desktopovém Chrome nebo Edge na tomto zařízení a stejné adrese.');
+        throw new Error('Pro velký ZIP je potřeba přímé ukládání na disk. V tomto prohlížeči stáhněte jednotlivé originály u stop. Záznamy v úložišti jednoho prohlížeče nejsou dostupné v jiném.');
     }
     const writable = destination ? await destination.createWritable() : null;
     const archive = new ZipWriter(writable ?? new BlobWriter('application/zip'), { level: 0, zip64: true, useWebWorkers: false });
@@ -48,39 +87,33 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
             if (track.byteLength === 0) { exportedTracks.push({ ...track, originalFile: null, trimmedFile: null }); continue; }
             const prefix = `${String(index + 1).padStart(2, '0')}-${track.kind}`;
             const originalFile = `originals/${prefix}.${track.mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
-            const blob = await readRecordingTrack(recording.id, track);
             onProgress(`Balení originálu ${index + 1}/${recording.tracks.length}: ${track.label}`);
-            const addFile = async (filename: string, content: Blob) => {
-                bufferedBytes += content.size;
+            const addFile = async (filename: string, content: Blob | ReadableStream<Uint8Array>, size: number) => {
+                bufferedBytes = addRecordingBytes(bufferedBytes, size);
                 if (!destination && bufferedBytes > MAXIMUM_BUFFERED_EXPORT_BYTES) throw new Error('ZIP je příliš velký pro stažení v tomto prohlížeči. Použijte přímé ukládání v Chrome nebo Edge.');
-                await archive.add(filename, new BlobReader(content), { signal });
+                await archive.add(filename, content instanceof Blob ? new BlobReader(content) : content, { signal });
             };
-            await addFile(originalFile, blob);
+            await addFile(originalFile, streamRecordingTrack(recording.id, track), track.byteLength);
             let trimmedFile: string | null = null;
             if (isTrimmed) {
                 const { withTrimmedRecordingTrack } = await import('./recordingStudioTrim');
                 await withTrimmedRecordingTrack({
-                    blob, track, trim: recording.trim!, signal,
+                    blob: await readRecordingTrack(recording.id, track, signal), track, trim: recording.trim!, signal,
                     onProgress: (progress) => onProgress(`Ořez stopy ${index + 1}/${recording.tracks.length}: ${Math.round(progress * 100)} %`),
                     consume: async (file, extension) => {
                         trimmedFile = `trimmed/${prefix}.${extension}`;
-                        await addFile(trimmedFile, file);
+                        await addFile(trimmedFile, file, file.size);
                     },
                 });
             }
             exportedTracks.push({ ...track, originalFile, trimmedFile });
         }
-        const manifest: RecordingArchiveManifest = {
-            schemaVersion: 1, id: recording.id, title: recording.title, createdAt: recording.createdAt,
-            status: recording.status, errorMessage: recording.errorMessage, durationSeconds: recording.durationSeconds,
-            trim: recording.trim, isTrimIncluded: isTrimmed, tracks: exportedTracks,
-            timing: 'Seconds on the shared session clock. startOffsetSeconds measures browser start-call offsets, not hardware genlock.',
-        };
+        const manifest = createRecordingArchiveManifest(recording, exportedTracks, isTrimmed);
         await archive.add('recording.json', new TextReader(JSON.stringify(manifest, null, 2)), { signal });
         await archive.add('README.txt', new TextReader([
             recording.title, '', 'ORIGINALS: unmodified source files, one file per camera, screen share or microphone.',
             'Keep embedded screen audio and microphone audio as separate sources when editing.',
-            'recording.json contains source names, dimensions, byte sizes, timing offsets and the shared trim range in seconds.',
+            'recording.json contains source names, dimensions, byte sizes, timing offsets, missingRanges and the shared trim range in seconds. A null missing-range end means unknown.',
             'All MediaRecorders are started/stopped in one browser turn. This is not hardware frame synchronization.',
             isTrimmed ? 'TRIMMED: copies of every recorded source, cut to the same session range. A trim can re-encode video/audio; originals preserve capture quality.' :
                 'No trimmed copies are included. The original source files and any saved trim decision are preserved.',

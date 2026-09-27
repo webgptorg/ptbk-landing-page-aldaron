@@ -1,5 +1,17 @@
 # Current preversion
 
+- Recording studio now separates committed media, queued bytes, storage destination and aggregate measured bitrate
+  from the browser's labelled quota estimate. Constant/artificial 10 GiB estimates are explained, physical free space
+  and unsupported remaining time stay unknown, and persistence is an explicit action with the actual result.
+  Supported browsers can record directly into a selected local directory using incrementally closed media fragments
+  and recoverable checkpoints, without a full-session RAM buffer, origin-media copy or 10 GB ceiling. Existing
+  IndexedDB recordings remain compatible. Read-only folder recovery remains exportable when disk or browser-cache
+  writes fail. All-source stops preserve committed prefixes on quota, permission and
+  write failures; bounded buffering and missing-tail metadata share the existing capture clock. ZIP64 originals
+  stream chunk by chunk, individual-original downloads with shared timing metadata provide a fallback, and export/temporary-space requirements
+  are disclosed. Added storage/failure/counter/bitrate regression coverage and browser-specific investigation evidence
+  in `docs/recording-studio-storage.md`; real macOS >10 GB and ten-hour soak validation remain explicitly unrun.
+
 - Fixed the AI ta Krajta logo-to-snake handoff. The existing SVG stays in place and its canonical curves move with
   the measured body; there is no second stroked snake, hold, crossfade or timed silhouette/color correction. The
   artwork, gradients, shadow and subpixel placement remain unchanged on activation. The canonical fills are

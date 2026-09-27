@@ -208,14 +208,21 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/admin/recording-studio` records any number of available cameras, screen shares,
   and optional microphones as separate local tracks. One capture coordinator starts
   and stops them on a shared clock; losing a source or a storage write stops the take.
-  IndexedDB commits each chunk together with its counters, and an exclusive browser
-  lock protects recording, recovery, editing and deletion across tabs. Size and
-  remaining-time estimates use browser quota and the combined recording bitrate,
-  keeping a storage reserve. Saved takes survive reload; unfinished ones expose only
+  IndexedDB commits each chunk together with its counters; a feature-detected selected-directory destination
+  closes immutable media fragments before its small authoritative checkpoint and stores only handles/metadata in
+  IndexedDB. Recovery can reconnect or import that folder without moving its media into origin storage; read-only
+  import still offers export when further folder or origin-cache writes fail. An exclusive
+  browser lock protects recording, recovery, editing and deletion across tabs. Committed bytes, queued bytes,
+  destination and aggregate bitrate are separate from the browser's labelled origin quota estimate. That estimate
+  can remain constant at 10 GiB, is never physical disk capacity, and supplies no remaining-time countdown.
+  Explicit persistence reports the browser's real result and protects against eviction only. A bounded write queue
+  and all-source failure stop preserve committed prefixes and identify missing tails on the shared session clock.
+  Saved takes survive reload; unfinished ones expose only
   persisted chunks. The shared admin editor autosaves one trim range for every track.
-  ZIP64 exports preserve originals and timing metadata and can include actual trimmed
+  ZIP64 exports stream original chunks, preserve timing/missing-range metadata and can include actual trimmed
   copies; trimming uses browser codecs and temporary local files, never an upload.
-  Capture and export reuse admin navigation/sign-out/reload protection. No server or
+  Individual originals are downloadable when a large ZIP cannot stream to disk; export and OPFS temporary-space
+  needs are disclosed. Capture and export reuse admin navigation/sign-out/reload protection. No server or
   database storage is added.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served

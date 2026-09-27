@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RecordingStudioCapture } from './RecordingStudioCapture';
-import type { RecordingSource, StudioRecording } from './recordingStudioTypes';
+import { RECORDING_MAX_PENDING_BYTES, type RecordingSource, type StudioRecording } from './recordingStudioTypes';
 
 const STORAGE = vi.hoisted(() => ({ append: vi.fn(), save: vi.fn() }));
-vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save }));
+vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save, createStudioRecording: async (recording: StudioRecording) => { await STORAGE.save(recording); return recording; } }));
 
 class TestRecorder {
     static readonly instances: TestRecorder[] = [];
@@ -29,7 +29,7 @@ function makeSource(id: string): RecordingSource {
 
 describe('multi-source capture barriers and durable failure handling', () => {
     beforeEach(() => { TestRecorder.instances.length = 0; vi.stubGlobal('MediaRecorder', TestRecorder); STORAGE.append.mockReset().mockResolvedValue(undefined); STORAGE.save.mockReset().mockResolvedValue(undefined); });
-    afterEach(() => vi.unstubAllGlobals());
+    afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
     it('starts/stops every source together and waits for the last data event and its disk write', async () => {
         const onProgress = vi.fn();
@@ -87,5 +87,88 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result?.status).toBe('interrupted');
         expect(TestRecorder.instances[0].state).toBe('inactive');
         expect(TestRecorder.instances[1].start).not.toHaveBeenCalled();
+    });
+
+    it.each(['NotAllowedError', 'UnknownError', 'NotReadableError'])('stops every source on a storage %s, retaining acknowledged bytes', async (name) => {
+        const onPendingBytes = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onPendingBytes });
+        await capture.start([makeSource('one'), makeSource('two'), makeSource('three')]);
+        TestRecorder.instances[0].emit('saved');
+        await vi.waitFor(() => expect(onPendingBytes).toHaveBeenLastCalledWith(0));
+        STORAGE.append.mockRejectedValueOnce(new DOMException('storage failure', name));
+        TestRecorder.instances[1].emit('missing');
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.tracks.map((track) => track.byteLength)).toEqual([5, 0, 0]);
+        expect(result?.captureEndSeconds).toBeGreaterThanOrEqual(0);
+        expect(TestRecorder.instances.every((recorder) => recorder.stop.mock.calls.length === 1)).toBe(true);
+        expect(onPendingBytes).toHaveBeenLastCalledWith(0);
+    });
+
+    it('bounds retained data before adding a delayed chunk and drains the earlier queue', async () => {
+        let release!: () => void;
+        STORAGE.append.mockImplementationOnce(() => new Promise<void>((resolve) => { release = resolve; }));
+        const onPendingBytes = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onPendingBytes });
+        await capture.start([makeSource('one'), makeSource('two')]);
+        const large = new Blob(['virtual size only']);
+        Object.defineProperty(large, 'size', { value: RECORDING_MAX_PENDING_BYTES });
+        TestRecorder.instances[0].ondataavailable?.({ data: large });
+        await vi.waitFor(() => expect(STORAGE.append).toHaveBeenCalledOnce());
+        TestRecorder.instances[1].emit('over the buffer');
+        release();
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.tracks.map((track) => track.byteLength)).toEqual([RECORDING_MAX_PENDING_BYTES, 0]);
+        expect(Math.max(...onPendingBytes.mock.calls.map(([bytes]) => bytes))).toBe(RECORDING_MAX_PENDING_BYTES);
+        expect(STORAGE.append).toHaveBeenCalledOnce();
+    });
+
+    it('simulates ten hours and >10 GiB across three sources without 32-bit counter rollover (not a real soak)', async () => {
+        let clock = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => clock);
+        let releasePending!: () => void;
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onPendingBytes: (bytes) => { if (bytes === 0) releasePending?.(); } });
+        await capture.start([makeSource('one'), makeSource('two'), makeSource('three')]);
+        const part = new Blob(['virtual size only']);
+        Object.defineProperty(part, 'size', { value: 32 * 1024 ** 2 });
+        for (let index = 0; index < 600; index += 1) {
+            clock = (index + 1) * 60_000;
+            const drained = new Promise<void>((resolve) => { releasePending = resolve; });
+            TestRecorder.instances[index % 3].ondataavailable?.({ data: part });
+            await drained;
+        }
+        const result = await capture.stop();
+        expect(result?.status).toBe('complete');
+        expect(result?.durationSeconds).toBe(36_000);
+        expect(result?.tracks.every((track) => track.byteLength === 200 * part.size + 4)).toBe(true);
+    });
+
+    it('does not call a failed final checkpoint complete', async () => {
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('one')]);
+        STORAGE.save.mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
+        const result = await capture.stop();
+        expect(result?.status).toBe('interrupted');
+        expect(result?.tracks[0].byteLength).toBe(4);
+    });
+
+    it('reports a denied storage destination before capture starts', async () => {
+        STORAGE.save.mockRejectedValueOnce(new DOMException('denied', 'NotAllowedError'));
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('one')]);
+        expect(await capture.finished).toBeNull();
+        expect(capture.failureMessage).toContain('Oprávnění k úložišti');
+        expect(TestRecorder.instances[0].start).not.toHaveBeenCalled();
+    });
+
+    it('never calls the session complete when a recorder supplied no media', async () => {
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('one'), makeSource('two')]);
+        TestRecorder.instances[1].ondataavailable = null;
+        const result = await capture.stop();
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('two');
+        expect(result?.tracks.map((track) => track.byteLength)).toEqual([4, 0]);
     });
 });

@@ -1,8 +1,9 @@
 import { getRecordingErrorMessage } from './recordingStudioDevices';
-import { appendRecordingChunk, saveStudioRecording } from './recordingStudioStorage';
-import { getCommonRecordingDuration } from './recordingStudioTiming';
+import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
+import { appendRecordingChunk, createStudioRecording, saveStudioRecording } from './recordingStudioStorage';
+import { addRecordingBytes, getCommonRecordingDuration, getRecordingByteLength } from './recordingStudioTiming';
 import {
-    RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_CHUNK_MILLISECONDS, RECORDING_MAX_PENDING_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
+    RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_CHUNK_MILLISECONDS, RECORDING_DIRECTORY_CHUNK_MILLISECONDS, RECORDING_MAX_PENDING_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
     type RecordingSource, type RecordingTrack, type StudioRecording,
 } from './recordingStudioTypes';
 
@@ -12,6 +13,8 @@ const AUDIO_MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
 type CaptureOptions = {
     readonly onProgress: (recording: StudioRecording) => void;
     readonly onStopping: () => void;
+    readonly onPendingBytes?: (bytes: number) => void;
+    readonly directory?: FileSystemDirectoryHandle | null;
 };
 
 type RecorderEntry = {
@@ -36,6 +39,7 @@ export class RecordingStudioCapture {
     private isStarting = true;
     private isStopping = false;
     private isWriteFailed = false;
+    private isBufferFull = false;
     private errorMessage: string | null = null;
     private readonly removeListeners: (() => void)[] = [];
 
@@ -52,7 +56,8 @@ export class RecordingStudioCapture {
                 status: 'recording', durationSeconds: 0, trim: null, errorMessage: null,
                 tracks: this.entries.map((entry) => this.describeTrack(entry)),
             };
-            await saveStudioRecording(this.recording);
+            try { this.recording = await createStudioRecording(this.recording, this.options.directory); }
+            catch (error) { throw new Error(getRecordingStorageErrorMessage(error, false)); }
             this.savedRecording = this.recording;
             this.startedAt = performance.now();
             this.recording = { ...this.recording, createdAt: new Date().toISOString() };
@@ -60,7 +65,7 @@ export class RecordingStudioCapture {
             for (const entry of this.entries) {
                 if (entry.source.stream.getTracks().some((track) => track.readyState !== 'live')) throw new Error('Jeden ze zdrojů byl odpojen.');
                 this.updateTrack(entry.source.id, { startOffsetSeconds: this.elapsedSeconds() });
-                entry.recorder.start(RECORDING_CHUNK_MILLISECONDS);
+                entry.recorder.start(this.options.directory ? RECORDING_DIRECTORY_CHUNK_MILLISECONDS : RECORDING_CHUNK_MILLISECONDS);
                 entry.isStarted = true;
             }
             this.options.onProgress(this.recording);
@@ -82,7 +87,10 @@ export class RecordingStudioCapture {
         // Final dataavailable is delivered BEFORE stop. Wait for every stop and then all queued writes.
         for (const entry of this.entries) {
             if (!entry.isStarted) entry.finish();
-            else if (entry.recorder.state !== 'inactive') entry.recorder.stop();
+            else if (entry.recorder.state !== 'inactive') {
+                try { entry.recorder.stop(); }
+                catch { this.errorMessage ??= `Stopu „${entry.source.label}“ se nepodařilo dokončit.`; entry.finish(); }
+            }
         }
         void this.finalize();
         return this.finished;
@@ -91,6 +99,9 @@ export class RecordingStudioCapture {
     private elapsedSeconds(): number {
         return Math.max(0, ((this.stoppedAt ?? performance.now()) - this.startedAt) / 1000);
     }
+
+    public get elapsedRecordingSeconds(): number { return this.elapsedSeconds(); }
+    public get failureMessage(): string | null { return this.errorMessage; }
 
     private prepareRecorder(source: RecordingSource): RecorderEntry {
         const isVideo = source.stream.getVideoTracks().length > 0;
@@ -131,15 +142,29 @@ export class RecordingStudioCapture {
     }
 
     private enqueueChunk(trackId: string, data: Blob): void {
-        if (data.size === 0 || !this.recording || this.isWriteFailed) return;
+        if (data.size === 0 || !this.recording || this.isWriteFailed || this.isBufferFull) return;
+        // Reject before retaining another Blob. Finish earlier writes, but never append after this gap.
+        if (data.size > RECORDING_MAX_PENDING_BYTES - this.pendingBytes) {
+            this.isBufferFull = true;
+            void this.stop('Úložiště nestíhá ukládat záznam. Všechny stopy se zastavují; neuložený konec je označen jako chybějící.');
+            return;
+        }
         const track = this.recording.tracks.find((candidate) => candidate.id === trackId)!;
+        let byteLength: number;
+        let chunkCount: number;
+        try {
+            addRecordingBytes(getRecordingByteLength(this.recording), data.size);
+            byteLength = addRecordingBytes(track.byteLength, data.size); chunkCount = addRecordingBytes(track.chunkCount, 1);
+        }
+        catch (error) { this.isBufferFull = true; void this.stop(getRecordingErrorMessage(error)); return; }
         this.updateTrack(trackId, {
-            byteLength: track.byteLength + data.size, chunkCount: track.chunkCount + 1,
+            byteLength, chunkCount,
             durationSeconds: Math.max(0, this.elapsedSeconds() - track.startOffsetSeconds),
         });
         this.recording = { ...this.recording, durationSeconds: this.elapsedSeconds() };
         const snapshot = this.recording;
         this.pendingBytes += data.size;
+        this.options.onPendingBytes?.(this.pendingBytes);
         this.writeQueue = this.writeQueue.then(async () => {
             if (this.isWriteFailed) return;
             await appendRecordingChunk(snapshot, trackId, track.chunkCount, data);
@@ -148,11 +173,8 @@ export class RecordingStudioCapture {
         }).catch((error: unknown) => {
             // Never append beyond a failed chunk: that would create an undecodable gap.
             this.isWriteFailed = true;
-            void this.stop(getRecordingErrorMessage(error));
-        }).finally(() => { this.pendingBytes -= data.size; });
-        if (this.pendingBytes > RECORDING_MAX_PENDING_BYTES) {
-            void this.stop('Úložiště nestíhá ukládat záznam. Nahrávání všech stop bylo zastaveno.');
-        }
+            void this.stop(getRecordingStorageErrorMessage(error));
+        }).finally(() => { this.pendingBytes -= data.size; this.options.onPendingBytes?.(this.pendingBytes); });
     }
 
     private async finalize(): Promise<void> {
@@ -164,14 +186,17 @@ export class RecordingStudioCapture {
             this.resolveFinished(null);
             return;
         }
+        const emptyTracks = saved.tracks.filter((track) => track.byteLength === 0 || track.chunkCount === 0);
+        if (emptyTracks.length > 0) this.errorMessage ??= `Chybí uložená média zdrojů: ${emptyTracks.map((track) => track.label).join(', ')}. Záznam není úplný.`;
         let result: StudioRecording = {
             ...saved, durationSeconds: getCommonRecordingDuration(saved.tracks),
             status: this.errorMessage ? 'interrupted' : 'complete', errorMessage: this.errorMessage,
+            captureEndSeconds: this.elapsedSeconds(),
         };
         try {
             await saveStudioRecording(result);
         } catch (error) {
-            result = { ...result, status: 'interrupted', errorMessage: getRecordingErrorMessage(error) };
+            result = { ...result, status: 'interrupted', errorMessage: getRecordingStorageErrorMessage(error) };
         }
         this.options.onProgress(result);
         this.resolveFinished(result);

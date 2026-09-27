@@ -2,11 +2,16 @@ import { expect, test, type Page } from '@playwright/test';
 import { ZipReader, Uint8ArrayReader, Uint8ArrayWriter } from '@zip.js/zip.js';
 import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
 import { readFile } from 'node:fs/promises';
+import { platform, release } from 'node:os';
 import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 import { createAdminSessionValueOrNull } from '@/lib/admin/adminSession';
 import type { RecordingArchiveManifest } from '@/lib/recording-studio/recordingStudioTypes';
 
 test.use({ serviceWorkers: 'block' });
+
+test.beforeEach(async ({ browser }, testInfo) => {
+    await testInfo.attach('platform-and-browser', { body: JSON.stringify({ platform: platform(), release: release(), browser: browser.browserType().name(), version: browser.version() }), contentType: 'application/json' });
+});
 
 async function openStudio(page: Page, baseURL: string | undefined) {
     test.skip(!process.env.ADMIN_PASSWORD, 'Needs the local test server admin password.');
@@ -55,6 +60,11 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     });
     await page.goto('/admin/recording-studio');
     await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    // Complete the unrelated cookie choice so a moving bottom panel cannot intercept studio controls.
+    const cookiePanel = page.getByRole('region', { name: 'Cookies', exact: true });
+    await cookiePanel.getByRole('button').first().click();
+    await page.getByRole('dialog').getByRole('button', { name: /Uložit nastavení|Save settings/ }).click();
+    await expect(cookiePanel).toHaveCount(0);
 }
 
 async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone') {
@@ -205,4 +215,172 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await page.getByRole('link', { name: 'Nahrávací studio', exact: true }).click();
     await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+});
+
+test('explains constant 10 GiB estimates while committed multi-source bytes and bitrate update', async ({ page, baseURL }) => {
+    await page.addInitScript(() => {
+        let usage = 0;
+        Object.defineProperties(navigator.storage, {
+            estimate: { value: async () => { usage += 1024 ** 2; return { usage, quota: usage + 10 * 1024 ** 3 }; } },
+            persist: { value: async () => false }, persisted: { value: async () => false },
+        });
+    });
+    await openStudio(page, baseURL);
+    const panel = page.getByRole('region', { name: 'Úložiště záznamu' });
+    await expect(panel.getByText('≈ 10 GiB', { exact: true })).toBeVisible();
+    await expect(panel).toContainText('Skutečné volné místo nelze v tomto prohlížeči zjistit');
+    await page.getByRole('button', { name: 'Požádat o trvalé úložiště' }).click();
+    await expect(panel).toContainText('Prohlížeč žádost o trvalé úložiště zamítl.');
+    await addSource(page, 'camera'); await addSource(page, 'screen'); await addSource(page, 'microphone');
+    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
+    await expect(page.getByTestId('recording-bitrate')).toContainText('/s');
+    const measuredBefore = await page.getByTestId('recording-committed-bytes').innerText();
+    await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText(measuredBefore);
+    await expect(panel.getByText('≈ 10 GiB', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('recording-pending-bytes')).toHaveText('0 B');
+    await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
+    await page.getByRole('button', { name: 'Smazat', exact: true }).click();
+    await page.getByRole('button', { name: 'Smazat záznam a všechny stopy', exact: true }).click();
+    await expect(page.getByTestId('recording-committed-bytes')).toHaveText('0 B');
+});
+
+test('records with missing estimate and persistence APIs and downloads individual originals', async ({ page, baseURL }) => {
+    await page.addInitScript(() => Object.defineProperties(navigator.storage, {
+        estimate: { value: undefined }, persist: { value: undefined }, persisted: { value: undefined },
+    }));
+    await openStudio(page, baseURL);
+    await expect(page.getByRole('region', { name: 'Úložiště záznamu' })).toContainText('Prohlížeč neposkytl aktuální odhad.');
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Stáhnout originál 1', exact: true }).click();
+    const bytes = await readFile((await (await download).path())!);
+    const input = new Input({ formats: ALL_FORMATS, source: new BufferSource(bytes) });
+    try { expect(await input.canRead()).toBe(true); expect(await input.computeDuration()).toBeGreaterThan(0); }
+    finally { input.dispose(); }
+});
+
+test('commits folder chunks without IndexedDB media, reloads and imports its checkpoint (OPFS test double for the picker)', async ({ page, baseURL }) => {
+    await page.addInitScript(() => Object.defineProperty(window, 'showDirectoryPicker', {
+        configurable: true,
+        // Real filesystem API and commits. OPFS here replaces only the OS picker; this does NOT test quota bypass.
+        value: async () => (await navigator.storage.getDirectory()).getDirectoryHandle('studio-directory-test', { create: true }),
+    }));
+    await openStudio(page, baseURL);
+    await page.getByRole('button', { name: 'Vybrat složku pro nahrávání' }).click();
+    await expect(page.getByRole('region', { name: 'Úložiště záznamu' })).toContainText('Složka studio-directory-test');
+    await addSource(page, 'camera'); await addSource(page, 'screen'); await addSource(page, 'microphone');
+    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
+    // Origin metadata is a cache for this backend: it must not roll back closed directory checkpoints.
+    await page.evaluate(() => {
+        const originalPut = IDBObjectStore.prototype.put;
+        IDBObjectStore.prototype.put = function (value, key) {
+            const request = key === undefined ? originalPut.call(this, value) : originalPut.call(this, value, key);
+            if (this.name === 'recordings') this.transaction.abort();
+            return request;
+        };
+    });
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    const metadata = await page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve) => { const request = indexedDB.open('promptbook-recording-studio'); request.onsuccess = () => resolve(request.result); });
+        const recordings = await new Promise<import('@/lib/recording-studio/recordingStudioTypes').StudioRecording[]>((resolve) => {
+            const request = database.transaction('recordings').objectStore('recordings').getAll(); request.onsuccess = () => resolve(request.result);
+        });
+        const chunks = await new Promise<number>((resolve) => { const request = database.transaction('chunks').objectStore('chunks').count(); request.onsuccess = () => resolve(request.result); });
+        database.close();
+        return { recording: recordings[0], chunks };
+    });
+    expect(metadata.chunks).toBe(0);
+    expect(metadata.recording.tracks.every((track) => track.byteLength > 0)).toBe(true);
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Originály ZIP', exact: true }).click();
+    const files = await readArchive((await (await download).path())!);
+    for (const [name, bytes] of Array.from(files)) {
+        if (!name.startsWith('originals/')) continue;
+        const input = new Input({ formats: ALL_FORMATS, source: new BufferSource(bytes) });
+        try { expect(await input.canRead()).toBe(true); expect(await input.computeDuration()).toBeGreaterThan(3); }
+        finally { input.dispose(); }
+    }
+    await page.evaluate(async (recordingId) => {
+        const parent = await (await navigator.storage.getDirectory()).getDirectoryHandle('studio-directory-test');
+        const directory = await parent.getDirectoryHandle(`promptbook-recording-${recordingId}`);
+        Object.defineProperty(window, 'showDirectoryPicker', { configurable: true, value: async () => directory });
+        const database = await new Promise<IDBDatabase>((resolve) => { const request = indexedDB.open('promptbook-recording-studio'); request.onsuccess = () => resolve(request.result); });
+        await new Promise<void>((resolve, reject) => {
+            const transaction = database.transaction(['recordings', 'directories'], 'readwrite');
+            transaction.objectStore('recordings').clear(); transaction.objectStore('directories').clear();
+            transaction.oncomplete = () => resolve(); transaction.onabort = () => reject(transaction.error);
+        });
+        database.close();
+    }, metadata.recording.id);
+    await page.getByRole('button', { name: 'Obnovit záznam ze složky' }).click();
+    await expect(page.getByRole('button', { name: 'Obnovit záznam ze složky' })).toBeEnabled();
+    await page.reload();
+    await expect(page.getByText('Uloženo', { exact: true })).toHaveCount(1);
+
+    // A separate visit with no cached handle must recover even if both destinations refuse further writes.
+    await page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve) => { const request = indexedDB.open('promptbook-recording-studio'); request.onsuccess = () => resolve(request.result); });
+        await new Promise<void>((resolve) => {
+            const transaction = database.transaction(['recordings', 'directories'], 'readwrite');
+            transaction.objectStore('recordings').clear(); transaction.objectStore('directories').clear();
+            transaction.oncomplete = () => resolve();
+        });
+        database.close();
+    });
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Obnovit záznam ze složky' })).toBeEnabled();
+    await page.evaluate(async (recordingId) => {
+        const parent = await (await navigator.storage.getDirectory()).getDirectoryHandle('studio-directory-test');
+        const directory = await parent.getDirectoryHandle(`promptbook-recording-${recordingId}`);
+        Object.defineProperty(window, 'showDirectoryPicker', { configurable: true, value: async () => directory });
+        const originalPut = IDBObjectStore.prototype.put;
+        IDBObjectStore.prototype.put = function (value, key) {
+            const request = key === undefined ? originalPut.call(this, value) : originalPut.call(this, value, key);
+            this.transaction.abort();
+            return request;
+        };
+        FileSystemFileHandle.prototype.createWritable = async () => { throw new DOMException('Simulated full disk', 'QuotaExceededError'); };
+    }, metadata.recording.id);
+    await page.getByRole('button', { name: 'Obnovit záznam ze složky' }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toHaveCount(1);
+    const recoveredDownload = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Stáhnout originál 1', exact: true }).click();
+    expect(await readFile((await (await recoveredDownload).path())!)).toEqual(Buffer.from(files.get('originals/01-camera.webm')!));
+});
+
+test('keeps committed multi-source data after a real IndexedDB transaction abort and offers recovery', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera'); await addSource(page, 'screen');
+    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await expect(page.getByTestId('recording-bitrate')).toContainText('/s');
+    await page.evaluate(() => {
+        const originalAdd = IDBObjectStore.prototype.add;
+        IDBObjectStore.prototype.add = function (value, key) {
+            const request = key === undefined ? originalAdd.call(this, value) : originalAdd.call(this, value, key);
+            if (this.name === 'chunks') this.transaction.abort();
+            return request;
+        };
+    });
+    await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
+    await page.reload();
+    await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Originály ZIP', exact: true }).click();
+    const files = await readArchive((await (await download).path())!);
+    const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
+    expect(manifest.status).toBe('interrupted'); expect(manifest.missingRanges.length).toBeGreaterThan(0);
+    expect(manifest.tracks.every((track) => track.byteLength > 0)).toBe(true);
 });

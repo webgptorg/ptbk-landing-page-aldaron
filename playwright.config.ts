@@ -38,6 +38,8 @@ export default defineConfig({
     globalTeardown: './tests/e2e/globalTeardown.ts',
     use: {
         baseURL,
+        // Allows the same real recording/storage suite to verify an installed browser, e.g. msedge.
+        channel: process.env.E2E_BROWSER_CHANNEL || undefined,
         viewport: { width: 1440, height: 900 },
         video: { mode: 'on', size: { width: 1280, height: 720 } },
         screenshot: 'only-on-failure',

@@ -45,17 +45,38 @@ can be added as its own audio file. Camera previews are muted, cameras capture v
 included when the browser's share picker supplies it. All sources start and stop in the same JavaScript turn.
 This is software synchronization, not hardware genlock; the editor's manifest records measured start-call offsets.
 
-Recordings stay in IndexedDB in the same browser profile, device, and site origin. Nothing is sent to the server.
-Chunks and their metadata commit atomically; incomplete takes retain successfully saved chunks after reopening.
+Recordings default to IndexedDB in the same browser profile, device, and site origin. Where `showDirectoryPicker`
+is available, **Vybrat složku pro nahrávání** records directly to a user-selected filesystem directory instead.
+Nothing is sent to the server. IndexedDB chunks and metadata commit atomically. Directory recordings close small
+immutable `.part` files (normally five seconds per source), then atomically replace a small `recording.json`
+checkpoint. They do not keep a whole take in RAM, copy a growing file on every append, or need a second copy to
+finalize. The folder checkpoint is authoritative; IndexedDB stores only its handle and a metadata cache. Even if
+that cache runs out of quota, committed folder data remains usable. Keep the whole recording subfolder: the parts
+are fragments of each original media stream, not standalone movies. Use the studio to export playable originals.
+**Obnovit záznam ze složky** opens that recording's subfolder, including after the site's metadata was cleared.
+Recovery only reads the folder; it can offer export even when a full disk or origin refuses further writes. If the
+browser cannot cache the handle, select the same recording subfolder again next visit.
+**Připojit složku znovu** renews access to a known folder; permissions are never requested silently on recovery.
+Incomplete takes retain successfully committed chunks after reopening.
 One browser tab holds the studio lock, including while recovering, editing, exporting, or deleting takes. Ending a
 source or failing to save a chunk stops every recorder. Normal admin navigation and sign-out wait for recording or
 export to finish, and closing/reloading during capture shows the existing browser warning.
 
 Use a current desktop Chrome or Edge over HTTPS (localhost also works). Device limits, codecs, and screen/audio
-capture depend on the browser and operating system. The displayed free capacity is **browser quota**, not a reading
-of physical free disk space. Remaining time estimates use all tracks' configured bitrates initially and measured
-saved bytes after capture starts, reserving 64 MiB for final chunks. Persistence is requested when recording begins;
-the browser can decline it, clear site data, or run out of disk sooner. Download takes you want to keep.
+capture depend on the browser and operating system. **Odhad prostoru pro web** is the reported origin quota minus
+reported usage, not physical free disk space or the capacity of a selected folder. The API can deliberately keep
+this number at 10 GiB while successful writes continue. No 10 GB recording ceiling is imposed. Committed bytes,
+queued bytes, destination, configured total bitrate and measured aggregate bitrate are shown separately. Estimates
+refresh every five seconds and after finalization, recovery, deletion, export and destination changes; failed,
+missing or stale measurements become unknown. Because neither supported backend exposes defensible physical
+capacity, remaining time is explicitly unknown. The studio never subtracts its media bytes from already-adjusted
+headroom. A low fresh origin estimate conservatively reserves 64 MiB for origin recording; it does not block a
+selected folder. The pending-write queue is bounded to 64 MiB; overflow or a failed write stops all sources and
+marks the uncommitted tail in the same session clock, without adding a pause timeline or silently dropping a source.
+The browser itself may emit a larger-than-requested MediaRecorder chunk; this is rejected as an interrupted take
+rather than retained in an unbounded queue. Persistence is an explicit button with granted/denied/unsupported/error
+feedback. It protects origin data from eviction, does not request a chosen quota, and reveals no disk free space.
+Download takes you want to keep. See [investigation and verification evidence](docs/recording-studio-storage.md).
 
 The shared editor saves one trim range in seconds, applied to every track on the session timeline. ZIP exports
 always contain unchanged `originals/` and `recording.json` (source names, dimensions, sizes, offsets, and trim range).
@@ -66,7 +87,12 @@ Conversion uses temporary files in the origin-private filesystem, requiring room
 temporary files are removed after processing or on the next studio visit following an interrupted export.
 
 ZIP64 archives stream directly to the chosen file when the browser offers the save-file picker, so large archives
-need no full-memory buffer. Other browsers use a download fallback capped at 256 MiB to avoid exhausting memory.
+need no full-memory buffer; original media is read one committed chunk at a time. Other browsers use a ZIP download
+fallback capped at 256 MiB to avoid exhausting memory, with **Stáhnout originál** for each source using local Blob
+references instead of a whole-session archive. **Stáhnout údaje o stopách** retains the same versioned timing,
+trim and missing-range metadata for those individual files. Moving to another browser does not transfer IndexedDB recordings.
+ZIP output needs destination space for the originals plus any trimmed copies; trimmed export additionally needs
+origin space for one temporary trimmed track. OPFS remains subject to origin quota and is not a quota bypass.
 The studio adds no environment variables, uploads, server APIs, or database migrations.
 
 Its E2E tests supply canvas video and synthesized audio with a silent Web Audio output, so they need no physical

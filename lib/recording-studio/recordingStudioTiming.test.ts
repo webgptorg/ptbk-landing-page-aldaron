@@ -21,6 +21,10 @@ describe('shared recording timeline and quota estimates', () => {
         expect(estimateRecordingSeconds(10, 2_000_000)).toBe(0);
         expect(estimateRecordingSeconds(null, 2_000_000)).toBeNull();
         expect(estimateRecordingSeconds(100_000_000, 0)).toBeNull();
+        expect(estimateRecordingSeconds(100_000_000, Number.MIN_VALUE)).toBeNull();
+        expect(estimateRecordingSeconds(100_000_000, NaN)).toBeNull();
+        expect(estimateRecordingSeconds(100_000_000, Infinity)).toBeNull();
+        expect(estimateRecordingSeconds(-1, 2_000_000)).toBeNull();
     });
     it('limits a recovered range to the last saved data present in every track', () => {
         const tracks = createTestStudioRecording().tracks.map((track) => ({ ...track, byteLength: 10 }));

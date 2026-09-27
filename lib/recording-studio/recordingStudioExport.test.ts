@@ -1,12 +1,12 @@
 import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { exportRecordingArchive } from './recordingStudioExport';
+import { exportRecordingArchive, exportRecordingManifest, recordingOriginalFilename } from './recordingStudioExport';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
 import type { RecordingArchiveManifest } from './recordingStudioTypes';
 
 const DOWNLOADS = vi.hoisted(() => ({ download: vi.fn(), read: vi.fn() }));
 vi.mock('@/lib/downloadBlobFile', () => ({ downloadBlobFile: DOWNLOADS.download }));
-vi.mock('./recordingStudioStorage', () => ({ readRecordingTrack: DOWNLOADS.read }));
+vi.mock('./recordingStudioStorage', () => ({ readRecordingTrack: DOWNLOADS.read, streamRecordingTrack: () => new Blob(['original bytes']).stream() }));
 
 describe('recording archive exports', () => {
     beforeEach(() => { DOWNLOADS.download.mockReset(); DOWNLOADS.read.mockReset().mockResolvedValue(new Blob(['original bytes'])); });
@@ -51,6 +51,19 @@ describe('recording archive exports', () => {
             recording: { ...recording, tracks: [{ ...recording.tracks[0], byteLength: 300 * 1024 * 1024 }] },
             destination: null, isTrimIncluded: false, signal: new AbortController().signal, onProgress: vi.fn(),
         })).rejects.toThrow('velký ZIP');
+        expect(DOWNLOADS.read).not.toHaveBeenCalled();
+    });
+
+    it('exports shared timing and missing tails for large individual originals without reading media', async () => {
+        const base = createTestStudioRecording();
+        const recording = { ...base, status: 'interrupted' as const, captureEndSeconds: null, tracks: base.tracks.map((track) => ({ ...track, byteLength: 12 * 1024 ** 3 })) };
+        exportRecordingManifest(recording);
+        const manifest = JSON.parse(await DOWNLOADS.download.mock.calls[0][0].blob.text()) as RecordingArchiveManifest;
+        expect(manifest.schemaVersion).toBe(1);
+        expect(manifest.tracks[1].originalFile).toBe(recordingOriginalFilename(recording, recording.tracks[1]));
+        expect(manifest.tracks[1].byteLength).toBe(12 * 1024 ** 3);
+        expect(manifest.tracks[1].startOffsetSeconds).toBe(0.002);
+        expect(manifest.missingRanges[1].endSeconds).toBeNull();
         expect(DOWNLOADS.read).not.toHaveBeenCalled();
     });
 });
