@@ -1,10 +1,20 @@
 import { readBrowserLocalStorageItem, removeBrowserLocalStorageItem, writeBrowserLocalStorageItem } from '@/lib/browser/browserStorage';
-import type { RecordingDisplaySurface, RecordingSource, RecordingSourceConfiguration, RecordingSourceKind } from './recordingStudioTypes';
+import type { RecordingDisplaySurface, RecordingSource, RecordingSourceConfiguration, RecordingSourceKind, StudioRecording } from './recordingStudioTypes';
 
 export const RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY = 'promptbook.recording-studio.source-configurations';
 export const RECORDING_SOURCE_CONFIGURATION_VERSION = 2;
+export const UNKNOWN_LEGACY_DEVICE_ID = '__recording-device-not-saved__';
 const SAFE_SOURCE_ID = /^[a-zA-Z0-9_-]{1,120}$/;
 const MAX_SOURCE_LABEL_LENGTH = 200;
+
+export type RecordingSourceConfigurationRestore = {
+    readonly configurations: readonly RecordingSourceConfiguration[];
+    readonly isLegacyIncomplete: boolean;
+};
+
+export function isUnknownLegacyDeviceId(deviceId: string): boolean {
+    return deviceId === UNKNOWN_LEGACY_DEVICE_ID;
+}
 
 type RecordingSourceConfigurationEnvelope = {
     readonly schemaVersion: number;
@@ -153,4 +163,76 @@ export function toRecordingSourceConfiguration(source: RecordingSource): Recordi
         isCaptureEnabled: source.isCaptureEnabled,
         isAudioEnabled: source.isAudioEnabled,
     };
+}
+
+function getLegacySourceId(recording: StudioRecording, trackId: string, trackIndex: number): string {
+    if (SAFE_SOURCE_ID.test(trackId)) return trackId;
+    return `legacy-${recording.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80) || 'recording'}-${trackIndex + 1}`;
+}
+
+function createLegacyTrackConfiguration(recording: StudioRecording, trackIndex: number, sourceId?: string): RecordingSourceConfiguration {
+    const track = recording.tracks[trackIndex];
+    const isCameraAudioEnabled = track.kind === 'camera' && track.isAudioIncluded;
+    const isMicrophoneSource = track.kind === 'microphone';
+    return {
+        id: sourceId ?? getLegacySourceId(recording, track.id, trackIndex),
+        kind: track.kind,
+        label: readSourceLabel(track.label, track.kind),
+        cameraDeviceId: track.kind === 'camera' ? UNKNOWN_LEGACY_DEVICE_ID : '',
+        cameraDeviceLabel: null,
+        microphoneDeviceId: isMicrophoneSource || isCameraAudioEnabled ? UNKNOWN_LEGACY_DEVICE_ID : '',
+        microphoneDeviceLabel: isMicrophoneSource ? readOptionalLabel(track.label) : readOptionalLabel(track.audioSourceLabel),
+        displaySurface: null,
+        // Track labels are retained as source labels, but they do not identify an authorized window or screen.
+        displaySourceLabel: null,
+        isCaptureEnabled: true,
+        isAudioEnabled: track.isAudioIncluded,
+    };
+}
+
+/** Uses a recorded snapshot when available; older tracks recover only metadata that was actually saved. */
+export function getRecordingSourceConfigurationRestore(recording: StudioRecording): RecordingSourceConfigurationRestore {
+    const savedConfigurations = normalizeRecordingSourceConfigurations({
+        schemaVersion: RECORDING_SOURCE_CONFIGURATION_VERSION,
+        configurations: recording.sourceConfiguration ?? [],
+    });
+    const configurationsById = new Map<string, RecordingSourceConfiguration>(
+        savedConfigurations.map((configuration): [string, RecordingSourceConfiguration] => [configuration.id, configuration]),
+    );
+    let isLegacyIncomplete = false;
+    const seenSourceIds = new Set<string>();
+    const configurations = recording.tracks.map((track, trackIndex) => {
+        const sourceId = getLegacySourceId(recording, track.id, trackIndex);
+        const isSourceIdRepeated = seenSourceIds.has(sourceId);
+        let uniqueSourceId = isSourceIdRepeated ? `legacy-${recording.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 72) || 'recording'}-${trackIndex + 1}` : sourceId;
+        let duplicateIndex = 2;
+        while (seenSourceIds.has(uniqueSourceId)) uniqueSourceId = `${uniqueSourceId.slice(0, 116)}-${duplicateIndex++}`;
+        seenSourceIds.add(uniqueSourceId);
+        const savedConfiguration = isSourceIdRepeated ? undefined : configurationsById.get(track.id);
+        if (!isSourceIdRepeated && savedConfiguration && savedConfiguration.kind === track.kind) return { ...savedConfiguration };
+        isLegacyIncomplete = true;
+        return createLegacyTrackConfiguration(recording, trackIndex, uniqueSourceId);
+    });
+    if (savedConfigurations.length !== recording.tracks.length) isLegacyIncomplete = true;
+    return { configurations, isLegacyIncomplete };
+}
+
+export function areRecordingSourceConfigurationsEqual(
+    first: readonly RecordingSourceConfiguration[],
+    second: readonly RecordingSourceConfiguration[],
+): boolean {
+    if (first.length !== second.length) return false;
+    return first.every((configuration, index) => {
+        const candidate = second[index];
+        return candidate !== undefined &&
+            configuration.id === candidate.id && configuration.kind === candidate.kind &&
+            configuration.label === candidate.label && configuration.cameraDeviceId === candidate.cameraDeviceId &&
+            configuration.cameraDeviceLabel === candidate.cameraDeviceLabel &&
+            configuration.microphoneDeviceId === candidate.microphoneDeviceId &&
+            configuration.microphoneDeviceLabel === candidate.microphoneDeviceLabel &&
+            configuration.displaySurface === candidate.displaySurface &&
+            configuration.displaySourceLabel === candidate.displaySourceLabel &&
+            configuration.isCaptureEnabled === candidate.isCaptureEnabled &&
+            configuration.isAudioEnabled === candidate.isAudioEnabled;
+    });
 }

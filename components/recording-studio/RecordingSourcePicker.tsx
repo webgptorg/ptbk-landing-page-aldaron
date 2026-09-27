@@ -1,9 +1,10 @@
 'use client';
 
+
 import { Button } from '@/components/ui/button';
 import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { getRecordingErrorMessage } from '@/lib/recording-studio/recordingStudioDevices';
-import { createRecordingSourceConfiguration } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
+import { createRecordingSourceConfiguration, isUnknownLegacyDeviceId } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
 import type { RecordingDisplaySurface, RecordingSourceConfiguration, RecordingSourceKind } from '@/lib/recording-studio/recordingStudioTypes';
 import { useEffect, useState } from 'react';
 
@@ -92,14 +93,14 @@ export function RecordingSourcePicker({ onAdd, onClose, initialConfiguration, in
                 <label className="block text-sm font-medium">Kamera
                     <select className="mt-2 w-full rounded-lg border p-3" value={cameraDeviceId} disabled={isAdding} onChange={(event) => setCameraDeviceId(event.target.value)}>
                         <option value="">Výchozí kamera systému</option>
-                        {isSavedCameraMissing && <option value={cameraDeviceId}>Dříve vybraná: {initialConfiguration?.cameraDeviceLabel || 'kamera; dostupnost se ověří při připojení'}</option>}
+                        {isSavedCameraMissing && <option value={cameraDeviceId}>{isUnknownLegacyDeviceId(cameraDeviceId) ? 'Výběr z původního záznamu není známý' : `Dříve vybraná: ${initialConfiguration?.cameraDeviceLabel || 'kamera; dostupnost se ověří při připojení'}`}</option>}
                         {cameraDevices.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Kamera ${index + 1}`}</option>)}
                     </select>
                 </label>
                 <label className="block text-sm font-medium">Mikrofon
                     <select className="mt-2 w-full rounded-lg border p-3" value={microphoneDeviceId} disabled={!isAudioEnabled || isAdding} onChange={(event) => setMicrophoneDeviceId(event.target.value)}>
                         <option value="">Výchozí mikrofon systému</option>
-                        {isAudioEnabled && isSavedMicrophoneMissing && <option value={microphoneDeviceId}>Dříve vybraný: {initialConfiguration?.microphoneDeviceLabel || 'mikrofon; dostupnost se ověří při připojení'}</option>}
+                        {isAudioEnabled && isSavedMicrophoneMissing && <option value={microphoneDeviceId}>{isUnknownLegacyDeviceId(microphoneDeviceId) ? 'Výběr z původního záznamu není známý' : `Dříve vybraný: ${initialConfiguration?.microphoneDeviceLabel || 'mikrofon; dostupnost se ověří při připojení'}`}</option>}
                         {microphoneDevices.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Mikrofon ${index + 1}`}</option>)}
                     </select>
                 </label>
@@ -114,7 +115,7 @@ export function RecordingSourcePicker({ onAdd, onClose, initialConfiguration, in
                 <label className="block text-sm font-medium">Mikrofon
                     <select className="mt-2 w-full rounded-lg border p-3" value={microphoneDeviceId} disabled={isAdding} onChange={(event) => setMicrophoneDeviceId(event.target.value)}>
                         <option value="">Výchozí mikrofon systému</option>
-                        {isSavedMicrophoneMissing && <option value={microphoneDeviceId}>Dříve vybraný: {initialConfiguration?.microphoneDeviceLabel || 'mikrofon; dostupnost se ověří při připojení'}</option>}
+                        {isSavedMicrophoneMissing && <option value={microphoneDeviceId}>{isUnknownLegacyDeviceId(microphoneDeviceId) ? 'Výběr z původního záznamu není známý' : `Dříve vybraný: ${initialConfiguration?.microphoneDeviceLabel || 'mikrofon; dostupnost se ověří při připojení'}`}</option>}
                         {microphoneDevices.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Mikrofon ${index + 1}`}</option>)}
                     </select>
                 </label>
@@ -144,7 +145,8 @@ export function RecordingSourcePicker({ onAdd, onClose, initialConfiguration, in
                         : 'Mikrofon bude samostatná zvuková stopa pro střihače.'}
             </p>
             {errorMessage && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{errorMessage}</p>}
-            <Button type="submit" disabled={isAdding}>{isAdding ? 'Připojuji zařízení…' : errorMessage ? 'Zkusit znovu' : 'Připojit zdroj'}</Button>
+            {(kind === 'camera' && (isUnknownLegacyDeviceId(cameraDeviceId) || (isAudioEnabled && isUnknownLegacyDeviceId(microphoneDeviceId))) || kind === 'microphone' && isUnknownLegacyDeviceId(microphoneDeviceId)) && <p role="status" className="text-sm text-amber-800">Starší záznam neuložil identitu potřebného zařízení. Zvolte výchozí systémové zařízení vědomě nebo vyberte konkrétní zařízení, než jej připojíte.</p>}
+            <Button type="submit" disabled={isAdding || (kind === 'camera' && (isUnknownLegacyDeviceId(cameraDeviceId) || (isAudioEnabled && isUnknownLegacyDeviceId(microphoneDeviceId))) || kind === 'microphone' && isUnknownLegacyDeviceId(microphoneDeviceId))}>{isAdding ? 'Připojuji zařízení…' : errorMessage ? 'Zkusit znovu' : 'Připojit zdroj'}</Button>
         </form>
     );
 }

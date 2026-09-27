@@ -224,7 +224,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Explicit persistence reports the browser's real result and protects against eviction only. A bounded write queue
   and all-source failure stop preserve committed prefixes and identify missing tails on the shared session clock.
   Saved takes survive reload; unfinished ones expose only
-  persisted chunks. The shared admin editor autosaves one trim range for every track.
+  persisted chunks. Each take retains an immutable snapshot of its intended source configuration. Its editor and list
+  can load that snapshot as a new browser-local setup; a changed setup is replaced only after confirmation, matching
+  live captures may stay connected, and every other source still needs its ordinary per-source readiness action.
+  Screen/window labels are hints only and always go through the browser chooser again. Older takes reconstruct only
+  their stored track details and leave unknown camera/microphone identities for the administrator to select.
+  Reusing settings never starts recording or changes the old take. The shared admin editor autosaves one trim range for every track.
   ZIP64 exports stream original chunks, preserve timing/missing-range metadata and can include actual trimmed
   copies; trimming uses browser codecs and temporary local files, never an upload.
   Individual originals are downloadable when a large ZIP cannot stream to disk; export and OPFS temporary-space

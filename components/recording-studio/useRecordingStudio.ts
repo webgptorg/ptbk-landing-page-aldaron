@@ -3,8 +3,8 @@
 import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { RecordingStudioCapture } from '@/lib/recording-studio/RecordingStudioCapture';
-import { acquireRecordingSource, getRecordingErrorMessage, getRecordingSourceReadiness, isRecordingSourceReady, matchesRecordingSourceConfiguration, releaseRecordingSource } from '@/lib/recording-studio/recordingStudioDevices';
-import { clearRecordingSourceConfigurations, loadRecordingSourceConfigurations, saveRecordingSourceConfigurations, toRecordingSourceConfiguration } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
+import { acquireRecordingSource, getRecordingErrorMessage, getRecordingSourceReadiness, isRecordingSourceReady, matchesRecordingSourceConfiguration, reconcileRecordingSourcesForConfiguration, releaseRecordingSource } from '@/lib/recording-studio/recordingStudioDevices';
+import { clearRecordingSourceConfigurations, loadRecordingSourceConfigurations, saveRecordingSourceConfigurations, toRecordingSourceConfiguration, UNKNOWN_LEGACY_DEVICE_ID, type RecordingSourceConfigurationRestore } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
 import { runWithRecordingStudioLock } from '@/lib/recording-studio/recordingStudioLock';
 import { estimateRecordingStorage, getRecordingStorageErrorMessage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
 import { chooseRecordingDirectory } from '@/lib/recording-studio/recordingStudioDirectory';
@@ -313,7 +313,40 @@ export function useRecordingStudio() {
     const connectSource = async (sourceId: string) => {
         const configuration = runtime.current.sourceConfigurations.find((candidate) => candidate.id === sourceId);
         if (!configuration) return;
+        if (configuration.cameraDeviceId === UNKNOWN_LEGACY_DEVICE_ID || configuration.microphoneDeviceId === UNKNOWN_LEGACY_DEVICE_ID) {
+            const message = 'Starší záznam neuložil výběr této kamery nebo mikrofonu. Otevřete Nastavení, vyberte dostupné zařízení nebo výchozí zařízení systému a potom jej připojte.';
+            setSourceErrors((previous) => ({ ...previous, [sourceId]: message }));
+            setSourceReadiness((previous) => ({ ...previous, [sourceId]: 'unavailable' }));
+            setErrorMessage(message);
+            return;
+        }
         await addSource(configuration);
+    };
+
+    const restoreSourceConfiguration = (restore: RecordingSourceConfigurationRestore) => {
+        const current = runtime.current;
+        if (phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current) {
+            throw new Error('Nejprve dokončete právě probíhající operaci studia.');
+        }
+
+        const restoredConfigurations = restore.configurations.map((configuration) => ({ ...configuration }));
+        const reconciliation = reconcileRecordingSourcesForConfiguration(restoredConfigurations, current.sources);
+        reconciliation.releasedSources.forEach(releaseRecordingSource);
+        current.sources = [...reconciliation.retainedSources];
+        setSources([...current.sources]);
+        setSourceErrors({});
+        persistSourceConfigurations(restoredConfigurations);
+        setSourceReadiness(Object.fromEntries(restoredConfigurations.map(({ id }) => [
+            id,
+            current.sources.some((source) => source.id === id) ? 'ready' as const : 'needs-permission' as const,
+        ])));
+        setErrorMessage(null);
+
+        return {
+            readySourceCount: current.sources.length,
+            sourcesNeedingConnection: restoredConfigurations.filter(({ isCaptureEnabled, id }) => isCaptureEnabled && !current.sources.some((source) => source.id === id)).length,
+            isLegacyIncomplete: restore.isLegacyIncomplete,
+        };
     };
 
     const startRecording = () => {
@@ -387,7 +420,7 @@ export function useRecordingStudio() {
             directoryReference.current = null; setDirectory(null); void refreshStorage();
         },
         requestPersistence: async () => { setPersistence(await requestRecordingPersistence()); await refreshStorage(); },
-        addSource, connectSource, removeSource, moveSource, setSourceCaptureEnabled, resetSourceConfigurations, releaseSources, startRecording,
+        addSource, connectSource, removeSource, moveSource, setSourceCaptureEnabled, resetSourceConfigurations, releaseSources, restoreSourceConfiguration, startRecording,
         stopRecording: () => { void runtime.current.capture?.stop(); },
         setErrorMessage, refreshStorage,
         updateRecording: (recording: StudioRecording) => setRecordings((previous) => previous.map((item) => item.id === recording.id ? recording : item)),

@@ -1,5 +1,13 @@
 # Current preversion
 
+- Saved recordings now keep an immutable source-configuration snapshot, with **Použít tuto konfiguraci zdrojů** in
+  their list and editor. Reuse replaces a different browser setup only after confirmation, preserves matching live
+  previews, and routes remaining camera, microphone and display sources through the existing per-source reconnect
+  and readiness flow. Display sharing always requires the browser chooser again; no permission or stream is restored
+  from a saved window name, and reuse never starts recording or edits the original take. Legacy recordings recover
+  only stored track labels and audio details; unknown device identities stay unresolved until the administrator
+  chooses a device. Repeated reuse replaces cards instead of duplicating them.
+
 - Recording source setup now has a versioned schema migration for editable labels, stable logical IDs, order, enabled
   sources, camera/microphone preferences, sound choices and preferred display-surface hints. Settings stay local to
   this origin and browser profile, use the existing browser-storage layer, and contain no live streams, permission

@@ -56,12 +56,14 @@ function RecordingTrackReview({ recordingId, track, trim }: {
     );
 }
 
-export function RecordingEditor({ recording, onChange }: {
+export function RecordingEditor({ recording, onChange, onUseSourceConfiguration }: {
     readonly recording: StudioRecording; readonly onChange: (recording: StudioRecording) => void;
+    readonly onUseSourceConfiguration: (reportSuccess: (message: string) => void) => void;
 }) {
     const [title, setTitle] = useState(recording.title);
     const [start, setStart] = useState(String(recording.trim?.startSeconds ?? 0));
     const [end, setEnd] = useState(String(recording.trim?.endSeconds ?? recording.durationSeconds));
+    const [sourceRestoreMessage, setSourceRestoreMessage] = useState<string | null>(null);
     const trim = { startSeconds: Number(start), endSeconds: Number(end) };
     const autosave = useAdminAutosave({
         value: { title, start, end },
@@ -87,6 +89,10 @@ export function RecordingEditor({ recording, onChange }: {
                 <Button type="button" variant="outline" size="sm" onClick={() => { setStart('0'); setEnd(String(recording.durationSeconds)); }}>Obnovit celý rozsah</Button>
             </fieldset>
             <AdminAutosaveStatus {...autosave} />
+            <div className="space-y-2">
+                <Button type="button" variant="outline" disabled={recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(setSourceRestoreMessage)}>Použít tuto konfiguraci zdrojů</Button>
+                {sourceRestoreMessage && <p role="status" className="text-sm text-cyan-800">{sourceRestoreMessage}</p>}
+            </div>
             <div className="grid gap-5 sm:grid-cols-2">
                 {recording.tracks.filter((track) => track.byteLength > 0).map((track) => <RecordingTrackReview key={track.id} recordingId={recording.id} track={track} trim={trim} />)}
             </div>

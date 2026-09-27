@@ -13,13 +13,14 @@ import { Download, Scissors } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { RecordingEditor } from './RecordingEditor';
 
-export function RecordingLibrary({ recordings, isDisabled, onChange, onDelete, onBusyChange, onStorageChange }: {
+export function RecordingLibrary({ recordings, isDisabled, onChange, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration }: {
     readonly recordings: readonly StudioRecording[];
     readonly isDisabled: boolean;
     readonly onChange: (recording: StudioRecording) => void;
     readonly onDelete: (recordingId: string) => void;
     readonly onBusyChange: (isBusy: boolean) => void;
     readonly onStorageChange: () => Promise<void>;
+    readonly onUseSourceConfiguration: (recording: StudioRecording, reportSuccess?: (message: string) => void) => void;
 }) {
     const [workingId, setWorkingId] = useState<string | null>(null);
     const [progress, setProgress] = useState('');
@@ -86,9 +87,10 @@ export function RecordingLibrary({ recordings, isDisabled, onChange, onDelete, o
                     </ul>
                     {recording.trim && <p className="text-sm text-cyan-800">Společný ořez: {formatRecordingDuration(recording.trim.startSeconds)} – {formatRecordingDuration(recording.trim.endSeconds)}</p>}
                     <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="outline" disabled={isBusy || recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(recording)}>Použít tuto konfiguraci zdrojů</Button>
                         {recording.storageDestination && <Button type="button" variant="outline" disabled={isBusy} onClick={() => { void reconnect(recording); }}>Připojit složku znovu</Button>}
                         <AdminEditorButton label="Náhled a ořez" title="Upravit záznam" description="Jeden rozsah pro všechny stopy; originály se nemění." buttonProps={{ disabled: isBusy || recording.durationSeconds <= 0 }}>
-                            <RecordingEditor key={recording.id} recording={recording} onChange={onChange} />
+                            <RecordingEditor key={recording.id} recording={recording} onChange={onChange} onUseSourceConfiguration={(reportSuccess) => onUseSourceConfiguration(recording, reportSuccess)} />
                         </AdminEditorButton>
                         <Button type="button" variant="outline" disabled={isBusy || getRecordingByteLength(recording) === 0} onClick={() => download(recording, false)}><Download className="mr-2 h-4 w-4" />Originály ZIP</Button>
                         <Button type="button" variant="outline" disabled={isBusy} onClick={() => exportRecordingManifest(recording)}>Stáhnout údaje o stopách</Button>

@@ -3,8 +3,10 @@
 import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { isRecordingSourceReady, matchesRecordingSourceConfiguration } from '@/lib/recording-studio/recordingStudioDevices';
+import { isRecordingSourceReady, matchesRecordingSourceConfiguration, reconcileRecordingSourcesForConfiguration } from '@/lib/recording-studio/recordingStudioDevices';
+import { areRecordingSourceConfigurationsEqual, getRecordingSourceConfigurationRestore, type RecordingSourceConfigurationRestore } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
 import { formatRecordingBytes, formatRecordingDuration, getRecordingByteLength } from '@/lib/recording-studio/recordingStudioTiming';
+import type { StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 import { Circle, Plus, Square } from 'lucide-react';
 import { useState } from 'react';
 import { RecordingLibrary } from './RecordingLibrary';
@@ -17,6 +19,12 @@ export function RecordingStudio() {
     const studio = useRecordingStudio();
     const [isLibraryBusy, setIsLibraryBusy] = useState(false);
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+    const [restoreRequest, setRestoreRequest] = useState<{
+        readonly recording: StudioRecording;
+        readonly restore: RecordingSourceConfigurationRestore;
+        readonly reportSuccess?: (message: string) => void;
+    } | null>(null);
+    const [configurationRestoreMessage, setConfigurationRestoreMessage] = useState<string | null>(null);
     const isRecording = studio.phase === 'recording';
     const isSessionBusy = ['starting', 'recording', 'stopping'].includes(studio.phase);
     const isReady = studio.phase === 'idle' && !studio.isChoosingDirectory;
@@ -27,11 +35,43 @@ export function RecordingStudio() {
             matchesRecordingSourceConfiguration(source, configuration) && isRecordingSourceReady(source));
     }).length;
     const isRecordingReady = enabledConfigurations.length > 0 && readySourceCount === enabledConfigurations.length;
+    const finishSourceConfigurationRestore = (request: NonNullable<typeof restoreRequest>) => {
+        try {
+            const result = studio.restoreSourceConfiguration(request.restore);
+            if (!result) return;
+            const isDisplaySourcePresent = request.restore.configurations.some(({ kind }) => kind === 'screen');
+            const legacyMessage = result.isLegacyIncomplete
+                ? 'Starší záznam neuložil všechny volby zařízení. Otevřete Nastavení u označené kamery nebo mikrofonu a výběr potvrďte; původní okno ani jeho oprávnění obnovit nelze.'
+                : '';
+            const message = `Konfigurace záznamu „${request.recording.title}“ je připravena pro nový záznam. Zachováno aktivních náhledů: ${result.readySourceCount}; zdrojů k připojení: ${result.sourcesNeedingConnection}. ${isDisplaySourcePresent ? 'Sdílenou obrazovku nebo okno vyberte znovu v dialogu prohlížeče; uložený název a typ jsou jen vodítko. ' : ''}Připojte zdroje a zkontrolujte připravenost; nahrávání se samo nespustí. ${legacyMessage}`.trim();
+            setConfigurationRestoreMessage(message);
+            request.reportSuccess?.(message);
+            setRestoreRequest(null);
+        } catch (error) {
+            setConfigurationRestoreMessage(error instanceof Error ? error.message : 'Konfiguraci zdrojů se nepodařilo obnovit.');
+            request.reportSuccess?.('Konfiguraci zdrojů se nepodařilo obnovit. Zkontrolujte stav studia a zkuste akci znovu.');
+            setRestoreRequest(null);
+        }
+    };
+    const requestSourceConfigurationRestore = (recording: StudioRecording, reportSuccess?: (message: string) => void) => {
+        const restore = getRecordingSourceConfigurationRestore(recording);
+        const isCurrentSetupPresent = studio.sourceConfigurations.length > 0 || studio.sources.length > 0;
+        const sourceReconciliation = reconcileRecordingSourcesForConfiguration(restore.configurations, studio.sources);
+        const isAuthorizedSourceReleaseRequired = sourceReconciliation.releasedSources.some((source) => source.stream.getTracks().some((track) => track.readyState === 'live'));
+        const isReplacingCurrentSetup = isCurrentSetupPresent &&
+            (!areRecordingSourceConfigurationsEqual(studio.sourceConfigurations, restore.configurations) || isAuthorizedSourceReleaseRequired);
+        if (isReplacingCurrentSetup) {
+            setRestoreRequest({ recording, restore, ...(reportSuccess ? { reportSuccess } : {}) });
+            return;
+        }
+        finishSourceConfigurationRestore({ recording, restore, ...(reportSuccess ? { reportSuccess } : {}) });
+    };
     return (
         <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6">
             <div className="mx-auto max-w-6xl space-y-9">
                 <div className="max-w-3xl space-y-2"><h2 className="text-2xl font-bold">Nahrávací studio</h2><p className="text-sm leading-6 text-slate-600">Nová kamera standardně nahrává i vybraný mikrofon přímo do stejného video souboru. Mikrofon můžete vypnout nebo přidat jako samostatný zdroj. Obraz náhledu je vždy ztlumený. Zastavení nahrávání ponechá dostupné náhledy aktivní; oprávnění uvolníte samostatným tlačítkem.</p></div>
                 {studio.errorMessage && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">{studio.errorMessage}</p>}
+                {configurationRestoreMessage && <p role="status" className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950">{configurationRestoreMessage}</p>}
                 {studio.phase === 'loading' && <p role="status" className="text-sm text-slate-500">Načítám místní záznamy…</p>}
                 <div>
                     <div className="rounded-xl border border-slate-200 bg-white p-5"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">Délka záznamu</p><p className="mt-2 text-3xl font-semibold tabular-nums" aria-label="Délka záznamu">{formatRecordingDuration(studio.elapsedSeconds)}</p><p className="mt-2 text-xs text-slate-500">{studio.activeRecording ? `${formatRecordingBytes(getRecordingByteLength(studio.activeRecording))} uloženo` : 'Všechny stopy mají společný čas.'}</p></div>
@@ -77,7 +117,21 @@ export function RecordingStudio() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} />
+                <AlertDialog open={restoreRequest !== null} onOpenChange={(isOpen) => { if (!isOpen) setRestoreRequest(null); }}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Nahradit aktuální nastavení zdrojů?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {restoreRequest && <>Nastavení prohlížeče se nahradí zdroji z „{restoreRequest.recording.title}“ v jejich uloženém pořadí. Nepatřící aktivní náhledy se uvolní; původní záznam, soubory, časová osa a ořez zůstanou beze změny. Zařízení, která nejdou bezpečně zachovat, připojíte zvlášť. Sdílení obrazovky nebo okna vždy vyžádá nový výběr v prohlížeči. Nahrávání se nespustí.</>}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => { if (restoreRequest) finishSourceConfigurationRestore(restoreRequest); }}>Nahradit nastavení zdrojů</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
             </div>
         </main>
     );

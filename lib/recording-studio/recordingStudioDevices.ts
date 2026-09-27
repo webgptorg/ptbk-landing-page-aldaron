@@ -22,6 +22,31 @@ export function matchesRecordingSourceConfiguration(source: RecordingSource, con
         source.isAudioEnabled === configuration.isAudioEnabled;
 }
 
+/** A stream is reusable only for the same logical source while all required tracks remain live. */
+export function canReuseRecordingSourceForConfiguration(source: RecordingSource, configuration: RecordingSourceConfiguration): boolean {
+    return matchesRecordingSourceConfiguration(source, configuration) &&
+        (configuration.kind !== 'screen' || source.displaySourceLabel === configuration.displaySourceLabel) &&
+        isRecordingSourceReady(source);
+}
+
+export function reconcileRecordingSourcesForConfiguration(
+    configurations: readonly RecordingSourceConfiguration[],
+    sources: readonly RecordingSource[],
+): { readonly retainedSources: readonly RecordingSource[]; readonly releasedSources: readonly RecordingSource[] } {
+    const retainedSourceIds = new Set<string>();
+    const retainedSources = configurations.flatMap((configuration) => {
+        const source = sources.find((candidate) => candidate.id === configuration.id &&
+            !retainedSourceIds.has(candidate.id) && canReuseRecordingSourceForConfiguration(candidate, configuration));
+        if (!source) return [];
+        retainedSourceIds.add(source.id);
+        return [{ ...source, ...configuration, stream: source.stream, microphoneLabel: source.microphoneLabel }];
+    });
+    return {
+        retainedSources,
+        releasedSources: sources.filter((source) => !retainedSourceIds.has(source.id)),
+    };
+}
+
 export function getRecordingSourceReadiness(error: unknown): RecordingSourceReadiness {
     if (error instanceof DOMException && (error.name === 'NotAllowedError' || error.name === 'AbortError' || error.name === 'InvalidStateError')) {
         return 'needs-permission';
