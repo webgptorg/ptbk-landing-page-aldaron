@@ -1,4 +1,4 @@
-[ ]
+[-] waiting for better model then `gpt-6-astra`
 
 [✨🎨] Make the snake emerge from the existing logo without even a small visual shape change
 
