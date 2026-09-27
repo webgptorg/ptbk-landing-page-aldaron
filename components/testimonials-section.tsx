@@ -24,6 +24,8 @@ export type TestimonialsSectionMetric = {
 type TestimonialsSectionProps = {
     id?: string;
     className?: string;
+    containerClassName?: string;
+    isAnimated?: boolean;
     language?: HomepageLanguage;
     eyebrow?: ReactNode;
     title?: ReactNode;
@@ -97,6 +99,8 @@ const testimonialVisuals = [
 export function TestimonialsSection({
     id,
     className,
+    containerClassName,
+    isAnimated = true,
     language = 'cs',
     eyebrow,
     title,
@@ -125,11 +129,11 @@ export function TestimonialsSection({
                 className,
             )}
         >
-            <div className="max-w-6xl mx-auto px-6 relative z-10">
+            <div className={cn('max-w-6xl mx-auto px-6 relative z-10', containerClassName)}>
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={isAnimated ? { opacity: 0, y: 20 } : false}
+                    whileInView={isAnimated ? { opacity: 1, y: 0 } : undefined}
                     viewport={{ once: true, margin: '-50px' }}
                     transition={{ duration: 0.6 }}
                     className="text-center mb-14"
@@ -159,8 +163,8 @@ export function TestimonialsSection({
                         return (
                             <motion.div
                                 key={`${testimonial.name}-${testimonial.role}`}
-                                initial={{ opacity: 0, y: 25 }}
-                                whileInView={{ opacity: 1, y: 0 }}
+                                initial={isAnimated ? { opacity: 0, y: 25 } : false}
+                                whileInView={isAnimated ? { opacity: 1, y: 0 } : undefined}
                                 viewport={{ once: true, margin: '-30px' }}
                                 transition={{ duration: 0.5, delay: i * 0.12 }}
                                 className="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-lg hover:shadow-gray-100/60 transition-all duration-500 flex flex-col"
@@ -203,8 +207,8 @@ export function TestimonialsSection({
                 {/* Metrics Strip */}
                 {resolvedMetrics.length > 0 && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={isAnimated ? { opacity: 0, y: 20 } : false}
+                        whileInView={isAnimated ? { opacity: 1, y: 0 } : undefined}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"

@@ -1,8 +1,8 @@
 'use client';
 
 import type { PavolLink } from '@/businesses/pavol/pavolContent';
-import { pavolContainerClassName } from '@/businesses/pavol/layout';
-import { pavolPageContent } from '@/businesses/pavol/pavolContent';
+import { PAVOL_CONTAINER_CLASS_NAME } from '@/businesses/pavol/layout';
+import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { Button } from '@/components/ui/button';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
@@ -32,11 +32,11 @@ function FooterLinkColumn({ title, links }: { title: string; links: PavolLink[] 
 }
 
 export function PavolFooter({ language }: { language: SupportedHomepageLanguage }) {
-    const content = pavolPageContent[language];
+    const CONTENT = PAVOL_PAGE_CONTENT[language];
 
     return (
         <footer className="border-t border-[var(--pavol-ink)]/10 bg-[var(--pavol-ink)] text-white">
-            <div className={`${pavolContainerClassName} py-16`}>
+            <div className={`${PAVOL_CONTAINER_CLASS_NAME} py-16`}>
                 <div className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_repeat(2,minmax(0,0.7fr))]">
                     <div className="max-w-md">
                         <div className="flex items-center gap-4">
@@ -52,11 +52,11 @@ export function PavolFooter({ language }: { language: SupportedHomepageLanguage 
 
                             <div>
                                 <p className="text-2xl font-semibold">Pavol Hejný</p>
-                                <p className="mt-1 text-sm text-slate-300">{content.hero.eyebrow}</p>
+                                <p className="mt-1 text-sm text-slate-300">{CONTENT.hero.eyebrow}</p>
                             </div>
                         </div>
 
-                        <p className="mt-6 text-sm leading-7 text-slate-300">{content.footer.description}</p>
+                        <p className="mt-6 text-sm leading-7 text-slate-300">{CONTENT.footer.description}</p>
 
                         <Button
                             asChild
@@ -64,18 +64,18 @@ export function PavolFooter({ language }: { language: SupportedHomepageLanguage 
                             className="mt-8 rounded-full bg-white px-7 text-[var(--pavol-ink)] hover:bg-white/90"
                         >
                             <Link href="#contact">
-                                {content.footer.primaryAction}
+                                {CONTENT.footer.primaryAction}
                                 <Send className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>
                     </div>
 
-                    <FooterLinkColumn title={content.footer.navigationTitle} links={content.header.navItems} />
-                    <FooterLinkColumn title={content.footer.connectTitle} links={content.contact.links} />
+                    <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={CONTENT.header.navItems} />
+                    <FooterLinkColumn title={CONTENT.footer.connectTitle} links={CONTENT.contact.links} />
                 </div>
 
                 <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-slate-400">© Pavol Hejný. {content.footer.rightsReservedText}</p>
+                    <p className="text-sm text-slate-400">© Pavol Hejný. {CONTENT.footer.rightsReservedText}</p>
 
                     <LegalFooterLinks
                         language={language}

@@ -13,20 +13,26 @@ type PavolService = {
     icon: LucideIcon;
     title: string;
     description: string;
+    topics: string[];
     buttonLabel: string;
     prefillMessage: string;
 };
 
-type PavolPageContent = {
+export type PavolPageContent = {
     header: {
         navItems: PavolLink[];
         primaryAction: string;
         secondaryAction: string;
         languageSwitcherLabel: string;
+        navigationLabel: string;
+        skipLinkLabel: string;
+        menuLabel: string;
     };
     hero: {
         eyebrow: string;
         title: string;
+        introduction: string;
+        portraitCaption: string;
         description: string;
         badges: string[];
         primaryAction: string;
@@ -71,6 +77,9 @@ type PavolPageContent = {
         formEmailPlaceholder: string;
         formCompanyLabel: string;
         formCompanyPlaceholder: string;
+        optionalLabel: string;
+        inquiryLabel: string;
+        generalInquiryLabel: string;
         formMessageLabel: string;
         formMessagePlaceholder: string;
         submitLabel: string;
@@ -78,6 +87,9 @@ type PavolPageContent = {
         successTitle: string;
         successDescription: string;
         errorMessage: string;
+        submissionErrorMessage: string;
+        anotherMessageLabel: string;
+        javascriptRequiredMessage: string;
         otherContactsTitle: string;
         links: PavolLink[];
     };
@@ -90,9 +102,9 @@ type PavolPageContent = {
     };
 };
 
-const cvLink = 'https://docs.google.com/document/d/1M0Py3W4eul8WMfzlvlHHBs50tP2hQ1f519QomfAOhcM/edit?usp=sharing';
+const CV_LINK = 'https://docs.google.com/document/d/1M0Py3W4eul8WMfzlvlHHBs50tP2hQ1f519QomfAOhcM/edit?usp=sharing';
 
-export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageContent> = {
+export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageContent> = {
     cs: {
         header: {
             navItems: [
@@ -106,12 +118,17 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             primaryAction: 'Napište mi',
             secondaryAction: 'CV',
             languageSwitcherLabel: 'Přepnout jazyk',
+            navigationLabel: 'Navigace stránky',
+            skipLinkLabel: 'Přejít k obsahu',
+            menuLabel: 'Menu',
         },
         hero: {
             eyebrow: 'AI konzultace, workshopy a vývoj',
             title: 'Pavol Hejný',
+            introduction: 'Stavím produkty.\nPomáhám týmům s AI.',
+            portraitCaption: 'Vývojář · AI konzultant · Lektor',
             description:
-                'Pomáhám firmám a týmům nasadit AI do vývoje, produktů a interních procesů tak, aby jim v praxi přinášela užitek. Bez dalšího hype.',
+                'Pomáhám firmám a týmům nasadit AI do vývoje, produktů a interních procesů tak, aby jim v praxi přinášela užitek.',
             badges: ['AI konzultace', 'Workshopy a přednášky', '15+ let vývoje'],
             primaryAction: 'Probrat AI',
             secondaryAction: 'Moje projekty',
@@ -128,6 +145,11 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
                     title: 'AI konzultace',
                     description:
                         'Strategie, výběr nástrojů, vendor lock-in, bezpečnost dat, práce s AI agenty a cesta od dema k běžnému provozu.',
+                    topics: [
+                        'Konkrétní použití ve vašem týmu',
+                        'Výběr nástrojů a práce s daty',
+                        'AI agenti v každodenní praxi',
+                    ],
                     buttonLabel: 'Domluvit AI konzultaci',
                     prefillMessage: 'Dobrý den, Pavle. Mám zájem o AI konzultaci. Prosím, ozvěte se mi.',
                 },
@@ -137,6 +159,11 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
                     title: 'Workshopy a přednášky',
                     description:
                         'Přednášky a praktické workshopy pro firmy, produktové týmy a vývojáře. Zaměříme se na to, co můžete hned použít, jak udržet kvalitu a která rozhodnutí je potřeba udělat.',
+                    topics: [
+                        'Praktické příklady pro váš obor',
+                        'Vývoj s AI a kontrola kvality',
+                        'Pro vývojáře i produktové týmy',
+                    ],
                     buttonLabel: 'Domluvit workshop nebo přednášku',
                     prefillMessage: 'Dobrý den, Pavle. Mám zájem o AI workshop nebo přednášku. Prosím, ozvěte se mi.',
                 },
@@ -164,7 +191,7 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             description: 'O AI, vývoji a digitálních produktech mluvím v rozhovorech, podcastech a na přednáškách.',
             highlightsLabel: 'Vybrané výstupy',
             restLabel: 'Další výstupy',
-            moreLabel: 'Více',
+            moreLabel: 'Další výstupy na LinkedIn',
         },
         contact: {
             eyebrow: 'Kontakt',
@@ -176,6 +203,9 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             formEmailPlaceholder: 'jmeno@firma.cz',
             formCompanyLabel: 'Firma / organizace',
             formCompanyPlaceholder: 'Firma s.r.o.',
+            optionalLabel: 'nepovinné',
+            inquiryLabel: 'S čím vám mohu pomoci?',
+            generalInquiryLabel: 'Jiný dotaz',
             formMessageLabel: 'Zpráva',
             formMessagePlaceholder: 'Popište stručně, co řešíte a s čím byste potřebovali pomoci.',
             submitLabel: 'Odeslat zprávu',
@@ -183,9 +213,13 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             successTitle: 'Děkuji, zpráva je odeslaná',
             successDescription: 'Ozvu se na uvedený e-mail co nejdřív.',
             errorMessage: 'Vyplňte prosím jméno, e-mail a zprávu.',
+            submissionErrorMessage:
+                'Zprávu se nepodařilo odeslat. Vaše údaje zůstaly vyplněné, zkuste to prosím znovu.',
+            anotherMessageLabel: 'Napsat další zprávu',
+            javascriptRequiredMessage: 'Pro odeslání formuláře zapněte JavaScript, nebo mi napište přes LinkedIn.',
             otherContactsTitle: 'Další odkazy',
             links: [
-                { label: 'CV', href: cvLink, icon: FileText },
+                { label: 'CV', href: CV_LINK, icon: FileText },
                 { label: 'GitHub', href: 'https://github.com/hejny', icon: Github },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/in/hejny/', icon: Linkedin },
                 { label: 'Facebook', href: 'https://www.facebook.com/hejny', icon: Facebook },
@@ -214,12 +248,16 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             primaryAction: 'Contact me',
             secondaryAction: 'CV',
             languageSwitcherLabel: 'Change language',
+            navigationLabel: 'Page navigation',
+            skipLinkLabel: 'Skip to content',
+            menuLabel: 'Menu',
         },
         hero: {
             eyebrow: 'AI consulting, workshops, and software development',
             title: 'Pavol Hejný',
-            description:
-                'I help companies and teams put AI to work in development, products, and internal processes. No hype for hype\'s sake.',
+            introduction: 'I build products.\nI help teams work with AI.',
+            portraitCaption: 'Developer · AI consultant · Educator',
+            description: 'I help companies and teams put AI to work in development, products, and internal processes.',
             badges: ['AI consulting', 'Workshops and talks', '15+ years building software'],
             primaryAction: "Let's talk about AI",
             secondaryAction: 'See my projects',
@@ -236,6 +274,11 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
                     title: 'AI consulting',
                     description:
                         'Strategy, tool selection, vendor lock-in, data security, AI agents, and the move from demo to daily use.',
+                    topics: [
+                        'Useful applications for your team',
+                        'Tool selection and data security',
+                        'AI agents in everyday work',
+                    ],
                     buttonLabel: "Let's talk about AI consulting",
                     prefillMessage: 'Hi Pavol, I would like to talk about AI consulting.',
                 },
@@ -245,6 +288,11 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
                     title: 'Workshops and talks',
                     description:
                         'Talks and hands-on workshops for companies, product teams, and developers. We focus on what you can use right away, how to keep quality up, and the decisions you need to make.',
+                    topics: [
+                        'Practical examples for your field',
+                        'Development with AI and quality control',
+                        'For developers and product teams',
+                    ],
                     buttonLabel: 'Arrange a workshop or talk',
                     prefillMessage: 'Hi Pavol, I would like to talk about an AI workshop or talk.',
                 },
@@ -272,7 +320,7 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             description: 'I talk about AI, development, and digital products on podcasts, in interviews, and at talks.',
             highlightsLabel: 'Selected appearances',
             restLabel: 'Other appearances',
-            moreLabel: 'See more',
+            moreLabel: 'More on LinkedIn',
         },
         contact: {
             eyebrow: 'Contact',
@@ -284,6 +332,9 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             formEmailPlaceholder: 'you@company.com',
             formCompanyLabel: 'Company / organization',
             formCompanyPlaceholder: 'Awesome Company',
+            optionalLabel: 'optional',
+            inquiryLabel: 'What can I help you with?',
+            generalInquiryLabel: 'General enquiry',
             formMessageLabel: 'Message',
             formMessagePlaceholder: 'Briefly explain your situation and what you need help with.',
             submitLabel: 'Send message',
@@ -291,9 +342,12 @@ export const pavolPageContent: Record<SupportedHomepageLanguage, PavolPageConten
             successTitle: 'Thanks. Your message has been sent.',
             successDescription: 'I will reply to your email soon.',
             errorMessage: 'Please fill in your name, email, and message.',
+            submissionErrorMessage: 'Your message could not be sent. Your details are still here; please try again.',
+            anotherMessageLabel: 'Write another message',
+            javascriptRequiredMessage: 'To send this form, enable JavaScript or contact me through LinkedIn.',
             otherContactsTitle: 'Find me elsewhere',
             links: [
-                { label: 'CV', href: cvLink, icon: FileText },
+                { label: 'CV', href: CV_LINK, icon: FileText },
                 { label: 'GitHub', href: 'https://github.com/hejny', icon: Github },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/in/hejny/', icon: Linkedin },
                 { label: 'Facebook', href: 'https://www.facebook.com/hejny', icon: Facebook },

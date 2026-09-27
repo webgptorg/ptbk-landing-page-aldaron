@@ -1,0 +1,33 @@
+.pavol-site :is(a, button, input, textarea, select, summary):focus-visible {
+    outline: 2px solid var(--pavol-accent);
+    outline-offset: 4px;
+}
+
+.pavol-site :is(main, section) {
+    scroll-margin-top: 6rem;
+}
+
+.pavol-site .pavol-mobile-menu > summary {
+    list-style: none;
+}
+
+.pavol-site .pavol-mobile-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.pavol-site .pavol-mobile-menu[open] > summary {
+    background: var(--pavol-warm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:has(.pavol-site) {
+        scroll-behavior: auto;
+    }
+
+    .pavol-site *,
+    .pavol-site *::before,
+    .pavol-site *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

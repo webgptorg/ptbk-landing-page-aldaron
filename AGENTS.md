@@ -32,6 +32,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   permanently redirect to Pavol Hejny's Czech `https://pavolhejny.cz/` and English
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
+- Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
+  Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu.
+  The introduction, projects, testimonials, and media remain readable without animated reveals; older media
+  appearances open through a native disclosure. Service enquiries use the existing `/api/waitlist` contact source,
+  prefill only an empty or unchanged template message, preserve custom drafts when the service changes or sending
+  fails, and prevent edits or duplicate submissions while a request is pending.
 - `/ai-supervize-mini` is the Czech one-day AI Supervize page. Published terms,
   prices, capacities, places, FAQs, registration, and participant information
   come from `/admin/workshops`; with no published term it shows a notice.
