@@ -73,6 +73,8 @@ const AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes']
     { path: '/media-kit', isIndexed: true },
     { path: '/branding', isIndexed: true },
     { path: '/opengraph-image' },
+    { path: '/media-kit/opengraph-image' },
+    { path: '/branding/opengraph-image' },
     { path: '/manifest.webmanifest' },
     { path: '/logo.svg' },
     { path: '/logo.png' },

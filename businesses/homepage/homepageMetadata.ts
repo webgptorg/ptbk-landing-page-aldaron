@@ -3,7 +3,7 @@ import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { SocialPreviewImageOptions } from '@/lib/metadata/social-preview-image';
-import type { SocialPreviewPaletteSeed } from '@/lib/metadata/social-preview-palette';
+import { PROMPTBOOK_SOCIAL_PREVIEW_PALETTE } from '@/lib/metadata/social-preview-palette';
 import type { Metadata } from 'next';
 
 /**
@@ -12,16 +12,6 @@ import type { Metadata } from 'next';
 const HOMEPAGE_LANGUAGE_ALTERNATES: Readonly<Record<SupportedHomepageLanguage, string>> = {
     cs: '/cs',
     en: '/en',
-};
-
-/**
- * Colors shared by both language variants, so the homepage looks the same wherever it is shared
- */
-const HOMEPAGE_PALETTE_SEED: SocialPreviewPaletteSeed = {
-    backgroundStart: '#04131c',
-    backgroundEnd: '#123847',
-    accent: '#7aebff',
-    accentSoft: '#7affeb',
 };
 
 export const HOMEPAGE_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguage, PageMetadataDefinition>> = {
@@ -68,11 +58,11 @@ export const HOMEPAGE_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageL
     cs: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.cs, {
         eyebrow: 'Česká AI platforma pro firemní data',
         artwork: 'knowledge',
-        paletteSeed: HOMEPAGE_PALETTE_SEED,
+        paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
     }),
     en: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.en, {
         eyebrow: 'Czech AI platform for company data',
         artwork: 'knowledge',
-        paletteSeed: HOMEPAGE_PALETTE_SEED,
+        paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
     }),
 };

@@ -2,6 +2,7 @@ import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { Metadata } from 'next';
+import { PROMPTBOOK_SOCIAL_PREVIEW_PALETTE } from '@/lib/metadata/social-preview-palette';
 
 /**
  * Definition of the site wide fallback, which is what a page inherits when it does not describe itself
@@ -26,12 +27,7 @@ export const DEFAULT_PAGE_DEFINITION: PageMetadataDefinition = {
 export const DEFAULT_SOCIAL_PREVIEW_OPTIONS = createSocialPreviewOptions(DEFAULT_PAGE_DEFINITION, {
     eyebrow: 'AI transformation for business',
     artwork: 'knowledge',
-    paletteSeed: {
-        backgroundStart: '#04131c',
-        backgroundEnd: '#123847',
-        accent: '#7aebff',
-        accentSoft: '#7affeb',
-    },
+    paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
 });
 
 /**

@@ -32,7 +32,7 @@ describe('createPageMetadata', () => {
             url: 'https://ptbk.io/cs/example',
             images: [
                 {
-                    url: 'https://ptbk.io/cs/example/opengraph-image',
+                    url: 'https://ptbk.io/cs/example/opengraph-image?v=2',
                     width: 1200,
                     height: 630,
                 },

@@ -4,6 +4,8 @@ import {
     SOCIAL_PREVIEW_IMAGE_SIZE,
     type SocialPreviewImageOptions,
 } from '@/lib/metadata/social-preview-image';
+import { createSocialPreviewOptions, type SocialPreviewContent } from '@/lib/metadata/create-social-preview-options';
+import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 
 /**
  * Exports expected by the Next.js `opengraph-image` file convention
@@ -29,4 +31,12 @@ export function createSocialPreviewImageRoute(options: SocialPreviewImageOptions
         contentType: SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE,
         renderSocialPreviewImage: () => createSocialPreviewImage(options),
     };
+}
+
+/** Supporting pages reuse their metadata copy and can choose a visual without duplicating an image template. */
+export function createPageSocialPreviewImageRoute(
+    definition: PageMetadataDefinition,
+    content?: Partial<SocialPreviewContent>,
+): SocialPreviewImageRoute {
+    return createSocialPreviewImageRoute(createSocialPreviewOptions(definition, content));
 }

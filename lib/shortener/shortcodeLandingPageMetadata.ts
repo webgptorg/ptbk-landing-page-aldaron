@@ -1,5 +1,6 @@
 import { shortenText } from '@/lib/language/shortenText';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
+import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { Metadata } from 'next';
 
 /** The longest title we place in a browser tab or a sharing card. */
@@ -36,19 +37,28 @@ function readHtmlAttribute(tag: string, attributeName: string): string | null {
     return attributeMatch?.[1] ?? attributeMatch?.[2] ?? attributeMatch?.[3] ?? null;
 }
 
+/** Decode attribute values without changing URL punctuation or executing the authored HTML. */
+function decodeHtmlEntities(value: string): string {
+    return value
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&quot;/gi, '"')
+        .replace(/&apos;|&#39;/gi, "'")
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&amp;/gi, '&');
+}
+
 /** Turns a Markdown or HTML fragment into one plain-text metadata value. */
 function toPlainText(value: string): string {
-    return value
-        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-        .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/[*_`~]/g, '')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;/gi, "'")
+    return decodeHtmlEntities(
+        value
+            .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+            .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+            .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+            .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/[*_`~]/g, ''),
+    )
         .replace(/\s+/g, ' ')
         .trim();
 }
@@ -160,9 +170,17 @@ function getSocialPreviewImagePath(value: string | null): string | null {
  * it; Markdown remains the friendly default in the administration.
  */
 export function extractShortcodeLandingPageMetadata(landingPage: string): ShortcodeLandingPageMetadata {
-    const title = toPlainText(getHtmlTitle(landingPage) ?? getMarkdownTitle(landingPage) ?? '');
+    const title = toPlainText(
+        getHtmlMetaContent(landingPage, 'og:title') ??
+            getHtmlMetaContent(landingPage, 'twitter:title') ??
+            getHtmlTitle(landingPage) ??
+            getMarkdownTitle(landingPage) ??
+            '',
+    );
     const description = toPlainText(
-        getHtmlMetaContent(landingPage, 'description') ??
+        getHtmlMetaContent(landingPage, 'og:description') ??
+            getHtmlMetaContent(landingPage, 'twitter:description') ??
+            getHtmlMetaContent(landingPage, 'description') ??
             getLeadingMarkdownQuote(landingPage) ??
             getFirstMarkdownParagraph(landingPage) ??
             '',
@@ -172,8 +190,10 @@ export function extractShortcodeLandingPageMetadata(landingPage: string): Shortc
         title: title === '' ? null : shortenText(title, MAXIMUM_TITLE_LENGTH),
         description: description === '' ? null : shortenText(description, MAXIMUM_DESCRIPTION_LENGTH),
         image:
+            getSocialPreviewImagePath(decodeHtmlEntities(getHtmlMetaContent(landingPage, 'og:image') ?? '')) ??
+            getSocialPreviewImagePath(decodeHtmlEntities(getHtmlMetaContent(landingPage, 'twitter:image') ?? '')) ??
             getSocialPreviewImagePath(getFirstMarkdownImageSource(landingPage)) ??
-            getSocialPreviewImagePath(getFirstHtmlImageSource(landingPage)),
+            getSocialPreviewImagePath(decodeHtmlEntities(getFirstHtmlImageSource(landingPage) ?? '')),
     };
 }
 
@@ -184,11 +204,11 @@ export function extractShortcodeLandingPageMetadata(landingPage: string): Shortc
  * documents, so they receive a canonical URL and rich social preview while
  * staying out of the sitemap and search index.
  */
-export function createShortcodeLandingPageMetadata(shortcode: string, landingPage: string): Metadata {
+export function createShortcodeLandingPageDefinition(shortcode: string, landingPage: string): PageMetadataDefinition {
     const extractedMetadata = extractShortcodeLandingPageMetadata(landingPage);
     const socialTitle = extractedMetadata.title ?? DEFAULT_SHORTCODE_TITLE;
 
-    return createPageMetadata({
+    return {
         path: `/${shortcode}`,
         language: 'en',
         title: `${socialTitle} | Promptbook`,
@@ -196,7 +216,12 @@ export function createShortcodeLandingPageMetadata(shortcode: string, landingPag
         description: extractedMetadata.description ?? DEFAULT_SHORTCODE_DESCRIPTION,
         socialDescription: extractedMetadata.description ?? DEFAULT_SHORTCODE_DESCRIPTION,
         socialPreviewImageAlt: socialTitle,
+        isSocialPreviewImageGenerated: true,
         ...(extractedMetadata.image === null ? {} : { socialPreviewImagePath: extractedMetadata.image }),
         isIndexed: false,
-    });
+    };
+}
+
+export function createShortcodeLandingPageMetadata(shortcode: string, landingPage: string): Metadata {
+    return createPageMetadata(createShortcodeLandingPageDefinition(shortcode, landingPage));
 }

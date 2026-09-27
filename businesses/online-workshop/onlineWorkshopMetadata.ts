@@ -40,6 +40,7 @@ export const ONLINE_WORKSHOP_THANK_YOU_PAGE_DEFINITION: PageMetadataDefinition =
     language: 'cs',
     title: 'Promptbook | Registrace na online workshop potvrzena',
     socialTitle: 'Registrace na online workshop potvrzena',
+    isSocialPreviewImageGenerated: true,
     description: 'Potvrzení registrace na bezplatný online workshop o psaní produkčního kódu s AI agenty.',
     isIndexed: false,
 };

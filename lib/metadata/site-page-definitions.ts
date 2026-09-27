@@ -6,12 +6,14 @@ import type { Metadata } from 'next';
 /**
  * Definitions of the supporting pages which are not a landing page of any business
  *
- * Note: They all share the site wide sharing preview, because a generated card per legal page brings no value.
+ * Public supporting pages have their own cards; internal tools retain the brand fallback.
  */
 export const BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/branding',
     language: 'en',
     title: 'Promptbook brand kit',
+    socialTitle: 'The Promptbook brand kit',
+    isSocialPreviewImageGenerated: true,
     description: 'Promptbook logos, colors, typefaces, and approved messages for partners, press, and product teams.',
     socialPreviewImageAlt: 'Promptbook brand kit',
     keywords: ['Promptbook branding', 'logo', 'brand assets', 'press kit'],
@@ -23,6 +25,8 @@ export const CONTACT_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/contact',
     language: 'en',
     title: 'Contact | Promptbook',
+    socialTitle: 'Let’s talk about your AI',
+    isSocialPreviewImageGenerated: true,
     description: 'Get in touch with the Promptbook team about AI agents for your business.',
     sitemapPriority: 0.6,
     sitemapChangeFrequency: 'yearly',
@@ -37,6 +41,8 @@ export const DATA_DELETION_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/data-deletion',
     language: 'en',
     title: 'Data Deletion Instructions | Promptbook',
+    socialTitle: 'Your data. Your control.',
+    isSocialPreviewImageGenerated: true,
     description:
         'How to request deletion of your personal data from Promptbook and from the third-party services it integrates with.',
     sitemapPriority: 0.3,
@@ -55,6 +61,8 @@ export const THANK_YOU_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/dekujeme',
     language: 'cs',
     title: 'Děkujeme | Promptbook',
+    socialTitle: 'Děkujeme. Těšíme se na setkání.',
+    isSocialPreviewImageGenerated: true,
     description: 'Potvrzení rezervace strategického hovoru s týmem Promptbook.',
     isIndexed: false,
 };

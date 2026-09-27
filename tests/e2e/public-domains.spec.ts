@@ -259,7 +259,7 @@ test.describe('isolated public domains', () => {
         }
 
         for (const hostname of ['ai-ta-krajta.cz', 'www.ai-ta-krajta.cz']) {
-            for (const path of ['/logo.svg', '/logo.png', '/manifest.webmanifest', '/opengraph-image']) {
+            for (const path of ['/logo.svg', '/logo.png', '/manifest.webmanifest', '/opengraph-image', '/media-kit/opengraph-image', '/branding/opengraph-image']) {
                 const response = await getHosted(request, hostname, path);
                 expect(response.status(), `${hostname}${path}`).toBe(200);
             }

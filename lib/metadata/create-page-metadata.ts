@@ -7,16 +7,7 @@ import {
 } from '@/lib/metadata/site-config';
 import { resolveSocialPreviewImagePath } from '@/lib/metadata/social-preview-image-path';
 import type { Metadata } from 'next';
-
-/**
- * Width of a sharing preview image in pixels, matching the 1.91:1 ratio expected by Facebook, LinkedIn and X
- */
-const SOCIAL_PREVIEW_IMAGE_WIDTH = 1200;
-
-/**
- * Height of a sharing preview image in pixels
- */
-const SOCIAL_PREVIEW_IMAGE_HEIGHT = 630;
+import { SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE, SOCIAL_PREVIEW_IMAGE_SIZE } from '@/lib/metadata/social-preview-image-config';
 
 /**
  * Robots directives applied to pages which must stay out of search results
@@ -101,8 +92,8 @@ export function createPageMetadata(definition: PageMetadataDefinition): Metadata
         ...(definition.socialPreviewImagePath
             ? {}
             : {
-                  width: SOCIAL_PREVIEW_IMAGE_WIDTH,
-                  height: SOCIAL_PREVIEW_IMAGE_HEIGHT,
+                  ...SOCIAL_PREVIEW_IMAGE_SIZE,
+                  type: SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE,
               }),
         alt: socialPreviewImageAlt,
     };

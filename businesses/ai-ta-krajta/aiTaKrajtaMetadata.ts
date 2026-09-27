@@ -4,10 +4,12 @@ import {
     AI_TA_KRAJTA_APP_ICONS,
     AI_TA_KRAJTA_BRAND_NAME,
     AI_TA_KRAJTA_BRANDING_PATH,
+    AI_TA_KRAJTA_BRANDING_SUBPAGE,
     AI_TA_KRAJTA_COLORS,
     AI_TA_KRAJTA_COVER_IMAGE_PATH,
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
+    AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE,
     AI_TA_KRAJTA_PATH,
     AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
     AI_TA_KRAJTA_RSS_FEED_PLATFORM,
@@ -84,10 +86,10 @@ export const AI_TA_KRAJTA_MEDIA_KIT_PAGE_DEFINITION: PageMetadataDefinition = {
         socialHandle: AI_TA_KRAJTA_X_HANDLE,
     },
     title: AI_TA_KRAJTA_BRAND_NAME + ' | Media kit a spolupráce',
-    socialTitle: 'Media kit | ' + AI_TA_KRAJTA_BRAND_NAME,
+    socialTitle: AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE.title,
     description: 'Media kit AI ta Krajta. Nabídka spolupráce, pravidla redakce a informace pro hosty i tipy na témata.',
     socialPreviewImageAlt: AI_TA_KRAJTA_BRAND_NAME + ', media kit a spolupráce',
-    socialPreviewImagePath: AI_TA_KRAJTA_COVER_IMAGE_PATH,
+    isSocialPreviewImageGenerated: true,
     keywords: [
         'AI ta Krajta media kit',
         'AI ta Krajta partnerství',
@@ -110,11 +112,11 @@ export const AI_TA_KRAJTA_BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
         socialHandle: AI_TA_KRAJTA_X_HANDLE,
     },
     title: AI_TA_KRAJTA_BRAND_NAME + ' | Brand kit a logo ke stažení',
-    socialTitle: 'Brand kit | ' + AI_TA_KRAJTA_BRAND_NAME,
+    socialTitle: AI_TA_KRAJTA_BRANDING_SUBPAGE.title,
     description:
         'Logo AI ta Krajta ke stažení. Barvy, správné psaní názvu a pravidla použití pro novináře, partnery a pořadatele.',
     socialPreviewImageAlt: AI_TA_KRAJTA_BRAND_NAME + ', brand kit a logo ke stažení',
-    socialPreviewImagePath: AI_TA_KRAJTA_COVER_IMAGE_PATH,
+    isSocialPreviewImageGenerated: true,
     keywords: [
         'AI ta Krajta logo',
         'AI ta Krajta brand kit',
@@ -247,6 +249,7 @@ export const AI_TA_KRAJTA_SOCIAL_PREVIEW_OPTIONS: SocialPreviewImageOptions = cr
     AI_TA_KRAJTA_PAGE_DEFINITION,
     {
         brandLabel: AI_TA_KRAJTA_BRAND_NAME,
+        brandKind: 'podcast',
         eyebrow: 'Podcast',
         artwork: 'podcast',
         paletteSeed: {

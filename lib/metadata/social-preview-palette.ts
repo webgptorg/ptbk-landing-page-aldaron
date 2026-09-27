@@ -38,6 +38,14 @@ export type SocialPreviewPaletteSeed = {
     readonly accentSoft: string;
 };
 
+/** The product palette shared by homepages, supporting pages, and the brand fallback. */
+export const PROMPTBOOK_SOCIAL_PREVIEW_PALETTE: SocialPreviewPaletteSeed = {
+    backgroundStart: '#04131c',
+    backgroundEnd: '#123847',
+    accent: '#7aebff',
+    accentSoft: '#7affeb',
+};
+
 /**
  * Turns a hexadecimal color into a translucent `rgba()` color
  *

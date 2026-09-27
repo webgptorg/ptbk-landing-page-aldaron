@@ -5,6 +5,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- Sharing cards use the shared 1200×630 PNG renderer in `lib/metadata`, with local Inter/Outfit fonts, real brand
+  marks, page-specific copy and colors, and the canonical public hostname. Public supporting pages, including
+  legal pages and podcast kits, have their own image routes. Both Open Graph and X use the same image and alt text.
+  Generated image URLs carry a shared design version to refresh cached artwork; authored image URLs are preserved.
+  Personal cards use the existing portrait. Room and confirmation cards never include query-string identity.
+  Project cards read only anonymously visible approved projects; short-link cards read only the authored public
+  landing page without following a destination or recording clicks, and retain explicitly supplied preview images.
+  Authored Open Graph copy and images take priority over X metadata and the landing page's ordinary text and images.
+
 - The four configured public domains (`ptbk.io`, `ai-ta-krajta.cz`, `pavolhejny.cz`, and
   `pavolhejny.com`, including `www.` aliases) share one build but serve only their own pages.
   The three branded domains answer unknown, Promptbook-only, foreign-branded, and unknown

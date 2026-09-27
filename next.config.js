@@ -37,6 +37,14 @@ const nextConfig = {
     serverExternalPackages: ['pg', '@promptbook/node'],
     outputFileTracingIncludes: {
         '/*': ['./migrations/**/*.sql'],
+        // Image assets are read from disk at runtime for public projects and short links.
+        '/**/opengraph-image': [
+            './public/fonts/workshop/Inter-Regular.ttf',
+            './public/fonts/workshop/Outfit-Bold.ttf',
+            './public/logo/promptbook-logo-white-transparent-1024.png',
+            './public/logo/pavol-hejny-ph.svg',
+            './public/people/pavol-hejny-transparent-square.png',
+        ],
     },
     devIndicators: false,
     async redirects() {

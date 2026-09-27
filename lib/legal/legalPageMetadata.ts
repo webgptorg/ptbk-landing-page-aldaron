@@ -64,6 +64,8 @@ function createLegalPageDefinition(
         path: LEGAL_PAGE_PATHS[kind][language],
         language,
         title,
+        socialTitle: title.replace(' | Promptbook', ''),
+        isSocialPreviewImageGenerated: true,
         description,
         languageAlternates: LEGAL_PAGE_PATHS[kind],
         sitemapPriority: LEGAL_PAGE_SITEMAP_PRIORITY,

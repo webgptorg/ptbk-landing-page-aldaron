@@ -57,7 +57,8 @@ function ArtworkCard({ palette, top, left, width, height, rotation = 0, children
                 flexDirection: 'column',
                 borderRadius: 28,
                 border: `1px solid ${palette.frame}`,
-                background: 'rgba(7, 17, 33, 0.5)',
+                background: `linear-gradient(145deg, ${palette.backgroundEnd}, ${palette.backgroundStart})`,
+                boxShadow: '0 22px 45px rgba(0, 0, 0, 0.25)',
                 padding: 24,
                 transform: `rotate(${rotation}deg)`,
             }}
@@ -85,46 +86,11 @@ function ArtworkLine({ width, color }: ArtworkLineProps) {
 }
 
 /**
- * Renders the subtle glow behind every artwork so the composition has depth
- * even when a social application adds its own dark chrome around the image.
- */
-function ArtworkGlow({ palette }: { readonly palette: SocialPreviewPalette }) {
-    return (
-        <>
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 52,
-                    right: 52,
-                    width: 340,
-                    height: 340,
-                    display: 'flex',
-                    borderRadius: 9999,
-                    background: palette.orbPrimary,
-                }}
-            />
-            <div
-                style={{
-                    position: 'absolute',
-                    right: -38,
-                    bottom: 8,
-                    width: 248,
-                    height: 248,
-                    display: 'flex',
-                    borderRadius: 9999,
-                    background: palette.orbSecondary,
-                }}
-            />
-        </>
-    );
-}
-
-/**
  * Represents company knowledge becoming an answer people can use.
  */
 function KnowledgeArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <ArtworkCard palette={palette} top={116} left={80} width={308} height={276} rotation={-8}>
                 <div style={{ display: 'flex', gap: 10, marginBottom: 30 }}>
                     <div
@@ -183,7 +149,7 @@ function KnowledgeArtwork({ palette }: { readonly palette: SocialPreviewPalette 
                     }}
                 />
             </ArtworkCard>
-        </>
+        </div>
     );
 }
 
@@ -199,7 +165,7 @@ function CityArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
     ] as const;
 
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <div
                 style={{
                     position: 'absolute',
@@ -269,7 +235,7 @@ function CityArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
                     }}
                 />
             </div>
-        </>
+        </div>
     );
 }
 
@@ -286,7 +252,7 @@ function AgricultureArtwork({ palette }: { readonly palette: SocialPreviewPalett
     ] as const;
 
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <div
                 style={{
                     position: 'absolute',
@@ -340,7 +306,7 @@ function AgricultureArtwork({ palette }: { readonly palette: SocialPreviewPalett
                     border: `1px solid ${palette.chipBorder}`,
                 }}
             />
-        </>
+        </div>
     );
 }
 
@@ -361,7 +327,7 @@ function IndustryArtwork({ palette }: { readonly palette: SocialPreviewPalette }
     ] as const;
 
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             {RINGS.map((ring) => (
                 <div
                     key={ring.size}
@@ -405,7 +371,7 @@ function IndustryArtwork({ palette }: { readonly palette: SocialPreviewPalette }
                     background: `linear-gradient(135deg, ${palette.accent} 0%, ${palette.accentSoft} 100%)`,
                 }}
             />
-        </>
+        </div>
     );
 }
 
@@ -414,7 +380,7 @@ function IndustryArtwork({ palette }: { readonly palette: SocialPreviewPalette }
  */
 function WorkshopArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <ArtworkCard palette={palette} top={86} left={62} width={426} height={326} rotation={-4}>
                 <div style={{ display: 'flex', gap: 10, marginBottom: 34 }}>
                     {[palette.accent, palette.accentSoft, 'rgba(255, 255, 255, 0.24)'].map((color) => (
@@ -458,7 +424,7 @@ function WorkshopArtwork({ palette }: { readonly palette: SocialPreviewPalette }
                 <ArtworkLine width={86} color="rgba(255, 255, 255, 0.82)" />
                 <ArtworkLine width={112} color="rgba(255, 255, 255, 0.42)" />
             </div>
-        </>
+        </div>
     );
 }
 
@@ -473,7 +439,7 @@ function CommunityArtwork({ palette }: { readonly palette: SocialPreviewPalette 
     ] as const;
 
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <div
                 style={{
                     position: 'absolute',
@@ -537,7 +503,7 @@ function CommunityArtwork({ palette }: { readonly palette: SocialPreviewPalette 
                     }}
                 />
             ))}
-        </>
+        </div>
     );
 }
 
@@ -548,7 +514,7 @@ function PodcastArtwork({ palette }: { readonly palette: SocialPreviewPalette })
     const WAVE_BARS = [58, 104, 154, 202, 254, 202, 154, 104, 58] as const;
 
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <div
                 style={{
                     position: 'absolute',
@@ -621,7 +587,7 @@ function PodcastArtwork({ palette }: { readonly palette: SocialPreviewPalette })
                     />
                 ))}
             </div>
-        </>
+        </div>
     );
 }
 
@@ -630,7 +596,7 @@ function PodcastArtwork({ palette }: { readonly palette: SocialPreviewPalette })
  */
 function PersonArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             <div
                 style={{
                     position: 'absolute',
@@ -691,7 +657,7 @@ function PersonArtwork({ palette }: { readonly palette: SocialPreviewPalette }) 
                     <ArtworkLine width={68} color="rgba(255, 255, 255, 0.3)" />
                 </div>
             </ArtworkCard>
-        </>
+        </div>
     );
 }
 
@@ -706,7 +672,7 @@ function LaunchArtwork({ palette }: { readonly palette: SocialPreviewPalette }) 
     ] as const;
 
     return (
-        <>
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
             {STEPS.map((step) => (
                 <div
                     key={step.left}
@@ -750,29 +716,17 @@ function LaunchArtwork({ palette }: { readonly palette: SocialPreviewPalette }) 
                     background: `linear-gradient(135deg, ${palette.accent} 0%, ${palette.accentSoft} 100%)`,
                 }}
             >
-                <div
-                    style={{
-                        width: 14,
-                        height: 58,
-                        display: 'flex',
-                        borderRadius: 999,
-                        background: 'rgba(7, 17, 33, 0.8)',
-                        transform: 'rotate(45deg)',
-                    }}
-                />
-                <div
-                    style={{
-                        position: 'absolute',
-                        width: 14,
-                        height: 58,
-                        display: 'flex',
-                        borderRadius: 999,
-                        background: 'rgba(7, 17, 33, 0.8)',
-                        transform: 'rotate(135deg)',
-                    }}
-                />
+                <svg width="64" height="64" viewBox="0 0 48 48" fill="none">
+                    <path
+                        d="M12 36L36 12M12 12H36V36"
+                        stroke="rgba(7, 17, 33, 0.8)"
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                </svg>
             </div>
-        </>
+        </div>
     );
 }
 
@@ -790,7 +744,6 @@ export function SocialPreviewArtwork({ kind, palette }: SocialPreviewArtworkProp
                 overflow: 'hidden',
             }}
         >
-            <ArtworkGlow palette={palette} />
             {kind === 'knowledge' && <KnowledgeArtwork palette={palette} />}
             {kind === 'city' && <CityArtwork palette={palette} />}
             {kind === 'agriculture' && <AgricultureArtwork palette={palette} />}

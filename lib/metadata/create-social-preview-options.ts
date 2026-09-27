@@ -1,8 +1,13 @@
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
-import { SITE_NAME } from '@/lib/metadata/site-config';
+import { createAbsoluteUrl, SITE_NAME } from '@/lib/metadata/site-config';
+import type { SocialPreviewBrandKind } from '@/lib/metadata/social-preview-assets';
 import type { SocialPreviewArtworkKind } from '@/lib/metadata/social-preview-artwork';
 import type { SocialPreviewImageOptions } from '@/lib/metadata/social-preview-image';
-import { createSocialPreviewPalette, type SocialPreviewPaletteSeed } from '@/lib/metadata/social-preview-palette';
+import {
+    createSocialPreviewPalette,
+    PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
+    type SocialPreviewPaletteSeed,
+} from '@/lib/metadata/social-preview-palette';
 
 /**
  * Page specific part of a sharing preview image
@@ -29,9 +34,12 @@ export type SocialPreviewContent = {
     readonly paletteSeed: SocialPreviewPaletteSeed;
 
     /**
-     * Brand shown next to the logo dot, defaults to the site name
+     * Brand shown next to its mark, defaults to the page's brand or the site name
      */
     readonly brandLabel?: string;
+
+    /** The local brand mark and, for a personal page, its portrait. */
+    readonly brandKind?: SocialPreviewBrandKind;
 };
 
 /**
@@ -42,16 +50,21 @@ export type SocialPreviewContent = {
  */
 export function createSocialPreviewOptions(
     definition: PageMetadataDefinition,
-    content: SocialPreviewContent,
+    content: Partial<SocialPreviewContent> = {},
 ): SocialPreviewImageOptions {
     const socialTitle = definition.socialTitle ?? definition.title;
 
     return {
         alt: definition.socialPreviewImageAlt ?? socialTitle,
-        brandLabel: content.brandLabel ?? SITE_NAME,
-        eyebrow: content.eyebrow,
+        brandLabel: content.brandLabel ?? definition.brand?.name ?? SITE_NAME,
+        brandKind: content.brandKind ?? 'promptbook',
+        eyebrow:
+            content.eyebrow ??
+            (definition.language === 'cs' ? 'Informace a užitečné odkazy' : 'Information & resources'),
         title: socialTitle,
-        artwork: content.artwork,
-        palette: createSocialPreviewPalette(content.paletteSeed),
+        description: definition.socialDescription ?? definition.description,
+        hostname: new URL(createAbsoluteUrl(definition.path)).hostname,
+        artwork: content.artwork ?? 'knowledge',
+        palette: createSocialPreviewPalette(content.paletteSeed ?? PROMPTBOOK_SOCIAL_PREVIEW_PALETTE),
     };
 }

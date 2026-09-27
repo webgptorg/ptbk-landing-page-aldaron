@@ -1,5 +1,4 @@
 import {
-    DEFAULT_SOCIAL_PREVIEW_IMAGE_PATH,
     OPEN_GRAPH_LOCALE_BY_LANGUAGE,
     SITE_DESCRIPTION,
     SITE_NAME,
@@ -8,6 +7,11 @@ import {
     SITE_URL,
 } from '@/lib/metadata/site-config';
 import type { Metadata, Viewport } from 'next';
+import {
+    SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE,
+    SOCIAL_PREVIEW_IMAGE_SIZE,
+} from '@/lib/metadata/social-preview-image-config';
+import { createGeneratedSocialPreviewImagePath } from '@/lib/metadata/social-preview-image-path';
 
 /**
  * Topics the whole site is about, inherited by pages which do not narrow them down
@@ -25,9 +29,9 @@ const SITE_KEYWORDS: readonly string[] = [
  * Sharing preview image inherited by pages which do not render their own
  */
 const DEFAULT_SOCIAL_PREVIEW_IMAGE = {
-    url: DEFAULT_SOCIAL_PREVIEW_IMAGE_PATH,
-    width: 1200,
-    height: 630,
+    url: createGeneratedSocialPreviewImagePath(),
+    ...SOCIAL_PREVIEW_IMAGE_SIZE,
+    type: SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE,
     alt: `${SITE_NAME} - ${SITE_DESCRIPTION}`,
 };
 

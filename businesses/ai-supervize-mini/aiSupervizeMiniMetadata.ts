@@ -35,10 +35,12 @@ export const AI_SUPERVIZE_MINI_SOCIAL_PREVIEW_OPTIONS = createSocialPreviewOptio
 /**
  * Definition of the practical information for people who already registered, which has no place in search results
  */
-const AI_SUPERVIZE_MINI_PARTICIPANT_PAGE_DEFINITION: PageMetadataDefinition = {
+export const AI_SUPERVIZE_MINI_PARTICIPANT_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/ai-supervize-mini/participant',
     language: 'cs',
     title: 'Informace pro účastníka | AI Supervize Mini',
+    socialTitle: 'Vše připraveno na AI Supervizi Mini',
+    isSocialPreviewImageGenerated: true,
     description:
         'Čas, místo, harmonogram a příprava pro registrované účastníky jednodenního workshopu AI Supervize Mini.',
     isIndexed: false,

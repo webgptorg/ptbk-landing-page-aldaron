@@ -1,277 +1,317 @@
-import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette';
+/* eslint-disable @next/next/no-img-element -- ImageResponse embeds local image data; next/image requires a browser. */
 import { SocialPreviewArtwork, type SocialPreviewArtworkKind } from '@/lib/metadata/social-preview-artwork';
+import { loadSocialPreviewAssets, type SocialPreviewBrandKind } from '@/lib/metadata/social-preview-assets';
+import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette';
+import { shortenText } from '@/lib/language/shortenText';
 import { ImageResponse } from 'next/og';
+import { SOCIAL_PREVIEW_IMAGE_SIZE } from '@/lib/metadata/social-preview-image-config';
+export {
+    SOCIAL_PREVIEW_IMAGE_SIZE,
+    SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE,
+} from '@/lib/metadata/social-preview-image-config';
 
-/**
- * Everything a social preview image needs to be rendered
- */
 export type SocialPreviewImageOptions = {
-    /**
-     * Alternative text of the image
-     */
     readonly alt: string;
-
-    /**
-     * Brand shown next to the logo dot
-     */
     readonly brandLabel: string;
-
-    /**
-     * Small uppercase line above the headline
-     */
+    readonly brandKind: SocialPreviewBrandKind;
     readonly eyebrow: string;
-
-    /**
-     * Headline of the card
-     */
     readonly title: string;
-
-    /**
-     * Non-textual visual metaphor which makes the page identifiable in a feed
-     */
+    readonly description: string;
+    readonly hostname: string;
     readonly artwork: SocialPreviewArtworkKind;
-
-    /**
-     * Colors of the card
-     */
     readonly palette: SocialPreviewPalette;
 };
 
-/**
- * Dimensions expected by Facebook, LinkedIn and X for a large sharing preview
- */
-export const SOCIAL_PREVIEW_IMAGE_SIZE = {
-    width: 1200,
-    height: 630,
-};
-
-/**
- * Format the social preview images are served in
- */
-export const SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE = 'image/png' as const;
-
-/**
- * Renders the large color shapes behind the composition
- */
-function SocialPreviewBackdrop({ palette }: { palette: SocialPreviewPalette }) {
-    return (
-        <>
-            <div
-                style={{
-                    position: 'absolute',
-                    top: -160,
-                    left: -130,
-                    width: 460,
-                    height: 460,
-                    display: 'flex',
-                    borderRadius: 9999,
-                    background: palette.orbPrimary,
-                }}
-            />
-            <div
-                style={{
-                    position: 'absolute',
-                    right: -110,
-                    bottom: -150,
-                    width: 460,
-                    height: 460,
-                    display: 'flex',
-                    borderRadius: 9999,
-                    background: palette.orbSecondary,
-                }}
-            />
-        </>
-    );
+/** Bound public, potentially user-authored copy before fitting it into the fixed canvas. */
+function preparePreviewText(text: string, maximumLength: number): string {
+    // The podcast's own snake drawing replaces the emoji; no remote emoji font is needed.
+    return shortenText(text.replace(/🐍/g, '').replace(/\s+/g, ' ').trim(), maximumLength);
 }
 
-/**
- * Renders the brand mark in the top left corner of the image
- */
-function SocialPreviewBrand({ brandLabel, palette }: { brandLabel: string; palette: SocialPreviewPalette }) {
+function SocialPreviewBackdrop({ palette }: { readonly palette: SocialPreviewPalette }) {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ position: 'absolute', left: 0, top: 0, width: 1200, height: 630, display: 'flex' }}>
             <div
                 style={{
-                    width: 30,
-                    height: 30,
+                    position: 'absolute',
+                    left: 520,
+                    top: -180,
+                    width: 780,
+                    height: 780,
+                    borderRadius: 999,
+                    background: `radial-gradient(circle, ${palette.orbPrimary} 0%, transparent 70%)`,
                     display: 'flex',
-                    borderRadius: 9,
-                    background: `linear-gradient(135deg, ${palette.accent} 0%, ${palette.accentSoft} 100%)`,
-                    transform: 'rotate(12deg)',
                 }}
             />
-            <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, letterSpacing: -0.6 }}>{brandLabel}</div>
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 715,
+                    top: 100,
+                    width: 440,
+                    height: 440,
+                    borderRadius: 999,
+                    border: `1px solid ${palette.chipBorder}`,
+                    display: 'flex',
+                }}
+            />
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 640,
+                    top: 25,
+                    width: 590,
+                    height: 590,
+                    borderRadius: 999,
+                    border: `1px solid ${palette.frame}`,
+                    display: 'flex',
+                }}
+            />
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 623,
+                    width: 1200,
+                    height: 7,
+                    background: `linear-gradient(90deg, ${palette.accent}, ${palette.accentSoft})`,
+                    display: 'flex',
+                }}
+            />
         </div>
     );
 }
 
-/**
- * Selects a title size which stays generous while letting longer localized headlines breathe.
- */
-function selectSocialPreviewTitleFontSize(title: string): number {
-    if (title.length > 58) {
-        return 46;
-    }
-
-    if (title.length > 42) {
-        return 52;
-    }
-
-    return 60;
-}
-
-/**
- * Renders the small context label and the one message a visitor should notice.
- */
-function SocialPreviewHeadline({ eyebrow, title, palette }: { eyebrow: string; title: string; palette: SocialPreviewPalette }) {
-    const titleFontSize = selectSocialPreviewTitleFontSize(title);
+function SocialPreviewHeadline({ options }: { readonly options: SocialPreviewImageOptions }) {
+    const title = preparePreviewText(options.title, 110);
+    const fontSize = title.length > 80 ? 47 : title.length > 55 ? 55 : title.length > 32 ? 64 : 76;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: 620, gap: 20 }}>
             <div
                 style={{
-                    display: 'flex',
-                    alignSelf: 'flex-start',
-                    borderRadius: 999,
-                    border: `1px solid ${palette.chipBorder}`,
-                    background: `${palette.accent}16`,
-                    padding: '10px 16px',
+                    display: 'block',
+                    lineClamp: 2,
+                    width: 620,
+                    wordBreak: 'break-word',
+                    overflow: 'hidden',
+                    color: options.palette.accent,
                     fontSize: 16,
+                    lineHeight: 1.35,
+                    fontFamily: 'Outfit',
                     fontWeight: 700,
-                    letterSpacing: 2.2,
+                    letterSpacing: 2,
                     textTransform: 'uppercase',
-                    color: palette.accent,
                 }}
             >
-                {eyebrow}
+                {preparePreviewText(options.eyebrow, 64)}
             </div>
             <div
                 style={{
-                    display: 'flex',
-                    maxWidth: 620,
-                    fontSize: titleFontSize,
-                    fontWeight: 800,
+                    display: 'block',
+                    lineClamp: 3,
+                    fontFamily: 'Outfit',
+                    fontWeight: 700,
+                    fontSize,
                     lineHeight: 1.04,
                     letterSpacing: -1.8,
+                    width: 620,
+                    wordBreak: 'break-word',
+                    overflow: 'hidden',
                 }}
             >
                 {title}
             </div>
-        </div>
-    );
-}
-
-/**
- * Renders a small source line without asking a social card to repeat the page's entire sales copy.
- */
-function SocialPreviewSourceLine({ palette }: { palette: SocialPreviewPalette }) {
-    return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                color: palette.mutedText,
-                fontSize: 18,
-                fontWeight: 600,
-                letterSpacing: 0.2,
-            }}
-        >
             <div
                 style={{
-                    width: 8,
-                    height: 8,
-                    display: 'flex',
-                    borderRadius: 999,
-                    background: palette.accent,
-                }}
-            />
-            ptbk.io
-        </div>
-    );
-}
-
-/**
- * Renders the sharing preview image of a page
- *
- * @param options content and colors of the card
- * @returns image response served by an `opengraph-image` route
- */
-export function createSocialPreviewImage(options: SocialPreviewImageOptions) {
-    const {
-        artwork,
-        brandLabel,
-        eyebrow,
-        palette,
-        title,
-    } = options;
-
-    return new ImageResponse(
-        <div
-            style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                position: 'relative',
-                overflow: 'hidden',
-                background: `linear-gradient(135deg, ${palette.backgroundStart} 0%, ${palette.backgroundEnd} 100%)`,
-                color: '#ffffff',
-                fontFamily: 'Inter, Arial, sans-serif',
-            }}
-        >
-            <SocialPreviewBackdrop palette={palette} />
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0,
-                    display: 'flex',
-                    opacity: 0.16,
-                    backgroundImage:
-                        'linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)',
-                    backgroundSize: '48px 48px',
-                }}
-            />
-            <div
-                style={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
+                    display: 'block',
+                    lineClamp: 3,
+                    color: options.palette.mutedText,
+                    fontSize: 23,
+                    lineHeight: 1.45,
+                    width: 565,
+                    wordBreak: 'break-word',
                     overflow: 'hidden',
-                    border: `1px solid ${palette.frame}`,
+                }}
+            >
+                {preparePreviewText(options.description, 145)}
+            </div>
+        </div>
+    );
+}
+
+function SocialPreviewFeature({
+    options,
+    logo,
+    portrait,
+}: {
+    readonly options: SocialPreviewImageOptions;
+    readonly logo: string;
+    readonly portrait?: string;
+}) {
+    if (portrait) {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    position: 'absolute',
+                    right: 22,
+                    bottom: 7,
+                    width: 485,
+                    height: 520,
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
                 }}
             >
                 <div
                     style={{
-                        width: '57%',
-                        height: '100%',
                         display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        padding: '58px 0 52px 68px',
+                        position: 'absolute',
+                        width: 400,
+                        height: 400,
+                        bottom: 38,
+                        borderRadius: 999,
+                        background: `linear-gradient(135deg, ${options.palette.accent}55, ${options.palette.orbSecondary})`,
                     }}
+                />
+                <img src={portrait} alt="" width={485} height={485} style={{ objectFit: 'contain' }} />
+            </div>
+        );
+    }
+
+    if (options.brandKind === 'podcast') {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    position: 'absolute',
+                    right: 65,
+                    top: 142,
+                    width: 380,
+                    height: 380,
+                    borderRadius: 52,
+                    transform: 'rotate(8deg)',
+                    boxShadow: '0 28px 70px rgba(0,0,0,0.32)',
+                }}
+            >
+                <img src={logo} alt="" width={380} height={380} />
+            </div>
+        );
+    }
+
+    return (
+        <div
+            style={{
+                position: 'absolute',
+                right: 20,
+                top: 128,
+                display: 'flex',
+                width: 552,
+                height: 454,
+                transform: 'scale(0.88)',
+                transformOrigin: 'right center',
+            }}
+        >
+            <SocialPreviewArtwork kind={options.artwork} palette={options.palette} />
+        </div>
+    );
+}
+
+/** One composition for every page, with real brand assets and embedded Czech-capable fonts. */
+export async function createSocialPreviewImage(options: SocialPreviewImageOptions, headers?: HeadersInit) {
+    const assets = await loadSocialPreviewAssets(options.brandKind);
+
+    return new ImageResponse(
+        (
+            <div
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: `linear-gradient(120deg, ${options.palette.backgroundStart}, ${options.palette.backgroundEnd})`,
+                    color: '#ffffff',
+                    fontFamily: 'Inter',
+                    fontWeight: 400,
+                }}
+            >
+                <SocialPreviewBackdrop palette={options.palette} />
+                <SocialPreviewFeature options={options} logo={assets.logo} portrait={assets.portrait} />
+                <div
+                    style={{ position: 'absolute', top: 42, left: 56, display: 'flex', alignItems: 'center', gap: 14 }}
                 >
-                    <SocialPreviewBrand brandLabel={brandLabel} palette={palette} />
-                    <SocialPreviewHeadline eyebrow={eyebrow} title={title} palette={palette} />
-                    <SocialPreviewSourceLine palette={palette} />
+                    <img src={assets.logo} alt="" width={44} height={44} style={{ objectFit: 'contain' }} />
+                    <div
+                        style={{
+                            display: 'flex',
+                            fontFamily: 'Outfit',
+                            fontWeight: 700,
+                            fontSize: 27,
+                            letterSpacing: -0.5,
+                        }}
+                    >
+                        {preparePreviewText(options.brandLabel, 48)}
+                    </div>
                 </div>
                 <div
                     style={{
                         position: 'absolute',
-                        right: -12,
-                        bottom: 14,
-                        width: 552,
-                        height: 454,
+                        left: 56,
+                        top: 130,
+                        height: 368,
                         display: 'flex',
+                        alignItems: 'center',
                     }}
                 >
-                    <SocialPreviewArtwork kind={artwork} palette={palette} />
+                    <SocialPreviewHeadline options={options} />
+                </div>
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: 56,
+                        bottom: 43,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 18,
+                    }}
+                >
+                    <div style={{ display: 'flex', fontSize: 20, color: options.palette.mutedText }}>
+                        {options.hostname}
+                    </div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            width: 34,
+                            height: 34,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 999,
+                            background: options.palette.accent,
+                            color: options.palette.backgroundStart,
+                        }}
+                    >
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                        >
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </div>
                 </div>
             </div>
-        </div>,
-        SOCIAL_PREVIEW_IMAGE_SIZE,
+        ),
+        {
+            ...SOCIAL_PREVIEW_IMAGE_SIZE,
+            headers,
+            fonts: [
+                { name: 'Inter', data: assets.bodyFont, weight: 400, style: 'normal' },
+                { name: 'Outfit', data: assets.headingFont, weight: 700, style: 'normal' },
+            ],
+        },
     );
 }

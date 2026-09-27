@@ -103,13 +103,15 @@ export const PAVOL_VIEWPORT: Viewport = { themeColor: '#fffaf5', colorScheme: 'l
 export const PAVOL_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(PAVOL_PAGE_DEFINITIONS.cs, {
         brandLabel: PAVOL_NAME,
+        brandKind: 'personal',
         eyebrow: 'AI konzultace, workshopy a vývoj',
         artwork: 'person',
         paletteSeed: PAVOL_PALETTE_SEED,
     }),
     en: createSocialPreviewOptions(PAVOL_PAGE_DEFINITIONS.en, {
         brandLabel: PAVOL_NAME,
-        eyebrow: 'AI consulting, workshops, and software development',
+        brandKind: 'personal',
+        eyebrow: 'AI consulting · Workshops · Development',
         artwork: 'person',
         paletteSeed: PAVOL_PALETTE_SEED,
     }),
