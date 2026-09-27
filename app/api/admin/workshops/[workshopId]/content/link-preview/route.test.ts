@@ -49,6 +49,9 @@ describe('admin workshop quick-link preview', () => {
     });
 
     it('uses the shared scraper and warns about a destination already in ordinary materials', async () => {
+        scrapePublicWebPagePreviewMock.mockResolvedValue({
+            url: 'https://canonical.example.com/redirected-guide', title: 'A useful guide', description: '', previewImageUrl: null,
+        });
         const response = await GET(createRequest(DESTINATION), ROUTE_CONTEXT);
 
         expect(response.status).toBe(200);

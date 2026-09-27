@@ -179,6 +179,20 @@ describe('workshop material tracking links', () => {
         );
     });
 
+    it.each([
+        'https://example.com/a(b)/%2f?filter=[first]&part=2#section',
+        "https://example.com/article?ref=workshop#chapter's!",
+        'HTTPS://Example.COM:443/a/../b?query=%2f%2F&tag=one+two#demo',
+        'https://example.com/article?filter=[one](two)#demo?',
+    ])('extracts and replaces the whole standalone URL %s', (destination) => {
+        const bodyMarkdown = ` \n${destination}\n `;
+
+        expect(getWorkshopMaterialLinkDestinations(bodyMarkdown)).toEqual([destination]);
+        expect(replaceWorkshopMaterialLinkDestinations(bodyMarkdown, new Map([
+            [destination, { shortUrl: 'https://ptbk.io/material', title: 'A [guide]' }],
+        ]))).toBe(' \n[A \\[guide\\]](https://ptbk.io/material)\n ');
+    });
+
     it('turns a Markdown autolink into one title-backed short link', () => {
         expect(
             replaceWorkshopMaterialLinkDestinations(
@@ -199,18 +213,24 @@ describe('workshop material tracking links', () => {
         expect(getWorkshopMaterialShortcodeSourceApp('project')).toBe('community');
     });
 
-    it('creates and returns an ad hoc short link instead of exposing a material destination', async () => {
-        let mappings: readonly { readonly destination_url: string; readonly shortcode_link_id: number }[] = [];
+    it.each([
+        { description: 'an authored Markdown link', isBareUrl: false, isMetadataUnavailable: false },
+        { description: 'a standalone URL', isBareUrl: true, isMetadataUnavailable: false },
+        { description: 'a standalone URL without metadata', isBareUrl: true, isMetadataUnavailable: true },
+    ])('creates a tracked short link for $description and resolves its preview target', async ({ isBareUrl, isMetadataUnavailable }) => {
+        const DESTINATION = "https://example.com/material(a)/%2f?filter=[one]&download=1#chapter's!";
+        const bodyMarkdown = isBareUrl ? DESTINATION : `[Otevřít materiál](${DESTINATION})`;
+        let mappings: readonly {
+            readonly destination_url: string;
+            readonly destination_title?: string;
+            readonly shortcode_link_id: number;
+        }[] = [];
         const mappingUpsert = vi.fn(async (values: {
             readonly destination_url: string;
+            readonly destination_title?: string;
             readonly shortcode_link_id: number;
         }) => {
-            mappings = [
-                {
-                    destination_url: values.destination_url,
-                    shortcode_link_id: values.shortcode_link_id,
-                },
-            ];
+            mappings = [values];
             return { error: null };
         });
         const from = vi.fn((tableName: string) => {
@@ -224,7 +244,10 @@ describe('workshop material tracking links', () => {
             if (tableName === 'ShortcodeLink') {
                 return {
                     select: vi.fn(() => ({
-                        in: vi.fn(async () => ({ data: [{ id: 44, shortcode: 'material-44' }], error: null })),
+                        in: vi.fn(async () => ({
+                            data: [{ id: 44, shortcode: 'material-44', url: createAdHocShortcodeLinkMock.mock.calls[0][1].urls }],
+                            error: null,
+                        })),
                     })),
                 };
             }
@@ -244,6 +267,11 @@ describe('workshop material tracking links', () => {
             },
             errorMessage: null,
         });
+        if (isMetadataUnavailable) {
+            fetchPublicWebPageTitleMock.mockRejectedValue(new Error('Page could not be loaded'));
+        } else {
+            fetchPublicWebPageTitleMock.mockResolvedValue('Otevřít materiál');
+        }
 
         const materializedLink = await materializeWorkshopMaterialShortLinks(
             { from } as unknown as SupabaseClient,
@@ -251,17 +279,19 @@ describe('workshop material tracking links', () => {
                 workshopSlug: 'production-ai-2026-08-24',
                 workshopKind: 'workshop',
                 contentBlockId: 'content-44',
-                bodyMarkdown: '[Otevřít materiál](https://example.com/material?download=1)',
+                bodyMarkdown,
             },
         );
 
         expect(materializedLink).toEqual({
-            bodyMarkdown: '[Otevřít materiál](https://ptbk.io/material-44)',
+            bodyMarkdown: isBareUrl
+                ? `[${isMetadataUnavailable ? 'example.com' : 'Otevřít materiál'}](https://ptbk.io/material-44)`
+                : '[Otevřít materiál](https://ptbk.io/material-44)',
             errorMessage: null,
         });
         expect(createAdHocShortcodeLinkMock).toHaveBeenCalledWith(expect.anything(), {
             urls: [
-                'https://example.com/material?download=1&utm_source=promptbook&utm_medium=workshop&utm_campaign=production-ai-2026-08-24&utm_content=content-44',
+                "https://example.com/material(a)/%2f?filter=%5Bone%5D&download=1&utm_source=promptbook&utm_medium=workshop&utm_campaign=production-ai-2026-08-24&utm_content=content-44#chapter's!",
             ],
             note: 'Ad hoc material link for production-ai-2026-08-24',
             sourceApp: 'online-workshop',
@@ -269,11 +299,22 @@ describe('workshop material tracking links', () => {
         expect(mappingUpsert).toHaveBeenCalledWith(
             {
                 content_block_id: 'content-44',
-                destination_url: 'https://example.com/material?download=1',
+                destination_url: DESTINATION,
                 shortcode_link_id: 44,
+                ...(isBareUrl ? { destination_title: isMetadataUnavailable ? 'example.com' : 'Otevřít materiál' } : {}),
             },
             { onConflict: 'content_block_id,destination_url', ignoreDuplicates: true },
         );
+        expect(fetchPublicWebPageTitleMock).toHaveBeenCalledTimes(isBareUrl ? 1 : 0);
+
+        const previewTarget = await loadWorkshopMaterialTrackedDestination(
+            { from } as unknown as SupabaseClient, 'content-44', 'https://ptbk.io/material-44', bodyMarkdown,
+        );
+        expect(previewTarget).toEqual({
+            destinationUrl: createAdHocShortcodeLinkMock.mock.calls[0][1].urls[0],
+            errorMessage: null,
+        });
+        expect(createAdHocShortcodeLinkMock).toHaveBeenCalledOnce();
     });
 
     it('reuses the persisted material short-link path for an artificial or moderator chat message', async () => {

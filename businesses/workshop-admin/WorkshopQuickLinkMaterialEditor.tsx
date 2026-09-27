@@ -13,7 +13,6 @@ import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { createWorkshopContentDefaults } from '@/lib/workshops/workshopContentDefaults';
 import {
-    createWorkshopQuickLinkMarkdown,
     getWorkshopMaterialAppendSortOrders,
     getWorkshopQuickLinkFallbackTitle,
     MAXIMAL_WORKSHOP_QUICK_LINK_COUNT,
@@ -202,7 +201,7 @@ export function WorkshopQuickLinkMaterialEditor({
                         const contentBlock = await onCreate({
                             ...createWorkshopContentDefaults(defaultUnlockAt, entry.sortOrder),
                             title,
-                            bodyMarkdown: createWorkshopQuickLinkMarkdown(title, entry.destination),
+                            bodyMarkdown: entry.destination,
                             idempotencyKey: entry.id,
                         });
                         updateEntry(entry.id, {

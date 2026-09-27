@@ -1,7 +1,5 @@
-import { getWorkshopMaterialLinkDestinations, replaceWorkshopMaterialLinkDestinations } from '@/lib/workshops/workshopMaterialLinks';
 import { describe, expect, it } from 'vitest';
 import {
-    createWorkshopQuickLinkMarkdown,
     getWorkshopMaterialAppendSortOrders,
     parseWorkshopQuickLinkInput,
 } from './workshopQuickLinkMaterials';
@@ -26,15 +24,15 @@ describe('quick workshop link materials', () => {
         ]);
     });
 
-    it('escapes an untrusted title while keeping the complete tracked destination', () => {
-        const destination = 'https://example.com/a(b)?campaign=one&part=2#section';
-        const markdown = createWorkshopQuickLinkMarkdown('A [guide] \\ to (start)', destination);
+    it.each([
+        'https://Example.COM',
+        'HTTPS://Example.COM:443/a/../b?ref=%2f%2F&tag=one+two#demo',
+        "https://example.com/a(b)?filter=[first]&part=2#chapter's!",
+        'https://example.com/příručka?query=%5Bdemo%5D#část',
+    ])('trims only line whitespace without reserializing %s', (destination) => {
+        const rows = parseWorkshopQuickLinkInput(` \t${destination} \t\r\n`);
 
-        expect(markdown).toBe('[A \\[guide\\] \\\\ to (start)](<https://example.com/a(b)?campaign=one&part=2#section>)');
-        expect(getWorkshopMaterialLinkDestinations(markdown)).toEqual([destination]);
-        expect(replaceWorkshopMaterialLinkDestinations(markdown, new Map([[destination, 'https://ptbk.io/abc']]))).toContain('https://ptbk.io/abc');
-        expect(createWorkshopQuickLinkMarkdown('<img src=x onerror=alert(1)> & guide', destination))
-            .toContain('[&lt;img src=x onerror=alert(1)&gt; &amp; guide]');
+        expect(rows).toEqual([{ lineNumber: 1, value: destination, destination, issue: null }]);
     });
 
     it('appends after the largest actual order, including sparse orders and a batch', () => {

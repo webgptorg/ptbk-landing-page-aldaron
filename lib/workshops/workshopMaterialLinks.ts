@@ -21,6 +21,7 @@ const WORKSHOP_UTM_MEDIUM = 'workshop';
 const WORKSHOP_MATERIAL_HASH_LINK_PREFIX = '#';
 const WORKSHOP_MATERIAL_ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const WORKSHOP_MATERIAL_LINK_BASE_URL = 'https://www.promptbook.studio';
+const WORKSHOP_MATERIAL_STANDALONE_URL_PATTERN = /^https?:\/\/\S+$/i;
 const WORKSHOP_MATERIAL_BARE_URL_PATTERN = /(^|\s)(https?:\/\/[^\s<>()\[\]"']+)/gm;
 const WORKSHOP_MATERIAL_BARE_URL_TRAILING_PUNCTUATION_PATTERN = /[.,;:!?]+$/;
 
@@ -305,6 +306,14 @@ function collectReferenceDefinitionRanges(markdown: string): readonly WorkshopMa
 }
 
 function collectWorkshopMaterialLinkRanges(markdown: string): readonly WorkshopMaterialLinkRange[] {
+    // A body containing only a URL has no surrounding prose or Markdown syntax:
+    // parentheses, brackets and trailing punctuation belong to the destination.
+    const standaloneDestination = markdown.trim();
+    if (WORKSHOP_MATERIAL_STANDALONE_URL_PATTERN.test(standaloneDestination)) {
+        const start = markdown.indexOf(standaloneDestination);
+        return [{ destination: standaloneDestination, start, end: start + standaloneDestination.length, isTitleRequired: true }];
+    }
+
     const sortedRanges = [
         ...collectMarkdownInlineLinkRanges(markdown),
         ...collectHtmlLinkRanges(markdown),

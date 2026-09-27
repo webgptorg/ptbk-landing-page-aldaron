@@ -38,7 +38,37 @@ describe('quick link material editor', () => {
     });
     afterEach(cleanup);
 
+    it.each([
+        { state: 'ready', title: 'Example article' },
+        { state: 'fallback', title: 'example.com' },
+    ])('passes only the original URL to creation with a $state title', async ({ state, title }) => {
+        const DESTINATION = 'https://example.com/article?ref=workshop#demo';
+        fetchAdminWorkshopQuickLinkPreviewMock.mockResolvedValue({
+            title,
+            state,
+            message: state === 'fallback' ? 'Stránka neodpověděla.' : null,
+            isExisting: false,
+        });
+        const onCreate = vi.fn().mockResolvedValue({ id: 'created', title });
+        renderEditor(onCreate);
+        fireEvent.change(screen.getByLabelText('Odkazy, jeden na řádek'), {
+            target: { value: ` \t${DESTINATION} \t\n` },
+        });
+
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Přidat 1 materiál' }).hasAttribute('disabled')).toBe(false));
+        fireEvent.click(screen.getByRole('button', { name: 'Přidat 1 materiál' }));
+        await waitFor(() => expect(onCreate).toHaveBeenCalledOnce());
+
+        // This callback is the generation boundary, before shared tracking/link materialization.
+        expect(onCreate.mock.calls[0][0]).toMatchObject({ title, bodyMarkdown: DESTINATION });
+        expect(fetchAdminWorkshopQuickLinkPreviewMock).toHaveBeenCalledExactlyOnceWith(
+            WORKSHOP_ID, DESTINATION, expect.any(AbortSignal),
+        );
+    });
+
     it('creates separate ordinary materials in order and retries only the failed item', async () => {
+        const FIRST_DESTINATION = 'https://Example.COM:443/first(a)/%2f?filter=[one]&part=1#start';
+        const SECOND_DESTINATION = "https://example.com/second?next=%2Fguide&tag=one+two#chapter's!";
         const onCreate = vi.fn()
             .mockRejectedValueOnce(new Error('Temporary failure'))
             .mockResolvedValueOnce({ id: 'second-material', title: 'Second title' })
@@ -46,7 +76,7 @@ describe('quick link material editor', () => {
         const onClose = vi.fn();
         renderEditor(onCreate, onClose);
         fireEvent.change(screen.getByLabelText('Odkazy, jeden na řádek'), {
-            target: { value: 'https://example.com/first?part=1#start\n\nhttps://example.com/second' },
+            target: { value: `  ${FIRST_DESTINATION} \n\n\t${SECOND_DESTINATION} ` },
         });
 
         await waitFor(() => expect(screen.getByRole('button', { name: 'Přidat 2 materiály' }).hasAttribute('disabled')).toBe(false));
@@ -57,20 +87,21 @@ describe('quick link material editor', () => {
 
         expect(onCreate.mock.calls[0][0]).toMatchObject({
             title: 'First title',
-            bodyMarkdown: '[First title](<https://example.com/first?part=1#start>)',
+            bodyMarkdown: FIRST_DESTINATION,
             unlockAt: DEFAULT_UNLOCK_AT,
             sortOrder: 80,
             isPublished: true,
             isPaidMembersOnly: false,
             isFollowUp: false,
         });
-        expect(onCreate.mock.calls[1][0]).toMatchObject({ sortOrder: 90, title: 'Second title' });
+        expect(onCreate.mock.calls[1][0]).toMatchObject({ sortOrder: 90, title: 'Second title', bodyMarkdown: SECOND_DESTINATION });
         expect(onClose).not.toHaveBeenCalled();
 
         fireEvent.click(await screen.findByRole('button', { name: 'Přidat 1 materiál' }));
         await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(3));
         expect(onCreate.mock.calls[2][0].idempotencyKey).toBe(onCreate.mock.calls[0][0].idempotencyKey);
         expect(onCreate.mock.calls[2][0].sortOrder).toBe(80);
+        expect(onCreate.mock.calls[2][0].bodyMarkdown).toBe(FIRST_DESTINATION);
         expect(onCreate.mock.calls[1][0].idempotencyKey).not.toBe(onCreate.mock.calls[0][0].idempotencyKey);
         await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
     });
@@ -95,7 +126,7 @@ describe('quick link material editor', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Přidat 1 materiál' }));
         await waitFor(() => expect(onCreate).toHaveBeenCalledOnce());
         expect(onCreate.mock.calls[0][0].title).toBe('My correction');
-        expect(onCreate.mock.calls[0][0].bodyMarkdown).toContain('https://example.com/new');
+        expect(onCreate.mock.calls[0][0].bodyMarkdown).toBe('https://example.com/new');
     });
 
     it('does not create a material when the draft is closed before confirmation', async () => {

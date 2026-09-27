@@ -1,5 +1,11 @@
 # Current preversion
 
+- Quick-link materials now pass only the trimmed original pasted URL as their body to ordinary material creation,
+  preserving URL spelling, percent encoding, query strings and fragments. Scraped titles, fallback titles and title
+  corrections remain separate. The shared link extractor recognizes complete standalone URLs containing parentheses,
+  brackets or trailing punctuation, so existing tracking, preview cards and QR codes retain the full destination.
+  Previously saved content and the full Markdown editor are unchanged.
+
 - Added a compact email-only request form to the AI ta Krajta homepage. It records a dedicated podcast email-update
   source and purpose note through the existing `/api/waitlist` contact pipeline, preserves the listener's email for
   retry on failure, and confirms only after the contact write succeeds. The contacts source filter now includes every

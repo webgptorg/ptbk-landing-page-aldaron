@@ -177,7 +177,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Its content tab offers the full Markdown material editor and a quick link dialog.
   The latter previews up to twelve public HTTP(S) links through the shared safe
   scraper, then explicitly creates one ordinary material per distinct URL in input
-  order. It keeps the submitted query and fragment, uses the full editor's
+  order. Each generated body is only the trimmed original URL, with its exact spelling,
+  query and fragment; the scraped or corrected title stays separate. It uses the full editor's
   publication, unlock and access defaults, appends after the greatest actual
   material order, and retries failures with stable creation IDs. The ordinary
   material creation path still owns short links and live room refresh. Ordinary

@@ -1,5 +1,4 @@
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
-import { escapeWorkshopMarkdownLinkTitle } from '@/lib/workshops/workshopMarkdownLink';
 import type { WorkshopContentBlock } from '@/lib/workshops/workshopTypes';
 
 export const MAXIMAL_WORKSHOP_QUICK_LINK_COUNT = 12;
@@ -14,7 +13,7 @@ export type WorkshopQuickLinkInputRow = {
     readonly issue: 'invalid' | 'duplicate' | null;
 };
 
-/** Keeps the submitted query and fragment; the preview URL is only for scraping. */
+/** Validates the URL without changing its submitted spelling, query or fragment. */
 export function parseWorkshopQuickLinkDestination(value: string): string | null {
     const trimmedValue = value.trim();
     if (
@@ -26,7 +25,7 @@ export function parseWorkshopQuickLinkDestination(value: string): string | null 
         return null;
     }
 
-    return new URL(trimmedValue).toString();
+    return trimmedValue;
 }
 
 export function parseWorkshopQuickLinkInput(value: string): readonly WorkshopQuickLinkInputRow[] {
@@ -65,8 +64,4 @@ export function getWorkshopMaterialAppendSortOrders(
         : 1;
     if (maximalExistingOrder + count * step > MAXIMAL_WORKSHOP_MATERIAL_SORT_ORDER) return null;
     return Array.from({ length: count }, (_, index) => maximalExistingOrder + (index + 1) * step);
-}
-
-export function createWorkshopQuickLinkMarkdown(title: string, destination: string): string {
-    return `[${escapeWorkshopMarkdownLinkTitle(title)}](<${destination}>)`;
 }
