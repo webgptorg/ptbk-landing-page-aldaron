@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { acquireRecordingSource, getRecordingErrorMessage, releaseRecordingSource } from './recordingStudioDevices';
+import { acquireRecordingSource, getRecordingErrorMessage, getRecordingSourceReadiness, isRecordingSourceReady, releaseRecordingSource } from './recordingStudioDevices';
 import { createRecordingSourceConfiguration } from './recordingStudioSourceConfiguration';
 import type { RecordingSource } from './recordingStudioTypes';
 
 class TestTrack extends EventTarget {
     public readyState = 'live';
+    public muted = false;
     public readonly stop = vi.fn(() => { this.readyState = 'ended'; });
     public readonly label: string;
     public readonly deviceId: string;
@@ -25,8 +26,14 @@ class TestStream {
     public getAudioTracks() { return this.tracks.filter((track) => track.kind === 'audio'); }
 }
 
-function createEnvironment(getUserMedia: (constraints: MediaStreamConstraints) => Promise<MediaStream>) {
-    const mediaDevices = { getUserMedia: vi.fn(getUserMedia), getDisplayMedia: vi.fn() };
+function createEnvironment(
+    getUserMedia: (constraints: MediaStreamConstraints) => Promise<MediaStream>,
+    getDisplayMedia: (constraints: DisplayMediaStreamOptions) => Promise<MediaStream> = async () => { throw new Error('No display capture fixture was configured.'); },
+) {
+    const mediaDevices = {
+        getUserMedia: vi.fn(getUserMedia), getDisplayMedia: vi.fn(getDisplayMedia),
+        getSupportedConstraints: vi.fn(() => ({ displaySurface: true })),
+    };
     vi.stubGlobal('navigator', { mediaDevices });
     vi.stubGlobal('MediaStream', TestStream);
     return mediaDevices;
@@ -140,6 +147,32 @@ describe('recording device acquisition', () => {
         const cameraSource = await acquireRecordingSource(createRecordingSourceConfiguration('camera'), [screenSource]);
         expect(cameraSource.microphoneLabel).toBe('USB microphone');
         expect(mediaDevices.getUserMedia).toHaveBeenCalledOnce();
+    });
+
+    it('uses a supported screen-selection hint while preserving the configured label and renewed chooser boundary', async () => {
+        const selectedStream = new TestStream([new TestTrack('video', 'Window: slides.pdf', 'display')]) as unknown as MediaStream;
+        const mediaDevices = createEnvironment(async () => { throw new Error('A screen source does not use getUserMedia.'); }, async () => selectedStream);
+        const configuration = { ...createRecordingSourceConfiguration('screen', 'Presentation window'), displaySurface: 'window' as const };
+        const source = await acquireRecordingSource(configuration);
+        expect(mediaDevices.getDisplayMedia).toHaveBeenCalledOnce();
+        expect(mediaDevices.getDisplayMedia).toHaveBeenCalledWith(expect.objectContaining({
+            audio: true, video: expect.objectContaining({ displaySurface: 'window' }),
+        }));
+        expect(source.label).toBe('Presentation window');
+        expect(source.displaySourceLabel).toBe('Window: slides.pdf');
+    });
+
+    it('marks each required track as part of readiness and classifies cancelled permissions separately', () => {
+        const source = createSource('camera');
+        expect(isRecordingSourceReady(source)).toBe(true);
+        const audioTrack = source.stream.getAudioTracks()[0] as unknown as TestTrack;
+        audioTrack.muted = true;
+        expect(isRecordingSourceReady(source)).toBe(false);
+        audioTrack.muted = false;
+        audioTrack.readyState = 'ended';
+        expect(isRecordingSourceReady(source)).toBe(false);
+        expect(getRecordingSourceReadiness(new DOMException('', 'AbortError'))).toBe('needs-permission');
+        expect(getRecordingSourceReadiness(new DOMException('', 'OverconstrainedError'))).toBe('unavailable');
     });
 
     it('explains denied, absent, busy and unsupported input requests separately', () => {

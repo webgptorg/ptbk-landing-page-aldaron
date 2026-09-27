@@ -1,5 +1,29 @@
 # Current preversion
 
+- Recording source setup now has a versioned schema migration for editable labels, stable logical IDs, order, enabled
+  sources, camera/microphone preferences, sound choices and preferred display-surface hints. Settings stay local to
+  this origin and browser profile, use the existing browser-storage layer, and contain no live streams, permission
+  grants or media. A completed or stopped take no longer releases healthy source previews; the cards say `Náhled
+  aktivní` until the administrator explicitly releases devices or leaves the page. Reload restores preferences but
+  never opens a camera, microphone or display chooser. Each source reconnects from its own action, saved display
+  choices remain hints for a newly opened browser chooser, and a readiness check blocks partial or unavailable takes.
+  The owner can label/reorder sources, disable a source, retry or replace a missing device, remove one source, or
+  explicitly reset the saved setup. Screen selection cancellation retains its setup, and an unavailable selected
+  camera/microphone is never silently replaced. Older source preferences and recording-directory manifests retain
+  their existing values through migration/defaults. All 64 recording-studio unit tests passed. The 12-case browser
+  suite passed in Playwright Chromium 151.0.7922.34 and Microsoft Edge 154.0.4258.37 on Windows 10 Pro 22H2
+  (10.0.19045.7663). Chromium needed its configured fresh-context retry once: the existing synthetic A/V marker
+  check measured 161 ms against its 150 ms bound on the first attempt, then passed on retry; Edge passed all cases
+  first attempt. Both suites closed and reopened the same persistent browser profile and verified that source cards
+  returned without camera, microphone or display capture calls. The added live-preview mute/unmute readiness case
+  also passed individually in both browsers; the full unit suite remained 64/64 after that change. E2E sources and
+  the display chooser are mocked, while MediaRecorder, browser storage, codecs and export remain real, so this
+  verifies browser lifecycle and recording paths rather than physical-device behavior. The reported macOS setup and
+  its native permissions were unavailable here; the owner's exact macOS and browser versions are also unknown.
+  Screen Capture requires renewed user activation and consent for every display request, so each reconnect opens the
+  browser chooser. A saved display-surface type is only a hint and is sent only when `getSupportedConstraints()`
+  reports it.
+
 - New camera sources now default to `Kamera + mikrofon`: choose a camera and a system-default or separate microphone,
   with an explicit, enabled-by-default `Nahrávat zvuk` option. Camera and microphone are requested together and stored
   in the same camera media file; the muted preview stays separate from the captured audio. Existing source intent is

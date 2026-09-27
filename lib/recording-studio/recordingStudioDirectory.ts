@@ -9,7 +9,10 @@ const BYTE_COUNT = NONNEGATIVE_NUMBER.int().max(Number.MAX_SAFE_INTEGER);
 const SOURCE_CONFIGURATION_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string().max(200),
     cameraDeviceId: z.string(), cameraDeviceLabel: z.string().max(200).nullable(),
-    microphoneDeviceId: z.string(), microphoneDeviceLabel: z.string().max(200).nullable(), isAudioEnabled: z.boolean(),
+    microphoneDeviceId: z.string(), microphoneDeviceLabel: z.string().max(200).nullable(),
+    displaySurface: z.enum(['browser', 'window', 'monitor']).nullable().default(null),
+    displaySourceLabel: z.string().max(200).nullable().default(null),
+    isCaptureEnabled: z.boolean().default(true), isAudioEnabled: z.boolean(),
 });
 const RECORDING_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), title: z.string(), createdAt: z.string().datetime(),

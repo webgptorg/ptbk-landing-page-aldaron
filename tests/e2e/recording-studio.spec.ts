@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ZipReader, Uint8ArrayReader, Uint8ArrayWriter } from '@zip.js/zip.js';
 import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
-import { readFile } from 'node:fs/promises';
-import { platform, release } from 'node:os';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir, platform, release } from 'node:os';
+import { resolve, sep, join } from 'node:path';
 import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 import { createAdminSessionValueOrNull } from '@/lib/admin/adminSession';
 import type { RecordingArchiveManifest } from '@/lib/recording-studio/recordingStudioTypes';
@@ -20,11 +21,12 @@ async function openStudio(page: Page, baseURL: string | undefined) {
         // Only replace physical devices/the permission picker. Recording, storage, codecs and ZIP are real.
         const streams: MediaStream[] = [];
         const mediaRequests: MediaStreamConstraints[] = [];
-        const testSettings = { cameraAudioErrorName: null as string | null };
+        const displayRequests: DisplayMediaStreamOptions[] = [];
+        const testSettings = { cameraAudioErrorName: null as string | null, displayErrorName: null as string | null };
         const markerPeriodMilliseconds = 700;
         const markerDurationSeconds = 0.24;
         const markerTimeOrigin = performance.now();
-        Object.assign(window, { studioTestStreams: streams, studioTestMediaRequests: mediaRequests, studioTestSettings: testSettings });
+        Object.assign(window, { studioTestStreams: streams, studioTestMediaRequests: mediaRequests, studioTestDisplayRequests: displayRequests, studioTestSettings: testSettings });
         const createStream = async (isVideo: boolean, isAudio: boolean) => {
             const stream = new MediaStream();
             if (isVideo) {
@@ -76,7 +78,11 @@ async function openStudio(page: Page, baseURL: string | undefined) {
                 }
                 return createStream(Boolean(constraints.video), Boolean(constraints.audio));
             } },
-            getDisplayMedia: { value: () => createStream(true, true) },
+            getDisplayMedia: { value: (options: DisplayMediaStreamOptions = {}) => {
+                displayRequests.push(options);
+                if (testSettings.displayErrorName) return Promise.reject(new DOMException('Synthetic display capture cancellation', testSettings.displayErrorName));
+                return createStream(true, options.audio !== false);
+            } },
             enumerateDevices: { value: () => Promise.resolve([]) },
         });
         Object.defineProperty(window, 'showSaveFilePicker', { value: undefined, configurable: true });
@@ -86,9 +92,11 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
     // Complete the unrelated cookie choice so a moving bottom panel cannot intercept studio controls.
     const cookiePanel = page.getByRole('region', { name: 'Cookies', exact: true });
-    await cookiePanel.getByRole('button').first().click();
-    await page.getByRole('dialog').getByRole('button', { name: /Uložit nastavení|Save settings/ }).click();
-    await expect(cookiePanel).toHaveCount(0);
+    if (await cookiePanel.count()) {
+        await cookiePanel.getByRole('button').first().click();
+        await page.getByRole('dialog').getByRole('button', { name: /Uložit nastavení|Save settings/ }).click();
+        await expect(cookiePanel).toHaveCount(0);
+    }
 }
 
 async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone', isAudioEnabled = true) {
@@ -218,7 +226,7 @@ test('records separate sources, restores them, trims every track and exports pla
     expect(mediaRequests.filter((request) => Boolean(request.audio))).toHaveLength(1);
     expect(mediaRequests[0].audio).toEqual({});
     expect(mediaRequests[1].audio).toBe(false);
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:04');
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
     await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
@@ -303,6 +311,144 @@ test('records separate sources, restores them, trims every track and exports pla
     expect(errors).toEqual([]);
 });
 
+test('keeps a multi-source setup through stops, release, and reload without restoring capture', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await addSource(page, 'microphone');
+    await addSource(page, 'screen');
+    await expect(page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByText('Náhled aktivní', { exact: true })).toHaveCount(3);
+    expect(await page.evaluate(() => (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests)).toHaveLength(1);
+
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByText('Náhled aktivní', { exact: true })).toHaveCount(3);
+    await expect(page.getByRole('button', { name: 'Odebrat zdroj', exact: true })).toHaveCount(3);
+
+    await page.getByRole('button', { name: 'Uvolnit všechna zařízení', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Připojit', exact: true })).toHaveCount(3);
+    await expect.poll(() => page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams.every((stream) => stream.getTracks().every((track) => track.readyState === 'ended')))).toBe(true);
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Připojit', exact: true })).toHaveCount(3);
+    expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[]; studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestMediaRequests.length + (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests.length)).toBe(0);
+
+    await page.getByRole('button', { name: 'Resetovat nastavení zdrojů', exact: true }).click();
+    await page.getByRole('button', { name: 'Resetovat zdroje', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Odebrat zdroj', exact: true })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Odebrat zdroj', exact: true })).toHaveCount(0);
+});
+
+test('blocks Start when a live camera preview loses its required microphone input', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    const startButton = page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true });
+    await expect(startButton).toBeEnabled();
+    await page.evaluate(() => {
+        const audioTrack = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[0].getAudioTracks()[0];
+        Object.defineProperty(audioTrack, 'muted', { configurable: true, value: true });
+        audioTrack.dispatchEvent(new Event('mute'));
+    });
+    await expect(startButton).toBeDisabled();
+    await expect(page.getByRole('alert').filter({ hasText: 'dočasně neposílá zvuk' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zkusit znovu', exact: true })).toBeVisible();
+    await page.evaluate(() => {
+        const audioTrack = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[0].getAudioTracks()[0];
+        Object.defineProperty(audioTrack, 'muted', { configurable: true, value: false });
+        audioTrack.dispatchEvent(new Event('unmute'));
+    });
+    await expect(startButton).toBeEnabled();
+});
+
+test('restores source preferences after closing and reopening the same browser profile', async ({ browser, baseURL }, testInfo) => {
+    test.skip(!process.env.ADMIN_PASSWORD, 'Needs the local test server admin password.');
+    const temporaryRoot = resolve(tmpdir());
+    const profileDirectory = await mkdtemp(join(temporaryRoot, 'promptbook-recording-studio-profile-'));
+    const resolvedProfileDirectory = resolve(profileDirectory);
+    if (!resolvedProfileDirectory.startsWith(`${temporaryRoot}${sep}`)) {
+        throw new Error('The temporary browser profile is outside the system temporary directory.');
+    }
+    const launchProfile = () => browser.browserType().launchPersistentContext(resolvedProfileDirectory, {
+        channel: process.env.E2E_BROWSER_CHANNEL || undefined,
+        headless: true,
+        recordVideo: { dir: testInfo.outputPath('profile-visits') },
+    });
+    let context: Awaited<ReturnType<typeof launchProfile>> | null = null;
+
+    try {
+        context = await launchProfile();
+        let page = await context.newPage();
+        await openStudio(page, baseURL);
+        await addSource(page, 'camera');
+        await addSource(page, 'microphone');
+        await addSource(page, 'screen');
+        const savedSourceIds = await page.evaluate(() => JSON.parse(localStorage.getItem('promptbook.recording-studio.source-configurations') ?? 'null') as {
+            configurations: { id: string; kind: string; isAudioEnabled: boolean; isCaptureEnabled: boolean }[];
+        });
+        expect(savedSourceIds.configurations.map(({ kind }) => kind)).toEqual(['camera', 'microphone', 'screen']);
+        expect(savedSourceIds.configurations.every(({ isCaptureEnabled }) => isCaptureEnabled)).toBe(true);
+        expect(savedSourceIds.configurations[0].isAudioEnabled).toBe(true);
+        await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+        await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+        await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+        await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+        await context.close();
+        context = null;
+
+        context = await launchProfile();
+        page = await context.newPage();
+        await openStudio(page, baseURL);
+        await expect(page.getByRole('button', { name: 'Připojit', exact: true })).toHaveCount(3);
+        expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[]; studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestMediaRequests.length + (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests.length)).toBe(0);
+        const restoredConfigurations = await page.evaluate(() => JSON.parse(localStorage.getItem('promptbook.recording-studio.source-configurations') ?? 'null') as {
+            configurations: { id: string; kind: string; isAudioEnabled: boolean; isCaptureEnabled: boolean }[];
+        });
+        expect(restoredConfigurations.configurations).toEqual(savedSourceIds.configurations);
+        await expect(page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true })).toBeDisabled();
+    } finally {
+        await context?.close();
+        await rm(resolvedProfileDirectory, { recursive: true, force: true });
+    }
+});
+
+test('retains a cancelled display-selection intent and retries it only from a new user action', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { displayErrorName: string | null } }).studioTestSettings.displayErrorName = 'AbortError';
+    });
+    await page.getByRole('button', { name: 'Přidat zdroj', exact: true }).click();
+    await page.getByLabel('Název zdroje').fill('Presentation window');
+    await page.getByRole('combobox', { name: 'Typ zdroje' }).selectOption('screen');
+    await page.getByLabel('Preferovaný typ sdílené plochy').selectOption('window');
+    await page.getByRole('button', { name: 'Připojit zdroj', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('Výběr sdílené plochy byl zrušen');
+    const savedConfiguration = await page.evaluate(() => JSON.parse(localStorage.getItem('promptbook.recording-studio.source-configurations') ?? 'null') as {
+        configurations: { id: string; kind: string; label: string; displaySurface: string | null; isCaptureEnabled: boolean }[];
+    });
+    expect(savedConfiguration.configurations[0]).toMatchObject({
+        id: expect.any(String), kind: 'screen', label: 'Presentation window', displaySurface: 'window', isCaptureEnabled: true,
+    });
+    expect(await page.evaluate(() => (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests)).toHaveLength(1);
+
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { displayErrorName: string | null } }).studioTestSettings.displayErrorName = null;
+    });
+    await page.getByRole('button', { name: 'Zkusit znovu', exact: true }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByText('Presentation window', { exact: true })).toBeVisible();
+    const displayRequests = await page.evaluate(() => (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests);
+    expect(displayRequests).toHaveLength(2);
+    expect(displayRequests.every((request) => request.audio === true)).toBe(true);
+    const displaySurfaceHintSupport = await page.evaluate(() => navigator.mediaDevices.getSupportedConstraints().displaySurface === true);
+    if (displaySurfaceHintSupport) expect((displayRequests[1].video as MediaTrackConstraints).displaySurface).toBe('window');
+});
+
 test('retains a failed camera-plus-microphone request and lets the owner explicitly retry without sound', async ({ page, baseURL }) => {
     await openStudio(page, baseURL);
     await page.evaluate(() => {
@@ -345,7 +491,7 @@ test('stops the whole take on disconnect and prevents a second tab from changing
     await openStudio(page, baseURL);
     await addSource(page, 'camera');
     await addSource(page, 'screen');
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
     const secondPage = await page.context().newPage();
     await secondPage.goto('/admin/recording-studio');
@@ -365,7 +511,7 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await openStudio(page, baseURL);
     await addSource(page, 'camera');
     await addSource(page, 'screen');
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:03');
     const dialogPromise = page.waitForEvent('dialog');
     const reload = page.evaluate(() => window.location.reload());
@@ -376,7 +522,7 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
     await connectPendingSources(page);
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
     await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/recording-studio$/);
@@ -402,7 +548,7 @@ test('explains constant 10 GiB estimates while committed multi-source bytes and 
     await page.getByRole('button', { name: 'Požádat o trvalé úložiště' }).click();
     await expect(panel).toContainText('Prohlížeč žádost o trvalé úložiště zamítl.');
     await addSource(page, 'camera'); await addSource(page, 'screen'); await addSource(page, 'microphone');
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
     await expect(page.getByTestId('recording-bitrate')).toContainText('/s');
     const measuredBefore = await page.getByTestId('recording-committed-bytes').innerText();
@@ -424,7 +570,7 @@ test('records with missing estimate and persistence APIs and downloads individua
     await openStudio(page, baseURL);
     await expect(page.getByRole('region', { name: 'Úložiště záznamu' })).toContainText('Prohlížeč neposkytl aktuální odhad.');
     await addSource(page, 'camera');
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
     await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
@@ -446,7 +592,7 @@ test('commits folder chunks without IndexedDB media, reloads and imports its che
     await page.getByRole('button', { name: 'Vybrat složku pro nahrávání' }).click();
     await expect(page.getByRole('region', { name: 'Úložiště záznamu' })).toContainText('Složka studio-directory-test');
     await addSource(page, 'camera'); await addSource(page, 'screen'); await addSource(page, 'microphone');
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByTestId('recording-committed-bytes')).not.toHaveText('0 B');
     // Origin metadata is a cache for this backend: it must not roll back closed directory checkpoints.
     await page.evaluate(() => {
@@ -532,7 +678,7 @@ test('commits folder chunks without IndexedDB media, reloads and imports its che
 test('keeps committed multi-source data after a real IndexedDB transaction abort and offers recovery', async ({ page, baseURL }) => {
     await openStudio(page, baseURL);
     await addSource(page, 'camera'); await addSource(page, 'screen');
-    await page.getByRole('button', { name: 'Nahrávat všechny zdroje', exact: true }).click();
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByTestId('recording-bitrate')).toContainText('/s');
     await page.evaluate(() => {
         const originalAdd = IDBObjectStore.prototype.add;

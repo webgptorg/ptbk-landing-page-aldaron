@@ -29,6 +29,7 @@ function makeSource(id: string, isAudioIncluded = false): RecordingSource {
     return {
         id, kind: 'camera', label: id, cameraDeviceId: '', cameraDeviceLabel: null,
         microphoneDeviceId: isAudioIncluded ? 'fixture-mic' : '', microphoneDeviceLabel: isAudioIncluded ? 'Fixture microphone' : null,
+        displaySurface: null, displaySourceLabel: null, isCaptureEnabled: true,
         isAudioEnabled: isAudioIncluded, microphoneLabel: isAudioIncluded ? 'Fixture microphone' : null,
         stream: { getVideoTracks: () => [videoTrack], getAudioTracks: () => audioTracks, getTracks: () => [videoTrack, ...audioTracks] } as unknown as MediaStream,
     };

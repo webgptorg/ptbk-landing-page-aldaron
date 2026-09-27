@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-    createRecordingSourceConfiguration, loadRecordingSourceConfigurations, normalizeRecordingSourceConfigurations,
-    RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY, saveRecordingSourceConfigurations,
+    clearRecordingSourceConfigurations, createRecordingSourceConfiguration, loadRecordingSourceConfigurations, normalizeRecordingSourceConfigurations,
+    RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY, RECORDING_SOURCE_CONFIGURATION_VERSION, saveRecordingSourceConfigurations,
 } from './recordingStudioSourceConfiguration';
 
 describe('recording source preferences', () => {
@@ -11,6 +11,7 @@ describe('recording source preferences', () => {
         expect(createRecordingSourceConfiguration('camera').isAudioEnabled).toBe(true);
         expect(createRecordingSourceConfiguration('microphone').isAudioEnabled).toBe(true);
         expect(createRecordingSourceConfiguration('screen').isAudioEnabled).toBe(true);
+        expect(createRecordingSourceConfiguration('screen').isCaptureEnabled).toBe(true);
     });
 
     it('keeps a prior explicit silent-camera choice silent when migrating older saved configurations', () => {
@@ -30,20 +31,41 @@ describe('recording source preferences', () => {
         vi.stubGlobal('window', { localStorage: {
             getItem: (key: string) => storage.get(key) ?? null,
             setItem: (key: string, value: string) => storage.set(key, value),
+            removeItem: (key: string) => storage.delete(key),
         } });
         const configuration = {
-            ...createRecordingSourceConfiguration('camera'),
+            ...createRecordingSourceConfiguration('camera', 'Desk camera with sound'),
             cameraDeviceId: 'camera-device', cameraDeviceLabel: 'Desk camera',
             microphoneDeviceId: 'microphone-device', microphoneDeviceLabel: 'USB microphone',
         };
         saveRecordingSourceConfigurations([configuration]);
-        expect(JSON.parse(storage.get(RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY)!)).toEqual({ schemaVersion: 1, configurations: [configuration] });
+        expect(JSON.parse(storage.get(RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY)!)).toEqual({ schemaVersion: RECORDING_SOURCE_CONFIGURATION_VERSION, configurations: [configuration] });
         expect(loadRecordingSourceConfigurations()).toEqual([configuration]);
+        clearRecordingSourceConfigurations();
+        expect(storage.has(RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY)).toBe(false);
+    });
+
+    it('migrates earlier preferences and preserves screen intent without restoring permission', () => {
+        const storage = new Map<string, string>();
+        vi.stubGlobal('window', { localStorage: {
+            getItem: (key: string) => storage.get(key) ?? null,
+            setItem: (key: string, value: string) => storage.set(key, value),
+            removeItem: (key: string) => storage.delete(key),
+        } });
+        const oldConfiguration = {
+            id: 'screen-source', kind: 'screen', label: 'Window: presentation.pdf', cameraDeviceId: '', cameraDeviceLabel: null,
+            microphoneDeviceId: '', microphoneDeviceLabel: null, isAudioEnabled: true,
+        };
+        storage.set(RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY, JSON.stringify({ schemaVersion: 1, configurations: [oldConfiguration] }));
+        expect(loadRecordingSourceConfigurations()).toEqual([{
+            ...oldConfiguration, displaySurface: null, displaySourceLabel: 'Window: presentation.pdf', isCaptureEnabled: true,
+        }]);
+        expect((JSON.parse(storage.get(RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY)!) as { schemaVersion: number }).schemaVersion).toBe(RECORDING_SOURCE_CONFIGURATION_VERSION);
     });
 
     it('ignores malformed entries, duplicate source IDs, corrupted JSON, and unsupported versions', () => {
         const configurations = normalizeRecordingSourceConfigurations({
-            schemaVersion: 1,
+            schemaVersion: RECORDING_SOURCE_CONFIGURATION_VERSION,
             configurations: [
                 { ...createRecordingSourceConfiguration('camera'), isAudioEnabled: false },
                 { ...createRecordingSourceConfiguration('camera'), id: 'bad-id', microphoneDeviceId: 3 },

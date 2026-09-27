@@ -205,10 +205,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   choice. The live camera preview is muted, while a track-presence indicator and live level
   meter describe the captured microphone. Standalone microphone and screen sources remain
   available, and an already configured matching microphone is cloned without transferring
-  ownership or adding a second audio track to the camera file. Versioned browser-local source
-  preferences survive recording stops and reloads; restoration never starts capture or requests
-  permission by itself. One capture coordinator starts and stops sources on a shared clock; losing
-  a required source or a storage write stops the take.
+  ownership or adding a second audio track to the camera file. Versioned, serializable browser-local source
+  preferences retain stable IDs, editable labels, order, enabled state, selected device IDs and screen-surface
+  intent; they contain no permission grants or live media and stay within the authenticated page's origin/profile.
+  Stop finalizes only the recording session, leaving authorized previews visibly active until the administrator
+  releases them or leaves the page. Reload restores source cards without capture; each camera/microphone is
+  deliberately reconnected, and each display source opens the browser chooser again. Readiness must be checked
+  before Start and follows required microphone mute/unmute events; cancellation or a missing device keeps its source
+  configuration and never substitutes another device silently. One capture coordinator starts and stops sources on a
+  shared clock; losing a required source or a storage write stops the take.
   IndexedDB commits each chunk together with its counters; a feature-detected selected-directory destination
   closes immutable media fragments before its small authoritative checkpoint and stores only handles/metadata in
   IndexedDB. Recovery can reconnect or import that folder without moving its media into origin storage; read-only

@@ -8,6 +8,8 @@ export const RECORDING_DIRECTORY_CHUNK_MILLISECONDS = 5_000;
 export const RECORDING_STUDIO_LOCK = 'promptbook-recording-studio';
 
 export type RecordingSourceKind = 'camera' | 'screen' | 'microphone';
+export type RecordingDisplaySurface = 'browser' | 'window' | 'monitor';
+export type RecordingSourceReadiness = 'ready' | 'needs-permission' | 'disconnected' | 'unavailable';
 
 /** Browser-local, serializable source intent. It never contains permission or live media state. */
 export type RecordingSourceConfiguration = {
@@ -18,6 +20,9 @@ export type RecordingSourceConfiguration = {
     readonly cameraDeviceLabel: string | null;
     readonly microphoneDeviceId: string;
     readonly microphoneDeviceLabel: string | null;
+    readonly displaySurface: RecordingDisplaySurface | null;
+    readonly displaySourceLabel: string | null;
+    readonly isCaptureEnabled: boolean;
     readonly isAudioEnabled: boolean;
 };
 

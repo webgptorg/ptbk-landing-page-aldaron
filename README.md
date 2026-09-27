@@ -41,9 +41,22 @@ This is a production Next.js application, not a collection of static marketing p
 ## Local recording studio
 
 `/admin/recording-studio` uses the existing admin login. Add each camera or screen share separately; a microphone
-can be added as its own audio file. Camera previews are muted, cameras capture video only, and screen audio is
-included when the browser's share picker supplies it. All sources start and stop in the same JavaScript turn.
-This is software synchronization, not hardware genlock; the editor's manifest records measured start-call offsets.
+can be added as its own audio file. A new camera records the selected microphone in the same video file by default;
+turn off **Nahrávat zvuk** for an intentional silent camera. Camera previews are muted. Screen audio is requested
+when enabled, but the browser and operating system may not provide an audio track for the chosen surface. All
+sources start and stop in the same JavaScript turn. This is software synchronization, not hardware genlock; the
+editor's manifest records measured start-call offsets.
+
+The studio keeps versioned source preferences in this origin's browser profile: source IDs, labels, order, enabled
+state, selected camera/microphone, and audio choices. They are not sent to an API. No stream, media, or permission
+grant is saved by the app; the browser controls whether camera/microphone access needs another prompt. Stopping a take
+finalizes only that recording; an authorized preview may remain active and is marked
+**Náhled aktivní** until **Uvolnit všechna zařízení** or page teardown. On a later visit, the cards return without
+opening devices. Reconnect each camera or microphone deliberately; an unavailable exact device stays selected
+until you choose a replacement. Each display source needs a fresh browser chooser from its own **Připojit** action.
+Its remembered surface type and label only help with reselection. The [Screen Capture specification](https://www.w3.org/TR/screen-capture/)
+requires renewed user consent for display capture; the browser may treat a supported surface type as a hint and may
+ignore it. See also [MDN's current `getDisplayMedia()` reference](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia).
 
 Recordings default to IndexedDB in the same browser profile, device, and site origin. Where `showDirectoryPicker`
 is available, **Vybrat složku pro nahrávání** records directly to a user-selected filesystem directory instead.

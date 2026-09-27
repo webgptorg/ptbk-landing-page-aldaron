@@ -1,9 +1,32 @@
-import type { RecordingSource, RecordingSourceConfiguration } from './recordingStudioTypes';
+import type { RecordingSource, RecordingSourceConfiguration, RecordingSourceReadiness } from './recordingStudioTypes';
 
 const VIDEO_CAPTURE_CONSTRAINTS: MediaTrackConstraints = { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } };
 
 export function releaseRecordingSource(source: RecordingSource): void {
     source.stream.getTracks().forEach((track) => track.stop());
+}
+
+export function isRecordingSourceReady(source: RecordingSource): boolean {
+    const isVideoRequired = source.kind !== 'microphone';
+    const isAudioRequired = source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled);
+    const isVideoReady = !isVideoRequired || source.stream.getVideoTracks().some((track) => track.readyState === 'live');
+    const audioTrack = source.stream.getAudioTracks().find((track) => track.readyState === 'live');
+    const isAudioReady = !isAudioRequired || Boolean(audioTrack && !audioTrack.muted);
+    return isVideoReady && isAudioReady;
+}
+
+export function matchesRecordingSourceConfiguration(source: RecordingSource, configuration: RecordingSourceConfiguration): boolean {
+    return source.id === configuration.id && source.kind === configuration.kind &&
+        source.cameraDeviceId === configuration.cameraDeviceId && source.microphoneDeviceId === configuration.microphoneDeviceId &&
+        source.displaySurface === configuration.displaySurface && source.isCaptureEnabled === configuration.isCaptureEnabled &&
+        source.isAudioEnabled === configuration.isAudioEnabled;
+}
+
+export function getRecordingSourceReadiness(error: unknown): RecordingSourceReadiness {
+    if (error instanceof DOMException && (error.name === 'NotAllowedError' || error.name === 'AbortError' || error.name === 'InvalidStateError')) {
+        return 'needs-permission';
+    }
+    return 'unavailable';
 }
 
 function selectedDeviceConstraints(deviceId: string): MediaTrackConstraints {
@@ -45,7 +68,12 @@ export async function acquireRecordingSource(
 
     try {
         if (configuration.kind === 'screen') {
-            stream = await navigator.mediaDevices.getDisplayMedia({ video: VIDEO_CAPTURE_CONSTRAINTS, audio: true });
+            const isDisplaySurfaceHintSupported = navigator.mediaDevices.getSupportedConstraints?.().displaySurface === true;
+            const videoConstraints = {
+                ...VIDEO_CAPTURE_CONSTRAINTS,
+                ...(configuration.displaySurface && isDisplaySurfaceHintSupported ? { displaySurface: configuration.displaySurface } : {}),
+            } as MediaTrackConstraints;
+            stream = await navigator.mediaDevices.getDisplayMedia({ video: videoConstraints, audio: configuration.isAudioEnabled });
             acquiredStream = stream;
         } else if (configuration.kind === 'microphone') {
             const reusableTrack = findReusableMicrophone(configuration, existingSources);
@@ -100,9 +128,9 @@ export async function acquireRecordingSource(
 
         const actualConfiguration: RecordingSourceConfiguration = {
             ...configuration,
-            label: videoTrack?.label || audioTrack?.label || configuration.label,
-            cameraDeviceLabel: videoTrack?.label || configuration.cameraDeviceLabel,
+            cameraDeviceLabel: configuration.kind === 'camera' ? videoTrack?.label || configuration.cameraDeviceLabel : configuration.cameraDeviceLabel,
             microphoneDeviceLabel: audioTrack?.label || microphoneLabel || configuration.microphoneDeviceLabel,
+            displaySourceLabel: configuration.kind === 'screen' ? videoTrack?.label || configuration.displaySourceLabel : configuration.displaySourceLabel,
         };
         return { ...actualConfiguration, stream, microphoneLabel: audioTrack ? microphoneLabel || audioTrack.label || 'Výchozí mikrofon' : null };
     } catch (error) {
@@ -114,6 +142,7 @@ export async function acquireRecordingSource(
 export function getRecordingErrorMessage(error: unknown, configuration?: RecordingSourceConfiguration): string {
     if (error instanceof DOMException) {
         if (error.name === 'NotAllowedError') {
+            if (configuration?.kind === 'screen') return 'Sdílení obrazovky nebylo povoleno nebo byl výběr zrušen. Nastavení i původní název zůstaly uložené; vyberte sdílenou plochu znovu.';
             return configuration?.kind === 'camera' && configuration.isAudioEnabled
                 ? 'Prohlížeč nebo systém zamítl přístup ke kameře či mikrofonu. Povolte oba zdroje v nastavení webu/systému a zkuste to znovu; zvuk lze také výslovně vypnout.'
                 : 'Prohlížeč nebo systém zamítl přístup k zařízení. Povolte jej v nastavení webu a zkuste to znovu.';
@@ -133,7 +162,9 @@ export function getRecordingErrorMessage(error: unknown, configuration?: Recordi
                 ? 'Vybraná kamera nebo mikrofon už nejsou dostupné. Obnovte seznam zařízení, vyberte jiné a zkuste to znovu.'
                 : 'Prohlížeč nepodporuje požadované nastavení zařízení. Vyberte jiné zařízení nebo upravte nastavení.';
         }
-        if (error.name === 'AbortError') return 'Zahájení snímání bylo přerušeno. Připojte zařízení znovu a zkuste to znovu.';
+        if (error.name === 'AbortError') return configuration?.kind === 'screen'
+            ? 'Výběr sdílené plochy byl zrušen. Nastavení zůstalo uložené a můžete jej vybrat znovu.'
+            : 'Zahájení snímání bylo přerušeno. Připojte zařízení znovu a zkuste to znovu.';
         if (error.name === 'SecurityError') return 'Prohlížeč z bezpečnostních důvodů zablokoval snímání. Otevřete studio přes HTTPS a zkontrolujte oprávnění webu.';
         if (error.name === 'QuotaExceededError') return 'Úložiště prohlížeče je plné. Uložené části záznamu zůstávají dostupné.';
     }
