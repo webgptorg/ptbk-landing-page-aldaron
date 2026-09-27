@@ -25,7 +25,7 @@ const SCROLLED_OFFSET_IN_PIXELS = 24;
  *       the product, and its main button plays a recording instead of opening a form.
  */
 export function AiTaKrajtaHeader() {
-    const { newestPlayableEpisode, playingEpisode, viewState, playEpisode, setIsPlaying, isPlaybackProgressRestored } = useAiTaKrajtaPageState();
+    const { newestPlayableEpisode, playingEpisode, viewState, playEpisode, setIsPlaying } = useAiTaKrajtaPageState();
     const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
@@ -100,7 +100,7 @@ export function AiTaKrajtaHeader() {
                     <button
                         type="button"
                         onClick={handleListenClick}
-                        disabled={!isPlaybackProgressRestored || newestPlayableEpisode === null}
+                        disabled={newestPlayableEpisode === null}
                         className="inline-flex h-10 items-center gap-2 rounded-full bg-[#ff6b6b] px-4 text-sm font-semibold text-[#1a201c] transition-transform hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                     >
                         {isNewestEpisodePlaying ? (

@@ -5,6 +5,7 @@ import {
     AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE,
     createAiTaKrajtaMarkGradientId,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
+import { createAiTaKrajtaSnakeBodySlices } from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeBody';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
@@ -107,6 +108,19 @@ function createMarkMarkup(): string {
 }
 
 /**
+ * The living animal standing in the pose of the logo, drawn with the strokes the game draws it with
+ */
+function createRestingSnakeMarkup(): string {
+    return createAiTaKrajtaSnakeBodySlices(AI_TA_KRAJTA_MARK_BODY, 1, 0)
+        .map(
+            (slice) =>
+                `<path d="M${slice.from.x} ${slice.from.y}L${slice.to.x} ${slice.to.y}" stroke="${slice.color}"` +
+                ` stroke-width="${slice.strokeWidth}" stroke-linecap="round" fill="none"/>`,
+        )
+        .join('');
+}
+
+/**
  * How far a rendered picture is from the cover, over every pixel outside the white corners of the cover
  */
 function measureAgainstCover(
@@ -151,6 +165,16 @@ describe('AI ta Krajta mark artwork', () => {
         //       animal at this size and which no rendering of a curve can avoid.
         expect(meanColorDistance).toBeLessThan(4);
         expect(silhouetteOverlap).toBeGreaterThan(0.96);
+    });
+
+    it('measures the animal so that it rests in the shape it is drawn in', async () => {
+        const mark = await drawOnCoverBackground(createMarkMarkup());
+        const restingSnake = await drawOnCoverBackground(createRestingSnakeMarkup());
+        const { silhouetteOverlap } = measureAgainstCover(mark, restingSnake);
+
+        // Note: A body of one thickness cannot hold the widest part of the drawn coil and the wedge of its tail at
+        //       once. What it misses is a thin rim, which is why the logo can be faded into it without a jump.
+        expect(silhouetteOverlap).toBeGreaterThan(0.87);
     });
 
     it('knows where the animal sits inside its view box', () => {

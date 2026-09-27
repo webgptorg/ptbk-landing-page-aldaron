@@ -1,7 +1,6 @@
 import {
     AI_TA_KRAJTA_MARK_SHAPES,
-    getAiTaKrajtaMarkFrameScale,
-    placeAiTaKrajtaMarkPointInFrame,
+    AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE,
     type AiTaKrajtaMarkFrame,
     type AiTaKrajtaMarkGradient,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
@@ -26,7 +25,7 @@ function createAiTaKrajtaMarkCanvasGradient(
  * Draws the canonical vector mark into a canvas at its original proportions
  *
  * Note: This is a renderer for the same artwork data used by the React SVG and the favicon SVG. Keeping the data
- *       shared also makes offscreen artwork comparisons independent of the moving SVG renderer.
+ *       shared lets the canvas hold the exact logo while the game takes it over.
  */
 export function drawAiTaKrajtaMarkOnCanvas(
     context: CanvasRenderingContext2D,
@@ -39,10 +38,8 @@ export function drawAiTaKrajtaMarkOnCanvas(
 
     context.save();
     context.globalAlpha = opacity;
-    const origin = placeAiTaKrajtaMarkPointInFrame({ x: 0, y: 0 }, frame);
-    const scale = getAiTaKrajtaMarkFrameScale(frame);
-    context.translate(origin.x, origin.y);
-    context.scale(scale, scale);
+    context.translate(frame.left, frame.top);
+    context.scale(frame.width / AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE, frame.height / AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE);
 
     for (const shape of AI_TA_KRAJTA_MARK_SHAPES) {
         context.fillStyle = createAiTaKrajtaMarkCanvasGradient(context, shape.gradient);

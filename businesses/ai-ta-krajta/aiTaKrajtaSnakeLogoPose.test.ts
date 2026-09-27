@@ -1,6 +1,5 @@
 import {
     AI_TA_KRAJTA_MARK_BODY,
-    getAiTaKrajtaMarkPointFromFrame,
     placeAiTaKrajtaMarkPointInFrame,
     type AiTaKrajtaMarkFrame,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
@@ -45,23 +44,5 @@ describe('AI ta Krajta snake logo pose', () => {
         expect(state.trail).toEqual(pose.trail);
         expect(state.segmentCount).toBe(pose.segmentCount);
         expect(state.score).toBe(0);
-    });
-
-    it('uses the SVG centered aspect-ratio fit instead of stretching a non-square frame', () => {
-        const pose = createAiTaKrajtaSnakeLogoPose({ left: 7, top: 11, width: 256, height: 128 });
-        expect(pose.headPosition.x).toBeCloseTo(7 + 64 + AI_TA_KRAJTA_MARK_BODY[0].x, 9);
-        expect(pose.headPosition.y).toBeCloseTo(11 + AI_TA_KRAJTA_MARK_BODY[0].y, 9);
-        expect(pose.trail).toHaveLength(AI_TA_KRAJTA_MARK_BODY.length);
-    });
-
-    it.each([
-        { left: 7.25, top: 11.5, width: 207.75, height: 128.5 },
-        { left: 23.125, top: -5.5, width: 153.25, height: 201.75 },
-    ])('round-trips the original body through a fractional SVG frame: %o', (frame) => {
-        for (const point of AI_TA_KRAJTA_MARK_BODY) {
-            const restored = getAiTaKrajtaMarkPointFromFrame(placeAiTaKrajtaMarkPointInFrame(point, frame), frame);
-            expect(restored.x).toBeCloseTo(point.x, 10);
-            expect(restored.y).toBeCloseTo(point.y, 10);
-        }
     });
 });

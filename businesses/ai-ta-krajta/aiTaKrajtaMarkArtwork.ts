@@ -42,9 +42,6 @@ export type AiTaKrajtaMarkShape = {
     readonly id: string;
     readonly pathData: string;
     readonly gradient: AiTaKrajtaMarkGradient;
-
-    /** The run of the measured centre line belonging to this layer, including its overlap with the next layer. */
-    readonly bodyPointRange: readonly [number, number];
 };
 
 /**
@@ -59,7 +56,6 @@ export const AI_TA_KRAJTA_MARK_SHAPES: readonly AiTaKrajtaMarkShape[] = [
     {
         // The tail, which slides out to the right from under the coil
         id: 'tail',
-        bodyPointRange: [55, 79],
         pathData:
             'M77.21 85.28C83.27 87.09 88.69 90.53 94.29 93.34C95.86 94.12 97.46 94.91 98.99 95.78C99.73 96.2 100.52 96.48 101.06 97.14C101.06 97.8 100.96 98.31 100.63 98.89C99.65 99.28 98.49 99.2 97.42 99.27C94.62 99.47 91.83 99.78 89.03 99.98C85.9 100.21 82.78 100.61 79.64 100.84C72.4 101.35 65.01 101.12 57.74 101.12C54.46 101.12 51.2 101.5 47.93 101.26C46.59 101.17 44.96 101.36 43.91 100.46C44.46 98.71 47.12 99.13 48.64 99.13C53.18 99.13 58.04 98.87 62.5 97.92C64.88 97.41 67.24 96.89 69.55 96.06C71.17 95.49 72.59 95.01 73.56 93.48C74.54 91.95 75.08 90.22 75.58 88.49C75.91 87.34 76.01 86.17 76.91 85.35C77.01 85.33 77.11 85.3 77.21 85.28Z',
         gradient: {
@@ -76,7 +72,6 @@ export const AI_TA_KRAJTA_MARK_SHAPES: readonly AiTaKrajtaMarkShape[] = [
     {
         // The far side of the coil, which the rest of the body then lies over
         id: 'coil',
-        bodyPointRange: [35, 66],
         pathData:
             'M63.68 79.92C63.3 82.6 59.78 84.34 57.46 85.16C53.06 86.74 48.65 87.7 43.98 88.03C42.24 88.16 39.63 88.67 37.96 88.06C37.25 87.81 36.82 87.11 36.17 86.76C34.29 87.08 32.23 87.82 30.42 88.46C29.41 88.82 28.32 89.27 27.27 89.16C25.06 84.96 29 80.06 32.14 77.59C32.93 76.97 33.82 76.59 34.7 76.15C35.76 75.62 36.96 74.85 38.12 74.61C44.64 73.21 51.34 74.88 57.46 77.06C58.8 77.54 60.12 78.15 61.44 78.71C62.27 79.07 63.07 79.28 63.68 79.92Z',
         gradient: {
@@ -94,7 +89,6 @@ export const AI_TA_KRAJTA_MARK_SHAPES: readonly AiTaKrajtaMarkShape[] = [
     {
         // The head, the neck and the near side of the coil, in one stroke of the drawing
         id: 'body',
-        bodyPointRange: [0, 50],
         pathData:
             'M75.76 43.38C75.33 44.6 75.84 45.98 76.11 47.22C76.69 49.93 77.17 52.84 77.37 55.61C78.04 65.07 78.93 74.95 76.92 84.34C76.81 84.86 77.39 85.39 77.18 85.89C75.97 88.85 75.69 92.43 73.41 94.87C72.44 95.91 71.11 96.27 69.83 96.73C67.62 97.52 65.38 98 63.09 98.49C59.12 99.34 54.98 99.55 50.95 99.84C49.3 99.95 47.64 99.73 46 99.83C45.21 99.88 44.61 100.74 43.89 100.75C41.96 100.79 40.26 99.27 38.26 99.27C34.97 99.27 29.71 99.1 27.71 96C26.93 94.78 26.74 93.29 26.74 91.88C26.74 90.86 26.86 89.85 27.11 88.88C27.92 88.36 28.95 88.25 29.88 87.91C31.88 87.2 34.25 86.23 36.36 86.08C37.06 86.41 37.57 87.17 38.27 87.42C39.02 87.68 40.17 87.47 40.96 87.47C43.32 87.47 45.67 87.26 48.01 86.92C50.56 86.56 53.05 85.91 55.47 85.05C57.22 84.43 59.11 83.98 60.61 82.8C61.66 81.98 62.6 80.95 63.09 79.74C63.22 79.42 63.68 79.38 63.92 79.2C64.24 78.95 64.43 78.29 64.61 77.94C65.6 75.95 66.06 73.69 66.52 71.54C68.2 63.69 67.55 55.43 66.99 47.5C66.81 45.04 66.44 42.55 66.09 40.11C65.68 37.2 65.29 34.49 66.99 31.86C67.49 31.08 68.13 30.35 68.84 29.74C73.16 26.04 79.06 27.78 83.34 30.54C85.53 31.94 88.14 34.68 87.53 37.55C86.81 40.88 82.38 41.91 79.5 42.32C78.16 42.51 76.75 42.35 75.76 43.38Z',
         gradient: {
@@ -130,8 +124,9 @@ export type AiTaKrajtaMarkBodyPoint = AiTaKrajtaMarkPoint & {
 /**
  * The animal itself, from the tip of its nose to the tip of its tail
  *
- * These measurements are the motion skeleton of the paths above, not a substitute silhouette. The game deforms
- * the original curves around this line; it never paints round strokes from the measured widths over the artwork.
+ * Note: The shapes above are a picture of the snake and these are the snake. Measured off the middle of those same
+ *       traced shapes, they let the game pick the drawing up and start moving it, instead of swapping it for a
+ *       different, straight animal at the moment somebody clicks it.
  */
 export const AI_TA_KRAJTA_MARK_BODY: readonly AiTaKrajtaMarkBodyPoint[] = [
     { x: 80.2, y: 35.9, halfWidth: 7.4, color: '#ff5c5a' },
@@ -217,18 +212,6 @@ export const AI_TA_KRAJTA_MARK_BODY: readonly AiTaKrajtaMarkBodyPoint[] = [
 ];
 
 /**
- * The tail passes behind the foreground coil here. Its painted underside belongs to that foreground body, while
- * the narrow joint is hidden by the existing fills until movement opens the coil. Indices refer to BODY above;
- * these measurements add no replacement outline to the public mark.
- */
-export const AI_TA_KRAJTA_MARK_TAIL_JOINT = {
-    undersideEndPointIndex: 61,
-    firstPointIndex: 60,
-    lastPointIndex: 69,
-    maximumHalfWidth: 2,
-} as const;
-
-/**
  * Where the drawn animal really sits inside its view box, measured off the traced shapes
  *
  * Note: The snake is drawn a little above and to the right of the middle of its box, which nobody notices beside a
@@ -245,7 +228,8 @@ export const AI_TA_KRAJTA_MARK_BOUNDS = {
 /**
  * The shadow the animal casts wherever it is drawn as large as it is in the terrarium
  *
- * The SVG keeps this shadow throughout the game, including its eyes. Canvas uses it only for the food.
+ * Note: The still logo and the canvas of the game both wear it. A shadow which appeared or vanished at the moment one
+ *       is handed over to the other would be the thing left to give that handover away.
  */
 export const AI_TA_KRAJTA_MARK_SHADOW_CLASS_NAME = 'drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]';
 
@@ -256,29 +240,17 @@ export function placeAiTaKrajtaMarkPointInFrame(
     point: AiTaKrajtaMarkPoint,
     frame: AiTaKrajtaMarkFrame,
 ): AiTaKrajtaMarkPoint {
-    const scale = getAiTaKrajtaMarkFrameScale(frame);
-
     return {
-        x: frame.left + (frame.width - AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE * scale) / 2 + point.x * scale,
-        y: frame.top + (frame.height - AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE * scale) / 2 + point.y * scale,
+        x: frame.left + (point.x / AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE) * frame.width,
+        y: frame.top + (point.y / AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE) * frame.height,
     };
-}
-
-/** Inverse of the SVG's centered aspect-ratio fit, for animation in the original artwork coordinates. */
-export function getAiTaKrajtaMarkPointFromFrame(
-    point: AiTaKrajtaMarkPoint,
-    frame: AiTaKrajtaMarkFrame,
-): AiTaKrajtaMarkPoint {
-    const origin = placeAiTaKrajtaMarkPointInFrame({ x: 0, y: 0 }, frame);
-    const scale = getAiTaKrajtaMarkFrameScale(frame);
-    return { x: (point.x - origin.x) / scale, y: (point.y - origin.y) / scale };
 }
 
 /**
  * How many pixels of a rendered frame one unit of the artwork is worth
  */
 export function getAiTaKrajtaMarkFrameScale(frame: AiTaKrajtaMarkFrame): number {
-    return Math.min(frame.width, frame.height) / AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE;
+    return frame.width / AI_TA_KRAJTA_MARK_VIEW_BOX_SIZE;
 }
 
 /**

@@ -3,21 +3,22 @@
 import {
     advanceSnakeState,
     createSnakeState,
+    getSnakeSegments,
     resizeSnakeState,
     type SnakeBounds,
     type SnakePoint,
     type SnakeState,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeSimulation';
+import { drawAiTaKrajtaMarkOnCanvas } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkCanvas';
 import {
     AI_TA_KRAJTA_MARK_SHADOW_CLASS_NAME,
     getAiTaKrajtaMarkFrameScale,
-    getAiTaKrajtaMarkPointFromFrame,
     type AiTaKrajtaMarkFrame,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaMarkArtwork';
-import { createAiTaKrajtaSnakeArtworkRenderer } from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeBody';
+import { createAiTaKrajtaSnakeBodySlices } from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeBody';
 import { createAiTaKrajtaSnakeLogoPose } from '@/businesses/ai-ta-krajta/aiTaKrajtaSnakeLogoPose';
 import { AI_TA_KRAJTA_COLORS } from '@/businesses/ai-ta-krajta/config';
-import { useEffect, useRef, useState, type PointerEvent, type RefObject } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 
 /**
  * Where an eye sits on the head and how big it is, in units of the view box of the mark
@@ -35,7 +36,13 @@ const FOOD_RADIUS_IN_PIXELS = 6;
 const FOOD_GLOW_RADIUS_IN_PIXELS = 14;
 
 /**
- * Speed, eyes and food ease in; the artwork itself has no timed transition.
+ * How long the exact logo stays intact before its living version starts to emerge
+ */
+const LOGO_HOLD_DURATION_IN_MILLISECONDS = 220;
+
+/**
+ * How long the snake takes to leave the drawing behind: to lose the proportions and colours of the logo, to open its
+ * eyes and to come up to speed
  */
 const LOGO_RELEASE_DURATION_IN_MILLISECONDS = 700;
 
@@ -47,11 +54,11 @@ function clampProgress(value: number): number {
 }
 
 /**
- * How far the game has accelerated, independently of the artwork's geometry
+ * How far the game has released the logo into its playable body
  */
 function getLogoReleaseProgress(elapsedInMilliseconds: number): number {
     return clampProgress(
-        elapsedInMilliseconds / LOGO_RELEASE_DURATION_IN_MILLISECONDS,
+        (elapsedInMilliseconds - LOGO_HOLD_DURATION_IN_MILLISECONDS) / LOGO_RELEASE_DURATION_IN_MILLISECONDS,
     );
 }
 
@@ -83,59 +90,100 @@ function drawFood(context: CanvasRenderingContext2D, state: SnakeState, opacity:
     context.restore();
 }
 
-/** Eyes share the moving SVG so food can stay behind the body without an extra full-size canvas. */
-function createEyesRenderer(mark: SVGSVGElement) {
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    group.setAttribute('opacity', '0');
-    for (const side of [-1, 1]) {
-        for (const isPupil of [false, true]) {
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', String(EYE_FORWARD_OFFSET + (isPupil ? PUPIL_FORWARD_OFFSET : 0)));
-            circle.setAttribute('cy', String(EYE_SIDEWAYS_OFFSET * side));
-            circle.setAttribute('r', String(isPupil ? PUPIL_HALF_WIDTH : EYE_HALF_WIDTH));
-            circle.setAttribute('fill', isPupil ? AI_TA_KRAJTA_COLORS.MOSS_DEEP : '#ffffff');
-            group.appendChild(circle);
-        }
+/**
+ * Draws the eyes, which is what turns a drawn snake into an animal looking where it goes
+ *
+ * Note: The logo has none, so they open while the snake wakes up rather than the moment the game begins.
+ */
+function drawEyes(context: CanvasRenderingContext2D, state: SnakeState, markScale: number, opacity: number): void {
+    if (opacity <= 0) {
+        return;
     }
-    mark.appendChild(group);
-    return {
-        draw(state: SnakeState, frame: AiTaKrajtaMarkFrame, opacity: number, artworkScale: number) {
-            const headPosition = getAiTaKrajtaMarkPointFromFrame(state.headPosition, frame);
-            group.setAttribute('opacity', String(opacity));
-            group.setAttribute('transform',
-                `translate(${headPosition.x} ${headPosition.y}) rotate(${state.headAngleInRadians * 180 / Math.PI}) scale(${artworkScale})`,
-            );
-        },
-        remove() { group.remove(); },
-    };
-}
-/** Measures both elements in the same CSS coordinate system, inside the terrarium's border. */
-function readMarkFrame(canvas: HTMLCanvasElement, mark: SVGSVGElement): AiTaKrajtaMarkFrame {
-    const canvasBounds = canvas.getBoundingClientRect();
-    const markBounds = mark.getBoundingClientRect();
-    return {
-        left: markBounds.left - canvasBounds.left,
-        top: markBounds.top - canvasBounds.top,
-        width: markBounds.width,
-        height: markBounds.height,
-    };
-}
 
-/** Converts the travelled path back to the unchanged SVG view box, including SVG's centered aspect-ratio fit. */
-function getArtworkTrail(state: SnakeState, frame: AiTaKrajtaMarkFrame): readonly SnakePoint[] {
-    return state.trail.map((point) => getAiTaKrajtaMarkPointFromFrame(point, frame));
+    const sidewaysAngle = state.headAngleInRadians + Math.PI / 2;
+
+    context.save();
+    context.globalAlpha = opacity;
+
+    for (const side of [-1, 1]) {
+        const eyePosition: SnakePoint = {
+            x:
+                state.headPosition.x +
+                (Math.cos(state.headAngleInRadians) * EYE_FORWARD_OFFSET +
+                    Math.cos(sidewaysAngle) * EYE_SIDEWAYS_OFFSET * side) *
+                    markScale,
+            y:
+                state.headPosition.y +
+                (Math.sin(state.headAngleInRadians) * EYE_FORWARD_OFFSET +
+                    Math.sin(sidewaysAngle) * EYE_SIDEWAYS_OFFSET * side) *
+                    markScale,
+        };
+
+        context.fillStyle = '#ffffff';
+        context.beginPath();
+        context.arc(eyePosition.x, eyePosition.y, EYE_HALF_WIDTH * markScale, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = AI_TA_KRAJTA_COLORS.MOSS_DEEP;
+        context.beginPath();
+        context.arc(
+            eyePosition.x + Math.cos(state.headAngleInRadians) * PUPIL_FORWARD_OFFSET * markScale,
+            eyePosition.y + Math.sin(state.headAngleInRadians) * PUPIL_FORWARD_OFFSET * markScale,
+            PUPIL_HALF_WIDTH * markScale,
+            0,
+            Math.PI * 2,
+        );
+        context.fill();
+    }
+
+    context.restore();
 }
 
 /**
- * The logo's existing SVG is the snake renderer for the entire game. Canvas owns only food and pointer input.
- * Keeping the original SVG node, view box, gradients and CSS shadow also keeps subpixel placement and native device
- * resolution identical on activation. The blank food canvas is initialized while idle, too: mounting a filtered
- * canvas only on activation can change Chromium's compositing and shift the SVG raster at fractional pixel ratios.
- * No animation frame is scheduled until activation, and there is no second animal waiting to replace the artwork.
+ * Draws the animal along the line its head has travelled
+ *
+ * @param markScale how many pixels one unit of the artwork is worth here
+ * @param releaseProgress how far the logo has been let go, zero while it is still the logo and one once it is loose
  */
-export function AiTaKrajtaSnakeGame({ markRef, isActive }: {
-    readonly markRef: RefObject<SVGSVGElement | null>;
-    readonly isActive: boolean;
+function drawSnake(
+    context: CanvasRenderingContext2D,
+    state: SnakeState,
+    bounds: SnakeBounds,
+    markScale: number,
+    releaseProgress: number,
+): void {
+    const centerLine = [state.headPosition, ...getSnakeSegments(state, bounds)];
+
+    context.save();
+    context.lineCap = 'round';
+
+    for (const slice of createAiTaKrajtaSnakeBodySlices(centerLine, markScale, releaseProgress)) {
+        context.strokeStyle = slice.color;
+        context.lineWidth = slice.strokeWidth;
+        context.beginPath();
+        context.moveTo(slice.from.x, slice.from.y);
+        context.lineTo(slice.to.x, slice.to.y);
+        context.stroke();
+    }
+
+    context.restore();
+    drawEyes(context, state, markScale, releaseProgress);
+}
+
+/**
+ * The snake of the logo, let loose
+ *
+ * Note: It moves freely rather than jumping from square to square, so it steers the way a snake in a browser game
+ *       does. The whole game is `aiTaKrajtaSnakeSimulation`, this only draws what it returns and feeds the pointer
+ *       into it.
+ *
+ */
+export function AiTaKrajtaSnakeGame({
+    initialMarkFrame,
+    onInitialMarkFrameDrawn,
+}: {
+    readonly initialMarkFrame: AiTaKrajtaMarkFrame;
+    readonly onInitialMarkFrameDrawn: () => void;
 }) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const targetPositionRef = useRef<SnakePoint | null>(null);
@@ -143,123 +191,110 @@ export function AiTaKrajtaSnakeGame({ markRef, isActive }: {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const mark = markRef.current;
         const context = canvas?.getContext('2d') ?? null;
-        if (canvas === null || mark === null || context === null) return;
 
-        const artworkRenderer = createAiTaKrajtaSnakeArtworkRenderer(mark);
-        const eyesRenderer = createEyesRenderer(mark);
-        let bounds: SnakeBounds = { width: 0, height: 0 };
-        let markFrame = readMarkFrame(canvas, mark);
+        if (canvas === null || context === null) {
+            return;
+        }
+
+        let bounds: SnakeBounds = { width: canvas.clientWidth, height: canvas.clientHeight };
         let state: SnakeState;
         let isSnakeStateInitialized = false;
-        let isSnakeMoving = false;
         let lastFrameTimestamp: number | null = null;
-        let elapsedInMilliseconds = 0;
-        let releaseProgress = 0;
-        let artworkScale = 1;
+        let gameStartTimestamp: number | null = null;
         let animationFrameId = 0;
-        let pixelRatio = 0;
-
-        const drawFrame = () => {
-            context.clearRect(0, 0, bounds.width, bounds.height);
-            drawFood(context, state, releaseProgress);
-            if (isSnakeMoving) artworkRenderer.draw(getArtworkTrail(state, markFrame), artworkScale);
-            eyesRenderer.draw(state, markFrame, releaseProgress, artworkScale);
-        };
+        let isInitialMarkFrameDrawn = false;
 
         const resizeCanvas = () => {
-            const canvasBounds = canvas.getBoundingClientRect();
-            const nextBounds = { width: canvasBounds.width, height: canvasBounds.height };
-            const nextPixelRatio = window.devicePixelRatio || 1;
-            const nextMarkFrame = readMarkFrame(canvas, mark);
-            if (nextBounds.width <= 0 || nextBounds.height <= 0 || getAiTaKrajtaMarkFrameScale(nextMarkFrame) <= 0) return;
-            const isSizeChanged = bounds.width !== nextBounds.width || bounds.height !== nextBounds.height;
-            const isMarkFrameChanged = markFrame.left !== nextMarkFrame.left || markFrame.top !== nextMarkFrame.top ||
-                markFrame.width !== nextMarkFrame.width || markFrame.height !== nextMarkFrame.height;
+            const devicePixelRatio = Math.min(2, window.devicePixelRatio || 1);
+            const nextBounds: SnakeBounds = { width: canvas.clientWidth, height: canvas.clientHeight };
 
-            if (isSnakeStateInitialized && (isSizeChanged || isMarkFrameChanged)) {
-                const resizedState = resizeSnakeState(state, bounds, nextBounds);
-                if (isSnakeMoving) {
-                    const bodyLengthScale = state.segmentCount > 1
-                        ? (resizedState.segmentCount - 1) / (state.segmentCount - 1)
-                        : 1;
-                    artworkScale *= bodyLengthScale * getAiTaKrajtaMarkFrameScale(markFrame) /
-                        getAiTaKrajtaMarkFrameScale(nextMarkFrame);
-                    state = resizedState;
-                } else {
-                    state = { ...resizedState, ...createAiTaKrajtaSnakeLogoPose(nextMarkFrame) };
-                }
+            if (
+                isSnakeStateInitialized &&
+                (bounds.width !== nextBounds.width || bounds.height !== nextBounds.height)
+            ) {
+                state = resizeSnakeState(state, bounds, nextBounds);
+
                 if (targetPositionRef.current !== null) {
                     targetPositionRef.current = {
-                        x: targetPositionRef.current.x * nextBounds.width / bounds.width,
-                        y: targetPositionRef.current.y * nextBounds.height / bounds.height,
+                        x:
+                            bounds.width > 0
+                                ? (targetPositionRef.current.x / bounds.width) * nextBounds.width
+                                : nextBounds.width / 2,
+                        y:
+                            bounds.height > 0
+                                ? (targetPositionRef.current.y / bounds.height) * nextBounds.height
+                                : nextBounds.height / 2,
                     };
                 }
             }
 
-            markFrame = nextMarkFrame;
             bounds = nextBounds;
-            // Setting width/height clears a canvas, so do it only when needed and repaint in this same callback.
-            if (isSizeChanged || pixelRatio !== nextPixelRatio) {
-                pixelRatio = nextPixelRatio;
-                canvas.width = Math.max(1, Math.round(bounds.width * pixelRatio));
-                canvas.height = Math.max(1, Math.round(bounds.height * pixelRatio));
-                context.setTransform(canvas.width / bounds.width, 0, 0, canvas.height / bounds.height, 0, 0);
-            }
-            if (isSnakeStateInitialized) drawFrame();
+            canvas.width = Math.max(1, Math.round(bounds.width * devicePixelRatio));
+            canvas.height = Math.max(1, Math.round(bounds.height * devicePixelRatio));
+            context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
         };
 
         resizeCanvas();
-        state = createSnakeState(bounds, Math.random, createAiTaKrajtaSnakeLogoPose(markFrame));
+        const markScale = getAiTaKrajtaMarkFrameScale(initialMarkFrame);
+        state = createSnakeState(bounds, Math.random, createAiTaKrajtaSnakeLogoPose(initialMarkFrame));
         isSnakeStateInitialized = true;
-        drawFrame();
 
         const renderFrame = (frameTimestamp: number) => {
-            // Use the same bounded time for release and simulation after a hidden tab resumes.
-            const stepInSeconds = lastFrameTimestamp === null ? 0 : Math.min(1 / 20, (frameTimestamp - lastFrameTimestamp) / 1000);
+            const stepInSeconds = lastFrameTimestamp === null ? 0 : (frameTimestamp - lastFrameTimestamp) / 1000;
             lastFrameTimestamp = frameTimestamp;
-            elapsedInMilliseconds += stepInSeconds * 1000;
-            releaseProgress = getLogoReleaseProgress(elapsedInMilliseconds);
-            if (pixelRatio !== (window.devicePixelRatio || 1)) resizeCanvas();
+            gameStartTimestamp ??= frameTimestamp;
+            const logoReleaseProgress = getLogoReleaseProgress(frameTimestamp - gameStartTimestamp);
 
-            if (stepInSeconds > 0) {
-                const previousScore = state.score;
-                state = advanceSnakeState(state, {
-                    bounds,
-                    targetPosition: targetPositionRef.current,
-                    stepInSeconds: stepInSeconds * releaseProgress,
-                    createRandomNumber: Math.random,
-                });
-                isSnakeMoving = true;
-                if (state.score !== previousScore) setScore(state.score);
+            const previousScore = state.score;
+            state = advanceSnakeState(state, {
+                bounds,
+                targetPosition: targetPositionRef.current,
+                // Note: The animal stands as still as the logo until it is let go, and then comes up to speed
+                stepInSeconds: stepInSeconds * logoReleaseProgress,
+                createRandomNumber: Math.random,
+            });
+
+            if (state.score !== previousScore) {
+                setScore(state.score);
             }
 
-            drawFrame();
+            context.clearRect(0, 0, bounds.width, bounds.height);
+            drawFood(context, state, logoReleaseProgress);
+            drawSnake(context, state, bounds, markScale, logoReleaseProgress);
+            drawAiTaKrajtaMarkOnCanvas(context, initialMarkFrame, 1 - logoReleaseProgress);
+
+            if (!isInitialMarkFrameDrawn) {
+                isInitialMarkFrameDrawn = true;
+                onInitialMarkFrameDrawn();
+            }
+
             animationFrameId = window.requestAnimationFrame(renderFrame);
         };
-        if (isActive) animationFrameId = window.requestAnimationFrame(renderFrame);
+
+        animationFrameId = window.requestAnimationFrame(renderFrame);
 
         const resizeObserver = new ResizeObserver(resizeCanvas);
         resizeObserver.observe(canvas);
-        resizeObserver.observe(mark);
 
         return () => {
             window.cancelAnimationFrame(animationFrameId);
             resizeObserver.disconnect();
-            artworkRenderer.reset();
-            eyesRenderer.remove();
         };
-    }, [isActive, markRef]);
+    }, [initialMarkFrame, onInitialMarkFrameDrawn]);
 
     const handlePointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
         const canvasBounds = event.currentTarget.getBoundingClientRect();
+
         targetPositionRef.current = {
             x: event.clientX - canvasBounds.left,
             y: event.clientY - canvasBounds.top,
         };
     };
-    const handlePointerLeave = () => { targetPositionRef.current = null; };
+
+    const handlePointerLeave = () => {
+        targetPositionRef.current = null;
+    };
 
     return (
         <div className="relative h-full w-full">
@@ -269,15 +304,13 @@ export function AiTaKrajtaSnakeGame({ markRef, isActive }: {
                 onPointerDown={handlePointerMove}
                 onPointerLeave={handlePointerLeave}
                 onPointerCancel={handlePointerLeave}
-                className={`h-full w-full ${isActive ? 'cursor-crosshair touch-none' : 'pointer-events-none'} ${AI_TA_KRAJTA_MARK_SHADOW_CLASS_NAME}`}
+                className={`h-full w-full cursor-crosshair touch-none ${AI_TA_KRAJTA_MARK_SHADOW_CLASS_NAME}`}
                 aria-label="Krajta, veďte ji myší nebo prstem"
-                aria-hidden={!isActive}
                 role="img"
             />
             <output
                 aria-live="polite"
-                hidden={!isActive}
-                className="pointer-events-none absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-[#101916]/80 px-3 py-1.5 text-sm font-bold text-white shadow-lg backdrop-blur-sm"
+                className="pointer-events-none absolute right-4 top-4 rounded-full border border-white/20 bg-[#101916]/80 px-3 py-1.5 text-sm font-bold text-white shadow-lg backdrop-blur-sm"
             >
                 Skóre: {score}
             </output>
