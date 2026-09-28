@@ -1,0 +1,17 @@
+[ ]
+
+[✨🧭] Prepare workshop activity and Git timeline metadata from a synchronized recording
+
+- Extend the shared session clock and versioned export manifest in [the recording editor](2026-09-0850-studio-synchronized-editor.md). This task produces metadata for a workshop player; it does not publish the media. Reuse [subtitle and speech-event tracks](2026-09-0870-studio-captions-and-speech-events.md) as inputs, without treating the transcript itself as visible player subtitles.
+- Add an editable, exportable workshop timeline with non-overlapping intervals covering the prepared recording: `active` (speaking or other meaningful live activity) and `automatic-coding` (unattended agent work). Let the editor mark/split/merge/reclassify ranges manually. Speech events may suggest boundaries, but silence alone must never automatically imply automatic coding; gaps and uncertain classifications require review and default to ordinary 1× playback.
+- Add timestamped event markers with a short human-readable title and optional detail/type for timeline annotations. Keep these separate from interval classification and subtitles. Allow editing, deleting and reordering by time without modifying raw media.
+- Add a reviewed Auto-view scene track that chooses `editor` or `application` over time, with a configured default and explicit transitions. This controls only the participant composite, never source exports. Validate that each chosen source exists over its selected interval.
+- Record repository association and a starting commit, then associate session positions with actual commits by SHA. Allow explicit timestamp-to-SHA anchors and a reviewed automatic proposal using commit timestamps from the workshop's selected repository/branches. Do not equate commit author/committer time with exact recording time without calibration: timezone, delayed pushes, rebases, clock skew and uncommitted work can make inference wrong. Between anchors choose the latest known commit at or before the playhead; before the first anchor use the starting commit, and show unknown when no reliable mapping exists. Never invent a commit.
+- Export a documented, versioned JSON sidecar with source recording ID/revision, repository identity, start SHA, event markers, classified intervals, Auto-view scene choices and commit anchors. Use the same original-session-to-prepared-export time map and selected range as media, subtitle and speech exports: clip crossing intervals, rebase to export zero, preserve the original coordinates/provenance in the manifest, and reject out-of-duration or overlapping invalid data. Keep manual edits through regeneration and make stale source revisions explicit.
+- Acceptance criteria:
+    - A paused and appended multi-source recording exports events, activity intervals and commit anchors aligned with each prepared video at the same common timestamp.
+    - Speech and silence do not silently label agent coding; unclassified gaps play at 1×. Manual corrections survive reload and re-export.
+    - Starting SHA and reviewed anchors select the correct commit before, at and after boundaries; missing/rebased commits show an honest unavailable state.
+- Keep in mind the DRY _(don't repeat yourself)_ principle. Reuse the editor's timing, persistence and export machinery.
+- Do an analysis of the current functionality before you start implementing.
+- Add the changes into the [changelog](../changelog/_current-preversion.md).
