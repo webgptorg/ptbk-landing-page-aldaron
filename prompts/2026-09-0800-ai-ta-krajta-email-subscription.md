@@ -41,7 +41,14 @@
 
 ---
 
-
 [x] (2 attempts) by Developer on OpenAI Codex `gpt-6-luna` thinking `max` (ChatGPT account) - Implementation ~$0.1278 2 minutes; Testing 31 minutes; Fixing ~$0.4472 an hour; Testing 27 minutes
 
 [✨📬] The subscription in AI ta Krajta page should be also in the footer and linked in menu, put the subscription after episodes
+
+---
+
+[ ]
+
+[✨📬] The subscription in AI ta Krajta page should be also in the footer
+
+look at other pages for reference like https://www.ptbk.io/cs
