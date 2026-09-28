@@ -1,6 +1,6 @@
 import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { exportRecordingArchive, exportRecordingManifest, recordingOriginalFilename } from './recordingStudioExport';
+import { bufferRecordingPreparedDownload, exportRecordingArchive, exportRecordingManifest, recordingOriginalFilename, recordingPreparedFilename } from './recordingStudioExport';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
 import type { RecordingArchiveManifest } from './recordingStudioTypes';
 
@@ -9,6 +9,26 @@ vi.mock('@/lib/downloadBlobFile', () => ({ downloadBlobFile: DOWNLOADS.download 
 vi.mock('./recordingStudioStorage', () => ({ readRecordingTrack: DOWNLOADS.read, streamRecordingTrack: () => new Blob(['original bytes']).stream() }));
 
 describe('recording archive exports', () => {
+    it('never loads a large or cancelled prepared file into a download buffer', async () => {
+        const file = new Blob(['prepared media']);
+        const read = vi.spyOn(file, 'arrayBuffer');
+        Object.defineProperty(file, 'size', { value: 300 * 1024 * 1024 });
+        await expect(bufferRecordingPreparedDownload(file, new AbortController().signal)).rejects.toThrow('256 MiB');
+        const controller = new AbortController();
+        controller.abort();
+        await expect(bufferRecordingPreparedDownload(new Blob(['media']), controller.signal)).rejects.toThrow();
+        expect(read).not.toHaveBeenCalled();
+    });
+
+    it('retains distinct individual source filenames after storage clones their objects', () => {
+        const recording = createTestStudioRecording();
+        for (const track of recording.tracks) {
+            expect(recordingOriginalFilename(structuredClone(recording), track)).toBe(recordingOriginalFilename(recording, track));
+            expect(recordingPreparedFilename(structuredClone(recording), track)).toBe(recordingPreparedFilename(recording, track));
+        }
+        expect(new Set(recording.tracks.map((track) => recordingOriginalFilename(structuredClone(recording), track))).size).toBe(recording.tracks.length);
+        expect(() => recordingPreparedFilename(recording, { ...recording.tracks[0], id: 'absent' })).toThrow();
+    });
     beforeEach(() => { DOWNLOADS.download.mockReset(); DOWNLOADS.read.mockReset().mockResolvedValue(new Blob(['original bytes'])); });
     it('preserves all original tracks and shared trim decisions in a real ZIP64 archive', async () => {
         const recording = createTestStudioRecording();
@@ -59,11 +79,11 @@ describe('recording archive exports', () => {
         const recording = { ...base, status: 'interrupted' as const, captureEndSeconds: null, tracks: base.tracks.map((track) => ({ ...track, byteLength: 12 * 1024 ** 3 })) };
         exportRecordingManifest(recording);
         const manifest = JSON.parse(await DOWNLOADS.download.mock.calls[0][0].blob.text()) as RecordingArchiveManifest;
-        expect(manifest.schemaVersion).toBe(2);
+        expect(manifest.schemaVersion).toBe(3);
         expect(manifest.tracks[1].originalFile).toBe(recordingOriginalFilename(recording, recording.tracks[1]));
         expect(manifest.tracks[1].byteLength).toBe(12 * 1024 ** 3);
         expect(manifest.tracks[1].startOffsetSeconds).toBe(0.002);
-        expect(manifest.missingRanges[1].endSeconds).toBeNull();
+        expect(manifest.missingRanges.some((range) => range.trackId === recording.tracks[1].id && range.endSeconds === null)).toBe(true);
         expect(DOWNLOADS.read).not.toHaveBeenCalled();
     });
 });

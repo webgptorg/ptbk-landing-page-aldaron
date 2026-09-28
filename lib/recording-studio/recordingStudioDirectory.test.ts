@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { appendDirectoryRecordingChunk, chooseRecordingDirectory, readDirectoryRecording, readDirectoryRecordingChunk, reconnectRecordingDirectory, saveDirectoryRecording } from './recordingStudioDirectory';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
+import { createRecordingEditRecipe } from './recordingStudioSessionTime';
 
 /** Models File System Access commit-on-close, including failures before a checkpoint is closed. */
 function createDirectory() {
@@ -45,6 +46,23 @@ describe('incrementally committed selected-directory media', () => {
         await appendDirectoryRecordingChunk(handle, snapshot, snapshot.tracks[0].id, 0, new Blob(['take']));
         expect(await readDirectoryRecording(handle)).toEqual(snapshot);
         expect(await (await readDirectoryRecordingChunk(handle, snapshot.tracks[0], 0)).text()).toBe('take');
+    });
+
+    it('round-trips a shared edit recipe and segmented timing without copying or rekeying media', async () => {
+        const { handle, recording, files } = createDirectory();
+        const track = { ...recording.tracks[0], byteLength: 4, chunkCount: 1, segments: [
+            { sourceStartSeconds: 0, sessionStartSeconds: 1, durationSeconds: 3 },
+            { sourceStartSeconds: 3, sessionStartSeconds: 8, durationSeconds: 2 },
+        ] };
+        const stored = { ...recording, tracks: [track], trim: { startSeconds: 8, endSeconds: 9 } };
+        await appendDirectoryRecordingChunk(handle, stored, track.id, 0, new Blob(['take']));
+        const edited = { ...stored, editRecipe: createRecordingEditRecipe(stored) };
+        await saveDirectoryRecording(handle, edited);
+        expect(await readDirectoryRecording(handle)).toEqual(edited);
+        expect(await (await readDirectoryRecordingChunk(handle, track, 0)).text()).toBe('take');
+        expect(files.size).toBe(2);
+        await saveDirectoryRecording(handle, { ...edited, tracks: [{ ...track, segments: [...track.segments].reverse() }] });
+        await expect(readDirectoryRecording(handle)).rejects.toThrow('časové úseky');
     });
 
     it.each(['QuotaExceededError', 'NotAllowedError', 'UnknownError'])('retains the previous checkpoint on %s despite any optimistic quota estimate', async (name) => {

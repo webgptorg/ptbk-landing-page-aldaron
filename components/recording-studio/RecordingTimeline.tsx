@@ -1,0 +1,118 @@
+'use client';
+
+import { formatRecordingTimecode, getRecordingTrackSegments } from '@/lib/recording-studio/recordingStudioSessionTime';
+import type { RecordingMediaArtwork } from '@/lib/recording-studio/recordingStudioMedia';
+import type { RecordingTrack, RecordingTrim } from '@/lib/recording-studio/recordingStudioTypes';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+
+const MINIMUM_SELECTION_SECONDS = 0.001;
+const TIMELINE_LABEL_WIDTH = 180;
+const RULER_INTERVALS_SECONDS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 18000, 36000];
+
+export function RecordingTimeline({ tracks, durationSeconds, seconds, selection, artwork, availableRanges, onSeek, onSelection, onBeginEdit }: {
+    readonly tracks: readonly RecordingTrack[];
+    readonly durationSeconds: number;
+    readonly seconds: number;
+    readonly selection: RecordingTrim;
+    readonly artwork: Readonly<Record<string, RecordingMediaArtwork>>;
+    readonly availableRanges: Readonly<Record<string, readonly RecordingTrim[]>>;
+    readonly onSeek: (seconds: number) => void;
+    readonly onSelection: (selection: RecordingTrim) => void;
+    readonly onBeginEdit: () => void;
+}) {
+    const [zoomLevel, setZoomLevel] = useState(0);
+    const zoom = 2 ** zoomLevel;
+    const scrollReference = useRef<HTMLDivElement>(null);
+    const [viewport, setViewport] = useState({ left: 0, width: 850 });
+    const bodyReference = useRef<HTMLDivElement>(null);
+    const dragReference = useRef<'start' | 'end' | 'playhead' | null>(null);
+    const safeDuration = Math.max(0.001, durationSeconds);
+    const timelineWidth = Math.max(viewport.width, zoom * 850) - TIMELINE_LABEL_WIDTH;
+    const rulerInterval = RULER_INTERVALS_SECONDS.find((interval) => interval / safeDuration * timelineWidth >= 100) ?? safeDuration / 10;
+    const firstRulerTime = Math.floor(viewport.left / timelineWidth * safeDuration / rulerInterval) * rulerInterval;
+    const lastRulerTime = Math.min(safeDuration, (viewport.left + viewport.width) / timelineWidth * safeDuration);
+    const rulerTimes = Array.from({ length: Math.max(0, Math.min(80, Math.ceil((lastRulerTime - firstRulerTime) / rulerInterval) + 1)) }, (_, index) => firstRulerTime + index * rulerInterval).filter((value) => value <= safeDuration);
+    const playheadSeconds = useRef(seconds);
+    playheadSeconds.current = seconds;
+    const focusPlayhead = useCallback(() => {
+        const element = scrollReference.current;
+        if (element) element.scrollLeft = Math.max(0, playheadSeconds.current / safeDuration * (bodyReference.current?.clientWidth ?? 0) - (element.clientWidth - TIMELINE_LABEL_WIDTH) / 2);
+    }, [safeDuration]);
+    useLayoutEffect(focusPlayhead, [focusPlayhead, zoomLevel]); // Preserve the current session moment when zooming.
+    useEffect(() => {
+        const element = scrollReference.current!;
+        const measure = () => setViewport({ left: element.scrollLeft, width: element.clientWidth });
+        const observer = new ResizeObserver(measure); observer.observe(element); measure();
+        return () => observer.disconnect();
+    }, []);
+    const percent = (value: number) => `${Math.max(0, Math.min(100, value / safeDuration * 100))}%`;
+    const pointerSeconds = (event: PointerEvent) => {
+        const rectangle = bodyReference.current!.getBoundingClientRect();
+        return Math.max(0, Math.min(safeDuration, (event.clientX - rectangle.left) / rectangle.width * safeDuration));
+    };
+    const changeHandle = (handle: 'start' | 'end', value: number) => {
+        onSelection(handle === 'start'
+            ? { ...selection, startSeconds: Math.max(0, Math.min(selection.endSeconds - MINIMUM_SELECTION_SECONDS, value)) }
+            : { ...selection, endSeconds: Math.min(safeDuration, Math.max(selection.startSeconds + MINIMUM_SELECTION_SECONDS, value)) });
+    };
+    const movePointer = (event: PointerEvent) => {
+        if (!dragReference.current) return;
+        const value = pointerSeconds(event);
+        if (dragReference.current === 'playhead') onSeek(value);
+        else changeHandle(dragReference.current, value);
+    };
+    const startPointer = (event: PointerEvent<HTMLDivElement>) => {
+        const handle = (event.target as HTMLElement).closest<HTMLElement>('[data-trim-handle]')?.dataset.trimHandle as 'start' | 'end' | undefined;
+        if (event.button !== 0) return;
+        dragReference.current = handle ?? 'playhead';
+        if (handle) onBeginEdit();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        movePointer(event);
+    };
+    const handleKey = (event: KeyboardEvent, handle?: 'start' | 'end') => {
+        const value = handle === 'start' ? selection.startSeconds : handle === 'end' ? selection.endSeconds : seconds;
+        const step = event.shiftKey ? 10 : event.altKey ? 0.01 : 1;
+        const target = event.key === 'Home' ? 0 : event.key === 'End' ? safeDuration :
+            event.key === 'ArrowLeft' ? value - step : event.key === 'ArrowRight' ? value + step : null;
+        if (target === null) return;
+        event.preventDefault(); event.stopPropagation();
+        if (handle) { onBeginEdit(); changeHandle(handle, target); }
+        else onSeek(target);
+    };
+    return <section aria-label="Společná časová osa" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-semibold">Časová osa všech zdrojů</h3>
+            <div className="flex flex-wrap items-center gap-3"><button type="button" className="text-sm text-cyan-800 underline" onClick={focusPlayhead}>Ukázat přehrávací hlavu</button><label className="flex items-center gap-2 text-sm">Přiblížení <input aria-label="Přiblížení časové osy" type="range" min="0" max="10" value={zoomLevel} onChange={(event) => setZoomLevel(Number(event.target.value))} />{zoom}×</label></div>
+        </div>
+        <p className="text-xs text-slate-600">Tažením posuňte přehrávací hlavu nebo krajní úchyty výběru. Šipky: 1 s · Shift: 10 s · Alt: 0,01 s · Home/End: kraj záznamu. Šrafování označuje nedostupný rozsah. Zvuková vlna je řídký vzorek úrovně.</p>
+        <div ref={scrollReference} onScroll={(event) => setViewport({ left: event.currentTarget.scrollLeft, width: event.currentTarget.clientWidth })} className="overflow-x-auto rounded-xl border border-slate-300 bg-white" tabIndex={0} aria-label="Posouvání časové osy">
+            <div className="flex" style={{ width: `max(100%, ${zoom * 850}px)` }}>
+                <div className="sticky left-0 z-20 shrink-0 border-r bg-white/95" style={{ width: TIMELINE_LABEL_WIDTH }}>
+                    <div className="h-14 p-3 text-xs text-slate-500">Původní čas relace</div>
+                    {tracks.map((track) => <div key={track.id} className="h-24 border-t p-3 text-sm"><p className="truncate font-medium" title={track.label}>{track.label}</p><p className="mt-1 text-xs text-slate-500">{track.kind === 'microphone' ? 'Zvuk' : track.kind === 'screen' ? 'Obrazovka' : 'Kamera'}{track.isAudioIncluded && track.kind !== 'microphone' ? ' + zvuk' : ''}</p></div>)}
+                </div>
+                <div ref={bodyReference} className="relative min-w-0 flex-1 touch-none select-none" onPointerDown={startPointer} onPointerMove={movePointer} onPointerUp={() => { dragReference.current = null; }} onPointerCancel={() => { dragReference.current = null; }}>
+                    <div className="relative h-14" role="slider" tabIndex={0} aria-label="Přehrávací hlava" aria-valuemin={0} aria-valuemax={safeDuration} aria-valuenow={seconds} aria-valuetext={formatRecordingTimecode(seconds)} onKeyDown={(event) => handleKey(event)}>
+                        {rulerTimes.map((value) => <span key={value} className="absolute top-2 border-l pl-1 text-[10px] tabular-nums text-slate-600" style={{ left: percent(value), transform: value === safeDuration ? 'translateX(-100%)' : undefined }}>{formatRecordingTimecode(value)}</span>)}
+                    </div>
+                    {tracks.map((track) => <div key={track.id} className="relative h-24 overflow-hidden border-t bg-slate-100" style={{ backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 6px, #cbd5e1 6px, #cbd5e1 7px)' }} aria-label={`Stopa ${track.label}`}>
+                        {(availableRanges[track.id] ?? []).map((range, index) => <div key={index} className="absolute inset-y-1 rounded bg-cyan-100" style={{ left: percent(range.startSeconds), width: percent(range.endSeconds - range.startSeconds) }} />)}
+                        <div className="pointer-events-none absolute inset-0" aria-label={`Náhledy a vzorky zvuku: ${track.label}`}>
+                            {getRecordingTrackSegments(track).map((segment, segmentIndex) => <div key={segmentIndex}>
+                                {(artwork[track.id]?.thumbnails ?? []).filter(({ seconds: sourceSeconds }) => sourceSeconds >= segment.sourceStartSeconds && sourceSeconds < segment.sourceStartSeconds + segment.durationSeconds).map((thumbnail, index) =>
+                                    <svg key={index} className="absolute top-2 h-12 w-20 -translate-x-1/2" style={{ left: percent(segment.sessionStartSeconds + thumbnail.seconds - segment.sourceStartSeconds) }} viewBox="0 0 80 48" aria-hidden="true"><image href={thumbnail.url} width="80" height="48" preserveAspectRatio="xMidYMid slice" /></svg>)}
+                                {(artwork[track.id]?.peaks ?? []).filter(({ seconds: sourceSeconds }) => sourceSeconds >= segment.sourceStartSeconds && sourceSeconds < segment.sourceStartSeconds + segment.durationSeconds).map((peak, index) => {
+                                    const height = Math.min(30, Math.max(1, peak.amplitude * 90));
+                                    return <span key={index} className="absolute w-0.5 bg-cyan-700" style={{ left: percent(segment.sessionStartSeconds + peak.seconds - segment.sourceStartSeconds), top: 76 - height / 2, height }} />;
+                                })}
+                            </div>)}
+                        </div>
+                    </div>)}
+                    <div className="pointer-events-none absolute inset-y-10 border-x-2 border-cyan-600 bg-cyan-500/10" style={{ left: percent(selection.startSeconds), width: percent(selection.endSeconds - selection.startSeconds) }} />
+                    {(['start', 'end'] as const).map((handle) => <div key={handle} role="slider" tabIndex={0} data-trim-handle={handle} aria-label={handle === 'start' ? 'Začátek výběru' : 'Konec výběru'} aria-valuemin={0} aria-valuemax={safeDuration} aria-valuenow={handle === 'start' ? selection.startSeconds : selection.endSeconds} aria-valuetext={formatRecordingTimecode(handle === 'start' ? selection.startSeconds : selection.endSeconds)} onKeyDown={(event) => handleKey(event, handle)} className="absolute inset-y-9 z-10 w-5 -translate-x-1/2 cursor-ew-resize border-x-4 border-cyan-700 bg-cyan-600/20 outline-offset-2 focus:outline focus:outline-2 focus:outline-cyan-900" style={{ left: percent(handle === 'start' ? selection.startSeconds : selection.endSeconds) }}><span className="absolute top-0 bg-cyan-800 px-0.5 text-[10px] text-white">{handle === 'start' ? 'IN' : 'OUT'}</span></div>)}
+                    <div className="pointer-events-none absolute inset-y-8 z-10 w-0.5 bg-rose-600" style={{ left: percent(seconds) }} />
+                </div>
+            </div>
+        </div>
+    </section>;
+}

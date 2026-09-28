@@ -1,11 +1,14 @@
 import { z } from 'zod';
 import type { RecordingTrack, StudioRecording } from './recordingStudioTypes';
+import { isRecordingSegmentMapValid } from './recordingStudioSessionTime';
 
 const DIRECTORY_MANIFEST_NAME = 'recording.json';
 const MAXIMUM_MANIFEST_BYTES = 4 * 1024 * 1024;
 const SAFE_IDENTIFIER = /^[a-zA-Z0-9_-]+$/;
 const NONNEGATIVE_NUMBER = z.number().finite().nonnegative();
 const BYTE_COUNT = NONNEGATIVE_NUMBER.int().max(Number.MAX_SAFE_INTEGER);
+const TIME_SEGMENT_SCHEMA = z.object({ sourceStartSeconds: NONNEGATIVE_NUMBER, sessionStartSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER });
+const TRIM_SCHEMA = z.object({ startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER });
 const SOURCE_CONFIGURATION_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string().max(200),
     cameraDeviceId: z.string(), cameraDeviceLabel: z.string().max(200).nullable(),
@@ -17,7 +20,12 @@ const SOURCE_CONFIGURATION_SCHEMA = z.object({
 const RECORDING_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), title: z.string(), createdAt: z.string().datetime(),
     status: z.enum(['recording', 'complete', 'interrupted']), durationSeconds: NONNEGATIVE_NUMBER,
-    errorMessage: z.string().nullable(), trim: z.object({ startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER }).nullable(),
+    errorMessage: z.string().nullable(), trim: TRIM_SCHEMA.nullable(),
+    editRecipe: z.object({
+        schemaVersion: z.literal(1), timeUnit: z.literal('seconds'), selection: TRIM_SCHEMA,
+        preparedTimeZeroSessionSeconds: NONNEGATIVE_NUMBER,
+        sources: z.array(z.object({ sourceId: z.string().regex(SAFE_IDENTIFIER), segments: z.array(TIME_SEGMENT_SCHEMA) })),
+    }).optional(),
     storageDestination: z.object({ kind: z.literal('directory'), name: z.string() }),
     captureEndSeconds: NONNEGATIVE_NUMBER.nullable().optional(),
     sourceConfiguration: z.array(SOURCE_CONFIGURATION_SCHEMA).optional(),
@@ -26,6 +34,7 @@ const RECORDING_SCHEMA = z.object({
         byteLength: BYTE_COUNT, chunkCount: BYTE_COUNT, startOffsetSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER,
         width: NONNEGATIVE_NUMBER.nullable(), height: NONNEGATIVE_NUMBER.nullable(), frameRate: NONNEGATIVE_NUMBER.nullable(), isAudioIncluded: z.boolean(),
         audioSourceLabel: z.string().nullable().optional(),
+        segments: z.array(TIME_SEGMENT_SCHEMA).optional(),
     })),
 });
 
@@ -81,6 +90,7 @@ export async function readDirectoryRecording(directory: FileSystemDirectoryHandl
     try { envelope = z.object({ schemaVersion: z.literal(1), recording: RECORDING_SCHEMA }).parse(JSON.parse(content)); }
     catch { throw new Error('Složka neobsahuje platný popis záznamu. Vyberte podsložku konkrétního záznamu se souborem recording.json.'); }
     if (new Set(envelope.recording.tracks.map((track) => track.id)).size !== envelope.recording.tracks.length) throw new Error('Záznam má duplicitní stopy.');
+    if (envelope.recording.tracks.some((track) => track.segments && !isRecordingSegmentMapValid(track.segments))) throw new Error('Záznam obsahuje překrývající se nebo neplatné časové úseky.');
     return envelope.recording;
 }
 

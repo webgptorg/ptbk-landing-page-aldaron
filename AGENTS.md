@@ -237,11 +237,24 @@ use cases, and audiences. Keep these rules current when behavior changes.
   live captures may stay connected, and every other source still needs its ordinary per-source readiness action.
   Screen/window labels are hints only and always go through the browser chooser again. Older takes reconstruct only
   their stored track details and leave unknown camera/microphone identities for the administrator to select.
-  Reusing settings never starts recording or changes the old take. The shared admin editor autosaves one trim range for every track.
-  ZIP64 exports stream original chunks, preserve timing/missing-range metadata and can include actual trimmed
-  copies; trimming uses browser codecs and temporary local files, never an upload.
-  Individual originals are downloadable when a large ZIP cannot stream to disk; export and OPFS temporary-space
-  needs are disclosed. Capture and export reuse admin navigation/sign-out/reload protection. No server or
+  Reusing settings never starts recording or changes the old take. Saved recordings open the authenticated
+  `/admin/recording-studio/<recordingId>` workspace, sharing the setup/recording shell and its browser lock. Existing
+  IDs and original media stay unchanged; a URL identifies local data and missing local media remains explicit.
+  One transport, playhead and zoomable timeline map source offsets/segments onto session time, wait for asynchronous
+  seeks/buffering and playback starts, correct drift, and hide unavailable frames. Pausing or revealing a hidden
+  video settles its decoded frame even if its clock was already correct. The target after settling is 100 ms, not
+  hardware synchronization. Video visibility/solo and audio mute/solo are separate monitoring choices; one audio
+  source is audible initially and every source remains in export. Shared IN/OUT handles and precise seconds edit
+  one non-destructive selection with undo/reset and the existing autosave/error/navigation protection.
+  ZIP64 exports stream original chunks and a versioned recipe/manifest with explicit seconds, segment mappings,
+  selected interval, prepared zero, missing ranges and per-source processing. Prepared files retain each source's
+  audio; video uses its recorded nominal frame rate when known, with resampling recorded in the manifest.
+  Files are transcoded and checked within 50 ms of the common boundaries; unsupported or discontinuous sources
+  remain clearly labelled originals plus recipe. Trimming uses browser codecs and one temporary local file, never
+  an upload or a composed layout. Individual prepared files have JSON sidecars; cancel/retry preserves originals.
+  Prepared downloads without a disk picker are detached before temporary-file cleanup and limited to 256 MiB;
+  larger prepared files need a disk stream. Individual originals are downloadable when a large ZIP cannot stream
+  to disk; export and OPFS temporary-space needs are disclosed. Capture and export reuse admin navigation/sign-out/reload protection. No server or
   database storage is added.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
@@ -507,3 +520,6 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `tests/e2e/videos/`, retaining only recent runs.
 - Recording-studio E2E sources use canvas video and synthesized audio with a silent Web Audio output, independent
   of physical audio-device clocks. Keep recording, storage, codecs, trimming, and ZIP exports real in these tests.
+  Recorded A/V markers are checked from decoded sample timestamps rather than speaker-output latency. The preparation
+  fixture additionally carries readable/binary timecodes and claps at 25/30 fps with distinct startup offsets.
+  Simulated ten-hour mappings and decoder delays do not establish a ten-hour capture soak or physical macOS behavior.

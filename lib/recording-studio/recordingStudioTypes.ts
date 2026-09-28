@@ -36,6 +36,34 @@ export type RecordingTrim = {
     readonly endSeconds: number;
 };
 
+/** Rate-one mapping; holes between segments stay holes on the session clock. */
+export type RecordingTimeSegment = {
+    readonly sourceStartSeconds: number;
+    readonly sessionStartSeconds: number;
+    readonly durationSeconds: number;
+};
+
+export type RecordingEditRecipe = {
+    readonly schemaVersion: 1;
+    readonly timeUnit: 'seconds';
+    readonly selection: RecordingTrim;
+    readonly preparedTimeZeroSessionSeconds: number;
+    readonly sources: readonly { readonly sourceId: string; readonly segments: readonly RecordingTimeSegment[] }[];
+};
+
+export type RecordingMediaComponent = {
+    readonly kind: 'video' | 'audio';
+    readonly firstTimestampSeconds: number;
+    readonly endTimestampSeconds: number;
+};
+
+export type RecordingMediaBounds = {
+    readonly firstTimestampSeconds: number;
+    readonly availableStartTimestampSeconds: number;
+    readonly endTimestampSeconds: number;
+    readonly components: readonly RecordingMediaComponent[];
+};
+
 export type RecordingTrack = {
     readonly id: string;
     readonly kind: RecordingSourceKind;
@@ -51,6 +79,7 @@ export type RecordingTrack = {
     readonly isAudioIncluded: boolean;
     /** Missing on older takes. On camera files, the microphone which supplied embedded audio. */
     readonly audioSourceLabel?: string | null;
+    readonly segments?: readonly RecordingTimeSegment[];
 };
 
 export type StudioRecording = {
@@ -61,6 +90,7 @@ export type StudioRecording = {
     readonly durationSeconds: number;
     readonly tracks: readonly RecordingTrack[];
     readonly trim: RecordingTrim | null;
+    readonly editRecipe?: RecordingEditRecipe;
     readonly errorMessage: string | null;
     /** Immutable source preferences for this take; absent on older recordings. */
     readonly sourceConfiguration?: readonly RecordingSourceConfiguration[];
@@ -73,10 +103,25 @@ export type StudioRecording = {
 export type RecordingArchiveTrack = RecordingTrack & {
     readonly originalFile: string | null;
     readonly trimmedFile: string | null;
+    /** Present when the export inspected the container, distinct from recorder-observed times. */
+    readonly originalMedia?: RecordingMediaBounds;
+    readonly preparation?: {
+        readonly status: 'prepared' | 'original-and-recipe';
+        readonly reason?: string;
+        readonly processing?: string;
+        readonly firstTimestampSeconds?: number;
+        readonly endTimestampSeconds?: number;
+        readonly originalContainerOriginSeconds?: number;
+        readonly components?: readonly RecordingMediaComponent[];
+        readonly videoFrameRate?: number | null;
+        readonly preparedTimeZeroSessionSeconds: number;
+    };
 };
 
 export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds' | 'sourceConfiguration'> & {
-    readonly schemaVersion: 2;
+    readonly schemaVersion: 3;
+    readonly timeUnit: 'seconds';
+    readonly editRecipe: RecordingEditRecipe;
     readonly isTrimIncluded: boolean;
     readonly tracks: readonly RecordingArchiveTrack[];
     readonly timing: string;

@@ -10,6 +10,7 @@
 /coverage
 /tests/e2e/.artifacts/
 /tests/e2e/videos/*.webm
+/.cache/recording-editor-validation/
 
 # next.js
 /.next/

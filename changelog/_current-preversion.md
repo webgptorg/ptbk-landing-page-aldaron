@@ -1,5 +1,23 @@
 # Current preversion
 
+- Replaced the recording-detail modal with an authenticated preparation workspace at
+  `/admin/recording-studio/<recordingId>`, reusing the studio shell, browser lock, stable IDs and local media.
+  All camera, screen and audio sources now share a zoomable timeline, decoded thumbnails/sparse audio samples,
+  playhead and coordinated play/pause/seek/speed controls. Offset/segment mappings retain gaps and short sources;
+  playback waits for decoder starts, pausing/revealing a source settles its decoded frame, and decoder failures
+  hide stale frames and can be retried. Visual hide/solo and audio mute/solo only affect monitoring,
+  with one audible source initially; every source remains in exports. A common draggable IN/OUT range, precise
+  seconds, undo/reset and protected autosave persist a versioned recipe without changing original bytes. ZIP64
+  and individual-file exports preserve separate sources and embedded audio, include explicit source/session/export
+  timing, record video resampling to the source's nominal cadence, and validate transcoded boundaries within 50 ms
+  per component, including long final frames. Unsupported or discontinuous sources are
+  clearly labelled originals plus recipe. Cancellation/retry preserves originals; export holds the selected edit
+  steady and preserves incomplete trim drafts. Small individual prepared downloads survive temporary-file cleanup;
+  larger ones require direct disk saving instead of an unbounded memory copy. Legacy metadata and directory
+  checkpoints retain their IDs and saved selections, and deep links explain
+  absent local data. Added deterministic timecode/clap, late-session, failure/recovery and external FFmpeg checks;
+  verification details and unavailable macOS/physical-device tests are recorded in `docs/recording-studio-editor.md`.
+
 - Investigated the missing VS Code window reported on another macOS Space. The studio's shared capture path does not
   enumerate or filter system windows; its optional `displaySurface` value is a type preference, and the browser/OS
   owns the chooser. Added contextual Spaces guidance beside manual, restored, and historical screen-source selection,

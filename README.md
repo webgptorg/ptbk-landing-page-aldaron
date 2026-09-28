@@ -91,11 +91,31 @@ rather than retained in an unbounded queue. Persistence is an explicit button wi
 feedback. It protects origin data from eviction, does not request a chosen quota, and reveals no disk free space.
 Download takes you want to keep. See [investigation and verification evidence](docs/recording-studio-storage.md).
 
-The shared editor saves one trim range in seconds, applied to every track on the session timeline. ZIP exports
-always contain unchanged `originals/` and `recording.json` (source names, dimensions, sizes, offsets, and trim range).
-**ZIP s ořezem** also produces `trimmed/` copies using Mediabunny and browser codecs, preserving the source dimensions
-and audio; trimming can re-encode, so originals remain the highest-quality material. A browser unable to process
-every embedded track refuses trimmed export instead of silently dropping audio. **Originály ZIP** remains available.
+**Náhled a ořez** opens `/admin/recording-studio/<recordingId>` in the studio's persistent workspace shell.
+The existing recording/source IDs, original bytes and saved selection survive reload and back navigation. These
+authenticated URLs identify data in this browser profile; another computer shows a missing-local-recording state.
+The timeline has a lane per source, sparse decoded thumbnails/audio samples, zoom/scroll, an hours-inclusive clock,
+one transport and a shared IN/OUT selection. Drag either handle or use arrows (Shift: 10 s, Alt: 0.01 s), Home/End,
+or the precise second fields. Undo/reset and the existing autosave/error/navigation protection apply to edit metadata.
+Native independent playback controls are absent. A common monotonic clock waits for decoder seeks/buffering,
+corrects drift and maps recorded offsets/segments without stretching durations or closing gaps. The preview target
+is at most 100 ms error after settling, not hardware synchronization. Hidden and solo video monitoring are separate
+from audio mute/solo; only one audio source is audible initially to avoid echo. Monitoring never excludes an export.
+
+ZIP exports always contain unchanged `originals/` and a version 3 `recording.json`, including the versioned edit
+recipe, source IDs, source-to-session segments, seconds as the time unit, common selection, prepared time zero,
+missing ranges and processing results. Existing records derive the recipe without copying media; the first edit
+persists it. This is temporal trimming; there was no spatial crop in the original studio.
+**ZIP s ořezem** produces separate `trimmed/` copies using browser transcoding, preserving dimensions and
+embedded audio. Video uses the source's recorded nominal frame rate when available, with resampling and the applied
+`videoFrameRate` explicitly recorded in the manifest. Unknown rates retain the source cadence. Every component's
+output bounds are checked within 50 ms of the common selection. Codec padding
+and frame granularity are included in the actual per-component timestamps in the manifest. Gaps, unsupported
+codecs or unavailable processing produce an explicitly labelled original-and-recipe fallback for that source,
+never a falsely successful trimmed file. Originals remain the highest-quality material. **Stáhnout ořez** also
+downloads an individual prepared source and JSON sidecar. Cancel/retry leaves original media and the recipe intact.
+When direct disk saving is unavailable, individual prepared downloads are limited to 256 MiB and detached from
+the temporary file before cleanup; larger outputs require a disk stream or the labelled originals/recipe fallback.
 Conversion uses temporary files in the origin-private filesystem, requiring room for one trimmed track at a time;
 temporary files are removed after processing or on the next studio visit following an interrupted export.
 
@@ -110,6 +130,8 @@ The studio adds no environment variables, uploads, server APIs, or database migr
 
 Its E2E tests supply canvas video and synthesized audio with a silent Web Audio output, so they need no physical
 camera, microphone, or working speaker device. Recording, storage, codecs, trimming, and ZIP exports remain real.
+The editor additionally uses reproducible 25/30 fps timecode/clap files and an independent FFmpeg export checker.
+See [editor analysis, timing contract and verification](docs/recording-studio-editor.md) for evidence and platform limits.
 
 ## Technology
 

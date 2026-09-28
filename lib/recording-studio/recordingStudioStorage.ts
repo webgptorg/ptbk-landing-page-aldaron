@@ -1,6 +1,7 @@
 import { appendDirectoryRecordingChunk, readDirectoryRecording, readDirectoryRecordingChunk, reconnectRecordingDirectory, recordingChunkFilename, saveDirectoryRecording } from './recordingStudioDirectory';
 import { addRecordingBytes, getCommonRecordingDuration, validateRecordingTrim } from './recordingStudioTiming';
 import type { RecordingTrack, RecordingTrim, StudioRecording } from './recordingStudioTypes';
+import { createRecordingEditRecipe, getRecordingSessionDuration } from './recordingStudioSessionTime';
 
 const RECORDING_DATABASE_NAME = 'promptbook-recording-studio';
 const RECORDING_DATABASE_VERSION = 2;
@@ -71,7 +72,7 @@ export async function listStudioRecordings(): Promise<StudioRecording[]> {
     return Array.from(byId.values()).sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
-async function readStudioRecording(recordingId: string): Promise<StudioRecording | undefined> {
+export async function readStudioRecording(recordingId: string): Promise<StudioRecording | undefined> {
     const retained = RECORDING_DIRECTORIES.get(recordingId);
     if (retained) return retained.recording;
     const database = await openRecordingDatabase();
@@ -216,9 +217,9 @@ export async function reconnectStudioRecording(recordingId: string): Promise<Stu
 }
 
 export async function editStudioRecording(recording: StudioRecording, title: string, trim: RecordingTrim): Promise<StudioRecording> {
-    validateRecordingTrim(trim, recording.durationSeconds);
+    validateRecordingTrim(trim, getRecordingSessionDuration(recording));
     if (!title.trim()) throw new Error('Vyplňte název záznamu.');
-    const updated = { ...recording, title: title.trim(), trim };
+    const updated = { ...recording, title: title.trim(), trim, editRecipe: createRecordingEditRecipe(recording, trim) };
     await saveStudioRecording(updated);
     return updated;
 }

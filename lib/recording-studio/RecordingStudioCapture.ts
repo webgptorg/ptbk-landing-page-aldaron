@@ -3,6 +3,7 @@ import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
 import { appendRecordingChunk, createStudioRecording, saveStudioRecording } from './recordingStudioStorage';
 import { addRecordingBytes, getCommonRecordingDuration, getRecordingByteLength } from './recordingStudioTiming';
 import { toRecordingSourceConfiguration } from './recordingStudioSourceConfiguration';
+import { getRecordingClockSeconds } from './recordingStudioSessionTime';
 import {
     RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_CHUNK_MILLISECONDS, RECORDING_DIRECTORY_CHUNK_MILLISECONDS, RECORDING_MAX_PENDING_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
     type RecordingSource, type RecordingTrack, type StudioRecording,
@@ -110,7 +111,7 @@ export class RecordingStudioCapture {
     }
 
     private elapsedSeconds(): number {
-        return Math.max(0, ((this.stoppedAt ?? performance.now()) - this.startedAt) / 1000);
+        return getRecordingClockSeconds(this.startedAt, this.stoppedAt ?? performance.now());
     }
 
     public get elapsedRecordingSeconds(): number { return this.elapsedSeconds(); }

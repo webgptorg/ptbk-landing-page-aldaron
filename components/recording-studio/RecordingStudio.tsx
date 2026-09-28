@@ -9,6 +9,9 @@ import { formatRecordingBytes, formatRecordingDuration, getRecordingByteLength }
 import type { StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 import { Circle, Plus, Square } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { RecordingEditor } from './RecordingEditor';
 import { RecordingLibrary } from './RecordingLibrary';
 import { RecordingSourcePicker } from './RecordingSourcePicker';
 import { RecordingSourcePreview } from './RecordingSourcePreview';
@@ -17,6 +20,8 @@ import { useRecordingStudio } from './useRecordingStudio';
 
 export function RecordingStudio() {
     const studio = useRecordingStudio();
+    const { recordingId } = useParams<{ recordingId?: string }>();
+    const selectedRecording = studio.recordings.find((recording) => recording.id === recordingId);
     const [isLibraryBusy, setIsLibraryBusy] = useState(false);
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
     const [restoreRequest, setRestoreRequest] = useState<{
@@ -68,7 +73,28 @@ export function RecordingStudio() {
     };
     return (
         <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6">
-            <div className="mx-auto max-w-6xl space-y-9">
+            <div className="mx-auto max-w-7xl space-y-9">
+                <nav className="flex flex-wrap items-center gap-4 text-sm" aria-label="Režim studia">
+                    <Link href="/admin/recording-studio" className="font-semibold text-cyan-800 underline">Studio · nastavení a záznamy</Link>
+                    {recordingId && <span>Příprava zdrojů pro střihače</span>}
+                </nav>
+                {recordingId && <section className="space-y-5" aria-label="Pracovní prostor záznamu">
+                    <h2 className="text-2xl font-bold">Příprava záznamu</h2>
+                    <p className="break-all text-xs text-slate-500">ID: {recordingId} · Média jsou místní pro tento prohlížeč a profil. Adresa je nepřenáší na jiný počítač.</p>
+                    {studio.errorMessage && <p role="alert">{studio.errorMessage}</p>}
+                    {isSessionBusy && <div role="status" className="space-y-3 rounded-xl border bg-white p-4">
+                        <p>Probíhá nahrávání všech zdrojů: {formatRecordingDuration(studio.elapsedSeconds)}. Příprava záznamu bude dostupná po dokončení zápisu.</p>
+                        <Button type="button" variant="destructive" disabled={!isRecording} onClick={studio.stopRecording}>{isRecording ? 'Zastavit všechny stopy' : 'Dokončuji záznam…'}</Button>
+                    </div>}
+                    {studio.phase === 'loading' ? <p role="status">Načítám místní záznam…</p> : studio.phase === 'unavailable' ? <p>Záznam nebylo možné načíst. Vyřešte uvedený problém a obnovte tuto adresu.</p> : !selectedRecording ? <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                        <h3 className="font-semibold">Místní záznam není dostupný</h3><p>Na této adrese nejsou v tomto profilu uložená média. Otevřete ji v původním prohlížeči nebo připojte složku záznamu ve studiu. Nový prázdný záznam se nevytváří.</p>
+                        <Link href="/admin/recording-studio" className="underline">Otevřít studio a obnovit ze složky</Link>
+                    </div> : studio.phase === 'idle' && <>
+                        <RecordingEditor key={selectedRecording.id} recording={selectedRecording} isDisabled={isLibraryBusy} onChange={studio.updateRecording} onUseSourceConfiguration={(reportSuccess) => requestSourceConfigurationRestore(selectedRecording, reportSuccess)} />
+                        <RecordingLibrary recordings={[selectedRecording]} isWorkspace isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
+                    </>}
+                </section>}
+                <div className={recordingId ? 'hidden' : 'contents'}>
                 <div className="max-w-3xl space-y-2"><h2 className="text-2xl font-bold">Nahrávací studio</h2><p className="text-sm leading-6 text-slate-600">Nová kamera standardně nahrává i vybraný mikrofon přímo do stejného video souboru. Mikrofon můžete vypnout nebo přidat jako samostatný zdroj. Obraz náhledu je vždy ztlumený. Zastavení nahrávání ponechá dostupné náhledy aktivní; oprávnění uvolníte samostatným tlačítkem.</p></div>
                 {studio.errorMessage && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">{studio.errorMessage}</p>}
                 {configurationRestoreMessage && <p role="status" className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950">{configurationRestoreMessage}</p>}
@@ -132,6 +158,7 @@ export function RecordingStudio() {
                     </AlertDialogContent>
                 </AlertDialog>
                 <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
+                </div>
             </div>
         </main>
     );

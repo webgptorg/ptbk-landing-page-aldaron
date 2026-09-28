@@ -28,6 +28,12 @@ it('upgrades the original IndexedDB format without losing media or trim and stre
     expect(await storage.listStudioRecordings()).toEqual([recording]);
     expect(await (await storage.readRecordingTrack(recording.id, recording.tracks[0])).text()).toBe('abcdef');
     expect(await new Response(storage.streamRecordingTrack(recording.id, recording.tracks[0])).text()).toBe('abcdef');
+    const edited = await storage.editStudioRecording(recording, 'Same stable recording', { startSeconds: 2, endSeconds: 4 });
+    const reloaded = await storage.readStudioRecording(recording.id);
+    expect(reloaded).toEqual(edited);
+    expect(reloaded?.editRecipe).toMatchObject({ schemaVersion: 1, selection: { startSeconds: 2, endSeconds: 4 }, preparedTimeZeroSessionSeconds: 2 });
+    expect(reloaded?.editRecipe?.sources[0].sourceId).toBe(recording.tracks[0].id);
+    expect(await new Response(storage.streamRecordingTrack(recording.id, recording.tracks[0])).text()).toBe('abcdef');
     await storage.deleteStudioRecording(recording.id);
     expect(await storage.listStudioRecordings()).toEqual([]);
 });

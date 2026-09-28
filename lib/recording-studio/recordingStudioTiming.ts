@@ -2,6 +2,7 @@ import {
     RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_STORAGE_RESERVE_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
     type RecordingSource, type RecordingTrack, type RecordingTrim, type StudioRecording,
 } from './recordingStudioTypes';
+import { getRecordingTrackEndSeconds } from './recordingStudioSessionTime';
 
 const RECORDING_SIZE_UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
 
@@ -21,7 +22,7 @@ export function addRecordingBytes(current: number, added: number): number {
 /** The last point for which every source has persisted data, including after recovery. */
 export function getCommonRecordingDuration(tracks: readonly RecordingTrack[]): number {
     if (tracks.length === 0 || tracks.some((track) => track.byteLength === 0)) return 0;
-    return Math.max(0, Math.min(...tracks.map((track) => track.startOffsetSeconds + track.durationSeconds)));
+    return Math.max(0, Math.min(...tracks.map(getRecordingTrackEndSeconds)));
 }
 
 /** Missing tails are expressed on the existing session clock; a crashed page cannot supply an end time. */
@@ -29,7 +30,7 @@ export function getRecordingMissingRanges(recording: StudioRecording) {
     if (recording.status !== 'interrupted') return [];
     return recording.tracks.map((track) => ({
         trackId: track.id,
-        startSeconds: track.byteLength === 0 ? 0 : track.startOffsetSeconds + track.durationSeconds,
+        startSeconds: getRecordingTrackEndSeconds(track),
         endSeconds: recording.captureEndSeconds ?? null,
     })).filter((range) => range.endSeconds === null || range.endSeconds > range.startSeconds);
 }
@@ -52,14 +53,6 @@ export function validateRecordingTrim(trim: RecordingTrim, durationSeconds: numb
         trim.endSeconds > durationSeconds || trim.endSeconds <= trim.startSeconds) {
         throw new Error('Začátek musí být před koncem a oba časy uvnitř záznamu.');
     }
-}
-
-/** All edits use the session clock; offsets retain the small difference between browser start calls. */
-export function getTrackTrim(trim: RecordingTrim, track: RecordingTrack, firstTimestamp = 0) {
-    return {
-        start: firstTimestamp + trim.startSeconds - track.startOffsetSeconds,
-        end: firstTimestamp + trim.endSeconds - track.startOffsetSeconds,
-    };
 }
 
 export function formatRecordingDuration(seconds: number): string {

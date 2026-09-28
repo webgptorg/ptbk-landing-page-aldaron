@@ -1,16 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
-import { estimateRecordingSeconds, getCommonRecordingDuration, getTrackTrim, validateRecordingTrim } from './recordingStudioTiming';
+import { estimateRecordingSeconds, getCommonRecordingDuration, validateRecordingTrim } from './recordingStudioTiming';
 import { RECORDING_STORAGE_RESERVE_BYTES } from './recordingStudioTypes';
 
 describe('shared recording timeline and quota estimates', () => {
-    it('maps one session trim to source clocks without losing start offsets', () => {
-        const recording = createTestStudioRecording();
-        const trim = { startSeconds: 2, endSeconds: 7 };
-        expect(getTrackTrim(trim, recording.tracks[0])).toEqual({ start: 2, end: 7 });
-        expect(getTrackTrim(trim, recording.tracks[1], 0.5)).toEqual({ start: 2.498, end: 7.498 });
-        expect(getTrackTrim({ startSeconds: 0, endSeconds: 5 }, recording.tracks[1]).start).toBe(-0.002);
-    });
     it.each([
         [-1, 5], [3, 3], [4, 2], [0, 11], [NaN, 5], [0, Infinity],
     ])('refuses an invalid trim %s–%s', (startSeconds, endSeconds) => {
