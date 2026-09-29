@@ -73,14 +73,23 @@ const SOURCE_READINESS_LABELS: Record<RecordingSourceReadiness, string> = {
     unavailable: 'Zdroj není dostupný; zkontrolujte výběr',
 };
 
-export function RecordingSourcePreview({ configuration, source, readiness, errorMessage, byteLength, isRecording, isBusy, sourceIndex, sourceCount, onConnect, onRemove, onMove, onSetCaptureEnabled, children }: {
+export function RecordingSourcePreview({ configuration, source, readiness, errorMessage, byteLength, isRecording, capturePhase, isBusy, sourceIndex, sourceCount,
+    isPreviewMinimized, isPreviewMuted, isMirrorPreview, onTogglePreviewMinimized, onTogglePreviewMuted, onToggleMirrorPreview,
+    onConnect, onRemove, onMove, onSetCaptureEnabled, children }: {
     readonly configuration: RecordingSourceConfiguration;
     readonly source: RecordingSource | null;
     readonly readiness: RecordingSourceReadiness;
     readonly errorMessage: string | null;
     readonly byteLength: number;
     readonly isRecording: boolean;
+    readonly capturePhase: 'recording' | 'pausing' | 'paused' | 'resuming' | 'starting' | 'stopping' | 'idle';
     readonly isBusy: boolean;
+    readonly isPreviewMinimized: boolean;
+    readonly isPreviewMuted: boolean;
+    readonly isMirrorPreview: boolean;
+    readonly onTogglePreviewMinimized: () => void;
+    readonly onTogglePreviewMuted: () => void;
+    readonly onToggleMirrorPreview: () => void;
     readonly sourceIndex: number;
     readonly sourceCount: number;
     readonly onConnect: () => Promise<void>;
@@ -90,6 +99,7 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
     readonly children?: ReactNode;
 }) {
     const videoReference = useRef<HTMLVideoElement>(null);
+    const audioReference = useRef<HTMLAudioElement>(null);
     const [isConnecting, setIsConnecting] = useState(false);
     const audioTracks = source?.stream.getAudioTracks() ?? [];
     const isAudioIncluded = audioTracks.some((track) => track.readyState === 'live');
@@ -107,18 +117,32 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
         video.srcObject = source.stream;
         return () => { video.srcObject = null; };
     }, [source]);
+    useEffect(() => {
+        const audio = audioReference.current;
+        if (!audio || !source) return;
+        audio.srcObject = source.stream;
+        return () => { audio.srcObject = null; };
+    }, [source]);
     const Icon = SOURCE_ICONS[configuration.kind];
     const microphoneName = source?.microphoneLabel || configuration.microphoneDeviceLabel || 'Výchozí mikrofon systému';
     const isVideoSource = configuration.kind !== 'microphone';
 
     return (
         <article className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-            <div className="relative flex aspect-video items-center justify-center bg-slate-950">
+            <div className={`relative flex items-center justify-center bg-slate-950 ${isPreviewMinimized ? 'min-h-20' : 'aspect-video'}`}>
                 {isVideoSource && source
-                    ? <video ref={videoReference} autoPlay muted playsInline className="h-full w-full object-contain" aria-label={`Ztlumený živý náhled: ${configuration.label}`} />
+                    ? <video ref={videoReference} autoPlay muted={isPreviewMuted} playsInline className={`h-full w-full object-contain ${isPreviewMinimized ? 'absolute h-px w-px opacity-0' : ''} ${isMirrorPreview ? '-scale-x-100' : ''}`} aria-label={`Živý náhled: ${configuration.label}`} />
                     : <Icon className="h-12 w-12 text-cyan-300" aria-hidden="true" />}
+                {!isVideoSource && source && <audio ref={audioReference} autoPlay muted={isPreviewMuted} aria-label={`Živý zvuk: ${configuration.label}`} />}
+                {isPreviewMinimized && <span className="text-xs text-slate-200">Náhled minimalizován · zdroj zůstává zapnutý</span>}
                 <span className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs font-medium ${isSourceLive ? 'bg-emerald-950/80 text-emerald-100' : 'bg-slate-800 text-slate-200'}`}>
-                    {!configuration.isCaptureEnabled ? 'Vypnuto' : isRecording && isReady ? 'Nahrává' : isSourceLive ? 'Náhled aktivní' : SOURCE_READINESS_LABELS[currentReadiness]}
+                    {!configuration.isCaptureEnabled ? 'Vypnuto' : !isReady ? SOURCE_READINESS_LABELS[currentReadiness]
+                        : capturePhase === 'starting' ? 'Připravuji záznam…'
+                        : capturePhase === 'stopping' ? 'Dokončuji a ukládám…'
+                        : capturePhase === 'pausing' ? 'Pozastavuji a ukládám…'
+                        : capturePhase === 'paused' ? 'Pauza · pouze živý náhled'
+                        : capturePhase === 'resuming' ? 'Obnovuji záznam…'
+                        : isRecording ? 'Nahrává' : isSourceLive ? 'Náhled aktivní' : SOURCE_READINESS_LABELS[currentReadiness]}
                 </span>
             </div>
             <div className="space-y-3 p-4">
@@ -152,8 +176,13 @@ export function RecordingSourcePreview({ configuration, source, readiness, error
                         <div className="h-full rounded-full bg-cyan-600 transition-[width]" style={{ width: `${audioLevel ?? 0}%` }} />
                     </div>
                 </div>}
-                {isVideoSource && source?.stream.getAudioTracks().length ? <p className="text-xs text-slate-500">Náhled obrazu je ztlumený; zvuk se dál ukládá do souboru.</p> : null}
+                {isVideoSource && source?.stream.getAudioTracks().length ? <p className="text-xs text-slate-500">{isPreviewMuted ? 'Náhled je ztlumený.' : 'Zvuk živého náhledu je zapnutý.'} Tato volba nemění zvuk v souboru.</p> : null}
                 {isRecording && source && <p className="text-xs text-slate-500">Uloženo {formatRecordingBytes(byteLength)}</p>}
+                <div className="flex flex-wrap gap-2 text-xs">
+                    <Button type="button" variant="outline" size="sm" aria-pressed={isPreviewMinimized} onClick={onTogglePreviewMinimized}>{isPreviewMinimized ? 'Zvětšit náhled' : 'Minimalizovat náhled'}</Button>
+                    {isAudioIncluded && <Button type="button" variant="outline" size="sm" aria-pressed={!isPreviewMuted} onClick={onTogglePreviewMuted}>{isPreviewMuted ? 'Zapnout poslech' : 'Ztlumit poslech'}</Button>}
+                    {configuration.kind === 'camera' && <Button type="button" variant="outline" size="sm" aria-pressed={isMirrorPreview} onClick={onToggleMirrorPreview}>{isMirrorPreview ? 'Zrušit zrcadlení náhledu' : 'Zrcadlit náhled'}</Button>}
+                </div>
                 {currentErrorMessage && <p role="alert" className="rounded bg-red-50 p-2 text-xs leading-5 text-red-800">{currentErrorMessage}</p>}
                 <div className="flex flex-wrap gap-2">
                     {configuration.isCaptureEnabled && !isReady && <Button type="button" variant="outline" size="sm" disabled={isBusy || isConnecting} onClick={() => {

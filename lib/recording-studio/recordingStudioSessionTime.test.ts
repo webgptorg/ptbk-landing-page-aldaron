@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
-import { createRecordingEditRecipe, formatRecordingTimecode, getRecordingPreparationRange, getRecordingSessionDuration, getRecordingTrackSegments, getRecordingUnavailableRanges, sessionToRecordingMediaTime } from './recordingStudioSessionTime';
+import { createRecordingEditRecipe, formatRecordingTimecode, getRecordingAvailableRanges, getRecordingMediaParts, getRecordingPartAtTime, getRecordingPartForSelection, getRecordingPartTrack, getRecordingPreparationRange, getRecordingSessionDuration, getRecordingTrackSegments, getRecordingUnavailableRanges, sessionToRecordingMediaTime } from './recordingStudioSessionTime';
 
 describe('source preparation time model', () => {
     const recording = createTestStudioRecording();
@@ -15,7 +15,7 @@ describe('source preparation time model', () => {
         expect(sessionToRecordingMediaTime(track, 35_555.55, 0.08)).toBeCloseTo(35_555.36, 6);
     });
     it('retains startup, internal and short encoder gaps without sliding later material left', () => {
-        const segmented = { ...track, segments: [
+        const segmented = { ...track, durationSeconds: 8, segments: [
             { sourceStartSeconds: 0, sessionStartSeconds: 1, durationSeconds: 3 },
             { sourceStartSeconds: 3, sessionStartSeconds: 8, durationSeconds: 5 },
         ] };
@@ -28,6 +28,21 @@ describe('source preparation time model', () => {
         ]);
         expect(() => getRecordingPreparationRange(segmented, { startSeconds: 3, endSeconds: 9 }, 0, 8)).toThrow('chybějící');
         expect(getRecordingPreparationRange(segmented, { startSeconds: 8.5, endSeconds: 10 }, 0.1, 8.1)).toEqual({ start: 3.5999999999999996, end: 5.1 });
+        const legacyPart = getRecordingMediaParts(segmented)[0];
+        expect(getRecordingPartAtTime(segmented, 5)).toBeNull();
+        expect(getRecordingPartAtTime(segmented, 9)).toEqual(legacyPart);
+        expect(getRecordingPartForSelection(segmented, { startSeconds: 8.5, endSeconds: 10 })).toEqual(legacyPart);
+        expect(getRecordingPartForSelection(segmented, { startSeconds: 3, endSeconds: 9 })).toBeNull();
+        expect(getRecordingAvailableRanges({ ...segmented, parts: [legacyPart] })).toEqual([
+            { startSeconds: 1, endSeconds: 4 }, { startSeconds: 8, endSeconds: 13 },
+        ]);
+        expect(sessionToRecordingMediaTime(getRecordingPartTrack(segmented, legacyPart), 9)).toBe(4);
+        expect(getRecordingTrackSegments({ ...segmented, parts: [legacyPart, { ...legacyPart, id: 'appended',
+            segments: undefined, sessionStartSeconds: 13, durationSeconds: 2 }] })).toEqual([
+            { sourceStartSeconds: 0, sessionStartSeconds: 1, durationSeconds: 3 },
+            { sourceStartSeconds: 3, sessionStartSeconds: 8, durationSeconds: 5 },
+            { sourceStartSeconds: 8, sessionStartSeconds: 13, durationSeconds: 2 },
+        ]);
     });
     it('exposes longer committed tails and never advertises an empty source as playable', () => {
         expect(getRecordingSessionDuration({ ...recording, tracks: [track], captureEndSeconds: 36_001 })).toBe(36_001);

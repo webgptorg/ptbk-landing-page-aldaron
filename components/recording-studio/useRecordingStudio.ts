@@ -8,7 +8,8 @@ import { clearRecordingSourceConfigurations, loadRecordingSourceConfigurations, 
 import { runWithRecordingStudioLock } from '@/lib/recording-studio/recordingStudioLock';
 import { estimateRecordingStorage, getRecordingStorageErrorMessage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
 import { chooseRecordingDirectory } from '@/lib/recording-studio/recordingStudioDirectory';
-import { importStudioRecordingDirectory, recoverStudioRecordings, resetRecordingDirectoryCache } from '@/lib/recording-studio/recordingStudioStorage';
+import { importStudioRecordingDirectory, readStudioRecording, recoverStudioRecordings, resetRecordingDirectoryCache } from '@/lib/recording-studio/recordingStudioStorage';
+import { getRecordingSessionDuration } from '@/lib/recording-studio/recordingStudioSessionTime';
 import { RecordingBitrateMeter } from '@/lib/recording-studio/recordingStudioTiming';
 import {
     type RecordingPersistence, type RecordingSource, type RecordingSourceConfiguration, type RecordingSourceReadiness, type StudioRecording,
@@ -67,10 +68,10 @@ export function useRecordingStudio() {
     const bitrateMeter = useRef(new RecordingBitrateMeter());
     const [measuredBytesPerSecond, setMeasuredBytesPerSecond] = useState<number | null>(null);
     const [pendingBytes, setPendingBytes] = useState(0);
-    const [phase, setPhase] = useState<'loading' | 'idle' | 'starting' | 'recording' | 'stopping' | 'unavailable'>('loading');
+    const [phase, setPhase] = useState<'loading' | 'idle' | 'starting' | 'recording' | 'pausing' | 'paused' | 'resuming' | 'stopping' | 'unavailable'>('loading');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
-    const runtime = useRef({ isDisposed: false, isAddingSource: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] });
+    const runtime = useRef({ isDisposed: false, isAddingSource: false, isStartPending: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] });
 
     const refreshStorage = useCallback((): Promise<void> => {
         // A deletion/finalization may occur while a poll is in flight. Sample again after that older request.
@@ -87,7 +88,7 @@ export function useRecordingStudio() {
     }, []);
 
     useEffect(() => {
-        const current = { isDisposed: false, isAddingSource: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] };
+        const current = { isDisposed: false, isAddingSource: false, isStartPending: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] };
         runtime.current = current;
         if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined' || !window.indexedDB || !navigator.locks) {
             setErrorMessage('Studio potřebuje HTTPS (nebo localhost), snímání médií, MediaRecorder, IndexedDB a zámky prohlížeče. Otevřete ho v podporovaném aktuálním prohlížeči.');
@@ -148,7 +149,7 @@ export function useRecordingStudio() {
     }, [refreshStorage]);
 
     useEffect(() => {
-        if (phase !== 'recording') return;
+        if (phase !== 'recording' && phase !== 'paused' && phase !== 'pausing') return;
         const update = () => {
             setElapsedSeconds(runtime.current.capture?.elapsedRecordingSeconds ?? 0);
             setMeasuredBytesPerSecond(bitrateMeter.current.read());
@@ -386,16 +387,24 @@ export function useRecordingStudio() {
         };
     };
 
-    const startRecording = () => {
+    const startRecording = (appendTo?: StudioRecording, isSourceSetChangeAllowed = false) => {
         const current = runtime.current;
         const enabledConfigurations = current.sourceConfigurations.filter(({ isCaptureEnabled }) => isCaptureEnabled);
         const recordingSources = enabledConfigurations.map((configuration) => current.sources.find((source) =>
             matchesRecordingSourceConfiguration(source, configuration) && isRecordingSourceReady(source),
         )).filter((source): source is RecordingSource => source !== undefined);
-        if (phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current ||
+        if (phase !== 'idle' || current.capture || current.isStartPending || current.isAddingSource || directoryOperation.current ||
             enabledConfigurations.length === 0 || recordingSources.length !== enabledConfigurations.length) return;
+        const latestTake = appendTo?.takes?.[appendTo.takes.length - 1];
+        const previousSourceIds = latestTake?.sourceIds ?? appendTo?.tracks.map((track) => track.id) ?? [];
+        if (appendTo && (appendTo.status !== 'complete' || (!isSourceSetChangeAllowed &&
+            JSON.stringify([...previousSourceIds].sort()) !== JSON.stringify([...recordingSources.map((source) => source.id)].sort())))) {
+            setErrorMessage('Donahrání vyžaduje připravenou původní sadu zdrojů. Změnu sady potvrďte výslovně.');
+            return;
+        }
+        current.isStartPending = true;
         setErrorMessage(null);
-        setElapsedSeconds(0);
+        setElapsedSeconds(appendTo ? getRecordingSessionDuration(appendTo) : 0);
         setActiveRecording(null);
         bitrateMeter.current = new RecordingBitrateMeter(); setMeasuredBytesPerSecond(null); setPendingBytes(0);
         setPhase('starting');
@@ -404,19 +413,24 @@ export function useRecordingStudio() {
             try {
                 const estimate = await estimateRecordingStorage();
                 setStorage(estimate);
-                if (!directoryReference.current && isRecordingOriginStorageLow(estimate)) throw new Error('Prohlížeč hlásí málo prostoru pro web. Zvolte dostupnou složku nebo uvolněte prostor po záloze záznamů.');
+                if (!(appendTo?.storageDestination || directoryReference.current) && isRecordingOriginStorageLow(estimate)) throw new Error('Prohlížeč hlásí málo prostoru pro web. Zvolte dostupnou složku nebo uvolněte prostor po záloze záznamů.');
                 if (current.isDisposed) return;
+                const savedProject = appendTo ? await readStudioRecording(appendTo.id) : undefined;
+                if (appendTo && !savedProject) throw new Error('Místní projekt není dostupný pro donahrání.');
                 const capture = new RecordingStudioCapture({
-                    directory: directoryReference.current,
+                    directory: appendTo ? null : directoryReference.current,
+                    existingRecording: savedProject,
+                    isSourceSetChangeAllowed,
                     onProgress: (recording) => {
                         if (!current.isDisposed) { setActiveRecording(recording); setMeasuredBytesPerSecond(bitrateMeter.current.update(recording)); }
                     },
                     onPendingBytes: (bytes) => { if (!current.isDisposed) setPendingBytes(bytes); },
                     onStopping: () => { if (!current.isDisposed) setPhase('stopping'); },
+                    onPhaseChange: (nextPhase) => { if (!current.isDisposed) setPhase(nextPhase); },
                 });
                 current.capture = capture;
                 await capture.start(recordingSources);
-                if (!current.isDisposed) setPhase((previous) => previous === 'starting' ? 'recording' : previous);
+                if (!current.isDisposed) setPhase(capture.currentPhase);
                 const recording = await capture.finished;
                 if (recording && !current.isDisposed) {
                     setRecordings((previous) => [recording, ...previous.filter((item) => item.id !== recording.id)]);
@@ -427,6 +441,7 @@ export function useRecordingStudio() {
             } catch (error) {
                 if (!current.isDisposed) setErrorMessage(getRecordingErrorMessage(error));
             } finally {
+                current.isStartPending = false;
                 current.capture = null;
                 if (!current.isDisposed) {
                     setSources([...current.sources]);
@@ -462,6 +477,8 @@ export function useRecordingStudio() {
         requestPersistence: async () => { setPersistence(await requestRecordingPersistence()); await refreshStorage(); },
         addSource, connectSource, removeSource, moveSource, setSourceCaptureEnabled, resetSourceConfigurations, releaseSources, restoreSourceConfiguration, startRecording,
         stopRecording: () => { void runtime.current.capture?.stop(); },
+        pauseRecording: () => { void runtime.current.capture?.pause(); },
+        resumeRecording: () => { runtime.current.capture?.resume(); },
         setErrorMessage, refreshStorage,
         updateRecording: (recording: StudioRecording) => setRecordings((previous) => previous.map((item) => item.id === recording.id ? recording : item)),
         removeRecording: (recordingId: string) => setRecordings((previous) => previous.filter((item) => item.id !== recordingId)),

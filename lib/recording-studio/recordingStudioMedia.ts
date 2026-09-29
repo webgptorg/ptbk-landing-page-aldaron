@@ -34,6 +34,13 @@ export async function inspectRecordingMedia(input: Input, expectedTrack?: Record
     };
 }
 
+/** Reads timing metadata from a closed playable part; Blob references do not copy its full media bytes. */
+export async function inspectRecordingBlob(blob: Blob, expectedTrack: RecordingTrack): Promise<RecordingMediaBounds> {
+    const input = openRecordingMedia(blob);
+    try { return await inspectRecordingMedia(input, expectedTrack); }
+    finally { input.dispose(); }
+}
+
 /** Bounded sparse samples, never decodeAudioData on an entire ten-hour source. */
 export async function readRecordingMediaArtwork(input: Input, bounds: RecordingMediaBounds, signal: AbortSignal): Promise<RecordingMediaArtwork> {
     const thumbnails: { seconds: number; url: string }[] = [];

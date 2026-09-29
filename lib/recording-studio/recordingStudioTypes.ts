@@ -43,6 +43,35 @@ export type RecordingTimeSegment = {
     readonly durationSeconds: number;
 };
 
+/** One independently playable, immutable MediaRecorder run. Its ID is the storage key. */
+export type RecordingMediaPart = {
+    readonly id: string;
+    readonly takeId: string;
+    readonly sessionStartSeconds: number;
+    readonly durationSeconds: number;
+    readonly byteLength: number;
+    readonly chunkCount: number;
+    readonly mimeType: string;
+    /** Legacy single-file recordings can map several separated session intervals into one file. */
+    readonly segments?: readonly RecordingTimeSegment[];
+    /** Capture settings belong to this file; a later take may change camera audio. */
+    readonly isAudioIncluded?: boolean;
+    readonly width?: number | null;
+    readonly height?: number | null;
+    readonly frameRate?: number | null;
+    /** Decoded container bounds, measured after the recorder's final chunk was committed. */
+    readonly mediaBounds?: RecordingMediaBounds;
+};
+
+export type RecordingTake = {
+    readonly id: string;
+    readonly startedAt: string;
+    readonly sessionStartSeconds: number;
+    readonly durationSeconds: number;
+    readonly sourceIds: readonly string[];
+    readonly sourceConfiguration?: readonly RecordingSourceConfiguration[];
+};
+
 export type RecordingEditRecipe = {
     readonly schemaVersion: 1;
     readonly timeUnit: 'seconds';
@@ -80,6 +109,8 @@ export type RecordingTrack = {
     /** Missing on older takes. On camera files, the microphone which supplied embedded audio. */
     readonly audioSourceLabel?: string | null;
     readonly segments?: readonly RecordingTimeSegment[];
+    /** Absent on legacy single-file recordings. Parts are never concatenated as container bytes. */
+    readonly parts?: readonly RecordingMediaPart[];
 };
 
 export type StudioRecording = {
@@ -89,6 +120,7 @@ export type StudioRecording = {
     readonly status: 'recording' | 'complete' | 'interrupted';
     readonly durationSeconds: number;
     readonly tracks: readonly RecordingTrack[];
+    readonly takes?: readonly RecordingTake[];
     readonly trim: RecordingTrim | null;
     readonly editRecipe?: RecordingEditRecipe;
     readonly errorMessage: string | null;
@@ -102,6 +134,7 @@ export type StudioRecording = {
 
 export type RecordingArchiveTrack = RecordingTrack & {
     readonly originalFile: string | null;
+    readonly originalParts?: readonly { readonly partId: string; readonly takeId: string; readonly file: string; readonly sessionStartSeconds: number; readonly durationSeconds: number }[];
     readonly trimmedFile: string | null;
     /** Present when the export inspected the container, distinct from recorder-observed times. */
     readonly originalMedia?: RecordingMediaBounds;
@@ -118,7 +151,7 @@ export type RecordingArchiveTrack = RecordingTrack & {
     };
 };
 
-export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds' | 'sourceConfiguration'> & {
+export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds' | 'sourceConfiguration' | 'takes'> & {
     readonly schemaVersion: 3;
     readonly timeUnit: 'seconds';
     readonly editRecipe: RecordingEditRecipe;

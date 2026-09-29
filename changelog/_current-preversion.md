@@ -1,5 +1,17 @@
 # Current preversion
 
+- Extended the shared recording workspace with a persistent live monitor (grid, focused source, pinned source,
+  optional tile hiding/minimizing, preview sound and camera mirroring). Those display settings never change armed
+  capture sources or raw files. A single guarded Pause/Resume closes every source into independently playable,
+  durably checkpointed parts and resumes them on a recorded-content clock without paused wall time. Failed
+  restart, device loss or storage failure interrupts the entire take and retains committed parts. Editing now has
+  **Donahrát do tohoto projektu**: it restores the intended sources, waits for renewed permissions and explicit
+  Start, then appends a new take under the same recording ID. Old media and edits remain; an untouched full range
+  extends while a custom trim remains fixed. ZIP manifests carry take/part identities, timing and real source gaps.
+  Closed parts carry measured encoded bounds and their own camera audio/video settings; shorter tails and older
+  single-file timeline gaps remain explicit. Source reuse for a different new recording remains a separate action. Design and verification evidence are in
+  `docs/recording-studio-monitoring-pause-append.md`.
+
 - Replaced the recording-detail modal with an authenticated preparation workspace at
   `/admin/recording-studio/<recordingId>`, reusing the studio shell, browser lock, stable IDs and local media.
   All camera, screen and audio sources now share a zoomable timeline, decoded thumbnails/sparse audio samples,

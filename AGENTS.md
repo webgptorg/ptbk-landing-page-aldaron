@@ -257,6 +257,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   larger prepared files need a disk stream. Individual originals are downloadable when a large ZIP cannot stream
   to disk; export and OPFS temporary-space needs are disclosed. Capture and export reuse admin navigation/sign-out/reload protection. No server or
   database storage is added.
+  The same workspace offers a responsive live monitor with grid, focus and pinned-source layouts; hidden or
+  minimized previews, preview sound and camera mirror preferences are browser-local presentation settings and never
+  alter armed recorder sources or raw files. One global pause closes and commits independently playable parts for
+  every source, freezes the shared recorded-content clock, and resumes with a new aligned part set. Failure of one
+  required source interrupts the entire take. Closed parts use measured encoded bounds for the next shared
+  boundary and retain per-part audio and video settings; shorter tails remain timeline gaps. From editing,
+  `Donahrát` explicitly restores the latest intended
+  source setup and appends a new take at the same project's recorded end after a separate Start; source-set changes
+  require explicit confirmation and appear as timeline gaps. Existing raw parts and custom trim boundaries remain;
+  an untouched full-session range extends to the new end. Configuration reuse for a new recording remains distinct.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
   by `/[shortcode]`; `/shortener` redirects to the admin page.

@@ -1,19 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RecordingStudioCapture } from './RecordingStudioCapture';
+import { createRecordingEditRecipe, getRecordingSelection, getRecordingUnavailableRanges } from './recordingStudioSessionTime';
 import { RECORDING_MAX_PENDING_BYTES, type RecordingSource, type StudioRecording } from './recordingStudioTypes';
 
-const STORAGE = vi.hoisted(() => ({ append: vi.fn(), save: vi.fn() }));
-vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save, createStudioRecording: async (recording: StudioRecording) => { await STORAGE.save(recording); return recording; } }));
+const STORAGE = vi.hoisted(() => ({ append: vi.fn(), save: vi.fn(), readPart: vi.fn() }));
+const MEDIA = vi.hoisted(() => ({ inspect: vi.fn() }));
+vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save, readRecordingPart: STORAGE.readPart,
+    createStudioRecording: async (recording: StudioRecording) => { await STORAGE.save(recording); return recording; } }));
+vi.mock('./recordingStudioMedia', () => ({ inspectRecordingBlob: MEDIA.inspect }));
 
 class TestRecorder {
     static readonly instances: TestRecorder[] = [];
+    static failStartAt = -1;
     static isTypeSupported = (_mimeType: string) => true;
     public state = 'inactive';
     public mimeType: string;
     public ondataavailable: ((event: { data: Blob }) => void) | null = null;
     public onstop: (() => void) | null = null;
     public onerror: (() => void) | null = null;
-    public start = vi.fn(() => { this.state = 'recording'; });
+    public start = vi.fn(() => {
+        if (TestRecorder.instances.indexOf(this) === TestRecorder.failStartAt) throw new Error('Synthetic recorder start failure');
+        this.state = 'recording';
+    });
     public stop = vi.fn(() => {
         this.state = 'inactive';
         queueMicrotask(() => { this.emit('tail'); this.onstop?.(); });
@@ -23,8 +31,8 @@ class TestRecorder {
 }
 
 function makeSource(id: string, isAudioIncluded = false): RecordingSource {
-    const videoTrack = Object.assign(new EventTarget(), { kind: 'video', readyState: 'live', muted: false, label: id, getSettings: () => ({ width: 640, height: 480, frameRate: 30 }) });
-    const audioTrack = Object.assign(new EventTarget(), { kind: 'audio', readyState: 'live', muted: false, label: 'Fixture microphone', getSettings: () => ({ deviceId: 'fixture-mic' }) });
+    const videoTrack = Object.assign(new EventTarget(), { kind: 'video', readyState: 'live', muted: false, label: id, stop: vi.fn(), getSettings: () => ({ width: 640, height: 480, frameRate: 30 }) });
+    const audioTrack = Object.assign(new EventTarget(), { kind: 'audio', readyState: 'live', muted: false, label: 'Fixture microphone', stop: vi.fn(), getSettings: () => ({ deviceId: 'fixture-mic' }) });
     const audioTracks = isAudioIncluded ? [audioTrack] : [];
     return {
         id, kind: 'camera', label: id, cameraDeviceId: '', cameraDeviceLabel: null,
@@ -36,8 +44,19 @@ function makeSource(id: string, isAudioIncluded = false): RecordingSource {
 }
 
 describe('multi-source capture barriers and durable failure handling', () => {
-    beforeEach(() => { TestRecorder.instances.length = 0; vi.stubGlobal('MediaRecorder', TestRecorder); STORAGE.append.mockReset().mockResolvedValue(undefined); STORAGE.save.mockReset().mockResolvedValue(undefined); });
-    afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+    beforeEach(() => {
+        TestRecorder.instances.length = 0; TestRecorder.failStartAt = -1; vi.stubGlobal('MediaRecorder', TestRecorder);
+        STORAGE.append.mockReset().mockResolvedValue(undefined); STORAGE.save.mockReset().mockResolvedValue(undefined);
+        STORAGE.readPart.mockReset().mockResolvedValue(new Blob(['encoded']));
+        MEDIA.inspect.mockReset().mockImplementation(async (_blob: Blob, track: { durationSeconds: number; kind: string; isAudioIncluded: boolean }) => {
+            const durationSeconds = Math.max(0.001, track.durationSeconds);
+            const components = track.kind === 'microphone' ? [{ kind: 'audio', firstTimestampSeconds: 0, endTimestampSeconds: durationSeconds }]
+                : [{ kind: 'video', firstTimestampSeconds: 0, endTimestampSeconds: durationSeconds },
+                    ...(track.isAudioIncluded ? [{ kind: 'audio', firstTimestampSeconds: 0, endTimestampSeconds: durationSeconds }] : [])];
+            return { firstTimestampSeconds: 0, availableStartTimestampSeconds: 0, endTimestampSeconds: durationSeconds, components };
+        });
+    });
+    afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
     it('starts/stops every source together and waits for the last data event and its disk write', async () => {
         const onProgress = vi.fn();
@@ -56,7 +75,7 @@ describe('multi-source capture barriers and durable failure handling', () => {
         const result = finish.mock.calls[0][0] as StudioRecording;
         expect(result.status).toBe('complete');
         expect(result.tracks.map((track) => [track.byteLength, track.chunkCount])).toEqual([[4, 1], [4, 1]]);
-        expect(STORAGE.append.mock.calls.map((call) => [call[1], call[2]])).toEqual([['one', 0], ['two', 0]]);
+        expect(STORAGE.append.mock.calls.map((call) => [call[1], call[2]])).toEqual(result.tracks.map((track) => [track.parts?.[0].id, 0]));
     });
 
     it('records a sound-enabled camera into one supported video/audio file and saves audio metadata', async () => {
@@ -67,6 +86,39 @@ describe('multi-source capture barriers and durable failure handling', () => {
         const result = await capture.stop();
         expect(result?.tracks[0]).toMatchObject({ isAudioIncluded: true, audioSourceLabel: 'Fixture microphone' });
         expect(result?.sourceConfiguration?.[0]).toMatchObject({ isAudioEnabled: true, microphoneDeviceId: 'fixture-mic' });
+    });
+
+    it('keeps each appended camera part\'s audio setting when an explicit replacement is video-only', async () => {
+        const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await first.start([makeSource('camera', true)]);
+        const original = await first.stop();
+        expect(original?.status).toBe('complete');
+        const second = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), existingRecording: original! });
+        await second.start([makeSource('camera', false)]);
+        const appended = await second.stop();
+        expect(appended?.status).toBe('complete');
+        expect(appended?.tracks[0].parts?.map((part) => part.isAudioIncluded)).toEqual([true, false]);
+        expect(appended?.tracks[0].parts?.map((part) => part.frameRate)).toEqual([30, 30]);
+        expect(MEDIA.inspect.mock.calls.map((call) => call[1].isAudioIncluded)).toEqual([true, false]);
+    });
+
+    it('rejects reusing a source identity for another kind during append', async () => {
+        const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await first.start([makeSource('camera')]);
+        const original = await first.stop();
+        const second = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), existingRecording: original!, isSourceSetChangeAllowed: true });
+        await second.start([{ ...makeSource('camera'), kind: 'screen' }]);
+        expect(await second.finished).toBeNull();
+        expect(second.failureMessage).toContain('stejnou identitou');
+        expect(original?.status).toBe('complete');
+    });
+
+    it('rejects duplicate source identities before recording any data', async () => {
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera'), makeSource('camera')]);
+        expect(await capture.finished).toBeNull();
+        expect(capture.failureMessage).toContain('duplicitní identitu');
+        expect(TestRecorder.instances).toHaveLength(0);
     });
 
     it('refuses to start a configured camera when its required microphone track is missing', async () => {
@@ -221,7 +273,7 @@ describe('multi-source capture barriers and durable failure handling', () => {
         await capture.start([makeSource('one')]);
         expect(await capture.finished).toBeNull();
         expect(capture.failureMessage).toContain('Oprávnění k úložišti');
-        expect(TestRecorder.instances[0].start).not.toHaveBeenCalled();
+        expect(TestRecorder.instances).toHaveLength(0);
     });
 
     it('never calls the session complete when a recorder supplied no media', async () => {
@@ -232,5 +284,209 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result?.status).toBe('interrupted');
         expect(result?.errorMessage).toContain('two');
         expect(result?.tracks.map((track) => track.byteLength)).toEqual([4, 0]);
+    });
+
+    it('closes every source at the same global pause boundary and excludes paused wall time', async () => {
+        let clockMilliseconds = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => clockMilliseconds);
+        const phases: string[] = [];
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onPhaseChange: (phase) => phases.push(phase) });
+        await capture.start([makeSource('camera', true), makeSource('screen'), makeSource('microphone')]);
+        clockMilliseconds = 1_000;
+        await Promise.all([capture.pause(), capture.pause()]);
+        expect(capture.currentPhase).toBe('paused');
+        expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
+        expect(capture.elapsedRecordingSeconds).toBe(1);
+        clockMilliseconds = 6_000;
+        expect(capture.elapsedRecordingSeconds).toBe(1);
+        capture.resume();
+        expect(TestRecorder.instances.slice(3).every((recorder) => recorder.state === 'recording')).toBe(true);
+        clockMilliseconds = 8_000;
+        const result = await capture.stop();
+        expect(result?.status).toBe('complete');
+        expect(result?.durationSeconds).toBe(3);
+        expect(result?.tracks.every((track) => track.parts?.length === 2)).toBe(true);
+        expect(result?.tracks.every((track) => track.parts?.[1].sessionStartSeconds === 1)).toBe(true);
+        expect(result?.tracks.every((track) => track.parts?.[1].durationSeconds === 2)).toBe(true);
+        expect(result?.tracks[0].isAudioIncluded).toBe(true);
+        expect(phases).toContain('pausing');
+        expect(phases).toContain('paused');
+        expect(phases).toContain('resuming');
+    });
+
+    it('releases a recorder still gathering when its stop event never confirms the pause', async () => {
+        const sources = [makeSource('camera'), makeSource('stalled screen')];
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start(sources);
+        const stalledRecorder = TestRecorder.instances[1];
+        stalledRecorder.stop = vi.fn();
+        vi.useFakeTimers();
+        const pause = capture.pause();
+        await vi.advanceTimersByTimeAsync(15_000);
+        await pause;
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('stalled screen');
+        expect(stalledRecorder.stop).toHaveBeenCalledTimes(2);
+        expect(sources[1].stream.getTracks()[0].stop).toHaveBeenCalledOnce();
+    });
+
+    it('moves the shared pause boundary to committed media timestamps and exposes a shorter source as a gap', async () => {
+        let clockMilliseconds = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => clockMilliseconds);
+        const bounds = (endTimestampSeconds: number) => ({ firstTimestampSeconds: 0, availableStartTimestampSeconds: 0,
+            endTimestampSeconds, components: [{ kind: 'video', firstTimestampSeconds: 0, endTimestampSeconds }] });
+        MEDIA.inspect.mockResolvedValueOnce(bounds(1.4)).mockResolvedValueOnce(bounds(1.1));
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera'), makeSource('screen')]);
+        clockMilliseconds = 1_000;
+        await capture.pause();
+        expect(capture.elapsedRecordingSeconds).toBe(1.4);
+        clockMilliseconds = 5_000;
+        expect(capture.elapsedRecordingSeconds).toBe(1.4);
+        capture.resume();
+        clockMilliseconds = 6_000;
+        const result = (await capture.stop())!;
+        expect(result.durationSeconds).toBeCloseTo(2.4, 3);
+        expect(result.tracks.every((track) => track.parts?.[1].sessionStartSeconds === 1.4)).toBe(true);
+        expect(getRecordingUnavailableRanges(result.tracks[1], 2.4)).toContainEqual({ startSeconds: 1.1, endSeconds: 1.4 });
+    });
+
+    it('appends a new take under the same project ID and preserves a custom trim', async () => {
+        let clockMilliseconds = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => clockMilliseconds);
+        const sources = [makeSource('camera'), makeSource('screen'), makeSource('microphone')];
+        const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await first.start(sources);
+        clockMilliseconds = 4_000;
+        const original = await first.stop();
+        expect(original?.status).toBe('complete');
+        const edited = { ...original!, trim: { startSeconds: 1, endSeconds: 3 } };
+        const appended = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), existingRecording: edited });
+        clockMilliseconds = 10_000;
+        await appended.start(sources);
+        clockMilliseconds = 12_000;
+        const result = await appended.stop();
+        expect(result?.id).toBe(original?.id);
+        expect(result?.tracks.map((track) => track.id)).toEqual(original?.tracks.map((track) => track.id));
+        expect(result?.takes).toHaveLength(2);
+        expect(result?.tracks.every((track) => track.parts?.length === 2)).toBe(true);
+        expect(result?.tracks.every((track) => track.parts?.[1].sessionStartSeconds === 4)).toBe(true);
+        expect(result?.trim).toEqual({ startSeconds: 1, endSeconds: 3 });
+        expect(result?.durationSeconds).toBe(6);
+    });
+
+    it('extends a full-session selection and leaves explicit source changes as lane gaps', async () => {
+        let clockMilliseconds = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => clockMilliseconds);
+        const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await first.start([makeSource('camera'), makeSource('former microphone')]);
+        clockMilliseconds = 2_000;
+        const original = await first.stop();
+        const appended = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(),
+            existingRecording: { ...original!, trim: { startSeconds: 0, endSeconds: 2 } }, isSourceSetChangeAllowed: true });
+        clockMilliseconds = 5_000;
+        await appended.start([makeSource('camera'), makeSource('new screen')]);
+        clockMilliseconds = 7_000;
+        const result = (await appended.stop())!;
+        expect(result.tracks.map((track) => track.id)).toEqual(['camera', 'former microphone', 'new screen']);
+        expect(result.trim).toEqual({ startSeconds: 0, endSeconds: 4 });
+        expect(getRecordingSelection(result)).toEqual({ startSeconds: 0, endSeconds: 4 });
+        expect(getRecordingUnavailableRanges(result.tracks[1], 4)).toEqual([{ startSeconds: 2, endSeconds: 4 }]);
+        expect(getRecordingUnavailableRanges(result.tracks[2], 4)).toEqual([{ startSeconds: 0, endSeconds: 2 }]);
+    });
+
+    it('extends a legacy full-session recipe whose trim field is absent', async () => {
+        let clockMilliseconds = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => clockMilliseconds);
+        const source = makeSource('camera');
+        const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await first.start([source]);
+        clockMilliseconds = 2_000;
+        const original = (await first.stop())!;
+        const previous = { ...original, editRecipe: createRecordingEditRecipe(original) };
+        const appended = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), existingRecording: previous });
+        clockMilliseconds = 4_000;
+        await appended.start([source]);
+        clockMilliseconds = 6_000;
+        const result = (await appended.stop())!;
+
+        expect(result.trim).toEqual({ startSeconds: 0, endSeconds: 4 });
+        expect(result.editRecipe?.selection).toEqual(result.trim);
+    });
+
+    it('leaves a complete project untouched when a new take has no supported recorder codec', async () => {
+        const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await first.start([makeSource('camera')]);
+        const original = (await first.stop())!;
+        STORAGE.save.mockClear();
+        vi.spyOn(TestRecorder, 'isTypeSupported').mockReturnValue(false);
+        const append = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), existingRecording: original });
+        await append.start([makeSource('camera')]);
+        expect(await append.finished).toBeNull();
+        expect(STORAGE.save).not.toHaveBeenCalled();
+        expect(original.status).toBe('complete');
+    });
+
+    it('stops from a pending pause only after every recorder flushes and never resumes a subset', async () => {
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera', true), makeSource('screen'), makeSource('microphone')]);
+        let releaseCamera!: () => void;
+        const camera = TestRecorder.instances[0];
+        camera.stop = vi.fn(() => {
+            camera.state = 'inactive';
+            releaseCamera = () => { camera.emit('tail'); camera.onstop?.(); };
+        });
+        const pause = capture.pause();
+        const stop = capture.stop();
+        expect(capture.currentPhase).toBe('stopping');
+        expect(TestRecorder.instances).toHaveLength(3);
+        await vi.waitFor(() => expect(releaseCamera).toBeTypeOf('function'));
+        releaseCamera();
+        await pause;
+        const result = await stop;
+        expect(result?.status).toBe('complete');
+        expect(result?.tracks.every((track) => track.parts?.length === 1 && track.parts[0].byteLength > 0)).toBe(true);
+        expect(TestRecorder.instances).toHaveLength(3);
+    });
+
+    it('releases a source whose recorder refuses Stop instead of leaving it active during pause', async () => {
+        const source = makeSource('camera');
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([source, makeSource('screen')]);
+        TestRecorder.instances[0].stop = vi.fn(() => { throw new Error('Synthetic stop failure'); });
+        await capture.pause();
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('další záznam byl přerušen');
+        expect(source.stream.getVideoTracks()[0].stop).toHaveBeenCalledOnce();
+        expect(TestRecorder.instances[1].state).toBe('inactive');
+    });
+
+    it('interrupts the whole session when a recorder cannot resume its next aligned segment', async () => {
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera', true), makeSource('screen'), makeSource('microphone')]);
+        await capture.pause();
+        TestRecorder.failStartAt = 4;
+        capture.resume();
+        const result = await capture.finished;
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('Synthetic recorder start failure');
+        expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
+        expect(result?.tracks.every((track) => track.parts?.[0].byteLength === 4)).toBe(true);
+    });
+
+    it('does not start recorders after Stop arrives during the initial storage checkpoint', async () => {
+        let releaseStorage!: () => void;
+        STORAGE.save.mockImplementationOnce(() => new Promise<void>((resolve) => { releaseStorage = resolve; }));
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        const starting = capture.start([makeSource('camera')]);
+        await vi.waitFor(() => expect(releaseStorage).toBeTypeOf('function'));
+        const stopping = capture.stop('Studio bylo zavřeno během přípravy.');
+        releaseStorage();
+        await starting;
+        const result = await stopping;
+        expect(TestRecorder.instances).toHaveLength(0);
+        expect(result?.status).toBe('interrupted');
     });
 });

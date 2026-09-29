@@ -59,6 +59,11 @@ export class RecordingStudioTransport {
         this.setSourceState(id, 'error', message);
         if (!this.operation) void this.synchronize();
     }
+    public markGap(id: string) {
+        this.sources.get(id)?.dispose();
+        this.sources.delete(id);
+        this.setSourceState(id, 'gap');
+    }
     public register(track: RecordingTrack, media: HTMLMediaElement, firstTimestampSeconds: number, endTimestampSeconds: number, availableStartTimestampSeconds = firstTimestampSeconds): () => void {
         this.sources.get(track.id)?.dispose();
         const handleWaiting = () => {

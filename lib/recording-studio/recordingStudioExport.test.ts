@@ -6,7 +6,8 @@ import type { RecordingArchiveManifest } from './recordingStudioTypes';
 
 const DOWNLOADS = vi.hoisted(() => ({ download: vi.fn(), read: vi.fn() }));
 vi.mock('@/lib/downloadBlobFile', () => ({ downloadBlobFile: DOWNLOADS.download }));
-vi.mock('./recordingStudioStorage', () => ({ readRecordingTrack: DOWNLOADS.read, streamRecordingTrack: () => new Blob(['original bytes']).stream() }));
+vi.mock('./recordingStudioStorage', () => ({ readRecordingTrack: DOWNLOADS.read, readRecordingPart: DOWNLOADS.read,
+    streamRecordingTrack: () => new Blob(['original bytes']).stream(), streamRecordingPart: () => new Blob(['original bytes']).stream() }));
 
 describe('recording archive exports', () => {
     it('never loads a large or cancelled prepared file into a download buffer', async () => {
@@ -38,7 +39,7 @@ describe('recording archive exports', () => {
         });
         const reader = new ZipReader(new BlobReader(DOWNLOADS.download.mock.calls[0][0].blob));
         const entries = await reader.getEntries();
-        expect(entries.map((entry) => entry.filename)).toEqual(['originals/01-camera.webm', 'originals/02-screen.webm', 'recording.json', 'README.txt']);
+        expect(entries.map((entry) => entry.filename)).toEqual(['originals/01-camera-part-001.webm', 'originals/02-screen-part-001.webm', 'recording.json', 'README.txt']);
         for (const entry of entries.slice(0, 2)) {
             if (entry.directory) throw new Error('Expected file');
             expect(await entry.getData(new TextWriter())).toBe('original bytes');

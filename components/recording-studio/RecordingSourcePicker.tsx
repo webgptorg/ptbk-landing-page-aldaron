@@ -82,7 +82,7 @@ export function RecordingSourcePicker({ onAdd, onClose, initialConfiguration, in
                 <input className="mt-2 w-full rounded-lg border p-3" value={label} maxLength={200} disabled={isAdding} onChange={(event) => setLabel(event.target.value)} />
             </label>
             <label className="block text-sm font-medium">Typ zdroje
-                <select className="mt-2 w-full rounded-lg border p-3" value={kind} disabled={isAdding} onChange={(event) => {
+                <select className="mt-2 w-full rounded-lg border p-3" value={kind} disabled={isAdding || Boolean(initialConfiguration)} onChange={(event) => {
                     setKind(event.target.value as RecordingSourceKind);
                     const selectedKind = event.target.value as RecordingSourceKind;
                     if (!initialConfiguration && Object.values(defaultLabels).includes(label)) setLabel(defaultLabels[selectedKind]);
@@ -90,6 +90,7 @@ export function RecordingSourcePicker({ onAdd, onClose, initialConfiguration, in
                     <option value="camera">Kamera</option><option value="screen">Obrazovka / okno / karta</option><option value="microphone">Samostatný mikrofon</option>
                 </select>
             </label>
+            {initialConfiguration && <p className="text-xs text-slate-600">Typ existujícího zdroje je pevný kvůli časové ose projektu. Jiný typ přidejte jako nový zdroj s vlastní identitou.</p>}
             {kind === 'camera' && <>
                 <label className="block text-sm font-medium">Kamera
                     <select className="mt-2 w-full rounded-lg border p-3" value={cameraDeviceId} disabled={isAdding} onChange={(event) => setCameraDeviceId(event.target.value)}>

@@ -1,4 +1,4 @@
-[ ] use `gpt-6-sol`
+[x] by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation ~$0.5848 22 minutes; Testing 34 minutes
 
 [✨⏯️] Add configurable live monitoring, synchronized pause/resume and append recording to the shared studio
 
@@ -36,3 +36,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

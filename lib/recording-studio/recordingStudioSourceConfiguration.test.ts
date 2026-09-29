@@ -129,6 +129,30 @@ describe('recording source preferences', () => {
         expect(restore.configurations[1]).toMatchObject({ id: 'legacy-microphone', kind: 'microphone', label: 'Náhradní USB mikrofon', microphoneDeviceId: UNKNOWN_LEGACY_DEVICE_ID, microphoneDeviceLabel: 'Náhradní USB mikrofon' });
     });
 
+    it('restores a missing latest-take snapshot from that take’s track after a source-set change', () => {
+        const camera = { ...createRecordingSourceConfiguration('camera', 'Kamera'), id: 'camera', isAudioEnabled: false };
+        const track = (id: string, kind: RecordingTrack['kind']): RecordingTrack => ({
+            id, kind, label: id, mimeType: kind === 'microphone' ? 'audio/webm' : 'video/webm',
+            byteLength: 1, chunkCount: 1, startOffsetSeconds: 0, durationSeconds: 2,
+            width: kind === 'microphone' ? null : 1920, height: kind === 'microphone' ? null : 1080,
+            frameRate: kind === 'microphone' ? null : 30, isAudioIncluded: kind === 'microphone',
+        });
+        const recording: StudioRecording = {
+            id: 'changed-take', title: 'Změněná sada', createdAt: new Date(0).toISOString(), status: 'complete',
+            durationSeconds: 4, trim: null, errorMessage: null,
+            tracks: [track('camera', 'camera'), track('old-microphone', 'microphone'), track('new-screen', 'screen')],
+            takes: [{ id: 'first', startedAt: new Date(0).toISOString(), sessionStartSeconds: 0,
+                durationSeconds: 2, sourceIds: ['camera', 'old-microphone'] },
+            { id: 'second', startedAt: new Date(2000).toISOString(), sessionStartSeconds: 2,
+                durationSeconds: 2, sourceIds: ['camera', 'new-screen'], sourceConfiguration: [camera] }],
+        };
+
+        expect(getRecordingSourceConfigurationRestore(recording).configurations).toMatchObject([
+            { id: 'camera', kind: 'camera' },
+            { id: 'new-screen', kind: 'screen', label: 'new-screen', microphoneDeviceId: '', displaySourceLabel: null },
+        ]);
+    });
+
     it('reconstructs only stored legacy track details and blocks guessed device identities', () => {
         const track = (id: string, kind: RecordingTrack['kind'], label: string, isAudioIncluded: boolean, audioSourceLabel: string | null = null): RecordingTrack => ({
             id, kind, label, mimeType: kind === 'microphone' ? 'audio/webm' : 'video/webm', byteLength: 1, chunkCount: 1,

@@ -14,6 +14,8 @@ import { Download, Scissors } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { getRecordingWorkspacePath } from '@/lib/recording-studio/recordingStudioSessionTime';
+import { getRecordingMediaParts } from '@/lib/recording-studio/recordingStudioSessionTime';
+import type { RecordingMediaPart } from '@/lib/recording-studio/recordingStudioTypes';
 
 export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onChange, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration }: {
     readonly isWorkspace?: boolean;
@@ -31,13 +33,13 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
     const controller = useRef<AbortController | null>(null);
     useEffect(() => () => controller.current?.abort(), []);
 
-    const download = (recording: StudioRecording, isTrimIncluded: boolean, track?: RecordingTrack) => {
+    const download = (recording: StudioRecording, isTrimIncluded: boolean, track?: RecordingTrack, selectedPart?: RecordingMediaPart) => {
         if (controller.current) return;
         const operationController = new AbortController();
         controller.current = operationController;
         setWorkingId(recording.id); setErrorMessage(null); setProgress(track ? 'Připravuji stažení originálu…' : 'Připravuji ZIP archiv…'); onBusyChange(true);
         // Invoke the native picker in the click gesture, before the asynchronous export work.
-        const destination = track ? isTrimIncluded ? chooseRecordingPreparedDestination(recording, track) : chooseRecordingOriginalDestination(recording, track) : chooseRecordingArchiveDestination(recording);
+        const destination = track ? isTrimIncluded ? chooseRecordingPreparedDestination(recording, track) : chooseRecordingOriginalDestination(recording, track, selectedPart) : chooseRecordingArchiveDestination(recording);
         // Attach a rejection handler immediately while pending edit metadata is flushed.
         void destination.catch(() => undefined);
         void (async () => {
@@ -49,8 +51,10 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                     if (track) {
                         const savedTrack = savedRecording.tracks.find((candidate) => candidate.id === track.id);
                         if (!savedTrack) throw new Error('Zdroj není v uloženém záznamu dostupný.');
+                        const savedPart = selectedPart ? getRecordingMediaParts(savedTrack).find((part) => part.id === selectedPart.id) : undefined;
+                        if (selectedPart && !savedPart) throw new Error('Část média už není dostupná.');
                         if (isTrimIncluded) await exportRecordingPrepared(savedRecording, savedTrack, await destination, operationController.signal, setProgress);
-                        else await exportRecordingOriginal(savedRecording, savedTrack, await destination, operationController.signal);
+                        else await exportRecordingOriginal(savedRecording, savedTrack, await destination, operationController.signal, savedPart);
                         setProgress(isTrimIncluded ? 'Oříznutý soubor a jeho předpis jsou připravené.' : 'Originál je připravený.');
                     } else {
                         const result = await exportRecordingArchive({ recording: savedRecording, isTrimIncluded, destination: await destination, signal: operationController.signal, onProgress: setProgress });
@@ -110,7 +114,15 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                     <p className="break-all text-xs text-slate-500">{recording.storageDestination ? `Složka: ${recording.storageDestination.name}` : 'Úložiště tohoto prohlížeče (IndexedDB)'}</p>
                     {getRecordingMissingRanges(recording).map((range) => <p key={range.trackId} className="text-xs text-amber-800">{recording.tracks.find((track) => track.id === range.trackId)?.label}: nepotvrzený konec od {formatRecordingDuration(range.startSeconds)} do {range.endSeconds === null ? 'neznámého času' : formatRecordingDuration(range.endSeconds)}. Společně uložený rozsah končí v {formatRecordingDuration(recording.durationSeconds)}.</p>)}
                     <ul className="divide-y divide-slate-100 text-sm">
-                        {recording.tracks.map((track, index) => <li key={track.id} className="flex flex-wrap items-center justify-between gap-3 py-2"><span className="min-w-0 truncate" title={track.label}>{index + 1}. {track.label}{track.kind === 'microphone' ? ' · zvuk' : track.isAudioIncluded ? ` · obraz i zvuk${track.audioSourceLabel ? ` (${track.audioSourceLabel})` : ''}` : ''}</span><span className="shrink-0 tabular-nums text-slate-500">{formatRecordingBytes(track.byteLength)}</span><Button type="button" variant="outline" size="sm" disabled={isBusy || track.byteLength === 0} onClick={() => download(recording, false, track)}>Stáhnout originál {index + 1}</Button>{recording.trim && <Button type="button" variant="outline" size="sm" disabled={isBusy || track.byteLength === 0} onClick={() => download(recording, true, track)}>Stáhnout ořez {index + 1}</Button>}</li>)}
+                        {recording.tracks.map((track, index) => {
+                            const parts = getRecordingMediaParts(track);
+                            const isPreparationPossible = Boolean(recording.trim && parts.some((part) => part.sessionStartSeconds <= recording.trim!.startSeconds && part.sessionStartSeconds + part.durationSeconds >= recording.trim!.endSeconds));
+                            return <li key={track.id} className="flex flex-wrap items-center justify-between gap-3 py-2"><span className="min-w-0 truncate" title={track.label}>{index + 1}. {track.label}{track.kind === 'microphone' ? ' · zvuk' : track.isAudioIncluded ? ` · obraz i zvuk${track.audioSourceLabel ? ` (${track.audioSourceLabel})` : ''}` : ''} · {parts.length} částí</span><span className="shrink-0 tabular-nums text-slate-500">{formatRecordingBytes(track.byteLength)}</span>
+                                {parts.length <= 1 ? <Button type="button" variant="outline" size="sm" disabled={isBusy || track.byteLength === 0} onClick={() => download(recording, false, track)}>Stáhnout originál {index + 1}</Button>
+                                    : parts.map((part, partIndex) => <Button key={part.id} type="button" variant="outline" size="sm" disabled={isBusy || part.byteLength === 0} onClick={() => download(recording, false, track, part)}>Originál {index + 1} · část {partIndex + 1}</Button>)}
+                                {recording.trim && isPreparationPossible && <Button type="button" variant="outline" size="sm" disabled={isBusy || track.byteLength === 0} onClick={() => download(recording, true, track)}>Stáhnout ořez {index + 1}</Button>}
+                            </li>;
+                        })}
                     </ul>
                     {recording.trim && <p className="text-sm text-cyan-800">Společný ořez: {formatRecordingDuration(recording.trim.startSeconds)} – {formatRecordingDuration(recording.trim.endSeconds)}</p>}
                     <div className="flex flex-wrap gap-2">

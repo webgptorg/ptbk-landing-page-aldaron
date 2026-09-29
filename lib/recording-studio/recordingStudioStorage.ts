@@ -1,7 +1,7 @@
 import { appendDirectoryRecordingChunk, readDirectoryRecording, readDirectoryRecordingChunk, reconnectRecordingDirectory, recordingChunkFilename, saveDirectoryRecording } from './recordingStudioDirectory';
 import { addRecordingBytes, getCommonRecordingDuration, validateRecordingTrim } from './recordingStudioTiming';
-import type { RecordingTrack, RecordingTrim, StudioRecording } from './recordingStudioTypes';
-import { createRecordingEditRecipe, getRecordingSessionDuration } from './recordingStudioSessionTime';
+import type { RecordingMediaPart, RecordingTrack, RecordingTrim, StudioRecording } from './recordingStudioTypes';
+import { createRecordingEditRecipe, getRecordingMediaParts, getRecordingSessionDuration } from './recordingStudioSessionTime';
 
 const RECORDING_DATABASE_NAME = 'promptbook-recording-studio';
 const RECORDING_DATABASE_VERSION = 2;
@@ -122,31 +122,43 @@ export async function appendRecordingChunk(recording: StudioRecording, trackId: 
 
 /** Keep disk-backed Blob references; never read the entire recording into an ArrayBuffer. */
 export async function readRecordingTrack(recordingId: string, track: RecordingTrack, signal?: AbortSignal): Promise<Blob> {
+    const parts = getRecordingMediaParts(track);
+    if (parts.length !== 1) throw new Error('Stopa má více samostatných částí. Otevřete konkrétní část nebo stáhněte ZIP s časovým předpisem.');
+    return readRecordingPart(recordingId, parts[0], signal);
+}
+
+export async function readRecordingPart(recordingId: string, part: RecordingMediaPart, signal?: AbortSignal): Promise<Blob> {
     const parts: Blob[] = [];
-    for await (const data of iterateRecordingTrack(recordingId, track)) { signal?.throwIfAborted(); parts.push(data); }
-    return new Blob(parts, { type: track.mimeType });
+    for await (const data of iterateRecordingMedia(recordingId, part.id, part.chunkCount, part.byteLength)) { signal?.throwIfAborted(); parts.push(data); }
+    return new Blob(parts, { type: part.mimeType });
 }
 
 /** Export reads one persisted chunk at a time, independent of session length. */
-async function* iterateRecordingTrack(recordingId: string, track: RecordingTrack): AsyncGenerator<Blob> {
+async function* iterateRecordingMedia(recordingId: string, storageId: string, chunkCount: number, expectedByteLength: number): AsyncGenerator<Blob> {
     const recording = await readStudioRecording(recordingId);
     if (!recording) throw new Error('Místní záznam není dostupný.');
     const directory = recording.storageDestination ? await requireRecordingDirectory(recording) : null;
     const database = directory ? null : await openRecordingDatabase();
     let byteLength = 0;
-    for (let sequence = 0; sequence < track.chunkCount; sequence += 1) {
-        const data = directory ? await readDirectoryRecordingChunk(directory, track, sequence) :
-            (await readRequest<RecordingChunk | undefined>(database!.transaction(CHUNK_STORE).objectStore(CHUNK_STORE).get([recordingId, track.id, sequence])))?.data;
-        if (!data) throw new Error(`Stopa „${track.label}“ není úplná. Ponechte uložená data k obnově.`);
+    for (let sequence = 0; sequence < chunkCount; sequence += 1) {
+        const data = directory ? await readDirectoryRecordingChunk(directory, storageId, sequence) :
+            (await readRequest<RecordingChunk | undefined>(database!.transaction(CHUNK_STORE).objectStore(CHUNK_STORE).get([recordingId, storageId, sequence])))?.data;
+        if (!data) throw new Error(`Část média „${storageId}“ není úplná. Ponechte uložená data k obnově.`);
         byteLength = addRecordingBytes(byteLength, data.size);
-        if (byteLength > track.byteLength) throw new Error(`Velikost stopy „${track.label}“ neodpovídá uloženému záznamu.`);
+        if (byteLength > expectedByteLength) throw new Error(`Velikost části „${storageId}“ neodpovídá uloženému záznamu.`);
         yield data;
     }
-    if (byteLength !== track.byteLength) throw new Error(`Velikost stopy „${track.label}“ neodpovídá uloženému záznamu.`);
+    if (byteLength !== expectedByteLength) throw new Error(`Velikost části „${storageId}“ neodpovídá uloženému záznamu.`);
 }
 
 export function streamRecordingTrack(recordingId: string, track: RecordingTrack): ReadableStream<Uint8Array> {
-    const iterator = iterateRecordingTrack(recordingId, track);
+    const parts = getRecordingMediaParts(track);
+    if (parts.length !== 1) throw new Error('Stopa má více samostatných částí. Stáhněte jejich originály odděleně.');
+    return streamRecordingPart(recordingId, parts[0]);
+}
+
+export function streamRecordingPart(recordingId: string, part: RecordingMediaPart): ReadableStream<Uint8Array> {
+    const iterator = iterateRecordingMedia(recordingId, part.id, part.chunkCount, part.byteLength);
     let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
     return new ReadableStream({
         async pull(controller) {
@@ -237,8 +249,10 @@ export async function deleteStudioRecording(recordingId: string): Promise<void> 
         if (checkpoint.id !== recordingId) throw new Error('Složka obsahuje jiný záznam. Nejprve ji znovu připojte.');
         // Delete only files the manifest owns. Never recursively delete a user-selected folder.
         for (const track of checkpoint.tracks) {
-            for (let sequence = 0; sequence < track.chunkCount; sequence += 1) {
-                await directory.removeEntry(recordingChunkFilename(track.id, sequence)).catch(ignoreMissingFile);
+            for (const part of getRecordingMediaParts(track)) {
+                for (let sequence = 0; sequence < part.chunkCount; sequence += 1) {
+                    await directory.removeEntry(recordingChunkFilename(part.id, sequence)).catch(ignoreMissingFile);
+                }
             }
         }
         await directory.removeEntry('recording.json').catch(ignoreMissingFile);
@@ -284,7 +298,8 @@ export async function recoverStudioRecordings(): Promise<StudioRecording[]> {
 function recoverRecording(recording: StudioRecording): StudioRecording {
     if (recording.status !== 'recording') return recording;
     return {
-        ...recording, status: 'interrupted', durationSeconds: getCommonRecordingDuration(recording.tracks), captureEndSeconds: null,
+        ...recording, status: 'interrupted', durationSeconds: recording.takes?.length
+            ? getRecordingSessionDuration(recording) : getCommonRecordingDuration(recording.tracks), captureEndSeconds: null,
         errorMessage: 'Nahrávání bylo přerušeno. Obnovené jsou pouze potvrzené části; délka chybějícího konce není známá.',
     };
 }

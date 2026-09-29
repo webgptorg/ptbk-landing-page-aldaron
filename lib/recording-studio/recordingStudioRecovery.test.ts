@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { afterEach, expect, it, vi } from 'vitest';
-import { importStudioRecordingDirectory, listStudioRecordings, readRecordingTrack, reconnectStudioRecording, recoverStudioRecordings, streamRecordingTrack } from './recordingStudioStorage';
+import { importStudioRecordingDirectory, listStudioRecordings, readRecordingTrack, reconnectStudioRecording, recoverStudioRecordings, saveStudioRecording, streamRecordingTrack } from './recordingStudioStorage';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
 
 afterEach(() => vi.restoreAllMocks());
@@ -29,4 +29,21 @@ it('recovers and exports a readable folder when both folder and origin writes fa
     expect(await recoverStudioRecordings()).toContainEqual(recovered);
     expect(await reconnectStudioRecording(recovered.id)).toEqual(recovered);
     expect(createWritable).not.toHaveBeenCalled();
+});
+
+it('keeps the appended project clock when an intentionally absent source has no later media', async () => {
+    const base = createTestStudioRecording();
+    const originalTrack = { ...base.tracks[0], byteLength: 4, chunkCount: 1, durationSeconds: 4 };
+    const appendedTrack = { ...originalTrack, id: `${originalTrack.id}-added`, startOffsetSeconds: 4, durationSeconds: 2,
+        parts: [{ id: 'appended-part', takeId: 'second-take', sessionStartSeconds: 4, durationSeconds: 2,
+            byteLength: 4, chunkCount: 1, mimeType: originalTrack.mimeType }] };
+    const recording = { ...base, id: 'recovered-appended-project', status: 'recording' as const,
+        durationSeconds: 6, tracks: [originalTrack, appendedTrack],
+        takes: [{ id: 'first-take', startedAt: base.createdAt, sessionStartSeconds: 0, durationSeconds: 4, sourceIds: [originalTrack.id] },
+            { id: 'second-take', startedAt: base.createdAt, sessionStartSeconds: 4, durationSeconds: 2, sourceIds: [appendedTrack.id] }] };
+    await saveStudioRecording(recording);
+    const recovered = (await recoverStudioRecordings()).find((item) => item.id === recording.id);
+    expect(recovered?.status).toBe('interrupted');
+    expect(recovered?.durationSeconds).toBe(6);
+    expect(recovered?.takes).toEqual(recording.takes);
 });

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { RecordingTrack, StudioRecording } from './recordingStudioTypes';
-import { isRecordingSegmentMapValid } from './recordingStudioSessionTime';
+import { getRecordingTrackSegments, isRecordingSegmentMapValid } from './recordingStudioSessionTime';
 
 const DIRECTORY_MANIFEST_NAME = 'recording.json';
 const MAXIMUM_MANIFEST_BYTES = 4 * 1024 * 1024;
@@ -8,6 +8,10 @@ const SAFE_IDENTIFIER = /^[a-zA-Z0-9_-]+$/;
 const NONNEGATIVE_NUMBER = z.number().finite().nonnegative();
 const BYTE_COUNT = NONNEGATIVE_NUMBER.int().max(Number.MAX_SAFE_INTEGER);
 const TIME_SEGMENT_SCHEMA = z.object({ sourceStartSeconds: NONNEGATIVE_NUMBER, sessionStartSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER });
+const MEDIA_COMPONENT_SCHEMA = z.object({ kind: z.enum(['video', 'audio']), firstTimestampSeconds: NONNEGATIVE_NUMBER, endTimestampSeconds: NONNEGATIVE_NUMBER });
+const MEDIA_BOUNDS_SCHEMA = z.object({ firstTimestampSeconds: NONNEGATIVE_NUMBER, availableStartTimestampSeconds: NONNEGATIVE_NUMBER,
+    endTimestampSeconds: NONNEGATIVE_NUMBER, components: z.array(MEDIA_COMPONENT_SCHEMA) });
+const MEDIA_PART_SCHEMA = z.object({ id: z.string().regex(SAFE_IDENTIFIER), takeId: z.string().regex(SAFE_IDENTIFIER), sessionStartSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER, byteLength: BYTE_COUNT, chunkCount: BYTE_COUNT, mimeType: z.string(), segments: z.array(TIME_SEGMENT_SCHEMA).optional(), isAudioIncluded: z.boolean().optional(), width: NONNEGATIVE_NUMBER.nullable().optional(), height: NONNEGATIVE_NUMBER.nullable().optional(), frameRate: NONNEGATIVE_NUMBER.nullable().optional(), mediaBounds: MEDIA_BOUNDS_SCHEMA.optional() });
 const TRIM_SCHEMA = z.object({ startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER });
 const SOURCE_CONFIGURATION_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string().max(200),
@@ -29,12 +33,14 @@ const RECORDING_SCHEMA = z.object({
     storageDestination: z.object({ kind: z.literal('directory'), name: z.string() }),
     captureEndSeconds: NONNEGATIVE_NUMBER.nullable().optional(),
     sourceConfiguration: z.array(SOURCE_CONFIGURATION_SCHEMA).optional(),
+    takes: z.array(z.object({ id: z.string().regex(SAFE_IDENTIFIER), startedAt: z.string().datetime(), sessionStartSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER, sourceIds: z.array(z.string().regex(SAFE_IDENTIFIER)), sourceConfiguration: z.array(SOURCE_CONFIGURATION_SCHEMA).optional() })).optional(),
     tracks: z.array(z.object({
         id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string(), mimeType: z.string(),
         byteLength: BYTE_COUNT, chunkCount: BYTE_COUNT, startOffsetSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER,
         width: NONNEGATIVE_NUMBER.nullable(), height: NONNEGATIVE_NUMBER.nullable(), frameRate: NONNEGATIVE_NUMBER.nullable(), isAudioIncluded: z.boolean(),
         audioSourceLabel: z.string().nullable().optional(),
         segments: z.array(TIME_SEGMENT_SCHEMA).optional(),
+        parts: z.array(MEDIA_PART_SCHEMA).optional(),
     })),
 });
 
@@ -91,11 +97,15 @@ export async function readDirectoryRecording(directory: FileSystemDirectoryHandl
     catch { throw new Error('Složka neobsahuje platný popis záznamu. Vyberte podsložku konkrétního záznamu se souborem recording.json.'); }
     if (new Set(envelope.recording.tracks.map((track) => track.id)).size !== envelope.recording.tracks.length) throw new Error('Záznam má duplicitní stopy.');
     if (envelope.recording.tracks.some((track) => track.segments && !isRecordingSegmentMapValid(track.segments))) throw new Error('Záznam obsahuje překrývající se nebo neplatné časové úseky.');
+    if (envelope.recording.tracks.some((track) => track.parts?.some((part) => part.segments && !isRecordingSegmentMapValid(part.segments)))) throw new Error('Záznam obsahuje překrývající se nebo neplatné časové úseky.');
+    const partIds = envelope.recording.tracks.flatMap((track) => track.parts?.map((part) => part.id) ?? []);
+    if (new Set(partIds).size !== partIds.length) throw new Error('Záznam má duplicitní části médií.');
+    if (envelope.recording.tracks.some((track) => track.parts && !isRecordingSegmentMapValid(getRecordingTrackSegments(track)))) throw new Error('Záznam obsahuje překrývající se části médií.');
     return envelope.recording;
 }
 
-export async function readDirectoryRecordingChunk(directory: FileSystemDirectoryHandle, track: RecordingTrack, sequence: number): Promise<File> {
-    return (await directory.getFileHandle(recordingChunkFilename(track.id, sequence))).getFile();
+export async function readDirectoryRecordingChunk(directory: FileSystemDirectoryHandle, storage: string | RecordingTrack, sequence: number): Promise<File> {
+    return (await directory.getFileHandle(recordingChunkFilename(typeof storage === 'string' ? storage : storage.id, sequence))).getFile();
 }
 
 /** Requests only access to the already selected recording folder, and only from an explicit reconnect action. */

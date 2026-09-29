@@ -65,6 +65,17 @@ describe('incrementally committed selected-directory media', () => {
         await expect(readDirectoryRecording(handle)).rejects.toThrow('časové úseky');
     });
 
+    it('round-trips independently timed parts with their own audio setting and encoded bounds', async () => {
+        const { handle, recording } = createDirectory();
+        const part = { id: 'part-one', takeId: 'take-one', sessionStartSeconds: 1, durationSeconds: 2,
+            byteLength: 4, chunkCount: 1, mimeType: 'video/webm', isAudioIncluded: false,
+            mediaBounds: { firstTimestampSeconds: 0, availableStartTimestampSeconds: 0.04, endTimestampSeconds: 2,
+                components: [{ kind: 'video' as const, firstTimestampSeconds: 0, endTimestampSeconds: 2 }] } };
+        const stored = { ...recording, tracks: [{ ...recording.tracks[0], byteLength: 4, chunkCount: 1, parts: [part] }] };
+        await saveDirectoryRecording(handle, stored);
+        expect(await readDirectoryRecording(handle)).toEqual(stored);
+    });
+
     it.each(['QuotaExceededError', 'NotAllowedError', 'UnknownError'])('retains the previous checkpoint on %s despite any optimistic quota estimate', async (name) => {
         const { handle, recording, failures, aborted } = createDirectory();
         await saveDirectoryRecording(handle, recording);

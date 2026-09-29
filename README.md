@@ -102,6 +102,25 @@ corrects drift and maps recorded offsets/segments without stretching durations o
 is at most 100 ms error after settling, not hardware synchronization. Hidden and solo video monitoring are separate
 from audio mute/solo; only one audio source is audible initially to avoid echo. Monitoring never excludes an export.
 
+The live monitor offers a grid, one focused source, and a pinned primary source with the other sources still
+available. Hide, minimize, preview sound, and camera mirroring affect only this browser's monitor; the source list
+and every armed recorder remain intact. Monitor preferences are stored separately from capture preferences. The
+status line always shows the armed source count. **Pozastavit všechny stopy** closes every source's current media
+part and saves its shared boundary. Live previews may keep running while the session clock is paused. **Pokračovat
+ve všech stopách** starts new playable parts at the next shared session time, excluding the paused wall time; a
+failure stops the whole take as interrupted. After final chunks flush, encoded media timestamps set the common
+next boundary and shorter tails remain gaps. MediaRecorder start/stop call times are browser observations, not
+hardware synchronization or a promise that capture survives sleep or revoked permission.
+
+In a recording's workspace, **Donahrát do tohoto projektu** restores the latest intended source setup, then waits
+for each required device or display chooser and an explicit **Start**. The new take keeps the same recording ID and
+begins at the saved session end. New or missing sources require explicit confirmation and show real timeline gaps.
+An untouched full-session selection extends to the appended end; a custom IN/OUT selection stays as it was.
+**Použít tuto konfiguraci zdrojů** prepares a separate new recording instead. Each paused section and appended
+take is an independent playable original in the ZIP with its own ID and time mapping; preparation across these
+boundaries is labelled originals plus recipe until a safe join is available. See
+[monitoring, pause and append design and verification](docs/recording-studio-monitoring-pause-append.md).
+
 ZIP exports always contain unchanged `originals/` and a version 3 `recording.json`, including the versioned edit
 recipe, source IDs, source-to-session segments, seconds as the time unit, common selection, prepared time zero,
 missing ranges and processing results. Existing records derive the recipe without copying media; the first edit

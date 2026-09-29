@@ -1,7 +1,8 @@
-import { RECORDING_STUDIO_PATH, type RecordingEditRecipe, type RecordingTimeSegment, type RecordingTrack, type RecordingTrim, type StudioRecording } from './recordingStudioTypes';
+import { RECORDING_STUDIO_PATH, type RecordingEditRecipe, type RecordingMediaPart, type RecordingTimeSegment, type RecordingTrack, type RecordingTrim, type StudioRecording } from './recordingStudioTypes';
 
 export const RECORDING_SYNC_TOLERANCE_SECONDS = 0.1;
 export const RECORDING_SEEK_TOLERANCE_SECONDS = 0.025;
+const PART_SELECTION_BOUNDARY_TOLERANCE_SECONDS = 0.000001;
 
 export function getRecordingClockSeconds(startMilliseconds: number, currentMilliseconds: number): number {
     return Math.max(0, (currentMilliseconds - startMilliseconds) / 1000);
@@ -14,7 +15,50 @@ export function getRecordingWorkspacePath(recordingId: string): string {
 /** Legacy records keep their IDs/bytes; only the missing mapping is derived. */
 export function getRecordingTrackSegments(track: RecordingTrack): readonly RecordingTimeSegment[] {
     if (track.byteLength === 0) return [];
+    if (track.parts) {
+        let sourceStartSeconds = 0;
+        return track.parts.filter((part) => part.byteLength > 0 && part.durationSeconds > 0).flatMap((part) => {
+            const segments = (part.segments ?? [{ sourceStartSeconds: 0, sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds }])
+                .map((segment) => ({ ...segment, sourceStartSeconds: sourceStartSeconds + segment.sourceStartSeconds }));
+            sourceStartSeconds += part.durationSeconds;
+            return segments;
+        });
+    }
     return track.segments ?? [{ sourceStartSeconds: 0, sessionStartSeconds: track.startOffsetSeconds, durationSeconds: track.durationSeconds }];
+}
+
+export function getRecordingMediaParts(track: RecordingTrack): readonly RecordingMediaPart[] {
+    return track.parts ?? (track.byteLength > 0 ? [{
+        id: track.id, takeId: track.id, sessionStartSeconds: track.startOffsetSeconds,
+        durationSeconds: track.durationSeconds, byteLength: track.byteLength,
+        chunkCount: track.chunkCount, mimeType: track.mimeType,
+        segments: track.segments, isAudioIncluded: track.isAudioIncluded,
+    }] : []);
+}
+
+export function getRecordingPartAtTime(track: RecordingTrack, seconds: number): RecordingMediaPart | null {
+    return getRecordingMediaParts(track).find((part) => part.byteLength > 0 &&
+        (part.segments ?? [{ sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds }])
+            .some((segment) => seconds >= segment.sessionStartSeconds && seconds < segment.sessionStartSeconds + segment.durationSeconds)) ?? null;
+}
+
+export function getRecordingPartForSelection(track: RecordingTrack, selection: RecordingTrim): RecordingMediaPart | null {
+    if (selection.endSeconds <= selection.startSeconds) return null;
+    const part = getRecordingPartAtTime(track, selection.startSeconds);
+    if (!part) return null;
+    return (part.segments ?? [{ sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds }])
+        .some((segment) => selection.startSeconds >= segment.sessionStartSeconds &&
+            selection.endSeconds <= segment.sessionStartSeconds + segment.durationSeconds + PART_SELECTION_BOUNDARY_TOLERANCE_SECONDS)
+        ? part : null;
+}
+
+export function getRecordingPartTrack(track: RecordingTrack, part: RecordingMediaPart): RecordingTrack {
+    return { ...track, byteLength: part.byteLength, chunkCount: part.chunkCount, mimeType: part.mimeType,
+        startOffsetSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds,
+        isAudioIncluded: part.isAudioIncluded ?? track.isAudioIncluded,
+        width: part.width ?? track.width, height: part.height ?? track.height,
+        frameRate: part.frameRate ?? track.frameRate, parts: undefined,
+        segments: part.segments ?? [{ sourceStartSeconds: 0, sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds }] };
 }
 
 export function getRecordingTrackEndSeconds(track: RecordingTrack): number {
@@ -60,6 +104,14 @@ export function sessionToRecordingMediaTime(track: RecordingTrack, sessionSecond
 }
 
 export function getRecordingAvailableRanges(track: RecordingTrack, firstTimestampSeconds = 0, mediaEndSeconds = Infinity, availableStartTimestampSeconds = firstTimestampSeconds): readonly RecordingTrim[] {
+    if (track.parts) return track.parts.filter((part) => part.byteLength > 0).flatMap((part) => {
+        const bounds = part.mediaBounds;
+        const first = bounds?.firstTimestampSeconds ?? 0;
+        return (part.segments ?? [{ sourceStartSeconds: 0, sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds }]).map((segment) => ({
+            startSeconds: segment.sessionStartSeconds + Math.max(0, (bounds?.availableStartTimestampSeconds ?? first) - first - segment.sourceStartSeconds),
+            endSeconds: segment.sessionStartSeconds + Math.max(0, Math.min(segment.durationSeconds, (bounds?.endTimestampSeconds ?? part.durationSeconds) - first - segment.sourceStartSeconds)),
+        }));
+    }).filter((range) => range.endSeconds > range.startSeconds);
     return getRecordingTrackSegments(track).map((segment) => ({
         startSeconds: segment.sessionStartSeconds + Math.max(0, availableStartTimestampSeconds - firstTimestampSeconds - segment.sourceStartSeconds),
         endSeconds: segment.sessionStartSeconds + Math.max(0, Math.min(segment.durationSeconds, mediaEndSeconds - firstTimestampSeconds - segment.sourceStartSeconds)),

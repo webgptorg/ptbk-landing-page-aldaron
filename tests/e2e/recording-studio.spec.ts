@@ -344,9 +344,9 @@ test('recovers a corrupt preview and cancels preparation without losing original
     }, recording.id);
     await page.reload();
     const camera = page.getByRole('article', { name: 'Monitor Fixture camera' });
+    await page.getByRole('slider', { name: 'Přehrávací hlava', exact: true }).press('ArrowRight');
     await expect(camera).toHaveAttribute('data-source-state', 'error');
     await expect(camera.locator('video')).toHaveCount(0);
-    await page.getByRole('slider', { name: 'Přehrávací hlava', exact: true }).press('ArrowRight');
     await expect(page.getByRole('article', { name: 'Monitor Fixture screen' })).toHaveAttribute('data-source-state', 'ready');
     await page.evaluate(async ({ recordingId, bytes }) => {
         const database = await new Promise<IDBDatabase>((resolve) => { const request = indexedDB.open('promptbook-recording-studio'); request.onsuccess = () => resolve(request.result); });
@@ -468,10 +468,10 @@ test('records separate sources, restores them, trims every track and exports pla
     await page.getByLabel('Název záznamu', { exact: true }).fill('Synchronized editing take');
     await page.getByLabel('Začátek (sekundy)', { exact: true }).fill('0.5');
     await page.getByLabel('Konec (sekundy)', { exact: true }).fill('2.5');
+    await page.getByRole('slider', { name: 'Přehrávací hlava', exact: true }).press('ArrowRight');
     const preview = workspace.locator('video').first();
     await expect(preview).toHaveAttribute('data-source-id');
     await expect.poll(() => workspace.locator('video, audio').evaluateAll((elements) => elements.length === 5 && elements.every((element) => !(element as HTMLMediaElement).controls))).toBe(true);
-    await page.getByRole('slider', { name: 'Přehrávací hlava', exact: true }).press('ArrowRight');
     await expect.poll(() => preview.evaluate((video: HTMLVideoElement) => Math.abs(video.currentTime - 1))).toBeLessThan(0.1);
     await page.getByRole('button', { name: 'Přehrát vše', exact: true }).click();
     await expect.poll(() => preview.evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThan(1.5);
@@ -536,6 +536,137 @@ test('records separate sources, restores them, trims every track and exports pla
     await expect(page.getByLabel('Nahrávat zvuk')).toBeChecked();
     await page.getByRole('dialog').getByRole('button', { name: 'Zavřít', exact: true }).click();
     expect(errors).toEqual([]);
+});
+
+test('keeps all three sources through monitor layouts, global pauses and an appended take', async ({ page, baseURL }, testInfo) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await addSource(page, 'screen');
+    await addSource(page, 'microphone');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).evaluate((button: HTMLButtonElement) => {
+        button.click(); button.click();
+    });
+    await expect(page.getByRole('button', { name: 'Pozastavit všechny stopy', exact: true })).toBeEnabled();
+
+    for (const layout of ['Jeden zdroj', 'Připnutý zdroj', 'Mřížka', 'Jeden zdroj', 'Připnutý zdroj'] as const) {
+        await page.getByRole('button', { name: layout, exact: true }).click();
+        await expect(page.getByText('3 z 3 zapnutých zdrojů', { exact: false })).toBeVisible();
+    }
+    await page.getByLabel('Hlavní zdroj monitoru').selectOption({ index: 1 });
+    await page.getByRole('button', { name: 'Minimalizovat náhled' }).first().click();
+    await page.getByRole('button', { name: 'Zapnout poslech' }).first().click();
+    await page.getByRole('button', { name: 'Mřížka', exact: true }).click();
+    await page.getByRole('button', { name: 'Zrcadlit náhled' }).click();
+    await page.getByRole('button', { name: 'Skrýt dlaždici z monitoru' }).first().click();
+    await page.getByRole('button', { name: 'Jeden zdroj', exact: true }).click();
+    expect(await page.locator('main video, main audio').count()).toBe(3);
+
+    const backgroundTab = await page.context().newPage();
+    await backgroundTab.goto('about:blank');
+    await backgroundTab.bringToFront();
+    const backgroundVisibility = await page.evaluate(() => document.visibilityState);
+    await page.waitForTimeout(1_200);
+    await page.bringToFront();
+    await backgroundTab.close();
+    await expect(page.getByRole('button', { name: 'Pozastavit všechny stopy', exact: true })).toBeEnabled();
+    await testInfo.attach('background-tab-visibility', { body: backgroundVisibility, contentType: 'text/plain' });
+
+    for (let pauseIndex = 0; pauseIndex < 2; pauseIndex += 1) {
+        await page.waitForTimeout(2_000);
+        await page.getByRole('button', { name: 'Pozastavit všechny stopy', exact: true }).evaluate((button: HTMLButtonElement) => {
+            button.click(); button.click();
+        });
+        await expect(page.getByRole('button', { name: 'Pokračovat ve všech stopách' })).toBeEnabled();
+        const pausedClock = await page.getByLabel('Délka záznamu', { exact: true }).textContent();
+        await page.waitForTimeout(1_250);
+        expect(await page.getByLabel('Délka záznamu', { exact: true }).textContent()).toBe(pausedClock);
+        await expect(page.locator('article:visible').getByText('Pauza · pouze živý náhled')).toBeVisible();
+        await page.getByRole('button', { name: 'Pokračovat ve všech stopách' }).evaluate((button: HTMLButtonElement) => {
+            button.click(); button.click();
+        });
+        await expect(page.getByRole('button', { name: 'Pozastavit všechny stopy', exact: true })).toBeEnabled();
+    }
+    await page.waitForTimeout(2_000);
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Náhled a ořez', exact: true })).toHaveCount(1);
+    await page.getByRole('button', { name: 'Připnutý zdroj', exact: true }).click();
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Připnutý zdroj', exact: true })).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByRole('link', { name: 'Náhled a ořez', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/recording-studio\/[^/]+$/);
+    const workspaceUrl = page.url();
+    await page.getByLabel('Začátek (sekundy)', { exact: true }).fill('0.2');
+    await page.getByLabel('Konec (sekundy)', { exact: true }).fill('1');
+    await page.getByRole('button', { name: 'Donahrát do tohoto projektu' }).click();
+    await expect(page.getByRole('button', { name: 'Start · donahrát do projektu' })).toBeVisible();
+    const reconnectButtons = page.getByLabel('Zdroje k připojení').getByRole('button');
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { displayErrorName: string | null } }).studioTestSettings.displayErrorName = 'NotAllowedError';
+    });
+    await reconnectButtons.filter({ hasText: 'Sdílení obrazovky' }).click();
+    await expect(reconnectButtons).toHaveCount(3);
+    await expect(page.getByRole('button', { name: 'Start · donahrát do projektu' })).toBeDisabled();
+    await page.evaluate(() => {
+        (window as unknown as { studioTestSettings: { displayErrorName: string | null } }).studioTestSettings.displayErrorName = null;
+    });
+    while (await reconnectButtons.count() > 0) {
+        const remaining = await reconnectButtons.count();
+        await reconnectButtons.first().click();
+        await expect(reconnectButtons).toHaveCount(remaining - 1);
+    }
+    await page.getByRole('button', { name: 'Start · donahrát do projektu' }).click();
+    await expect(page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true })).toBeEnabled();
+    await page.waitForTimeout(2_000);
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Donahrát do tohoto projektu' })).toBeVisible();
+    await expect(page.getByLabel('Začátek (sekundy)', { exact: true })).toHaveValue('0.2');
+    await expect(page.getByLabel('Konec (sekundy)', { exact: true })).toHaveValue('1');
+    await page.reload();
+    expect(page.url()).toBe(workspaceUrl);
+    await expect(page.getByLabel('Konec (sekundy)', { exact: true })).toHaveValue('1');
+
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Originály ZIP', exact: true }).click();
+    const archive = await readArchive((await (await download).path())!);
+    const manifest = JSON.parse(new TextDecoder().decode(archive.get('recording.json'))) as RecordingArchiveManifest;
+    expect(manifest.id).toBe(workspaceUrl.split('/').at(-1));
+    expect(manifest.status).toBe('complete');
+    expect(manifest.takes).toHaveLength(2);
+    expect(manifest.trim).toEqual({ startSeconds: 0.2, endSeconds: 1 });
+    expect(manifest.editRecipe.selection).toEqual(manifest.trim);
+    expect(manifest.tracks).toHaveLength(3);
+    expect(manifest.tracks.every((track) => track.parts?.length === 4 && track.parts.every((part) => part.byteLength > 0 && part.mediaBounds))).toBe(true);
+    const appendStart = manifest.takes![1].sessionStartSeconds;
+    const durationMeasurements: { sourceId: string; partId: string; mappedSeconds: number; encodedSeconds: number }[] = [];
+    for (const track of manifest.tracks) {
+        const parts = track.parts!;
+        expect(Math.abs(parts[3].sessionStartSeconds - appendStart)).toBeLessThan(0.1);
+        expect(parts.every((part, index) => index === 0 || part.sessionStartSeconds >= parts[index - 1].sessionStartSeconds + parts[index - 1].durationSeconds - 0.1)).toBe(true);
+        for (const originalPart of manifest.tracks.find((source) => source.id === track.id)!.originalParts!) {
+            const input = new Input({ formats: ALL_FORMATS, source: new BufferSource(archive.get(originalPart.file)!) });
+            try {
+                expect(await input.canRead()).toBe(true);
+                const encodedSeconds = await input.computeDuration();
+                durationMeasurements.push({ sourceId: track.id, partId: originalPart.partId,
+                    mappedSeconds: originalPart.durationSeconds, encodedSeconds });
+                // The persisted part boundary comes from this closed container, not the earlier Stop call.
+                const mediaOriginSeconds = parts.find((part) => part.id === originalPart.partId)!.mediaBounds!.firstTimestampSeconds;
+                expect(Math.abs(encodedSeconds - mediaOriginSeconds - originalPart.durationSeconds)).toBeLessThan(0.1);
+            }
+            finally { input.dispose(); }
+        }
+    }
+    const cameraParts = manifest.tracks.find((track) => track.kind === 'camera')?.originalParts;
+    expect(cameraParts).toHaveLength(4);
+    for (const partIndex of [0, 3]) {
+        const markerWindows = await inspectAudioVideoMarkers(page, archive.get(cameraParts![partIndex].file)!);
+        expect(markerWindows.some((window) => window.nearestGap !== null && window.nearestGap <= 0.1), JSON.stringify(markerWindows)).toBe(true);
+    }
+    expect(archive.size).toBeGreaterThanOrEqual(14);
+    await testInfo.attach('studio-pause-append-durations', { body: JSON.stringify(durationMeasurements, null, 2), contentType: 'application/json' });
+    await testInfo.attach('studio-pause-append-manifest', { body: JSON.stringify(manifest, null, 2), contentType: 'application/json' });
 });
 
 test('keeps a multi-source setup through stops, release, and reload without restoring capture', async ({ page, baseURL }) => {
@@ -765,8 +896,8 @@ test('retains a failed camera-plus-microphone request and lets the owner explici
     await page.reload();
     await page.getByRole('button', { name: 'Nastavení', exact: true }).first().click();
     await expect(page.getByLabel('Nahrávat zvuk')).not.toBeChecked();
-    await page.getByLabel('Typ zdroje').selectOption('screen');
-    await page.getByLabel('Typ zdroje').selectOption('camera');
+    await expect(page.getByLabel('Typ zdroje')).toBeDisabled();
+    await expect(page.getByLabel('Typ zdroje')).toHaveValue('camera');
     await expect(page.getByLabel('Nahrávat zvuk')).not.toBeChecked();
     await page.getByRole('dialog').getByRole('button', { name: 'Zavřít', exact: true }).click();
 });
@@ -956,7 +1087,9 @@ test('commits folder chunks without IndexedDB media, reloads and imports its che
     await expect(page.getByText('Uloženo', { exact: true })).toHaveCount(1);
     const recoveredDownload = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Stáhnout originál 1', exact: true }).click();
-    expect(await readFile((await (await recoveredDownload).path())!)).toEqual(Buffer.from(files.get('originals/01-camera.webm')!));
+    const firstOriginal = Array.from(files.keys()).find((name) => name.startsWith('originals/01-camera'));
+    expect(firstOriginal).toBeDefined();
+    expect(await readFile((await (await recoveredDownload).path())!)).toEqual(Buffer.from(files.get(firstOriginal!)!));
 });
 
 test('keeps committed multi-source data after a real IndexedDB transaction abort and offers recovery', async ({ page, baseURL }) => {

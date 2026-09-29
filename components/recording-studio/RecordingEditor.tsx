@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
+import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { Button } from '@/components/ui/button';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
@@ -17,6 +18,7 @@ type RecordingEditorProps = {
     readonly isDisabled: boolean;
     readonly recording: StudioRecording; readonly onChange: (recording: StudioRecording) => void;
     readonly onUseSourceConfiguration: (reportSuccess: (message: string) => void) => void;
+    readonly onAppend: () => void;
 };
 
 export function RecordingEditor(props: RecordingEditorProps) {
@@ -30,7 +32,7 @@ export function RecordingEditor(props: RecordingEditorProps) {
     return transport ? <RecordingEditorWorkspace {...props} transport={transport} /> : <p role="status">Připravuji časovou osu…</p>;
 }
 
-function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSourceConfiguration, transport }: RecordingEditorProps & { readonly transport: RecordingStudioTransport }) {
+function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSourceConfiguration, onAppend, transport }: RecordingEditorProps & { readonly transport: RecordingStudioTransport }) {
     const durationSeconds = getRecordingSessionDuration(recording);
     const initialSelection = getRecordingSelection(recording);
     const [title, setTitle] = useState(recording.title);
@@ -63,7 +65,9 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
     const toggleSource = (values: string[], id: string) => values.includes(id) ? values.filter((value) => value !== id) : [...values, id];
     const handleBounds = useCallback((id: string, bounds: RecordingMediaBounds | null) => {
         const track = recording.tracks.find((candidate) => candidate.id === id)!;
-        setAvailableRanges((values) => ({ ...values, [id]: bounds ? getRecordingAvailableRanges(track, bounds.firstTimestampSeconds, bounds.endTimestampSeconds, bounds.availableStartTimestampSeconds) : [] }));
+        setAvailableRanges((values) => ({ ...values, [id]: track.parts
+            ? getRecordingAvailableRanges(track)
+            : bounds ? getRecordingAvailableRanges(track, bounds.firstTimestampSeconds, bounds.endTimestampSeconds, bounds.availableStartTimestampSeconds) : [] }));
     }, [recording.tracks]);
     const handleArtwork = useCallback((id: string, value: RecordingMediaArtwork) => setArtwork((values) => ({ ...values, [id]: value })), []);
     useEffect(() => { if (isDisabled) transport.pause(); }, [isDisabled, transport]);
@@ -103,7 +107,10 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
             </RecordingSourceMonitor>)}
         </div>
         <details className="rounded-lg border p-3 text-xs text-slate-600"><summary className="cursor-pointer">Časování a předpis pro střihače</summary><p className="my-2">Cíl náhledu je odchylka do 100 ms po ustálení přesunu. Starší záznamy obsahují časy spuštění prohlížeče, nikoli měření latence zařízení. Export znovu kóduje na vybrané hranice; nepodporované nebo chybějící části ponechá výslovně jako originál s předpisem.</p><pre className="max-h-48 overflow-auto">{JSON.stringify(createRecordingEditRecipe(recording, isSelectionValid ? selection : initialSelection), null, 2)}</pre></details>
-        <div className="space-y-2"><Button type="button" variant="outline" disabled={recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(setSourceRestoreMessage)}>Použít tuto konfiguraci zdrojů</Button>{sourceRestoreMessage && <p role="status" className="text-sm text-cyan-800">{sourceRestoreMessage}</p>}</div>
+        <div className="space-y-2"><div className="flex flex-wrap gap-2">
+            <Button type="button" disabled={recording.status !== 'complete'} onClick={() => { void flushAdminSaves().then((isSaved) => { if (isSaved) onAppend(); else setSourceRestoreMessage('Nejprve opravte a uložte změny ořezu.'); }); }}>Donahrát do tohoto projektu</Button>
+            <Button type="button" variant="outline" disabled={recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(setSourceRestoreMessage)}>Použít tuto konfiguraci zdrojů · nový záznam</Button>
+        </div>{sourceRestoreMessage && <p role="status" className="text-sm text-cyan-800">{sourceRestoreMessage}</p>}</div>
         </fieldset>
     </form>;
 }

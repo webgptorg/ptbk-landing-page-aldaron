@@ -1,5 +1,5 @@
 import { readBrowserLocalStorageItem, removeBrowserLocalStorageItem, writeBrowserLocalStorageItem } from '@/lib/browser/browserStorage';
-import type { RecordingDisplaySurface, RecordingSource, RecordingSourceConfiguration, RecordingSourceKind, StudioRecording } from './recordingStudioTypes';
+import type { RecordingDisplaySurface, RecordingSource, RecordingSourceConfiguration, RecordingSourceKind, RecordingTrack, StudioRecording } from './recordingStudioTypes';
 
 export const RECORDING_SOURCE_CONFIGURATION_STORAGE_KEY = 'promptbook.recording-studio.source-configurations';
 export const RECORDING_SOURCE_CONFIGURATION_VERSION = 2;
@@ -170,12 +170,11 @@ function getLegacySourceId(recording: StudioRecording, trackId: string, trackInd
     return `legacy-${recording.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80) || 'recording'}-${trackIndex + 1}`;
 }
 
-function createLegacyTrackConfiguration(recording: StudioRecording, trackIndex: number, sourceId?: string): RecordingSourceConfiguration {
-    const track = recording.tracks[trackIndex];
+function createLegacyTrackConfiguration(track: RecordingTrack, sourceId: string): RecordingSourceConfiguration {
     const isCameraAudioEnabled = track.kind === 'camera' && track.isAudioIncluded;
     const isMicrophoneSource = track.kind === 'microphone';
     return {
-        id: sourceId ?? getLegacySourceId(recording, track.id, trackIndex),
+        id: sourceId,
         kind: track.kind,
         label: readSourceLabel(track.label, track.kind),
         cameraDeviceId: track.kind === 'camera' ? UNKNOWN_LEGACY_DEVICE_ID : '',
@@ -192,16 +191,18 @@ function createLegacyTrackConfiguration(recording: StudioRecording, trackIndex: 
 
 /** Uses a recorded snapshot when available; older tracks recover only metadata that was actually saved. */
 export function getRecordingSourceConfigurationRestore(recording: StudioRecording): RecordingSourceConfigurationRestore {
+    const latestTake = recording.takes?.[recording.takes.length - 1];
+    const intendedTracks = latestTake ? latestTake.sourceIds.map((id) => recording.tracks.find((track) => track.id === id)).filter((track): track is StudioRecording['tracks'][number] => Boolean(track)) : recording.tracks;
     const savedConfigurations = normalizeRecordingSourceConfigurations({
         schemaVersion: RECORDING_SOURCE_CONFIGURATION_VERSION,
-        configurations: recording.sourceConfiguration ?? [],
+        configurations: latestTake?.sourceConfiguration ?? recording.sourceConfiguration ?? [],
     });
     const configurationsById = new Map<string, RecordingSourceConfiguration>(
         savedConfigurations.map((configuration): [string, RecordingSourceConfiguration] => [configuration.id, configuration]),
     );
     let isLegacyIncomplete = false;
     const seenSourceIds = new Set<string>();
-    const configurations = recording.tracks.map((track, trackIndex) => {
+    const configurations = intendedTracks.map((track, trackIndex) => {
         const sourceId = getLegacySourceId(recording, track.id, trackIndex);
         const isSourceIdRepeated = seenSourceIds.has(sourceId);
         let uniqueSourceId = isSourceIdRepeated ? `legacy-${recording.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 72) || 'recording'}-${trackIndex + 1}` : sourceId;
@@ -211,9 +212,9 @@ export function getRecordingSourceConfigurationRestore(recording: StudioRecordin
         const savedConfiguration = isSourceIdRepeated ? undefined : configurationsById.get(track.id);
         if (!isSourceIdRepeated && savedConfiguration && savedConfiguration.kind === track.kind) return { ...savedConfiguration };
         isLegacyIncomplete = true;
-        return createLegacyTrackConfiguration(recording, trackIndex, uniqueSourceId);
+        return createLegacyTrackConfiguration(track, uniqueSourceId);
     });
-    if (savedConfigurations.length !== recording.tracks.length) isLegacyIncomplete = true;
+    if (savedConfigurations.length !== intendedTracks.length) isLegacyIncomplete = true;
     return { configurations, isLegacyIncomplete };
 }
 
