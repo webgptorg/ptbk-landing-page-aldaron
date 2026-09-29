@@ -1,6 +1,7 @@
 import { getRecordingErrorMessage } from './recordingStudioDevices';
 import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
 import { appendRecordingChunk, createStudioRecording, readRecordingPart, saveStudioRecording } from './recordingStudioStorage';
+import { extendRecordingWorkshopActivity } from './recordingStudioWorkshop';
 import { inspectRecordingBlob } from './recordingStudioMedia';
 import { addRecordingBytes, getRecordingByteLength } from './recordingStudioTiming';
 import { toRecordingSourceConfiguration } from './recordingStudioSourceConfiguration';
@@ -443,6 +444,7 @@ export class RecordingStudioCapture {
         };
         if (result.editRecipe) result = { ...result, editRecipe: createRecordingEditRecipe(result,
             isFullSelection ? { startSeconds: 0, endSeconds: durationSeconds } : undefined) };
+        if (result.workshopMetadata) result = { ...result, workshopMetadata: extendRecordingWorkshopActivity(result.workshopMetadata, durationSeconds) };
         try {
             await saveStudioRecording(result);
         } catch (error) {

@@ -13,7 +13,7 @@ const E2E_COLD_COMPILATION_TEST_TIMEOUT_MS = 180_000;
  * A browser assertion can be the first request for a lazily loaded client-side editor. Keep its cold compilation
  * allowance next to the suite-wide test allowance instead of making individual tests depend on implementation timing.
  */
-const E2E_COLD_COMPONENT_EXPECT_TIMEOUT_MS = 30_000;
+const E2E_COLD_COMPONENT_EXPECT_TIMEOUT_MS = 60_000;
 
 const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4009';
 const usesExternalServer = process.env.E2E_BASE_URL !== undefined;

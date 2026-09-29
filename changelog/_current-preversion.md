@@ -1,5 +1,15 @@
 # Current preversion
 
+- Added browser-local workshop player metadata to the synchronized recording editor: reviewed activity intervals,
+  independent event markers, validated Auto-view scene choices, repository/start SHA and reviewed commit anchors.
+  Speech suggests boundaries only; unclassified gaps stay at 1× and never become automatic coding from silence.
+  Git timestamp proposals require an explicit wall-clock/session calibration and verification against selected branches;
+  confirmed missing SHA references report unavailable, while failed GitHub checks remain unknown. Manual edits survive
+  derived-track regeneration, appended takes and selected-directory reloads; scene validation checks actual video.
+  Manifest schema 5 and original/prepared JSON sidecars use the shared IN/OUT recipe, retain original coordinates and
+  report stale source revisions. This is local metadata for a later player, not published media or visible transcript
+  subtitles. Design and limits are documented in `docs/recording-studio-workshop-metadata.md`.
+
 - Added independent browser-local subtitle and speech-activity revisions to the synchronized recording editor.
   A finished camera/screen audio stream or standalone microphone is selected for each explicit request; older
   recordings locally verify actual audio before enabling a source. Czech,

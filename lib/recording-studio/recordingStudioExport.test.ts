@@ -2,7 +2,9 @@ import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { bufferRecordingPreparedDownload, exportRecordingArchive, exportRecordingManifest, exportRecordingOriginal, recordingOriginalFilename, recordingPreparedFilename } from './recordingStudioExport';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
-import type { RecordingArchiveManifest, RecordingDerivedTrack } from './recordingStudioTypes';
+import { getRecordingMediaRevision } from './recordingStudioDerived';
+import { createRecordingWorkshopMetadata } from './recordingStudioWorkshop';
+import type { RecordingArchiveManifest, RecordingDerivedTrack, RecordingEditRecipe, RecordingTrim } from './recordingStudioTypes';
 
 const DOWNLOADS = vi.hoisted(() => ({ download: vi.fn(), read: vi.fn() }));
 vi.mock('@/lib/downloadBlobFile', () => ({ downloadBlobFile: DOWNLOADS.download }));
@@ -68,6 +70,39 @@ describe('recording archive exports', () => {
         expect(manifest.tracks[0].trimmedFile).toBeNull();
         await reader.close();
     });
+    it('exports one common workshop clock for both sources, including paused-part fallback', async () => {
+        const base = createTestStudioRecording();
+        const tracks = base.tracks.map((track) => ({ ...track, byteLength: 28, chunkCount: 2, startOffsetSeconds: 0,
+            durationSeconds: 10, parts: [0, 5].map((sessionStartSeconds, index) => ({ id: `${track.id}-${index}`,
+                takeId: `take-${index}`, sessionStartSeconds, durationSeconds: 5, byteLength: 14, chunkCount: 1,
+                mimeType: 'video/webm', isAudioIncluded: track.isAudioIncluded })) }));
+        const source = { ...base, tracks, trim: { startSeconds: 4, endSeconds: 6 } };
+        const metadata = createRecordingWorkshopMetadata(source, await getRecordingMediaRevision(source));
+        const recording = { ...source, workshopMetadata: { ...metadata,
+            events: [{ id: 'event', seconds: 5, title: 'Append', detail: '', type: 'take' }],
+            autoView: { ...metadata.autoView, isDefaultReviewed: true } } };
+        await exportRecordingArchive({ recording, destination: null, isTrimIncluded: true,
+            signal: new AbortController().signal, onProgress: vi.fn() });
+        const reader = new ZipReader(new BlobReader(DOWNLOADS.download.mock.calls[0][0].blob));
+        const entries = await reader.getEntries();
+        const original = entries.find((entry) => entry.filename.endsWith('-workshop.json') && entry.filename.includes('metadata/original/'));
+        const prepared = entries.find((entry) => entry.filename.endsWith('-workshop.json') && entry.filename.includes('metadata/prepared/'));
+        const manifestEntry = entries.find((entry) => entry.filename === 'recording.json');
+        if (!original || original.directory || !prepared || prepared.directory || !manifestEntry || manifestEntry.directory) throw new Error('Missing workshop files');
+        const preparedData = JSON.parse(await prepared.getData(new TextWriter())) as {
+            readonly events: readonly { readonly seconds: number; readonly originalSeconds: number }[];
+            readonly activityIntervals: readonly RecordingTrim[];
+            readonly editRecipe: RecordingEditRecipe;
+        };
+        const manifest = JSON.parse(await manifestEntry.getData(new TextWriter())) as RecordingArchiveManifest;
+        expect(preparedData.events).toMatchObject([{ seconds: 1, originalSeconds: 5 }]);
+        expect(preparedData.activityIntervals).toMatchObject([{ startSeconds: 0, endSeconds: 2 }]);
+        expect(preparedData.editRecipe.sources).toHaveLength(2);
+        expect(manifest.workshopMetadata?.originalFile).toBe(original.filename);
+        expect(manifest.workshopMetadata?.preparedFile).toBe(prepared.filename);
+        expect(manifest.tracks.every((track) => track.trimmedFile === null)).toBe(true);
+        await reader.close();
+    });
     it('preserves all original tracks and shared trim decisions in a real ZIP64 archive', async () => {
         const recording = createTestStudioRecording();
         await exportRecordingArchive({
@@ -115,9 +150,9 @@ describe('recording archive exports', () => {
     it('exports shared timing and missing tails for large individual originals without reading media', async () => {
         const base = createTestStudioRecording();
         const recording = { ...base, status: 'interrupted' as const, captureEndSeconds: null, tracks: base.tracks.map((track) => ({ ...track, byteLength: 12 * 1024 ** 3 })) };
-        exportRecordingManifest(recording);
+        await exportRecordingManifest(recording);
         const manifest = JSON.parse(await DOWNLOADS.download.mock.calls[0][0].blob.text()) as RecordingArchiveManifest;
-        expect(manifest.schemaVersion).toBe(4);
+        expect(manifest.schemaVersion).toBe(5);
         expect(manifest.tracks[1].originalFile).toBe(recordingOriginalFilename(recording, recording.tracks[1]));
         expect(manifest.tracks[1].byteLength).toBe(12 * 1024 ** 3);
         expect(manifest.tracks[1].startOffsetSeconds).toBe(0.002);

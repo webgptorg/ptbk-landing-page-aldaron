@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { appendDirectoryRecordingChunk, chooseRecordingDirectory, readDirectoryRecording, readDirectoryRecordingChunk, reconnectRecordingDirectory, saveDirectoryRecording } from './recordingStudioDirectory';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
 import { createRecordingEditRecipe } from './recordingStudioSessionTime';
+import { getRecordingMediaRevision } from './recordingStudioDerived';
+import { createRecordingWorkshopMetadata } from './recordingStudioWorkshop';
 
 /** Models File System Access commit-on-close, including failures before a checkpoint is closed. */
 function createDirectory() {
@@ -63,6 +65,22 @@ describe('incrementally committed selected-directory media', () => {
         expect(files.size).toBe(2);
         await saveDirectoryRecording(handle, { ...edited, tracks: [{ ...track, segments: [...track.segments].reverse() }] });
         await expect(readDirectoryRecording(handle)).rejects.toThrow('časové úseky');
+    });
+
+    it('keeps manually edited workshop metadata in a directory checkpoint and rejects malformed metadata', async () => {
+        const { handle, recording, files } = createDirectory();
+        const metadata = createRecordingWorkshopMetadata(recording, await getRecordingMediaRevision(recording));
+        const edited = { ...recording, workshopMetadata: { ...metadata,
+            activityIntervals: [{ ...metadata.activityIntervals[0]!, classification: 'automatic-coding' as const,
+                origin: 'manual' as const, isReviewed: true }],
+            events: [{ id: 'event-one', seconds: 2, title: 'Agent started', detail: 'Reviewed against video', type: 'agent' }],
+        } };
+        await saveDirectoryRecording(handle, edited);
+        expect((await readDirectoryRecording(handle)).workshopMetadata).toEqual(edited.workshopMetadata);
+        const malformed = { ...edited, workshopMetadata: { ...edited.workshopMetadata,
+            commitAnchors: [{ id: 'anchor-one', seconds: 2, commit: { sha: 'invented' }, origin: 'manual', isReviewed: true }] } };
+        files.set('recording.json', new Blob([JSON.stringify({ schemaVersion: 1, recording: malformed })]));
+        await expect(readDirectoryRecording(handle)).rejects.toThrow(/platný popis/);
     });
 
     it('round-trips independently timed parts with their own audio setting and encoded bounds', async () => {

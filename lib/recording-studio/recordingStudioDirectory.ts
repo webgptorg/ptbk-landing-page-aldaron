@@ -24,6 +24,28 @@ const DERIVED_TRACK_SCHEMA = z.discriminatedUnion('kind', [
     z.object({ id: z.string().regex(SAFE_IDENTIFIER), kind: z.literal('subtitles'), provenance: DERIVED_PROVENANCE_SCHEMA, cues: z.array(DERIVED_CUE_SCHEMA).max(20_000) }),
     z.object({ id: z.string().regex(SAFE_IDENTIFIER), kind: z.literal('speech-activity'), provenance: DERIVED_PROVENANCE_SCHEMA, intervals: z.array(DERIVED_INTERVAL_SCHEMA).max(100_000) }),
 ]);
+const WORKSHOP_COMMIT_SCHEMA = z.object({ sha: z.string().regex(/^[a-f0-9]{40}$/i), availability: z.enum(['verified', 'unavailable', 'unverified']),
+    checkedAt: z.string().datetime(), committedAt: z.string().datetime().nullable(), message: z.string().nullable() });
+const WORKSHOP_METADATA_SCHEMA = z.object({
+    schemaVersion: z.literal(1), sourceRevision: z.string().regex(/^[a-f0-9]{64}$/),
+    activityIntervals: z.array(TRIM_SCHEMA.extend({ id: z.string().regex(SAFE_IDENTIFIER),
+        classification: z.enum(['active', 'automatic-coding', 'unclassified']),
+        origin: z.enum(['manual', 'speech-suggestion', 'initial']), isReviewed: z.boolean(),
+        suggestedFrom: z.object({ speechTrackId: z.string().regex(SAFE_IDENTIFIER),
+            audioSourceId: z.string().regex(SAFE_IDENTIFIER), mediaRevision: z.string().regex(/^[a-f0-9]{64}$/) }).optional() })).max(5_000),
+    events: z.array(z.object({ id: z.string().regex(SAFE_IDENTIFIER), seconds: NONNEGATIVE_NUMBER,
+        title: z.string().max(120), detail: z.string().max(2_000), type: z.string().max(80) })).max(5_000),
+    autoView: z.object({ defaultScene: z.enum(['editor', 'application']), isDefaultReviewed: z.boolean(),
+        editorSourceId: z.string().regex(SAFE_IDENTIFIER).nullable(), applicationSourceId: z.string().regex(SAFE_IDENTIFIER).nullable(),
+        transitions: z.array(z.object({ id: z.string().regex(SAFE_IDENTIFIER), seconds: NONNEGATIVE_NUMBER,
+            scene: z.enum(['editor', 'application']), isReviewed: z.boolean() })).max(5_000) }),
+    repository: z.object({ owner: z.string(), name: z.string(),
+        branch: z.union([z.string(), z.array(z.string()), z.null()]) }).nullable(),
+    startingCommit: WORKSHOP_COMMIT_SCHEMA.nullable(),
+    commitAnchors: z.array(z.object({ id: z.string().regex(SAFE_IDENTIFIER), seconds: NONNEGATIVE_NUMBER,
+        commit: WORKSHOP_COMMIT_SCHEMA, origin: z.enum(['manual', 'timestamp-proposal']), isReviewed: z.boolean() })).max(5_000),
+    calibration: z.object({ sessionSeconds: NONNEGATIVE_NUMBER, wallClockAtSessionSeconds: z.string().datetime({ offset: true }) }).nullable(),
+});
 const SOURCE_CONFIGURATION_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string().max(200),
     cameraDeviceId: z.string(), cameraDeviceLabel: z.string().max(200).nullable(),
@@ -37,6 +59,7 @@ const RECORDING_SCHEMA = z.object({
     status: z.enum(['recording', 'complete', 'interrupted']), durationSeconds: NONNEGATIVE_NUMBER,
     errorMessage: z.string().nullable(), trim: TRIM_SCHEMA.nullable(),
     derivedTracks: z.array(DERIVED_TRACK_SCHEMA).max(100).optional(),
+    workshopMetadata: WORKSHOP_METADATA_SCHEMA.optional(),
     editRecipe: z.object({
         schemaVersion: z.literal(1), timeUnit: z.literal('seconds'), selection: TRIM_SCHEMA,
         preparedTimeZeroSessionSeconds: NONNEGATIVE_NUMBER,

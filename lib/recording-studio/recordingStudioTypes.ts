@@ -155,6 +155,72 @@ export type RecordingDerivedTrack = {
     readonly intervals: readonly RecordingSpeechInterval[];
 };
 
+export type RecordingWorkshopActivityInterval = RecordingTrim & {
+    readonly id: string;
+    readonly classification: 'active' | 'automatic-coding' | 'unclassified';
+    readonly origin: 'manual' | 'speech-suggestion' | 'initial';
+    readonly isReviewed: boolean;
+    /** Retained after manual edits, so a suggested boundary remains traceable to its audio revision. */
+    readonly suggestedFrom?: { readonly speechTrackId: string; readonly audioSourceId: string; readonly mediaRevision: string };
+};
+
+export type RecordingWorkshopEvent = {
+    readonly id: string;
+    readonly seconds: number;
+    readonly title: string;
+    readonly detail: string;
+    readonly type: string;
+};
+
+export type RecordingWorkshopScene = 'editor' | 'application';
+export type RecordingWorkshopSceneTransition = {
+    readonly id: string;
+    readonly seconds: number;
+    readonly scene: RecordingWorkshopScene;
+    readonly isReviewed: boolean;
+};
+
+export type RecordingWorkshopCommit = {
+    readonly sha: string;
+    /** A failed provider check is unknown; only an editor's explicit review marks a SHA unavailable. */
+    readonly availability: 'verified' | 'unavailable' | 'unverified';
+    readonly checkedAt: string;
+    readonly committedAt: string | null;
+    readonly message: string | null;
+};
+
+export type RecordingWorkshopCommitAnchor = {
+    readonly id: string;
+    readonly seconds: number;
+    readonly commit: RecordingWorkshopCommit;
+    readonly origin: 'manual' | 'timestamp-proposal';
+    readonly isReviewed: boolean;
+};
+
+/** Original session seconds. All edits live with the browser-local recording and never alter media. */
+export type RecordingWorkshopMetadata = {
+    readonly schemaVersion: 1;
+    readonly sourceRevision: string;
+    readonly activityIntervals: readonly RecordingWorkshopActivityInterval[];
+    readonly events: readonly RecordingWorkshopEvent[];
+    readonly autoView: {
+        readonly defaultScene: RecordingWorkshopScene;
+        readonly isDefaultReviewed: boolean;
+        readonly editorSourceId: string | null;
+        readonly applicationSourceId: string | null;
+        readonly transitions: readonly RecordingWorkshopSceneTransition[];
+    };
+    readonly repository: {
+        readonly owner: string;
+        readonly name: string;
+        readonly branch: import('@/lib/github/githubRepository').GithubBranchSelection;
+    } | null;
+    readonly startingCommit: RecordingWorkshopCommit | null;
+    readonly commitAnchors: readonly RecordingWorkshopCommitAnchor[];
+    /** Explicit calibration; Git timestamps by themselves are never a recording clock. */
+    readonly calibration: { readonly sessionSeconds: number; readonly wallClockAtSessionSeconds: string } | null;
+};
+
 export type StudioRecording = {
     readonly id: string;
     readonly title: string;
@@ -167,6 +233,7 @@ export type StudioRecording = {
     readonly editRecipe?: RecordingEditRecipe;
     /** Independent, non-destructive browser-local metadata revisions. */
     readonly derivedTracks?: readonly RecordingDerivedTrack[];
+    readonly workshopMetadata?: RecordingWorkshopMetadata;
     readonly errorMessage: string | null;
     /** Immutable source preferences for this take; absent on older recordings. */
     readonly sourceConfiguration?: readonly RecordingSourceConfiguration[];
@@ -196,7 +263,7 @@ export type RecordingArchiveTrack = RecordingTrack & {
 };
 
 export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds' | 'sourceConfiguration' | 'takes'> & {
-    readonly schemaVersion: 4;
+    readonly schemaVersion: 5;
     readonly timeUnit: 'seconds';
     readonly editRecipe: RecordingEditRecipe;
     readonly isTrimIncluded: boolean;
@@ -204,6 +271,15 @@ export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'c
     readonly derivedTracks: readonly { readonly id: string; readonly kind: RecordingDerivedTrack['kind']; readonly provenance: RecordingDerivedProvenance; readonly originalFiles: readonly string[]; readonly preparedFiles: readonly string[] }[];
     /** Only in standalone manifest downloads; ZIP stores these as independent sidecars. */
     readonly derivedTrackData?: readonly RecordingDerivedTrack[];
+    readonly workshopMetadata: {
+        readonly sourceRevision: string;
+        readonly currentRevision: string;
+        readonly isSourceRevisionStale: boolean;
+        readonly originalFile: string | null;
+        readonly preparedFile: string | null;
+    } | null;
+    /** Original session coordinates and provenance, retained even when prepared sidecars are clipped. */
+    readonly workshopMetadataData?: RecordingWorkshopMetadata;
     readonly timing: string;
     readonly missingRanges: readonly { readonly trackId: string; readonly startSeconds: number; readonly endSeconds: number | null }[];
 };
