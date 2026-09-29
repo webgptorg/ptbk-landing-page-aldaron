@@ -102,8 +102,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `/api/waitlist`, with its own contact source and purpose note. The source
   filter and exports retain that source alongside any collaboration history for
   the same email; this collects requests without sending campaigns. The
-  subscription section follows the episodes and is linked from the header menu
-  and footer. Privacy
+  subscription section follows the episodes and is linked from the header menu;
+  the same email form also appears in the shared podcast footer on the podcast,
+  media-kit and branding pages. Privacy
   links point to the canonical Promptbook legal page. The podcast tab icon uses
   the page's own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are
   rounded and transparent, while the raster fills its square. That drawing is

@@ -25,29 +25,13 @@ async function openStudio(page: Page, baseURL: string | undefined) {
         const mediaRequests: MediaStreamConstraints[] = [];
         const displayRequests: DisplayMediaStreamOptions[] = [];
         const testSettings = { cameraAudioErrorName: null as string | null, displayErrorName: null as string | null, displayInitiallyMuted: false };
-        const markerPeriodMilliseconds = 700;
-        const markerDurationSeconds = 0.24;
-        const markerTimeOrigin = performance.now();
+        const MARKER_PERIOD_MILLISECONDS = 700;
+        const MARKER_DURATION_SECONDS = 0.24;
+        const MARKER_TIME_ORIGIN = performance.now();
         Object.assign(window, { studioTestStreams: streams, studioTestMediaRequests: mediaRequests, studioTestDisplayRequests: displayRequests, studioTestSettings: testSettings });
         const createStream = async (isVideo: boolean, isAudio: boolean) => {
             const stream = new MediaStream();
-            if (isVideo) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 320; canvas.height = 180;
-                const context = canvas.getContext('2d')!;
-                const draw = () => {
-                    const isMarkerVisible = (performance.now() - markerTimeOrigin) % markerPeriodMilliseconds < markerDurationSeconds * 1000;
-                    context.fillStyle = isMarkerVisible ? '#fff' : '#102030';
-                    context.fillRect(0, 0, 320, 180);
-                    context.fillStyle = '#fff'; context.font = '24px sans-serif';
-                    context.fillText(String(performance.now()), 20, 90);
-                };
-                draw();
-                const interval = setInterval(draw, 33);
-                const videoTrack = canvas.captureStream(30).getVideoTracks()[0];
-                videoTrack.addEventListener('ended', () => clearInterval(interval));
-                stream.addTrack(videoTrack);
-            }
+            let audioAnalyser: AnalyserNode | null = null;
             if (isAudio) {
                 // Render real audio into a captured stream without connecting the fixture oscillator to speakers.
                 const context = new AudioContext();
@@ -58,16 +42,45 @@ async function openStudio(page: Page, baseURL: string | undefined) {
                 oscillator.frequency.value = 880;
                 oscillator.connect(gain); gain.connect(destination); oscillator.start();
                 stream.addTrack(destination.stream.getAudioTracks()[0]);
+                // Observe the captured audio after the stream destination. Browser load can delay its samples
+                // relative to the wall clock, so the visual pulse must follow this signal rather than a timer.
+                audioAnalyser = context.createAnalyser();
+                audioAnalyser.fftSize = 256;
+                context.createMediaStreamSource(destination.stream).connect(audioAnalyser);
                 await context.resume();
-                const elapsedSeconds = (performance.now() - markerTimeOrigin) / 1000;
+                const elapsedSeconds = (performance.now() - MARKER_TIME_ORIGIN) / 1000;
                 const audioTimeAtOrigin = context.currentTime - elapsedSeconds;
-                const nextMarkerIndex = Math.max(0, Math.ceil(elapsedSeconds / (markerPeriodMilliseconds / 1000)));
+                const nextMarkerIndex = Math.max(0, Math.ceil(elapsedSeconds / (MARKER_PERIOD_MILLISECONDS / 1000)));
                 for (let markerIndex = nextMarkerIndex; markerIndex < 100; markerIndex += 1) {
-                    const markerTime = audioTimeAtOrigin + markerIndex * markerPeriodMilliseconds / 1000;
+                    const markerTime = audioTimeAtOrigin + markerIndex * MARKER_PERIOD_MILLISECONDS / 1000;
                     if (markerTime < context.currentTime) continue;
                     gain.gain.setValueAtTime(0.2, markerTime);
-                    gain.gain.setValueAtTime(0, markerTime + markerDurationSeconds);
+                    gain.gain.setValueAtTime(0, markerTime + MARKER_DURATION_SECONDS);
                 }
+            }
+            if (isVideo) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 320; canvas.height = 180;
+                const context = canvas.getContext('2d')!;
+                const audioLevelSamples = new Float32Array(256);
+                const draw = () => {
+                    let isMarkerVisible: boolean;
+                    if (audioAnalyser) {
+                        audioAnalyser.getFloatTimeDomainData(audioLevelSamples);
+                        isMarkerVisible = audioLevelSamples.some((sample) => Math.abs(sample) > 0.04);
+                    } else {
+                        isMarkerVisible = (performance.now() - MARKER_TIME_ORIGIN) % MARKER_PERIOD_MILLISECONDS < MARKER_DURATION_SECONDS * 1000;
+                    }
+                    context.fillStyle = isMarkerVisible ? '#fff' : '#102030';
+                    context.fillRect(0, 0, 320, 180);
+                    context.fillStyle = '#fff'; context.font = '24px sans-serif';
+                    context.fillText(String(performance.now()), 20, 90);
+                };
+                draw();
+                const interval = setInterval(draw, 33);
+                const videoTrack = canvas.captureStream(30).getVideoTracks()[0];
+                videoTrack.addEventListener('ended', () => clearInterval(interval));
+                stream.addTrack(videoTrack);
             }
             streams.push(stream);
             return stream;

@@ -1,6 +1,7 @@
 'use client';
 
 import { AiTaKrajtaMark } from '@/businesses/ai-ta-krajta/AiTaKrajtaMark';
+import { AiTaKrajtaEmailSubscriptionForm } from '@/businesses/ai-ta-krajta/AiTaKrajtaEmailSubscriptionForm';
 import {
     AI_TA_KRAJTA_NAME,
     AI_TA_KRAJTA_PATH,
@@ -25,16 +26,15 @@ const FOOTER_LINK_CLASS_NAME = 'text-sm text-white/50 transition-colors hover:te
 const CURRENT_YEAR = new Date().getFullYear();
 
 /**
- * Footer of the podcast page with the legal documents of the site
+ * Footer shared by the podcast and its supporting pages
  *
- * Note: It deliberately does not reuse the product footer. A podcast needs neither its sales message nor its
- *       newsletter signup; only the legal links are shared through `LegalFooterLinks`.
+ * Note: It uses the podcast's own email subscription form and shares only the legal links with the product footer.
  */
 export function AiTaKrajtaFooter() {
     return (
         <footer className="border-t border-white/10 bg-[#141a16]">
             <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
-                <div className="grid gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
+                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.75fr)_minmax(0,0.7fr)_minmax(0,1.15fr)]">
                     <div className="max-w-sm">
                         <Link
                             href={AI_TA_KRAJTA_PATH}
@@ -84,15 +84,7 @@ export function AiTaKrajtaFooter() {
                             ))}
                             <li>
                                 <Link
-                                    href={'#' + AI_TA_KRAJTA_SECTION_IDS.EMAIL_SUBSCRIPTION}
-                                    className={FOOTER_LINK_CLASS_NAME}
-                                >
-                                    Odebírat
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href={'#' + AI_TA_KRAJTA_SECTION_IDS.PEOPLE}
+                                    href={`${AI_TA_KRAJTA_PATH}#${AI_TA_KRAJTA_SECTION_IDS.PEOPLE}`}
                                     className={FOOTER_LINK_CLASS_NAME}
                                 >
                                     Kdo v tom jede
@@ -100,6 +92,10 @@ export function AiTaKrajtaFooter() {
                             </li>
                         </ul>
                     </nav>
+
+                    <div className="min-w-0">
+                        <AiTaKrajtaEmailSubscriptionForm isFooter />
+                    </div>
                 </div>
 
                 <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/40 sm:flex-row sm:items-center sm:justify-between">

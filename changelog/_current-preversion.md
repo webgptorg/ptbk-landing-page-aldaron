@@ -98,7 +98,7 @@
   retry on failure, and confirms only after the contact write succeeds. The contacts source filter now includes every
   source in a merged email history, keeping subscriber requests and collaboration inquiries independently filterable
   and preserving both in exports. Privacy information links to its canonical Promptbook domain; no campaign sender was
-  added.
+  added. The same form now appears in the shared podcast footer on the homepage, media kit and branding pages.
 
 - Fixed the AI ta Krajta snake's body wobbling at walls and corners. The simulation now keeps the path through each
   reflected contact, and shared body strokes follow that path with width and colour tied to travelled distance.

@@ -143,7 +143,7 @@ test.describe('isolated public domains', () => {
         expect(blockedAssetUrls).toEqual([]);
     });
 
-    test('subscribes from the podcast apex and www alias on mobile without interrupting playback or page state', async ({ page }) => {
+    test('subscribes from the podcast section and footer on mobile without interrupting playback or page state', async ({ page }) => {
         await page.addInitScript(() => {
             Object.defineProperty(HTMLMediaElement.prototype, 'play', {
                 configurable: true,
@@ -156,7 +156,10 @@ test.describe('isolated public domains', () => {
             const email = createE2eTestEmail(`ai-ta-krajta-email-${hostname.startsWith('www.') ? 'www' : 'apex'}`);
             await page.goto(localDomainUrl(hostname, '/?person=pavol-hejny#dily'), { waitUntil: 'networkidle' });
 
-            await expect(page.getByRole('link', { name: 'zásad ochrany osobních údajů' })).toHaveAttribute(
+            const IS_FOOTER_SUBSCRIPTION = hostname.startsWith('www.');
+            const SUBSCRIPTION_AREA = IS_FOOTER_SUBSCRIPTION ? page.locator('footer') : page.locator('section#odber');
+            await expect(page.locator('footer').getByRole('form', { name: 'Zůstaň v obraze' })).toBeVisible();
+            await expect(SUBSCRIPTION_AREA.getByRole('link', { name: 'zásad ochrany osobních údajů' })).toHaveAttribute(
                 'href',
                 'https://ptbk.io/cs/ochrana-osobnich-udaju',
             );
@@ -165,7 +168,7 @@ test.describe('isolated public domains', () => {
             await expect(page).toHaveURL(/episode=/);
             await expect(page.getByRole('button', { name: 'Pozastavit', exact: true })).toBeVisible();
 
-            const emailField = page.getByRole('textbox', { name: 'E-mail' });
+            const emailField = SUBSCRIPTION_AREA.getByRole('textbox', { name: 'E-mail' });
             await emailField.fill(` ${email} `);
             const waitlistRequestPromise = page.waitForRequest(
                 (request) => request.method() === 'POST' && new URL(request.url()).pathname === '/api/waitlist',
