@@ -6,7 +6,7 @@ import { tmpdir, platform, release } from 'node:os';
 import { resolve, sep, join } from 'node:path';
 import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 import { createAdminSessionValueOrNull } from '@/lib/admin/adminSession';
-import type { RecordingArchiveManifest } from '@/lib/recording-studio/recordingStudioTypes';
+import type { RecordingArchiveManifest, StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 import { EDITOR_FIXTURE_PATH, readEditorFrameTimecodes, seedRecordingEditorFixture } from './recordingStudioEditorFixtures';
 import { inspectAudioVideoMarkers } from './recordingStudioMarkerInspection';
 
@@ -118,6 +118,35 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     }
 }
 
+async function waitForRecordingSeconds(page: Page, minimumSeconds: number) {
+    await expect.poll(async () => {
+        const timecode = await page.getByLabel('Délka záznamu', { exact: true }).textContent();
+        const [hours = NaN, minutes = NaN, seconds = NaN] = (timecode ?? '').split(':').map(Number);
+        return [hours, minutes, seconds].every(Number.isFinite) ? hours * 3_600 + minutes * 60 + seconds : -1;
+    }).toBeGreaterThanOrEqual(minimumSeconds);
+}
+
+async function waitForCommittedRecordingSources(page: Page, sourceCount: number) {
+    await expect.poll(() => page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+        try {
+            const recordings = await new Promise<StudioRecording[]>((resolve, reject) => {
+                const request = database.transaction('recordings').objectStore('recordings').getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            const activeRecording = recordings.find((recording) => recording.status === 'recording');
+            return activeRecording?.tracks.filter((track) => track.parts?.some((part) => part.byteLength > 0)).length ?? 0;
+        } finally {
+            database.close();
+        }
+    })).toBe(sourceCount);
+}
+
 async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone', isAudioEnabled = true) {
     await page.getByRole('button', { name: 'Přidat zdroj', exact: true }).click();
     await page.getByLabel('Typ zdroje').selectOption(kind);
@@ -166,6 +195,112 @@ test('requires admin authentication before accepting browser-local transcription
         multipart: { language: 'cs', file: { name: 'recording.wav', mimeType: 'audio/wav', buffer: Buffer.from('untrusted') } },
     });
     expect(response.status()).toBe(401);
+});
+
+test('persists reviewed workshop annotations and rebases them beside every prepared source', async ({ page, baseURL }, testInfo) => {
+    await openStudio(page, baseURL);
+    await seedRecordingEditorFixture(page);
+    const editor = page.getByRole('region', { name: 'Metadata workshopu' });
+    await editor.getByRole('button', { name: 'Založit metadata workshopu' }).click();
+    await editor.getByRole('checkbox', { name: 'Výchozí scénu jsem zkontroloval(a)' }).check();
+    await editor.getByRole('button', { name: 'Přidat událost u hlavy' }).click();
+    await editor.getByLabel('Čas události').fill('2.25');
+    await editor.getByLabel('Název události').fill('Agent finished the first pass');
+    await expect(editor.getByText('Metadata jsou připravená k exportu.')).toBeVisible();
+    await expect.poll(() => page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        const recording = await new Promise<import('@/lib/recording-studio/recordingStudioTypes').StudioRecording>((resolve, reject) => {
+            const request = database.transaction('recordings', 'readonly').objectStore('recordings').get('synchronized-fixture');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        database.close();
+        return recording.workshopMetadata?.events[0]?.title ?? null;
+    })).toBe('Agent finished the first pass');
+    await page.reload();
+    await expect(page.getByRole('region', { name: 'Metadata workshopu' }).getByLabel('Název události')).toHaveValue('Agent finished the first pass');
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'ZIP s ořezem', exact: true }).click();
+    const archivePath = testInfo.outputPath('workshop-metadata.zip');
+    await (await downloadPromise).saveAs(archivePath);
+    const files = await readArchive(archivePath);
+    const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
+    const preparedFilename = manifest.workshopMetadata?.preparedFile;
+    if (!preparedFilename) throw new Error('Missing prepared workshop metadata');
+    const prepared = JSON.parse(new TextDecoder().decode(files.get(preparedFilename))) as {
+        readonly preparedTimeZeroSessionSeconds: number;
+        readonly events: readonly { readonly seconds: number; readonly originalSeconds: number; readonly title: string }[];
+        readonly activityIntervals: readonly { readonly startSeconds: number; readonly endSeconds: number; readonly classification: string }[];
+    };
+    expect(manifest.tracks.filter((track) => track.trimmedFile).length).toBeGreaterThan(1);
+    expect(prepared.preparedTimeZeroSessionSeconds).toBe(1.25);
+    expect(prepared.events).toMatchObject([{ seconds: 1, originalSeconds: 2.25, title: 'Agent finished the first pass' }]);
+    expect(prepared.activityIntervals).toMatchObject([{ startSeconds: 0, endSeconds: 5, classification: 'unclassified' }]);
+});
+
+test('aligns reviewed workshop events, activity, scenes and Git anchors with prepared appended-take sources', async ({ page, baseURL }, testInfo) => {
+    await openStudio(page, baseURL);
+    await seedRecordingEditorFixture(page, { isAppendedSession: true });
+    await page.route('**/api/admin/workshops/repository/commit', async (route) => {
+        const commitId = (route.request().postDataJSON() as { lookup: { commitId: string } }).lookup.commitId;
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+            commit: { sha: commitId, committedAt: '2026-09-28T08:20:00.000Z', message: 'Selected branch commit' },
+        }) });
+    });
+    const playhead = page.getByRole('slider', { name: 'Přehrávací hlava', exact: true });
+    await playhead.press('Home');
+    for (let second = 0; second < 11; second += 1) await playhead.press('ArrowRight');
+    await expect(page.getByLabel('Společný čas')).toHaveAttribute('data-session-seconds', '11');
+    const editor = page.getByRole('region', { name: 'Metadata workshopu' });
+    await editor.getByRole('button', { name: 'Založit metadata workshopu' }).click();
+    const activity = editor.getByRole('heading', { name: 'Aktivita' }).locator('..');
+    await activity.getByRole('button', { name: 'Rozdělit u hlavy' }).click();
+    await activity.getByLabel('Typ').nth(1).selectOption('automatic-coding');
+    await activity.getByRole('checkbox', { name: 'Ručně potvrzeno' }).check();
+    await editor.getByRole('button', { name: 'Přidat událost u hlavy' }).click();
+    await editor.getByLabel('Název události').fill('Agent started unattended pass');
+    await editor.getByLabel('Zdroj application').selectOption('camera');
+    await editor.getByRole('checkbox', { name: 'Výchozí scénu jsem zkontroloval(a)' }).check();
+    await editor.getByRole('button', { name: 'Přechod u hlavy' }).click();
+    await editor.getByRole('checkbox', { name: 'Zkontrolováno' }).check();
+    await editor.getByLabel('Repozitář workshopu').fill('example/workshop');
+    await editor.getByLabel('Větve workshopu').fill('main');
+    await editor.getByRole('button', { name: 'Uložit repozitář' }).click();
+    await editor.getByLabel('Počáteční SHA').fill('a'.repeat(40));
+    await editor.getByRole('button', { name: 'Ověřit a uložit' }).click();
+    await expect(editor.getByText(/Počáteční commit:/)).toBeVisible();
+    await editor.getByLabel('SHA nové kotvy').fill('b'.repeat(40));
+    await editor.getByRole('button', { name: 'Ověřit a přidat kotvu' }).click();
+    await expect(editor.getByText('Metadata jsou připravená k exportu.')).toBeVisible();
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'ZIP s ořezem', exact: true }).click();
+    const archivePath = testInfo.outputPath('appended-workshop-metadata.zip');
+    await (await downloadPromise).saveAs(archivePath);
+    const files = await readArchive(archivePath);
+    const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
+    const preparedFilename = manifest.workshopMetadata?.preparedFile;
+    if (!preparedFilename) throw new Error('Missing prepared workshop metadata');
+    const prepared = JSON.parse(new TextDecoder().decode(files.get(preparedFilename))) as {
+        readonly preparedTimeZeroSessionSeconds: number;
+        readonly commitAtSelectionStart: { readonly state: string; readonly sha: string };
+        readonly events: readonly { readonly seconds: number; readonly originalSeconds: number }[];
+        readonly activityIntervals: readonly { readonly startSeconds: number; readonly endSeconds: number; readonly classification: string }[];
+        readonly autoView: { readonly transitions: readonly { readonly seconds: number; readonly originalSeconds: number }[] };
+        readonly commitAnchors: readonly { readonly seconds: number; readonly originalSeconds: number; readonly commit: { readonly sha: string } }[];
+    };
+    expect(manifest.tracks.filter((track) => track.trimmedFile).length).toBe(3);
+    expect(manifest.tracks.every((track) => track.preparation?.preparedTimeZeroSessionSeconds === 9.25)).toBe(true);
+    expect(prepared.preparedTimeZeroSessionSeconds).toBe(9.25);
+    expect(prepared.commitAtSelectionStart).toMatchObject({ state: 'known', sha: 'a'.repeat(40) });
+    expect(prepared.events).toMatchObject([{ seconds: 1.75, originalSeconds: 11 }]);
+    expect(prepared.activityIntervals).toMatchObject([
+        { startSeconds: 0, endSeconds: 1.75, classification: 'unclassified' },
+        { startSeconds: 1.75, endSeconds: 5, classification: 'automatic-coding' },
+    ]);
+    expect(prepared.autoView.transitions).toMatchObject([{ seconds: 1.75, originalSeconds: 11 }]);
+    expect(prepared.commitAnchors).toMatchObject([{ seconds: 1.75, originalSeconds: 11, commit: { sha: 'b'.repeat(40) } }]);
 });
 
 test('generates separate Czech subtitles and speech activity from chosen camera and microphone audio', async ({ page, baseURL }) => {
@@ -714,7 +849,7 @@ test('records separate sources, restores them, trims every track and exports pla
     await (await trimmedDownload).saveAs(captureArchivePath);
     const files = await readArchive(captureArchivePath);
     const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
-    expect(manifest.schemaVersion).toBe(4);
+    expect(manifest.schemaVersion).toBe(5);
     expect(manifest.editRecipe.preparedTimeZeroSessionSeconds).toBe(0.5);
     expect(manifest.trim).toEqual({ startSeconds: 0.5, endSeconds: 2.5 });
     expect(manifest.tracks).toHaveLength(5);
@@ -969,16 +1104,18 @@ test('keeps a multi-source setup through stops, release, and reload without rest
     await addSource(page, 'screen');
     await expect(page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true })).toBeEnabled();
     await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
-    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+    await waitForRecordingSeconds(page, 2);
+    await waitForCommittedRecordingSources(page, 3);
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
-    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Uložené záznamy' }).getByRole('article').first().getByText('Uloženo', { exact: true })).toBeVisible();
     await expect(page.getByText('Náhled aktivní', { exact: true })).toHaveCount(3);
     expect(await page.evaluate(() => (window as unknown as { studioTestDisplayRequests: DisplayMediaStreamOptions[] }).studioTestDisplayRequests)).toHaveLength(1);
 
     await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
-    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+    await waitForRecordingSeconds(page, 2);
+    await waitForCommittedRecordingSources(page, 3);
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
-    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Uložené záznamy' }).getByRole('article').first().getByText('Uloženo', { exact: true })).toBeVisible();
     await expect(page.getByText('Náhled aktivní', { exact: true })).toHaveCount(3);
     await expect(page.getByRole('button', { name: 'Odebrat zdroj', exact: true })).toHaveCount(3);
 
@@ -1220,7 +1357,7 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await addSource(page, 'camera');
     await addSource(page, 'screen');
     await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
-    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:03');
+    await waitForRecordingSeconds(page, 3);
     const dialogPromise = page.waitForEvent('dialog');
     const reload = page.evaluate(() => window.location.reload());
     const dialog = await dialogPromise;
@@ -1231,7 +1368,8 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
     await connectPendingSources(page);
     await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
-    await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
+    await waitForRecordingSeconds(page, 2);
+    await waitForCommittedRecordingSources(page, 2);
     await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/recording-studio$/);
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();

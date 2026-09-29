@@ -1,5 +1,5 @@
 import { serializeSubtitleFile } from '@/lib/workshops/subtitles/workshopSubtitleFormat';
-import { getRecordingMediaParts, getRecordingSessionDuration } from './recordingStudioSessionTime';
+import { clipRecordingSessionRange, getRecordingMediaParts, getRecordingSessionDuration } from './recordingStudioSessionTime';
 import type { RecordingDerivedTrack, RecordingMediaBounds, RecordingMediaPart, RecordingSpeechInterval, RecordingSubtitleCue, RecordingTrack, RecordingTrim, StudioRecording } from './recordingStudioTypes';
 
 export const RECORDING_SUBTITLE_CHUNK_SECONDS = 70;
@@ -117,15 +117,15 @@ export function applyRecordingSpeechCorrection(intervals: readonly RecordingSpee
 }
 
 export function clipRecordingDerivedTrack(track: RecordingDerivedTrack, selection: RecordingTrim): RecordingDerivedTrack {
-    const clip = (value: { readonly startSeconds: number; readonly endSeconds: number }) => ({
-        startSeconds: Math.max(value.startSeconds, selection.startSeconds) - selection.startSeconds,
-        endSeconds: Math.min(value.endSeconds, selection.endSeconds) - selection.startSeconds,
-    });
-    if (track.kind === 'subtitles') return { ...track, cues: track.cues.filter((cue) => cue.endSeconds > selection.startSeconds && cue.startSeconds < selection.endSeconds)
-        .map((cue) => ({ ...cue, ...clip(cue) })).filter((cue) => cue.endSeconds > cue.startSeconds)
+    if (track.kind === 'subtitles') return { ...track, cues: track.cues.flatMap((cue) => {
+        const clipped = clipRecordingSessionRange(cue, selection);
+        return clipped ? [{ ...cue, ...clipped }] : [];
+    })
         .sort((first, second) => first.startSeconds - second.startSeconds) };
-    return { ...track, intervals: track.intervals.filter((interval) => interval.endSeconds > selection.startSeconds && interval.startSeconds < selection.endSeconds)
-        .map((interval) => ({ ...interval, ...clip(interval) })).filter((interval) => interval.endSeconds > interval.startSeconds) };
+    return { ...track, intervals: track.intervals.flatMap((interval) => {
+        const clipped = clipRecordingSessionRange(interval, selection);
+        return clipped ? [{ ...interval, ...clipped }] : [];
+    }) };
 }
 
 export function getRecordingSpeechEvents(intervals: readonly RecordingSpeechInterval[]) {

@@ -93,7 +93,7 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
             if (!(await flushAdminSaves())) return;
             const savedRecording = await readStudioRecording(recordingId);
             if (!savedRecording) throw new Error('Místní záznam není dostupný.');
-            exportRecordingManifest(savedRecording);
+            await exportRecordingManifest(savedRecording);
         } catch (error) { setErrorMessage(getRecordingErrorMessage(error)); }
     };
     return (

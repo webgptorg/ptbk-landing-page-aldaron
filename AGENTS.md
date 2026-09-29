@@ -276,6 +276,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Separate timeline lanes and editable cues/intervals share transport, autosave and undo. Original and actually
   prepared source exports carry independent SRT/WebVTT and JSON/CSV sidecars; prepared coordinates clip to the shared
   IN/OUT and subtract its start. The browser sends audio externally only after explicit subtitle generation.
+  Optional browser-local workshop metadata shares that session clock and saved edit recipe. Reviewed activity ranges
+  cover the selected export; speech may suggest boundaries, but silence never classifies automatic coding and
+  unclassified time stays at 1×. Independent event markers, reviewed Auto-view scenes and validated video source
+  coverage never change original media. Repository/branch association and an actual starting SHA precede reviewed
+  time-to-SHA anchors; commit timestamps only propose positions after an explicit session/wall-clock calibration.
+  Missing or rebased SHA references report unavailable. Manual edits persist across derived-track regeneration and
+  appended takes; source revision changes are visible. Manifest schema 5 lists original and prepared workshop JSON
+  sidecars clipped/rebased by the common IN/OUT recipe, retaining original coordinates and provenance. These files
+  do not publish media or turn transcripts into participant subtitles.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
   by `/[shortcode]`; `/shortener` redirects to the admin page.

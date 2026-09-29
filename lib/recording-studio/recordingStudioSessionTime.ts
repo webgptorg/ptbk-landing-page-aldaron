@@ -94,6 +94,14 @@ export function createRecordingEditRecipe(recording: StudioRecording, selection 
     };
 }
 
+/** One clip/rebase rule for every metadata interval on the shared recorded-content clock. */
+export function clipRecordingSessionRange(range: RecordingTrim, selection: RecordingTrim): RecordingTrim | null {
+    const startSeconds = Math.max(range.startSeconds, selection.startSeconds);
+    const endSeconds = Math.min(range.endSeconds, selection.endSeconds);
+    return endSeconds > startSeconds ? { startSeconds: startSeconds - selection.startSeconds,
+        endSeconds: endSeconds - selection.startSeconds } : null;
+}
+
 /** Media timestamps are never stretched to fit the recorder's wall-clock duration. */
 export function sessionToRecordingMediaTime(track: RecordingTrack, sessionSeconds: number, firstTimestampSeconds = 0, mediaEndSeconds = Infinity, availableStartTimestampSeconds = firstTimestampSeconds): number | null {
     const segment = getRecordingTrackSegments(track).find((candidate) => sessionSeconds >= candidate.sessionStartSeconds &&

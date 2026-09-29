@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { RecordingTimeline } from './RecordingTimeline';
 import { RecordingSourceMonitor } from './RecordingSourceMonitor';
 import { RecordingDerivedEditor } from './RecordingDerivedEditor';
+import { RecordingWorkshopEditor } from './RecordingWorkshopEditor';
 
 type RecordingEditorProps = {
     readonly isDisabled: boolean;
@@ -42,6 +43,7 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
     const [sourceRestoreMessage, setSourceRestoreMessage] = useState<string | null>(null);
     const [history, setHistory] = useState<RecordingTrim[]>([]);
     const [derivedTracks, setDerivedTracks] = useState(recording.derivedTracks ?? []);
+    const [workshopMetadata, setWorkshopMetadata] = useState(recording.workshopMetadata);
     const [hiddenDerivedTrackIds, setHiddenDerivedTrackIds] = useState<string[]>([]);
     const [hiddenSources, setHiddenSources] = useState<string[]>([]);
     const [visualSolo, setVisualSolo] = useState<string | null>(null);
@@ -54,12 +56,12 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
     const selection = { startSeconds: Number(start), endSeconds: Number(end) };
     const isSelectionValid = start !== '' && end !== '' && Number.isFinite(selection.startSeconds) && Number.isFinite(selection.endSeconds) && selection.startSeconds >= 0 && selection.endSeconds <= durationSeconds && selection.startSeconds < selection.endSeconds;
     const autosave = useAdminAutosave({
-        value: { title, start, end, derivedTracks },
+        value: { title, start, end, derivedTracks, workshopMetadata },
         onSave: async () => {
             // Export disables the controls before flushing. Disabled fields are excluded from native form
             // validation, so preserve incomplete raw input rather than converting an empty field to zero.
             if (!isSelectionValid) throw new AdminSaveValidationError('Vyplňte platný začátek a konec společného výběru.');
-            onChange(await editStudioRecording(recording, title, selection, derivedTracks));
+            onChange(await editStudioRecording(recording, title, selection, derivedTracks, workshopMetadata));
             return true;
         },
     });
@@ -102,6 +104,7 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
         </div>
         <p className="text-sm text-slate-600">Časový ořez platí pro všechny soubory. Originály se nemění. Obraz a poslech níže slouží jen ke kontrole; všechny zdroje zůstávají v exportu. Ve výchozím poslechu hraje jen jeden mikrofon, aby se zvuk nezdvojoval.</p>
         <RecordingDerivedEditor recording={recording} tracks={derivedTracks} onChange={setDerivedTracks} seconds={snapshot.seconds} onSeek={transport.seek} hiddenTrackIds={hiddenDerivedTrackIds} onToggleVisibility={(trackId) => setHiddenDerivedTrackIds((values) => values.includes(trackId) ? values.filter((value) => value !== trackId) : [...values, trackId])} isDisabled={isDisabled} />
+        <RecordingWorkshopEditor recording={recording} metadata={workshopMetadata} onChange={setWorkshopMetadata} derivedTracks={derivedTracks} seconds={snapshot.seconds} onSeek={transport.seek} isDisabled={isDisabled} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {recording.tracks.map((track) => <RecordingSourceMonitor key={track.id} recordingId={recording.id} track={track} transport={transport} isVisible={!hiddenSources.includes(track.id) && (!visualSolo || visualSolo === track.id)} isMuted={audioSolo ? audioSolo !== track.id : mutedSources.includes(track.id)} onBounds={handleBounds} onArtwork={handleArtwork}>
                 <div className="flex flex-wrap gap-2 text-xs">
