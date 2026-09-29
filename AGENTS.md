@@ -267,6 +267,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   source setup and appends a new take at the same project's recorded end after a separate Start; source-set changes
   require explicit confirmation and appear as timeline gaps. Existing raw parts and custom trim boundaries remain;
   an untouched full-session range extends to the new end. Configuration reuse for a new recording remains distinct.
+  The finished recording editor can explicitly derive independent subtitle and speech-activity revisions from one
+  selected audio-bearing camera, screen or microphone source at a time. Subtitle chunks use the existing authenticated
+  OpenAI transcription path with Czech/English/mixed language; Silero VAD runs locally for activity. Generation records
+  source, media/timing revision and settings, preserves manual corrections through new revisions, marks old revisions
+  stale after media changes, and maps results through parts and takes to the original recorded-content clock.
+  Missing audio is unknown, loud unresolved sound is uncertain, and a global pause occupies no session time.
+  Separate timeline lanes and editable cues/intervals share transport, autosave and undo. Original and actually
+  prepared source exports carry independent SRT/WebVTT and JSON/CSV sidecars; prepared coordinates clip to the shared
+  IN/OUT and subtract its start. The browser sends audio externally only after explicit subtitle generation.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
   by `/[shortcode]`; `/shortener` redirects to the admin page.

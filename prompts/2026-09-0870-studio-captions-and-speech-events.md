@@ -1,4 +1,4 @@
-[ ] use `gpt-6-sol`
+[x] by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation ~$0.5831 35 minutes; Testing 34 minutes
 
 [✨📝] Generate separate subtitle and speech-event tracks from a chosen recorded audio source
 
@@ -38,3 +38,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Share jobs, timing maps and exports without conflating subtitles with speech-activity events.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

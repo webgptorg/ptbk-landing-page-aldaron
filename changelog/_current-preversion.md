@@ -1,5 +1,17 @@
 # Current preversion
 
+- Added independent browser-local subtitle and speech-activity revisions to the synchronized recording editor.
+  A finished camera/screen audio stream or standalone microphone is selected for each explicit request; older
+  recordings locally verify actual audio before enabling a source. Czech,
+  English and mixed subtitles reuse the authenticated OpenAI transcription route, while local Silero VAD produces
+  speech, silence, uncertain and unavailable intervals without invented confidence. Overlapping subtitle chunks
+  reconcile matching suggestions while keeping cues recognized by only one chunk. Shared session timing survives
+  offsets, pauses and appended takes. Editable lanes, autosave, undo, progress/cancel/retry and stale-revision labels
+  preserve corrected captions and original media. ZIP and individual source exports include UTF-8 SRT/WebVTT and
+  activity JSON/CSV beside source files, with prepared metadata clipped and rebased to the same IN/OUT as prepared
+  media. Manifest schema 4 distinguishes original and prepared coordinates. Implementation analysis, formats and
+  platform verification limits are in `docs/recording-studio-derived-tracks.md`.
+
 - Extended the shared recording workspace with a persistent live monitor (grid, focused source, pinned source,
   optional tile hiding/minimizing, preview sound and camera mirroring). Those display settings never change armed
   capture sources or raw files. A single guarded Pause/Resume closes every source into independently playable,

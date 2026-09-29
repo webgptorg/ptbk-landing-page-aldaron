@@ -1,16 +1,18 @@
 'use client';
 
 import { formatRecordingTimecode, getRecordingTrackSegments } from '@/lib/recording-studio/recordingStudioSessionTime';
+import { getRecordingSpeechEvents } from '@/lib/recording-studio/recordingStudioDerived';
 import type { RecordingMediaArtwork } from '@/lib/recording-studio/recordingStudioMedia';
-import type { RecordingTrack, RecordingTrim } from '@/lib/recording-studio/recordingStudioTypes';
+import type { RecordingDerivedTrack, RecordingTrack, RecordingTrim } from '@/lib/recording-studio/recordingStudioTypes';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 
 const MINIMUM_SELECTION_SECONDS = 0.001;
 const TIMELINE_LABEL_WIDTH = 180;
 const RULER_INTERVALS_SECONDS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 18000, 36000];
 
-export function RecordingTimeline({ tracks, durationSeconds, seconds, selection, artwork, availableRanges, onSeek, onSelection, onBeginEdit }: {
+export function RecordingTimeline({ tracks, derivedTracks = [], durationSeconds, seconds, selection, artwork, availableRanges, onSeek, onSelection, onBeginEdit }: {
     readonly tracks: readonly RecordingTrack[];
+    readonly derivedTracks?: readonly RecordingDerivedTrack[];
     readonly durationSeconds: number;
     readonly seconds: number;
     readonly selection: RecordingTrim;
@@ -90,6 +92,7 @@ export function RecordingTimeline({ tracks, durationSeconds, seconds, selection,
                 <div className="sticky left-0 z-20 shrink-0 border-r bg-white/95" style={{ width: TIMELINE_LABEL_WIDTH }}>
                     <div className="h-14 p-3 text-xs text-slate-500">Původní čas relace</div>
                     {tracks.map((track) => <div key={track.id} className="h-24 border-t p-3 text-sm"><p className="truncate font-medium" title={track.label}>{track.label}</p><p className="mt-1 text-xs text-slate-500">{track.kind === 'microphone' ? 'Zvuk' : track.kind === 'screen' ? 'Obrazovka' : 'Kamera'}{track.isAudioIncluded && track.kind !== 'microphone' ? ' + zvuk' : ''}</p></div>)}
+                    {derivedTracks.map((track) => <div key={track.id} className="h-16 border-t p-2 text-xs"><p className="truncate font-medium" title={track.provenance.sourceLabel}>{track.kind === 'subtitles' ? 'Titulky' : 'Aktivita řeči'}</p><p className="truncate text-slate-500">{track.provenance.sourceLabel}</p></div>)}
                 </div>
                 <div ref={bodyReference} className="relative min-w-0 flex-1 touch-none select-none" onPointerDown={startPointer} onPointerMove={movePointer} onPointerUp={() => { dragReference.current = null; }} onPointerCancel={() => { dragReference.current = null; }}>
                     <div className="relative h-14" role="slider" tabIndex={0} aria-label="Přehrávací hlava" aria-valuemin={0} aria-valuemax={safeDuration} aria-valuenow={seconds} aria-valuetext={formatRecordingTimecode(seconds)} onKeyDown={(event) => handleKey(event)}>
@@ -107,6 +110,12 @@ export function RecordingTimeline({ tracks, durationSeconds, seconds, selection,
                                 })}
                             </div>)}
                         </div>
+                    </div>)}
+                    {derivedTracks.map((track) => <div key={track.id} className="relative h-16 overflow-hidden border-t bg-white" aria-label={`${track.kind === 'subtitles' ? 'Titulky' : 'Aktivita řeči'} zdroje ${track.provenance.sourceLabel}`}>
+                        {track.kind === 'subtitles' ? track.cues.filter((cue) => cue.isEnabled).map((cue) => <div key={cue.id} title={`${formatRecordingTimecode(cue.startSeconds)}–${formatRecordingTimecode(cue.endSeconds)} ${cue.text}`} className={`absolute inset-y-3 overflow-hidden rounded border px-1 text-[10px] text-white ${cue.origin === 'manual' ? 'border-cyan-900 bg-cyan-700' : 'border-cyan-700 bg-cyan-500'}`} style={{ left: percent(cue.startSeconds), width: percent(cue.endSeconds - cue.startSeconds) }}>{cue.text}</div>) : <>
+                            {track.intervals.map((interval) => <div key={interval.id} title={`${formatRecordingTimecode(interval.startSeconds)}–${formatRecordingTimecode(interval.endSeconds)} ${interval.type} · ${interval.origin}`} className={`absolute inset-y-3 border ${interval.type === 'speech' ? 'border-violet-700 bg-violet-400' : interval.type === 'silence' ? 'border-slate-400 bg-slate-200' : interval.type === 'uncertain' ? 'border-amber-600 bg-amber-200' : 'border-slate-500 bg-slate-300'}`} style={{ left: percent(interval.startSeconds), width: percent(interval.endSeconds - interval.startSeconds) }} />)}
+                            {getRecordingSpeechEvents(track.intervals).map((event) => <span key={`${event.intervalId}-${event.type}`} className="pointer-events-none absolute inset-y-1 border-l-2 border-violet-900" title={`${event.type === 'speech-start' ? 'Začátek řeči' : 'Konec řeči'} · ${formatRecordingTimecode(event.seconds)}`} style={{ left: percent(event.seconds) }}><span className="bg-violet-900 px-0.5 text-[9px] text-white">{event.type === 'speech-start' ? 'S' : 'E'}</span></span>)}
+                        </>}
                     </div>)}
                     <div className="pointer-events-none absolute inset-y-10 border-x-2 border-cyan-600 bg-cyan-500/10" style={{ left: percent(selection.startSeconds), width: percent(selection.endSeconds - selection.startSeconds) }} />
                     {(['start', 'end'] as const).map((handle) => <div key={handle} role="slider" tabIndex={0} data-trim-handle={handle} aria-label={handle === 'start' ? 'Začátek výběru' : 'Konec výběru'} aria-valuemin={0} aria-valuemax={safeDuration} aria-valuenow={handle === 'start' ? selection.startSeconds : selection.endSeconds} aria-valuetext={formatRecordingTimecode(handle === 'start' ? selection.startSeconds : selection.endSeconds)} onKeyDown={(event) => handleKey(event, handle)} className="absolute inset-y-9 z-10 w-5 -translate-x-1/2 cursor-ew-resize border-x-4 border-cyan-700 bg-cyan-600/20 outline-offset-2 focus:outline focus:outline-2 focus:outline-cyan-900" style={{ left: percent(handle === 'start' ? selection.startSeconds : selection.endSeconds) }}><span className="absolute top-0 bg-cyan-800 px-0.5 text-[10px] text-white">{handle === 'start' ? 'IN' : 'OUT'}</span></div>)}

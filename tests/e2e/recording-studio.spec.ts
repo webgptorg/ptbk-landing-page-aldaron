@@ -161,6 +161,231 @@ test('requires admin authentication for a stable recording workspace address', a
     await expect(page).toHaveURL(/\/admin\/login\?redirectPath=%2Fadmin%2Frecording-studio%2Fsynchronized-fixture/);
 });
 
+test('requires admin authentication before accepting browser-local transcription audio', async ({ request }) => {
+    const response = await request.post('/api/admin/recording-studio/transcribe', {
+        multipart: { language: 'cs', file: { name: 'recording.wav', mimeType: 'audio/wav', buffer: Buffer.from('untrusted') } },
+    });
+    expect(response.status()).toBe(401);
+});
+
+test('generates separate Czech subtitles and speech activity from chosen camera and microphone audio', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await seedRecordingEditorFixture(page);
+    let transcriptionRequests = 0;
+    await page.route('**/api/admin/recording-studio/transcribe', async (route) => {
+        transcriptionRequests += 1;
+        expect(route.request().postDataBuffer()?.byteLength).toBeGreaterThan(1_000);
+        expect(route.request().postData()).toContain('name="language"');
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+            cues: [{ startSeconds: 1, endSeconds: 2, text: 'Dobrý den' }],
+        }) });
+    });
+    const subtitleSource = page.getByLabel('Zvuk pro titulky');
+    const activitySource = page.getByLabel('Zvuk pro aktivitu');
+    await expect(subtitleSource.locator('option[value="screen"]')).toHaveAttribute('disabled', '');
+    await expect(subtitleSource.locator('option[value="camera"]')).not.toHaveAttribute('disabled');
+    await subtitleSource.selectOption('camera');
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    const cameraSubtitles = page.getByRole('article', { name: 'Titulky Fixture camera' });
+    await expect(cameraSubtitles).toBeVisible();
+    await expect(cameraSubtitles.locator('textarea')).toHaveValue('Dobrý den');
+    await cameraSubtitles.locator('textarea').fill('Opravený český text');
+    await expect(cameraSubtitles.locator('textarea')).toHaveValue('Opravený český text');
+
+    await subtitleSource.selectOption('microphone');
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    const microphoneSubtitles = page.getByRole('article', { name: 'Titulky Fixture microphone' });
+    await expect(microphoneSubtitles).toBeVisible();
+    await expect(cameraSubtitles.locator('textarea')).toHaveValue('Opravený český text');
+    await expect(microphoneSubtitles.locator('textarea')).toHaveValue('Dobrý den');
+
+    await activitySource.selectOption('camera');
+    await page.getByRole('button', { name: 'Analyzovat řeč · nová revize' }).click();
+    await expect(page.getByRole('article', { name: 'Aktivita řeči Fixture camera' })).toBeVisible();
+    await activitySource.selectOption('microphone');
+    await page.getByRole('button', { name: 'Analyzovat řeč · nová revize' }).click();
+    await expect(page.getByRole('article', { name: 'Aktivita řeči Fixture microphone' })).toBeVisible();
+    expect(transcriptionRequests).toBe(2);
+
+    const readStoredTracks = () => page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        const recording = await new Promise<import('@/lib/recording-studio/recordingStudioTypes').StudioRecording>((resolve, reject) => {
+            const request = database.transaction('recordings').objectStore('recordings').get('synchronized-fixture');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        database.close();
+        return recording.derivedTracks ?? [];
+    });
+    await expect.poll(async () => (await readStoredTracks()).length).toBe(4);
+    const storedTracks = await readStoredTracks();
+    expect(storedTracks.map((track) => [track.kind, track.provenance.sourceId])).toEqual([
+        ['subtitles', 'camera'], ['subtitles', 'microphone'], ['speech-activity', 'camera'], ['speech-activity', 'microphone'],
+    ]);
+    const cameraCue = storedTracks[0].kind === 'subtitles' ? storedTracks[0].cues[0] : null;
+    const microphoneCue = storedTracks[1].kind === 'subtitles' ? storedTracks[1].cues[0] : null;
+    expect(cameraCue?.startSeconds).toBeGreaterThan(1.3);
+    expect(microphoneCue?.startSeconds).toBeGreaterThan((cameraCue?.startSeconds ?? 0) + 0.2);
+    expect(cameraCue?.text).toBe('Opravený český text');
+    await page.reload();
+    await expect(page.getByRole('article', { name: 'Titulky Fixture camera' }).locator('textarea')).toHaveValue('Opravený český text');
+});
+
+test('keeps a caption returned by only one long-audio chunk at the overlap boundary', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    const recordingId = 'long-audio-overlap-fixture';
+    await page.goto('/admin/recording-studio');
+    await page.evaluate(async (id) => {
+        const SAMPLE_RATE = 16_000;
+        const DURATION_SECONDS = 75;
+        const sampleCount = SAMPLE_RATE * DURATION_SECONDS;
+        const wav = new ArrayBuffer(44 + sampleCount * 2);
+        const view = new DataView(wav);
+        const writeText = (offset: number, value: string) => {
+            for (let index = 0; index < value.length; index += 1) view.setUint8(offset + index, value.charCodeAt(index));
+        };
+        writeText(0, 'RIFF'); view.setUint32(4, wav.byteLength - 8, true); writeText(8, 'WAVE');
+        writeText(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true); view.setUint32(24, SAMPLE_RATE, true);
+        view.setUint32(28, SAMPLE_RATE * 2, true); view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true); writeText(36, 'data'); view.setUint32(40, sampleCount * 2, true);
+        const recording: import('@/lib/recording-studio/recordingStudioTypes').StudioRecording = {
+            id, title: 'Long overlap reference', createdAt: '2026-09-29T08:00:00.000Z',
+            status: 'complete', durationSeconds: DURATION_SECONDS, captureEndSeconds: DURATION_SECONDS,
+            trim: null, errorMessage: null,
+            tracks: [{ id: 'microphone', kind: 'microphone', label: 'Long microphone', mimeType: 'audio/wav',
+                byteLength: wav.byteLength, chunkCount: 1, startOffsetSeconds: 0, durationSeconds: DURATION_SECONDS,
+                width: null, height: null, frameRate: null, isAudioIncluded: true }],
+        };
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio', 2);
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        await new Promise<void>((resolve, reject) => {
+            const transaction = database.transaction(['recordings', 'chunks'], 'readwrite');
+            transaction.objectStore('recordings').put(recording);
+            transaction.objectStore('chunks').put({ recordingId: id, trackId: 'microphone', sequence: 0,
+                data: new Blob([wav], { type: 'audio/wav' }) });
+            transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error);
+        });
+        database.close();
+    }, recordingId);
+    let transcriptionRequests = 0;
+    await page.route('**/api/admin/recording-studio/transcribe', async (route) => {
+        transcriptionRequests += 1;
+        expect(route.request().postDataBuffer()?.byteLength).toBeLessThan(3_000_000);
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ cues: transcriptionRequests === 1
+            ? [{ startSeconds: 69.7, endSeconds: 70.3, text: 'Hraniční věta' }] : [] }) });
+    });
+    await page.goto(`/admin/recording-studio/${recordingId}`);
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    const generated = page.getByRole('article', { name: 'Titulky Long microphone' });
+    await expect(generated.locator('textarea')).toHaveValue('Hraniční věta');
+    await expect(generated.getByLabel('Začátek titulku')).toHaveValue('69.7');
+    await expect(generated.getByLabel('Konec titulku')).toHaveValue('70.3');
+    expect(transcriptionRequests).toBe(2);
+});
+
+test('checks actual legacy audio despite incorrect saved flags', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await seedRecordingEditorFixture(page);
+    await page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        await new Promise<void>((resolve, reject) => {
+            const transaction = database.transaction('recordings', 'readwrite');
+            const store = transaction.objectStore('recordings');
+            const read = store.get('synchronized-fixture');
+            read.onsuccess = () => {
+                const recording = read.result as import('@/lib/recording-studio/recordingStudioTypes').StudioRecording;
+                store.put({ ...recording, tracks: recording.tracks.map((track) => track.id === 'screen'
+                    ? { ...track, isAudioIncluded: true } : track.id === 'camera'
+                        ? { ...track, isAudioIncluded: false } : track) });
+            };
+            transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error);
+        });
+        database.close();
+    });
+    await page.reload();
+    const subtitleSource = page.getByLabel('Zvuk pro titulky');
+    await expect(subtitleSource.locator('option[value="screen"]')).toHaveAttribute('disabled', '');
+    await expect(subtitleSource.locator('option[value="screen"]')).toContainText('bez zpracovatelného zvuku');
+    await expect(subtitleSource.locator('option[value="camera"]')).not.toHaveAttribute('disabled');
+    await page.route('**/api/admin/recording-studio/transcribe', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ cues: [{ startSeconds: 1, endSeconds: 2, text: 'Ověřený zvuk' }] }),
+    }));
+    await subtitleSource.selectOption('camera');
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    await expect(page.getByRole('article', { name: 'Titulky Fixture camera' }).locator('textarea')).toHaveValue('Ověřený zvuk');
+});
+
+test('keeps caption corrections through retry, cancellation and a stale generation', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await seedRecordingEditorFixture(page);
+    let responseMode: 'failure' | 'success' | 'blocked' = 'failure';
+    const blockedRequest: { release: (() => void) | null } = { release: null };
+    const releaseBlockedRequest = () => {
+        (blockedRequest.release as (() => void) | null)?.();
+        blockedRequest.release = null;
+    };
+    await page.route('**/api/admin/recording-studio/transcribe', async (route) => {
+        if (responseMode === 'blocked') await new Promise<void>((resolve) => { blockedRequest.release = resolve; });
+        if (responseMode === 'failure') await route.fulfill({ status: 502, contentType: 'application/json', body: JSON.stringify({ error: 'Přepis selhal; opakujte požadavek.' }) });
+        else await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+            cues: [{ startSeconds: 1, endSeconds: 2, text: 'Původní návrh' }],
+        }) }).catch(() => undefined);
+    });
+    await page.getByLabel('Zvuk pro titulky').selectOption('camera');
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    const derivedEditor = page.getByRole('region', { name: 'Odvozené stopy řeči' });
+    await expect(derivedEditor.getByRole('alert')).toContainText('Přepis selhal');
+    responseMode = 'success';
+    await page.getByRole('button', { name: 'Zkusit znovu' }).click();
+    const cameraRevisions = page.getByRole('article', { name: 'Titulky Fixture camera' });
+    await expect(cameraRevisions).toHaveCount(1);
+    await cameraRevisions.first().locator('textarea').fill('Ruční oprava');
+    await expect(page.getByText('Uloženo', { exact: true }).first()).toBeVisible();
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    await expect(cameraRevisions).toHaveCount(2);
+    await expect(cameraRevisions.first().locator('textarea')).toHaveValue('Ruční oprava');
+    await expect(cameraRevisions.nth(1).locator('textarea')).toHaveValue('Původní návrh');
+
+    responseMode = 'blocked';
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    await expect.poll(() => blockedRequest.release !== null).toBe(true);
+    await page.getByRole('button', { name: 'Zrušit generování' }).click();
+    releaseBlockedRequest();
+    await expect(page.getByText('Generování bylo zrušeno.', { exact: false })).toBeVisible();
+    await expect(cameraRevisions).toHaveCount(2);
+    await expect(cameraRevisions.first().locator('textarea')).toHaveValue('Ruční oprava');
+
+    await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
+    await expect.poll(() => blockedRequest.release !== null).toBe(true);
+    await page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        await new Promise<void>((resolve, reject) => {
+            const transaction = database.transaction('recordings', 'readwrite');
+            const store = transaction.objectStore('recordings');
+            const read = store.get('synchronized-fixture');
+            read.onsuccess = () => store.put({ ...read.result, takes: [{ id: 'new-take', startedAt: '2026-09-29T08:00:00.000Z',
+                sessionStartSeconds: 8, durationSeconds: 1, sourceIds: ['camera'] }] });
+            transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error);
+        });
+        database.close();
+    });
+    releaseBlockedRequest();
+    await expect(derivedEditor.getByRole('alert')).toContainText('Výsledek je zastaralý');
+    await expect(cameraRevisions).toHaveCount(2);
+    await expect(cameraRevisions.first().locator('textarea')).toHaveValue('Ruční oprava');
+});
+
 test('synchronizes rendered timecodes, monitoring and prepared separate-source files', async ({ page, baseURL }, testInfo) => {
     await openStudio(page, baseURL);
     await seedRecordingEditorFixture(page);
@@ -489,7 +714,7 @@ test('records separate sources, restores them, trims every track and exports pla
     await (await trimmedDownload).saveAs(captureArchivePath);
     const files = await readArchive(captureArchivePath);
     const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
-    expect(manifest.schemaVersion).toBe(3);
+    expect(manifest.schemaVersion).toBe(4);
     expect(manifest.editRecipe.preparedTimeZeroSessionSeconds).toBe(0.5);
     expect(manifest.trim).toEqual({ startSeconds: 0.5, endSeconds: 2.5 });
     expect(manifest.tracks).toHaveLength(5);
@@ -665,6 +890,74 @@ test('keeps all three sources through monitor layouts, global pauses and an appe
         expect(markerWindows.some((window) => window.nearestGap !== null && window.nearestGap <= 0.1), JSON.stringify(markerWindows)).toBe(true);
     }
     expect(archive.size).toBeGreaterThanOrEqual(14);
+    const selectedStart = Math.max(...manifest.tracks.map((track) => track.parts![3].sessionStartSeconds)) + 0.2;
+    const selectedEnd = Math.min(...manifest.tracks.map((track) => track.parts![3].sessionStartSeconds + track.parts![3].durationSeconds)) - 0.2;
+    expect(selectedEnd - selectedStart).toBeGreaterThan(0.5);
+    const audioSourceIds = manifest.tracks.filter((track) => track.isAudioIncluded).map((track) => track.id);
+    await page.evaluate(async ({ recordingId, sourceIds, selectedStart, selectedEnd }) => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        await new Promise<void>((resolve, reject) => {
+            const transaction = database.transaction('recordings', 'readwrite');
+            const store = transaction.objectStore('recordings');
+            const read = store.get(recordingId);
+            read.onsuccess = () => {
+                const recording = read.result as import('@/lib/recording-studio/recordingStudioTypes').StudioRecording;
+                const derivedTracks = sourceIds.flatMap((sourceId) => {
+                    const source = recording.tracks.find((track) => track.id === sourceId)!;
+                    const provenance = { sourceId, sourceLabel: source.label, mediaRevision: 'a'.repeat(64), createdAt: '2026-09-29T08:00:00.000Z',
+                        language: 'cs' as const, processor: 'fixture', settings: { fixture: true } };
+                    return [
+                        { id: `subtitle-${sourceId}`, kind: 'subtitles', provenance, cues: [
+                            { id: `start-${sourceId}`, startSeconds: selectedStart - 0.2, endSeconds: selectedStart + 0.3,
+                                text: 'Přes začátek', isEnabled: true, origin: 'manual' },
+                            { id: `end-${sourceId}`, startSeconds: selectedEnd - 0.3, endSeconds: selectedEnd + 0.2,
+                                text: 'Přes konec', isEnabled: true, origin: 'manual' },
+                        ] },
+                        { id: `activity-${sourceId}`, kind: 'speech-activity', provenance: { ...provenance, language: null }, intervals: [
+                            { id: `speech-${sourceId}`, type: 'speech', startSeconds: selectedStart - 0.2,
+                                endSeconds: selectedStart + 0.3, origin: 'manual' },
+                            { id: `silence-${sourceId}`, type: 'silence', startSeconds: selectedEnd - 0.3,
+                                endSeconds: selectedEnd + 0.2, origin: 'manual' },
+                        ] },
+                    ];
+                });
+                store.put({ ...recording, derivedTracks });
+            };
+            transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error);
+        });
+        database.close();
+    }, { recordingId: manifest.id, sourceIds: audioSourceIds, selectedStart, selectedEnd });
+    await page.reload();
+    await page.getByLabel('Začátek (sekundy)', { exact: true }).fill(String(selectedStart));
+    await page.getByLabel('Konec (sekundy)', { exact: true }).fill(String(selectedEnd));
+    const preparedDownload = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'ZIP s ořezem', exact: true }).click();
+    const preparedArchive = await readArchive((await (await preparedDownload).path())!);
+    const preparedManifest = JSON.parse(new TextDecoder().decode(preparedArchive.get('recording.json'))) as RecordingArchiveManifest;
+    expect(preparedManifest.editRecipe.preparedTimeZeroSessionSeconds).toBeCloseTo(selectedStart, 6);
+    const preparedAudioSources = preparedManifest.tracks.filter((track) => track.trimmedFile && audioSourceIds.includes(track.id));
+    expect(preparedAudioSources.length).toBeGreaterThan(0);
+    for (const source of preparedAudioSources) {
+        const sourceSidecars = preparedManifest.derivedTracks.filter((track) => track.provenance.sourceId === source.id);
+        expect(sourceSidecars).toHaveLength(2);
+        expect(sourceSidecars.every((track) => track.preparedFiles.every((filename) => preparedArchive.has(filename)))).toBe(true);
+        const subtitleFile = sourceSidecars.find((track) => track.kind === 'subtitles')!.preparedFiles.find((filename) => filename.endsWith('.srt'))!;
+        const subtitleText = new TextDecoder().decode(preparedArchive.get(subtitleFile));
+        expect(subtitleText).toContain('00:00:00,000 --> 00:00:00,300');
+        expect(subtitleText).toContain('Přes konec');
+        const activityFile = sourceSidecars.find((track) => track.kind === 'speech-activity')!.preparedFiles.find((filename) => filename.endsWith('.json'))!;
+        const activity = JSON.parse(new TextDecoder().decode(preparedArchive.get(activityFile))) as {
+            coordinate: string; intervals: { type: string; startSeconds: number; endSeconds: number }[];
+        };
+        expect(activity.coordinate).toBe('prepared-export');
+        const speech = activity.intervals.find((interval) => interval.type === 'speech');
+        expect(speech?.startSeconds).toBe(0);
+        expect(speech?.endSeconds).toBeCloseTo(0.3, 6);
+        expect(activity.intervals.find((interval) => interval.type === 'silence')?.endSeconds).toBeCloseTo(selectedEnd - selectedStart, 6);
+    }
     await testInfo.attach('studio-pause-append-durations', { body: JSON.stringify(durationMeasurements, null, 2), contentType: 'application/json' });
     await testInfo.attach('studio-pause-append-manifest', { body: JSON.stringify(manifest, null, 2), contentType: 'application/json' });
 });

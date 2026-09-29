@@ -4,6 +4,7 @@ import { readRecordingPart, readRecordingTrack, streamRecordingPart, streamRecor
 import { addRecordingBytes, getRecordingByteLength, getRecordingMissingRanges, validateRecordingTrim } from './recordingStudioTiming';
 import type { RecordingArchiveManifest, RecordingArchiveTrack, RecordingMediaPart, RecordingTrack, StudioRecording } from './recordingStudioTypes';
 import { createRecordingEditRecipe, getRecordingMediaParts, getRecordingPartForSelection, getRecordingPartTrack, getRecordingSessionDuration, getRecordingUnavailableRanges } from './recordingStudioSessionTime';
+import { getRecordingDerivedFiles, getRecordingDerivedManifestEntries, type RecordingDerivedFile } from './recordingStudioDerivedExport';
 
 const MAXIMUM_BUFFERED_EXPORT_BYTES = 256 * 1024 * 1024;
 
@@ -79,6 +80,8 @@ export async function exportRecordingPrepared(recording: StudioRecording, track:
             const filename = recordingPreparedFilename(recording, track);
             if (destination) await file.stream().pipeTo(await destination.createWritable(), { signal });
             else downloadBlobFile({ fileName: filename, blob: await bufferRecordingPreparedDownload(file, signal) });
+            const derivedFiles = getRecordingDerivedFiles(recording, recordingFileStem(recording), true).filter((candidate) => candidate.sourceId === track.id);
+            for (const derivedFile of derivedFiles) downloadBlobFile({ fileName: derivedFile.filename.split('/').pop()!, blob: new Blob([derivedFile.content], { type: derivedFile.type }) });
             const manifest = createRecordingArchiveManifest(recording, recording.tracks.map((candidate) => ({
                 ...candidate, originalFile: getRecordingMediaParts(candidate).length === 1 ? recordingOriginalFilename(recording, candidate) : null,
                 originalParts: getRecordingMediaParts(candidate).map((sourcePart) => ({ partId: sourcePart.id, takeId: sourcePart.takeId,
@@ -86,7 +89,7 @@ export async function exportRecordingPrepared(recording: StudioRecording, track:
                     durationSeconds: sourcePart.durationSeconds })),
                 trimmedFile: candidate.id === track.id ? filename : null,
                 ...(candidate.id === track.id ? { originalMedia, preparation: { status: 'prepared' as const, processing: 'Video/audio transcoded, timestamp-clipped; video resampled to videoFrameRate when available, otherwise original cadence. No spatial crop. Boundary tolerance 0.05 seconds per component.', preparedTimeZeroSessionSeconds: recording.trim!.startSeconds, ...preparedTiming } } : {}),
-            })), recording.tracks.length === 1);
+            })), recording.tracks.length === 1, derivedFiles);
             downloadBlobFile({ fileName: `${filename}.json`, blob: new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }) });
         },
     });
@@ -116,13 +119,18 @@ export async function exportRecordingOriginal(recording: StudioRecording, track:
         signal.throwIfAborted();
         downloadBlobFile({ fileName: selectedPart ? recordingOriginalPartFilename(recording, track, part) : recordingOriginalFilename(recording, track), blob });
     }
+    signal.throwIfAborted();
+    for (const sidecar of getRecordingDerivedFiles(recording, recordingFileStem(recording), false).filter((file) => file.sourceId === track.id)) {
+        downloadBlobFile({ fileName: sidecar.filename.split('/').pop()!, blob: new Blob([sidecar.content], { type: sidecar.type }) });
+    }
 }
 
-function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean): RecordingArchiveManifest {
+function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean, derivedFiles: readonly RecordingDerivedFile[] = []): RecordingArchiveManifest {
     return {
-        schemaVersion: 3, timeUnit: 'seconds', editRecipe: createRecordingEditRecipe(recording), id: recording.id, title: recording.title, createdAt: recording.createdAt,
+        schemaVersion: 4, timeUnit: 'seconds', editRecipe: createRecordingEditRecipe(recording), id: recording.id, title: recording.title, createdAt: recording.createdAt,
         status: recording.status, errorMessage: recording.errorMessage, durationSeconds: recording.durationSeconds, takes: recording.takes,
         trim: recording.trim, isTrimIncluded, tracks, sourceConfiguration: recording.sourceConfiguration,
+        derivedTracks: getRecordingDerivedManifestEntries(recording, derivedFiles),
         captureEndSeconds: recording.captureEndSeconds, missingRanges: [
             ...tracks.flatMap((track) => getRecordingUnavailableRanges(track, getRecordingSessionDuration(recording),
                 track.parts && track.parts.length > 1 ? undefined : track.originalMedia?.firstTimestampSeconds,
@@ -130,7 +138,7 @@ function createRecordingArchiveManifest(recording: StudioRecording, tracks: read
                 track.parts && track.parts.length > 1 ? undefined : track.originalMedia?.availableStartTimestampSeconds).map((range) => ({ trackId: track.id, ...range }))),
             ...getRecordingMissingRanges(recording).filter((range) => range.endSeconds === null),
         ],
-        timing: 'All time values: seconds. Each original part is an independent playable container and maps from its own media zero to originalParts.sessionStartSeconds at rate 1. Paused wall time is excluded from the session clock. Part start/stop times are browser observations, not hardware genlock. No gaps are collapsed and monitoring never excludes files. Video frame rate is frames per second; null retains original cadence. Prepared zero is editRecipe.preparedTimeZeroSessionSeconds; preparation component timestamps use prepared time. Encoder availability remains unverified where originalMedia is absent.',
+        timing: 'All time values: seconds. Original derived metadata and media use the original session clock. Prepared metadata and media clip to editRecipe.selection and subtract preparedTimeZeroSessionSeconds; out-of-range entries are omitted. Disabled cues remain only in JSON metadata. Each original part is an independent playable container and maps from its own media zero to originalParts.sessionStartSeconds at rate 1. Paused wall time is excluded from the session clock. Part start/stop times are browser observations, not hardware genlock. No gaps are collapsed and monitoring never excludes files. Video frame rate is frames per second; null retains original cadence. Encoder availability remains unverified where originalMedia is absent.',
     };
 }
 
@@ -142,7 +150,8 @@ export function exportRecordingManifest(recording: StudioRecording): void {
             file: recordingOriginalPartFilename(recording, track, part), sessionStartSeconds: part.sessionStartSeconds,
             durationSeconds: part.durationSeconds })), trimmedFile: null,
     })), false);
-    downloadBlobFile({ fileName: `${recordingFileStem(recording)}.json`, blob: new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }) });
+    const backup = { ...manifest, derivedTrackData: recording.derivedTracks ?? [] };
+    downloadBlobFile({ fileName: `${recordingFileStem(recording)}.json`, blob: new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }) });
 }
 
 type ArchiveExportOptions = {
@@ -215,7 +224,14 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
             }
             exportedTracks.push({ ...track, originalFile, originalParts, trimmedFile, preparation, originalMedia });
         }
-        const manifest = createRecordingArchiveManifest(recording, exportedTracks, isTrimmed && fallbackCount === 0);
+        const preparedSourceIds = new Set(exportedTracks.filter((track) => track.trimmedFile !== null).map((track) => track.id));
+        const derivedFiles = [
+            ...getRecordingDerivedFiles(recording, recordingFileStem(recording), false),
+            ...(isTrimmed ? getRecordingDerivedFiles(recording, recordingFileStem(recording), true)
+                .filter((file) => preparedSourceIds.has(file.sourceId)) : []),
+        ];
+        for (const file of derivedFiles) await archive.add(file.filename, new TextReader(file.content), { signal });
+        const manifest = createRecordingArchiveManifest(recording, exportedTracks, isTrimmed && fallbackCount === 0, derivedFiles);
         await archive.add('recording.json', new TextReader(JSON.stringify(manifest, null, 2)), { signal });
         await archive.add('README.txt', new TextReader([
             recording.title, '', 'ORIGINALS: unmodified, independently playable media parts for every camera, screen share or microphone.',
@@ -224,6 +240,7 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
             'All sources share one session clock. Each pause closes all source containers before resume creates new parts. Start/stop calls are browser observations, not hardware frame synchronization.',
             isTrimmed ? `PREPARATION: ${preparedCount} real trimmed files; ${fallbackCount} sources require originals + recipe. Inspect each track preparation.status/reason. Only prepared files use the common selected interval and time zero; originals keep original timing. Video/audio are re-encoded; actual bounds are recorded (50 ms validation tolerance).` :
                 'No trimmed copies are included. The original source files and any saved trim decision are preserved.',
+            'METADATA: subtitle SRT/WebVTT plus JSON edits, and independent speech-activity JSON/CSV, are in metadata/original and metadata/prepared. Their coordinate systems and selected source/revision/settings are recorded in each JSON and recording.json. VAD intervals are suggestions, not automatic cuts; no confidence is fabricated.',
             recording.status === 'interrupted' ? 'INTERRUPTED TAKE: only successfully saved chunks are present; the tail may be incomplete. Check each source before editing.' : '',
         ].join('\n')), { signal });
         signal.throwIfAborted();

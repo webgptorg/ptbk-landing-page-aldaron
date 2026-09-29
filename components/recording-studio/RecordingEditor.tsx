@@ -13,6 +13,7 @@ import type { RecordingTrim, StudioRecording } from '@/lib/recording-studio/reco
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { RecordingTimeline } from './RecordingTimeline';
 import { RecordingSourceMonitor } from './RecordingSourceMonitor';
+import { RecordingDerivedEditor } from './RecordingDerivedEditor';
 
 type RecordingEditorProps = {
     readonly isDisabled: boolean;
@@ -40,6 +41,8 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
     const [end, setEnd] = useState(String(initialSelection.endSeconds));
     const [sourceRestoreMessage, setSourceRestoreMessage] = useState<string | null>(null);
     const [history, setHistory] = useState<RecordingTrim[]>([]);
+    const [derivedTracks, setDerivedTracks] = useState(recording.derivedTracks ?? []);
+    const [hiddenDerivedTrackIds, setHiddenDerivedTrackIds] = useState<string[]>([]);
     const [hiddenSources, setHiddenSources] = useState<string[]>([]);
     const [visualSolo, setVisualSolo] = useState<string | null>(null);
     const [audioSolo, setAudioSolo] = useState<string | null>(null);
@@ -51,12 +54,12 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
     const selection = { startSeconds: Number(start), endSeconds: Number(end) };
     const isSelectionValid = start !== '' && end !== '' && Number.isFinite(selection.startSeconds) && Number.isFinite(selection.endSeconds) && selection.startSeconds >= 0 && selection.endSeconds <= durationSeconds && selection.startSeconds < selection.endSeconds;
     const autosave = useAdminAutosave({
-        value: { title, start, end },
+        value: { title, start, end, derivedTracks },
         onSave: async () => {
             // Export disables the controls before flushing. Disabled fields are excluded from native form
             // validation, so preserve incomplete raw input rather than converting an empty field to zero.
             if (!isSelectionValid) throw new AdminSaveValidationError('Vyplňte platný začátek a konec společného výběru.');
-            onChange(await editStudioRecording(recording, title, selection));
+            onChange(await editStudioRecording(recording, title, selection, derivedTracks));
             return true;
         },
     });
@@ -89,7 +92,7 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
             <label className="text-sm">Rychlost <select aria-label="Rychlost přehrávání" className="rounded border p-2" value={snapshot.speed} onChange={(event) => transport.setSpeed(Number(event.target.value))}>{[0.25, 0.5, 1, 1.5, 2, 4].map((speed) => <option key={speed} value={speed}>{speed}×</option>)}</select></label>
             <span role="status" className="text-xs text-slate-600">{snapshot.isSettling ? 'Čekám na společný čas zdrojů…' : snapshot.isPlaying ? 'Společné přehrávání' : 'Pozastaveno'}</span>
         </div>
-        <RecordingTimeline tracks={recording.tracks} durationSeconds={durationSeconds} seconds={snapshot.seconds} selection={isSelectionValid ? selection : initialSelection} artwork={artwork} availableRanges={availableRanges} onSeek={transport.seek} onSelection={setSelection} onBeginEdit={beginEdit} />
+        <RecordingTimeline tracks={recording.tracks} derivedTracks={derivedTracks.filter((track) => !hiddenDerivedTrackIds.includes(track.id))} durationSeconds={durationSeconds} seconds={snapshot.seconds} selection={isSelectionValid ? selection : initialSelection} artwork={artwork} availableRanges={availableRanges} onSeek={transport.seek} onSelection={setSelection} onBeginEdit={beginEdit} />
         <div className="flex flex-wrap items-end gap-3">
             <label className="text-sm">Začátek (sekundy)<input type="number" min="0" max={Number(end) - 0.001} step="any" required value={start} onFocus={beginEdit} onChange={(event) => setStart(event.target.value)} className="mt-1 block w-40 rounded border p-2" /></label>
             <label className="text-sm">Konec (sekundy)<input type="number" min={Number(start) + 0.001} max={durationSeconds} step="any" required value={end} onFocus={beginEdit} onChange={(event) => setEnd(event.target.value)} className="mt-1 block w-40 rounded border p-2" /></label>
@@ -98,6 +101,7 @@ function RecordingEditorWorkspace({ recording, isDisabled, onChange, onUseSource
             <span className="text-sm text-cyan-800">Výběr: {formatRecordingTimecode(Math.max(0, selection.endSeconds - selection.startSeconds))}</span>
         </div>
         <p className="text-sm text-slate-600">Časový ořez platí pro všechny soubory. Originály se nemění. Obraz a poslech níže slouží jen ke kontrole; všechny zdroje zůstávají v exportu. Ve výchozím poslechu hraje jen jeden mikrofon, aby se zvuk nezdvojoval.</p>
+        <RecordingDerivedEditor recording={recording} tracks={derivedTracks} onChange={setDerivedTracks} seconds={snapshot.seconds} onSeek={transport.seek} hiddenTrackIds={hiddenDerivedTrackIds} onToggleVisibility={(trackId) => setHiddenDerivedTrackIds((values) => values.includes(trackId) ? values.filter((value) => value !== trackId) : [...values, trackId])} isDisabled={isDisabled} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {recording.tracks.map((track) => <RecordingSourceMonitor key={track.id} recordingId={recording.id} track={track} transport={transport} isVisible={!hiddenSources.includes(track.id) && (!visualSolo || visualSolo === track.id)} isMuted={audioSolo ? audioSolo !== track.id : mutedSources.includes(track.id)} onBounds={handleBounds} onArtwork={handleArtwork}>
                 <div className="flex flex-wrap gap-2 text-xs">

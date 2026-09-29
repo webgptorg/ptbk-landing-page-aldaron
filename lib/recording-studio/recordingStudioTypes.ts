@@ -113,6 +113,48 @@ export type RecordingTrack = {
     readonly parts?: readonly RecordingMediaPart[];
 };
 
+export type RecordingDerivedProvenance = {
+    readonly sourceId: string;
+    readonly sourceLabel: string;
+    /** SHA-256 of committed media, takes and session mappings; excludes title and trim. */
+    readonly mediaRevision: string;
+    readonly createdAt: string;
+    readonly language: 'cs' | 'en' | 'mul' | null;
+    readonly processor: string;
+    readonly settings: Readonly<Record<string, string | number | boolean>>;
+};
+
+export type RecordingSubtitleCue = {
+    readonly id: string;
+    readonly startSeconds: number;
+    readonly endSeconds: number;
+    readonly text: string;
+    readonly isEnabled: boolean;
+    readonly origin: 'generated' | 'manual';
+};
+
+export type RecordingSpeechInterval = {
+    readonly id: string;
+    readonly type: 'speech' | 'silence' | 'uncertain' | 'unknown';
+    readonly startSeconds: number;
+    readonly endSeconds: number;
+    readonly origin: 'generated' | 'manual';
+    /** The detector does not expose calibrated confidence, so this is normally absent. */
+    readonly confidence?: number;
+};
+
+export type RecordingDerivedTrack = {
+    readonly id: string;
+    readonly kind: 'subtitles';
+    readonly provenance: RecordingDerivedProvenance;
+    readonly cues: readonly RecordingSubtitleCue[];
+} | {
+    readonly id: string;
+    readonly kind: 'speech-activity';
+    readonly provenance: RecordingDerivedProvenance;
+    readonly intervals: readonly RecordingSpeechInterval[];
+};
+
 export type StudioRecording = {
     readonly id: string;
     readonly title: string;
@@ -123,6 +165,8 @@ export type StudioRecording = {
     readonly takes?: readonly RecordingTake[];
     readonly trim: RecordingTrim | null;
     readonly editRecipe?: RecordingEditRecipe;
+    /** Independent, non-destructive browser-local metadata revisions. */
+    readonly derivedTracks?: readonly RecordingDerivedTrack[];
     readonly errorMessage: string | null;
     /** Immutable source preferences for this take; absent on older recordings. */
     readonly sourceConfiguration?: readonly RecordingSourceConfiguration[];
@@ -152,11 +196,14 @@ export type RecordingArchiveTrack = RecordingTrack & {
 };
 
 export type RecordingArchiveManifest = Pick<StudioRecording, 'id' | 'title' | 'createdAt' | 'status' | 'errorMessage' | 'durationSeconds' | 'trim' | 'captureEndSeconds' | 'sourceConfiguration' | 'takes'> & {
-    readonly schemaVersion: 3;
+    readonly schemaVersion: 4;
     readonly timeUnit: 'seconds';
     readonly editRecipe: RecordingEditRecipe;
     readonly isTrimIncluded: boolean;
     readonly tracks: readonly RecordingArchiveTrack[];
+    readonly derivedTracks: readonly { readonly id: string; readonly kind: RecordingDerivedTrack['kind']; readonly provenance: RecordingDerivedProvenance; readonly originalFiles: readonly string[]; readonly preparedFiles: readonly string[] }[];
+    /** Only in standalone manifest downloads; ZIP stores these as independent sidecars. */
+    readonly derivedTrackData?: readonly RecordingDerivedTrack[];
     readonly timing: string;
     readonly missingRanges: readonly { readonly trackId: string; readonly startSeconds: number; readonly endSeconds: number | null }[];
 };

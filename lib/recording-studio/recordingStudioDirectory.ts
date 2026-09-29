@@ -3,7 +3,7 @@ import type { RecordingTrack, StudioRecording } from './recordingStudioTypes';
 import { getRecordingTrackSegments, isRecordingSegmentMapValid } from './recordingStudioSessionTime';
 
 const DIRECTORY_MANIFEST_NAME = 'recording.json';
-const MAXIMUM_MANIFEST_BYTES = 4 * 1024 * 1024;
+const MAXIMUM_MANIFEST_BYTES = 16 * 1024 * 1024;
 const SAFE_IDENTIFIER = /^[a-zA-Z0-9_-]+$/;
 const NONNEGATIVE_NUMBER = z.number().finite().nonnegative();
 const BYTE_COUNT = NONNEGATIVE_NUMBER.int().max(Number.MAX_SAFE_INTEGER);
@@ -13,6 +13,17 @@ const MEDIA_BOUNDS_SCHEMA = z.object({ firstTimestampSeconds: NONNEGATIVE_NUMBER
     endTimestampSeconds: NONNEGATIVE_NUMBER, components: z.array(MEDIA_COMPONENT_SCHEMA) });
 const MEDIA_PART_SCHEMA = z.object({ id: z.string().regex(SAFE_IDENTIFIER), takeId: z.string().regex(SAFE_IDENTIFIER), sessionStartSeconds: NONNEGATIVE_NUMBER, durationSeconds: NONNEGATIVE_NUMBER, byteLength: BYTE_COUNT, chunkCount: BYTE_COUNT, mimeType: z.string(), segments: z.array(TIME_SEGMENT_SCHEMA).optional(), isAudioIncluded: z.boolean().optional(), width: NONNEGATIVE_NUMBER.nullable().optional(), height: NONNEGATIVE_NUMBER.nullable().optional(), frameRate: NONNEGATIVE_NUMBER.nullable().optional(), mediaBounds: MEDIA_BOUNDS_SCHEMA.optional() });
 const TRIM_SCHEMA = z.object({ startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER });
+const DERIVED_PROVENANCE_SCHEMA = z.object({ sourceId: z.string().regex(SAFE_IDENTIFIER), sourceLabel: z.string().max(200),
+    mediaRevision: z.string().regex(/^[a-f0-9]{64}$/), createdAt: z.string().datetime(), language: z.enum(['cs', 'en', 'mul']).nullable(),
+    processor: z.string().max(100), settings: z.record(z.union([z.string(), z.number().finite(), z.boolean()])) });
+const DERIVED_INTERVAL_SCHEMA = z.object({ id: z.string().regex(SAFE_IDENTIFIER), type: z.enum(['speech', 'silence', 'uncertain', 'unknown']),
+    startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER, origin: z.enum(['generated', 'manual']), confidence: z.number().min(0).max(1).optional() });
+const DERIVED_CUE_SCHEMA = z.object({ id: z.string().regex(SAFE_IDENTIFIER), startSeconds: NONNEGATIVE_NUMBER, endSeconds: NONNEGATIVE_NUMBER,
+    text: z.string().max(5_000), isEnabled: z.boolean(), origin: z.enum(['generated', 'manual']) });
+const DERIVED_TRACK_SCHEMA = z.discriminatedUnion('kind', [
+    z.object({ id: z.string().regex(SAFE_IDENTIFIER), kind: z.literal('subtitles'), provenance: DERIVED_PROVENANCE_SCHEMA, cues: z.array(DERIVED_CUE_SCHEMA).max(20_000) }),
+    z.object({ id: z.string().regex(SAFE_IDENTIFIER), kind: z.literal('speech-activity'), provenance: DERIVED_PROVENANCE_SCHEMA, intervals: z.array(DERIVED_INTERVAL_SCHEMA).max(100_000) }),
+]);
 const SOURCE_CONFIGURATION_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), kind: z.enum(['camera', 'screen', 'microphone']), label: z.string().max(200),
     cameraDeviceId: z.string(), cameraDeviceLabel: z.string().max(200).nullable(),
@@ -25,6 +36,7 @@ const RECORDING_SCHEMA = z.object({
     id: z.string().regex(SAFE_IDENTIFIER), title: z.string(), createdAt: z.string().datetime(),
     status: z.enum(['recording', 'complete', 'interrupted']), durationSeconds: NONNEGATIVE_NUMBER,
     errorMessage: z.string().nullable(), trim: TRIM_SCHEMA.nullable(),
+    derivedTracks: z.array(DERIVED_TRACK_SCHEMA).max(100).optional(),
     editRecipe: z.object({
         schemaVersion: z.literal(1), timeUnit: z.literal('seconds'), selection: TRIM_SCHEMA,
         preparedTimeZeroSessionSeconds: NONNEGATIVE_NUMBER,
