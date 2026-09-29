@@ -8,6 +8,7 @@ import { WorkshopEndControls, type WorkshopEndSaveAction } from '@/businesses/wo
 import { WorkshopEventFields } from '@/businesses/workshop-admin/WorkshopEventFields';
 import { WorkshopPanelSettings } from '@/businesses/workshop-admin/WorkshopPanelSettings';
 import { WorkshopRepositoryFields } from '@/businesses/workshop-admin/WorkshopRepositoryFields';
+import { WorkshopHostedRecordingManager } from '@/businesses/workshop-admin/WorkshopHostedRecordingManager';
 import {
     createWorkshopRepositoryDraft,
     createWorkshopRepositoryWriteValues,
@@ -70,7 +71,8 @@ function createWorkshopSettingsDraft(workshop: WorkshopDetails) {
         selectedEnd: null as WorkshopSelectedEnd | null,
         eventDetails: workshop.event ?? DEFAULT_EVENT_DETAILS,
         primaryStageContent: normalizeWorkshopPrimaryStageContent(workshop.primaryStageContent),
-        youtubeVideoId: workshop.youtubeVideoId ?? '', recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
+        youtubeVideoId: workshop.youtubeVideoId ?? '', videoSource: workshop.videoSource ?? 'youtube',
+        recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
         previewYoutubeVideoId: workshop.previewYoutubeVideoId ?? '', presentationUrl: workshop.presentationUrl ?? '',
         repositoryDraft: createWorkshopRepositoryDraft(workshop.repository), reactionText: workshop.allowedReactions.join(' '),
         disabledPanels: workshop.disabledPanels, artificialWatchingParticipantCount: workshop.artificialWatchingParticipantCount ?? 0,
@@ -91,7 +93,7 @@ export function WorkshopSettingsForm({
     const isReactionSettingOffered = isWorkshopPanelOfferedByKind(workshop.kind, 'reactions');
     const isWatchingCountSettingOffered = isWorkshopPanelOfferedByKind(workshop.kind, 'watching-count');
     const [draft, setDraft] = useState(() => createWorkshopSettingsDraft(workshop));
-    const { slug, title, description, startsAt, endsAt, selectedEnd, eventDetails, primaryStageContent, youtubeVideoId,
+    const { slug, title, description, startsAt, endsAt, selectedEnd, eventDetails, primaryStageContent, youtubeVideoId, videoSource,
         recordingStartOffsetSeconds, previewYoutubeVideoId, presentationUrl, repositoryDraft, reactionText,
         disabledPanels, artificialWatchingParticipantCount, isPublished } = draft;
     const changeDraft = (changes: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...changes }));
@@ -131,6 +133,7 @@ export function WorkshopSettingsForm({
             ...(roomCapabilities.isStageOffered
                 ? {
                       primaryStageContent,
+                      videoSource,
                       youtubeVideoId: youtubeVideoId.trim() || null,
                       recordingStartOffsetSeconds,
                       previewYoutubeVideoId: previewYoutubeVideoId.trim() || null,
@@ -265,6 +268,18 @@ export function WorkshopSettingsForm({
                 {roomCapabilities.isStageOffered && (
                     <>
                         <label className="text-sm font-medium text-slate-700">
+                            Zdroj videa
+                            <select aria-label="Zdroj videa" value={videoSource}
+                                onChange={(event) => changeDraft({ videoSource: event.target.value as 'youtube' | 'hosted' })}
+                                className="mt-2 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900">
+                                <option value="youtube">YouTube</option>
+                                <option value="hosted" disabled={!workshop.hostedRecordingRevisionId && videoSource !== 'hosted'}>
+                                    Hostovaný synchronizovaný záznam
+                                </option>
+                            </select>
+                            <span className="mt-1 block text-xs font-normal text-slate-500">Nastavení neaktivního zdroje zůstane uložené.</span>
+                        </label>
+                        <label className="text-sm font-medium text-slate-700">
                             Hlavní obsah stage
                             <select
                                 aria-label="Hlavní obsah stage"
@@ -313,11 +328,14 @@ export function WorkshopSettingsForm({
                                 className="mt-2"
                             />
                             <span className="mt-1 block text-xs font-normal text-slate-400">
-                                Použije se jen po skončení workshopu, když placený člen otevře záznam. Živý stream ani
+                                Použije se jen pro YouTube po skončení workshopu, když placený člen otevře záznam. Živý stream ani
                                 odpočet se tím nemění. Uloží se jako{' '}
                                 {formatCzechCountedNoun(recordingStartOffsetSeconds, ['sekunda', 'sekundy', 'sekund'])}.
                             </span>
                         </div>
+                        <WorkshopHostedRecordingManager workshop={workshop}
+                            onPublished={() => changeDraft({ videoSource: 'hosted' })}
+                            onRemoved={() => changeDraft({ videoSource: 'youtube' })} />
                     </>
                 )}
                 {roomCapabilities.isPresentationOffered && (

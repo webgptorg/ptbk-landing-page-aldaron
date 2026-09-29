@@ -124,6 +124,10 @@ export type WorkshopDetails = WorkshopSummary & {
     readonly artificialWatchingParticipantCount?: number;
     readonly youtubeVideoId: string | null;
 
+    /** Existing rows use YouTube. A hosted revision ID is included only in an authorized room response. */
+    readonly videoSource?: 'youtube' | 'hosted';
+    readonly hostedRecordingRevisionId?: string | null;
+
     /** The configured source shown on the main stage while this scheduled workshop is ongoing. */
     readonly primaryStageContent?: WorkshopPrimaryStageContent;
 

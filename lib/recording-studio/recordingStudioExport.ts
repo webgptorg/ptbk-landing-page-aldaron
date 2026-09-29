@@ -142,7 +142,7 @@ export async function exportRecordingOriginal(recording: StudioRecording, track:
     for (const workshopFile of workshopFiles) downloadBlobFile({ fileName: workshopFile.filename.split('/').pop()!, blob: new Blob([workshopFile.content], { type: 'application/json' }) });
 }
 
-function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean,
+export function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean,
     derivedFiles: readonly RecordingDerivedFile[] = [], workshopFiles: readonly RecordingWorkshopFile[] = []): RecordingArchiveManifest {
     const workshopFile = workshopFiles[0];
     return {

@@ -1,5 +1,14 @@
 # Current preversion
 
+- Added private, synchronized hosted recordings for workshop video: direct independent file/sidecar import and a
+  studio **Publish to workshop** action share resumable SHA-256 checked multipart S3 uploads. Schema 5 manifests,
+  prepared timing, codecs, optional metadata and subtitles are verified before an atomic revision switch. Admins get
+  an error report and preview; incomplete files never replace the published revision. Participant requests for the
+  manifest and every media byte range recheck room access and the existing live/free versus paid replay rule. A
+  connected viewer keeps one immutable revision during replacement; abandoned uploads and old revisions have guarded
+  cleanup. Verified unpublished revisions can be resumed for publication after a reload; draft files can be replaced.
+  Existing YouTube settings, teaser, offset and stage choice remain available when switching sources.
+
 - Added browser-local workshop player metadata to the synchronized recording editor: reviewed activity intervals,
   independent event markers, validated Auto-view scene choices, repository/start SHA and reviewed commit anchors.
   Speech suggests boundaries only; unclassified gaps stay at 1× and never become automatic coding from silence.

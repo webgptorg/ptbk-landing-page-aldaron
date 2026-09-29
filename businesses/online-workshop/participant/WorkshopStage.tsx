@@ -4,6 +4,7 @@ import { WorkshopWrapUp } from '@/businesses/online-workshop/participant/Worksho
 import { WorkshopStageComment } from '@/businesses/online-workshop/participant/WorkshopStageComment';
 import { WorkshopRepositoryCommitNotification } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitNotification';
 import { WorkshopPresentationStage } from '@/businesses/online-workshop/participant/WorkshopPresentationStage';
+import { WorkshopHostedRecordingPlayer } from '@/businesses/online-workshop/participant/WorkshopHostedRecordingPlayer';
 import { useWorkshopRepositoryCommitNotification } from '@/businesses/online-workshop/participant/useWorkshopRepositoryCommitNotification';
 import type { SubscribeToWorkshopReactions } from '@/businesses/online-workshop/participant/useWorkshopReactionAnimations';
 import type { WorkshopFeedbackValues } from '@/businesses/online-workshop/participant/workshopParticipantApi';
@@ -168,12 +169,15 @@ export function WorkshopStage({
     const isWorkshopPast = isWorkshopPhasePast(phase);
     const primaryStageContent = normalizeWorkshopPrimaryStageContent(workshop.primaryStageContent);
     const isVideoPrimary = primaryStageContent === 'video';
+    const isHostedVideo = workshop.videoSource === 'hosted';
+    const hostedRevisionId = isHostedVideo ? workshop.hostedRecordingRevisionId ?? null : null;
+    const isVideoConfigured = isHostedVideo ? hostedRevisionId !== null : workshop.youtubeVideoId !== null;
     const isVideoStageActive = isWorkshopOngoing && isVideoPrimary;
     const isPrimarySourceAvailable = primaryStageContent === 'video'
-        ? workshop.youtubeVideoId !== null || paidMembersOnlyVideo !== null
+        ? isVideoConfigured || paidMembersOnlyVideo !== null
         : primaryStageContent === 'presentation'
           ? workshop.presentationUrl !== null
-          : repository !== null;
+          : repositoryPanel !== null;
     const remainingMilliseconds = Date.parse(workshop.startsAt) - currentTime;
     const newRepositoryCommit = useWorkshopRepositoryCommitNotification({
         workshopSlug: workshop.slug,
@@ -185,7 +189,7 @@ export function WorkshopStage({
     // Note: Once the workshop is over, the room only holds its video for the members whose membership pays for it, and
     //       the server is what decides that. The wrap-up therefore keeps its feedback for everybody and gains either
     //       the button which plays the video again or the offer of the membership which unlocks it.
-    const isVideoRewatchOffered = isWorkshopPast && workshop.youtubeVideoId !== null;
+    const isVideoRewatchOffered = isWorkshopPast && isVideoConfigured;
     const [isVideoRewatchShown, setIsVideoRewatchShown] = useState(false);
     useEffect(() => {
         if (!isVideoRewatchOffered) {
@@ -223,11 +227,14 @@ export function WorkshopStage({
     }, [workshop.youtubeVideoId, isVideoStageActive]);
 
     const countdownSegments = getRemainingSegments(remainingMilliseconds);
-    const isVideoRewatchVisible = isVideoRewatchShown && isVideoPrimary && workshop.youtubeVideoId !== null;
+    const isVideoRewatchVisible = isVideoRewatchShown && isVideoPrimary && isVideoConfigured;
     const isPrimarySourceVisible = isPrimarySourceOpen && !isVideoPrimary;
     const ongoingPrimaryStageContent = primaryStageContent === 'video' ? (
         <div className="relative min-w-0 w-full max-w-full min-h-[220px] aspect-video sm:min-h-[260px]">
-            {workshop.youtubeVideoId !== null && !isVideoEmbedUnavailable ? (
+            {hostedRevisionId ? (
+                <WorkshopHostedRecordingPlayer workshopSlug={workshop.slug} revisionId={hostedRevisionId}
+                    isLive serverTime={serverTime} />
+            ) : !isHostedVideo && workshop.youtubeVideoId !== null && !isVideoEmbedUnavailable ? (
                 <iframe
                     ref={videoFrameReference}
                     className="absolute inset-0 h-full w-full"
@@ -249,8 +256,8 @@ export function WorkshopStage({
             ) : (
                 <WorkshopPrimarySourceUnavailable
                     primaryStageContent="video"
-                    isConfigured={workshop.youtubeVideoId !== null}
-                    fallbackUrl={workshop.youtubeVideoId === null ? undefined : `https://www.youtube.com/watch?v=${encodeURIComponent(workshop.youtubeVideoId)}`}
+                    isConfigured={isVideoConfigured}
+                    fallbackUrl={isHostedVideo || workshop.youtubeVideoId === null ? undefined : `https://www.youtube.com/watch?v=${encodeURIComponent(workshop.youtubeVideoId)}`}
                 />
             )}
         </div>
@@ -291,7 +298,7 @@ export function WorkshopStage({
                             navigation={wrapUpNavigation}
                         />
                     </div>
-                    {isVideoRewatchVisible && workshop.youtubeVideoId !== null && (
+                    {isVideoRewatchVisible && (
                         <div>
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-room-border/10 px-5 py-3">
                         <span className="inline-flex items-center gap-2 text-sm font-bold text-room-heading">
@@ -306,13 +313,16 @@ export function WorkshopStage({
                         </button>
                     </div>
                     <div className="relative aspect-video">
-                        {isVideoEmbedUnavailable ? (
+                        {hostedRevisionId ? (
+                            <WorkshopHostedRecordingPlayer workshopSlug={workshop.slug} revisionId={hostedRevisionId}
+                                isLive={false} serverTime={serverTime} />
+                        ) : isVideoEmbedUnavailable ? (
                             <WorkshopPrimarySourceUnavailable
                                 primaryStageContent="video"
                                 isConfigured
-                                fallbackUrl={`https://www.youtube.com/watch?v=${encodeURIComponent(workshop.youtubeVideoId)}&t=${workshop.recordingStartOffsetSeconds}s`}
+                                fallbackUrl={workshop.youtubeVideoId === null ? undefined : `https://www.youtube.com/watch?v=${encodeURIComponent(workshop.youtubeVideoId)}&t=${workshop.recordingStartOffsetSeconds}s`}
                             />
-                        ) : (
+                        ) : workshop.youtubeVideoId !== null ? (
                             <iframe
                                 className="absolute inset-0 h-full w-full"
                                 src={createYoutubeEmbedUrl(workshop.youtubeVideoId, {
@@ -329,7 +339,7 @@ export function WorkshopStage({
                                 allowFullScreen
                                 onError={() => setIsVideoEmbedUnavailable(true)}
                             />
-                        )}
+                        ) : null}
                     </div>
                 </div>
                     )}
@@ -393,7 +403,7 @@ export function WorkshopStage({
             )}
             {isWorkshopOngoing && <WorkshopStageComment stageComment={stageComment} />}
 
-            {isVideoStageActive && workshop.youtubeVideoId && (
+            {isVideoStageActive && !isHostedVideo && workshop.youtubeVideoId && (
                 <button
                     type="button"
                     onClick={handleVideoFullscreen}
@@ -405,7 +415,7 @@ export function WorkshopStage({
                 </button>
             )}
 
-            {isVideoStageActive && workshop.youtubeVideoId && !isVideoUnmuted && (
+            {isVideoStageActive && !isHostedVideo && workshop.youtubeVideoId && !isVideoUnmuted && (
                 <motion.div
                     initial={isReducedMotionPreferred ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}

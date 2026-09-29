@@ -19,7 +19,7 @@ import type { WorkshopMaterialPreviewKind } from '@/lib/workshops/workshopMateri
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { Clock3, Crown, ExternalLink, Lock, Sparkles } from 'lucide-react';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 
 type WorkshopContentProps = {
     readonly workshopSlug: string;
@@ -68,6 +68,8 @@ type WorkshopMaterialCardProps = {
     readonly callToActionLabel?: string;
     readonly ariaLabel?: string;
     readonly previewKind?: WorkshopMaterialPreviewKind;
+    /** A protected in-room source may use the same card without creating a public link or QR target. */
+    readonly children?: ReactNode;
 };
 
 type WorkshopMaterialLink = {
@@ -232,6 +234,7 @@ export function WorkshopMaterialCard({
     callToActionLabel,
     ariaLabel,
     previewKind = 'material',
+    children,
 }: WorkshopMaterialCardProps) {
     const isReducedMotionPreferred = useReducedMotion() === true;
     const isFollowUp = contentBlock.isFollowUp;
@@ -266,12 +269,12 @@ export function WorkshopMaterialCard({
                 </div>
             )}
             {contentBlock.title && <h3 className="mb-5 text-xl font-bold text-room-heading">{contentBlock.title}</h3>}
-            <WorkshopMaterialBody
+            {children ?? <WorkshopMaterialBody
                 contentBlockId={contentBlock.id}
                 bodyMarkdown={contentBlock.bodyMarkdown}
                 previewKind={previewKind}
                 callToActionLabel={callToActionLabel}
-            />
+            />}
         </motion.article>
     );
 }

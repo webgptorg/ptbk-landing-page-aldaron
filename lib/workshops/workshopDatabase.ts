@@ -98,6 +98,8 @@ export type WorkshopRow = {
     readonly starts_at: string;
     readonly ends_at: string | null;
     readonly youtube_video_id: string | null;
+    readonly video_source?: 'youtube' | 'hosted';
+    readonly hosted_recording_revision_id?: string | null;
     readonly primary_stage_content?: string | null;
 
     /** Where an unlocked recording begins, in seconds from the beginning of its stream. */
@@ -190,6 +192,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
     Pick<
         WorkshopRow,
         | 'youtube_video_id'
+        | 'video_source'
         | 'recording_start_offset_seconds'
         | 'github_repository'
         | 'github_repository_branches'
@@ -203,7 +206,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
 export const WORKSHOP_SUMMARY_COLUMNS =
     'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
 
-const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_urls`;
+const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, video_source, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_urls`;
 
 type WorkshopContentRow = {
     readonly id: string;
@@ -533,10 +536,12 @@ export function mapWorkshopRepository(
     });
 }
 
-export function mapWorkshopRow(row: WorkshopRow): WorkshopDetails {
+export function mapWorkshopRow(row: WorkshopRow, isHostedRevisionIncluded = false): WorkshopDetails {
     return {
         ...mapWorkshopSummaryRow(row),
-        youtubeVideoId: row.youtube_video_id,
+        youtubeVideoId: !isHostedRevisionIncluded && row.video_source === 'hosted' ? null : row.youtube_video_id,
+        videoSource: row.video_source === 'hosted' ? 'hosted' : 'youtube',
+        hostedRecordingRevisionId: isHostedRevisionIncluded ? row.hosted_recording_revision_id ?? null : null,
         primaryStageContent: normalizeWorkshopPrimaryStageContent(row.primary_stage_content),
         recordingStartOffsetSeconds: row.recording_start_offset_seconds,
         previewYoutubeVideoId: row.preview_youtube_video_id,
@@ -2479,7 +2484,8 @@ export async function loadWorkshopPublicState(
 ): Promise<LoadedWorkshopPublicState> {
     const contentVisibilityCutoff = new Date().toISOString();
     const workshop = mapWorkshopRow(workshopRow);
-    const isWorkshopPast = workshopRow.room_kind === 'workshop' && isWorkshopPhasePast(getWorkshopPhase(workshop));
+    const workshopPhase = getWorkshopPhase(workshop);
+    const isWorkshopPast = workshopRow.room_kind === 'workshop' && isWorkshopPhasePast(workshopPhase);
 
     // Note: The reactions which flew over the stage recently are replayed for somebody entering the room. A room
     //       without that panel therefore does not load them, exactly as it does not count them.
@@ -2640,8 +2646,11 @@ export async function loadWorkshopPublicState(
     // The recording of an ended workshop is decided here for the very same reason: a member who has not unlocked it
     // receives the teaser published for it instead of the stream, rather than the room merely not playing what it
     // still handed over.
-    const { readableVideo, paidMembersOnlyVideo } = selectWorkshopVideoForMember(workshop, {
+    const { readableVideo, paidMembersOnlyVideo } = selectWorkshopVideoForMember({
+        ...workshop, hostedRecordingRevisionId: workshopRow.hosted_recording_revision_id ?? null,
+    }, {
         isWorkshopPast,
+        isWorkshopUpcoming: workshopRow.room_kind === 'workshop' && workshopPhase !== 'ongoing' && !isWorkshopPast,
         isPaidMember,
         isMembershipOffered: roomCapabilities.isMembershipOffered,
     });
@@ -2923,7 +2932,7 @@ export async function loadWorkshopAdminSnapshot(
 
     return {
         snapshot: {
-            workshop: mapWorkshopRow(workshopRow),
+            workshop: mapWorkshopRow(workshopRow, true),
             contentBlocks: ((contentResult.data ?? []) as WorkshopContentRow[]).map((contentBlock) =>
                 mapWorkshopContentRow(contentBlock, linkClickCountByContentBlockId.get(contentBlock.id) ?? 0),
             ),

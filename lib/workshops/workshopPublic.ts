@@ -123,7 +123,7 @@ export async function loadPublishedWorkshopEventCardSummaries(): Promise<readonl
     return Promise.all(
         workshopRows.map(async (workshopRow) => {
             const eventCardDetails = await createWorkshopEventCardDetails({
-                youtubeVideoId: workshopRow.youtube_video_id,
+                youtubeVideoId: workshopRow.video_source === 'hosted' ? null : workshopRow.youtube_video_id,
                 recordingStartOffsetSeconds: workshopRow.recording_start_offset_seconds,
                 repository: mapWorkshopRepository(workshopRow),
                 isRecordingAvailable: isWorkshopPhasePast(

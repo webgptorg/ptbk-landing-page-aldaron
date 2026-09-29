@@ -266,14 +266,18 @@ export function OnlineWorkshopParticipantPage({
         />
     );
     const stageSourceMaterials: readonly WorkshopSpecialMaterial[] = [
-        ...(state.workshop.youtubeVideoId !== null
+        ...(state.workshop.youtubeVideoId !== null || state.workshop.hostedRecordingRevisionId
             ? [
                   {
                       id: 'video',
                       sourceType: 'video' as const,
                       content: (
                           <WorkshopVideoMaterial
-                              videoId={state.workshop.youtubeVideoId}
+                              videoId={state.workshop.youtubeVideoId ?? undefined}
+                              hostedRevisionId={state.workshop.hostedRecordingRevisionId ?? undefined}
+                              workshopSlug={state.workshop.slug}
+                              serverTime={state.serverTime}
+                              isLive={!isWorkshopPast}
                               recordingStartOffsetSeconds={isWorkshopPast ? state.workshop.recordingStartOffsetSeconds : 0}
                           />
                       ),
