@@ -438,6 +438,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   offset as hours, minutes and seconds, while it stays stored, exported and read
   in seconds; it applies only to that paid replay and never to the countdown or
   live stream.
+  A workshop can instead select a hosted synchronized recording while preserving its inactive YouTube settings.
+  Direct admin import and studio publication use the same private multipart object storage and schema 5 validation;
+  verified revisions publish atomically, and old revisions remain briefly for connected viewers. Room JSON and every
+  hosted manifest/range request apply the same live/free and paid replay rule. Prepared hosted media uses export zero,
+  with recorded pause gaps mapped to the chosen live wall clock; the YouTube offset is never applied again. Imported
+  subtitle sidecars stay out of the participant player. Cleanup claims inactive revisions before removing objects.
+  The hosted participant player uses one prepared-export clock across Auto, Editor, Aplikace and Kamera, with a camera
+  overlay in Auto, reviewed activity speed boundaries, event markers and anchored commit selection in the existing
+  repository graph. Auto speed advances automatic-coding intervals through decoded steps at up to 10× and waits when
+  decoding is slower. Free live playback serves only the completed, at-most-two-second segment at the server-delayed playhead through a
+  time-authorized route; direct full-file bytes and other segments are denied. Members may seek the full published
+  recording. Complete publication is required before this scheduled live delivery; it is not an ingest stream.
 - Pending chat messages, member-written poll answers, and community projects use
   `lib/workshops/workshopAutoApproval.ts` for optional AI approval after saving.
   `WORKSHOP_AUTO_APPROVAL_API_KEY` enables it; the model and HTTPS base URL are

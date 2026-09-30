@@ -94,6 +94,10 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopRouteCon
         );
     }
 
+    if (parsedResult.data.videoSource === 'hosted' && existingWorkshop.hosted_recording_revision_id === null) {
+        return NextResponse.json({ error: 'Publish a verified hosted recording before selecting it' }, { status: 409 });
+    }
+
     const startsAt = parsedResult.data.startsAt ?? existingWorkshop.starts_at;
     const endsAt = parsedResult.data.endsAt === undefined ? existingWorkshop.ends_at : parsedResult.data.endsAt;
     if (endsAt !== null && Date.parse(endsAt) <= Date.parse(startsAt)) {
@@ -124,7 +128,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopRouteCon
 
     const updatedWorkshopRow = data as WorkshopRow;
     await broadcastWorkshopEvent(supabase, updatedWorkshopRow, { kind: 'state-changed' });
-    return NextResponse.json({ workshop: mapWorkshopRow(updatedWorkshopRow) });
+    return NextResponse.json({ workshop: mapWorkshopRow(updatedWorkshopRow, true) });
 }
 
 /**

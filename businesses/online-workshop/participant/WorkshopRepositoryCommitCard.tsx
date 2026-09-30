@@ -15,6 +15,7 @@ type WorkshopRepositoryCommitCardProps = {
     readonly isNew: boolean;
     readonly isBranchGraph?: boolean;
     readonly isInRange?: boolean;
+    readonly isCurrentRecordingCommit?: boolean;
     readonly className?: string;
 };
 
@@ -27,6 +28,7 @@ export function WorkshopRepositoryCommitCard({
     isNew,
     isBranchGraph = false,
     isInRange = false,
+    isCurrentRecordingCommit = false,
     className,
 }: WorkshopRepositoryCommitCardProps) {
     return (
@@ -36,10 +38,12 @@ export function WorkshopRepositoryCommitCard({
             rel="noopener noreferrer"
             data-workshop-repository-commit={commit.sha}
             data-workshop-commit-in-range={isInRange || undefined}
+            data-current-recording-commit={isCurrentRecordingCommit || undefined}
+            aria-current={isCurrentRecordingCommit ? 'true' : undefined}
             title={`${commit.message} · ${commit.authorName ?? 'Neznámý autor'} · ${formatGithubCommitDate(commit.committedAt)}`}
             className={cn(
                 'flex min-w-0 items-start gap-3 rounded-xl border px-3.5 py-2.5 transition',
-                isNew
+                isCurrentRecordingCommit ? 'border-room-success bg-room-success/15 ring-2 ring-room-success/40' : isNew
                     ? 'border-room-warning/40 bg-room-warning/[0.08] hover:border-room-warning/70'
                     : isInRange ? 'border-room-accent/40 bg-room-accent/10 hover:border-room-accent/70'
                     : 'border-room-border/[0.08] bg-room-inset/30 hover:border-room-accent/35 hover:bg-room-overlay/[0.05]',
@@ -66,6 +70,7 @@ export function WorkshopRepositoryCommitCard({
                     Nový
                 </span>
             )}
+            {isCurrentRecordingCommit && <span className="shrink-0 rounded-full bg-room-success px-2 py-0.5 text-[11px] font-bold text-room-action-foreground">Teď</span>}
             <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-room-subtle" aria-hidden="true" />
         </a>
     );

@@ -145,7 +145,68 @@ references instead of a whole-session archive. **Stáhnout údaje o stopách** r
 trim and missing-range metadata for those individual files. Moving to another browser does not transfer IndexedDB recordings.
 ZIP output needs destination space for the originals plus any trimmed copies; trimmed export additionally needs
 origin space for one temporary trimmed track. OPFS remains subject to origin quota and is not a quota bypass.
-The studio adds no environment variables, uploads, server APIs, or database migrations.
+Capture and local export need no server storage. Publishing a prepared recording to a workshop uses the separate
+private hosted-recording service described below.
+
+### Hosted synchronized workshop recordings
+
+In `/admin/workshops`, select a workshop and use **Hostovaný synchronizovaný záznam** to upload prepared `editor`,
+`application`, and/or `camera` files independently. Include their schema 5 studio manifest (one combined file or the
+individual manifests from separate prepared exports); select the matching source ID if a filename changed. Optional
+prepared workshop metadata, activity/event/commit JSON and SRT/WebVTT subtitle sidecars are imported but subtitles
+are not shown in the participant player. The server checks the shared export clock, per-track timing and codecs and
+returns a report and admin preview. **Publikovat záznam** then atomically switches the workshop to the verified revision.
+The studio editor also has **Publikovat do workshopu**, using the same server upload and validation path. A studio
+project is not needed to import previously exported files on another device. The admin page can reopen an interrupted
+or verified unpublished revision after a reload; reselect the original files to resume matching SHA-256 chunks, or
+remove one draft file to replace it. Studio publication prepares each selected video source from one continuous
+playable part; a selection crossing recorded pause/append parts needs separately prepared continuous files before
+direct admin import.
+
+Use a **private AWS S3 bucket** for durable media. The app sends 8 MiB SHA-256 checked chunks through authenticated
+Node.js routes, and proxies authorized 4 MiB byte ranges back to viewers. The bucket must deny public access and
+allow the server identity `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`,
+`s3:AbortMultipartUpload`, and `s3:ListMultipartUploadParts` on the `workshop-recordings/` objects, plus
+`s3:ListBucketMultipartUploads` on the bucket. Configure the hosting ingress to accept 8 MiB request bodies and permit 60-second
+upload calls and a 300-second verification call. No browser-to-bucket URL or CDN cache is used for paid bytes.
+
+```dotenv
+HOSTED_RECORDING_S3_BUCKET=YOUR_PRIVATE_BUCKET
+HOSTED_RECORDING_S3_REGION=YOUR_AWS_REGION
+HOSTED_RECORDING_S3_ACCESS_KEY_ID=YOUR_SERVER_ONLY_ACCESS_KEY
+HOSTED_RECORDING_S3_SECRET_ACCESS_KEY=YOUR_SERVER_ONLY_SECRET
+# Optional for a compatible S3 endpoint; keep the bucket private
+# HOSTED_RECORDING_S3_ENDPOINT=https://YOUR_PRIVATE_ENDPOINT
+HOSTED_RECORDING_CLEANUP_SECRET=YOUR_RANDOM_SCHEDULER_SECRET
+```
+
+Schedule `POST /api/hosted-recordings/cleanup` with
+`Authorization: Bearer <HOSTED_RECORDING_CLEANUP_SECRET>` at least daily. It claims and removes abandoned revisions
+after 24 hours and unpublished ready or superseded revisions after seven days, never the current published pointer.
+It also aborts old
+multipart uploads left before a database row could be written. Add an S3 lifecycle rule to abort incomplete multipart
+uploads after one day as a second recovery path if the scheduler is unavailable. Keep old revisions for at least the
+seven-day retention window; a connected viewer may request its superseded revision for 24 hours after replacement.
+Each media request is still checked
+against the workshop session and paid membership. The YouTube URL, replay offset, teaser, and stage choice remain
+stored when the hosted source is selected. Prepared hosted media starts at export zero; the YouTube replay offset is
+never applied to it. The administrator aligns export zero with the workshop's live clock, and recorded pauses retain
+their wall-clock gaps.
+
+The participant player uses one session playhead for the editor, application and camera files. Auto follows reviewed
+scene choices, overlays the camera and selects one audible file. Reviewed automatic-coding intervals advance in
+decoded steps at up to 10×; when decoding is slow, the playhead waits for the frame instead of showing stale video.
+Events and verified commit anchors share those session seconds. The existing YouTube player remains active for
+YouTube-only workshops.
+
+A non-paying live viewer receives only the completed segment at the delayed playhead, normally two seconds behind the
+workshop clock. Segments are capped at two seconds and split at recorded take boundaries, so the wall-time delay follows
+studio pauses. Each request remuxes a self-contained MP4 or WebM segment from the already published private file,
+requires a key-frame-aligned segment boundary, and rechecks the current server time and room access before
+returning bytes. An unaligned or unavailable segment buffers or falls back to another ready track; no earlier or
+future segment and no full-file byte range is served to that viewer. Publish the complete prepared media before the
+workshop starts. This is scheduled playback of a complete upload, not incremental live capture or upload. Members
+can seek the full revision. See `docs/workshop-hosted-player.md` for timing and delivery limits.
 
 Its E2E tests supply canvas video and synthesized audio with a silent Web Audio output, so they need no physical
 camera, microphone, or working speaker device. Recording, storage, codecs, trimming, and ZIP exports remain real.

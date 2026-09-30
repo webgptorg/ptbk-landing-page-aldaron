@@ -110,6 +110,11 @@ export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/people/tomas-kroupa.jpg',
     '/people/tomas-mikolov.jpg',
     '/people/tomas-studenik.jpg',
+    '/recording-studio/vad/ort-wasm-simd-threaded.jsep.mjs',
+    '/recording-studio/vad/ort-wasm-simd-threaded.jsep.wasm',
+    '/recording-studio/vad/ort-wasm-simd-threaded.mjs',
+    '/recording-studio/vad/ort-wasm-simd-threaded.wasm',
+    '/recording-studio/vad/silero_vad_legacy.onnx',
     '/sponsors/CI-Technology-Incubation.png',
     '/workshop-participant-service-worker.js',
 ];

@@ -5,13 +5,15 @@ import type { WorkshopDetails, WorkshopPaidMembersVideo } from '@/lib/workshops/
  */
 export type WorkshopVideo = Pick<
     WorkshopDetails,
-    'youtubeVideoId' | 'previewYoutubeVideoId' | 'recordingStartOffsetSeconds'
+    'youtubeVideoId' | 'previewYoutubeVideoId' | 'recordingStartOffsetSeconds' | 'videoSource' | 'hostedRecordingRevisionId'
 >;
 
 /**
  * What decides whether the recording of a workshop reaches the member reading the room
  */
 export type WorkshopMemberVideoAccess = {
+    /** Future rooms do not release hosted bytes before the event begins. YouTube keeps its existing room behavior. */
+    readonly isWorkshopUpcoming?: boolean;
     /**
      * Whether the workshop is already over, which is the moment its stream becomes a recording the membership unlocks
      *
@@ -50,7 +52,14 @@ const EMPTY_WORKSHOP_VIDEO: WorkshopVideo = {
     youtubeVideoId: null,
     previewYoutubeVideoId: null,
     recordingStartOffsetSeconds: 0,
+    videoSource: 'youtube',
+    hostedRecordingRevisionId: null,
 };
+
+/** The room and each media request use this same paid replay rule. */
+export function isWorkshopRecordingReadable({ isWorkshopPast, isWorkshopUpcoming = false, isPaidMember, isMembershipOffered }: WorkshopMemberVideoAccess): boolean {
+    return !isWorkshopUpcoming && (!isMembershipOffered || !isWorkshopPast || isPaidMember);
+}
 
 /**
  * Decides which video of an occurrence one member receives and which of it is offered to them instead.
@@ -61,15 +70,27 @@ const EMPTY_WORKSHOP_VIDEO: WorkshopVideo = {
  *       to put in front of its video either.
  */
 export function selectWorkshopVideoForMember(
-    { youtubeVideoId, previewYoutubeVideoId, recordingStartOffsetSeconds }: WorkshopVideo,
-    { isWorkshopPast, isPaidMember, isMembershipOffered }: WorkshopMemberVideoAccess,
+    { youtubeVideoId, previewYoutubeVideoId, recordingStartOffsetSeconds, videoSource = 'youtube', hostedRecordingRevisionId = null }: WorkshopVideo,
+    access: WorkshopMemberVideoAccess,
 ): WorkshopMemberVideoSelection {
-    const isVideoWithheld = isMembershipOffered && isWorkshopPast && !isPaidMember && youtubeVideoId !== null;
+    const isHosted = videoSource === 'hosted';
+    if (isHosted && access.isWorkshopUpcoming) {
+        return { readableVideo: EMPTY_WORKSHOP_VIDEO, paidMembersOnlyVideo: null };
+    }
+    const isRecordingAvailable = isHosted ? hostedRecordingRevisionId !== null : youtubeVideoId !== null;
+    const isVideoWithheld = !isWorkshopRecordingReadable({ ...access,
+        isWorkshopUpcoming: isHosted && access.isWorkshopUpcoming }) && isRecordingAvailable;
 
     return isVideoWithheld
         ? { readableVideo: EMPTY_WORKSHOP_VIDEO, paidMembersOnlyVideo: { previewYoutubeVideoId } }
         : {
-              readableVideo: { youtubeVideoId, previewYoutubeVideoId: null, recordingStartOffsetSeconds },
+              readableVideo: {
+                  youtubeVideoId: isHosted ? null : youtubeVideoId,
+                  hostedRecordingRevisionId: isHosted ? hostedRecordingRevisionId : null,
+                  videoSource,
+                  previewYoutubeVideoId: null,
+                  recordingStartOffsetSeconds: isHosted ? 0 : recordingStartOffsetSeconds,
+              },
               paidMembersOnlyVideo: null,
           };
 }

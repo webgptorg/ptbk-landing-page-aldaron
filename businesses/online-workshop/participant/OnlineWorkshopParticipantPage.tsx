@@ -17,6 +17,7 @@ import { WorkshopPresentationMaterial } from '@/businesses/online-workshop/parti
 import { WorkshopVideoMaterial } from '@/businesses/online-workshop/participant/WorkshopVideoMaterial';
 import { WorkshopReactions } from '@/businesses/online-workshop/participant/WorkshopReactions';
 import { WorkshopRepositoryPanel } from '@/businesses/online-workshop/participant/WorkshopRepositoryPanel';
+import { WorkshopRecordingTimelineProvider } from '@/businesses/online-workshop/participant/WorkshopRecordingTimelineContext';
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
 import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { WorkshopServerConnectionStatus } from '@/businesses/online-workshop/participant/WorkshopServerConnectionStatus';
@@ -266,14 +267,18 @@ export function OnlineWorkshopParticipantPage({
         />
     );
     const stageSourceMaterials: readonly WorkshopSpecialMaterial[] = [
-        ...(state.workshop.youtubeVideoId !== null
+        ...(state.workshop.youtubeVideoId !== null || state.workshop.hostedRecordingRevisionId
             ? [
                   {
                       id: 'video',
                       sourceType: 'video' as const,
                       content: (
                           <WorkshopVideoMaterial
-                              videoId={state.workshop.youtubeVideoId}
+                              videoId={state.workshop.youtubeVideoId ?? undefined}
+                              hostedRevisionId={state.workshop.hostedRecordingRevisionId ?? undefined}
+                              workshopSlug={state.workshop.slug}
+                              serverTime={state.serverTime}
+                              isLive={!isWorkshopPast}
                               recordingStartOffsetSeconds={isWorkshopPast ? state.workshop.recordingStartOffsetSeconds : 0}
                           />
                       ),
@@ -523,7 +528,9 @@ export function OnlineWorkshopParticipantPage({
             workshopSlug={workshopSlug}
             isMembershipOffered={roomCapabilities.isMembershipOffered}
         >
-            {roomLayout}
+            <WorkshopRecordingTimelineProvider workshopSlug={workshopSlug} repository={connectedRepository}>
+                {roomLayout}
+            </WorkshopRecordingTimelineProvider>
         </CommunityMembershipRoomProvider>
     );
 }

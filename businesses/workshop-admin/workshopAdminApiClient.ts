@@ -54,6 +54,7 @@ export type WorkshopWriteValues = {
     /** The address a term of an event held by somebody else leads to, which every other term leaves empty. */
     readonly externalUrl?: string | null;
     readonly youtubeVideoId?: string | null;
+    readonly videoSource?: 'youtube' | 'hosted';
     readonly primaryStageContent?: WorkshopPrimaryStageContent;
 
     /** The number of waiting-room seconds to skip when a paid member replays an ended workshop. */

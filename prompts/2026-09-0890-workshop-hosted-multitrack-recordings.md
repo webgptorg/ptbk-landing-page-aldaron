@@ -1,4 +1,4 @@
-[ ]
+[x] (2 attempts) by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation ~$0.5478 20 minutes; Testing an hour; Fixing ~$0.00 40 minutes; Testing 35 minutes
 
 [✨📦] Upload and publish a hosted synchronized recording for a workshop
 
@@ -16,3 +16,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Share video-source selection and gating across stage, materials and wrap-up.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

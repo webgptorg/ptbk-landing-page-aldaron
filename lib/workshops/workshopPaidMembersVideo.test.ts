@@ -5,6 +5,8 @@ const WORKSHOP_VIDEO: WorkshopVideo = {
     youtubeVideoId: 'dQw4w9WgXcQ',
     previewYoutubeVideoId: 'M7lc1UVf-VE',
     recordingStartOffsetSeconds: 75,
+    videoSource: 'youtube',
+    hostedRecordingRevisionId: null,
 };
 
 const PAID_MEMBER_OF_AN_ENDED_WORKSHOP = { isWorkshopPast: true, isPaidMember: true, isMembershipOffered: true };
@@ -17,6 +19,14 @@ describe('the video one member of a room is given', () => {
 
         expect(selection.readableVideo.youtubeVideoId).toBe(WORKSHOP_VIDEO.youtubeVideoId);
         expect(selection.readableVideo.recordingStartOffsetSeconds).toBe(WORKSHOP_VIDEO.recordingStartOffsetSeconds);
+        expect(selection.paidMembersOnlyVideo).toBeNull();
+    });
+
+    it('keeps the existing YouTube stream available in an upcoming room', () => {
+        const selection = selectWorkshopVideoForMember(WORKSHOP_VIDEO, {
+            ...FREE_MEMBER_OF_A_RUNNING_WORKSHOP, isWorkshopUpcoming: true,
+        });
+        expect(selection.readableVideo.youtubeVideoId).toBe(WORKSHOP_VIDEO.youtubeVideoId);
         expect(selection.paidMembersOnlyVideo).toBeNull();
     });
 
@@ -60,6 +70,8 @@ describe('the video one member of a room is given', () => {
                 youtubeVideoId: null,
                 previewYoutubeVideoId: WORKSHOP_VIDEO.previewYoutubeVideoId,
                 recordingStartOffsetSeconds: WORKSHOP_VIDEO.recordingStartOffsetSeconds,
+                videoSource: 'youtube',
+                hostedRecordingRevisionId: null,
             },
             FREE_MEMBER_OF_AN_ENDED_WORKSHOP,
         );
@@ -68,6 +80,8 @@ describe('the video one member of a room is given', () => {
             youtubeVideoId: null,
             previewYoutubeVideoId: null,
             recordingStartOffsetSeconds: WORKSHOP_VIDEO.recordingStartOffsetSeconds,
+            videoSource: 'youtube',
+            hostedRecordingRevisionId: null,
         });
         expect(selection.paidMembersOnlyVideo).toBeNull();
     });
@@ -80,5 +94,24 @@ describe('the video one member of a room is given', () => {
 
         expect(selection.readableVideo.youtubeVideoId).toBe(WORKSHOP_VIDEO.youtubeVideoId);
         expect(selection.paidMembersOnlyVideo).toBeNull();
+    });
+
+    it('hides a hosted recording before the workshop and never applies the YouTube offset to it', () => {
+        const hosted = { ...WORKSHOP_VIDEO, videoSource: 'hosted' as const,
+            hostedRecordingRevisionId: 'revision-one' };
+        const upcoming = selectWorkshopVideoForMember(hosted, {
+            ...FREE_MEMBER_OF_A_RUNNING_WORKSHOP, isWorkshopUpcoming: true,
+        });
+        expect(upcoming.readableVideo.hostedRecordingRevisionId).toBeNull();
+        expect(upcoming.paidMembersOnlyVideo).toBeNull();
+
+        const live = selectWorkshopVideoForMember(hosted, FREE_MEMBER_OF_A_RUNNING_WORKSHOP);
+        expect(live.readableVideo.hostedRecordingRevisionId).toBe('revision-one');
+        expect(live.readableVideo.youtubeVideoId).toBeNull();
+        expect(live.readableVideo.recordingStartOffsetSeconds).toBe(0);
+
+        const replay = selectWorkshopVideoForMember(hosted, FREE_MEMBER_OF_AN_ENDED_WORKSHOP);
+        expect(replay.readableVideo.hostedRecordingRevisionId).toBeNull();
+        expect(replay.paidMembersOnlyVideo).toEqual({ previewYoutubeVideoId: WORKSHOP_VIDEO.previewYoutubeVideoId });
     });
 });

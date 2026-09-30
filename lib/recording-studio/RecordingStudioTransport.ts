@@ -268,7 +268,7 @@ export function settleRecordingMedia(media: HTMLMediaElement, seconds: number, s
 }
 
 /** HTML supports playing at rate zero without advancing; an unresolved start never advances the master clock. */
-function prepareRecordingMediaPlayback(media: HTMLMediaElement, signal: AbortSignal): Promise<void> {
+export function prepareRecordingMediaPlayback(media: HTMLMediaElement, signal: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {
         const finish = (error?: unknown) => {
             clearTimeout(timeout);

@@ -210,15 +210,15 @@ describe('workshop settings form', () => {
     });
 
     it('saves a permanent room without sending settings its kind does not have', async () => {
-        const { onSave, submit } = renderWorkshopSettingsForm(COMMUNITY);
+        const { onSave } = renderWorkshopSettingsForm(COMMUNITY);
 
-        submit();
+        fireEvent.click(screen.getByLabelText('Publikovaný'));
 
         await waitFor(() =>
             expect(onSave).toHaveBeenCalledWith({
                 title: COMMUNITY.title,
                 description: COMMUNITY.description,
-                isPublished: COMMUNITY.isPublished,
+                isPublished: false,
                 disabledPanels: COMMUNITY.disabledPanels,
             }),
         );
@@ -299,17 +299,17 @@ describe('workshop settings form', () => {
     });
 
     it('keeps saving the settings of a workshop whose end is left open without an end', async () => {
-        const { onSave, submit } = renderWorkshopSettingsForm(OPEN_ENDED_WORKSHOP);
+        const { onSave } = renderWorkshopSettingsForm(OPEN_ENDED_WORKSHOP);
 
-        submit();
+        fireEvent.change(screen.getByLabelText('Název'), { target: { value: 'Open-ended workshop' } });
 
         await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ endsAt: null })));
     });
 
     it('saves a workshop occurrence with its schedule, its stage, and its reactions', async () => {
-        const { onSave, submit } = renderWorkshopSettingsForm(WORKSHOP);
+        const { onSave } = renderWorkshopSettingsForm(WORKSHOP);
 
-        submit();
+        fireEvent.change(screen.getByLabelText('Název'), { target: { value: 'Updated workshop' } });
 
         await waitFor(() =>
             expect(onSave).toHaveBeenCalledWith(

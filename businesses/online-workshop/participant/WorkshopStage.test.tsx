@@ -27,6 +27,10 @@ vi.mock('@/businesses/community/membership/CommunityMembershipRoomProvider', () 
     useCommunityMembershipRoom: () => membershipRoomMock.membershipRoom,
 }));
 
+vi.mock('@/businesses/online-workshop/participant/WorkshopHostedRecordingPlayer', () => ({
+    WorkshopHostedRecordingPlayer: () => <div data-testid="hosted-recording-player">Hosted controls</div>,
+}));
+
 const PAID_MEMBERSHIP: CommunityMembershipRoomState = {
     status: 'active',
     monthlyPriceCzk: 199,
@@ -161,6 +165,17 @@ afterEach(() => {
 });
 
 describe('workshop stage', () => {
+    it('lets hosted controls extend below their picture in the live stage and paid replay', () => {
+        const reactionSource = createReactionSource();
+        const workshop: WorkshopDetails = { ...WORKSHOP, videoSource: 'hosted',
+            hostedRecordingRevisionId: 'revision-one' };
+        const baseProps = { workshop, subscribeToReactions: reactionSource.subscribeToReactions };
+        const { rerender } = render(<WorkshopStage {...baseProps} serverTime="2026-08-20T19:10:00+02:00" />);
+        expect(screen.getByTestId('hosted-recording-player').parentElement?.className).not.toContain('aspect-video');
+        rerender(<WorkshopStage {...baseProps} serverTime="2026-08-20T20:31:00+02:00" />);
+        fireEvent.click(screen.getByRole('button', { name: /Přehrát video znovu/ }));
+        expect(screen.getByTestId('hosted-recording-player').parentElement?.className).not.toContain('aspect-video');
+    });
     it('offers the PDF only after the recorded end, including newly ended workshops', () => {
         const reactionSource = createReactionSource();
         const props = { workshop: WORKSHOP, subscribeToReactions: reactionSource.subscribeToReactions };

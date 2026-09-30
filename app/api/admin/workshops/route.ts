@@ -103,5 +103,5 @@ export async function POST(request: NextRequest) {
         }
     }
 
-    return NextResponse.json({ workshop: mapWorkshopRow(data as WorkshopRow) }, { status: 201 });
+    return NextResponse.json({ workshop: mapWorkshopRow(data as WorkshopRow, true) }, { status: 201 });
 }
