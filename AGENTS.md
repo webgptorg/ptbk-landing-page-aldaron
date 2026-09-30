@@ -214,9 +214,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   deliberately reconnected, and each display source opens the browser chooser again. Readiness must be checked
   before Start and follows required microphone mute/unmute events; cancellation or a missing device keeps its source
   configuration and never substitutes another device silently. One capture coordinator starts and stops sources on a
-  shared clock; losing a required source or a storage write stops the take. A muted required video track is temporarily
-  unavailable, blocks Start, and interrupts an active take as incomplete rather than acting like an intentional pause;
-  reselect the source to reconnect. The display-source picker belongs to the browser/OS: `displaySurface` is a type
+  shared clock; a lost source stops only its own track and leaves the rest of the session in it as a gap, while the
+  remaining sources record on. The take ends when no source is left to record or when the shared storage fails, and
+  it is saved as interrupted naming every source it lost. A muted required video track is temporarily
+  unavailable, blocks Start, and takes its own track out of an active take rather than acting like an intentional pause;
+  reselect the source to reconnect. Every failure passes through one channel in `recordingStudioAlerts.ts`, which
+  shows it on the source card and the page, plays a synthesized sound and posts a browser notification, because the
+  administrator is normally working in the application being recorded rather than watching the studio tab. Both
+  channels are on by default, are turned off separately in browser-local settings, and an explicit test button raises
+  a real alert through the real channels. A refused or missing channel leaves the others announcing.
+  The display-source picker belongs to the browser/OS: `displaySurface` is a type
   preference, the app does not enumerate system windows, and saved names cannot force a window or restore its stream.
   The macOS Spaces help is shown for manually selected, restored, and reused display configurations. It scopes the
   reported cross-Space behavior to the owner's unspecified Mac/Chrome versions and links to an authenticated plain
@@ -260,8 +267,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The same workspace offers a responsive live monitor with grid, focus and pinned-source layouts; hidden or
   minimized previews, preview sound and camera mirror preferences are browser-local presentation settings and never
   alter armed recorder sources or raw files. One global pause closes and commits independently playable parts for
-  every source, freezes the shared recorded-content clock, and resumes with a new aligned part set. Failure of one
-  required source interrupts the entire take. Closed parts use measured encoded bounds for the next shared
+  every source, freezes the shared recorded-content clock, and resumes with a new aligned part set. A source lost
+  while paused is not started again on resume. Closed parts use measured encoded bounds for the next shared
   boundary and retain per-part audio and video settings; shorter tails remain timeline gaps. From editing,
   `Donahrát` explicitly restores the latest intended
   source setup and appends a new take at the same project's recorded end after a separate Start; source-set changes

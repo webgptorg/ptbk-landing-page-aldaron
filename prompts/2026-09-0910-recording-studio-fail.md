@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on Claude Code `claude-opus-5` thinking `max` - Implementation 7.59 an hour; Testing 35 minutes
 
 [✨🚞] When something fails in the recording studio, the user should be immediately notified and aware.
 
@@ -14,3 +14,4 @@
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
 
 ![alt text](prompts/screenshots/2026-09-0910-recording-studio-fail.png)
+

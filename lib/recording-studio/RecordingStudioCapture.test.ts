@@ -139,15 +139,36 @@ describe('multi-source capture barriers and durable failure handling', () => {
         await capture.stop();
     });
 
-    it('stops and preserves the session when a required microphone track is muted', async () => {
+    it('stops only the affected track when a required microphone is muted and keeps the others recording', async () => {
         const source = makeSource('camera with microphone', true);
-        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        const onFailure = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
         await capture.start([source, makeSource('another camera')]);
         source.stream.getAudioTracks()[0].dispatchEvent(new Event('mute'));
-        const result = await capture.finished;
+        await vi.waitFor(() => expect(TestRecorder.instances[0].state).toBe('inactive'));
+        expect(TestRecorder.instances[1].state).toBe('recording');
+        expect(capture.currentPhase).toBe('recording');
+        expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({ impact: 'recording-continues', sourceId: 'camera with microphone' }));
+        expect(onFailure.mock.calls[0][0].message).toContain('přestal posílat zvuk');
+        const result = await capture.stop();
         expect(result?.status).toBe('interrupted');
-        expect(result?.errorMessage).toContain('přestal posílat zvuk');
+        expect(result?.errorMessage).toContain('ostatní stopy nahrávají dál');
+        expect(result?.tracks.map((track) => track.parts?.length)).toEqual([1, 1]);
+    });
+
+    it('stops the whole take when the last remaining source is lost', async () => {
+        const onFailure = vi.fn();
+        const sources = [makeSource('one'), makeSource('two')];
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
+        await capture.start(sources);
+        sources[0].stream.getTracks()[0].dispatchEvent(new Event('ended'));
+        await vi.waitFor(() => expect(TestRecorder.instances[0].state).toBe('inactive'));
+        sources[1].stream.getTracks()[0].dispatchEvent(new Event('ended'));
+        const result = await capture.finished;
         expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('poslední nahrávaný zdroj');
+        expect(onFailure.mock.calls.map((call) => call[0].impact)).toEqual(['recording-continues', 'recording-stopped']);
     });
 
     it('interrupts a screen recording when the browser temporarily mutes its video track', async () => {
@@ -165,15 +186,36 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(TestRecorder.instances[0].state).toBe('inactive');
     });
 
-    it('stops all sources when a device disconnects', async () => {
+    it('keeps recording the remaining sources when one device disconnects and announces the loss', async () => {
+        const onFailure = vi.fn();
+        const sources = [makeSource('one'), makeSource('two')];
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
+        await capture.start(sources);
+        sources[1].stream.getTracks()[0].dispatchEvent(new Event('ended'));
+        await vi.waitFor(() => expect(TestRecorder.instances[1].state).toBe('inactive'));
+        expect(TestRecorder.instances[0].state).toBe('recording');
+        expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({
+            impact: 'recording-continues', sourceId: 'two', sourceLabel: 'two',
+            message: expect.stringContaining('byl odpojen') as unknown as string,
+        }));
+        const result = await capture.stop();
+        expect(result?.status).toBe('interrupted');
+        expect(result?.errorMessage).toContain('two');
+        expect(result?.tracks.map((track) => track.id)).toEqual(['one', 'two']);
+    });
+
+    it('pauses and resumes a take which is missing a lost source, without recording it again', async () => {
         const sources = [makeSource('one'), makeSource('two')];
         const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
         await capture.start(sources);
         sources[1].stream.getTracks()[0].dispatchEvent(new Event('ended'));
-        const result = await capture.finished;
-        expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
-        expect(result?.status).toBe('interrupted');
-        expect(result?.errorMessage).toContain('two');
+        await vi.waitFor(() => expect(TestRecorder.instances[1].state).toBe('inactive'));
+        await capture.pause();
+        expect(capture.currentPhase).toBe('paused');
+        capture.resume();
+        expect(capture.currentPhase).toBe('recording');
+        const result = await capture.stop();
+        expect(result?.tracks.map((track) => track.parts?.length)).toEqual([2, 1]);
     });
 
     it('keeps only acknowledged bytes after a quota failure and never writes beyond the gap', async () => {
@@ -258,13 +300,16 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result?.tracks.every((track) => track.byteLength === 200 * part.size + 4)).toBe(true);
     });
 
-    it('does not call a failed final checkpoint complete', async () => {
-        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+    it('does not call a failed final checkpoint complete, and announces that last failure too', async () => {
+        const onFailure = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
         await capture.start([makeSource('one')]);
         STORAGE.save.mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
         const result = await capture.stop();
         expect(result?.status).toBe('interrupted');
         expect(result?.tracks[0].byteLength).toBe(4);
+        expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({ impact: 'recording-stopped' }));
+        expect(onFailure.mock.calls[0][0].message).toContain('plné');
     });
 
     it('reports a denied storage destination before capture starts', async () => {

@@ -36,8 +36,9 @@ Pause/Resume makes parts inside the current take; Donahrát makes a new take. Th
 reuse action still prepares a different recording. Existing parts, title and edit recipe are retained. An
 untouched full-session trim extends after append, while a custom selection stays fixed.
 
-The finalizing phase holds navigation protection until all recorder tails and storage writes settle. A failed
-source, full queue, missing media, or failed checkpoint marks the project interrupted and retains acknowledged
+The finalizing phase holds navigation protection until all recorder tails and storage writes settle. A full queue,
+missing media, or failed checkpoint stops every recorder, while a failed source stops only its own track and leaves
+the take running on the remaining ones. Either marks the project interrupted and retains acknowledged
 chunks. Folder media parts remain immutable and their small checkpoint is authoritative; IndexedDB commits a
 chunk and its counters in one transaction. Exports package every part as an original plus a versioned recipe.
 One prepared file is offered only when the selected interval lies in one playable part; crossing a pause or take

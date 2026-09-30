@@ -71,9 +71,23 @@ Recovery only reads the folder; it can offer export even when a full disk or ori
 browser cannot cache the handle, select the same recording subfolder again next visit.
 **Připojit složku znovu** renews access to a known folder; permissions are never requested silently on recovery.
 Incomplete takes retain successfully committed chunks after reopening.
-One browser tab holds the studio lock, including while recovering, editing, exporting, or deleting takes. Ending a
-source or failing to save a chunk stops every recorder. Normal admin navigation and sign-out wait for recording or
-export to finish, and closing/reloading during capture shows the existing browser warning.
+One browser tab holds the studio lock, including while recovering, editing, exporting, or deleting takes. Normal
+admin navigation and sign-out wait for recording or export to finish, and closing/reloading during capture shows the
+existing browser warning.
+
+Losing a source does not end the recording. When a camera, a shared window or a required microphone stops, only that
+source's recorder is closed: its media up to that moment is kept, the rest of the session stays a gap in its lane,
+and every other source records on without a break on the same session clock. The take itself ends only when no
+source is left to record, when a chunk cannot be saved, or when the origin runs out of space — the failures which
+affect all tracks at once. Such a take is saved as **Přerušený záznam** and names every source it lost.
+
+Because an administrator is normally working inside the application being recorded, every failure is also announced
+outside the studio tab: an alert sound and a browser notification, beside the message on the failing source's card
+and at the top of the page. **Povolit upozornění prohlížeče** asks for the permission, both channels can be turned
+off separately, and the settings stay in this browser profile only. **Otestovat výstrahu** raises a real alert
+through the real channels, which is the way to find a muted tab or a refused permission before a recording needs
+them. A refused or unsupported channel leaves the others announcing; the studio page keeps the last twenty alerts
+with their times.
 
 Use a current desktop Chrome or Edge over HTTPS (localhost also works). Device limits, codecs, and screen/audio
 capture depend on the browser and operating system. **Odhad prostoru pro web** is the reported origin quota minus

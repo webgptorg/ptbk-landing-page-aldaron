@@ -14,7 +14,9 @@ import { RecordingBitrateMeter } from '@/lib/recording-studio/recordingStudioTim
 import {
     type RecordingPersistence, type RecordingSource, type RecordingSourceConfiguration, type RecordingSourceReadiness, type StudioRecording,
 } from '@/lib/recording-studio/recordingStudioTypes';
+import type { RecordingAlert } from '@/lib/recording-studio/recordingStudioAlerts';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRecordingStudioAlerts } from './useRecordingStudioAlerts';
 
 function getMutedAudioReadinessMessage(source: RecordingSource, configuration: RecordingSourceConfiguration): string {
     const microphoneName = source.microphoneLabel || source.label;
@@ -52,6 +54,7 @@ function getRecordingSourceReadinessMessage(source: RecordingSource, configurati
 }
 
 export function useRecordingStudio() {
+    const alertChannel = useRecordingStudioAlerts();
     const [sources, setSources] = useState<RecordingSource[]>([]);
     const [sourceConfigurations, setSourceConfigurations] = useState<RecordingSourceConfiguration[]>([]);
     const [sourceErrors, setSourceErrors] = useState<Record<string, string>>({});
@@ -72,6 +75,20 @@ export function useRecordingStudio() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const runtime = useRef({ isDisposed: false, isAddingSource: false, isStartPending: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] });
+
+    /**
+     * Puts one announced failure where the administrator is already looking
+     *
+     * Note: A failure of one source reuses the very card and readiness state a disconnected source has when the studio
+     *       is idle, so a take which went on recording without that source still says so in one place only.
+     */
+    const showAnnouncedAlert = useCallback((alert: RecordingAlert) => {
+        setErrorMessage(alert.message);
+        const failedSourceId = alert.sourceId;
+        if (failedSourceId === null) return;
+        setSourceErrors((previous) => ({ ...previous, [failedSourceId]: alert.message }));
+        setSourceReadiness((previous) => ({ ...previous, [failedSourceId]: 'disconnected' }));
+    }, []);
 
     const refreshStorage = useCallback((): Promise<void> => {
         // A deletion/finalization may occur while a poll is in flight. Sample again after that older request.
@@ -310,9 +327,8 @@ export function useRecordingStudio() {
                     const message = configuration.kind === 'screen'
                         ? `Sdílené okno, karta nebo obrazovka „${source.label}“ skončila nebo byla odpojena. Připojte zdroj znovu a vyberte jej v dialogu prohlížeče.`
                         : `Zařízení „${source.label}“ bylo odpojeno. Připojte jej znovu nebo změňte výběr.`;
-                    setSourceErrors((previous) => ({ ...previous, [source.id]: message }));
-                    setSourceReadiness((previous) => ({ ...previous, [source.id]: 'disconnected' }));
-                    setErrorMessage(message);
+                    // A source lost while preparing is announced too: nobody watches this tab while setting a room up.
+                    showAnnouncedAlert(alertChannel.announceFailure({ impact: 'no-recording', message, sourceId: source.id, sourceLabel: source.label }));
                 }, { once: true });
 
                 const isRequiredAudioTrack = track.kind === 'audio' &&
@@ -427,6 +443,8 @@ export function useRecordingStudio() {
                     onPendingBytes: (bytes) => { if (!current.isDisposed) setPendingBytes(bytes); },
                     onStopping: () => { if (!current.isDisposed) setPhase('stopping'); },
                     onPhaseChange: (nextPhase) => { if (!current.isDisposed) setPhase(nextPhase); },
+                    // A studio page which is being closed reports its own shutdown; that is not a failure to announce.
+                    onFailure: (failure) => { if (!current.isDisposed) showAnnouncedAlert(alertChannel.announceFailure(failure)); },
                 });
                 current.capture = capture;
                 await capture.start(recordingSources);
@@ -469,6 +487,10 @@ export function useRecordingStudio() {
     return {
         sources, sourceConfigurations, sourceErrors, sourceReadiness, recordings, activeRecording, storage, phase, errorMessage, elapsedSeconds,
         directory, isChoosingDirectory, pendingBytes, measuredBytesPerSecond, persistence,
+        alerts: alertChannel.alerts, alertPreferences: alertChannel.alertPreferences, notificationPermission: alertChannel.notificationPermission,
+        isAlertSoundSupported: alertChannel.isAlertSoundSupported, announceTestAlert: alertChannel.announceTestAlert,
+        changeAlertPreferences: alertChannel.changeAlertPreferences, dismissAlert: alertChannel.dismissAlert, dismissAllAlerts: alertChannel.dismissAllAlerts,
+        requestNotificationPermission: alertChannel.requestNotificationPermission,
         chooseDirectory,
         useBrowserStorage: () => {
             if (phase !== 'idle' || directoryOperation.current) return;

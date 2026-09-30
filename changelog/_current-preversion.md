@@ -1,5 +1,15 @@
 # Current preversion
 
+- A recording-studio failure now keeps recording whatever it can and always says so out loud. Losing a camera, a
+  shared window or a microphone stops only that source's track, leaves the rest of the session in it as a gap and
+  lets the other sources record on the same clock; the take itself ends only when nothing is left to record or when
+  the shared storage fails. Every failure — including a stopped, crashed or out-of-space recording — goes through one
+  channel which shows it on the source card and the page, plays an alert sound and posts a browser notification, so
+  an administrator working in the very application being recorded is told without watching the studio tab. Sound and
+  notifications can be turned off separately, are remembered in this browser only, and an explicit **Otestovat
+  výstrahu** button raises a real alert through the real channels before a recording needs them. A take which lost a
+  source is saved as interrupted and names every source it lost.
+
 - Added a shared-clock participant player for hosted workshop recordings with Auto/Editor/Aplikace/Kamera views,
   camera picture-in-picture, one audible track, event and activity timeline, manual speed and reviewed automatic
   coding intervals at up to 10×. The existing repository graph highlights the verified anchored SHA at the playhead.

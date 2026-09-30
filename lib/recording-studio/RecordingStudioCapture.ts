@@ -1,4 +1,5 @@
 import { getRecordingErrorMessage } from './recordingStudioDevices';
+import type { RecordingFailure } from './recordingStudioAlerts';
 import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
 import { appendRecordingChunk, createStudioRecording, readRecordingPart, saveStudioRecording } from './recordingStudioStorage';
 import { extendRecordingWorkshopActivity } from './recordingStudioWorkshop';
@@ -34,6 +35,8 @@ type CaptureOptions = {
     readonly existingRecording?: StudioRecording;
     readonly isSourceSetChangeAllowed?: boolean;
     readonly onPhaseChange?: (phase: CapturePhase) => void;
+    /** Every failure, whether it ended the take or only one of its sources. Describing it is all this class does. */
+    readonly onFailure?: (failure: RecordingFailure) => void;
 };
 
 type RecorderEntry = {
@@ -44,6 +47,8 @@ type RecorderEntry = {
     readonly finish: () => void;
     isStarted: boolean;
     isStopConfirmed: boolean;
+    /** A source which was taken out of the running take. Its part keeps the media it had already committed. */
+    isDropped: boolean;
     startedAt: number;
 };
 
@@ -52,6 +57,7 @@ export class RecordingStudioCapture {
     public readonly finished: Promise<StudioRecording | null>;
     private resolveFinished!: (recording: StudioRecording | null) => void;
     private entries: RecorderEntry[] = [];
+    private droppedEntries: RecorderEntry[] = [];
     private sources: readonly RecordingSource[] = [];
     private recording: StudioRecording | null = null;
     private savedRecording: StudioRecording | null = null;
@@ -67,7 +73,9 @@ export class RecordingStudioCapture {
     private isWriteFailed = false;
     private isBufferFull = false;
     private errorMessage: string | null = null;
-    private readonly removeListeners: (() => void)[] = [];
+    private readonly continuedFailureMessages: string[] = [];
+    private readonly reportedFailureMessages = new Set<string>();
+    private readonly removeListeners: { readonly sourceId: string; readonly remove: () => void }[] = [];
 
     public constructor(private readonly options: CaptureOptions) {
         this.finished = new Promise((resolve) => { this.resolveFinished = resolve; });
@@ -119,7 +127,8 @@ export class RecordingStudioCapture {
                 this.options.onProgress(this.recording);
             }
         } catch (error) {
-            this.errorMessage = getRecordingErrorMessage(error);
+            // Nothing was ever recorded here, so this is a take which never began rather than one which was cut short.
+            this.reportFailure({ impact: 'no-recording', message: getRecordingErrorMessage(error) });
             this.isStopping = true;
         } finally {
             this.isStarting = false;
@@ -132,7 +141,7 @@ export class RecordingStudioCapture {
             ? this.recordedSeconds + Math.max(0, (performance.now() - this.segmentStartedAt) / 1000)
             : this.recordedSeconds;
     }
-    public get failureMessage(): string | null { return this.errorMessage; }
+    public get failureMessage(): string | null { return this.recordedFailureMessage; }
     public get currentPhase(): CapturePhase { return this.phase; }
 
     public pause(): Promise<void> {
@@ -160,7 +169,7 @@ export class RecordingStudioCapture {
     }
 
     public stop(errorMessage: string | null = null): Promise<StudioRecording | null> {
-        if (errorMessage && !this.errorMessage) this.errorMessage = errorMessage;
+        if (errorMessage) this.reportFailure({ impact: 'recording-stopped', message: errorMessage });
         if (this.isFinalizing) return this.finished;
         this.isStopping = true;
         if (this.isStarting) return this.finished;
@@ -174,6 +183,82 @@ export class RecordingStudioCapture {
     private setPhase(phase: CapturePhase): void {
         this.phase = phase;
         this.options.onPhaseChange?.(phase);
+    }
+
+    /**
+     * The one place every failure of this capture passes through
+     *
+     * Note: A failure has to do two separate things — stay on the saved project as its recorded reason, and reach an
+     *       administrator who is not looking at this tab. Routing both through here is what keeps a newly handled
+     *       failure from being written down without ever being announced.
+     *
+     * @param failure what broke and what it did to the take
+     */
+    private reportFailure(failure: RecordingFailure): void {
+        // The same sentence twice is the same failure; a recorder reporting its loss on two events is not two of them.
+        if (this.reportedFailureMessages.has(failure.message)) return;
+        this.reportedFailureMessages.add(failure.message);
+        // A take which only lost one source is still running, so its reason must not block pausing or measuring either.
+        if (failure.impact === 'recording-continues') this.continuedFailureMessages.push(failure.message);
+        else this.errorMessage ??= failure.message;
+        this.options.onFailure?.(failure);
+    }
+
+    /** The saved project names every failure of the take, including the ones it went on recording through. */
+    private get recordedFailureMessage(): string | null {
+        const messages = [...this.continuedFailureMessages, ...(this.errorMessage === null ? [] : [this.errorMessage])];
+        return messages.length === 0 ? null : messages.join(' ');
+    }
+
+    /**
+     * Takes one lost source out of the running take instead of ending the take with it
+     *
+     * Note: Losing a camera is not losing the workshop. The remaining sources keep their recorders and the shared
+     *       clock, while the lost one keeps the media it had already committed and leaves the rest of the session as
+     *       its own gap. Only when nothing is left to record does the take itself end.
+     *
+     * @param sourceId the source which was lost
+     * @param reason what happened to it, without any sentence about the consequence
+     */
+    private failSource(sourceId: string, reason: string): void {
+        if (this.isStopping) return;
+        const source = this.sources.find((candidate) => candidate.id === sourceId);
+        const entry = this.entries.find((candidate) => candidate.source.id === sourceId);
+        if (!source || entry?.isDropped) return;
+        if (this.sources.length <= 1) {
+            void this.stop(`${reason} Byl to poslední nahrávaný zdroj, takže se záznam zastavil; uložené části zůstávají dostupné.`);
+            return;
+        }
+        this.sources = this.sources.filter((candidate) => candidate.id !== sourceId);
+        this.removeSourceListeners(sourceId);
+        if (entry) this.dropEntry(entry);
+        this.reportFailure({ impact: 'recording-continues', sourceId, sourceLabel: source.label,
+            message: `${reason} Jeho stopa byla zastavena a zbytek záznamu v ní zůstane mezerou; ostatní stopy nahrávají dál.` });
+    }
+
+    /** Closes the part of a dropped source where it really ended, so the surviving sources keep one shared clock. */
+    private dropEntry(entry: RecorderEntry): void {
+        entry.isDropped = true;
+        this.entries = this.entries.filter((candidate) => candidate !== entry);
+        this.droppedEntries.push(entry);
+        const durationSeconds = entry.isStarted ? Math.max(0, (performance.now() - entry.startedAt) / 1000) : 0;
+        this.updateTrack(entry.source.id, (track) => ({ ...track,
+            parts: track.parts?.map((part) => part.id === entry.partId ? { ...part, durationSeconds } : part),
+        }));
+        // Its own Stop must not be mistaken for the source ending again, and its media stream stays live for a preview.
+        entry.recorder.onerror = null;
+        entry.recorder.onstop = () => { entry.isStopConfirmed = true; entry.finish(); };
+        if (!entry.isStarted || entry.recorder.state === 'inactive') { entry.finish(); return; }
+        try { entry.recorder.stop(); }
+        catch {
+            entry.recorder.ondataavailable = null;
+            entry.recorder.onstop = null;
+            entry.finish();
+        }
+    }
+
+    private removeSourceListeners(sourceId: string): void {
+        this.removeListeners.filter((listener) => listener.sourceId === sourceId).forEach(({ remove }) => remove());
     }
 
     private beginSegment(preparedEntries?: RecorderEntry[]): void {
@@ -209,7 +294,7 @@ export class RecordingStudioCapture {
     }
 
     private async closeSegment(): Promise<void> {
-        if (this.entries.length === 0) return;
+        if (this.entries.length === 0 && this.droppedEntries.length === 0) return;
         const endedAt = performance.now();
         this.recordedSeconds += Math.max(0, (endedAt - this.segmentStartedAt) / 1000);
         for (const entry of this.entries) {
@@ -221,7 +306,8 @@ export class RecordingStudioCapture {
             else if (entry.recorder.state !== 'inactive') {
                 try { entry.recorder.stop(); }
                 catch {
-                    this.errorMessage ??= `Stopu „${entry.source.label}“ se nepodařilo dokončit. Její další záznam byl přerušen.`;
+                    this.reportFailure({ impact: 'recording-stopped', sourceId: entry.source.id, sourceLabel: entry.source.label,
+                        message: `Stopu „${entry.source.label}“ se nepodařilo dokončit. Její další záznam byl přerušen.` });
                     // A failed stop must not leave one recorder gathering through a global pause.
                     entry.recorder.ondataavailable = null;
                     entry.recorder.onstop = null;
@@ -231,14 +317,17 @@ export class RecordingStudioCapture {
             }
         }
         const entries = this.entries;
+        const droppedEntries = this.droppedEntries;
         this.entries = [];
+        this.droppedEntries = [];
         const isStopped = await Promise.race([
-            Promise.all(entries.map((entry) => entry.stopped)).then(() => true),
+            Promise.all([...entries, ...droppedEntries].map((entry) => entry.stopped)).then(() => true),
             new Promise<false>((resolve) => setTimeout(() => resolve(false), RECORDER_STOP_TIMEOUT_MILLISECONDS)),
         ]);
         if (!isStopped) {
-            const unconfirmedEntries = entries.filter((entry) => !entry.isStopConfirmed);
-            this.errorMessage ??= `Zdroje ${unconfirmedEntries.map((entry) => `„${entry.source.label}“`).join(', ')} nepotvrdily dokončení. Potvrzené části zůstávají uložené; chybějící konec je označený.`;
+            const unconfirmedEntries = [...entries, ...droppedEntries].filter((entry) => !entry.isStopConfirmed);
+            this.reportFailure({ impact: 'recording-stopped',
+                message: `Zdroje ${unconfirmedEntries.map((entry) => `„${entry.source.label}“`).join(', ')} nepotvrdily dokončení. Potvrzené části zůstávají uložené; chybějící konec je označený.` });
             unconfirmedEntries.forEach((entry) => {
                 entry.recorder.ondataavailable = null;
                 entry.recorder.onstop = null;
@@ -252,7 +341,12 @@ export class RecordingStudioCapture {
         await this.writeQueue;
         if (!this.errorMessage && !this.isWriteFailed && !this.isBufferFull) {
             try { await this.measureCommittedSegment(entries); }
-            catch (error) { this.errorMessage = `Časování uzavřených částí se nepodařilo ověřit: ${getRecordingErrorMessage(error)} Uložená média zůstávají dostupná.`; }
+            catch (error) { this.reportFailure({ impact: 'recording-stopped',
+                message: `Časování uzavřených částí se nepodařilo ověřit: ${getRecordingErrorMessage(error)} Uložená média zůstávají dostupná.` }); }
+            // A source which was lost mid-segment ended before this boundary, so it is measured but never moves it.
+            for (const entry of droppedEntries) {
+                try { await this.measurePart(entry); } catch { /* Its recorded wall-clock length already stands, and the rest is a gap. */ }
+            }
         }
         if (this.recording) {
             const takes = this.recording.takes?.map((take, index, all) => index === all.length - 1
@@ -267,21 +361,30 @@ export class RecordingStudioCapture {
         let measuredEndSeconds = this.recording.takes?.at(-1)?.sessionStartSeconds ?? 0;
         for (const entry of entries) {
             if (!entry.isStarted) continue;
-            const track = this.recording.tracks.find((candidate) => candidate.id === entry.source.id);
-            const part = track?.parts?.find((candidate) => candidate.id === entry.partId);
-            if (!track || !part || part.byteLength === 0) throw new Error(`Zdroj „${entry.source.label}“ nemá potvrzenou část média.`);
-            const bounds = await inspectRecordingBlob(await readRecordingPart(this.recording.id, part), getRecordingPartTrack(track, part));
-            const durationSeconds = Math.max(...bounds.components.map((component) => component.endTimestampSeconds)) - bounds.firstTimestampSeconds;
-            if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) throw new Error(`Zdroj „${entry.source.label}“ nemá čitelnou délku média.`);
-            this.updateTrack(entry.source.id, (current) => {
-                const parts = current.parts?.map((candidate) => candidate.id === entry.partId
-                    ? { ...candidate, durationSeconds, mediaBounds: bounds } : candidate);
-                const measuredTrack = { ...current, parts };
-                return { ...measuredTrack, durationSeconds: Math.max(0, getRecordingTrackEndSeconds(measuredTrack) - current.startOffsetSeconds) };
-            });
-            measuredEndSeconds = Math.max(measuredEndSeconds, part.sessionStartSeconds + durationSeconds);
+            measuredEndSeconds = Math.max(measuredEndSeconds, await this.measurePart(entry));
         }
         this.recordedSeconds = measuredEndSeconds;
+    }
+
+    /**
+     * Replaces the recorded wall-clock length of one part with the length its encoded media really has
+     *
+     * @returns where that part ends on the shared session clock
+     */
+    private async measurePart(entry: RecorderEntry): Promise<number> {
+        const track = this.recording?.tracks.find((candidate) => candidate.id === entry.source.id);
+        const part = track?.parts?.find((candidate) => candidate.id === entry.partId);
+        if (!this.recording || !track || !part || part.byteLength === 0) throw new Error(`Zdroj „${entry.source.label}“ nemá potvrzenou část média.`);
+        const bounds = await inspectRecordingBlob(await readRecordingPart(this.recording.id, part), getRecordingPartTrack(track, part));
+        const durationSeconds = Math.max(...bounds.components.map((component) => component.endTimestampSeconds)) - bounds.firstTimestampSeconds;
+        if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) throw new Error(`Zdroj „${entry.source.label}“ nemá čitelnou délku média.`);
+        this.updateTrack(entry.source.id, (current) => {
+            const parts = current.parts?.map((candidate) => candidate.id === entry.partId
+                ? { ...candidate, durationSeconds, mediaBounds: bounds } : candidate);
+            const measuredTrack = { ...current, parts };
+            return { ...measuredTrack, durationSeconds: Math.max(0, getRecordingTrackEndSeconds(measuredTrack) - current.startOffsetSeconds) };
+        });
+        return part.sessionStartSeconds + durationSeconds;
     }
 
     private validateRequiredTracks(source: RecordingSource): void {
@@ -310,13 +413,13 @@ export class RecordingStudioCapture {
         const recorder = this.createRecorder(source, mimeTypes);
         let finish!: () => void;
         const stopped = new Promise<void>((resolve) => { finish = resolve; });
-        const entry: RecorderEntry = { source, recorder, partId, stopped, finish, isStarted: false, isStopConfirmed: false, startedAt: 0 };
+        const entry: RecorderEntry = { source, recorder, partId, stopped, finish, isStarted: false, isStopConfirmed: false, isDropped: false, startedAt: 0 };
         recorder.ondataavailable = (event) => this.enqueueChunk(source.id, partId, event.data);
-        recorder.onerror = () => { void this.stop(`Nahrávání zdroje „${source.label}“ selhalo. Všechny stopy byly zastaveny.`); };
+        recorder.onerror = () => { this.failSource(source.id, `Nahrávání zdroje „${source.label}“ selhalo.`); };
         recorder.onstop = () => {
             entry.isStopConfirmed = true;
             finish();
-            if (!this.isStopping && this.phase !== 'pausing') void this.stop(`Zdroj „${source.label}“ skončil. Všechny stopy byly zastaveny.`);
+            if (!this.isStopping && this.phase !== 'pausing') this.failSource(source.id, `Zdroj „${source.label}“ skončil.`);
         };
         return entry;
     }
@@ -324,20 +427,20 @@ export class RecordingStudioCapture {
     private listenToSources(): void {
         for (const source of this.sources) {
         for (const track of source.stream.getTracks()) {
-            const handleEnded = () => { void this.stop(`Zdroj „${source.label}“ byl odpojen. Všechny stopy byly zastaveny.`); };
+            const handleEnded = () => { this.failSource(source.id, `Zdroj „${source.label}“ byl odpojen.`); };
             const isRequiredMicrophone = track.kind === 'audio' &&
                 (source.kind === 'microphone' || (source.kind === 'camera' && source.isAudioEnabled));
             const isRequiredVideo = track.kind === 'video' && source.kind !== 'microphone';
             const handleMuted = () => {
-                if (isRequiredMicrophone) void this.stop(`Mikrofon „${source.microphoneLabel || source.label}“ přestal posílat zvuk. Všechny stopy byly zastaveny; uložené části zůstávají dostupné.`);
-                if (isRequiredVideo) void this.stop(`Prohlížeč nebo systém dočasně přestal poskytovat obraz ze zdroje „${source.label}“ (video stopa byla ztlumena). Záznam byl přerušen, nejde o běžnou pauzu; uložené části zůstávají dostupné. Připojte zdroj znovu a potvrďte nový výběr.`);
+                if (isRequiredMicrophone) this.failSource(source.id, `Mikrofon „${source.microphoneLabel || source.label}“ přestal posílat zvuk.`);
+                if (isRequiredVideo) this.failSource(source.id, `Prohlížeč nebo systém dočasně přestal poskytovat obraz ze zdroje „${source.label}“ (video stopa byla ztlumena); nejde o běžnou pauzu. Připojte zdroj znovu a potvrďte nový výběr.`);
             };
             track.addEventListener('ended', handleEnded);
             track.addEventListener('mute', handleMuted);
-            this.removeListeners.push(() => {
+            this.removeListeners.push({ sourceId: source.id, remove: () => {
                 track.removeEventListener('ended', handleEnded);
                 track.removeEventListener('mute', handleMuted);
-            });
+            } });
         }
         }
     }
@@ -419,9 +522,9 @@ export class RecordingStudioCapture {
 
     private async finalize(): Promise<void> {
         if (this.transition) await this.transition;
-        if (this.entries.length > 0) await this.closeSegment();
+        if (this.entries.length > 0 || this.droppedEntries.length > 0) await this.closeSegment();
         await this.writeQueue;
-        this.removeListeners.forEach((remove) => remove());
+        this.removeListeners.forEach(({ remove }) => remove());
         const saved = this.savedRecording;
         if (!saved || !this.recording) {
             this.resolveFinished(null);
@@ -429,7 +532,8 @@ export class RecordingStudioCapture {
         }
         const committedTracks = this.isWriteFailed ? saved.tracks : this.recording.tracks;
         const emptyTracks = committedTracks.flatMap((track) => (track.parts ?? []).filter((part) => part.byteLength === 0).map(() => track.label));
-        if (emptyTracks.length > 0) this.errorMessage ??= `Chybí uložená média zdrojů: ${Array.from(new Set(emptyTracks)).join(', ')}. Záznam není úplný.`;
+        if (emptyTracks.length > 0) this.reportFailure({ impact: 'recording-stopped',
+            message: `Chybí uložená média zdrojů: ${Array.from(new Set(emptyTracks)).join(', ')}. Záznam není úplný.` });
         const previous = this.options.existingRecording;
         const durationSeconds = Math.max(this.recordedSeconds, ...committedTracks.map(getRecordingTrackEndSeconds));
         const previousSelection = previous ? getRecordingSelection(previous) : null;
@@ -437,9 +541,10 @@ export class RecordingStudioCapture {
             Math.abs(previousSelection.endSeconds - getRecordingSessionDuration(previous)) < 0.001);
         const trim = isFullSelection && (previous?.trim || previous?.editRecipe)
             ? { startSeconds: 0, endSeconds: durationSeconds } : this.recording.trim;
+        const failureMessage = this.recordedFailureMessage;
         let result: StudioRecording = {
             ...this.recording, tracks: committedTracks, durationSeconds, trim,
-            status: this.errorMessage ? 'interrupted' : 'complete', errorMessage: this.errorMessage,
+            status: failureMessage ? 'interrupted' : 'complete', errorMessage: failureMessage,
             captureEndSeconds: this.recordedSeconds,
         };
         if (result.editRecipe) result = { ...result, editRecipe: createRecordingEditRecipe(result,
@@ -448,7 +553,9 @@ export class RecordingStudioCapture {
         try {
             await saveStudioRecording(result);
         } catch (error) {
-            result = { ...result, status: 'interrupted', errorMessage: getRecordingStorageErrorMessage(error) };
+            // Losing the very write which records the take is a failure of its own, and the last one worth announcing.
+            this.reportFailure({ impact: 'recording-stopped', message: getRecordingStorageErrorMessage(error) });
+            result = { ...result, status: 'interrupted', errorMessage: this.recordedFailureMessage };
         }
         this.options.onProgress(result);
         this.resolveFinished(result);

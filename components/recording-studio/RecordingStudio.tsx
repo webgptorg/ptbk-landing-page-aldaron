@@ -12,6 +12,7 @@ import { Circle, Pause, Play, Plus, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { RecordingAlertPanel } from './RecordingAlertPanel';
 import { RecordingEditor } from './RecordingEditor';
 import { RecordingLibrary } from './RecordingLibrary';
 import { RecordingSourcePicker } from './RecordingSourcePicker';
@@ -148,6 +149,7 @@ export function RecordingStudio() {
                 <div>
                     <div className="rounded-xl border border-slate-200 bg-white p-5"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">Společný čas záznamu · {sessionStatus}</p><p className="mt-2 text-3xl font-semibold tabular-nums" aria-label="Délka záznamu">{formatRecordingDuration(studio.elapsedSeconds)}</p><p className="mt-2 text-xs text-slate-500">{studio.activeRecording ? `${formatRecordingBytes(getRecordingByteLength(studio.activeRecording))} uloženo` : 'Všechny stopy mají společný čas.'}</p></div>
                 </div>
+                <RecordingAlertPanel studio={studio} />
                 <RecordingStoragePanel studio={studio} isDisabled={!isReady || isLibraryBusy} />
                 <section className="space-y-5" aria-labelledby="recording-sources-title">
                     <div className="flex flex-wrap items-center justify-between gap-4"><h2 id="recording-sources-title" className="text-xl font-bold">Zdroje <span className="ml-1 text-slate-400">{studio.sourceConfigurations.length}</span></h2>
@@ -198,7 +200,7 @@ export function RecordingStudio() {
                                 {monitorPreferences.layout !== 'focus' && !isPinnedPrimary && <Button type="button" variant="outline" size="sm" className="mt-1" onClick={() => toggleMonitorSource('hiddenSourceIds', configuration.id)}>Skrýt dlaždici z monitoru</Button>}
                             </div>;
                         })}</div>}
-                    <p className="text-xs leading-5 text-slate-500">{isSessionBusy ? 'Před odchodem nebo odhlášením zastavte nahrávání. Selhání nebo odpojení kterékoli požadované stopy zastaví celý záznam a zachová uložené části i společný čas.' : 'Obraz ani zvuk se neodesílá na server. Nastavení se ukládá v místním úložišti této domény a profilu prohlížeče; po obnovení stránky se zařízení sama nezapnou. Kameru nebo mikrofon může prohlížeč znovu vyžádat a sdílenou plochu je vždy nutné vybrat znovu.'}</p>
+                    <p className="text-xs leading-5 text-slate-500">{isSessionBusy ? 'Před odchodem nebo odhlášením zastavte nahrávání. Selhání nebo odpojení zdroje zastaví jen jeho stopu, ohlásí se výstrahou a ostatní stopy nahrávají dál na společném čase; celý záznam skončí, až když nezbude co nahrávat nebo když selže ukládání.' : 'Obraz ani zvuk se neodesílá na server. Nastavení se ukládá v místním úložišti této domény a profilu prohlížeče; po obnovení stránky se zařízení sama nezapnou. Kameru nebo mikrofon může prohlížeč znovu vyžádat a sdílenou plochu je vždy nutné vybrat znovu.'}</p>
                 </section>
                 <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
                     <AlertDialogContent>

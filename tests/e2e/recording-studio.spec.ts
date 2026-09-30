@@ -118,12 +118,14 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     }
 }
 
+async function readRecordedSeconds(page: Page) {
+    const timecode = await page.getByLabel('Délka záznamu', { exact: true }).textContent();
+    const [hours = NaN, minutes = NaN, seconds = NaN] = (timecode ?? '').split(':').map(Number);
+    return [hours, minutes, seconds].every(Number.isFinite) ? hours * 3_600 + minutes * 60 + seconds : -1;
+}
+
 async function waitForRecordingSeconds(page: Page, minimumSeconds: number) {
-    await expect.poll(async () => {
-        const timecode = await page.getByLabel('Délka záznamu', { exact: true }).textContent();
-        const [hours = NaN, minutes = NaN, seconds = NaN] = (timecode ?? '').split(':').map(Number);
-        return [hours, minutes, seconds].every(Number.isFinite) ? hours * 3_600 + minutes * 60 + seconds : -1;
-    }).toBeGreaterThanOrEqual(minimumSeconds);
+    await expect.poll(() => readRecordedSeconds(page)).toBeGreaterThanOrEqual(minimumSeconds);
 }
 
 async function waitForCommittedRecordingSources(page: Page, sourceCount: number) {
@@ -1133,6 +1135,96 @@ test('keeps a multi-source setup through stops, release, and reload without rest
     await expect(page.getByRole('button', { name: 'Odebrat zdroj', exact: true })).toHaveCount(0);
 });
 
+type StudioTestNotification = { readonly title: string; readonly body: string | undefined };
+
+/** Records what the browser was asked to announce, without a real desktop notification in the test run. */
+async function recordStudioNotifications(page: Page) {
+    await page.addInitScript(() => {
+        const postedNotifications: StudioTestNotification[] = [];
+        class TestNotification {
+            public static readonly permission = 'granted';
+            public static requestPermission = () => Promise.resolve('granted' as NotificationPermission);
+            public onclick: (() => void) | null = null;
+            public constructor(title: string, options?: NotificationOptions) {
+                postedNotifications.push({ title, body: options?.body });
+            }
+            public close() { /* Nothing is shown in the test run, so nothing has to be taken back either. */ }
+        }
+        Object.defineProperty(window, 'Notification', { value: TestNotification, configurable: true, writable: true });
+        Object.assign(window, { studioTestNotifications: postedNotifications });
+    });
+}
+
+function readStudioNotifications(page: Page) {
+    return page.evaluate(() => (window as unknown as { studioTestNotifications: StudioTestNotification[] }).studioTestNotifications);
+}
+
+test('announces a studio failure through sound and a browser notification before one is needed', async ({ page, baseURL }) => {
+    await recordStudioNotifications(page);
+    await openStudio(page, baseURL);
+
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    const alertHistory = page.getByRole('log', { name: 'Historie výstrah', exact: true });
+    await expect(alertHistory).toContainText('Zkušební výstraha nahrávacího studia');
+    await expect.poll(() => readStudioNotifications(page)).toEqual([expect.objectContaining({
+        title: 'Zkušební výstraha nahrávacího studia', body: expect.stringContaining('Nic se nepokazilo') as unknown as string,
+    })]);
+
+    await page.getByRole('button', { name: 'Skrýt všechny výstrahy', exact: true }).click();
+    await expect(alertHistory).toHaveCount(0);
+});
+
+test('keeps the other tracks recording when one source is disconnected and alerts about the loss', async ({ page, baseURL }) => {
+    await recordStudioNotifications(page);
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await addSource(page, 'screen');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForRecordingSeconds(page, 2);
+    await waitForCommittedRecordingSources(page, 2);
+
+    // The screen share is the second acquired stream; ending it is exactly what closing a shared window does.
+    await page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[1]
+        .getTracks().forEach((track) => track.dispatchEvent(new Event('ended'))));
+
+    const alertHistory = page.getByRole('log', { name: 'Historie výstrah', exact: true });
+    await expect(alertHistory).toContainText('záznam pokračuje');
+    await expect(alertHistory).toContainText('ostatní stopy nahrávají dál');
+    await expect.poll(() => readStudioNotifications(page).then((notifications) => notifications.map(({ title }) => title)))
+        .toEqual([expect.stringContaining('záznam pokračuje') as unknown as string]);
+
+    // The take keeps running on the shared clock with the source which survived.
+    const stopButton = page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true });
+    await expect(stopButton).toBeEnabled();
+    await waitForRecordingSeconds(page, await readRecordedSeconds(page) + 2);
+    await expect(stopButton).toBeEnabled();
+    await stopButton.click();
+    // A take which lost a source is saved as interrupted: its timeline really does have a hole in it.
+    await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+
+    const recording = await page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+        try {
+            const recordings = await new Promise<StudioRecording[]>((resolve, reject) => {
+                const request = database.transaction('recordings').objectStore('recordings').getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            return recordings[recordings.length - 1];
+        } finally { database.close(); }
+    });
+    expect(recording.tracks).toHaveLength(2);
+    expect(recording.tracks.every((track) => (track.parts ?? []).every((part) => part.byteLength > 0))).toBe(true);
+    // The lost source keeps only what it committed; the survivor carries the whole session.
+    const [cameraTrack, screenTrack] = recording.tracks;
+    expect(screenTrack.durationSeconds).toBeLessThan(cameraTrack.durationSeconds);
+    expect(recording.errorMessage).toContain('ostatní stopy nahrávají dál');
+});
+
 test('blocks Start when a live camera preview loses its required microphone input', async ({ page, baseURL }) => {
     await openStudio(page, baseURL);
     await addSource(page, 'camera');
@@ -1332,7 +1424,7 @@ test('retains a failed camera-plus-microphone request and lets the owner explici
     await page.getByRole('dialog').getByRole('button', { name: 'Zavřít', exact: true }).click();
 });
 
-test('stops the whole take on disconnect and prevents a second tab from changing it', async ({ page, baseURL }) => {
+test('stops the whole take once every source has disconnected and prevents a second tab from changing it', async ({ page, baseURL }) => {
     await openStudio(page, baseURL);
     await addSource(page, 'camera');
     await addSource(page, 'screen');
@@ -1342,11 +1434,8 @@ test('stops the whole take on disconnect and prevents a second tab from changing
     await secondPage.goto('/admin/recording-studio');
     await expect(secondPage.getByRole('alert').filter({ hasText: 'Studio už' })).toContainText('jiné kartě');
     await secondPage.close();
-    await page.evaluate(() => {
-        const streams = (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams;
-        const track = streams[1].getVideoTracks()[0];
-        track.stop(); track.dispatchEvent(new Event('ended'));
-    });
+    await page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams
+        .forEach((stream) => stream.getTracks().forEach((track) => { track.stop(); track.dispatchEvent(new Event('ended')); })));
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
     await expect(page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true })).toHaveCount(0);
