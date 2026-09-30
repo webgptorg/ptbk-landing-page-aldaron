@@ -61,6 +61,8 @@ export type RecordingMediaPart = {
     readonly frameRate?: number | null;
     /** Decoded container bounds, measured after the recorder's final chunk was committed. */
     readonly mediaBounds?: RecordingMediaBounds;
+    /** Container seek index as it was checked when this part closed; absent on parts recorded before that check. */
+    readonly indexStatus?: import('./recordingStudioIndex').RecordingIndexStatus;
 };
 
 export type RecordingTake = {
@@ -243,9 +245,18 @@ export type StudioRecording = {
     readonly captureEndSeconds?: number | null;
 };
 
+/** How one exported original relates to the container the recorder wrote. */
+export type RecordingArchiveIndexState = {
+    readonly status: import('./recordingStudioIndex').RecordingIndexStatus;
+    /** True when the container index was written by this studio around unchanged media packets. */
+    readonly isIndexRebuilt: boolean;
+    readonly reason?: string;
+};
+
 export type RecordingArchiveTrack = RecordingTrack & {
     readonly originalFile: string | null;
-    readonly originalParts?: readonly { readonly partId: string; readonly takeId: string; readonly file: string; readonly sessionStartSeconds: number; readonly durationSeconds: number }[];
+    readonly originalParts?: readonly ({ readonly partId: string; readonly takeId: string; readonly file: string;
+        readonly sessionStartSeconds: number; readonly durationSeconds: number } & Partial<RecordingArchiveIndexState>)[];
     readonly trimmedFile: string | null;
     /** Present when the export inspected the container, distinct from recorder-observed times. */
     readonly originalMedia?: RecordingMediaBounds;

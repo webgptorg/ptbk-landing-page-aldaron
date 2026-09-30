@@ -1,15 +1,22 @@
 import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { bufferRecordingPreparedDownload, exportRecordingArchive, exportRecordingManifest, exportRecordingOriginal, recordingOriginalFilename, recordingPreparedFilename } from './recordingStudioExport';
-import { createTestStudioRecording } from './recordingStudioTestUtilities';
+import { createIndexedMatroskaBlob, createTestStudioRecording, createUnindexedMatroskaBlob } from './recordingStudioTestUtilities';
+import { RECORDING_INDEX_REPAIR_COMMAND } from './recordingStudioIndex';
 import { getRecordingMediaRevision } from './recordingStudioDerived';
 import { createRecordingWorkshopMetadata } from './recordingStudioWorkshop';
 import type { RecordingArchiveManifest, RecordingDerivedTrack, RecordingEditRecipe, RecordingTrim } from './recordingStudioTypes';
 
 const DOWNLOADS = vi.hoisted(() => ({ download: vi.fn(), read: vi.fn() }));
+const REINDEX = vi.hoisted(() => {
+    class RecordingIndexRebuildUnavailable extends Error {}
+    return { RebuildUnavailableError: RecordingIndexRebuildUnavailable, rebuild: vi.fn() };
+});
 vi.mock('@/lib/downloadBlobFile', () => ({ downloadBlobFile: DOWNLOADS.download }));
 vi.mock('./recordingStudioStorage', () => ({ readRecordingTrack: DOWNLOADS.read, readRecordingPart: DOWNLOADS.read,
     streamRecordingTrack: () => new Blob(['original bytes']).stream(), streamRecordingPart: () => new Blob(['original bytes']).stream() }));
+vi.mock('./recordingStudioReindex', () => ({ RecordingIndexRebuildUnavailable: REINDEX.RebuildUnavailableError,
+    withRebuiltRecordingIndex: REINDEX.rebuild }));
 
 describe('recording archive exports', () => {
     it('never loads a large or cancelled prepared file into a download buffer', async () => {
@@ -32,7 +39,66 @@ describe('recording archive exports', () => {
         expect(new Set(recording.tracks.map((track) => recordingOriginalFilename(structuredClone(recording), track))).size).toBe(recording.tracks.length);
         expect(() => recordingPreparedFilename(recording, { ...recording.tracks[0], id: 'absent' })).toThrow();
     });
-    beforeEach(() => { DOWNLOADS.download.mockReset(); DOWNLOADS.read.mockReset().mockResolvedValue(new Blob(['original bytes'])); });
+    beforeEach(() => {
+        DOWNLOADS.download.mockReset(); DOWNLOADS.read.mockReset().mockResolvedValue(new Blob(['original bytes']));
+        REINDEX.rebuild.mockReset();
+    });
+
+    it('rebuilds the missing index of an individually downloaded original', async () => {
+        const rebuilt = createIndexedMatroskaBlob(10, 64);
+        DOWNLOADS.read.mockResolvedValue(createUnindexedMatroskaBlob());
+        REINDEX.rebuild.mockImplementation((options: { consume: (file: Blob) => Promise<unknown> }) =>
+            options.consume(new File([rebuilt], 'rebuilt.webm', { type: 'video/webm' })));
+        const base = createTestStudioRecording();
+        const mediaBounds = { firstTimestampSeconds: 0, availableStartTimestampSeconds: 0, endTimestampSeconds: 10, components: [] };
+        const track = { ...base.tracks[0], byteLength: 14, chunkCount: 1, parts: [
+            { id: 'part-one', takeId: 'take-one', sessionStartSeconds: 0, durationSeconds: 10, byteLength: 14, chunkCount: 1,
+                mimeType: 'video/webm', indexStatus: 'unindexed' as const, mediaBounds },
+        ] };
+        const recording = { ...base, tracks: [track, base.tracks[1]] };
+        await exportRecordingOriginal(recording, track, null, new AbortController().signal);
+        expect(REINDEX.rebuild).toHaveBeenCalledWith(expect.objectContaining({ format: 'matroska', expectedMedia: mediaBounds }));
+        const [download] = DOWNLOADS.download.mock.calls[0];
+        expect(download.fileName).toBe(recordingOriginalFilename(recording, track));
+        expect(download.blob.size).toBe(rebuilt.size);
+    });
+
+    it('hands over the recorder\'s own bytes and records the reason when no index can be built', async () => {
+        DOWNLOADS.read.mockResolvedValue(createUnindexedMatroskaBlob());
+        REINDEX.rebuild.mockRejectedValue(new REINDEX.RebuildUnavailableError('Prohlížeč neumí zkopírovat všechny zaznamenané stopy.'));
+        const base = createTestStudioRecording();
+        const progress: string[] = [];
+        const track = { ...base.tracks[0], byteLength: 14, chunkCount: 1 };
+        await exportRecordingOriginal({ ...base, tracks: [track, base.tracks[1]] }, track, null,
+            new AbortController().signal, undefined, (message) => progress.push(message));
+        expect(progress).toContain('Prohlížeč neumí zkopírovat všechny zaznamenané stopy.');
+        expect(DOWNLOADS.download.mock.calls[0][0].blob.size).toBe(createUnindexedMatroskaBlob().size);
+    });
+
+    it('says of every archived original whether its index was rebuilt', async () => {
+        DOWNLOADS.read.mockResolvedValue(createUnindexedMatroskaBlob());
+        REINDEX.rebuild
+            .mockImplementationOnce((options: { consume: (file: Blob) => Promise<unknown> }) =>
+                options.consume(new File([createIndexedMatroskaBlob()], 'rebuilt.webm', { type: 'video/webm' })))
+            .mockRejectedValueOnce(new REINDEX.RebuildUnavailableError('Doplněný index se nepodařilo ověřit.'));
+        const base = createTestStudioRecording();
+        const recording = { ...base, tracks: base.tracks.map((track) => ({ ...track, byteLength: 14, chunkCount: 1 })) };
+        await exportRecordingArchive({ recording, destination: null, isTrimIncluded: false,
+            signal: new AbortController().signal, onProgress: vi.fn() });
+        const reader = new ZipReader(new BlobReader(DOWNLOADS.download.mock.calls[0][0].blob));
+        const entries = await reader.getEntries();
+        const manifestEntry = entries.find((entry) => entry.filename === 'recording.json');
+        if (!manifestEntry || manifestEntry.directory) throw new Error('Expected manifest');
+        const manifest = JSON.parse(await manifestEntry.getData(new TextWriter())) as RecordingArchiveManifest;
+        expect(manifest.tracks.map((track) => track.originalParts?.[0])).toMatchObject([
+            { status: 'indexed', isIndexRebuilt: true },
+            { status: 'unindexed', isIndexRebuilt: false, reason: 'Doplněný index se nepodařilo ověřit.' },
+        ]);
+        const readme = entries.find((entry) => entry.filename === 'README.txt');
+        if (!readme || readme.directory) throw new Error('Expected README');
+        expect(await readme.getData(new TextWriter())).toContain(RECORDING_INDEX_REPAIR_COMMAND);
+        await reader.close();
+    });
     it('downloads source-specific original metadata with an individual source', async () => {
         const base = createTestStudioRecording();
         const subtitleTrack: RecordingDerivedTrack = { id: 'subtitle-one', kind: 'subtitles',

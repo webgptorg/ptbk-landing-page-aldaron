@@ -24,6 +24,13 @@ describe('studio failures announced to an administrator who is not watching the 
         expect(describeRecordingAlertTitle(createRecordingTestFailure())).toBe('Zkušební výstraha nahrávacího studia');
     });
 
+    it('says when a whole take was saved and only needs work done to it', () => {
+        expect(describeRecordingAlertTitle({ impact: 'recording-kept', sourceLabel: 'App', message: '' }))
+            .toBe('Zdroj „App“ je uložený · potřebuje opravu');
+        expect(describeRecordingAlertTitle({ impact: 'recording-kept', message: '' })).toBe('Záznam je uložený · potřebuje opravu');
+        expect(getRecordingAlertSeverity('recording-kept')).toBe('warning');
+    });
+
     it('sounds the loud alarm only where something is no longer being recorded', () => {
         expect(getRecordingAlertSeverity('recording-stopped')).toBe('critical');
         expect(getRecordingAlertSeverity('test')).toBe('critical');

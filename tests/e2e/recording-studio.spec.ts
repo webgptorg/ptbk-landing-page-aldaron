@@ -6,6 +6,7 @@ import { tmpdir, platform, release } from 'node:os';
 import { resolve, sep, join } from 'node:path';
 import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 import { createAdminSessionValueOrNull } from '@/lib/admin/adminSession';
+import { readRecordingIndexReport } from '@/lib/recording-studio/recordingStudioIndex';
 import type { RecordingArchiveManifest, StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 import { EDITOR_FIXTURE_PATH, readEditorFrameTimecodes, seedRecordingEditorFixture } from './recordingStudioEditorFixtures';
 import { inspectAudioVideoMarkers } from './recordingStudioMarkerInspection';
@@ -180,6 +181,13 @@ async function readArchive(pathname: string) {
     }
     await reader.close();
     return files;
+}
+
+/** What one exported container holds, so two of them can be compared as media even when their bytes differ. */
+async function readMediaShape(bytes: Uint8Array) {
+    const input = new Input({ formats: ALL_FORMATS, source: new BufferSource(bytes) });
+    try { return { trackCount: (await input.getTracks()).length, durationSeconds: await input.computeDuration() }; }
+    finally { input.dispose(); }
 }
 
 test('requires admin authentication for the recording studio', async ({ page }) => {
@@ -738,7 +746,10 @@ test('recovers a corrupt preview and cancels preparation without losing original
     await page.getByRole('button', { name: 'Stáhnout originál 2', exact: true }).click();
     const downloaded = await originalDownload;
     expect(downloaded.suggestedFilename()).toContain('-2-camera.webm');
+    // These fixtures already carry an index, so the studio must hand them over untouched rather than remux them.
+    expect(await readRecordingIndexReport(new Blob([new Uint8Array(originalBytes)]))).toMatchObject({ status: 'indexed', format: 'matroska' });
     expect(await readFile((await downloaded.path())!)).toEqual(Buffer.from(originalBytes));
+    await expect(page.getByRole('status').filter({ hasText: 'Originál je připravený.' })).toBeVisible();
     const preparedDownload = page.waitForEvent('download', (download) => download.suggestedFilename().endsWith('.webm'));
     await page.getByRole('button', { name: 'Stáhnout ořez 2', exact: true }).click();
     const preparedFile = await preparedDownload;
@@ -811,7 +822,18 @@ test('records separate sources, restores them, trims every track and exports pla
     const originalDownload = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Originály ZIP', exact: true }).click();
     const originals = await readArchive((await (await originalDownload).path())!);
-    expect(Array.from(originals.keys()).filter((name) => name.startsWith('originals/'))).toHaveLength(5);
+    const originalNames = Array.from(originals.keys()).filter((name) => name.startsWith('originals/'));
+    expect(originalNames).toHaveLength(5);
+    // No original may leave the studio unseekable, however the browser's recorder wrote its container.
+    const unseekableOriginals: string[] = [];
+    for (const name of originalNames) {
+        const report = await readRecordingIndexReport(new Blob([new Uint8Array(originals.get(name)!)]));
+        if (report.status !== 'indexed') unseekableOriginals.push(`${name}: ${report.status} — ${report.detail}`);
+    }
+    expect(unseekableOriginals).toEqual([]);
+    const originalsManifest = JSON.parse(new TextDecoder().decode(originals.get('recording.json'))) as RecordingArchiveManifest;
+    expect(originalsManifest.tracks.flatMap((track) => track.originalParts ?? []).map((part) => [part.status, part.isIndexRebuilt]))
+        .toEqual(new Array(5).fill(['indexed', true]));
     // Exercise the streaming disk path with a real writable file, without automating an OS save dialog.
     await page.evaluate(() => Object.defineProperty(window, 'showSaveFilePicker', {
         configurable: true, value: async () => (await navigator.storage.getDirectory()).getFileHandle('test-studio-export.zip', { create: true }),
@@ -1578,6 +1600,12 @@ test('commits folder chunks without IndexedDB media, reloads and imports its che
     await expect(page.getByRole('button', { name: 'Obnovit záznam ze složky' })).toBeEnabled();
     await page.reload();
     await expect(page.getByText('Uloženo', { exact: true })).toHaveCount(1);
+    // One original, two export paths: the imported recording must hand over the very same indexed container.
+    const firstOriginal = Array.from(files.keys()).find((name) => name.startsWith('originals/01-camera'));
+    expect(firstOriginal).toBeDefined();
+    const importedDownload = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Stáhnout originál 1', exact: true }).click();
+    expect(await readFile((await (await importedDownload).path())!)).toEqual(Buffer.from(files.get(firstOriginal!)!));
 
     // A separate visit with no cached handle must recover even if both destinations refuse further writes.
     await page.evaluate(async () => {
@@ -1607,9 +1635,15 @@ test('commits folder chunks without IndexedDB media, reloads and imports its che
     await expect(page.getByText('Uloženo', { exact: true })).toHaveCount(1);
     const recoveredDownload = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Stáhnout originál 1', exact: true }).click();
-    const firstOriginal = Array.from(files.keys()).find((name) => name.startsWith('originals/01-camera'));
-    expect(firstOriginal).toBeDefined();
-    expect(await readFile((await (await recoveredDownload).path())!)).toEqual(Buffer.from(files.get(firstOriginal!)!));
+    // Refusing every write also refuses the working file an index needs, so the recorder's own bytes are handed
+    // over and said to be unindexed instead of the export failing — the media itself is the one already archived.
+    const recoveredBytes = await readFile((await (await recoveredDownload).path())!);
+    expect(await readRecordingIndexReport(new Blob([new Uint8Array(recoveredBytes)]))).toMatchObject({ status: 'unindexed' });
+    await expect(page.getByRole('status').filter({ hasText: 'zůstal bez indexu pro vyhledávání' })).toBeVisible();
+    const recovered = await readMediaShape(recoveredBytes);
+    const archived = await readMediaShape(files.get(firstOriginal!)!);
+    expect(recovered.trackCount).toBe(archived.trackCount);
+    expect(Math.abs(recovered.durationSeconds - archived.durationSeconds)).toBeLessThan(0.05);
 });
 
 test('keeps committed multi-source data after a real IndexedDB transaction abort and offers recovery', async ({ page, baseURL }) => {

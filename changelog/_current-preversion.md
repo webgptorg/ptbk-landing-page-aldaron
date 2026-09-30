@@ -1,5 +1,24 @@
 # Current preversion
 
+- Recording-studio files no longer leave the studio without a seek index. A browser recorder writes a live container
+  — the Matroska `Segment` keeps an unknown size, no `Cues` are written and no duration is stored — so every original
+  played from the beginning but could not be seeked in, which is what the manual
+  `ffmpeg -i … -map 0 -c copy …` repair was fixing. The studio now decides in one place what a usable index is, from
+  a bounded read of the container's head and tail rather than from its media, and checks every part the moment it
+  closes, at a global pause as well as at Stop. The verdict stays on that part, and both the individual
+  **Stáhnout originál** and the originals inside a ZIP are handed over inside a proper indexed container, rebuilt by
+  forced packet copy through the same temporary working file trimming already uses: not one packet is re-encoded, no
+  timestamp is shifted, the result is accepted only when it really is seekable and still covers the measured
+  recorded range, and the committed capture bytes in the browser or the chosen folder are never rewritten. Where no
+  index can be built — an unsupported codec, no working storage, a rebuilt file too large to download without a disk
+  picker, or a result which fails that check — the recorder's own bytes are handed over unchanged and the reason is
+  written into `recording.json` beside each part's index status and explained in the archive `README.txt`. An index
+  which cannot be checked at all, or which this browser could never rebuild, is announced through the existing alert
+  channel with the exact `ffmpeg` command, so the administrator hears it while they are still in the room; because
+  nothing was lost and nothing stopped, such a take stays complete and remains available for **Donahrát**. Trimmed
+  files always carried an index and are unchanged. Analysis, the contract and its limits are in
+  `docs/recording-studio-seek-index.md`.
+
 - A recording-studio failure now keeps recording whatever it can and always says so out loud. Losing a camera, a
   shared window or a microphone stops only that source's track, leaves the rest of the session in it as a gap and
   lets the other sources record on the same clock; the take itself ends only when nothing is left to record or when

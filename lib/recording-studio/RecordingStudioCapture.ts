@@ -3,6 +3,7 @@ import type { RecordingFailure } from './recordingStudioAlerts';
 import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
 import { appendRecordingChunk, createStudioRecording, readRecordingPart, saveStudioRecording } from './recordingStudioStorage';
 import { extendRecordingWorkshopActivity } from './recordingStudioWorkshop';
+import { describeRecordingIndexCheckFailure, describeRecordingIndexWarning, readRecordingIndexReport, type RecordingIndexStatus } from './recordingStudioIndex';
 import { inspectRecordingBlob } from './recordingStudioMedia';
 import { addRecordingBytes, getRecordingByteLength } from './recordingStudioTiming';
 import { toRecordingSourceConfiguration } from './recordingStudioSourceConfiguration';
@@ -75,6 +76,10 @@ export class RecordingStudioCapture {
     private errorMessage: string | null = null;
     private readonly continuedFailureMessages: string[] = [];
     private readonly reportedFailureMessages = new Set<string>();
+    /** Whether an index can be rebuilt depends on the container and its codecs, so one answer per MIME type is enough. */
+    private readonly indexRebuildSupport = new Map<string, boolean>();
+    /** The media of the parts closed by the current boundary: measuring and checking them must not read storage twice. */
+    private readonly closedPartMedia = new Map<string, Blob>();
     private readonly removeListeners: { readonly sourceId: string; readonly remove: () => void }[] = [];
 
     public constructor(private readonly options: CaptureOptions) {
@@ -200,7 +205,9 @@ export class RecordingStudioCapture {
         this.reportedFailureMessages.add(failure.message);
         // A take which only lost one source is still running, so its reason must not block pausing or measuring either.
         if (failure.impact === 'recording-continues') this.continuedFailureMessages.push(failure.message);
-        else this.errorMessage ??= failure.message;
+        // A complete take whose saved media needs work is announced, but it is not an interrupted take: what has to
+        // be done to it belongs on the part it concerns rather than in the reason the whole take failed.
+        else if (failure.impact !== 'recording-kept') this.errorMessage ??= failure.message;
         this.options.onFailure?.(failure);
     }
 
@@ -347,7 +354,9 @@ export class RecordingStudioCapture {
             for (const entry of droppedEntries) {
                 try { await this.measurePart(entry); } catch { /* Its recorded wall-clock length already stands, and the rest is a gap. */ }
             }
+            for (const entry of [...entries, ...droppedEntries]) await this.verifyPartIndex(entry);
         }
+        this.closedPartMedia.clear();
         if (this.recording) {
             const takes = this.recording.takes?.map((take, index, all) => index === all.length - 1
                 ? { ...take, durationSeconds: this.recordedSeconds - take.sessionStartSeconds } : take);
@@ -375,7 +384,7 @@ export class RecordingStudioCapture {
         const track = this.recording?.tracks.find((candidate) => candidate.id === entry.source.id);
         const part = track?.parts?.find((candidate) => candidate.id === entry.partId);
         if (!this.recording || !track || !part || part.byteLength === 0) throw new Error(`Zdroj „${entry.source.label}“ nemá potvrzenou část média.`);
-        const bounds = await inspectRecordingBlob(await readRecordingPart(this.recording.id, part), getRecordingPartTrack(track, part));
+        const bounds = await inspectRecordingBlob(await this.readClosedPartMedia(part), getRecordingPartTrack(track, part));
         const durationSeconds = Math.max(...bounds.components.map((component) => component.endTimestampSeconds)) - bounds.firstTimestampSeconds;
         if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) throw new Error(`Zdroj „${entry.source.label}“ nemá čitelnou délku média.`);
         this.updateTrack(entry.source.id, (current) => {
@@ -385,6 +394,50 @@ export class RecordingStudioCapture {
             return { ...measuredTrack, durationSeconds: Math.max(0, getRecordingTrackEndSeconds(measuredTrack) - current.startOffsetSeconds) };
         });
         return part.sessionStartSeconds + durationSeconds;
+    }
+
+    /** Every committed chunk is fetched from storage once, however many questions this boundary asks about the part. */
+    private async readClosedPartMedia(part: RecordingMediaPart): Promise<Blob> {
+        const cached = this.closedPartMedia.get(part.id);
+        if (cached) return cached;
+        const media = await readRecordingPart(this.recording!.id, part);
+        this.closedPartMedia.set(part.id, media);
+        return media;
+    }
+
+    /**
+     * Checks the seek index of one closed part the moment its media is committed
+     *
+     * Note: A `MediaRecorder` writes a live container, so a part without an index is the ordinary outcome and is
+     *       recorded rather than announced — the export rebuilds that index around unchanged packets. What does
+     *       deserve reaching an administrator who is still in the room is a part this browser will never be able to
+     *       index, because only `ffmpeg` will repair it afterwards, and a part whose container cannot be read at all.
+     */
+    private async verifyPartIndex(entry: RecorderEntry): Promise<void> {
+        const track = this.recording?.tracks.find((candidate) => candidate.id === entry.source.id);
+        const part = track?.parts?.find((candidate) => candidate.id === entry.partId);
+        if (!this.recording || !part || part.byteLength === 0) return;
+        try {
+            const media = await this.readClosedPartMedia(part);
+            const report = await readRecordingIndexReport(media);
+            this.updatePartIndexStatus(entry, report.status);
+            if (report.status !== 'unindexed') return;
+            const { canRebuildRecordingIndex } = await import('./recordingStudioReindex');
+            const isRebuildSupported = this.indexRebuildSupport.get(part.mimeType) ?? await canRebuildRecordingIndex(media, report.format);
+            this.indexRebuildSupport.set(part.mimeType, isRebuildSupported);
+            if (!isRebuildSupported) {
+                this.reportFailure({ impact: 'recording-kept', sourceId: entry.source.id, sourceLabel: entry.source.label,
+                    message: describeRecordingIndexWarning(entry.source.label, report) });
+            }
+        } catch (error) {
+            this.reportFailure({ impact: 'recording-kept', sourceId: entry.source.id, sourceLabel: entry.source.label,
+                message: describeRecordingIndexCheckFailure(entry.source.label, error) });
+        }
+    }
+
+    private updatePartIndexStatus(entry: RecorderEntry, indexStatus: RecordingIndexStatus): void {
+        this.updateTrack(entry.source.id, (current) => ({ ...current,
+            parts: current.parts?.map((candidate) => candidate.id === entry.partId ? { ...candidate, indexStatus } : candidate) }));
     }
 
     private validateRequiredTracks(source: RecordingSource): void {

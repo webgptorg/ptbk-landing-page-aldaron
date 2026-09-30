@@ -254,6 +254,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   hardware synchronization. Video visibility/solo and audio mute/solo are separate monitoring choices; one audio
   source is audible initially and every source remains in export. Shared IN/OUT handles and precise seconds edit
   one non-destructive selection with undo/reset and the existing autosave/error/navigation protection.
+  What a usable container seek index is, is decided once in `recordingStudioIndex.ts` from a bounded read of the
+  container head and tail, never from media bytes. A browser recorder writes a live container without a seek index or
+  a stored duration, so every closed part is checked as it closes, keeps that verdict, and no original leaves the
+  studio unseekable: individual downloads and the ZIP's originals are remuxed by forced packet copy with no timestamp
+  shift, verified against the part's measured bounds, and the media data itself is never re-encoded or rewritten in
+  storage. A rebuild which is impossible or unverified hands over the recorder's own bytes and records the reason in
+  the manifest and README. An index which cannot be checked or cannot be rebuilt in this browser is announced through
+  the shared alert channel, naming the `ffmpeg -map 0 -c copy` repair; because nothing was lost, such a take stays
+  complete and the reason stays on its part rather than in the take's failure message.
   ZIP64 exports stream original chunks and a versioned recipe/manifest with explicit seconds, segment mappings,
   selected interval, prepared zero, missing ranges and per-source processing. Prepared files retain each source's
   audio; video uses its recorded nominal frame rate when known, with resampling recorded in the manifest.

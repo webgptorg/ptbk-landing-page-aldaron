@@ -4,9 +4,10 @@ import { readBrowserLocalStorageItem, writeBrowserLocalStorageItem } from '@/lib
  * What one failure did to the take which was running, if any
  *
  * Note: This is the only thing which decides how loudly a failure is announced, so a source which was taken out of a
- *       running take is never described the same way as a take which ended.
+ *       running take is never described the same way as a take which ended. `recording-kept` is the quietest of them:
+ *       nothing was lost and nothing stopped, but what was saved needs the administrator to do something to it.
  */
-export type RecordingAlertImpact = 'test' | 'recording-continues' | 'recording-stopped' | 'no-recording';
+export type RecordingAlertImpact = 'test' | 'recording-continues' | 'recording-kept' | 'recording-stopped' | 'no-recording';
 
 /** How urgent the announcement of one failure is. It is derived from the impact, never written by hand. */
 export type RecordingAlertSeverity = 'critical' | 'warning';
@@ -35,7 +36,7 @@ export type RecordingAlert = {
 export const RECORDING_ALERT_HISTORY_LIMIT = 20;
 
 export function getRecordingAlertSeverity(impact: RecordingAlertImpact): RecordingAlertSeverity {
-    return impact === 'recording-continues' || impact === 'no-recording' ? 'warning' : 'critical';
+    return impact === 'recording-continues' || impact === 'recording-kept' || impact === 'no-recording' ? 'warning' : 'critical';
 }
 
 /**
@@ -53,6 +54,10 @@ export function describeRecordingAlertTitle(failure: RecordingFailure): string {
 
     if (failure.impact === 'recording-continues') {
         return `${sourceName} selhal · záznam pokračuje`;
+    }
+
+    if (failure.impact === 'recording-kept') {
+        return failure.sourceLabel ? `${sourceName} je uložený · potřebuje opravu` : 'Záznam je uložený · potřebuje opravu';
     }
 
     if (failure.impact === 'recording-stopped') {

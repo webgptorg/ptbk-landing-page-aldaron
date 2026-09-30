@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { getRecordingStorageErrorMessage } from '@/lib/recording-studio/recordingStudioCapacity';
 import { getRecordingErrorMessage } from '@/lib/recording-studio/recordingStudioDevices';
-import { chooseRecordingArchiveDestination, chooseRecordingOriginalDestination, chooseRecordingPreparedDestination, exportRecordingArchive, exportRecordingManifest, exportRecordingOriginal, exportRecordingPrepared } from '@/lib/recording-studio/recordingStudioExport';
+import { chooseRecordingArchiveDestination, chooseRecordingOriginalDestination, chooseRecordingPreparedDestination, describeRecordingOriginalIndexState, exportRecordingArchive, exportRecordingManifest, exportRecordingOriginal, exportRecordingPrepared } from '@/lib/recording-studio/recordingStudioExport';
 import { deleteStudioRecording, readStudioRecording, reconnectStudioRecording } from '@/lib/recording-studio/recordingStudioStorage';
 import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { formatRecordingBytes, formatRecordingDuration, getRecordingByteLength, getRecordingMissingRanges } from '@/lib/recording-studio/recordingStudioTiming';
@@ -53,12 +53,18 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                         if (!savedTrack) throw new Error('Zdroj není v uloženém záznamu dostupný.');
                         const savedPart = selectedPart ? getRecordingMediaParts(savedTrack).find((part) => part.id === selectedPart.id) : undefined;
                         if (selectedPart && !savedPart) throw new Error('Část média už není dostupná.');
-                        if (isTrimIncluded) await exportRecordingPrepared(savedRecording, savedTrack, await destination, operationController.signal, setProgress);
-                        else await exportRecordingOriginal(savedRecording, savedTrack, await destination, operationController.signal, savedPart);
-                        setProgress(isTrimIncluded ? 'Oříznutý soubor a jeho předpis jsou připravené.' : 'Originál je připravený.');
+                        if (isTrimIncluded) {
+                            await exportRecordingPrepared(savedRecording, savedTrack, await destination, operationController.signal, setProgress);
+                            setProgress('Oříznutý soubor a jeho předpis jsou připravené.');
+                        } else {
+                            setProgress(describeRecordingOriginalIndexState(await exportRecordingOriginal(savedRecording, savedTrack,
+                                await destination, operationController.signal, savedPart, setProgress)));
+                        }
                     } else {
                         const result = await exportRecordingArchive({ recording: savedRecording, isTrimIncluded, destination: await destination, signal: operationController.signal, onProgress: setProgress });
-                        setProgress(result.fallbackCount > 0 ? `ZIP obsahuje ${result.preparedCount} oříznutých souborů. U ${result.fallbackCount} zdrojů obsahuje pouze originály a předpis; důvody jsou v recording.json.` : 'ZIP je připravený.');
+                        const unindexedNotice = result.unindexedOriginalCount > 0
+                            ? ` U ${result.unindexedOriginalCount} originálů zůstal kontejner bez indexu pro vyhledávání; důvod a doporučený příkaz jsou v recording.json a README.txt.` : '';
+                        setProgress((result.fallbackCount > 0 ? `ZIP obsahuje ${result.preparedCount} oříznutých souborů. U ${result.fallbackCount} zdrojů obsahuje pouze originály a předpis; důvody jsou v recording.json.` : 'ZIP je připravený.') + unindexedNotice);
                     }
                 });
             } catch (error) {

@@ -1,9 +1,9 @@
 import { ALL_FORMATS, BlobSource, Conversion, Input, Mp4OutputFormat, Output, StreamTarget, WebMOutputFormat } from 'mediabunny';
 import { getRecordingPreparationRange } from './recordingStudioSessionTime';
 import { inspectRecordingMedia } from './recordingStudioMedia';
+import { isRecordingTemporaryFileSupported, withRecordingTemporaryFile } from './recordingStudioTemporaryFile';
 import { RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_VIDEO_BITS_PER_SECOND, type RecordingMediaBounds, type RecordingMediaComponent, type RecordingTrack, type RecordingTrim } from './recordingStudioTypes';
 
-const EXPORT_TEMPORARY_DIRECTORY = 'promptbook-recording-studio-exports';
 const EXPORT_BOUNDARY_TOLERANCE_SECONDS = 0.05;
 
 export type RecordingPreparedTiming = {
@@ -19,33 +19,27 @@ export class RecordingPreparationUnavailable extends Error {
     public constructor(message: string, public readonly originalMedia?: RecordingMediaBounds) { super(message); }
 }
 
-export async function clearRecordingExportTemporaryFiles(): Promise<void> {
-    if (!navigator.storage?.getDirectory) return;
-    const root = await navigator.storage.getDirectory();
-    await root.removeEntry(EXPORT_TEMPORARY_DIRECTORY, { recursive: true }).catch((error: unknown) => {
-        if (!(error instanceof DOMException) || error.name !== 'NotFoundError') throw error;
-    });
-}
-
-/** A seekable disk-backed output avoids holding an entire transcoded camera track in memory. */
-export async function withTrimmedRecordingTrack<Result>(options: {
+type TrimmedTrackOptions<Result> = {
     readonly blob: Blob;
     readonly track: RecordingTrack;
     readonly trim: RecordingTrim;
     readonly signal: AbortSignal;
     readonly onProgress: (progress: number) => void;
     readonly consume: (file: File, extension: string, timing: RecordingPreparedTiming) => Promise<Result>;
-}): Promise<Result> {
-    if (!navigator.storage?.getDirectory) throw new RecordingPreparationUnavailable('Tento prohlížeč nepodporuje pracovní úložiště pro ořez. K dispozici jsou originály a předpis.');
-    const root = await navigator.storage.getDirectory();
-    const directory = await root.getDirectoryHandle(EXPORT_TEMPORARY_DIRECTORY, { create: true });
-    const filename = crypto.randomUUID();
-    const handle = await directory.getFileHandle(filename, { create: true });
-    const writable = await handle.createWritable();
-    const input = new Input({ formats: ALL_FORMATS, source: new BlobSource(options.blob) });
+};
+
+/** A seekable disk-backed output avoids holding an entire transcoded camera track in memory. */
+export async function withTrimmedRecordingTrack<Result>(options: TrimmedTrackOptions<Result>): Promise<Result> {
+    if (!isRecordingTemporaryFileSupported()) throw new RecordingPreparationUnavailable('Tento prohlížeč nepodporuje pracovní úložiště pro ořez. K dispozici jsou originály a předpis.');
+    return withRecordingTemporaryFile(async ({ writable, readFile }) => convertTrimmedRecordingTrack(options, writable, readFile));
+}
+
+async function convertTrimmedRecordingTrack<Result>(options: TrimmedTrackOptions<Result>,
+    writable: FileSystemWritableFileStream, readFile: () => Promise<File>): Promise<Result> {
     const isMp4 = options.track.mimeType.includes('mp4');
     const videoFrameRate = options.track.kind !== 'microphone' && options.track.frameRate !== null &&
         Number.isFinite(options.track.frameRate) && options.track.frameRate > 0 ? options.track.frameRate : null;
+    const input = new Input({ formats: ALL_FORMATS, source: new BlobSource(options.blob) });
     const output = new Output({ format: isMp4 ? new Mp4OutputFormat() : new WebMOutputFormat(), target: new StreamTarget(writable) });
     let conversion: Conversion | null = null;
     const cancel = () => { void conversion?.cancel().catch(() => undefined); };
@@ -75,7 +69,7 @@ export async function withTrimmedRecordingTrack<Result>(options: {
         conversion.onProgress = options.onProgress;
         await conversion.execute();
         options.signal.throwIfAborted();
-        const file = await handle.getFile();
+        const file = await readFile();
         const prepared = new Input({ formats: ALL_FORMATS, source: new BlobSource(file) });
         try {
             const preparedBounds = await inspectRecordingMedia(prepared, options.track);
@@ -96,7 +90,5 @@ export async function withTrimmedRecordingTrack<Result>(options: {
         options.signal.removeEventListener('abort', cancel);
         await conversion?.cancel().catch(() => undefined);
         input.dispose();
-        await writable.abort().catch(() => undefined);
-        await directory.removeEntry(filename);
     }
 }

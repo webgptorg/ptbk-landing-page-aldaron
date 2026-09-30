@@ -128,7 +128,7 @@ export function useRecordingStudio() {
                 setSourceConfigurations(current.sourceConfigurations);
                 setSourceReadiness(Object.fromEntries(current.sourceConfigurations.map(({ id }) => [id, 'needs-permission' as const])));
                 const recovered = await recoverStudioRecordings();
-                const { clearRecordingExportTemporaryFiles } = await import('@/lib/recording-studio/recordingStudioTrim');
+                const { clearRecordingExportTemporaryFiles } = await import('@/lib/recording-studio/recordingStudioTemporaryFile');
                 await clearRecordingExportTemporaryFiles().catch(() => undefined);
                 if (!current.isDisposed) {
                     setRecordings(recovered);

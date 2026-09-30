@@ -1,13 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RecordingStudioCapture } from './RecordingStudioCapture';
 import { createRecordingEditRecipe, getRecordingSelection, getRecordingUnavailableRanges } from './recordingStudioSessionTime';
+import { RECORDING_INDEX_REPAIR_COMMAND } from './recordingStudioIndex';
+import { createIndexedMatroskaBlob, createUnindexedMatroskaBlob } from './recordingStudioTestUtilities';
 import { RECORDING_MAX_PENDING_BYTES, type RecordingSource, type StudioRecording } from './recordingStudioTypes';
 
 const STORAGE = vi.hoisted(() => ({ append: vi.fn(), save: vi.fn(), readPart: vi.fn() }));
 const MEDIA = vi.hoisted(() => ({ inspect: vi.fn() }));
+const REINDEX = vi.hoisted(() => ({ canRebuild: vi.fn() }));
 vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save, readRecordingPart: STORAGE.readPart,
     createStudioRecording: async (recording: StudioRecording) => { await STORAGE.save(recording); return recording; } }));
 vi.mock('./recordingStudioMedia', () => ({ inspectRecordingBlob: MEDIA.inspect }));
+vi.mock('./recordingStudioReindex', () => ({ canRebuildRecordingIndex: REINDEX.canRebuild }));
 
 class TestRecorder {
     static readonly instances: TestRecorder[] = [];
@@ -48,6 +52,7 @@ describe('multi-source capture barriers and durable failure handling', () => {
         TestRecorder.instances.length = 0; TestRecorder.failStartAt = -1; vi.stubGlobal('MediaRecorder', TestRecorder);
         STORAGE.append.mockReset().mockResolvedValue(undefined); STORAGE.save.mockReset().mockResolvedValue(undefined);
         STORAGE.readPart.mockReset().mockResolvedValue(new Blob(['encoded']));
+        REINDEX.canRebuild.mockReset().mockResolvedValue(true);
         MEDIA.inspect.mockReset().mockImplementation(async (_blob: Blob, track: { durationSeconds: number; kind: string; isAudioIncluded: boolean }) => {
             const durationSeconds = Math.max(0.001, track.durationSeconds);
             const components = track.kind === 'microphone' ? [{ kind: 'audio', firstTimestampSeconds: 0, endTimestampSeconds: durationSeconds }]
@@ -519,6 +524,71 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result?.errorMessage).toContain('Synthetic recorder start failure');
         expect(TestRecorder.instances.every((recorder) => recorder.state === 'inactive')).toBe(true);
         expect(result?.tracks.every((track) => track.parts?.[0].byteLength === 4)).toBe(true);
+    });
+
+    it('records the checked seek index of every closed part without announcing the ordinary live container', async () => {
+        STORAGE.readPart.mockResolvedValue(createUnindexedMatroskaBlob());
+        REINDEX.canRebuild.mockResolvedValue(true);
+        const onFailure = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
+        await capture.start([makeSource('camera'), makeSource('screen')]);
+        const result = await capture.stop();
+        expect(result?.status).toBe('complete');
+        expect(result?.tracks.map((track) => track.parts?.[0].indexStatus)).toEqual(['unindexed', 'unindexed']);
+        // One answer per container is enough, and a rebuildable index is nothing to wake anybody up for.
+        expect(REINDEX.canRebuild).toHaveBeenCalledTimes(1);
+        // Measuring a closed part and checking its index share one read of its committed chunks.
+        expect(STORAGE.readPart).toHaveBeenCalledTimes(2);
+        expect(onFailure).not.toHaveBeenCalled();
+    });
+
+    it('announces a missing index which this browser cannot rebuild, while keeping the take complete', async () => {
+        STORAGE.readPart.mockResolvedValue(createUnindexedMatroskaBlob());
+        REINDEX.canRebuild.mockResolvedValue(false);
+        const onFailure = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
+        await capture.start([makeSource('screen')]);
+        const result = await capture.stop();
+        expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({ impact: 'recording-kept', sourceId: 'screen', sourceLabel: 'screen' }));
+        expect(onFailure.mock.calls[0][0].message).toContain(RECORDING_INDEX_REPAIR_COMMAND);
+        expect(result?.status).toBe('complete');
+        expect(result?.errorMessage).toBeNull();
+        expect(result?.tracks[0].parts?.[0].indexStatus).toBe('unindexed');
+    });
+
+    it('announces a part whose container cannot be checked at all', async () => {
+        STORAGE.readPart.mockRejectedValue(new Error('Část média „part-one“ není úplná.'));
+        const onFailure = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
+        await capture.start([makeSource('camera')]);
+        const result = await capture.stop();
+        const indexFailure = onFailure.mock.calls.map(([failure]) => failure).find((failure) => failure.impact === 'recording-kept');
+        expect(indexFailure?.message).toContain('Část média „part-one“ není úplná.');
+        expect(indexFailure?.message).toContain(RECORDING_INDEX_REPAIR_COMMAND);
+        // Measuring the part reads the same media, so its own failure still interrupts the take.
+        expect(result?.errorMessage).not.toContain(RECORDING_INDEX_REPAIR_COMMAND);
+    });
+
+    it('leaves an already indexed container alone and never probes a rebuild for it', async () => {
+        STORAGE.readPart.mockResolvedValue(createIndexedMatroskaBlob());
+        const onFailure = vi.fn();
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn(), onFailure });
+        await capture.start([makeSource('camera')]);
+        const result = await capture.stop();
+        expect(result?.tracks[0].parts?.[0].indexStatus).toBe('indexed');
+        expect(REINDEX.canRebuild).not.toHaveBeenCalled();
+        expect(onFailure).not.toHaveBeenCalled();
+    });
+
+    it('checks the index of each part a pause closes, not only the last one', async () => {
+        STORAGE.readPart.mockResolvedValue(createUnindexedMatroskaBlob());
+        REINDEX.canRebuild.mockResolvedValue(true);
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera')]);
+        await capture.pause();
+        capture.resume();
+        const result = await capture.stop();
+        expect(result?.tracks[0].parts?.map((part) => part.indexStatus)).toEqual(['unindexed', 'unindexed']);
     });
 
     it('does not start recorders after Stop arrives during the initial storage checkpoint', async () => {

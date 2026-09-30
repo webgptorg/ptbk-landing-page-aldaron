@@ -2,7 +2,8 @@ import { BlobReader, BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js';
 import { downloadBlobFile } from '@/lib/downloadBlobFile';
 import { readRecordingPart, readRecordingTrack, streamRecordingPart, streamRecordingTrack } from './recordingStudioStorage';
 import { addRecordingBytes, getRecordingByteLength, getRecordingMissingRanges, validateRecordingTrim } from './recordingStudioTiming';
-import type { RecordingArchiveManifest, RecordingArchiveTrack, RecordingMediaPart, RecordingTrack, StudioRecording } from './recordingStudioTypes';
+import { readRecordingIndexReport, RECORDING_INDEX_REPAIR_COMMAND } from './recordingStudioIndex';
+import type { RecordingArchiveIndexState, RecordingArchiveManifest, RecordingArchiveTrack, RecordingMediaPart, RecordingTrack, StudioRecording } from './recordingStudioTypes';
 import { createRecordingEditRecipe, getRecordingMediaParts, getRecordingPartForSelection, getRecordingPartTrack, getRecordingSessionDuration, getRecordingUnavailableRanges } from './recordingStudioSessionTime';
 import { getRecordingDerivedFiles, getRecordingDerivedManifestEntries, type RecordingDerivedFile } from './recordingStudioDerivedExport';
 import { createRecordingWorkshopSidecar } from './recordingStudioWorkshop';
@@ -57,6 +58,66 @@ function getPartArchiveFiles(recording: StudioRecording, track: RecordingTrack, 
         file: `originals/${prefix}-part-${String(index + 1).padStart(3, '0')}.${recordingMediaFileExtension(part.mimeType)}` }));
 }
 
+/** Metadata-only manifests report what the capture already checked, without opening any media again. */
+function describeRecordedPartIndex(part: RecordingMediaPart): Partial<RecordingArchiveIndexState> {
+    return part.indexStatus ? { status: part.indexStatus, isIndexRebuilt: false } : {};
+}
+
+function describeOriginalParts(recording: StudioRecording, track: RecordingTrack) {
+    return getRecordingMediaParts(track).map((part) => ({ partId: part.id, takeId: part.takeId,
+        file: recordingOriginalPartFilename(recording, track, part), sessionStartSeconds: part.sessionStartSeconds,
+        durationSeconds: part.durationSeconds, ...describeRecordedPartIndex(part) }));
+}
+
+/**
+ * Hands over one recorded part with a seek index whenever this browser can build one
+ *
+ * Note: A recorder writes a live container, so an original leaving the studio is a file an editor can play but not
+ *       seek in. Copying its packets into an indexed container is the studio's own `ffmpeg -map 0 -c copy` and
+ *       changes no media. Where that copy is impossible the recorder's own bytes are handed over unchanged and the
+ *       reason is written into the manifest, so an export never waits on an index it cannot produce.
+ *
+ * @returns what the delivered file says about its index, as the manifest records it
+ */
+async function deliverRecordingOriginal(options: {
+    readonly recording: StudioRecording;
+    readonly part: RecordingMediaPart;
+    readonly signal: AbortSignal;
+    readonly onProgress?: (message: string) => void;
+    /** Without a disk picker a rebuilt container has to be detached into memory, which only small files allow. */
+    readonly maximumBufferedBytes?: number;
+    readonly deliverIndexed: (file: File) => Promise<void>;
+    readonly deliverRecorded: () => Promise<void>;
+}): Promise<RecordingArchiveIndexState> {
+    const media = await readRecordingPart(options.recording.id, options.part, options.signal);
+    // An unanswerable question about the index leaves the export exactly as it was before the index was ever checked.
+    const report = await readRecordingIndexReport(media).catch(() => null);
+    if (!report || report.status !== 'unindexed') {
+        await options.deliverRecorded();
+        return { status: report?.status ?? 'unknown', isIndexRebuilt: false, reason: report?.detail };
+    }
+    const { withRebuiltRecordingIndex, RecordingIndexRebuildUnavailable } = await import('./recordingStudioReindex');
+    try {
+        return await withRebuiltRecordingIndex({
+            blob: media, format: report.format, signal: options.signal, expectedMedia: options.part.mediaBounds,
+            onProgress: (progress) => options.onProgress?.(`Doplňuji index kontejneru: ${Math.round(progress * 100)} %`),
+            consume: async (file) => {
+                if (options.maximumBufferedBytes !== undefined && file.size > options.maximumBufferedBytes) {
+                    throw new RecordingIndexRebuildUnavailable(`Kontejner s doplněným indexem přesahuje ${Math.round(options.maximumBufferedBytes / 1024 ** 2)} MiB a bez přímého ukládání na disk jej nelze stáhnout. Předává se originál; index doplňte příkazem ${RECORDING_INDEX_REPAIR_COMMAND}.`);
+                }
+                await options.deliverIndexed(file);
+                return { status: 'indexed' as const, isIndexRebuilt: true, reason: report.detail };
+            },
+        });
+    } catch (error) {
+        options.signal.throwIfAborted();
+        if (!(error instanceof RecordingIndexRebuildUnavailable)) throw error;
+        options.onProgress?.(error.message);
+        await options.deliverRecorded();
+        return { status: report.status, isIndexRebuilt: false, reason: error.message };
+    }
+}
+
 /** Storage returns fresh objects; filenames follow the stable source identity. */
 function recordingSourceNumber(recording: StudioRecording, sourceId: string): number {
     const index = recording.tracks.findIndex((track) => track.id === sourceId);
@@ -99,9 +160,7 @@ export async function exportRecordingPrepared(recording: StudioRecording, track:
             for (const workshopFile of workshopFiles) downloadBlobFile({ fileName: workshopFile.filename.split('/').pop()!, blob: new Blob([workshopFile.content], { type: 'application/json' }) });
             const manifest = createRecordingArchiveManifest(recording, recording.tracks.map((candidate) => ({
                 ...candidate, originalFile: getRecordingMediaParts(candidate).length === 1 ? recordingOriginalFilename(recording, candidate) : null,
-                originalParts: getRecordingMediaParts(candidate).map((sourcePart) => ({ partId: sourcePart.id, takeId: sourcePart.takeId,
-                    file: recordingOriginalPartFilename(recording, candidate, sourcePart), sessionStartSeconds: sourcePart.sessionStartSeconds,
-                    durationSeconds: sourcePart.durationSeconds })),
+                originalParts: describeOriginalParts(recording, candidate),
                 trimmedFile: candidate.id === track.id ? filename : null,
                 ...(candidate.id === track.id ? { originalMedia, preparation: { status: 'prepared' as const, processing: 'Video/audio transcoded, timestamp-clipped; video resampled to videoFrameRate when available, otherwise original cadence. No spatial crop. Boundary tolerance 0.05 seconds per component.', preparedTimeZeroSessionSeconds: recording.trim!.startSeconds, ...preparedTiming } } : {}),
             })), recording.tracks.length === 1, derivedFiles, workshopFiles);
@@ -121,25 +180,44 @@ export async function bufferRecordingPreparedDownload(file: Blob, signal: AbortS
     return new Blob([bytes], { type: file.type });
 }
 
-export async function exportRecordingOriginal(recording: StudioRecording, track: RecordingTrack, destination: FileSystemFileHandle | null, signal: AbortSignal, selectedPart?: RecordingMediaPart): Promise<void> {
+/** @returns what the delivered file says about its index, so the studio can report it instead of a bare success. */
+export async function exportRecordingOriginal(recording: StudioRecording, track: RecordingTrack, destination: FileSystemFileHandle | null, signal: AbortSignal,
+    selectedPart?: RecordingMediaPart, onProgress?: (message: string) => void): Promise<RecordingArchiveIndexState> {
     signal.throwIfAborted();
     const workshopFiles = await getRecordingWorkshopFiles(recording, false);
     const parts = getRecordingMediaParts(track);
     const part = selectedPart ?? (parts.length === 1 ? parts[0] : null);
     if (!part) throw new Error('Stopa má více samostatných částí. Stáhněte je jednotlivě nebo jako ZIP.');
-    if (destination) {
-        await streamRecordingPart(recording.id, part).pipeTo(await destination.createWritable(), { signal });
-    } else {
-        // Disk-backed Blob references, no byte-sized JS buffer or whole-session ZIP.
-        const blob = await readRecordingPart(recording.id, part, signal);
-        signal.throwIfAborted();
-        downloadBlobFile({ fileName: selectedPart ? recordingOriginalPartFilename(recording, track, part) : recordingOriginalFilename(recording, track), blob });
-    }
+    const fileName = selectedPart ? recordingOriginalPartFilename(recording, track, part) : recordingOriginalFilename(recording, track);
+    const indexState = await deliverRecordingOriginal({
+        recording, part, signal, onProgress,
+        maximumBufferedBytes: destination ? undefined : MAXIMUM_BUFFERED_EXPORT_BYTES,
+        deliverIndexed: async (file) => {
+            if (destination) await file.stream().pipeTo(await destination.createWritable(), { signal });
+            // The temporary file is removed as soon as this step returns, so a plain download has to be detached.
+            else downloadBlobFile({ fileName, blob: await bufferRecordingPreparedDownload(file, signal) });
+        },
+        deliverRecorded: async () => {
+            if (destination) { await streamRecordingPart(recording.id, part).pipeTo(await destination.createWritable(), { signal }); return; }
+            // Disk-backed Blob references, no byte-sized JS buffer or whole-session ZIP.
+            const blob = await readRecordingPart(recording.id, part, signal);
+            signal.throwIfAborted();
+            downloadBlobFile({ fileName, blob });
+        },
+    });
     signal.throwIfAborted();
     for (const sidecar of getRecordingDerivedFiles(recording, recordingFileStem(recording), false).filter((file) => file.sourceId === track.id)) {
         downloadBlobFile({ fileName: sidecar.filename.split('/').pop()!, blob: new Blob([sidecar.content], { type: sidecar.type }) });
     }
     for (const workshopFile of workshopFiles) downloadBlobFile({ fileName: workshopFile.filename.split('/').pop()!, blob: new Blob([workshopFile.content], { type: 'application/json' }) });
+    return indexState;
+}
+
+/** One sentence about the index of a delivered original, so a fallback is never reported as a plain success. */
+export function describeRecordingOriginalIndexState(indexState: RecordingArchiveIndexState): string {
+    if (indexState.isIndexRebuilt) return 'Originál je připravený; chybějící index kontejneru byl doplněn bez překódování médií.';
+    if (indexState.status !== 'unindexed') return 'Originál je připravený.';
+    return `Originál je připravený, ale zůstal bez indexu pro vyhledávání. ${indexState.reason ?? ''} Index doplňte příkazem ${RECORDING_INDEX_REPAIR_COMMAND}.`.replace(/\s+/g, ' ');
 }
 
 export function createRecordingArchiveManifest(recording: StudioRecording, tracks: readonly RecordingArchiveTrack[], isTrimIncluded: boolean,
@@ -172,9 +250,7 @@ export async function exportRecordingManifest(recording: StudioRecording): Promi
     const workshopFiles = await getRecordingWorkshopFiles(recording, false);
     const manifest = createRecordingArchiveManifest(recording, recording.tracks.map((track) => ({
         ...track, originalFile: getRecordingMediaParts(track).length === 1 ? recordingOriginalFilename(recording, track) : null,
-        originalParts: getRecordingMediaParts(track).map((part) => ({ partId: part.id, takeId: part.takeId,
-            file: recordingOriginalPartFilename(recording, track, part), sessionStartSeconds: part.sessionStartSeconds,
-            durationSeconds: part.durationSeconds })), trimmedFile: null,
+        originalParts: describeOriginalParts(recording, track), trimmedFile: null,
     })), false, [], workshopFiles);
     const backup = { ...manifest, derivedTrackData: recording.derivedTracks ?? [] };
     downloadBlobFile({ fileName: `${recordingFileStem(recording)}.json`, blob: new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }) });
@@ -189,7 +265,8 @@ type ArchiveExportOptions = {
 };
 
 /** ZIP64 supports long takes; already-compressed video is stored without another compression pass. */
-export async function exportRecordingArchive({ recording, destination, isTrimIncluded, signal, onProgress }: ArchiveExportOptions): Promise<{ readonly preparedCount: number; readonly fallbackCount: number }> {
+export async function exportRecordingArchive({ recording, destination, isTrimIncluded, signal, onProgress }: ArchiveExportOptions):
+    Promise<{ readonly preparedCount: number; readonly fallbackCount: number; readonly unindexedOriginalCount: number }> {
     const isTrimmed = isTrimIncluded && recording.trim !== null;
     if (isTrimmed) validateRecordingTrim(recording.trim!, getRecordingSessionDuration(recording));
     const workshopFiles = [
@@ -205,6 +282,7 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
     let bufferedBytes = 0;
     let preparedCount = 0;
     let fallbackCount = 0;
+    let unindexedOriginalCount = 0;
     try {
         for (let index = 0; index < recording.tracks.length; index += 1) {
             const track = recording.tracks[index];
@@ -219,9 +297,19 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
                 if (!destination && bufferedBytes > MAXIMUM_BUFFERED_EXPORT_BYTES) throw new Error('ZIP je příliš velký pro stažení v tomto prohlížeči. Použijte přímé ukládání v Chrome nebo Edge.');
                 await archive.add(filename, content instanceof Blob ? new BlobReader(content) : content, { signal });
             };
-            for (const { part, file } of partFiles) await addFile(file, streamRecordingPart(recording.id, part), part.byteLength);
+            const indexStates = new Map<string, RecordingArchiveIndexState>();
+            for (const { part, file } of partFiles) {
+                const indexState = await deliverRecordingOriginal({
+                    recording, part, signal,
+                    onProgress: (message) => onProgress(`Originál ${index + 1}/${recording.tracks.length} (${track.label}): ${message}`),
+                    deliverIndexed: (rebuilt) => addFile(file, rebuilt, rebuilt.size),
+                    deliverRecorded: () => addFile(file, streamRecordingPart(recording.id, part), part.byteLength),
+                });
+                if (indexState.status === 'unindexed') unindexedOriginalCount += 1;
+                indexStates.set(part.id, indexState);
+            }
             const originalParts = partFiles.map(({ part, file }) => ({ partId: part.id, takeId: part.takeId, file,
-                sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds }));
+                sessionStartSeconds: part.sessionStartSeconds, durationSeconds: part.durationSeconds, ...indexStates.get(part.id)! }));
             let trimmedFile: string | null = null;
             let preparation: RecordingArchiveTrack['preparation'];
             let originalMedia: RecordingArchiveTrack['originalMedia'];
@@ -265,8 +353,9 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
         const manifest = createRecordingArchiveManifest(recording, exportedTracks, isTrimmed && fallbackCount === 0, derivedFiles, workshopFiles);
         await archive.add('recording.json', new TextReader(JSON.stringify(manifest, null, 2)), { signal });
         await archive.add('README.txt', new TextReader([
-            recording.title, '', 'ORIGINALS: unmodified, independently playable media parts for every camera, screen share or microphone.',
+            recording.title, '', 'ORIGINALS: independently playable media parts for every camera, screen share or microphone, with the recorded media data unchanged.',
             'A camera file can contain its selected microphone audio. Separate microphone and screen audio remain separate files when they were configured as separate sources.',
+            `SEEK INDEX: MediaRecorder writes a live container without a seek index or stored duration, so every original is remuxed by packet copy (the browser's own "${RECORDING_INDEX_REPAIR_COMMAND}") into an indexed container. No packet is re-encoded and no timestamp is shifted. Each recording.json originalParts entry reports status, isIndexRebuilt and, where the index could not be rebuilt, the reason; such a file is the recorder's own bytes and needs that ffmpeg command before an editor can seek in it.`,
             'recording.json contains source and selected-device preferences, embedded-audio presence, dimensions, byte sizes, timing offsets, missingRanges and the shared trim range in seconds. A null missing-range end means unknown.',
             'All sources share one session clock. Each pause closes all source containers before resume creates new parts. Start/stop calls are browser observations, not hardware frame synchronization.',
             isTrimmed ? `PREPARATION: ${preparedCount} real trimmed files; ${fallbackCount} sources require originals + recipe. Inspect each track preparation.status/reason. Only prepared files use the common selected interval and time zero; originals keep original timing. Video/audio are re-encoded; actual bounds are recorded (50 ms validation tolerance).` :
@@ -278,7 +367,7 @@ export async function exportRecordingArchive({ recording, destination, isTrimInc
         signal.throwIfAborted();
         const result = await archive.close();
         if (!destination && result instanceof Blob) downloadBlobFile({ fileName: `${recordingFileStem(recording)}.zip`, blob: result });
-        return { preparedCount, fallbackCount };
+        return { preparedCount, fallbackCount, unindexedOriginalCount };
     } catch (error) {
         // Abort a direct-to-disk export instead of publishing a deceptively complete partial ZIP.
         await writable?.abort().catch(() => undefined);
