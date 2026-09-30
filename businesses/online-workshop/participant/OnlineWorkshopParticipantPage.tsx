@@ -17,6 +17,7 @@ import { WorkshopPresentationMaterial } from '@/businesses/online-workshop/parti
 import { WorkshopVideoMaterial } from '@/businesses/online-workshop/participant/WorkshopVideoMaterial';
 import { WorkshopReactions } from '@/businesses/online-workshop/participant/WorkshopReactions';
 import { WorkshopRepositoryPanel } from '@/businesses/online-workshop/participant/WorkshopRepositoryPanel';
+import { WorkshopRecordingTimelineProvider } from '@/businesses/online-workshop/participant/WorkshopRecordingTimelineContext';
 import { WorkshopStage } from '@/businesses/online-workshop/participant/WorkshopStage';
 import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { WorkshopServerConnectionStatus } from '@/businesses/online-workshop/participant/WorkshopServerConnectionStatus';
@@ -527,7 +528,9 @@ export function OnlineWorkshopParticipantPage({
             workshopSlug={workshopSlug}
             isMembershipOffered={roomCapabilities.isMembershipOffered}
         >
-            {roomLayout}
+            <WorkshopRecordingTimelineProvider workshopSlug={workshopSlug} repository={connectedRepository}>
+                {roomLayout}
+            </WorkshopRecordingTimelineProvider>
         </CommunityMembershipRoomProvider>
     );
 }

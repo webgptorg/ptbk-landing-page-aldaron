@@ -2,11 +2,13 @@
 
 import { WorkshopRepositoryCommitCard } from '@/businesses/online-workshop/participant/WorkshopRepositoryCommitCard';
 import { WorkshopRepositoryGraph } from '@/businesses/online-workshop/participant/WorkshopRepositoryGraph';
+import { useWorkshopRecordingCommitSelection } from '@/businesses/online-workshop/participant/WorkshopRecordingTimelineContext';
 import { useWorkshopProjectPreview } from '@/businesses/online-workshop/participant/useWorkshopProjectPreview';
 import { WorkshopProjectPreviewCard } from '@/components/workshops/WorkshopProjectPreviewCard';
 import type { WorkshopRepositoryProgressController } from '@/businesses/online-workshop/participant/useWorkshopRepositoryProgress';
 import {
     createGithubCommitsUrlForBranchSelection,
+    createGithubCommitUrl,
     createGithubRepositoryUrl,
     formatGithubRepositoryName,
     getGithubBranchSelectionPatterns,
@@ -59,6 +61,7 @@ function formatWorkshopDeploymentLabel(deploymentUrl: string, deploymentCount: n
  *       cannot be reached.
  */
 export function WorkshopRepositoryPanel({ workshopSlug, repository, progressController }: WorkshopRepositoryPanelProps) {
+    const recordingCommit = useWorkshopRecordingCommitSelection();
     const projectPreview = useWorkshopProjectPreview(workshopSlug, repository);
     const { progress, isProgressRead, newCommitShas } = progressController;
     const repositoryName = formatGithubRepositoryName(repository);
@@ -70,6 +73,9 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository, progressCont
     const graphBranches: readonly WorkshopRepositoryBranch[] =
         progress?.branches ??
         getGithubBranchSelectionPatterns(repository.branch).map((branchName) => ({ name: branchName, headSha: null }));
+    const currentRecordingCommitSha = recordingCommit.state === 'known' ? recordingCommit.sha : null;
+    const isCurrentRecordingCommitInGraph = currentRecordingCommitSha !== null &&
+        visibleCommits.some((commit) => commit.sha === currentRecordingCommitSha);
 
     return (
         <article
@@ -133,6 +139,18 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository, progressCont
             )}
 
             <div className="space-y-3 px-5 py-4">
+                {recordingCommit.state !== 'absent' && <div role="status" className="rounded-xl border border-room-border/15 bg-room-inset/40 p-3 text-sm text-room-text">
+                    {recordingCommit.state === 'known' ? <>
+                        <span className="font-semibold">Commit v čase záznamu: </span>
+                        <a href={createGithubCommitUrl(repository, recordingCommit.sha)} target="_blank" rel="noopener noreferrer"
+                            className="font-mono text-room-accent underline underline-offset-4">{recordingCommit.sha.slice(0, 12)}</a>
+                        {!isCurrentRecordingCommitInGraph && <span className="ml-2 text-room-muted">Commit není v načtené části grafu; může být mimo načtenou historii nebo už nedostupný.</span>}
+                    </> : recordingCommit.state === 'unavailable'
+                        ? 'Commit přiřazený tomuto času už není dostupný.'
+                        : recordingCommit.state === 'different-repository'
+                            ? 'Záznam odkazuje na jiný repozitář. Přehrávání pokračuje bez výběru commitu.'
+                            : 'Pro tento čas není ověřený commit.'}
+                </div>}
                 {!isProgressRead ? (
                     <p className="flex items-center gap-2 text-sm text-room-muted">
                         <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> Načítám commity…
@@ -167,6 +185,7 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository, progressCont
                                     branches={graphBranches}
                                     newCommitShas={newCommitShas}
                                     range={isRangeConfigured ? range : undefined}
+                                    currentRecordingCommitSha={currentRecordingCommitSha}
                                 />
                             ) : (
                                 <ol className="space-y-2">
@@ -176,6 +195,7 @@ export function WorkshopRepositoryPanel({ workshopSlug, repository, progressCont
                                                 repository={repository}
                                                 commit={commit}
                                                 isNew={newCommitShas.has(commit.sha)}
+                                                isCurrentRecordingCommit={commit.sha === currentRecordingCommitSha}
                                             />
                                         </li>
                                     ))}

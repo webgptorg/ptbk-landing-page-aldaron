@@ -42,6 +42,7 @@ export type HostedRecordingPlayerMetadata = {
     readonly autoView: unknown | null;
     readonly repository: unknown | null;
     readonly startingCommit: unknown | null;
+    readonly commitAtSelectionStart?: { readonly state: 'known' | 'unavailable' | 'unknown'; readonly sha: string | null };
     readonly commitAnchors: readonly unknown[];
 };
 
@@ -187,9 +188,21 @@ function checkIntervalList(value: unknown, durationSeconds: number): readonly un
     return value;
 }
 
+function checkEvents(value: unknown, durationSeconds: number): readonly unknown[] {
+    const events = checkPointList(value, durationSeconds, 'Event');
+    for (const event of events) {
+        const entry = getObject(event, 'Event');
+        if (typeof entry.title !== 'string' || !entry.title.trim() || entry.title.length > 120 ||
+            entry.detail !== undefined && (typeof entry.detail !== 'string' || entry.detail.length > 2000)) {
+            throw new Error('Event needs a bounded title and detail.');
+        }
+    }
+    return events;
+}
+
 function checkWorkshopSidecar(value: Record<string, unknown>, durationSeconds: number,
     sourceIdByRole: ReadonlyMap<HostedRecordingVideoRole, string>): Pick<HostedRecordingPlayerMetadata,
-        'activityIntervals' | 'events' | 'autoView' | 'repository' | 'startingCommit' | 'commitAnchors'> {
+        'activityIntervals' | 'events' | 'autoView' | 'repository' | 'startingCommit' | 'commitAtSelectionStart' | 'commitAnchors'> {
     if (value.schemaVersion !== 1 || value.timeUnit !== 'seconds' || value.coordinate !== 'prepared-export' ||
         value.isSourceRevisionStale === true || typeof value.sourceRevision !== 'string' ||
         !value.sourceRevision || value.sourceRevision !== value.currentRevision) {
@@ -203,7 +216,7 @@ function checkWorkshopSidecar(value: Record<string, unknown>, durationSeconds: n
         throw new Error('Workshop sidecar selection does not match prepared media.');
     }
     const activityIntervals = checkIntervalList(value.activityIntervals, durationSeconds);
-    const events = checkPointList(value.events, durationSeconds, 'Event');
+    const events = checkEvents(value.events, durationSeconds);
     const commitAnchors = checkPointList(value.commitAnchors, durationSeconds, 'Commit anchor');
     const autoView = getObject(value.autoView, 'Auto-view');
     const editorSourceId = sourceIdByRole.get('editor');
@@ -235,13 +248,6 @@ function checkWorkshopSidecar(value: Record<string, unknown>, durationSeconds: n
         autoView.defaultScene === 'application' && !applicationSourceId) {
         throw new Error('Auto-view default selects a missing screen track.');
     }
-    for (const event of events) {
-        const entry = getObject(event, 'Event');
-        if (typeof entry.title !== 'string' || !entry.title.trim() || entry.title.length > 120 ||
-            typeof entry.detail !== 'string' || entry.detail.length > 2000) {
-            throw new Error('Event needs a bounded title and detail.');
-        }
-    }
     const repository = value.repository;
     if (repository !== null && repository !== undefined) {
         const repositoryObject = getObject(repository, 'Repository');
@@ -252,6 +258,14 @@ function checkWorkshopSidecar(value: Record<string, unknown>, durationSeconds: n
         throw new Error('Commit metadata needs a repository.');
     }
     if (value.startingCommit) checkCommit(value.startingCommit, 'Starting commit');
+    const commitAtSelectionStart = value.commitAtSelectionStart === undefined ? undefined :
+        getObject(value.commitAtSelectionStart, 'Commit at selection start');
+    if (commitAtSelectionStart && (!['known', 'unavailable', 'unknown'].includes(String(commitAtSelectionStart.state)) ||
+        (commitAtSelectionStart.state === 'known' &&
+            (typeof commitAtSelectionStart.sha !== 'string' || !/^[0-9a-f]{40}$/i.test(commitAtSelectionStart.sha))) ||
+        (commitAtSelectionStart.state !== 'known' && commitAtSelectionStart.sha !== null))) {
+        throw new Error('Commit at selection start is invalid.');
+    }
     let previousCommitSeconds = -1;
     for (const anchor of commitAnchors) {
         const entry = getObject(anchor, 'Commit anchor');
@@ -263,7 +277,9 @@ function checkWorkshopSidecar(value: Record<string, unknown>, durationSeconds: n
         checkCommit(entry.commit, 'Commit anchor');
     }
     return { activityIntervals, events, autoView, repository: value.repository ?? null,
-        startingCommit: value.startingCommit ?? null, commitAnchors };
+        startingCommit: value.startingCommit ?? null,
+        commitAtSelectionStart: commitAtSelectionStart as HostedRecordingPlayerMetadata['commitAtSelectionStart'],
+        commitAnchors };
 }
 
 function checkSubtitle(bytes: Uint8Array, durationSeconds: number): void {
@@ -303,7 +319,7 @@ function checkSubtitle(bytes: Uint8Array, durationSeconds: number): void {
 
 function checkStandaloneSidecar(value: Record<string, unknown>, role: 'activity' | 'events' | 'commits',
     durationSeconds: number): Partial<Pick<HostedRecordingPlayerMetadata,
-        'activityIntervals' | 'events' | 'repository' | 'startingCommit' | 'commitAnchors'>> {
+        'activityIntervals' | 'events' | 'repository' | 'startingCommit' | 'commitAtSelectionStart' | 'commitAnchors'>> {
     if (value.schemaVersion !== 1 || value.coordinate !== 'prepared-export' ||
         value.timeUnit !== 'seconds') {
         throw new Error(`${role}: sidecar needs schema 1 and prepared-export seconds.`);
@@ -312,15 +328,7 @@ function checkStandaloneSidecar(value: Record<string, unknown>, role: 'activity'
     if (role === 'activity') {
         return { activityIntervals: checkIntervalList(value.intervals ?? value.activityIntervals, durationSeconds) };
     } else if (role === 'events') {
-        const events = checkPointList(value.events, durationSeconds, 'Event');
-        for (const event of events) {
-            const entry = getObject(event, 'Event');
-            if (typeof entry.title !== 'string' || !entry.title.trim() || entry.title.length > 120 ||
-                typeof entry.detail !== 'string' || entry.detail.length > 2000) {
-                throw new Error('Event needs a bounded title and detail.');
-            }
-        }
-        return { events };
+        return { events: checkEvents(value.events, durationSeconds) };
     } else {
         if (value.repository !== null && value.repository !== undefined) {
             const repository = getObject(value.repository, 'Repository');
@@ -344,8 +352,16 @@ function checkStandaloneSidecar(value: Record<string, unknown>, role: 'activity'
             previousSeconds = seconds;
             checkCommit(entry.commit, 'Commit anchor');
         }
+        const selectionStart = value.commitAtSelectionStart;
+        if (selectionStart !== undefined && (getObject(selectionStart, 'Commit at selection start').state === 'known'
+            ? typeof getObject(selectionStart, 'Commit at selection start').sha !== 'string' ||
+                !/^[0-9a-f]{40}$/i.test(String(getObject(selectionStart, 'Commit at selection start').sha))
+            : !['unknown', 'unavailable'].includes(String(getObject(selectionStart, 'Commit at selection start').state)) ||
+                getObject(selectionStart, 'Commit at selection start').sha !== null)) {
+            throw new Error('Commit at selection start is invalid.');
+        }
         return { repository: value.repository ?? null, startingCommit: value.startingCommit ?? null,
-            commitAnchors };
+            commitAtSelectionStart: selectionStart as HostedRecordingPlayerMetadata['commitAtSelectionStart'], commitAnchors };
     }
 }
 

@@ -193,6 +193,21 @@ stored when the hosted source is selected. Prepared hosted media starts at expor
 never applied to it. The administrator aligns export zero with the workshop's live clock, and recorded pauses retain
 their wall-clock gaps.
 
+The participant player uses one session playhead for the editor, application and camera files. Auto follows reviewed
+scene choices, overlays the camera and selects one audible file. Reviewed automatic-coding intervals advance in
+decoded steps at up to 10×; when decoding is slow, the playhead waits for the frame instead of showing stale video.
+Events and verified commit anchors share those session seconds. The existing YouTube player remains active for
+YouTube-only workshops.
+
+A non-paying live viewer receives only the completed segment at the delayed playhead, normally two seconds behind the
+workshop clock. Segments are capped at two seconds and split at recorded take boundaries, so the wall-time delay follows
+studio pauses. Each request remuxes a self-contained MP4 or WebM segment from the already published private file,
+requires a key-frame-aligned segment boundary, and rechecks the current server time and room access before
+returning bytes. An unaligned or unavailable segment buffers or falls back to another ready track; no earlier or
+future segment and no full-file byte range is served to that viewer. Publish the complete prepared media before the
+workshop starts. This is scheduled playback of a complete upload, not incremental live capture or upload. Members
+can seek the full revision. See `docs/workshop-hosted-player.md` for timing and delivery limits.
+
 Its E2E tests supply canvas video and synthesized audio with a silent Web Audio output, so they need no physical
 camera, microphone, or working speaker device. Recording, storage, codecs, trimming, and ZIP exports remain real.
 The editor additionally uses reproducible 25/30 fps timecode/clap files and an independent FFmpeg export checker.

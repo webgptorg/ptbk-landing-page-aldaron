@@ -1,4 +1,4 @@
-import { authorizeHostedRecording, isAuthorizedHostedRecording } from
+import { authorizeHostedRecording, getAuthorizedHostedRecordingManifest, isAuthorizedHostedRecording } from
     '@/lib/workshops/hostedRecording/hostedRecordingDelivery';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const authorized = await authorizeHostedRecording(request, workshopSlug, revisionId);
     if (!isAuthorizedHostedRecording(authorized)) return authorized;
     if (!authorized.revision.player_metadata) return NextResponse.json({ error: 'Recording unavailable' }, { status: 404 });
-    return NextResponse.json(authorized.revision.player_metadata, { headers: {
+    return NextResponse.json(getAuthorizedHostedRecordingManifest(authorized), { headers: {
         'Cache-Control': 'private, no-store', Vary: 'Cookie', 'X-Content-Type-Options': 'nosniff',
     } });
 }

@@ -28,6 +28,7 @@ type WorkshopRepositoryGraphProps = {
     readonly branches: readonly WorkshopRepositoryBranch[];
     readonly newCommitShas: ReadonlySet<string>;
     readonly range?: WorkshopRepositoryCommitRange;
+    readonly currentRecordingCommitSha?: string | null;
 };
 
 function getGraphLaneX(laneIndex: number): number {
@@ -62,6 +63,7 @@ export function WorkshopRepositoryGraph({
     branches,
     newCommitShas,
     range,
+    currentRecordingCommitSha,
 }: WorkshopRepositoryGraphProps) {
     const graphRows = createWorkshopRepositoryGraphRows(commits, createWorkshopRepositoryGraphBranchHeadShas(branches, commits));
     const maximalLaneCount = Math.max(...graphRows.map((row) => row.laneCount), 1);
@@ -145,6 +147,7 @@ export function WorkshopRepositoryGraph({
                                     commit={row.commit}
                                     isNew={newCommitShas.has(row.commit.sha)}
                                     isInRange={isInRange}
+                                    isCurrentRecordingCommit={row.commit.sha === currentRecordingCommitSha}
                                     isBranchGraph
                                     className="my-1 mr-3 w-full"
                                 />

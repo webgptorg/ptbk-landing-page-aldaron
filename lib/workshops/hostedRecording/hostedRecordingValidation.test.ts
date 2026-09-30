@@ -65,6 +65,16 @@ describe('hosted recording publication validation', () => {
         expect(result.report.errors.join(' ')).toMatch(/outside the export/);
     });
 
+    it('accepts a timeline event whose detail is omitted', async () => {
+        STORAGE.read.mockImplementation(async (key: string) => new TextEncoder().encode(JSON.stringify(
+            key === 'events' ? { schemaVersion: 1, coordinate: 'prepared-export', timeUnit: 'seconds',
+                events: [{ seconds: 12, title: 'Nasazení' }] } : MANIFEST)));
+        const result = await validateHostedRecordingAssets([MANIFEST_ASSET, EDITOR_ASSET,
+            createAsset('events', 'events', 'events.json')], LIVE_START_AT);
+        expect(result.report.isValid).toBe(true);
+        expect(result.playerMetadata?.events).toEqual([{ seconds: 12, title: 'Nasazení' }]);
+    });
+
     it('keeps paused wall time outside the live session clock', async () => {
         STORAGE.read.mockResolvedValue(new TextEncoder().encode(JSON.stringify({ ...MANIFEST,
             takes: [

@@ -230,7 +230,8 @@ export function WorkshopStage({
     const isVideoRewatchVisible = isVideoRewatchShown && isVideoPrimary && isVideoConfigured;
     const isPrimarySourceVisible = isPrimarySourceOpen && !isVideoPrimary;
     const ongoingPrimaryStageContent = primaryStageContent === 'video' ? (
-        <div className="relative min-w-0 w-full max-w-full min-h-[220px] aspect-video sm:min-h-[260px]">
+        <div className={hostedRevisionId ? 'relative min-w-0 w-full max-w-full' :
+            'relative min-w-0 w-full max-w-full min-h-[220px] aspect-video sm:min-h-[260px]'}>
             {hostedRevisionId ? (
                 <WorkshopHostedRecordingPlayer workshopSlug={workshop.slug} revisionId={hostedRevisionId}
                     isLive serverTime={serverTime} />
@@ -312,7 +313,7 @@ export function WorkshopStage({
                             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Zpět na závěrečné shrnutí
                         </button>
                     </div>
-                    <div className="relative aspect-video">
+                    <div className={hostedRevisionId ? 'relative' : 'relative aspect-video'}>
                         {hostedRevisionId ? (
                             <WorkshopHostedRecordingPlayer workshopSlug={workshop.slug} revisionId={hostedRevisionId}
                                 isLive={false} serverTime={serverTime} />

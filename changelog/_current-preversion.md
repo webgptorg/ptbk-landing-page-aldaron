@@ -1,5 +1,14 @@
 # Current preversion
 
+- Added a shared-clock participant player for hosted workshop recordings with Auto/Editor/Aplikace/Kamera views,
+  camera picture-in-picture, one audible track, event and activity timeline, manual speed and reviewed automatic
+  coding intervals at up to 10×. The existing repository graph highlights the verified anchored SHA at the playhead.
+  Free live viewers receive only the independently remuxed, at-most-two-second segment at the server-delayed playhead; full media byte ranges,
+  past and future segments remain server-gated, while members can seek the complete published recording. The existing
+  YouTube stage, supplementary placement, wrap-up and paid replay offer remain in use. Slow decoders make accelerated
+  navigation wait for a decoded frame rather than desynchronize the tracks. Delivery and publication limits are in
+  `docs/workshop-hosted-player.md`.
+
 - Added private, synchronized hosted recordings for workshop video: direct independent file/sidecar import and a
   studio **Publish to workshop** action share resumable SHA-256 checked multipart S3 uploads. Schema 5 manifests,
   prepared timing, codecs, optional metadata and subtitles are verified before an atomic revision switch. Admins get

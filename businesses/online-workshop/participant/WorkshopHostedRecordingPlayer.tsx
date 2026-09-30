@@ -1,96 +1,109 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { HostedRecordingTransport, type HostedRecordingSnapshot } from './HostedRecordingTransport';
+import { useWorkshopRecordingCommitSelection, useWorkshopRecordingTimelineStore } from './WorkshopRecordingTimelineContext';
+import { getHostedRecordingLiveSeconds, getHostedRecordingLiveSegmentIndex, getHostedRecordingLiveWindow,
+    type HostedRecordingMetadata, type HostedRecordingRole,
+    type HostedRecordingSpeed, type HostedRecordingView } from '@/lib/workshops/hostedRecording/hostedRecordingTimeline';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 
 const TRACK_ROLES = ['editor', 'application', 'camera'] as const;
-export type TrackRole = (typeof TRACK_ROLES)[number];
-const TRACK_LABELS: Record<TrackRole, string> = { editor: 'Editor', application: 'Aplikace', camera: 'Kamera' };
-const MAXIMUM_ACCEPTABLE_DRIFT_SECONDS = 0.1;
+const TRACK_LABELS: Record<HostedRecordingRole, string> = { editor: 'Editor', application: 'Aplikace', camera: 'Kamera' };
+const SPEED_OPTIONS: readonly HostedRecordingSpeed[] = ['auto', 0.5, 1, 1.5, 2, 4];
+const EMPTY_SNAPSHOT: HostedRecordingSnapshot = { seconds: 0, isPlaying: false, isPlayRequested: false,
+    isSettling: false, view: 'auto', speed: 'auto', effectiveSpeed: 1, sourceStates: {},
+    isMuted: true, volume: 1, audioRole: null };
 
-export type PlayerManifest = {
-    readonly schemaVersion: 1;
-    readonly durationSeconds: number;
-    readonly liveStartAt: string;
-    readonly liveSegments?: readonly { readonly startSeconds: number; readonly endSeconds: number;
-        readonly startsAt: string }[];
-    readonly tracks: readonly { readonly role: TrackRole; readonly contentType: string; readonly hasAudio: boolean }[];
-    readonly events: readonly { readonly seconds?: number; readonly title?: string }[];
-    readonly autoView: { readonly defaultScene?: 'editor' | 'application';
-        readonly transitions?: readonly { readonly seconds: number; readonly scene: 'editor' | 'application' }[] } | null;
-};
-
-export type HostedRecordingAdminPreview = {
-    readonly manifest: PlayerManifest;
-    readonly trackUrls: Partial<Record<TrackRole, string>>;
-};
+export type TrackRole = HostedRecordingRole;
+export type PlayerManifest = HostedRecordingMetadata;
+export type HostedRecordingAdminPreview = { readonly manifest: PlayerManifest;
+    readonly trackUrls: Partial<Record<TrackRole, string>> };
 type ParticipantProps = { readonly workshopSlug: string; readonly revisionId: string; readonly isLive: boolean;
     readonly serverTime: string; readonly adminPreview?: never };
 type AdminProps = { readonly adminPreview: HostedRecordingAdminPreview; readonly serverTime: string;
     readonly isLive?: false; readonly workshopSlug?: never; readonly revisionId?: never };
 type Props = ParticipantProps | AdminProps;
 
-function getSceneAt(manifest: PlayerManifest, seconds: number): TrackRole | null {
-    if (!manifest.autoView) return null;
-    return [...(manifest.autoView.transitions ?? [])]
-        .filter((transition) => transition.seconds <= seconds)
-        .sort((first, second) => second.seconds - first.seconds)[0]?.scene ?? manifest.autoView.defaultScene ?? null;
+function formatTime(seconds: number): string {
+    const wholeSeconds = Math.floor(Math.max(0, seconds));
+    const hours = Math.floor(wholeSeconds / 3600);
+    const minutes = Math.floor(wholeSeconds % 3600 / 60);
+    const remainder = wholeSeconds % 60;
+    return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}` :
+        `${minutes}:${String(remainder).padStart(2, '0')}`;
 }
 
-function getLivePlaybackSeconds(manifest: PlayerManifest, wallClockMilliseconds: number): number {
-    const segments = manifest.liveSegments ?? [{ startSeconds: 0,
-        endSeconds: manifest.durationSeconds, startsAt: manifest.liveStartAt }];
-    let previousEndSeconds = 0;
-    for (const segment of segments) {
-        const segmentStartMilliseconds = Date.parse(segment.startsAt);
-        if (wallClockMilliseconds < segmentStartMilliseconds) return previousEndSeconds;
-        const segmentEndMilliseconds = segmentStartMilliseconds +
-            (segment.endSeconds - segment.startSeconds) * 1000;
-        if (wallClockMilliseconds < segmentEndMilliseconds) {
-            return segment.startSeconds + (wallClockMilliseconds - segmentStartMilliseconds) / 1000;
-        }
-        previousEndSeconds = segment.endSeconds;
-    }
-    return previousEndSeconds;
+function getPreferredScene(manifest: PlayerManifest, seconds: number): HostedRecordingRole | null {
+    return [...(manifest.autoView?.transitions ?? [])].reverse().find((transition) =>
+        transition.seconds <= seconds)?.scene ?? manifest.autoView?.defaultScene ?? null;
+}
+
+function getTrackMessage(role: HostedRecordingRole, state: HostedRecordingSnapshot['sourceStates'][HostedRecordingRole]): string {
+    if (state === 'error') return `${TRACK_LABELS[role]} se nepodařilo načíst.`;
+    if (state === 'gap') return `${TRACK_LABELS[role]} má v tomto čase mezeru.`;
+    if (state === 'buffering' || state === 'loading') return `Načítám ${TRACK_LABELS[role].toLowerCase()}…`;
+    return `${TRACK_LABELS[role]} není v tomto záznamu dostupný.`;
+}
+
+function HostedTrack({ role, url, transport, isVisible, isOverlay, mediaOffsetSeconds }: {
+    readonly role: HostedRecordingRole; readonly url: string; readonly transport: HostedRecordingTransport;
+    readonly isVisible: boolean; readonly isOverlay: boolean; readonly mediaOffsetSeconds: number;
+}) {
+    const mediaReference = useRef<HTMLVideoElement>(null);
+    const hideTextTracks = useCallback(() => {
+        const media = mediaReference.current;
+        if (media) for (const textTrack of Array.from(media.textTracks)) textTrack.mode = 'disabled';
+    }, []);
+    useEffect(() => {
+        const media = mediaReference.current;
+        if (!media) return undefined;
+        media.textTracks.addEventListener?.('addtrack', hideTextTracks);
+        const unregister = transport.register(role, media, mediaOffsetSeconds);
+        return () => { media.textTracks.removeEventListener?.('addtrack', hideTextTracks); unregister(); };
+    }, [role, transport, url, mediaOffsetSeconds, hideTextTracks]);
+    return <video ref={mediaReference} src={url} preload="metadata" playsInline controls={false} muted
+        aria-hidden="true" tabIndex={-1} onLoadedMetadata={hideTextTracks}
+        className={isOverlay ? `absolute bottom-3 right-3 z-10 aspect-video w-[30%] rounded border-2 border-white object-contain shadow-xl ${isVisible ? '' : 'invisible'}` :
+            `absolute inset-0 h-full w-full object-contain ${isVisible ? '' : 'invisible'}`} />;
 }
 
 export function WorkshopHostedRecordingPlayer(props: Props) {
-    const { serverTime, adminPreview } = props;
+    const { adminPreview, serverTime } = props;
     const workshopSlug = props.workshopSlug ?? '';
     const revisionId = props.revisionId ?? '';
     const isLive = props.isLive ?? false;
-    // Keep one immutable revision for this mounted viewer while an admin publishes a replacement.
+    const timelineStore = useWorkshopRecordingTimelineStore();
+    const recordingCommit = useWorkshopRecordingCommitSelection();
+    const fullscreenReference = useRef<HTMLDivElement>(null);
     const viewerRevision = useRef({ workshopSlug, revisionId });
-    if (viewerRevision.current.workshopSlug !== workshopSlug) {
-        viewerRevision.current = { workshopSlug, revisionId };
-    }
+    if (viewerRevision.current.workshopSlug !== workshopSlug) viewerRevision.current = { workshopSlug, revisionId };
+    const [serverClockOffsetMilliseconds, setServerClockOffsetMilliseconds] = useState(() => Date.parse(serverTime) - Date.now());
     const [manifest, setManifest] = useState<PlayerManifest | null>(null);
-    const [playableRoles, setPlayableRoles] = useState<readonly TrackRole[]>([]);
+    const [playableRoles, setPlayableRoles] = useState<readonly HostedRecordingRole[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [selectedRole, setSelectedRole] = useState<TrackRole | 'auto'>('auto');
-    const [audioRole, setAudioRole] = useState<TrackRole | null>(null);
-    const [isAudioEnabled, setIsAudioEnabled] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [seconds, setSeconds] = useState(0);
-    const videoReferences = useRef<Partial<Record<TrackRole, HTMLVideoElement | null>>>({});
-    const serverClockOffset = useMemo(() => Date.parse(serverTime) - Date.now(), [serverTime]);
+    const [transport, setTransport] = useState<HostedRecordingTransport | null>(null);
+    const [liveSegmentIndex, setLiveSegmentIndex] = useState(-1);
+    const [liveSegmentRetry, setLiveSegmentRetry] = useState(0);
+    const isLiveLocked = manifest?.delivery?.mode === 'live-window';
+    const snapshot = useSyncExternalStore(transport?.subscribe ?? (() => () => undefined),
+        transport?.getSnapshot ?? (() => EMPTY_SNAPSHOT), () => EMPTY_SNAPSHOT);
     const baseUrl = adminPreview ? '' :
         `/api/workshops/${encodeURIComponent(workshopSlug)}/hosted-recording/${encodeURIComponent(viewerRevision.current.revisionId)}`;
 
     const showManifest = useCallback((loaded: PlayerManifest) => {
-        const video = document.createElement('video');
-        const availableTracks = loaded.tracks.filter((track) => video.canPlayType(track.contentType) !== '');
-        if (availableTracks.length === 0) {
-            throw new Error('Tento prohlížeč neumí přehrát formát záznamu. Zkuste aktuální prohlížeč s podporou MP4 nebo WebM.');
-        }
-        setManifest(loaded);
-        setPlayableRoles(availableTracks.map((track) => track.role));
-        setAudioRole(availableTracks.find((track) => track.role === 'camera' && track.hasAudio)?.role ??
-            availableTracks.find((track) => track.hasAudio)?.role ?? null);
+        if (loaded.schemaVersion !== 1 || !Number.isFinite(loaded.durationSeconds) || loaded.durationSeconds <= 0 ||
+            !Array.isArray(loaded.tracks)) throw new Error('Neplatný manifest záznamu.');
+        const probe = document.createElement('video');
+        const available = loaded.tracks.filter((track) => probe.canPlayType(track.contentType) !== '');
+        if (available.length === 0) throw new Error('Tento prohlížeč neumí přehrát formát záznamu.');
+        if (loaded.delivery?.serverTime) setServerClockOffsetMilliseconds(Date.parse(loaded.delivery.serverTime) - Date.now());
+        setPlayableRoles(available.map((track) => track.role));
+        setManifest({ ...loaded, tracks: available });
     }, []);
 
     useEffect(() => {
         const controller = new AbortController();
-        setManifest(null); setPlayableRoles([]); setError(null); setSeconds(0); setIsPlaying(false);
+        setManifest(null); setPlayableRoles([]); setError(null);
         if (adminPreview) {
             try { showManifest(adminPreview.manifest); }
             catch (cause) { setError(cause instanceof Error ? cause.message : 'Záznam nelze načíst.'); }
@@ -100,129 +113,168 @@ export function WorkshopHostedRecordingPlayer(props: Props) {
             .then(async (response) => {
                 if (!response.ok) throw new Error(response.status === 403 ? 'Záznam vyžaduje placené členství.' : 'Záznam nelze načíst.');
                 return response.json() as Promise<PlayerManifest>;
-            }).then((loaded) => {
-                if (loaded.schemaVersion !== 1 || !Number.isFinite(loaded.durationSeconds)) throw new Error('Neplatný manifest záznamu.');
-                showManifest(loaded);
-            }).catch((cause: unknown) => { if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : 'Záznam nelze načíst.'); });
+            }).then(showManifest).catch((cause: unknown) => {
+                if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : 'Záznam nelze načíst.');
+            });
         return () => controller.abort();
-    }, [baseUrl, adminPreview?.manifest, showManifest]);
-
-    const roles = playableRoles;
-    const autoRole = manifest ? getSceneAt(manifest, seconds) : null;
-    const activeRole = (selectedRole === 'auto' ? autoRole : selectedRole) &&
-        roles.includes((selectedRole === 'auto' ? autoRole : selectedRole) as TrackRole)
-        ? (selectedRole === 'auto' ? autoRole : selectedRole) as TrackRole : roles[0] ?? null;
-
-    const seekAll = useCallback((nextSeconds: number) => {
-        if (!manifest) return;
-        const bounded = Math.max(0, Math.min(nextSeconds, manifest.durationSeconds));
-        setSeconds(bounded);
-        for (const video of Object.values(videoReferences.current)) {
-            if (video && video.readyState >= 1) video.currentTime = bounded;
-        }
-    }, [manifest]);
+    }, [adminPreview, baseUrl, showManifest]);
 
     useEffect(() => {
-        if (!manifest || !isLive) return;
-        seekAll(getLivePlaybackSeconds(manifest, Date.now() + serverClockOffset));
-    }, [manifest, isLive, serverClockOffset, seekAll]);
+        if (!manifest) { setTransport(null); return; }
+        const nextTransport = new HostedRecordingTransport(manifest, isLiveLocked, serverClockOffsetMilliseconds);
+        if (isLive && !isLiveLocked) {
+            nextTransport.seek(getHostedRecordingLiveSeconds(manifest, Date.now() + serverClockOffsetMilliseconds));
+            nextTransport.play();
+        }
+        setTransport(nextTransport);
+        return () => nextTransport.dispose();
+    }, [manifest, isLive, isLiveLocked, serverClockOffsetMilliseconds]);
 
     useEffect(() => {
-        for (const [role, video] of Object.entries(videoReferences.current)) {
-            if (video) video.muted = !isAudioEnabled || role !== audioRole;
-        }
-    }, [audioRole, isAudioEnabled, manifest]);
+        if (!manifest || !isLiveLocked) { setLiveSegmentIndex(-1); return; }
+        const updateSegment = () => setLiveSegmentIndex(getHostedRecordingLiveSegmentIndex(manifest,
+            Date.now() + serverClockOffsetMilliseconds));
+        updateSegment();
+        const timer = window.setInterval(updateSegment, 200);
+        return () => window.clearInterval(timer);
+    }, [manifest, isLiveLocked, serverClockOffsetMilliseconds]);
 
     useEffect(() => {
-        if (!isPlaying || !manifest) return;
-        const interval = window.setInterval(() => {
-            const master = activeRole ? videoReferences.current[activeRole] : null;
-            if (!master) return;
-            if (isLive) {
-                const liveSeconds = getLivePlaybackSeconds(manifest, Date.now() + serverClockOffset);
-                if (Math.abs(master.currentTime - liveSeconds) > MAXIMUM_ACCEPTABLE_DRIFT_SECONDS) {
-                    seekAll(liveSeconds);
-                    return;
-                }
-            }
-            setSeconds(master.currentTime);
-            for (const [role, video] of Object.entries(videoReferences.current)) {
-                if (!video || role === activeRole || video.readyState < 1) continue;
-                if (Math.abs(video.currentTime - master.currentTime) > MAXIMUM_ACCEPTABLE_DRIFT_SECONDS) {
-                    video.currentTime = master.currentTime;
-                }
-            }
-        }, 250);
-        return () => window.clearInterval(interval);
-    }, [activeRole, isLive, isPlaying, manifest, seekAll, serverClockOffset]);
+        if (!isLiveLocked || liveSegmentIndex < 0 ||
+            !Object.values(snapshot.sourceStates).includes('error')) return;
+        const timer = window.setTimeout(() => setLiveSegmentRetry((current) => current + 1), 500);
+        return () => window.clearTimeout(timer);
+    }, [isLiveLocked, liveSegmentIndex, snapshot.sourceStates]);
 
-    const togglePlayback = async () => {
-        if (isPlaying) {
-            for (const video of Object.values(videoReferences.current)) video?.pause();
-            setIsPlaying(false); return;
-        }
-        const master = activeRole ? videoReferences.current[activeRole] : null;
-        if (!master || !manifest) return;
-        if (isLive) {
-            seekAll(getLivePlaybackSeconds(manifest, Date.now() + serverClockOffset));
-        }
-        for (const video of Object.values(videoReferences.current)) {
-            if (!video || video === master) continue;
-            video.currentTime = master.currentTime;
-            void video.play().catch(() => undefined);
-        }
-        try { await master.play(); setIsPlaying(true); }
-        catch {
-            for (const video of Object.values(videoReferences.current)) video?.pause();
-            setError('Přehrávání se nepodařilo spustit.');
-        }
+    useEffect(() => { timelineStore?.publish(manifest, snapshot.seconds); }, [timelineStore, manifest, snapshot.seconds]);
+    useEffect(() => () => timelineStore?.publish(null, 0), [timelineStore]);
+
+    const preferredRole = manifest ? getPreferredScene(manifest, snapshot.seconds) : null;
+    const visibleRole = transport?.getVisibleRole() ?? null;
+    const overlayRole = transport?.getOverlayRole() ?? null;
+    const selectedRole = snapshot.view === 'auto' ? preferredRole : snapshot.view;
+    const displayedRole = snapshot.view === 'auto' ? visibleRole :
+        snapshot.sourceStates[snapshot.view] === 'ready' ? snapshot.view : null;
+    const fallbackMessage = snapshot.view === 'auto' && preferredRole !== null && visibleRole !== null &&
+        preferredRole !== visibleRole ? `${TRACK_LABELS[preferredRole]} není připravený; přehrává se ${TRACK_LABELS[visibleRole]}.` : null;
+    const statusMessage = isLiveLocked && liveSegmentIndex < 0 ? null : displayedRole === null ? selectedRole ? getTrackMessage(selectedRole,
+        snapshot.sourceStates[selectedRole]) : 'Žádná obrazová stopa není v tomto čase připravená.' : null;
+    const durationSeconds = manifest?.durationSeconds ?? 0;
+    const activityIntervals = manifest?.activityIntervals ?? [];
+    const events = manifest?.events ?? [];
+    const liveWindow = manifest && isLiveLocked && liveSegmentIndex >= 0 ?
+        getHostedRecordingLiveWindow(manifest, liveSegmentIndex) : null;
+
+    const toggleFullscreen = useCallback(() => {
+        const container = fullscreenReference.current;
+        if (!container) return;
+        if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+        else void container.requestFullscreen().catch(() => undefined);
+    }, []);
+    const onKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.target !== event.currentTarget || !transport) return;
+        if (event.key === ' ' || event.key.toLowerCase() === 'k') {
+            event.preventDefault();
+            if (isLiveLocked) transport.play();
+            else if (snapshot.isPlayRequested) transport.pause(); else transport.play();
+        } else if (!isLiveLocked && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+            event.preventDefault();
+            transport.seek(snapshot.seconds + (event.key === 'ArrowRight' ? 5 : -5));
+        } else if (event.key.toLowerCase() === 'm') {
+            transport.setMuted(!snapshot.isMuted);
+        } else if (event.key.toLowerCase() === 'f') toggleFullscreen();
     };
 
     if (error) return <p role="alert" className="p-4 text-room-text">{error}</p>;
-    if (!manifest) return <p role="status" className="p-4 text-room-text">Načítám záznam…</p>;
-    return <div className="space-y-3 bg-room-inset p-3 text-room-text" aria-label="Synchronizovaný záznam workshopu">
+    if (!manifest || !transport) return <p role="status" className="p-4 text-room-text">Načítám záznam…</p>;
+    return <div ref={fullscreenReference} tabIndex={0} onKeyDown={onKeyboard}
+        className="space-y-3 bg-room-inset p-3 text-room-text focus-visible:outline-room-accent"
+        aria-label="Synchronizovaný záznam workshopu">
         <div role="tablist" aria-label="Obrazová stopa" className="flex flex-wrap gap-2">
-            <button type="button" role="tab" aria-selected={selectedRole === 'auto'}
-                onClick={() => setSelectedRole('auto')} className="rounded border border-room-border/30 px-3 py-1 aria-selected:bg-room-hover">Auto-view</button>
-            {TRACK_ROLES.map((role) => <button key={role} type="button" role="tab"
-                aria-selected={selectedRole === role} disabled={!roles.includes(role)}
-                onClick={() => setSelectedRole(role)}
-                className="rounded border border-room-border/30 px-3 py-1 aria-selected:bg-room-hover disabled:opacity-40">
-                {TRACK_LABELS[role]}{!roles.includes(role)
-                    ? manifest.tracks.some((track) => track.role === role) ? ' · formát nepodporován' : ' · nedostupné'
-                    : ''}
+            {(['auto', ...TRACK_ROLES] as const).map((view) => <button key={view} type="button" role="tab"
+                aria-selected={snapshot.view === view} onClick={() => transport.setView(view as HostedRecordingView)}
+                className="rounded border border-room-border/30 px-3 py-1 aria-selected:bg-room-hover focus-visible:outline-room-accent">
+                {view === 'auto' ? 'Auto' : TRACK_LABELS[view]}
+                {view !== 'auto' && !playableRoles.includes(view) ? ' · nedostupné' : ''}
             </button>)}
         </div>
-        <div className="relative aspect-video overflow-hidden rounded bg-black">
-            {manifest.tracks.filter((track) => roles.includes(track.role)).map((track) => <video key={track.role} ref={(video) => { videoReferences.current[track.role] = video; }}
-                className={track.role === activeRole ? 'absolute inset-0 h-full w-full object-contain' : 'invisible absolute inset-0 h-full w-full'}
-                src={adminPreview ? adminPreview.trackUrls[track.role] : `${baseUrl}/${track.role}`}
-                preload="metadata" playsInline muted
-                onLoadedMetadata={(event) => { if (seconds > 0) event.currentTarget.currentTime = seconds; }}
-                onEnded={() => setIsPlaying(false)} onError={() => setError('Obrazová stopa se nepodařila přehrát.')} />)}
+        <div className="relative aspect-video overflow-hidden rounded bg-black" aria-live="off">
+            {(isLiveLocked && liveWindow === null ? [] : manifest.tracks).map((track) => <HostedTrack
+                key={`${track.role}:${isLiveLocked ? `${liveSegmentIndex}:${liveSegmentRetry}` : 'full'}`} role={track.role}
+                transport={transport} url={adminPreview ? adminPreview.trackUrls[track.role] ?? '' :
+                    `${baseUrl}/${track.role}${isLiveLocked ? `?segment=${liveSegmentIndex}` : ''}`}
+                isVisible={displayedRole === track.role || overlayRole === track.role}
+                isOverlay={overlayRole === track.role && displayedRole !== track.role}
+                mediaOffsetSeconds={liveWindow?.startSeconds ?? 0} />)}
+            {isLiveLocked && liveSegmentIndex < 0 && <p role="status"
+                className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-white">
+                {liveSegmentIndex === -2 ? 'Živý záznam skončil. Čekáme na závěr workshopu.' :
+                    'Čekám na další dokončený živý úsek…'}</p>}
+            {statusMessage && <p role="status" className="absolute inset-0 flex items-center justify-center bg-black/85 p-4 text-center text-sm text-white">
+                {statusMessage}</p>}
+            {snapshot.isSettling && displayedRole === null && !statusMessage && <p role="status"
+                className="absolute inset-0 flex items-center justify-center bg-black/85 p-4 text-white">Načítám společný čas stop…</p>}
         </div>
+        {fallbackMessage && <p role="status" className="text-xs text-room-muted">{fallbackMessage}</p>}
+        {!adminPreview && recordingCommit.state === 'absent' && <p role="status" className="text-xs text-room-muted">
+            Záznam nemá připojený repozitář; commit v tomto čase nelze zobrazit.
+        </p>}
+        {isLiveLocked && <p className="text-xs text-room-muted">Živě: připojení vždy naváže na aktuální čas. Posun a změna rychlosti jsou dostupné členům.</p>}
         <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={() => void togglePlayback()} className="rounded bg-room-accent px-3 py-2 font-semibold text-room-surface">
-                {isPlaying ? 'Pozastavit' : 'Přehrát'}
+            <button type="button" onClick={() => {
+                if (isLiveLocked) transport.play();
+                else if (snapshot.isPlayRequested) transport.pause(); else transport.play();
+            }} className="rounded bg-room-accent px-3 py-2 font-semibold text-room-surface">
+                {isLiveLocked ? 'Přejít živě' : snapshot.isPlayRequested ? 'Pozastavit' : 'Přehrát'}
             </button>
-            <label className="flex min-w-40 flex-1 items-center gap-2 text-xs">
-                Čas <input type="range" min={0} max={manifest.durationSeconds} step="0.1" value={seconds}
-                    onChange={(event) => seekAll(Number(event.target.value))} className="min-w-24 flex-1" />
-            </label>
-            <span className="font-mono text-xs">{Math.floor(seconds)} / {Math.floor(manifest.durationSeconds)} s</span>
-            <button type="button" onClick={() => setIsAudioEnabled((current) => !current)} disabled={!audioRole}
+            {!isLiveLocked && Object.values(snapshot.sourceStates).includes('error') &&
+                <button type="button" onClick={() => transport.retry()}
+                    className="rounded border border-room-border/30 px-3 py-2">Zkusit stopu znovu</button>}
+            <span className="font-mono text-xs tabular-nums" aria-live="off">{formatTime(snapshot.seconds)} / {formatTime(durationSeconds)}</span>
+            <button type="button" onClick={() => transport.setMuted(!snapshot.isMuted)} disabled={!snapshot.audioRole}
                 className="rounded border border-room-border/30 px-2 py-1 disabled:opacity-50">
-                {isAudioEnabled ? 'Ztlumit' : 'Zapnout zvuk'}
+                {snapshot.isMuted ? 'Zapnout zvuk' : 'Ztlumit'}
             </button>
-            {isAudioEnabled && <label className="text-xs">Poslech <select className="rounded border p-1 text-slate-900"
-                value={audioRole ?? ''} onChange={(event) => setAudioRole(event.target.value as TrackRole)}>
-                {manifest.tracks.filter((track) => track.hasAudio).map((track) => <option key={track.role} value={track.role}>{TRACK_LABELS[track.role]}</option>)}
-            </select></label>}
+            <label className="flex items-center gap-1 text-xs">Hlasitost
+                <input type="range" min={0} max={1} step={0.05} value={snapshot.volume}
+                    aria-label="Hlasitost" onChange={(event) => transport.setVolume(Number(event.target.value))} />
+            </label>
+            <label className="flex items-center gap-1 text-xs">Rychlost
+                <select value={snapshot.speed} disabled={isLiveLocked} aria-label="Rychlost přehrávání"
+                    onChange={(event) => transport.setSpeed(event.target.value === 'auto' ? 'auto' :
+                        Number(event.target.value) as HostedRecordingSpeed)}
+                    className="rounded border border-room-border/30 bg-room-inset p-1 text-room-text">
+                    {SPEED_OPTIONS.map((speed) => <option key={speed} value={speed}>{speed === 'auto' ? 'Auto' : `${speed}×`}</option>)}
+                </select>
+                {snapshot.speed === 'auto' && !isLiveLocked && <span aria-label={`Aktuální rychlost ${snapshot.effectiveSpeed}×`}>
+                    {snapshot.effectiveSpeed}×</span>}
+            </label>
+            <button type="button" onClick={toggleFullscreen} className="rounded border border-room-border/30 px-2 py-1">Celá obrazovka</button>
         </div>
-        {manifest.events.length > 0 && <details className="text-xs"><summary className="cursor-pointer">Události z časové osy</summary>
-            <ul className="mt-2 space-y-1">{manifest.events.filter((event) => typeof event.seconds === 'number' && event.title)
-                .map((event, index) => <li key={index}><button type="button" onClick={() => seekAll(event.seconds!)}
-                    className="underline">{Math.floor(event.seconds!)} s · {event.title}</button></li>)}</ul>
+        <div className="relative pt-2">
+            <div className="relative h-2 overflow-hidden rounded bg-room-overlay/20" aria-hidden="true">
+                {activityIntervals.map((interval, index) => <span key={index} className={`absolute top-0 h-full ${interval.classification === 'automatic-coding'
+                    ? 'bg-amber-500' : interval.classification === 'active' ? 'bg-cyan-500' : 'bg-slate-400/50'}`}
+                    style={{ left: `${interval.startSeconds / durationSeconds * 100}%`,
+                        width: `${(interval.endSeconds - interval.startSeconds) / durationSeconds * 100}%` }} />)}
+            </div>
+            {events.map((event, index) => <button key={event.id ?? index} type="button" disabled={isLiveLocked}
+                onClick={() => transport.seek(event.seconds)} title={`${event.title}${event.detail ? `: ${event.detail}` : ''}`}
+                aria-label={`${formatTime(event.seconds)} · ${event.title}${event.detail ? ` · ${event.detail}` : ''}`}
+                className="absolute top-0 z-20 h-4 w-2 -translate-x-1/2 rounded bg-room-accent focus-visible:outline-room-accent disabled:cursor-default"
+                style={{ left: `${event.seconds / durationSeconds * 100}%` }} />)}
+            <input type="range" min={0} max={durationSeconds} step={0.05} value={snapshot.seconds}
+                disabled={isLiveLocked} aria-label="Čas záznamu" aria-valuetext={formatTime(snapshot.seconds)}
+                onChange={(event) => transport.seek(Number(event.target.value))}
+                className="relative z-10 w-full accent-room-accent disabled:opacity-60" />
+        </div>
+        <p className="text-xs text-room-muted">Aktivní úseky jsou modré, automatické kódování oranžové. Auto rychlost posouvá záznam po dekódovaných krocích až 10×; při pomalém načítání čeká. Zvuk je při 10× ztlumený.</p>
+        {events.length > 0 && <details className="text-xs"><summary className="cursor-pointer">Události z časové osy</summary>
+            <ol className="mt-2 space-y-1">{events.map((event, index) => <li key={event.id ?? index}>
+                <button type="button" disabled={isLiveLocked} onClick={() => transport.seek(event.seconds)}
+                    className="underline disabled:no-underline">{formatTime(event.seconds)} · {event.title}</button>
+                {event.detail && <p className="text-room-muted">{event.detail}</p>}
+            </li>)}</ol>
         </details>}
     </div>;
 }

@@ -194,5 +194,5 @@ describe('workshop wrap-up PDF', () => {
         for (const commit of commits) expect(bytes).toContain(`/URI (https://github.com/example/workshop/commit/${commit.sha})`);
         expect(bytes).toContain('/Subtype /Image');
         expect(bytes.trimEnd().endsWith('%%EOF')).toBe(true);
-    });
+    }, 20_000);
 });

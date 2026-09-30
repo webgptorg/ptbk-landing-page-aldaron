@@ -1,7 +1,9 @@
-import { authorizeHostedRecording, createHostedRecordingRangeResponse,
+import { authorizeHostedRecording, authorizeHostedRecordingSegment,
+    createHostedRecordingLiveSegmentResponse, createHostedRecordingRangeResponse,
     isAuthorizedHostedRecording } from '@/lib/workshops/hostedRecording/hostedRecordingDelivery';
 import { getHostedRecordingAssets } from '@/lib/workshops/hostedRecording/hostedRecordingRequest';
 import { HOSTED_RECORDING_VIDEO_ROLES } from '@/lib/workshops/hostedRecording/hostedRecordingValidation';
+import { getHostedRecordingLiveWindow } from '@/lib/workshops/hostedRecording/hostedRecordingTimeline';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -14,10 +16,24 @@ async function deliver(request: NextRequest, context: RouteContext, isHead = fal
         return NextResponse.json({ error: 'Track unavailable' }, { status: 404 });
     const authorized = await authorizeHostedRecording(request, workshopSlug, revisionId);
     if (!isAuthorizedHostedRecording(authorized)) return authorized;
+    const segmentParameter = request.nextUrl.searchParams.get('segment');
+    if (authorized.isLiveWindowLocked && segmentParameter === null)
+        return NextResponse.json({ error: 'Full recording unavailable during live viewing' },
+            { status: 403, headers: { 'Cache-Control': 'private, no-store' } });
+    const segmentIndex = segmentParameter === null ? null : Number(segmentParameter);
+    if (segmentParameter !== null && (!/^\d+$/.test(segmentParameter) || !Number.isSafeInteger(segmentIndex)))
+        return NextResponse.json({ error: 'Invalid segment' }, { status: 400 });
+    if (authorized.isLiveWindowLocked && segmentIndex !== null) {
+        const denied = authorizeHostedRecordingSegment(authorized, segmentIndex);
+        if (denied) return denied;
+    }
     const assets = await getHostedRecordingAssets(authorized.supabase, revisionId);
     const asset = assets.find((candidate) => candidate.role === role && candidate.status === 'complete');
     if (!asset) return NextResponse.json({ error: 'Track unavailable' }, { status: 404 });
-    return createHostedRecordingRangeResponse(request, asset, isHead);
+    return authorized.isLiveWindowLocked && segmentIndex !== null ?
+        createHostedRecordingLiveSegmentResponse(request, asset, segmentIndex,
+            getHostedRecordingLiveWindow(authorized.revision.player_metadata!, segmentIndex)!, isHead) :
+        createHostedRecordingRangeResponse(request, asset, isHead);
 }
 
 export async function GET(request: NextRequest, context: RouteContext) { return deliver(request, context); }

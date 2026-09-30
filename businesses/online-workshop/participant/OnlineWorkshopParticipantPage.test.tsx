@@ -524,7 +524,7 @@ describe('online workshop participant room', () => {
 
         const videoMaterial = screen.getByLabelText('Video workshopu');
         expect(videoMaterial).not.toBeNull();
-        expect(within(videoMaterial).getByRole('link', { name: /Otevřít video/ }).getAttribute('href')).toContain(
+        expect(within(videoMaterial).getByRole('link', { name: 'Otevřít video: Otevřít video z workshopu' }).getAttribute('href')).toContain(
             'dQw4w9WgXcQ&t=75s',
         );
         fireEvent.click(screen.getByRole('button', { name: 'Prozkoumat repozitář' }));
@@ -578,7 +578,7 @@ describe('online workshop participant room', () => {
         fireEvent.change(commentDrafts[0], { target: { value: 'Draft in participant one' } });
         fireEvent.change(commentDrafts[1], { target: { value: 'Draft in participant two' } });
 
-        expect(screen.getAllByLabelText('Video workshopu')).toHaveLength(0);
+        expect(screen.queryAllByLabelText('Video workshopu')).toHaveLength(0);
         expect(screen.getAllByLabelText('Prezentace workshopu')).toHaveLength(2);
         expect(screen.getAllByLabelText('Projekt workshopu')).toHaveLength(2);
         expect(screen.getAllByText('Co si z workshopu odnášíte?')).toHaveLength(2);
@@ -628,7 +628,7 @@ describe('online workshop participant room', () => {
             'Draft in participant one',
             'Draft in participant two',
         ]);
-        expect(screen.getAllByText('Jana Nováková')).toHaveLength(2);
+        expect(screen.getAllByText(/Připojen\/a jako Jana Nováková/)).toHaveLength(2);
     });
 
     it('keeps the presentation material available to a paying participant', async () => {

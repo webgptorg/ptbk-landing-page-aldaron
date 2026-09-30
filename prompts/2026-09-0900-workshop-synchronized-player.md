@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-sol` thinking `max` (ChatGPT account) - Implementation ~$0.7993 an hour; Testing 32 minutes
 
 [✨🎬] Play hosted workshop tracks with one clock, automatic speed and synchronized Git context
 
@@ -16,3 +16,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Share clock, timing and authorization with the upload and metadata PRDs.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

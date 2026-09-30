@@ -9,9 +9,14 @@ import {
 } from '@/businesses/online-workshop/participant/workshopParticipantStateCache';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
 import type { WorkshopPublicState } from '@/lib/workshops/workshopTypes';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const WORKSHOP_SLUG = 'production-ai-2026-08-24';
+
+beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-24T17:00:00.000Z'));
+});
 
 function createState(workshopSlug = WORKSHOP_SLUG): WorkshopPublicState {
     return {
