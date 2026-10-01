@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { useFixedControlClearance } from '@/hooks/useFixedControlClearance';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -8,8 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 
 const STORAGE_KEY = 'promptbook_notif_shown';
 
-export function BookingNotification({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { bookingNotification } = getHomepageContent(language);
+export function BookingNotification({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { bookingNotification } = getProFirmyContent(language);
     const notifications = bookingNotification.notifications;
     const [isVisible, setIsVisible] = useState(false);
     const [notification, setNotification] = useState(notifications[0]);

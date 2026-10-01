@@ -1,11 +1,11 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { motion } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 
-export function EnemySection({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { enemy } = getHomepageContent(language);
+export function EnemySection({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { enemy } = getProFirmyContent(language);
 
     return (
         <section className="relative pt-[50px] pb-24 bg-white overflow-hidden">

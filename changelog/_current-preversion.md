@@ -1,6 +1,19 @@
 # Current preversion
 
-- Recording-studio files no longer leave the studio without a seek index. A browser recorder writes a live container
+- The Czech company-data proposition — firemní dokumenty, virtuální zaměstnanec, GDPR a strategický hovor — is now
+  a landing page of its own at **`/cs/pro-firmy`**, so the main homepage can be repositioned without it being lost.
+  It is the same page as before, not a copy of it: the composition moved to `businesses/pro-firmy/_ProFirmyPage.tsx`
+  and every word to `businesses/pro-firmy/proFirmyContent.tsx`, and `/cs` and `/en` keep rendering exactly that until
+  the homepage gets a composition of its own. Nothing was redesigned, so the header and its strategic-call button,
+  the animated assistant conversation, the industries, pain points, solution, how-it-works, the comparison, the
+  testimonials and metrics, the team, the final call to action, the qualification popup, the booking notice and the
+  footer all read and behave as they did, on a phone as well as on a desktop, and the qualification form still
+  records its lead through the same contact source and thank-you page. The page says it is `/cs/pro-firmy` rather
+  than pretending to be the homepage: it has its own title, description, keywords, canonical address, generated
+  1200×630 sharing card and sitemap entry, and it names no English alternate, because the slug is Czech only. The
+  old `/pro-firmy` address, which until now led to the homepage, permanently leads to it instead, so an inbound link
+  keeps reaching the proposition it was given. The default header copy every public page wears moved out of the
+  landing page's content into `components/headerContent.ts`, where the header which falls back to it lives. A browser recorder writes a live container
   — the Matroska `Segment` keeps an unknown size, no `Cues` are written and no duration is stored — so every original
   played from the beginning but could not be seeked in, which is what the manual
   `ffmpeg -i … -map 0 -c copy …` repair was fixing. The studio now decides in one place what a usable index is, from

@@ -1,6 +1,7 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getHeaderContent } from '@/components/headerContent';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -45,7 +46,7 @@ const PRIMARY_ACTION_BUTTON_CLASS_NAME =
     'bg-promptbook-blue-dark text-white hover:bg-promptbook-blue-dark/90 hover:shadow-lg transition-all duration-300 shrink-0 text-[13px] sm:text-sm px-3 sm:px-4';
 
 interface HeaderProps {
-    language?: HomepageLanguage;
+    language?: SupportedHomepageLanguage;
     isBare?: boolean;
     tryItYourselfText?: ReactNode;
     whyPromptbookText?: ReactNode;
@@ -84,7 +85,7 @@ export function Header({
     containerClassName,
 }: HeaderProps = {}) {
     const resolvedLanguage = language ?? 'cs';
-    const { header } = getHomepageContent(resolvedLanguage);
+    const header = getHeaderContent(resolvedLanguage);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {

@@ -2,9 +2,12 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-export type HomepageLanguage = SupportedHomepageLanguage;
+/**
+ * Language the company-data landing page is published in
+ */
+export type ProFirmyLanguage = SupportedHomepageLanguage;
 
-export type HomepageChatMessage = {
+export type ProFirmyChatMessage = {
     id: number;
     type: 'user' | 'bot';
     text: string;
@@ -21,15 +24,8 @@ type Question = {
     fields?: { id: string; label: string; type: string; placeholder: string; inputMode?: string }[];
 };
 
-type HomepageContent = {
+type ProFirmyContent = {
     loading: string;
-    header: {
-        fomoBefore: string;
-        fomoStrong: string;
-        fomoAfter: string;
-        ctaMobile: string;
-        ctaDesktop: string;
-    };
     hero: {
         eyebrow: string;
         heading: ReactNode;
@@ -38,7 +34,7 @@ type HomepageContent = {
         badges: [string, string, string];
         chatTitle: string;
         chatInputPlaceholder: string;
-        chatMessages: HomepageChatMessage[];
+        chatMessages: ProFirmyChatMessage[];
     };
     socialProof: {
         eyebrow: string;
@@ -145,16 +141,16 @@ type HomepageContent = {
     };
 };
 
-export const homepageContent = {
+/**
+ * Every word of the company-data landing page, in each language it is published in
+ *
+ * Note: This is the proposition of `/cs/pro-firmy` — company documents, a virtual employee and a strategic call.
+ *       `/cs` and `/en` render it until the main homepage is repositioned around autonomous agendas; the new
+ *       homepage brings its own content and must leave this one alone.
+ */
+export const proFirmyContent = {
     cs: {
         loading: 'Načítání...',
-        header: {
-            fomoBefore: 'Zbývá',
-            fomoStrong: '7 míst z 10',
-            fomoAfter: 'pro strategický hovor zdarma',
-            ctaMobile: 'Chci hovor zdarma',
-            ctaDesktop: 'Zarezervovat hovor zdarma',
-        },
         hero: {
             eyebrow: 'Česká AI platforma pro firemní data',
             heading: (
@@ -528,13 +524,6 @@ export const homepageContent = {
     },
     en: {
         loading: 'Loading...',
-        header: {
-            fomoBefore: 'Only',
-            fomoStrong: '7 of 10 spots',
-            fomoAfter: 'left for a free strategy call',
-            ctaMobile: 'Free call',
-            ctaDesktop: 'Book a free call',
-        },
         hero: {
             eyebrow: 'Czech AI platform for company data',
             heading: (
@@ -907,8 +896,8 @@ export const homepageContent = {
             messageSuffix: 'booked a strategy call',
         },
     },
-} satisfies Record<HomepageLanguage, HomepageContent>;
+} satisfies Record<ProFirmyLanguage, ProFirmyContent>;
 
-export function getHomepageContent(language: HomepageLanguage = 'cs') {
-    return homepageContent[language];
+export function getProFirmyContent(language: ProFirmyLanguage = 'cs') {
+    return proFirmyContent[language];
 }

@@ -1,12 +1,12 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
-export function FinalCTASection({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { finalCta } = getHomepageContent(language);
+export function FinalCTASection({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { finalCta } = getProFirmyContent(language);
 
     const handleCTAClick = () => {
         window.dispatchEvent(new CustomEvent('open-qualification-popup'));

@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on Claude Code `claude-opus-5` thinking `max` - Implementation $22.43 3 hours; Testing 32 minutes
 
 [✨🏢] Preserve the current company-data homepage as `/pro-firmy`
 
@@ -38,3 +38,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

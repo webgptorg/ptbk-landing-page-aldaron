@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -99,8 +99,8 @@ const stepVisuals = [
 /* ═══════════════════════════════════════════════════════════
    MAIN SECTION - Vertical Timeline, alternating sides
    ═══════════════════════════════════════════════════════════ */
-export function HowItWorksSection({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { howItWorks } = getHomepageContent(language);
+export function HowItWorksSection({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { howItWorks } = getProFirmyContent(language);
     const steps = howItWorks.steps.map((step, index) => ({
         ...step,
         ...stepVisuals[index],

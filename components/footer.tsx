@@ -1,5 +1,6 @@
 'use client';
 
+import { PRO_FIRMY_PATH } from '@/businesses/pro-firmy/config';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ export interface FooterProps {
 
 type FooterContent = Required<Omit<FooterProps, 'language' | 'isTechnologyIncubationShown'>>;
 
-const pathnamesWithTechnologyIncubation = new Set(['/', '/cs', '/en', '/pro-mesta']);
+const pathnamesWithTechnologyIncubation = new Set(['/', '/cs', '/en', PRO_FIRMY_PATH, '/pro-mesta']);
 
 function shouldShowTechnologyIncubation(pathname: string | null) {
     return pathname !== null && pathnamesWithTechnologyIncubation.has(pathname);

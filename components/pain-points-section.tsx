@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { motion, useInView } from 'framer-motion';
 import {
     AlertTriangle,
@@ -415,8 +415,8 @@ const painPointVisuals = [
 /* ═══════════════════════════════════════════════════════════
    MAIN SECTION
    ═══════════════════════════════════════════════════════════ */
-export function PainPointsSection({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { painPoints } = getHomepageContent(language);
+export function PainPointsSection({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { painPoints } = getProFirmyContent(language);
     const points = painPoints.points.map((point, index) => ({
         ...point,
         ...painPointVisuals[index],

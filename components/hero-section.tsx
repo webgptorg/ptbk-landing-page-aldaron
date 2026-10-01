@@ -1,14 +1,14 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, FileText, Shield, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CompletedBubble, TypewriterBubble } from './ui/ChatBubbles';
 
-export function HeroSection({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { hero } = getHomepageContent(language);
+export function HeroSection({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { hero } = getProFirmyContent(language);
     const chatMessages = hero.chatMessages;
     const [mounted, setMounted] = useState(false);
     // Which message is currently typing

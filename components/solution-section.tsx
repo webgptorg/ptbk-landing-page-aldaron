@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { motion } from 'framer-motion';
 
 /* ═══════════════════════════════════════════════════════════
@@ -93,8 +93,8 @@ const benefitVisuals = [
 /* ═══════════════════════════════════════════════════════════
    MAIN SECTION
    ═══════════════════════════════════════════════════════════ */
-export function SolutionSection({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { solution } = getHomepageContent(language);
+export function SolutionSection({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { solution } = getProFirmyContent(language);
     const benefits = solution.benefits.map((benefit, index) => ({
         ...benefit,
         ...benefitVisuals[index],

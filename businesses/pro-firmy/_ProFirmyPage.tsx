@@ -1,5 +1,6 @@
 'use client';
 
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { BookingNotification } from '@/components/booking-notification';
 import { EnemySection } from '@/components/enemy-section';
 import { FinalCTASection } from '@/components/final-cta-section';
@@ -15,27 +16,36 @@ import { TeamSection } from '@/components/team-section';
 import { TestimonialsSection } from '@/components/testimonials-section';
 import { Suspense } from 'react';
 
-export function ProFirmyPage() {
+/**
+ * Company-data landing page: company documents, a virtual employee answering in plain language, and a strategic call
+ *
+ * Note: This composition is published at `/cs/pro-firmy` and, until the main homepage is repositioned around
+ *       autonomous agendas, also at `/cs` and `/en`. The repositioned homepage brings a composition of its own
+ *       instead of changing this one, so that `/cs/pro-firmy` keeps the proposition it preserves.
+ */
+export function ProFirmyPage({ language }: { language: ProFirmyLanguage }) {
+    const content = getProFirmyContent(language);
+
     return (
         <main className="min-h-screen">
-            <Header />
-            <Suspense fallback={<div>Načítání...</div>}>
-                <HeroSection />
+            <Header language={language} />
+            <Suspense fallback={<div>{content.loading}</div>}>
+                <HeroSection language={language} />
             </Suspense>
-            <SocialProofStrip />
-            <PainPointsSection />
-            <SolutionSection />
-            <HowItWorksSection />
-            <EnemySection />
-            <TestimonialsSection />
-            <TeamSection />
-            <FinalCTASection />
-            <Footer />
+            <SocialProofStrip language={language} />
+            <PainPointsSection language={language} />
+            <SolutionSection language={language} />
+            <HowItWorksSection language={language} />
+            <EnemySection language={language} />
+            <TestimonialsSection language={language} />
+            <TeamSection {...content.team} />
+            <FinalCTASection language={language} />
+            <Footer language={language} />
             {/* <- Note: Due to legal reasons we cannot use `<MinimalFooter/>` here and need to use `<Footer/>` instead
-                         On the other hand, we can use `<MinimalFooter/>` on the `/dekujeme` page 
+                         On the other hand, we can use `<MinimalFooter/>` on the `/dekujeme` page
             */}
-            <QualificationPopup />
-            <BookingNotification />
+            <QualificationPopup language={language} />
+            <BookingNotification language={language} />
         </main>
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { InfiniteSlider } from '@/components/ui/infinite-slider';
 import { motion } from 'framer-motion';
 import {
@@ -37,8 +37,8 @@ const industryIcons = [
     Radio,
 ];
 
-export function SocialProofStrip({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { socialProof } = getHomepageContent(language);
+export function SocialProofStrip({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { socialProof } = getProFirmyContent(language);
 
     return (
         <section className="relative py-14 bg-white border-y border-gray-100">

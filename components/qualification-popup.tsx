@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -11,8 +11,8 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ArrowLeft, Calendar, CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export function QualificationPopup({ language = 'cs' }: { language?: HomepageLanguage }) {
-    const { qualificationPopup } = getHomepageContent(language);
+export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { qualificationPopup } = getProFirmyContent(language);
     const questions = qualificationPopup.questions;
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);

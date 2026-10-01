@@ -26,7 +26,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
 - `/en` is its English localization.
-- `/pro-mesta`, `/pro-firmy`, `/for-agro`, `/for-industry`, `/ai-supervize`,
+- `/cs/pro-firmy` is the Czech company-data landing page: company documents, a virtual
+  employee answering in plain language, GDPR, and a strategic call. It owns that
+  proposition — its composition in `businesses/pro-firmy/_ProFirmyPage.tsx`, every word
+  in `businesses/pro-firmy/proFirmyContent.tsx`, and its own metadata, canonical URL,
+  sharing card and sitemap entry in `businesses/pro-firmy/proFirmyMetadata.ts`. It is
+  published in Czech only and names no language alternate. `/cs` and `/en` render that
+  same composition until the homepage is repositioned; repositioning means composing the
+  homepage from sections and content of its own, never changing the preserved ones.
+  The legacy `/pro-firmy` permanently redirects there. The header's own default copy is
+  site chrome and lives beside it in `components/headerContent.ts`, so no landing page
+  owns the words every other page wears.
+- `/pro-mesta`, `/for-agro`, `/for-industry`, `/ai-supervize`,
   `/hackathon-factory`, and `/pavol` are specialized landing pages. `/pavol`
   redirects to `/cs/pavol` or `/en/pavol`; those legacy Promptbook paths then
   permanently redirect to Pavol Hejny's Czech `https://pavolhejny.cz/` and English

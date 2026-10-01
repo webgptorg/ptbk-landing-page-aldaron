@@ -1,6 +1,6 @@
 'use client';
 
-import { getHomepageContent, type HomepageLanguage } from '@/businesses/homepage/homepageContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Quote } from 'lucide-react';
@@ -26,7 +26,7 @@ type TestimonialsSectionProps = {
     className?: string;
     containerClassName?: string;
     isAnimated?: boolean;
-    language?: HomepageLanguage;
+    language?: ProFirmyLanguage;
     eyebrow?: ReactNode;
     title?: ReactNode;
     description?: ReactNode;
@@ -108,18 +108,18 @@ export function TestimonialsSection({
     testimonials,
     metrics,
 }: TestimonialsSectionProps) {
-    const { testimonials: homepageTestimonials } = getHomepageContent(language);
+    const { testimonials: defaultTestimonials } = getProFirmyContent(language);
     const resolvedTestimonials: Testimonial[] =
         testimonials ??
-        homepageTestimonials.items.map((testimonial, index) => ({
+        defaultTestimonials.items.map((testimonial, index) => ({
             name: testimonial.company,
             role: testimonial.author,
             testimonial: testimonial.quote,
             icon: testimonialVisuals[index]?.CustomIcon,
         }));
-    const resolvedMetrics = metrics ?? homepageTestimonials.metrics;
-    const resolvedEyebrow = eyebrow ?? homepageTestimonials.eyebrow;
-    const resolvedTitle = title ?? homepageTestimonials.heading;
+    const resolvedMetrics = metrics ?? defaultTestimonials.metrics;
+    const resolvedEyebrow = eyebrow ?? defaultTestimonials.eyebrow;
+    const resolvedTitle = title ?? defaultTestimonials.heading;
 
     return (
         <section

@@ -11,6 +11,7 @@ import {
     AI_TA_KRAJTA_RSS_FEED_MEDIA_TYPE,
     AI_TA_KRAJTA_RSS_FEED_PLATFORM,
 } from '@/businesses/ai-ta-krajta/config';
+import { PRO_FIRMY_PATH } from '@/businesses/pro-firmy/config';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 /**
@@ -19,6 +20,7 @@ import { expect, test, type APIRequestContext, type Page } from '@playwright/tes
 const PUBLIC_PAGE_PATHS = [
     '/cs',
     '/en',
+    PRO_FIRMY_PATH,
     '/pro-mesta',
     '/for-agro',
     '/for-industry',
@@ -63,10 +65,12 @@ type PublicRedirect = {
 };
 
 const PERMANENT_REDIRECT_STATUS_CODE = 308;
+const MOVED_PERMANENTLY_STATUS_CODE = 301;
 const TEMPORARY_REDIRECT_STATUS_CODE = 307;
 
 const PUBLIC_REDIRECTS: readonly PublicRedirect[] = [
     { path: '/', statusCode: TEMPORARY_REDIRECT_STATUS_CODE, destinationPaths: ['/cs', '/en'] },
+    { path: '/pro-firmy', statusCode: MOVED_PERMANENTLY_STATUS_CODE, destinationPaths: [PRO_FIRMY_PATH] },
     { path: '/pavol', statusCode: TEMPORARY_REDIRECT_STATUS_CODE, destinationPaths: ['/cs/pavol', '/en/pavol'] },
     {
         path: '/privacy',
