@@ -1,3 +1,4 @@
+import type { QualificationPopupContent } from '@/components/qualification-popup';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
@@ -7,21 +8,20 @@ import type { ReactNode } from 'react';
  */
 export type ProFirmyLanguage = SupportedHomepageLanguage;
 
+/**
+ * Contact source under which a lead from the company-data landing page is recorded
+ *
+ * Note: It is the source this page has always written, so the existing contacts and the filters reading them keep
+ *       meaning the same thing after the main homepage got a lead flow of its own.
+ */
+export const PRO_FIRMY_QUALIFICATION_PLACE_NAME = 'qualification-popup';
+
 export type ProFirmyChatMessage = {
     id: number;
     type: 'user' | 'bot';
     text: string;
     startDelay: number;
     static?: boolean;
-};
-
-type Question = {
-    id: string;
-    question: string;
-    subtitle?: string;
-    type: 'single' | 'contact';
-    options?: string[];
-    fields?: { id: string; label: string; type: string; placeholder: string; inputMode?: string }[];
 };
 
 type ProFirmyContent = {
@@ -121,20 +121,7 @@ type ProFirmyContent = {
         capacityNote: string;
         riskReversal: string;
     };
-    qualificationPopup: {
-        dialogTitle: string;
-        questions: Question[];
-        successTitle: (name: string) => string;
-        successDescription: ReactNode;
-        successEmailPrefix: string;
-        close: string;
-        stepLabel: (currentStep: number, totalSteps: number) => string;
-        remainingSpots: string;
-        intro: string;
-        submitting: string;
-        submit: string;
-        back: string;
-    };
+    qualificationPopup: QualificationPopupContent;
     bookingNotification: {
         notifications: { company: string; time: string }[];
         messageSuffix: string;
@@ -145,8 +132,9 @@ type ProFirmyContent = {
  * Every word of the company-data landing page, in each language it is published in
  *
  * Note: This is the proposition of `/cs/pro-firmy` — company documents, a virtual employee and a strategic call.
- *       `/cs` and `/en` render it until the main homepage is repositioned around autonomous agendas; the new
- *       homepage brings its own content and must leave this one alone.
+ *       The main homepage now makes the agenda claim instead and owns its words in
+ *       `businesses/homepage/homepageContent.tsx`. The English copy is kept because the sections reading it accept
+ *       either language, but no public address publishes this proposition in English.
  */
 export const proFirmyContent = {
     cs: {
@@ -497,6 +485,8 @@ export const proFirmyContent = {
                     ],
                 },
             ],
+            requiredFieldError: 'Toto pole je povinné.',
+            invalidEmailError: 'Zadejte prosím platný e-mail.',
             successTitle: (name) => `Díky, ${name}!`,
             successDescription: (
                 <>
@@ -871,6 +861,8 @@ export const proFirmyContent = {
                     ],
                 },
             ],
+            requiredFieldError: 'This field is required.',
+            invalidEmailError: 'Please enter a valid email address.',
             successTitle: (name) => `Thanks, ${name}!`,
             successDescription: (
                 <>

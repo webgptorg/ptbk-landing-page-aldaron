@@ -1,0 +1,40 @@
+   ▲ Next.js 15.2.6
+   - Local:        http://localhost:4009
+   - Network:      http://192.168.192.1:4009
+   - Environments: .env
+
+ ✓ Starting...
+ ○ Compiling /instrumentation ...
+ ✓ Compiled /instrumentation in 4s (229 modules)
+ ✓ Ready in 19.3s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 545ms (153 modules)
+ ○ Compiling /cs ...
+ ✓ Compiled /cs in 32.4s (4376 modules)
+ GET /cs 200 in 35461ms
+ ✓ Compiled in 3.4s (1455 modules)
+ ✓ Compiled in 651ms (1441 modules)
+ GET /cs 200 in 671ms
+ GET /cs 200 in 432ms
+ GET /cs 200 in 434ms
+ GET /cs 200 in 451ms
+ GET /cs 200 in 438ms
+ GET /cs 200 in 633ms
+ ○ Compiling /en ...
+ ✓ Compiled /en in 1692ms (4366 modules)
+ GET /en 200 in 3408ms
+ GET /en 200 in 390ms
+ GET /en 200 in 324ms
+ GET /en 200 in 425ms
+ GET /en 200 in 623ms
+ GET /en 200 in 365ms
+ GET /en 200 in 421ms
+ GET /cs 200 in 308ms
+ GET /en 200 in 492ms
+ ○ Compiling /cs/pro-firmy ...
+ ✓ Compiled /cs/pro-firmy in 14.7s (5251 modules)
+ GET /cs/pro-firmy 200 in 16929ms
+ GET /cs 200 in 494ms
+ GET /en 200 in 447ms
+ GET /cs/pro-firmy 200 in 721ms
+[?25h

@@ -1,13 +1,20 @@
-import { ProFirmyPage } from '@/businesses/pro-firmy/_ProFirmyPage';
-import { HOMEPAGE_METADATA } from '@/businesses/homepage/homepageMetadata';
+import { Homepage } from '@/businesses/homepage/_Homepage';
+import { createHomepageStructuredData, HOMEPAGE_METADATA } from '@/businesses/homepage/homepageMetadata';
+import { StructuredData } from '@/components/structured-data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = HOMEPAGE_METADATA.cs;
 
 /**
- * Note: The homepage still shows the company-data proposition preserved at `/cs/pro-firmy`. Repositioning the
- *       homepage means composing it here from its own sections, not changing the page this renders.
+ * Czech main homepage, which is the source of truth for the structure and copy of the homepage
+ *
+ * Note: The company-data proposition this address used to hold is preserved at `/cs/pro-firmy`.
  */
 export default function HomePage() {
-    return <ProFirmyPage language="cs" />;
+    return (
+        <>
+            <StructuredData nodes={createHomepageStructuredData('cs')} />
+            <Homepage language="cs" />
+        </>
+    );
 }

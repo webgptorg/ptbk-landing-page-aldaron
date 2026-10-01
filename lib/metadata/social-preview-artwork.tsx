@@ -8,6 +8,7 @@ import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette
  * image template or encoding its route name in the renderer.
  */
 export const SOCIAL_PREVIEW_ARTWORK_KINDS = [
+    'agenda',
     'knowledge',
     'city',
     'agriculture',
@@ -82,6 +83,106 @@ function ArtworkLine({ width, color }: ArtworkLineProps) {
                 background: color,
             }}
         />
+    );
+}
+
+/**
+ * Represents a bounded area of responsibility which holds several tasks at once and keeps working through them.
+ *
+ * The ring around the card is what makes it an agenda rather than a to-do list: the work comes back around instead
+ * of ending with the last line.
+ */
+function AgendaArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
+    const TASK_ROWS = [
+        { width: 196, color: 'rgba(255, 255, 255, 0.3)', markerColor: palette.accentSoft },
+        { width: 226, color: 'rgba(255, 255, 255, 0.9)', markerColor: palette.accent },
+        { width: 174, color: 'rgba(255, 255, 255, 0.42)', markerColor: 'rgba(255, 255, 255, 0.24)' },
+        { width: 208, color: 'rgba(255, 255, 255, 0.42)', markerColor: 'rgba(255, 255, 255, 0.24)' },
+    ] as const;
+
+    return (
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
+            {/* The work coming back around */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 36,
+                    left: 44,
+                    width: 384,
+                    height: 384,
+                    display: 'flex',
+                    borderRadius: 999,
+                    border: `2px dashed ${palette.chipBorder}`,
+                }}
+            />
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 28,
+                    left: 220,
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    borderRadius: 999,
+                    border: '8px solid rgba(7, 17, 33, 0.78)',
+                    background: palette.accent,
+                }}
+            />
+
+            {/* The agenda itself: one named area holding tasks of different states */}
+            <ArtworkCard palette={palette} top={104} left={92} width={288} height={248} rotation={-3}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+                    <div
+                        style={{
+                            width: 16,
+                            height: 16,
+                            display: 'flex',
+                            borderRadius: 5,
+                            background: palette.accent,
+                        }}
+                    />
+                    <ArtworkLine width={122} color="rgba(255, 255, 255, 0.82)" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                    {TASK_ROWS.map((row) => (
+                        <div key={row.width} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div
+                                style={{
+                                    width: 12,
+                                    height: 12,
+                                    display: 'flex',
+                                    borderRadius: 999,
+                                    background: row.markerColor,
+                                }}
+                            />
+                            <ArtworkLine width={row.width} color={row.color} />
+                        </div>
+                    ))}
+                </div>
+            </ArtworkCard>
+
+            {/* The question which comes back to a person */}
+            <div
+                style={{
+                    position: 'absolute',
+                    right: 24,
+                    bottom: 70,
+                    width: 164,
+                    height: 104,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    borderRadius: 24,
+                    border: `1px solid ${palette.chipBorder}`,
+                    background: `${palette.accentSoft}26`,
+                    padding: 22,
+                    transform: 'rotate(7deg)',
+                }}
+            >
+                <ArtworkLine width={76} color="rgba(255, 255, 255, 0.84)" />
+                <ArtworkLine width={104} color="rgba(255, 255, 255, 0.38)" />
+            </div>
+        </div>
     );
 }
 
@@ -744,6 +845,7 @@ export function SocialPreviewArtwork({ kind, palette }: SocialPreviewArtworkProp
                 overflow: 'hidden',
             }}
         >
+            {kind === 'agenda' && <AgendaArtwork palette={palette} />}
             {kind === 'knowledge' && <KnowledgeArtwork palette={palette} />}
             {kind === 'city' && <CityArtwork palette={palette} />}
             {kind === 'agriculture' && <AgricultureArtwork palette={palette} />}

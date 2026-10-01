@@ -1,18 +1,111 @@
 'use client';
 
-import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import { subscribeToWaitlist } from '@/lib/subscription/subscribeToWaitlist';
 import { cn } from '@/lib/utils';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ArrowLeft, Calendar, CheckCircle2 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLanguage }) {
-    const { qualificationPopup } = getProFirmyContent(language);
+/**
+ * Name of the browser event which opens the dialog
+ *
+ * Note: Every call to action of a page lives far away from the dialog in the tree, so they reach it through one
+ *       event instead of each section threading a setter down to itself.
+ */
+export const OPEN_QUALIFICATION_POPUP_EVENT_NAME = 'open-qualification-popup';
+
+/**
+ * Opens the qualification dialog of the page the visitor is on
+ */
+export function openQualificationPopup(): void {
+    window.dispatchEvent(new CustomEvent(OPEN_QUALIFICATION_POPUP_EVENT_NAME));
+}
+
+/**
+ * One step of the qualification flow: either a question with prepared answers, or the contact fields closing it
+ */
+export type QualificationQuestion = {
+    readonly id: string;
+    readonly question: string;
+    readonly subtitle?: string;
+    readonly type: 'single' | 'contact';
+    readonly options?: readonly string[];
+    readonly fields?: readonly {
+        readonly id: string;
+        readonly label: string;
+        readonly type: string;
+        readonly placeholder: string;
+        readonly inputMode?: string;
+    }[];
+};
+
+/**
+ * Every word of the qualification dialog, supplied by the landing page which opens it
+ *
+ * Note: The dialog owns the flow, the validation and the submission; it owns none of the copy, because the pages
+ *       which open it make different propositions and may not borrow each other's words or each other's claims.
+ */
+export type QualificationPopupContent = {
+    readonly dialogTitle: string;
+    readonly intro: string;
+    readonly questions: readonly QualificationQuestion[];
+
+    /**
+     * Shown under a contact field the visitor left empty
+     */
+    readonly requiredFieldError: string;
+
+    /**
+     * Shown under the e-mail field when what is in it cannot be an address
+     */
+    readonly invalidEmailError: string;
+
+    readonly successTitle: (name: string) => string;
+    readonly successDescription: ReactNode;
+    readonly successEmailPrefix: string;
+    readonly close: string;
+    readonly stepLabel: (currentStep: number, totalSteps: number) => string;
+    readonly submitting: string;
+    readonly submit: string;
+    readonly back: string;
+
+    /**
+     * Optional note about free capacity
+     *
+     * Note: It is deliberately optional. A page which cannot honestly count the places left simply leaves it out
+     *       rather than inventing a number.
+     */
+    readonly remainingSpots?: string;
+};
+
+type QualificationPopupProps = {
+    /**
+     * Language of the shared legal note the dialog closes with
+     */
+    readonly language?: SupportedHomepageLanguage;
+
+    /**
+     * Words of this particular dialog
+     */
+    readonly content: QualificationPopupContent;
+
+    /**
+     * Contact source the lead is recorded under, so each proposition stays tellable apart in `/admin/contacts`
+     */
+    readonly placeName: string;
+};
+
+export function QualificationPopup({
+    language = 'cs',
+    content: qualificationPopup,
+    placeName,
+}: QualificationPopupProps) {
     const questions = qualificationPopup.questions;
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
@@ -23,8 +116,8 @@ export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLan
 
     useEffect(() => {
         const handleOpen = () => setIsOpen(true);
-        window.addEventListener('open-qualification-popup', handleOpen);
-        return () => window.removeEventListener('open-qualification-popup', handleOpen);
+        window.addEventListener(OPEN_QUALIFICATION_POPUP_EVENT_NAME, handleOpen);
+        return () => window.removeEventListener(OPEN_QUALIFICATION_POPUP_EVENT_NAME, handleOpen);
     }, []);
 
     useEffect(() => {
@@ -51,11 +144,11 @@ export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLan
         const value = answers[fieldId]?.trim() ?? '';
 
         if (!value) {
-            return 'Toto pole je povinné.';
+            return qualificationPopup.requiredFieldError;
         }
 
         if (fieldId === 'email' && !isEmailAddressValid(value)) {
-            return 'Zadejte prosím platný e-mail.';
+            return qualificationPopup.invalidEmailError;
         }
 
         return null;
@@ -100,7 +193,6 @@ export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLan
         const fullname = answers.name || '';
         const email = answers.email || '';
         const phone = answers.phone || '';
-        const placeName = 'qualification-popup';
         const note = JSON.stringify(answers, null, 4);
         await subscribeToWaitlist({ fullname, email, placeName, phone, note });
 
@@ -176,10 +268,12 @@ export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLan
                                 <span className="text-[12px] font-medium text-gray-400 uppercase tracking-wider">
                                     {qualificationPopup.stepLabel(currentStep, totalSteps)}
                                 </span>
-                                <span className="text-[12px] text-emerald-600 font-medium flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    {qualificationPopup.remainingSpots}
-                                </span>
+                                {qualificationPopup.remainingSpots && (
+                                    <span className="text-[12px] text-emerald-600 font-medium flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        {qualificationPopup.remainingSpots}
+                                    </span>
+                                )}
                             </div>
                             {currentStep === 0 && (
                                 <p className="text-[13px] text-gray-400 mt-2">{qualificationPopup.intro}</p>

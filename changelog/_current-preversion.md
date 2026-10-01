@@ -1,10 +1,39 @@
 # Current preversion
 
+- The main homepage is no longer about asking an AI questions over company documents. It is about handing over an
+  **agenda**: a bounded area of responsibility which keeps being handled, instead of a task somebody has to prompt
+  for again and again. `/cs` and `/en` are a composition of their own in `businesses/homepage`, built in the order
+  a first-time reader needs it. The hero promises the outcome in plain words and shows one agenda actually being
+  held — its name, the context it carries, and four tasks of different lifecycles at once: one finished, one being
+  worked on, one waiting, and one question handed back to a person instead of being decided alone. Immediately
+  below, two columns put a one-shot task beside an agenda line by line — who starts it, how much it covers, what
+  happens afterwards, what it does when unsure, what is left behind — and those columns stay two columns on a phone,
+  so the contrast survives the narrow screen. Only then is the word introduced and taken apart: an agenda holds
+  context, goals and tasks, several agents and its rules and tools, it runs on in the background, it returns
+  outcomes and escalations, and a person can look inside, change the brief, approve and correct at any point. It is
+  said outright that an agenda is not another word for a scheduled job — accounting is an agenda, filing VAT and
+  watching deadlines are tasks inside it — and that which agent happens to be carrying it out is an implementation
+  detail. Five examples show the breadth without the product becoming any one of them, and the page says so in as
+  many words before moving on. The strongest of them is walked through step by step on its own: an application which
+  is not only generated but kept alive, from the agenda knowing the repository, through a change written down as a
+  task, a strong coding agent doing the work and the quality gate it has to pass, to the next task and the one after
+  that — and the page admits that this very site is such an agenda. Only after all of that comes the leverage:
+  Promptbook builds on ChatGPT, Codex, Claude Code and agents like them rather than replacing them, the durable
+  agenda belongs to no single vendor — the same brief moves this site forward through `claude-code` and through
+  `openai-codex` alike — and an agenda lives as files in a folder, in Git where that fits, without a reader having
+  to know what Git is. Nothing invents scarcity, metrics, customers or autonomy: the closing call to action says
+  what actually happens on a twenty-minute call, including that it may end with "not this, not yet", and no
+  capacity bar, booking notice or borrowed testimonial came along. The lead flow is the one which already worked —
+  the same dialog, the same contact API and the same thank-you page — now asking about the area which should keep
+  running rather than about document chaos, and recording its leads under a contact source of its own so the two
+  propositions stay tellable apart. Title, description, keywords, canonical address, both language alternates,
+  Schema.org `WebPage` data and a new 1200×630 sharing card drawn as an agenda all say the same thing the page
+  does, and the shared card version was bumped so crawlers let go of the old one.
+
 - The Czech company-data proposition — firemní dokumenty, virtuální zaměstnanec, GDPR a strategický hovor — is now
-  a landing page of its own at **`/cs/pro-firmy`**, so the main homepage can be repositioned without it being lost.
+  a landing page of its own at **`/cs/pro-firmy`**, so the main homepage could be repositioned without it being lost.
   It is the same page as before, not a copy of it: the composition moved to `businesses/pro-firmy/_ProFirmyPage.tsx`
-  and every word to `businesses/pro-firmy/proFirmyContent.tsx`, and `/cs` and `/en` keep rendering exactly that until
-  the homepage gets a composition of its own. Nothing was redesigned, so the header and its strategic-call button,
+  and every word to `businesses/pro-firmy/proFirmyContent.tsx`. Nothing was redesigned, so the header and its strategic-call button,
   the animated assistant conversation, the industries, pain points, solution, how-it-works, the comparison, the
   testimonials and metrics, the team, the final call to action, the qualification popup, the booking notice and the
   footer all read and behave as they did, on a phone as well as on a desktop, and the qualification form still

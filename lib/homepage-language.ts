@@ -1,5 +1,13 @@
 export type SupportedHomepageLanguage = 'cs' | 'en';
 
+/**
+ * Every language the site publishes a homepage in, in the order they are offered in
+ *
+ * Note: It is written down beside the type so that a component offering the languages - the header switching
+ *       between them - iterates the one list instead of repeating it.
+ */
+export const SUPPORTED_HOMEPAGE_LANGUAGES: readonly SupportedHomepageLanguage[] = ['cs', 'en'];
+
 export const fallbackHomepageLanguage: SupportedHomepageLanguage = 'en';
 
 export function getPreferredHomepageLanguage(acceptLanguage: string | null): SupportedHomepageLanguage {

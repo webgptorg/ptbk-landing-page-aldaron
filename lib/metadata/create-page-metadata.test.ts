@@ -1,5 +1,6 @@
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
+import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 import { describe, expect, it } from 'vitest';
 
 const TRANSLATED_PAGE: PageMetadataDefinition = {
@@ -32,7 +33,7 @@ describe('createPageMetadata', () => {
             url: 'https://ptbk.io/cs/example',
             images: [
                 {
-                    url: 'https://ptbk.io/cs/example/opengraph-image?v=2',
+                    url: `https://ptbk.io/cs/example/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`,
                     width: 1200,
                     height: 630,
                 },
