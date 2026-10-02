@@ -22,6 +22,7 @@ type FooterLink = { href: string; text: string };
 
 export interface FooterProps {
     language?: FooterLanguage;
+    claim?: string;
     productHeader?: string;
     productLinks?: FooterLink[];
     companyHeader?: string;
@@ -42,7 +43,7 @@ export interface FooterProps {
     isTechnologyIncubationShown?: boolean;
 }
 
-type FooterContent = Required<Omit<FooterProps, 'language' | 'isTechnologyIncubationShown'>>;
+type FooterContent = Required<Omit<FooterProps, 'language' | 'isTechnologyIncubationShown' | 'claim'>>;
 
 const pathnamesWithTechnologyIncubation = new Set(['/', '/cs', '/en', PRO_FIRMY_PATH, '/pro-mesta']);
 
@@ -172,9 +173,10 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
     } = overrides;
 
     const claim =
-        language === 'cs'
+        overrides.claim ??
+        (language === 'cs'
             ? 'Vytvořte AI, která skutečně rozumí vaší firmě.'
-            : 'Create AI that truly understands your business.';
+            : 'Create AI that truly understands your business.');
     const [email, setEmail] = useState('');
     const [isConsentGiven, setIsConsentGiven] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);

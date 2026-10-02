@@ -15,8 +15,8 @@ describe('public sharing preview coverage', () => {
     it('versions generated artwork without propagating participant query parameters or fragments', () => {
         expect(
             createGeneratedSocialPreviewImagePath('/cs/online-workshop/participant?email=private@example.test#chat'),
-        ).toBe('/cs/online-workshop/participant/opengraph-image?v=2');
-        expect(createGeneratedSocialPreviewImagePath()).toBe('/opengraph-image?v=2');
+        ).toBe('/cs/online-workshop/participant/opengraph-image?v=3');
+        expect(createGeneratedSocialPreviewImagePath()).toBe('/opengraph-image?v=3');
     });
 
     it.each(INDEXED_PAGE_METADATA_DEFINITIONS)(
@@ -24,7 +24,7 @@ describe('public sharing preview coverage', () => {
         (definition) => {
             const metadata = createPageMetadata(definition);
             const imagePath = `${definition.path}/opengraph-image`;
-            const imageUrl = new URL(createPublicUrl(`${imagePath}?v=2`));
+            const imageUrl = new URL(createPublicUrl(`${imagePath}?v=3`));
             const domain = getPublicDomainRouteByHostname(imageUrl.hostname);
 
             expect(definition.isSocialPreviewImageGenerated).toBe(true);

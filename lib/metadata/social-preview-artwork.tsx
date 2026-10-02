@@ -8,6 +8,7 @@ import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette
  * image template or encoding its route name in the renderer.
  */
 export const SOCIAL_PREVIEW_ARTWORK_KINDS = [
+    'agenda',
     'knowledge',
     'city',
     'agriculture',
@@ -20,6 +21,62 @@ export const SOCIAL_PREVIEW_ARTWORK_KINDS = [
 ] as const;
 
 export type SocialPreviewArtworkKind = (typeof SOCIAL_PREVIEW_ARTWORK_KINDS)[number];
+
+/** A durable workspace surrounds different tasks; the outer arrows keep the work moving. */
+function AgendaArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
+    return (
+        <div style={{ display: 'flex', position: 'absolute', left: 32, top: 16, width: 490, height: 420 }}>
+            <svg width="490" height="420" viewBox="0 0 490 420" fill="none" style={{ position: 'absolute' }}>
+                <path
+                    d="M80 85 C120 5 400 5 434 133 M424 103 L434 133 L450 105 M410 335 C370 415 90 415 56 287 M40 315 L56 287 L65 318"
+                    stroke={palette.accent}
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>
+            <ArtworkCard palette={palette} top={96} left={74} width={340} height={234}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+                    <div
+                        style={{ display: 'flex', width: 34, height: 34, borderRadius: 9, background: palette.accent }}
+                    />
+                    <ArtworkLine width={170} color="rgba(255,255,255,0.8)" />
+                </div>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    {[0, 1, 2].map((index) => (
+                        <div
+                            key={index}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                gap: 14,
+                                width: 90,
+                                height: 96,
+                                borderRadius: 12,
+                                padding: 14,
+                                background: `${palette.accent}20`,
+                                border: `1px solid ${palette.chipBorder}`,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: index === 1 ? 10 : 4,
+                                    background: index === 2 ? palette.accent : 'rgba(255,255,255,0.5)',
+                                }}
+                            />
+                            <ArtworkLine width={50} color="rgba(255,255,255,0.55)" />
+                            <ArtworkLine width={35} color="rgba(255,255,255,0.25)" />
+                        </div>
+                    ))}
+                </div>
+            </ArtworkCard>
+        </div>
+    );
+}
 
 type SocialPreviewArtworkProps = {
     readonly kind: SocialPreviewArtworkKind;
@@ -744,6 +801,7 @@ export function SocialPreviewArtwork({ kind, palette }: SocialPreviewArtworkProp
                 overflow: 'hidden',
             }}
         >
+            {kind === 'agenda' && <AgendaArtwork palette={palette} />}
             {kind === 'knowledge' && <KnowledgeArtwork palette={palette} />}
             {kind === 'city' && <CityArtwork palette={palette} />}
             {kind === 'agriculture' && <AgricultureArtwork palette={palette} />}

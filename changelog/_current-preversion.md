@@ -1,5 +1,16 @@
 # Current preversion
 
+- Repositioned `/cs` and `/en` around ongoing AI agendas: bounded responsibilities with lasting context, multiple
+  goals/tasks, agents and tools. A new visual composition contrasts one-shot work with background continuation,
+  demonstrates application maintenance, and offers customer communication, accounting preparation and content
+  examples with explicit human oversight. Verified Promptbook Coder harnesses and repository context follow the
+  core concept. `/cs/pro-firmy` retains its company-document proposition. Homepage SEO, JSON-LD and versioned
+  1200×630 social artwork now describe agendas. The existing qualification contact source and full-load thank-you
+  route are reused with localized agenda questions and confirmation; failures preserve answers for retry, and
+  pending submissions prevent edits and duplicates. No invented activity, metrics or scarcity is added.
+  Verification also corrected an existing hosted-recording test fixture to age its superseded revision explicitly,
+  so its cleanup assertion no longer depends on the date the suite runs.
+
 - The Czech company-data proposition — firemní dokumenty, virtuální zaměstnanec, GDPR a strategický hovor — is now
   a landing page of its own at **`/cs/pro-firmy`**, so the main homepage can be repositioned without it being lost.
   It is the same page as before, not a copy of it: the composition moved to `businesses/pro-firmy/_ProFirmyPage.tsx`

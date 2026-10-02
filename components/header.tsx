@@ -153,7 +153,10 @@ export function Header({
             <div className={cn('container mx-auto px-4', containerClassName)}>
                 <div className="flex items-center justify-between h-14 gap-4">
                     {/* Brand trail: the optional context is used by product-area pages such as the community. */}
-                    <div className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Navigace značky">
+                    <div
+                        className="flex min-w-0 shrink-0 items-center gap-2"
+                        aria-label={resolvedLanguage === 'cs' ? 'Navigace značky' : 'Brand navigation'}
+                    >
                         <Link
                             href={resolvedBrandHref}
                             className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
@@ -257,7 +260,10 @@ export function Header({
                 </div>
 
                 {hasNavItems && (
-                    <nav className="flex gap-2 overflow-x-auto pb-3 pt-1 lg:hidden" aria-label="Section navigation">
+                    <nav
+                        className="flex gap-2 overflow-x-auto pb-3 pt-1 lg:hidden"
+                        aria-label={resolvedLanguage === 'cs' ? 'Navigace sekcí' : 'Section navigation'}
+                    >
                         {navItems!.map((item) => (
                             <Link
                                 key={item.href}
