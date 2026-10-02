@@ -347,6 +347,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Shared community and workshop behavior
 
+- The description an administrator writes about a term or a permanent room is Markdown, and how it reads is decided
+  once, in `components/events/EventDescription.tsx`. The door of its room reads the whole passage, with its paragraphs,
+  lists, quotations, code and links, which open beside the room; the card a term is chosen with reads the very same
+  words as one flowing excerpt, because that card is a single button where block elements and destinations are neither
+  valid nor clickable, and the compact card still cuts the excerpt off after two lines. An authored heading leads its
+  paragraph instead of claiming a level in the page around it, the formatting inherits the colours of the surface it is
+  read on, raw HTML only ever contributes its text, an image is read by its label, and only an address of a known
+  protocol becomes a link. The wrap-up PDF already reads the same Markdown, and a calendar entry, which can show no
+  formatting at all, receives it as the plain text of `convertMarkdownToPlainText`, which drops no word and keeps both
+  the label and the destination of a link. A description written by a member rather than by an administration — the
+  project a discussion is about — stays the plain text its moderation approved.
+
 - Workshop occurrences choose video, presentation, or their connected repository as the primary stage source. Old
   data defaults to video; the choice never changes which sources are stored. The countdown and wrap-up still follow
   `workshopPhase.ts`, and other readable sources remain supplementary special materials with recording access chosen

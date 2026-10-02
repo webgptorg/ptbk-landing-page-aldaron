@@ -1,6 +1,7 @@
 import { createCalendarFileName, type CalendarEvent } from '@/lib/calendar/create-calendar-links';
 import { getFirstName } from '@/lib/getFirstName';
 import { createAbsoluteUrl } from '@/lib/metadata/site-config';
+import { convertMarkdownToPlainText } from '@/lib/text/markdownText';
 import {
     createWorkshopParticipantLink,
     createWorkshopSelectionPath,
@@ -81,6 +82,8 @@ export function getWorkshopCalendarEndsAt(occurrence: WorkshopOccurrenceTiming):
  * Note: The event points to the participant room with the details of the participant prefilled, so that the link inside
  *       the calendar entry connects them without any typing. An incomplete identity falls back to the plain room, which
  *       still asks for the details in its connection form.
+ * Note: A calendar application shows nothing but plain text, so the Markdown the description was written in is
+ *       flattened rather than repeated with its marks in the middle of somebody's day.
  */
 export function createWorkshopCalendarEvent({
     occurrence,
@@ -93,7 +96,7 @@ export function createWorkshopCalendarEvent({
     return {
         id: occurrence.slug,
         title: createWorkshopCalendarEventTitle(occurrence.title, hostFullname, participantIdentity.fullname),
-        description: occurrence.description,
+        description: convertMarkdownToPlainText(occurrence.description),
         startsAt: occurrence.startsAt,
         endsAt: getWorkshopCalendarEndsAt(occurrence),
         url: createAbsoluteUrl(participantLink ?? createWorkshopSelectionPath(participantPath, occurrence.slug)),

@@ -72,6 +72,20 @@ describe('workshop calendar event', () => {
         expect(Date.parse(event.endsAt) - Date.parse(event.startsAt)).toBe(60 * 60 * 1000);
     });
 
+    it('flattens the Markdown of the description, because a calendar shows plain text only', () => {
+        const event = createWorkshopCalendarEvent({
+            occurrence: {
+                ...ONLINE_WORKSHOP_OCCURRENCE,
+                description: 'Celé workflow **od issue po merge**.\n\n- rozpad úkolů\n- code review',
+            },
+            hostFullname: 'Pavol Hejný',
+            participantIdentity: { email: 'karel@firma.cz', fullname: 'Karel Novák' },
+            participantPath: PARTICIPANT_PATH,
+        });
+
+        expect(event.description).toBe('Celé workflow od issue po merge.\n\nrozpad úkolů\ncode review');
+    });
+
     it('names the downloaded file after the workshop', () => {
         expect(createWorkshopCalendarFileName('online-workshop-2026-08-20')).toBe('online-workshop-2026-08-20.ics');
     });

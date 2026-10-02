@@ -1,3 +1,4 @@
+import { EventDescription } from '@/components/events/EventDescription';
 import { WorkshopPhaseBadge } from '@/components/workshops/WorkshopPhaseBadge';
 import { formatEventFormat } from '@/lib/events/eventLocation';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
@@ -213,9 +214,11 @@ export function EventTermOptionCard({
                         {occurrence.title}
                     </span>
                     {occurrence.description.trim() !== '' && (
-                        <span className={cn(densityClassNames.description, appearanceClassNames.description)}>
-                            {occurrence.description}
-                        </span>
+                        <EventDescription
+                            description={occurrence.description}
+                            shape="inline"
+                            className={cn(densityClassNames.description, appearanceClassNames.description)}
+                        />
                     )}
                 </>
             )}

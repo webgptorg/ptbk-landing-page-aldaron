@@ -19,6 +19,7 @@ export function createCzechCommunityConnectionDetails(community: WorkshopDetails
     return {
         title: community.title,
         description: community.description,
+        isDescriptionMarkdown: true,
         dateLabel: 'Kdykoli online',
         durationLabel: 'Stálý přístup',
         roomLabel: 'Komunita Promptbooku',

@@ -207,7 +207,12 @@ export function WorkshopSettingsForm({
                         value={description}
                         onChange={(event) => changeDraft({ description: event.target.value })}
                         className="mt-2"
+                        placeholder={'O čem termín je.\n\n- **tučně** a *kurzívou*\n- [odkaz](https://…)'}
                     />
+                    <span className="mt-1 block text-xs font-normal text-slate-400">
+                        Markdown. Formátování si přečtou karty termínu, dveře místnosti i shrnutí workshopu; v kalendáři
+                        zůstane čistý text.
+                    </span>
                 </label>
                 {roomCapabilities.isScheduled && (
                     <>

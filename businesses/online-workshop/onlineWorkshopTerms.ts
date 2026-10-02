@@ -32,6 +32,7 @@ export function createOnlineWorkshopConnectionDetails(
     return {
         title: workshop.title,
         description: workshop.description,
+        isDescriptionMarkdown: true,
         dateLabel: `${formatCzechWorkshopRelativeDate(workshop.startsAt, currentTime)} · ${formatCzechWorkshopTime(workshop.startsAt)}`,
         durationLabel: formatCzechWorkshopDuration(workshop.startsAt, workshop.endsAt),
     };

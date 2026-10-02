@@ -1,5 +1,6 @@
 'use client';
 
+import { EventDescription } from '@/components/events/EventDescription';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,11 @@ import {
 import { isWorkshopParticipantFullnameValid } from '@/lib/workshops/workshopParticipantFullname';
 import { ArrowRight, LockKeyhole, Radio } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
+
+/**
+ * How the door of a room reads what it is about, whichever way that description was written
+ */
+const WORKSHOP_CONNECTION_DESCRIPTION_CLASS_NAME = 'mt-4 text-sm leading-6 text-room-text';
 
 type WorkshopConnectionFormProps = {
     readonly connectionDetails: WorkshopConnectionDetails;
@@ -33,6 +39,15 @@ type WorkshopConnectionFormProps = {
 export type WorkshopConnectionDetails = {
     readonly title: string;
     readonly description: string;
+
+    /**
+     * Whether the description is the Markdown an administrator wrote about this event, see `EventDescription`
+     *
+     * Note: Only a room whose description was written in its administration reads its own formatting. A discussion is
+     *       described by the member who shared the project it is about, and their words go through the moderation of
+     *       the community rather than through a formatter, so they stay the plain text they were submitted as.
+     */
+    readonly isDescriptionMarkdown?: boolean;
     readonly dateLabel: string;
     readonly durationLabel: string;
     readonly roomLabel?: string;
@@ -89,7 +104,14 @@ export function WorkshopConnectionForm({
                     <h1 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
                         {connectionDetails.title}
                     </h1>
-                    <p className="mt-4 text-sm leading-6 text-room-text">{connectionDetails.description}</p>
+                    {connectionDetails.isDescriptionMarkdown === true ? (
+                        <EventDescription
+                            description={connectionDetails.description}
+                            className={WORKSHOP_CONNECTION_DESCRIPTION_CLASS_NAME}
+                        />
+                    ) : (
+                        <p className={WORKSHOP_CONNECTION_DESCRIPTION_CLASS_NAME}>{connectionDetails.description}</p>
+                    )}
                     <dl className="mt-8 space-y-4 text-sm">
                         <div>
                             <dt className="text-room-subtle">Kdy</dt>

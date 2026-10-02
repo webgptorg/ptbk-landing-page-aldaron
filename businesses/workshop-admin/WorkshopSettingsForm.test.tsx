@@ -116,9 +116,11 @@ describe('workshop settings form', () => {
     it('autosaves the permanent community without adding event-only settings', async () => {
         const { onSave } = renderWorkshopSettingsForm(COMMUNITY);
         expect(screen.queryByLabelText('Hlavní obsah stage')).toBeNull();
-        fireEvent.change(screen.getByLabelText('Popis'), { target: { value: 'New community description' } });
+        fireEvent.change(screen.getByLabelText(/^Popis/), { target: { value: 'New **community** description' } });
         await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
-        expect(onSave.mock.calls[0][0]).toEqual(expect.objectContaining({ description: 'New community description' }));
+        expect(onSave.mock.calls[0][0]).toEqual(
+            expect.objectContaining({ description: 'New **community** description' }),
+        );
         expect(onSave.mock.calls[0][0]).not.toHaveProperty('startsAt');
     });
 
