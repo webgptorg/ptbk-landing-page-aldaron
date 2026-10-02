@@ -37,7 +37,7 @@ export const TeamSection = ({
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div className="text-center">
                     <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-                    {description && <p className="mt-4 text-lg text-muted-foreground">{description}</p>}
+                    <p className="mt-4 text-lg text-muted-foreground">{description}</p>
                 </div>
 
                 <div className="mt-12  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-12 lg:mt-16 items-center">

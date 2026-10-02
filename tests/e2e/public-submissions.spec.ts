@@ -52,17 +52,17 @@ test('submits the business lead dialog', async ({ page }) => {
     await expect(dialog.getByText('Poptávka odeslána!')).toBeVisible();
 });
 
-test('submits the preserved company-page qualification lead flow', async ({ page }) => {
-    await page.goto('/cs/pro-firmy');
+test('submits the homepage qualification lead flow', async ({ page }) => {
+    await page.goto('/cs');
     await page.locator('#hero-cta').click();
 
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: 'Výroba / Průmysl' }).click();
-    await expect(dialog.getByRole('heading', { name: 'Co vás nejvíc trápí?' })).toBeVisible();
+    await expect(dialog.getByText('Co vás nejvíc trápí?')).toBeVisible();
     await dialog.getByRole('button', { name: 'Lidé tráví hodiny hledáním dokumentů' }).click();
-    await expect(dialog.getByRole('heading', { name: 'Kdy byste chtěli začít?' })).toBeVisible();
+    await expect(dialog.getByText('Kdy byste chtěli začít?')).toBeVisible();
     await dialog.getByRole('button', { name: 'Příští kvartál' }).click();
-    await expect(dialog.getByRole('heading', { name: 'Kam se vám ozveme?' })).toBeVisible();
+    await expect(dialog.getByText('Kam se vám ozveme?')).toBeVisible();
 
     await dialog.getByPlaceholder('Jan Novák').fill('E2E Qualification');
     await dialog.getByPlaceholder('Název vaší firmy').fill('E2E Example s.r.o.');

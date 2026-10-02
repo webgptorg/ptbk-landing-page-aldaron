@@ -50,7 +50,7 @@ describe('shortcode landing-page metadata', () => {
 
         expect(generated.openGraph?.images).toEqual([
             expect.objectContaining({
-                url: 'https://ptbk.io/launch/opengraph-image?v=3',
+                url: 'https://ptbk.io/launch/opengraph-image?v=2',
                 width: 1200,
                 height: 630,
                 type: 'image/png',

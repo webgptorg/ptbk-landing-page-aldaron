@@ -18,21 +18,14 @@ export const HOMEPAGE_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguag
     cs: {
         path: HOMEPAGE_LANGUAGE_ALTERNATES.cs,
         language: 'cs',
-        title: 'Promptbook – Svěřte AI agendu. Ať práce pokračuje.',
-        socialTitle: 'Svěřte AI agendu. Ať práce pokračuje.',
+        title: 'Promptbook - Okamžitý přístup ke všemu, co vaše firma kdy napsala',
+        socialTitle: 'Okamžitý přístup ke všemu, co vaše firma kdy napsala',
         description:
-            'Promptbook mění jednotlivé AI úkoly v dlouhodobé agendy pro firmy a projekty. Kontext, cíle, agenti a nástroje pro práci na pozadí, s vaším dohledem.',
+            'Nahrajte firemní dokumenty, vytvořte virtuálního zaměstnance a ptejte se normální češtinou. Bez promptů, bez halucinací, 100% GDPR. Česká AI platforma.',
         socialDescription:
-            'Od jednorázového úkolu k průběžné péči o web, aplikaci nebo firemní agendu. Vy určujete směr. Práce pokračuje.',
-        socialPreviewImageAlt: 'Promptbook – AI agendy: kontext, úkoly a nástroje v průběžném pracovním cyklu',
-        keywords: [
-            'AI agendy',
-            'AI pro firmy',
-            'práce na pozadí',
-            'údržba aplikací',
-            'dlouhodobá odpovědnost',
-            'Promptbook',
-        ],
+            'Nahrajte firemní dokumenty, vytvořte virtuálního zaměstnance a ptejte se normální češtinou. Bez promptů, bez halucinací, 100% GDPR.',
+        socialPreviewImageAlt: 'Promptbook - okamžitý přístup ke všemu, co vaše firma kdy napsala',
+        keywords: ['AI pro firmy', 'firemní dokumenty', 'virtuální zaměstnanec', 'GDPR', 'česká AI', 'Promptbook'],
         languageAlternates: HOMEPAGE_LANGUAGE_ALTERNATES,
         isSocialPreviewImageGenerated: true,
         sitemapPriority: 1,
@@ -41,21 +34,14 @@ export const HOMEPAGE_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguag
     en: {
         path: HOMEPAGE_LANGUAGE_ALTERNATES.en,
         language: 'en',
-        title: 'Promptbook – Give AI a responsibility. Let the work continue.',
-        socialTitle: 'Give AI a responsibility. Let the work continue.',
+        title: 'Promptbook - Instant access to everything your company has ever written',
+        socialTitle: 'Instant access to everything your company has ever written',
         description:
-            'Promptbook turns individual AI tasks into ongoing agendas for companies and projects. Context, goals, agents and tools for background work with human oversight.',
+            'Upload your company documents, create a virtual employee, and ask in plain language. No prompting, no hallucinations, 100% GDPR. A Czech AI platform.',
         socialDescription:
-            'From a one-shot task to ongoing care for your application, website or business agenda. You set the direction. The work continues.',
-        socialPreviewImageAlt: 'Promptbook – AI agendas: context, tasks and tools in a continuous work cycle',
-        keywords: [
-            'AI agendas',
-            'AI for business',
-            'background work',
-            'application maintenance',
-            'ongoing responsibilities',
-            'Promptbook',
-        ],
+            'Upload your company documents, create a virtual employee, and ask in plain language. No prompting, no hallucinations, 100% GDPR.',
+        socialPreviewImageAlt: 'Promptbook - instant access to everything your company has ever written',
+        keywords: ['AI for business', 'company documents', 'virtual employee', 'GDPR', 'Czech AI', 'Promptbook'],
         languageAlternates: HOMEPAGE_LANGUAGE_ALTERNATES,
         isSocialPreviewImageGenerated: true,
         sitemapPriority: 1,
@@ -70,13 +56,13 @@ export const HOMEPAGE_METADATA: Readonly<Record<SupportedHomepageLanguage, Metad
 
 export const HOMEPAGE_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.cs, {
-        eyebrow: 'AI pro dlouhodobé agendy',
-        artwork: 'agenda',
+        eyebrow: 'Česká AI platforma pro firemní data',
+        artwork: 'knowledge',
         paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
     }),
     en: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.en, {
-        eyebrow: 'AI for ongoing responsibilities',
-        artwork: 'agenda',
+        eyebrow: 'Czech AI platform for company data',
+        artwork: 'knowledge',
         paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
     }),
 };

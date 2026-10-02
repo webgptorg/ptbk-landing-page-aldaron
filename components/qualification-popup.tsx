@@ -1,299 +1,368 @@
 'use client';
 
-import { getProFirmyContent } from '@/businesses/pro-firmy/proFirmyContent';
+import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import { subscribeToWaitlist } from '@/lib/subscription/subscribeToWaitlist';
-import { ArrowLeft, Calendar } from 'lucide-react';
-import { useEffect, useRef, useState, type HTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { ArrowLeft, Calendar, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-/** Page-owned questions reuse one contact pipeline. The preserved page remains the default. */
-export type QualificationPopupContent = Omit<
-    ReturnType<typeof getProFirmyContent>['qualificationPopup'],
-    'remainingSpots' | 'successTitle' | 'successDescription' | 'successEmailPrefix'
-> & {
-    remainingSpots?: string;
-};
-
-type QualificationPopupProps = {
-    language?: SupportedHomepageLanguage;
-    content?: QualificationPopupContent;
-    confirmationContext?: 'agenda';
-};
-
-const QUALIFICATION_MESSAGES = {
-    cs: {
-        required: 'Toto pole je povinné.',
-        email: 'Zadejte prosím platný e-mail.',
-        error: 'Odeslání se nezdařilo. Vaše odpovědi zůstaly vyplněné. Zkuste to prosím znovu.',
-    },
-    en: {
-        required: 'This field is required.',
-        email: 'Please enter a valid email address.',
-        error: 'We couldn’t send your request. Your answers are still here. Please try again.',
-    },
-};
-const OPTION_TRANSITION_DELAY_MS = 300;
-
-export function QualificationPopup({ language = 'cs', content, confirmationContext }: QualificationPopupProps) {
-    const CONTENT = content ?? getProFirmyContent(language).qualificationPopup;
-    const MESSAGES = QUALIFICATION_MESSAGES[language];
+export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+    const { qualificationPopup } = getProFirmyContent(language);
+    const questions = qualificationPopup.questions;
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isStepChanging, setIsStepChanging] = useState(false);
-    const [isValidationShown, setIsValidationShown] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const isSubmissionPending = useRef(false);
-    const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const questionHeading = useRef<HTMLHeadingElement>(null);
-    const opener = useRef<HTMLElement | null>(null);
-    const QUESTION = CONTENT.questions[currentStep];
-    const PROGRESS = ((currentStep + 1) / CONTENT.questions.length) * 100;
+    const [showValidation, setShowValidation] = useState(false);
 
     useEffect(() => {
-        const handleOpen = () => {
-            opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-            setIsOpen(true);
-        };
+        const handleOpen = () => setIsOpen(true);
         window.addEventListener('open-qualification-popup', handleOpen);
-        return () => {
-            window.removeEventListener('open-qualification-popup', handleOpen);
-            if (transitionTimer.current !== null) clearTimeout(transitionTimer.current);
-        };
+        return () => window.removeEventListener('open-qualification-popup', handleOpen);
     }, []);
 
     useEffect(() => {
-        setIsValidationShown(false);
-        if (isOpen && currentStep > 0) questionHeading.current?.focus();
+        setShowValidation(false);
     }, [currentStep, isOpen]);
 
-    function getFieldError(fieldId: string): string | null {
-        const VALUE = answers[fieldId]?.trim() ?? '';
-        if (!VALUE) return MESSAGES.required;
-        if (fieldId === 'email' && !isEmailAddressValid(VALUE)) return MESSAGES.email;
+    const currentQuestion = questions[currentStep];
+    const totalSteps = questions.length;
+    const progress = ((currentStep + 1) / totalSteps) * 100;
+
+    const canProceed = () => {
+        if (currentQuestion.type === 'contact') {
+            const name = answers['name'];
+            const email = answers['email'];
+            const phone = answers['phone'];
+            const company = answers['company'];
+            if (!name || !email || !phone || !company) return false;
+            return isEmailAddressValid(email);
+        }
+        return !!answers[currentQuestion.id];
+    };
+
+    const getContactFieldError = (fieldId: string) => {
+        const value = answers[fieldId]?.trim() ?? '';
+
+        if (!value) {
+            return 'Toto pole je povinné.';
+        }
+
+        if (fieldId === 'email' && !isEmailAddressValid(value)) {
+            return 'Zadejte prosím platný e-mail.';
+        }
+
         return null;
-    }
+    };
 
-    function handleClose() {
-        if (isSubmissionPending.current) return;
-        if (transitionTimer.current !== null) clearTimeout(transitionTimer.current);
-        transitionTimer.current = null;
-        setIsOpen(false);
-        setCurrentStep(0);
-        setAnswers({});
-        setIsStepChanging(false);
-        setIsValidationShown(false);
-        setError(null);
-    }
-
-    function handleOptionSelect(option: string) {
-        if (transitionTimer.current !== null || isSubmissionPending.current) return;
-        setAnswers((previous) => ({ ...previous, [QUESTION.id]: option }));
-        setIsStepChanging(true);
-        transitionTimer.current = setTimeout(() => {
-            setCurrentStep((previous) => Math.min(previous + 1, CONTENT.questions.length - 1));
-            setIsStepChanging(false);
-            transitionTimer.current = null;
-        }, OPTION_TRANSITION_DELAY_MS);
-    }
-
-    async function handleSubmit() {
-        if (isSubmissionPending.current) return;
-        if (QUESTION.fields?.some((field) => getFieldError(field.id) !== null)) {
-            setIsValidationShown(true);
+    const handleNext = () => {
+        if (!canProceed()) {
+            setShowValidation(true);
             return;
         }
-        isSubmissionPending.current = true;
-        setIsSubmitting(true);
-        setError(null);
-        try {
-            await subscribeToWaitlist({
-                fullname: answers.name.trim(),
-                email: answers.email.trim(),
-                phone: answers.phone.trim(),
-                placeName: 'qualification-popup',
-                note: JSON.stringify(answers, null, 4),
-            });
-            const PARAMETERS = new URLSearchParams({ name: answers.name.trim(), email: answers.email.trim() });
-            if (confirmationContext) {
-                PARAMETERS.set('context', confirmationContext);
-                PARAMETERS.set('lang', language);
-            }
-            window.location.href = `/dekujeme?${PARAMETERS.toString()}`;
-        } catch {
-            setError(MESSAGES.error);
-            isSubmissionPending.current = false;
-            setIsSubmitting(false);
+
+        if (currentStep < totalSteps - 1) {
+            setCurrentStep((s) => s + 1);
+        } else {
+            handleSubmit();
         }
-    }
+    };
+
+    const handleBack = () => {
+        if (currentStep > 0) {
+            setCurrentStep((s) => s - 1);
+        }
+    };
+
+    const handleOptionSelect = (option: string) => {
+        setAnswers((prev) => ({ ...prev, [currentQuestion.id]: option }));
+        setTimeout(() => {
+            if (currentStep < totalSteps - 1) {
+                setCurrentStep((s) => s + 1);
+            }
+        }, 450);
+    };
+
+    const handleSubmit = async () => {
+        if (!canProceed()) {
+            setShowValidation(true);
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        const fullname = answers.name || '';
+        const email = answers.email || '';
+        const phone = answers.phone || '';
+        const placeName = 'qualification-popup';
+        const note = JSON.stringify(answers, null, 4);
+        await subscribeToWaitlist({ fullname, email, placeName, phone, note });
+
+        setIsSubmitting(false);
+        // Redirect to thank you page with personalization
+        const params = new URLSearchParams({
+            name: answers.name || '',
+            email: answers.email || '',
+        });
+        window.location.href = `/dekujeme?${params.toString()}`;
+    };
+
+    const handleClose = () => {
+        setIsOpen(false);
+        setTimeout(() => {
+            setCurrentStep(0);
+            setAnswers({});
+            setIsSubmitted(false);
+            setShowValidation(false);
+        }, 300);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent
-                lang={language}
-                closeLabel={CONTENT.close}
-                aria-describedby={undefined}
-                onCloseAutoFocus={(event) => {
-                    event.preventDefault();
-                    opener.current?.focus();
-                }}
-                className="flex h-[620px] max-h-[calc(100dvh-2rem)] max-w-lg flex-col overflow-hidden rounded-3xl border-0 p-0 shadow-2xl"
-            >
-                <DialogTitle className="sr-only">{CONTENT.dialogTitle}</DialogTitle>
-                <div
-                    className="h-1.5 shrink-0 bg-gray-100"
-                    role="progressbar"
-                    aria-label={CONTENT.stepLabel(currentStep, CONTENT.questions.length)}
-                    aria-valuenow={PROGRESS}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                >
+            <DialogContent className="max-w-lg p-0 overflow-hidden border-0 rounded-3xl shadow-2xl h-[600px] sm:h-[620px] flex flex-col">
+                {/* Accessibility: hidden title for screen readers */}
+                <VisuallyHidden>
+                    <DialogTitle>{qualificationPopup.dialogTitle}</DialogTitle>
+                </VisuallyHidden>
+
+                {/* Progress bar */}
+                {!isSubmitted && (
                     <div
-                        className="h-full bg-cyan-600 transition-all motion-reduce:transition-none"
-                        style={{ width: `${PROGRESS}%` }}
-                    />
-                </div>
-                <form
-                    className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-6 sm:px-8 sm:py-8"
-                    onSubmit={(event) => {
-                        event.preventDefault();
-                        if (QUESTION.type === 'contact') void handleSubmit();
-                    }}
-                    noValidate
-                >
-                    <div className="mb-5 pr-6">
-                        <div className="flex items-center justify-between gap-2 text-xs">
-                            <span className="text-slate-500">
-                                {CONTENT.stepLabel(currentStep, CONTENT.questions.length)}
-                            </span>
-                            {CONTENT.remainingSpots && (
-                                <span className="font-medium text-emerald-700">{CONTENT.remainingSpots}</span>
+                        className="h-1.5 bg-gray-100"
+                        role="progressbar"
+                        aria-valuenow={progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                    >
+                        <div
+                            className="h-full bg-gradient-to-r from-[#0891b2] to-[#06b6d4] transition-all duration-500 ease-out rounded-full"
+                            style={{ width: `${progress}%` }}
+                        ></div>
+                    </div>
+                )}
+
+                {isSubmitted ? (
+                    /* Success State */
+                    <div className="px-8 py-14 text-center">
+                        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-cyan-50 to-teal-50 rounded-full flex items-center justify-center">
+                            <CheckCircle2 className="w-10 h-10 text-cyan-600" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#0f172a] mb-3">
+                            {qualificationPopup.successTitle(answers.name || '')}
+                        </h3>
+                        <p className="text-[15px] text-gray-500 leading-relaxed mb-2">
+                            {qualificationPopup.successDescription}
+                        </p>
+                        <p className="text-[13px] text-gray-400 leading-relaxed">
+                            {qualificationPopup.successEmailPrefix}{' '}
+                            <strong className="text-gray-500">{answers.email}</strong>.
+                        </p>
+                        <Button onClick={handleClose} variant="outline" className="mt-8 rounded-full px-6">
+                            {qualificationPopup.close}
+                        </Button>
+                    </div>
+                ) : (
+                    /* Question Steps */
+                    <div className="px-5 sm:px-8 py-6 sm:py-8 flex-1 flex flex-col overflow-y-auto">
+                        {/* Header: value prop + step */}
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="text-[12px] font-medium text-gray-400 uppercase tracking-wider">
+                                    {qualificationPopup.stepLabel(currentStep, totalSteps)}
+                                </span>
+                                <span className="text-[12px] text-emerald-600 font-medium flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    {qualificationPopup.remainingSpots}
+                                </span>
+                            </div>
+                            {currentStep === 0 && (
+                                <p className="text-[13px] text-gray-400 mt-2">{qualificationPopup.intro}</p>
                             )}
                         </div>
-                        {currentStep === 0 && (
-                            <p className="mt-3 text-sm leading-relaxed text-slate-500">{CONTENT.intro}</p>
-                        )}
-                    </div>
-                    <h2
-                        ref={questionHeading}
-                        tabIndex={-1}
-                        className="mb-5 text-xl font-bold text-slate-900 outline-none"
-                    >
-                        {QUESTION.question}
-                    </h2>
-                    <fieldset disabled={isSubmitting || isStepChanging} className="flex min-w-0 flex-1 flex-col">
-                        <legend className="sr-only">{QUESTION.question}</legend>
-                        {QUESTION.type === 'single' && (
+
+                        {/* Question */}
+                        <h3 className="text-xl font-bold text-[#0f172a] mb-6">{currentQuestion.question}</h3>
+
+                        {/* Single select options */}
+                        {currentQuestion.type === 'single' && currentQuestion.options && (
                             <div className="space-y-2.5">
-                                {QUESTION.options?.map((option) => (
+                                {currentQuestion.options.map((option) => (
                                     <button
                                         key={option}
-                                        type="button"
                                         onClick={() => handleOptionSelect(option)}
-                                        aria-pressed={answers[QUESTION.id] === option}
-                                        className="w-full rounded-xl border border-gray-200 bg-white px-5 py-3.5 text-left text-[15px] text-gray-700 transition-colors hover:bg-gray-50 aria-pressed:border-cyan-600 aria-pressed:bg-cyan-50 focus-visible:outline-cyan-700"
+                                        className={`w-full text-left px-5 py-3.5 rounded-xl border text-[15px] transition-all duration-200 ${
+                                            answers[currentQuestion.id] === option
+                                                ? 'border-[#0891b2] bg-cyan-50 text-[#0f172a] font-medium shadow-sm'
+                                                : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50'
+                                        }`}
                                     >
                                         {option}
                                     </button>
                                 ))}
                             </div>
                         )}
-                        {QUESTION.type === 'contact' && (
-                            <div>
-                                {QUESTION.subtitle && (
-                                    <p className="mb-4 text-sm leading-relaxed text-slate-500">{QUESTION.subtitle}</p>
+
+                        {/* Contact fields */}
+                        {currentQuestion.type === 'contact' && currentQuestion.fields && (
+                            <div className="space-y-3">
+                                {currentQuestion.subtitle && (
+                                    <p className="text-[13px] text-gray-400 -mt-2 mb-3">{currentQuestion.subtitle}</p>
                                 )}
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                    {QUESTION.fields?.map((field, index) => {
-                                        const FIELD_ERROR = isValidationShown ? getFieldError(field.id) : null;
-                                        const FIELD_ID = `qualification-${field.id}`;
-                                        return (
-                                            <div key={field.id} className={index > 1 ? 'sm:col-span-2' : undefined}>
-                                                <label
-                                                    htmlFor={FIELD_ID}
-                                                    className="mb-1 block text-xs font-medium text-slate-600"
-                                                >
-                                                    {field.label}
-                                                </label>
-                                                <input
-                                                    id={FIELD_ID}
-                                                    type={field.type}
-                                                    inputMode={
-                                                        field.inputMode as HTMLAttributes<HTMLInputElement>['inputMode']
-                                                    }
-                                                    autoComplete={
-                                                        field.id === 'company'
-                                                            ? 'organization'
-                                                            : field.id === 'phone'
-                                                              ? 'tel'
-                                                              : field.id
-                                                    }
-                                                    value={answers[field.id] || ''}
-                                                    required
-                                                    disabled={isSubmitting}
-                                                    onChange={(event) =>
-                                                        setAnswers((previous) => ({
-                                                            ...previous,
-                                                            [field.id]: event.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder={field.placeholder}
-                                                    aria-invalid={!!FIELD_ERROR}
-                                                    aria-describedby={FIELD_ERROR ? `${FIELD_ID}-error` : undefined}
-                                                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-100 disabled:opacity-60 aria-[invalid=true]:border-red-500"
-                                                />
-                                                {FIELD_ERROR && (
-                                                    <p id={`${FIELD_ID}-error`} className="mt-1 text-xs text-red-700">
-                                                        {FIELD_ERROR}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
+                                {/* 2-column grid: Name + Company */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {currentQuestion.fields.slice(0, 2).map((field) => (
+                                        <div key={field.id}>
+                                            {(() => {
+                                                const fieldError = showValidation
+                                                    ? getContactFieldError(field.id)
+                                                    : null;
+
+                                                return (
+                                                    <>
+                                                        <label
+                                                            className={cn(
+                                                                'mb-1 block text-[12px] font-medium text-gray-500',
+                                                                fieldError && 'text-red-600',
+                                                            )}
+                                                        >
+                                                            {field.label}
+                                                        </label>
+                                                        <input
+                                                            type={field.type}
+                                                            inputMode={
+                                                                field.inputMode as React.HTMLAttributes<HTMLInputElement>['inputMode']
+                                                            }
+                                                            value={answers[field.id] || ''}
+                                                            onChange={(e) =>
+                                                                setAnswers((prev) => ({
+                                                                    ...prev,
+                                                                    [field.id]: e.target.value,
+                                                                }))
+                                                            }
+                                                            placeholder={field.placeholder}
+                                                            aria-invalid={!!fieldError}
+                                                            className={cn(
+                                                                'w-full rounded-xl border px-4 py-3 text-[14px] text-[#0f172a] placeholder:text-gray-300 transition-all duration-200 focus:outline-none',
+                                                                fieldError
+                                                                    ? 'border-red-300 bg-red-50/70 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                                                                    : 'border-gray-200 focus:border-[#0891b2] focus:ring-2 focus:ring-cyan-100',
+                                                            )}
+                                                            autoFocus={field.id === 'name'}
+                                                        />
+                                                        {fieldError && (
+                                                            <p className="mt-1 text-[12px] text-red-600">
+                                                                {fieldError}
+                                                            </p>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    ))}
                                 </div>
+                                {/* Full-width: Email + Phone */}
+                                {currentQuestion.fields.slice(2).map((field) => (
+                                    <div key={field.id}>
+                                        {(() => {
+                                            const fieldError = showValidation ? getContactFieldError(field.id) : null;
+
+                                            return (
+                                                <>
+                                                    <label
+                                                        className={cn(
+                                                            'mb-1 block text-[12px] font-medium text-gray-500',
+                                                            fieldError && 'text-red-600',
+                                                        )}
+                                                    >
+                                                        {field.label}
+                                                    </label>
+                                                    <input
+                                                        type={field.type}
+                                                        inputMode={
+                                                            field.inputMode as React.HTMLAttributes<HTMLInputElement>['inputMode']
+                                                        }
+                                                        value={answers[field.id] || ''}
+                                                        onChange={(e) =>
+                                                            setAnswers((prev) => ({
+                                                                ...prev,
+                                                                [field.id]: e.target.value,
+                                                            }))
+                                                        }
+                                                        placeholder={field.placeholder}
+                                                        aria-invalid={!!fieldError}
+                                                        className={cn(
+                                                            'w-full rounded-xl border px-4 py-3 text-[14px] text-[#0f172a] placeholder:text-gray-300 transition-all duration-200 focus:outline-none',
+                                                            fieldError
+                                                                ? 'border-red-300 bg-red-50/70 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                                                                : 'border-gray-200 focus:border-[#0891b2] focus:ring-2 focus:ring-cyan-100',
+                                                        )}
+                                                    />
+                                                    {fieldError && (
+                                                        <p className="mt-1 text-[12px] text-red-600">{fieldError}</p>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                ))}
                             </div>
                         )}
-                        {error && (
-                            <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">
-                                {error}
-                            </p>
-                        )}
-                        <div className="mt-auto flex flex-col items-center gap-3 pt-6">
-                            {QUESTION.type === 'contact' && (
+
+                        {/* Navigation */}
+                        {currentQuestion.type === 'contact' ? (
+                            /* Contact step: centered CTA + back + GDPR */
+                            <div className="mt-auto pt-6 flex flex-col items-center gap-3">
                                 <Button
-                                    type="submit"
+                                    onClick={handleNext}
                                     disabled={isSubmitting}
-                                    className="h-auto w-full whitespace-normal rounded-full bg-cyan-800 px-6 py-3 text-white hover:bg-cyan-900"
+                                    className="bg-gradient-to-r from-[#0e7490] to-[#0891b2] text-white rounded-full px-8 py-5 text-[15px] font-semibold hover:shadow-lg hover:shadow-cyan-500/15 transition-all duration-300 disabled:opacity-40 w-full sm:w-auto"
                                 >
-                                    {isSubmitting ? CONTENT.submitting : CONTENT.submit}
-                                    <Calendar aria-hidden="true" className="ml-2 h-4 w-4" />
+                                    {isSubmitting ? (
+                                        qualificationPopup.submitting
+                                    ) : (
+                                        <>
+                                            {qualificationPopup.submit}
+                                            <Calendar className="ml-2 w-4 h-4" />
+                                        </>
+                                    )}
                                 </Button>
-                            )}
-                            {currentStep > 0 && (
+
                                 <button
-                                    type="button"
-                                    onClick={() => setCurrentStep((previous) => Math.max(0, previous - 1))}
-                                    className="flex min-h-10 items-center gap-2 text-sm text-slate-500 hover:text-slate-800"
+                                    onClick={handleBack}
+                                    className="flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                    <ArrowLeft aria-hidden="true" size={14} />
-                                    {CONTENT.back}
+                                    <ArrowLeft className="w-3.5 h-3.5" />
+                                    {qualificationPopup.back}
                                 </button>
-                            )}
-                        </div>
-                    </fieldset>
-                    {QUESTION.type === 'contact' && (
-                        <PersonalDataConsentNote
-                            language={language}
-                            className="mt-2 text-center text-[11px] text-gray-500"
-                            linkClassName="hover:text-gray-700"
-                        />
-                    )}
-                </form>
+
+                                <PersonalDataConsentNote
+                                    language={language}
+                                    className="mt-1 text-center text-[11px] text-gray-400"
+                                    linkClassName="hover:text-gray-600"
+                                />
+                            </div>
+                        ) : (
+                            /* Single-select steps: just back button */
+                            <div className="flex items-center justify-between mt-auto pt-6">
+                                <button
+                                    onClick={handleBack}
+                                    className={`flex items-center gap-1.5 text-[14px] text-gray-400 hover:text-gray-600 transition-colors ${
+                                        currentStep === 0 ? 'invisible' : ''
+                                    }`}
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    {qualificationPopup.back}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     );

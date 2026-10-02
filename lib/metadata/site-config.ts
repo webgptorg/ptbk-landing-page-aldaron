@@ -14,7 +14,7 @@ export const SITE_NAME = 'Promptbook';
 /**
  * Short claim used wherever a page does not provide its own description
  */
-export const SITE_DESCRIPTION = 'Promptbook turns AI tasks into ongoing responsibilities for companies and projects.';
+export const SITE_DESCRIPTION = 'Create AI that truly understands your business.';
 
 /**
  * Handle of the brand on X (formerly Twitter)

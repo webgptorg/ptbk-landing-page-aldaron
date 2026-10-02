@@ -19,11 +19,9 @@ import { createGeneratedSocialPreviewImagePath } from '@/lib/metadata/social-pre
 const SITE_KEYWORDS: readonly string[] = [
     'AI',
     'AI agents',
-    'AI agendas',
-    'ongoing responsibilities',
+    'prompt engineering',
     'artificial intelligence',
-    'background work',
-    'application maintenance',
+    'company knowledge base',
     'Promptbook',
 ];
 
