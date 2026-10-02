@@ -4,11 +4,7 @@ import { loadSocialPreviewAssets, type SocialPreviewBrandKind } from '@/lib/meta
 import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette';
 import { shortenText } from '@/lib/language/shortenText';
 import { ImageResponse } from 'next/og';
-import {
-    SOCIAL_PREVIEW_DESCRIPTION_MAXIMUM_LENGTH,
-    SOCIAL_PREVIEW_IMAGE_SIZE,
-    SOCIAL_PREVIEW_TITLE_MAXIMUM_LENGTH,
-} from '@/lib/metadata/social-preview-image-config';
+import { SOCIAL_PREVIEW_IMAGE_SIZE } from '@/lib/metadata/social-preview-image-config';
 export {
     SOCIAL_PREVIEW_IMAGE_SIZE,
     SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE,
@@ -87,7 +83,7 @@ function SocialPreviewBackdrop({ palette }: { readonly palette: SocialPreviewPal
 }
 
 function SocialPreviewHeadline({ options }: { readonly options: SocialPreviewImageOptions }) {
-    const title = preparePreviewText(options.title, SOCIAL_PREVIEW_TITLE_MAXIMUM_LENGTH);
+    const title = preparePreviewText(options.title, 110);
     const fontSize = title.length > 80 ? 47 : title.length > 55 ? 55 : title.length > 32 ? 64 : 76;
 
     return (
@@ -138,7 +134,7 @@ function SocialPreviewHeadline({ options }: { readonly options: SocialPreviewIma
                     overflow: 'hidden',
                 }}
             >
-                {preparePreviewText(options.description, SOCIAL_PREVIEW_DESCRIPTION_MAXIMUM_LENGTH)}
+                {preparePreviewText(options.description, 145)}
             </div>
         </div>
     );

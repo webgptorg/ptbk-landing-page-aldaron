@@ -1,7 +1,6 @@
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
-import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 import { createGeneratedSocialPreviewImagePath } from '@/lib/metadata/social-preview-image-path';
 import {
     createPublicUrl,
@@ -16,8 +15,8 @@ describe('public sharing preview coverage', () => {
     it('versions generated artwork without propagating participant query parameters or fragments', () => {
         expect(
             createGeneratedSocialPreviewImagePath('/cs/online-workshop/participant?email=private@example.test#chat'),
-        ).toBe(`/cs/online-workshop/participant/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`);
-        expect(createGeneratedSocialPreviewImagePath()).toBe(`/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`);
+        ).toBe('/cs/online-workshop/participant/opengraph-image?v=2');
+        expect(createGeneratedSocialPreviewImagePath()).toBe('/opengraph-image?v=2');
     });
 
     it.each(INDEXED_PAGE_METADATA_DEFINITIONS)(
@@ -25,7 +24,7 @@ describe('public sharing preview coverage', () => {
         (definition) => {
             const metadata = createPageMetadata(definition);
             const imagePath = `${definition.path}/opengraph-image`;
-            const imageUrl = new URL(createPublicUrl(`${imagePath}?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`));
+            const imageUrl = new URL(createPublicUrl(`${imagePath}?v=2`));
             const domain = getPublicDomainRouteByHostname(imageUrl.hostname);
 
             expect(definition.isSocialPreviewImageGenerated).toBe(true);

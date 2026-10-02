@@ -1,7 +1,6 @@
 'use client';
 
 import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
-import { openQualificationPopup } from '@/components/qualification-popup';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -108,7 +107,7 @@ export function HowItWorksSection({ language = 'cs' }: { language?: ProFirmyLang
     }));
 
     const handleCTAClick = () => {
-        openQualificationPopup();
+        window.dispatchEvent(new CustomEvent('open-qualification-popup'));
     };
 
     return (

@@ -25,37 +25,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
-- `/en` is its English localization, which states the same proposition in natural English
-  rather than translating the Czech literally.
-- The homepage proposition is the **agenda**: a bounded area of responsibility with its own
-  context, goals, recurring and one-off tasks, agents, rules and tools, which keeps being
-  handled in the background instead of being prompted for again and again. It owns its
-  composition in `businesses/homepage/_Homepage.tsx`, its sections beside it, every word in
-  `businesses/homepage/homepageContent.tsx`, its addresses in `businesses/homepage/config.ts`
-  and its metadata, language alternates, sharing card and `WebPage` data in
-  `businesses/homepage/homepageMetadata.ts`. The page introduces the outcome before the word,
-  contrasts a one-shot task with an agenda where a phone still shows both, takes the agenda
-  apart, keeps a person able to inspect, approve and steer it, and only then explains the
-  leverage. Examples reveal the principle and return to it, with a self-maintaining
-  application as the one explained in depth; none of them may turn Promptbook into accounting,
-  inbox or website software. Named model and harness compatibility is claimed only where the
-  repository verifies it. The page manufactures no scarcity, metrics, testimonials, customer
-  or autonomy claims, and adds no copy which says nothing the heading and visual have not.
+- `/en` is its English localization.
 - `/cs/pro-firmy` is the Czech company-data landing page: company documents, a virtual
   employee answering in plain language, GDPR, and a strategic call. It owns that
   proposition — its composition in `businesses/pro-firmy/_ProFirmyPage.tsx`, every word
   in `businesses/pro-firmy/proFirmyContent.tsx`, and its own metadata, canonical URL,
   sharing card and sitemap entry in `businesses/pro-firmy/proFirmyMetadata.ts`. It is
-  published in Czech only, names no language alternate, and is the only address publishing
-  it. Neither it nor the homepage borrows the other's words.
+  published in Czech only and names no language alternate. `/cs` and `/en` render that
+  same composition until the homepage is repositioned; repositioning means composing the
+  homepage from sections and content of its own, never changing the preserved ones.
   The legacy `/pro-firmy` permanently redirects there. The header's own default copy is
   site chrome and lives beside it in `components/headerContent.ts`, so no landing page
-  owns the words every other page wears; a page which offers a language switch in that
-  header carries its brand by the mark alone on a phone, so its primary action still fits.
-  Both propositions open the one qualification dialog in `components/qualification-popup.tsx`,
-  which owns the flow, the validation and the submission but none of the copy: each page
-  supplies its own questions, its own words and its own contact source, and a page which
-  cannot honestly count free places simply offers no capacity note.
+  owns the words every other page wears.
 - `/pro-mesta`, `/for-agro`, `/for-industry`, `/ai-supervize`,
   `/hackathon-factory`, and `/pavol` are specialized landing pages. `/pavol`
   redirects to `/cs/pavol` or `/en/pavol`; those legacy Promptbook paths then

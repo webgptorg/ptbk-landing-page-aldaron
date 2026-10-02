@@ -2,7 +2,6 @@ import {
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_PLAYBACK_PROGRESS_STORAGE_KEY,
 } from '@/businesses/ai-ta-krajta/config';
-import { PRO_FIRMY_PATH } from '@/businesses/pro-firmy/config';
 import { createE2eTestEmail } from '@/lib/e2e/testData';
 import { expect, test } from '@playwright/test';
 import { submitAndExpectApiSuccess } from './support/submissions';
@@ -53,36 +52,8 @@ test('submits the business lead dialog', async ({ page }) => {
     await expect(dialog.getByText('Poptávka odeslána!')).toBeVisible();
 });
 
-test('submits the homepage agenda lead flow', async ({ page }) => {
+test('submits the homepage qualification lead flow', async ({ page }) => {
     await page.goto('/cs');
-    await page.locator('#hero-cta').click();
-
-    const dialog = page.getByRole('dialog');
-    // The homepage has no honest number of free places to report, so it promises none.
-    await expect(dialog.getByText('Zbývají 3 místa')).toHaveCount(0);
-
-    await dialog.getByRole('button', { name: 'Web nebo aplikace — údržba a rozvoj' }).click();
-    await expect(dialog.getByText('Jak se to řeší dneska?')).toBeVisible();
-    await dialog.getByRole('button', { name: 'Pokaždé to znovu zadáváme do chatu s AI' }).click();
-    await expect(dialog.getByText('Pro koho to řešíte?')).toBeVisible();
-    await dialog.getByRole('button', { name: 'Firma do 10 lidí' }).click();
-    await expect(dialog.getByText('Kam se vám ozveme?')).toBeVisible();
-
-    await dialog.getByPlaceholder('Jan Novák').fill('E2E Agenda');
-    await dialog.getByPlaceholder('Název', { exact: true }).fill('E2E Example s.r.o.');
-    await dialog.getByPlaceholder('jan@firma.cz').fill(createE2eTestEmail('homepage-agenda'));
-    await dialog.getByPlaceholder('+420 777 123 456').fill('+420 777 000 001');
-
-    const thankYouNavigation = page.waitForURL(/\/dekujeme\?/);
-    await submitAndExpectApiSuccess(page, '/api/waitlist', () =>
-        dialog.getByRole('button', { name: 'Odeslat' }).click(),
-    );
-    await thankYouNavigation;
-    await expect(page).toHaveURL(/\/dekujeme\?/);
-});
-
-test('submits the preserved company-data qualification lead flow', async ({ page }) => {
-    await page.goto(PRO_FIRMY_PATH);
     await page.locator('#hero-cta').click();
 
     const dialog = page.getByRole('dialog');

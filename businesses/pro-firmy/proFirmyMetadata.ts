@@ -7,8 +7,9 @@ import { PROMPTBOOK_SOCIAL_PREVIEW_PALETTE } from '@/lib/metadata/social-preview
 import type { Metadata } from 'next';
 
 /**
- * Note: The page is published in Czech only, so it names no language alternates. `/en` belongs to the main homepage
- *       and holds the agenda proposition, so claiming it here would send readers to a different promise.
+ * Note: The page is published in Czech only, so it names no language alternates. The English company-data copy is
+ *       still rendered at `/en`, but that address belongs to the main homepage and will hold a different
+ *       proposition once the homepage is repositioned - claiming it here would send readers to the wrong page.
  */
 export const PRO_FIRMY_PAGE_DEFINITION: PageMetadataDefinition = {
     path: PRO_FIRMY_PATH,

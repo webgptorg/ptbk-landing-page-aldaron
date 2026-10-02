@@ -1,7 +1,6 @@
 'use client';
 
 import { getHeaderContent } from '@/components/headerContent';
-import { openQualificationPopup } from '@/components/qualification-popup';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -98,7 +97,8 @@ export function Header({
     }, []);
 
     const handleCTAClick = () => {
-        openQualificationPopup();
+        // Dispatch custom event to open qualification popup
+        window.dispatchEvent(new CustomEvent('open-qualification-popup'));
     };
 
     const hasNavItems = !isBare && !!navItems?.length;
@@ -168,15 +168,7 @@ export function Header({
                                 />
                             )}
                             {brandName ?? (
-                                // Note: A language switch takes the room the wordmark needs on a phone, and the
-                                //       primary action may not be the thing pushed off the screen, so below the
-                                //       tablet width the brand is carried by its mark alone.
-                                <span
-                                    className={cn(
-                                        'text-lg text-gray-900 sm:text-xl',
-                                        languageSwitcher && 'hidden sm:inline',
-                                    )}
-                                >
+                                <span className="text-lg text-gray-900 sm:text-xl">
                                     Prompt<b>book</b>
                                 </span>
                             )}

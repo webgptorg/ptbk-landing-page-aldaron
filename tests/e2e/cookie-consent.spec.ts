@@ -1,4 +1,3 @@
-import { PRO_FIRMY_PATH } from '@/businesses/pro-firmy/config';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const COOKIE_PANEL_SELECTOR = '[data-cookie-consent-panel]';
@@ -122,11 +121,9 @@ test('cookie panel and coder badge clear a player opened later, resized and clos
     await expectAbove(coderBadge, panel);
 });
 
-// The booking notice counts recent calls, so it belongs to the company-data page which offers them and not to the
-// homepage, whose agenda proposition manufactures no such activity. Its clearance is therefore verified where it shows.
 test('a booking notice leaves cookie choices clickable and the footer can be scrolled clear', async ({ page }) => {
     await page.clock.install();
-    await page.goto(PRO_FIRMY_PATH, { waitUntil: 'domcontentloaded' });
+    await page.goto('/cs', { waitUntil: 'domcontentloaded' });
     const panel = page.locator(COOKIE_PANEL_SELECTOR);
     const notification = page.locator('[data-booking-notification]');
     await expect(panel).toBeVisible();

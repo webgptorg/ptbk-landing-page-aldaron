@@ -1,7 +1,6 @@
 'use client';
 
 import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
-import { openQualificationPopup } from '@/components/qualification-popup';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, FileText, Shield, Sparkles } from 'lucide-react';
@@ -77,7 +76,7 @@ export function HeroSection({ language = 'cs' }: { language?: ProFirmyLanguage }
     }, [chatMessages, currentMessageIndex]);
 
     const handleCTAClick = () => {
-        openQualificationPopup();
+        window.dispatchEvent(new CustomEvent('open-qualification-popup'));
     };
 
     return (

@@ -1,10 +1,9 @@
-import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 import { expect, test } from '@playwright/test';
 import sharp from 'sharp';
 
 const SHARING_PREVIEW_PAGES = [
-    { hostname: 'ptbk.io', path: '/cs', title: /Dejte AI na starost celou agendu/ },
-    { hostname: 'ptbk.io', path: '/en', title: /Hand AI a whole agenda/ },
+    { hostname: 'ptbk.io', path: '/cs', title: /Okamžitý přístup/ },
+    { hostname: 'ptbk.io', path: '/en', title: /Instant access/ },
     { hostname: 'ptbk.io', path: '/cs/pro-firmy', title: /Promptbook pro firmy/ },
     { hostname: 'ptbk.io', path: '/contact', title: /Let’s talk/ },
     { hostname: 'ptbk.io', path: '/en/privacy-policy', title: /Privacy Policy/ },
@@ -27,9 +26,7 @@ for (const preview of SHARING_PREVIEW_PAGES) {
             waitUntil: 'domcontentloaded',
         });
 
-        // The design version busts the long-lived cache of social crawlers, so it is read from the one constant which
-        // sets it rather than repeated here - a bumped design must not look like a broken page.
-        const expectedImageUrl = `https://${preview.hostname}${preview.path.replace(/\/$/, '')}/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`;
+        const expectedImageUrl = `https://${preview.hostname}${preview.path.replace(/\/$/, '')}/opengraph-image?v=2`;
         await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', preview.title);
         await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', expectedImageUrl);
         await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', expectedImageUrl);
