@@ -180,7 +180,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   opens on the member's month, can filter by day, and uses the same terms and
   statuses as the cards. Empty days cannot be selected; an empty month is only
   selected when the member's month has no terms. The room offers Google Calendar
-  and `webcal:` subscriptions.
+  and `webcal:` subscriptions, and beside them the plain `https:` address of the
+  calendar, shown as selectable text and copied by one click, for an application
+  which is subscribed to by hand. A browser which refuses the clipboard says so
+  and leaves that address readable. Whether a copy is reported as done is decided
+  once, in `hooks/useCopyTextToClipboard.ts`.
 - `/cs/komunita/projects` is the full project gallery, ordered by upvotes.
   `/cs/komunita/projects/<project_id>` shows scraped project details and a
   moderated discussion. Project-room sessions derive from the community session;

@@ -1,5 +1,20 @@
 # Current preversion
 
+- The published calendar of `/cs/komunita` can now also be taken away as its plain address. Beside the two buttons
+  which hand the subscription straight to Google Calendar and to whatever calendar application the device answers
+  `webcal:` with, the room shows the `https://ptbk.io/cs/komunita/calendar.ics` address itself and copies it on one
+  click, because an application which is subscribed to by hand — Outlook on the web, Thunderbird, a phone calendar
+  which never learnt `webcal:` — asks to be given a web address rather than to be sent anywhere. The `https:` address
+  is the one handed over, as that is what a `subscribe from a web address` field takes. The address is shown rather
+  than hidden behind the button, so a browser which refuses the clipboard — an insecure origin, a denied permission —
+  leaves the member able to select it by hand, and such a refusal says so instead of quietly doing nothing. Whether a
+  copy is reported as done is now decided in one place for the whole application, so the copy control of the room and
+  the one in `/admin/shortener` cannot confirm in two different moments, and the pill the subscription buttons wear is
+  written once beside them rather than repeated by each control. The three ways of taking the calendar are one shared
+  block, so a room which publishes a calendar of its own later offers its address in exactly the same way without
+  saying so again. Nothing about what is published changed: the same terms, under the same stable slugs, are served by
+  the same `/cs/komunita/calendar.ics`, which still carries no subscriber identity.
+
 - The main homepage is no longer about asking an AI questions over company documents. It is about handing over an
   **agenda**: a bounded area of responsibility which keeps being handled, instead of a task somebody has to prompt
   for again and again. `/cs` and `/en` are a composition of their own in `businesses/homepage`, built in the order

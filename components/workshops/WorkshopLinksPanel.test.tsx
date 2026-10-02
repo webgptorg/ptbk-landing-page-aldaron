@@ -9,7 +9,7 @@ import { formatEventPrice } from '@/lib/events/eventPrice';
 import { getWorkshopPhaseAppearance } from '@/components/workshops/workshopPhaseAppearance';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const TERM_LIST_LABEL = 'Termíny akcí';
 
@@ -152,7 +152,18 @@ function showCardsView(): void {
     fireEvent.click(screen.getByRole('button', { name: 'Karty' }));
 }
 
-afterEach(cleanup);
+/**
+ * Hands the test the clipboard a browser would otherwise own, because jsdom has none of its own
+ */
+function giveTheBrowserAClipboard(writeText: (text: string) => Promise<void>): void {
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+}
+
+afterEach(() => {
+    cleanup();
+    Reflect.deleteProperty(navigator, 'clipboard');
+    vi.restoreAllMocks();
+});
 
 describe('workshop links panel', () => {
     it('opens on the calendar of the month a member is in', () => {
@@ -343,6 +354,30 @@ describe('workshop links panel', () => {
         expect(screen.getByRole('link', { name: /Jiná kalendářová aplikace/ }).getAttribute('href')).toBe(
             'webcal://ptbk.io/cs/komunita/calendar.ics',
         );
+    });
+
+    it('hands the address of the calendar over for an application which is subscribed to by hand', async () => {
+        const writeText = vi.fn(async () => {});
+        giveTheBrowserAClipboard(writeText);
+        renderWorkshopLinksPanel();
+
+        expect(screen.getByText(CALENDAR_FEED_URL)).not.toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Zkopírovat adresu kalendáře' }));
+
+        expect(await screen.findByRole('button', { name: 'Adresa zkopírována' })).not.toBeNull();
+        expect(writeText).toHaveBeenCalledWith(CALENDAR_FEED_URL);
+    });
+
+    it('leaves the address readable by hand when the browser refuses its clipboard', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        giveTheBrowserAClipboard(() => Promise.reject(new Error('Clipboard is not available')));
+        renderWorkshopLinksPanel();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Zkopírovat adresu kalendáře' }));
+
+        expect(await screen.findByRole('button', { name: 'Zkopírujte adresu ručně' })).not.toBeNull();
+        expect(screen.getByText(CALENDAR_FEED_URL)).not.toBeNull();
     });
 
     it('explains an empty list of terms without offering a view of nothing', () => {

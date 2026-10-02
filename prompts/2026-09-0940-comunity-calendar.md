@@ -1,4 +1,4 @@
-[ ]
+[^] by Developer on Claude Code `claude-opus-5` thinking `max` - Implementation 0.85 an hour; Testing in progress
 
 [✨😝] In the comunity there should be option to copy the calendar URL to add it into calendar applications manually
 
@@ -6,3 +6,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do a analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+
