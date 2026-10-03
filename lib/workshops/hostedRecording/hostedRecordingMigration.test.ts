@@ -46,12 +46,6 @@ describe('hosted recording publication transaction', () => {
                 'SELECT public.claim_workshop_hosted_recording_cleanup($1, $2, $3)',
                 [SECOND_REVISION_ID, OLD_UPLOAD_CUTOFF, OLD_REVISION_CUTOFF]);
             expect(claimedCurrent.rows[0]!.claim_workshop_hosted_recording_cleanup).toBe(false);
-            // Publication stamps superseded_at with the real database clock. Age this fixture explicitly before
-            // testing old-revision cleanup, so crossing the fixed cutoff date cannot change the expected result.
-            await database.query(
-                "UPDATE public.workshop_hosted_recording_revisions SET superseded_at = $2::timestamptz - interval '1 day' WHERE id = $1",
-                [FIRST_REVISION_ID, OLD_REVISION_CUTOFF],
-            );
             const claimedPrevious = await database.query<{ claim_workshop_hosted_recording_cleanup: boolean }>(
                 'SELECT public.claim_workshop_hosted_recording_cleanup($1, $2, $3)',
                 [FIRST_REVISION_ID, OLD_UPLOAD_CUTOFF, OLD_REVISION_CUTOFF]);

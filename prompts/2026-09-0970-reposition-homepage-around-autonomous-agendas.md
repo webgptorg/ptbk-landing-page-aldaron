@@ -1,4 +1,4 @@
-[x] (2 attempts) by Developer on OpenAI Codex `gpt-6.1-sol` thinking `max` (ChatGPT account) - Implementation ~.09 16 hours; Testing 15 minutes; Fixing ~$0.4326 33 minutes; Testing 15 minutes
+[ ]
 
 [✨⚙️] Reposition the main Promptbook homepage around autonomous agendas
 
@@ -75,4 +75,3 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
-

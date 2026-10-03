@@ -7,11 +7,11 @@ import Link from 'next/link';
  *
  * Note: It is the counterpart of `<MinimalFooter/>` and belongs on the confirmation pages such as `/dekujeme`.
  */
-export function MinimalHeader({ href = '/' }: { href?: string } = {}) {
+export function MinimalHeader() {
     return (
         <header className="py-6 px-6">
             <div className="max-w-4xl mx-auto">
-                <Link href={href} className="flex items-center gap-2.5 w-fit">
+                <Link href="/" className="flex items-center gap-2.5 w-fit">
                     <Image src={promptbookLogo} alt="Promptbook" width={36} height={36} className="w-9 h-9" />
                     <span className="text-xl text-gray-900">
                         Prompt<b>book</b>

@@ -1,7 +1,6 @@
 'use client';
 
 import { MinimalFooter } from '@/components/minimal-footer';
-import { HomepageThankYou } from '@/businesses/homepage/HomepageThankYou';
 import { MinimalHeader } from '@/components/minimal-header';
 import jiriJahn from '@/public/people/jiri-jahn-transparent-square.png';
 import pavolHejny from '@/public/people/pavol-hejny-transparent-square.png';
@@ -15,11 +14,6 @@ function ThankYouContent() {
     const searchParams = useSearchParams();
     const name = searchParams.get('name') || '';
     const email = searchParams.get('email') || '';
-
-    if (searchParams.get('source') === 'agenda') {
-        const language = searchParams.get('language') === 'en' ? 'en' : 'cs';
-        return <HomepageThankYou language={language} name={name} email={email} />;
-    }
 
     return (
         <div className="min-h-screen flex flex-col bg-white">
