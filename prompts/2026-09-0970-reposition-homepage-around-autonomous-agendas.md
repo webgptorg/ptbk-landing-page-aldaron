@@ -1,4 +1,4 @@
-[ ]
+[-] - Write better
 
 [✨⚙️] Reposition the main Promptbook homepage around autonomous agendas
 
