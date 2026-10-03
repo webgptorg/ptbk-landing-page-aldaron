@@ -3,6 +3,7 @@ import {
     extractShortcodeLandingPageMetadata,
 } from '@/lib/shortener/shortcodeLandingPageMetadata';
 import { describe, expect, it } from 'vitest';
+import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 
 describe('shortcode landing-page metadata', () => {
     it('preserves authored Open Graph copy and image ahead of the document and its decorative images', () => {
@@ -50,7 +51,7 @@ describe('shortcode landing-page metadata', () => {
 
         expect(generated.openGraph?.images).toEqual([
             expect.objectContaining({
-                url: 'https://ptbk.io/launch/opengraph-image?v=2',
+                url: `https://ptbk.io/launch/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`,
                 width: 1200,
                 height: 630,
                 type: 'image/png',

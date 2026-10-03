@@ -8,6 +8,7 @@ import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette
  * image template or encoding its route name in the renderer.
  */
 export const SOCIAL_PREVIEW_ARTWORK_KINDS = [
+    'agenda',
     'knowledge',
     'city',
     'agriculture',
@@ -40,6 +41,112 @@ type ArtworkLineProps = {
     readonly width: number;
     readonly color: string;
 };
+
+/** Durable context and several working parts feed a repeating cycle and a reviewed outcome. */
+function AgendaArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
+    const INPUT_CARDS = [
+        { left: 18, rotation: -6 },
+        { left: 190, rotation: 0 },
+        { left: 362, rotation: 6 },
+    ];
+
+    return (
+        <div style={{ display: 'flex', position: 'absolute', left: 0, top: 0, width: 552, height: 454 }}>
+            <svg width="552" height="454" viewBox="0 0 552 454" style={{ position: 'absolute', top: 0, left: 0 }}>
+                <path
+                    d="M100 135V177H276M276 135V215M448 135V177H276"
+                    fill="none"
+                    stroke={palette.chipBorder}
+                    strokeWidth="3"
+                />
+                <path
+                    d="M369 244A100 100 0 1 1 243 209"
+                    fill="none"
+                    stroke={palette.accent}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                />
+                <path
+                    d="M239 196L253 207L237 219M357 233L371 245L381 228"
+                    fill="none"
+                    stroke={palette.accent}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>
+            {INPUT_CARDS.map((card, index) => (
+                <ArtworkCard
+                    key={card.left}
+                    palette={palette}
+                    top={30}
+                    left={card.left}
+                    width={155}
+                    height={112}
+                    rotation={card.rotation}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+                        <div style={{ display: 'flex', gap: 7 }}>
+                            {Array.from({ length: index + 1 }, (_, itemIndex) => (
+                                <div
+                                    key={itemIndex}
+                                    style={{
+                                        display: 'flex',
+                                        width: 20,
+                                        height: 20,
+                                        borderRadius: index === 2 ? 999 : 5,
+                                        background: palette.accent,
+                                        opacity: 1 - itemIndex * 0.2,
+                                    }}
+                                />
+                            ))}
+                        </div>
+                        <ArtworkLine width={90} color={palette.chipBorder} />
+                        <ArtworkLine width={66} color={palette.frame} />
+                    </div>
+                </ArtworkCard>
+            ))}
+            <div
+                style={{
+                    display: 'flex',
+                    position: 'absolute',
+                    top: 252,
+                    left: 231,
+                    width: 90,
+                    height: 90,
+                    borderRadius: 25,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: palette.orbPrimary,
+                    border: `1px solid ${palette.chipBorder}`,
+                }}
+            >
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <path
+                        d="M13 19L24 13L35 19L24 25L13 19ZM13 25L24 31L35 25M13 31L24 37L35 31"
+                        stroke={palette.accent}
+                        strokeWidth="3"
+                        strokeLinejoin="round"
+                    />
+                </svg>
+            </div>
+            <ArtworkCard palette={palette} top={371} left={198} width={295} height={75}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+                        <path
+                            d="M6 15L12 21L25 8"
+                            stroke={palette.accent}
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                    <ArtworkLine width={178} color={palette.chipBorder} />
+                </div>
+            </ArtworkCard>
+        </div>
+    );
+}
 
 /**
  * Renders a glass surface which the individual visual metaphors can compose.
@@ -744,6 +851,7 @@ export function SocialPreviewArtwork({ kind, palette }: SocialPreviewArtworkProp
                 overflow: 'hidden',
             }}
         >
+            {kind === 'agenda' && <AgendaArtwork palette={palette} />}
             {kind === 'knowledge' && <KnowledgeArtwork palette={palette} />}
             {kind === 'city' && <CityArtwork palette={palette} />}
             {kind === 'agriculture' && <AgricultureArtwork palette={palette} />}
