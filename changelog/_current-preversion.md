@@ -1,5 +1,13 @@
 # Current preversion
 
+- Added **`/cs/whitepaper`** and **`/en/whitepaper`** as a shared, light APT product landing page and complete
+  interactive whitepaper. Scroll-linked 3D agent/project/task layers, a step-through check/repair/pause cycle,
+  a commit/revert demonstration and three domain scenarios explain the principles without executing real actions.
+  The responsive page includes native chapter disclosures, shareable chapter links, language switching, reduced-motion
+  support and Markdown downloads. Czech uses the authored source directly; English has a full translation. Both have
+  localized canonical metadata, language alternates, generated sharing cards, sitemap entries and shared footer links.
+  Existing capabilities, planned extensions, operating safeguards and the long-term vision are explicitly distinguished.
+
 - The Czech company-data proposition — firemní dokumenty, virtuální zaměstnanec, GDPR a strategický hovor — is now
   a landing page of its own at **`/cs/pro-firmy`**, so the main homepage can be repositioned without it being lost.
   It is the same page as before, not a copy of it: the composition moved to `businesses/pro-firmy/_ProFirmyPage.tsx`

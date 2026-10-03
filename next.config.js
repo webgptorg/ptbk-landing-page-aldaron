@@ -37,6 +37,10 @@ const nextConfig = {
     serverExternalPackages: ['pg', '@promptbook/node'],
     outputFileTracingIncludes: {
         '/*': ['./migrations/**/*.sql'],
+        '/cs/whitepaper': ['./prompts/2026-10-0000-whitepaper.md'],
+        '/cs/whitepaper/download': ['./prompts/2026-10-0000-whitepaper.md'],
+        '/en/whitepaper': ['./businesses/whitepaper/whitepaper.en.md'],
+        '/en/whitepaper/download': ['./businesses/whitepaper/whitepaper.en.md'],
         // Image assets are read from disk at runtime for public projects and short links.
         '/**/opengraph-image': [
             './public/fonts/workshop/Inter-Regular.ttf',

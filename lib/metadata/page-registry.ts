@@ -13,6 +13,7 @@ import { HOMEPAGE_PAGE_DEFINITIONS } from '@/businesses/homepage/homepageMetadat
 import { ONLINE_WORKSHOP_PAGE_DEFINITION } from '@/businesses/online-workshop/onlineWorkshopMetadata';
 import { PAVOL_PAGE_DEFINITIONS } from '@/businesses/pavol/pavolMetadata';
 import { PRO_FIRMY_PAGE_DEFINITION } from '@/businesses/pro-firmy/proFirmyMetadata';
+import { WHITEPAPER_PAGE_DEFINITIONS } from '@/businesses/whitepaper/whitepaperMetadata';
 import { CITIES_CS_PAGE_DEFINITION } from '@/businesses/pro-mesta/citiesCsMetadata';
 import { LEGAL_PAGE_DEFINITION_LIST } from '@/lib/legal/legalPageMetadata';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
@@ -31,6 +32,8 @@ import {
 const PAGE_METADATA_DEFINITIONS: readonly PageMetadataDefinition[] = [
     HOMEPAGE_PAGE_DEFINITIONS.cs,
     HOMEPAGE_PAGE_DEFINITIONS.en,
+    WHITEPAPER_PAGE_DEFINITIONS.cs,
+    WHITEPAPER_PAGE_DEFINITIONS.en,
     PRO_FIRMY_PAGE_DEFINITION,
     CITIES_CS_PAGE_DEFINITION,
     FOR_AGRO_PAGE_DEFINITION,

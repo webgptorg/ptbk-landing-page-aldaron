@@ -1,6 +1,8 @@
 'use client';
 
 import { PRO_FIRMY_PATH } from '@/businesses/pro-firmy/config';
+import { WHITEPAPER_PATHS } from '@/businesses/whitepaper/whitepaperConfig';
+import { createPublicUrl } from '@/lib/domains/publicDomainRouting';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
@@ -171,6 +173,12 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
         isTechnologyIncubationShown = shouldShowTechnologyIncubation(pathname),
     } = overrides;
 
+    // Keep the localized whitepaper discoverable even when a landing page supplies its own product links.
+    const whitepaperUrl = createPublicUrl(WHITEPAPER_PATHS[language]);
+    const productLinksWithWhitepaper = productLinks.some(
+        (link) => link.href === whitepaperUrl || link.href === WHITEPAPER_PATHS[language],
+    ) ? productLinks : [...productLinks, { href: whitepaperUrl, text: 'Whitepaper' }];
+
     const claim =
         language === 'cs'
             ? 'Vytvořte AI, která skutečně rozumí vaší firmě.'
@@ -213,7 +221,7 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
                     <div>
                         <h3 className="text-lg font-semibold mb-6">{productHeader}</h3>
                         <ul className="space-y-3">
-                            {productLinks.map((link) => (
+                            {productLinksWithWhitepaper.map((link) => (
                                 <li key={link.href}>
                                     <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
                                         {link.text}

@@ -4,6 +4,8 @@ import sharp from 'sharp';
 const SHARING_PREVIEW_PAGES = [
     { hostname: 'ptbk.io', path: '/cs', title: /Okamžitý přístup/ },
     { hostname: 'ptbk.io', path: '/en', title: /Instant access/ },
+    { hostname: 'ptbk.io', path: '/cs/whitepaper', title: /Od úkolování AI/ },
+    { hostname: 'ptbk.io', path: '/en/whitepaper', title: /From AI tasks/ },
     { hostname: 'ptbk.io', path: '/cs/pro-firmy', title: /Promptbook pro firmy/ },
     { hostname: 'ptbk.io', path: '/contact', title: /Let’s talk/ },
     { hostname: 'ptbk.io', path: '/en/privacy-policy', title: /Privacy Policy/ },

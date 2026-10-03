@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.5416 an hour; Testing 41 minutes
 
 [✨📜] Create a whitepaper page
 
@@ -18,3 +18,4 @@
     - Share the things between the English and Czech versions to avoid duplication and also with other pages if possible
 - Link the whitepaper in the footer
 - Add the changes into the [changelog](./changelog/_current-preversion.md)
+

@@ -26,6 +26,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
 - `/en` is its English localization.
+- `/cs/whitepaper` and `/en/whitepaper` share a light interactive APT whitepaper in `businesses/whitepaper`.
+  Its scroll-linked CSS 3D layers, controlled-cycle simulation, commit/revert example and domain scenarios explain
+  the authored principles without running agents or external actions. Reduced motion keeps the model still; the full
+  server-rendered chapter reader uses native disclosures and shareable chapter anchors. Czech reads directly from
+  `prompts/2026-10-0000-whitepaper.md`; the English translation lives beside the shared page. Both provide Markdown
+  downloads, canonical language alternates, their own sharing cards and sitemap entries. Shared full and minimal
+  footers link to the localized paper. Described capabilities, planned features and the long-term vision remain distinct.
 - `/cs/pro-firmy` is the Czech company-data landing page: company documents, a virtual
   employee answering in plain language, GDPR, and a strategic call. It owns that
   proposition — its composition in `businesses/pro-firmy/_ProFirmyPage.tsx`, every word
