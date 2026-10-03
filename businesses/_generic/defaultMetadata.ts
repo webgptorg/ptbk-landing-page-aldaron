@@ -1,5 +1,5 @@
-import { HOMEPAGE_PAGE_DEFINITIONS } from '@/businesses/homepage/homepageMetadata';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
+import { HOMEPAGE_PAGE_DEFINITIONS } from '@/businesses/homepage/homepageMetadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { Metadata } from 'next';
@@ -17,7 +17,7 @@ export const DEFAULT_PAGE_DEFINITION: PageMetadataDefinition = {
  * Sharing preview shown for the brand itself and for every page without an image of its own
  */
 export const DEFAULT_SOCIAL_PREVIEW_OPTIONS = createSocialPreviewOptions(DEFAULT_PAGE_DEFINITION, {
-    eyebrow: 'AI for ongoing responsibilities',
+    eyebrow: 'AI agendas for companies and projects',
     artwork: 'agenda',
     paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
 });

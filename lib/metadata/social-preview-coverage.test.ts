@@ -10,13 +10,14 @@ import {
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 
 describe('public sharing preview coverage', () => {
     it('versions generated artwork without propagating participant query parameters or fragments', () => {
         expect(
             createGeneratedSocialPreviewImagePath('/cs/online-workshop/participant?email=private@example.test#chat'),
-        ).toBe('/cs/online-workshop/participant/opengraph-image?v=3');
-        expect(createGeneratedSocialPreviewImagePath()).toBe('/opengraph-image?v=3');
+        ).toBe(`/cs/online-workshop/participant/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`);
+        expect(createGeneratedSocialPreviewImagePath()).toBe(`/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`);
     });
 
     it.each(INDEXED_PAGE_METADATA_DEFINITIONS)(
@@ -24,7 +25,7 @@ describe('public sharing preview coverage', () => {
         (definition) => {
             const metadata = createPageMetadata(definition);
             const imagePath = `${definition.path}/opengraph-image`;
-            const imageUrl = new URL(createPublicUrl(`${imagePath}?v=3`));
+            const imageUrl = new URL(createPublicUrl(`${imagePath}?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`));
             const domain = getPublicDomainRouteByHostname(imageUrl.hostname);
 
             expect(definition.isSocialPreviewImageGenerated).toBe(true);

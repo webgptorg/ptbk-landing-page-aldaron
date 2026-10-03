@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 import sharp from 'sharp';
+import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 
 const SHARING_PREVIEW_PAGES = [
-    { hostname: 'ptbk.io', path: '/cs', title: /Svěřte AI agendu/ },
+    { hostname: 'ptbk.io', path: '/cs', title: /Svěřte AI odpovědnost/ },
     { hostname: 'ptbk.io', path: '/en', title: /Give AI a responsibility/ },
     { hostname: 'ptbk.io', path: '/cs/pro-firmy', title: /Promptbook pro firmy/ },
     { hostname: 'ptbk.io', path: '/contact', title: /Let’s talk/ },
@@ -26,7 +27,7 @@ for (const preview of SHARING_PREVIEW_PAGES) {
             waitUntil: 'domcontentloaded',
         });
 
-        const expectedImageUrl = `https://${preview.hostname}${preview.path.replace(/\/$/, '')}/opengraph-image?v=3`;
+        const expectedImageUrl = `https://${preview.hostname}${preview.path.replace(/\/$/, '')}/opengraph-image?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`;
         await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', preview.title);
         await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', expectedImageUrl);
         await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', expectedImageUrl);

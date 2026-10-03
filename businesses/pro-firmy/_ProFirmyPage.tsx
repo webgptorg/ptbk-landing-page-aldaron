@@ -19,8 +19,8 @@ import { Suspense } from 'react';
 /**
  * Company-data landing page: company documents, a virtual employee answering in plain language, and a strategic call
  *
- * Note: Published at `/cs/pro-firmy`. The agenda homepages at `/cs` and `/en` own their composition separately,
- *       so this page keeps the company-data proposition it preserves.
+ * Note: This preserved composition is published at `/cs/pro-firmy`. The agenda homepage owns its own composition
+ *       in `businesses/homepage`, so changes to that proposition do not change this page.
  */
 export function ProFirmyPage({ language }: { language: ProFirmyLanguage }) {
     const content = getProFirmyContent(language);

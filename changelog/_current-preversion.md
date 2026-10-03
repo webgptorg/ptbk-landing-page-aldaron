@@ -1,15 +1,21 @@
 # Current preversion
 
-- Repositioned `/cs` and `/en` around ongoing AI agendas: bounded responsibilities with lasting context, multiple
-  goals/tasks, agents and tools. A new visual composition contrasts one-shot work with background continuation,
-  demonstrates application maintenance, and offers customer communication, accounting preparation and content
-  examples with explicit human oversight. Verified Promptbook Coder harnesses and repository context follow the
-  core concept. `/cs/pro-firmy` retains its company-document proposition. Homepage SEO, JSON-LD and versioned
-  1200×630 social artwork now describe agendas. The existing qualification contact source and full-load thank-you
-  route are reused with localized agenda questions and confirmation; failures preserve answers for retry, and
-  pending submissions prevent edits and duplicates. No invented activity, metrics or scarcity is added.
-  Verification also corrected an existing hosted-recording test fixture to age its superseded revision explicitly,
-  so its cleanup assertion no longer depends on the date the suite runs.
+- Repositioned **`/cs` and `/en`** around ongoing AI agendas: a company or project hands over a bounded responsibility
+  with durable context, goals, recurring and one-off tasks, agents/tools and human approval rules. A new visual
+  composition contrasts one-shot work with an agenda that continues in the background, leads with maintaining and
+  evolving an application, and offers communication, administration and operations as illustrative workflows.
+  Coding harnesses and repository workspaces follow the product explanation; the named Codex, Claude Code and
+  OpenCode runners were verified in the installed Promptbook Coder package. The preserved **`/cs/pro-firmy`**
+  company-data proposition stays independent and linked from the homepage. Reused the shared header, footer, team
+  and `/api/waitlist` contact source, with an agenda enquiry that retains failed drafts, prevents duplicate requests
+  and reaches a localized agenda confirmation through the existing full-load `/dekujeme` route. Updated homepage
+  SEO, structured data, site description and localized/root sharing cards with ongoing-cycle artwork and a shared
+  design-version refresh. No fabricated activity, scarcity, metrics or new autonomy/security guarantees were added.
+  Analysis and compatibility evidence are in `docs/homepage-agendas.md`.
+  Cookie-clearance verification now visits the preserved company page for its booking notice and checks that both
+  agenda homepages stay free of those delayed booking claims; cookie layout coverage includes the company page too.
+  The full unit run also exposed a date-dependent recording-cleanup fixture; it now explicitly ages its superseded
+  revision before asserting cleanup, without changing the migration or production retention rules.
 
 - The Czech company-data proposition — firemní dokumenty, virtuální zaměstnanec, GDPR a strategický hovor — is now
   a landing page of its own at **`/cs/pro-firmy`**, so the main homepage can be repositioned without it being lost.

@@ -20,10 +20,9 @@ const SITE_KEYWORDS: readonly string[] = [
     'AI',
     'AI agents',
     'AI agendas',
-    'ongoing responsibilities',
     'artificial intelligence',
+    'ongoing responsibilities',
     'background work',
-    'application maintenance',
     'Promptbook',
 ];
 

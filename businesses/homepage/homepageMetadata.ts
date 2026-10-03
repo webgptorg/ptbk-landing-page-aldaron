@@ -18,19 +18,20 @@ export const HOMEPAGE_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguag
     cs: {
         path: HOMEPAGE_LANGUAGE_ALTERNATES.cs,
         language: 'cs',
-        title: 'Promptbook – Svěřte AI agendu. Ať práce pokračuje.',
-        socialTitle: 'Svěřte AI agendu. Ať práce pokračuje.',
+        title: 'Promptbook – AI agendy, které pracují na pozadí',
+        socialTitle: 'Svěřte AI odpovědnost. Práce pokračuje.',
         description:
-            'Promptbook mění jednotlivé AI úkoly v dlouhodobé agendy pro firmy a projekty. Kontext, cíle, agenti a nástroje pro práci na pozadí, s vaším dohledem.',
+            'Promptbook mění průběžné odpovědnosti firem a projektů v AI agendy: vlastní kontext, cíle, úkoly, agenti a pravidla. Práce pokračuje na pozadí, člověk drží směr.',
         socialDescription:
-            'Od jednorázového úkolu k průběžné péči o web, aplikaci nebo firemní agendu. Vy určujete směr. Práce pokračuje.',
-        socialPreviewImageAlt: 'Promptbook – AI agendy: kontext, úkoly a nástroje v průběžném pracovním cyklu',
+            'Jedna agenda propojí kontext, cíle a AI nástroje v práci, která pokračuje na pozadí. Vy určujete pravidla a schvalujete důležitá rozhodnutí.',
+        socialPreviewImageAlt:
+            'Promptbook – průběžná AI agenda propojuje kontext, úkoly a nástroje s výsledky a lidským rozhodnutím',
         keywords: [
             'AI agendy',
+            'průběžná odpovědnost',
             'AI pro firmy',
-            'práce na pozadí',
             'údržba aplikací',
-            'dlouhodobá odpovědnost',
+            'práce na pozadí',
             'Promptbook',
         ],
         languageAlternates: HOMEPAGE_LANGUAGE_ALTERNATES,
@@ -41,19 +42,20 @@ export const HOMEPAGE_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguag
     en: {
         path: HOMEPAGE_LANGUAGE_ALTERNATES.en,
         language: 'en',
-        title: 'Promptbook – Give AI a responsibility. Let the work continue.',
-        socialTitle: 'Give AI a responsibility. Let the work continue.',
+        title: 'Promptbook – Ongoing AI agendas for companies and projects',
+        socialTitle: 'Give AI a responsibility. Keep work moving.',
         description:
-            'Promptbook turns individual AI tasks into ongoing agendas for companies and projects. Context, goals, agents and tools for background work with human oversight.',
+            'Turn ongoing responsibilities into AI agendas with durable context, goals, tasks, agents and rules. Promptbook keeps work moving in the background, with people steering.',
         socialDescription:
-            'From a one-shot task to ongoing care for your application, website or business agenda. You set the direction. The work continues.',
-        socialPreviewImageAlt: 'Promptbook – AI agendas: context, tasks and tools in a continuous work cycle',
+            'Context, goals and AI tools become ongoing background work. You set the rules and approve the decisions that need you.',
+        socialPreviewImageAlt:
+            'Promptbook – an ongoing AI agenda connects context, tasks and tools to outcomes and human decisions',
         keywords: [
             'AI agendas',
+            'ongoing responsibility',
             'AI for business',
-            'background work',
             'application maintenance',
-            'ongoing responsibilities',
+            'background work',
             'Promptbook',
         ],
         languageAlternates: HOMEPAGE_LANGUAGE_ALTERNATES,
@@ -70,12 +72,12 @@ export const HOMEPAGE_METADATA: Readonly<Record<SupportedHomepageLanguage, Metad
 
 export const HOMEPAGE_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.cs, {
-        eyebrow: 'AI pro dlouhodobé agendy',
+        eyebrow: 'AI agendy pro firmy a projekty',
         artwork: 'agenda',
         paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
     }),
     en: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.en, {
-        eyebrow: 'AI for ongoing responsibilities',
+        eyebrow: 'AI agendas for companies and projects',
         artwork: 'agenda',
         paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
     }),

@@ -145,7 +145,7 @@ type ProFirmyContent = {
  * Every word of the company-data landing page, in each language it is published in
  *
  * Note: This is the proposition of `/cs/pro-firmy` — company documents, a virtual employee and a strategic call.
- *       The agenda homepages at `/cs` and `/en` own their content and must leave this proposition alone.
+ *       The agenda homepage at `/cs` and `/en` owns its own content and must leave this proposition alone.
  */
 export const proFirmyContent = {
     cs: {

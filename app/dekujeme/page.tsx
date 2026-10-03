@@ -1,7 +1,7 @@
 'use client';
 
-import { AgendaThankYou } from '@/businesses/homepage/AgendaThankYou';
 import { MinimalFooter } from '@/components/minimal-footer';
+import { HomepageThankYou } from '@/businesses/homepage/HomepageThankYou';
 import { MinimalHeader } from '@/components/minimal-header';
 import jiriJahn from '@/public/people/jiri-jahn-transparent-square.png';
 import pavolHejny from '@/public/people/pavol-hejny-transparent-square.png';
@@ -16,8 +16,9 @@ function ThankYouContent() {
     const name = searchParams.get('name') || '';
     const email = searchParams.get('email') || '';
 
-    if (searchParams.get('context') === 'agenda') {
-        return <AgendaThankYou language={searchParams.get('lang') === 'en' ? 'en' : 'cs'} email={email} />;
+    if (searchParams.get('source') === 'agenda') {
+        const language = searchParams.get('language') === 'en' ? 'en' : 'cs';
+        return <HomepageThankYou language={language} name={name} email={email} />;
     }
 
     return (

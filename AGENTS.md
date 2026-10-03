@@ -24,20 +24,21 @@ use cases, and audiences. Keep these rules current when behavior changes.
   paths across sites; a same-brand nested path normalizes to that brand's public path.
   Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
-- `/cs` is the Czech homepage and source of truth for homepage structure and copy.
-- `/en` is its English localization. Both homepages own their composition and copy in `businesses/homepage`: an
-  agenda is a lasting area of responsibility with context, goals/tasks, agents/tools and human oversight. They
-  contrast one-shot work with background continuation, lead with application maintenance, and only then explain
-  coding harnesses and repositories. Illustrative examples are not live activity. The shared qualification flow
-  retains `qualification-popup` contact capture; homepage questions and the `context=agenda` confirmation are
-  localized and make no scarcity claims. Failed submissions keep answers for retry and pending requests lock edits.
+- `/cs` is the Czech homepage and source of truth for homepage structure and copy; `/en` is its English localization.
+  Their own composition and content in `businesses/homepage` present ongoing AI agendas: bounded responsibilities
+  with durable context, goals/tasks, multiple agents/tools and human rules, contrasted with one-shot AI work.
+  Application maintenance is the first illustrative workflow; other examples explain the general model and their
+  human decision points. Verified coding harnesses and repository workspaces are explained after the core concept.
+  Header/hero/final enquiry actions reuse `/api/waitlist` and `qualification-popup`, retain failed drafts and block
+  duplicate submissions. The full-load `/dekujeme?source=agenda&language=…` confirmation follows that proposition
+  in the chosen language; ordinary company-page confirmations keep their existing behavior.
 - `/cs/pro-firmy` is the Czech company-data landing page: company documents, a virtual
   employee answering in plain language, GDPR, and a strategic call. It owns that
   proposition — its composition in `businesses/pro-firmy/_ProFirmyPage.tsx`, every word
   in `businesses/pro-firmy/proFirmyContent.tsx`, and its own metadata, canonical URL,
   sharing card and sitemap entry in `businesses/pro-firmy/proFirmyMetadata.ts`. It is
-  published in Czech only and names no language alternate. The agenda-based `/cs` and `/en`
-  have their own sections and content and link to this preserved proposition.
+  published in Czech only and names no language alternate. Its company-data content and composition remain
+  independent of the agenda homepage, which links to it for document-focused enquiries.
   The legacy `/pro-firmy` permanently redirects there. The header's own default copy is
   site chrome and lives beside it in `components/headerContent.ts`, so no landing page
   owns the words every other page wears.

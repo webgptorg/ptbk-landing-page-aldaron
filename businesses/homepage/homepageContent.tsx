@@ -1,18 +1,15 @@
-import type { QualificationPopupContent } from '@/components/qualification-popup';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 
-export type AgendaExample = {
-    id: string;
+export type HomepageAgendaExample = {
+    id: 'software' | 'communication' | 'administration' | 'operations';
     label: string;
-    title: string;
-    goal: string;
+    responsibility: string;
     context: string;
-    steps: { title: string; detail: string }[];
-    approval: string;
-    outcome: string;
+    steps: readonly { title: string; description: string }[];
+    humanDecision: string;
 };
 
-type HomepageContent = {
+export type HomepageContent = {
     skipLink: string;
     navigation: { model: string; examples: string; technology: string; language: string };
     callToAction: string;
@@ -23,352 +20,314 @@ type HomepageContent = {
         emphasis: string;
         description: string;
         secondaryAction: string;
-        callNote: string;
-        illustration: string;
-        oneShotLabel: string;
-        oneShotPrompt: string;
-        oneShotSteps: string[];
-        agendaLabel: string;
-        agendaPrompt: string;
-        agendaSteps: string[];
+        exampleLabel: string;
+        exampleTitle: string;
+        cycle: readonly string[];
+        outcome: string;
+        decision: string;
         continuation: string;
-        human: string;
+    };
+    comparison: {
+        heading: string;
+        oneShot: { label: string; request: string; steps: readonly string[]; ending: string };
+        agenda: { label: string; request: string; steps: readonly string[]; ending: string };
+        bridge: string;
     };
     model: {
-        eyebrow: string;
-        title: string;
-        description: string;
-        parts: { title: string; description: string; example: string }[];
-        work: string[];
-        results: string;
-        controlTitle: string;
-        controlDescription: string;
+        heading: string;
+        definition: string;
+        parts: readonly { title: string; description: string }[];
+        cycleLabel: string;
+        cycle: readonly string[];
+        outcomes: string;
+        human: string;
+        humanActions: readonly string[];
     };
     examples: {
-        eyebrow: string;
-        title: string;
-        selector: string;
-        illustration: string;
-        context: string;
-        approval: string;
-        outcome: string;
-        items: AgendaExample[];
+        heading: string;
+        exampleLabel: string;
+        contextLabel: string;
+        decisionLabel: string;
+        items: readonly HomepageAgendaExample[];
         conclusion: string;
     };
     technology: {
-        eyebrow: string;
-        title: string;
-        description: string;
+        heading: string;
         harnessTitle: string;
         harnessDescription: string;
-        vendorDescription: string;
+        harnessScope: string;
         workspaceTitle: string;
         workspaceDescription: string;
-        folder: string;
-        files: { name: string; description: string }[];
-        link: string;
+        workspaceLabel: string;
+        folders: readonly string[];
+        independence: string;
+        documentation: string;
     };
-    team: { title: string; description: null; jiriDescription: string; pavolDescription: string };
-    contact: { title: string; description: string; steps: string[]; companyLink: string };
-    footer: { productLinks: { href: string; text: string }[]; claim: string };
-    qualification: QualificationPopupContent;
+    team: { title: string; description: string; jiriDescription: string; pavolDescription: string };
+    contact: { heading: string; description: string; companyPageLabel: string; companyPageLink: string };
+    footer: { claim: string; model: string; companyPage: string; documentation: string; branding: string };
+    enquiry: {
+        title: string;
+        description: string;
+        responsibility: string;
+        responsibilityPlaceholder: string;
+        fullname: string;
+        company: string;
+        email: string;
+        phone: string;
+        submitting: string;
+        error: string;
+        close: string;
+    };
     confirmation: {
         title: string;
         description: string;
-        steps: { title: string; description: string }[];
-        email: string;
+        steps: readonly { title: string; description: string }[];
+        emailLabel: string;
         back: string;
     };
 };
 
-/** Czech is the source of truth. Examples describe bounded agendas, not preconnected services or a live dashboard. */
-const HOMEPAGE_CONTENT: Record<SupportedHomepageLanguage, HomepageContent> = {
+/** Czech owns the composition; English expresses the same product model in its own words. */
+export const HOMEPAGE_CONTENT: Readonly<Record<SupportedHomepageLanguage, HomepageContent>> = {
     cs: {
         skipLink: 'Přejít na obsah',
-        navigation: {
-            model: 'Jak funguje agenda',
-            examples: 'Příklady',
-            technology: 'Pod kapotou',
-            language: 'English',
-        },
-        callToAction: 'Probrat naši první agendu',
-        mobileCallToAction: 'Začít',
+        navigation: { model: 'Jak funguje agenda', examples: 'Příklady', technology: 'Pod kapotou', language: 'Jazyk' },
+        callToAction: 'Domluvit hovor zdarma',
+        mobileCallToAction: 'Probrat agendu',
         hero: {
             eyebrow: 'Promptbook pro firmy a projekty',
-            heading: 'Svěřte AI agendu.',
-            emphasis: 'Ať práce pokračuje.',
+            heading: 'Svěřte AI odpovědnost.',
+            emphasis: 'Práce pokračuje na pozadí.',
             description:
-                'Údržba aplikace, komunikace se zákazníky nebo provoz firmy. Promptbook mění jednotlivé AI úkoly v dlouhodobou odpovědnost, která se řeší na pozadí. Bez nového zadání pro každý další krok.',
+                'Údržba aplikace, komunikace se zákazníky nebo provoz firmy. Promptbook z nich dělá agendy, které mohou pokračovat bez toho, abyste pokaždé otevírali chat a zadávali další krok.',
             secondaryAction: 'Podívat se, jak to funguje',
-            callNote: 'Na strategickém hovoru zdarma vybereme vhodnou agendu a její hranice.',
-            illustration: 'Od jednoho úkolu k průběžné péči',
-            oneShotLabel: 'Jednorázový úkol',
-            oneShotPrompt: '„Vytvoř mi web.“',
-            oneShotSteps: ['Zadání', 'Výsledek', 'Hotovo'],
-            agendaLabel: 'Dlouhodobá agenda',
-            agendaPrompt: '„Starej se o náš web a rozvíjej ho.“',
-            agendaSteps: ['Sleduje změny', 'Pracuje', 'Ověřuje'],
-            continuation: 'Další změna. Stejný kontext. Práce pokračuje.',
-            human: 'Vy určujete směr a schvalujete důležité kroky.',
+            exampleLabel: 'Příklad agendy',
+            exampleTitle: 'Udržovat a rozvíjet naši aplikaci',
+            cycle: ['Sledovat změny', 'Opravit a otestovat', 'Pokračovat'],
+            outcome: 'Oprava připravená, testy prošly',
+            decision: 'Větší změna? Vyžádat vaše schválení.',
+            continuation: 'Kontext zůstává. Přichází další práce.',
+        },
+        comparison: {
+            heading: 'Firma se skládá z odpovědností. Dejte je do pohybu.',
+            oneShot: {
+                label: 'Jednorázový úkol',
+                request: '„Vytvoř mi aplikaci.“',
+                steps: ['Zadání', 'Práce AI', 'Výsledek'],
+                ending: 'Úkol hotový. Další krok znovu zadáváte vy.',
+            },
+            agenda: {
+                label: 'Průběžná agenda',
+                request: '„Starej se o naši aplikaci.“',
+                steps: ['Kontext', 'Práce AI', 'Výsledek', 'Další krok'],
+                ending: 'Odpovědnost trvá. Agenda pokračuje a ozve se, když potřebuje vaše rozhodnutí.',
+            },
+            bridge: 'Silní AI agenti už zvládají složité úkoly. Promptbook na jejich schopnostech staví a propojuje je v práci, která pokračuje v čase.',
         },
         model: {
-            eyebrow: 'Co je agenda',
-            title: 'Firma funguje díky odpovědnostem, které někdo průběžně řeší.',
-            description:
-                'Agenda je vymezená oblast odpovědnosti s vlastní pamětí, cíli a pravidly. Obsahuje jednorázové i opakované úkoly. Jednotlivý úkol skončí; agenda má na co navázat.',
+            heading: 'Jedna agenda. Mnoho úkolů. Kontext zůstává.',
+            definition:
+                'Agenda je vymezená oblast odpovědnosti s vlastními cíli, kontextem a pravidly. Úkoly vznikají a končí. Agenda zůstává.',
             parts: [
                 {
-                    title: 'Kontext a pravidla',
-                    description: 'Co má znát, kam smí zasáhnout a kdy se má zeptat.',
-                    example: 'Znalosti · historie · hranice',
+                    title: 'Kontext',
+                    description: 'Co má firma nebo projekt za sebou, co potřebuje a kde jsou podklady.',
                 },
                 {
                     title: 'Cíle a úkoly',
-                    description: 'Více cílů, průběžná péče i úkoly s konkrétním termínem.',
-                    example: 'Záměr · plán · další kroky',
+                    description: 'Dlouhodobé cíle, opakovaná práce i jednorázové změny v jedné agendě.',
                 },
                 {
                     title: 'Agenti a nástroje',
-                    description: 'V jedné agendě může spolupracovat více agentů. Každý podle své role.',
-                    example: 'Realizace · kontrola · připojené nástroje',
+                    description: 'Více agentů může spolupracovat. Každý s nástroji pro svou část práce.',
+                },
+                {
+                    title: 'Pravidla a hranice',
+                    description: 'Co se smí stát samostatně a co vyžaduje člověka nebo schválení.',
                 },
             ],
-            work: ['Sleduje podněty', 'Volí další krok', 'Pracuje a ověřuje', 'Navazuje'],
-            results: 'Výsledky průběžně. Otázky a rozhodnutí, když je potřeba člověk.',
-            controlTitle: 'Běžný další krok bez dalšího promptu. Směr zůstává na vás.',
-            controlDescription:
-                'Nahlížíte do práce, opravujete zadání, měníte priority a schvalujete kroky podle domluvených pravidel. Rozsah samostatné práce vychází z přístupů, nástrojů a hranic konkrétní agendy.',
+            cycleLabel: 'Práce na pozadí podle pravidel agendy',
+            cycle: ['Sleduje', 'Plánuje', 'Jedná', 'Kontroluje', 'Navazuje'],
+            outcomes: 'Výsledky a rozhodnutí, která potřebují vás',
+            human: 'Směr držíte vy.',
+            humanActions: ['Nahlédnout', 'Opravit', 'Schválit', 'Změnit směr'],
         },
         examples: {
-            eyebrow: 'Jedna myšlenka, různé odpovědnosti',
-            title: 'Vytvořit aplikaci je začátek. Udržovat ji je agenda.',
-            selector: 'Vybrat příklad agendy',
-            illustration: 'Ilustrační průběh agendy',
-            context: 'Co si agenda nese dál',
-            approval: 'Kdy vstupuje člověk',
-            outcome: 'O co je postaráno',
+            heading: 'Co by u vás mělo pokračovat i po zavření chatu?',
+            exampleLabel: 'Ilustrační průběh agendy',
+            contextLabel: 'Co agenda zná',
+            decisionLabel: 'Kde rozhoduje člověk',
             items: [
                 {
                     id: 'software',
                     label: 'Web a aplikace',
-                    title: 'Udržovat a rozvíjet naši aplikaci',
-                    goal: 'První verzi už máme. Teď potřebujeme vyřizovat změny, opravovat chyby a držet kvalitu i za měsíc.',
-                    context: 'Repozitář, produktové zadání, pravidla kvality, testy a historie rozhodnutí.',
+                    responsibility: 'Udržovat a rozvíjet naši aplikaci.',
+                    context: 'Repozitář, zadání produktu, historie změn a pravidla kvality.',
                     steps: [
+                        { title: 'Porozumět produktu', description: 'Projít kód, zadání a otevřené požadavky.' },
+                        { title: 'Pracovat na změně', description: 'Připravit opravu, novou funkci nebo aktualizaci.' },
                         {
-                            title: 'Porozumět aplikaci',
-                            detail: 'Zorientovat se v kódu, zadání a dosavadních rozhodnutích.',
+                            title: 'Ověřit kvalitu',
+                            description: 'Spustit testy, zkontrolovat výsledek a opravit nalezené chyby.',
                         },
                         {
-                            title: 'Zpracovat další změnu',
-                            detail: 'Vzít požadavek nebo chybu a navrhnout konkrétní postup.',
-                        },
-                        {
-                            title: 'Upravit a otestovat',
-                            detail: 'Využít silné nástroje pro vývoj, spustit testy a opravit nalezené problémy.',
-                        },
-                        {
-                            title: 'Předat změnu ke kontrole',
-                            detail: 'Ukázat výsledek a podle pravidel vyžádat schválení před nasazením.',
-                        },
-                        {
-                            title: 'Pokračovat v péči',
-                            detail: 'Navázat další opravou, aktualizací nebo rozvojem se stejným kontextem.',
+                            title: 'Navázat další prací',
+                            description:
+                                'Uchovat kontext a historii. Pokračovat s dalším požadavkem nebo pravidelnou kontrolou.',
                         },
                     ],
-                    approval:
-                        'Změnu priorit, nejasné zadání nebo nasazení řešíte podle dohodnutých pravidel. Nemusíte ručně spouštět každý vývojový úkol.',
-                    outcome: 'Aplikace, o kterou se průběžně pečuje. Nejen její první vygenerovaná verze.',
+                    humanDecision:
+                        'Změna směru produktu nebo zveřejnění podle dohodnutých pravidel. Vy sledujete udržovanou aplikaci, nemusíte ručně obsluhovat každý běh coding agenta.',
                 },
                 {
                     id: 'communication',
-                    label: 'Zákaznická komunikace',
-                    title: 'Průběžně vyřizovat zákaznické dotazy',
-                    goal: 'Příchozí zprávy potřebují kontext, návaznost a jasná pravidla pro odpovědi.',
-                    context: 'Informace o službě, historie komunikace, tón odpovědí a oprávnění.',
+                    label: 'Komunikace',
+                    responsibility: 'Udržovat zákaznickou komunikaci vyřízenou.',
+                    context: 'Historie komunikace, informace o službách a pravidla odpovídání.',
                     steps: [
-                        { title: 'Roztřídit příchozí zprávy', detail: 'Rozpoznat téma a to, co je potřeba vyřešit.' },
-                        { title: 'Připravit odpověď', detail: 'Doplnit souvislosti z dostupných podkladů.' },
+                        {
+                            title: 'Zpracovat nové zprávy',
+                            description: 'Rozlišit běžný dotaz, návaznou domluvu a výjimku.',
+                        },
+                        {
+                            title: 'Připravit odpověď',
+                            description: 'Použít souvislosti a podklady konkrétního zákazníka.',
+                        },
                         {
                             title: 'Předat výjimky',
-                            detail: 'Nejasnosti a závazky vůči zákazníkovi dát člověku ke schválení.',
+                            description: 'Nestandardní závazek nebo citlivou situaci dát člověku k rozhodnutí.',
                         },
                         {
-                            title: 'Navázat na otevřené případy',
-                            detail: 'Udržet přehled o tom, co čeká na odpověď nebo další krok.',
+                            title: 'Hlídání pokračuje',
+                            description: 'Sledovat otevřené konverzace a navazující úkoly podle nastavených pravidel.',
                         },
                     ],
-                    approval:
-                        'Odesílání a přístupy se nastavují pro konkrétní agendu. Sporné případy a nové závazky zůstávají u člověka.',
-                    outcome: 'Komunikace s návazností i mezi jednotlivými zprávami.',
+                    humanDecision:
+                        'Citlivé odpovědi a nové závazky. Přístup ke schránce a oprávnění je potřeba nastavit pro konkrétní agendu.',
                 },
                 {
                     id: 'administration',
-                    label: 'Účetní administrativa',
-                    title: 'Udržovat podklady a termíny v pořádku',
-                    goal: 'Účetnictví je agenda. Příprava podkladů k DPH, zpracování dokladů a hlídání termínů jsou její různé úkoly.',
-                    context: 'Dostupné doklady, interní postupy, kalendář termínů a odpovědné osoby.',
+                    label: 'Administrativa',
+                    responsibility: 'Udržovat účetní podklady a termíny v pořádku.',
+                    context: 'Doklady, přehled povinností a postupy dohodnuté s účetní.',
                     steps: [
-                        { title: 'Zpracovat dostupné doklady', detail: 'Uspořádat je a označit chybějící údaje.' },
-                        { title: 'Sledovat termíny', detail: 'Připomenout, co se blíží a které podklady ještě chybí.' },
                         {
-                            title: 'Připravit podklady ke kontrole',
-                            detail: 'Dát účetnímu přehled a nejasnosti k rozhodnutí.',
+                            title: 'Zpracovat podklady',
+                            description: 'Roztřídit dostupné doklady a označit chybějící údaje.',
                         },
-                        { title: 'Pokračovat dalším obdobím', detail: 'Navázat na dosavadní postupy a nové doklady.' },
+                        {
+                            title: 'Hlídání termínů',
+                            description: 'Udržovat úkoly k uzávěrce, DPH a dalším povinnostem.',
+                        },
+                        {
+                            title: 'Připravit ke kontrole',
+                            description: 'Dát účetní přehled podkladů a otevřených otázek.',
+                        },
+                        {
+                            title: 'Další období',
+                            description: 'Stejná odpovědnost pokračuje s novými doklady a novými termíny.',
+                        },
                     ],
-                    approval:
-                        'Odborné posouzení, schválení a zákonná podání zůstávají na odpovědném člověku. Konkrétní napojení se domlouvá při zavedení.',
-                    outcome: 'Průběžně připravené podklady pro kontrolu účetním.',
+                    humanDecision:
+                        'Účetní kontrola a podání zůstávají odborníkovi. Účetnictví je agenda; příprava DPH je jeden z jejích úkolů.',
                 },
                 {
-                    id: 'content',
-                    label: 'Obsah a provoz webu',
-                    title: 'Udržovat informace na webu aktuální',
-                    goal: 'Napsat jeden článek nestačí. Informace, odkazy a publikační plán potřebují průběžnou péči.',
-                    context: 'Schválené zdroje, styl komunikace, struktura webu a publikační pravidla.',
+                    id: 'operations',
+                    label: 'Provoz firmy',
+                    responsibility: 'Udržovat obsah a provozní informace aktuální.',
+                    context: 'Zdroje informací, publikační plán a interní postupy firmy.',
                     steps: [
-                        { title: 'Projít domluvené zdroje', detail: 'Najít změny, které se mají promítnout na web.' },
-                        { title: 'Připravit úpravy', detail: 'Aktualizovat návrhy textů a související odkazy.' },
                         {
-                            title: 'Předložit obsah ke schválení',
-                            detail: 'Ukázat, co se mění a z jakých podkladů to vychází.',
+                            title: 'Zachytit změnu',
+                            description: 'Podle dostupných zdrojů zjistit, co je potřeba aktualizovat.',
                         },
-                        { title: 'Vrátit se k další kontrole', detail: 'Pokračovat podle plánu i nových podnětů.' },
+                        { title: 'Připravit úpravy', description: 'Promítnout změnu do obsahu a navazujících úkolů.' },
+                        {
+                            title: 'Zkontrolovat souvislosti',
+                            description: 'Zachovat konzistenci informací a upozornit na rozpory.',
+                        },
+                        {
+                            title: 'Udržovat dál',
+                            description: 'Vracet se k odpovědnosti, když dorazí změna nebo nastane čas kontroly.',
+                        },
                     ],
-                    approval:
-                        'Vy určujete důvěryhodné zdroje a pravidla publikace. Citlivé informace a veřejná tvrzení procházejí kontrolou.',
-                    outcome: 'Obsah, který nezůstane stát po prvním zveřejnění.',
+                    humanDecision:
+                        'Publikace a výjimky podle vašich pravidel. Zdroje, nástroje i rozsah práce vymezíme pro váš provoz.',
                 },
             ],
             conclusion:
-                'Stejný princip platí i pro vaši vlastní provozní agendu: jasná odpovědnost, trvalý kontext a práce, která má na co navazovat.',
+                'Stejný princip pro různé odpovědnosti. Rozsah, nástroje a míru samostatnosti nastavujeme pro konkrétní firmu nebo projekt.',
         },
         technology: {
-            eyebrow: 'Na čem Promptbook staví',
-            title: 'Silné AI nástroje. Trvalé zadání.',
-            description:
-                'Dnešní AI zvládá složité jednorázové úkoly výborně. Promptbook na této schopnosti staví a zasazuje ji do dlouhodobé práce pro firmu nebo projekt.',
-            harnessTitle: 'Schopnosti pod kapotou',
+            heading: 'Silné nástroje pod kapotou. Vaše agenda v popředí.',
+            harnessTitle: 'Stavíme na schopnostech coding agentů',
             harnessDescription:
-                'Promptbook Coder zapojuje tyto vývojové nástroje. Mohou psát kód, spouštět testy a provádět změny tam, kde je to pro agendu nejlepší cesta.',
-            vendorDescription:
-                'Agenda není vázaná na jednoho dodavatele modelu. Nástroje a modely jsou volba pro konkrétní práci; cíle a kontext patří agendě. Vy řešíte výsledek.',
-            workspaceTitle: 'Pracovní prostor, který přetrvá',
+                'Kód může být nejlepší cesta, jak práci vykonat. Promptbook Coder umí práci předávat těmto nástrojům:',
+            harnessScope:
+                'Volba nástroje a modelu patří k nastavení práce. Agenda není svázaná s jedním dodavatelem AI.',
+            workspaceTitle: 'Kontext, který nezmizí s jedním chatem',
             workspaceDescription:
-                'Tam, kde to dává smysl, žije agenda ve složce nebo Git repozitáři. Kontext, definice agentů, zadání a historie tak zůstávají pohromadě i mezi jednotlivými běhy.',
-            folder: 'vaše-agenda/',
-            files: [
-                { name: 'kontext/', description: 'znalosti a souvislosti' },
-                { name: 'cíle-a-úkoly/', description: 'zadání, plán a priority' },
-                { name: 'agenti/', description: 'role, instrukce a nástroje' },
-                { name: 'historie/', description: 'změny a rozhodnutí' },
+                'Tam, kde to dává smysl, je pracovním prostorem složka nebo Git repozitář. Drží pohromadě kontext, definice agentů, zadání, úkoly a historii. Pro porozumění agendě nemusíte znát Git.',
+            workspaceLabel: 'Příklad trvalého pracovního prostoru',
+            folders: [
+                'Kontext a podklady',
+                'Cíle a zadání',
+                'Opakované i jednorázové úkoly',
+                'Definice agentů a pravidla',
+                'Historie práce',
             ],
-            link: 'Prozkoumat Promptbook Coder',
+            independence: 'Nástroje se mohou měnit. Odpovědnost, kontext a historie zůstávají základem agendy.',
+            documentation: 'Otevřít dokumentaci Promptbooku',
         },
         team: {
-            title: 'Lidé za Promptbookem',
-            description: null,
-            jiriDescription: 'Matematik a spoluzakladatel Promptbooku.',
-            pavolDescription: 'Vývojář a spoluzakladatel Promptbooku.',
+            title: 'S kým proberete svou agendu',
+            description: 'Propojíme potřeby vašeho projektu s konkrétním technickým postupem.',
+            jiriDescription: 'Jiří Jahn vede Promptbook. Doktor matematiky, dříve výzkumník v IT4I.',
+            pavolDescription: 'Pavol Hejný vyvíjí Promptbook a jeho nástroje pro práci s AI.',
         },
         contact: {
-            title: 'Která agenda by měla pokračovat i bez vás u klávesnice?',
+            heading: 'Začněme jednou odpovědností.',
             description:
-                'Začněme jednou konkrétní odpovědností. Společně vybereme první krok a ověříme, co pro něj Promptbook potřebuje.',
-            steps: ['Vymezíme cíl', 'Projdeme nástroje a přístupy', 'Domluvíme hranice a schvalování'],
-            companyLink: 'Hledáte odpovědi nad firemními dokumenty? Promptbook pro firmy',
+                'Na strategickém hovoru vymezíme první agendu: co má zvládat, jaké potřebuje podklady a kdy má zapojit vás.',
+            companyPageLabel: 'Hledáte odpovědi nad firemními dokumenty?',
+            companyPageLink: 'Promptbook pro firemní data',
         },
         footer: {
-            productLinks: [
-                { href: '#kontakt', text: 'Probrat agendu' },
-                { href: '/cs/pro-firmy', text: 'Firemní data a dokumenty' },
-                { href: 'https://coder.ptbk.io/', text: 'Promptbook Coder' },
-                { href: 'https://github.com/webgptorg/promptbook', text: 'Dokumentace' },
-                { href: '/branding', text: 'Branding' },
-            ],
-            claim: 'AI pro agendy, které pokračují.',
+            claim: 'Odpovědnosti, které mohou pokračovat na pozadí.',
+            model: 'Jak fungují agendy',
+            companyPage: 'Pro firemní data',
+            documentation: 'Dokumentace',
+            branding: 'Branding',
         },
-        qualification: {
-            dialogTitle: 'Proberme vaši první agendu',
-            intro: 'Pomozte nám připravit strategický hovor o vaší agendě.',
-            questions: [
-                {
-                    id: 'agenda',
-                    question: 'O kterou oblast se má AI průběžně starat?',
-                    type: 'single',
-                    options: [
-                        'Web nebo aplikace',
-                        'Zákaznická komunikace',
-                        'Účetní administrativa',
-                        'Obsah a provoz webu',
-                        'Jiná firemní nebo projektová agenda',
-                    ],
-                },
-                {
-                    id: 'support',
-                    question: 'S čím chcete začít?',
-                    type: 'single',
-                    options: [
-                        'Vybrat vhodnou agendu a její hranice',
-                        'Navázat na existující projekt nebo proces',
-                        'Probrat možnosti a konkrétní napojení',
-                    ],
-                },
-                {
-                    id: 'urgency',
-                    question: 'Kdy byste chtěli začít?',
-                    type: 'single',
-                    options: ['Co nejdřív', 'Příští kvartál', 'Zatím zkoumáme možnosti'],
-                },
-                {
-                    id: 'contact',
-                    question: 'Kam se vám ozveme?',
-                    type: 'contact',
-                    subtitle: 'Domluvíme termín hovoru. Vaše odpovědi nám pomohou se připravit.',
-                    fields: [
-                        { id: 'name', label: 'Jméno', type: 'text', placeholder: 'Jan Novák' },
-                        {
-                            id: 'company',
-                            label: 'Firma nebo projekt',
-                            type: 'text',
-                            placeholder: 'Název firmy nebo projektu',
-                        },
-                        { id: 'email', label: 'E-mail', type: 'email', placeholder: 'jan@firma.cz' },
-                        {
-                            id: 'phone',
-                            label: 'Telefon',
-                            type: 'tel',
-                            inputMode: 'tel',
-                            placeholder: '+420 777 123 456',
-                        },
-                    ],
-                },
-            ],
-            close: 'Zavřít',
-            stepLabel: (step, total) => `Krok ${step + 1} z ${total}`,
+        enquiry: {
+            title: 'Proberme vaši první agendu',
+            description: 'Napište, o co se má AI průběžně starat. Ozveme se a domluvíme strategický hovor.',
+            responsibility: 'Jakou odpovědnost chcete předat?',
+            responsibilityPlaceholder: 'Například údržbu naší aplikace a práci na dalších změnách…',
+            fullname: 'Jméno a příjmení',
+            company: 'Firma nebo projekt',
+            email: 'E-mail',
+            phone: 'Telefon (nepovinný)',
             submitting: 'Odesílám…',
-            submit: 'Domluvit hovor zdarma',
-            back: 'Zpět',
+            error: 'Poptávku se nepodařilo odeslat. Vaše údaje zůstaly vyplněné. Zkuste to prosím znovu.',
+            close: 'Zavřít',
         },
         confirmation: {
-            title: 'Děkujeme za váš zájem',
-            description: 'Vaše odpovědi jsme přijali. Teď spolu najdeme první smysluplnou agendu.',
+            title: 'Děkujeme za poptávku.',
+            description: 'Vaši odpovědnost i kontaktní údaje máme. Dalším krokem je společně vymezit první agendu.',
             steps: [
+                { title: 'Domluvíme si hovor', description: 'Ozveme se na uvedený kontakt a dohodneme vhodný termín.' },
                 {
-                    title: 'Ozveme se vám',
-                    description: 'Projdeme vaše odpovědi a domluvíme termín strategického hovoru.',
+                    title: 'Vymezíme odpovědnost',
+                    description: 'Probereme cíle, dostupné podklady a hranice samostatné práce.',
                 },
                 {
-                    title: 'Vymezíme první agendu',
-                    description: 'Probereme cíl, dostupné nástroje a kroky, které mají vyžadovat váš souhlas.',
-                },
-                {
-                    title: 'Dohodneme další postup',
-                    description: 'Společně posoudíme proveditelnost a navrhneme konkrétní první krok.',
+                    title: 'Navrhneme další krok',
+                    description: 'Dohodneme, co má první agenda dělat a co má nechat na vás.',
                 },
             ],
-            email: 'Kontaktní e-mail',
+            emailLabel: 'Kontaktní e-mail',
             back: 'Zpět na hlavní stránku',
         },
     },
@@ -378,292 +337,253 @@ const HOMEPAGE_CONTENT: Record<SupportedHomepageLanguage, HomepageContent> = {
             model: 'How agendas work',
             examples: 'Examples',
             technology: 'Under the hood',
-            language: 'Česky',
+            language: 'Language',
         },
-        callToAction: 'Discuss your first agenda',
-        mobileCallToAction: 'Let’s talk',
+        callToAction: 'Book a free strategy call',
+        mobileCallToAction: 'Talk to us',
         hero: {
             eyebrow: 'Promptbook for companies and projects',
             heading: 'Give AI a responsibility.',
-            emphasis: 'Let the work continue.',
+            emphasis: 'Let the work keep going.',
             description:
-                'Maintaining an application, handling customer communication, keeping operations moving. Promptbook turns individual AI tasks into ongoing responsibilities that run in the background. Without a fresh prompt for every next step.',
+                'Maintaining an application, handling customer communication, keeping operations on track. Promptbook turns these into agendas that can keep working in the background, without another chat and another prompt for every next step.',
             secondaryAction: 'See how it works',
-            callNote: 'A free strategy call to choose your first agenda and define its boundaries.',
-            illustration: 'From a single task to ongoing care',
-            oneShotLabel: 'One-shot task',
-            oneShotPrompt: '“Build me a website.”',
-            oneShotSteps: ['Request', 'Result', 'Done'],
-            agendaLabel: 'Ongoing agenda',
-            agendaPrompt: '“Maintain and improve our website.”',
-            agendaSteps: ['Observe', 'Act', 'Check'],
-            continuation: 'Next change. Same context. The work continues.',
-            human: 'You set the direction and approve important steps.',
+            exampleLabel: 'Example agenda',
+            exampleTitle: 'Maintain and improve our application',
+            cycle: ['Watch for changes', 'Fix and test', 'Continue'],
+            outcome: 'Fix ready, tests passed',
+            decision: 'A bigger change? Ask for your approval.',
+            continuation: 'Context stays. The next task arrives.',
+        },
+        comparison: {
+            heading: 'Companies run on responsibilities. Put yours to work.',
+            oneShot: {
+                label: 'One-shot task',
+                request: '“Build me an application.”',
+                steps: ['Request', 'AI work', 'Result'],
+                ending: 'Task complete. You prompt the next step.',
+            },
+            agenda: {
+                label: 'Ongoing agenda',
+                request: '“Take care of our application.”',
+                steps: ['Context', 'AI work', 'Result', 'Next step'],
+                ending: 'The responsibility continues. The agenda carries on and asks when it needs your decision.',
+            },
+            bridge: 'Powerful AI agents already handle complex tasks. Promptbook builds on that strength to connect individual runs into work that continues over time.',
         },
         model: {
-            eyebrow: 'Meet the agenda',
-            title: 'Companies run on responsibilities that keep getting handled.',
-            description:
-                'An agenda is a defined area of responsibility with its own context, goals and rules. It holds both one-off and recurring tasks. A task ends; the agenda carries the work forward.',
+            heading: 'One agenda. Many tasks. Context that lasts.',
+            definition:
+                'An agenda is a bounded area of responsibility with its own goals, context and rules. Tasks come and go. The agenda stays.',
             parts: [
                 {
-                    title: 'Context and rules',
-                    description: 'What it needs to know, what it may change, and when to ask.',
-                    example: 'Knowledge · history · boundaries',
+                    title: 'Context',
+                    description: 'What the company or project knows, what it needs and where the information lives.',
                 },
                 {
                     title: 'Goals and tasks',
-                    description: 'Multiple goals, ongoing care and individual tasks with their own deadlines.',
-                    example: 'Purpose · plan · next steps',
+                    description: 'Long-term goals, recurring work and one-off changes within the same agenda.',
                 },
                 {
                     title: 'Agents and tools',
-                    description: 'Several agents can work within one agenda, each with a different role.',
-                    example: 'Implementation · review · connected tools',
+                    description: 'Multiple agents can work together, each with tools for its part of the work.',
+                },
+                {
+                    title: 'Rules and boundaries',
+                    description: 'What can happen independently and what needs a person or an approval.',
                 },
             ],
-            work: ['Observe changes', 'Choose a next step', 'Work and verify', 'Continue'],
-            results: 'Results along the way. Questions and decisions when a person is needed.',
-            controlTitle: 'Routine work moves on. You still set the direction.',
-            controlDescription:
-                'Inspect the work, correct instructions, change priorities and approve steps under agreed rules. How much an agenda can do on its own depends on its access, tools and boundaries.',
+            cycleLabel: 'Background work within the agenda’s rules',
+            cycle: ['Observe', 'Plan', 'Act', 'Check', 'Continue'],
+            outcomes: 'Outcomes and decisions that need you',
+            human: 'You set the direction.',
+            humanActions: ['Inspect', 'Correct', 'Approve', 'Change course'],
         },
         examples: {
-            eyebrow: 'One idea, different responsibilities',
-            title: 'Building an app is a start. Maintaining it is an agenda.',
-            selector: 'Choose an example agenda',
-            illustration: 'Illustrative agenda workflow',
-            context: 'Context that carries forward',
-            approval: 'Where a person steps in',
-            outcome: 'The responsibility being handled',
+            heading: 'What should keep moving after you close the chat?',
+            exampleLabel: 'Illustrative agenda workflow',
+            contextLabel: 'What the agenda knows',
+            decisionLabel: 'Where a person decides',
             items: [
                 {
                     id: 'software',
-                    label: 'Websites & apps',
-                    title: 'Maintain and improve our application',
-                    goal: 'The first version exists. Now we need changes handled, bugs fixed and quality maintained next month, too.',
-                    context: 'The repository, product requirements, quality rules, tests and past decisions.',
+                    label: 'Web and applications',
+                    responsibility: 'Maintain and improve our application.',
+                    context: 'The repository, product requirements, change history and quality standards.',
                     steps: [
                         {
-                            title: 'Understand the application',
-                            detail: 'Get familiar with the code, requirements and decisions made so far.',
+                            title: 'Understand the product',
+                            description: 'Read the code, requirements and open requests.',
+                        },
+                        { title: 'Make a change', description: 'Prepare a fix, a feature or an update.' },
+                        {
+                            title: 'Verify quality',
+                            description: 'Run tests, review the result and fix the issues found.',
                         },
                         {
-                            title: 'Work through the next change',
-                            detail: 'Take a request or a bug and work out a concrete approach.',
-                        },
-                        {
-                            title: 'Implement and test',
-                            detail: 'Use capable coding tools, run tests and fix problems they uncover.',
-                        },
-                        {
-                            title: 'Bring the change for review',
-                            detail: 'Show the result and request approval before release when the rules require it.',
-                        },
-                        {
-                            title: 'Continue the maintenance',
-                            detail: 'Move on to the next fix, update or improvement with the same context.',
+                            title: 'Keep the work moving',
+                            description:
+                                'Retain context and history. Continue with the next request or a recurring check.',
                         },
                     ],
-                    approval:
-                        'Changes in priority, unclear requirements and releases follow the rules you agree on. You do not have to launch every coding task yourself.',
-                    outcome: 'An application that keeps being cared for, beyond its first generated version.',
+                    humanDecision:
+                        'Product direction and releases follow your agreed approval rules. You work with the maintained application, without manually operating every coding-agent run.',
                 },
                 {
                     id: 'communication',
-                    label: 'Customer communication',
-                    title: 'Keep customer enquiries moving',
-                    goal: 'Incoming messages need context, follow-through and clear rules for replies.',
-                    context: 'Service information, conversation history, tone of voice and permissions.',
+                    label: 'Communication',
+                    responsibility: 'Keep customer communication handled.',
+                    context: 'Conversation history, service information and rules for replying.',
                     steps: [
                         {
-                            title: 'Sort incoming messages',
-                            detail: 'Identify the topic and what needs to be resolved.',
+                            title: 'Process new messages',
+                            description: 'Identify a routine question, a follow-up or an exception.',
                         },
-                        { title: 'Prepare a reply', detail: 'Bring in context from the information available.' },
+                        {
+                            title: 'Prepare a reply',
+                            description: 'Use the context and information relevant to that customer.',
+                        },
                         {
                             title: 'Escalate exceptions',
-                            detail: 'Bring uncertainty and new customer commitments to a person for approval.',
+                            description: 'Bring unusual commitments and sensitive situations to a person.',
                         },
                         {
-                            title: 'Follow up on open cases',
-                            detail: 'Keep track of what still needs a reply or another step.',
+                            title: 'Follow through',
+                            description: 'Keep track of open conversations and follow-up tasks under the agreed rules.',
                         },
                     ],
-                    approval:
-                        'Sending permissions and access are configured for each agenda. Disputes and new commitments stay with a person.',
-                    outcome: 'Communication with continuity between individual messages.',
+                    humanDecision:
+                        'Sensitive replies and new commitments need a person. Inbox access and permissions are configured for each agenda.',
                 },
                 {
                     id: 'administration',
-                    label: 'Accounting admin',
-                    title: 'Keep records and deadlines in order',
-                    goal: 'Accounting is an agenda. Preparing VAT documents, processing records and monitoring deadlines are different tasks within it.',
-                    context: 'Available records, internal procedures, deadlines and the people responsible.',
+                    label: 'Administration',
+                    responsibility: 'Keep accounting records and deadlines in order.',
+                    context: 'Documents, a list of obligations and procedures agreed with your accountant.',
                     steps: [
                         {
-                            title: 'Organise available records',
-                            detail: 'Put documents in order and flag missing information.',
-                        },
-                        { title: 'Monitor deadlines', detail: 'Surface upcoming dates and the records still needed.' },
-                        {
-                            title: 'Prepare for professional review',
-                            detail: 'Give the accountant an overview and questions that need a decision.',
+                            title: 'Process documents',
+                            description: 'Organize available records and flag missing information.',
                         },
                         {
-                            title: 'Continue into the next period',
-                            detail: 'Carry the established procedures forward as new records arrive.',
+                            title: 'Track deadlines',
+                            description: 'Maintain tasks for period closing, VAT preparation and other obligations.',
+                        },
+                        {
+                            title: 'Prepare for review',
+                            description: 'Give the accountant an overview of records and unresolved questions.',
+                        },
+                        {
+                            title: 'Continue next period',
+                            description: 'The same responsibility continues with new documents and deadlines.',
                         },
                     ],
-                    approval:
-                        'Professional judgement, approval and statutory filings remain with the responsible person. Specific connections are agreed during setup.',
-                    outcome: 'Records kept ready for an accountant’s review.',
+                    humanDecision:
+                        'Professional review and filing stay with the accountant. Accounting is the agenda; VAT preparation is one task within it.',
                 },
                 {
-                    id: 'content',
-                    label: 'Content operations',
-                    title: 'Keep website information up to date',
-                    goal: 'Writing one article is only part of the job. Information, links and publishing plans need ongoing attention.',
-                    context: 'Approved sources, editorial style, site structure and publishing rules.',
+                    id: 'operations',
+                    label: 'Company operations',
+                    responsibility: 'Keep content and operational information up to date.',
+                    context: 'Information sources, a publishing plan and the company’s internal procedures.',
                     steps: [
                         {
-                            title: 'Review agreed sources',
-                            detail: 'Find changes that should be reflected on the website.',
-                        },
-                        { title: 'Prepare updates', detail: 'Revise draft copy and related links.' },
-                        {
-                            title: 'Bring content for approval',
-                            detail: 'Show what changed and which sources support it.',
+                            title: 'Notice a change',
+                            description: 'Use the available sources to identify what needs updating.',
                         },
                         {
-                            title: 'Return for the next review',
-                            detail: 'Continue on a schedule and respond to new information.',
+                            title: 'Prepare updates',
+                            description: 'Carry the change through to content and related tasks.',
+                        },
+                        {
+                            title: 'Check consistency',
+                            description: 'Keep information aligned and flag conflicting details.',
+                        },
+                        {
+                            title: 'Keep maintaining',
+                            description: 'Return to the responsibility when something changes or a review is due.',
                         },
                     ],
-                    approval:
-                        'You choose trusted sources and publishing rules. Sensitive information and public claims go through review.',
-                    outcome: 'Content that continues to receive attention after publication.',
+                    humanDecision:
+                        'Publishing and exceptions follow your rules. Sources, tools and scope are defined for your operation.',
                 },
             ],
             conclusion:
-                'The same principle applies to your own operational responsibilities: a clear scope, lasting context and work that carries forward.',
+                'Different responsibilities, the same principle. Scope, tools and independence are set for each company or project.',
         },
         technology: {
-            eyebrow: 'What Promptbook builds on',
-            title: 'Powerful AI tools. A lasting brief.',
-            description:
-                'Today’s AI is excellent at complex one-shot tasks. Promptbook builds on that ability to support ongoing work for a company or project.',
-            harnessTitle: 'Capability under the hood',
+            heading: 'Powerful tools underneath. Your agenda up front.',
+            harnessTitle: 'Built on the strength of coding agents',
             harnessDescription:
-                'Promptbook Coder supports these coding tools. They can write code, run tests and make changes when that is the best way to carry out an agenda.',
-            vendorDescription:
-                'The agenda is not tied to one model vendor. Models and tools are choices for the work at hand; the goals and context belong to the agenda. You focus on the outcome.',
-            workspaceTitle: 'A workspace that lasts',
+                'Code can be the best way to get work done. Promptbook Coder can delegate work to these tools:',
+            harnessScope:
+                'The tool and model are execution choices. The durable agenda does not belong to one AI vendor.',
+            workspaceTitle: 'Context that outlives a chat',
             workspaceDescription:
-                'Where it makes sense, an agenda lives in a folder or Git repository. Context, agent definitions, requirements and history stay together across individual runs.',
-            folder: 'your-agenda/',
-            files: [
-                { name: 'context/', description: 'knowledge and background' },
-                { name: 'goals-and-tasks/', description: 'requirements, plans and priorities' },
-                { name: 'agents/', description: 'roles, instructions and tools' },
-                { name: 'history/', description: 'changes and decisions' },
+                'Where appropriate, a folder or Git repository is the durable workspace. It holds context, agent definitions, requirements, tasks and history together. You do not need to understand Git to understand an agenda.',
+            workspaceLabel: 'Example durable workspace',
+            folders: [
+                'Context and reference material',
+                'Goals and requirements',
+                'Recurring and one-off tasks',
+                'Agent definitions and rules',
+                'Work history',
             ],
-            link: 'Explore Promptbook Coder',
+            independence: 'Tools can change. Responsibility, context and history remain the foundation of the agenda.',
+            documentation: 'Read the Promptbook documentation',
         },
         team: {
-            title: 'The people behind Promptbook',
-            description: null,
-            jiriDescription: 'Mathematician and co-founder of Promptbook.',
-            pavolDescription: 'Developer and co-founder of Promptbook.',
+            title: 'The people behind your first agenda',
+            description: 'We connect your project’s needs with a practical technical approach.',
+            jiriDescription: 'Jiří Jahn leads Promptbook. A mathematics PhD and former researcher at IT4I.',
+            pavolDescription: 'Pavol Hejný develops Promptbook and its tools for working with AI.',
         },
         contact: {
-            title: 'What should keep moving when you step away?',
+            heading: 'Start with one responsibility.',
             description:
-                'Start with one real responsibility. We’ll choose a first step together and work out what Promptbook needs to handle it.',
-            steps: ['Define the goal', 'Review tools and access', 'Agree boundaries and approvals'],
-            companyLink: 'Looking for answers from company documents? Promptbook for companies (Czech)',
+                'On a strategy call, we will define your first agenda: what it should handle, the context it needs and when it should involve you.',
+            companyPageLabel: 'Looking for answers from company documents?',
+            companyPageLink: 'Promptbook for company data (Czech)',
         },
         footer: {
-            productLinks: [
-                { href: '#kontakt', text: 'Discuss an agenda' },
-                { href: '/cs/pro-firmy', text: 'Company data & documents (Czech)' },
-                { href: 'https://coder.ptbk.io/', text: 'Promptbook Coder' },
-                { href: 'https://github.com/webgptorg/promptbook', text: 'Documentation' },
-                { href: '/branding', text: 'Branding' },
-            ],
-            claim: 'AI for responsibilities that keep moving.',
+            claim: 'Ongoing responsibilities, working in the background.',
+            model: 'How agendas work',
+            companyPage: 'Company data (Czech)',
+            documentation: 'Documentation',
+            branding: 'Branding',
         },
-        qualification: {
-            dialogTitle: 'Discuss your first agenda',
-            intro: 'Help us prepare a strategy call about your ongoing responsibility.',
-            questions: [
-                {
-                    id: 'agenda',
-                    question: 'What should AI take ongoing responsibility for?',
-                    type: 'single',
-                    options: [
-                        'A website or application',
-                        'Customer communication',
-                        'Accounting administration',
-                        'Content operations',
-                        'Another company or project responsibility',
-                    ],
-                },
-                {
-                    id: 'support',
-                    question: 'Where would you like to start?',
-                    type: 'single',
-                    options: [
-                        'Choose an agenda and define its boundaries',
-                        'Build on an existing project or process',
-                        'Discuss possibilities and specific connections',
-                    ],
-                },
-                {
-                    id: 'urgency',
-                    question: 'When would you like to start?',
-                    type: 'single',
-                    options: ['As soon as possible', 'Next quarter', 'We’re exploring for now'],
-                },
-                {
-                    id: 'contact',
-                    question: 'How can we reach you?',
-                    subtitle: 'We’ll arrange a call. Your answers will help us prepare.',
-                    type: 'contact',
-                    fields: [
-                        { id: 'name', label: 'Name', type: 'text', placeholder: 'Alex Smith' },
-                        {
-                            id: 'company',
-                            label: 'Company or project',
-                            type: 'text',
-                            placeholder: 'Your company or project',
-                        },
-                        { id: 'email', label: 'Email', type: 'email', placeholder: 'alex@company.com' },
-                        { id: 'phone', label: 'Phone', type: 'tel', inputMode: 'tel', placeholder: '+44 7700 900000' },
-                    ],
-                },
-            ],
-            close: 'Close',
-            stepLabel: (step, total) => `Step ${step + 1} of ${total}`,
+        enquiry: {
+            title: 'Let’s discuss your first agenda',
+            description: 'Tell us what AI should keep taking care of. We will get in touch to arrange a strategy call.',
+            responsibility: 'What responsibility would you like to hand over?',
+            responsibilityPlaceholder: 'For example, maintaining our application and working through changes…',
+            fullname: 'Full name',
+            company: 'Company or project',
+            email: 'Email',
+            phone: 'Phone (optional)',
             submitting: 'Sending…',
-            submit: 'Arrange a free call',
-            back: 'Back',
+            error: 'We could not send your enquiry. Your details are still here. Please try again.',
+            close: 'Close',
         },
         confirmation: {
-            title: 'Thank you for getting in touch',
-            description: 'We’ve received your answers. Let’s find the right first agenda together.',
+            title: 'Thank you for your enquiry.',
+            description:
+                'We have your responsibility and contact details. Next, we will define the first agenda together.',
             steps: [
-                { title: 'We’ll get in touch', description: 'We’ll review your answers and arrange a strategy call.' },
                 {
-                    title: 'Define your first agenda',
-                    description: 'We’ll discuss the goal, available tools and steps that should need your approval.',
+                    title: 'Arrange a call',
+                    description: 'We will get in touch using your contact details to find a suitable time.',
                 },
                 {
-                    title: 'Agree on what comes next',
-                    description: 'Together we’ll assess feasibility and propose a concrete first step.',
+                    title: 'Define the responsibility',
+                    description: 'We will discuss goals, available context and boundaries for independent work.',
+                },
+                {
+                    title: 'Agree on the next step',
+                    description: 'We will outline what the first agenda should handle and what stays with you.',
                 },
             ],
-            email: 'Contact email',
+            emailLabel: 'Contact email',
             back: 'Back to the homepage',
         },
     },
