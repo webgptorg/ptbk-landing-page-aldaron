@@ -1,4 +1,4 @@
-[ ]
+[ ] use `gpt-6-astra`
 
 [✨🛰️] Create an interactive, benefit-led Czech and English homepage for autonomous agendas
 
