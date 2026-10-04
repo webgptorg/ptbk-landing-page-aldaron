@@ -51,8 +51,8 @@
             "focus": false
         },
         {
-            "name": "🧪 Test for `ptbk coder`",
-            "commands": ["set -a && source .env && set +a", "npm run test-for-ptbk-coder", "npm run delete-test-data"],
+            "name": "🧪 Check",
+            "commands": ["set -a && source .env && set +a", "npm run check", "npm run delete-test-data"],
             "execute": true,
             "onlySingle": true,
             "focus": true
