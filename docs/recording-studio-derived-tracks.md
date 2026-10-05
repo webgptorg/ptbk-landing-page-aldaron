@@ -4,7 +4,7 @@
 
 The synchronized editor already keeps each camera, screen and microphone as an independent browser-local media source. `RecordingMediaPart` and its segments map source timestamps to the recorded-content session clock. A global pause closes parts and removes paused wall time; appended takes add parts without changing earlier media. `RecordingStudioTransport` owns playback and seeking, while `RecordingTimeline` and `RecordingEditor` use the same session seconds. The saved IN/OUT selection is one `RecordingEditRecipe` for all sources. ZIP export retains original parts and prepares a separate file per source only when that selection fits one decodable part.
 
-The workshop subtitle feature already had bounded 16 kHz WAV conversion, an authenticated admin route, the shared private OpenAI transcription client, Czech/English/mixed language handling, and SRT/WebVTT serialization. It did not operate on browser-local studio parts or store studio edits. The studio had no speech activity detector. Studio metadata is stored with its recording in IndexedDB or the selected recording directory, so a separate database or remote job store would duplicate the local recording's ownership and recovery behavior.
+The workshop subtitle feature already had bounded 16 kHz WAV conversion, an authenticated admin route, the shared private OpenAI transcription client, Czech/English/mixed language handling, and SRT/WebVTT serialization. It did not operate on browser-local studio parts or store studio edits. The studio had no speech activity detector. Studio metadata is stored with its recording in IndexedDB, so a separate database or remote job store would duplicate the local recording's ownership and recovery behavior.
 
 ## Derived track contract
 

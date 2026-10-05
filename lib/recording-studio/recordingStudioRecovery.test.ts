@@ -1,36 +1,29 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { importStudioRecordingDirectory, listStudioRecordings, readRecordingTrack, reconnectStudioRecording, recoverStudioRecordings, saveStudioRecording, streamRecordingTrack } from './recordingStudioStorage';
+import { appendRecordingChunk, readRecordingTrack, readStudioRecording, recoverStudioRecordings, saveStudioRecording, streamRecordingTrack } from './recordingStudioStorage';
 import { claimTestRecordingStudioAuthority, createTestStudioRecording } from './recordingStudioTestUtilities';
 
 // Becoming the studio is the one write these tests need to succeed; everything after it may be refused.
 beforeEach(async () => { await claimTestRecordingStudioAuthority(); });
 afterEach(() => vi.restoreAllMocks());
 
-it('recovers and exports a readable folder when both folder and origin writes fail', async () => {
+it('recovers and exports the committed chunks of a take when the origin refuses to save its recovered status', async () => {
     const base = createTestStudioRecording();
     const recording = {
-        ...base, status: 'recording' as const, storageDestination: { kind: 'directory' as const, name: 'saved-take' },
+        ...base, id: 'recovered-on-a-full-origin', status: 'recording' as const,
         tracks: [{ ...base.tracks[0], byteLength: 4, chunkCount: 1, durationSeconds: 5 }],
     };
-    const manifest = new Blob([JSON.stringify({ schemaVersion: 1, recording })]);
-    const createWritable = vi.fn().mockRejectedValue(new DOMException('Disk full', 'QuotaExceededError'));
-    const directory = {
-        name: 'saved-take',
-        getFileHandle: async (name: string) => ({ getFile: async () => name === 'recording.json' ? manifest : new Blob(['take']), createWritable }),
-    } as unknown as FileSystemDirectoryHandle;
+    await appendRecordingChunk(recording, recording.tracks[0].id, 0, new Blob(['take']));
     vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => { throw new DOMException('Origin full', 'QuotaExceededError'); });
 
-    const recovered = await importStudioRecordingDirectory(directory);
-    expect(recovered.status).toBe('interrupted');
-    expect(recovered.captureEndSeconds).toBeNull();
-    expect(recovered.durationSeconds).toBe(5);
-    expect(await readRecordingTrack(recovered.id, recovered.tracks[0]).then((blob) => blob.text())).toBe('take');
-    expect(await new Response(streamRecordingTrack(recovered.id, recovered.tracks[0])).text()).toBe('take');
-    expect(await listStudioRecordings()).toContainEqual(recovered);
-    expect(await recoverStudioRecordings()).toContainEqual(recovered);
-    expect(await reconnectStudioRecording(recovered.id)).toEqual(recovered);
-    expect(createWritable).not.toHaveBeenCalled();
+    const recovered = (await recoverStudioRecordings()).find((item) => item.id === recording.id);
+    expect(recovered?.status).toBe('interrupted');
+    expect(recovered?.captureEndSeconds).toBeNull();
+    expect(recovered?.durationSeconds).toBe(5);
+    expect(await readRecordingTrack(recording.id, recording.tracks[0]).then((blob) => blob.text())).toBe('take');
+    expect(await new Response(streamRecordingTrack(recording.id, recording.tracks[0])).text()).toBe('take');
+    // Nothing was written, so the stored take is exactly the committed prefix it was before the recovery.
+    expect(await readStudioRecording(recording.id)).toEqual(recording);
 });
 
 it('keeps the appended project clock when an intentionally absent source has no later media', async () => {

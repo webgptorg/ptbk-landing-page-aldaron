@@ -8,9 +8,8 @@ import { clearRecordingSourceConfigurations, loadRecordingSourceConfigurations, 
 import { RecordingStudioOwnership, type RecordingStudioOwnershipSnapshot, type RecordingStudioActivation } from '@/lib/recording-studio/RecordingStudioOwnership';
 import { RECORDING_STUDIO_AUTHORITY, type RecordingStudioAuthority } from '@/lib/recording-studio/recordingStudioAuthority';
 import { assertRecordingStudioWorkAccepted, cancelRecordingStudioWork, isRecordingStudioWorkRunning, runRecordingStudioWork, setRecordingStudioWorkAccepted, settleRecordingStudioWork } from '@/lib/recording-studio/recordingStudioWork';
-import { estimateRecordingStorage, getRecordingStorageErrorMessage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
-import { chooseRecordingDirectory } from '@/lib/recording-studio/recordingStudioDirectory';
-import { importStudioRecordingDirectory, readStudioRecording, recoverStudioRecordings, resetRecordingDirectoryCache } from '@/lib/recording-studio/recordingStudioStorage';
+import { estimateRecordingStorage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
+import { readStudioRecording, recoverStudioRecordings } from '@/lib/recording-studio/recordingStudioStorage';
 import { getRecordingSessionDuration } from '@/lib/recording-studio/recordingStudioSessionTime';
 import { RecordingBitrateMeter } from '@/lib/recording-studio/recordingStudioTiming';
 import {
@@ -82,10 +81,6 @@ export function useRecordingStudio() {
     const [activeRecording, setActiveRecording] = useState<StudioRecording | null>(null);
     const [storage, setStorage] = useState(UNKNOWN_RECORDING_STORAGE);
     const [persistence, setPersistence] = useState<RecordingPersistence>('not-granted');
-    const [directory, setDirectory] = useState<FileSystemDirectoryHandle | null>(null);
-    const [isChoosingDirectory, setIsChoosingDirectory] = useState(false);
-    const directoryReference = useRef<FileSystemDirectoryHandle | null>(null);
-    const directoryOperation = useRef(false);
     const storageRequest = useRef<Promise<void> | null>(null);
     const bitrateMeter = useRef(new RecordingBitrateMeter());
     const [measuredBytesPerSecond, setMeasuredBytesPerSecond] = useState<number | null>(null);
@@ -123,7 +118,7 @@ export function useRecordingStudio() {
             const estimate = await estimateRecordingStorage();
             if (runtime.current.isDisposed || !runtime.current.isAcceptingWork) return;
             setStorage(estimate);
-            if (!directoryReference.current && isRecordingOriginStorageLow(estimate)) {
+            if (isRecordingOriginStorageLow(estimate)) {
                 void runtime.current.capture?.stop('Prohlížeč hlásí málo prostoru pro web. Všechny stopy byly zastaveny; uložené části zůstávají dostupné.');
             }
         })().finally(() => { storageRequest.current = null; });
@@ -152,9 +147,7 @@ export function useRecordingStudio() {
         };
         const activate = async (activation: RecordingStudioActivation) => {
             setPhase('loading'); setErrorMessage(null); setActiveRecording(null); setElapsedSeconds(0);
-            directoryReference.current = null; setDirectory(null);
             try {
-                resetRecordingDirectoryCache();
                 current.sourceConfigurations = loadRecordingSourceConfigurations();
                 setSourceConfigurations(current.sourceConfigurations);
                 setSourceReadiness(Object.fromEntries(current.sourceConfigurations.map(({ id }) => [id, 'needs-permission' as const])));
@@ -259,27 +252,6 @@ export function useRecordingStudio() {
         const timer = setInterval(update, 250);
         return () => clearInterval(timer);
     }, [phase]);
-
-    const chooseDirectory = async (isImport: boolean) => {
-        if (!runtime.current.isAcceptingWork || phase !== 'idle' || runtime.current.capture || directoryOperation.current) return;
-        directoryOperation.current = true; setIsChoosingDirectory(true); setErrorMessage(null);
-        // Invoke immediately while the native picker still has the click gesture.
-        const selection = chooseRecordingDirectory(isImport);
-        try {
-            await runRecordingStudioWork(async (signal) => {
-                const selectedDirectory = await selection;
-                signal.throwIfAborted();
-                if (!isImport) { directoryReference.current = selectedDirectory; setDirectory(selectedDirectory); return selectedDirectory; }
-                const recording = await importStudioRecordingDirectory(selectedDirectory);
-                signal.throwIfAborted();
-                setRecordings((previous) => [recording, ...previous.filter((item) => item.id !== recording.id)]);
-                return selectedDirectory;
-            });
-            await refreshStorage();
-        } catch (error) {
-            if (!(error instanceof DOMException && error.name === 'AbortError')) setErrorMessage(error instanceof DOMException ? getRecordingStorageErrorMessage(error, false) : getRecordingErrorMessage(error));
-        } finally { directoryOperation.current = false; setIsChoosingDirectory(false); }
-    };
 
     const persistSourceConfigurations = (configurations: readonly RecordingSourceConfiguration[]) => {
         assertRecordingStudioWorkAccepted();
@@ -472,7 +444,7 @@ export function useRecordingStudio() {
 
     const restoreSourceConfiguration = (restore: RecordingSourceConfigurationRestore) => {
         const current = runtime.current;
-        if (!current.isAcceptingWork || phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current) {
+        if (!current.isAcceptingWork || phase !== 'idle' || current.capture || current.isAddingSource) {
             throw new Error('Nejprve dokončete právě probíhající operaci studia.');
         }
 
@@ -502,7 +474,7 @@ export function useRecordingStudio() {
         const recordingSources = enabledConfigurations.map((configuration) => current.sources.find((source) =>
             matchesRecordingSourceConfiguration(source, configuration) && isRecordingSourceReady(source),
         )).filter((source): source is RecordingSource => source !== undefined);
-        if (!current.isAcceptingWork || phase !== 'idle' || current.capture || current.isStartPending || current.isAddingSource || directoryOperation.current ||
+        if (!current.isAcceptingWork || phase !== 'idle' || current.capture || current.isStartPending || current.isAddingSource ||
             enabledConfigurations.length === 0 || recordingSources.length !== enabledConfigurations.length) return;
         const latestTake = appendTo?.takes?.[appendTo.takes.length - 1];
         const previousSourceIds = latestTake?.sourceIds ?? appendTo?.tracks.map((track) => track.id) ?? [];
@@ -524,13 +496,12 @@ export function useRecordingStudio() {
             try {
                 const estimate = await estimateRecordingStorage();
                 setStorage(estimate);
-                if (!(appendTo?.storageDestination || directoryReference.current) && isRecordingOriginStorageLow(estimate)) throw new Error('Prohlížeč hlásí málo prostoru pro web. Zvolte dostupnou složku nebo uvolněte prostor po záloze záznamů.');
+                if (isRecordingOriginStorageLow(estimate)) throw new Error('Prohlížeč hlásí málo prostoru pro web. Stáhněte záznamy, které chcete zachovat, a smazáním starších uvolněte prostor.');
                 if (current.isDisposed || !current.isAcceptingWork) return;
                 const savedProject = appendTo ? await readStudioRecording(appendTo.id) : undefined;
                 if (current.isDisposed || !current.isAcceptingWork) return;
                 if (appendTo && !savedProject) throw new Error('Místní projekt není dostupný pro donahrání.');
                 const capture = new RecordingStudioCapture({
-                    directory: appendTo ? null : directoryReference.current,
                     existingRecording: savedProject,
                     isSourceSetChangeAllowed,
                     onProgress: (recording) => {
@@ -590,17 +561,12 @@ export function useRecordingStudio() {
         continueWaiting: () => ownershipReference.current?.continueWaiting(),
         refreshOwner: () => ownershipReference.current?.refreshOwner(),
         dismissActivation: () => ownershipReference.current?.dismissActivation(),
-        directory, isChoosingDirectory, pendingBytes, measuredBytesPerSecond, persistence,
+        pendingBytes, measuredBytesPerSecond, persistence,
         alerts: alertChannel.alerts, alertPreferences: alertChannel.alertPreferences, notificationPermission: alertChannel.notificationPermission,
         isAlertSoundSupported: alertChannel.isAlertSoundSupported, alertActivation: alertChannel.alertActivation,
         testAlert: alertChannel.testAlert, startTestAlert: alertChannel.startTestAlert, cancelTestAlert,
         changeAlertPreferences: alertChannel.changeAlertPreferences, dismissAlert: alertChannel.dismissAlert, dismissAllAlerts: alertChannel.dismissAllAlerts,
         requestNotificationPermission: alertChannel.requestNotificationPermission,
-        chooseDirectory,
-        useBrowserStorage: () => {
-            if (!runtime.current.isAcceptingWork || phase !== 'idle' || directoryOperation.current) return;
-            directoryReference.current = null; setDirectory(null); void refreshStorage();
-        },
         requestPersistence: async () => { setPersistence(await requestRecordingPersistence()); await refreshStorage(); },
         addSource, connectSource, removeSource, moveSource, setSourceCaptureEnabled, resetSourceConfigurations, releaseSources, restoreSourceConfiguration, startRecording,
         stopRecording: () => { if (runtime.current.isAcceptingWork) void runtime.current.capture?.stop(); },

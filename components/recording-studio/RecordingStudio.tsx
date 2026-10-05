@@ -62,7 +62,7 @@ export function RecordingStudio() {
         stopping: 'Dokončování a ukládání', unavailable: 'Nedostupné',
     }[studio.phase];
     const isAppendWorkspace = Boolean(recordingId && appendRecordingId === recordingId);
-    const isReady = studio.isActive && studio.phase === 'idle' && !studio.isChoosingDirectory;
+    const isReady = studio.isActive && studio.phase === 'idle';
     const enabledConfigurations = studio.sourceConfigurations.filter(({ isCaptureEnabled }) => isCaptureEnabled);
     const readySourceIds = new Set(enabledConfigurations.filter((configuration) => {
         const source = studio.sources.find((candidate) => candidate.id === configuration.id);
@@ -136,11 +136,11 @@ export function RecordingStudio() {
                     {isAppendWorkspace && <div className="space-y-3 rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950"><p>Nový take začne na konci uložené časové osy. Připojení oprávnění nic nespustí; po kontrole zdrojů stiskněte Start. Původní média i vlastní ořez zůstanou zachované.</p>
                         {!isSessionBusy && <Button type="button" variant="outline" onClick={() => { setAppendRecordingId(null); setIsSourceSetChangeAllowed(false); }}>Zrušit donahrání a vrátit se ke střihu</Button>}</div>}
                     {studio.phase === 'loading' ? <p role="status">Načítám místní záznam…</p> : studio.phase === 'unavailable' ? <p>Záznam je přístupný pouze v aktivní instanci studia. Převzetí a případnou chybu vyřešte výše.</p> : !selectedRecording ? <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-5">
-                        <h3 className="font-semibold">Místní záznam není dostupný</h3><p>Na této adrese nejsou v tomto profilu uložená média. Otevřete ji v původním prohlížeči nebo připojte složku záznamu ve studiu. Nový prázdný záznam se nevytváří.</p>
-                        <Link href="/admin/recording-studio" className="underline">Otevřít studio a obnovit ze složky</Link>
+                        <h3 className="font-semibold">Místní záznam není dostupný</h3><p>Na této adrese nejsou v tomto profilu uložená média. Otevřete ji v prohlížeči a profilu, ve kterém záznam vznikl. Nový prázdný záznam se nevytváří.</p>
+                        <Link href="/admin/recording-studio" className="underline">Otevřít studio a uložené záznamy</Link>
                     </div> : studio.phase === 'idle' && !isAppendWorkspace && <>
                         <RecordingEditor key={selectedRecording.id} recording={selectedRecording} isDisabled={isLibraryBusy || !studio.isActive} onChange={studio.updateRecording} onUseSourceConfiguration={(reportSuccess) => requestSourceConfigurationRestore(selectedRecording, reportSuccess)} onAppend={() => requestSourceConfigurationRestore(selectedRecording, undefined, true)} />
-                        <RecordingLibrary recordings={[selectedRecording]} isWorkspace isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
+                        <RecordingLibrary recordings={[selectedRecording]} isWorkspace isDisabled={!isReady} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
                     </>}
                 </section>}
                 <div className={recordingId && !isAppendWorkspace ? 'hidden' : 'contents'}>
@@ -152,7 +152,7 @@ export function RecordingStudio() {
                     <div className="rounded-xl border border-slate-200 bg-white p-5"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">Společný čas záznamu · {sessionStatus}</p><p className="mt-2 text-3xl font-semibold tabular-nums" aria-label="Délka záznamu">{formatRecordingDuration(studio.elapsedSeconds)}</p><p className="mt-2 text-xs text-slate-500">{studio.activeRecording ? `${formatRecordingBytes(getRecordingByteLength(studio.activeRecording))} uloženo` : 'Všechny stopy mají společný čas.'}</p></div>
                 </div>
                 <RecordingAlertPanel studio={studio} isTakeRunning={isSessionBusy} />
-                <RecordingStoragePanel studio={studio} isDisabled={!isReady || isLibraryBusy} />
+                <RecordingStoragePanel studio={studio} />
                 <section className="space-y-5" aria-labelledby="recording-sources-title">
                     <div className="flex flex-wrap items-center justify-between gap-4"><h2 id="recording-sources-title" className="text-xl font-bold">Zdroje <span className="ml-1 text-slate-400">{studio.sourceConfigurations.length}</span></h2>
                         <div className="flex flex-wrap gap-2">
@@ -230,7 +230,7 @@ export function RecordingStudio() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                {!recordingId && <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />}
+                {!recordingId && <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />}
                 </div>
             </div>
         </main>

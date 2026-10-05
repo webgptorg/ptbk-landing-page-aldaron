@@ -11,10 +11,20 @@ const FIXTURE_SOURCES = [
     { name: 'microphone', kind: 'microphone', offset: 0.71, frameRate: null, isAudioIncluded: true },
 ] as const;
 
-/** Imported legacy metadata and real FFmpeg-generated files; the production storage/decoders remain real. */
-export async function seedRecordingEditorFixture(page: Page, { isLongSession = false, isVariableFrameRate = false,
-    isAppendedSession = false }: { readonly isLongSession?: boolean; readonly isVariableFrameRate?: boolean;
-    readonly isAppendedSession?: boolean } = {}) {
+type RecordingEditorFixtureOptions = {
+    readonly isLongSession?: boolean;
+    readonly isVariableFrameRate?: boolean;
+    readonly isAppendedSession?: boolean;
+};
+
+/**
+ * Writes the fixture recording and its media into the studio database the page already has
+ *
+ * Note: Imported legacy metadata and real FFmpeg-generated files; the production storage/decoders remain real.
+ *       Nothing is opened here, so a test can also store the fixture before the studio first reads its database.
+ */
+export async function storeRecordingEditorFixture(page: Page, { isLongSession = false, isVariableFrameRate = false,
+    isAppendedSession = false }: RecordingEditorFixtureOptions = {}) {
     const files = await Promise.all(FIXTURE_SOURCES.map(async (source) => {
         const isVariableCamera = isVariableFrameRate && source.kind === 'camera';
         return {
@@ -72,6 +82,12 @@ export async function seedRecordingEditorFixture(page: Page, { isLongSession = f
         });
         database.close();
     }, { recording, encoded: files.map((source) => source.bytes.toString('base64')) });
+    return recording;
+}
+
+/** Stores the fixture recording and opens its workspace. */
+export async function seedRecordingEditorFixture(page: Page, options: RecordingEditorFixtureOptions = {}) {
+    const recording = await storeRecordingEditorFixture(page, options);
     await page.goto(EDITOR_FIXTURE_PATH);
     return recording;
 }

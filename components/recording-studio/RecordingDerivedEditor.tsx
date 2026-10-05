@@ -127,7 +127,7 @@ export function RecordingDerivedEditor({ recording, tracks, onChange, seconds, o
             try {
                 if (!(await flushAdminEditorSaves())) throw new Error('Nejprve opravte a uložte změny v editoru.');
                 const savedRecording = await readStudioRecording(recording.id);
-                if (!savedRecording) throw new Error('Místní záznam není dostupný. Připojte jeho složku znovu.');
+                if (!savedRecording) throw new Error('Místní záznam není dostupný.');
                 const generated = await generateRecordingDerivedTrack({ recording: savedRecording, sourceId, kind, language,
                     signal: operation.signal, onProgress: setProgress, transcribe: transcribeRecordingChunk });
                 operation.signal.throwIfAborted();

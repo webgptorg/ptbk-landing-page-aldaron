@@ -2,7 +2,7 @@ import { getRecordingErrorMessage } from './recordingStudioDevices';
 import type { RecordingFailure } from './recordingStudioAlerts';
 import { isRecordingStudioAuthorityLost } from './recordingStudioAuthority';
 import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
-import { appendRecordingChunk, createStudioRecording, readRecordingPart, saveStudioRecording } from './recordingStudioStorage';
+import { appendRecordingChunk, readRecordingPart, saveStudioRecording } from './recordingStudioStorage';
 import { extendRecordingWorkshopActivity } from './recordingStudioWorkshop';
 import { describeRecordingIndexCheckFailure, describeRecordingIndexWarning, readRecordingIndexReport, type RecordingIndexStatus } from './recordingStudioIndex';
 import { inspectRecordingBlob } from './recordingStudioMedia';
@@ -10,7 +10,7 @@ import { addRecordingBytes, getRecordingByteLength } from './recordingStudioTimi
 import { toRecordingSourceConfiguration } from './recordingStudioSourceConfiguration';
 import { createRecordingEditRecipe, getRecordingMediaParts, getRecordingPartTrack, getRecordingSelection, getRecordingSessionDuration, getRecordingTrackEndSeconds } from './recordingStudioSessionTime';
 import {
-    RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_CHUNK_MILLISECONDS, RECORDING_DIRECTORY_CHUNK_MILLISECONDS, RECORDING_MAX_PENDING_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
+    RECORDING_AUDIO_BITS_PER_SECOND, RECORDING_CHUNK_MILLISECONDS, RECORDING_MAX_PENDING_BYTES, RECORDING_VIDEO_BITS_PER_SECOND,
     type RecordingMediaPart, type RecordingSource, type RecordingTrack, type StudioRecording,
 } from './recordingStudioTypes';
 
@@ -33,7 +33,6 @@ type CaptureOptions = {
     readonly onProgress: (recording: StudioRecording) => void;
     readonly onStopping: () => void;
     readonly onPendingBytes?: (bytes: number) => void;
-    readonly directory?: FileSystemDirectoryHandle | null;
     readonly existingRecording?: StudioRecording;
     readonly isSourceSetChangeAllowed?: boolean;
     readonly onPhaseChange?: (phase: CapturePhase) => void;
@@ -128,7 +127,7 @@ export class RecordingStudioCapture {
             };
             // A rejected codec must not change an existing project before a new take has even started.
             const preparedEntries = existing ? sources.map((source) => this.prepareRecorder(source, crypto.randomUUID())) : undefined;
-            try { this.recording = existing ? (await saveStudioRecording(this.recording), this.recording) : await createStudioRecording(this.recording, this.options.directory); }
+            try { await saveStudioRecording(this.recording); }
             catch (error) { throw isRecordingStudioAuthorityLost(error) ? error : new Error(getRecordingStorageErrorMessage(error, false)); }
             this.savedRecording = this.recording;
             if (!this.isStopping) {
@@ -338,7 +337,7 @@ export class RecordingStudioCapture {
                     parts: [...(track.parts ?? []), part],
                 }));
                 entry.startedAt = startedAt;
-                entry.recorder.start(this.recording.storageDestination ? RECORDING_DIRECTORY_CHUNK_MILLISECONDS : RECORDING_CHUNK_MILLISECONDS);
+                entry.recorder.start(RECORDING_CHUNK_MILLISECONDS);
                 entry.isStarted = true;
             }
             this.setPhase('recording');

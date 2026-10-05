@@ -15,7 +15,7 @@ Nothing in the media. `ffmpeg -map 0 -c copy` re-encodes nothing; it only rewrit
 is the container's seek metadata, and it was missing by design:
 
 - Capture uses `MediaRecorder` (`lib/recording-studio/RecordingStudioCapture.ts`), started with a timeslice so each
-  chunk can be committed atomically to IndexedDB or to a selected directory.
+  chunk can be committed atomically to IndexedDB.
 - A `MediaRecorder` muxes for streaming. Its Matroska `Segment` element carries an **unknown size**, no `Cues`
   element is written, and `Info/Duration` is absent, because the browser does not know where the file ends while it
   is still being written. Safari's fragmented MP4 is the same story without an `mfra`/`sidx` index.
@@ -34,8 +34,8 @@ and its Safari fallback) or to rewrite the container after the recorder has clos
 
 Rewriting the committed media in place was rejected: an 8 Mbit/s screen share is about 1 MB/s, so a one-hour part is
 around 3.6 GB. Doubling that transiently is not acceptable against the browser's ~10 GiB origin estimate, it would
-add minutes to **Stop**, and for a selected-directory destination it would have to overwrite the immutable fragments
-that crash recovery depends on. Committed capture bytes therefore stay untouched.
+add minutes to **Stop**, and it would have to replace the committed chunks that crash recovery depends on.
+Committed capture bytes therefore stay untouched.
 
 ## What the studio does instead
 
@@ -95,7 +95,7 @@ Prepared (trimmed) files were already written by mediabunny and always carried a
 
 ## Limits
 
-- Committed capture bytes are never rewritten, so a recording restored from IndexedDB or a selected directory is
+- Committed capture bytes are never rewritten, so a recording restored from IndexedDB is
   still a live container until it is exported. The studio's own preview does not need the index.
 - A rebuild costs one full read plus one OPFS-sized write per part, which is why the ZIP and the individual download
   disclose their temporary-space needs exactly as trimming already did.
@@ -122,6 +122,6 @@ Prepared (trimmed) files were already written by mediabunny and always carried a
     part, so one recorded part cannot leave the studio as two different containers;
   - a seeded already-indexed fixture is still handed over byte-identical to what was stored, so a container which
     needs nothing is not remuxed;
-  - a recording imported read-only from a folder whose writes all fail is asserted to hand over the recorder's own
-    `unindexed` bytes, to say so in its status line, and to still carry the same track count and a duration within
-    50 ms of the indexed copy in the archive.
+  - a recording whose working file cannot be written, because every file write is refused, is asserted to hand
+    over the recorder's own `unindexed` bytes, to say so in its status line, and to still carry the same track
+    count and a duration within 50 ms of the indexed copy in the archive.

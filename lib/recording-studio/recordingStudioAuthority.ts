@@ -204,7 +204,7 @@ export class RecordingStudioAuthorityKeeper {
     }
 
     /**
-     * Commits something which is not in the database — a file in a folder, a publication on the server — while nobody
+     * Commits something which is not in the database — an exported file, a publication on the server — while nobody
      * can take the studio over
      *
      * Note: Such a commit cannot be part of a database transaction. A fenced transaction first persists a pending

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { estimateRecordingStorage, hasPredictableRecordingHeadroom, isRecordingEstimateFresh, isRecordingOriginStorageLow, readRecordingPersistence, requestRecordingPersistence } from './recordingStudioCapacity';
+import { estimateRecordingStorage, getRecordingStorageErrorMessage, hasPredictableRecordingHeadroom, isRecordingEstimateFresh, isRecordingOriginStorageLow, readRecordingPersistence, requestRecordingPersistence } from './recordingStudioCapacity';
 import { addRecordingBytes, formatRecordingBytes, getConfiguredRecordingBytesPerSecond, getRecordingMissingRanges, RecordingBitrateMeter } from './recordingStudioTiming';
 import { createTestStudioRecording } from './recordingStudioTestUtilities';
 import type { RecordingSource } from './recordingStudioTypes';
@@ -52,6 +52,16 @@ describe('honest storage measurements', () => {
         expect(await requestRecordingPersistence(storage)).toBe('granted');
         vi.mocked(storage.persist).mockRejectedValue(new Error());
         expect(await requestRecordingPersistence(storage)).toBe('failed');
+    });
+
+    it('explains a refused write by its cause and says what stays available', () => {
+        const explain = (name: string, isCaptureFailure?: boolean) => getRecordingStorageErrorMessage(new DOMException('Refused', name), isCaptureFailure);
+        expect(explain('QuotaExceededError')).toBe('Úložiště je plné nebo byla vyčerpána kvóta. Všechny stopy se zastavují. Již uložené části zůstávají k obnově a exportu.');
+        for (const name of ['NotAllowedError', 'SecurityError']) expect(explain(name)).toContain('Oprávnění k úložišti chybí nebo bylo odebráno.');
+        expect(explain('UnknownError')).toContain('Přístup k úložišti selhal');
+        // Deletion and export share the explanation, but stop no recording.
+        expect(explain('NotFoundError', false)).toBe('Soubor záznamu už není dostupný. Již uložené části zůstávají k obnově a exportu.');
+        expect(explain('QuotaExceededError', false)).not.toContain('Všechny stopy se zastavují');
     });
 });
 

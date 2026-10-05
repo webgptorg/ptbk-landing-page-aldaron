@@ -57,12 +57,12 @@ export async function requestRecordingPersistence(storage = navigator.storage): 
     catch { return 'failed'; }
 }
 
-/** Shared by both backends; never confuse capture-device errors with filesystem permission errors. */
+/** Shared by capture, deletion and export; never confuse capture-device errors with storage permission errors. */
 export function getRecordingStorageErrorMessage(error: unknown, isCaptureFailure = true): string {
     const name = error instanceof Error ? error.name : '';
     const explanation = name === 'QuotaExceededError' ? 'Úložiště je plné nebo byla vyčerpána kvóta.' :
         name === 'NotAllowedError' || name === 'SecurityError' ? 'Oprávnění k úložišti chybí nebo bylo odebráno.' :
-        name === 'NotFoundError' ? 'Složka nebo soubor záznamu už není dostupný.' :
+        name === 'NotFoundError' ? 'Soubor záznamu už není dostupný.' :
         'Přístup k úložišti selhal; příčinou může být plný či odpojený disk.';
     return `${explanation}${isCaptureFailure ? ' Všechny stopy se zastavují.' : ''} Již uložené části zůstávají k obnově a exportu.`;
 }

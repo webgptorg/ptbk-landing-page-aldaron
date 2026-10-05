@@ -43,7 +43,7 @@ try {
                     samples.push(await measure());
                 }
                 database.close();
-                return { userAgent: navigator.userAgent, samples, isDirectoryPickerSupported: typeof window.showDirectoryPicker === 'function', isOriginDirectorySupported: typeof navigator.storage?.getDirectory === 'function', isPersistenceSupported: typeof navigator.storage?.persist === 'function' };
+                return { userAgent: navigator.userAgent, samples, isOriginDirectorySupported: typeof navigator.storage?.getDirectory === 'function', isPersistenceSupported: typeof navigator.storage?.persist === 'function' };
             });
             RESULTS.push({ name, platform: platform(), operatingSystemRelease: release(), browsingMode: 'fresh persistent profile; headless', version: context.browser()?.version(), ...result });
         } catch (error) { RESULTS.push({ name, error: String(error) }); }

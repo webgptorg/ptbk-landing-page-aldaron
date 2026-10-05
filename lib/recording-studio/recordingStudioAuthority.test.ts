@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { isRecordingStudioAuthorityLost, RECORDING_STUDIO_AUTHORITY, RecordingStudioAuthorityKeeper } from './recordingStudioAuthority';
 import { AUTHORITY_STORE, CHUNK_STORE, openRecordingDatabase, readRequest, RECORDING_STORE } from './recordingStudioDatabase';
 import {
-    appendRecordingChunk, createStudioRecording, deleteStudioRecording, editStudioRecording, importStudioRecordingDirectory, listStudioRecordings,
-    readRecordingTrack, recoverStudioRecordings, saveStudioRecording,
+    appendRecordingChunk, deleteStudioRecording, editStudioRecording, listStudioRecordings, readRecordingTrack, recoverStudioRecordings, saveStudioRecording,
 } from './recordingStudioStorage';
 import { claimTestRecordingStudioAuthority, createTestStudioRecording } from './recordingStudioTestUtilities';
 
@@ -16,48 +15,6 @@ async function readStoredRecords() {
         recordings: await readRequest(transaction.objectStore(RECORDING_STORE).getAll()),
         chunkCount: await readRequest(transaction.objectStore(CHUNK_STORE).count()),
     };
-}
-
-type TestDirectoryState = { readonly files: Map<string, Blob>; readonly closing: { hold: Promise<void> | null } };
-const TEST_DIRECTORIES = new Map<string, TestDirectoryState>();
-
-/**
- * A folder which commits a file when its writable is closed, as the File System Access API does
- *
- * Note: Its files live beside it rather than on it, because the studio remembers the handle of a folder in the
- *       database, and a handle is stored there by its name alone.
- */
-class TestDirectory {
-    public constructor(public readonly name: string) {}
-
-    public async getDirectoryHandle(): Promise<TestDirectory> {
-        return this;
-    }
-
-    public async getFileHandle(filename: string) {
-        const { files, closing } = TEST_DIRECTORIES.get(this.name)!;
-        return {
-            getFile: async () => { const file = files.get(filename); if (!file) throw new DOMException('missing', 'NotFoundError'); return file; },
-            createWritable: async () => {
-                let pending: Blob | null = null;
-                return {
-                    write: async (data: Blob | string) => { pending = typeof data === 'string' ? new Blob([data]) : data; },
-                    close: async () => { await closing.hold; files.set(filename, pending!); },
-                    abort: async () => undefined,
-                };
-            },
-        };
-    }
-
-    public async removeEntry(filename: string): Promise<void> {
-        TEST_DIRECTORIES.get(this.name)!.files.delete(filename);
-    }
-}
-
-function createDirectory(name = 'take') {
-    const state: TestDirectoryState = { files: new Map(), closing: { hold: null } };
-    TEST_DIRECTORIES.set(name, state);
-    return { handle: new TestDirectory(name) as unknown as FileSystemDirectoryHandle, ...state };
 }
 
 describe('the right of one studio tab to write, kept in the storage it writes to', () => {
@@ -112,7 +69,7 @@ describe('the right of one studio tab to write, kept in the storage it writes to
             () => editStudioRecording(stored, 'Renamed by the old tab', { startSeconds: 1, endSeconds: 3 }),
             () => recoverStudioRecordings(),
             () => deleteStudioRecording(stored.id),
-            () => createStudioRecording({ ...recording, id: 'another-take' }),
+            () => saveStudioRecording({ ...recording, id: 'another-take' }),
         ];
         for (const write of staleWrites) {
             const failure = await write().then(() => null, (error: unknown) => error);
@@ -236,70 +193,6 @@ describe('a commit outside the database, held together with the right to write',
         otherTab = new RecordingStudioAuthorityKeeper();
         await claimTestRecordingStudioAuthority();
         for (const recording of await listStudioRecordings()) await deleteStudioRecording(recording.id);
-    });
-
-    it('refuses to revoke an unfinished file commit and allows retry after its acknowledged checkpoint', async () => {
-        const { handle, files, closing } = createDirectory();
-        const base = createTestStudioRecording();
-        const recording = await createStudioRecording({ ...base, status: 'recording' }, handle);
-        expect(recording.storageDestination).toEqual({ kind: 'directory', name: 'take/take' });
-        const { generation } = await RECORDING_STUDIO_AUTHORITY.read();
-
-        let finishClose!: () => void;
-        let reportCloseStarted!: () => void;
-        const closeStarted = new Promise<void>((resolve) => { reportCloseStarted = resolve; });
-        closing.hold = new Promise((resolve) => { finishClose = resolve; reportCloseStarted(); });
-        const save = saveStudioRecording({ ...recording, title: 'Checkpoint in flight' });
-        await closeStarted;
-        // The file is being closed, which is its commit; nobody can say any more whether it will land.
-        await new Promise((resolve) => setTimeout(resolve, 5));
-        await expect(otherTab.claim('other-tab', generation)).rejects.toThrow('nedokončila zápis');
-
-        finishClose();
-        await save;
-        expect(await otherTab.claim('other-tab', generation)).not.toBeNull();
-        await expect(saveStudioRecording({ ...recording, title: 'Stale after the retry' })).rejects.toThrow('Studio řídí jiná karta');
-        expect((JSON.parse(await files.get('recording.json')!.text()) as { recording: { title: string } }).recording.title).toBe('Checkpoint in flight');
-    });
-
-    it('never touches the folder of a studio which lost its right to write', async () => {
-        const { handle, files } = createDirectory();
-        const base = createTestStudioRecording();
-        const recording = await createStudioRecording({ ...base, status: 'recording', tracks: [base.tracks[0]] }, handle);
-        const snapshot = { ...recording, tracks: [{ ...recording.tracks[0], byteLength: 4, chunkCount: 1 }] };
-        await appendRecordingChunk(snapshot, snapshot.tracks[0].id, 0, new Blob(['take']));
-        const committedFiles = Array.from(files.keys()).sort();
-        const committedManifest = await files.get('recording.json')!.text();
-
-        await claimTestRecordingStudioAuthority(otherTab, 'other-tab');
-
-        const next = { ...snapshot, tracks: [{ ...snapshot.tracks[0], byteLength: 8, chunkCount: 2 }] };
-        const staleWrites: (() => Promise<unknown>)[] = [
-            () => appendRecordingChunk(next, next.tracks[0].id, 1, new Blob(['tail'])),
-            () => saveStudioRecording({ ...snapshot, status: 'complete' }),
-            () => deleteStudioRecording(snapshot.id),
-            () => createStudioRecording({ ...base, id: 'another-take' }, handle),
-        ];
-        for (const write of staleWrites) {
-            expect(isRecordingStudioAuthorityLost(await write().then(() => null, (error: unknown) => error))).toBe(true);
-        }
-        expect(Array.from(files.keys()).sort()).toEqual(committedFiles);
-        expect(await files.get('recording.json')!.text()).toBe(committedManifest);
-    });
-
-    it('still reads a folder for a studio whose own storage refuses every further write', async () => {
-        const { handle } = createDirectory('imported');
-        const base = createTestStudioRecording();
-        const recording = await createStudioRecording({ ...base, id: 'imported-take', tracks: [base.tracks[0]] }, handle);
-        vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => { throw new DOMException('Origin full', 'QuotaExceededError'); });
-        try {
-            // A full origin is not a takeover: the import stays readable and the tab stays the studio.
-            expect((await importStudioRecordingDirectory(handle)).id).toBe(recording.id);
-            expect(RECORDING_STUDIO_AUTHORITY.heldAuthority).not.toBeNull();
-        } finally { vi.restoreAllMocks(); }
-        // A tab which has given the studio up imports nothing, even from a folder it was already asked about.
-        RECORDING_STUDIO_AUTHORITY.surrender(RECORDING_STUDIO_AUTHORITY.heldAuthority!);
-        await expect(importStudioRecordingDirectory(handle)).rejects.toThrow('Studio řídí jiná karta');
     });
 
     it('passes the result and the failure of the commit through unchanged', async () => {

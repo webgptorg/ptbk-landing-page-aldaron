@@ -8,8 +8,7 @@ import { RECORDING_MAX_PENDING_BYTES, type RecordingSource, type StudioRecording
 const STORAGE = vi.hoisted(() => ({ append: vi.fn(), save: vi.fn(), readPart: vi.fn() }));
 const MEDIA = vi.hoisted(() => ({ inspect: vi.fn() }));
 const REINDEX = vi.hoisted(() => ({ canRebuild: vi.fn() }));
-vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save, readRecordingPart: STORAGE.readPart,
-    createStudioRecording: async (recording: StudioRecording) => { await STORAGE.save(recording); return recording; } }));
+vi.mock('./recordingStudioStorage', () => ({ appendRecordingChunk: STORAGE.append, saveStudioRecording: STORAGE.save, readRecordingPart: STORAGE.readPart }));
 vi.mock('./recordingStudioMedia', () => ({ inspectRecordingBlob: MEDIA.inspect }));
 vi.mock('./recordingStudioReindex', () => ({ canRebuildRecordingIndex: REINDEX.canRebuild }));
 
@@ -337,7 +336,7 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(onFailure.mock.calls[0][0].message).toContain('plné');
     });
 
-    it('reports a denied storage destination before capture starts', async () => {
+    it('reports refused storage before capture starts', async () => {
         STORAGE.save.mockRejectedValueOnce(new DOMException('denied', 'NotAllowedError'));
         const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
         await capture.start([makeSource('one')]);

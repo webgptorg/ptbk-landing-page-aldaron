@@ -6,7 +6,7 @@ import { commitRecordingStudioExport, runRecordingStudioWork } from '@/lib/recor
 import { getRecordingStorageErrorMessage } from '@/lib/recording-studio/recordingStudioCapacity';
 import { getRecordingErrorMessage } from '@/lib/recording-studio/recordingStudioDevices';
 import { chooseRecordingArchiveDestination, chooseRecordingOriginalDestination, chooseRecordingPreparedDestination, describeRecordingOriginalIndexState, exportRecordingArchive, exportRecordingManifest, exportRecordingOriginal, exportRecordingPrepared } from '@/lib/recording-studio/recordingStudioExport';
-import { deleteStudioRecording, readStudioRecording, reconnectStudioRecording } from '@/lib/recording-studio/recordingStudioStorage';
+import { deleteStudioRecording, readStudioRecording } from '@/lib/recording-studio/recordingStudioStorage';
 import { flushAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
 import { formatRecordingBytes, formatRecordingDuration, getRecordingByteLength, getRecordingMissingRanges } from '@/lib/recording-studio/recordingStudioTiming';
 import type { RecordingTrack, StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
@@ -17,11 +17,10 @@ import { getRecordingWorkspacePath } from '@/lib/recording-studio/recordingStudi
 import { getRecordingMediaParts } from '@/lib/recording-studio/recordingStudioSessionTime';
 import type { RecordingMediaPart } from '@/lib/recording-studio/recordingStudioTypes';
 
-export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onChange, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration }: {
+export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration }: {
     readonly isWorkspace?: boolean;
     readonly recordings: readonly StudioRecording[];
     readonly isDisabled: boolean;
-    readonly onChange: (recording: StudioRecording) => void;
     readonly onDelete: (recordingId: string) => void;
     readonly onBusyChange: (isBusy: boolean) => void;
     readonly onStorageChange: () => Promise<void>;
@@ -78,12 +77,6 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
             }
         }, operationController).catch(() => undefined);
     };
-    const reconnect = async (recording: StudioRecording) => {
-        setWorkingId(recording.id); onBusyChange(true); setErrorMessage(null);
-        try { onChange(await runRecordingStudioWork(() => reconnectStudioRecording(recording.id))); }
-        catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Složku se nepodařilo připojit.'); }
-        finally { setWorkingId(null); onBusyChange(false); await onStorageChange(); }
-    };
     const remove = (recording: StudioRecording, closeEditor: () => void) => {
         setWorkingId(recording.id); setErrorMessage(null); onBusyChange(true);
         void runRecordingStudioWork(async () => {
@@ -106,7 +99,7 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
     };
     return (
         <section className="space-y-5" aria-labelledby={isWorkspace ? 'recording-export-title' : 'recording-library-title'}>
-            <div><h2 id={isWorkspace ? 'recording-export-title' : 'recording-library-title'} className="text-xl font-bold">{isWorkspace ? 'Soubory pro střihače' : 'Uložené záznamy'}</h2><p className="mt-1 text-sm text-slate-500">V tomto prohlížeči nebo ve zvolených místních složkách. Originály a ZIP slouží jako záloha pro střihače. Export zahrnuje všechny zdroje bez ohledu na náhled. Ořez potřebuje místo na jeden dočasný soubor v úložišti prohlížeče; ZIP navíc místo v cíli. Bez přímého ukládání na disk lze stáhnout jednotlivý ořez do 256 MiB, velké originály zůstávají dostupné jednotlivě s časovým předpisem.</p></div>
+            <div><h2 id={isWorkspace ? 'recording-export-title' : 'recording-library-title'} className="text-xl font-bold">{isWorkspace ? 'Soubory pro střihače' : 'Uložené záznamy'}</h2><p className="mt-1 text-sm text-slate-500">Originály a ZIP slouží jako záloha pro střihače. Export zahrnuje všechny zdroje bez ohledu na náhled. Ořez potřebuje místo na jeden dočasný soubor v úložišti prohlížeče; ZIP navíc místo v cíli. Bez přímého ukládání na disk lze stáhnout jednotlivý ořez do 256 MiB, velké originály zůstávají dostupné jednotlivě s časovým předpisem.</p></div>
             {errorMessage && <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{errorMessage}</p>}
             {progress && <div role="status" className="flex flex-wrap items-center gap-4 rounded-lg bg-cyan-50 p-4 text-sm text-cyan-900">{progress}
                 {controller.current && <Button type="button" variant="outline" size="sm" onClick={() => controller.current?.abort()}>Zrušit export</Button>}
@@ -119,7 +112,6 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                         <span className={`rounded-full px-3 py-1 text-xs font-medium ${recording.status === 'complete' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}>{recording.status === 'complete' ? 'Uloženo' : 'Přerušený záznam'}</span>
                     </div>
                     {recording.errorMessage && <p className="text-sm text-amber-800">{recording.errorMessage}</p>}
-                    <p className="break-all text-xs text-slate-500">{recording.storageDestination ? `Složka: ${recording.storageDestination.name}` : 'Úložiště tohoto prohlížeče (IndexedDB)'}</p>
                     {getRecordingMissingRanges(recording).map((range) => <p key={range.trackId} className="text-xs text-amber-800">{recording.tracks.find((track) => track.id === range.trackId)?.label}: nepotvrzený konec od {formatRecordingDuration(range.startSeconds)} do {range.endSeconds === null ? 'neznámého času' : formatRecordingDuration(range.endSeconds)}. Společně uložený rozsah končí v {formatRecordingDuration(recording.durationSeconds)}.</p>)}
                     <ul className="divide-y divide-slate-100 text-sm">
                         {recording.tracks.map((track, index) => {
@@ -135,13 +127,12 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                     {recording.trim && <p className="text-sm text-cyan-800">Společný ořez: {formatRecordingDuration(recording.trim.startSeconds)} – {formatRecordingDuration(recording.trim.endSeconds)}</p>}
                     <div className="flex flex-wrap gap-2">
                         <Button type="button" variant="outline" disabled={isBusy || recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(recording)}>Použít tuto konfiguraci zdrojů</Button>
-                        {recording.storageDestination && <Button type="button" variant="outline" disabled={isBusy} onClick={() => { void reconnect(recording); }}>Připojit složku znovu</Button>}
                         {!isWorkspace && (isBusy ? <Button type="button" variant="outline" disabled>Náhled a ořez</Button> : <Button variant="outline" asChild><Link href={getRecordingWorkspacePath(recording.id)}>Náhled a ořez</Link></Button>)}
                         <Button type="button" variant="outline" disabled={isBusy || getRecordingByteLength(recording) === 0} onClick={() => download(recording, false)}><Download className="mr-2 h-4 w-4" />Originály ZIP</Button>
                         <Button type="button" variant="outline" disabled={isBusy} onClick={() => { void downloadManifest(recording.id); }}>Stáhnout údaje o stopách</Button>
                         {recording.trim && <Button type="button" disabled={isBusy} onClick={() => download(recording, true)}><Scissors className="mr-2 h-4 w-4" />ZIP s ořezem</Button>}
                         <AdminEditorButton label="Smazat" title="Smazat místní záznam" errorMessage={errorMessage} buttonProps={{ disabled: isBusy, className: 'text-red-700' }}>
-                            {(closeEditor) => <div className="space-y-4"><p className="text-sm text-slate-600">Záznam „{recording.title}“ a všechny jeho potvrzené části budou odstraněny {recording.storageDestination ? 'z jeho složky na disku' : 'z tohoto prohlížeče'}. Stažené ZIP soubory zůstanou zachované.</p><Button type="button" variant="destructive" disabled={isBusy} onClick={() => remove(recording, closeEditor)}>Smazat záznam a všechny stopy</Button></div>}
+                            {(closeEditor) => <div className="space-y-4"><p className="text-sm text-slate-600">Záznam „{recording.title}“ a všechny jeho potvrzené části budou odstraněny z tohoto prohlížeče. Stažené ZIP soubory zůstanou zachované.</p><Button type="button" variant="destructive" disabled={isBusy} onClick={() => remove(recording, closeEditor)}>Smazat záznam a všechny stopy</Button></div>}
                         </AdminEditorButton>
                     </div>
                 </article>

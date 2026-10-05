@@ -20,6 +20,8 @@ recordings use an authoritative JSON checkpoint, immutable parts and a cached ha
 Existing IDs must remain unchanged: no rekeying, media copying or database migration is
 needed. Older edit state is a nullable shared `trim`; adaptation can derive a versioned
 recipe on read and persist it only on editing. Directory validation must preserve it.
+(Directory recordings were retired on 2026-10-05; see `recording-studio-storage.md`.
+This analysis and the results below describe the studio as it was when they were written.)
 
 `recordingStudioExport.ts` already streams ZIP64 and individual originals, with a 256 MiB
 buffered ZIP limit. `recordingStudioTrim.ts` uses Mediabunny and one OPFS temporary file.

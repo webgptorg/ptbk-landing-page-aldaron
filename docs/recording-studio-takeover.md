@@ -49,7 +49,10 @@ an owner additionally checks a renewed request before releasing.
 
 Web Locks and BroadcastChannel are scoped to the same origin, browser profile and storage partition. They do not
 coordinate other devices, other origins or applications. IndexedDB schema 3 adds an authority store in the existing
-browser database; no server schema or media storage is added.
+browser database; no server schema or media storage is added. Schema 4 only removes what the retired folder
+destination left behind and keeps that store and its generation, so a tab which was fenced stays fenced. Like every
+schema change it is made only by the tab which is becoming the studio; a tab of an earlier deployment can no longer
+open the upgraded database and has to be reloaded.
 
 Every ownership claim compares the generation it saw *before* requesting the lock and atomically advances it.
 Every media/chunk/checkpoint, recovery, deletion and editor transaction includes that same authority store. A native
@@ -62,7 +65,7 @@ stealing does not stop the old callback.
 Before the old document can explicitly reacquire, it also waits for admitted editor saves to settle after discarding
 their superseded drafts, so an old callback cannot inherit a new token in that same document.
 
-Folder checkpoint/chunk/deletion commits, export output and Studio server/upload/publication operations cannot be
+Export output and Studio server/upload/publication operations cannot be
 part of an IndexedDB media transaction. `RecordingStudioAuthorityKeeper.commit` first persists a pending-operation
 marker through the same fenced authority transaction. Ownership claims check it atomically with the generation and
 refuse revocation while the external effect is pending. Owner discovery, ordinary media writes and cooperative cleanup

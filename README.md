@@ -58,19 +58,14 @@ Its remembered surface type and label only help with reselection. The [Screen Ca
 requires renewed user consent for display capture; the browser may treat a supported surface type as a hint and may
 ignore it. See also [MDN's current `getDisplayMedia()` reference](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia).
 
-Recordings default to IndexedDB in the same browser profile, device, and site origin. Where `showDirectoryPicker`
-is available, **Vybrat složku pro nahrávání** records directly to a user-selected filesystem directory instead.
-Nothing is sent to the server. IndexedDB chunks and metadata commit atomically. Directory recordings close small
-immutable `.part` files (normally five seconds per source), then atomically replace a small `recording.json`
-checkpoint. They do not keep a whole take in RAM, copy a growing file on every append, or need a second copy to
-finalize. The folder checkpoint is authoritative; IndexedDB stores only its handle and a metadata cache. Even if
-that cache runs out of quota, committed folder data remains usable. Keep the whole recording subfolder: the parts
-are fragments of each original media stream, not standalone movies. Use the studio to export playable originals.
-**Obnovit záznam ze složky** opens that recording's subfolder, including after the site's metadata was cleared.
-Recovery only reads the folder; it can offer export even when a full disk or origin refuses further writes. If the
-browser cannot cache the handle, select the same recording subfolder again next visit.
-**Připojit složku znovu** renews access to a known folder; permissions are never requested silently on recovery.
-Incomplete takes retain successfully committed chunks after reopening.
+Recordings are kept in IndexedDB, in the browser profile, device, and site origin they were made in. That is the
+only place the studio records to, so nothing is chosen, reconnected or imported before or after a take, and nothing
+is sent to the server. Every source hands over a chunk about once a second, and each chunk commits in one
+transaction together with the take's byte counters: a crash never advertises media which was not saved, no whole
+take is kept in RAM, and finishing a take needs no second copy. Incomplete takes retain successfully committed
+chunks after reopening. Recording into a selected folder was retired. What the browser remembered about such
+takes — the handle of the folder and a copy of the take's description — is dropped the next time the studio is
+opened, while the folders and their files on disk are never touched; the studio no longer reads them.
 One browser tab holds the studio lock, including while recovering, editing, exporting, or deleting takes. Normal
 admin navigation and sign-out wait for recording or export to finish, and closing/reloading during capture shows the
 existing browser warning.
@@ -108,19 +103,19 @@ steps for checking by hand are in `docs/recording-studio-alerts.md`.
 
 Use a current desktop Chrome or Edge over HTTPS (localhost also works). Device limits, codecs, and screen/audio
 capture depend on the browser and operating system. **Odhad prostoru pro web** is the reported origin quota minus
-reported usage, not physical free disk space or the capacity of a selected folder. The API can deliberately keep
-this number at 10 GiB while successful writes continue. No 10 GB recording ceiling is imposed. Committed bytes,
-queued bytes, destination, configured total bitrate and measured aggregate bitrate are shown separately. Estimates
-refresh every five seconds and after finalization, recovery, deletion, export and destination changes; failed,
-missing or stale measurements become unknown. Because neither supported backend exposes defensible physical
-capacity, remaining time is explicitly unknown. The studio never subtracts its media bytes from already-adjusted
-headroom. A low fresh origin estimate conservatively reserves 64 MiB for origin recording; it does not block a
-selected folder. The pending-write queue is bounded to 64 MiB; overflow or a failed write stops all sources and
-marks the uncommitted tail in the same session clock, without adding a pause timeline or silently dropping a source.
-The browser itself may emit a larger-than-requested MediaRecorder chunk; this is rejected as an interrupted take
-rather than retained in an unbounded queue. Persistence is an explicit button with granted/denied/unsupported/error
-feedback. It protects origin data from eviction, does not request a chosen quota, and reveals no disk free space.
-Download takes you want to keep. See [investigation and verification evidence](docs/recording-studio-storage.md).
+reported usage, not physical free disk space. The API can deliberately keep this number at 10 GiB while successful
+writes continue. No 10 GB recording ceiling is imposed. Committed bytes, queued bytes, configured total bitrate and
+measured aggregate bitrate are shown separately. Estimates refresh every five seconds and after finalization,
+recovery, deletion and export; failed, missing or stale measurements become unknown. Because the browser exposes no
+defensible physical capacity, remaining time is explicitly unknown. The studio never subtracts its media bytes from
+already-adjusted headroom. A low fresh origin estimate conservatively reserves 64 MiB: a new take is refused and a
+running one is stopped with its committed media kept. The pending-write queue is bounded to 64 MiB; overflow or a
+failed write stops all sources and marks the uncommitted tail in the same session clock, without adding a pause
+timeline or silently dropping a source. The browser itself may emit a larger-than-requested MediaRecorder chunk; this
+is rejected as an interrupted take rather than retained in an unbounded queue. Persistence is an explicit button with
+granted/denied/unsupported/error feedback. It protects origin data from eviction, does not request a chosen quota, and
+reveals no disk free space. Download takes you want to keep. See [investigation and verification
+evidence](docs/recording-studio-storage.md).
 
 **Náhled a ořez** opens `/admin/recording-studio/<recordingId>` in the studio's persistent workspace shell.
 The existing recording/source IDs, original bytes and saved selection survive reload and back navigation. These

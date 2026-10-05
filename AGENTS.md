@@ -264,10 +264,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `getDisplayMedia({ video: true, audio: false })` diagnostic at `/admin/recording-studio/capture-probe`. Whole-display
   capture remains an explicit user choice with a privacy warning, never an automatic fallback. Native picker behavior
   and capture continuity across Spaces require physical Mac testing; mocked browser tests do not establish them.
-  IndexedDB commits each chunk together with its counters; a feature-detected selected-directory destination
-  closes immutable media fragments before its small authoritative checkpoint and stores only handles/metadata in
-  IndexedDB. Recovery can reconnect or import that folder without moving its media into origin storage; read-only
-  import still offers export when further folder or origin-cache writes fail. An exclusive
+  IndexedDB is the only capture destination and is never offered as a choice: it commits each chunk together with
+  its counters, and no folder is selected, reconnected or imported. Recording into a selected directory was retired;
+  database schema 4 drops what it left in the browser — the store of folder handles and the descriptions of such
+  takes — without touching a folder, a file or a take recorded into the browser. The filesystem is still used by
+  exports, save-file pickers and temporary files. An exclusive
   browser lock protects recording, recovery, editing and deletion across tabs. A blocked or deactivated instance
   offers explicit confirmed takeover entirely from that tab, through addressed BroadcastChannel handshakes and the
   same exclusive lock. Responsive owners settle recording transitions/final data, drain persistence, release all
@@ -279,8 +280,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   through that same authority, and logical revocation never promises physical termination of a suspended tab's devices
   or preservation of its uncommitted tail. Studio upload revision/source identifiers survive handover. The cross-tab
   tests, conservative external-commit recovery limits and physical/browser protocol are in
-  `docs/recording-studio-takeover.md`. Committed bytes, queued bytes,
-  destination and aggregate bitrate are separate from the browser's labelled origin quota estimate. That estimate
+  `docs/recording-studio-takeover.md`. Committed bytes, queued bytes
+  and aggregate bitrate are separate from the browser's labelled origin quota estimate. That estimate
   can remain constant at 10 GiB, is never physical disk capacity, and supplies no remaining-time countdown.
   Explicit persistence reports the browser's real result and protects against eviction only. A bounded write queue
   and all-source failure stop preserve committed prefixes and identify missing tails on the shared session clock.
