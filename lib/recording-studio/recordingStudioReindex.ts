@@ -1,7 +1,7 @@
 import { ALL_FORMATS, BlobSource, Conversion, Input, Mp4OutputFormat, Output, StreamTarget, WebMOutputFormat } from 'mediabunny';
 import { inspectRecordingMedia } from './recordingStudioMedia';
 import { readRecordingIndexReport, RECORDING_INDEX_REPAIR_COMMAND, type RecordingContainerFormat } from './recordingStudioIndex';
-import { isRecordingTemporaryFileSupported, withRecordingTemporaryFile } from './recordingStudioTemporaryFile';
+import { isRecordingTemporaryFileSupported, withRecordingTemporaryFile, type RecordingTemporaryFile } from './recordingStudioTemporaryFile';
 import type { RecordingMediaBounds } from './recordingStudioTypes';
 
 /** The rebuilt container must land on the very same media timeline as the recorder wrote it. */
@@ -11,13 +11,12 @@ const REBUILD_BOUNDARY_TOLERANCE_SECONDS = 0.05;
 export class RecordingIndexRebuildUnavailable extends Error {}
 
 type RebuildOptions = {
-    readonly blob: Blob;
     readonly format: RecordingContainerFormat;
     readonly signal: AbortSignal;
     readonly onProgress?: (progress: number) => void;
     /** The bounds measured when the part closed, checked against the rebuilt container. */
     readonly expectedMedia?: RecordingMediaBounds;
-};
+} & ({ readonly blob: Blob; readonly input?: never } | { readonly input: Input; readonly blob?: never });
 
 function describeRebuildFailure(reason: string): RecordingIndexRebuildUnavailable {
     return new RecordingIndexRebuildUnavailable(`${reason} Předává se originál; index doplňte příkazem ${RECORDING_INDEX_REPAIR_COMMAND}.`);
@@ -66,28 +65,33 @@ export async function canRebuildRecordingIndex(blob: Blob, format: RecordingCont
  */
 export async function withRebuiltRecordingIndex<Result>(options: RebuildOptions & {
     readonly consume: (file: File) => Promise<Result>;
+    /** Explicit upload preparations own their lifetime so resumed multipart parts use exactly the same bytes. */
+    readonly temporaryFile?: RecordingTemporaryFile;
 }): Promise<Result> {
     if (!isRecordingTemporaryFileSupported()) {
         throw describeRebuildFailure('Tento prohlížeč nepodporuje pracovní úložiště pro doplnění indexu.');
     }
     let isDelivering = false;
     try {
-        return await withRecordingTemporaryFile(async ({ writable, readFile }) => {
+        const deliver = async ({ writable, readFile }: RecordingTemporaryFile) => {
             const file = await rebuildIndexedRecordingContainer(options, writable, readFile);
             isDelivering = true;
             return options.consume(file);
-        });
+        };
+        return options.temporaryFile ? await deliver(options.temporaryFile) : await withRecordingTemporaryFile(deliver);
     } catch (error) {
         options.signal.throwIfAborted();
         if (isDelivering || error instanceof RecordingIndexRebuildUnavailable) throw error;
         throw describeRebuildFailure(`Doplnění indexu selhalo: ${getErrorMessage(error)}`);
+    } finally {
+        options.input?.dispose();
     }
 }
 
 /** Copies encoded packets into a seekable output and refuses anything which is not exactly the recorded media. */
 async function rebuildIndexedRecordingContainer(options: RebuildOptions,
     writable: FileSystemWritableFileStream, readFile: () => Promise<File>): Promise<File> {
-    const input = openIndexedInput(options.blob);
+    const input = options.input ?? openIndexedInput(options.blob!);
     const output = new Output({ format: createIndexedOutputFormat(options.format), target: new StreamTarget(writable) });
     let conversion: Conversion | null = null;
     const cancel = () => { void conversion?.cancel().catch(() => undefined); };

@@ -222,7 +222,29 @@ use cases, and audiences. Keep these rules current when behavior changes.
   overwrite existing tracks, and no participant endpoint or public database role exposes subtitles.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
-- `/admin/recording-studio` records any number of available cameras, screen shares,
+- `/admin/studio` contains addressable `Nahrávání` at `/admin/studio/recording` and `Střižna` at
+  `/admin/studio/editor`, with individual recording/project URLs. Legacy recording-studio URLs permanently redirect
+  to their recording views; the capture probe and transcription API retain their addresses. One mounted owner,
+  browser lock and save/takeover protection span both sections. Section navigation flushes drafts while retaining
+  active capture; editing and upload require it to finish. Independent editing does not require capture permissions.
+  Completed recordings open stable browser-local projects by references to their existing recording/track/part media,
+  never copied blobs or an export/re-import. Linked part trims/cuts/moves and manually aligned external sources share
+  the existing transport. Stable assets have separate locations; pinned timing/revisions, scenes and recipe undo never
+  rewrite raw recordings, and deleting a referenced recorder source is refused. Schema 5 stores small projects/assets/
+  upload manifests and indexes chunk byte offsets; external media is never copied just to import it. Read-only file
+  handles recheck permission, session Files require reselection after reload, and changed or missing sources retain
+  explicit relink errors. HTTPS sources require progressive CORS/range reads; direct Google Drive is explicitly
+  unsupported until authorized large-file ranges and native synchronized seeks are proven. The composite scene track
+  draws shared decoders with normalized fullscreen/rectangular/circular presets, hard cuts and one saved audio source;
+  monitor audio stays separate and gaps never hold old frames. Metadata and portable recipes map original/project/
+  prepared coordinates consistently, retaining unavailable mappings and excluding credentials/serialized permissions.
+  Explicit post-capture CDN upload uses bounded direct browser-to-S3 multipart PUTs, short-lived part/read signatures,
+  immutable manifests, verified completion/ranged seeking, retry/resume/cancel and fenced uncertain-outcome recovery.
+  Only successful verification changes a stable asset's location; local originals remain. Its private asset/reference
+  migration and separate cleanup namespace protect project objects and never publish to participants. Local editing
+  works without S3/Drive configuration. Design, actual long-container measurements, provider CORS and integration
+  limits are in `docs/studio-workshop-editor.md`.
+- `/admin/studio/recording` records any number of available cameras, screen shares,
   and optional microphones. A newly configured camera defaults to recording its selected
   system-default or chosen microphone inside the same video file; video-only is an explicit
   choice. The live camera preview is muted, while a track-presence indicator and live level
@@ -292,7 +314,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Screen/window labels are hints only and always go through the browser chooser again. Older takes reconstruct only
   their stored track details and leave unknown camera/microphone identities for the administrator to select.
   Reusing settings never starts recording or changes the old take. Saved recordings open the authenticated
-  `/admin/recording-studio/<recordingId>` workspace, sharing the setup/recording shell and its browser lock. Existing
+  `/admin/studio/recording/<recordingId>` workspace, sharing the setup/recording shell and its browser lock. Existing
   IDs and original media stay unchanged; a URL identifies local data and missing local media remains explicit.
   One transport, playhead and zoomable timeline map source offsets/segments onto session time, wait for asynchronous
   seeks/buffering and playback starts, correct drift, and hide unavailable frames. Pausing or revealing a hidden
@@ -640,6 +662,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   independent and retry once in a fresh browser context for transient failures;
   failed-attempt traces remain available. Each attempt archives one recording in
   `tests/e2e/videos/`, retaining only recent runs.
+  The suite keeps compiled routes, gives its owned server a 10 GiB heap budget unless `NODE_OPTIONS` already specifies
+  a heap limit, and starts Next with `--disable-source-maps` to omit Node's additional source-map cache. Browser maps,
+  traces and Next's memory safeguards remain. Studio's browser-local
+  editors load on demand without server rendering; the shared capture owner remains mounted across their views.
 - Recording-studio E2E sources use canvas video and synthesized audio with a silent Web Audio output, independent
   of physical audio-device clocks. Keep recording, storage, codecs, trimming, and ZIP exports real in these tests.
   Recorded A/V markers are checked from decoded sample timestamps rather than speaker-output latency. The preparation

@@ -10,9 +10,13 @@ const MINIMUM_SELECTION_SECONDS = 0.001;
 const TIMELINE_LABEL_WIDTH = 180;
 const RULER_INTERVALS_SECONDS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 18000, 36000];
 
-export function RecordingTimeline({ tracks, derivedTracks = [], durationSeconds, seconds, selection, artwork, availableRanges, onSeek, onSelection, onBeginEdit }: {
+export function RecordingTimeline({ tracks, derivedTracks = [], compositionScenes = [], coordinateLabel = 'Původní čas relace', onSceneSelect, onSceneMove, durationSeconds, seconds, selection, artwork, availableRanges, onSeek, onSelection, onBeginEdit, onEndEdit }: {
     readonly tracks: readonly RecordingTrack[];
     readonly derivedTracks?: readonly RecordingDerivedTrack[];
+    readonly compositionScenes?: readonly { readonly id: string; readonly startSeconds: number; readonly endSeconds: number; readonly label: string; readonly minimumSeconds?: number; readonly maximumSeconds?: number }[];
+    readonly coordinateLabel?: string;
+    readonly onSceneSelect?: (id: string) => void;
+    readonly onSceneMove?: (id: string, seconds: number) => void;
     readonly durationSeconds: number;
     readonly seconds: number;
     readonly selection: RecordingTrim;
@@ -21,13 +25,14 @@ export function RecordingTimeline({ tracks, derivedTracks = [], durationSeconds,
     readonly onSeek: (seconds: number) => void;
     readonly onSelection: (selection: RecordingTrim) => void;
     readonly onBeginEdit: () => void;
+    readonly onEndEdit?: () => void;
 }) {
     const [zoomLevel, setZoomLevel] = useState(0);
     const zoom = 2 ** zoomLevel;
     const scrollReference = useRef<HTMLDivElement>(null);
     const [viewport, setViewport] = useState({ left: 0, width: 850 });
     const bodyReference = useRef<HTMLDivElement>(null);
-    const dragReference = useRef<'start' | 'end' | 'playhead' | null>(null);
+    const dragReference = useRef<'start' | 'end' | 'playhead' | { readonly sceneId: string } | null>(null);
     const safeDuration = Math.max(0.001, durationSeconds);
     const timelineWidth = Math.max(viewport.width, zoom * 850) - TIMELINE_LABEL_WIDTH;
     const rulerInterval = RULER_INTERVALS_SECONDS.find((interval) => interval / safeDuration * timelineWidth >= 100) ?? safeDuration / 10;
@@ -60,17 +65,21 @@ export function RecordingTimeline({ tracks, derivedTracks = [], durationSeconds,
     const movePointer = (event: PointerEvent) => {
         if (!dragReference.current) return;
         const value = pointerSeconds(event);
-        if (dragReference.current === 'playhead') onSeek(value);
+        if (typeof dragReference.current === 'object') onSceneMove?.(dragReference.current.sceneId, value);
+        else if (dragReference.current === 'playhead') onSeek(value);
         else changeHandle(dragReference.current, value);
     };
     const startPointer = (event: PointerEvent<HTMLDivElement>) => {
         const handle = (event.target as HTMLElement).closest<HTMLElement>('[data-trim-handle]')?.dataset.trimHandle as 'start' | 'end' | undefined;
+        const sceneId = (event.target as HTMLElement).closest<HTMLElement>('[data-scene-handle]')?.dataset.sceneHandle;
         if (event.button !== 0) return;
-        dragReference.current = handle ?? 'playhead';
-        if (handle) onBeginEdit();
+        dragReference.current = sceneId && onSceneMove ? { sceneId } : handle ?? 'playhead';
+        if (handle || sceneId) onBeginEdit();
+        if (sceneId) onSceneSelect?.(sceneId);
         event.currentTarget.setPointerCapture(event.pointerId);
         movePointer(event);
     };
+    const finishPointer = () => { dragReference.current = null; onEndEdit?.(); };
     const handleKey = (event: KeyboardEvent, handle?: 'start' | 'end') => {
         const value = handle === 'start' ? selection.startSeconds : handle === 'end' ? selection.endSeconds : seconds;
         const step = event.shiftKey ? 10 : event.altKey ? 0.01 : 1;
@@ -78,7 +87,7 @@ export function RecordingTimeline({ tracks, derivedTracks = [], durationSeconds,
             event.key === 'ArrowLeft' ? value - step : event.key === 'ArrowRight' ? value + step : null;
         if (target === null) return;
         event.preventDefault(); event.stopPropagation();
-        if (handle) { onBeginEdit(); changeHandle(handle, target); }
+        if (handle) { onBeginEdit(); changeHandle(handle, target); onEndEdit?.(); }
         else onSeek(target);
     };
     return <section aria-label="Společná časová osa" className="space-y-3">
@@ -90,14 +99,24 @@ export function RecordingTimeline({ tracks, derivedTracks = [], durationSeconds,
         <div ref={scrollReference} onScroll={(event) => setViewport({ left: event.currentTarget.scrollLeft, width: event.currentTarget.clientWidth })} className="overflow-x-auto rounded-xl border border-slate-300 bg-white" tabIndex={0} aria-label="Posouvání časové osy">
             <div className="flex" style={{ width: `max(100%, ${zoom * 850}px)` }}>
                 <div className="sticky left-0 z-20 shrink-0 border-r bg-white/95" style={{ width: TIMELINE_LABEL_WIDTH }}>
-                    <div className="h-14 p-3 text-xs text-slate-500">Původní čas relace</div>
+                    <div className="h-14 p-3 text-xs text-slate-500">{coordinateLabel}</div>
+                    {compositionScenes.length > 0 && <div className="h-16 border-t p-3 text-sm font-medium">Kompozice · předpis</div>}
                     {tracks.map((track) => <div key={track.id} className="h-24 border-t p-3 text-sm"><p className="truncate font-medium" title={track.label}>{track.label}</p><p className="mt-1 text-xs text-slate-500">{track.kind === 'microphone' ? 'Zvuk' : track.kind === 'screen' ? 'Obrazovka' : 'Kamera'}{track.isAudioIncluded && track.kind !== 'microphone' ? ' + zvuk' : ''}</p></div>)}
                     {derivedTracks.map((track) => <div key={track.id} className="h-16 border-t p-2 text-xs"><p className="truncate font-medium" title={track.provenance.sourceLabel}>{track.kind === 'subtitles' ? 'Titulky' : 'Aktivita řeči'}</p><p className="truncate text-slate-500">{track.provenance.sourceLabel}</p></div>)}
                 </div>
-                <div ref={bodyReference} className="relative min-w-0 flex-1 touch-none select-none" onPointerDown={startPointer} onPointerMove={movePointer} onPointerUp={() => { dragReference.current = null; }} onPointerCancel={() => { dragReference.current = null; }}>
+                <div ref={bodyReference} className="relative min-w-0 flex-1 touch-none select-none" onPointerDown={startPointer} onPointerMove={movePointer} onPointerUp={finishPointer} onPointerCancel={finishPointer} onLostPointerCapture={finishPointer}>
                     <div className="relative h-14" role="slider" tabIndex={0} aria-label="Přehrávací hlava" aria-valuemin={0} aria-valuemax={safeDuration} aria-valuenow={seconds} aria-valuetext={formatRecordingTimecode(seconds)} onKeyDown={(event) => handleKey(event)}>
                         {rulerTimes.map((value) => <span key={value} className="absolute top-2 border-l pl-1 text-[10px] tabular-nums text-slate-600" style={{ left: percent(value), transform: value === safeDuration ? 'translateX(-100%)' : undefined }}>{formatRecordingTimecode(value)}</span>)}
                     </div>
+                    {compositionScenes.length > 0 && <div className="relative h-16 overflow-hidden border-t bg-violet-50" aria-label="Stopa kompozice">
+                        {compositionScenes.map((scene) => <button key={scene.id} type="button" className="absolute inset-y-2 truncate rounded border border-violet-700 bg-violet-200 px-2 text-left text-xs text-violet-950" style={{ left: percent(scene.startSeconds), width: percent(scene.endSeconds - scene.startSeconds) }} title={scene.label} onPointerDown={(event) => event.stopPropagation()} onClick={() => { onSeek(scene.startSeconds); onSceneSelect?.(scene.id); }}>{scene.label}</button>)}
+                        {onSceneMove && compositionScenes.map((scene) => <div key={`boundary:${scene.id}`} role="slider" tabIndex={0} data-scene-handle={scene.id} aria-label={`Hranice scény: ${scene.label}`} aria-valuemin={scene.minimumSeconds ?? 0} aria-valuemax={scene.maximumSeconds ?? safeDuration} aria-valuenow={scene.startSeconds} aria-valuetext={formatRecordingTimecode(scene.startSeconds)} className="absolute inset-y-1 z-20 w-3 -translate-x-1/2 cursor-ew-resize rounded border-2 border-violet-900 bg-violet-700/50 outline-offset-2 focus:outline focus:outline-2 focus:outline-violet-900" style={{ left: percent(scene.startSeconds) }} onKeyDown={(event) => {
+                            const step = event.shiftKey ? 10 : event.altKey ? 0.01 : 1;
+                            const value = event.key === 'Home' ? scene.minimumSeconds ?? 0 : event.key === 'End' ? scene.maximumSeconds ?? safeDuration : event.key === 'ArrowLeft' ? scene.startSeconds - step : event.key === 'ArrowRight' ? scene.startSeconds + step : null;
+                            if (value === null) return;
+                            event.preventDefault(); event.stopPropagation(); onSceneSelect?.(scene.id); onBeginEdit(); onSceneMove(scene.id, value); onEndEdit?.();
+                        }} />)}
+                    </div>}
                     {tracks.map((track) => <div key={track.id} className="relative h-24 overflow-hidden border-t bg-slate-100" style={{ backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 6px, #cbd5e1 6px, #cbd5e1 7px)' }} aria-label={`Stopa ${track.label}`}>
                         {(availableRanges[track.id] ?? []).map((range, index) => <div key={index} className="absolute inset-y-1 rounded bg-cyan-100" style={{ left: percent(range.startSeconds), width: percent(range.endSeconds - range.startSeconds) }} />)}
                         <div className="pointer-events-none absolute inset-0" aria-label={`Náhledy a vzorky zvuku: ${track.label}`}>

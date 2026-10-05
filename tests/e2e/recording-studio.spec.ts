@@ -112,7 +112,7 @@ async function openStudio(page: Page, baseURL: string | undefined, isBlocked = f
         Object.defineProperty(window, 'showSaveFilePicker', { value: undefined, configurable: true });
     });
     // An absolute address, because a page of a browser attached to from outside has no base address of its own.
-    await page.goto(new URL('/admin/recording-studio', baseURL).href);
+    await page.goto(new URL('/admin/studio/recording', baseURL).href);
     if (isBlocked) {
         await expect(page.getByRole('button', { name: 'Převzít studio v této kartě', exact: true })).toBeEnabled();
         await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
@@ -240,13 +240,28 @@ async function readMediaShape(bytes: Uint8Array) {
 }
 
 test('requires admin authentication for the recording studio', async ({ page }) => {
-    await page.goto('/admin/recording-studio');
-    await expect(page).toHaveURL(/\/admin\/login\?redirectPath=%2Fadmin%2Frecording-studio/);
+    await page.goto('/admin/studio/recording');
+    await expect(page).toHaveURL(/\/admin\/login\?redirectPath=%2Fadmin%2Fstudio%2Frecording/);
+});
+
+test('keeps the active Studio owner and capture across its recording and editor sections', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL); await addSource(page, 'camera'); await addSource(page, 'screen');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click(); await waitForRecordingSeconds(page, 2);
+    const streamsBefore = await page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams?.length);
+    await page.getByRole('link', { name: 'Střižna', exact: true }).click();
+    await expect(page).toHaveURL('/admin/studio/editor'); await expect(page.getByText(/Nahrávání dál běží/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nový projekt', exact: true })).toBeDisabled();
+    expect(await page.evaluate(async () => (await navigator.locks.query()).held?.filter(({ name }) => name === 'promptbook-recording-studio').length ?? 0)).toBe(1);
+    await page.getByRole('link', { name: 'Nahrávání', exact: true }).click(); await expect(page).toHaveURL('/admin/studio/recording');
+    await waitForRecordingSeconds(page, 3);
+    expect(await page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams?.length)).toBe(streamsBefore);
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Uložené záznamy' })).toBeVisible();
 });
 
 test('requires admin authentication for a stable recording workspace address', async ({ page }) => {
     await page.goto(EDITOR_FIXTURE_PATH);
-    await expect(page).toHaveURL(/\/admin\/login\?redirectPath=%2Fadmin%2Frecording-studio%2Fsynchronized-fixture/);
+    await expect(page).toHaveURL(/\/admin\/login\?redirectPath=%2Fadmin%2Fstudio%2Frecording%2Fsynchronized-fixture/);
 });
 
 test('requires admin authentication before accepting browser-local transcription audio', async ({ request }) => {
@@ -430,7 +445,7 @@ test('generates separate Czech subtitles and speech activity from chosen camera 
 test('keeps a caption returned by only one long-audio chunk at the overlap boundary', async ({ page, baseURL }) => {
     await openStudio(page, baseURL);
     const recordingId = 'long-audio-overlap-fixture';
-    await page.goto('/admin/recording-studio');
+    await page.goto('/admin/studio/recording');
     await page.evaluate(async (id) => {
         const SAMPLE_RATE = 16_000;
         const DURATION_SECONDS = 75;
@@ -473,7 +488,7 @@ test('keeps a caption returned by only one long-audio chunk at the overlap bound
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ cues: transcriptionRequests === 1
             ? [{ startSeconds: 69.7, endSeconds: 70.3, text: 'Hraniční věta' }] : [] }) });
     });
-    await page.goto(`/admin/recording-studio/${recordingId}`);
+    await page.goto(`/admin/studio/recording/${recordingId}`);
     await page.getByRole('button', { name: 'Generovat titulky · nová revize' }).click();
     const generated = page.getByRole('article', { name: 'Titulky Long microphone' });
     await expect(generated.locator('textarea')).toHaveValue('Hraniční věta');
@@ -684,8 +699,8 @@ test('synchronizes rendered timecodes, monitoring and prepared separate-source f
     await writeFile(testInfo.outputPath('measured-timecodes.json'), JSON.stringify(measured, null, 2));
     await page.reload();
     await expect(page.getByLabel('Začátek (sekundy)', { exact: true })).toHaveValue('1.25');
-    await page.getByRole('link', { name: 'Studio · nastavení a záznamy' }).click();
-    await expect(page).toHaveURL('/admin/recording-studio');
+    await page.getByRole('link', { name: 'Nahrávání' }).click();
+    await expect(page).toHaveURL('/admin/studio/recording');
     await page.goBack();
     await expect(page).toHaveURL(EDITOR_FIXTURE_PATH);
     await expect(page.getByLabel('Konec (sekundy)', { exact: true })).toHaveValue('6.25');
@@ -734,7 +749,7 @@ test('keeps late session gaps, local missing media, autosave failure and retry h
     });
     await page.getByLabel('Název záznamu', { exact: true }).fill('Recoverable editor draft');
     await expect(workspace.getByRole('alert')).toContainText('Fixture write failed');
-    await page.getByRole('link', { name: 'Studio · nastavení a záznamy' }).click();
+    await page.getByRole('link', { name: 'Nahrávání' }).click();
     await expect(page).toHaveURL(EDITOR_FIXTURE_PATH);
     await expect(page.getByLabel('Název záznamu', { exact: true })).toHaveValue('Recoverable editor draft');
     await page.evaluate(() => Object.assign(window, { studioEditorShouldFailSave: false }));
@@ -742,7 +757,7 @@ test('keeps late session gaps, local missing media, autosave failure and retry h
     await expect(workspace.getByRole('alert')).toHaveCount(0);
     await page.reload();
     await expect(page.getByLabel('Název záznamu', { exact: true })).toHaveValue('Recoverable editor draft');
-    await page.goto('/admin/recording-studio/absent-on-this-computer');
+    await page.goto('/admin/studio/recording/absent-on-this-computer');
     await expect(page.getByRole('heading', { name: 'Místní záznam není dostupný' })).toBeVisible();
     await expect(page.getByLabel('Název záznamu', { exact: true })).toHaveCount(0);
 });
@@ -895,7 +910,7 @@ test('records separate sources, restores them, trims every track and exports pla
     await diskReader.close();
     await page.evaluate(() => Object.defineProperty(window, 'showSaveFilePicker', { value: undefined, configurable: true }));
     await page.getByRole('link', { name: 'Náhled a ořez', exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/recording-studio\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/studio\/recording\/[^/]+$/);
     const workspaceUrl = page.url();
     const workspace = page.getByRole('region', { name: 'Pracovní prostor záznamu' });
     await page.getByLabel('Název záznamu', { exact: true }).fill('Synchronized editing take');
@@ -962,7 +977,7 @@ test('records separate sources, restores them, trims every track and exports pla
     await page.reload();
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Místní záznam není dostupný' })).toBeVisible();
-    await page.getByRole('link', { name: 'Studio · nastavení a záznamy' }).click();
+    await page.getByRole('link', { name: 'Nahrávání' }).click();
     await expect(page.getByRole('button', { name: 'Připojit', exact: true })).toHaveCount(5);
     expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
     await page.getByRole('button', { name: 'Nastavení', exact: true }).first().click();
@@ -1028,7 +1043,7 @@ test('keeps all three sources through monitor layouts, global pauses and an appe
     await expect(page.getByRole('button', { name: 'Připnutý zdroj', exact: true })).toHaveAttribute('aria-pressed', 'true');
 
     await page.getByRole('link', { name: 'Náhled a ořez', exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/recording-studio\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/studio\/recording\/[^/]+$/);
     const workspaceUrl = page.url();
     await page.getByLabel('Začátek (sekundy)', { exact: true }).fill('0.2');
     await page.getByLabel('Konec (sekundy)', { exact: true }).fill('1');
@@ -1518,11 +1533,11 @@ test('keeps a pending test alert through a change of studio view and fires it on
     await expect(page.getByRole('timer')).toBeVisible();
     // The editor of a take is another view of the same studio, so the countdown has to go on behind it.
     await page.getByRole('link', { name: 'Náhled a ořez', exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/recording-studio\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/studio\/recording\/[^/]+$/);
     await expect.poll(() => readStudioNotifications(page).then((notifications) => notifications.map(({ title }) => title))).toEqual([TEST_ALERT_TITLE]);
 
-    await page.getByRole('link', { name: 'Studio · nastavení a záznamy', exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/recording-studio$/);
+    await page.getByRole('link', { name: 'Nahrávání', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/studio\/recording$/);
     const alertRows = page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
     await expect(alertRows).toHaveCount(1);
     await expect(alertRows).toContainText(TEST_ALERT_TITLE);
@@ -1543,7 +1558,7 @@ test('cancels a pending test alert the moment the administrator signs out (API-p
     await expect(page.getByRole('group', { name: 'Zkouška výstrahy', exact: true })).toHaveCount(0);
 
     await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS + 1_500);
-    expect(new URL(page.url()).pathname).toBe('/admin/recording-studio');
+    expect(new URL(page.url()).pathname).toBe('/admin/studio/recording');
     expect(await readStudioNotifications(page)).toEqual([]);
     await expect(page.getByRole('log', { name: 'Historie výstrah', exact: true })).toHaveCount(0);
 });
@@ -1989,7 +2004,7 @@ test('stops the whole take once every source has disconnected and prevents a sec
     await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByLabel('Délka záznamu', { exact: true })).toHaveText('00:00:02');
     const secondPage = await page.context().newPage();
-    await secondPage.goto('/admin/recording-studio');
+    await secondPage.goto('/admin/studio/recording');
     await expect(secondPage.getByRole('alert').filter({ hasText: 'Studio už' })).toContainText('jiné kartě');
     await secondPage.close();
     await page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams
@@ -2018,10 +2033,10 @@ test('recovers persisted chunks after an interrupted page and waits for stop bef
     await waitForRecordingSeconds(page, 2);
     await waitForCommittedRecordingSources(page, 2);
     await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/recording-studio$/);
+    await expect(page).toHaveURL(/\/admin\/studio\/recording$/);
     await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
     await expect(page).toHaveURL(/\/admin$/);
-    await page.getByRole('link', { name: 'Nahrávací studio', exact: true }).click();
+    await page.getByRole('link', { name: 'Studio', exact: true }).click();
     await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
 });
@@ -2131,7 +2146,7 @@ test('records, pauses, reloads, previews and exports a multi-track take without 
 
     // All of that media is in the browser's own database, which has no place left for a folder.
     const stored = await readStoredStudioData(page);
-    expect(stored.storeNames).toEqual(['authority', 'chunks', 'recordings']);
+    expect(stored.storeNames).toEqual(['assetUploads', 'assets', 'authority', 'chunks', 'projects', 'recordings']);
     expect(stored.recordingIds).toEqual([manifest.id]);
     expect(stored.chunkCount).toBeGreaterThanOrEqual(6);
     expect(directoryPickerCallCount).toBe(0);
@@ -2183,7 +2198,7 @@ test('starts without a take once recorded into a folder, asks for no folder and 
     await expect(page.getByText('Retired folder take')).toHaveCount(0);
     await expect(page.getByText('Přerušený záznam', { exact: true })).toHaveCount(0);
     await expect(page.getByText(/složk/i)).toHaveCount(0);
-    expect(await readStoredStudioData(page)).toEqual({ storeNames: ['authority', 'chunks', 'recordings'], recordingIds: [EDITOR_FIXTURE_ID], chunkCount: 3 });
+    expect(await readStoredStudioData(page)).toEqual({ storeNames: ['assetUploads', 'assets', 'authority', 'chunks', 'projects', 'recordings'], recordingIds: [EDITOR_FIXTURE_ID], chunkCount: 3 });
     // Only what the browser remembered about that take is gone. Its folder and its files are nobody's to remove.
     expect(await page.evaluate(async (filenames) => {
         const folder = await (await navigator.storage.getDirectory()).getDirectoryHandle('retired-recording-folder');
@@ -2337,7 +2352,7 @@ for (const ownerPhase of ['idle', 'recording', 'paused'] as const) {
             expect(recording.status).toBe('interrupted');
             expect(recording.errorMessage).toContain('převzetí');
             expect(recording.tracks.every((track) => track.byteLength > 0)).toBe(true);
-            await expect(otherPage).toHaveURL(new RegExp(`/admin/recording-studio/${recording.id}$`));
+            await expect(otherPage).toHaveURL(new RegExp(`/admin/studio/recording/${recording.id}$`));
             await expect(otherPage.getByLabel('Název záznamu', { exact: true })).toHaveValue(recording.title);
         } else {
             await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();

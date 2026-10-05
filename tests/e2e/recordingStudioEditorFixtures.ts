@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import type { RecordingTrack, StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 
 export const EDITOR_FIXTURE_ID = 'synchronized-fixture';
-export const EDITOR_FIXTURE_PATH = `/admin/recording-studio/${EDITOR_FIXTURE_ID}`;
+export const EDITOR_FIXTURE_PATH = `/admin/studio/recording/${EDITOR_FIXTURE_ID}`;
 const FIXTURE_SOURCES = [
     { name: 'screen', kind: 'screen', offset: 0, frameRate: 25, isAudioIncluded: false },
     { name: 'camera', kind: 'camera', offset: 0.37, frameRate: 30, isAudioIncluded: true },
@@ -74,7 +74,7 @@ export async function storeRecordingEditorFixture(page: Page, { isLongSession = 
                 const track = recording.tracks[index];
                 const storageIds = track.parts?.map((part) => part.id) ?? [track.id];
                 storageIds.forEach((trackId) => transaction.objectStore('chunks').put({
-                    recordingId: recording.id, trackId, sequence: 0,
+                    recordingId: recording.id, trackId, sequence: 0, byteStart: 0,
                     data: new Blob([Uint8Array.from(atob(data), (character) => character.charCodeAt(0))], { type: track.mimeType }),
                 }));
             });

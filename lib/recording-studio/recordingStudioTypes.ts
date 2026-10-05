@@ -1,4 +1,6 @@
-export const RECORDING_STUDIO_PATH = '/admin/recording-studio';
+import { STUDIO_RECORDING_PATH } from './studioProjectTypes';
+export const RECORDING_STUDIO_PATH = STUDIO_RECORDING_PATH;
+export const LEGACY_RECORDING_STUDIO_PATH = '/admin/recording-studio';
 export const RECORDING_CHUNK_MILLISECONDS = 1_000;
 export const RECORDING_VIDEO_BITS_PER_SECOND = 8_000_000;
 export const RECORDING_AUDIO_BITS_PER_SECOND = 192_000;

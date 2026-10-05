@@ -116,5 +116,8 @@ export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/recording-studio/vad/ort-wasm-simd-threaded.wasm',
     '/recording-studio/vad/silero_vad_legacy.onnx',
     '/sponsors/CI-Technology-Incubation.png',
+    '/studio-media-worker.js',
+    '/studio-range-reader.d.mts',
+    '/studio-range-reader.mjs',
     '/workshop-participant-service-worker.js',
 ];

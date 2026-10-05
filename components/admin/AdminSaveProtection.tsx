@@ -2,8 +2,9 @@
 
 import {
     flushAdminSaves, getAdminSaveRevision, getAdminServerSaveRevision, getPendingAdminDrafts, getPendingAdminSaves, hasPendingAdminWork,
-    runAfterAdminSaves, subscribeToAdminSaves,
+    runAfterAdminSaves, subscribeToAdminSaves, flushAdminEditorSaves, confirmDiscardPendingAdminDrafts,
 } from '@/lib/admin/adminPendingSaves';
+import { STUDIO_PATH } from '@/lib/recording-studio/studioProjectTypes';
 import { useRouter } from 'next/navigation';
 import { useEffect, useSyncExternalStore } from 'react';
 
@@ -26,6 +27,16 @@ export function AdminSaveProtection() {
             if (destination.pathname === window.location.pathname && destination.search === window.location.search && destination.hash) return;
             event.preventDefault();
             event.stopPropagation();
+            const isStudioSectionChange = link.hasAttribute('data-admin-navigation-preserves-studio') && destination.origin === window.location.origin &&
+                window.location.pathname.startsWith(`${STUDIO_PATH}/`) && destination.pathname.startsWith(`${STUDIO_PATH}/`);
+            if (isStudioSectionChange) {
+                // Capture's explicit operation lasts until Stop. Both sections retain that same mounted owner.
+                // Only editor drafts must settle here; waiting for the capture itself would deadlock navigation.
+                void flushAdminEditorSaves().then((isSaved) => {
+                    if (isSaved && confirmDiscardPendingAdminDrafts()) router.push(`${destination.pathname}${destination.search}${destination.hash}`);
+                });
+                return;
+            }
             void runAfterAdminSaves(() => {
                 if (destination.origin === window.location.origin) router.push(`${destination.pathname}${destination.search}${destination.hash}`);
                 else window.location.assign(destination.href);

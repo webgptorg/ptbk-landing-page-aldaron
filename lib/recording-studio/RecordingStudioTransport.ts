@@ -59,6 +59,13 @@ export class RecordingStudioTransport {
         this.setSourceState(id, 'error', message);
         if (!this.operation) void this.synchronize();
     }
+    /** A source change joins the same decoder barrier; its previous frame may never remain visible. */
+    public beginSourceLoading(id: string) {
+        this.sources.get(id)?.dispose();
+        this.sources.delete(id);
+        this.setSourceState(id, 'loading');
+        void this.synchronize();
+    }
     public markGap(id: string) {
         this.sources.get(id)?.dispose();
         this.sources.delete(id);

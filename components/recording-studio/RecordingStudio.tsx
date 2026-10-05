@@ -10,20 +10,37 @@ import { DEFAULT_MONITOR_PREFERENCES, loadRecordingMonitorPreferences, saveRecor
 import type { StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 import { Circle, Pause, Play, Plus, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RecordingAlertPanel } from './RecordingAlertPanel';
-import { RecordingEditor } from './RecordingEditor';
 import { RecordingLibrary } from './RecordingLibrary';
 import { RecordingSourcePicker } from './RecordingSourcePicker';
 import { RecordingSourcePreview } from './RecordingSourcePreview';
 import { RecordingStoragePanel } from './RecordingStoragePanel';
 import { useRecordingStudio } from './useRecordingStudio';
 import { RecordingStudioOwnershipPanel } from './RecordingStudioOwnershipPanel';
+import { STUDIO_RECORDING_PATH, STUDIO_EDITOR_PATH, getStudioProjectPath } from '@/lib/recording-studio/studioProjectTypes';
+import { openStudioRecordingProject } from '@/lib/recording-studio/studioProjectStorage';
+import { runRecordingStudioWork } from '@/lib/recording-studio/recordingStudioWork';
+import { flushAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
+
+// Both editors read browser-local sources. Load their media/analysis dependencies only when their view is opened;
+// the shared owner stays mounted, while these dependencies do not also enter the server rendering module graph.
+const RecordingEditor = dynamic(() => import('./RecordingEditor').then((module) => module.RecordingEditor), {
+    ssr: false,
+    loading: () => <p role="status">Načítám střih a export záznamu…</p>,
+});
+const StudioEditingSection = dynamic(() => import('./StudioEditingSection').then((module) => module.StudioEditingSection), {
+    ssr: false,
+    loading: () => <p role="status">Načítám Střižnu…</p>,
+});
 
 export function RecordingStudio() {
     const studio = useRecordingStudio();
-    const { recordingId } = useParams<{ recordingId?: string }>();
+    const { recordingId, projectId } = useParams<{ recordingId?: string; projectId?: string }>();
+    const isEditingSection = usePathname().startsWith(STUDIO_EDITOR_PATH);
+    const router = useRouter();
     const selectedRecording = studio.recordings.find((recording) => recording.id === recordingId);
     const [isLibraryBusy, setIsLibraryBusy] = useState(false);
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -121,14 +138,30 @@ export function RecordingStudio() {
         }
         finishSourceConfigurationRestore({ recording, restore, isAppend, ...(reportSuccess ? { reportSuccess } : {}) });
     };
+    const openEditor = (recording: StudioRecording) => {
+        if (!isReady || isLibraryBusy) return;
+        setIsLibraryBusy(true);
+        void runRecordingStudioWork(async () => {
+            if (!(await flushAdminEditorSaves())) return;
+            const project = await openStudioRecordingProject(recording);
+            router.push(getStudioProjectPath(project.id));
+        }).catch((error: unknown) => setConfigurationRestoreMessage(error instanceof Error ? error.message : 'Projekt Střižny nelze otevřít.'))
+            .finally(() => setIsLibraryBusy(false));
+    };
     return (
         <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6">
             <div className="mx-auto max-w-7xl space-y-9">
                 <nav className="flex flex-wrap items-center gap-4 text-sm" aria-label="Režim studia">
-                    <Link href="/admin/recording-studio" className="font-semibold text-cyan-800 underline">Studio · nastavení a záznamy</Link>
+                    <span className="text-lg font-bold">Studio</span>
+                    <Link href={STUDIO_RECORDING_PATH} data-admin-navigation-preserves-studio aria-current={!isEditingSection ? 'page' : undefined} className="font-semibold text-cyan-800 underline">Nahrávání</Link>
+                    <Link href={STUDIO_EDITOR_PATH} data-admin-navigation-preserves-studio aria-current={isEditingSection ? 'page' : undefined} className="font-semibold text-cyan-800 underline">Střižna</Link>
                     {recordingId && <span>{isAppendWorkspace ? 'Donahrávání do projektu' : 'Střih a export projektu'}</span>}
                 </nav>
                 <RecordingStudioOwnershipPanel studio={studio} />
+                {isEditingSection && <>
+                    {isSessionBusy && <p role="status" className="rounded border border-amber-300 bg-amber-50 p-4 text-sm">Nahrávání dál běží na společném čase. Před úpravami nebo uploadem ho dokončete v sekci Nahrávání.</p>}
+                    <StudioEditingSection projectId={projectId} recordings={studio.recordings} isReady={studio.isActive && studio.phase !== 'loading' && studio.phase !== 'unavailable'} isDisabled={!isReady || isLibraryBusy} />
+                </>}
                 {recordingId && <section className="space-y-5" aria-label="Pracovní prostor záznamu">
                     <h2 className="text-2xl font-bold">{isAppendWorkspace ? 'Donahrávání do projektu' : 'Pracovní prostor záznamu'}</h2>
                     <p className="break-all text-xs text-slate-500">ID: {recordingId} · Média jsou místní pro tento prohlížeč a profil. Adresa je nepřenáší na jiný počítač.</p>
@@ -137,14 +170,14 @@ export function RecordingStudio() {
                         {!isSessionBusy && <Button type="button" variant="outline" onClick={() => { setAppendRecordingId(null); setIsSourceSetChangeAllowed(false); }}>Zrušit donahrání a vrátit se ke střihu</Button>}</div>}
                     {studio.phase === 'loading' ? <p role="status">Načítám místní záznam…</p> : studio.phase === 'unavailable' ? <p>Záznam je přístupný pouze v aktivní instanci studia. Převzetí a případnou chybu vyřešte výše.</p> : !selectedRecording ? <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-5">
                         <h3 className="font-semibold">Místní záznam není dostupný</h3><p>Na této adrese nejsou v tomto profilu uložená média. Otevřete ji v prohlížeči a profilu, ve kterém záznam vznikl. Nový prázdný záznam se nevytváří.</p>
-                        <Link href="/admin/recording-studio" className="underline">Otevřít studio a uložené záznamy</Link>
+                        <Link href={STUDIO_RECORDING_PATH} className="underline">Otevřít studio a uložené záznamy</Link>
                     </div> : studio.phase === 'idle' && !isAppendWorkspace && <>
                         <RecordingEditor key={selectedRecording.id} recording={selectedRecording} isDisabled={isLibraryBusy || !studio.isActive} onChange={studio.updateRecording} onUseSourceConfiguration={(reportSuccess) => requestSourceConfigurationRestore(selectedRecording, reportSuccess)} onAppend={() => requestSourceConfigurationRestore(selectedRecording, undefined, true)} />
-                        <RecordingLibrary recordings={[selectedRecording]} isWorkspace isDisabled={!isReady} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
+                        <RecordingLibrary recordings={[selectedRecording]} isWorkspace isDisabled={!isReady} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} onOpenEditor={openEditor} />
                     </>}
                 </section>}
-                <div className={recordingId && !isAppendWorkspace ? 'hidden' : 'contents'}>
-                <div className="max-w-3xl space-y-2"><h2 className="text-2xl font-bold">{isAppendWorkspace ? 'Příprava a živý monitor projektu' : 'Nahrávací studio'}</h2><p className="text-sm leading-6 text-slate-600">Kamera může nahrávat vybraný mikrofon do svého video souboru. Rozložení, poslech a zrcadlení živého náhledu jsou pouze volby monitoru; nemění surové soubory. Zastavení ponechá náhledy aktivní, dokud zařízení neuvolníte.</p></div>
+                <div className={isEditingSection || (recordingId && !isAppendWorkspace) ? 'hidden' : 'contents'}>
+                <div className="max-w-3xl space-y-2"><h2 className="text-2xl font-bold">{isAppendWorkspace ? 'Příprava a živý monitor projektu' : 'Nahrávání'}</h2><p className="text-sm leading-6 text-slate-600">Kamera může nahrávat vybraný mikrofon do svého video souboru. Rozložení, poslech a zrcadlení živého náhledu jsou pouze volby monitoru; nemění surové soubory. Zastavení ponechá náhledy aktivní, dokud zařízení neuvolníte.</p></div>
                 {studio.errorMessage && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">{studio.errorMessage}</p>}
                 {configurationRestoreMessage && <p role="status" className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950">{configurationRestoreMessage}</p>}
                 {studio.phase === 'loading' && <p role="status" className="text-sm text-slate-500">Načítám místní záznamy…</p>}
@@ -230,7 +263,7 @@ export function RecordingStudio() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                {!recordingId && <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />}
+                {!recordingId && <RecordingLibrary recordings={studio.recordings} isDisabled={!isReady} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} onOpenEditor={openEditor} />}
                 </div>
             </div>
         </main>
