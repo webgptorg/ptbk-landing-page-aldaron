@@ -9,8 +9,13 @@ import { readBrowserLocalStorageItem, writeBrowserLocalStorageItem } from '@/lib
  */
 export type RecordingAlertImpact = 'test' | 'recording-continues' | 'recording-kept' | 'recording-stopped' | 'no-recording';
 
-/** How urgent the announcement of one failure is. It is derived from the impact, never written by hand. */
-export type RecordingAlertSeverity = 'critical' | 'warning';
+/**
+ * How one alert is painted, sounded and worded. It is derived from the impact, never written by hand.
+ *
+ * Note: `test` is a level of its own rather than a quiet `critical`, so that a rehearsal heard from the next room or
+ *       read in a notification can never be mistaken for a lost source or a failed disk.
+ */
+export type RecordingAlertSeverity = 'critical' | 'warning' | 'test';
 
 /** One failure of the recording studio, as every channel which announces it receives it. */
 export type RecordingFailure = {
@@ -30,13 +35,43 @@ export type RecordingAlert = {
     readonly sourceId: string | null;
     readonly sourceLabel: string | null;
     readonly occurredAt: number;
+    /** Whether its notification waits on the screen until it is dismissed. See `isRecordingAlertKeptOnScreen`. */
+    readonly isKeptOnScreen: boolean;
 };
 
 /** Older failures stay readable after the fact without letting a flapping device grow without a bound. */
 export const RECORDING_ALERT_HISTORY_LIMIT = 20;
 
+/** A rehearsal which arrived this much later than planned says so, because that is what a throttled tab does to it. */
+const RECORDING_ALERT_TEST_NOTICEABLE_DELAY_MILLISECONDS = 2_000;
+
 export function getRecordingAlertSeverity(impact: RecordingAlertImpact): RecordingAlertSeverity {
-    return impact === 'recording-continues' || impact === 'recording-kept' || impact === 'no-recording' ? 'warning' : 'critical';
+    if (impact === 'test') {
+        return 'test';
+    }
+
+    return impact === 'recording-stopped' ? 'critical' : 'warning';
+}
+
+/**
+ * Whether the notification of one alert stays on the screen until the administrator dismisses it
+ *
+ * Note: A stopped recording waits for the administrator, while a take which is still running must not have the very
+ *       screen it is recording buried under a notification. A test obeys the same rule from what the studio is doing
+ *       when it fires, and that is not a detail: a browser hands the two forms to the system separately — Chrome on
+ *       macOS posts the waiting one as `Google Chrome Helper (Alerts)` and the passing one as `Google Chrome`, each
+ *       with its own switch in the system settings — so a test before a recording rehearses the form a stopped
+ *       recording arrives in, and a test during one rehearses the form a lost source arrives in.
+ *
+ * @param impact what the alert is about
+ * @param isTakeRunning whether the studio is recording at the moment the alert is raised
+ */
+export function isRecordingAlertKeptOnScreen(impact: RecordingAlertImpact, isTakeRunning: boolean): boolean {
+    if (impact === 'test') {
+        return !isTakeRunning;
+    }
+
+    return impact === 'recording-stopped';
 }
 
 /**
@@ -47,7 +82,8 @@ export function getRecordingAlertSeverity(impact: RecordingAlertImpact): Recordi
  */
 export function describeRecordingAlertTitle(failure: RecordingFailure): string {
     if (failure.impact === 'test') {
-        return 'Zkušební výstraha nahrávacího studia';
+        // A notification is often read by its first words alone, so those words are the ones which say it is a test.
+        return 'Zkouška výstrahy studia · nic se nepokazilo';
     }
 
     const sourceName = failure.sourceLabel ? `Zdroj „${failure.sourceLabel}“` : 'Nahrávací studio';
@@ -67,7 +103,7 @@ export function describeRecordingAlertTitle(failure: RecordingFailure): string {
     return failure.sourceLabel ? `${sourceName} selhal` : 'Chyba nahrávacího studia';
 }
 
-export function createRecordingAlert(failure: RecordingFailure, occurredAt = Date.now()): RecordingAlert {
+export function createRecordingAlert(failure: RecordingFailure, occurredAt = Date.now(), isTakeRunning = false): RecordingAlert {
     return {
         id: crypto.randomUUID(),
         impact: failure.impact,
@@ -77,18 +113,31 @@ export function createRecordingAlert(failure: RecordingFailure, occurredAt = Dat
         sourceId: failure.sourceId ?? null,
         sourceLabel: failure.sourceLabel ?? null,
         occurredAt,
+        isKeptOnScreen: isRecordingAlertKeptOnScreen(failure.impact, isTakeRunning),
     };
 }
 
-/** The test alert takes the very path a real failure takes, so a silent channel is found before it is needed. */
-export function createRecordingTestFailure(): RecordingFailure {
+/**
+ * The test alert takes the very path a real failure takes, so a silent channel is found before it is needed
+ *
+ * Note: It promises nothing about what the administrator saw or heard. Whether a notification appears is decided by
+ *       the browser and then by the system, and neither tells the page; the panel says so beside the alert.
+ *
+ * @param delayMilliseconds how much later than planned the countdown ran out
+ */
+export function createRecordingTestFailure(delayMilliseconds = 0): RecordingFailure {
+    const delayNote = delayMilliseconds >= RECORDING_ALERT_TEST_NOTICEABLE_DELAY_MILLISECONDS
+        ? ` Odpočet doběhl o ${Math.round(delayMilliseconds / 1000)} s později, než měl: prohlížeč nebo systém tuto kartu na pozadí zpomalil.`
+        : '';
+
     return {
         impact: 'test',
-        message: 'Takto vypadá výstraha studia. Nic se nepokazilo a žádný záznam se nezastavil. Pokud jste ji neslyšeli ani neviděli mimo tuto kartu, povolte zvuk a upozornění prohlížeče.',
+        message: `Toto je jen zkouška: nic se nepokazilo, žádný záznam se nezastavil a žádný zdroj se neodpojil. Skutečná výstraha přijde stejnou cestou.${delayNote}`,
     };
 }
 
-export function appendRecordingAlert(alerts: readonly RecordingAlert[], alert: RecordingAlert): readonly RecordingAlert[] {
+/** Keeps the newest entries of any alert history, whatever each of them carries beside its alert. */
+export function appendRecordingAlert<AlertEntry>(alerts: readonly AlertEntry[], alert: AlertEntry): readonly AlertEntry[] {
     return [alert, ...alerts].slice(0, RECORDING_ALERT_HISTORY_LIMIT);
 }
 

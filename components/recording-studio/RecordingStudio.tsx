@@ -149,7 +149,7 @@ export function RecordingStudio() {
                 <div>
                     <div className="rounded-xl border border-slate-200 bg-white p-5"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">Společný čas záznamu · {sessionStatus}</p><p className="mt-2 text-3xl font-semibold tabular-nums" aria-label="Délka záznamu">{formatRecordingDuration(studio.elapsedSeconds)}</p><p className="mt-2 text-xs text-slate-500">{studio.activeRecording ? `${formatRecordingBytes(getRecordingByteLength(studio.activeRecording))} uloženo` : 'Všechny stopy mají společný čas.'}</p></div>
                 </div>
-                <RecordingAlertPanel studio={studio} />
+                <RecordingAlertPanel studio={studio} isTakeRunning={isSessionBusy} />
                 <RecordingStoragePanel studio={studio} isDisabled={!isReady || isLibraryBusy} />
                 <section className="space-y-5" aria-labelledby="recording-sources-title">
                     <div className="flex flex-wrap items-center justify-between gap-4"><h2 id="recording-sources-title" className="text-xl font-bold">Zdroje <span className="ml-1 text-slate-400">{studio.sourceConfigurations.length}</span></h2>

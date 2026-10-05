@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on Claude Code `opus` thinking `max` - Implementation $27.66 5 hours; Checking 21 minutes
 
 [✨⏲️] Test recording failure alerts after a five-second countdown and verify real system notifications
 
@@ -25,3 +25,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

@@ -243,8 +243,20 @@ use cases, and audiences. Keep these rules current when behavior changes.
   reselect the source to reconnect. Every failure passes through one channel in `recordingStudioAlerts.ts`, which
   shows it on the source card and the page, plays a synthesized sound and posts a browser notification, because the
   administrator is normally working in the application being recorded rather than watching the studio tab. Both
-  channels are on by default, are turned off separately in browser-local settings, and an explicit test button raises
-  a real alert through the real channels. A refused or missing channel leaves the others announcing.
+  channels are on by default and are turned off separately in browser-local settings; a refused, missing or failing
+  channel leaves the other announcing. An explicit test button raises one clearly labelled test alert through the
+  real channels after a five-second countdown, kept in `recordingStudioAlertTest.ts` as a deadline rather than a
+  count of ticks. It shows the remaining time and `Zrušit test`, ignores repeated clicks, and has the click itself
+  open the sound output and ask for a missing notification permission, the countdown starting after the answer.
+  Leaving the tab neither cancels nor pauses it; unmounting the studio, signing out, leaving its page or the studio
+  becoming unavailable cancels it, and it survives a change of studio view. A test has a severity of its own, never
+  touches a take, a source or saved media, and never delays a real failure. Beside each alert the studio records how
+  far each channel is known to have got — permission, dispatch accepted, reported by the browser, clicked — and calls
+  only a clicked notification delivered, because the system's notification settings, a Focus mode or a shared display
+  decide what is shown and tell the page nothing. The permission is read again on returning to the tab. The notification of
+  a stopped recording waits on the screen while one for a running take passes, which a browser may hand to the system
+  as two separately configured applications; a test follows the same rule from what the studio is doing. No service
+  worker or push is used. The checks behind this and the manual protocol are in `docs/recording-studio-alerts.md`.
   The display-source picker belongs to the browser/OS: `displaySurface` is a type
   preference, the app does not enumerate system windows, and saved names cannot force a window or restore its stream.
   The macOS Spaces help is shown for manually selected, restored, and reused display configurations. It scopes the

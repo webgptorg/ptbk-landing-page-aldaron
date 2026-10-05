@@ -1,7 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type BrowserContext, type ConnectOverCDPOptions, type Page, type PlaywrightWorkerArgs } from '@playwright/test';
 import { ZipReader, Uint8ArrayReader, Uint8ArrayWriter } from '@zip.js/zip.js';
 import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { createServer, type AddressInfo } from 'node:net';
 import { tmpdir, platform, release } from 'node:os';
 import { resolve, sep, join } from 'node:path';
 import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
@@ -107,7 +108,8 @@ async function openStudio(page: Page, baseURL: string | undefined) {
         });
         Object.defineProperty(window, 'showSaveFilePicker', { value: undefined, configurable: true });
     });
-    await page.goto('/admin/recording-studio');
+    // An absolute address, because a page of a browser attached to from outside has no base address of its own.
+    await page.goto(new URL('/admin/recording-studio', baseURL).href);
     await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
     expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
     // Complete the unrelated cookie choice so a moving bottom panel cannot intercept studio controls.
@@ -148,6 +150,25 @@ async function waitForCommittedRecordingSources(page: Page, sourceCount: number)
             database.close();
         }
     })).toBe(sourceCount);
+}
+
+/** The newest take as the browser stored it, which is what a failure must leave readable. */
+async function readLatestStoredRecording(page: Page) {
+    return page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open('promptbook-recording-studio');
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+        try {
+            const recordings = await new Promise<StudioRecording[]>((resolve, reject) => {
+                const request = database.transaction('recordings').objectStore('recordings').getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            return recordings[recordings.length - 1];
+        } finally { database.close(); }
+    });
 }
 
 async function addSource(page: Page, kind: 'camera' | 'screen' | 'microphone', isAudioEnabled = true) {
@@ -1157,47 +1178,478 @@ test('keeps a multi-source setup through stops, release, and reload without rest
     await expect(page.getByRole('button', { name: 'Odebrat zdroj', exact: true })).toHaveCount(0);
 });
 
-type StudioTestNotification = { readonly title: string; readonly body: string | undefined };
+/** One notification the studio asked the browser for, as the page itself saw the request and its answers. */
+type StudioTestNotification = {
+    readonly title: string;
+    readonly body: string | undefined;
+    readonly isKeptOnScreen: boolean;
+    readonly requestedAt: number;
+    /** What the studio page was to the browser at the moment it asked. */
+    readonly visibilityState: DocumentVisibilityState;
+    readonly isFocused: boolean;
+    /** Everything the browser answered afterwards, in order. */
+    readonly events: string[];
+};
 
-/** Records what the browser was asked to announce, without a real desktop notification in the test run. */
-async function recordStudioNotifications(page: Page) {
-    await page.addInitScript(() => {
-        const postedNotifications: StudioTestNotification[] = [];
+type StudioTestNotificationSettings = {
+    permission: NotificationPermission;
+    /** The constructor is refused outright, which is what a mobile browser does. */
+    isDispatchRefused: boolean;
+    /** The request is accepted and then reported as impossible to show. */
+    isDisplayFailing: boolean;
+};
+
+type StudioTestNotificationWindow = {
+    readonly studioTestNotifications: StudioTestNotification[];
+    readonly studioTestNotificationSettings: StudioTestNotificationSettings;
+    readonly studioTestNotificationInstances: { onclick: (() => void) | null }[];
+    readonly studioTestPermissionAnswers: ((permission: NotificationPermission) => void)[];
+};
+
+const TEST_ALERT_TITLE = 'Zkouška výstrahy studia · nic se nepokazilo';
+const TEST_ALERT_COUNTDOWN_MILLISECONDS = 5_000;
+
+/**
+ * Replaces the Notifications API of the page with a stand-in which records what the studio asks of it
+ *
+ * Note: The headless browser this suite runs in refuses every notification, so the path through the API can only be
+ *       followed against a stand-in there. Whatever it records is an API-path check: it shows which requests the
+ *       studio makes and how it reads the answers, and it is no evidence of a banner reaching any screen.
+ */
+async function replaceStudioNotifications(page: Page, permission: NotificationPermission = 'granted') {
+    await page.addInitScript((initialPermission) => {
+        const notifications: StudioTestNotification[] = [];
+        const instances: { onclick: (() => void) | null }[] = [];
+        const permissionAnswers: ((permission: NotificationPermission) => void)[] = [];
+        const settings: StudioTestNotificationSettings = { permission: initialPermission, isDispatchRefused: false, isDisplayFailing: false };
         class TestNotification {
-            public static readonly permission = 'granted';
-            public static requestPermission = () => Promise.resolve('granted' as NotificationPermission);
+            public static get permission() { return settings.permission; }
+            // A question stays open until the test answers it, the way it does while an administrator reads it.
+            public static requestPermission = () => new Promise<NotificationPermission>((resolve) => {
+                permissionAnswers.push((answer) => { settings.permission = answer; resolve(answer); });
+            });
+            public onshow: (() => void) | null = null;
+            public onerror: (() => void) | null = null;
             public onclick: (() => void) | null = null;
             public constructor(title: string, options?: NotificationOptions) {
-                postedNotifications.push({ title, body: options?.body });
+                if (settings.isDispatchRefused) throw new TypeError('Illegal constructor. Use ServiceWorkerRegistration.showNotification() instead.');
+                const notification: StudioTestNotification = {
+                    title, body: options?.body, isKeptOnScreen: options?.requireInteraction === true, requestedAt: Date.now(),
+                    visibilityState: document.visibilityState, isFocused: document.hasFocus(), events: [],
+                };
+                notifications.push(notification);
+                instances.push(this);
+                // A browser answers after the constructor has returned, never inside it.
+                setTimeout(() => {
+                    const answer = settings.isDisplayFailing ? 'error' : 'show';
+                    notification.events.push(answer);
+                    (answer === 'show' ? this.onshow : this.onerror)?.();
+                }, 0);
             }
             public close() { /* Nothing is shown in the test run, so nothing has to be taken back either. */ }
         }
         Object.defineProperty(window, 'Notification', { value: TestNotification, configurable: true, writable: true });
-        Object.assign(window, { studioTestNotifications: postedNotifications });
+        Object.assign(window, {
+            studioTestNotifications: notifications, studioTestNotificationSettings: settings,
+            studioTestNotificationInstances: instances, studioTestPermissionAnswers: permissionAnswers,
+        });
+    }, permission);
+}
+
+/**
+ * Watches the real Notifications API of the page without standing in for any of it
+ *
+ * Note: Every request reaches the browser and every recorded answer is the browser's own. That makes it a check of
+ *       the production path against a real engine, and still not proof of delivery: a browser reports `show` the
+ *       moment it has accepted a notification, whatever a system does with it afterwards, and a headless one has no
+ *       screen to show it on at all.
+ */
+async function observeStudioNotifications(page: Page) {
+    await page.addInitScript(() => {
+        const notifications: StudioTestNotification[] = [];
+        class ObservedNotification extends Notification {
+            public constructor(title: string, options?: NotificationOptions) {
+                super(title, options);
+                const notification: StudioTestNotification = {
+                    title, body: options?.body, isKeptOnScreen: options?.requireInteraction === true, requestedAt: Date.now(),
+                    visibilityState: document.visibilityState, isFocused: document.hasFocus(), events: [],
+                };
+                notifications.push(notification);
+                for (const type of ['show', 'error', 'click']) this.addEventListener(type, () => notification.events.push(type));
+            }
+        }
+        Object.defineProperty(window, 'Notification', { value: ObservedNotification, configurable: true, writable: true });
+        Object.assign(window, { studioTestNotifications: notifications });
     });
 }
 
 function readStudioNotifications(page: Page) {
-    return page.evaluate(() => (window as unknown as { studioTestNotifications: StudioTestNotification[] }).studioTestNotifications);
+    return page.evaluate(() => (window as unknown as StudioTestNotificationWindow).studioTestNotifications);
 }
 
-test('announces a studio failure through sound and a browser notification before one is needed', async ({ page, baseURL }) => {
-    await recordStudioNotifications(page);
-    await openStudio(page, baseURL);
+function changeStudioNotificationSettings(page: Page, change: Partial<StudioTestNotificationSettings>) {
+    return page.evaluate((settingsChange) => {
+        Object.assign((window as unknown as StudioTestNotificationWindow).studioTestNotificationSettings, settingsChange);
+    }, change);
+}
 
-    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+/** The switches with which Playwright keeps a background tab as fast as a visible one. */
+const BACKGROUND_THROTTLING_SWITCHES = ['--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding'];
+
+async function findFreePort(): Promise<number> {
+    return new Promise((resolvePort, reject) => {
+        const probe = createServer();
+        probe.once('error', reject);
+        probe.listen(0, '127.0.0.1', () => {
+            const { port } = probe.address() as AddressInfo;
+            probe.close(() => resolvePort(port));
+        });
+    });
+}
+
+/**
+ * Opens a browser in which a tab in the background really is in the background
+ *
+ * Note: Playwright presents every page of an ordinary test as focused and visible, and switches the throttling of
+ *       background timers off, so that tests can run side by side. Both are exactly what the studio does not get in
+ *       use: it is left for another tab, where the browser hides it and slows its timers to about one a second. A
+ *       browser of its own keeps that throttling, and its default context is attached to without Playwright's page
+ *       overrides. It is the full browser rather than the headless shell, which has no tabs to put behind each other
+ *       and refuses every notification.
+ *
+ * Note: `noDefaults` is not one of Playwright's documented options. Should a later Playwright stop honouring it, the
+ *       studio page is reported visible again and every test built on this fails on that very check, rather than
+ *       passing for the wrong reason.
+ */
+async function launchBackgroundableBrowser(playwright: PlaywrightWorkerArgs['playwright'], isHeadless: boolean): Promise<{ readonly context: BrowserContext; readonly close: () => Promise<void> }> {
+    const debuggingPort = await findFreePort();
+    const launchedBrowser = await playwright.chromium.launch({
+        channel: process.env.E2E_BROWSER_CHANNEL || 'chromium', headless: isHeadless,
+        args: [`--remote-debugging-port=${debuggingPort}`], ignoreDefaultArgs: BACKGROUND_THROTTLING_SWITCHES,
+    });
+    try {
+        const connectionOptions = { noDefaults: true } as unknown as ConnectOverCDPOptions;
+        const browser = await playwright.chromium.connectOverCDP(`http://127.0.0.1:${debuggingPort}`, connectionOptions);
+        return {
+            context: browser.contexts()[0],
+            close: async () => { await browser.close().catch(() => undefined); await launchedBrowser.close(); },
+        };
+    } catch (error) {
+        await launchedBrowser.close();
+        throw error;
+    }
+}
+
+function readStudioPageVisibility(page: Page) {
+    return page.evaluate(() => ({ visibilityState: document.visibilityState, isFocused: document.hasFocus() }));
+}
+
+test('counts a test alert down for five seconds and then announces it exactly once (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    const testButton = page.getByRole('button', { name: 'Otestovat výstrahu', exact: true });
+    const testNotice = page.getByRole('group', { name: 'Zkouška výstrahy', exact: true });
     const alertHistory = page.getByRole('log', { name: 'Historie výstrah', exact: true });
-    await expect(alertHistory).toContainText('Zkušební výstraha nahrávacího studia');
-    await expect.poll(() => readStudioNotifications(page)).toEqual([expect.objectContaining({
-        title: 'Zkušební výstraha nahrávacího studia', body: expect.stringContaining('Nic se nepokazilo') as unknown as string,
-    })]);
+
+    const clickedAt = Date.now();
+    await testButton.click();
+    await expect(testNotice.getByRole('status')).toContainText('Přepněte teď na jinou kartu, do jiné aplikace nebo na jinou plochu');
+    await expect(testNotice.getByRole('timer')).toHaveText(/^Zbývá [1-5] s$/);
+    await expect(testNotice.getByRole('button', { name: 'Zrušit test', exact: true })).toBeVisible();
+    await expect(testButton).toBeDisabled();
+    // Nothing is announced by the click itself any more: that is the whole point of the countdown.
+    expect(await readStudioNotifications(page)).toEqual([]);
+    await expect(alertHistory).toHaveCount(0);
+
+    await expect(alertHistory).toContainText(TEST_ALERT_TITLE);
+    const notifications = await readStudioNotifications(page);
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]).toMatchObject({ title: TEST_ALERT_TITLE, isKeptOnScreen: true });
+    expect(notifications[0].body).toContain('Toto je jen zkouška: nic se nepokazilo');
+    // The same clock runs in the test and in the browser, so the deadline can be checked against the click.
+    expect(notifications[0].requestedAt - clickedAt).toBeGreaterThanOrEqual(TEST_ALERT_COUNTDOWN_MILLISECONDS - 100);
+    await expect(testNotice).toHaveCount(0);
+    await expect(testButton).toBeEnabled();
+
+    // The row says how far each channel is known to have got, and calls nothing delivered which nobody confirmed.
+    const delivery = alertHistory.getByTestId('recording-alert-delivery');
+    await expect(delivery).toContainText('prohlížeč je předal systému; jestli se objevilo na obrazovce, rozhodl systém');
+    await expect(delivery).toContainText('Zvuk: prohlížeč signál přehrál');
+    await page.evaluate(() => (window as unknown as StudioTestNotificationWindow).studioTestNotificationInstances[0].onclick?.());
+    await expect(delivery).toContainText('doručeno, otevřeli jste je kliknutím');
+    await expect(alertHistory.getByRole('listitem')).toBeFocused();
+
+    // One click, one alert: nothing of the finished test is left behind to fire again.
+    await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS / 2);
+    expect(await readStudioNotifications(page)).toHaveLength(1);
+    await expect(alertHistory.getByRole('listitem')).toHaveCount(1);
 
     await page.getByRole('button', { name: 'Skrýt všechny výstrahy', exact: true }).click();
     await expect(alertHistory).toHaveCount(0);
 });
 
+test('schedules one test from repeated clicks and announces nothing after Zrušit test (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    const testButton = page.getByRole('button', { name: 'Otestovat výstrahu', exact: true });
+    const testNotice = page.getByRole('group', { name: 'Zkouška výstrahy', exact: true });
+    const alertHistory = page.getByRole('log', { name: 'Historie výstrah', exact: true });
+
+    // Three clicks inside one task reach the handler before the page has had a chance to disable the button.
+    await testButton.evaluate((button: HTMLButtonElement) => { button.click(); button.click(); button.click(); });
+    await expect(testNotice.getByRole('timer')).toBeVisible();
+    await expect(alertHistory.getByRole('listitem')).toHaveCount(1);
+    await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS / 2);
+    expect(await readStudioNotifications(page)).toHaveLength(1);
+    await expect(alertHistory.getByRole('listitem')).toHaveCount(1);
+
+    await testButton.click();
+    await expect(testNotice.getByRole('timer')).toBeVisible();
+    await testNotice.getByRole('button', { name: 'Zrušit test', exact: true }).click();
+    await expect(testNotice).toHaveCount(0);
+    await expect(testButton).toBeEnabled();
+    // Longer than a whole countdown: a cancelled test must not surface late either.
+    await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS + 1_500);
+    expect(await readStudioNotifications(page)).toHaveLength(1);
+    await expect(alertHistory.getByRole('listitem')).toHaveCount(1);
+});
+
+test('runs a test alert during a recording without stopping, failing or changing the take (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    const startButton = page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true });
+    await startButton.click();
+    await waitForRecordingSeconds(page, 2);
+    await waitForCommittedRecordingSources(page, 1);
+
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    await expect(page.getByRole('group', { name: 'Zkouška výstrahy', exact: true })).toContainText('Právě se nahrává: zkušební signál může zachytit mikrofon');
+    const alertRows = page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
+    await expect(alertRows).toHaveCount(1);
+    await expect(alertRows).toContainText(TEST_ALERT_TITLE);
+    // During a take the rehearsal is the passing banner, so it does not sit on the screen being recorded.
+    expect(await readStudioNotifications(page)).toEqual([expect.objectContaining({ title: TEST_ALERT_TITLE, isKeptOnScreen: false })]);
+
+    // The take never noticed: it is still running on its clock, nothing is reported as failed and no source lost.
+    const stopButton = page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true });
+    await expect(stopButton).toBeEnabled();
+    await waitForRecordingSeconds(page, await readRecordedSeconds(page) + 2);
+    // Within the studio itself: the page around it keeps an empty announcer of its own for route changes.
+    await expect(page.getByRole('main').getByRole('alert')).toHaveCount(0);
+    await stopButton.click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+    await expect(page.getByText('Přerušený záznam', { exact: true })).toHaveCount(0);
+    await expect(startButton).toBeEnabled();
+    const recording = await readLatestStoredRecording(page);
+    expect(recording).toMatchObject({ status: 'complete', errorMessage: null });
+    expect(recording.tracks.every((track) => track.byteLength > 0)).toBe(true);
+});
+
+test('announces a real failure at once while a test alert is still counting down (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await addSource(page, 'screen');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForRecordingSeconds(page, 2);
+    await waitForCommittedRecordingSources(page, 2);
+    const readNotificationTitles = () => readStudioNotifications(page).then((notifications) => notifications.map(({ title }) => title));
+
+    const clickedAt = Date.now();
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    const testTimer = page.getByRole('timer');
+    await expect(testTimer).toBeVisible();
+    await page.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[1]
+        .getTracks().forEach((track) => track.dispatchEvent(new Event('ended'))));
+
+    // The lost source is announced while the countdown of the test is still on the page: it waited for nothing.
+    await expect.poll(readNotificationTitles).toEqual([expect.stringContaining('záznam pokračuje') as unknown as string]);
+    await expect(testTimer).toBeVisible();
+
+    await expect.poll(readNotificationTitles).toEqual([expect.stringContaining('záznam pokračuje') as unknown as string, TEST_ALERT_TITLE]);
+    const [failureNotification, testNotification] = await readStudioNotifications(page);
+    expect(failureNotification.requestedAt - clickedAt).toBeLessThan(TEST_ALERT_COUNTDOWN_MILLISECONDS);
+    expect(testNotification.requestedAt - clickedAt).toBeGreaterThanOrEqual(TEST_ALERT_COUNTDOWN_MILLISECONDS - 100);
+    // And the test did not swallow or replace it: both are in the history, each under its own name.
+    await expect(page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem')).toHaveCount(2);
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+});
+
+test('keeps a pending test alert through a change of studio view and fires it once (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForRecordingSeconds(page, 2);
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+    await expect(page.getByText('Uloženo', { exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    await expect(page.getByRole('timer')).toBeVisible();
+    // The editor of a take is another view of the same studio, so the countdown has to go on behind it.
+    await page.getByRole('link', { name: 'Náhled a ořez', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/recording-studio\/[^/]+$/);
+    await expect.poll(() => readStudioNotifications(page).then((notifications) => notifications.map(({ title }) => title))).toEqual([TEST_ALERT_TITLE]);
+
+    await page.getByRole('link', { name: 'Studio · nastavení a záznamy', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/recording-studio$/);
+    const alertRows = page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
+    await expect(alertRows).toHaveCount(1);
+    await expect(alertRows).toContainText(TEST_ALERT_TITLE);
+    await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS / 2);
+    expect(await readStudioNotifications(page)).toHaveLength(1);
+});
+
+test('cancels a pending test alert the moment the administrator signs out (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    // A page outlives the click on sign-out until the server has answered, with its timers running. That wait is
+    // held open here by keeping the browser from leaving at all, so the studio is watched well past the deadline.
+    await page.evaluate(() => document.addEventListener('submit', (event) => event.preventDefault()));
+
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    await expect(page.getByRole('timer')).toBeVisible();
+    await page.getByRole('button', { name: 'Odhlásit se', exact: true }).click();
+    await expect(page.getByRole('group', { name: 'Zkouška výstrahy', exact: true })).toHaveCount(0);
+
+    await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS + 1_500);
+    expect(new URL(page.url()).pathname).toBe('/admin/recording-studio');
+    expect(await readStudioNotifications(page)).toEqual([]);
+    await expect(page.getByRole('log', { name: 'Historie výstrah', exact: true })).toHaveCount(0);
+});
+
+test('asks for the notification permission by the click and starts the countdown only after the answer (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page, 'default');
+    await openStudio(page, baseURL);
+    const panel = page.getByRole('region', { name: 'Výstrahy při selhání' });
+    const testNotice = page.getByRole('group', { name: 'Zkouška výstrahy', exact: true });
+    await expect(panel).toContainText('Prohlížeč zatím nemá oprávnění upozornění posílat');
+    await expect(page.getByRole('button', { name: 'Povolit upozornění prohlížeče', exact: true })).toBeEnabled();
+
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    await expect(testNotice.getByRole('status')).toContainText('Prohlížeč se ptá, zda smí posílat upozornění');
+    expect(await page.evaluate(() => (window as unknown as StudioTestNotificationWindow).studioTestPermissionAnswers.length)).toBe(1);
+    // However long the question stays open, none of the countdown is spent on it.
+    await page.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS / 2);
+    await expect(testNotice.getByRole('timer')).toHaveCount(0);
+
+    await page.evaluate(() => (window as unknown as StudioTestNotificationWindow).studioTestPermissionAnswers[0]('granted'));
+    await expect(testNotice.getByRole('timer')).toHaveText('Zbývá 5 s');
+    await expect(panel).toContainText('Prohlížeč má oprávnění upozornění posílat');
+    await expect(page.getByRole('log', { name: 'Historie výstrah', exact: true })).toContainText(TEST_ALERT_TITLE);
+    expect((await readStudioNotifications(page)).map(({ title }) => title)).toEqual([TEST_ALERT_TITLE]);
+    // The timer never asked for anything: the one question was the one the click put.
+    expect(await page.evaluate(() => (window as unknown as StudioTestNotificationWindow).studioTestPermissionAnswers.length)).toBe(1);
+});
+
+test('tells a refused dispatch, a failed display and a revoked permission apart without losing the alert (API-path check)', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
+    await openStudio(page, baseURL);
+    const panel = page.getByRole('region', { name: 'Výstrahy při selhání' });
+    const testButton = page.getByRole('button', { name: 'Otestovat výstrahu', exact: true });
+    const alertRows = page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
+
+    await changeStudioNotificationSettings(page, { isDispatchRefused: true });
+    await testButton.click();
+    await expect(alertRows).toHaveCount(1);
+    await expect(alertRows.first()).toContainText(TEST_ALERT_TITLE);
+    await expect(alertRows.first()).toContainText('prohlížeč je nedokázal odeslat. Prohlížeč k tomu říká: Illegal constructor.');
+    // The other channel and the history are untouched by a notification which never left.
+    await expect(alertRows.first()).toContainText('Zvuk: prohlížeč signál přehrál');
+    await expect(panel).toContainText('Poslední upozornění prohlížeč nedokázal odeslat');
+
+    await changeStudioNotificationSettings(page, { isDispatchRefused: false, isDisplayFailing: true });
+    await testButton.click();
+    await expect(alertRows).toHaveCount(2);
+    await expect(alertRows.first()).toContainText('Upozornění: prohlížeč je nedokázal odeslat.');
+    await expect(alertRows.first()).toContainText('Zvuk: prohlížeč signál přehrál');
+
+    // The permission is taken away in the settings of the browser while the studio stays open in its tab.
+    await changeStudioNotificationSettings(page, { isDisplayFailing: false, permission: 'denied' });
+    await expect(panel).not.toContainText('Upozornění jsou pro tento web v prohlížeči zakázaná');
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    await expect(panel).toContainText('Upozornění jsou pro tento web v prohlížeči zakázaná');
+
+    await page.getByRole('checkbox', { name: 'Zvukový signál', exact: true }).uncheck();
+    await testButton.click();
+    await expect(alertRows).toHaveCount(3);
+    await expect(alertRows.first()).toContainText('neodesláno, pro tento web je v prohlížeči zakázané');
+    await expect(alertRows.first()).toContainText('Zvuk: vypnut v nastavení studia');
+    expect(await readStudioNotifications(page)).toHaveLength(1);
+});
+
+test('reports notifications the browser really blocks and still tests the sound and the page', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    // No stand-in here. The headless shell refuses notifications for every site, which is a genuine blocked browser.
+    test.skip(await page.evaluate(() => Notification.permission) !== 'denied', 'Only a browser which blocks notifications by itself can show the blocked case for real.');
+    const panel = page.getByRole('region', { name: 'Výstrahy při selhání' });
+    await expect(panel).toContainText('Upozornění jsou pro tento web v prohlížeči zakázaná');
+    await expect(page.getByRole('button', { name: 'Povolit upozornění prohlížeče', exact: true })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+    // A blocked browser is not asked again, so the countdown starts at once.
+    await expect(page.getByRole('timer')).toHaveText(/^Zbývá [1-5] s$/);
+    const alertRow = page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
+    await expect(alertRow).toContainText(TEST_ALERT_TITLE);
+    await expect(alertRow).toContainText('neodesláno, pro tento web je v prohlížeči zakázané');
+    await expect(alertRow).toContainText('Zvuk: prohlížeč signál přehrál');
+});
+
+test('counts a test alert down on a hidden studio page and hands exactly one notification to the real browser API', async ({ playwright, baseURL }, testInfo) => {
+    test.skip(!process.env.ADMIN_PASSWORD, 'Needs the local test server admin password.');
+    const backgroundableBrowser = await launchBackgroundableBrowser(playwright, testInfo.project.use.headless !== false);
+    try {
+        const { context } = backgroundableBrowser;
+        await context.grantPermissions(['notifications'], { origin: baseURL });
+        const studioPage = await context.newPage();
+        await studioPage.setViewportSize({ width: 1440, height: 900 });
+        await observeStudioNotifications(studioPage);
+        await openStudio(studioPage, baseURL);
+        expect(await studioPage.evaluate(() => Notification.permission)).toBe('granted');
+        expect(await readStudioPageVisibility(studioPage)).toEqual({ visibilityState: 'visible', isFocused: true });
+
+        const clickedAt = Date.now();
+        await studioPage.getByRole('button', { name: 'Otestovat výstrahu', exact: true }).click();
+        await expect(studioPage.getByRole('timer')).toHaveText(/^Zbývá [1-5] s$/);
+
+        // Another page becomes the active one, which is what switching to another tab does to the studio.
+        const otherPage = await context.newPage();
+        await otherPage.bringToFront();
+        await expect.poll(() => readStudioPageVisibility(studioPage)).toEqual({ visibilityState: 'hidden', isFocused: false });
+        expect(await readStudioNotifications(studioPage)).toEqual([]);
+
+        // Losing focus neither cancelled the test nor held it back for good: the real constructor is called once.
+        await expect.poll(() => readStudioNotifications(studioPage).then(({ length }) => length), { timeout: 30_000 }).toBe(1);
+        const [notification] = await readStudioNotifications(studioPage);
+        expect(notification).toMatchObject({ title: TEST_ALERT_TITLE, isKeptOnScreen: true, visibilityState: 'hidden', isFocused: false });
+        // Not before the deadline. How long after it is the browser's business in a hidden tab.
+        expect(notification.requestedAt - clickedAt).toBeGreaterThanOrEqual(TEST_ALERT_COUNTDOWN_MILLISECONDS - 100);
+        await testInfo.attach('hidden-page-test-alert', { contentType: 'application/json', body: JSON.stringify({
+            millisecondsFromClickToRequest: notification.requestedAt - clickedAt, notification, browserVersion: context.browser()?.version(),
+        }) });
+
+        await otherPage.waitForTimeout(TEST_ALERT_COUNTDOWN_MILLISECONDS / 2);
+        const notifications = await readStudioNotifications(studioPage);
+        expect(notifications).toHaveLength(1);
+        // The engine itself reported the notification, not a stand-in. It has no screen here, so this is no banner.
+        expect(notifications[0].events).toContain('show');
+        expect(notifications[0].events).not.toContain('error');
+
+        await studioPage.bringToFront();
+        const alertRow = studioPage.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
+        await expect(alertRow).toHaveCount(1);
+        await expect(alertRow).toContainText(TEST_ALERT_TITLE);
+        await expect(alertRow).toContainText('prohlížeč je předal systému; jestli se objevilo na obrazovce, rozhodl systém');
+        await expect(studioPage.getByRole('group', { name: 'Zkouška výstrahy', exact: true })).toHaveCount(0);
+    } finally {
+        await backgroundableBrowser.close();
+    }
+});
+
 test('keeps the other tracks recording when one source is disconnected and alerts about the loss', async ({ page, baseURL }) => {
-    await recordStudioNotifications(page);
+    await replaceStudioNotifications(page);
     await openStudio(page, baseURL);
     await addSource(page, 'camera');
     await addSource(page, 'screen');
@@ -1214,6 +1666,9 @@ test('keeps the other tracks recording when one source is disconnected and alert
     await expect(alertHistory).toContainText('ostatní stopy nahrávají dál');
     await expect.poll(() => readStudioNotifications(page).then((notifications) => notifications.map(({ title }) => title)))
         .toEqual([expect.stringContaining('záznam pokračuje') as unknown as string]);
+    // A take which is still running gets the passing banner, so the screen it records is not buried (API-path check).
+    expect((await readStudioNotifications(page))[0].isKeptOnScreen).toBe(false);
+    await expect(alertHistory.getByTestId('recording-alert-delivery')).toContainText('Podoba: krátký banner, který systém sám skryje.');
 
     // The take keeps running on the shared clock with the source which survived.
     const stopButton = page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true });
@@ -1224,27 +1679,80 @@ test('keeps the other tracks recording when one source is disconnected and alert
     // A take which lost a source is saved as interrupted: its timeline really does have a hole in it.
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
 
-    const recording = await page.evaluate(async () => {
-        const database = await new Promise<IDBDatabase>((resolve, reject) => {
-            const request = indexedDB.open('promptbook-recording-studio');
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-        try {
-            const recordings = await new Promise<StudioRecording[]>((resolve, reject) => {
-                const request = database.transaction('recordings').objectStore('recordings').getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-            return recordings[recordings.length - 1];
-        } finally { database.close(); }
-    });
+    const recording = await readLatestStoredRecording(page);
     expect(recording.tracks).toHaveLength(2);
     expect(recording.tracks.every((track) => (track.parts ?? []).every((part) => part.byteLength > 0))).toBe(true);
     // The lost source keeps only what it committed; the survivor carries the whole session.
     const [cameraTrack, screenTrack] = recording.tracks;
     expect(screenTrack.durationSeconds).toBeLessThan(cameraTrack.durationSeconds);
     expect(recording.errorMessage).toContain('ostatní stopy nahrávají dál');
+});
+
+test('announces a lost source and a refused storage write from a hidden studio page through the real browser API', async ({ playwright, baseURL }, testInfo) => {
+    test.skip(!process.env.ADMIN_PASSWORD, 'Needs the local test server admin password.');
+    const backgroundableBrowser = await launchBackgroundableBrowser(playwright, testInfo.project.use.headless !== false);
+    try {
+        const { context } = backgroundableBrowser;
+        await context.grantPermissions(['notifications'], { origin: baseURL });
+        const studioPage = await context.newPage();
+        await studioPage.setViewportSize({ width: 1440, height: 900 });
+        await observeStudioNotifications(studioPage);
+        await openStudio(studioPage, baseURL);
+        await addSource(studioPage, 'camera');
+        await addSource(studioPage, 'screen');
+        await studioPage.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+        await waitForRecordingSeconds(studioPage, 2);
+        await waitForCommittedRecordingSources(studioPage, 2);
+
+        // The administrator is working elsewhere: from here on the studio records as a hidden, throttled tab.
+        const otherPage = await context.newPage();
+        await otherPage.bringToFront();
+        await expect.poll(() => readStudioPageVisibility(studioPage)).toEqual({ visibilityState: 'hidden', isFocused: false });
+        const readNotificationTitles = () => readStudioNotifications(studioPage).then((notifications) => notifications.map(({ title }) => title));
+
+        // A controlled loss of one source: ending the shared screen is exactly what closing the shared window does.
+        await studioPage.evaluate(() => (window as unknown as { studioTestStreams: MediaStream[] }).studioTestStreams[1]
+            .getTracks().forEach((track) => track.dispatchEvent(new Event('ended'))));
+        await expect.poll(readNotificationTitles).toEqual([expect.stringContaining('záznam pokračuje') as unknown as string]);
+
+        // A controlled storage failure: the real engine aborts the write of the next chunk. No disk is filled.
+        await studioPage.evaluate(() => {
+            const originalAdd = IDBObjectStore.prototype.add;
+            IDBObjectStore.prototype.add = function (value, key) {
+                const request = key === undefined ? originalAdd.call(this, value) : originalAdd.call(this, value, key);
+                if (this.name === 'chunks') this.transaction.abort();
+                return request;
+            };
+        });
+        await expect.poll(readNotificationTitles, { timeout: 30_000 })
+            .toEqual([expect.stringContaining('záznam pokračuje') as unknown as string, 'Nahrávání se zastavilo']);
+
+        // Both real failures took the path the test alert rehearses, from a page nobody was looking at, and each in
+        // its own form: the running take got the passing banner, the stopped one the notification which waits.
+        await expect.poll(() => readStudioNotifications(studioPage).then((notifications) => notifications.map(({ events }) => events)))
+            .toEqual([['show'], ['show']]);
+        const notifications = await readStudioNotifications(studioPage);
+        expect(notifications.map(({ visibilityState, isFocused }) => ({ visibilityState, isFocused })))
+            .toEqual([{ visibilityState: 'hidden', isFocused: false }, { visibilityState: 'hidden', isFocused: false }]);
+        expect(notifications.map(({ isKeptOnScreen }) => isKeptOnScreen)).toEqual([false, true]);
+
+        await studioPage.bringToFront();
+        await expect(studioPage.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+        const alertRows = studioPage.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem');
+        await expect(alertRows).toHaveCount(2);
+        await expect(alertRows.first()).toContainText('Nahrávání se zastavilo');
+        await expect(alertRows.last()).toContainText('záznam pokračuje');
+        for (const alertRow of await alertRows.all()) await expect(alertRow).toContainText('prohlížeč je předal systému');
+
+        // What was committed before each failure is still there, readable and offered for export.
+        const recording = await readLatestStoredRecording(studioPage);
+        expect(recording.status).toBe('interrupted');
+        expect(recording.tracks).toHaveLength(2);
+        expect(recording.tracks.every((track) => track.byteLength > 0 && (track.parts ?? []).every((part) => part.byteLength > 0))).toBe(true);
+        await expect(studioPage.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
+    } finally {
+        await backgroundableBrowser.close();
+    }
 });
 
 test('blocks Start when a live camera preview loses its required microphone input', async ({ page, baseURL }) => {
@@ -1647,10 +2155,12 @@ test('commits folder chunks without IndexedDB media, reloads and imports its che
 });
 
 test('keeps committed multi-source data after a real IndexedDB transaction abort and offers recovery', async ({ page, baseURL }) => {
+    await replaceStudioNotifications(page);
     await openStudio(page, baseURL);
     await addSource(page, 'camera'); await addSource(page, 'screen');
     await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
     await expect(page.getByTestId('recording-bitrate')).toContainText('/s');
+    // The write is refused by the real storage engine; no disk is filled to provoke it.
     await page.evaluate(() => {
         const originalAdd = IDBObjectStore.prototype.add;
         IDBObjectStore.prototype.add = function (value, key) {
@@ -1660,6 +2170,14 @@ test('keeps committed multi-source data after a real IndexedDB transaction abort
         };
     });
     await expect(page.getByText('Přerušený záznam', { exact: true })).toBeVisible();
+    // A failed write leaves through the very channel the test alert rehearses, in the form which waits on the screen
+    // because nothing is being recorded any more (API-path check).
+    const stoppedAlertRow = page.getByRole('log', { name: 'Historie výstrah', exact: true }).getByRole('listitem').filter({ hasText: 'Nahrávání se zastavilo' });
+    await expect(stoppedAlertRow).toHaveCount(1);
+    await expect(stoppedAlertRow.getByTestId('recording-alert-delivery')).toContainText('Podoba: zůstává na obrazovce, dokud je nezavřete.');
+    await expect(stoppedAlertRow.getByTestId('recording-alert-delivery')).toContainText('Zvuk: prohlížeč signál přehrál');
+    expect((await readStudioNotifications(page)).filter(({ title }) => title === 'Nahrávání se zastavilo'))
+        .toEqual([expect.objectContaining({ isKeptOnScreen: true, events: ['show'] })]);
     await expect(page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Originály ZIP', exact: true })).toBeEnabled();
     await page.reload();

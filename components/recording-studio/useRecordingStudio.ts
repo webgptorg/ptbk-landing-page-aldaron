@@ -54,7 +54,6 @@ function getRecordingSourceReadinessMessage(source: RecordingSource, configurati
 }
 
 export function useRecordingStudio() {
-    const alertChannel = useRecordingStudioAlerts();
     const [sources, setSources] = useState<RecordingSource[]>([]);
     const [sourceConfigurations, setSourceConfigurations] = useState<RecordingSourceConfiguration[]>([]);
     const [sourceErrors, setSourceErrors] = useState<Record<string, string>>({});
@@ -75,6 +74,9 @@ export function useRecordingStudio() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const runtime = useRef({ isDisposed: false, isAddingSource: false, isStartPending: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] });
+    // A take is running from the click which starts it until its last write, not only while a recorder exists.
+    const alertChannel = useRecordingStudioAlerts({ isTakeRunning: () => runtime.current.isStartPending || runtime.current.capture !== null });
+    const { cancelTestAlert } = alertChannel;
 
     /**
      * Puts one announced failure where the administrator is already looking
@@ -164,6 +166,16 @@ export function useRecordingStudio() {
             releaseLock?.();
         };
     }, [refreshStorage]);
+
+    /**
+     * A studio which cannot act announces nothing, so it rehearses nothing either
+     *
+     * Note: Today that is a studio refused by the browser or blocked by the tab which holds the lock. Whatever
+     *       deactivates a studio later — another tab taking it over — has to cancel its pending test through here too.
+     */
+    useEffect(() => {
+        if (phase === 'unavailable') cancelTestAlert();
+    }, [phase, cancelTestAlert]);
 
     useEffect(() => {
         if (phase !== 'recording' && phase !== 'paused' && phase !== 'pausing') return;
@@ -419,6 +431,8 @@ export function useRecordingStudio() {
             return;
         }
         current.isStartPending = true;
+        // This is the last click before hours spent in another application, so the alert sound is opened by it.
+        alertChannel.prepareAlertSound();
         setErrorMessage(null);
         setElapsedSeconds(appendTo ? getRecordingSessionDuration(appendTo) : 0);
         setActiveRecording(null);
@@ -488,7 +502,8 @@ export function useRecordingStudio() {
         sources, sourceConfigurations, sourceErrors, sourceReadiness, recordings, activeRecording, storage, phase, errorMessage, elapsedSeconds,
         directory, isChoosingDirectory, pendingBytes, measuredBytesPerSecond, persistence,
         alerts: alertChannel.alerts, alertPreferences: alertChannel.alertPreferences, notificationPermission: alertChannel.notificationPermission,
-        isAlertSoundSupported: alertChannel.isAlertSoundSupported, announceTestAlert: alertChannel.announceTestAlert,
+        isAlertSoundSupported: alertChannel.isAlertSoundSupported, alertActivation: alertChannel.alertActivation,
+        testAlert: alertChannel.testAlert, startTestAlert: alertChannel.startTestAlert, cancelTestAlert,
         changeAlertPreferences: alertChannel.changeAlertPreferences, dismissAlert: alertChannel.dismissAlert, dismissAllAlerts: alertChannel.dismissAllAlerts,
         requestNotificationPermission: alertChannel.requestNotificationPermission,
         chooseDirectory,

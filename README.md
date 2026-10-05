@@ -84,10 +84,27 @@ affect all tracks at once. Such a take is saved as **Přerušený záznam** and 
 Because an administrator is normally working inside the application being recorded, every failure is also announced
 outside the studio tab: an alert sound and a browser notification, beside the message on the failing source's card
 and at the top of the page. **Povolit upozornění prohlížeče** asks for the permission, both channels can be turned
-off separately, and the settings stay in this browser profile only. **Otestovat výstrahu** raises a real alert
-through the real channels, which is the way to find a muted tab or a refused permission before a recording needs
-them. A refused or unsupported channel leaves the others announcing; the studio page keeps the last twenty alerts
-with their times.
+off separately, and the settings stay in this browser profile only. A refused, unsupported or failing channel leaves
+the other one announcing; the studio page keeps the last twenty alerts with their times and with what became of each
+on both channels.
+
+**Otestovat výstrahu** raises a real, clearly labelled test alert through those same channels after a five-second
+countdown, so that you can first switch to the tab, application or desktop you will be working in. Leaving the tab
+does not cancel it, **Zrušit test** does, and a second click starts no second test. The countdown follows a deadline;
+a browser may run a hidden tab's timers late, and none run while the computer sleeps or the browser is closed. If the
+browser has never been asked for the notification permission, the click asks and the countdown starts after the
+answer. A test never stops a recording or changes a source or a saved take, and a real failure during the countdown
+is announced at once.
+
+The studio only knows what the browser tells it: that the notification was accepted and the sound was rendered.
+Whether a banner appears is decided by the system — its notification settings for the browser, a Focus or Do Not
+Disturb mode, and on macOS the option for notifications while mirroring or sharing the display — so nothing on the
+page claims delivery, and only a notification you clicked is shown as delivered. The notification of a stopped
+recording stays on the screen until dismissed; a source lost while the take continues is a passing banner. On macOS
+Chrome delivers those two forms as two separate entries in **System Settings → Notifications**, _Google Chrome Helper
+(Alerts)_ and _Google Chrome_; a test before a recording uses the first and a test during one the second, so run it
+in the situation you will record in. Analysis, the checks behind these statements, the recorded macOS run and the
+steps for checking by hand are in `docs/recording-studio-alerts.md`.
 
 Use a current desktop Chrome or Edge over HTTPS (localhost also works). Device limits, codecs, and screen/audio
 capture depend on the browser and operating system. **Odhad prostoru pro web** is the reported origin quota minus

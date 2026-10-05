@@ -1,5 +1,30 @@
 # Current preversion
 
+- The recording studio's **Otestovat výstrahu** now fires after a five-second countdown instead of at once, so an
+  administrator can first switch to the tab, application or desktop they will work in while recording. The notice
+  shows the remaining time, says where to go and offers **Zrušit test**; a repeated click starts no second test, and
+  exactly one clearly labelled test alert then goes out through the same sound and notification channel as a real
+  failure. The countdown follows a deadline rather than counting ticks, so a hidden and throttled tab is merely late
+  and says by how much; leaving the tab neither cancels nor pauses it, while unmounting the studio, signing out,
+  leaving its page or the studio becoming unavailable cancels it, and it survives moving between the studio's views. The click itself
+  opens the sound output and, when the browser was never asked, requests the notification permission, the full
+  countdown starting only after the answer. A test has a severity of its own — its own colour, wording and melody —
+  never stops a recording or changes a source or a saved take, and never delays a real failure, whose timing is
+  unchanged. The notification path was verified rather than assumed, and what that uncovered is fixed: the studio
+  ignored whether the browser took a notification, lost the browser's `show` and `error` answers, read the permission
+  only once, promised delivery it could not know about, and waited without a bound for a sound output which a browser
+  may never start. Each alert now shows how far each channel is known to have got — disabled, unsupported, permission
+  missing or denied, dispatch failed, accepted, reported by the browser, or clicked — a refused channel never silences
+  the other or removes the alert, the permission is read again on returning from the browser's settings, and a
+  clicked notification brings the studio forward to that alert. Nothing claims delivery except a clicked notification:
+  on the owner's Mac the browser reported every test as shown while an active Focus mode kept all of them off the
+  screen, and a focused studio tab was found not to be the cause of a missing notification. The page now names what
+  really decides — the system's notification settings, Focus and a shared display — and that Chrome on macOS delivers
+  the waiting notification of a stopped recording and the passing banner of a lost source as two separately
+  configured applications, which a test before and during a recording rehearses in turn. No service worker or push
+  was added. A human observation of a banner, of the sound, of another Space and of a clicked notification is still
+  outstanding and is recorded as unverified, with the exact steps, in `docs/recording-studio-alerts.md`.
+
 - Added **`/cs/whitepaper`** and **`/en/whitepaper`** as a shared, light APT product landing page and complete
   interactive whitepaper. Scroll-linked 3D agent/project/task layers, a step-through check/repair/pause cycle,
   a commit/revert demonstration and three domain scenarios explain the principles without executing real actions.
