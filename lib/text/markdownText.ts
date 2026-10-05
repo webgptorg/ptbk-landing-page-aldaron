@@ -2,15 +2,37 @@ import { decodeXmlEntities } from '@/lib/xml/xmlTags';
 import { Lexer, type MarkedToken, type Token, type Tokens } from 'marked';
 
 /**
+ * How authored Markdown is read
+ *
+ * Note: A line somebody ended stays ended. Whoever writes a description line by line means those lines, yet a line end
+ *       left inside a run of text ends the line only in the PDF and in plain text, while a page reads it as a mere
+ *       space. So the line breaks are read as breaks here, once, and every reader keeps the very same lines.
+ */
+const MARKDOWN_LEXER_OPTIONS = { gfm: true, breaks: true } as const;
+
+/**
  * How far apart the blocks and the lines of flattened Markdown stand
  */
 const MARKDOWN_PLAIN_TEXT_BLOCK_SEPARATOR = '\n\n';
 const MARKDOWN_PLAIN_TEXT_LINE_SEPARATOR = '\n';
 const MARKDOWN_PLAIN_TEXT_CELL_SEPARATOR = ' · ';
 
-/** Uses only Marked's built-in tokens, shared by text extraction and the PDF renderer. */
+/**
+ * What stands in front of an item of a flattened list which is not numbered
+ */
+const MARKDOWN_PLAIN_TEXT_LIST_ITEM_MARKER = '• ';
+
+/** Uses only Marked's built-in tokens, shared by text extraction, the page and the PDF renderer. */
 export function readMarkdownTokens(markdown: string): readonly MarkedToken[] {
-    return Lexer.lex(markdown) as MarkedToken[];
+    // Note: The lexer keeps its tokenizer on the options it is given, so it is given options of its own.
+    return Lexer.lex(markdown, { ...MARKDOWN_LEXER_OPTIONS }) as MarkedToken[];
+}
+
+/**
+ * The number an ordered list counts from, which is the one its first item was written with
+ */
+export function readMarkdownListStart(list: Tokens.List): number {
+    return typeof list.start === 'number' ? list.start : 1;
 }
 
 export function readMarkdownTokenText(token: Token): string {
@@ -100,7 +122,30 @@ function readMarkdownInlinePlainText(tokens: readonly Token[]): string {
 }
 
 /**
- * Every block of Markdown as one line of plain text, in the order it was written
+ * One list as plain text, which keeps what makes it a list: a bullet or a number in front of every item
+ *
+ * Note: Whatever an item goes on with — a second line, or a list of its own — is indented under its first line, so
+ *       the items stay apart even where nothing but their text can be shown.
+ */
+function readMarkdownListPlainText(list: Tokens.List): string {
+    const firstItemNumber = readMarkdownListStart(list);
+
+    return list.items
+        .map((item, itemIndex) => {
+            const marker = list.ordered ? `${firstItemNumber + itemIndex}. ` : MARKDOWN_PLAIN_TEXT_LIST_ITEM_MARKER;
+            const continuationIndent = ' '.repeat(marker.length);
+
+            return readMarkdownBlockPlainTexts(item.tokens)
+                .flatMap((text) => text.split(MARKDOWN_PLAIN_TEXT_LINE_SEPARATOR))
+                .map((line, lineIndex) => `${lineIndex === 0 ? marker : continuationIndent}${line}`)
+                .join(MARKDOWN_PLAIN_TEXT_LINE_SEPARATOR);
+        })
+        .filter((itemText) => itemText !== '')
+        .join(MARKDOWN_PLAIN_TEXT_LINE_SEPARATOR);
+}
+
+/**
+ * Every block of Markdown as plain text, in the order it was written
  */
 function readMarkdownBlockPlainTexts(tokens: readonly Token[]): readonly string[] {
     return tokens
@@ -116,13 +161,7 @@ function readMarkdownBlockPlainTexts(tokens: readonly Token[]): readonly string[
                 case 'blockquote':
                     return readMarkdownBlockPlainTexts(markdownToken.tokens);
                 case 'list':
-                    return [
-                        markdownToken.items
-                            .map((item) =>
-                                readMarkdownBlockPlainTexts(item.tokens).join(MARKDOWN_PLAIN_TEXT_LINE_SEPARATOR),
-                            )
-                            .join(MARKDOWN_PLAIN_TEXT_LINE_SEPARATOR),
-                    ];
+                    return [readMarkdownListPlainText(markdownToken)];
                 case 'table':
                     return [
                         [markdownToken.header, ...markdownToken.rows]
@@ -149,8 +188,8 @@ function readMarkdownBlockPlainTexts(tokens: readonly Token[]): readonly string[
  * Turns authored Markdown into the plain text read wherever formatting cannot be shown at all, such as the description
  * of a calendar entry
  *
- * Note: Nothing is dropped on the way: emphasis simply loses its marks, a list becomes one line per item, and a link
- *       keeps both its label and its destination.
+ * Note: Nothing is dropped on the way: emphasis simply loses its marks, a line which was ended stays ended, a list
+ *       keeps a bullet or a number in front of each of its items, and a link keeps both its label and its destination.
  */
 export function convertMarkdownToPlainText(markdown: string): string {
     return readMarkdownBlockPlainTexts(readMarkdownTokens(markdown)).join(MARKDOWN_PLAIN_TEXT_BLOCK_SEPARATOR);

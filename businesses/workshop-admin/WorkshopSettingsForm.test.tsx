@@ -124,6 +124,16 @@ describe('workshop settings form', () => {
         expect(onSave.mock.calls[0][0]).not.toHaveProperty('startsAt');
     });
 
+    it('autosaves a description written on several lines with every line and bullet it was written with', async () => {
+        const multilineDescription = 'Bez slidů.\nRovnou v repozitáři.\n\n- rozpad úkolů\n- code review';
+        const { onSave } = renderWorkshopSettingsForm(WORKSHOP);
+        const descriptionField = screen.getByLabelText(/^Popis/);
+        expect(descriptionField.tagName).toBe('TEXTAREA');
+        fireEvent.change(descriptionField, { target: { value: multilineDescription } });
+        await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
+        expect(onSave.mock.calls[0][0]).toEqual(expect.objectContaining({ description: multilineDescription }));
+    });
+
     it('keeps the artificial watching-count field out of a shared-screen view', () => {
         renderWorkshopSettingsForm(WORKSHOP, vi.fn(), false);
 

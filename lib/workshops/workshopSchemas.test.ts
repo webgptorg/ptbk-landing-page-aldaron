@@ -44,6 +44,17 @@ describe('workshop request validation', () => {
         });
     });
 
+    it('keeps every line of a description and trims only what surrounds it', () => {
+        const multilineDescription = 'Bez slidů.\nRovnou v repozitáři.\n\n- rozpad úkolů\n  - nad reálným pull requestem';
+
+        expect(
+            workshopCreateSchema.parse({ ...VALID_WORKSHOP, description: `\n${multilineDescription}\n\n` }).description,
+        ).toBe(multilineDescription);
+        expect(workshopUpdateSchema.parse({ description: `  ${multilineDescription}\n` })).toEqual({
+            description: multilineDescription,
+        });
+    });
+
     it('renames a participant under the very same rule the connection form uses', () => {
         expect(workshopParticipantRenameSchema.parse({ fullname: '  Jana Nová  ' })).toEqual({ fullname: 'Jana Nová' });
         expect(workshopParticipantRenameSchema.safeParse({ fullname: '   ' }).success).toBe(false);

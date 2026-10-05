@@ -206,12 +206,15 @@ export function WorkshopSettingsForm({
                     <Textarea
                         value={description}
                         onChange={(event) => changeDraft({ description: event.target.value })}
-                        className="mt-2"
+                        className="mt-2 min-h-40 font-mono"
                         placeholder={'O čem termín je.\n\n- **tučně** a *kurzívou*\n- [odkaz](https://…)'}
                     />
                     <span className="mt-1 block text-xs font-normal text-slate-400">
-                        Markdown. Formátování si přečtou karty termínu, dveře místnosti i shrnutí workshopu; v kalendáři
-                        zůstane čistý text.
+                        Markdown na tolik řádků, kolik potřebujete: konec řádku zůstane koncem řádku, prázdný řádek
+                        oddělí odstavec a řádky začínající <code>-</code> nebo <code>1.</code> jsou odrážky a číslovaný
+                        seznam. Celý popis takhle přečtou karty termínu na webu, dveře místnosti i shrnutí workshopu;
+                        výběr termínu v čekárně z něj ukáže první dva řádky a v kalendáři zůstane čistý text
+                        s odrážkami.
                     </span>
                 </label>
                 {roomCapabilities.isScheduled && (

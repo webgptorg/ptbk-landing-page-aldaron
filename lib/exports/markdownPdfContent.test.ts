@@ -29,6 +29,17 @@ describe('Markdown in downloadable recaps', () => {
         expect(document).not.toContain('javascript:');
     });
 
+    it('keeps every line which was ended and the number an ordered list was written with', () => {
+        const document = JSON.stringify(
+            createMarkdownPdfContent(
+                'Bez slidů.\nRovnou v repozitáři.\n\n3. nasazení\n4. otázky',
+                'https://example.com/room',
+            ),
+        );
+        expect(document).toContain('"text":["Bez slidů.","\\n","Rovnou v repozitáři."]');
+        expect(document).toContain('"start":3');
+    });
+
     it('extracts complete authored list points without merging nested words or treating code as lessons', () => {
         expect(
             extractMarkdownKeyPoints(

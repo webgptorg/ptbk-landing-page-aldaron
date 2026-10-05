@@ -7,8 +7,9 @@ const FIRST_REVISION_ID = '22222222-2222-4222-8222-222222222222';
 const SECOND_REVISION_ID = '33333333-3333-4333-8333-333333333333';
 const DRAFT_REVISION_ID = '44444444-4444-4444-8444-444444444444';
 const READY_REVISION_ID = '55555555-5555-4555-8555-555555555555';
-const OLD_UPLOAD_CUTOFF = '2026-10-01T00:00:00Z';
-const OLD_REVISION_CUTOFF = '2026-10-01T00:00:00Z';
+// A revision is superseded at the moment this test runs, so the cutoffs lie ahead of that moment, not on a fixed day.
+const OLD_UPLOAD_CUTOFF = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+const OLD_REVISION_CUTOFF = OLD_UPLOAD_CUTOFF;
 
 describe('hosted recording publication transaction', () => {
     it('atomically replaces the pointer, protects private rows, and claims only inactive revisions for cleanup', async () => {

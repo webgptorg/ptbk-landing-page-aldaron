@@ -83,6 +83,30 @@ describe('Online workshop registration form', () => {
         expect(secondWorkshopButton.textContent).toContain(SECOND_WORKSHOP.description);
     });
 
+    it('reads a description written on several lines on those lines, without leaving the one button of its term', () => {
+        render(
+            <OnlineWorkshopRegistrationForm
+                workshops={[
+                    {
+                        ...FIRST_WORKSHOP,
+                        description: 'Bez slidů.\nRovnou v repozitáři.\n\n- rozpad úkolů\n- [code review](https://ptbk.io)',
+                    },
+                ]}
+                currentTime={CURRENT_TIME}
+            />,
+        );
+
+        const workshopButton = screen.getByRole('button', { name: /4\. 9\. 2026/ });
+        expect(workshopButton.querySelectorAll('br')).toHaveLength(1);
+        expect(Array.from(workshopButton.querySelectorAll('.list-item'), (item) => item.textContent)).toEqual([
+            'rozpad úkolů',
+            'code review',
+        ]);
+
+        // A button may hold neither block elements nor another destination, however the description was written.
+        expect(workshopButton.querySelectorAll('p, ul, ol, li, div, a')).toHaveLength(0);
+    });
+
     it('offers no registration form until an online workshop is published', () => {
         const { container } = render(<OnlineWorkshopRegistrationForm workshops={[]} currentTime={CURRENT_TIME} />);
 

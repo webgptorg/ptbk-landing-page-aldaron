@@ -1,33 +1,151 @@
-import { readMarkdownTokenText, readMarkdownTokens } from '@/lib/text/markdownText';
+import { readMarkdownListStart, readMarkdownTokenText, readMarkdownTokens } from '@/lib/text/markdownText';
 import type { MarkedToken, Token, Tokens } from 'marked';
-import { Fragment, type ReactNode } from 'react';
+import { createElement, Fragment, type CSSProperties, type ReactNode } from 'react';
 
 /**
- * How much room an authored description is read in
+ * What an authored description is built from
  *
- * Note: A `block` description is the whole passage an administrator wrote, with its paragraphs, its lists and its
- *       links. An `inline` one is the very same words as one flowing excerpt, because the card a term is chosen with
- *       is a single button: block elements and destinations inside a button are neither valid nor clickable, and the
- *       compact card cuts the excerpt off after two lines anyway. Both read the same Markdown, so a term is never
- *       described in two different ways — only at two different lengths.
+ * Note: A `block` description is built from the elements a passage is ordinarily written in — paragraphs, lists, a
+ *       quotation — and leads out through its links. A `phrasing` one is the very same passage, line for line and
+ *       bullet for bullet, built from phrasing content alone, because the card a term is chosen with is a single
+ *       button: block elements and destinations inside a button are neither valid nor clickable. Both are one walk
+ *       through the same Markdown, so a term is never described in two different ways — only in two vocabularies.
  */
-export const EVENT_DESCRIPTION_SHAPES = ['block', 'inline'] as const;
+export const EVENT_DESCRIPTION_SHAPES = ['block', 'phrasing'] as const;
 
 export type EventDescriptionShape = (typeof EVENT_DESCRIPTION_SHAPES)[number];
+
+/**
+ * Everything a description consists of besides the text which runs through it
+ */
+type EventDescriptionPart =
+    | 'root'
+    | 'paragraph'
+    | 'heading'
+    | 'unorderedList'
+    | 'orderedList'
+    | 'listItem'
+    | 'quotation'
+    | 'codeBlock'
+    | 'rule'
+    | 'table'
+    | 'tableHead'
+    | 'tableBody'
+    | 'tableRow'
+    | 'tableHeaderCell'
+    | 'tableCell';
+
+type EventDescriptionElement = {
+    readonly tagName: string;
+    readonly className?: string;
+};
+
+/**
+ * The element each part of a description is made of in each of its shapes
+ *
+ * Note: A phrasing part is a `span` which is displayed as the block, the list item or the table cell it stands for, so
+ *       both shapes keep the very same lines and differ only in what a button is allowed to contain.
+ * Note: Neither shape brings a text colour of its own. What a block part does colour — the edge of a quotation, the
+ *       ground of a block of code — is only ever read inside a room, so it wears the palette of the room; a phrasing
+ *       part is read on a landing page as well, so it borrows the colour of the text around it.
+ */
+const EVENT_DESCRIPTION_ELEMENTS: Readonly<
+    Record<EventDescriptionShape, Readonly<Record<EventDescriptionPart, EventDescriptionElement>>>
+> = {
+    block: {
+        root: { tagName: 'div' },
+        paragraph: { tagName: 'p', className: 'mt-3 first:mt-0' },
+        heading: { tagName: 'p', className: 'mt-3 first:mt-0 font-semibold' },
+        unorderedList: { tagName: 'ul', className: 'mt-3 first:mt-0 list-disc space-y-1 pl-5' },
+        orderedList: { tagName: 'ol', className: 'mt-3 first:mt-0 list-decimal space-y-1 pl-5' },
+        listItem: { tagName: 'li', className: '[&>*+*]:mt-1' },
+        quotation: { tagName: 'blockquote', className: 'mt-3 first:mt-0 border-l-2 border-room-border/20 pl-3 italic' },
+        codeBlock: {
+            tagName: 'pre',
+            className: 'mt-3 first:mt-0 max-w-full overflow-x-auto rounded bg-room-overlay/[0.06] p-2',
+        },
+        rule: { tagName: 'hr', className: 'mt-3 first:mt-0 border-room-border/20' },
+        table: { tagName: 'table', className: 'mt-3 first:mt-0 block max-w-full overflow-x-auto' },
+        tableHead: { tagName: 'thead' },
+        tableBody: { tagName: 'tbody' },
+        tableRow: { tagName: 'tr' },
+        tableHeaderCell: { tagName: 'th', className: 'pr-4 text-left font-semibold' },
+        tableCell: { tagName: 'td', className: 'pr-4 align-top' },
+    },
+    phrasing: {
+        root: { tagName: 'span' },
+        paragraph: { tagName: 'span', className: 'mt-1.5 first:mt-0 block' },
+        heading: { tagName: 'span', className: 'mt-1.5 first:mt-0 block font-semibold' },
+        unorderedList: { tagName: 'span', className: 'mt-1.5 first:mt-0 block list-disc pl-5' },
+        orderedList: { tagName: 'span', className: 'mt-1.5 first:mt-0 block list-decimal pl-5' },
+        listItem: { tagName: 'span', className: 'list-item [&>*+*]:mt-0' },
+        quotation: { tagName: 'span', className: 'mt-1.5 first:mt-0 block border-l-2 border-current pl-3 italic' },
+        codeBlock: { tagName: 'span', className: 'mt-1.5 first:mt-0 block whitespace-pre-wrap' },
+        rule: { tagName: 'span', className: 'mt-1.5 first:mt-0 block border-t border-current opacity-30' },
+        table: { tagName: 'span', className: 'mt-1.5 first:mt-0 table' },
+        tableHead: { tagName: 'span', className: 'table-header-group' },
+        tableBody: { tagName: 'span', className: 'table-row-group' },
+        tableRow: { tagName: 'span', className: 'table-row' },
+        tableHeaderCell: { tagName: 'span', className: 'table-cell pr-4 text-left font-semibold' },
+        tableCell: { tagName: 'span', className: 'table-cell pr-4 align-top' },
+    },
+};
 
 /**
  * Protocols a description may lead out to, which leaves `javascript:` and `data:` addresses as plain labels
  */
 const EVENT_DESCRIPTION_ALLOWED_LINK_PROTOCOLS = new Set(['https:', 'http:', 'mailto:']);
 
-/**
- * What an excerpt puts between two blocks of the description and in front of each item of a list
- */
-const EVENT_DESCRIPTION_EXCERPT_BLOCK_SEPARATOR = ' ';
-const EVENT_DESCRIPTION_EXCERPT_LIST_ITEM_MARKER = '• ';
-
 const EVENT_DESCRIPTION_CODE_CLASS_NAME = 'font-mono text-[0.95em]';
-const EVENT_DESCRIPTION_BLOCK_CLASS_NAME = 'mt-3 first:mt-0';
+
+/**
+ * What only one part of a description is told beyond what it is made of
+ */
+type EventDescriptionElementProperties = {
+    readonly start?: number;
+    readonly style?: CSSProperties;
+};
+
+/**
+ * One part of a description as the element its shape makes that part of
+ */
+function createEventDescriptionElement(
+    shape: EventDescriptionShape,
+    part: EventDescriptionPart,
+    key: string,
+    children?: ReactNode,
+    properties: EventDescriptionElementProperties = {},
+): ReactNode {
+    const { tagName, className } = EVENT_DESCRIPTION_ELEMENTS[shape][part];
+
+    return createElement(tagName, { key, className, ...properties }, children);
+}
+
+/**
+ * What makes an ordered list count from the number its first item was written with
+ *
+ * Note: A list which is a real list is simply told where to begin, and counts its own items from there.
+ */
+function createEventDescriptionOrderedListProperties(
+    shape: EventDescriptionShape,
+    firstItemNumber: number,
+): EventDescriptionElementProperties {
+    return shape === 'block' ? { start: firstItemNumber } : {};
+}
+
+/**
+ * What makes one item of an ordered list carry the number it was written with
+ *
+ * Note: An item which is only displayed as an item of a list is counted by the browser together with whatever real
+ *       list the page around its card happens to stand in, and no counter set on the phrasing list changes that. So
+ *       such an item is not left to be counted at all: it is told the very number it wears.
+ */
+function createEventDescriptionOrderedListItemProperties(
+    shape: EventDescriptionShape,
+    itemNumber: number,
+): EventDescriptionElementProperties {
+    return shape === 'block' ? {} : { style: { listStyleType: `"${itemNumber}. "` } };
+}
 
 /**
  * The address of a link which may be opened, or `null` for one which stays a label
@@ -54,7 +172,7 @@ function renderEventDescriptionLink(token: Tokens.Link, shape: EventDescriptionS
     const label = renderEventDescriptionInlineTokens(token.tokens, shape);
     const href = resolveEventDescriptionHref(token.href);
 
-    if (shape === 'inline' || href === null) {
+    if (shape === 'phrasing' || href === null) {
         return label;
     }
 
@@ -83,7 +201,8 @@ function renderEventDescriptionInlineToken(token: MarkedToken, shape: EventDescr
         case 'codespan':
             return <code className={EVENT_DESCRIPTION_CODE_CLASS_NAME}>{token.text}</code>;
         case 'br':
-            return shape === 'inline' ? EVENT_DESCRIPTION_EXCERPT_BLOCK_SEPARATOR : <br />;
+            // A line which was ended stays ended, which a button is allowed to say as well.
+            return <br />;
         case 'link':
             return renderEventDescriptionLink(token, shape);
         case 'image':
@@ -110,7 +229,76 @@ function renderEventDescriptionInlineTokens(
     ));
 }
 
-function renderEventDescriptionBlockTokens(tokens: readonly Token[]): readonly ReactNode[] {
+function renderEventDescriptionList(list: Tokens.List, shape: EventDescriptionShape, key: string): ReactNode {
+    const firstItemNumber = readMarkdownListStart(list);
+    const items = list.items.map((item, itemIndex) =>
+        createEventDescriptionElement(
+            shape,
+            'listItem',
+            `item-${itemIndex}`,
+            renderEventDescriptionBlockTokens(item.tokens, shape),
+            list.ordered ? createEventDescriptionOrderedListItemProperties(shape, firstItemNumber + itemIndex) : {},
+        ),
+    );
+
+    return list.ordered
+        ? createEventDescriptionElement(
+              shape,
+              'orderedList',
+              key,
+              items,
+              createEventDescriptionOrderedListProperties(shape, firstItemNumber),
+          )
+        : createEventDescriptionElement(shape, 'unorderedList', key, items);
+}
+
+function renderEventDescriptionTableRow(
+    cells: readonly Tokens.TableCell[],
+    cellPart: 'tableHeaderCell' | 'tableCell',
+    shape: EventDescriptionShape,
+    key: string,
+): ReactNode {
+    return createEventDescriptionElement(
+        shape,
+        'tableRow',
+        key,
+        cells.map((cell, cellIndex) =>
+            createEventDescriptionElement(
+                shape,
+                cellPart,
+                `cell-${cellIndex}`,
+                renderEventDescriptionInlineTokens(cell.tokens, shape),
+            ),
+        ),
+    );
+}
+
+function renderEventDescriptionTable(table: Tokens.Table, shape: EventDescriptionShape, key: string): ReactNode {
+    return createEventDescriptionElement(shape, 'table', key, [
+        createEventDescriptionElement(
+            shape,
+            'tableHead',
+            'head',
+            renderEventDescriptionTableRow(table.header, 'tableHeaderCell', shape, 'header'),
+        ),
+        createEventDescriptionElement(
+            shape,
+            'tableBody',
+            'body',
+            table.rows.map((row, rowIndex) =>
+                renderEventDescriptionTableRow(row, 'tableCell', shape, `row-${rowIndex}`),
+            ),
+        ),
+    ]);
+}
+
+/**
+ * Every block of a description as the part it is, in the order it was written
+ */
+function renderEventDescriptionBlockTokens(
+    tokens: readonly Token[],
+    shape: EventDescriptionShape,
+): readonly ReactNode[] {
     return tokens.flatMap((token, index): readonly ReactNode[] => {
         const markdownToken = token as MarkedToken;
         const key = `${markdownToken.type}-${index}`;
@@ -123,170 +311,58 @@ function renderEventDescriptionBlockTokens(tokens: readonly Token[]): readonly R
                 // Note: A description is one passage rather than a document of its own, so an authored heading leads
                 //       its paragraph instead of claiming a level in the outline of the page around it.
                 return [
-                    <p key={key} className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} font-semibold`}>
-                        {renderEventDescriptionInlineTokens(markdownToken.tokens, 'block')}
-                    </p>,
-                ];
-            case 'list': {
-                const items = markdownToken.items.map((item, itemIndex) => (
-                    <li key={`item-${itemIndex}`}>{renderEventDescriptionBlockTokens(item.tokens)}</li>
-                ));
-
-                return [
-                    markdownToken.ordered ? (
-                        <ol
-                            key={key}
-                            start={Number(markdownToken.start) || 1}
-                            className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} list-decimal space-y-1 pl-5`}
-                        >
-                            {items}
-                        </ol>
-                    ) : (
-                        <ul key={key} className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} list-disc space-y-1 pl-5`}>
-                            {items}
-                        </ul>
+                    createEventDescriptionElement(
+                        shape,
+                        'heading',
+                        key,
+                        renderEventDescriptionInlineTokens(markdownToken.tokens, shape),
                     ),
                 ];
-            }
+            case 'list':
+                return [renderEventDescriptionList(markdownToken, shape, key)];
             case 'blockquote':
                 return [
-                    <blockquote
-                        key={key}
-                        className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} border-l-2 border-room-border/20 pl-3 italic`}
-                    >
-                        {renderEventDescriptionBlockTokens(markdownToken.tokens)}
-                    </blockquote>,
+                    createEventDescriptionElement(
+                        shape,
+                        'quotation',
+                        key,
+                        renderEventDescriptionBlockTokens(markdownToken.tokens, shape),
+                    ),
                 ];
             case 'code':
                 return [
-                    <pre
-                        key={key}
-                        className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} max-w-full overflow-x-auto rounded bg-room-overlay/[0.06] p-2`}
-                    >
-                        <code className={EVENT_DESCRIPTION_CODE_CLASS_NAME}>{markdownToken.text}</code>
-                    </pre>,
+                    createEventDescriptionElement(
+                        shape,
+                        'codeBlock',
+                        key,
+                        <code className={EVENT_DESCRIPTION_CODE_CLASS_NAME}>{markdownToken.text}</code>,
+                    ),
                 ];
             case 'hr':
-                return [<hr key={key} className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} border-room-border/20`} />];
+                return [createEventDescriptionElement(shape, 'rule', key)];
             case 'table':
-                return [
-                    <table
-                        key={key}
-                        className={`${EVENT_DESCRIPTION_BLOCK_CLASS_NAME} block max-w-full overflow-x-auto`}
-                    >
-                        <thead>
-                            <tr>
-                                {markdownToken.header.map((cell, cellIndex) => (
-                                    <th key={`header-${cellIndex}`} className="pr-4 text-left font-semibold">
-                                        {renderEventDescriptionInlineTokens(cell.tokens, 'block')}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {markdownToken.rows.map((row, rowIndex) => (
-                                <tr key={`row-${rowIndex}`}>
-                                    {row.map((cell, cellIndex) => (
-                                        <td key={`cell-${cellIndex}`} className="pr-4 align-top">
-                                            {renderEventDescriptionInlineTokens(cell.tokens, 'block')}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>,
-                ];
+                return [renderEventDescriptionTable(markdownToken, shape, key)];
             default: {
                 const paragraph =
                     'tokens' in markdownToken && markdownToken.tokens !== undefined
-                        ? renderEventDescriptionInlineTokens(markdownToken.tokens, 'block')
+                        ? renderEventDescriptionInlineTokens(markdownToken.tokens, shape)
                         : readMarkdownTokenText(markdownToken);
 
                 // A token which is left with no text at all — a stripped tag, say — becomes no paragraph.
-                return paragraph === ''
-                    ? []
-                    : [
-                          <p key={key} className={EVENT_DESCRIPTION_BLOCK_CLASS_NAME}>
-                              {paragraph}
-                          </p>,
-                      ];
+                return paragraph === '' ? [] : [createEventDescriptionElement(shape, 'paragraph', key, paragraph)];
             }
         }
     });
-}
-
-/**
- * Every block of a description as its own run of inline nodes, in the order it was written
- */
-function createEventDescriptionExcerptRuns(tokens: readonly Token[]): readonly (readonly ReactNode[])[] {
-    return tokens.flatMap((token): readonly (readonly ReactNode[])[] => {
-        const markdownToken = token as MarkedToken;
-
-        switch (markdownToken.type) {
-            case 'space':
-            case 'def':
-            case 'hr':
-                return [];
-            case 'blockquote':
-                return createEventDescriptionExcerptRuns(markdownToken.tokens);
-            case 'heading':
-                // An authored heading leads its paragraph in an excerpt exactly as it does in the whole passage.
-                return [
-                    [
-                        <strong key="heading" className="font-semibold">
-                            {renderEventDescriptionInlineTokens(markdownToken.tokens, 'inline')}
-                        </strong>,
-                    ],
-                ];
-            case 'list':
-                // An excerpt has no bullets to indent, so each item says that it is one.
-                return markdownToken.items.map((item) => [
-                    EVENT_DESCRIPTION_EXCERPT_LIST_ITEM_MARKER,
-                    ...joinEventDescriptionExcerptRuns(createEventDescriptionExcerptRuns(item.tokens)),
-                ]);
-            case 'code':
-                return [
-                    [
-                        <code key="code" className={EVENT_DESCRIPTION_CODE_CLASS_NAME}>
-                            {markdownToken.text}
-                        </code>,
-                    ],
-                ];
-            case 'table':
-                return [markdownToken.header, ...markdownToken.rows].map((row) =>
-                    joinEventDescriptionExcerptRuns(
-                        row.map((cell) => renderEventDescriptionInlineTokens(cell.tokens, 'inline')),
-                    ),
-                );
-            default: {
-                if ('tokens' in markdownToken && markdownToken.tokens !== undefined) {
-                    return [renderEventDescriptionInlineTokens(markdownToken.tokens, 'inline')];
-                }
-
-                // A token which is left with no text at all — a stripped tag, say — adds no separator of its own.
-                const text = readMarkdownTokenText(markdownToken);
-
-                return text === '' ? [] : [[text]];
-            }
-        }
-    });
-}
-
-function joinEventDescriptionExcerptRuns(runs: readonly (readonly ReactNode[])[]): readonly ReactNode[] {
-    return runs.flatMap((run, index) => [
-        ...(index === 0 ? [] : [EVENT_DESCRIPTION_EXCERPT_BLOCK_SEPARATOR]),
-        <Fragment key={`run-${index}`}>{run}</Fragment>,
-    ]);
 }
 
 type EventDescriptionProps = {
     /**
-     * The words an administrator wrote about one event, written as Markdown
+     * The words an administrator wrote about one event, written as Markdown on as many lines as they took
      */
     readonly description: string;
 
     /**
-     * How much room they are read in, see `EVENT_DESCRIPTION_SHAPES`
+     * What they are built from where they are read, see `EVENT_DESCRIPTION_SHAPES`
      */
     readonly shape?: EventDescriptionShape;
     readonly className?: string;
@@ -300,21 +376,14 @@ type EventDescriptionProps = {
  *       same Markdown through `createMarkdownPdfContent`. The description carries no markup of its own: raw HTML only
  *       ever contributes its text, an image is read by its label, and only an address of a known protocol ever becomes
  *       a link.
- * Note: The formatting takes no colours of its own and inherits the ones of the surface it is read on, so the fixed
- *       palette of a landing page and the appearance a member chose for their room both stay intact. What does need a
- *       colour — a link, a quotation, a block of code — only ever appears in the whole passage, which is read inside a
- *       room.
+ * Note: A description is written on as many lines as it takes, and it is read on those lines wherever it is read: a
+ *       line which was ended stays ended, a paragraph stays a paragraph, and an item of a list stays on a line of its
+ *       own behind its bullet or its number.
  */
 export function EventDescription({ description, shape = 'block', className }: EventDescriptionProps) {
-    const tokens = readMarkdownTokens(description);
-
-    if (shape === 'inline') {
-        return (
-            <span className={className}>
-                {joinEventDescriptionExcerptRuns(createEventDescriptionExcerptRuns(tokens))}
-            </span>
-        );
-    }
-
-    return <div className={className}>{renderEventDescriptionBlockTokens(tokens)}</div>;
+    return createElement(
+        EVENT_DESCRIPTION_ELEMENTS[shape].root.tagName,
+        { className },
+        renderEventDescriptionBlockTokens(readMarkdownTokens(description), shape),
+    );
 }

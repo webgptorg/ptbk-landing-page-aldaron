@@ -335,17 +335,24 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Shared community and workshop behavior
 
-- The description an administrator writes about a term or a permanent room is Markdown, and how it reads is decided
-  once, in `components/events/EventDescription.tsx`. The door of its room reads the whole passage, with its paragraphs,
-  lists, quotations, code and links, which open beside the room; the card a term is chosen with reads the very same
-  words as one flowing excerpt, because that card is a single button where block elements and destinations are neither
-  valid nor clickable, and the compact card still cuts the excerpt off after two lines. An authored heading leads its
-  paragraph instead of claiming a level in the page around it, the formatting inherits the colours of the surface it is
-  read on, raw HTML only ever contributes its text, an image is read by its label, and only an address of a known
-  protocol becomes a link. The wrap-up PDF already reads the same Markdown, and a calendar entry, which can show no
-  formatting at all, receives it as the plain text of `convertMarkdownToPlainText`, which drops no word and keeps both
-  the label and the destination of a link. A description written by a member rather than by an administration — the
-  project a discussion is about — stays the plain text its moderation approved.
+- The description an administrator writes about a term or a permanent room is Markdown on as many lines as it takes,
+  and how it reads is decided once, in `components/events/EventDescription.tsx`. A line which was ended stays ended, a
+  paragraph stays a paragraph, and an item of a bulleted or numbered list stays on a line of its own behind its bullet
+  or its number, wherever the description is read; `readMarkdownTokens` reads those line breaks for the page, the PDF
+  and the plain text alike. The door of its room reads the whole passage, with its paragraphs, lists, quotations, code
+  and links, which open beside the room; the card a term is chosen with reads the very same lines built from phrasing
+  content alone and without destinations, because that card is a single button where block elements and destinations
+  are neither valid nor clickable. A numbered item of such a card is told its own number, because a browser would
+  otherwise count it together with whatever list the page around the card stands in. The comfortable card reads the
+  whole description and begins at its top, however long its neighbours are; the compact card still cuts it off after
+  two lines. An authored heading leads its paragraph instead of claiming a level in the page around it, the formatting
+  inherits the colours of the surface it is read on, raw HTML only ever contributes its text, an image is read by its
+  label, and only an address of a known protocol becomes a link. The wrap-up PDF already reads the same Markdown, and a
+  calendar entry, which can show no formatting at all, receives it as the plain text of `convertMarkdownToPlainText`,
+  which drops no word, keeps every line and the bullet or number of every list item, and keeps both the label and the
+  destination of a link. The administration writes it in a field which takes several lines and says so. A description
+  written by a member rather than by an administration — the project a discussion is about — stays the plain text its
+  moderation approved.
 
 - Workshop occurrences choose video, presentation, or their connected repository as the primary stage source. Old
   data defaults to video; the choice never changes which sources are stored. The countdown and wrap-up still follow

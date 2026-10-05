@@ -83,7 +83,7 @@ describe('workshop calendar event', () => {
             participantPath: PARTICIPANT_PATH,
         });
 
-        expect(event.description).toBe('Celé workflow od issue po merge.\n\nrozpad úkolů\ncode review');
+        expect(event.description).toBe('Celé workflow od issue po merge.\n\n• rozpad úkolů\n• code review');
     });
 
     it('names the downloaded file after the workshop', () => {

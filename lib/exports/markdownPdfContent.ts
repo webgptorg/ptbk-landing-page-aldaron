@@ -1,4 +1,4 @@
-import { readMarkdownTokens, readMarkdownTokenText } from '@/lib/text/markdownText';
+import { readMarkdownListStart, readMarkdownTokens, readMarkdownTokenText } from '@/lib/text/markdownText';
 import type { MarkedToken, Token, Tokens } from 'marked';
 import type { Content, ContentText } from 'pdfmake/interfaces';
 
@@ -97,7 +97,7 @@ function renderBlockTokens(tokens: readonly Token[], baseUrl: string): Content[]
                 );
                 return [
                     markdownToken.ordered
-                        ? { ol: items, start: Number(markdownToken.start) || 1, margin: [0, 0, 0, 8] }
+                        ? { ol: items, start: readMarkdownListStart(markdownToken), margin: [0, 0, 0, 8] }
                         : { ul: items, margin: [0, 0, 0, 8] },
                 ];
             }

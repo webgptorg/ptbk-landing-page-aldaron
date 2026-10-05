@@ -74,7 +74,8 @@ export type EventTermDensity = (typeof EVENT_TERM_DENSITIES)[number];
  *
  * Note: A compact card says everything a comfortable one says, in the same order, only quieter and with a description
  *       which is cut off after two lines — so a term offered beside another one is never described differently, merely
- *       shorter.
+ *       shorter. A comfortable card reads the whole description on every line it was written on, with its paragraphs
+ *       and the items of its lists each on a line of their own.
  */
 const EVENT_TERM_OPTION_CARD_DENSITIES: Readonly<
     Record<
@@ -184,7 +185,9 @@ export function EventTermOptionCard({
             aria-pressed={isSelected}
             onClick={onSelect}
             className={cn(
-                'border text-left transition-all',
+                // Note: A card stands in a row with cards whose descriptions take a different number of lines, so
+                //       what it says begins at its top rather than in the middle of the room the tallest of them takes.
+                'flex flex-col border text-left transition-all',
                 densityClassNames.card,
                 isSelected ? appearanceClassNames.selectedCard : appearanceClassNames.card,
             )}
@@ -216,7 +219,7 @@ export function EventTermOptionCard({
                     {occurrence.description.trim() !== '' && (
                         <EventDescription
                             description={occurrence.description}
-                            shape="inline"
+                            shape="phrasing"
                             className={cn(densityClassNames.description, appearanceClassNames.description)}
                         />
                     )}
