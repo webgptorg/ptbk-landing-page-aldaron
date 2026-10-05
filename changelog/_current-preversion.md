@@ -1,5 +1,18 @@
 # Current preversion
 
+- Added **Převzít studio v této kartě** to the blocked recording Studio and editor. A confirmation in the requesting
+  tab now hands ownership over without finding, closing or refreshing the original tab: the old instance stops
+  recording, drains final media writes, releases every preview/device track, settles exports/generation/uploads and
+  flushes valid editor saves before releasing the actual browser lock. Failed saves are reported and retained;
+  discarding edits requires a separate confirmation. The new instance reloads committed media, opens a stopped take,
+  restores source intent without capture and never starts automatically. Deactivated tabs stay disabled through focus,
+  polling and refresh. Requests use addressed identities and acknowledged cancellation, with bounded waiting and one
+  winner for simultaneous requests. Explicit forced takeover fences stale media, recovery, deletion, saves and
+  publication through the existing browser database before taking the lock; unresolved disk/server commits remain
+  blocked, and the UI distinguishes revocation from physically stopping a suspended tab's devices. Resumable upload
+  revision/source identifiers are retained. Real cross-tab tests and browser/physical limits are documented in
+  `docs/recording-studio-takeover.md`.
+
 - The recording studio's **Otestovat výstrahu** now fires after a five-second countdown instead of at once, so an
   administrator can first switch to the tab, application or desktop they will work in while recording. The notice
   shows the remaining time, says where to go and offers **Zrušit test**; a repeated click starts no second test, and

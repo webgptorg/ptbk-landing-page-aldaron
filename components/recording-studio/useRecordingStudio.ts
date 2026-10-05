@@ -1,11 +1,13 @@
 'use client';
 
-import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { discardPendingAdminEditorSaves, flushAdminEditorSaves, getPendingAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { RecordingStudioCapture } from '@/lib/recording-studio/RecordingStudioCapture';
 import { acquireRecordingSource, getRecordingErrorMessage, getRecordingSourceReadiness, isRecordingSourceReady, isRecordingSourceTemporarilyUnavailable, matchesRecordingSourceConfiguration, reconcileRecordingSourcesForConfiguration, releaseRecordingSource } from '@/lib/recording-studio/recordingStudioDevices';
 import { clearRecordingSourceConfigurations, loadRecordingSourceConfigurations, saveRecordingSourceConfigurations, toRecordingSourceConfiguration, UNKNOWN_LEGACY_DEVICE_ID, type RecordingSourceConfigurationRestore } from '@/lib/recording-studio/recordingStudioSourceConfiguration';
-import { runWithRecordingStudioLock } from '@/lib/recording-studio/recordingStudioLock';
+import { RecordingStudioOwnership, type RecordingStudioOwnershipSnapshot, type RecordingStudioActivation } from '@/lib/recording-studio/RecordingStudioOwnership';
+import { RECORDING_STUDIO_AUTHORITY, type RecordingStudioAuthority } from '@/lib/recording-studio/recordingStudioAuthority';
+import { assertRecordingStudioWorkAccepted, cancelRecordingStudioWork, isRecordingStudioWorkRunning, runRecordingStudioWork, setRecordingStudioWorkAccepted, settleRecordingStudioWork } from '@/lib/recording-studio/recordingStudioWork';
 import { estimateRecordingStorage, getRecordingStorageErrorMessage, isRecordingOriginStorageLow, readRecordingPersistence, RECORDING_STORAGE_REFRESH_MILLISECONDS, requestRecordingPersistence, UNKNOWN_RECORDING_STORAGE } from '@/lib/recording-studio/recordingStudioCapacity';
 import { chooseRecordingDirectory } from '@/lib/recording-studio/recordingStudioDirectory';
 import { importStudioRecordingDirectory, readStudioRecording, recoverStudioRecordings, resetRecordingDirectoryCache } from '@/lib/recording-studio/recordingStudioStorage';
@@ -17,6 +19,24 @@ import {
 import type { RecordingAlert } from '@/lib/recording-studio/recordingStudioAlerts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecordingStudioAlerts } from './useRecordingStudioAlerts';
+import { settleRecordingStudioHandover } from '@/lib/recording-studio/recordingStudioHandover';
+
+const DEACTIVATED_STUDIO_SESSION_KEY = 'promptbook-recording-studio-deactivated';
+const PREVIOUS_STUDIO_AUTHORITY_SESSION_KEY = 'promptbook-recording-studio-previous-authority';
+const FORCED_INTERRUPTION_MESSAGE = 'Studio bylo nuceně převzato v jiné kartě. Obnovené jsou pouze potvrzené části; neuložený konec ani jeho délku nelze zaručit.';
+
+function createStudioRuntime() {
+    return { isDisposed: false, isAcceptingWork: false, isAddingSource: false, isStartPending: false,
+        startSettlement: null as Promise<unknown> | null, activationSettlement: null as Promise<void> | null,
+        capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] };
+}
+
+function rememberStudioDeactivation(isDeactivated: boolean): void {
+    try {
+        if (isDeactivated) sessionStorage.setItem(DEACTIVATED_STUDIO_SESSION_KEY, 'yes');
+        else sessionStorage.removeItem(DEACTIVATED_STUDIO_SESSION_KEY);
+    } catch { /* Storage fencing still protects writes when browser-local preferences are unavailable. */ }
+}
 
 function getMutedAudioReadinessMessage(source: RecordingSource, configuration: RecordingSourceConfiguration): string {
     const microphoneName = source.microphoneLabel || source.label;
@@ -73,7 +93,11 @@ export function useRecordingStudio() {
     const [phase, setPhase] = useState<'loading' | 'idle' | 'starting' | 'recording' | 'pausing' | 'paused' | 'resuming' | 'stopping' | 'unavailable'>('loading');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
-    const runtime = useRef({ isDisposed: false, isAddingSource: false, isStartPending: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] });
+    const runtime = useRef(createStudioRuntime());
+    const ownershipReference = useRef<RecordingStudioOwnership | null>(null);
+    const [ownership, setOwnership] = useState<RecordingStudioOwnershipSnapshot | null>(null);
+    const stateReference = useRef({ phase, elapsedSeconds });
+    stateReference.current = { phase, elapsedSeconds };
     // A take is running from the click which starts it until its last write, not only while a recorder exists.
     const alertChannel = useRecordingStudioAlerts({ isTakeRunning: () => runtime.current.isStartPending || runtime.current.capture !== null });
     const { cancelTestAlert } = alertChannel;
@@ -97,7 +121,7 @@ export function useRecordingStudio() {
         if (storageRequest.current) return storageRequest.current.then(() => refreshStorage());
         storageRequest.current = (async () => {
             const estimate = await estimateRecordingStorage();
-            if (runtime.current.isDisposed) return;
+            if (runtime.current.isDisposed || !runtime.current.isAcceptingWork) return;
             setStorage(estimate);
             if (!directoryReference.current && isRecordingOriginStorageLow(estimate)) {
                 void runtime.current.capture?.stop('Prohlížeč hlásí málo prostoru pro web. Všechny stopy byly zastaveny; uložené části zůstávají dostupné.');
@@ -107,33 +131,42 @@ export function useRecordingStudio() {
     }, []);
 
     useEffect(() => {
-        const current = { isDisposed: false, isAddingSource: false, isStartPending: false, capture: null as RecordingStudioCapture | null, sources: [] as RecordingSource[], sourceConfigurations: [] as RecordingSourceConfiguration[] };
+        const current = createStudioRuntime();
         runtime.current = current;
         if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined' || !window.indexedDB || !navigator.locks) {
             setErrorMessage('Studio potřebuje HTTPS (nebo localhost), snímání médií, MediaRecorder, IndexedDB a zámky prohlížeče. Otevřete ho v podporovaném aktuálním prohlížeči.');
             setPhase('unavailable');
             return;
         }
-        let releaseLock: (() => void) | undefined;
-        const released = new Promise<void>((resolve) => { releaseLock = resolve; });
-        // One owner also prevents another tab from deleting or recovering an active take.
-        void runWithRecordingStudioLock(async (lock) => {
-            if (current.isDisposed) return;
-            if (!lock) {
-                setErrorMessage('Studio už je otevřené v jiné kartě. Zavřete ji a obnovte tuto stránku.');
-                setPhase('unavailable');
-                return;
+        const releaseDevices = () => {
+            current.sources.forEach(releaseRecordingSource);
+            current.sources = [];
+            if (!current.isDisposed) {
+                setSources([]);
+                setSourceReadiness(Object.fromEntries(current.sourceConfigurations.map(({ id }) => [id, 'needs-permission' as const])));
             }
+        };
+        const acceptWork = (isAccepted: boolean) => {
+            current.isAcceptingWork = isAccepted && !current.isDisposed;
+            setRecordingStudioWorkAccepted(current.isAcceptingWork);
+        };
+        const activate = async (activation: RecordingStudioActivation) => {
+            setPhase('loading'); setErrorMessage(null); setActiveRecording(null); setElapsedSeconds(0);
+            directoryReference.current = null; setDirectory(null);
             try {
                 resetRecordingDirectoryCache();
                 current.sourceConfigurations = loadRecordingSourceConfigurations();
                 setSourceConfigurations(current.sourceConfigurations);
                 setSourceReadiness(Object.fromEntries(current.sourceConfigurations.map(({ id }) => [id, 'needs-permission' as const])));
-                const recovered = await recoverStudioRecordings();
+                const recovered = await recoverStudioRecordings(activation.origin === 'forced' ? FORCED_INTERRUPTION_MESSAGE : undefined);
                 const { clearRecordingExportTemporaryFiles } = await import('@/lib/recording-studio/recordingStudioTemporaryFile');
                 await clearRecordingExportTemporaryFiles().catch(() => undefined);
-                if (!current.isDisposed) {
+                await RECORDING_STUDIO_AUTHORITY.assertCurrent();
+                if (!current.isDisposed && ownershipReference.current?.getSnapshot().status === 'active') {
                     setRecordings(recovered);
+                    rememberStudioDeactivation(false);
+                    try { sessionStorage.setItem(PREVIOUS_STUDIO_AUTHORITY_SESSION_KEY, JSON.stringify(RECORDING_STUDIO_AUTHORITY.heldAuthority)); } catch { /* Preferences unavailable. */ }
+                    acceptWork(true);
                     setPhase('idle');
                     await refreshStorage();
                     const result = await readRecordingPersistence();
@@ -142,28 +175,67 @@ export function useRecordingStudio() {
             } catch (error) {
                 if (!current.isDisposed) { setErrorMessage(getRecordingErrorMessage(error)); setPhase('unavailable'); }
             }
-            await released;
-            await current.capture?.stop('Stránka studia byla zavřena.');
-            current.sources.forEach(releaseRecordingSource);
-            current.sources = [];
-            // History navigation can unmount the page before an editor save or cancelled export settles.
-            await flushAdminSaves();
-        }).catch((error: unknown) => {
-            if (!current.isDisposed) { setErrorMessage(getRecordingErrorMessage(error)); setPhase('unavailable'); }
+        };
+        const ownershipController = new RecordingStudioOwnership({
+            activate: (activation) => {
+                current.activationSettlement = activate(activation);
+                return current.activationSettlement;
+            },
+            describeState: () => ({ phase: current.capture?.currentPhase ?? stateReference.current.phase,
+                recordedSeconds: current.capture?.elapsedRecordingSeconds ?? stateReference.current.elapsedSeconds,
+                isFileWorkRunning: isRecordingStudioWorkRunning(), isEditUnsaved: getPendingAdminEditorSaves().length > 0 }),
+            settleWork: (request) => settleRecordingStudioHandover(current, request, acceptWork, releaseDevices),
+            resumeWork: () => { acceptWork(stateReference.current.phase !== 'unavailable'); },
+            abandonWork: async () => {
+                const capture = current.capture;
+                acceptWork(false); cancelRecordingStudioWork(); capture?.abandon(); releaseDevices();
+                // Keep the old lifetime callback until stale async work has exited, including native pickers.
+                await Promise.allSettled([capture?.settleAbandonedWork(), current.startSettlement, current.activationSettlement, settleRecordingStudioWork()]);
+                discardPendingAdminEditorSaves();
+                // Discard cancels queued drafts, but an admitted save still has to settle under the old token.
+                // Do not let this document explicitly regain ownership while that old callback is still running.
+                await flushAdminEditorSaves();
+            },
+            deactivate: (inactivity) => {
+                acceptWork(false); releaseDevices();
+                if (inactivity.reason === 'handed-over' || inactivity.reason === 'revoked') rememberStudioDeactivation(true);
+                if (!current.isDisposed) { setPhase('unavailable'); setActiveRecording(null); setPendingBytes(0); }
+            },
+            shutDown: async () => {
+                acceptWork(false); cancelRecordingStudioWork();
+                await current.activationSettlement;
+                await current.capture?.stop('Stránka studia byla zavřena.');
+                await current.startSettlement;
+                releaseDevices();
+                await settleRecordingStudioWork(); await flushAdminEditorSaves();
+            },
         });
-        const storageTimer = setInterval(() => { void refreshStorage(); }, RECORDING_STORAGE_REFRESH_MILLISECONDS);
+        ownershipReference.current = ownershipController;
+        const unsubscribe = ownershipController.subscribe(() => { if (!current.isDisposed) setOwnership(ownershipController.getSnapshot()); });
+        setOwnership(ownershipController.getSnapshot());
+        let isAutoClaimAllowed = true;
+        let previousAuthority: RecordingStudioAuthority | null = null;
+        try {
+            isAutoClaimAllowed = sessionStorage.getItem(DEACTIVATED_STUDIO_SESSION_KEY) !== 'yes';
+            const previous: unknown = JSON.parse(sessionStorage.getItem(PREVIOUS_STUDIO_AUTHORITY_SESSION_KEY) ?? 'null');
+            if (typeof previous === 'object' && previous !== null && 'generation' in previous && 'instanceId' in previous &&
+                typeof previous.generation === 'number' && Number.isSafeInteger(previous.generation) && typeof previous.instanceId === 'string') previousAuthority = { generation: previous.generation, instanceId: previous.instanceId };
+        } catch { /* Unavailable preferences. */ }
+        ownershipController.start(isAutoClaimAllowed, previousAuthority);
+        const checkAuthority = () => ownershipController.checkAuthority();
+        window.addEventListener('focus', checkAuthority);
+        document.addEventListener('visibilitychange', checkAuthority);
+        const storageTimer = setInterval(() => {
+            checkAuthority();
+            if (current.isAcceptingWork) void refreshStorage();
+        }, RECORDING_STORAGE_REFRESH_MILLISECONDS);
         return () => {
             current.isDisposed = true;
             clearInterval(storageTimer);
-            void current.capture?.stop('Stránka studia byla zavřena.').finally(() => {
-                current.sources.forEach(releaseRecordingSource);
-                current.sources = [];
-            });
-            if (!current.capture) {
-                current.sources.forEach(releaseRecordingSource);
-                current.sources = [];
-            }
-            releaseLock?.();
+            window.removeEventListener('focus', checkAuthority);
+            document.removeEventListener('visibilitychange', checkAuthority);
+            unsubscribe(); ownershipController.dispose();
+            if (ownershipReference.current === ownershipController) ownershipReference.current = null;
         };
     }, [refreshStorage]);
 
@@ -189,16 +261,20 @@ export function useRecordingStudio() {
     }, [phase]);
 
     const chooseDirectory = async (isImport: boolean) => {
-        if (phase !== 'idle' || runtime.current.capture || directoryOperation.current) return;
+        if (!runtime.current.isAcceptingWork || phase !== 'idle' || runtime.current.capture || directoryOperation.current) return;
         directoryOperation.current = true; setIsChoosingDirectory(true); setErrorMessage(null);
         // Invoke immediately while the native picker still has the click gesture.
         const selection = chooseRecordingDirectory(isImport);
         try {
-            const selected = await selection;
-            if (isImport) {
-                const recording = await protectAdminMutation(() => importStudioRecordingDirectory(selected));
+            await runRecordingStudioWork(async (signal) => {
+                const selectedDirectory = await selection;
+                signal.throwIfAborted();
+                if (!isImport) { directoryReference.current = selectedDirectory; setDirectory(selectedDirectory); return selectedDirectory; }
+                const recording = await importStudioRecordingDirectory(selectedDirectory);
+                signal.throwIfAborted();
                 setRecordings((previous) => [recording, ...previous.filter((item) => item.id !== recording.id)]);
-            } else { directoryReference.current = selected; setDirectory(selected); }
+                return selectedDirectory;
+            });
             await refreshStorage();
         } catch (error) {
             if (!(error instanceof DOMException && error.name === 'AbortError')) setErrorMessage(error instanceof DOMException ? getRecordingStorageErrorMessage(error, false) : getRecordingErrorMessage(error));
@@ -206,6 +282,7 @@ export function useRecordingStudio() {
     };
 
     const persistSourceConfigurations = (configurations: readonly RecordingSourceConfiguration[]) => {
+        assertRecordingStudioWorkAccepted();
         const nextConfigurations = [...configurations];
         runtime.current.sourceConfigurations = nextConfigurations;
         setSourceConfigurations(nextConfigurations);
@@ -227,7 +304,7 @@ export function useRecordingStudio() {
     };
 
     const removeSource = (sourceId: string) => {
-        if (runtime.current.capture) return;
+        if (!runtime.current.isAcceptingWork || runtime.current.capture) return;
         const current = runtime.current;
         const source = current.sources.find((candidate) => candidate.id === sourceId);
         if (source) releaseRecordingSource(source);
@@ -238,7 +315,7 @@ export function useRecordingStudio() {
     };
 
     const resetSourceConfigurations = () => {
-        if (runtime.current.capture || phase !== 'idle') return;
+        if (!runtime.current.isAcceptingWork || runtime.current.capture || phase !== 'idle') return;
         releaseSources();
         runtime.current.sourceConfigurations = [];
         setSourceConfigurations([]);
@@ -248,7 +325,7 @@ export function useRecordingStudio() {
 
     const moveSource = (sourceId: string, offset: -1 | 1) => {
         const current = runtime.current;
-        if (current.capture || phase !== 'idle') return;
+        if (!current.isAcceptingWork || current.capture || phase !== 'idle') return;
         const sourceIndex = current.sourceConfigurations.findIndex(({ id }) => id === sourceId);
         const destinationIndex = sourceIndex + offset;
         if (sourceIndex < 0 || destinationIndex < 0 || destinationIndex >= current.sourceConfigurations.length) return;
@@ -259,7 +336,7 @@ export function useRecordingStudio() {
 
     const setSourceCaptureEnabled = (sourceId: string, isCaptureEnabled: boolean) => {
         const current = runtime.current;
-        if (current.capture || phase !== 'idle') return;
+        if (!current.isAcceptingWork || current.capture || phase !== 'idle') return;
         const nextConfigurations = current.sourceConfigurations.map((configuration) =>
             configuration.id === sourceId ? { ...configuration, isCaptureEnabled } : configuration,
         );
@@ -275,7 +352,7 @@ export function useRecordingStudio() {
 
     const addSource = async (configuration: RecordingSourceConfiguration) => {
         const current = runtime.current;
-        if (current.capture || current.isAddingSource || phase !== 'idle') return;
+        if (!current.isAcceptingWork || current.capture || current.isAddingSource || phase !== 'idle') return;
         current.isAddingSource = true;
         setErrorMessage(null);
         setSourceErrors((previous) => { const next = { ...previous }; delete next[configuration.id]; return next; });
@@ -315,8 +392,12 @@ export function useRecordingStudio() {
             setSourceReadiness((previous) => ({ ...previous, [configuration.id]: 'needs-permission' }));
             // Keep the saved intent before requesting permission. A failed or cancelled dialog can be retried or
             // changed to a different microphone/video-only without losing the requested source card.
-            const source = await acquireRecordingSource(configuration, current.sources);
-            if (current.isDisposed) { releaseRecordingSource(source); return; }
+            const source = await runRecordingStudioWork(async (signal) => {
+                const acquired = await acquireRecordingSource(configuration, current.sources);
+                if (signal.aborted || current.isDisposed || !current.isAcceptingWork) { releaseRecordingSource(acquired); signal.throwIfAborted(); throw new Error('Studio bylo deaktivováno.'); }
+                return acquired;
+            });
+            if (current.isDisposed || !current.isAcceptingWork) { releaseRecordingSource(source); return; }
             current.sources.push(source);
             const savedConfiguration = toRecordingSourceConfiguration(source);
             const updatedConfigurations = current.sourceConfigurations.map((candidate) => candidate.id === source.id ? savedConfiguration : candidate);
@@ -391,7 +472,7 @@ export function useRecordingStudio() {
 
     const restoreSourceConfiguration = (restore: RecordingSourceConfigurationRestore) => {
         const current = runtime.current;
-        if (phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current) {
+        if (!current.isAcceptingWork || phase !== 'idle' || current.capture || current.isAddingSource || directoryOperation.current) {
             throw new Error('Nejprve dokončete právě probíhající operaci studia.');
         }
 
@@ -421,7 +502,7 @@ export function useRecordingStudio() {
         const recordingSources = enabledConfigurations.map((configuration) => current.sources.find((source) =>
             matchesRecordingSourceConfiguration(source, configuration) && isRecordingSourceReady(source),
         )).filter((source): source is RecordingSource => source !== undefined);
-        if (phase !== 'idle' || current.capture || current.isStartPending || current.isAddingSource || directoryOperation.current ||
+        if (!current.isAcceptingWork || phase !== 'idle' || current.capture || current.isStartPending || current.isAddingSource || directoryOperation.current ||
             enabledConfigurations.length === 0 || recordingSources.length !== enabledConfigurations.length) return;
         const latestTake = appendTo?.takes?.[appendTo.takes.length - 1];
         const previousSourceIds = latestTake?.sourceIds ?? appendTo?.tracks.map((track) => track.id) ?? [];
@@ -439,13 +520,14 @@ export function useRecordingStudio() {
         bitrateMeter.current = new RecordingBitrateMeter(); setMeasuredBytesPerSecond(null); setPendingBytes(0);
         setPhase('starting');
         // Reuse admin navigation, sign-out and beforeunload protection for the entire recording lifetime.
-        void protectAdminMutation(async () => {
+        current.startSettlement = protectAdminMutation(async () => {
             try {
                 const estimate = await estimateRecordingStorage();
                 setStorage(estimate);
                 if (!(appendTo?.storageDestination || directoryReference.current) && isRecordingOriginStorageLow(estimate)) throw new Error('Prohlížeč hlásí málo prostoru pro web. Zvolte dostupnou složku nebo uvolněte prostor po záloze záznamů.');
-                if (current.isDisposed) return;
+                if (current.isDisposed || !current.isAcceptingWork) return;
                 const savedProject = appendTo ? await readStudioRecording(appendTo.id) : undefined;
+                if (current.isDisposed || !current.isAcceptingWork) return;
                 if (appendTo && !savedProject) throw new Error('Místní projekt není dostupný pro donahrání.');
                 const capture = new RecordingStudioCapture({
                     directory: appendTo ? null : directoryReference.current,
@@ -458,7 +540,7 @@ export function useRecordingStudio() {
                     onStopping: () => { if (!current.isDisposed) setPhase('stopping'); },
                     onPhaseChange: (nextPhase) => { if (!current.isDisposed) setPhase(nextPhase); },
                     // A studio page which is being closed reports its own shutdown; that is not a failure to announce.
-                    onFailure: (failure) => { if (!current.isDisposed) showAnnouncedAlert(alertChannel.announceFailure(failure)); },
+                    onFailure: (failure) => { if (!current.isDisposed && current.isAcceptingWork) showAnnouncedAlert(alertChannel.announceFailure(failure)); },
                 });
                 current.capture = capture;
                 await capture.start(recordingSources);
@@ -491,7 +573,7 @@ export function useRecordingStudio() {
                         }
                         return [configuration.id, previous[configuration.id] === 'disconnected' ? 'disconnected' : 'unavailable'];
                     })));
-                    setActiveRecording(null); setPhase('idle'); setPendingBytes(0); setMeasuredBytesPerSecond(null);
+                    setActiveRecording(null); if (ownershipReference.current?.getSnapshot().status === 'active') setPhase('idle'); setPendingBytes(0); setMeasuredBytesPerSecond(null);
                     await refreshStorage();
                 }
             }
@@ -500,6 +582,14 @@ export function useRecordingStudio() {
 
     return {
         sources, sourceConfigurations, sourceErrors, sourceReadiness, recordings, activeRecording, storage, phase, errorMessage, elapsedSeconds,
+        ownership, isActive: ownership?.status === 'active' && !ownership.isHandingOver,
+        requestTakeover: (isUnsavedEditDiscardAllowed = false) => ownershipReference.current?.requestTakeover({ isUnsavedEditDiscardAllowed }),
+        prepareTakeover: () => ownershipReference.current?.prepareTakeover(),
+        forceTakeover: () => ownershipReference.current?.forceTakeover(),
+        cancelTakeover: () => ownershipReference.current?.cancelTakeover(),
+        continueWaiting: () => ownershipReference.current?.continueWaiting(),
+        refreshOwner: () => ownershipReference.current?.refreshOwner(),
+        dismissActivation: () => ownershipReference.current?.dismissActivation(),
         directory, isChoosingDirectory, pendingBytes, measuredBytesPerSecond, persistence,
         alerts: alertChannel.alerts, alertPreferences: alertChannel.alertPreferences, notificationPermission: alertChannel.notificationPermission,
         isAlertSoundSupported: alertChannel.isAlertSoundSupported, alertActivation: alertChannel.alertActivation,
@@ -508,14 +598,14 @@ export function useRecordingStudio() {
         requestNotificationPermission: alertChannel.requestNotificationPermission,
         chooseDirectory,
         useBrowserStorage: () => {
-            if (phase !== 'idle' || directoryOperation.current) return;
+            if (!runtime.current.isAcceptingWork || phase !== 'idle' || directoryOperation.current) return;
             directoryReference.current = null; setDirectory(null); void refreshStorage();
         },
         requestPersistence: async () => { setPersistence(await requestRecordingPersistence()); await refreshStorage(); },
         addSource, connectSource, removeSource, moveSource, setSourceCaptureEnabled, resetSourceConfigurations, releaseSources, restoreSourceConfiguration, startRecording,
-        stopRecording: () => { void runtime.current.capture?.stop(); },
-        pauseRecording: () => { void runtime.current.capture?.pause(); },
-        resumeRecording: () => { runtime.current.capture?.resume(); },
+        stopRecording: () => { if (runtime.current.isAcceptingWork) void runtime.current.capture?.stop(); },
+        pauseRecording: () => { if (runtime.current.isAcceptingWork) void runtime.current.capture?.pause(); },
+        resumeRecording: () => { if (runtime.current.isAcceptingWork) runtime.current.capture?.resume(); },
         setErrorMessage, refreshStorage,
         updateRecording: (recording: StudioRecording) => setRecordings((previous) => previous.map((item) => item.id === recording.id ? recording : item)),
         removeRecording: (recordingId: string) => setRecordings((previous) => previous.filter((item) => item.id !== recordingId)),

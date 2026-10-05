@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { HostedRecordingAdminPreview } from '@/businesses/workshop-admin/HostedRecordingAdminPreview';
 import { toDateTimeLocalValue } from '@/lib/dateTimeLocal';
-import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { flushAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
 import { createRecordingArchiveManifest, recordingFileStem, recordingPreparedFilename } from
     '@/lib/recording-studio/recordingStudioExport';
 import { getRecordingDerivedFiles } from '@/lib/recording-studio/recordingStudioDerivedExport';
@@ -19,6 +19,8 @@ import { cancelHostedRecordingRevision, createHostedRecordingRevision, publishHo
 import type { HostedRecordingValidationReport, HostedRecordingVideoRole } from
     '@/lib/workshops/hostedRecording/hostedRecordingValidation';
 import { useEffect, useRef, useState } from 'react';
+import { commitRecordingStudioWork, commitRecordingStudioUpload, runRecordingStudioWork } from '@/lib/recording-studio/recordingStudioWork';
+import { readRecordingStudioUploadState, saveRecordingStudioUploadState } from '@/lib/recording-studio/recordingStudioUploadState';
 
 type WorkshopOption = { readonly id: string; readonly title: string; readonly startsAt: string };
 type Props = { readonly recording: StudioRecording; readonly isDisabled: boolean };
@@ -26,6 +28,11 @@ const VIDEO_ROLES: readonly HostedRecordingVideoRole[] = ['editor', 'application
 const VIDEO_ROLE_LABELS: Record<HostedRecordingVideoRole, string> = {
     editor: 'Editor (VS Code)', application: 'Aplikace', camera: 'Kamera',
 };
+
+function uploadStudioAsset(...arguments_: Parameters<typeof uploadHostedRecordingAsset>): ReturnType<typeof uploadHostedRecordingAsset> {
+    const [workshopId, revisionId, asset, signal, onProgress] = arguments_;
+    return commitRecordingStudioUpload(() => uploadHostedRecordingAsset(workshopId, revisionId, asset, signal, onProgress, true), signal);
+}
 
 /** A studio project uses the same upload and server validation as independent exported files. */
 export function RecordingStudioPublish({ recording, isDisabled }: Props) {
@@ -49,8 +56,16 @@ export function RecordingStudioPublish({ recording, isDisabled }: Props) {
             .catch(() => setMessage('Seznam workshopů se nepodařilo načíst.'));
     }, []);
     useEffect(() => () => controllerReference.current?.abort(), []);
+    useEffect(() => {
+        const pending = readRecordingStudioUploadState(recording.id);
+        if (!pending) return;
+        setWorkshopId(pending.workshopId); setRevisionId(pending.revisionId);
+        setLiveStartAt(toDateTimeLocalValue(pending.liveStartAt)); setRevisionLiveStartAt(pending.liveStartAt);
+        setSourceIds(pending.sourceIds); setMessage('Rozpracovaný upload je zachován. Připravit a nahrát pokračuje ve stejné revizi a ověří uložené části.');
+    }, [recording.id]);
 
     const prepare = async () => {
+        if (isDisabled || isBusy) return;
         if (!workshopId || !liveStartAt) { setMessage('Vyberte workshop a začátek živého session času.'); return; }
         const selected = VIDEO_ROLES.flatMap((role) => {
             const track = recording.tracks.find((candidate) => candidate.id === sourceIds[role]);
@@ -62,89 +77,99 @@ export function RecordingStudioPublish({ recording, isDisabled }: Props) {
         setIsBusy(true); setMessage(null); setReport(null);
         const controller = new AbortController(); controllerReference.current = controller;
         try {
-            if (!await flushAdminSaves()) throw new Error('Nejprve uložte změny v editoru.');
-            if (recording.status !== 'complete') throw new Error('Publikovat lze jen dokončený záznam.');
-            const selection = getRecordingSelection(recording);
-            const recordingForPublish = { ...recording, trim: selection, editRecipe: createRecordingEditRecipe(recording, selection) };
-            validateRecordingWorkshopMetadata(recordingForPublish, selection);
-            const selectedLiveStartAt = new Date(liveStartAt).toISOString();
-            const revision = revisionId && report === null && !isPublished &&
-                revisionLiveStartAt === selectedLiveStartAt ? revisionId :
-                await createHostedRecordingRevision(workshopId, selectedLiveStartAt);
-            setRevisionId(revision);
-            setRevisionLiveStartAt(selectedLiveStartAt);
-            setIsPublished(false);
-            const preparedTracks = new Map<string, { readonly filename: string; readonly timing: RecordingPreparedTiming }>();
-            let firstAssetId: string | null = null;
-            for (const { role, track } of selected) {
-                controller.signal.throwIfAborted();
-                const part = getRecordingPartForSelection(track, selection);
-                if (!part) throw new Error(`Stopa „${track.label}“ nemá jedinou připravitelnou část pro celý výběr. Vyberte interval v jedné části nebo nahrajte samostatně exportované soubory.`);
-                setMessage(`Připravuji a nahrávám ${VIDEO_ROLE_LABELS[role]}…`);
-                const filename = recordingPreparedFilename(recordingForPublish, track);
-                const result = await withTrimmedRecordingTrack({
-                    blob: await readRecordingPart(recording.id, part, controller.signal),
-                    track: getRecordingPartTrack(track, part), trim: selection, signal: controller.signal,
-                    onProgress: (progress) => setMessage(`${VIDEO_ROLE_LABELS[role]}: příprava ${Math.round(progress * 100)} %`),
-                    consume: async (file, _extension, timing) => {
-                        const assetId = await uploadHostedRecordingAsset(workshopId, revision, { role, file, filename,
-                            sourceId: track.id }, controller.signal, (completedBytes, totalBytes) =>
-                            setMessage(`${VIDEO_ROLE_LABELS[role]}: nahrávání ${Math.round(completedBytes / totalBytes * 100)} %`));
-                        return { assetId, timing };
-                    },
-                });
-                if (!firstAssetId) firstAssetId = result.assetId;
-                preparedTracks.set(track.id, { filename, timing: result.timing });
-            }
-            setPreviewAssetId(firstAssetId);
-            const workshopSidecar = await createRecordingWorkshopSidecar(recordingForPublish, true);
-            const workshopFiles = workshopSidecar ? [{ filename: `metadata/prepared/${recordingFileStem(recording)}-workshop.json`,
-                content: JSON.stringify(workshopSidecar), coordinate: 'prepared-export' as const,
-                sourceRevision: workshopSidecar.sourceRevision, currentRevision: workshopSidecar.currentRevision }] : [];
-            if (workshopFiles[0]) {
-                const file = new File([workshopFiles[0].content], workshopFiles[0].filename.split('/').at(-1)!,
-                    { type: 'application/json' });
-                await uploadHostedRecordingAsset(workshopId, revision, { role: 'workshop', file }, controller.signal, () => undefined);
-            }
-            const derivedFiles = getRecordingDerivedFiles(recordingForPublish, recordingFileStem(recording), true);
-            for (const { role, track } of selected) {
-                const subtitle = derivedFiles.find((candidate) => candidate.sourceId === track.id &&
-                    candidate.filename.endsWith('.srt'));
-                if (subtitle) {
-                    const file = new File([subtitle.content], subtitle.filename.split('/').at(-1)!, { type: 'application/x-subrip' });
-                    await uploadHostedRecordingAsset(workshopId, revision, { role: `subtitle-${role}`, file },
-                        controller.signal, () => undefined);
+            await runRecordingStudioWork(async () => {
+                if (!await flushAdminEditorSaves()) throw new Error('Nejprve uložte změny v editoru.');
+                if (recording.status !== 'complete') throw new Error('Publikovat lze jen dokončený záznam.');
+                const selection = getRecordingSelection(recording);
+                const recordingForPublish = { ...recording, trim: selection, editRecipe: createRecordingEditRecipe(recording, selection) };
+                validateRecordingWorkshopMetadata(recordingForPublish, selection);
+                const selectedLiveStartAt = new Date(liveStartAt).toISOString();
+                const revision = revisionId && report === null && !isPublished &&
+                    revisionLiveStartAt === selectedLiveStartAt ? revisionId :
+                    await commitRecordingStudioWork(async () => {
+                        const createdRevision = await createHostedRecordingRevision(workshopId, selectedLiveStartAt);
+                        saveRecordingStudioUploadState(recording.id, { version: 1, workshopId, revisionId: createdRevision, liveStartAt: selectedLiveStartAt, sourceIds });
+                        return createdRevision;
+                    }, controller.signal);
+                setRevisionId(revision);
+                setRevisionLiveStartAt(selectedLiveStartAt);
+                setIsPublished(false);
+                const preparedTracks = new Map<string, { readonly filename: string; readonly timing: RecordingPreparedTiming }>();
+                let firstAssetId: string | null = null;
+                for (const { role, track } of selected) {
+                    controller.signal.throwIfAborted();
+                    const part = getRecordingPartForSelection(track, selection);
+                    if (!part) throw new Error(`Stopa „${track.label}“ nemá jedinou připravitelnou část pro celý výběr. Vyberte interval v jedné části nebo nahrajte samostatně exportované soubory.`);
+                    setMessage(`Připravuji a nahrávám ${VIDEO_ROLE_LABELS[role]}…`);
+                    const filename = recordingPreparedFilename(recordingForPublish, track);
+                    const result = await withTrimmedRecordingTrack({
+                        blob: await readRecordingPart(recording.id, part, controller.signal),
+                        track: getRecordingPartTrack(track, part), trim: selection, signal: controller.signal,
+                        onProgress: (progress) => setMessage(`${VIDEO_ROLE_LABELS[role]}: příprava ${Math.round(progress * 100)} %`),
+                        consume: async (file, _extension, timing) => {
+                            const assetId = await uploadStudioAsset(workshopId, revision, { role, file, filename,
+                                sourceId: track.id }, controller.signal, (completedBytes, totalBytes) =>
+                                setMessage(`${VIDEO_ROLE_LABELS[role]}: nahrávání ${Math.round(completedBytes / totalBytes * 100)} %`));
+                            return { assetId, timing };
+                        },
+                    });
+                    if (!firstAssetId) firstAssetId = result.assetId;
+                    preparedTracks.set(track.id, { filename, timing: result.timing });
                 }
-            }
-            const archiveTracks: RecordingArchiveTrack[] = recording.tracks.map((track: RecordingTrack) => {
-                const prepared = preparedTracks.get(track.id);
-                return { ...track, originalFile: null, trimmedFile: prepared?.filename ?? null,
-                    ...(prepared ? { preparation: { status: 'prepared' as const,
-                        preparedTimeZeroSessionSeconds: selection.startSeconds,
-                        firstTimestampSeconds: prepared.timing.firstTimestampSeconds,
-                        endTimestampSeconds: prepared.timing.endTimestampSeconds,
-                        components: prepared.timing.components,
-                        originalContainerOriginSeconds: prepared.timing.originalContainerOriginSeconds,
-                        videoFrameRate: prepared.timing.videoFrameRate } } : {}) };
-            });
-            const manifest = createRecordingArchiveManifest(recordingForPublish, archiveTracks,
-                preparedTracks.size === recording.tracks.length, derivedFiles, workshopFiles);
-            const manifestFile = new File([JSON.stringify(manifest)], `${recordingFileStem(recording)}.json`,
-                { type: 'application/json' });
-            await uploadHostedRecordingAsset(workshopId, revision, { role: 'manifest', file: manifestFile },
-                controller.signal, () => undefined);
-            setMessage('Soubory jsou uložené. Server ověřuje čas a kodeky…');
-            const validationReport = await validateHostedRecordingRevision(workshopId, revision);
-            setReport(validationReport);
-            setMessage(validationReport.isValid ? 'Náhled je připravený. Potvrďte publikaci do workshopu.' : 'Kontrola záznam odmítla.');
+                setPreviewAssetId(firstAssetId);
+                const workshopSidecar = await createRecordingWorkshopSidecar(recordingForPublish, true);
+                const workshopFiles = workshopSidecar ? [{ filename: `metadata/prepared/${recordingFileStem(recording)}-workshop.json`,
+                    content: JSON.stringify(workshopSidecar), coordinate: 'prepared-export' as const,
+                    sourceRevision: workshopSidecar.sourceRevision, currentRevision: workshopSidecar.currentRevision }] : [];
+                if (workshopFiles[0]) {
+                    const file = new File([workshopFiles[0].content], workshopFiles[0].filename.split('/').at(-1)!,
+                        { type: 'application/json' });
+                    await uploadStudioAsset(workshopId, revision, { role: 'workshop', file }, controller.signal, () => undefined);
+                }
+                const derivedFiles = getRecordingDerivedFiles(recordingForPublish, recordingFileStem(recording), true);
+                for (const { role, track } of selected) {
+                    const subtitle = derivedFiles.find((candidate) => candidate.sourceId === track.id &&
+                        candidate.filename.endsWith('.srt'));
+                    if (subtitle) {
+                        const file = new File([subtitle.content], subtitle.filename.split('/').at(-1)!, { type: 'application/x-subrip' });
+                        await uploadStudioAsset(workshopId, revision, { role: `subtitle-${role}`, file },
+                            controller.signal, () => undefined);
+                    }
+                }
+                const archiveTracks: RecordingArchiveTrack[] = recording.tracks.map((track: RecordingTrack) => {
+                    const prepared = preparedTracks.get(track.id);
+                    return { ...track, originalFile: null, trimmedFile: prepared?.filename ?? null,
+                        ...(prepared ? { preparation: { status: 'prepared' as const,
+                            preparedTimeZeroSessionSeconds: selection.startSeconds,
+                            firstTimestampSeconds: prepared.timing.firstTimestampSeconds,
+                            endTimestampSeconds: prepared.timing.endTimestampSeconds,
+                            components: prepared.timing.components,
+                            originalContainerOriginSeconds: prepared.timing.originalContainerOriginSeconds,
+                            videoFrameRate: prepared.timing.videoFrameRate } } : {}) };
+                });
+                const manifest = createRecordingArchiveManifest(recordingForPublish, archiveTracks,
+                    preparedTracks.size === recording.tracks.length, derivedFiles, workshopFiles);
+                const manifestFile = new File([JSON.stringify(manifest)], `${recordingFileStem(recording)}.json`,
+                    { type: 'application/json' });
+                await uploadStudioAsset(workshopId, revision, { role: 'manifest', file: manifestFile },
+                    controller.signal, () => undefined);
+                setMessage('Soubory jsou uložené. Server ověřuje čas a kodeky…');
+                const validationReport = await commitRecordingStudioWork(() => validateHostedRecordingRevision(workshopId, revision), controller.signal);
+                setReport(validationReport);
+                controller.signal.throwIfAborted();
+                setMessage(validationReport.isValid ? 'Náhled je připravený. Potvrďte publikaci do workshopu.' : 'Kontrola záznam odmítla.');
+            }, controller);
         } catch (error) { setMessage(error instanceof Error ? error.message : 'Publikace selhala.'); }
         finally { controllerReference.current = null; setIsBusy(false); }
     };
 
     const publish = async () => {
-        if (!workshopId || !revisionId || !report?.isValid) return;
+        if (isDisabled || isBusy || !workshopId || !revisionId || !report?.isValid) return;
         setIsBusy(true);
-        try { await publishHostedRecordingRevision(workshopId, revisionId);
+        try { await runRecordingStudioWork((signal) => commitRecordingStudioWork(async () => {
+            await publishHostedRecordingRevision(workshopId, revisionId);
+            saveRecordingStudioUploadState(recording.id, null);
+        }, signal));
             setIsPublished(true);
             setMessage('Záznam je publikovaný. Workshop používá hostované video.'); }
         catch (error) { setMessage(error instanceof Error ? error.message : 'Publikace selhala.'); }
@@ -152,10 +177,13 @@ export function RecordingStudioPublish({ recording, isDisabled }: Props) {
     };
 
     const cancel = async () => {
-        if (!workshopId || !revisionId || isPublished) return;
+        if (isDisabled || isBusy || !workshopId || !revisionId || isPublished) return;
         setIsBusy(true);
         try {
-            await cancelHostedRecordingRevision(workshopId, revisionId);
+            await runRecordingStudioWork((signal) => commitRecordingStudioWork(async () => {
+                await cancelHostedRecordingRevision(workshopId, revisionId);
+                saveRecordingStudioUploadState(recording.id, null);
+            }, signal));
             setRevisionId(null); setRevisionLiveStartAt(null); setPreviewAssetId(null); setReport(null);
             setMessage('Rozpracovaná revize byla zrušena.');
         } catch (error) { setMessage(error instanceof Error ? error.message : 'Revizi se nepodařilo zrušit.'); }
@@ -189,9 +217,9 @@ export function RecordingStudioPublish({ recording, isDisabled }: Props) {
             </select></label>)}</div>
         <div className="flex flex-wrap gap-2">
             <Button type="button" onClick={() => void prepare()} disabled={isBusy || isDisabled || !workshopId}>Připravit a nahrát</Button>
-            <Button type="button" onClick={() => void publish()} disabled={isBusy || !report?.isValid || isPublished}>Publikovat do workshopu</Button>
+            <Button type="button" onClick={() => void publish()} disabled={isDisabled || isBusy || !report?.isValid || isPublished}>Publikovat do workshopu</Button>
             {isBusy && <Button type="button" variant="outline" onClick={() => controllerReference.current?.abort()}>Přerušit</Button>}
-            {revisionId && !isBusy && !isPublished && <Button type="button" variant="outline" onClick={() => void cancel()}>Zrušit rozpracovanou revizi</Button>}
+            {revisionId && !isBusy && !isPublished && <Button type="button" variant="outline" disabled={isDisabled} onClick={() => void cancel()}>Zrušit rozpracovanou revizi</Button>}
         </div>
         {message && <p role="status">{message}</p>}
         {report && <div className="rounded border p-3" role="status">

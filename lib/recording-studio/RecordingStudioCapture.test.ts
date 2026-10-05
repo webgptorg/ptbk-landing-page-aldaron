@@ -93,6 +93,26 @@ describe('multi-source capture barriers and durable failure handling', () => {
         expect(result?.sourceConfiguration?.[0]).toMatchObject({ isAudioEnabled: true, microphoneDeviceId: 'fixture-mic' });
     });
 
+    it('abandons recorders immediately but settles an admitted write before the document can regain authority', async () => {
+        const capture = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
+        await capture.start([makeSource('camera')]);
+        let rejectWrite!: (error: Error) => void;
+        STORAGE.append.mockImplementationOnce(() => new Promise<void>((_resolve, reject) => { rejectWrite = reject; }));
+        TestRecorder.instances[0].emit('admitted');
+        await Promise.resolve();
+        capture.abandon();
+        expect(TestRecorder.instances[0].state).toBe('inactive');
+        expect(await capture.finished).toBeNull();
+        let isSettled = false;
+        const settling = capture.settleAbandonedWork().then(() => { isSettled = true; });
+        await Promise.resolve();
+        expect(isSettled).toBe(false);
+        rejectWrite(new Error('Old storage write refused'));
+        await settling;
+        expect(STORAGE.append).toHaveBeenCalledOnce();
+        expect(STORAGE.save).toHaveBeenCalledOnce(); // Only the initial checkpoint; no abandoned finalization.
+    });
+
     it('keeps each appended camera part\'s audio setting when an explicit replacement is video-only', async () => {
         const first = new RecordingStudioCapture({ onProgress: vi.fn(), onStopping: vi.fn() });
         await first.start([makeSource('camera', true)]);

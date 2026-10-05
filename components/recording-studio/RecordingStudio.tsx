@@ -19,6 +19,7 @@ import { RecordingSourcePicker } from './RecordingSourcePicker';
 import { RecordingSourcePreview } from './RecordingSourcePreview';
 import { RecordingStoragePanel } from './RecordingStoragePanel';
 import { useRecordingStudio } from './useRecordingStudio';
+import { RecordingStudioOwnershipPanel } from './RecordingStudioOwnershipPanel';
 
 export function RecordingStudio() {
     const studio = useRecordingStudio();
@@ -61,7 +62,7 @@ export function RecordingStudio() {
         stopping: 'Dokončování a ukládání', unavailable: 'Nedostupné',
     }[studio.phase];
     const isAppendWorkspace = Boolean(recordingId && appendRecordingId === recordingId);
-    const isReady = studio.phase === 'idle' && !studio.isChoosingDirectory;
+    const isReady = studio.isActive && studio.phase === 'idle' && !studio.isChoosingDirectory;
     const enabledConfigurations = studio.sourceConfigurations.filter(({ isCaptureEnabled }) => isCaptureEnabled);
     const readySourceIds = new Set(enabledConfigurations.filter((configuration) => {
         const source = studio.sources.find((candidate) => candidate.id === configuration.id);
@@ -127,17 +128,18 @@ export function RecordingStudio() {
                     <Link href="/admin/recording-studio" className="font-semibold text-cyan-800 underline">Studio · nastavení a záznamy</Link>
                     {recordingId && <span>{isAppendWorkspace ? 'Donahrávání do projektu' : 'Střih a export projektu'}</span>}
                 </nav>
+                <RecordingStudioOwnershipPanel studio={studio} />
                 {recordingId && <section className="space-y-5" aria-label="Pracovní prostor záznamu">
                     <h2 className="text-2xl font-bold">{isAppendWorkspace ? 'Donahrávání do projektu' : 'Pracovní prostor záznamu'}</h2>
                     <p className="break-all text-xs text-slate-500">ID: {recordingId} · Média jsou místní pro tento prohlížeč a profil. Adresa je nepřenáší na jiný počítač.</p>
                     {studio.errorMessage && <p role="alert">{studio.errorMessage}</p>}
                     {isAppendWorkspace && <div className="space-y-3 rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950"><p>Nový take začne na konci uložené časové osy. Připojení oprávnění nic nespustí; po kontrole zdrojů stiskněte Start. Původní média i vlastní ořez zůstanou zachované.</p>
                         {!isSessionBusy && <Button type="button" variant="outline" onClick={() => { setAppendRecordingId(null); setIsSourceSetChangeAllowed(false); }}>Zrušit donahrání a vrátit se ke střihu</Button>}</div>}
-                    {studio.phase === 'loading' ? <p role="status">Načítám místní záznam…</p> : studio.phase === 'unavailable' ? <p>Záznam nebylo možné načíst. Vyřešte uvedený problém a obnovte tuto adresu.</p> : !selectedRecording ? <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                    {studio.phase === 'loading' ? <p role="status">Načítám místní záznam…</p> : studio.phase === 'unavailable' ? <p>Záznam je přístupný pouze v aktivní instanci studia. Převzetí a případnou chybu vyřešte výše.</p> : !selectedRecording ? <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-5">
                         <h3 className="font-semibold">Místní záznam není dostupný</h3><p>Na této adrese nejsou v tomto profilu uložená média. Otevřete ji v původním prohlížeči nebo připojte složku záznamu ve studiu. Nový prázdný záznam se nevytváří.</p>
                         <Link href="/admin/recording-studio" className="underline">Otevřít studio a obnovit ze složky</Link>
                     </div> : studio.phase === 'idle' && !isAppendWorkspace && <>
-                        <RecordingEditor key={selectedRecording.id} recording={selectedRecording} isDisabled={isLibraryBusy} onChange={studio.updateRecording} onUseSourceConfiguration={(reportSuccess) => requestSourceConfigurationRestore(selectedRecording, reportSuccess)} onAppend={() => requestSourceConfigurationRestore(selectedRecording, undefined, true)} />
+                        <RecordingEditor key={selectedRecording.id} recording={selectedRecording} isDisabled={isLibraryBusy || !studio.isActive} onChange={studio.updateRecording} onUseSourceConfiguration={(reportSuccess) => requestSourceConfigurationRestore(selectedRecording, reportSuccess)} onAppend={() => requestSourceConfigurationRestore(selectedRecording, undefined, true)} />
                         <RecordingLibrary recordings={[selectedRecording]} isWorkspace isDisabled={!isReady} onChange={studio.updateRecording} onDelete={studio.removeRecording} onBusyChange={setIsLibraryBusy} onStorageChange={studio.refreshStorage} onUseSourceConfiguration={requestSourceConfigurationRestore} />
                     </>}
                 </section>}
@@ -155,13 +157,13 @@ export function RecordingStudio() {
                     <div className="flex flex-wrap items-center justify-between gap-4"><h2 id="recording-sources-title" className="text-xl font-bold">Zdroje <span className="ml-1 text-slate-400">{studio.sourceConfigurations.length}</span></h2>
                         <div className="flex flex-wrap gap-2">
                             <AdminEditorButton label="Přidat zdroj" title="Přidat zdroj záznamu" buttonProps={{ disabled: !isReady || isLibraryBusy }}>
-                                {(closeEditor) => <RecordingSourcePicker initialLabel={`Kamera ${studio.sourceConfigurations.filter(({ kind }) => kind === 'camera').length + 1}`} onAdd={studio.addSource} onClose={closeEditor} />}
+                                {(closeEditor) => <RecordingSourcePicker isDisabled={!studio.isActive} initialLabel={`Kamera ${studio.sourceConfigurations.filter(({ kind }) => kind === 'camera').length + 1}`} onAdd={studio.addSource} onClose={closeEditor} />}
                             </AdminEditorButton>
                             {studio.sources.length > 0 && !isSessionBusy && <Button type="button" variant="outline" disabled={!isReady || isLibraryBusy} onClick={studio.releaseSources}>Uvolnit všechna zařízení</Button>}
                             {studio.sourceConfigurations.length > 0 && !isSessionBusy && <Button type="button" variant="outline" disabled={!isReady || isLibraryBusy} onClick={() => setIsResetDialogOpen(true)}>Resetovat nastavení zdrojů</Button>}
                             {isSessionBusy ? <>
-                                <Button type="button" variant="outline" disabled={!isRecording && !isPaused} onClick={isPaused ? studio.resumeRecording : studio.pauseRecording}>{isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}{isPaused ? 'Pokračovat ve všech stopách' : studio.phase === 'pausing' ? 'Ukládám pauzu…' : 'Pozastavit všechny stopy'}</Button>
-                                <Button type="button" variant="destructive" disabled={!isRecording && !isPaused} onClick={studio.stopRecording}><Square className="mr-2 h-4 w-4" />{studio.phase === 'stopping' ? 'Ukládám všechny stopy…' : 'Zastavit všechny stopy'}</Button>
+                                <Button type="button" variant="outline" disabled={!studio.isActive || (!isRecording && !isPaused)} onClick={isPaused ? studio.resumeRecording : studio.pauseRecording}>{isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}{isPaused ? 'Pokračovat ve všech stopách' : studio.phase === 'pausing' ? 'Ukládám pauzu…' : 'Pozastavit všechny stopy'}</Button>
+                                <Button type="button" variant="destructive" disabled={!studio.isActive || (!isRecording && !isPaused)} onClick={studio.stopRecording}><Square className="mr-2 h-4 w-4" />{studio.phase === 'stopping' ? 'Ukládám všechny stopy…' : 'Zastavit všechny stopy'}</Button>
                             </> : <Button type="button" disabled={!isReady || isLibraryBusy || !isRecordingReady || (isSourceSetChanged && !isSourceSetChangeAllowed)} onClick={() => studio.startRecording(isAppendWorkspace ? selectedRecording : undefined, isSourceSetChangeAllowed)}><Circle className="mr-2 h-4 w-4 fill-current text-red-400" />{isAppendWorkspace ? 'Start · donahrát do projektu' : 'Nahrávat připravené zdroje'}</Button>}
                         </div>
                     </div>
@@ -174,7 +176,7 @@ export function RecordingStudio() {
                         <span className="font-medium text-amber-950">Před Start připojte:</span>
                         {sourcesNeedingConnection.map((configuration) => <Button key={configuration.id} type="button" variant="outline" size="sm" disabled={!isReady || isLibraryBusy} onClick={() => { void studio.connectSource(configuration.id); }}>Připojit {configuration.label}</Button>)}
                     </div>}
-                    {isSourceSetChanged && <label className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950"><input type="checkbox" checked={isSourceSetChangeAllowed} disabled={isSessionBusy} onChange={(event) => setIsSourceSetChangeAllowed(event.target.checked)} className="mt-1" /><span>Výslovně změnit sadu zdrojů v tomto novém take. Chybějící původní zdroje zůstanou v projektu jako mezery; nové zdroje mají mezeru před tímto take. Dřívější média se nemažou.</span></label>}
+                    {isSourceSetChanged && <label className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950"><input type="checkbox" checked={isSourceSetChangeAllowed} disabled={!studio.isActive || isSessionBusy} onChange={(event) => setIsSourceSetChangeAllowed(event.target.checked)} className="mt-1" /><span>Výslovně změnit sadu zdrojů v tomto novém take. Chybějící původní zdroje zůstanou v projektu jako mezery; nové zdroje mají mezeru před tímto take. Dřívější média se nemažou.</span></label>}
                     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm" aria-label="Rozložení živého monitoru">
                         <span className="mr-2 font-medium">Živý monitor</span>
                         {(['grid', 'focus', 'pinned'] as const).map((layout) => <Button key={layout} type="button" size="sm" variant="outline" aria-pressed={monitorPreferences.layout === layout} onClick={() => updateMonitorPreferences({ layout })}>{layout === 'grid' ? 'Mřížka' : layout === 'focus' ? 'Jeden zdroj' : 'Připnutý zdroj'}</Button>)}
@@ -194,7 +196,7 @@ export function RecordingStudio() {
                                     onTogglePreviewMinimized={() => toggleMonitorSource('minimizedSourceIds', configuration.id)} onTogglePreviewMuted={() => toggleMonitorSource('audibleSourceIds', configuration.id)} onToggleMirrorPreview={() => toggleMonitorSource('mirroredSourceIds', configuration.id)}
                                     onConnect={() => studio.connectSource(configuration.id)} onRemove={() => studio.removeSource(configuration.id)} onMove={(offset) => studio.moveSource(configuration.id, offset)} onSetCaptureEnabled={(isCaptureEnabled) => studio.setSourceCaptureEnabled(configuration.id, isCaptureEnabled)}>
                                 <AdminEditorButton label="Nastavení" title="Nastavení zdroje" buttonProps={{ disabled: isSessionBusy || !isReady || isLibraryBusy }}>
-                                    {(closeEditor) => <RecordingSourcePicker initialConfiguration={configuration} onAdd={studio.addSource} onClose={closeEditor} />}
+                                    {(closeEditor) => <RecordingSourcePicker isDisabled={!studio.isActive} initialConfiguration={configuration} onAdd={studio.addSource} onClose={closeEditor} />}
                                 </AdminEditorButton>
                                 </RecordingSourcePreview>
                                 {monitorPreferences.layout !== 'focus' && !isPinnedPrimary && <Button type="button" variant="outline" size="sm" className="mt-1" onClick={() => toggleMonitorSource('hiddenSourceIds', configuration.id)}>Skrýt dlaždici z monitoru</Button>}
@@ -210,7 +212,7 @@ export function RecordingStudio() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Zrušit</AlertDialogCancel>
-                            <AlertDialogAction onClick={studio.resetSourceConfigurations}>Resetovat zdroje</AlertDialogAction>
+                            <AlertDialogAction disabled={!studio.isActive} onClick={studio.resetSourceConfigurations}>Resetovat zdroje</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
@@ -224,7 +226,7 @@ export function RecordingStudio() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Zrušit</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => { if (restoreRequest) finishSourceConfigurationRestore(restoreRequest); }}>Nahradit nastavení zdrojů</AlertDialogAction>
+                            <AlertDialogAction disabled={!studio.isActive} onClick={() => { if (restoreRequest) finishSourceConfigurationRestore(restoreRequest); }}>Nahradit nastavení zdrojů</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>

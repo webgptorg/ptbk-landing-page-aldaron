@@ -54,7 +54,7 @@ export async function seedRecordingEditorFixture(page: Page, { isLongSession = f
     };
     await page.evaluate(async ({ recording, encoded }) => {
         const database = await new Promise<IDBDatabase>((resolve, reject) => {
-            const request = indexedDB.open('promptbook-recording-studio', 2);
+            const request = indexedDB.open('promptbook-recording-studio');
             request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
         });
         await new Promise<void>((resolve, reject) => {

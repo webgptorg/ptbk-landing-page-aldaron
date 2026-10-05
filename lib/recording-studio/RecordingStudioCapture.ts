@@ -1,5 +1,6 @@
 import { getRecordingErrorMessage } from './recordingStudioDevices';
 import type { RecordingFailure } from './recordingStudioAlerts';
+import { isRecordingStudioAuthorityLost } from './recordingStudioAuthority';
 import { getRecordingStorageErrorMessage } from './recordingStudioCapacity';
 import { appendRecordingChunk, createStudioRecording, readRecordingPart, saveStudioRecording } from './recordingStudioStorage';
 import { extendRecordingWorkshopActivity } from './recordingStudioWorkshop';
@@ -68,11 +69,15 @@ export class RecordingStudioCapture {
     private recordedSeconds = 0;
     private phase: CapturePhase = 'starting';
     private transition: Promise<void> | null = null;
+    private finalization: Promise<void> | null = null;
     private isStarting = true;
     private isStopping = false;
     private isFinalizing = false;
     private isWriteFailed = false;
     private isBufferFull = false;
+    /** The studio was taken from this tab: nothing more is written, and nothing about that is a failure to announce. */
+    private isAbandoned = false;
+    private finalSaveError: string | null = null;
     private errorMessage: string | null = null;
     private readonly continuedFailureMessages: string[] = [];
     private readonly reportedFailureMessages = new Set<string>();
@@ -124,7 +129,7 @@ export class RecordingStudioCapture {
             // A rejected codec must not change an existing project before a new take has even started.
             const preparedEntries = existing ? sources.map((source) => this.prepareRecorder(source, crypto.randomUUID())) : undefined;
             try { this.recording = existing ? (await saveStudioRecording(this.recording), this.recording) : await createStudioRecording(this.recording, this.options.directory); }
-            catch (error) { throw new Error(getRecordingStorageErrorMessage(error, false)); }
+            catch (error) { throw isRecordingStudioAuthorityLost(error) ? error : new Error(getRecordingStorageErrorMessage(error, false)); }
             this.savedRecording = this.recording;
             if (!this.isStopping) {
                 this.listenToSources();
@@ -133,7 +138,7 @@ export class RecordingStudioCapture {
             }
         } catch (error) {
             // Nothing was ever recorded here, so this is a take which never began rather than one which was cut short.
-            this.reportFailure({ impact: 'no-recording', message: getRecordingErrorMessage(error) });
+            if (!this.yieldToNewStudio(error)) this.reportFailure({ impact: 'no-recording', message: getRecordingErrorMessage(error) });
             this.isStopping = true;
         } finally {
             this.isStarting = false;
@@ -148,6 +153,8 @@ export class RecordingStudioCapture {
     }
     public get failureMessage(): string | null { return this.recordedFailureMessage; }
     public get currentPhase(): CapturePhase { return this.phase; }
+    /** A handover must report a failed final checkpoint instead of calling an in-memory result saved. */
+    public get finalizationSaveError(): string | null { return this.finalSaveError; }
 
     public pause(): Promise<void> {
         if (this.isStopping || this.phase !== 'recording' || this.transition) return this.transition ?? Promise.resolve();
@@ -160,7 +167,7 @@ export class RecordingStudioCapture {
             this.savedRecording = this.recording;
             this.options.onProgress(this.recording);
             this.setPhase('paused');
-        })().catch((error: unknown) => { void this.stop(getRecordingErrorMessage(error)); }).finally(() => { this.transition = null; });
+        })().catch((error: unknown) => { if (!this.yieldToNewStudio(error)) void this.stop(getRecordingErrorMessage(error)); }).finally(() => { this.transition = null; });
         return this.transition;
     }
 
@@ -174,6 +181,7 @@ export class RecordingStudioCapture {
     }
 
     public stop(errorMessage: string | null = null): Promise<StudioRecording | null> {
+        if (this.isAbandoned) return this.finished;
         if (errorMessage) this.reportFailure({ impact: 'recording-stopped', message: errorMessage });
         if (this.isFinalizing) return this.finished;
         this.isStopping = true;
@@ -181,8 +189,47 @@ export class RecordingStudioCapture {
         this.isFinalizing = true;
         this.setPhase('stopping');
         this.options.onStopping();
-        void this.finalize();
+        this.finalization = this.finalize();
         return this.finished;
+    }
+
+    /**
+     * Stops every recorder at once and writes nothing more
+     *
+     * Note: This is what a tab does once its studio was taken by another one. Its right to write is gone, so there is
+     *       nothing left to save the tail with, and the tab which took the studio over is the one which recovers what
+     *       had been committed. The media streams are left alone here; releasing the devices belongs to the studio.
+     */
+    public abandon(): void {
+        if (this.isAbandoned) return;
+        this.isAbandoned = true;
+        this.isStopping = true;
+        this.removeListeners.forEach(({ remove }) => remove());
+        const entries = [...this.entries, ...this.droppedEntries];
+        this.entries = [];
+        this.droppedEntries = [];
+        for (const entry of entries) {
+            entry.recorder.ondataavailable = null;
+            entry.recorder.onerror = null;
+            entry.recorder.onstop = null;
+            if (entry.recorder.state !== 'inactive') {
+                try { entry.recorder.stop(); } catch { /* A recorder which cannot be stopped ends with its released tracks. */ }
+            }
+            entry.finish();
+        }
+        this.resolveFinished(null);
+    }
+
+    /** An abandoned recorder stops immediately; its already admitted writes must finish under the old authority. */
+    public async settleAbandonedWork(): Promise<void> {
+        await Promise.allSettled([this.writeQueue, this.transition, this.finalization]);
+    }
+
+    /** A refusal of the storage itself is not a failure of the take: another tab is the studio now. */
+    private yieldToNewStudio(error: unknown): boolean {
+        if (!isRecordingStudioAuthorityLost(error)) return false;
+        this.abandon();
+        return true;
     }
 
     private setPhase(phase: CapturePhase): void {
@@ -200,6 +247,7 @@ export class RecordingStudioCapture {
      * @param failure what broke and what it did to the take
      */
     private reportFailure(failure: RecordingFailure): void {
+        if (this.isAbandoned) return;
         // The same sentence twice is the same failure; a recorder reporting its loss on two events is not two of them.
         if (this.reportedFailureMessages.has(failure.message)) return;
         this.reportedFailureMessages.add(failure.message);
@@ -534,7 +582,7 @@ export class RecordingStudioCapture {
     }
 
     private enqueueChunk(trackId: string, partId: string, data: Blob): void {
-        if (data.size === 0 || !this.recording || this.isWriteFailed || this.isBufferFull) return;
+        if (data.size === 0 || !this.recording || this.isWriteFailed || this.isBufferFull || this.isAbandoned) return;
         // Reject before retaining another Blob. Finish earlier writes, but never append after this gap.
         if (data.size > RECORDING_MAX_PENDING_BYTES - this.pendingBytes) {
             this.isBufferFull = true;
@@ -562,14 +610,14 @@ export class RecordingStudioCapture {
         this.pendingBytes += data.size;
         this.options.onPendingBytes?.(this.pendingBytes);
         this.writeQueue = this.writeQueue.then(async () => {
-            if (this.isWriteFailed) return;
+            if (this.isWriteFailed || this.isAbandoned) return;
             await appendRecordingChunk(snapshot, partId, part.chunkCount, data);
             this.savedRecording = snapshot;
             this.options.onProgress(snapshot);
         }).catch((error: unknown) => {
             // Never append beyond a failed chunk: that would create an undecodable gap.
             this.isWriteFailed = true;
-            void this.stop(getRecordingStorageErrorMessage(error));
+            if (!this.yieldToNewStudio(error)) void this.stop(getRecordingStorageErrorMessage(error));
         }).finally(() => { this.pendingBytes -= data.size; this.options.onPendingBytes?.(this.pendingBytes); });
     }
 
@@ -577,6 +625,8 @@ export class RecordingStudioCapture {
         if (this.transition) await this.transition;
         if (this.entries.length > 0 || this.droppedEntries.length > 0) await this.closeSegment();
         await this.writeQueue;
+        // A studio taken from this tab while it was finalizing has already been told so; nothing is finalized any more.
+        if (this.isAbandoned) return;
         this.removeListeners.forEach(({ remove }) => remove());
         const saved = this.savedRecording;
         if (!saved || !this.recording) {
@@ -606,8 +656,10 @@ export class RecordingStudioCapture {
         try {
             await saveStudioRecording(result);
         } catch (error) {
+            if (this.yieldToNewStudio(error)) return;
             // Losing the very write which records the take is a failure of its own, and the last one worth announcing.
             this.reportFailure({ impact: 'recording-stopped', message: getRecordingStorageErrorMessage(error) });
+            this.finalSaveError = getRecordingStorageErrorMessage(error);
             result = { ...result, status: 'interrupted', errorMessage: this.recordedFailureMessage };
         }
         this.options.onProgress(result);

@@ -2,12 +2,12 @@
 
 import { AdminEditorButton } from '@/components/admin/AdminEditorButton';
 import { Button } from '@/components/ui/button';
-import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
+import { commitRecordingStudioExport, runRecordingStudioWork } from '@/lib/recording-studio/recordingStudioWork';
 import { getRecordingStorageErrorMessage } from '@/lib/recording-studio/recordingStudioCapacity';
 import { getRecordingErrorMessage } from '@/lib/recording-studio/recordingStudioDevices';
 import { chooseRecordingArchiveDestination, chooseRecordingOriginalDestination, chooseRecordingPreparedDestination, describeRecordingOriginalIndexState, exportRecordingArchive, exportRecordingManifest, exportRecordingOriginal, exportRecordingPrepared } from '@/lib/recording-studio/recordingStudioExport';
 import { deleteStudioRecording, readStudioRecording, reconnectStudioRecording } from '@/lib/recording-studio/recordingStudioStorage';
-import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { flushAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
 import { formatRecordingBytes, formatRecordingDuration, getRecordingByteLength, getRecordingMissingRanges } from '@/lib/recording-studio/recordingStudioTiming';
 import type { RecordingTrack, StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
 import { Download, Scissors } from 'lucide-react';
@@ -34,7 +34,7 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
     useEffect(() => () => controller.current?.abort(), []);
 
     const download = (recording: StudioRecording, isTrimIncluded: boolean, track?: RecordingTrack, selectedPart?: RecordingMediaPart) => {
-        if (controller.current) return;
+        if (isDisabled || controller.current) return;
         const operationController = new AbortController();
         controller.current = operationController;
         setWorkingId(recording.id); setErrorMessage(null); setProgress(track ? 'Připravuji stažení originálu…' : 'Připravuji ZIP archiv…'); onBusyChange(true);
@@ -42,31 +42,33 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
         const destination = track ? isTrimIncluded ? chooseRecordingPreparedDestination(recording, track) : chooseRecordingOriginalDestination(recording, track, selectedPart) : chooseRecordingArchiveDestination(recording);
         // Attach a rejection handler immediately while pending edit metadata is flushed.
         void destination.catch(() => undefined);
-        void (async () => {
+        void runRecordingStudioWork(async () => {
             try {
-                if (!(await flushAdminSaves())) { setProgress('Export čeká na platné uložené změny.'); return; }
+                if (!(await flushAdminEditorSaves())) { setProgress('Export čeká na platné uložené změny.'); return; }
                 const savedRecording = await readStudioRecording(recording.id);
                 if (!savedRecording) throw new Error('Místní záznam není dostupný.');
-                await protectAdminMutation(async () => {
+                const selectedDestination = await destination;
+                operationController.signal.throwIfAborted();
+                await commitRecordingStudioExport(async () => {
                     if (track) {
                         const savedTrack = savedRecording.tracks.find((candidate) => candidate.id === track.id);
                         if (!savedTrack) throw new Error('Zdroj není v uloženém záznamu dostupný.');
                         const savedPart = selectedPart ? getRecordingMediaParts(savedTrack).find((part) => part.id === selectedPart.id) : undefined;
                         if (selectedPart && !savedPart) throw new Error('Část média už není dostupná.');
                         if (isTrimIncluded) {
-                            await exportRecordingPrepared(savedRecording, savedTrack, await destination, operationController.signal, setProgress);
+                            await exportRecordingPrepared(savedRecording, savedTrack, selectedDestination, operationController.signal, setProgress);
                             setProgress('Oříznutý soubor a jeho předpis jsou připravené.');
                         } else {
                             setProgress(describeRecordingOriginalIndexState(await exportRecordingOriginal(savedRecording, savedTrack,
-                                await destination, operationController.signal, savedPart, setProgress)));
+                                selectedDestination, operationController.signal, savedPart, setProgress)));
                         }
                     } else {
-                        const result = await exportRecordingArchive({ recording: savedRecording, isTrimIncluded, destination: await destination, signal: operationController.signal, onProgress: setProgress });
+                        const result = await exportRecordingArchive({ recording: savedRecording, isTrimIncluded, destination: selectedDestination, signal: operationController.signal, onProgress: setProgress });
                         const unindexedNotice = result.unindexedOriginalCount > 0
                             ? ` U ${result.unindexedOriginalCount} originálů zůstal kontejner bez indexu pro vyhledávání; důvod a doporučený příkaz jsou v recording.json a README.txt.` : '';
                         setProgress((result.fallbackCount > 0 ? `ZIP obsahuje ${result.preparedCount} oříznutých souborů. U ${result.fallbackCount} zdrojů obsahuje pouze originály a předpis; důvody jsou v recording.json.` : 'ZIP je připravený.') + unindexedNotice);
                     }
-                });
+                }, operationController.signal);
             } catch (error) {
                 const isCancelled = operationController.signal.aborted || (error instanceof DOMException && error.name === 'AbortError');
                 if (!isCancelled) setErrorMessage(error instanceof DOMException ? getRecordingStorageErrorMessage(error, false) : getRecordingErrorMessage(error));
@@ -74,32 +76,32 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
             } finally {
                 controller.current = null; setWorkingId(null); onBusyChange(false); await onStorageChange();
             }
-        })();
+        }, operationController).catch(() => undefined);
     };
     const reconnect = async (recording: StudioRecording) => {
         setWorkingId(recording.id); onBusyChange(true); setErrorMessage(null);
-        try { onChange(await protectAdminMutation(() => reconnectStudioRecording(recording.id))); }
+        try { onChange(await runRecordingStudioWork(() => reconnectStudioRecording(recording.id))); }
         catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Složku se nepodařilo připojit.'); }
         finally { setWorkingId(null); onBusyChange(false); await onStorageChange(); }
     };
     const remove = (recording: StudioRecording, closeEditor: () => void) => {
         setWorkingId(recording.id); setErrorMessage(null); onBusyChange(true);
-        void protectAdminMutation(async () => {
+        void runRecordingStudioWork(async () => {
             try {
                 await deleteStudioRecording(recording.id);
                 onDelete(recording.id); closeEditor();
             } catch (error) { setErrorMessage(error instanceof DOMException ? getRecordingStorageErrorMessage(error, false) : getRecordingErrorMessage(error)); }
             finally { setWorkingId(null); onBusyChange(false); await onStorageChange(); }
-        });
+        }).catch(() => undefined);
     };
     const isBusy = isDisabled || workingId !== null;
     const downloadManifest = async (recordingId: string) => {
         setErrorMessage(null);
         try {
-            if (!(await flushAdminSaves())) return;
+            if (!(await flushAdminEditorSaves())) return;
             const savedRecording = await readStudioRecording(recordingId);
             if (!savedRecording) throw new Error('Místní záznam není dostupný.');
-            await exportRecordingManifest(savedRecording);
+            await runRecordingStudioWork((signal) => commitRecordingStudioExport(() => exportRecordingManifest(savedRecording), signal));
         } catch (error) { setErrorMessage(getRecordingErrorMessage(error)); }
     };
     return (
@@ -139,7 +141,7 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                         <Button type="button" variant="outline" disabled={isBusy} onClick={() => { void downloadManifest(recording.id); }}>Stáhnout údaje o stopách</Button>
                         {recording.trim && <Button type="button" disabled={isBusy} onClick={() => download(recording, true)}><Scissors className="mr-2 h-4 w-4" />ZIP s ořezem</Button>}
                         <AdminEditorButton label="Smazat" title="Smazat místní záznam" errorMessage={errorMessage} buttonProps={{ disabled: isBusy, className: 'text-red-700' }}>
-                            {(closeEditor) => <div className="space-y-4"><p className="text-sm text-slate-600">Záznam „{recording.title}“ a všechny jeho potvrzené části budou odstraněny {recording.storageDestination ? 'z jeho složky na disku' : 'z tohoto prohlížeče'}. Stažené ZIP soubory zůstanou zachované.</p><Button type="button" variant="destructive" disabled={workingId !== null} onClick={() => remove(recording, closeEditor)}>Smazat záznam a všechny stopy</Button></div>}
+                            {(closeEditor) => <div className="space-y-4"><p className="text-sm text-slate-600">Záznam „{recording.title}“ a všechny jeho potvrzené části budou odstraněny {recording.storageDestination ? 'z jeho složky na disku' : 'z tohoto prohlížeče'}. Stažené ZIP soubory zůstanou zachované.</p><Button type="button" variant="destructive" disabled={isBusy} onClick={() => remove(recording, closeEditor)}>Smazat záznam a všechny stopy</Button></div>}
                         </AdminEditorButton>
                     </div>
                 </article>

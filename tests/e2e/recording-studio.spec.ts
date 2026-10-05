@@ -18,19 +18,22 @@ test.beforeEach(async ({ browser }, testInfo) => {
     await testInfo.attach('platform-and-browser', { body: JSON.stringify({ platform: platform(), release: release(), browser: browser.browserType().name(), version: browser.version() }), contentType: 'application/json' });
 });
 
-async function openStudio(page: Page, baseURL: string | undefined) {
+async function openStudio(page: Page, baseURL: string | undefined, isBlocked = false) {
     test.skip(!process.env.ADMIN_PASSWORD, 'Needs the local test server admin password.');
     await page.context().addCookies([{ name: ADMIN_SESSION_COOKIE_NAME, value: createAdminSessionValueOrNull()!, url: baseURL!, httpOnly: true, sameSite: 'Lax' }]);
     await page.addInitScript(() => {
         // Only replace physical devices/the permission picker. Recording, storage, codecs and ZIP are real.
         const streams: MediaStream[] = [];
+        const clonedTracks: MediaStreamTrack[] = [];
+        const originalClone = MediaStreamTrack.prototype.clone;
+        MediaStreamTrack.prototype.clone = function () { const cloned = originalClone.call(this); clonedTracks.push(cloned); return cloned; };
         const mediaRequests: MediaStreamConstraints[] = [];
         const displayRequests: DisplayMediaStreamOptions[] = [];
         const testSettings = { cameraAudioErrorName: null as string | null, displayErrorName: null as string | null, displayInitiallyMuted: false };
         const MARKER_PERIOD_MILLISECONDS = 700;
         const MARKER_DURATION_SECONDS = 0.24;
         const MARKER_TIME_ORIGIN = performance.now();
-        Object.assign(window, { studioTestStreams: streams, studioTestMediaRequests: mediaRequests, studioTestDisplayRequests: displayRequests, studioTestSettings: testSettings });
+        Object.assign(window, { studioTestStreams: streams, studioTestClonedTracks: clonedTracks, studioTestMediaRequests: mediaRequests, studioTestDisplayRequests: displayRequests, studioTestSettings: testSettings });
         const createStream = async (isVideo: boolean, isAudio: boolean) => {
             const stream = new MediaStream();
             let audioAnalyser: AnalyserNode | null = null;
@@ -110,7 +113,10 @@ async function openStudio(page: Page, baseURL: string | undefined) {
     });
     // An absolute address, because a page of a browser attached to from outside has no base address of its own.
     await page.goto(new URL('/admin/recording-studio', baseURL).href);
-    await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    if (isBlocked) {
+        await expect(page.getByRole('button', { name: 'Převzít studio v této kartě', exact: true })).toBeEnabled();
+        await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    } else await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
     expect(await page.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
     // Complete the unrelated cookie choice so a moving bottom panel cannot intercept studio controls.
     const cookiePanel = page.getByRole('region', { name: 'Cookies', exact: true });
@@ -426,7 +432,7 @@ test('keeps a caption returned by only one long-audio chunk at the overlap bound
                 width: null, height: null, frameRate: null, isAudioIncluded: true }],
         };
         const database = await new Promise<IDBDatabase>((resolve, reject) => {
-            const request = indexedDB.open('promptbook-recording-studio', 2);
+            const request = indexedDB.open('promptbook-recording-studio');
             request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
         });
         await new Promise<void>((resolve, reject) => {
@@ -2188,4 +2194,464 @@ test('keeps committed multi-source data after a real IndexedDB transaction abort
     const manifest = JSON.parse(new TextDecoder().decode(files.get('recording.json'))) as RecordingArchiveManifest;
     expect(manifest.status).toBe('interrupted'); expect(manifest.missingRanges.length).toBeGreaterThan(0);
     expect(manifest.tracks.every((track) => track.byteLength > 0)).toBe(true);
+});
+
+async function confirmStudioTakeover(page: Page, isForced = false) {
+    await page.getByRole('button', { name: isForced ? 'Nuceně převzít studio' : 'Převzít studio v této kartě', exact: true }).click();
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Jiná instance může právě nahrávat');
+    await dialog.getByRole('button', { name: isForced ? 'Potvrdit nucené převzetí' : 'Potvrdit převzetí', exact: true }).click();
+}
+
+async function readStudioLockCount(page: Page) {
+    return page.evaluate(async () => (await navigator.locks.query()).held?.filter(({ name }) => name === 'promptbook-recording-studio').length ?? 0);
+}
+
+test('studio takeover confirmation cancellation leaves the actual owner and recording untouched', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForCommittedRecordingSources(page, 1);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    await otherPage.getByRole('button', { name: 'Převzít studio v této kartě', exact: true }).click();
+    await expect(otherPage.getByRole('alertdialog')).toContainText('Nahrává');
+    await otherPage.getByRole('alertdialog').getByRole('button', { name: 'Zrušit', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true })).toBeEnabled();
+    expect((await readLatestStoredRecording(page)).status).toBe('recording');
+    expect(await readStudioLockCount(otherPage)).toBe(1);
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: 'Zastavit všechny stopy', exact: true }).click();
+});
+
+for (const ownerPhase of ['idle', 'recording', 'paused'] as const) {
+    test(`studio takeover from a ${ownerPhase} owner releases all tracks and reopens committed media without refreshing either tab`, async ({ page, baseURL }) => {
+        await openStudio(page, baseURL);
+        await addSource(page, 'microphone');
+        await addSource(page, 'camera');
+        await addSource(page, 'screen');
+        if (ownerPhase !== 'idle') {
+            await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+            await waitForCommittedRecordingSources(page, 3);
+            if (ownerPhase === 'paused') {
+                await page.getByRole('button', { name: 'Pozastavit všechny stopy', exact: true }).click();
+                await expect(page.getByRole('button', { name: 'Pokračovat ve všech stopách', exact: true })).toBeEnabled();
+            }
+        }
+        const ownerUrl = page.url();
+        const otherPage = await page.context().newPage();
+        await openStudio(otherPage, baseURL, true);
+        await otherPage.bringToFront();
+        await confirmStudioTakeover(otherPage);
+        await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+        expect(page.url()).toBe(ownerUrl);
+        expect(page.isClosed()).toBe(false);
+        expect(await page.evaluate(() => {
+            const tracked = window as unknown as { studioTestStreams: MediaStream[]; studioTestClonedTracks: MediaStreamTrack[] };
+            return [...tracked.studioTestStreams.flatMap((stream) => stream.getTracks()), ...tracked.studioTestClonedTracks].every((track) => track.readyState === 'ended');
+        })).toBe(true);
+        await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+        await expect(otherPage.getByText('Studio je aktivní v této kartě.', { exact: false })).toBeVisible();
+        expect(await readStudioLockCount(otherPage)).toBe(1);
+        expect(await otherPage.evaluate(() => (window as unknown as { studioTestMediaRequests: MediaStreamConstraints[] }).studioTestMediaRequests)).toEqual([]);
+        if (ownerPhase !== 'idle') {
+            const recording = await readLatestStoredRecording(otherPage);
+            expect(recording.status).toBe('interrupted');
+            expect(recording.errorMessage).toContain('převzetí');
+            expect(recording.tracks.every((track) => track.byteLength > 0)).toBe(true);
+            await expect(otherPage).toHaveURL(new RegExp(`/admin/recording-studio/${recording.id}$`));
+            await expect(otherPage.getByLabel('Název záznamu', { exact: true })).toHaveValue(recording.title);
+        } else {
+            await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+            await expect(otherPage.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true })).toBeDisabled();
+        }
+        await otherPage.close();
+        // A which gave ownership up stays inactive even after the new owner closes and A is refreshed.
+        await page.reload();
+        await expect(page.getByRole('button', { name: 'Převzít studio v této kartě', exact: true })).toBeEnabled();
+        expect(await readStudioLockCount(page)).toBe(0);
+        await confirmStudioTakeover(page);
+        await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+        expect(await readStudioLockCount(page)).toBe(1);
+    });
+}
+
+test('studio takeover serializes two simultaneous requesting tabs and repeated handovers with real Web Locks', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    const firstRequester = await page.context().newPage();
+    const secondRequester = await page.context().newPage();
+    await openStudio(firstRequester, baseURL, true);
+    await openStudio(secondRequester, baseURL, true);
+    await Promise.all([firstRequester, secondRequester].map(async (requester) => {
+        await requester.getByRole('button', { name: 'Převzít studio v této kartě', exact: true }).click();
+        await expect(requester.getByRole('alertdialog')).toContainText('Připraveno');
+    }));
+    await Promise.all([firstRequester, secondRequester].map((requester) => requester.getByRole('alertdialog').getByRole('button', { name: 'Potvrdit převzetí', exact: true }).click()));
+    await expect.poll(async () => Number(await firstRequester.getByRole('button', { name: 'Přidat zdroj', exact: true }).isEnabled()) +
+        Number(await secondRequester.getByRole('button', { name: 'Přidat zdroj', exact: true }).isEnabled())).toBe(1);
+    expect(await readStudioLockCount(page)).toBe(1);
+    const winner = await firstRequester.getByRole('button', { name: 'Přidat zdroj', exact: true }).isEnabled() ? firstRequester : secondRequester;
+    const loser = winner === firstRequester ? secondRequester : firstRequester;
+    await expect(loser.getByRole('alert').filter({ hasText: /žadateli|mezitím převzala/ })).toBeVisible();
+    for (const nextOwner of [page, winner, page]) {
+        await confirmStudioTakeover(nextOwner);
+        await expect(nextOwner.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+        expect(await readStudioLockCount(nextOwner)).toBe(1);
+    }
+});
+
+test('studio forced takeover fences a frozen recording owner and stops its capture when it resumes', async ({ page, baseURL, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Chromium CDP suspends JavaScript execution; Web Locks and storage stay real. Active capture may make lifecycle freezing ineligible.');
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForCommittedRecordingSources(page, 1);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    const session = await page.context().newCDPSession(page);
+    await session.send('Debugger.enable');
+    await session.send('Debugger.pause');
+    try {
+        await confirmStudioTakeover(otherPage);
+        await expect(otherPage.getByRole('alert').filter({ hasText: 'včas neodpověděla' })).toBeVisible();
+        await confirmStudioTakeover(otherPage, true);
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+        const recovered = await readLatestStoredRecording(otherPage);
+        expect(recovered.status).toBe('interrupted');
+        expect(recovered.errorMessage).toContain('nuceně');
+        expect(recovered.tracks[0].byteLength).toBeGreaterThan(0);
+        const committed = JSON.stringify(recovered);
+        await session.send('Debugger.resume').catch(() => undefined);
+        await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+        expect(await page.evaluate(() => {
+            const tracked = window as unknown as { studioTestStreams: MediaStream[]; studioTestClonedTracks: MediaStreamTrack[] };
+            return [...tracked.studioTestStreams.flatMap((stream) => stream.getTracks()), ...tracked.studioTestClonedTracks].every((track) => track.readyState === 'ended');
+        })).toBe(true);
+        // Final data events and the old finalization cannot overwrite the authoritative recovered take.
+        await expect.poll(async () => JSON.stringify(await readLatestStoredRecording(otherPage))).toBe(committed);
+        expect(await readStudioLockCount(otherPage)).toBe(1);
+        await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    } finally { await session.send('Debugger.resume').catch(() => undefined); await session.detach(); }
+});
+
+test('studio forced takeover rejects a suspended media transaction at the native commit boundary', async ({ page, baseURL, browserName }) => {
+    test.skip(browserName !== 'chromium');
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForCommittedRecordingSources(page, 1);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    const session = await page.context().newCDPSession(page);
+    await session.send('Debugger.enable');
+    const paused = new Promise<void>((resolve) => session.once('Debugger.paused', () => resolve()));
+    await page.evaluate(() => {
+        const original = IDBDatabase.prototype.transaction;
+        let isNextMediaWrite = true;
+        IDBDatabase.prototype.transaction = function (...arguments_: Parameters<IDBDatabase['transaction']>) {
+            const [stores, mode] = arguments_;
+            const isSuspendedMediaWrite = isNextMediaWrite && mode === 'readwrite' && Array.isArray(stores) && stores.includes('chunks');
+            if (isSuspendedMediaWrite) {
+                isNextMediaWrite = false;
+                // The real storage function has captured A's token, but has not issued its fenced native transaction.
+                debugger;
+            }
+            const transaction = original.apply(this, arguments_);
+            if (isSuspendedMediaWrite) transaction.addEventListener('abort', () => {
+                Object.assign(window, { studioStaleMediaWriteRejected: transaction.error?.name === 'ConstraintError' });
+            });
+            return transaction;
+        };
+    });
+    await paused;
+    try {
+        await confirmStudioTakeover(otherPage);
+        await expect(otherPage.getByRole('alert').filter({ hasText: 'včas neodpověděla' })).toBeVisible();
+        await confirmStudioTakeover(otherPage, true);
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+        const committed = JSON.stringify(await readLatestStoredRecording(otherPage));
+        await session.send('Debugger.resume');
+        await expect.poll(() => page.evaluate(() =>
+            (window as unknown as { studioStaleMediaWriteRejected?: boolean }).studioStaleMediaWriteRejected)).toBe(true);
+        await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+        expect(JSON.stringify(await readLatestStoredRecording(otherPage))).toBe(committed);
+        expect(await readStudioLockCount(otherPage)).toBe(1);
+    } finally { await session.send('Debugger.resume').catch(() => undefined); await session.detach(); }
+});
+
+test('studio takeover refuses failed editor saves, keeps the draft in A, and requires explicit discard in B', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    const fixture = await seedRecordingEditorFixture(page);
+    await page.evaluate(() => {
+        const original = IDBObjectStore.prototype.put;
+        IDBObjectStore.prototype.put = function (...arguments_: Parameters<IDBObjectStore['put']>) {
+            if (this.name === 'recordings') throw new DOMException('Takeover editor write failed', 'QuotaExceededError');
+            return original.apply(this, arguments_);
+        };
+    });
+    await page.getByLabel('Název záznamu', { exact: true }).fill('Unsaved handover draft');
+    await expect(page.getByRole('alert').filter({ hasText: 'Takeover editor write failed' })).toBeVisible();
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    await confirmStudioTakeover(otherPage);
+    await expect(otherPage.getByRole('alert').filter({ hasText: 'nemohla uložit změny editoru' })).toBeVisible();
+    await expect(page.getByLabel('Název záznamu', { exact: true })).toHaveValue('Unsaved handover draft');
+    await expect(page.getByLabel('Název záznamu', { exact: true })).toBeEnabled();
+    expect((await readLatestStoredRecording(otherPage)).title).toBe(fixture.title);
+    await otherPage.getByRole('button', { name: 'Převzít bez neuložených změn', exact: true }).click();
+    await expect(otherPage.getByRole('alertdialog')).toContainText('Neuložené změny editoru budou zahozeny');
+    await otherPage.getByRole('alertdialog').getByRole('button', { name: 'Potvrdit převzetí', exact: true }).click();
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+    expect((await readLatestStoredRecording(otherPage)).title).toBe(fixture.title);
+    expect(await readStudioLockCount(otherPage)).toBe(1);
+});
+
+test('studio takeover waits for an admitted editor save and reloads its acknowledged title and selection', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    const fixture = await seedRecordingEditorFixture(page);
+    await page.evaluate(() => {
+        const heldTransactions = new WeakSet<IDBTransaction>();
+        const originalComplete = Object.getOwnPropertyDescriptor(IDBTransaction.prototype, 'oncomplete')!;
+        const originalPut = IDBObjectStore.prototype.put;
+        IDBObjectStore.prototype.put = function (...arguments_: Parameters<IDBObjectStore['put']>) {
+            if (this.name === 'recordings' && arguments_[0]?.title === 'Saved during handover') heldTransactions.add(this.transaction);
+            return originalPut.apply(this, arguments_);
+        };
+        Object.defineProperty(IDBTransaction.prototype, 'oncomplete', { ...originalComplete,
+            set: function (this: IDBTransaction, handler: IDBTransaction['oncomplete']) {
+                originalComplete.set!.call(this, (event: Event) => {
+                    if (heldTransactions.has(this)) Object.assign(window, { studioReleaseEditorCommit: () => handler?.call(this, event) });
+                    else handler?.call(this, event);
+                });
+            },
+        });
+    });
+    await page.getByLabel('Název záznamu', { exact: true }).fill('Saved during handover');
+    await expect.poll(() => page.evaluate(() => 'studioReleaseEditorCommit' in window)).toBe(true);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    await confirmStudioTakeover(otherPage);
+    await expect(otherPage.getByRole('status').filter({ hasText: 'Ukládá změny editoru' })).toBeVisible();
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    await page.evaluate(() => (window as unknown as { studioReleaseEditorCommit: () => void }).studioReleaseEditorCommit());
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    const saved = await readLatestStoredRecording(otherPage);
+    expect(saved.title).toBe('Saved during handover');
+    expect(saved.trim).toEqual(fixture.trim);
+    expect(saved.tracks.map((track) => track.byteLength)).toEqual(fixture.tracks.map((track) => track.byteLength));
+    await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+});
+
+test('studio takeover reports a failed final checkpoint instead of a clean release and can recover through fencing', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForCommittedRecordingSources(page, 1);
+    await page.evaluate(() => {
+        const original = IDBObjectStore.prototype.put;
+        IDBObjectStore.prototype.put = function (...arguments_: Parameters<IDBObjectStore['put']>) {
+            const recording = arguments_[0] as { status?: string };
+            if (this.name === 'recordings' && recording.status !== 'recording') throw new DOMException('Takeover finalization write failed', 'QuotaExceededError');
+            return original.apply(this, arguments_);
+        };
+    });
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    await confirmStudioTakeover(otherPage);
+    await expect(otherPage.getByRole('alert').filter({ hasText: 'nemohla bezpečně dokončit' })).toBeVisible();
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    expect((await readLatestStoredRecording(otherPage)).status).toBe('recording');
+    await confirmStudioTakeover(otherPage, true);
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    expect((await readLatestStoredRecording(otherPage)).status).toBe('interrupted');
+    await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+});
+
+for (const transition of ['pausing', 'stopping'] as const) {
+    test(`studio takeover waits for the ${transition} transition and final real recorder events before recovery`, async ({ page, baseURL }) => {
+        await openStudio(page, baseURL);
+        await page.evaluate(() => {
+            const descriptor = Object.getOwnPropertyDescriptor(MediaRecorder.prototype, 'onstop')!;
+            const pending: (() => void)[] = [];
+            Object.assign(window, { studioPendingRecorderStops: pending });
+            Object.defineProperty(MediaRecorder.prototype, 'onstop', {
+                ...descriptor,
+                set(handler: ((event: Event) => void) | null) {
+                    descriptor.set!.call(this, handler ? (event: Event) => { pending.push(() => handler.call(this, event)); } : null);
+                },
+            });
+        });
+        await addSource(page, 'camera');
+        await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+        await waitForCommittedRecordingSources(page, 1);
+        const otherPage = await page.context().newPage();
+        await openStudio(otherPage, baseURL, true);
+        await page.getByRole('button', { name: transition === 'pausing' ? 'Pozastavit všechny stopy' : 'Zastavit všechny stopy', exact: true }).click();
+        await expect.poll(() => page.evaluate(() => (window as unknown as { studioPendingRecorderStops: unknown[] }).studioPendingRecorderStops.length)).toBe(1);
+        await confirmStudioTakeover(otherPage);
+        await expect(otherPage.getByRole('status').filter({ hasText: 'Zastavuje záznam' })).toBeVisible();
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+        expect((await readLatestStoredRecording(otherPage)).status).toBe('recording');
+        await page.evaluate(() => (window as unknown as { studioPendingRecorderStops: (() => void)[] }).studioPendingRecorderStops.splice(0).forEach((finish) => finish()));
+        await expect(page.getByRole('alert').filter({ hasText: 'deaktivované' })).toBeVisible();
+        await expect(otherPage.getByLabel('Název záznamu', { exact: true })).toBeEnabled();
+        expect((await readLatestStoredRecording(otherPage)).tracks[0].byteLength).toBeGreaterThan(0);
+        expect(await readStudioLockCount(otherPage)).toBe(1);
+    });
+}
+
+test('studio takeover cancelled while a frozen owner is delayed ignores the late request when A resumes', async ({ page, baseURL, browserName }) => {
+    test.skip(browserName !== 'chromium');
+    await openStudio(page, baseURL);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    const session = await page.context().newCDPSession(page);
+    await session.send('Debugger.enable');
+    await session.send('Debugger.pause');
+    try {
+        await confirmStudioTakeover(otherPage);
+        await expect(otherPage.getByRole('alert').filter({ hasText: 'včas neodpověděla' })).toBeVisible();
+        await otherPage.getByRole('button', { name: 'Zrušit požadavek', exact: true }).click();
+        await session.send('Debugger.resume').catch(() => undefined);
+        await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+        expect(await readStudioLockCount(otherPage)).toBe(1);
+    } finally { await session.send('Debugger.resume').catch(() => undefined); await session.detach(); }
+});
+
+test('studio takeover acquires the actual released lock when a frozen recording owner closes mid-request', async ({ page, baseURL, browserName }) => {
+    test.skip(browserName !== 'chromium');
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await waitForCommittedRecordingSources(page, 1);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    const session = await page.context().newCDPSession(page);
+    await session.send('Debugger.enable');
+    await session.send('Debugger.pause');
+    await confirmStudioTakeover(otherPage);
+    await page.close();
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    await expect(otherPage.getByText('Jiná instance skončila bez potvrzení předání.', { exact: false })).toBeVisible();
+    expect((await readLatestStoredRecording(otherPage)).status).toBe('interrupted');
+    expect(await readStudioLockCount(otherPage)).toBe(1);
+});
+
+test('studio takeover settles an in-progress Start before granting the waiting tab authority', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await addSource(page, 'camera');
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    await page.evaluate(() => {
+        const original = navigator.storage.estimate.bind(navigator.storage);
+        let isFirstCall = true;
+        navigator.storage.estimate = async () => {
+            if (!isFirstCall) return original();
+            isFirstCall = false;
+            await new Promise<void>((resolve) => Object.assign(window, { studioReleaseStartingEstimate: resolve }));
+            return original();
+        };
+    });
+    await page.getByRole('button', { name: 'Nahrávat připravené zdroje', exact: true }).click();
+    await expect(page.getByText('Společný čas záznamu · Spouštění všech stop', { exact: true })).toBeVisible();
+    await confirmStudioTakeover(otherPage);
+    await expect(otherPage.getByRole('status').filter({ hasText: 'Zastavuje záznam' })).toBeVisible();
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    await page.evaluate(() => (window as unknown as { studioReleaseStartingEstimate: () => void }).studioReleaseStartingEstimate());
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    expect(await readLatestStoredRecording(otherPage)).toBeUndefined();
+    expect(await readStudioLockCount(otherPage)).toBe(1);
+});
+
+test('studio takeover cancels an export waiting for its destination and preserves the saved selection', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    const fixture = await seedRecordingEditorFixture(page);
+    await page.getByLabel('Název záznamu', { exact: true }).fill('Saved before takeover export');
+    await expect.poll(async () => (await readLatestStoredRecording(page)).title).toBe('Saved before takeover export');
+    await page.evaluate(() => Object.defineProperty(window, 'showSaveFilePicker', { configurable: true,
+        value: () => new Promise<null>((resolve) => Object.assign(window, { studioReleaseExportPicker: () => resolve(null) })) }));
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    await page.getByRole('button', { name: 'Originály ZIP', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Zrušit export', exact: true })).toBeVisible();
+    await confirmStudioTakeover(otherPage);
+    await expect(otherPage.getByRole('status').filter({ hasText: /Čekám nejvýše 30 sekund/ })).toBeVisible();
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+    await page.evaluate(() => (window as unknown as { studioReleaseExportPicker: () => void }).studioReleaseExportPicker());
+    await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    const preserved = await readLatestStoredRecording(otherPage);
+    expect(preserved.title).toBe('Saved before takeover export');
+    expect(preserved.trim).toEqual(fixture.trim);
+    expect(preserved.tracks.map((track) => track.byteLength)).toEqual(fixture.tracks.map((track) => track.byteLength));
+});
+
+test('studio takeover waits for an acknowledged upload request and preserves resumable revision metadata', async ({ page, baseURL }) => {
+    await openStudio(page, baseURL);
+    await page.route('**/api/admin/workshops?kind=workshop', (route) => route.fulfill({ json: { workshops: [
+        { id: 'takeover-upload-workshop', title: 'Takeover upload fixture', startsAt: '2026-10-05T08:00:00Z' },
+    ] } }));
+    const heldUpload: { release: (() => void) | null } = { release: null };
+    await page.route('**/api/admin/workshops/takeover-upload-workshop/hosted-recordings**', async (route) => {
+        const pathname = new URL(route.request().url()).pathname;
+        if (route.request().method() === 'PUT') {
+            await new Promise<void>((resolve) => { heldUpload.release = resolve; });
+            await route.fulfill({ json: { ok: true } });
+        } else if (pathname.endsWith('/parts')) await route.fulfill({ json: { parts: [] } });
+        else if (pathname.endsWith('/assets')) await route.fulfill({ json: { asset: { id: 'takeover-upload-asset', status: 'uploading' } } });
+        else await route.fulfill({ json: { revision: { id: 'takeover-upload-revision' } } });
+    });
+    const fixture = await seedRecordingEditorFixture(page);
+    const publication = page.getByRole('region', { name: 'Publikovat do workshopu', exact: true });
+    await publication.getByRole('combobox', { name: 'Workshop', exact: true }).selectOption('takeover-upload-workshop');
+    await publication.getByRole('combobox', { name: 'Editor (VS Code)', exact: true }).selectOption('screen');
+    await publication.getByRole('button', { name: 'Připravit a nahrát', exact: true }).click();
+    try {
+        await expect.poll(() => heldUpload.release !== null).toBe(true);
+        // Discovery and cooperative cancellation must work even when B first opens during an admitted server write.
+        const otherPage = await page.context().newPage();
+        await openStudio(otherPage, baseURL, true);
+        await expect(otherPage.getByText(/Poslední hlášený stav:.*Probíhá práce se soubory nebo upload/)).toBeVisible();
+        await confirmStudioTakeover(otherPage);
+        await expect(otherPage.getByRole('status').filter({ hasText: /Čekám nejvýše 30 sekund/ })).toBeVisible();
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+        heldUpload.release!();
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+        expect((await readLatestStoredRecording(otherPage)).tracks.map((track) => track.byteLength)).toEqual(fixture.tracks.map((track) => track.byteLength));
+        const pending = await otherPage.evaluate((recordingId) => JSON.parse(localStorage.getItem(`promptbook-recording-studio-upload:${recordingId}`)!), fixture.id);
+        expect(pending).toMatchObject({ revisionId: 'takeover-upload-revision', workshopId: 'takeover-upload-workshop', sourceIds: { editor: 'screen' } });
+    } finally { heldUpload.release?.(); }
+});
+
+test('studio forced takeover refuses persisted external uncertainty and leaves the real owner lock intact', async ({ page, baseURL, browserName }) => {
+    test.skip(browserName !== 'chromium');
+    await openStudio(page, baseURL);
+    const otherPage = await page.context().newPage();
+    await openStudio(otherPage, baseURL, true);
+    // A committed uncertainty marker is what survives an external write whose lifetime transaction was terminated.
+    // Use the actual IndexedDB store, not a mocked authority/lock service.
+    await page.evaluate(async () => {
+        const database = await new Promise<IDBDatabase>((resolve) => {
+            const request = indexedDB.open('promptbook-recording-studio'); request.onsuccess = () => resolve(request.result);
+        });
+        await new Promise<void>((resolve, reject) => {
+            const transaction = database.transaction('authority', 'readwrite');
+            transaction.objectStore('authority').put({ generation: 1, operationId: 'external-operation-with-unknown-result' }, 'external-commit');
+            transaction.oncomplete = () => resolve(); transaction.onabort = () => reject(transaction.error);
+        });
+        database.close();
+    });
+    const session = await page.context().newCDPSession(page);
+    await session.send('Debugger.enable'); await session.send('Debugger.pause');
+    try {
+        await confirmStudioTakeover(otherPage);
+        await expect(otherPage.getByRole('alert').filter({ hasText: 'včas neodpověděla' })).toBeVisible();
+        await confirmStudioTakeover(otherPage, true);
+        await expect(otherPage.getByRole('alert').filter({ hasText: 'nedokončila zápis do souboru nebo na server' })).toBeVisible();
+        await expect(otherPage.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeDisabled();
+        expect(await readStudioLockCount(otherPage)).toBe(1);
+        await session.send('Debugger.resume');
+        await expect(page.getByRole('button', { name: 'Přidat zdroj', exact: true })).toBeEnabled();
+    } finally { await session.send('Debugger.resume').catch(() => undefined); await session.detach(); }
 });

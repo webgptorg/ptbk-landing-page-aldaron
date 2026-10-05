@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { flushAdminSaves } from '@/lib/admin/adminPendingSaves';
-import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
+import { flushAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
+import { runRecordingStudioWork } from '@/lib/recording-studio/recordingStudioWork';
 import { generateRecordingDerivedTrack } from '@/lib/recording-studio/recordingStudioDerivedGeneration';
 import { applyRecordingSpeechCorrection, getRecordingAudioAvailability, getRecordingMediaRevision } from '@/lib/recording-studio/recordingStudioDerived';
 import { openRecordingMedia } from '@/lib/recording-studio/recordingStudioMedia';
@@ -123,13 +123,13 @@ export function RecordingDerivedEditor({ recording, tracks, onChange, seconds, o
         controller.current = operation;
         setLastKind(kind);
         setWorkingKind(kind); setProgress('Ověřuji dokončený zdroj…'); setErrorMessage(null);
-        void (async () => {
+        void runRecordingStudioWork(async () => {
             try {
-                if (!(await flushAdminSaves())) throw new Error('Nejprve opravte a uložte změny v editoru.');
+                if (!(await flushAdminEditorSaves())) throw new Error('Nejprve opravte a uložte změny v editoru.');
                 const savedRecording = await readStudioRecording(recording.id);
                 if (!savedRecording) throw new Error('Místní záznam není dostupný. Připojte jeho složku znovu.');
-                const generated = await protectAdminMutation(() => generateRecordingDerivedTrack({ recording: savedRecording, sourceId, kind, language,
-                    signal: operation.signal, onProgress: setProgress, transcribe: transcribeRecordingChunk }));
+                const generated = await generateRecordingDerivedTrack({ recording: savedRecording, sourceId, kind, language,
+                    signal: operation.signal, onProgress: setProgress, transcribe: transcribeRecordingChunk });
                 operation.signal.throwIfAborted();
                 const current = await readStudioRecording(recording.id);
                 if (!current || await getRecordingMediaRevision(current) !== generated.provenance.mediaRevision) {
@@ -144,7 +144,7 @@ export function RecordingDerivedEditor({ recording, tracks, onChange, seconds, o
                 if (operation.signal.aborted) setProgress('Generování bylo zrušeno. Uložené úpravy i originály zůstaly zachované.');
                 else setErrorMessage(error instanceof Error ? error.message : 'Generování se nezdařilo. Zkuste to znovu.');
             } finally { controller.current = null; setWorkingKind(null); }
-        })();
+        }, operation).catch(() => undefined);
     };
     return <section className="space-y-4 rounded-xl border bg-white p-4" aria-label="Odvozené stopy řeči">
         <div><h3 className="font-semibold">Titulky a aktivita řeči</h3><p className="text-sm text-slate-600">Každou stopu vytvořte zvlášť z vybraného, dokončeného zvuku. Nové generování přidá revizi a ponechá ruční opravy. Zobrazení stop nemění přehrávání ani originály.</p></div>

@@ -45,11 +45,11 @@ function getContentType(asset: HostedRecordingUploadFile): string {
     return 'application/json';
 }
 
-async function uploadPartWithRetry(url: string, bytes: ArrayBuffer, checksum: string, signal: AbortSignal): Promise<void> {
+async function uploadPartWithRetry(url: string, bytes: ArrayBuffer, checksum: string, signal: AbortSignal, isCancellationBetweenRequestsOnly: boolean): Promise<void> {
     for (let attempt = 1; attempt <= MAXIMUM_PART_ATTEMPTS; attempt += 1) {
         signal.throwIfAborted();
         try {
-            const response = await fetch(url, { method: 'PUT', body: bytes, signal,
+            const response = await fetch(url, { method: 'PUT', body: bytes, signal: isCancellationBetweenRequestsOnly ? undefined : signal,
                 headers: { 'Content-Type': 'application/octet-stream', 'X-Chunk-SHA256': checksum } });
             if (response.ok) return;
             const body = await response.json().catch(() => null) as { error?: string } | null;
@@ -65,8 +65,12 @@ async function uploadPartWithRetry(url: string, bytes: ArrayBuffer, checksum: st
 
 /** One file at a time, one 8 MiB chunk in memory, with repeatable S3 part numbers. */
 export async function uploadHostedRecordingAsset(workshopId: string, revisionId: string, asset: HostedRecordingUploadFile,
-    signal: AbortSignal, onProgress: (completedBytes: number, totalBytes: number) => void): Promise<string> {
+    signal: AbortSignal, onProgress: (completedBytes: number, totalBytes: number) => void, isCancellationBetweenRequestsOnly = false): Promise<string> {
     return protectAdminMutation(async () => {
+        signal.throwIfAborted();
+        // Studio keeps its ownership barrier until each server response. Aborting fetch alone cannot prove that a
+        // multipart completion or part write stopped at the server; cancellation there happens between requests.
+        const requestSignal = isCancellationBetweenRequestsOnly ? undefined : signal;
         const assetBase = `${createRevisionUrl(workshopId, revisionId)}/assets`;
         const created = await requestAdminJson<{ readonly asset: { readonly id: string; readonly status: string } }>(assetBase,
             createJsonRequest('POST', { role: asset.role, sourceId: asset.sourceId ?? null,
@@ -78,7 +82,7 @@ export async function uploadHostedRecordingAsset(workshopId: string, revisionId:
             return created.asset.id;
         }
         if (created.asset.status === 'completing') {
-            await requestAdminJson(assetUrl, { method: 'POST', signal });
+            await requestAdminJson(assetUrl, { method: 'POST', signal: requestSignal });
             onProgress(asset.file.size, asset.file.size);
             return created.asset.id;
         }
@@ -94,13 +98,13 @@ export async function uploadHostedRecordingAsset(workshopId: string, revisionId:
             const checksum = btoa(String.fromCharCode(...Array.from(digest)));
             const existingPart = uploadedParts.get(partNumber);
             if (existingPart?.byteLength !== bytes.byteLength || existingPart.checksumSha256 !== checksum) {
-                await uploadPartWithRetry(`${assetUrl}/parts/${partNumber}`, bytes, checksum, signal);
+                await uploadPartWithRetry(`${assetUrl}/parts/${partNumber}`, bytes, checksum, signal, isCancellationBetweenRequestsOnly);
             }
             completedBytes += bytes.byteLength;
             onProgress(completedBytes, asset.file.size);
         }
         signal.throwIfAborted();
-        await requestAdminJson(assetUrl, { method: 'POST', signal });
+        await requestAdminJson(assetUrl, { method: 'POST', signal: requestSignal });
         return created.asset.id;
     });
 }

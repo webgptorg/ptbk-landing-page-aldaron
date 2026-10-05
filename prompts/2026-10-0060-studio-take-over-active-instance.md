@@ -1,4 +1,4 @@
-[ ]
+[x] by Developer on Claude Code `opus` thinking `max`, interrupted, continued by Developer on OpenAI Codex `gpt-6.1-sol` thinking `max` (ChatGPT account)
 
 [✨🗝️] Take over the active Studio from another tab without finding or closing the original tab
 
@@ -28,3 +28,5 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+
+

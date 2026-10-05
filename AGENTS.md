@@ -268,7 +268,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   closes immutable media fragments before its small authoritative checkpoint and stores only handles/metadata in
   IndexedDB. Recovery can reconnect or import that folder without moving its media into origin storage; read-only
   import still offers export when further folder or origin-cache writes fail. An exclusive
-  browser lock protects recording, recovery, editing and deletion across tabs. Committed bytes, queued bytes,
+  browser lock protects recording, recovery, editing and deletion across tabs. A blocked or deactivated instance
+  offers explicit confirmed takeover entirely from that tab, through addressed BroadcastChannel handshakes and the
+  same exclusive lock. Responsive owners settle recording transitions/final data, drain persistence, release all
+  capture/preview tracks, settle jobs/uploads and flush editor saves before release. Failed saves are reported and
+  retained unless explicitly discarded. B reloads authoritative recordings and device intent without starting capture;
+  A stays open and deactivated, including on refresh. Bounded waits distinguish refusal/timeout from success. Explicit
+  force advances a storage generation before stealing the lock; every authoritative mutation is fenced at commit,
+  including recovery, deletion, edits and external finalization/publication. Unresolved file/server commits fail closed
+  through that same authority, and logical revocation never promises physical termination of a suspended tab's devices
+  or preservation of its uncommitted tail. Studio upload revision/source identifiers survive handover. The cross-tab
+  tests, conservative external-commit recovery limits and physical/browser protocol are in
+  `docs/recording-studio-takeover.md`. Committed bytes, queued bytes,
   destination and aggregate bitrate are separate from the browser's labelled origin quota estimate. That estimate
   can remain constant at 10 GiB, is never physical disk capacity, and supplies no remaining-time countdown.
   Explicit persistence reports the browser's real result and protects against eviction only. A bounded write queue
