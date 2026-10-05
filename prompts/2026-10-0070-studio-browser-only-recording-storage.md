@@ -1,4 +1,4 @@
-[ ]
+[x] (2 attempts) by Developer on Claude Code `opus` thinking `max`, interrupted, continued by Developer on OpenAI Codex `gpt-6.1-sol` thinking `max` (ChatGPT account)
 
 [✨🧺] Remove recording-to-folder and make browser-local recording the only capture workflow
 
@@ -22,3 +22,5 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+
+

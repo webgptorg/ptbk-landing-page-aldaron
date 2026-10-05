@@ -1,12 +1,42 @@
 const RECORDING_DATABASE_NAME = 'promptbook-recording-studio';
-/** Version 3 adds the store which says which tab may write. See `recordingStudioAuthority.ts`. */
-const RECORDING_DATABASE_VERSION = 3;
+/**
+ * Version 3 adds the store which says which tab may write. See `recordingStudioAuthority.ts`.
+ * Version 4 retires recording into a selected folder. See `forgetRetiredDirectoryRecordings`.
+ */
+const RECORDING_DATABASE_VERSION = 4;
 export const RECORDING_STORE = 'recordings';
 export const CHUNK_STORE = 'chunks';
-export const DIRECTORY_STORE = 'directories';
 export const AUTHORITY_STORE = 'authority';
+/** Held the handles of the folders which takes used to be recorded into. Nothing reads or writes it any more. */
+const RETIRED_DIRECTORY_STORE = 'directories';
 
 let databasePromise: Promise<IDBDatabase> | null = null;
+
+function isRetiredDirectoryRecording(recording: unknown): boolean {
+    if (typeof recording !== 'object' || recording === null || !('storageDestination' in recording)) return false;
+    const destination = recording.storageDestination;
+    return typeof destination === 'object' && destination !== null && 'kind' in destination && destination.kind === 'directory';
+}
+
+/**
+ * Drops what the studio remembered about takes recorded into a selected folder, a destination it no longer has
+ *
+ * Note: Such a take kept only the handle of its folder and a copy of its description here, while its media never
+ *       entered this database. Both go, so that the library lists no take whose media it cannot read. The folder
+ *       itself, its files, and every take recorded into the browser are left exactly as they are.
+ *
+ * @param upgrade the version change which is under way, so the removal is committed together with the new schema
+ */
+function forgetRetiredDirectoryRecordings(database: IDBDatabase, upgrade: IDBTransaction): void {
+    if (database.objectStoreNames.contains(RETIRED_DIRECTORY_STORE)) database.deleteObjectStore(RETIRED_DIRECTORY_STORE);
+    const cursorRequest = upgrade.objectStore(RECORDING_STORE).openCursor();
+    cursorRequest.onsuccess = () => {
+        const cursor = cursorRequest.result;
+        if (!cursor) return;
+        if (isRetiredDirectoryRecording(cursor.value)) cursor.delete();
+        cursor.continue();
+    };
+}
 
 /**
  * Opens the database of the studio at the schema this code writes, upgrading it when it is older
@@ -25,8 +55,9 @@ export function openRecordingDatabase(): Promise<IDBDatabase> {
                 const chunks = database.createObjectStore(CHUNK_STORE, { keyPath: ['recordingId', 'trackId', 'sequence'] });
                 chunks.createIndex('recordingId', 'recordingId');
             }
-            if (!database.objectStoreNames.contains(DIRECTORY_STORE)) database.createObjectStore(DIRECTORY_STORE);
             if (!database.objectStoreNames.contains(AUTHORITY_STORE)) database.createObjectStore(AUTHORITY_STORE);
+            // Orphaned descriptions are retired too, even when their old handle store is missing.
+            forgetRetiredDirectoryRecordings(database, request.transaction!);
         };
         request.onsuccess = () => {
             request.result.onversionchange = () => { request.result.close(); databasePromise = null; };

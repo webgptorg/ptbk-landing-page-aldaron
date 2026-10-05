@@ -116,33 +116,54 @@ test('material ordering supports mouse, touch, and keyboard and keeps the saved 
     const getTitles = () => page.getByRole('article').locator('h3').allTextContents();
     const getHandle = (title: string) => page.getByRole('button', { name: new RegExp(`Přesunout materiál ${title},`) });
     const getArticle = (title: string) => page.getByRole('article').filter({ has: page.getByRole('heading', { name: title, exact: true }) });
+    const getDragCoordinates = async (sourceTitle: string, targetTitle: string) => {
+        const handle = getHandle(sourceTitle);
+        const targetArticle = getArticle(targetTitle);
+        // The target can start below the viewport. Scrolling and the previous drag can both move these cards.
+        await targetArticle.scrollIntoViewIfNeeded();
+        await handle.scrollIntoViewIfNeeded();
+        await expect(handle).toBeInViewport({ ratio: 1 });
+        await expect(targetArticle).toBeInViewport({ ratio: 1 });
+        const handleBox = await handle.boundingBox();
+        const targetBox = await targetArticle.boundingBox();
+        expect(handleBox).not.toBeNull();
+        expect(targetBox).not.toBeNull();
+        return {
+            start: { x: handleBox!.x + handleBox!.width / 2, y: handleBox!.y + handleBox!.height / 2 },
+            end: { x: targetBox!.x + 60, y: targetBox!.y + targetBox!.height / 2 },
+        };
+    };
 
     const firstHandle = getHandle('First material');
-    const firstHandleBox = await firstHandle.boundingBox();
-    const secondArticleBox = await getArticle('Second material').boundingBox();
-    expect(firstHandleBox).not.toBeNull();
-    expect(secondArticleBox).not.toBeNull();
 
     // Escaping a live drag restores its starting order without reaching the order endpoint.
-    await page.mouse.move(firstHandleBox!.x + 15, firstHandleBox!.y + 15);
+    const cancelledDrag = await getDragCoordinates('First material', 'Second material');
+    await page.mouse.move(cancelledDrag.start.x, cancelledDrag.start.y);
     await page.mouse.down();
-    await page.mouse.move(secondArticleBox!.x + 60, secondArticleBox!.y + secondArticleBox!.height / 2, { steps: 6 });
+    await page.mouse.move(cancelledDrag.end.x, cancelledDrag.end.y, { steps: 6 });
+    await expect(firstHandle).toHaveAttribute('aria-pressed', 'true');
     await page.keyboard.press('Escape');
     await page.mouse.up();
+    await expect(firstHandle).toHaveAttribute('aria-pressed', 'false');
     await expect.poll(getTitles).toEqual(['First material', 'Second material']);
     expect(reorderWrites).toHaveLength(0);
 
     // Releasing over the starting card is a no-op even after the handle activates dragging.
-    await page.mouse.move(firstHandleBox!.x + 15, firstHandleBox!.y + 15);
+    const unchangedDrag = await getDragCoordinates('First material', 'First material');
+    await page.mouse.move(unchangedDrag.start.x, unchangedDrag.start.y);
     await page.mouse.down();
-    await page.mouse.move(firstHandleBox!.x + 27, firstHandleBox!.y + 25, { steps: 2 });
+    await page.mouse.move(unchangedDrag.start.x + 12, unchangedDrag.start.y + 10, { steps: 2 });
+    await expect(firstHandle).toHaveAttribute('aria-pressed', 'true');
     await page.mouse.up();
+    await expect(firstHandle).toHaveAttribute('aria-pressed', 'false');
     await expect.poll(getTitles).toEqual(['First material', 'Second material']);
     expect(reorderWrites).toHaveLength(0);
 
-    await page.mouse.move(firstHandleBox!.x + 15, firstHandleBox!.y + 15);
+    const reorderedDrag = await getDragCoordinates('First material', 'Second material');
+    await page.mouse.move(reorderedDrag.start.x, reorderedDrag.start.y);
     await page.mouse.down();
-    await page.mouse.move(secondArticleBox!.x + 60, secondArticleBox!.y + secondArticleBox!.height / 2, { steps: 6 });
+    await page.mouse.move(reorderedDrag.end.x, reorderedDrag.end.y, { steps: 6 });
+    await expect(firstHandle).toHaveAttribute('aria-pressed', 'true');
     await page.mouse.up();
     await expect.poll(getTitles).toEqual(['Second material', 'First material']);
     await expect.poll(() => reorderWrites.length).toBe(1);
@@ -154,18 +175,13 @@ test('material ordering supports mouse, touch, and keyboard and keeps the saved 
     await expect.poll(getTitles).toEqual(['Second material', 'First material']);
 
     const secondHandle = getHandle('Second material');
-    const secondHandleBox = await secondHandle.boundingBox();
-    const firstArticleBox = await getArticle('First material').boundingBox();
-    expect(secondHandleBox).not.toBeNull();
-    expect(firstArticleBox).not.toBeNull();
+    const touchDrag = await getDragCoordinates('Second material', 'First material');
     const browserSession = await page.context().newCDPSession(page);
-    const touchStart = { x: secondHandleBox!.x + 15, y: secondHandleBox!.y + 15 };
-    const touchEnd = { x: firstArticleBox!.x + 60, y: firstArticleBox!.y + firstArticleBox!.height / 2 };
-    await browserSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [touchStart] });
-    await page.waitForTimeout(220);
+    await browserSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [touchDrag.start] });
+    await expect(secondHandle).toHaveAttribute('aria-pressed', 'true');
     await browserSession.send('Input.dispatchTouchEvent', {
         type: 'touchMove',
-        touchPoints: [touchEnd],
+        touchPoints: [touchDrag.end],
     });
     await browserSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await browserSession.detach();

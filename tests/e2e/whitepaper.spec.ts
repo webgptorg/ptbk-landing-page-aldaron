@@ -8,6 +8,29 @@ test.beforeEach(async ({ page }) => {
     });
 });
 
+test('keeps APT selection controls disabled until their first interaction can be handled', async ({ page }) => {
+    let releaseClientScripts!: () => void;
+    const clientScriptsReady = new Promise<void>((resolve) => { releaseClientScripts = resolve; });
+    await page.route(/\/_next\/static\/.*\.js(?:\?|$)/, async (route) => {
+        await clientScriptsReady;
+        await route.continue();
+    });
+    const content = WHITEPAPER_CONTENT.cs.framework;
+    const taskButton = page.getByRole('group', { name: content.hint })
+        .getByRole('button', { name: new RegExp(content.parts.task.name) });
+    try {
+        await page.goto('/cs/whitepaper', { waitUntil: 'commit' });
+        await expect(taskButton).toBeDisabled();
+        await expect(page.locator('.wp-apt-task')).toBeDisabled();
+    } finally {
+        releaseClientScripts();
+    }
+    await expect(taskButton).toBeEnabled();
+    await taskButton.click();
+    await expect(page.locator('#apt-explanation')).toContainText(content.parts.task.description);
+    await expect(page.locator('.wp-apt-task')).toHaveAttribute('aria-pressed', 'true');
+});
+
 for (const language of ['cs', 'en'] as const) {
     const CONTENT = WHITEPAPER_CONTENT[language];
 

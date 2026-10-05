@@ -1,5 +1,29 @@
 # Current preversion
 
+- Fixed the validation failures found during the studio storage cleanup: the material-order browser test now
+  scrolls its target into view and measures each drag afresh, verifies real mouse/touch activation, and retains its
+  cancellation, no-op, keyboard, saved-order and reload checks. The whitepaper's APT controls wait for their
+  selection handlers before accepting the first click; a delayed-script browser test covers that loading state.
+
+- The recording Studio records only into this browser's own storage. Recording into a selected folder is removed
+  completely, not merely unselected: the **Cíl ukládání** line, **Vybrat složku pro nahrávání**, **Obnovit záznam ze
+  složky**, **Ukládat do prohlížeče** and **Připojit složku znovu** are gone, together with the folder line of every
+  saved take, the folder help and the folder-specific warnings, and nothing replaces them with a one-choice
+  destination or a note that the browser is the only one. That also holds in Chrome and Edge, which offer a
+  directory picker. Capture, pause/resume, append, reading, recovery, deletion and export now have one path each:
+  every chunk still commits atomically together with its counters behind the bounded write queue, saved takes
+  survive a reload, an interrupted take keeps its committed prefix even when the origin refuses to save its
+  recovered status, and the single-instance lock and takeover fencing are unchanged. A refused write still stops
+  the take safely and reaches the shared sound/notification channel; committed and queued bytes, the labelled origin
+  estimate, persistence and the quota errors stay, the low-space refusal now says to download and delete older takes,
+  and no remaining-time estimate returns. Downloads, original and prepared exports, seek-index repair, ZIP and
+  sidecar output, save-file pickers and temporary export files are untouched. Browser database schema 4 drops what
+  the retired destination left behind — the store of folder handles and descriptions explicitly marked as
+  directory-backed, including orphaned descriptions without a handle store — so such a take neither breaks start-up
+  nor asks for its folder; it is no longer listed, and no conversion or restoration is offered. Takes recorded into
+  the browser stay exactly as they were, unrelated metadata and stores are retained, and no folder or file on disk
+  is opened, changed or deleted. Details are in `docs/recording-studio-storage.md`.
+
 - Added **Převzít studio v této kartě** to the blocked recording Studio and editor. A confirmation in the requesting
   tab now hands ownership over without finding, closing or refreshing the original tab: the old instance stops
   recording, drains final media writes, releases every preview/device track, settles exports/generation/uploads and

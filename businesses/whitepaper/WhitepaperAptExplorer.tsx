@@ -2,7 +2,7 @@
 
 import { ArrowDown, ArrowUpRight, Check, Folder, Sparkles } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { WHITEPAPER_PARTS, type WhitepaperPart } from './whitepaperConfig';
 import type { WhitepaperContent } from './whitepaperContent';
 
@@ -14,6 +14,7 @@ function AptLayer({
     separation,
     index,
     isSelected,
+    isInteractive,
     onSelect,
 }: {
     readonly part: WhitepaperPart;
@@ -21,6 +22,7 @@ function AptLayer({
     readonly separation: MotionValue<number>;
     readonly index: number;
     readonly isSelected: boolean;
+    readonly isInteractive: boolean;
     readonly onSelect: () => void;
 }) {
     const layerDepth = useTransform(separation, (distance) => (2 - index) * distance);
@@ -31,6 +33,7 @@ function AptLayer({
             type="button"
             className={`wp-apt-layer wp-apt-${part}`}
             style={{ z: layerDepth }}
+            disabled={!isInteractive}
             onClick={onSelect}
             aria-pressed={isSelected}
             aria-controls="apt-explanation"
@@ -55,6 +58,9 @@ function AptLayer({
 /** Real CSS perspective keeps the semantic controls available without WebGL or a canvas. */
 export function WhitepaperAptExplorer({ content }: { readonly content: WhitepaperContent['framework'] }) {
     const [selectedPart, setSelectedPart] = useState<WhitepaperPart>('agent');
+    const [isInteractive, setIsInteractive] = useState(false);
+    // Server-rendered controls must not accept a first click before their selection handlers are attached.
+    useEffect(() => setIsInteractive(true), []);
     const sceneReference = useRef<HTMLDivElement>(null);
     const isReducedMotion = useReducedMotion();
     const { scrollYProgress } = useScroll({ target: sceneReference, offset: ['start end', 'end start'] });
@@ -81,6 +87,7 @@ export function WhitepaperAptExplorer({ content }: { readonly content: Whitepape
                             separation={separation}
                             index={index}
                             isSelected={selectedPart === part}
+                            isInteractive={isInteractive}
                             onSelect={() => setSelectedPart(part)}
                         />
                     ))}
@@ -102,6 +109,7 @@ export function WhitepaperAptExplorer({ content }: { readonly content: Whitepape
                         <button
                             key={part}
                             type="button"
+                            disabled={!isInteractive}
                             className={`wp-part-choice wp-part-${part}`}
                             aria-pressed={selectedPart === part}
                             aria-controls="apt-explanation"

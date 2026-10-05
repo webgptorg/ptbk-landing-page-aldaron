@@ -3,6 +3,12 @@
 Investigation date: 2026-09-27. This extends `/admin/recording-studio`, originating in
 `prompts/2026-09-0440-admin-recording-studio.md` (marked implemented) and its archived trace.
 
+**Update 2026-10-05.** The selected-directory capture destination which this investigation added was retired by
+`prompts/2026-10-0070-studio-browser-only-recording-storage.md`. IndexedDB is the only capture destination again,
+and it is not offered as a choice. [Storage and failure contract](#storage-and-failure-contract) describes the
+studio as it is now. The investigation, the research and the dated validation results below are kept as they were
+written, so where they mention recording into a folder they describe a feature which no longer exists.
+
 ## What caused the misleading display
 
 The owner's observation is **about 70 GB free in macOS, about 10 GB continually displayed by the studio**.
@@ -72,39 +78,34 @@ writes do not prove that a recording can exceed 10 GB or that the machine has en
 - Committed media bytes come from acknowledged storage checkpoints; queued bytes are distinct. Combined VBR uses
   all source bytes on the existing session clock over a bounded window. Startup or a stalled/paused input yields
   no current rate, never infinity. The configured rate includes embedded audio and every selected source.
-  There is currently no pause/resume implementation: the related editor/control prompts are still marked TODO.
-  They must reuse this clock and storage contract, not infer pause timing from capacity telemetry.
+  The global pause added later (`recording-studio-monitoring-pause-append.md`) closes and commits its parts on
+  this clock and through this storage contract; pause timing is never inferred from capacity telemetry.
 - `navigator.storage.persist()` is invoked only by its explicit button. Granted, denied, unsupported and error
   states are separate. The existing origin can still be cleared manually or hit a write limit.
-- Browser storage retains the original atomic IndexedDB chunk/counter transactions. A fresh low origin estimate
-  can stop/prevent origin capture with a 64 MiB reserve. A high estimate never guarantees a successful write.
-- Selected-directory capture creates one uniquely named session subfolder. Every normally five-second source
-  fragment is closed, then a small manifest replacement is closed; only then are those bytes acknowledged.
-  No growing-file `keepExistingData` copy and no full-session assembly occurs at finalization. Directory media
-  does not enter IndexedDB/OPFS. The origin still needs space for a small initial metadata/handle registration;
-  later cache-write failure cannot roll back the authoritative directory checkpoint.
-- Import recovery requests read access and does not rewrite the folder checkpoint. It retains readable metadata
-  and the selected handle for the current visit even if origin registration fails, so a full disk/origin cannot
-  block streaming out already committed media. If the browser cannot remember the handle, select that same
-  recording subfolder again next visit. Editing/deletion still require write permission and successful writes;
-  the explicit reconnect action can request that permission. A new studio visit reloads the cache under its lock.
-- File counts grow with duration/source count (about 7,200 parts per source in ten hours at regular five-second
-  delivery). Filesystem latency/antivirus and encoder bursts can therefore matter; this tradeoff favors bounded
-  commits and crash recovery over keeping huge uncommitted writable files open. Actual ten-hour performance is
-  not yet validated. Browser-internal MediaRecorder buffering is outside the application's bound.
-- The application retains at most 64 MiB of pending chunks. Backlog overflow, quota, permission, disk or source
-  failure stops all recorders through the existing barrier and drains earlier queued writes. After a failed chunk,
+- Every take is recorded into IndexedDB, in atomic chunk/counter transactions of about one second per source.
+  There is no other capture destination and no control which chooses, reconnects or imports one. A fresh low
+  origin estimate can stop/prevent capture with a 64 MiB reserve. A high estimate never guarantees a successful
+  write. Actual ten-hour performance is not yet validated. Browser-internal MediaRecorder buffering is outside
+  the application's bound.
+- Recording into a selected folder is gone together with its checkpoint format, its reconnect cache and its
+  import. Database schema 4 removes what that destination left in the browser, in the same version change which
+  creates the schema: the store of folder handles, and the description of every take explicitly marked as
+  directory-backed, including orphaned descriptions with no handle store. Other metadata and stores are retained.
+  Such a take never had media in IndexedDB, so nothing recorded into the browser is removed, and no folder or file on
+  disk is opened, changed or deleted. A studio opened afterwards lists only takes it can read and asks for no
+  folder. Nothing converts or restores a folder-backed take; its files stay where the administrator keeps them.
+- The application retains at most 64 MiB of pending chunks. Backlog overflow or a quota, permission or disk
+  failure stops all recorders through the existing barrier and drains earlier queued writes, while a lost source
+  stops only its own track (`recording-studio-alerts.md`). After a failed chunk,
   later chunks are not appended beyond a hole. Previously committed prefixes remain available. Final checkpoint
-  failure leaves an interrupted take, never a false success. Recovery uses the last checkpoint even when saving
-  a recovery status in a full origin fails.
+  failure leaves an interrupted take, never a false success. Recovery uses the last committed transaction even
+  when saving a recovery status in a full origin fails. The failure reaches the shared sound/notification channel.
   A source that supplied no media makes the whole take interrupted, even if its recorder reported a normal stop.
 - `captureEndSeconds` and manifest `missingRanges` use source IDs and seconds on the same session timeline.
   An unclean crash has an unknown tail end (`null`). Common recoverable duration is the last point all sources
   have committed, and no source is moved left to conceal a gap. Files can still need player/container repair
   after interruption; the studio does not promise every truncated codec stream will decode.
-- A crash after closing a part but before checkpointing may leave an **unindexed part**. It is preserved in the
-  directory but is not claimed as recoverable timed media. Do not delete it if external repair is needed. Recovery
-  never overwrites media, obtains unrelated permissions, or deletes recordings to reclaim space.
+- Recovery never overwrites media, obtains unrelated permissions, or deletes recordings to reclaim space.
 - ZIP64 reads original chunks serially with backpressure; byte counters are exact JavaScript safe integers, not
   signed/unsigned 32-bit integers. A ZIP needs destination space for its outputs. A trimmed ZIP adds trimmed
   outputs plus one temporary trimmed track in OPFS. That temporary space is explicitly disclosed. Individual
@@ -118,14 +119,36 @@ writes do not prove that a recording can exceed 10 GB or that the machine has en
 Automated suites: `npm test -- lib/recording-studio` and
 `npm run test-e2e -- tests/e2e/recording-studio.spec.ts`. The browser suite records real canvas video and synthesized
 audio; it uses actual recording, IndexedDB, file commits, codecs and ZIP extraction. Each attempt attaches OS and
-browser version and archives a video. The directory integration substitutes an **OPFS handle for the native picker**:
-it tests streaming/checkpoint routing and that media does not enter IndexedDB, **not selected-disk capacity or
-quota bypass**. Unit tests inject quota/disk-write/permission failures, absent and stale APIs, denied persistence,
-constant/changing quota reports, aggregate VBR, bounded backlogs, failed finalization, and safe-integer boundaries.
+browser version and archives a video. One case records, pauses, reloads, previews and exports three sources in a
+browser which offers a directory picker and checks that the picker is never called, that no folder is offered and
+that all media is in IndexedDB. Another opens the studio on a schema 3 database holding a folder-backed take which
+was still being recorded, and checks that it starts without that take or a request for its folder, keeps the
+browser-recorded take beside it exportable and leaves the files of the folder as they were; an **OPFS folder stands
+in for a folder on disk** there. Unit tests inject quota/disk-write/permission failures, absent and stale APIs,
+denied persistence, constant/changing quota reports, aggregate VBR, bounded backlogs, failed finalization, the
+  schema 4 upgrade (including missing handle stores and preservation of unrelated metadata) and safe-integer boundaries.
 The simulated ten-hour case advances the capture clock and virtual byte sizes; it is **not a real soak test**.
 
 Platform execution results and the remaining manual protocol are recorded below. No test file is a certification
-that all OS free space is available to a web page.
+that all OS free space is available to a web page. The results are those of 2026-09-27, when a folder could still
+be recorded into; their folder cases are history rather than coverage of the present studio.
+
+**Browser-only verification, 2026-10-05 (macOS / Playwright Chromium):**
+
+- `npm test -- lib/recording-studio components/recording-studio`: all 274 tests passed across 25 files. Cleanup
+  removes only explicit directory-backed descriptions, including orphaned ones, and retains unrelated metadata,
+  stores, authority generations and IndexedDB media.
+- Eighteen targeted cases from `tests/e2e/recording-studio.spec.ts` passed. They cover three-source capture,
+  pause/resume, append, reload, preview, obsolete-folder metadata, constant/missing quota estimates, a real
+  transaction abort, sound and notification alerts, recovery and cross-tab takeover/fencing. The hidden-tab
+  storage-failure case uses the real browser notification API.
+- Download and streaming-export coverage retains original/prepared ZIP output, seek-index repair and its
+  temporary-write failure fallback. Real OPFS file handles stand in for the native save-file picker.
+- `npm run test-types` completed the production build followed by TypeScript; `npm run lint` passed with existing
+  warnings. These checks do not establish physical device behavior or a long capture soak.
+- The complete `npm run check` passed after fixing the material-order test's off-screen/stale drag coordinates
+  and the whitepaper's first-click hydration race. Its unchanged scope includes lint, production build, TypeScript,
+  the full browser suite (179 passed, one skipped, no retries) and the standard test-data cleanup.
 
 For installed Edge on Windows, set `$env:E2E_BROWSER_CHANNEL = 'msedge'` in PowerShell before running the same
 browser suite; remove that environment variable for the default Playwright Chromium. These tests use fresh
@@ -145,7 +168,7 @@ their estimates need not match the temporary contexts. Both record the browser v
 | Genuine macOS multi-source recording crossing 10 GB | Not run |
 | Genuine continuous ten-hour multi-source soak and resource measurements | Not run |
 | Representative other OS (e.g. Linux) | Not run; WSL lists no distributions and the local Docker daemon is unavailable |
-| Native OS folder selection, removable-disk-full/unplug, >4 GiB actual exported entry | Not run; directory API integration and injected failure/counter tests are additional coverage only |
+| Removable-disk-full/unplug of an export destination, >4 GiB actual exported entry | Not run; injected failure/counter tests are additional coverage only |
 
 For the Firefox follow-up, the cookie panel was dismissed before operating studio controls; the active capture
 clock advanced while committed bytes stayed zero. A standalone headless canvas/MediaRecorder probe also failed to
@@ -155,13 +178,13 @@ with absent media cannot label such a take complete. An earlier Edge run require
 startup readiness timeout; the latest run needed none. Failed-attempt traces follow Playwright's standard policy;
 no assertion was weakened to claim a pass.
 
-Manual completion protocol: record macOS version (`sw_vers`), browser About version, browsing mode, filesystem and
-backend. On an adequately provisioned disk, select multiple independent camera/screen/audio sources and record for
+Manual completion protocol: record macOS version (`sw_vers`), browser About version, browsing mode and filesystem.
+On an adequately provisioned disk, select multiple independent camera/screen/audio sources and record for
 ten real hours with actual committed bytes above 10 GB. At startup, periodically and after finalization, record
 studio committed/pending counts, raw API usage/quota, OS free space, process memory/CPU and dropped-source/errors.
 Preserve the manifest and all originals. Export through the native save picker and play/seek every source near
 start, middle, the 10 GB crossing and end in an external player/editor; compare visible timecode/audible references.
-Repeat a short recovery run using only a disposable test folder/volume, with revoked access or a realistically full
-test volume (never fill the user's working disk with dummy files). Verify the last committed prefixes, labelled
+Repeat a short recovery run in a disposable browser profile on a realistically full test volume (never fill the
+user's working disk with dummy files). Verify the last committed prefixes, labelled
 missing tails and unchanged prior takes. Repeat supported paths on Windows and another supported OS, documenting
 unavailable APIs explicitly. Attach evidence before changing any unrun status above.
