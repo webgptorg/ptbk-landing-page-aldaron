@@ -1,10 +1,11 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { appendRecordingChunk, deleteStudioRecording, editStudioRecording, listStudioRecordings, readRecordingTrack, recoverStudioRecordings, saveStudioRecording } from './recordingStudioStorage';
-import { createTestStudioRecording } from './recordingStudioTestUtilities';
+import { claimTestRecordingStudioAuthority, createTestStudioRecording } from './recordingStudioTestUtilities';
 
 describe('durable recording storage', () => {
     beforeEach(async () => {
+        await claimTestRecordingStudioAuthority();
         for (const recording of await listStudioRecordings()) await deleteStudioRecording(recording.id);
     });
     it('restores ordered track bytes and atomically persists matching metadata', async () => {

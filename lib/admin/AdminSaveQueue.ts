@@ -74,6 +74,21 @@ export class AdminSaveQueue {
         return this.runningSave;
     };
 
+    /**
+     * Gives up the draft which was never saved
+     *
+     * Note: A draft is only ever discarded on an explicit decision of the administrator, who has been told which
+     *       changes are lost. A queue left dirty behind an editor which is gone would otherwise block every later
+     *       flush and could write its stale value long after that value stopped being true.
+     */
+    public discard(): void {
+        this.clearTimeout();
+        this.draftKey = this.savedKey;
+        this.saveOperation = async () => true;
+        // A request which is already on its way finishes on its own and then finds nothing left to save.
+        this.publish({ isDirty: this.runningSave !== null, errorMessage: null, errorKind: null });
+    }
+
     private async saveLatest(): Promise<boolean> {
         while (true) {
             const savingKey = this.draftKey;

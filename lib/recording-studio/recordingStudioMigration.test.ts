@@ -1,6 +1,6 @@
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb';
 import { afterEach, expect, it, vi } from 'vitest';
-import { createTestStudioRecording } from './recordingStudioTestUtilities';
+import { claimTestRecordingStudioAuthority, createTestStudioRecording } from './recordingStudioTestUtilities';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -26,6 +26,7 @@ it('upgrades the original IndexedDB format without losing media or trim and stre
     database.close();
     const storage = await import('./recordingStudioStorage');
     expect(await storage.listStudioRecordings()).toEqual([recording]);
+    await claimTestRecordingStudioAuthority();
     expect(await (await storage.readRecordingTrack(recording.id, recording.tracks[0])).text()).toBe('abcdef');
     expect(await new Response(storage.streamRecordingTrack(recording.id, recording.tracks[0])).text()).toBe('abcdef');
     const edited = await storage.editStudioRecording(recording, 'Same stable recording', { startSeconds: 2, endSeconds: 4 });

@@ -1,8 +1,10 @@
 import 'fake-indexeddb/auto';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { importStudioRecordingDirectory, listStudioRecordings, readRecordingTrack, reconnectStudioRecording, recoverStudioRecordings, saveStudioRecording, streamRecordingTrack } from './recordingStudioStorage';
-import { createTestStudioRecording } from './recordingStudioTestUtilities';
+import { claimTestRecordingStudioAuthority, createTestStudioRecording } from './recordingStudioTestUtilities';
 
+// Becoming the studio is the one write these tests need to succeed; everything after it may be refused.
+beforeEach(async () => { await claimTestRecordingStudioAuthority(); });
 afterEach(() => vi.restoreAllMocks());
 
 it('recovers and exports a readable folder when both folder and origin writes fail', async () => {

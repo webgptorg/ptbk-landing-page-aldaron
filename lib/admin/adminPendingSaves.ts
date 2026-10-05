@@ -46,6 +46,20 @@ export function getPendingAdminSaves(scope?: AdminDraftProtectionScope | null) {
         .map(([queue]) => queue);
 }
 
+/** Editors with a draft which is not saved yet. An explicit operation in flight is not one of them. */
+export function getPendingAdminEditorSaves(): AdminSaveQueue[] {
+    return Array.from(SAVE_QUEUES.entries())
+        .filter(([queue, registration]) => !registration.isExplicitOperation && (queue.getSnapshot().isDirty || queue.getSnapshot().isSaving))
+        .map(([queue]) => queue);
+}
+
+/** Explicit operations in flight, such as an export or a deletion. They cannot be flushed, only waited for. */
+export function getPendingAdminOperations(): AdminSaveQueue[] {
+    return Array.from(SAVE_QUEUES.entries())
+        .filter(([queue, registration]) => registration.isExplicitOperation && (queue.getSnapshot().isDirty || queue.getSnapshot().isSaving))
+        .map(([queue]) => queue);
+}
+
 function isDraftWithinScope(draftScope: AdminDraftProtectionScope | null, requestedScope: AdminDraftProtectionScope): boolean {
     let currentScope = draftScope;
     while (currentScope !== null) {
@@ -85,12 +99,31 @@ function protectPendingSaves(event: BeforeUnloadEvent): void {
     event.returnValue = '';
 }
 
-export async function flushAdminSaves(scope?: AdminDraftProtectionScope | null): Promise<boolean> {
-    while (getPendingAdminSaves(scope).length > 0) {
-        const results = await Promise.all(getPendingAdminSaves(scope).map((queue) => queue.flush()));
+async function flushAdminSaveQueues(selectQueues: () => AdminSaveQueue[]): Promise<boolean> {
+    while (selectQueues().length > 0) {
+        const results = await Promise.all(selectQueues().map((queue) => queue.flush()));
         if (results.some((isSaved) => !isSaved)) return false;
     }
     return true;
+}
+
+export function flushAdminSaves(scope?: AdminDraftProtectionScope | null): Promise<boolean> {
+    return flushAdminSaveQueues(() => getPendingAdminSaves(scope));
+}
+
+/**
+ * Saves every editor draft without waiting for explicit operations
+ *
+ * Note: Flushing everything also waits for an export or an upload to end, which can take as long as that export.
+ *       Whoever only needs to know that no edit is left unsaved asks for the editors alone.
+ */
+export function flushAdminEditorSaves(): Promise<boolean> {
+    return flushAdminSaveQueues(getPendingAdminEditorSaves);
+}
+
+/** Gives up every editor draft which is not saved. See `AdminSaveQueue.discard` for when that is allowed. */
+export function discardPendingAdminEditorSaves(): void {
+    getPendingAdminEditorSaves().forEach((queue) => queue.discard());
 }
 
 /** A new-record draft is discarded only after an explicit confirmation. */

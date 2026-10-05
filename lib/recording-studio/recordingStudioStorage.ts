@@ -1,13 +1,13 @@
+import { RECORDING_STUDIO_AUTHORITY, rethrowLostRecordingStudioAuthority } from './recordingStudioAuthority';
+import { CHUNK_STORE, DIRECTORY_STORE, openRecordingDatabase, readRequest, RECORDING_STORE } from './recordingStudioDatabase';
 import { appendDirectoryRecordingChunk, readDirectoryRecording, readDirectoryRecordingChunk, reconnectRecordingDirectory, recordingChunkFilename, saveDirectoryRecording } from './recordingStudioDirectory';
 import { addRecordingBytes, getCommonRecordingDuration, validateRecordingTrim } from './recordingStudioTiming';
 import type { RecordingDerivedTrack, RecordingMediaPart, RecordingTrack, RecordingTrim, RecordingWorkshopMetadata, StudioRecording } from './recordingStudioTypes';
 import { createRecordingEditRecipe, getRecordingMediaParts, getRecordingSessionDuration } from './recordingStudioSessionTime';
 
-const RECORDING_DATABASE_NAME = 'promptbook-recording-studio';
-const RECORDING_DATABASE_VERSION = 2;
-const RECORDING_STORE = 'recordings';
-const CHUNK_STORE = 'chunks';
-const DIRECTORY_STORE = 'directories';
+/** How many files of a folder are removed while a takeover is held off, so that one never waits for a whole take. */
+const DIRECTORY_REMOVAL_BATCH_SIZE = 50;
+const DEFAULT_INTERRUPTION_MESSAGE = 'Nahrávání bylo přerušeno. Obnovené jsou pouze potvrzené části; délka chybějícího konce není známá.';
 // Retain the authoritative checkpoint for this visit even when the origin cannot cache it.
 const RECORDING_DIRECTORIES = new Map<string, { readonly directory: FileSystemDirectoryHandle; readonly recording: StudioRecording }>();
 
@@ -18,50 +18,12 @@ type RecordingChunk = {
     readonly data: Blob;
 };
 
-let databasePromise: Promise<IDBDatabase> | null = null;
+// Every write below is committed through `RECORDING_STUDIO_AUTHORITY`, which is what makes one ownership out of
+// recording, recovery, editing and deletion: the storage refuses all of them alike to a tab which is not the studio.
 
 /** Start a new visit only after acquiring the studio lock; another tab may have edited/deleted cached takes. */
 export function resetRecordingDirectoryCache(): void {
     RECORDING_DIRECTORIES.clear();
-}
-
-function openRecordingDatabase(): Promise<IDBDatabase> {
-    if (databasePromise) return databasePromise;
-    databasePromise = new Promise((resolve, reject) => {
-        const request = indexedDB.open(RECORDING_DATABASE_NAME, RECORDING_DATABASE_VERSION);
-        request.onupgradeneeded = () => {
-            const database = request.result;
-            if (!database.objectStoreNames.contains(RECORDING_STORE)) database.createObjectStore(RECORDING_STORE, { keyPath: 'id' });
-            if (!database.objectStoreNames.contains(CHUNK_STORE)) {
-                const chunks = database.createObjectStore(CHUNK_STORE, { keyPath: ['recordingId', 'trackId', 'sequence'] });
-                chunks.createIndex('recordingId', 'recordingId');
-            }
-            if (!database.objectStoreNames.contains(DIRECTORY_STORE)) database.createObjectStore(DIRECTORY_STORE);
-        };
-        request.onsuccess = () => {
-            request.result.onversionchange = () => { request.result.close(); databasePromise = null; };
-            resolve(request.result);
-        };
-        request.onerror = () => reject(request.error);
-        request.onblocked = () => reject(new Error('Zavřete ostatní karty nahrávacího studia a zkuste stránku obnovit.'));
-    });
-    void databasePromise.catch(() => { databasePromise = null; });
-    return databasePromise;
-}
-
-function waitForTransaction(transaction: IDBTransaction): Promise<void> {
-    return new Promise((resolve, reject) => {
-        transaction.oncomplete = () => resolve();
-        transaction.onabort = () => reject(transaction.error ?? new Error('Uložení do prohlížeče se nezdařilo.'));
-        transaction.onerror = () => reject(transaction.error);
-    });
-}
-
-function readRequest<Result>(request: IDBRequest<Result>): Promise<Result> {
-    return new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
 }
 
 export async function listStudioRecordings(): Promise<StudioRecording[]> {
@@ -82,13 +44,14 @@ export async function readStudioRecording(recordingId: string): Promise<StudioRe
 async function cacheDirectoryRecording(recording: StudioRecording, directory: FileSystemDirectoryHandle): Promise<void> {
     RECORDING_DIRECTORIES.set(recording.id, { recording, directory });
     // Failure to remember the folder in this browser must never prevent export of its committed media.
-    await cacheStudioRecording(recording).catch(() => undefined);
+    await cacheStudioRecording(recording).catch(rethrowLostRecordingStudioAuthority);
 }
 
 export async function saveStudioRecording(recording: StudioRecording): Promise<void> {
     if (recording.storageDestination) {
         const directory = await requireRecordingDirectory(recording);
-        await saveDirectoryRecording(directory, recording);
+        // A folder is not part of the database, so its checkpoint is committed while no takeover can happen.
+        await RECORDING_STUDIO_AUTHORITY.commit(() => saveDirectoryRecording(directory, recording));
         // The closed folder checkpoint is authoritative. A full origin must not roll it back.
         await cacheDirectoryRecording(recording, directory);
         return;
@@ -97,27 +60,23 @@ export async function saveStudioRecording(recording: StudioRecording): Promise<v
 }
 
 async function cacheStudioRecording(recording: StudioRecording): Promise<void> {
-    const database = await openRecordingDatabase();
-    const transaction = database.transaction(RECORDING_STORE, 'readwrite');
-    const completion = waitForTransaction(transaction);
-    transaction.objectStore(RECORDING_STORE).put(recording);
-    await completion;
+    await RECORDING_STUDIO_AUTHORITY.runTransaction([RECORDING_STORE], (transaction) => {
+        transaction.objectStore(RECORDING_STORE).put(recording);
+    });
 }
 
 /** Chunk and its byte counts commit atomically, so a crash never advertises data that was not saved. */
 export async function appendRecordingChunk(recording: StudioRecording, trackId: string, sequence: number, data: Blob): Promise<void> {
     if (recording.storageDestination) {
         const directory = await requireRecordingDirectory(recording);
-        await appendDirectoryRecordingChunk(directory, recording, trackId, sequence, data);
+        await RECORDING_STUDIO_AUTHORITY.commit(() => appendDirectoryRecordingChunk(directory, recording, trackId, sequence, data));
         await cacheDirectoryRecording(recording, directory);
         return;
     }
-    const database = await openRecordingDatabase();
-    const transaction = database.transaction([RECORDING_STORE, CHUNK_STORE], 'readwrite');
-    const completion = waitForTransaction(transaction);
-    transaction.objectStore(CHUNK_STORE).add({ recordingId: recording.id, trackId, sequence, data } satisfies RecordingChunk);
-    transaction.objectStore(RECORDING_STORE).put(recording);
-    await completion;
+    await RECORDING_STUDIO_AUTHORITY.runTransaction([RECORDING_STORE, CHUNK_STORE], (transaction) => {
+        transaction.objectStore(CHUNK_STORE).add({ recordingId: recording.id, trackId, sequence, data } satisfies RecordingChunk);
+        transaction.objectStore(RECORDING_STORE).put(recording);
+    });
 }
 
 /** Keep disk-backed Blob references; never read the entire recording into an ArrayBuffer. */
@@ -190,20 +149,22 @@ async function requireRecordingDirectory(recording: StudioRecording): Promise<Fi
 }
 
 async function registerRecordingDirectory(recording: StudioRecording, directory: FileSystemDirectoryHandle): Promise<void> {
-    const database = await openRecordingDatabase();
-    const transaction = database.transaction([DIRECTORY_STORE, RECORDING_STORE], 'readwrite');
-    const completion = waitForTransaction(transaction);
-    transaction.objectStore(DIRECTORY_STORE).put(directory, recording.id);
-    transaction.objectStore(RECORDING_STORE).put(recording);
-    await completion;
+    await RECORDING_STUDIO_AUTHORITY.runTransaction([DIRECTORY_STORE, RECORDING_STORE], (transaction) => {
+        transaction.objectStore(DIRECTORY_STORE).put(directory, recording.id);
+        transaction.objectStore(RECORDING_STORE).put(recording);
+    });
     RECORDING_DIRECTORIES.set(recording.id, { recording, directory });
 }
 
 export async function createStudioRecording(recording: StudioRecording, parentDirectory?: FileSystemDirectoryHandle | null): Promise<StudioRecording> {
     if (!parentDirectory) { await saveStudioRecording(recording); return recording; }
-    const directory = await parentDirectory.getDirectoryHandle(`promptbook-recording-${recording.id}`, { create: true });
-    const stored: StudioRecording = { ...recording, storageDestination: { kind: 'directory', name: `${parentDirectory.name}/${directory.name}` } };
-    await saveDirectoryRecording(directory, stored);
+    // The new folder and its first checkpoint appear together, or not at all for a tab which is no longer the studio.
+    const { stored, directory } = await RECORDING_STUDIO_AUTHORITY.commit(async () => {
+        const createdDirectory = await parentDirectory.getDirectoryHandle(`promptbook-recording-${recording.id}`, { create: true });
+        const storedRecording: StudioRecording = { ...recording, storageDestination: { kind: 'directory', name: `${parentDirectory.name}/${createdDirectory.name}` } };
+        await saveDirectoryRecording(createdDirectory, storedRecording);
+        return { stored: storedRecording, directory: createdDirectory };
+    });
     await registerRecordingDirectory(stored, directory);
     return stored;
 }
@@ -213,9 +174,12 @@ export async function importStudioRecordingDirectory(directory: FileSystemDirect
     const recording = { ...recoverRecording(await readDirectoryRecording(directory)), storageDestination: { kind: 'directory' as const, name: directory.name } };
     const existing = (await listStudioRecordings()).find((candidate) => candidate.id === recording.id);
     if (existing && !existing.storageDestination) throw new Error('Toto ID už patří záznamu v prohlížeči.');
+    // A folder picked in a tab which has since handed the studio over is not imported behind the new owner's back.
+    // Asking the storage would need a write, which a full disk refuses, and reading a folder must survive that.
+    RECORDING_STUDIO_AUTHORITY.assertHeld();
     // Recovery is read-only in the folder: a full disk or revoked write access must still allow reading.
     RECORDING_DIRECTORIES.set(recording.id, { recording, directory });
-    await registerRecordingDirectory(recording, directory).catch(() => undefined);
+    await registerRecordingDirectory(recording, directory).catch(rethrowLostRecordingStudioAuthority);
     return recording;
 }
 
@@ -239,7 +203,6 @@ export async function editStudioRecording(recording: StudioRecording, title: str
 }
 
 export async function deleteStudioRecording(recordingId: string): Promise<void> {
-    const database = await openRecordingDatabase();
     const recording = await readStudioRecording(recordingId);
     if (recording?.storageDestination) {
         const directory = await requireRecordingDirectory(recording);
@@ -250,59 +213,63 @@ export async function deleteStudioRecording(recordingId: string): Promise<void> 
         });
         if (checkpoint.id !== recordingId) throw new Error('Složka obsahuje jiný záznam. Nejprve ji znovu připojte.');
         // Delete only files the manifest owns. Never recursively delete a user-selected folder.
-        for (const track of checkpoint.tracks) {
-            for (const part of getRecordingMediaParts(track)) {
-                for (let sequence = 0; sequence < part.chunkCount; sequence += 1) {
-                    await directory.removeEntry(recordingChunkFilename(part.id, sequence)).catch(ignoreMissingFile);
-                }
-            }
+        const filenames = checkpoint.tracks.flatMap((track) => getRecordingMediaParts(track).flatMap((part) =>
+            Array.from({ length: part.chunkCount }, (_, sequence) => recordingChunkFilename(part.id, sequence))));
+        // The checkpoint goes last, so a deletion which is cut short still says which recording the folder holds.
+        filenames.push('recording.json');
+        for (let index = 0; index < filenames.length; index += DIRECTORY_REMOVAL_BATCH_SIZE) {
+            const batch = filenames.slice(index, index + DIRECTORY_REMOVAL_BATCH_SIZE);
+            await RECORDING_STUDIO_AUTHORITY.commit(async () => {
+                for (const filename of batch) await directory.removeEntry(filename).catch(ignoreMissingFile);
+            });
         }
-        await directory.removeEntry('recording.json').catch(ignoreMissingFile);
     }
-    const transaction = database.transaction([RECORDING_STORE, CHUNK_STORE, DIRECTORY_STORE], 'readwrite');
-    const completion = waitForTransaction(transaction);
-    transaction.objectStore(RECORDING_STORE).delete(recordingId);
-    transaction.objectStore(DIRECTORY_STORE).delete(recordingId);
-    const request = transaction.objectStore(CHUNK_STORE).index('recordingId').openCursor(IDBKeyRange.only(recordingId));
-    request.onsuccess = () => {
-        const cursor = request.result;
-        if (!cursor) return;
-        cursor.delete();
-        cursor.continue();
-    };
-    await completion;
+    await RECORDING_STUDIO_AUTHORITY.runTransaction([RECORDING_STORE, CHUNK_STORE, DIRECTORY_STORE], (transaction) => {
+        transaction.objectStore(RECORDING_STORE).delete(recordingId);
+        transaction.objectStore(DIRECTORY_STORE).delete(recordingId);
+        // Every chunk key begins with its recording, and an array sorts after any track identity which can follow it.
+        transaction.objectStore(CHUNK_STORE).delete(IDBKeyRange.bound([recordingId], [recordingId, []]));
+    });
     RECORDING_DIRECTORIES.delete(recordingId);
 }
 
-/** Only called while the browser-wide studio lock is held; never interrupts another tab's capture. */
-export async function recoverStudioRecordings(): Promise<StudioRecording[]> {
+/**
+ * Turns every take which was still being recorded into an interrupted one
+ *
+ * Note: Only called by the tab which has just become the studio, after the previous one released the lock or lost
+ *       its right to write; it never interrupts a capture which can still be finished.
+ *
+ * @param interruptionMessage why those takes were cut short, when the new studio knows more than that they were
+ */
+export async function recoverStudioRecordings(interruptionMessage = DEFAULT_INTERRUPTION_MESSAGE): Promise<StudioRecording[]> {
     const recordings = await listStudioRecordings();
     return Promise.all(recordings.map(async (recording) => {
         if (recording.storageDestination) {
             try {
                 const directory = await requireRecordingDirectory(recording);
-                const recovered = recoverRecording(await readDirectoryRecording(directory));
+                const recovered = recoverRecording(await readDirectoryRecording(directory), interruptionMessage);
                 if (recovered.id !== recording.id) throw new Error('Složka obsahuje jiný záznam.');
                 await cacheDirectoryRecording(recovered, directory);
                 return recovered;
-            } catch {
-                return { ...recoverRecording(recording), errorMessage: 'Složka není přístupná. Připojte ji znovu pro ověření uložených částí a export.' };
+            } catch (error) {
+                rethrowLostRecordingStudioAuthority(error);
+                return { ...recoverRecording(recording, interruptionMessage), errorMessage: 'Složka není přístupná. Připojte ji znovu pro ověření uložených částí a export.' };
             }
         }
         if (recording.status !== 'recording') return recording;
-        const recovered = recoverRecording(recording);
+        const recovered = recoverRecording(recording, interruptionMessage);
         // Full storage may reject even metadata. Still offer the committed chunks in this visit.
-        await cacheStudioRecording(recovered).catch(() => undefined);
+        await cacheStudioRecording(recovered).catch(rethrowLostRecordingStudioAuthority);
         return recovered;
     }));
 }
 
-function recoverRecording(recording: StudioRecording): StudioRecording {
+function recoverRecording(recording: StudioRecording, interruptionMessage = DEFAULT_INTERRUPTION_MESSAGE): StudioRecording {
     if (recording.status !== 'recording') return recording;
     return {
         ...recording, status: 'interrupted', durationSeconds: recording.takes?.length
             ? getRecordingSessionDuration(recording) : getCommonRecordingDuration(recording.tracks), captureEndSeconds: null,
-        errorMessage: 'Nahrávání bylo přerušeno. Obnovené jsou pouze potvrzené části; délka chybějícího konce není známá.',
+        errorMessage: interruptionMessage,
     };
 }
 

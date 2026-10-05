@@ -1,4 +1,16 @@
+import { RECORDING_STUDIO_AUTHORITY, type RecordingStudioAuthority, type RecordingStudioAuthorityKeeper } from './recordingStudioAuthority';
 import type { StudioRecording } from './recordingStudioTypes';
+
+/**
+ * Makes one keeper the studio, which is what holding the browser lock and claiming the storage does for a tab
+ *
+ * @param keeper the document's own keeper by default; a second one stands in for another tab
+ */
+export async function claimTestRecordingStudioAuthority(keeper: RecordingStudioAuthorityKeeper = RECORDING_STUDIO_AUTHORITY, instanceId = 'test-studio'): Promise<RecordingStudioAuthority> {
+    const authority = await keeper.claim(instanceId, (await keeper.read()).generation);
+    if (!authority) throw new Error('The test could not become the studio.');
+    return authority;
+}
 
 export function createTestStudioRecording(): StudioRecording {
     return {
