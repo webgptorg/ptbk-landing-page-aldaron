@@ -1,3 +1,4 @@
+import { PAVOL_COLORS } from '@/businesses/pavol/layout';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { PAVOL_CZECH_INTERNAL_PATH, PAVOL_ENGLISH_INTERNAL_PATH } from '@/lib/domains/publicDomainRouting';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
@@ -91,14 +92,14 @@ export const PAVOL_METADATA: Readonly<Record<SupportedHomepageLanguage, Metadata
  */
 export const PAVOL_LAYOUT_METADATA: Metadata = {
     manifest: null,
-    other: { 'msapplication-TileColor': '#fffaf5' },
+    other: { 'msapplication-TileColor': PAVOL_COLORS.PAPER },
     icons: {
         icon: [{ url: '/logo/pavol-hejny-ph.svg', type: 'image/svg+xml' }],
         shortcut: ['/logo/pavol-hejny-ph.svg'],
     },
 };
 
-export const PAVOL_VIEWPORT: Viewport = { themeColor: '#fffaf5', colorScheme: 'light' };
+export const PAVOL_VIEWPORT: Viewport = { themeColor: PAVOL_COLORS.PAPER, colorScheme: 'light' };
 
 export const PAVOL_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(PAVOL_PAGE_DEFINITIONS.cs, {

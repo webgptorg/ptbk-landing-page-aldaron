@@ -51,6 +51,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
 - Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
+  Their shared ivory, forest-green and gold design uses the existing portrait and project marks, with a featured
+  project, static editorial testimonials and responsive section layouts; visual tokens stay in `layout.ts` and `pavol.css`.
   Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu.
   The introduction, projects, testimonials, and media remain readable without animated reveals; older media
   appearances open through a native disclosure. Service enquiries use the existing `/api/waitlist` contact source,

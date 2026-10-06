@@ -24,14 +24,14 @@ export type PavolProject = {
     links: PavolProjectLink[];
 };
 
-const promptbookLogo = '/logo/promptbook-logo-blue-transparent-128.png';
+const PROMPTBOOK_LOGO = '/logo/promptbook-logo-blue-transparent-1024.png';
 const collboardLogo = '/pavol/projects/collboard.svg';
 const hEduLogo = '/pavol/projects/h-edu.svg';
 
 export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = {
     cs: [
         {
-            logos: [{ src: promptbookLogo, className: 'h-7 w-7' }],
+            logos: [{ src: PROMPTBOOK_LOGO, className: 'h-7 w-7' }],
             title: 'Promptbook',
             description:
                 'Ekosystém AI agentů, kteří si drží cíle, pravidla, znalosti a firemní kontext.',
@@ -71,7 +71,7 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
     ],
     en: [
         {
-            logos: [{ src: promptbookLogo, className: 'h-7 w-7' }],
+            logos: [{ src: PROMPTBOOK_LOGO, className: 'h-7 w-7' }],
             title: 'Promptbook',
             description:
                 'AI agents that keep track of goals, rules, knowledge, and company context.',

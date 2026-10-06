@@ -54,22 +54,22 @@ export function PavolContactSection({
     }, [form.isSubmitted]);
 
     return (
-        <section id="contact" tabIndex={-1} className="bg-[var(--pavol-warm)] py-16 outline-none sm:py-24">
+        <section id="contact" tabIndex={-1} className="pavol-section outline-none">
             <div className={`${PAVOL_CONTAINER_CLASS_NAME} grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-20`}>
-                <div>
+                <div className="lg:pt-8">
                     <PavolSectionHeading
                         eyebrow={CONTACT.eyebrow}
                         title={CONTACT.title}
                         description={CONTACT.description}
                     />
-                    <div className="mt-10 border-t border-[var(--pavol-ink)]/15 pt-7">
+                    <div className="mt-10 border-t border-[var(--pavol-border)] pt-7 lg:mt-16">
                         <h3 className="text-sm font-semibold text-[var(--pavol-ink)]">{CONTACT.otherContactsTitle}</h3>
                         <ul className="mt-4 flex flex-wrap gap-2">
                             {CONTACT.links.map((LINK) => (
                                 <li key={LINK.href}>
                                     <a
                                         href={LINK.href}
-                                        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--pavol-ink)]/15 px-4 text-sm text-slate-700 transition-colors hover:bg-white"
+                                        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--pavol-border)] px-4 text-sm text-[var(--pavol-ink)] transition-colors hover:bg-[var(--pavol-warm)]"
                                     >
                                         {LINK.icon && <LINK.icon aria-hidden="true" className="h-4 w-4" />}
                                         {LINK.label}
@@ -80,7 +80,7 @@ export function PavolContactSection({
                         </ul>
                     </div>
                 </div>
-                <div className="rounded-3xl border border-[var(--pavol-ink)]/10 bg-white p-5 shadow-sm sm:p-8">
+                <div className="pavol-contact-form rounded-2xl border border-[var(--pavol-border)] bg-white p-5 sm:p-8 lg:p-10">
                     {form.isSubmitted ? (
                         <div
                             ref={SUCCESS_REF}
@@ -138,32 +138,37 @@ export function PavolContactSection({
                                         ))}
                                     </select>
                                 </div>
-                                {FIELDS.map((FIELD) => (
-                                    <div key={FIELD.name}>
-                                        <label
-                                            htmlFor={`pavol-${FIELD.name}`}
-                                            className="text-sm font-semibold text-slate-700"
+                                <div className="grid gap-5 sm:grid-cols-2">
+                                    {FIELDS.map((FIELD) => (
+                                        <div
+                                            key={FIELD.name}
+                                            className={FIELD.name === 'company' ? 'sm:col-span-2' : 'min-w-0'}
                                         >
-                                            {FIELD.label}{' '}
-                                            {!FIELD.isRequired && (
-                                                <span className="ml-2 font-normal text-slate-500">
-                                                    ({CONTACT.optionalLabel})
-                                                </span>
-                                            )}
-                                        </label>
-                                        <Input
-                                            id={`pavol-${FIELD.name}`}
-                                            name={FIELD.name}
-                                            type={FIELD.type}
-                                            required={FIELD.isRequired}
-                                            value={form.fields[FIELD.name]}
-                                            onChange={(event) => form.updateField(FIELD.name, event.target.value)}
-                                            placeholder={FIELD.placeholder}
-                                            autoComplete={FIELD.autoComplete}
-                                            className="mt-2 h-12 bg-white text-base"
-                                        />
-                                    </div>
-                                ))}
+                                            <label
+                                                htmlFor={`pavol-${FIELD.name}`}
+                                                className="text-sm font-semibold text-slate-700"
+                                            >
+                                                {FIELD.label}{' '}
+                                                {!FIELD.isRequired && (
+                                                    <span className="ml-2 font-normal text-slate-500">
+                                                        ({CONTACT.optionalLabel})
+                                                    </span>
+                                                )}
+                                            </label>
+                                            <Input
+                                                id={`pavol-${FIELD.name}`}
+                                                name={FIELD.name}
+                                                type={FIELD.type}
+                                                required={FIELD.isRequired}
+                                                value={form.fields[FIELD.name]}
+                                                onChange={(event) => form.updateField(FIELD.name, event.target.value)}
+                                                placeholder={FIELD.placeholder}
+                                                autoComplete={FIELD.autoComplete}
+                                                className="mt-2 h-12 bg-white text-base"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
                                 <div>
                                     <label htmlFor="pavol-message" className="text-sm font-semibold text-slate-700">
                                         {CONTACT.formMessageLabel}
@@ -190,7 +195,7 @@ export function PavolContactSection({
                                 <Button
                                     type="submit"
                                     disabled={!form.isReady || form.isSubmitting}
-                                    className="h-12 w-full rounded-full bg-[var(--pavol-ink)] text-white hover:bg-[var(--pavol-accent)]"
+                                    className="pavol-primary-button h-14 w-full rounded-full"
                                 >
                                     {form.isSubmitting ? CONTACT.submittingLabel : CONTACT.submitLabel}
                                     {form.isSubmitting ? (

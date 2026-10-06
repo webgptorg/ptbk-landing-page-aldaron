@@ -28,7 +28,7 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
     }
 
     return (
-        <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--pavol-ink)]/10 bg-[#fffaf5]/95 backdrop-blur-md">
+        <header className="pavol-header fixed inset-x-0 top-0 z-50 border-b border-[var(--pavol-border)] backdrop-blur-md">
             <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:left-5 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-white focus:p-4 focus:text-[var(--pavol-ink)]"
@@ -38,7 +38,7 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
             <div className={`${PAVOL_CONTAINER_CLASS_NAME} flex h-20 items-center justify-between gap-3`}>
                 <Link
                     href={createPublicUrl(language === 'cs' ? PAVOL_CZECH_INTERNAL_PATH : PAVOL_ENGLISH_INTERNAL_PATH)}
-                    className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-md text-base font-semibold tracking-tight sm:text-lg"
+                    className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-md font-[family-name:var(--font-outfit)] text-base font-medium tracking-tight sm:text-xl"
                 >
                     <Image src="/logo/pavol-hejny-ph.svg" alt="" width={32} height={32} className="h-8 w-8" />
                     <span>Pavol Hejný</span>
@@ -48,7 +48,7 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                         <a
                             key={ITEM.href}
                             href={ITEM.href}
-                            className="rounded-full px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-[var(--pavol-warm)] hover:text-[var(--pavol-ink)]"
+                            className="rounded-full px-2.5 py-3 text-xs font-medium text-[var(--pavol-muted)] transition-colors hover:bg-[var(--pavol-warm)] hover:text-[var(--pavol-ink)]"
                         >
                             {ITEM.label}
                         </a>
@@ -67,7 +67,7 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                                 lang={ITEM.language}
                                 aria-label={ITEM.label}
                                 aria-current={ITEM.language === language ? 'page' : undefined}
-                                className={`flex h-11 w-9 items-center justify-center rounded-lg ${ITEM.language === language ? 'bg-[var(--pavol-warm)] text-[var(--pavol-ink)]' : 'text-slate-500 hover:text-[var(--pavol-accent)]'}`}
+                                className={`flex h-11 w-9 items-center justify-center rounded-full ${ITEM.language === language ? 'bg-[var(--pavol-warm)] text-[var(--pavol-ink)]' : 'text-[var(--pavol-muted)] hover:text-[var(--pavol-accent)]'}`}
                             >
                                 {ITEM.shortLabel}
                             </a>
@@ -75,7 +75,7 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                     </nav>
                     <Button
                         asChild
-                        className="hidden h-11 rounded-full bg-[var(--pavol-ink)] px-5 text-white hover:bg-[var(--pavol-accent)] sm:inline-flex"
+                        className="pavol-primary-button hidden h-11 rounded-full px-5 sm:inline-flex"
                     >
                         <a href="#contact">
                             {CONTENT.primaryAction}
@@ -96,13 +96,13 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                     >
                         <summary
                             aria-label={CONTENT.menuLabel}
-                            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[var(--pavol-ink)]/15"
+                            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[var(--pavol-border)]"
                         >
                             <Menu aria-hidden="true" className="h-5 w-5" />
                         </summary>
                         <nav
                             aria-label={CONTENT.navigationLabel}
-                            className="absolute inset-x-0 top-full max-h-[calc(100dvh-5rem)] overflow-y-auto border-b border-slate-200 bg-[#fffaf5] p-5 shadow-lg"
+                            className="absolute inset-x-0 top-full max-h-[calc(100dvh-5rem)] overflow-y-auto border-b border-[var(--pavol-border)] bg-[var(--pavol-paper)] p-5 shadow-lg"
                         >
                             <div className="mx-auto grid max-w-2xl gap-1">
                                 {CONTENT.navItems.map((ITEM) => (
