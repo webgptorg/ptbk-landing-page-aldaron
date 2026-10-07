@@ -1,9 +1,13 @@
-import { HomepagePage } from '@/businesses/homepage/HomepagePage';
+import { ProFirmyPage } from '@/businesses/pro-firmy/_ProFirmyPage';
 import { HOMEPAGE_METADATA } from '@/businesses/homepage/homepageMetadata';
-import type { Metadata } from 'next';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = HOMEPAGE_METADATA.cs;
 
+/**
+ * Note: The homepage still shows the company-data proposition preserved at `/cs/pro-firmy`. Repositioning the
+ *       homepage means composing it here from its own sections, not changing the page this renders.
+ */
 export default function HomePage() {
-    return <HomepagePage language="cs" />;
+    return <ProFirmyPage language="cs" />;
 }

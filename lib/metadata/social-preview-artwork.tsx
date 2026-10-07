@@ -9,7 +9,6 @@ import type { SocialPreviewPalette } from '@/lib/metadata/social-preview-palette
  */
 export const SOCIAL_PREVIEW_ARTWORK_KINDS = [
     'knowledge',
-    'responsibility',
     'city',
     'agriculture',
     'industry',
@@ -83,88 +82,6 @@ function ArtworkLine({ width, color }: ArtworkLineProps) {
                 background: color,
             }}
         />
-    );
-}
-
-/** A maintained product with checked work and a later related need; no knowledge-base metaphor. */
-function ResponsibilityArtwork({ palette }: { readonly palette: SocialPreviewPalette }) {
-    return (
-        <div style={{ display: 'flex', position: 'relative', width: 552, height: 454 }}>
-            <ArtworkCard palette={palette} top={68} left={76} width={356} height={280} rotation={-5}>
-                <div style={{ display: 'flex', gap: 7, marginBottom: 28 }}>
-                    {[0, 1, 2].map((index) => (
-                        <div
-                            key={index}
-                            style={{
-                                display: 'flex',
-                                width: 9,
-                                height: 9,
-                                borderRadius: 9,
-                                background: palette.accentSoft,
-                                opacity: 0.5,
-                            }}
-                        />
-                    ))}
-                </div>
-                <ArtworkLine width={172} color="rgba(255,255,255,.85)" />
-                <div style={{ display: 'flex', marginTop: 16 }}>
-                    <ArtworkLine width={242} color="rgba(255,255,255,.25)" />
-                </div>
-                <div style={{ display: 'flex', gap: 12, marginTop: 28 }}>
-                    {[0, 1, 2].map((index) => (
-                        <div
-                            key={index}
-                            style={{
-                                display: 'flex',
-                                width: 88,
-                                height: 68,
-                                borderRadius: 12,
-                                background: `${palette.accent}20`,
-                                border: `1px solid ${palette.frame}`,
-                            }}
-                        />
-                    ))}
-                </div>
-            </ArtworkCard>
-            {[
-                { top: 246, left: 220, isChecked: true },
-                { top: 326, left: 257, isChecked: false },
-            ].map((item) => (
-                <div
-                    key={item.top}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 18,
-                        position: 'absolute',
-                        top: item.top,
-                        left: item.left,
-                        width: 255,
-                        height: 66,
-                        padding: 16,
-                        borderRadius: 16,
-                        background: palette.backgroundEnd,
-                        border: `1px solid ${palette.frame}`,
-                        boxShadow: '0 12px 25px rgba(0,0,0,.18)',
-                    }}
-                >
-                    <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-                        <circle cx="15" cy="15" r="13" stroke={palette.accent} strokeWidth="2" />
-                        {item.isChecked ? (
-                            <path d="M9 15l4 4 8-8" stroke={palette.accent} strokeWidth="2" strokeLinecap="round" />
-                        ) : (
-                            <path
-                                d="M10 15h10m-4-4 4 4-4 4"
-                                stroke={palette.accent}
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                            />
-                        )}
-                    </svg>
-                    <ArtworkLine width={155} color="rgba(255,255,255,.65)" />
-                </div>
-            ))}
-        </div>
     );
 }
 
@@ -827,7 +744,6 @@ export function SocialPreviewArtwork({ kind, palette }: SocialPreviewArtworkProp
                 overflow: 'hidden',
             }}
         >
-            {kind === 'responsibility' && <ResponsibilityArtwork palette={palette} />}
             {kind === 'knowledge' && <KnowledgeArtwork palette={palette} />}
             {kind === 'city' && <CityArtwork palette={palette} />}
             {kind === 'agriculture' && <AgricultureArtwork palette={palette} />}

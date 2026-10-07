@@ -1,15 +1,5 @@
 # Current preversion
 
-- Repositioned `/cs` and `/en` around ongoing business responsibilities, with one localized interactive story area
-  for application care, customer communication and accounting documents. Fictional examples show preparation,
-  explicit human decisions, continued work and useful waiting states; direct controls, reduced motion, a native
-  complete reader and an isolated interaction fallback keep benefits readable. A homepage-specific qualification
-  presentation preserves drafts and retry behavior while reusing contact delivery, consent, attribution and the
-  existing conversion URL. Added matching search/social copy and product-care artwork with a homepage-only cache
-  revision. The Czech company-data offer, legacy redirect, whitepaper and branded-domain routing remain separate.
-  Cookie-layout checks cover both new homepages and the preserved company offer; booking-notice clearance is
-  verified on `/cs/pro-firmy`, where that notice remains, with all visibility, clickability and footer assertions retained.
-
 - Introduced **Studio** with addressable **Nahrávání** and **Střižna** sections and persistent workshop projects;
   old recording addresses redirect to their recording view. One authority and protected autosave span both sections,
   and changing sections keeps an active capture running. Finalized/interrupted recordings open or join projects by

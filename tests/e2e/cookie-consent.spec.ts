@@ -10,7 +10,6 @@ const VIEWPORTS = [
 const COOKIE_PAGE_PATHS = [
     '/cs',
     '/en',
-    '/cs/pro-firmy',
     '/cs/ochrana-osobnich-udaju',
     '/cs/komunita',
     '/ai-supervize',
@@ -122,10 +121,9 @@ test('cookie panel and coder badge clear a player opened later, resized and clos
     await expectAbove(coderBadge, panel);
 });
 
-test('the company-page booking notice leaves cookie choices clickable and the footer can be scrolled clear', async ({ page }) => {
+test('a booking notice leaves cookie choices clickable and the footer can be scrolled clear', async ({ page }) => {
     await page.clock.install();
-    // The preserved company offer owns this notice; the autonomous-agenda homepages have their own composition.
-    await page.goto('/cs/pro-firmy', { waitUntil: 'domcontentloaded' });
+    await page.goto('/cs', { waitUntil: 'domcontentloaded' });
     const panel = page.locator(COOKIE_PANEL_SELECTOR);
     const notification = page.locator('[data-booking-notification]');
     await expect(panel).toBeVisible();

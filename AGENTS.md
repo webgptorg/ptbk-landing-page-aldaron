@@ -24,17 +24,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   paths across sites; a same-brand nested path normalizes to that brand's public path.
   Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
-- `/cs` and `/en` share the benefit-led autonomous-agenda homepage in `businesses/homepage`.
-  Czech is the copy source of truth; English uses the same composition, localized stories and behavior.
-  Its software-care, customer-communication and accounting-document illustrations share one scenario definition
-  with a native server-rendered reader. Selection and deliberate story steps are atomic, with no autoplay or real
-  business operations; preparation, human approval and external outcomes remain distinct. A bounded artifact reveal
-  stops offscreen/hidden and is removed for reduced motion. An error boundary keeps the readable page and CTA available.
-  The configurable qualification-popup presentation reuses the existing contact source, consent and delivery, retains
-  failed/closed drafts, and reaches the localized homepage confirmation at `/dekujeme?flow=homepage&lang=…` without
-  contact identity in the URL. The full footer retains legal and funding information. The whitepaper is optional depth;
-  company-document enquiries remain at `/cs/pro-firmy`. Homepage sharing cards have their own authored revision in
-  addition to the shared image design version, leaving other preview URLs unchanged.
+- `/cs` is the Czech homepage and source of truth for homepage structure and copy.
+- `/en` is its English localization.
 - `/cs/whitepaper` and `/en/whitepaper` share a light interactive APT whitepaper in `businesses/whitepaper`.
   Its scroll-linked CSS 3D layers, controlled-cycle simulation, commit/revert example and domain scenarios explain
   the authored principles without running agents or external actions. Reduced motion keeps the model still; the full
@@ -47,8 +38,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   proposition — its composition in `businesses/pro-firmy/_ProFirmyPage.tsx`, every word
   in `businesses/pro-firmy/proFirmyContent.tsx`, and its own metadata, canonical URL,
   sharing card and sitemap entry in `businesses/pro-firmy/proFirmyMetadata.ts`. It is
-  published in Czech only and names no language alternate. The homepages have their own composition and content;
-  shared sections and the qualification popup retain the company offer as their default presentation.
+  published in Czech only and names no language alternate. `/cs` and `/en` render that
+  same composition until the homepage is repositioned; repositioning means composing the
+  homepage from sections and content of its own, never changing the preserved ones.
   The legacy `/pro-firmy` permanently redirects there. The header's own default copy is
   site chrome and lives beside it in `components/headerContent.ts`, so no landing page
   owns the words every other page wears.
