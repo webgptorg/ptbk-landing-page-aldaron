@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Synchronized `package-lock.json` with the dependency versions in `package.json`, so clean `npm ci` installs can
+  resolve the AWS S3 request presigner used by studio asset routes.
+
 - Fixed recording-studio E2E capture on hosts where the physical audio output clock stalls. Synthetic screen and
   microphone audio now use a silent Web Audio output and finish resuming before the source is returned, so all five
   sources produce real media for the existing recording, ZIP, trimming, and playback checks.
