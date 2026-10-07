@@ -3,9 +3,9 @@ import { DEFAULT_SOCIAL_PREVIEW_IMAGE_PATH } from '@/lib/metadata/site-config';
 import { SOCIAL_PREVIEW_IMAGE_VERSION } from '@/lib/metadata/social-preview-image-config';
 
 /** A fixed design version never carries a visitor's query-string identity into an image URL. */
-export function createGeneratedSocialPreviewImagePath(pagePath = '/'): string {
+export function createGeneratedSocialPreviewImagePath(pagePath = '/', revision?: string): string {
     const pathname = pagePath.split(/[?#]/)[0]!.replace(/\/$/, '');
-    return `${pathname}${DEFAULT_SOCIAL_PREVIEW_IMAGE_PATH}?v=${SOCIAL_PREVIEW_IMAGE_VERSION}`;
+    return `${pathname}${DEFAULT_SOCIAL_PREVIEW_IMAGE_PATH}?v=${SOCIAL_PREVIEW_IMAGE_VERSION}${revision ? `-${encodeURIComponent(revision)}` : ''}`;
 }
 
 /**
@@ -20,5 +20,8 @@ export function resolveSocialPreviewImagePath(definition: PageMetadataDefinition
         return definition.socialPreviewImagePath;
     }
 
-    return createGeneratedSocialPreviewImagePath(definition.isSocialPreviewImageGenerated ? definition.path : '/');
+    return createGeneratedSocialPreviewImagePath(
+        definition.isSocialPreviewImageGenerated ? definition.path : '/',
+        definition.isSocialPreviewImageGenerated ? definition.socialPreviewImageRevision : undefined,
+    );
 }

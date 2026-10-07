@@ -52,8 +52,8 @@ test('submits the business lead dialog', async ({ page }) => {
     await expect(dialog.getByText('Poptávka odeslána!')).toBeVisible();
 });
 
-test('submits the homepage qualification lead flow', async ({ page }) => {
-    await page.goto('/cs');
+test('preserves the company-page qualification lead flow', async ({ page }) => {
+    await page.goto('/cs/pro-firmy');
     await page.locator('#hero-cta').click();
 
     const dialog = page.getByRole('dialog');

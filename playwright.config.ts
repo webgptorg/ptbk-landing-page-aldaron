@@ -15,6 +15,18 @@ const E2E_COLD_COMPILATION_TEST_TIMEOUT_MS = 180_000;
  */
 const E2E_COLD_COMPONENT_EXPECT_TIMEOUT_MS = 60_000;
 
+// This suite retains every lazily compiled route to avoid re-emitting shared chunks under an active request.
+// Its complete compiler graph needs more heap than Next's ordinary development-session default (half of RAM).
+// Set the budget only on the owned E2E server, and honor an explicit owner-supplied Node heap limit.
+const E2E_DEVELOPMENT_SERVER_HEAP_SIZE_MIB = 10_240;
+const E2E_INHERITED_NODE_OPTIONS = process.env.NODE_OPTIONS ?? '';
+const IS_E2E_SERVER_HEAP_LIMIT_CONFIGURED = /(?:^|[\s"'])--max[-_]old[-_]space[-_]size(?:[-_]percentage)?(?:[=\s"']|$)/.test(
+    E2E_INHERITED_NODE_OPTIONS,
+);
+const E2E_DEVELOPMENT_SERVER_NODE_OPTIONS = IS_E2E_SERVER_HEAP_LIMIT_CONFIGURED
+    ? E2E_INHERITED_NODE_OPTIONS
+    : `${E2E_INHERITED_NODE_OPTIONS} --max-old-space-size=${E2E_DEVELOPMENT_SERVER_HEAP_SIZE_MIB}`.trim();
+
 const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4009';
 const usesExternalServer = process.env.E2E_BASE_URL !== undefined;
 const usesIsolatedInMemorySupabase = !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -48,7 +60,11 @@ export default defineConfig({
     webServer: usesExternalServer
         ? undefined
         : {
-              command: 'npx next dev -p 4009',
+              // Next normally enables Node's source-map cache as well as the browser's development maps. Keeping
+              // every compiled route adds avoidable memory in that server cache. Together with the explicit heap
+              // budget below, the supported flag omits only Node's --enable-source-maps;
+              // browser source maps, failed-attempt traces and the complete development-server suite stay available.
+              command: 'npx next dev --disable-source-maps -p 4009',
               url: baseURL,
               reuseExistingServer: !process.env.CI,
               timeout: E2E_COLD_COMPILATION_TEST_TIMEOUT_MS,
@@ -61,6 +77,7 @@ export default defineConfig({
               // Next does not replace explicitly empty environment values from .env.
               env: {
                   ...process.env,
+                  NODE_OPTIONS: E2E_DEVELOPMENT_SERVER_NODE_OPTIONS,
                   DATABASE_URL: '',
                   E2E_IN_MEMORY_SUPABASE: usesIsolatedInMemorySupabase ? 'true' : '',
                   E2E_KEEP_COMPILED_ROUTES: 'true',

@@ -12,7 +12,7 @@ import { HOSTED_RECORDING_MAXIMUM_MEDIA_BYTES, HOSTED_RECORDING_PART_BYTES } fro
 export { HOSTED_RECORDING_MAXIMUM_MEDIA_BYTES, HOSTED_RECORDING_PART_BYTES } from './hostedRecordingConstants';
 const MAXIMUM_PROBE_BYTES = 128 * 1024 * 1024;
 
-type StorageConfiguration = { readonly client: S3Client; readonly bucket: string };
+type StorageConfiguration = { readonly client: S3Client; readonly readClient?: S3Client; readonly bucket: string };
 let storageConfiguration: StorageConfiguration | null = null;
 
 export function getHostedRecordingStorage(): StorageConfiguration {
@@ -32,6 +32,12 @@ export function getHostedRecordingStorage(): StorageConfiguration {
             forcePathStyle: Boolean(process.env.HOSTED_RECORDING_S3_ENDPOINT),
             credentials: { accessKeyId, secretAccessKey },
         }),
+        ...(process.env.HOSTED_RECORDING_S3_PLAYBACK_ENDPOINT ? { readClient: new S3Client({
+            region: process.env.HOSTED_RECORDING_S3_PLAYBACK_REGION || region,
+            endpoint: process.env.HOSTED_RECORDING_S3_PLAYBACK_ENDPOINT,
+            forcePathStyle: process.env.HOSTED_RECORDING_S3_PLAYBACK_PATH_STYLE !== 'false',
+            credentials: { accessKeyId, secretAccessKey },
+        }) } : {}),
     };
     return storageConfiguration;
 }
@@ -40,11 +46,12 @@ export function createHostedRecordingObjectKey(workshopId: string, revisionId: s
     return `workshop-recordings/${workshopId}/${revisionId}/${assetId}`;
 }
 
-export async function beginHostedRecordingUpload(key: string, contentType: string): Promise<string> {
+export async function beginHostedRecordingUpload(key: string, contentType: string, metadata?: Record<string, string>): Promise<string> {
     const { client, bucket } = getHostedRecordingStorage();
     const result = await client.send(new CreateMultipartUploadCommand({
         Bucket: bucket, Key: key, ContentType: contentType, CacheControl: 'private, no-store',
         ChecksumAlgorithm: 'SHA256',
+        ...(metadata ? { Metadata: metadata } : {}),
     }));
     if (!result.UploadId) throw new Error('Object storage did not return an upload ID.');
     return result.UploadId;
@@ -64,7 +71,7 @@ export async function uploadHostedRecordingPart(key: string, uploadId: string, p
     }
 }
 
-export async function completeHostedRecordingUpload(key: string, uploadId: string, expectedBytes: number): Promise<void> {
+export async function completeHostedRecordingUpload(key: string, uploadId: string, expectedBytes: number, expectedChecksums?: readonly string[]): Promise<void> {
     const { client, bucket } = getHostedRecordingStorage();
     if (await isHostedRecordingObjectComplete(key, expectedBytes)) return;
     const parts: { PartNumber: number; ETag: string; ChecksumSHA256?: string }[] = [];
@@ -89,7 +96,7 @@ export async function completeHostedRecordingUpload(key: string, uploadId: strin
         } while (marker !== undefined);
         const expectedParts = Math.ceil(expectedBytes / HOSTED_RECORDING_PART_BYTES);
         if (parts.length !== expectedParts || totalBytes !== expectedBytes ||
-            parts.some((part, index) => part.PartNumber !== index + 1)) {
+            parts.some((part, index) => part.PartNumber !== index + 1 || (expectedChecksums && part.ChecksumSHA256 !== expectedChecksums[index]))) {
             throw new Error('Uploaded parts do not match the declared file size. Retry missing chunks.');
         }
         await client.send(new CompleteMultipartUploadCommand({ Bucket: bucket, Key: key, UploadId: uploadId,
@@ -139,18 +146,18 @@ export async function abortHostedRecordingUpload(key: string, uploadId: string):
 }
 
 /** Also catches multipart uploads created just before a process died, before its database insert. */
-export async function abortAbandonedHostedRecordingUploads(cutoff: Date): Promise<number> {
+export async function abortAbandonedHostedRecordingUploads(cutoff: Date, prefix = 'workshop-recordings/', protectedUploadIds: ReadonlySet<string> = new Set()): Promise<number> {
     const { client, bucket } = getHostedRecordingStorage();
     let keyMarker: string | undefined;
     let uploadIdMarker: string | undefined;
     let abortedCount = 0;
     do {
         const response = await client.send(new ListMultipartUploadsCommand({
-            Bucket: bucket, Prefix: 'workshop-recordings/', KeyMarker: keyMarker,
+            Bucket: bucket, Prefix: prefix, KeyMarker: keyMarker,
             UploadIdMarker: uploadIdMarker,
         }));
         for (const upload of response.Uploads ?? []) {
-            if (upload.Key && upload.UploadId && upload.Initiated && upload.Initiated < cutoff) {
+            if (upload.Key && upload.UploadId && upload.Initiated && upload.Initiated < cutoff && !protectedUploadIds.has(upload.UploadId)) {
                 await abortHostedRecordingUpload(upload.Key, upload.UploadId);
                 abortedCount += 1;
             }

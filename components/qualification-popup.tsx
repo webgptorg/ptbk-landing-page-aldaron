@@ -1,5 +1,6 @@
 'use client';
 
+import { QualificationEnquiryPopup, type QualificationPresentation } from '@/components/qualification-enquiry-popup';
 import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,22 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ArrowLeft, Calendar, CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+/** Existing callers retain the company offer's presentation and behavior. */
+export function QualificationPopup({
+    language = 'cs',
+    presentation,
+}: {
+    language?: ProFirmyLanguage;
+    presentation?: QualificationPresentation;
+}) {
+    return presentation ? (
+        <QualificationEnquiryPopup language={language} presentation={presentation} />
+    ) : (
+        <CompanyQualificationPopup language={language} />
+    );
+}
+
+function CompanyQualificationPopup({ language }: { language: ProFirmyLanguage }) {
     const { qualificationPopup } = getProFirmyContent(language);
     const questions = qualificationPopup.questions;
     const [isOpen, setIsOpen] = useState(false);

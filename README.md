@@ -35,12 +35,21 @@ This is a production Next.js application, not a collection of static marketing p
 | Homepages | `/` redirects by `Accept-Language`; `/cs` is the Czech source of truth and `/en` is its localized variant. |
 | Audience pages | `/pro-mesta`, `/for-agro`, `/for-industry`, `/ai-supervize`, `/ai-supervize-mini`, and related campaign routes. |
 | Workshops and community | `/cs/online-workshop`, `/cs/online-workshop/participant`, `/cs/komunita`, and `/cs/komunita/projects`. |
-| Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/recording-studio`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |
+| Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/studio`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |
 | Public short links | `/<shortcode>` resolves a managed short link; `/shortener` leads to its administration. |
 
-## Local recording studio
+## Studio
 
-`/admin/recording-studio` uses the existing admin login. Add each camera or screen share separately; a microphone
+**Studio** contains **Nahrávání** at `/admin/studio/recording` and **Střižna** at `/admin/studio/editor`.
+Finalized recordings open editing projects by reference without copying or uploading media. Střižna also opens
+independent read-only local-file and progressive HTTPS projects without capture permissions. Linked parts, manual
+alignment, shared transport, saved fullscreen/camera scenes, one composition audio source and portable recipes
+support assembling long workshops. Optional **Nahrát na CDN** uploads individual assets directly from the browser
+to private S3 multipart storage, preserving originals and switching location only after verification. Projects stay
+browser-local; upload does not publish a participant room. See [analysis, setup, CORS and measured verification](docs/studio-workshop-editor.md).
+
+`/admin/studio/recording` uses the existing admin login. Legacy recording URLs redirect to their corresponding view.
+Add each camera or screen share separately; a microphone
 can be added as its own audio file. A new camera records the selected microphone in the same video file by default;
 turn off **Nahrávat zvuk** for an intentional silent camera. Camera previews are muted. Screen audio is requested
 when enabled, but the browser and operating system may not provide an audio track for the chosen surface. All
@@ -117,7 +126,7 @@ granted/denied/unsupported/error feedback. It protects origin data from eviction
 reveals no disk free space. Download takes you want to keep. See [investigation and verification
 evidence](docs/recording-studio-storage.md).
 
-**Náhled a ořez** opens `/admin/recording-studio/<recordingId>` in the studio's persistent workspace shell.
+**Náhled a ořez** opens `/admin/studio/recording/<recordingId>` in the studio's persistent workspace shell.
 The existing recording/source IDs, original bytes and saved selection survive reload and back navigation. These
 authenticated URLs identify data in this browser profile; another computer shows a missing-local-recording state.
 The timeline has a lane per source, sparse decoded thumbnails/audio samples, zoom/scroll, an hours-inclusive clock,
@@ -189,7 +198,7 @@ remove one draft file to replace it. Studio publication prepares each selected v
 playable part; a selection crossing recorded pause/append parts needs separately prepared continuous files before
 direct admin import.
 
-Use a **private AWS S3 bucket** for durable media. The app sends 8 MiB SHA-256 checked chunks through authenticated
+The existing workshop publication/import flow uses a **private AWS S3 bucket** for durable media. It sends 8 MiB SHA-256 checked chunks through authenticated
 Node.js routes, and proxies authorized 4 MiB byte ranges back to viewers. The bucket must deny public access and
 allow the server identity `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`,
 `s3:AbortMultipartUpload`, and `s3:ListMultipartUploadParts` on the `workshop-recordings/` objects, plus
@@ -211,7 +220,9 @@ Schedule `POST /api/hosted-recordings/cleanup` with
 after 24 hours and unpublished ready or superseded revisions after seven days, never the current published pointer.
 It also aborts old
 multipart uploads left before a database row could be written. Add an S3 lifecycle rule to abort incomplete multipart
-uploads after one day as a second recovery path if the scheduler is unavailable. Keep old revisions for at least the
+uploads after one day, scoped to `workshop-recordings/`, as a second recovery path if the scheduler is unavailable.
+The separate Studio direct-upload service uses `studio-assets/`, project references and its own retention; do not
+apply that lifecycle rule to protected editor uploads. Keep old revisions for at least the
 seven-day retention window; a connected viewer may request its superseded revision for 24 hours after replacement.
 Each media request is still checked
 against the workshop session and paid membership. The YouTube URL, replay offset, teaser, and stage choice remain

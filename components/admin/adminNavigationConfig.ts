@@ -6,7 +6,7 @@ import {
     ADMIN_WORKSHOPS_PATH,
 } from '@/lib/admin/adminConstants';
 import { ADMIN_SHORTENER_PATH } from '@/lib/shortener/shortcodeLinkConstants';
-import { RECORDING_STUDIO_PATH } from '@/lib/recording-studio/recordingStudioTypes';
+import { STUDIO_PATH } from '@/lib/recording-studio/studioProjectTypes';
 import { ContactRound, LayoutDashboard, Link2, Radio, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
 
 export type AdminNavigationItem = {
@@ -45,9 +45,9 @@ export const ADMIN_NAVIGATION_ITEMS: readonly AdminNavigationItem[] = [
         icon: UsersRound,
     },
     {
-        path: RECORDING_STUDIO_PATH,
-        label: 'Nahrávací studio',
-        description: 'Souběžný záznam kamer a obrazovek, společný ořez a ZIP pro střihače.',
+        path: STUDIO_PATH,
+        label: 'Studio',
+        description: 'Nahrávání workshopů, propojená multitrack Střižna a volitelné soukromé CDN.',
         icon: Video,
     },
     {

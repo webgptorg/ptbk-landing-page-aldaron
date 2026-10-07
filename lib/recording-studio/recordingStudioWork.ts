@@ -1,5 +1,6 @@
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
-import { RECORDING_STUDIO_AUTHORITY, RecordingStudioAuthorityLostError } from './recordingStudioAuthority';
+import { RECORDING_STUDIO_AUTHORITY, RecordingStudioAuthorityLostError, type RecordingStudioExternalRecovery } from './recordingStudioAuthority';
+import { JsonRequestError } from '@/lib/api/requestJson';
 
 type StudioWork = { readonly controller: AbortController; readonly settled: Promise<unknown> };
 const RUNNING_WORK = new Set<StudioWork>();
@@ -60,14 +61,16 @@ export async function commitRecordingStudioExport<Result>(operation: () => Promi
 }
 
 /** Upload cancellation occurs between acknowledged requests; a network failure retains the uncertainty marker. */
-export async function commitRecordingStudioUpload<Result>(operation: () => Promise<Result>, signal: AbortSignal): Promise<Result> {
-    const outcome = await commitRecordingStudioWork(async () => {
+export async function commitRecordingStudioUpload<Result>(operation: () => Promise<Result>, signal: AbortSignal, recovery?: RecordingStudioExternalRecovery): Promise<Result> {
+    const outcome = await RECORDING_STUDIO_AUTHORITY.commit(async () => {
         try { return { result: await operation() }; }
         catch (error) {
             if (signal.aborted && error instanceof DOMException && error.name === 'AbortError') return { error };
+            // An acknowledged refusal has a known outcome. A network/server failure still keeps uncertainty fenced.
+            if (error instanceof JsonRequestError && error.status >= 400 && error.status < 500) return { error };
             throw error;
         }
-    }, signal);
+    }, signal, recovery);
     if ('error' in outcome) throw outcome.error;
     return outcome.result;
 }

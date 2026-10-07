@@ -1,5 +1,37 @@
 # Current preversion
 
+- Repositioned `/cs` and `/en` around ongoing business responsibilities, with one localized interactive story area
+  for application care, customer communication and accounting documents. Fictional examples show preparation,
+  explicit human decisions, continued work and useful waiting states; direct controls, reduced motion, a native
+  complete reader and an isolated interaction fallback keep benefits readable. A homepage-specific qualification
+  presentation preserves drafts and retry behavior while reusing contact delivery, consent, attribution and the
+  existing conversion URL. Added matching search/social copy and product-care artwork with a homepage-only cache
+  revision. The Czech company-data offer, legacy redirect, whitepaper and branded-domain routing remain separate.
+  Cookie-layout checks cover both new homepages and the preserved company offer; booking-notice clearance is
+  verified on `/cs/pro-firmy`, where that notice remains, with all visibility, clickability and footer assertions retained.
+
+- Introduced **Studio** with addressable **Nahrávání** and **Střižna** sections and persistent workshop projects;
+  old recording addresses redirect to their recording view. One authority and protected autosave span both sections,
+  and changing sections keeps an active capture running. Finalized/interrupted recordings open or join projects by
+  stable references to existing IndexedDB parts, without copying media. Linked parts support common trim, cuts,
+  reordering and manual external-source offsets, with pinned revisions, undo and mapped workshop metadata. A saved
+  scene track renders fullscreen, rectangular or circular camera composition from the shared native decoders and
+  selects one audible source; gaps stay empty. Read-only file handles/session files and progressive HTTPS ranges share
+  the same source abstraction, with explicit permission/relink errors and no imported-media copies. Portable JSON
+  recipes strip permissions and authorization URLs; referenced recorder media cannot be deleted silently.
+  Explicit **Nahrát na CDN** converts selected local assets to private S3 locations only after verified multipart
+  upload and native remote seeking. Bounded browser PUTs go directly to storage using short-lived signatures;
+  checksum/identity reconciliation, pause/reload/resume, retries, cancellation, completion leases and uncertain-outcome
+  recovery preserve originals and cuts. Separate private asset/reference migrations and cleanup protect editor media
+  without publishing a workshop or changing hosted participant access. Configuration, CORS, long-container measurements,
+  endpoint testing and the explicitly unsupported/unverified direct Google Drive source are documented in
+  `docs/studio-workshop-editor.md`.
+
+- Studio loads its browser-local editors and media analysis only when their view is opened, while keeping the
+  shared capture owner mounted. The full browser-check server uses an explicit heap budget for its retained compiler
+  graph and omits Node's additional source-map cache to avoid memory-threshold restarts during late metadata requests;
+  owner-supplied heap limits, browser source maps, traces and every check remain.
+
 - Fixed the validation failures found during the studio storage cleanup: the material-order browser test now
   scrolls its target into view and measures each drag afresh, verifies real mouse/touch activation, and retains its
   cancellation, no-op, keyboard, saved-order and reload checks. The whitepaper's APT controls wait for their

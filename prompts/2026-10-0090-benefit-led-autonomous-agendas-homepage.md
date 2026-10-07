@@ -1,4 +1,4 @@
-[ ] use `gpt-6-astra`
+[x] (2 attempts) by Developer on OpenAI Codex `gpt-6-astra` thinking `max` (ChatGPT account) - Implementation ~$0.6246 32 minutes; Checking 19 minutes; Fixing ~$0.2742 20 minutes; Checking 18 minutes
 
 [✨🛰️] Create an interactive, benefit-led Czech and English homepage for autonomous agendas
 
@@ -66,3 +66,4 @@
 - Keep in mind the DRY _(don't repeat yourself)_ principle. Share localized scenario data, conversion behavior and suitable presentation primitives without sharing unrelated page state.
 - Do an analysis of the current functionality before you start implementing.
 - Add the changes into the [changelog](../changelog/_current-preversion.md).
+

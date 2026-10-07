@@ -18,8 +18,8 @@ function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAp
             <a
                 href={appearance.href}
                 className={cn(
-                    'group flex h-full gap-5 rounded-2xl border border-slate-200 bg-white p-5 transition-colors hover:border-[var(--pavol-accent)]',
-                    IS_HIGHLIGHT ? 'flex-col sm:p-6' : 'flex-col sm:flex-row',
+                    'group flex h-full overflow-hidden rounded-2xl border border-[var(--pavol-border)] bg-white transition-colors hover:border-[var(--pavol-accent)]',
+                    IS_HIGHLIGHT ? 'flex-col' : 'flex-col gap-5 p-5 sm:flex-row',
                 )}
             >
                 <div
@@ -30,8 +30,8 @@ function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAp
                             : undefined
                     }
                     className={cn(
-                        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-3xl font-bold',
-                        IS_HIGHLIGHT ? 'h-48 w-full sm:h-56' : 'h-32 w-full sm:h-28 sm:w-40',
+                        'relative flex shrink-0 items-center justify-center overflow-hidden bg-slate-100 text-3xl font-bold',
+                        IS_HIGHLIGHT ? 'h-56 w-full sm:h-64' : 'h-32 w-full rounded-lg sm:h-28 sm:w-40',
                         appearance.thumbnailClassName,
                     )}
                 >
@@ -51,7 +51,7 @@ function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAp
                         (appearance.thumbnailLabel ?? appearance.source)
                     )}
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col">
+                <div className={cn('flex min-w-0 flex-1 flex-col', IS_HIGHLIGHT && 'p-6 sm:p-8')}>
                     <div className="flex items-center justify-between gap-3 text-xs font-semibold text-[var(--pavol-accent)]">
                         <span>
                             {appearance.kind}{' '}
@@ -60,12 +60,14 @@ function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAp
                             </span>{' '}
                             {appearance.source}
                         </span>
-                        <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+                        <span className={IS_HIGHLIGHT ? 'pavol-link-arrow' : undefined}>
+                            <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+                        </span>
                     </div>
-                    <h3 className="mt-3 text-xl font-semibold leading-snug text-[var(--pavol-ink)]">
+                    <h3 className="mt-3 text-2xl font-medium leading-snug tracking-tight text-[var(--pavol-ink)]">
                         {appearance.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-600">{appearance.description}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-[var(--pavol-muted)]">{appearance.description}</p>
                 </div>
             </a>
         </article>
@@ -78,7 +80,7 @@ export function PavolMediaSection({ language }: { readonly language: SupportedHo
     const HIGHLIGHTS = APPEARANCES.filter((APPEARANCE) => APPEARANCE.importance === 'highlight');
     const OTHER_APPEARANCES = APPEARANCES.filter((APPEARANCE) => APPEARANCE.importance === 'rest');
     return (
-        <section id="media" tabIndex={-1} className="bg-white py-16 outline-none sm:py-24">
+        <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading
                     eyebrow={CONTENT.eyebrow}
@@ -86,16 +88,16 @@ export function PavolMediaSection({ language }: { readonly language: SupportedHo
                     description={CONTENT.description}
                 />
                 <h3 className="sr-only">{CONTENT.highlightsLabel}</h3>
-                <div className="mt-10 grid gap-5 md:grid-cols-2">
+                <div className="mt-12 grid gap-6 md:grid-cols-2 lg:gap-8">
                     {HIGHLIGHTS.map((APPEARANCE) => (
                         <MediaAppearanceCard key={APPEARANCE.href} appearance={APPEARANCE} />
                     ))}
                 </div>
-                <details className="group/media mt-6 rounded-2xl border border-slate-200 p-5 sm:p-6">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
+                <details className="group/media mt-8 border-y border-[var(--pavol-border)] py-6">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-base font-medium [&::-webkit-details-marker]:hidden">
                         <span>
                             {CONTENT.restLabel}{' '}
-                            <span className="ml-2 font-normal text-slate-500">({OTHER_APPEARANCES.length})</span>
+                            <span className="ml-2 font-mono text-sm font-normal text-[var(--pavol-muted)]">({OTHER_APPEARANCES.length})</span>
                         </span>
                         <ChevronDown
                             aria-hidden="true"

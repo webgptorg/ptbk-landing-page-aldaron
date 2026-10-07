@@ -220,12 +220,18 @@ function detectRecordingContainerFormat(bytes: Uint8Array): RecordingContainerFo
     return box && ['ftyp', 'styp', 'moov', 'moof'].includes(box.type) ? 'isobmff' : 'unknown';
 }
 
-async function readBlobBytes(blob: Blob, start: number, end: number): Promise<Uint8Array> {
+/** Structural reads can come from a Blob or a bounded IndexedDB range adapter without assembling a whole Blob. */
+export type RecordingIndexSource = {
+    readonly size: number;
+    readonly slice: (start: number, end: number) => { readonly arrayBuffer: () => Promise<ArrayBuffer> };
+};
+
+async function readBlobBytes(blob: RecordingIndexSource, start: number, end: number): Promise<Uint8Array> {
     return new Uint8Array(await blob.slice(start, end).arrayBuffer());
 }
 
 /** Reads only the structural head and tail of a recorded part; media bytes are never decoded or scanned. */
-export async function readRecordingIndexReport(blob: Blob): Promise<RecordingIndexReport> {
+export async function readRecordingIndexReport(blob: RecordingIndexSource): Promise<RecordingIndexReport> {
     if (blob.size === 0) return createReport('unknown', 'unknown', 'Část média je prázdná.');
     const header = await readBlobBytes(blob, 0, Math.min(blob.size, INDEX_HEADER_BYTES));
     const format = detectRecordingContainerFormat(header);

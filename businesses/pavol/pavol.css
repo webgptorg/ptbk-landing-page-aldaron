@@ -1,6 +1,248 @@
+.pavol-site {
+    color-scheme: light;
+    --pavol-section-space: clamp(4rem, 7vw, 6.5rem);
+}
+
+.pavol-site ::selection {
+    color: var(--pavol-ink);
+    background: var(--pavol-gold);
+}
+
+.pavol-header {
+    background: color-mix(in srgb, var(--pavol-paper) 94%, transparent);
+}
+
+.pavol-section {
+    padding-block: var(--pavol-section-space);
+}
+
+.pavol-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--pavol-accent);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.7;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.pavol-section-title {
+    text-wrap: balance;
+}
+
+.pavol-section-description {
+    color: var(--pavol-muted);
+}
+
+.pavol-hero-name {
+    font-size: clamp(3.2rem, 7.4vw, 6.5rem);
+    line-height: 1.04;
+    letter-spacing: -0.06em;
+}
+
+.pavol-portrait-frame {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    aspect-ratio: 0.93;
+    border-radius: 1.25rem 8rem 1.25rem 1.25rem;
+    background: #e6e8dd;
+}
+
+.pavol-portrait-frame::after {
+    position: absolute;
+    inset: 1.25rem;
+    z-index: -1;
+    border: 1px solid rgb(32 57 50 / 12%);
+    border-radius: 0.25rem 6.75rem 0.25rem 0.25rem;
+    content: '';
+}
+
+.pavol-portrait-disc {
+    position: absolute;
+    top: 10%;
+    left: 4%;
+    width: 92%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--pavol-gold);
+}
+
+.pavol-portrait-image {
+    position: absolute;
+    top: 5%;
+    left: 7%;
+    width: 86%;
+    height: auto;
+    max-width: none;
+}
+
+.pavol-primary-button {
+    background: var(--pavol-ink);
+    color: white;
+    box-shadow: 0 4px 10px rgb(32 57 50 / 8%);
+}
+
+.pavol-primary-button:hover {
+    background: var(--pavol-accent);
+}
+
+.pavol-numbers > div {
+    padding-inline: 1.25rem;
+    border-left: 1px solid rgb(32 57 50 / 15%);
+}
+
+.pavol-numbers > div:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+}
+
+.pavol-service {
+    background: var(--pavol-paper);
+    border: 1px solid var(--pavol-warm);
+}
+
+.pavol-service:nth-child(even) {
+    background: #f0f4ef;
+    border-color: #e4ebe2;
+}
+
+.pavol-link-arrow {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgb(32 57 50 / 20%);
+    border-radius: 50%;
+    transition: background 180ms, color 180ms, transform 180ms;
+}
+
+.group:is(:hover, :focus-visible) .pavol-link-arrow {
+    color: white;
+    background: var(--pavol-ink);
+    transform: rotate(45deg);
+}
+
+.pavol-projects .pavol-eyebrow {
+    color: var(--pavol-gold);
+}
+
+.pavol-projects .pavol-section-description,
+.pavol-project-description {
+    color: #c4d0c6;
+}
+
+.pavol-project {
+    background: rgb(255 255 255 / 3%);
+}
+
+.pavol-project-number {
+    color: #c4d0c6;
+}
+
+.pavol-project-featured {
+    min-height: 26rem;
+    color: var(--pavol-ink);
+    background: var(--pavol-gold);
+    border-color: var(--pavol-gold);
+}
+
+.pavol-project-featured h3 {
+    margin-top: auto;
+    padding-top: 5rem;
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    line-height: 1.1;
+}
+
+.pavol-project-featured .pavol-project-description {
+    max-width: 24rem;
+    color: var(--pavol-ink);
+}
+
+.pavol-project-featured .pavol-project-number {
+    color: var(--pavol-ink);
+}
+
+.pavol-project-featured .pavol-project-mark {
+    background: var(--pavol-ink);
+}
+
+.pavol-project-watermark {
+    opacity: 0.07;
+}
+
+.pavol-project-link {
+    border-color: rgb(255 255 255 / 30%);
+}
+
+.pavol-project-link:hover {
+    background: rgb(255 255 255 / 10%);
+}
+
+.pavol-project-featured .pavol-project-link {
+    color: white;
+    background: var(--pavol-ink);
+    border-color: var(--pavol-ink);
+}
+
+.pavol-project-featured .pavol-project-link:hover {
+    background: var(--pavol-accent);
+}
+
+.pavol-project-featured > div:last-child {
+    margin-top: 0;
+}
+
+.pavol-testimonial {
+    padding-block: 1.5rem 0.5rem;
+    border-top: 1px solid rgb(32 57 50 / 20%);
+}
+
+.pavol-testimonial:first-child {
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border: 0;
+    border-radius: 1rem;
+    background: #e9eee5;
+}
+
+.pavol-testimonial:first-child blockquote {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    letter-spacing: -0.025em;
+}
+
+.pavol-contact-form {
+    box-shadow: 0 12px 40px rgb(32 57 50 / 5%);
+}
+
+.pavol-contact-form :is(input, select, textarea) {
+    border-color: var(--pavol-border);
+    border-radius: 0.625rem;
+    background: #fdfdfb;
+    color: var(--pavol-ink);
+}
+
+.pavol-contact-form :is(input, textarea)::placeholder {
+    color: var(--pavol-muted);
+}
+
 .pavol-site :is(a, button, input, textarea, select, summary):focus-visible {
     outline: 2px solid var(--pavol-accent);
     outline-offset: 4px;
+}
+
+.pavol-projects :is(a, button):focus-visible,
+.pavol-site footer :is(a, button):focus-visible {
+    outline-color: var(--pavol-gold);
+}
+
+.pavol-project-featured a:focus-visible {
+    outline-color: var(--pavol-ink);
 }
 
 .pavol-site :is(main, section) {
@@ -17,6 +259,81 @@
 
 .pavol-site .pavol-mobile-menu[open] > summary {
     background: var(--pavol-warm);
+}
+
+@media (min-width: 768px) {
+    .pavol-testimonial:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 1024px) {
+    .pavol-numbers > div,
+    .pavol-numbers > div:nth-child(odd) {
+        padding-inline: 2rem;
+        border-left: 1px solid rgb(32 57 50 / 15%);
+    }
+
+    .pavol-numbers > div:first-child {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .pavol-project-grid {
+        grid-template-columns: 1.05fr 1fr;
+    }
+
+    .pavol-project-featured {
+        grid-row: span 2;
+    }
+
+    .pavol-project-watermark {
+        top: 14%;
+        right: -2rem;
+        width: 23rem;
+        height: 23rem;
+    }
+
+    .pavol-project:last-child {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        column-gap: 1.5rem;
+        align-items: center;
+    }
+
+    .pavol-project:last-child > div:first-child {
+        grid-row: 1 / 3;
+    }
+
+    .pavol-project:last-child .pavol-project-number {
+        display: none;
+    }
+
+    .pavol-project:last-child h3 {
+        margin-top: 0;
+    }
+
+    .pavol-project:last-child .pavol-project-description {
+        grid-column: 2;
+        margin-bottom: 0;
+    }
+
+    .pavol-project:last-child > div:last-child {
+        grid-column: 3;
+        grid-row: 1 / 3;
+        margin-top: 0;
+    }
+
+    .pavol-testimonials {
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .pavol-testimonial:first-child {
+        grid-column: 1;
+        grid-row: span 2;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

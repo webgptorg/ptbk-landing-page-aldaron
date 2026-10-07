@@ -86,7 +86,7 @@ it('forgets a take which was recorded into a folder and keeps every take recorde
 
     const { storage, claimTestRecordingStudioAuthority } = await openStudioModules();
     expect(await storage.listStudioRecordings()).toEqual([browserRecording]);
-    expect(await readUpgradedSchema()).toEqual({ version: 4, storeNames: ['authority', 'chunks', 'recordings'] });
+    expect(await readUpgradedSchema()).toEqual({ version: 5, storeNames: ['assetUploads', 'assets', 'authority', 'chunks', 'projects', 'recordings'] });
     // The right to write goes on from where the previous studio left it, so a tab it had fenced stays fenced.
     expect(await claimTestRecordingStudioAuthority()).toMatchObject({ generation: 6 });
     // Starting the studio neither fails over such a take nor brings it back as one to reconnect.
@@ -99,7 +99,7 @@ it('forgets a take which was recorded into a folder and keeps every take recorde
 it('gives a fresh installation no store for folders at all', async () => {
     const { storage } = await openStudioModules();
     expect(await storage.listStudioRecordings()).toEqual([]);
-    expect(await readUpgradedSchema()).toEqual({ version: 4, storeNames: ['authority', 'chunks', 'recordings'] });
+    expect(await readUpgradedSchema()).toEqual({ version: 5, storeNames: ['assetUploads', 'assets', 'authority', 'chunks', 'projects', 'recordings'] });
 });
 
 it.each([2, 3])('forgets orphaned directory metadata without a handle store in schema %i', async (version) => {

@@ -1,5 +1,5 @@
 import { RECORDING_STUDIO_AUTHORITY, rethrowLostRecordingStudioAuthority } from './recordingStudioAuthority';
-import { CHUNK_STORE, openRecordingDatabase, readRequest, RECORDING_STORE } from './recordingStudioDatabase';
+import { CHUNK_STORE, openRecordingDatabase, readRequest, RECORDING_STORE, STUDIO_PROJECT_STORE, STUDIO_ASSET_STORE } from './recordingStudioDatabase';
 import { addRecordingBytes, getCommonRecordingDuration, validateRecordingTrim } from './recordingStudioTiming';
 import type { RecordingDerivedTrack, RecordingMediaPart, RecordingTrack, RecordingTrim, RecordingWorkshopMetadata, StudioRecording } from './recordingStudioTypes';
 import { createRecordingEditRecipe, getRecordingMediaParts, getRecordingSessionDuration } from './recordingStudioSessionTime';
@@ -37,7 +37,9 @@ export async function saveStudioRecording(recording: StudioRecording): Promise<v
 /** Chunk and its byte counts commit atomically, so a crash never advertises data that was not saved. */
 export async function appendRecordingChunk(recording: StudioRecording, trackId: string, sequence: number, data: Blob): Promise<void> {
     await RECORDING_STUDIO_AUTHORITY.runTransaction([RECORDING_STORE, CHUNK_STORE], (transaction) => {
-        transaction.objectStore(CHUNK_STORE).add({ recordingId: recording.id, trackId, sequence, data } satisfies RecordingChunk);
+        const part = recording.tracks.flatMap(getRecordingMediaParts).find((candidate) => candidate.id === trackId);
+        const byteStart = (part?.byteLength ?? recording.tracks.find((track) => track.id === trackId)?.byteLength ?? data.size) - data.size;
+        transaction.objectStore(CHUNK_STORE).add({ recordingId: recording.id, trackId, sequence, data, byteStart });
         transaction.objectStore(RECORDING_STORE).put(recording);
     });
 }
@@ -109,11 +111,21 @@ export async function editStudioRecording(recording: StudioRecording, title: str
 
 /** The take and every chunk of its media go in one transaction, so neither can be left behind without the other. */
 export async function deleteStudioRecording(recordingId: string): Promise<void> {
-    await RECORDING_STUDIO_AUTHORITY.runTransaction([RECORDING_STORE, CHUNK_STORE], (transaction) => {
-        transaction.objectStore(RECORDING_STORE).delete(recordingId);
-        // Every chunk key begins with its recording, and an array sorts after any track identity which can follow it.
-        transaction.objectStore(CHUNK_STORE).delete(IDBKeyRange.bound([recordingId], [recordingId, []]));
-    });
+    let isReferenced = false;
+    await RECORDING_STUDIO_AUTHORITY.runTransaction([RECORDING_STORE, CHUNK_STORE, STUDIO_PROJECT_STORE, STUDIO_ASSET_STORE], (transaction) => {
+        const assets = transaction.objectStore(STUDIO_ASSET_STORE).getAll();
+        assets.onsuccess = () => {
+            const referencedAssetIds = new Set(assets.result.filter((asset) => asset.original?.kind === 'recording' && asset.original.recordingId === recordingId).map((asset) => asset.id));
+            const projects = transaction.objectStore(STUDIO_PROJECT_STORE).getAll();
+            projects.onsuccess = () => {
+                isReferenced = projects.result.some((project) => project.clips.some((clip: { assetId: string }) => referencedAssetIds.has(clip.assetId)));
+                if (isReferenced) return;
+                transaction.objectStore(RECORDING_STORE).delete(recordingId);
+                transaction.objectStore(CHUNK_STORE).delete(IDBKeyRange.bound([recordingId], [recordingId, []]));
+            };
+        };
+    }, true);
+    if (isReferenced) throw new Error('Záznam používá projekt Střižny. Nejdříve odstraňte jeho odkazy z projektů; zdrojová média se při střihu nemažou.');
 }
 
 /**

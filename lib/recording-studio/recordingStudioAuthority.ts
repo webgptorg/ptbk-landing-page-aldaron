@@ -3,6 +3,7 @@ import { AUTHORITY_STORE, openRecordingDatabase, readRecordingDatabaseAsIs, read
 const OWNER_KEY = 'owner';
 const REVOCATION_KEY_PREFIX = 'revoked:';
 const EXTERNAL_COMMIT_KEY = 'external-commit';
+export type RecordingStudioExternalRecovery = { readonly kind: 'studio-asset'; readonly assetId: string; readonly action: 'create' | 'complete' | 'cancel' };
 
 /** An external commit whose outcome cannot be established must never be raced by a new owner. */
 export class RecordingStudioExternalCommitPendingError extends Error {
@@ -183,7 +184,7 @@ export class RecordingStudioAuthorityKeeper {
      * @param storeNames the stores written to; the store of the authority is always part of the transaction
      * @param write issues every request at once; nothing may be awaited inside it
      */
-    public async runTransaction(storeNames: readonly string[], write: (transaction: IDBTransaction) => void): Promise<void> {
+    public async runTransaction(storeNames: readonly string[], write: (transaction: IDBTransaction) => void, isCommitDeferred = false): Promise<void> {
         const authority = this.requireHeldAuthority();
         const database = await this.openValidatedDatabase(authority);
         const transaction = database.transaction(Array.from(new Set([...storeNames, AUTHORITY_STORE])), 'readwrite');
@@ -193,7 +194,9 @@ export class RecordingStudioAuthorityKeeper {
             requireUnrevokedGeneration(transaction, authority.generation, () => { isRevoked = true; });
             write(transaction);
             // The storage then commits or refuses on its own, even if this tab is suspended before it hears the answer.
-            if (typeof transaction.commit === 'function') transaction.commit();
+            // Conditional reference checks issue writes from IDB success callbacks and use native auto-commit.
+            // They still hold this very same fenced transaction, with no asynchronous work outside its callbacks.
+            if (!isCommitDeferred && typeof transaction.commit === 'function') transaction.commit();
             await completion;
         } catch (error) {
             abortQuietly(transaction);
@@ -215,15 +218,15 @@ export class RecordingStudioAuthorityKeeper {
      *
      * @param commitOutside the commit; it starts only once the storage has confirmed that this tab still owns the studio
      */
-    public async commit<Result>(commitOutside: () => Promise<Result>, signal?: AbortSignal): Promise<Result> {
+    public async commit<Result>(commitOutside: () => Promise<Result>, signal?: AbortSignal, recovery?: RecordingStudioExternalRecovery): Promise<Result> {
         signal?.throwIfAborted();
         const authority = this.requireHeldAuthority();
-        const request = this.externalCommitQueue.then(() => this.commitOutside(authority, commitOutside, signal));
+        const request = this.externalCommitQueue.then(() => this.commitOutside(authority, commitOutside, signal, recovery));
         this.externalCommitQueue = request.then(() => undefined, () => undefined);
         return request;
     }
 
-    private async commitOutside<Result>(authority: RecordingStudioAuthority, commitOutside: () => Promise<Result>, signal?: AbortSignal): Promise<Result> {
+    private async commitOutside<Result>(authority: RecordingStudioAuthority, commitOutside: () => Promise<Result>, signal?: AbortSignal, recovery?: RecordingStudioExternalRecovery): Promise<Result> {
         signal?.throwIfAborted();
         if (this.requireHeldAuthority() !== authority) throw new RecordingStudioAuthorityLostError();
         await this.openValidatedDatabase(authority);
@@ -232,7 +235,7 @@ export class RecordingStudioAuthorityKeeper {
         // native transaction as the generation, so it cannot revoke an effect already admitted by this commit.
         const operationId = crypto.randomUUID();
         await this.runTransaction([], (pending) => {
-            pending.objectStore(AUTHORITY_STORE).add({ generation: authority.generation, operationId }, EXTERNAL_COMMIT_KEY);
+            pending.objectStore(AUTHORITY_STORE).add({ generation: authority.generation, operationId, ...(recovery ? { recovery } : {}) }, EXTERNAL_COMMIT_KEY);
         });
         if (signal?.aborted) {
             // The effect has not begun. Unlike aborting a network/file operation, cancellation here is known safe.
@@ -246,6 +249,25 @@ export class RecordingStudioAuthorityKeeper {
         if (this.requireHeldAuthority() !== authority) throw new RecordingStudioAuthorityLostError();
         await this.runTransaction([], (transaction) => transaction.objectStore(AUTHORITY_STORE).delete(EXTERNAL_COMMIT_KEY));
         return result;
+    }
+
+    /** Only a server-proven immutable Studio asset operation may clear its own uncertainty marker after reload. */
+    public async reconcileAssetCommit(check: (recovery: RecordingStudioExternalRecovery) => Promise<boolean>): Promise<void> {
+        const pending = await readRecordingDatabaseAsIs(async (database) => database.objectStoreNames.contains(AUTHORITY_STORE)
+            ? readRequest(database.transaction(AUTHORITY_STORE).objectStore(AUTHORITY_STORE).get(EXTERNAL_COMMIT_KEY)) : undefined);
+        if (!pending || pending.recovery?.kind !== 'studio-asset' || typeof pending.operationId !== 'string' ||
+            !/^[a-f0-9-]{36}$/.test(pending.recovery.assetId) || !['create', 'complete', 'cancel'].includes(pending.recovery.action)) return;
+        if (!await check(pending.recovery)) return;
+        await readRecordingDatabaseAsIs(async (database) => {
+            const transaction = database.transaction(AUTHORITY_STORE, 'readwrite');
+            const completion = waitForTransaction(transaction);
+            const store = transaction.objectStore(AUTHORITY_STORE);
+            const current = store.get(EXTERNAL_COMMIT_KEY);
+            current.onsuccess = () => {
+                if (current.result?.operationId === pending.operationId && current.result?.generation === pending.generation) store.delete(EXTERNAL_COMMIT_KEY);
+            };
+            await completion;
+        });
     }
 
     /** Asks the storage whether this tab may still write, for work which is about to leave the browser. */

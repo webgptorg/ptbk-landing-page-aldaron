@@ -17,7 +17,7 @@ import { getRecordingWorkspacePath } from '@/lib/recording-studio/recordingStudi
 import { getRecordingMediaParts } from '@/lib/recording-studio/recordingStudioSessionTime';
 import type { RecordingMediaPart } from '@/lib/recording-studio/recordingStudioTypes';
 
-export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration }: {
+export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration, onOpenEditor }: {
     readonly isWorkspace?: boolean;
     readonly recordings: readonly StudioRecording[];
     readonly isDisabled: boolean;
@@ -25,6 +25,7 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
     readonly onBusyChange: (isBusy: boolean) => void;
     readonly onStorageChange: () => Promise<void>;
     readonly onUseSourceConfiguration: (recording: StudioRecording, reportSuccess?: (message: string) => void) => void;
+    readonly onOpenEditor?: (recording: StudioRecording) => void;
 }) {
     const [workingId, setWorkingId] = useState<string | null>(null);
     const [progress, setProgress] = useState('');
@@ -126,6 +127,7 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                     </ul>
                     {recording.trim && <p className="text-sm text-cyan-800">Společný ořez: {formatRecordingDuration(recording.trim.startSeconds)} – {formatRecordingDuration(recording.trim.endSeconds)}</p>}
                     <div className="flex flex-wrap gap-2">
+                        {onOpenEditor && <Button type="button" disabled={isBusy || recording.status === 'recording'} onClick={() => onOpenEditor(recording)}>Otevřít ve střižně</Button>}
                         <Button type="button" variant="outline" disabled={isBusy || recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(recording)}>Použít tuto konfiguraci zdrojů</Button>
                         {!isWorkspace && (isBusy ? <Button type="button" variant="outline" disabled>Náhled a ořez</Button> : <Button variant="outline" asChild><Link href={getRecordingWorkspacePath(recording.id)}>Náhled a ořez</Link></Button>)}
                         <Button type="button" variant="outline" disabled={isBusy || getRecordingByteLength(recording) === 0} onClick={() => download(recording, false)}><Download className="mr-2 h-4 w-4" />Originály ZIP</Button>

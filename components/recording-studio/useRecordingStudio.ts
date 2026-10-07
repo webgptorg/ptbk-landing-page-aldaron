@@ -128,8 +128,8 @@ export function useRecordingStudio() {
     useEffect(() => {
         const current = createStudioRuntime();
         runtime.current = current;
-        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined' || !window.indexedDB || !navigator.locks) {
-            setErrorMessage('Studio potřebuje HTTPS (nebo localhost), snímání médií, MediaRecorder, IndexedDB a zámky prohlížeče. Otevřete ho v podporovaném aktuálním prohlížeči.');
+        if (!window.isSecureContext || !window.indexedDB || !navigator.locks) {
+            setErrorMessage('Studio potřebuje HTTPS (nebo localhost), IndexedDB a zámky prohlížeče. Otevřete ho v podporovaném aktuálním prohlížeči.');
             setPhase('unavailable');
             return;
         }
@@ -214,7 +214,8 @@ export function useRecordingStudio() {
             if (typeof previous === 'object' && previous !== null && 'generation' in previous && 'instanceId' in previous &&
                 typeof previous.generation === 'number' && Number.isSafeInteger(previous.generation) && typeof previous.instanceId === 'string') previousAuthority = { generation: previous.generation, instanceId: previous.instanceId };
         } catch { /* Unavailable preferences. */ }
-        ownershipController.start(isAutoClaimAllowed, previousAuthority);
+        void import('@/lib/recording-studio/studioAssetRecovery').then(({ reconcileStudioAssetCommit }) => reconcileStudioAssetCommit())
+            .catch(() => undefined).then(() => { if (!current.isDisposed) ownershipController.start(isAutoClaimAllowed, previousAuthority); });
         const checkAuthority = () => ownershipController.checkAuthority();
         window.addEventListener('focus', checkAuthority);
         document.addEventListener('visibilitychange', checkAuthority);

@@ -207,5 +207,22 @@ describe('a commit outside the database, held together with the right to write',
         // another tab cannot safely revoke it while that uncertainty survives in storage.
         await expect(RECORDING_STUDIO_AUTHORITY.assertCurrent()).resolves.toBeUndefined();
         await expect(otherTab.claim('other-tab', (await otherTab.read()).generation)).rejects.toThrow('nedokončila zápis');
+        // This test intentionally leaves an unknown external effect; retire its isolated fixture before the next case.
+        await new Promise<void>((resolve, reject) => { const request = indexedDB.deleteDatabase('promptbook-recording-studio'); request.onsuccess = () => resolve(); request.onerror = () => reject(request.error); });
+    });
+
+    it('recovers only a server-proven immutable asset operation and leaves unknown commits fenced', async () => {
+        const assetId = crypto.randomUUID();
+        await expect(RECORDING_STUDIO_AUTHORITY.commit(async () => { throw new Error('Lost completion response'); }, undefined,
+            { kind: 'studio-asset', assetId, action: 'complete' })).rejects.toThrow('Lost completion response');
+        await RECORDING_STUDIO_AUTHORITY.reconcileAssetCommit(async () => false);
+        await expect(otherTab.claim('other-tab', (await otherTab.read()).generation)).rejects.toThrow('nedokončila zápis');
+        const check = vi.fn(async () => true); await RECORDING_STUDIO_AUTHORITY.reconcileAssetCommit(check);
+        expect(check).toHaveBeenCalledWith({ kind: 'studio-asset', assetId, action: 'complete' });
+        expect(await otherTab.claim('other-tab', (await otherTab.read()).generation)).not.toBeNull();
+        await claimTestRecordingStudioAuthority();
+        await expect(RECORDING_STUDIO_AUTHORITY.commit(async () => { throw new Error('Unknown disk write'); })).rejects.toThrow('Unknown disk write');
+        check.mockClear(); await RECORDING_STUDIO_AUTHORITY.reconcileAssetCommit(check); expect(check).not.toHaveBeenCalled();
+        await expect(otherTab.claim('other-tab', (await otherTab.read()).generation)).rejects.toThrow('nedokončila zápis');
     });
 });

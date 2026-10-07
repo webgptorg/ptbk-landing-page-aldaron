@@ -143,4 +143,24 @@ describe('seek index of one recorded container', () => {
         expect(failure).toContain('Část média není úplná.');
         expect(failure).toContain(RECORDING_INDEX_REPAIR_COMMAND);
     });
+
+    it('checks a ten-GiB range source using only its structural head and tail', async () => {
+        const size = 10 * 1024 * 1024 * 1024;
+        const header = new Uint8Array(await createBytesBlob(FILE_TYPE,
+            encodeIsobmffBox('moov', [...movieHeader(4_000), ...encodeIsobmffBox('mvex', [])]),
+            encodeIsobmffBox('moof', [])).arrayBuffer());
+        const reads: { start: number; end: number }[] = [];
+        const report = await readRecordingIndexReport({
+            size,
+            slice: (start, end) => ({ arrayBuffer: async () => {
+                reads.push({ start, end });
+                const bytes = new Uint8Array(end - start);
+                if (start === 0) bytes.set(header);
+                if (end === size) bytes.set(FRAGMENT_INDEX, bytes.length - FRAGMENT_INDEX.length);
+                return bytes.buffer;
+            } }),
+        });
+        expect(report.status).toBe('indexed');
+        expect(reads).toEqual([{ start: 0, end: 256 * 1024 }, { start: size - 64 * 1024, end: size }]);
+    });
 });

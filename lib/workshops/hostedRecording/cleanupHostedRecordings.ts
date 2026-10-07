@@ -5,6 +5,7 @@ import { getHostedRecordingAssets, HOSTED_RECORDING_REVISION_TABLE,
     type HostedRecordingRevisionRow } from './hostedRecordingRequest';
 import { abortAbandonedHostedRecordingUploads, abortHostedRecordingUpload,
     deleteHostedRecordingObjects } from './hostedRecordingStorage';
+import { cleanupStudioAssets } from '@/lib/recording-studio/cleanupStudioAssets';
 
 const ABANDONED_UPLOAD_AGE_MILLISECONDS = 24 * 60 * 60 * 1000;
 const SUPERSEDED_RETENTION_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
@@ -39,5 +40,5 @@ export async function cleanupHostedRecordings(): Promise<number> {
         cleaned += 1;
     }
     await abortAbandonedHostedRecordingUploads(new Date(oldUploadCutoff));
-    return cleaned;
+    return cleaned + await cleanupStudioAssets();
 }

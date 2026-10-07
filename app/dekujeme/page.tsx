@@ -1,5 +1,6 @@
 'use client';
 
+import { HomepageThankYou } from '@/businesses/homepage/HomepageThankYou';
 import { MinimalFooter } from '@/components/minimal-footer';
 import { MinimalHeader } from '@/components/minimal-header';
 import jiriJahn from '@/public/people/jiri-jahn-transparent-square.png';
@@ -14,6 +15,10 @@ function ThankYouContent() {
     const searchParams = useSearchParams();
     const name = searchParams.get('name') || '';
     const email = searchParams.get('email') || '';
+
+    if (searchParams.get('flow') === 'homepage') {
+        return <HomepageThankYou language={searchParams.get('lang') === 'en' ? 'en' : 'cs'} />;
+    }
 
     return (
         <div className="min-h-screen flex flex-col bg-white">

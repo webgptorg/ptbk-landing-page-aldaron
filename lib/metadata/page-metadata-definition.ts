@@ -86,6 +86,9 @@ export type PageMetadataDefinition = {
      */
     readonly isSocialPreviewImageGenerated?: boolean;
 
+    /** Optional authored revision for one generated card, in addition to the shared design version. */
+    readonly socialPreviewImageRevision?: string;
+
     /**
      * Kind of content for the Open Graph protocol, defaults to `website`
      */

@@ -35,23 +35,23 @@ export function PavolFooter({ language }: { language: SupportedHomepageLanguage 
     const CONTENT = PAVOL_PAGE_CONTENT[language];
 
     return (
-        <footer className="border-t border-[var(--pavol-ink)]/10 bg-[var(--pavol-ink)] text-white">
+        <footer className="border-t border-[var(--pavol-border)] bg-[var(--pavol-ink)] text-white">
             <div className={`${PAVOL_CONTAINER_CLASS_NAME} py-16`}>
                 <div className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_repeat(2,minmax(0,0.7fr))]">
                     <div className="max-w-md">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10">
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/10">
                                 <Image
                                     src="/logo/pavol-hejny-ph.svg"
                                     alt="Pavol Hejný"
                                     width={36}
                                     height={36}
-                                    className="h-9 w-9"
+                                    className="h-9 w-9 invert"
                                 />
                             </div>
 
                             <div>
-                                <p className="text-2xl font-semibold">Pavol Hejný</p>
+                                <p className="font-[family-name:var(--font-outfit)] text-2xl font-medium">Pavol Hejný</p>
                                 <p className="mt-1 text-sm text-slate-300">{CONTENT.hero.eyebrow}</p>
                             </div>
                         </div>

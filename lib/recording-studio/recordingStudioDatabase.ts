@@ -3,10 +3,14 @@ const RECORDING_DATABASE_NAME = 'promptbook-recording-studio';
  * Version 3 adds the store which says which tab may write. See `recordingStudioAuthority.ts`.
  * Version 4 retires recording into a selected folder. See `forgetRetiredDirectoryRecordings`.
  */
-const RECORDING_DATABASE_VERSION = 4;
+const RECORDING_DATABASE_VERSION = 5;
 export const RECORDING_STORE = 'recordings';
 export const CHUNK_STORE = 'chunks';
 export const AUTHORITY_STORE = 'authority';
+export const STUDIO_PROJECT_STORE = 'projects';
+export const STUDIO_ASSET_STORE = 'assets';
+export const STUDIO_UPLOAD_STORE = 'assetUploads';
+export const CHUNK_RANGE_INDEX = 'byteRange';
 /** Held the handles of the folders which takes used to be recorded into. Nothing reads or writes it any more. */
 const RETIRED_DIRECTORY_STORE = 'directories';
 
@@ -56,6 +60,27 @@ export function openRecordingDatabase(): Promise<IDBDatabase> {
                 chunks.createIndex('recordingId', 'recordingId');
             }
             if (!database.objectStoreNames.contains(AUTHORITY_STORE)) database.createObjectStore(AUTHORITY_STORE);
+            for (const storeName of [STUDIO_PROJECT_STORE, STUDIO_ASSET_STORE, STUDIO_UPLOAD_STORE]) {
+                if (!database.objectStoreNames.contains(storeName)) database.createObjectStore(storeName, { keyPath: 'id' });
+            }
+            const chunks = request.transaction!.objectStore(CHUNK_STORE);
+            if (!chunks.indexNames.contains(CHUNK_RANGE_INDEX)) {
+                chunks.createIndex(CHUNK_RANGE_INDEX, ['recordingId', 'trackId', 'byteStart']);
+                // Upgrade metadata only. Blob payloads stay in their original records and are never decoded/copied.
+                let previousStorageKey = '';
+                let byteStart = 0;
+                const cursorRequest = chunks.openCursor();
+                cursorRequest.onsuccess = () => {
+                    const cursor = cursorRequest.result;
+                    if (!cursor) return;
+                    const chunk = cursor.value;
+                    const storageKey = JSON.stringify([chunk.recordingId, chunk.trackId]);
+                    if (storageKey !== previousStorageKey) { previousStorageKey = storageKey; byteStart = 0; }
+                    cursor.update({ ...chunk, byteStart });
+                    byteStart += chunk.data.size;
+                    cursor.continue();
+                };
+            }
             // Orphaned descriptions are retired too, even when their old handle store is missing.
             forgetRetiredDirectoryRecordings(database, request.transaction!);
         };

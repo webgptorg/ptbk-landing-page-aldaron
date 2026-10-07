@@ -3,7 +3,7 @@ import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { SocialPreviewImageOptions } from '@/lib/metadata/social-preview-image';
-import { PROMPTBOOK_SOCIAL_PREVIEW_PALETTE } from '@/lib/metadata/social-preview-palette';
+import type { SocialPreviewPaletteSeed } from '@/lib/metadata/social-preview-palette';
 import type { Metadata } from 'next';
 
 /**
@@ -18,32 +18,42 @@ export const HOMEPAGE_PAGE_DEFINITIONS: Readonly<Record<SupportedHomepageLanguag
     cs: {
         path: HOMEPAGE_LANGUAGE_ALTERNATES.cs,
         language: 'cs',
-        title: 'Promptbook - Okamžitý přístup ke všemu, co vaše firma kdy napsala',
-        socialTitle: 'Okamžitý přístup ke všemu, co vaše firma kdy napsala',
+        title: 'Promptbook — Předejte AI agendu, ne každý další úkol',
+        socialTitle: 'Předejte AI agendu. Ne každý další úkol.',
         description:
-            'Nahrajte firemní dokumenty, vytvořte virtuálního zaměstnance a ptejte se normální češtinou. Bez promptů, bez halucinací, 100% GDPR. Česká AI platforma.',
+            'Méně zadávání a připomínání. S Promptbookem proberte AI pro průběžnou péči o web, zákaznickou komunikaci či firemní podklady v dohodnutých mezích.',
         socialDescription:
-            'Nahrajte firemní dokumenty, vytvořte virtuálního zaměstnance a ptejte se normální češtinou. Bez promptů, bez halucinací, 100% GDPR.',
-        socialPreviewImageAlt: 'Promptbook - okamžitý přístup ke všemu, co vaše firma kdy napsala',
-        keywords: ['AI pro firmy', 'firemní dokumenty', 'virtuální zaměstnanec', 'GDPR', 'česká AI', 'Promptbook'],
+            'Vy určujete směr. Práce má navazovat i bez dalšího pobízení. Vyvíjíme a nasazujeme AI systémy pro konkrétní firemní agendy.',
+        socialPreviewImageAlt:
+            'Promptbook — předejte AI agendu. Ilustrace průběžné péče o produkt s kontrolou člověka.',
+        keywords: ['AI pro firmy', 'autonomní agendy', 'péče o aplikace', 'zákaznická komunikace', 'Promptbook'],
         languageAlternates: HOMEPAGE_LANGUAGE_ALTERNATES,
         isSocialPreviewImageGenerated: true,
+        socialPreviewImageRevision: 'agendas-1',
         sitemapPriority: 1,
         sitemapChangeFrequency: 'weekly',
     },
     en: {
         path: HOMEPAGE_LANGUAGE_ALTERNATES.en,
         language: 'en',
-        title: 'Promptbook - Instant access to everything your company has ever written',
-        socialTitle: 'Instant access to everything your company has ever written',
+        title: 'Promptbook — Hand over a responsibility, not another prompt',
+        socialTitle: 'Hand over a responsibility. Not another prompt.',
         description:
-            'Upload your company documents, create a virtual employee, and ask in plain language. No prompting, no hallucinations, 100% GDPR. A Czech AI platform.',
+            'Less assigning and chasing. Explore AI for ongoing application care, customer communication and business documents, with agreed boundaries and human oversight.',
         socialDescription:
-            'Upload your company documents, create a virtual employee, and ask in plain language. No prompting, no hallucinations, 100% GDPR.',
-        socialPreviewImageAlt: 'Promptbook - instant access to everything your company has ever written',
-        keywords: ['AI for business', 'company documents', 'virtual employee', 'GDPR', 'Czech AI', 'Promptbook'],
+            'You set the direction. Work should continue without another reminder. We develop and deploy AI systems for specific business responsibilities.',
+        socialPreviewImageAlt:
+            'Promptbook — hand over a responsibility. Illustration of ongoing product care with human oversight.',
+        keywords: [
+            'AI for business',
+            'ongoing responsibilities',
+            'autonomous agendas',
+            'application care',
+            'Promptbook',
+        ],
         languageAlternates: HOMEPAGE_LANGUAGE_ALTERNATES,
         isSocialPreviewImageGenerated: true,
+        socialPreviewImageRevision: 'agendas-1',
         sitemapPriority: 1,
         sitemapChangeFrequency: 'weekly',
     },
@@ -54,15 +64,22 @@ export const HOMEPAGE_METADATA: Readonly<Record<SupportedHomepageLanguage, Metad
     en: createPageMetadata(HOMEPAGE_PAGE_DEFINITIONS.en),
 };
 
+const HOMEPAGE_SOCIAL_PREVIEW_PALETTE: SocialPreviewPaletteSeed = {
+    backgroundStart: '#102b2a',
+    backgroundEnd: '#244e42',
+    accent: '#b8dec0',
+    accentSoft: '#daf1be',
+};
+
 export const HOMEPAGE_SOCIAL_PREVIEW_OPTIONS: Readonly<Record<SupportedHomepageLanguage, SocialPreviewImageOptions>> = {
     cs: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.cs, {
-        eyebrow: 'Česká AI platforma pro firemní data',
-        artwork: 'knowledge',
-        paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
+        eyebrow: 'Průběžná práce. Váš směr.',
+        artwork: 'responsibility',
+        paletteSeed: HOMEPAGE_SOCIAL_PREVIEW_PALETTE,
     }),
     en: createSocialPreviewOptions(HOMEPAGE_PAGE_DEFINITIONS.en, {
-        eyebrow: 'Czech AI platform for company data',
-        artwork: 'knowledge',
-        paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
+        eyebrow: 'Ongoing work. Your direction.',
+        artwork: 'responsibility',
+        paletteSeed: HOMEPAGE_SOCIAL_PREVIEW_PALETTE,
     }),
 };
