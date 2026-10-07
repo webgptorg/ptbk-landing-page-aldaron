@@ -2,6 +2,20 @@
 
 [✨🛰️] Create an interactive, benefit-led Czech and English homepage for autonomous agendas
 
+- Look at the Whitepaper for more details
+    - Look [at the Whitepaper - Promptbook - Od úkolování AI k autonomním agendám](prompts/2026-10-0000-whitepaper.md)
+    - Look at the pages `/en/whitepaper` and `/cs/whitepaper`
+    - All of theese detail the principles and should not be flooded in the homepage content, which should remain concise and benefit-focused. But you can link to them for visitors who want to dive deeper.
+- The pages should serve landing page for Promptbook
+- Show interactive elements for agents, projects and tasks
+- Show it with multiple agenda examples
+- It should work great on both desktop and mobile devices.
+- Do it in the light version
+- Use 3D elements (agents, project and tasks) to enhance interactivity and visual appeal.
+    - connect them with the scroll to create a dynamic and engaging experience.
+- The page should look like landing page for Apple products
+- Keep in mind the DRY _(don't repeat yourself)_ principle.
+    - Share the things between the English and Czech versions to avoid duplication and also with other pages if possible
 - Replace the main homepage proposition with a business-facing presentation of Promptbook's vision: systems that take on an ongoing agenda, recognize necessary work and keep handling it within an agreed remit, instead of waiting for a person to specify every next task. This is not a knowledge-base landing page, an agent directory, or a renamed virtual employee answering questions about documents.
 - Source: [Promptbook — Od úkolování AI k autonomním agendám, whitepaper 0.1, 2 October 2026](2026-10-0000-whitepaper.md), also supplied by the owner as a PDF. Use chapters 1 and 7 for the shift from individual requests to ongoing work, chapter 11 for concrete scenarios, and chapters 10 and 12 for the limits and distinction between present capabilities and vision. The owner explicitly wants the homepage to explain benefits, not the whitepaper's technical details.
 - **One integrated implementation task:** the homepage proposition, Czech/English content, interactive use-case stories, visual design, navigation, conversion, metadata and verification all belong to this PRD. Deliver them together; do not treat the interactive experience as an optional enhancement, a separate PRD or future work after a static homepage.
