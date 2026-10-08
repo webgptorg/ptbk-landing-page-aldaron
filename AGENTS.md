@@ -654,6 +654,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Database and verification
 
+- On Windows, enable repository-local `core.longpaths` before Coder checks (`git config --local core.longpaths true`).
+  Private check worktrees live below `.git/ptbk-coder/check-views/`; Git otherwise omits dependency paths exceeding
+  260 characters and the ignored-file consistency check fails before any check runs. Keep `.eslintrc.json` marked
+  `root: true` so these nested copies resolve only their own ESLint plugins and rules.
 - Put database changes in `migrations/*.sql`. Startup and
   `npm run migrate-database` run `_initialize.sql`, then migrations in filename
   order, recording immutable filenames and checksums in `public."Migration"`.
