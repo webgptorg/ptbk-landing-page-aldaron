@@ -1,20 +1,24 @@
 {
-  "jest.pathToConfig": "jest.config.ts",
-  "jestrunner.jestCommand": "npm run test-unit --",
-  "files.eol": "\n",
-  "editor.formatOnSave": true,
-  "prettier.configPath": ".prettierrc",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "html.autoClosingTags": false,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  },
-  "[xml]": {
-    "editor.defaultFormatter": "redhat.vscode-xml"
-  },
-  "typescript.tsdk": "node_modules\\typescript\\lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "markdown.copyFiles.destination": {
-    "prompts/*md": "./prompts/screenshots/${documentBaseName}.png"
-  }
+    "jest.pathToConfig": "jest.config.ts",
+    "jestrunner.jestCommand": "npm run test-unit --",
+    "files.eol": "\n",
+    "editor.formatOnSave": true,
+    "prettier.configPath": ".prettierrc",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "html.autoClosingTags": false,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "markdown.copyFiles.destination": {
+        "prompts/*md": "./prompts/screenshots/${documentBaseName}.png"
+    },
+    "search.exclude": {
+        "prompts/traces": true,
+        "tasks/traces": true
+    }
 }
