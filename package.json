@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "npx kill-port 4009 && next dev -p 4009",
+        "prebuild": "node scripts/ensure-sharp-runtime.cjs",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
