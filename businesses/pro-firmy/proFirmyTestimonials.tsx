@@ -18,15 +18,6 @@ const testimonials: ProFirmyTestimonial[] = [
         company: 'Slezská univerzita v Opavě',
         icon: BookOpen,
     },
-    /*
-    Note: Commenting out non-prooven testimonial for now
-    {
-        quote: 'Nováčci se už nemusí bát zeptat. Mají odpovědi okamžitě a přesně podle našich interních směrnic.',
-        author: 'Městská část',
-        company: 'Praha 13',
-        icon: Building2,
-    },
-    */
 ];
 
 const metrics = [

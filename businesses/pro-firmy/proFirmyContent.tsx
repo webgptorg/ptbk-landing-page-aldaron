@@ -395,11 +395,6 @@ export const proFirmyContent = {
                     author: 'IT oddělení',
                     company: 'Slezská univerzita v Opavě',
                 },
-                {
-                    quote: 'Nováčci se už nemusí bát zeptat. Mají odpovědi okamžitě a přesně podle našich interních směrnic.',
-                    author: 'Městská část',
-                    company: 'Praha 13',
-                },
             ],
             metrics: [
                 { value: '1 000 000', label: 'normostran kapacity', suffix: '' },
@@ -767,11 +762,6 @@ export const proFirmyContent = {
                     quote: "Promptbook didn't cut us off from each other. The opposite. We finally have time for the real work we're paid to do.",
                     author: 'IT department',
                     company: 'Silesian University in Opava',
-                },
-                {
-                    quote: "Newcomers aren't afraid to ask anymore. They get answers right away, straight from our internal policies.",
-                    author: 'Municipal district',
-                    company: 'Prague 13',
                 },
             ],
             metrics: [
