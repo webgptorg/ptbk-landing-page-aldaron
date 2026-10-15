@@ -1,26 +1,30 @@
-# Specifikace nových stránek Promptbooku
+# Web Promptbooku
 
-Stav: implementovaná česká revizní verze `/new` a `/new/partnership`, podle podkladů dodaných 15. října 2026. Tato specifikace popisuje celé stránky a kalkulačku, nejen změny proti předchozí verzi. Nejde o specifikaci samotného enginu, připravované aplikace nebo platebního systému.
+Specifikace celého budoucího hlavního webu, připraveného pod `/new`. Zákazník vidí plnohodnotný produktový web, nikoli označenou pracovní verzi. Přepnutí na `/` je samostatné rozhodnutí; tato implementace nemění současnou homepage, jiné značkové weby ani jejich chování.
 
-## Záměr
+## Produkt a publikum
 
-Promptbook poskytuje technologii a komerční licenci pro dlouhodobé firemní AI agendy. Agentura navrhuje a nasazuje konkrétní řešení, zůstává komunikačním místem klienta a zajišťuje běžnou péči. Koncový klient platí licenci přímo Promptbooku a práci zvlášť agentuře. Web má umožnit pochopit produkt, poznat partnerskou příležitost, spočítat úplnou ekonomiku a domluvit první pilot.
+Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní prostředí a kontext; engine a ovládací aplikace jsou oddělené. Primární distribuční partner je agentura, freelancer nebo integrátor: dodává konkrétní řešení a pečuje o klienta. Promptbook je technologický partner. Klient hradí licenci Promptbooku a práci partnerovi.
 
-Primární čtenář je majitel menší agentury, který chce usnadnit vlastní práci a nabídnout novou službu klientům. Nabídka je otevřená také freelancerům a integrátorům. Příběh koncové firmy je argumentem, který partner používá u svých klientů, nikoli slibem, že Promptbook bude jejich koncovým dodavatelem.
+## Rozcestník specifikace
 
-## Úplný rozsah specifikace
+- [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
+- [Partnerství](new-partnership-page.md): vlastní služby, role, 20% podíl a cesta prvního nasazení.
+- [Cena, licence a podpora](new-commercial-offer.md): přesné podmínky Start/Business, plátci, instance, výluky a SLA.
+- [Kalkulačka](new-economics-calculator.md): rychlý a pokročilý pohled, kompletní model, parametry a ekonomika.
+- [Kontakt, sdílení a PDF](new-contact-and-pdf.md): kontaktní systém, e-mailová brána, celý report a ochrana údajů.
+- [Srovnání](new-comparisons.md): férové vymezení alternativ, zdroje a aktualizace.
+- [Společná kvalita](new-pages-quality.md): navigace, přístupnost, metadata, testy a podmínky přesunu.
+- [Zdroje a rozhodnutí](new-pages-sources.md): podklady, autorita posledního zadání, příběh a hranice veřejných tvrzení.
 
-1. [Zdroje, rozhodnutí a otevřené body](new-pages-sources.md): původ požadavků, rozpory, pořadí autority, nepodložené a budoucí sliby.
-2. [Produktová stránka](new-product-page.md): cílové publikum, sdělení, pořadí bloků, obsah a cesty návštěvníka.
-3. [Partnerská stránka](new-partnership-page.md): role, nabídka partnerství, platby, výnosy, implementace a doporučování.
-4. [Obchodní nabídka a podpora](new-commercial-offer.md): oba plány, instance, výluky, veřejná licence a SLA.
-5. [Kalkulačka ekonomiky](new-economics-calculator.md): režimy, všechny vstupy, jednotky, vzorce, výsledky a okrajové stavy.
-6. [Společné chování a ověření](new-pages-quality.md): navigace, mobil, přístupnost, metadata, soukromí, export, testy a akceptace.
+## Rozsah cest
 
-Dokumenty se čtou dohromady. Obchodní část má přednost před staršími cenovými návrhy a marketingovým textem. Implementace nesmí přidávat nové smluvní přísliby tam, kde specifikace uvádí dohodu nebo otevřený bod.
+`/new`, `/new/partnership`, `/new/kalkulacka`, `/new/cenik`, `/new/agendy`, `/new/agendy/{email|documents|social|video|coding}`, `/new/srovnani`, `/new/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip}`, `/new/o-nas`, `/new/bezpecnost`, `/new/faq`, `/new/soukromi`, `/new/podminky`.
 
-## Hranice vydání
+Všechny interní marketingové odkazy zůstávají pod `/new`. GitHub, zdroje srovnání, obchodní rejstřík a sociální profily jsou záměrně externí. Právní dokumenty používají existující společný obsah a zachovávají jeho právní odkazy. Údaje o firmě a fotografie pocházejí ze stávajícího webu, nevytvářejí se nové identity.
 
-Aktualizují se pouze existující revizní stránky a jejich sdílené součásti. `/cs`, `/en`, `/cs/pro-firmy`, ostatní značkové weby, jejich navigace a obchodní nabídky se tímto vydáním nemění. Stránky zůstávají veřejně dostupné, ale `noindex`, mimo sitemapu. Vydání nemění upstream licenci, zákaznická data, účty, smlouvy, Stripe, provoz agentů ani partnerům neaktivuje nárok na výplatu.
+## Závazné redakční principy
 
-Česká revizní verze je záměrně zachována. Angličtina jako budoucí výchozí jazyk celé prezentace, další jazyky, katalog, srovnávací stránky a registrace do aplikace jsou oddělené pokračování, nikoli funkce skrytě předstírané těmito dvěma stránkami.
+Každý blok má jeden účel. Bez prázdných štítků, opakování téže výhody v mnoha místech a technických vysvětlivek v hero. `book` se nepřekládá a není vstupním požadavkem ani tématem zákaznického webu. Uživatel předává práci a pravidla, ne interní souborový formát.
+
+Navenek není rozlišení „dnes / připravujeme / vize“, termín dokončení aplikace ani odkaz „současný web“. Jde o cílové znění pro uvedení kompletního produktu. Interní kontrola připravenosti a technický `noindex` tím nezanikají. Smluvní podmínky se tím nemění.

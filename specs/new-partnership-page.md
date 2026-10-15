@@ -1,60 +1,32 @@
-# Partnerská stránka /new/partnership
+# Partnerství `/new/partnership`
 
-## Publikum a nabídka
+## Smysl
 
-Hlavním čtenářem je majitel menší agentury. Nabídka je otevřená freelancerům, agenturám i integrátorům. Agentura může být netechnická v běžné práci, ale dnešní nasazení vyžaduje technické kompetence nebo technického spolupracovníka; připravovaná aplikace tuto realitu nezakrývá.
+Pro majitele agentur, freelancery a integrátory, kteří chtějí nasazovat firemní agendy. Agentura dodává konkrétní službu, komunikuje s klientem a zajišťuje běžnou péči; Promptbook dodává technologii a sjednanou produktovou podporu. Není to jen affiliate odkaz ani prodej neomezeného servisu od Promptbooku.
 
-Sdělení: **„Dřív jste prodávali hodiny. Teď nabídněte AI služby.“** Opěrná věta: **„Vaši klienti. Vaše služby. Naše technologie.“** Nejde pouze o affiliate odkaz. Partner dodává řešení a komunikuje s klientem; Promptbook je technologický partner, ne koncová servisní agentura.
+Stránka není druhá kopie celého úvodu. Příklady agend, bezpečnost a podrobný ceník mají vlastní odkazy v navigaci. Partnerství se prezentuje jako hotová nabídka, bez označení připravovaného programu, falešného přihlášení nebo automatického uzavření smlouvy.
 
-## Cesta návštěvníka
+## Pořadí
 
-Partner pochopí přínos, uvidí přesný ceník technologie a pravidla podílu, spočítá svou ekonomiku, potom e-mailem domluví první pilot a partnerskou dohodu. Začít lze vlastní agendou a následně prvním klientem. Web neslibuje neexistující partnerský dashboard nebo samoobslužnou registraci do aplikace.
+1. Hero **„Vaši klienti. Vaše služby. Naše technologie.“** Popis dlouhodobých AI agend a rozdělení rolí. Akce **Stát se partnerem** otevře kontaktní formulář, **Spočítat můj přínos** přejde na rychlou kalkulačku na téže stránce.
+2. Tři konkrétní přínosy: klientský vztah a vlastní cena služeb; technologický základ Promptbooku; průběžné příjmy ze servisu a licenčního podílu.
+3. **20 % pro vás. Bez partnerského paušálu.** Klient platí licenci Promptbooku, Promptbook vyplácí partnerovi podíl. Číselný příklad Business 100 USD → 20 USD bez DPH a vratek. Vlastní služby jsou další fakturací partnera.
+4. Tři kroky: vybrat proces, nastavit provoz/přístupy/pravidla a dlouhodobě dodávat službu. Začít lze na vlastní agendě a poté u klienta.
+5. Rychlá kalkulačka ve výchozím partnerském tabu. Primární výsledek je částka, která může partnerovi zbýt po zadaných nákladech za uvedené období; ne nepopsané číslo ani garantovaný zisk.
+6. Pro koho partnerství je a není. Velikost týmu nerozhoduje, schopnost zajistit nasazení a péči ano. Není to bezpracná provize.
+7. Krátké rozbalitelné odpovědi o podílu, licencích a samotném doporučování.
+8. Stručná návaznost na přesný ceník a podporu, závěrečný kontakt a společná patička.
 
-Hlavní akce hero: **Domluvit partnerství**, e-mail jiri@ptbk.io. Sekundární: **Spočítat partnerský přínos**, kotva `#kalkulacka`. Produktová stránka je dostupná v horní navigaci a patičce. Stejná horní lišta a oznámení připravované aplikace jako na `/new`.
+## Podíl a platby
 
-## Pořadí bloků
+Přesné podmínky podle [obchodní nabídky](new-commercial-offer.md): 20 % ze skutečně uhrazených licencí bez DPH po vratkách. Start i Business, měsíční vyúčtování po dobu placeného užívání a trvání partnerské dohody. Žádný automatický 12měsíční konec, bezpodmínečné doživotní oprávnění nebo jiné procento podle slideru. Přiřazení klienta, splatnost a ukončení nároku určí dohoda.
 
-1. Horní nabídka pilotu, navigace, partnerské hero a označená modelová ilustrace.
-2. Stručné společné produktové principy.
-3. Partnerský model, tři role, platby, podíl a doporučování.
-4. Jak funguje Promptbook ve třech krocích.
-5. Pět firemních scénářů s rozbalitelným detailem.
-6. Kontrola, vlastní kontext, datové hranice a Dnes / připravujeme / vize.
-7. Stejný ceník Start/Business a vysvětlení veřejné licence.
-8. Kalkulačka, při prvním načtení **Nasazuji klientům**.
-9. Servisní SLA, partnerské a společné FAQ.
-10. Zdroje a zakladatelé, výzva ke spolupráci, společná patička.
+Žádný partnerský paušál a žádné povinné nákupy balíků licencí. Vlastní produkční používání partnera není z tohoto důvodu bezplatné. Klient platí licenci přímo Promptbooku. Provoz a AI platí klient nebo partner podle dohody; model kalkulačky obě cesty rozlišuje. Implementaci a servis určuje partner sám.
 
-Sdílené bloky mají stejný význam jako na [produktové stránce](new-product-page.md), nikoli druhý nezávislý ceník nebo jinou interpretaci dostupnosti.
+## Pouhé doporučení
 
-## Partnerský model
+Tvůrce nebo návštěvník, který chce pouze doporučovat, má vlastní kontaktní akci. Ta neaktivuje neexistující trackingový účet. Konkrétní spolupráce se domluví; implementační 20% podmínky se automaticky nerozšiřují na všechny tvůrce, vlastní nákupy nebo víceúrovňové doporučení. Žádné vymyšlené cookie okno nebo výplatní minimum.
 
-### Role
+## Vztah a kontakty
 
-**Partner:** vybírá agendu, navrhuje řešení, instaluje, integruje, školí a zajišťuje běžnou péči. Samostatně stanovuje cenu své práce a servisu. Zůstává komunikačním místem klienta.
-
-**Promptbook:** dodává software a licenci, u Business první posouzení problémů platformy v definovaném SLA. Nenabízí spravovaný hosting, automatickou instalaci aktualizací nebo neomezené konzultace.
-
-**Klient:** má samostatné prostředí a platí licenci přímo Promptbooku, práci agentuře. AI a provoz platí sám nebo podle dohody agentura/provozní partner. Vlastnictví, přístupy, předání a konfigurace se řeší při implementaci, ne nevyřčeným příslibem aplikace.
-
-### Ekonomika spolupráce
-
-Zvýraznit, že Promptbook platí podíl partnerovi, nikoli naopak. Žádný partnerský paušál nebo povinný nákup zásoby licencí. Vlastní produkční používání partnera není z tohoto důvodu zdarma.
-
-Podíl: 20 % ze skutečně uhrazených licenčních plateb přivedených klientů bez DPH po vratkách, Start i Business. Vyúčtování měsíční po dobu placeného užívání a trvání dohody. Ostatní plnění jsou mimo základ. Detaily přiřazení, splatnosti a zániku nároku upraví dohoda. Číselný příklad 100 → 20 USD a 19 → 3,80 USD. Nenásobit tržby partnera celou cenou licence.
-
-Hlavní obchodní prostor je vlastní implementace a dlouhodobý servis; podíl z licence je další složka. Žádná garantovaná návratnost, pasivní příjem bez práce nebo slib, že není potřeba klienta dále obsluhovat. Kalkulačka musí ukázat i zápornou marži/příspěvek po nákladech.
-
-### Doporučování a tvůrci
-
-Samostatný rozbalitelný blok pro návštěvníka, který pouze doporučuje obsahem. Strategie tuto cestu navrhuje, ale samoobslužný affiliate program je v přípravě. Kontakt vede k individuální domluvě, nikoli k aktivaci neexistujícího odkazu.
-
-20% nabídka implementačním partnerům se bez dohody automaticky neprohlašuje za schválené podmínky každého tvůrce. Nepublikovat vymyšlené trackingové okno, provize za přivedení další agentury, nárok za vlastní nákup nebo instrukce k neoznačené reklamě.
-
-## FAQ navíc oproti produktové stránce
-
-Musí agentura kupovat balík licencí? Ne; odlišit vlastní produkční nasazení. Jak dlouho dostává podíl? Po dobu plateb a dohody, nikoli pevně 12 měsíců nebo bezpodmínečně navždy. Je program i pro freelancery? Ano, s reálnou schopností zajistit nasazení a péči.
-
-## Závěrečná výzva
-
-„Začněte jedním klientem.“ Pozvat k popisu klientů a první agendy, společně domluvit pilot, rozdělení péče a partnerské podmínky. Na dotazy a SLA používat jednotný kontakt Jiří Jahn / jiri@ptbk.io. Nezakládat uživatelům partnerství, licence, platby ani nasazení pouhou návštěvou nebo manipulací kalkulačky.
+CTA píše do stejného kontaktního systému jako zbytek webu a zaznamená téma partnerství. Jiří řeší obchod, Pavol technologii; oba zůstávají rovnocenně prezentovaní na hlavní a příběhové stránce. Jiřího konkrétní adresa pro smluvní SLA se nemění, ale není jedinou tváří webu.

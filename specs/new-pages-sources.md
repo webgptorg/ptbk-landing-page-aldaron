@@ -1,43 +1,41 @@
-# Zdroje, rozhodnutí a otevřené body
+# Zdroje a rozhodnutí
 
-## Dodané podklady
+## Autorita zadání
 
-**L — „Promptbook - licence pro firemní AI agenty.pdf“**, dokument „Promptbook — licence pro firemní AI agenty“, finální návrh nabídky pro jednání, verze 1.0, 15. října 2026, 3 strany. S. 1: definice platformy, platby, Start/Business a instance. S. 2: náklady mimo cenu, partnerství a servisní SLA. S. 2–3: veřejný kód, produkční práva, individuální rozsah a kontakt. Dokument sám říká, že nenahrazuje licenční smlouvu ani partnerskou dohodu.
+**L:** „Promptbook - licence pro firemní AI agenty.pdf“, verze 1.0, 15. října 2026, 3 strany. S. 1 definuje plány, platby a klientské prostředí. S. 2 provozní výluky, podíl a servisní SLA. S. 2–3 veřejnou licenci a individuální rozsah. Je to návrh nabídky pro jednání, ne nahrazení smlouvy.
 
-**W — „Web ptbk plus hlavní myšlenka ptbk.pdf“**, 10 stran. Body 1–4: důvod existence, změna práce, „babysitting AI“, mise a vize. Bod 5: agentury jako hlavní publikum, firmy jako klienti agentur, tvůrci a technická linie. Body 7–8: dnešní produkt, aplikace teprve v přípravě, neslibované funkce a odlišení. Body 9–11: rozpracované obchodní hypotézy, důkazy a vstupní cesta. S. 9–10: navržená struktura webu.
+**W:** „Web ptbk plus hlavní myšlenka ptbk.pdf“, 10 stran. Positioning, opakovaná firemní práce, agentury jako primární cesta, příběh změny od úkolování k agendám. Obsahuje také rozpracované cenové hypotézy a historický stav přípravy aplikace.
 
-**C — zadání v této konverzaci:** dvě propojené stránky na `/new` a `/new/partnership`, úplný rozpad nákladů, kalkulačka vlastní agendy a partnerských nasazení, původní čtyři scénáře a přímé commitování do `main`. Nové PDF upřesňují a mění dřívější obchodní hypotézy.
+**C:** Celá konverzace, zejména poslední explicitní revize: jednoduchý úvod a více podstránek, žádné zbytečné štítky, žádné psaní knihy/book jako podmínka, pět interaktivních ukázek, silný E2E a datový argument, hotový cílový web bez roadmapových odznaků, rychlá a pokročilá kalkulačka s GET, skutečný PDF export za e-mail, existující kontaktní systém, oba rovnocenní zakladatelé, právní patička a všechny nové cesty pod `/new`.
 
-Originální PDF se touto změnou nekopírují do veřejného repozitáře ani na web. Uvádíme jejich názvy, verzi a lokátory kvůli dohledatelnosti. Tato implementace neprovádí externí průzkum konkurence, právní revizi ani audit bezpečnostní architektury.
+**R:** Stávající repozitář: kontaktní helper a `/api/waitlist`, Contact, společné právní dokumenty, organizační konstanty, skutečné fotografie/jména obou zakladatelů a licencované PDF fonty.
 
-## Výslovná rozhodnutí při rozporech
+**E:** Externí primární zdroje konkrétních alternativ, kontrolované 15. října 2026; jsou uvedené v [srovnáních](new-comparisons.md) a na stránkách. Jde o nově vyžádaný výzkum, ne o ověření všech tvrzení v původních PDF.
 
-| Téma | Rozpor nebo neúplnost | Rozhodnutí tohoto vydání |
-| --- | --- | --- |
-| Co se prodává | C: placená aplikace, W: různé úvahy o spotřebě, L: software a komerční licence | L, s. 1: licence klientské instance, nikoli pouze hezké UI |
-| Cena vstupu | C: Starter 10 USD/měsíc, W: bezplatný trial nebo kredit | L, s. 1: Start 19 USD na 30 dní, jednorázově, jednou pro koncového klienta |
-| Produkční tarif | W, s. 5: 5–10 tisíc Kč, čeká na ceník; C: orientační Business | L, s. 1: 100 USD měsíčně za instanci bez ročního závazku |
-| Fakturace | W, bod 9: agenturní předplatné, spotřeba a otevřená přímá fakturace | L, s. 1–2: klient platí licenci Promptbooku, práci agentuře; agentura neplatí partnerský paušál |
-| Podíl partnera | C: sazba experimentální a 12 měsíců; W: otevřené | L, s. 2: 20 % z uhrazených licencí bez DPH po vratkách, Start i Business, po dobu placeného užívání a trvání dohody |
-| Jednotka | C: agenti, agenda nebo server | L, s. 1: samostatné klientské prostředí; více prostředí znamená více licencí i na jednom stroji |
-| Veřejný engine | C/W: zkratka „open source zdarma“ | L, s. 2–3: neprodukční použití podle veřejné licence, produkční licence podle práv konkrétní verze; žádná změna již udělených práv |
-| Dostupnost aplikace | W, s. 1 ji popisuje jako řešení obsluhy, s. 6 ji řadí do budoucnosti | Konkrétní stav produktu z bodu 7: dnešní terminál, aplikace MangoWeb v přípravě, orientačně kolem 20. 11. 2026 |
-| CTA | W: registrovat zdarma a kredit na tokeny | Dokud není ověřená registrace a produkt připravený, poctivá e-mailová domluva pilotu za 19 USD; žádná fiktivní registrace nebo kredit |
-| Podpora | C: širší garance a enterprise, W: „jede bez hlídání“ | L: první věcná reakce do 16 pracovních hodin u Business, žádné 24/7 SLA, provoz ani garance opravy |
-| Data | W: všechna data zůstávají ve firmě; zároveň vyžaduje ověření toku aplikace | Oddělit uložení kontextu od odesílaných vstupů externím modelům a nástrojům; stav šifrování připravované aplikace označit jako návrh k ověření |
-| Autonomie | W: „jednou nastavíš a jede“ | Vyjádřit méně opakovaného úkolování; nevydávat za bezchybnost, neomezenou samostatnost nebo konec péče partnera |
-| Jazyky | W: angličtina jako základ | Současný rozsah C jsou dvě existující české revizní stránky; mezinárodní přepnutí celé prezentace je výslovně odložené |
+Originální PDF se nevkládají do veřejného repozitáře nebo downloadů. Zachovávají se názvy a lokátory pro dohledatelnost.
 
-L má pro konkrétní nabídku přednost: W sám označuje ceník a obchodní model jako otevřený. W řídí cílovku, argumentaci a kompozici, nikoli přepis přesných cen či SLA.
+## Vyřešené rozpory
 
-## Tvrzení, která se zatím nezveřejňují jako důkaz
+| Téma | Rozhodnutí |
+| --- | --- |
+| Cena a podíl | L má přednost před starším Starter 10 USD, volitelnými provizemi nebo trialovými hypotézami W. Start 19 USD / 30 dní, Business 100 USD / prostředí/měsíc, pevně 20 %. |
+| Předmět licence | Software a produkční klientské prostředí podle L; nepřepisuje se zpět na pouhý poplatek za UI. |
+| Open source / zdarma | Veřejná licence konkrétní verze a již udělená práva; veřejný kód se nevydává za neomezené produkční oprávnění. |
+| Dostupnost na webu | Poslední C výslovně chce cílový hotový web. Odstraňuje veřejné Dnes/připravujeme/vize a termín MangoWebu. Skutečná připravenost je interní podmínka budoucího přepnutí, nikoli nově potvrzené dokončení produktu. |
+| Book / kniha | Poslední C ruší metaforu „napište knihu“. Book se nepřekládá a veřejný web jej vůbec nevyžaduje. Konfiguraci může vytvořit systém nebo partner. |
+| CTA | C ruší mailto. Používá se existující kontaktní endpoint a evidence R; žádná falešná objednávka či registrace. |
+| Data a E2E | C výslovně potvrzuje cílovou architekturu a chce hlavní bezpečnostní sdělení. Popsat ovládací kanál přesně, nezamlčet externí modelové vstupy a nevydávat webový úkol za audit. |
+| Kontaktní osoba | L určuje Jiřího pro SLA. C určuje oba rovnocenné spoluzakladatele v prezentaci: Pavol technologie, Jiří obchod. Nejde o změnu adresy eskalačního SLA. |
+| Firma | Nepřesný hlasový název se nenahrazuje novou identitou. Právní údaje jsou z existujícího R: AI Web s.r.o. |
+| Srovnání | C nově žádá výzkum. Nepravdivé zkratky W o permanentním hlídání konkurentů se nepřebírají; používají se skutečné schopnosti z E. |
+| Úvod vs. podrobnosti | C schvaluje samostatné podstránky. Smluvní a technické vysvětlení patří do ceníku/FAQ/bezpečnosti, nikoli do každé karty homepage. |
 
-- McKinsey 62 % / 23 %, tržní srovnání a ceny konkurence: podklad je zmiňuje, ale žádá ověření; tento úkol není externí průzkum. Nepublikovat je jako ověřené aktuální skutečnosti.
-- „Neonmedia běží na Promptbooku“, výsledky pilotů, reference a úvodní video: bez dodaných schválených výstupů nezobrazovat logo jako důkaz, smyšlená čísla, reference ani falešný přehrávač.
-- Schopnost agenta samostatně hledat práci, ověřování mimo kód a ranní souhrn: W, s. 7 výslovně říká neslibovat. Samostatné hledání práce smí být pouze označená vize.
-- Vlastní příběh zakladatele, „co nikdy neuděláme“ a unikátnost kombinace výhod: zůstávají otevřené, bez vymyšlené autobiografie nebo tvrzení „jediní na trhu“.
-- Pojmenované služby nejsou seznam ověřených hotových konektorů. Přístup a konfigurace se ověřují pro konkrétní nasazení.
+## Příběh a důkazy
 
-## Co chybí pro další vydání
+Příběh popisuje pouze vlastníkem uvedený vývoj od webových chatbotů k jednotlivým úkolům a dlouhodobým agendám, použití coding harnesses, vlastní soubory a partnerskou distribuci. Bez nových letopočtů, osobních příhod, citací, jmen klientů nebo smyšlených metrik.
 
-Ověřená URL a stav aplikace, konečná pravidla párování a datového toku, podporované verze/konfigurace, schválené objednávkové a partnerské podmínky, přiřazení klientů a splatnost podílů, podmínky pro samotné tvůrce, schválené důkazy z pilotů a videa. Tyto mezery neblokují revizní stránky, ale blokují příslušné silnější sliby, automatickou registraci a automatické platby.
+Žádné tvrzení „Neonmedia běží na Promptbooku“ bez schváleného pilotu, žádné převzaté procentní tržní statistiky a žádné falešné reference/videa. Ilustrace agend používají syntetické podklady a jsou označené jako ukázka. Výsledky kalkulací vycházejí z odhadů, ne z měřených klientských úspor.
+
+## Rozsah této změny
+
+Implementuje web, formuláře, matematiku, PDF a specifikace. Nemění engine, licenční soubor upstream, obchodní dohody, podporované runtime, platby, partnerskou atribuci nebo kryptografický protokol. Konkrétní objednávky a provozní připravenost zůstávají součástí dodání a schválení vlastníkem.

@@ -1,7 +1,11 @@
-# New landing-page feature
+# Promptbook launch website
 
-Read `specs/_main.md` and its linked specifications before changing `/new`, `/new/partnership` or the calculator. These describe the complete current behavior, not merely pending work. Keep them in sync with the pages.
+Read `../../specs/_main.md` and the relevant linked specification before edits. Keep every new route and internal marketing link under `/new`; do not alter the old homepage or other businesses as a side effect.
 
-Use `commercialTerms.ts` as the shared source of proposal constants and clauses. Never restore the old $10 Starter, app-only licensing, 10-agent limit, 12-month commission cap, free hosted trial, or a currently available MangoWeb app claim. Do not alter upstream licence files or existing customer rights.
+The latest owner feedback replaces the former roadmap badges and book-writing metaphor. No public “today/planned”, MangoWeb deadline, “current website”, or instruction to write a book. Do not translate `book`; it is not a customer prerequisite. Both Jiří Jahn (business) and Pavol Hejný (technology) are equal cofounders.
 
-Every estimate must remain distinguishable from commercial terms. Start is a one-off 30-day pilot, not MRR; Business is per client environment, not physical host. Direct client licence payments are not agency turnover. Preserve input validation, negative outcomes, local exports, documented data boundaries and the targeted tests.
+Use `commercialTerms.ts` for prices, share and support. The partner share is fixed at 20%, never a form/GET override. Preserve full-client economics and Start's one-period rules. Share all known calculator assumptions without identity. Use the existing contact collection, not mailto marketing CTAs or a new database. PDF download is gated by accepted email capture and has real error/retry behavior.
+
+Comparisons need primary sources and a review date. Do not deny competitors' automation capabilities to make the positioning stronger. Story, screenshots and customer evidence must not be invented. Security wording separates E2E app communication from external model/tool data. Launch-ready copy does not establish a completed audit or authorize moving the routes to `/`.
+
+Keep specs, focused tests and public behavior aligned. Never submit test leads to the production contact database.

@@ -2,28 +2,28 @@ import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import { PROMPTBOOK_SOCIAL_PREVIEW_PALETTE } from '@/lib/metadata/social-preview-palette';
+import { sitePath } from './siteConfig';
 
 export const NEW_PAGE_DEFINITION: PageMetadataDefinition = {
-    path: '/new', language: 'cs', title: 'Promptbook — dřív jste AI úkolovali, teď pracuje pro vás',
-    description: 'AI agendy pro firmy a agentury. Start za 19 USD na 30 dní, Business za 100 USD měsíčně za instanci. Spočítejte celý provoz i přínos.',
-    socialTitle: 'Dřív jste AI úkolovali. Teď pracuje pro vás.',
-    socialPreviewImageAlt: 'Promptbook — AI agendy, vlastní firemní kontext a partnerské nasazení',
-    isSocialPreviewImageGenerated: true,
-    // These Czech review routes do not replace the indexed homepages or constitute a checkout.
-    isIndexed: false,
+    path:sitePath(),language:'cs',title:'Promptbook — Dřív jste AI úkolovali. Teď pracuje pro vás.',
+    description:'AI agendy pro e-maily, doklady, obsah a údržbu webu. Vlastní data, end-to-end šifrované ovládání a nasazení s partnerem.',
+    socialTitle:'Dřív jste AI úkolovali. Teď pracuje pro vás.',
+    socialPreviewImageAlt:'Promptbook — firemní agendy pod vaší kontrolou',
+    isSocialPreviewImageGenerated:true,isIndexed:false,
 };
 export const PARTNERSHIP_PAGE_DEFINITION: PageMetadataDefinition = {
-    ...NEW_PAGE_DEFINITION, path: '/new/partnership',
-    title: 'Promptbook pro agentury — implementace, servis a partnerský podíl',
-    socialTitle: 'Vaši klienti. Vaše služby. Naše technologie.',
-    description: 'Nasaďte firmám AI agendy. Klient platí licenci Promptbooku a práci vám. Bez partnerského paušálu, s podílem 20 % z uhrazených licencí.',
-    socialPreviewImageAlt: 'Promptbook pro agentury a freelancery — technologie a partnerská ekonomika',
+    ...NEW_PAGE_DEFINITION,path:sitePath('partnership'),title:'Partnerství s Promptbookem — vaše služby, naše technologie',
+    socialTitle:'Vaši klienti. Vaše služby. Naše technologie.',
+    description:'Nabídněte klientům dlouhodobé AI agendy. Vlastní implementace a servis, 20% partnerský podíl a technologie Promptbooku.',
+    socialPreviewImageAlt:'Partnerství s Promptbookem',
 };
 export const NEW_METADATA = createPageMetadata(NEW_PAGE_DEFINITION);
 export const PARTNERSHIP_METADATA = createPageMetadata(PARTNERSHIP_PAGE_DEFINITION);
-export const NEW_PREVIEW = createSocialPreviewOptions(NEW_PAGE_DEFINITION, {
-    eyebrow: 'AI agendy pro vás i vaše klienty', artwork: 'knowledge', paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
-});
-export const PARTNERSHIP_PREVIEW = createSocialPreviewOptions(PARTNERSHIP_PAGE_DEFINITION, {
-    eyebrow: 'Pro agentury a integrátory', artwork: 'knowledge', paletteSeed: PROMPTBOOK_SOCIAL_PREVIEW_PALETTE,
-});
+export const NEW_PREVIEW = createSocialPreviewOptions(NEW_PAGE_DEFINITION,{eyebrow:'Promptbook',artwork:'knowledge',paletteSeed:PROMPTBOOK_SOCIAL_PREVIEW_PALETTE});
+export const PARTNERSHIP_PREVIEW = createSocialPreviewOptions(PARTNERSHIP_PAGE_DEFINITION,{eyebrow:'Partnerství',artwork:'knowledge',paletteSeed:PROMPTBOOK_SOCIAL_PREVIEW_PALETTE});
+
+/** Future root website lives only under /new until an explicit cutover. Query values never enter metadata. */
+export function newPageMetadata(path:string,title:string,description:string) {
+    const metadata=createPageMetadata({ ...NEW_PAGE_DEFINITION,path:sitePath(path),title:`${title} | Promptbook`,socialTitle:title,description,isSocialPreviewImageGenerated:false });
+    return { ...metadata,openGraph:{...metadata.openGraph,images:[{url:'https://ptbk.io/new/opengraph-image',width:1200,height:630,alt:'Promptbook'}]},twitter:{...metadata.twitter,images:['https://ptbk.io/new/opengraph-image']} };
+}

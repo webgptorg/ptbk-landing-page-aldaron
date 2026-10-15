@@ -1,49 +1,54 @@
-# Společné chování a akceptace
+# Společná kvalita a akceptace webu
 
-## Rozsah a navigace
+## Izolovaný rozsah
 
-Existují dvě přímé veřejné cesty `/new` a `/new/partnership`, včetně obvyklé normalizace koncového lomítka. Produkt a partnerství jsou propojené horní navigací a patičkou; produkt navíc partnerskou výzvou v obsahu. Žádné nové vlastní domény, přesměrování hlavní homepage nebo zásahy do ostatních značkových domén.
+Veškerý nový web žije pod `/new`. Změny se týkají jeho rout, vlastní obchodní prezentace, kalkulačky a příslušných specifikací/testů. Stávající homepage, značkové domény, administrace a jiné formuláře se nemění. Sdílené kontaktní a právní mechanismy se používají beze změny kontraktu.
 
-Kotvy: obsah, agenti, jak to funguje, kontrola, dostupnost, ceník, kalkulačka, podpora a zdroje; partnerská stránka navíc partnerství. Každý odkaz směřuje na existující kotvu, stávající veřejnou stránku, upstream repozitář nebo e-mailovou domluvu. Nedostupná aplikace nemá aktivní registrační tlačítko.
+Prefix cest má jeden zdroj, aby budoucí přesun nebyl ruční hledání desítek odkazů. Přesun rout, canonical URL a změna indexace na `/` je samostatná operace. Do té doby žádné přesměrování původní homepage. Neznámý detail agendy nebo srovnání vrátí 404 s cestou zpět do nového webu.
 
-## Vzhled a přístupnost
+## Vzhled a navigace
 
-Zachovat stávající světlý vizuální jazyk revizních stránek, logo Promptbooku, typografii, čitelné rozestupy a rozlišení textu, ilustrací, cen a výsledků. Ceník má dvě hlavní karty, individuální rozsah a veřejný kód jsou pod ním. Stejný vizuální základ pro obě publika.
+Jednotný světlý vizuální jazyk, tmavý text, zelené akcenty, velké čitelné nadpisy, dostatek prostoru. Žádné prázdné marketingové štítky, přehnané poznámky pod každou kartou nebo dlouhý technický manuál v úvodu. Vlastní formát book se na marketingových stránkách nevysvětluje ani nevyžaduje.
 
-Responzivita od šířky 375 px; sloupce se na mobilu skládají bez horizontálního přetékání. Navigace i oba taby musí být dosažitelné na mobilu. Dlouhá jména, pracovní podmínky a částky nesmějí překrývat ovládání.
+V horní navigaci logo/úvod, agendy, partnerství, ceník, srovnání, příběh a kontaktní akce. Mobil má přístupné rozbalitelné menu, ne zcela zmizelou navigaci. Interní marketingové odkazy zůstávají pod `/new`. Žádný odkaz „současný web“ a žádné veřejné označení „dnes / připravujeme / vize“.
 
-Jeden hlavní nadpis, logická hierarchie sekcí, označené navigace a odkaz pro přeskočení na obsah. Číselná a výběrová pole mají label, hint je programově spojený s polem. Taby mají role, stav výběru a vztah k panelu; šipky přepínají mezi nimi, Home/End volí první/poslední a přesouvají fokus. Rozbalení detailů a FAQ musí fungovat klávesnicí. Stav exportu a hlavní přepočítané výsledky jsou přístupné čtečkám. Ilustrace není skutečný stav klienta. Pohyb není podmínkou čitelnosti, respektovat redukovaný pohyb.
+Kalkulačka je samostatná výrazná karta s velkým zaoblením a stínem, ne další nerozlišený blok. Výsledná částka tvoří větu s benefitem a obdobím. Pokročilé parametry netvoří vstupní formulář homepage.
 
-## Metadata a veřejné sliby
+## Zakladatelé a firma
 
-Obě stránky mají vlastní titulek, popis, kanonickou URL a sdílecí kartu; používají již existující společný renderer 1200 × 630 a značku. Sdílecí text odpovídá aktuální nabídce a nepředstírá dostupnou aplikaci. České texty mají lokální označení jazyka. Nenahlašovat neexistující anglickou alternativu.
+Pavol Hejný a Jiří Jahn jsou rovnocenní spoluzakladatelé. Oba mají stejnou vizuální prioritu, skutečný portrét, jméno, roli a možnost kontaktu. Pavol: technologie; Jiří: obchod. Jediné jméno v konfiguraci SLA nesmí znamenat jediného zakladatele na webu.
 
-Revizní stránky zůstávají `noindex`, nevstupují do sitemap a nenahrazují indexované domovské stránky. Nejde o utajení: každý s URL je může otevřít. Při budoucím veřejném uvedení je indexace samostatné rozhodnutí.
+Patička přebírá oficiální údaje ze stávajícího repozitáře: **AI Web s.r.o., IČO 21012288, datová schránka hzuu4yn**, odkazy na rejstřík, právní kontakt a osobní údaje. Nepřepisovat je podle nepřesného hlasového přepisu názvu firmy a nevymýšlet adresu nebo DIČ. Právní dokumenty používají existující společné znění.
 
-Kontaktní CTA je `mailto:jiri@ptbk.io` s odpovídajícím předmětem, nikoli Stripe checkout, odeslaný e-mail nebo registrace. Není vytvořen nový formulář, databáze kontaktů, partnerský účet, faktura nebo transakce. Podmínky jsou označené jako návrh nabídky, právní dokumenty webu nenahrazují licenci a objednávku.
+## Přístupnost
 
-## Soukromí
+Jeden H1 na stránce, logická hierarchie, označené navigace, přeskočení na obsah, viditelný fokus. Taby mají aktivní stav, vazbu na panel, přepínání šipkami a Home/End. Pohyb je omezený a lze jej pozastavit; redukovaný pohyb neomezuje čitelnost.
 
-Kalkulačka neodesílá vstupy, nevolá modely, neukládá je do veřejné URL a nevytváří tracking partnerů. Export zůstává lokální. Existující celowebový souhlas a analytika se nemění; neslibovat, že celá stránka je bez jakýchkoli analytických požadavků. Předvyplněné e-mailové odkazy obsahují téma/scénář, nikoli celý finanční profil návštěvníka.
+Každé pole má label a jednotku, výsledky mají slovní interpretaci. Modál má správný fokus, titulek, popis, chyby a stav práce. Rychlé změny kalkulace ani selhání PDF nezničí vstupy. Mobil od 375 px musí fungovat bez horizontálního přetékání celé stránky; případný široký obsah smí mít vlastní ovladatelný kontejner.
 
-Veřejný kód a vlastní soubory neprokazují samy o sobě, že všechna data vždy zůstávají ve firmě. Jasně rozlišit modelového poskytovatele a připravovanou aplikaci. Zdrojové PDF se nevkládají do veřejných downloadů.
+## Metadata a URL
 
-## Akceptační scénáře
+Každá stránka má vlastní titulek, popis a canonical URL bez výpočtových parametrů. Podstránky používají sdílený značkový social preview; hlavní stránka a partnerství vlastní existující renderer. Nenahlašovat neexistující jazykové alternativy. Nový obsah je český.
 
-- Obě URL fungují, propojují se a původní homepage zůstává beze změny.
-- V obou cenících je Start 19 USD / 30 dní a Business 100 USD / instanci / měsíc. Žádný Starter za 10 USD, třetí bezplatný plán nebo deset-agentový limit.
-- Instance je klientské prostředí a více prostředí na jednom serveru je více licencí.
-- Start má explicitně 30 dní, jednou pro klienta, bez obnovy, podpory a SLA. Business první věcnou reakci do 16 pracovních hodin; přesné pracovní okno, české svátky a žádnou garanci opravy/dostupnosti.
-- Aplikace je připravovaná, datum orientační, CTA nezve do již dostupné aplikace. Samostatné hledání práce je jen vize. Bez nepodloženého klientského důkazu, videa nebo konkurenčních statistik.
-- Partnerství: přímo placená klientská licence, žádný partnerský paušál, pevný 20% podíl ze skutečných plateb po vratkách pro oba plány. Žádný automatický 12měsíční konec.
-- Každý z pěti scénářů mění pracovní vstupy a konečný výsledek. Taby zachovávají hodnoty, reset obnoví výchozí příklad.
-- Start ignoruje delší horizont/více instancí i při přímém volání výpočtu; neextrapoluje návratnost přes 30 dní a nikdy negeneruje MRR.
-- Business počítá celý zvolený horizont včetně 24 měsíců za předpokladu pokračující dohody. Nulové platby nebo plné vratky znamenají nulový licenční podíl.
-- AI předplatné nenásobí retry rezerva a nepřičítají se k němu tokeny. Lokální režim zahrnuje uvedenou infrastrukturu. Další jednotky nemultiplikují čas již uvedený za celou položku.
-- Partnerem hrazený provoz se odečte partnerovi a nepřipočte klientovi dvakrát. Databáze, nasazení a režie se počítají jednou.
-- Nulový objem a nákladné varianty mohou mít záporný přínos; nuloví klienti zachovají režii. Nevalidní čísla nezpůsobují NaN/Infinity v UI.
-- Export obsahuje verzi, všechny vstupy a výsledky a po změně plánu správné období. Ovládání funguje klávesnicí a na mobilu.
+Pod `/new` zůstává technický `noindex` a žádné zařazení do sitemap. To není veřejný badge ani zajištění utajení. Referrer pro nové stránky je omezen na stejný origin, aby finanční parametry nebyly běžným referrerem externích odkazů. Kalkulace v URL je přesto viditelná držiteli odkazu, prohlížeči a provozním logům; není to tajné úložiště.
 
-## Ověření implementace
+## Akceptace
 
-Cílené jednotkové testy ekonomiky a prohlížečové testy obou stránek; lint nových součástí; produkční build a TypeScript (build před kontrolou typů podle pravidel repozitáře). Prohlédnout rozložení na desktopu a mobilu, při chybě opravovat, ne pouze zakrývat přetečení. Ověřit nasazení stejného commitu na produkčním projektu a HTTP obou URL. Neprohlašovat plnou regresní sadu ostatních aplikací za provedenou, pokud běžely jen cílené testy.
+- Homepage je stručná; podrobnosti mají funkční samostatné cesty. Žádné zadané zakázané slogany, psaní knihy, roadmapové štítky nebo CTA `mailto`.
+- Pět funkčních ukázek má rozdílné vizualizace, správný aktivní stav a vazbu na detail agendy. Modelová data se nevydávají za zákaznické výsledky.
+- Oba zakladatelé mají stejné role spoluzakladatelů a skutečné portréty. Právní údaje souhlasí se zdrojem.
+- Ceník obsahuje Start 19 USD jednorázově na 30 dní, Business 100 USD měsíčně za prostředí. Plné právní nuance a SLA jsou dostupné na cenové stránce a FAQ, ne opakované všude.
+- Bezpečnost rozlišuje E2E ovládací přenos, vlastní pracovní úložiště a odesílání vstupů externím modelům/nástrojům.
+- Ve srovnáních jsou primární zdroje a datum; žádné nepravdivé tvrzení, že všechny alternativy vyžadují permanentní ruční ovládání.
+- Mini kalkulačka má jen hlavní vstupy, správně popsaný benefit a přechod na pokročilou. Parametry se zachovají včetně neviditelných.
+- URL round-trip, reload a historie obnoví všechna známá pole. Neznámé hodnoty, NaN/Infinity, prototype keys a přepis provize jsou odmítnuté/normalizované.
+- Start nikdy negeneruje roční pilot, automatický Business, MRR nebo návratnost mimo dobu pilotu. 20 % je konstanta, nikoli uživatelská volba.
+- Náklady na AI/provoz, implementaci a lidskou práci nejsou vynechané nebo započtené dvakrát. Režie při nule klientů zůstává. Záporný výsledek je vidět.
+- Kontakt používá existující endpoint/evidenci. Chyba zachová údaje; kontaktní úspěch se nepotvrdí před backendem. Newsletter se nezapíná.
+- PDF brána vyžádá e-mail v obou kalkulačkách. Po chybě kontaktu se PDF nestáhne. Po chybě PDF lze opakovat bez druhého zápisu uloženého kontaktu. PDF je skutečný čitelný soubor s českými znaky, kompletním rozkladem a použitelným share linkem.
+
+## Ověření před přepnutím
+
+Cílené jednotkové testy ekonomiky, URL parseru a PDF definice; prohlížečové testy interakcí, kontaktu/PDF, mobilu a rout; lint; produkční build a potom TypeScript. Prohlédnout skutečné screenshoty a renderovaný PDF report, ne jen zdrojový kód. Produkční GET ověří obsah stejného commitu; testovací kontakty neposílat na skutečnou produkci. Netvrdit plnou regresní sadu všech ostatních aplikací, pokud běží jen cílené testy.
+
+Před finálním přesunem na `/` vlastník ověří skutečnou připravenost aplikace, párování a E2E implementace, schvalování, dostupný onboarding a smluvní podmínky. Cílové znění stránky tyto technické a obchodní kontroly nenahrazuje; tato změna je neimplementuje uvnitř enginu.

@@ -1,133 +1,119 @@
-# Úplná specifikace kalkulačky ekonomiky
+# Kalkulačka: rychlá a pokročilá
 
-## Účel a dva pohledy
+## Účel
 
-Kalkulačka na obou stránkách porovnává úplné náklady s ekonomickým přínosem. Nevyčísluje jen peníze pro Promptbook. Je deterministická, funguje v prohlížeči, nevolá AI ani API ceníků a nezakládá objednávku.
+Vyčíslit úplné náklady, hodnotu uvolněné práce a ekonomiku partnerské služby. Nikoli pouze licenci Promptbooku. Výpočet je deterministický v prohlížeči, nevolá AI nebo živý cenový API endpoint a nezakládá objednávku.
 
-Tab **Mám vlastní agendu**: cena licence + AI + provoz + partner + zbývající lidská práce proti nákladům téže ruční práce. Výstupem je uvolněná kapacita, čistý přínos a návratnost nasazení, nikoli automatický přírůstek tržeb.
+Oba režimy používají stejný model. **Pro mou firmu** porovnává ruční práci s automatizací včetně lidské kontroly. **Nasazuji klientům** ukazuje implementaci, servis a 20% licenční podíl proti partnerovým nákladům. Tržby nejsou zisk, uvolněné hodiny nejsou automaticky ušetřené mzdy.
 
-Tab **Nasazuji klientům**: vlastní implementace, servis a 20% podíl z licencí proti nákladům partnera. Výstupy odlišují tržby a příspěvek po zadaných nákladech. Klientem hrazená licence není celou svou hodnotou tržbou agentury.
+## Rychlá kalkulačka
 
-Na `/new` je výchozí první tab, na `/new/partnership` druhý. Přepínání tabů zachová rozpracované hodnoty. Kalkulačka je stejná, liší se počáteční pohled. Obnovení příkladu vrátí Business, účetní podklady a všechny výchozí vstupy; zachová aktuální tab. Nové načtení stránky obnoví výchozí stav; hodnoty se neukládají do účtu, URL nebo úložiště prohlížeče.
+Na `/new` výchozí firemní režim; na `/new/partnership` partnerský. Výchozí scénář účetní podklady, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, vlastní světlý povrch, oddělený kontrastní výsledkový blok. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
 
-## Nabídka versus modelové odhady
+Viditelné vstupy jsou pouze scénář a nejdůležitější čísla. Firma: objem práce a náklad na člověka za hodinu. Partner: počet aktivních klientů a servis za klienta. Objem/počet klientů lze upravit číslem i posuvníkem. Partnerský podíl je viditelně **pevně 20 %**, bez výběru.
 
-Obchodní konstanty vycházejí z L v1.0: Start **19 USD / 30 dní jednorázově**, Business **100 USD / instanci / měsíc**, podíl **20 %**. Nejsou volnými posuvníky návštěvníka. V UI jsou přesně dva licenční plány. Individuální nabídka a veřejný neprodukční kód nejsou další číselné tarify.
+Přínos musí být zřejmý při rychlém skenování: **„Za 12 měsíců můžete ušetřit v hodnotě práce 100 854 Kč“** nebo **„Za 12 měsíců vám může zbýt po nákladech … Kč“**. Částka není vytržená z věty a zvoleného období. Při záporném výsledku se věta změní na převýšení nákladů a výsledek se nezakrývá.
 
-Ostatní předvyplněné hodnoty jsou ilustrativní, editovatelné a nejsou mzdovým průzkumem, ceníkem poskytovatele nebo garantovanou úsporou. Výpočet je v Kč bez DPH; USD se převádí editovatelným ilustrativním kurzem. Nezahrnuje daň z příjmů, financování, nevyplněné režie ani automaticky odhadnuté dodatečné tržby.
+Doplňkové metriky: u firmy uvolněné hodiny a provoz bez interní práce; u partnera tržby a náklady obsluhy za období. Stručná poznámka vysvětluje odhad a rozdíl mezi kapacitou/hotovostí nebo tržbami/ziskem. Není zde plný formulář tokenů, vratek, režie, akvizice a implementace.
 
-## Jednotka a období
+**Pokročilá kalkulačka** otevře `/new/kalkulacka` se všemi rozpracovanými hodnotami v GET, ne prázdný nový příklad. **Stáhnout PDF výpočet** otevře kontaktní e-mailovou bránu. **Obnovit příklad** vrátí výchozí odhady a scénář, zachová režim.
 
-Business: jedna klientská instance, měsíční období. Více instancí u téhož klienta násobí **jen licenci**. Ostatní náklady, objem práce a čas se zadávají za **celého jednoho klienta**, včetně jeho případných více instancí. Sdílený server se uvádí odpovídajícím podílem nákladů, nikoli zaměňuje s licencí.
+## Pokročilá kalkulačka `/new/kalkulacka`
 
-Start: vždy jedna instance pro jednoho koncového klienta a přesně jeden 30denní pilot. Horizont i počet instancí jsou ve výpočtu pevně 1; příslušná pole se skryjí. Vstupy objemu, práce, AI a ostatních služeb se interpretují za celých 30 dní. Při návratu na Business zůstanou dříve zadaný horizont a počet instancí zachovány. Start nepřidá další měsíce nebo automatický Business. Každý klient v pilotním partnerském portfoliu musí mít vlastní nárok na svůj jediný pilot; kalkulačka nárok neověřuje ani neuděluje.
+Přebírá stejné primární ovládání a výsledkovou kartu. K tomu plán a logicky pojmenované rozbalovací skupiny: práce a kontrola; AI a externí služby; server a provoz; nasazení, servis a licence; partnerovy náklady a úhrady. Partner má navíc objem práce jednoho klienta. V každé skupině jsou významy a jednotky vstupů.
 
-## Scénáře a výchozí pracovní předpoklady
+Plné výsledky ukazují i nákladové mezisoučty, ruční základ, zbývající práci, jednorázové nasazení a návratnost. Partnerský pohled odděluje servis, podíl, obsluhu, implementaci, akvizici a horizont. Rozpad klientových nákladů je dostupný také partnerovi.
 
-| Scénář | Položek za období | Jednotek na položku | Ruční minuty na celou položku | Kč/h | Zbylá práce | Dohled h | Vstupní / výstupní tokeny na jednotku | Další služby Kč/jednotku | Hosting Kč |
+GET a PDF jsou úplně specifikované v [kontaktu a exportu](new-contact-and-pdf.md). Změna scénáře přepíše jen pracovní předpoklady níže, nikoli plán, tokenové ceny, kurz, servisní cenu nebo partnerské vstupy. Přepínání režimů uchová model.
+
+## Pevná nabídka
+
+Start **19 USD jednorázově na 30 dní**, Business **100 USD za prostředí a měsíc**, podíl **20 %**. Tyto hodnoty nejsou vstupy a URL je nesmí přepsat. Přesné právní podmínky určuje [obchodní nabídka](new-commercial-offer.md). V kalkulačce neexistuje třetí bezplatný ani libovolně nacenitelný tarif.
+
+Ostatní hodnoty jsou editovatelné ilustrativní odhady, ne průzkum mezd, skutečné tarify providerů nebo zaručená úspora. Částky jsou v Kč bez DPH. USD převádí editovatelný modelový kurz, nikoli aktuální kurzová služba.
+
+## Období a prostředí
+
+Business: měsíční období a zvolený horizont. Počet samostatných prostředí jednoho klienta násobí **jen licenci**. Veškerá práce, AI, hosting a jiné náklady se zadávají za **celého klienta**, ne automaticky za každou instanci.
+
+Start: vždy jedna instance a jeden 30denní pilot. Měsíční pracovní/nákladové vstupy se interpretují za celých 30 dní. Skutečný výpočet normalizuje horizont a instance na 1 a tato pole při Startu nejsou aktivní. Formulář a URL ale uchovají předchozí Business hodnoty pro návrat k Business. Start se neprodlouží, nepřevede automaticky a nikdy nevytvoří MRR. Každý klient musí mít nárok na svůj jediný Start; kalkulačka oprávnění neuděluje ani neověřuje.
+
+## Scénáře a odhady
+
+| Scénář | Položky / měsíc | Jednotky / položku | Minuty ručně / celou položku | Kč/h | Zbylá práce | Dohled h | Vstupní / výstupní tokeny na jednotku | Externí služba Kč/jednotku | Hosting Kč |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |
-| E-maily a komunikace | 500 e-mailů | 3 zprávy v kontextu | 6 | 500 | 30 % | 2 | 4 000 / 600 | 0 | 500 |
-| Účetní podklady | 300 dokladů | 2 strany | 8 | 550 | 25 % | 2 | 5 000 / 800 | 0 | 500 |
+| E-maily | 500 | 3 zprávy | 6 | 500 | 30 % | 2 | 4 000 / 600 | 0 | 500 |
+| Účetní podklady | 300 | 2 strany | 8 | 550 | 25 % | 2 | 5 000 / 800 | 0 | 500 |
 | Sociální sítě | 20 témat | 3 sítě | 90 | 700 | 25 % | 2 | 16 000 / 4 000 | 10 | 500 |
-| Video → obsah | 8 videí | 30 minut videa | 240 | 800 | 25 % | 2 | 2 000 / 600 | 1 | 900 |
-| Web, který se udržuje | 12 úkolů | 1 web | 75 | 1 200 | 30 % | 2 | 180 000 / 18 000 | 0 | 900 |
+| Video → obsah | 8 videí | 30 minut | 240 | 800 | 25 % | 2 | 2 000 / 600 | 1 | 900 |
+| Web | 12 úkolů | 1 web | 75 | 1 200 | 30 % | 2 | 180 000 / 18 000 | 0 | 900 |
 
-Tokeny pokrývají celý pracovní postup na jednotku, včetně kontextu a nástrojových kroků, ne jen jednu modelovou odpověď. Ruční čas se naopak zadává za **celou položku**. Například 90 minut pro sociální sítě již pokrývá celé téma pro všechny zadané sítě; nenásobí se počtem sítí znovu.
+Ruční čas je za **celou položku**, například celé téma pro všechny sítě, a počtem sítí se znovu nenásobí. Tokeny pokrývají celý postup na jednotku včetně kontextu a nástrojových kroků. Nejde jen o jeden modelový dotaz.
 
-Změna scénáře přepíše jen pracovní předpoklady uvedené v tabulce. Zachová plán, kurz, způsob placení AI, vlastní tokenové ceny, servis, nasazení, horizont i partnerské hodnoty. Výchozí scénář jsou účetní podklady.
+## Úplné vstupy a jejich výchozí hodnoty
 
-## Všechny vstupy
+Společné enumy: režim firma/partner; scénář výše; plán Business/Start; AI **tokeny / předplatné / lokální model** (výchozí tokeny); plátce AI/provozu **klient samostatně / partner v ceně servisu** (výchozí klient).
 
-### Společné a pracovní
+Číselné vstupy:
 
-Scénář; plán; způsob placení AI (**tokeny / vlastní předplatné / lokální model**); plátce AI a ostatního provozu (**klient samostatně / partner v ceně servisu**). Výchozí Business, tokeny, klient samostatně.
+| Skupina | Hodnoty |
+| --- | --- |
+| Období a licence | kurz USD/Kč 22; prostředí na klienta 1; horizont Business 12 měsíců |
+| Práce | objem, jednotky na položku, ruční minuty celé položky, celkový hodinový náklad, zbylá lidská práce %, dohled — podle scénáře |
+| AI | vstup 3 USD / milion; výstup 15 USD / milion; tokeny podle scénáře; předplatné 1 500 Kč/měsíc; rezerva 25 %; externí služba podle scénáře |
+| Provoz | server podle scénáře; databáze 0; zálohy/úložiště 100; jiné nástroje 0; elektřina 0; rozpočítaný hardware 0 Kč/měsíc |
+| Služby | servis partnera 2 500 Kč za klienta/měsíc; nasazení 15 000 Kč jednorázově |
+| Partner | klienti 10; uhrazené licence 100 %; vratky 0 %; obsluha 2 h/klienta/měsíc; interní náklad 600 Kč/h; implementace 12 h/klienta; akvizice 2 000 Kč/klienta; režie portfolia 2 000 Kč/měsíc |
 
-Kurz USD → Kč: **22**, bez živé aktualizace. Počet instancí na klienta: **1**. Objem položek, jednotek na položku, ruční minuty na položku, plně zatížený hodinový náklad člověka, procento zbývající lidské práce a dodatečný dohled: podle tabulky scénářů.
+Hodinový náklad představuje celkový náklad zaměstnavatele nebo sazbu externího dodavatele, ne automaticky hrubou mzdu. Při samostatné správě lze servis dát na 0 a vlastní práci uvést do dohledu. Režie portfolia se neúčtuje znovu za každého klienta.
 
-Hodinový náklad může představovat zaměstnance včetně souvisejících nákladů nebo sazbu externího dodavatele: asistent, účetní, social media manažer, copywriter nebo vývojář. Bez nesprávného ztotožnění hrubé mzdy a úplných nákladů firmy.
+AI předplatné **nahrazuje tokenový účet**, nepřičítá se. Příplatky a podporovaný automatizovaný provoz musí uživatel ověřit u poskytovatele. Příplatky lze zadat do ostatních nástrojů. Lokální režim má nulový externí tokenový účet, ale stále uvedené náklady hardwaru a provozu. Co je v hostingu, nezapočítávat znovu zvlášť.
 
-### AI
+## Výpočet klienta
 
-Vstupní a výstupní tokeny na jednotku; ceny za milion tokenů: **3 / 15 USD**. Cena vlastního AI předplatného: **1 500 Kč za období**, používá se jen v režimu předplatného. Další služby za jednotku podle scénáře (např. OCR, obrázky, přepis). Rezerva na měřenou spotřebu: **25 %**.
+`V` položek, `U` jednotek na položku, `I/O` tokenů na jednotku, `Pi/Po` cena USD/milion, `K` Kč/USD, `M` období, `N` licencovaných prostředí. U Startu `M=N=1`.
 
-Předplatné nahrazuje tokenový účet, nepřičítá se k němu. Dostupnou kapacitu, automatizovaný provoz a další poplatky ověřuje uživatel u poskytovatele; příplatky může zahrnout do ostatních nástrojů. Lokální model má nulový externí tokenový účet, ale nikoli nulový hardware, energii nebo server. Výkon a kvalita nejsou garantované.
-
-### Provoz za celého klienta a období
-
-Hosting: podle scénáře. Databáze: **0 Kč**, pokud je již v serveru. Zálohy a úložiště: **100 Kč**. Ostatní nástroje: **0 Kč** (licence, monitoring, doména, e-mailing, rendering). Elektřina: **0 Kč**, pokud je již v hostingu. Rozpočítaný hardware: **0 Kč**; ekonomický náklad, ne nutně výdaj tohoto měsíce. Položky nemají být započítané zároveň v pronájmu i samostatně.
-
-Cena servisu partnera: **2 500 Kč za klienta a období**. Při vlastní správě ji lze nastavit na nulu a zahrnout vlastní čas do dohledu. Plátce „partner v ceně servisu“ znamená, že tato cena obsahuje všechny rozepsané AI a provozní položky, nejde o další přirážku automaticky připočtenou nad servis.
-
-Cena nasazení účtovaná klientovi: **15 000 Kč**, jednou. Horizont Business: **12 měsíců**, editovatelný; Start vždy 30 dní.
-
-### Partnerské vstupy
-
-Počet aktivních klientů: **10**. Skutečně uhrazená část licencí: **100 %**. Vratky z uhrazených licencí: **0 %**. Tyto dvě hodnoty ovlivňují podíl partnera, nikoli standardní cenový odhad licence jednoho klienta.
-
-Obsluha jednoho klienta: **2 hodiny za období**. Interní náklad partnera: **600 Kč/h**. Implementace jednoho klienta: **12 hodin**. Náklady na získání jednoho klienta: **2 000 Kč jednorázově**. Další režie celého portfolia: **2 000 Kč za období**, ne za každého klienta.
-
-Výše 20% podílu je viditelná pevná podmínka. Pole délky provize nebo 12měsíční strop neexistují. Výpočet předpokládá trvající placené užívání a partnerskou dohodu po celý zvolený horizont; zobrazený horizont není příslibem doživotních plateb.
-
-## Vzorce klientské ekonomiky
-
-Označení: `V` položek, `U` jednotek na položku, `I/O` tokenů na jednotku, `Pi/Po` USD za milion tokenů, `K` Kč/USD, `M` počet období (Start 1), `N` instancí (Start 1).
-
-- Licence = `(Start 19, Business 100) × N × K`.
-- Jednotky = `V × U`.
-- Tokeny = `V × U × (I × Pi + O × Po) / 1 000 000 × K`.
-- AI = tokeny, nebo uvedené předplatné, nebo nula pro lokální model.
-- Další služby = `V × U × cena služby za jednotku`.
-- Rezerva = `(měřený tokenový účet + další služby) × rezerva %`; pevné AI předplatné a fixní infrastruktura se do rezervy nezapočítají.
-- Ostatní provoz = AI + další služby + rezerva + hosting + databáze + zálohy/úložiště + elektřina + rozpočítaný hardware + ostatní nástroje.
-- Klientský provoz bez interní práce = licence + servis + ostatní provoz **jen když ho klient platí samostatně**.
+- Licence = `(Start 19 nebo Business 100) × N × K`.
+- Jednotky = `V × U`; tokenový účet = `V × U × (I×Pi + O×Po) / 1 000 000 × K`.
+- AI = tokenový účet, nebo cena předplatného, nebo 0 při lokálním modelu.
+- Externí služby = `V × U × cena služby za jednotku`.
+- Rezerva = `(jen měřený tokenový účet + externí služby) × rezerva %`. Nezvyšuje pevné předplatné ani fixní infrastrukturu.
+- Infrastruktura = server + databáze + zálohy + elektřina + rozpočítaný hardware.
+- Ostatní provoz = AI + externí služby + rezerva + infrastruktura + ostatní nástroje.
+- Provoz placený klientem = licence + servis partnera + ostatní provoz **jen při plátci klient**.
 - Ruční hodiny = `V × ruční minuty celé položky / 60`.
-- Zbývající hodiny = ruční hodiny × ponechaná práce % + dodatečný dohled.
-- Uvolněná kapacita = ruční hodiny − zbývající hodiny; může být záporná.
-- Výchozí náklad práce = ruční hodiny × hodinový náklad.
-- Zbývající práce = zbývající hodiny × stejný hodinový náklad.
-- Celkový ekonomický náklad = klientský provoz bez interní práce + zbývající práce.
-- Přínos za období = výchozí náklad práce − celkový ekonomický náklad.
-- Náklad za horizont = ekonomický náklad × M + jednorázové nasazení.
-- Přínos za horizont = výchozí náklad práce × M − náklad za horizont.
-- Návratnost = jednorázové nasazení / kladný přínos za období. Při nekladném přínosu „Nevychází“. Nulové nasazení při kladném přínosu: „Bez vstupního nákladu“.
+- Zbývající hodiny = ruční hodiny × zbylá práce % + dohled.
+- Uvolněné hodiny = ruční hodiny − zbývající hodiny (mohou být záporné).
+- Ruční náklad = ruční hodiny × hodinový náklad; zbývající práce = zbývající hodiny × stejný hodinový náklad.
+- Celkový ekonomický náklad = provoz placený klientem + zbývající práce.
+- Přínos období = ruční náklad − celkový ekonomický náklad.
+- Náklad horizontu = ekonomický náklad × M + jednorázové nasazení.
+- Přínos horizontu = přínos období × M − nasazení.
+- Návratnost = nasazení / kladný přínos období. Při nekladném přínosu není. Při nasazení 0 a kladném přínosu je bez vstupního nákladu. Start neuvádí návratnost za více než 30 dní; vhodný podíl období převádí na dny.
 
-Business návratnost je v měsících a předpokládá rovnoměrný přínos. Start může uvést návratnost ve dnech (`podíl období × 30`) pouze do 30 dní; jinak „Nevychází“. Levný pilot se nikdy neextrapoluje do dalších měsíců.
+## Výpočet partnera
 
-## Vzorce partnera
+`C` aktivních klientů se stejným profilem, od prvního měsíce a po celý horizont. Není to růstový model ani predikce odchodů.
 
-Označení `C` počet klientů. Stejný klientský profil platí pro všechny, nejde o simulaci růstu nebo směs typů klientů.
-
-- Čisté uhrazené licence = `C × cena licence × uhrazená část % × (1 − vratky %)`.
-- Partnerský podíl = čisté uhrazené licence × **20 %**.
+- Čisté uhrazené licence = `C × licence × uhrazené % × (1 − vratky %)`.
+- Podíl = čisté uhrazené licence × **20 %**.
 - Servisní tržby = `C × cena servisu`.
-- Tržby za období bez implementace = servisní tržby + partnerský podíl.
-- Náklady na AI/provoz hrazené partnerem = `C × ostatní provoz`, pouze když je zvolen plátce partner; jinak nula.
-- Náklad obsluhy období = `C × hodiny obsluhy × interní hodinový náklad + režie portfolia + provoz hrazený partnerem`.
-- Příspěvek období = tržby období − náklad obsluhy období.
-- Implementační tržby = `C × cena nasazení`.
-- Náklady implementace/akvizice = `C × (implementační hodiny × interní hodinový náklad + náklad získání klienta)`.
-- Tržby za horizont = tržby období × M + implementační tržby.
-- Náklady za horizont = náklady obsluhy × M + náklady implementace/akvizice.
-- Příspěvek za horizont = tržby za horizont − náklady za horizont, před daní z příjmů.
+- Tržby období bez implementace = servisní tržby + podíl.
+- Provoz hrazený partnerem = `C × ostatní provoz`, pouze když je zvolen partner; jinak 0.
+- Náklad obsluhy = `C × hodiny obsluhy × interní náklad/h + režie portfolia + provoz hrazený partnerem`.
+- Příspěvek období = tržby období − náklad obsluhy.
+- Implementační tržby = `C × cena nasazení`; náklad implementace = `C × (implementační hodiny × interní náklad/h + akvizice)`.
+- Celkové tržby = tržby období × M + implementační tržby.
+- Celkové náklady = náklad obsluhy × M + náklad implementace.
+- Výsledek horizontu = celkové tržby − celkové náklady, před daní z příjmů.
+- Business MRR = tržby období bez implementace; **Start MRR = 0**.
 
-Business MRR = tržby období bez implementace, za předpokladu pokračujícího placení a dohody. **Start MRR = 0**. Pilot má samostatný výsledek za 30 dní a jednorázovou implementaci. Případné pokračování na Business vyžaduje nové rozhodnutí/objednávku a nepromítá se do výsledku Startu.
+Podíl není další poplatek klientovi. Celá klientova licence není tržbou agentury. Při plátci partner je uvedený servis včetně AI/provozu; model tyto náklady nepřičte klientovi podruhé, ale odečte partnerovi. Více klientů neodstraňuje náklad času a servisu.
 
-Licence hrazená klientem Promptbooku je v partnerském výsledku pouze informativní základ podílu, ne další servisní tržba. Pokud partner přebírá AI/provoz do vlastní ceny, klient nesmí dostat tyto náklady přičtené podruhé a partner je musí mít odečtené od svého výsledku.
+## Vstupní validace a zobrazení
 
-## Zobrazení výsledků
+Běžná čísla 0–1e9; kurz 0,01–1 000; Business horizont celé 1–120; prostředí celé 1–100; klienti celí 0–5 000. Zbylá práce/úhrady/vratky 0–100 %, rezerva 0–500 %. Přímý výpočet normalizuje ne-konečné a záporné hodnoty; URL parser používá výchozí hodnoty pro nečíselné vstupy. Podíl není editable pole.
 
-Klient: výrazný přínos za období, uvolněné hodiny, návratnost, srovnávací pruhy ruční práce / práce s agendou, úplný rozpad nákladů, jednorázové nasazení a čistý přínos za horizont. Výslovně označit kapacitu versus hotovostní úsporu mezd; nepředpovídat konverze, nové tržby nebo automatické snižování počtu zaměstnanců.
+Rozpracované prázdné číselné pole nesmí vyvolat NaN/Infinity. Záporné výsledky jsou skutečně zobrazené a doplněné správným slovním významem. Nuloví klienti mají nulové tržby, ale zachovanou fixní režii. Nulový objem práce nevynuluje fixní náklady a dohled.
 
-Partner: výrazné tržby za období, zvlášť služby, základ podílu a podíl; náklady obsluhy, režie a případný vlastní provoz; příspěvek; jednorázové nasazení; celkový výsledek za horizont. Rozbalitelný úplný klientský rozpad. Start výslovně ukazuje nulové opakované měsíční tržby.
-
-Rozpad ukazuje součásti AI a infrastruktury i při plátci partner; jsou označené jako zahrnuté v jeho servisu. Mezivýsledky nejsou další náklady. Partnerský podíl se klientovi nepřičítá.
-
-Záporné výsledky nezakrývat ani nezastropovat na nule. Finanční částky se v UI zaokrouhlují na celé Kč, hodiny/návratnost na jedno desetinné místo; výpočty a export zachovávají nekrácené hodnoty. Dílčí zaokrouhlení se mohou lišit od součtu o korunu.
-
-## Formulář, limity a export
-
-Základní vstupy jsou viditelné, tokeny, infrastruktura a detailní partnerské náklady v pojmenovaných rozbalovacích blocích. U vstupů jsou jednotky a vysvětlení předpokladů. Prázdná rozpracovaná číselná hodnota nemění výsledek na NaN; při opuštění pole se vrátí poslední platná hodnota.
-
-Běžná čísla: 0 až 1e9, záporné na 0, nečíselné/ne-konečné při přímém výpočtu na 0. Kurz 0,01 až 1 000. Horizont Business celé 1–120, instance celé 1–100, klienti celí 0–5 000. Procenta zbývající práce, plateb a vratek 0–100, rezerva 0–500. Nuloví klienti znamenají nulové tržby, ale zachování uvedené fixní režie.
-
-„Stáhnout výpočet“ vytvoří UTF-8 textový soubor `promptbook-{company|partner}-{scenario}.txt` lokálně. Obsahuje scénář, režim, verzi obchodního modelu, období, podmínky podílu, upozornění a všechny normalizované vstupy i výsledky. Úspěch a selhání mají přístupnou zprávu; selhání nemaže výpočet. „Ověřit předpoklady“ otevře e-mail na jiri@ptbk.io s názvem scénáře v předmětu, neposílá automaticky všechny hodnoty.
+Kč v UI zaokrouhlit na celé koruny, čas/návratnost na jedno desetinné místo. Výpočet zachovává přesné hodnoty, PDF může ukázat haléře. Součet jednotlivě zaokrouhlených řádků se může o korunu lišit; mezisoučty se znovu nepřičítají jako další náklady. Výše úspor není slibem nových tržeb z publikovaného obsahu.
