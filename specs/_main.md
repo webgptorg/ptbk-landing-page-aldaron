@@ -1,0 +1,30 @@
+# Web Promptbooku
+
+Specifikace celého budoucího hlavního webu, připraveného pod `/new`. Zákazník vidí plnohodnotný produktový web, nikoli označenou pracovní verzi. Přepnutí na `/` je samostatné rozhodnutí; tato implementace nemění současnou homepage, jiné značkové weby ani jejich chování.
+
+## Produkt a publikum
+
+Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní prostředí a kontext; engine a ovládací aplikace jsou oddělené. Primární distribuční partner je agentura, freelancer nebo integrátor: dodává konkrétní řešení a pečuje o klienta. Promptbook je technologický partner. Klient hradí licenci Promptbooku a práci partnerovi.
+
+## Rozcestník specifikace
+
+- [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
+- [Partnerství](new-partnership-page.md): vlastní služby, role, 20% podíl a cesta prvního nasazení.
+- [Cena, licence a podpora](new-commercial-offer.md): přesné podmínky Start/Business, plátci, instance, výluky a SLA.
+- [Kalkulačka](new-economics-calculator.md): rychlý a pokročilý pohled, kompletní model, parametry a ekonomika.
+- [Kontakt, sdílení a PDF](new-contact-and-pdf.md): kontaktní systém, e-mailová brána, celý report a ochrana údajů.
+- [Srovnání](new-comparisons.md): férové vymezení alternativ, zdroje a aktualizace.
+- [Společná kvalita](new-pages-quality.md): navigace, přístupnost, metadata, testy a podmínky přesunu.
+- [Zdroje a rozhodnutí](new-pages-sources.md): podklady, autorita posledního zadání, příběh a hranice veřejných tvrzení.
+
+## Rozsah cest
+
+`/new`, `/new/partnership`, `/new/kalkulacka`, `/new/cenik`, `/new/agendy`, `/new/agendy/{email|documents|social|video|coding}`, `/new/srovnani`, `/new/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip}`, `/new/o-nas`, `/new/bezpecnost`, `/new/faq`, `/new/soukromi`, `/new/podminky`.
+
+Všechny interní marketingové odkazy zůstávají pod `/new`. GitHub, zdroje srovnání, obchodní rejstřík a sociální profily jsou záměrně externí. Právní dokumenty používají existující společný obsah a zachovávají jeho právní odkazy. Údaje o firmě a fotografie pocházejí ze stávajícího webu, nevytvářejí se nové identity.
+
+## Závazné redakční principy
+
+Každý blok má jeden účel. Bez prázdných štítků, opakování téže výhody v mnoha místech a technických vysvětlivek v hero. `book` se nepřekládá a není vstupním požadavkem ani tématem zákaznického webu. Uživatel předává práci a pravidla, ne interní souborový formát.
+
+Navenek není rozlišení „dnes / připravujeme / vize“, termín dokončení aplikace ani odkaz „současný web“. Jde o cílové znění pro uvedení kompletního produktu. Interní kontrola připravenosti a technický `noindex` tím nezanikají. Smluvní podmínky se tím nemění.

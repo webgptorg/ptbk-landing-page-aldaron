@@ -1,0 +1,11 @@
+# Promptbook website under /new
+
+The complete launch website is isolated under `/new`: product, partnership, five agenda details, pricing, security, story, FAQ, six primary-source comparisons, legal pages and an advanced calculator. The existing root and other branded sites are unchanged. There are no public work-in-progress labels or links to an “old/current website”. Technical noindex remains until an explicit cutover.
+
+The specification entry is [`../../specs/_main.md`](../../specs/_main.md). The latest owner's instructions override the former public availability timeline and book-writing metaphor. Both cofounders have equal prominence. Public content describes the target paired/E2E architecture without pretending the external model provider sees no inputs. Actual readiness and security verification remain launch checks, not claims established by this website implementation.
+
+`commercialTerms.ts` keeps the October 15 proposal: Start $19 once/30 days, Business $100/environment/month, 20% share on paid licences net of refunds. The share cannot be set through UI or query params. `economics.ts` remains the calculation source; `calculatorState.ts` round-trips the complete allowlisted form, including inactive Business assumptions during Start. The result clamps Start to one period and no MRR. Hypothetical wages, token prices and costs remain explicit assumptions.
+
+Marketing CTAs use `LeadCaptureProvider` and the existing `subscribeToWaitlist` → `/api/waitlist` → Contact system. PDF requests capture an email and a frozen calculation link, then generate the report locally with existing licensed fonts and pdfmake. Rendering failure may retry without repeating an accepted lead in the same dialog. No newsletter consent, real customer account, invoice, AI execution or payment is created. Do not submit test contacts against production.
+
+Run focused Vitest tests in `businesses/new`, Playwright `tests/e2e/new-landing.spec.ts`, lint, the full production build and then TypeScript. Inspect the resulting layouts and actual PDF. Browser dependencies and optional native libraries may need an environment-only repair in a clean Linux sandbox; don't silently upgrade or rewrite the shared lockfile.

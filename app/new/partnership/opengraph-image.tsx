@@ -1,0 +1,5 @@
+import { PARTNERSHIP_PREVIEW } from '@/businesses/new/newMetadata';
+import { createSocialPreviewImageRoute } from '@/lib/metadata/social-preview-image-route';
+const { alt, contentType, renderSocialPreviewImage, size } = createSocialPreviewImageRoute(PARTNERSHIP_PREVIEW);
+export { alt, contentType, size };
+export default renderSocialPreviewImage;
