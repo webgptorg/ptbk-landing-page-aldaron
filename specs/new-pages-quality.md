@@ -8,7 +8,7 @@ Prefix cest má jeden zdroj, aby budoucí přesun nebyl ruční hledání desít
 
 ## Vzhled a navigace
 
-Jednotný světlý vizuální jazyk, tmavý text, zelené akcenty, velké čitelné nadpisy, dostatek prostoru. Žádné prázdné marketingové štítky, přehnané poznámky pod každou kartou nebo dlouhý technický manuál v úvodu. Vlastní formát book se na marketingových stránkách nevysvětluje ani nevyžaduje.
+Jednotný prémiový světlý vizuální jazyk: téměř bílé pozadí, tmavý text, střídmé zelené akcenty, výrazná typografická hierarchie a dostatek prostoru. Inspirace produktovými landing pages Applu spočívá v čistotě a soustředění na ukázku, nikoli v kopírování značky. Méně vnořených rámečků; každá agenda má vlastní kompozici s jemnou prostorovou hloubkou. Žádné prázdné marketingové štítky, přehnané poznámky pod každou kartou nebo dlouhý technický manuál v úvodu. Vlastní formát book se na marketingových stránkách nevysvětluje ani nevyžaduje.
 
 V horní navigaci logo/úvod, agendy, partnerství, ceník, srovnání, příběh a kontaktní akce. Mobil má přístupné rozbalitelné menu, ne zcela zmizelou navigaci. Interní marketingové odkazy zůstávají pod `/new`. Žádný odkaz „současný web“ a žádné veřejné označení „dnes / připravujeme / vize“.
 
