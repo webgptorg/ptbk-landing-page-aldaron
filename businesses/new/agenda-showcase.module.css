@@ -224,7 +224,7 @@
    creates a non-scrolling ancestor and breaks native sticky positioning. */
 :global(html):has(.showcase),:global(body):has(.showcase){overflow-x:clip}
 .scrollTrack{position:relative}
-.scrollTrack[data-immersive=true]{padding-bottom:110vh}
+.scrollTrack[data-immersive=true]::after{content:'';display:block;height:110vh}
 .scrollTrack[data-immersive=true] .stageShell{position:sticky;top:84px}
 .stageShell{position:relative}
 .tabs{margin-bottom:18px;border-radius:999px;background:#edf0eb;padding:5px;max-width:790px}
@@ -316,7 +316,7 @@
 }
 @media(prefers-reduced-motion:reduce){
  :global(html):has(.showcase){scroll-behavior:auto}
- .scrollTrack[data-immersive=true]{padding-bottom:0}.scrollTrack[data-immersive=true] .stageShell{position:relative;top:auto}
+ .scrollTrack[data-immersive=true]::after{display:none}.scrollTrack[data-immersive=true] .stageShell{position:relative;top:auto}
  .scene,.scene::before,.mailSource,.contextNote,.mailReply,.invoiceStack,.extracted,.facebookPost,.instagramPost,.linkedinPost,.editingDesk,.videoOutputs,.codeWindow,.browserPreview,.topic,.issue,.videoOrb{transform:none!important}
  .scene [data-revealed]{filter:none;translate:none}.showcase *{transition:none!important;animation:none!important}
 }
