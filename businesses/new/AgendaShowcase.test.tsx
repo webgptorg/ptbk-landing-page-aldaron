@@ -8,6 +8,8 @@ let changeMotion: (reduced: boolean) => void;
 
 beforeEach(() => {
     vi.useFakeTimers();
+    vi.stubGlobal('innerWidth', 800);
+    vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
     vi.stubGlobal('IntersectionObserver', class {
         constructor(callback: IntersectionObserverCallback) {
@@ -22,7 +24,7 @@ beforeEach(() => {
     });
 });
 
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 function step(index: number) {
     fireEvent.click(within(screen.getByRole('list', { name: 'Průběh ukázky' })).getAllByRole('button')[index]);
@@ -105,26 +107,74 @@ describe('agenda demonstrations', () => {
         expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('3');
     });
 
-    it('links depth to scrolling without advancing work, and freezes it when paused', () => {
+    it('keeps compact screens unpinned, links depth to scroll, and freezes it when paused', () => {
         render(<AgendaShowcase />);
         const panel = screen.getByRole('tabpanel');
         let top = 100;
         vi.spyOn(panel, 'getBoundingClientRect').mockImplementation(() => ({ top, height: 600 } as DOMRect));
         fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
-        const before = panel.style.getPropertyValue('--tilt');
+        const before = panel.style.getPropertyValue('--orbit');
         top = -200;
         fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
-        expect(panel.style.getPropertyValue('--tilt')).not.toBe(before);
+        expect(panel.style.getPropertyValue('--orbit')).not.toBe(before);
         expect(panel.getAttribute('data-stage')).toBe('0');
         fireEvent.click(screen.getByRole('button', { name: 'Pozastavit ukázku' }));
-        const frozen = panel.style.getPropertyValue('--tilt');
+        const frozen = panel.style.getPropertyValue('--orbit');
         top = -400;
         fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
-        expect(panel.style.getPropertyValue('--tilt')).toBe(frozen);
+        expect(panel.style.getPropertyValue('--orbit')).toBe(frozen);
         act(() => changeMotion(true));
-        expect(panel.style.getPropertyValue('--tilt')).toBe('');
+        expect(panel.style.getPropertyValue('--orbit')).toBe('');
     });
+    it('scrubs all four story beats when pinned, keeps manual steps stable, and respects reduced motion', () => {
+        vi.stubGlobal('innerWidth', 1280);
+        vi.stubGlobal('innerHeight', 950);
+        vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(650);
+        render(<AgendaShowcase />);
+        const track = screen.getByRole('region', { name: 'Prostorová ukázka' });
+        const panel = screen.getByRole('tabpanel');
+        let top = 84;
+        vi.spyOn(track, 'getBoundingClientRect').mockImplementation(() => ({ top, height: 1750 } as DOMRect));
+        function scrollToProgress(progress: number) {
+            top = 84 - 1100 * progress;
+            fireEvent.scroll(window);
+            act(() => vi.advanceTimersByTime(32));
+        }
+        expect(track.getAttribute('data-immersive')).toBe('true');
+        scrollToProgress(0);
+        act(() => vi.advanceTimersByTime(12000));
+        expect(panel.getAttribute('data-stage')).toBe('0');
+        for (const [progress, expected] of [[.3, '1'], [.55, '2'], [.85, '3'], [.3, '1']]) {
+            scrollToProgress(Number(progress));
+            expect(panel.getAttribute('data-stage')).toBe(expected);
+        }
+        step(2);
+        scrollToProgress(.95);
+        expect(panel.getAttribute('data-stage')).toBe('2');
+        fireEvent.click(screen.getByRole('button', { name: 'Procházet scrollováním' }));
+        scrollToProgress(.95);
+        expect(panel.getAttribute('data-stage')).toBe('3');
+        fireEvent.click(screen.getByRole('tab', { name: 'Sociální sítě' }));
+        expect(panel.getAttribute('data-stage')).toBe('3');
+        scrollToProgress(.3);
+        expect(panel.getAttribute('data-stage')).toBe('1');
+        fireEvent.click(screen.getByRole('button', { name: 'Přehrát ukázku' }));
+        expect(panel.getAttribute('data-stage')).toBe('0');
+        act(() => vi.advanceTimersByTime(2800));
+        expect(panel.getAttribute('data-stage')).toBe('1');
+        vi.stubGlobal('innerHeight', 700);
+        fireEvent.resize(window);
+        expect(track.getAttribute('data-immersive')).toBe('false');
+        vi.stubGlobal('innerHeight', 950);
+        fireEvent.resize(window);
+        expect(track.getAttribute('data-immersive')).toBe('true');
+        act(() => changeMotion(true));
+        expect(track.getAttribute('data-immersive')).toBe('false');
+        expect(panel.getAttribute('data-stage')).toBe('3');
+        expect(panel.style.getPropertyValue('--orbit')).toBe('');
+    });
+
 });

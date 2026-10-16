@@ -217,3 +217,106 @@
  .scene,.mailSource,.contextNote,.mailReply,.invoiceStack,.extracted,.facebookPost,.instagramPost,.linkedinPost,.editingDesk,.videoOutputs,.codeWindow,.browserPreview,.topic{transform:none!important}
  .showcase *{transition:none!important;animation:none!important}
 }
+
+/* A quiet, dark presentation stage. Each object owns its perspective so layers
+   never intersect the parent plane (also avoids Safari/Chromium 3D clipping). */
+/* Scope the overflow correction to pages with this gallery: hidden on body
+   creates a non-scrolling ancestor and breaks native sticky positioning. */
+:global(html):has(.showcase),:global(body):has(.showcase){overflow-x:clip}
+.scrollTrack{position:relative}
+.scrollTrack[data-immersive=true]{padding-bottom:110vh}
+.scrollTrack[data-immersive=true] .stageShell{position:sticky;top:84px}
+.stageShell{position:relative}
+.tabs{margin-bottom:18px;border-radius:999px;background:#edf0eb;padding:5px;max-width:790px}
+.tabs button{border-radius:999px;padding:13px 10px}
+.tabs button[aria-selected=true]{background:#193d32;color:#f1f8ec;box-shadow:0 5px 14px #173c3226}
+.tabs button[aria-selected=true]:hover{background:#234c3d;color:white}
+.panel{--orbit:0deg;--lift:0px;--light:50%;--progress:0;--stage-glow:#44694e;--stage-base:#10251e;background:var(--stage-base);border:1px solid #294238;border-radius:32px;padding:28px 36px 14px;overflow:hidden;color:#edf4e9;box-shadow:0 26px 65px -38px #1d352c80}
+.panel[data-scenario=documents]{--stage-glow:#6d6449;--stage-base:#27291f;background:var(--stage-base)}
+.panel[data-scenario=social]{--stage-glow:#5b6c42;--stage-base:#1e2a20;background:var(--stage-base)}
+.panel[data-scenario=video]{--stage-glow:#3b7065;--stage-base:#102726;background:var(--stage-base)}
+.panel[data-scenario=coding]{--stage-glow:#456074;--stage-base:#17262d;background:var(--stage-base)}
+.panel::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at var(--light) 52%,var(--stage-glow),transparent 68%);opacity:.65}
+.heading{display:block;text-align:center}
+.sceneLabel{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:13px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#b5c8b7}
+.sceneLabel>span+span{border-left:1px solid #67816d;padding-left:14px;letter-spacing:.08em}
+.heading h2{font-size:clamp(28px,3.2vw,41px)!important;line-height:1.1!important;max-width:750px;margin:0 auto!important;color:#f5f7ef;letter-spacing:-.05em!important}
+.perspective{perspective:none;position:relative;padding:14px 0 0}
+.scene{transform:none;transform-style:flat;isolation:isolate;color:#243a2e;min-height:470px}
+.scene::before{content:'';position:absolute;z-index:-1;width:80%;height:80px;left:10%;bottom:30px;border-radius:50%;background:radial-gradient(ellipse,#0006,transparent 70%);transform:translateX(calc(var(--lift) * .7));pointer-events:none}
+.scene [data-revealed=false]{translate:0 35px;scale:.94;filter:blur(3px)}
+.scene [data-revealed=true]{scale:1;filter:blur(0)}
+.scene [data-revealed]{transition:opacity .65s,translate .8s cubic-bezier(.2,.75,.2,1),scale .8s cubic-bezier(.2,.75,.2,1),filter .65s,transform .7s cubic-bezier(.2,.75,.2,1)}
+.sceneFootnote{position:relative;color:#c1d2c2;font-size:10px;letter-spacing:.015em;transform:none}
+.sceneFootnote .liveDot{background:#a4d2a6;box-shadow:0 0 10px #a4d2a633}
+.playback{position:relative;border-top:1px solid #ffffff20;padding-top:12px}
+.steps button{color:#a8b9ac;font-size:10px!important}
+.steps button>span{border-color:#66796b;color:#afc1b1}
+.steps button[aria-current=step]{color:#f0f8e9}
+.steps button[aria-current=step]>span{background:#d5e9c1;color:#253e29;border-color:#d5e9c1;box-shadow:0 0 20px #c4e7a81a}
+.steps button[data-complete=true]{color:#c3d9bb}
+.steps button[data-complete=true]>span{background:#ffffff12;color:#c1dcaf;border-color:#87aa7950}
+.transport{background:#ffffff0a;border-color:#8ca18f66;color:#e2eddc;width:38px;height:38px}
+.transport:hover{background:#ffffff1a}
+.panel :focus-visible{outline-color:#d5e9c1}
+.scrollCue{position:relative;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:28px;margin-top:8px;color:#9eb3a1;font-size:9px;letter-spacing:.025em}
+.scrollCue button,.scrollCue a{border:0;background:none;padding:5px 0;font:inherit;color:inherit!important;display:flex;gap:7px;align-items:center}
+.scrollCue a{opacity:.8}.scrollCue a:hover{opacity:1}
+.caption{scroll-margin-top:100px}
+/* Physical edge highlights, offset shadows and independent camera movement. */
+.mailSource{box-shadow:1px 2px 0 #b8c6b9,3px 5px 0 #7d9382,0 30px 45px -15px #0005;transform:perspective(1100px) rotateY(calc(15deg + var(--orbit))) rotateZ(-3deg) translateY(calc(var(--lift) * .35))}
+.contextNote{transform:perspective(900px) rotateY(calc(9deg + var(--orbit))) rotateZ(-5deg) translateY(calc(var(--lift) * -.65));box-shadow:1px 3px 0 #8aab7d,0 18px 30px -8px #0004;position:relative;z-index:2}
+.mailReply{transform:perspective(1100px) rotateY(calc(-12deg + var(--orbit))) rotateX(3deg) translateY(calc(var(--lift) * -.7));box-shadow:2px 4px 0 #94aa99,0 32px 65px -18px #0009;position:relative;z-index:3}
+.panel[data-stage='0'] .mailSource{transform:perspective(1000px) translateX(55%) translateY(45px) rotateY(calc(-14deg + var(--orbit))) rotateZ(-5deg) scale(1.08)}
+.invoiceStack{transform-style:flat;transform:perspective(1000px) rotateY(calc(20deg + var(--orbit))) rotateZ(-7deg) translateY(calc(var(--lift) * .5))}
+.paperBehind{transform:rotate(5deg);inset:6px -7px -8px 6px;box-shadow:2px 3px 0 #c9c7bb,4px 6px 0 #929c87}
+.invoice{box-shadow:1px 2px 0 #b4b7a5,0 35px 45px -16px #0006}
+.extracted{background:#f5f5ec;border:1px solid #fff9;border-radius:20px;padding:25px 28px;transform:perspective(1000px) rotateY(calc(-15deg + var(--orbit))) translateY(calc(var(--lift) * -.6));box-shadow:2px 4px 0 #a2b196,0 25px 50px -12px #0005}
+.extracted h3{font-size:29px!important;margin:10px 0 16px!important}
+.extracted .responsibility{color:#5d6958}
+.panel[data-stage='0'] .invoiceStack{transform:perspective(1000px) translateX(62%) rotateY(calc(-18deg + var(--orbit))) rotateZ(-7deg) scale(1.03)}
+.topic{color:#e3ecda;transform:none;position:relative;z-index:4}
+.topicLabel{color:#b3c4a2;font-size:8px}.topic svg{color:#b5c5a1}
+.socialFan{transform-style:flat;gap:25px}
+.socialFan article{box-shadow:2px 4px 0 #899c85,0 35px 50px -15px #0008;border-color:#e6ebdd}
+.facebookPost{transform:perspective(1000px) rotateY(calc(22deg + var(--orbit))) rotateZ(-7deg) translateY(calc(10px + var(--lift) * .5))}
+.instagramPost{transform:perspective(1000px) rotateY(var(--orbit)) translateY(calc(var(--lift) * -.65)) scale(1.04);border:5px solid #e3e5d7!important;border-radius:24px!important;position:relative;z-index:3}
+.linkedinPost{transform:perspective(1000px) rotateY(calc(-22deg + var(--orbit))) rotateZ(7deg) translateY(calc(10px + var(--lift) * .6))}
+.panel[data-stage='0'] .topic{transform:perspective(1000px) translateY(155px) rotateY(var(--orbit)) scale(1.65);padding:24px}
+.panel[data-stage='0'] .topic strong{font-weight:500;font-size:20px;letter-spacing:-.04em}
+.editingDesk{transform:perspective(1100px) rotateY(calc(17deg + var(--orbit))) rotateX(3deg) translateY(calc(var(--lift) * .4));box-shadow:2px 3px 0 #5d7b6e,4px 7px 0 #14231d,0 30px 55px -8px #0008;border-color:#6c8c7c;border-radius:20px;background:linear-gradient(145deg,#35483d,#15291f);padding:12px}
+.videoMonitor{box-shadow:inset 0 0 0 1px #a3c3a92b;background:radial-gradient(ellipse at 80% 90%,#597953,#253e2f 70%)}
+.videoOrb{transform:translateX(calc(var(--lift) * -.4)) rotate(calc(var(--orbit) * 2));transition:transform .2s linear}
+.videoOutputs{transform:perspective(1000px) rotateY(calc(-16deg + var(--orbit))) rotateZ(2deg) translateY(calc(var(--lift) * -.6))}
+.articleOutput{box-shadow:2px 3px 0 #c3cab8,4px 6px 0 #6b8271,0 30px 55px -12px #0008;border-radius:10px}
+.outputFormats>span{background:#e7eee2;border-color:#a6b69e}
+.panel[data-stage='0'] .editingDesk{transform:perspective(1000px) translateX(34%) rotateY(calc(-15deg + var(--orbit))) rotateX(6deg) scale(1.04)}
+.issue{background:#253c3f;border-color:#5a777b;color:#dee8e5;transform:perspective(1000px) rotateY(calc(var(--orbit) * -.5))}
+.issue strong{color:#afc5c2}
+.codeWindow{transform:perspective(1000px) rotateY(calc(17deg + var(--orbit))) rotateZ(-2deg) translateY(calc(var(--lift) * .45));border-color:#75908c;box-shadow:2px 4px 0 #617976,4px 7px 0 #273f3e,0 30px 55px -12px #0009}
+.browserPreview{transform:perspective(1000px) rotateY(calc(-17deg + var(--orbit))) rotateZ(3deg) translateY(calc(var(--lift) * -.65));box-shadow:2px 4px 0 #b0c4c1,4px 7px 0 #698582,0 32px 50px -10px #0008}
+@media(min-width:701px){
+ .heading h2{min-height:2.2em;display:flex;align-items:center;justify-content:center}.perspective{height:460px}.scene{min-height:0;height:480px;scale:.9;transform-origin:center top}
+ .emailScene{grid-template-rows:245px 131px 34px;padding-top:17px;gap:17px 45px}.contextNote{padding:13px 22px}.mailSource>p{font-size:12px}.mailSender{padding-top:15px;padding-bottom:12px}.mailQueue>span{padding:7px 0}
+ .documentsScene{padding:20px 35px 35px;gap:24px;grid-template-columns:.95fr 30px 1.05fr}.invoiceParties{margin:20px 0}.invoiceTotal{padding:16px 0 20px}.extracted dl>div{padding:9px 0}.handoff{margin-top:16px;padding:13px}
+ .socialScene{grid-template-rows:45px 1fr 32px;height:495px;scale:.86;padding:0 25px;gap:13px}.instagramArtwork{height:242px}.facebookArtwork{height:167px}.socialFan{gap:28px}
+ .videoScene{padding:25px 25px 35px;gap:42px}.videoMonitor{height:220px}
+ .codingScene{grid-template-rows:42px 1fr 32px;gap:17px;padding-top:0}.codeWindow pre{min-height:171px;padding:18px 14px 13px}.testRun{min-height:86px;padding-bottom:13px}.browserContent{padding:24px}.browserContent h3{margin:15px 0 19px!important}
+}
+@media(max-width:700px){
+ .panel{border-radius:25px;padding:24px 17px 12px}.heading h2{font-size:29px!important;max-width:370px}.sceneLabel{font-size:8px;margin-bottom:12px}.tabs{border-radius:20px;gap:2px;padding:4px}.tabs button{border-radius:16px;font-size:9px!important;padding:12px 2px}.perspective{padding-top:22px}
+ .scene{transform:none}.sceneFootnote{font-size:9px}.scene::before{bottom:60px;width:94%;left:3%}
+ .mailSource{transform:perspective(800px) rotateY(calc(var(--orbit) * .6)) rotateZ(-3deg)}.contextNote{transform:perspective(800px) rotateY(calc(var(--orbit) * -.6)) rotateZ(2deg)}.mailReply{transform:perspective(800px) rotateY(calc(var(--orbit) * -.7)) rotateZ(-2deg) translateY(calc(var(--lift) * -.18))}
+ .panel[data-stage='0'] .mailSource{transform:perspective(800px) translateY(100px) rotateY(calc(-12deg + var(--orbit))) rotateZ(-5deg)}
+ .invoiceStack{transform:perspective(800px) rotateY(calc(10deg + var(--orbit))) rotateZ(-5deg)}.extracted{padding:18px 20px;transform:perspective(800px) rotateY(calc(var(--orbit) * -.5)) rotateZ(2deg);border-radius:16px}.extracted h3{font-size:23px!important}.panel[data-stage='0'] .invoiceStack{transform:perspective(800px) translateY(110px) rotateY(calc(-16deg + var(--orbit))) rotateZ(-7deg)}
+ .socialScene{padding:0 5px;gap:18px}.socialFan{gap:17px 13px}.facebookPost{transform:perspective(700px) rotateY(calc(12deg + var(--orbit) * .4)) rotateZ(-4deg)}.instagramPost{transform:perspective(700px) rotateY(calc(-10deg + var(--orbit) * .4)) rotateZ(3deg);border-width:3px!important;border-radius:16px!important}.linkedinPost{transform:perspective(900px) rotateX(5deg) rotateY(calc(var(--orbit) * -.6)) rotateZ(-2deg)}.panel[data-stage='0'] .topic{transform:perspective(800px) translateY(200px) rotateY(var(--orbit)) scale(1.1)}.panel[data-stage='0'] .topic strong{font-size:17px}
+ .editingDesk{padding:8px;transform:perspective(900px) rotateY(calc(var(--orbit) * .6)) rotateX(5deg) rotateZ(-3deg)}.videoOutputs{transform:perspective(900px) rotateY(calc(var(--orbit) * -.7)) rotateZ(2deg)}.panel[data-stage='0'] .editingDesk{transform:perspective(900px) translateY(115px) rotateY(calc(-12deg + var(--orbit))) rotateX(8deg)}
+ .codeWindow{transform:perspective(900px) rotateY(calc(var(--orbit) * .6)) rotateZ(-2deg)}.browserPreview{transform:perspective(900px) rotateY(calc(var(--orbit) * -.7)) rotateZ(2deg)}
+ .steps button{font-size:9px!important}.scrollCue{font-size:8px;margin-top:7px}.playback{padding-top:10px}.transport{width:37px;height:37px}
+}
+@media(prefers-reduced-motion:reduce){
+ :global(html):has(.showcase){scroll-behavior:auto}
+ .scrollTrack[data-immersive=true]{padding-bottom:0}.scrollTrack[data-immersive=true] .stageShell{position:relative;top:auto}
+ .scene,.scene::before,.mailSource,.contextNote,.mailReply,.invoiceStack,.extracted,.facebookPost,.instagramPost,.linkedinPost,.editingDesk,.videoOutputs,.codeWindow,.browserPreview,.topic,.issue,.videoOrb{transform:none!important}
+ .scene [data-revealed]{filter:none;translate:none}.showcase *{transition:none!important;animation:none!important}
+}
