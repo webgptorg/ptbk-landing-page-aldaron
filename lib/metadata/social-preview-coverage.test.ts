@@ -25,6 +25,7 @@ describe('public sharing preview coverage', () => {
             const metadata = createPageMetadata(definition);
             const imagePath = `${definition.path}/opengraph-image`;
             const imageUrl = new URL(createPublicUrl(`${imagePath}?v=2`));
+            if (definition.socialPreviewContentVersion) imageUrl.searchParams.set('content', definition.socialPreviewContentVersion);
             const domain = getPublicDomainRouteByHostname(imageUrl.hostname);
 
             expect(definition.isSocialPreviewImageGenerated).toBe(true);

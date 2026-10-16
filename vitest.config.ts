@@ -13,6 +13,6 @@ export default defineConfig({
         },
     },
     test: {
-        exclude: ['node_modules/**', '.next/**', '.tmp/**', 'out/**', 'tests/e2e/**'],
+        exclude: ['node_modules/**', '.git/**', '.next/**', '.tmp/**', 'out/**', 'tests/e2e/**'],
     },
 });

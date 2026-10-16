@@ -26,6 +26,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/` redirects to `/cs` or `/en` using `Accept-Language`.
 - `/cs` is the Czech homepage and source of truth for homepage structure and copy.
 - `/en` is its English localization.
+- Both homepages share the business-facing composition in `businesses/homepage`: ongoing responsibilities,
+  concrete benefits and an enquiry about deployment. Their three fictional stories (software care, customer
+  communication and accounting inputs) share localized definitions with the server-rendered summaries. One finite
+  state model owns scenario/step selection; direct controls never execute work, and scroll changes only visual depth.
+  Layered surfaces keep their own readable space at narrow widths; contact anchors remain usable before the enquiry handler is ready.
+  Optional motion stops offscreen, in hidden tabs and for reduced motion. Drafts, approval, continuation and waiting
+  remain distinct. The configured qualification presentation retains drafts, uses the existing contact source and
+  consent infrastructure, and reaches a localized `/dekujeme?source=autonomous-agendas&lang=…` confirmation.
+  The full footer retains legal and funding information. Homepage-only social content revisions supplement the
+  shared image design version without changing other pages' cards or authored image URLs.
 - `/cs/whitepaper` and `/en/whitepaper` share a light interactive APT whitepaper in `businesses/whitepaper`.
   Its scroll-linked CSS 3D layers, controlled-cycle simulation, commit/revert example and domain scenarios explain
   the authored principles without running agents or external actions. Reduced motion keeps the model still; the full
@@ -38,9 +48,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   proposition — its composition in `businesses/pro-firmy/_ProFirmyPage.tsx`, every word
   in `businesses/pro-firmy/proFirmyContent.tsx`, and its own metadata, canonical URL,
   sharing card and sitemap entry in `businesses/pro-firmy/proFirmyMetadata.ts`. It is
-  published in Czech only and names no language alternate. `/cs` and `/en` render that
-  same composition until the homepage is repositioned; repositioning means composing the
-  homepage from sections and content of its own, never changing the preserved ones.
+  published in Czech only and names no language alternate. Its composition, words and default qualification
+  behaviour remain independent of the new `/cs` and `/en` autonomous-agenda homepages.
   The legacy `/pro-firmy` permanently redirects there. The header's own default copy is
   site chrome and lives beside it in `components/headerContent.ts`, so no landing page
   owns the words every other page wears.

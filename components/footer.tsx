@@ -24,6 +24,7 @@ type FooterLink = { href: string; text: string };
 
 export interface FooterProps {
     language?: FooterLanguage;
+    claim?: string;
     productHeader?: string;
     productLinks?: FooterLink[];
     companyHeader?: string;
@@ -44,7 +45,7 @@ export interface FooterProps {
     isTechnologyIncubationShown?: boolean;
 }
 
-type FooterContent = Required<Omit<FooterProps, 'language' | 'isTechnologyIncubationShown'>>;
+type FooterContent = Required<Omit<FooterProps, 'language' | 'isTechnologyIncubationShown' | 'claim'>>;
 
 const pathnamesWithTechnologyIncubation = new Set(['/', '/cs', '/en', PRO_FIRMY_PATH, '/pro-mesta']);
 
@@ -179,10 +180,10 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
         (link) => link.href === whitepaperUrl || link.href === WHITEPAPER_PATHS[language],
     ) ? productLinks : [...productLinks, { href: whitepaperUrl, text: 'Whitepaper' }];
 
-    const claim =
+    const claim = overrides.claim ?? (
         language === 'cs'
             ? 'Vytvořte AI, která skutečně rozumí vaší firmě.'
-            : 'Create AI that truly understands your business.';
+            : 'Create AI that truly understands your business.');
     const [email, setEmail] = useState('');
     const [isConsentGiven, setIsConsentGiven] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);

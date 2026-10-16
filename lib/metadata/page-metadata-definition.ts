@@ -86,6 +86,9 @@ export type PageMetadataDefinition = {
      */
     readonly isSocialPreviewImageGenerated?: boolean;
 
+    /** Optional authored content revision, in addition to the shared artwork design version. */
+    readonly socialPreviewContentVersion?: string;
+
     /**
      * Kind of content for the Open Graph protocol, defaults to `website`
      */

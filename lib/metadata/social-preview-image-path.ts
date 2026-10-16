@@ -20,5 +20,8 @@ export function resolveSocialPreviewImagePath(definition: PageMetadataDefinition
         return definition.socialPreviewImagePath;
     }
 
-    return createGeneratedSocialPreviewImagePath(definition.isSocialPreviewImageGenerated ? definition.path : '/');
+    const imagePath = createGeneratedSocialPreviewImagePath(definition.isSocialPreviewImageGenerated ? definition.path : '/');
+    return definition.socialPreviewContentVersion
+        ? `${imagePath}&content=${encodeURIComponent(definition.socialPreviewContentVersion)}`
+        : imagePath;
 }

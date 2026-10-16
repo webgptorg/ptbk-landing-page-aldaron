@@ -2,6 +2,7 @@
 
 import { getProFirmyContent, type ProFirmyLanguage } from '@/businesses/pro-firmy/proFirmyContent';
 import { PersonalDataConsentNote } from '@/components/legal/PersonalDataConsentNote';
+import { QualificationEnquiry, type QualificationEnquiryPresentation } from '@/components/qualification-enquiry';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
@@ -11,7 +12,14 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ArrowLeft, Calendar, CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export function QualificationPopup({ language = 'cs' }: { language?: ProFirmyLanguage }) {
+export function QualificationPopup({ language = 'cs', presentation }: { language?: ProFirmyLanguage; presentation?: QualificationEnquiryPresentation }) {
+    return presentation
+        ? <QualificationEnquiry language={language} presentation={presentation} />
+        : <CompanyQualificationPopup language={language} />;
+}
+
+// Preserve the company offer's questions, appearance, attribution and default behaviour.
+function CompanyQualificationPopup({ language }: { language: ProFirmyLanguage }) {
     const { qualificationPopup } = getProFirmyContent(language);
     const questions = qualificationPopup.questions;
     const [isOpen, setIsOpen] = useState(false);

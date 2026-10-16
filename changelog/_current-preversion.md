@@ -1,5 +1,21 @@
 # Current preversion
 
+- Replaced `/cs` and `/en` with a shared, light business homepage for ongoing AI responsibilities. Three localized,
+  fictional stories show software care, customer communication and accounting-document preparation through incoming
+  needs, checked drafts, human decisions, follow-up work and waiting. Layered project, AI-care and work surfaces respond
+  to scroll without covering the example text on phones or tablets; keyboard/touch step controls, reduced motion
+  and server-rendered summaries keep the same information available without motion or working client scripts.
+  Contact anchors remain usable until the enquiry handler is ready. Enquiries reuse the existing qualification source and consent,
+  retain drafts through close/failure, prevent duplicate pending submissions and reach a localized confirmation.
+  Updated homepage metadata and generated social artwork; preserved the company-data offer, whitepaper and branded
+  domain routing. Verification and limits are recorded in `docs/autonomous-agendas-homepage.md`.
+  Cookie/booking-notice preservation checks now visit `/cs/pro-firmy`, with cookie layout coverage retained for both
+  homepages and added for the company offer. The Studio seek check waits for every expected source to be ready before
+  measuring synchronization, including the intended startup gaps in an appended recording part.
+
+- Unit-test discovery now excludes Git's private check worktrees, so archived tests cannot import the current
+  workspace's modules and report false failures when running the repository suite.
+
 - Introduced **Studio** with addressable **Nahrávání** and **Střižna** sections and persistent workshop projects;
   old recording addresses redirect to their recording view. One authority and protected autosave span both sections,
   and changing sections keeps an active capture running. Finalized/interrupted recordings open or join projects by

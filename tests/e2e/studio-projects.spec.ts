@@ -279,6 +279,11 @@ test('Studio opens a finalized multitrack recording without copying, renders sav
     const deviations: { seconds: number; maximumDeviationSeconds: number }[] = [];
     for (const seconds of [1.5, 7.8, 8.1, 9.5, 15.5]) {
         await seek.fill(String(seconds));
+        // A clip transition can briefly have no loading/buffering elements before the new sources register.
+        // Wait for positive readiness too. At 8.1 s only the screen has begun in the appended part;
+        // the camera and microphone deliberately retain their 0.37 s and 0.71 s startup offsets.
+        const EXPECTED_SOURCE_COUNT = seconds === 8.1 ? 1 : 3;
+        await expect(page.locator('[data-source-state=ready]')).toHaveCount(EXPECTED_SOURCE_COUNT);
         await expect
             .poll(async () => page.locator('[data-source-state=loading], [data-source-state=buffering]').count())
             .toBe(0);
@@ -326,7 +331,7 @@ test('Studio opens a finalized multitrack recording without copying, renders sav
             }
             return { maximumDeviationSeconds: Math.max(0, ...deviations), readyCount: deviations.length };
         }, seconds);
-        expect(result.readyCount).toBeGreaterThan(0);
+        expect(result.readyCount).toBe(EXPECTED_SOURCE_COUNT);
         expect(result.maximumDeviationSeconds).toBeLessThanOrEqual(0.1);
         deviations.push({ seconds, maximumDeviationSeconds: result.maximumDeviationSeconds });
     }
