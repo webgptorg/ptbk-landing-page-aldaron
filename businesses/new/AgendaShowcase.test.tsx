@@ -34,6 +34,7 @@ describe('agenda demonstrations', () => {
     it('changes the actual work and permits deliberate inspection of each stage', () => {
         render(<AgendaShowcase />);
         expect(screen.queryByText('Dobrý den, kdy můžeme očekávat naši objednávku?')).not.toBeNull();
+        step(0);
         expect(screen.getByText('FIREMNÍ KONTEXT').parentElement?.getAttribute('aria-hidden')).toBe('true');
         step(1);
         expect(screen.getByText('FIREMNÍ KONTEXT').parentElement?.getAttribute('aria-hidden')).toBe('false');
@@ -71,8 +72,9 @@ describe('agenda demonstrations', () => {
         expect(screen.getByText('Zpráva byla přijata')).not.toBeNull();
     });
 
-    it('plays once, pauses offscreen or in a hidden tab, and replays only on request', () => {
+    it('plays once on request, pauses offscreen or in a hidden tab, and permits replay', () => {
         render(<AgendaShowcase />);
+        fireEvent.click(screen.getByRole('button', { name: 'Přehrát ukázku' }));
         act(() => vi.advanceTimersByTime(2800));
         expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('1');
         act(() => intersect(false));
@@ -90,6 +92,22 @@ describe('agenda demonstrations', () => {
         act(() => vi.advanceTimersByTime(20000));
         expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('3');
         fireEvent.click(screen.getByRole('button', { name: 'Přehrát ukázku znovu' }));
+        expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('0');
+    });
+
+    it('shows a complete compact preview without an unsolicited reset or timer', () => {
+        vi.stubGlobal('innerWidth', 390);
+        render(<AgendaShowcase />);
+        expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('3');
+        act(() => vi.advanceTimersByTime(30000));
+        expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('3');
+        fireEvent.click(screen.getByRole('tab', { name: 'Sociální sítě' }));
+        expect(screen.getAllByText(/Naplánováno ·/)).toHaveLength(3);
+        expect(screen.getByRole('group', { name: 'Facebook, Instagram a LinkedIn' }).getAttribute('tabindex')).toBe('0');
+        fireEvent.click(screen.getByRole('button', { name: 'Přehrát ukázku' }));
+        expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('0');
+        fireEvent.click(screen.getByRole('button', { name: 'Pozastavit ukázku' }));
+        act(() => vi.advanceTimersByTime(30000));
         expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('0');
     });
 
@@ -119,8 +137,8 @@ describe('agenda demonstrations', () => {
         fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
         expect(panel.style.getPropertyValue('--orbit')).not.toBe(before);
-        expect(panel.getAttribute('data-stage')).toBe('0');
-        fireEvent.click(screen.getByRole('button', { name: 'Pozastavit ukázku' }));
+        expect(panel.getAttribute('data-stage')).toBe('3');
+        step(2);
         const frozen = panel.style.getPropertyValue('--orbit');
         top = -400;
         fireEvent.scroll(window);

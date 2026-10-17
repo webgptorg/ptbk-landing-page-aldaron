@@ -54,7 +54,7 @@ function SocialScene({ stage }: SceneProps) {
 
     return <div className={`${s.scene} ${s.socialScene}`}>
         <div className={s.topic}><strong>{t("Méně rutiny. Více času.")}</strong><ArrowDown size={16} /></div>
-        <div className={s.socialFan} data-revealed={stage >= 1} aria-hidden={stage < 1}>
+        <div className={s.socialFan} role="group" aria-label={t('Facebook, Instagram a LinkedIn')} tabIndex={stage >= 1 ? 0 : -1} data-revealed={stage >= 1} aria-hidden={stage < 1}>
             <article className={s.facebookPost}>
                 <header className={s.socialHeader}><span className={s.networkMark}>{t("f")}</span><div><strong>{t("Facebook")}</strong></div></header>
                 <p>{t("Pět drobností, které vám usnadní pracovní den. Kterou vyzkoušíte jako první?")}</p>

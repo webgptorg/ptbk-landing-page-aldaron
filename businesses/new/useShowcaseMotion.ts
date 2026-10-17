@@ -32,8 +32,11 @@ export function useShowcaseMotion(
                 ? Math.max(0, Math.min(1, (84 - bounds.top) / travel))
                 : Math.max(0, Math.min(1, (window.innerHeight - panel.getBoundingClientRect().top) / (window.innerHeight + panel.offsetHeight)));
             panel.style.setProperty('--progress', progress.toFixed(4));
-            panel.style.setProperty('--orbit', `${(10 - progress * 20).toFixed(2)}deg`);
-            panel.style.setProperty('--lift', `${(32 - progress * 64).toFixed(2)}px`);
+            const compact = window.innerWidth <= 760;
+            const orbit = compact ? 3 : 10;
+            const lift = compact ? 8 : 32;
+            panel.style.setProperty('--orbit', `${(orbit - progress * orbit * 2).toFixed(2)}deg`);
+            panel.style.setProperty('--lift', `${(lift - progress * lift * 2).toFixed(2)}px`);
             panel.style.setProperty('--light', `${(25 + progress * 50).toFixed(2)}%`);
             if (canPin) setScrollStage(Math.min(3, Math.floor(progress * 4)));
         }
@@ -41,6 +44,8 @@ export function useShowcaseMotion(
             if (!frame && inView && !document.hidden && !media.matches && !paused) frame = requestAnimationFrame(updateDepth);
         }
         function measure() {
+            // The cue always reserves its desktop height, preventing a pin/unpin
+            // feedback loop when the viewport sits at the height threshold.
             canPin = !media.matches && window.innerWidth >= 900 && shell!.offsetHeight + 108 <= window.innerHeight;
             setImmersive(canPin);
             requestUpdate();

@@ -22,7 +22,7 @@ export function AgendaShowcase({ initialScenario = 'email' }: { initialScenario?
     const { t, locale, path } = useSiteLocale();
 
     const [active, setActive] = useState<ScenarioId>(initialScenario);
-    const [stage, setStage] = useState(0);
+    const [stage, setStage] = useState(3);
     const [mode, setMode] = useState<'scroll' | 'auto' | 'paused'>('scroll');
     const track = useRef<HTMLElement>(null);
     const shell = useRef<HTMLDivElement>(null);
@@ -31,16 +31,17 @@ export function AgendaShowcase({ initialScenario = 'email' }: { initialScenario?
     const scrollDriven = immersive && mode === 'scroll';
     const paused = mode === 'paused';
     const id = useId();
-    const shownStage = reduced ? 3 : scrollDriven ? scrollStage : stage;
+    // Compact screens show a complete, stable composition until playback is requested.
+    const shownStage = reduced ? 3 : scrollDriven ? scrollStage : mode === 'scroll' ? 3 : stage;
     const tab = tabs.find(item => item.id === active)!;
 
     useEffect(() => {
-        if (scrollDriven || paused || reduced || !visible || stage >= 3) return;
+        if (mode !== 'auto' || reduced || !visible || stage >= 3) return;
         const timer = window.setTimeout(() => setStage(value => Math.min(3, value + 1)), 2800);
         return () => window.clearTimeout(timer);
-    }, [scrollDriven, paused, reduced, visible, stage, active]);
+    }, [mode, reduced, visible, stage, active]);
 
-    function select(value: ScenarioId) { setActive(value); setStage(0); setMode('scroll'); }
+    function select(value: ScenarioId) { setActive(value); setStage(3); setMode('scroll'); }
     function navigate(event: KeyboardEvent<HTMLButtonElement>, index: number) {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
@@ -66,17 +67,17 @@ export function AgendaShowcase({ initialScenario = 'email' }: { initialScenario?
                         {t(step)}
                     </button>
                 </li>)}</ol>
-                {!reduced && <button className={s.transport} type="button" aria-label={t(scrollDriven ? 'Přehrát ukázku' : stage >= 3 ? 'Přehrát ukázku znovu' : paused ? 'Pokračovat v ukázce' : 'Pozastavit ukázku')} onClick={() => {
-                    if (scrollDriven || stage >= 3) { setStage(0); setMode('auto'); }
+                {!reduced && <button className={s.transport} type="button" aria-label={t(mode === 'scroll' ? 'Přehrát ukázku' : stage >= 3 ? 'Přehrát ukázku znovu' : paused ? 'Pokračovat v ukázce' : 'Pozastavit ukázku')} onClick={() => {
+                    if (mode === 'scroll' || stage >= 3) { setStage(0); setMode('auto'); }
                     else setMode(paused ? 'auto' : 'paused');
                 }}>
-                    {scrollDriven ? <Play size={17} /> : stage >= 3 ? <RotateCcw size={17} /> : paused ? <Play size={17} /> : <Pause size={17} />}
+                    {mode === 'scroll' ? <Play size={17} /> : stage >= 3 ? <RotateCcw size={17} /> : paused ? <Play size={17} /> : <Pause size={17} />}
                 </button>}
             </div>
-            {immersive && !reduced && <div className={s.scrollCue}>
+            <div className={s.scrollCue}>{immersive && !reduced && <>
                 {scrollDriven ? <span><ArrowDown size={13} />{t('Posouvejte stránku')}</span> : <button type="button" onClick={() => setMode('scroll')}><ArrowDown size={13} />{t('Procházet scrollováním')}</button>}
                 <a href={`#${id}-after`}>{t("Přeskočit ukázku ")}<ArrowDown size={12} /></a>
-            </div>}
+            </>}</div>
         </div>
         </div>
         </section>

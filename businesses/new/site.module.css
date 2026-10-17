@@ -18,7 +18,7 @@
 .hero>*{position:relative}
 .site .textLink{color:#303fa8!important}
 /* An open data section continues the same canvas as the demonstrations. */
-.security{background:none;color:var(--ink);border-radius:0;padding:130px 0 80px;margin:0 auto;max-width:1040px;gap:90px}
+.security{background:none;color:var(--ink);border-radius:0;padding:96px 0;margin:0 auto;max-width:none;gap:80px}
 .security h2{font-size:clamp(38px,4.4vw,56px);letter-spacing:-.055em}
 .security p{color:var(--muted);font-size:18px;line-height:1.7;margin:25px 0}
 .security .textLink{color:#303fa8!important}
@@ -34,7 +34,7 @@
 .homepage .hero{padding-bottom:72px}
 .homepage .hero .actions{gap:28px}
 .homepage .hero .textLink{font-size:14px;font-weight:550;min-height:44px}
-.homepage>.section{padding:96px 0}
+.homepage>.section{padding:84px 0;border-top:1px solid var(--line)}
 .homepage .sectionTitle{margin-bottom:40px}
 .homepage .audience{gap:100px;max-width:1000px}
 .homepage .audience>div{padding:0;border:0}
@@ -51,20 +51,22 @@
 .homepage .founder{background:none;border-radius:0;padding:0;grid-template-columns:175px 1fr;gap:28px}
 .homepage .founderPortrait{height:240px}
 .homepage .founder .secondaryButton{display:flex;min-height:44px;margin-top:16px;padding:0;background:none;border:0;justify-content:flex-start;color:#303fa8;font-size:13px}
-.homepage .ctaBand{display:block;text-align:center;padding:70px 0}
+.homepage .ctaBand{display:block;text-align:center;padding:70px 0;border-top:1px solid var(--line)}
 .homepage .ctaBand h2{font-size:clamp(30px,3.4vw,44px);text-wrap:balance}
 .homepage .ctaBand .button{margin-top:28px}
 @media(max-width:1050px){.security{gap:45px}.homepage .founder{grid-template-columns:120px 1fr;gap:20px}}
 @media(max-width:760px){
- .security{padding:80px 0 35px;gap:45px;grid-template-columns:1fr;max-width:580px}
+ .security{padding:64px 0;gap:36px;grid-template-columns:1fr;max-width:580px;text-align:center}
+ .security>div:first-child{max-width:420px;margin-inline:auto}.security h2{font-size:38px}.security p{margin:20px auto}.security .textLink{min-height:44px;justify-content:center}
  .security p{font-size:16px}.securityDiagram{max-width:430px;width:100%;justify-self:center}.securityDiagram .small{font-size:12px}
- .homepage .hero{padding-bottom:48px}.homepage .hero .actions{gap:12px 24px}
- .homepage>.section{padding:62px 0}.homepage .sectionTitle{margin-bottom:28px}.homepage .audience{gap:30px}
- .homepage .pricingSummary{gap:26px;margin-top:32px}.homepage .priceCard+.priceCard{padding-left:26px}.homepage .price{font-size:36px}.homepage .price span{font-size:12px}
- .homepage .founders{gap:36px}.homepage .founder{grid-template-columns:125px 1fr;gap:24px}.homepage .founderPortrait{height:190px}
+ .homepage .hero{padding:48px 0}.homepage .hero .actions{gap:12px;flex-direction:column}.homepage .hero .actions>.button{min-width:220px}.homepage .hero>p{max-width:370px}.homepage .hero h1{font-size:clamp(32px,8.5vw,44px);line-height:1.12}
+ .homepage>.section{padding:56px 0}.homepage .sectionTitle{margin:0 auto 30px;text-align:center;max-width:440px}.homepage .sectionTitle h2{font-size:30px;line-height:1.15;text-wrap:balance}.homepage .sectionTitle .actions{justify-content:center}.homepage .audience{gap:28px;max-width:440px;margin-inline:auto}.homepage .audience>div+div{padding-top:26px;border-top:1px solid var(--line)}
+ .homepage .wideLink{padding:30px 0;align-items:center;text-align:center;gap:16px}.homepage .wideLink h3{font-size:21px;line-height:1.3}
+ .homepage .pricingSummary{grid-template-columns:1fr;gap:30px;margin:32px auto 0;max-width:440px}.homepage .priceCard,.homepage .priceCard:last-child{align-items:center;text-align:center;padding:0;gap:16px}.homepage .priceCard+.priceCard{border-left:0;border-top:1px solid var(--line);padding:30px 0 0}.homepage .price{font-size:42px}.homepage .price span{font-size:13px}.homepage .priceCard h3{font-size:25px}.homepage .priceCard p{font-size:15px}.homepage .priceCard .button{font-size:14px;padding:14px 22px;min-width:190px}.homepage .priceNote{text-align:center;font-size:12px;line-height:1.7;margin-top:26px!important}
+ .homepage .founders{gap:30px;max-width:440px;margin-inline:auto}.homepage .founder{grid-template-columns:125px 1fr;gap:24px}.homepage .founderPortrait{height:190px}
  .homepage .ctaBand{padding:45px 0}
 }
-@media(max-width:420px){.homepage .pricingSummary{gap:18px}.homepage .priceCard+.priceCard{padding-left:18px}.homepage .price{font-size:32px}.homepage .priceCard h3{font-size:21px}.homepage .founder{grid-template-columns:105px 1fr;gap:18px}.securityDiagram{grid-template-columns:1fr 90px 1fr}}
+@media(max-width:420px){.homepage .founder{grid-template-columns:105px 1fr;gap:18px}.securityDiagram{grid-template-columns:1fr 90px 1fr}.homepage .founder strong{font-size:11px}.homepage .founder h3{font-size:22px}}
 .priceCard:last-child{background:linear-gradient(135deg,#f3f5ff,#eef2fd);border-color:#cbd4f0}
 .languageSwitch{display:flex;gap:2px;padding:3px;border:1px solid #e0e4ef;border-radius:999px;flex-shrink:0;font-size:11px;font-weight:650;letter-spacing:.02em}
 .languageSwitch a{padding:5px 8px;border-radius:999px;color:#697187}

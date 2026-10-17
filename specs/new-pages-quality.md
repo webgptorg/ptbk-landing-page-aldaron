@@ -54,3 +54,7 @@ Pod `/new` zůstává technický `noindex` a žádné zařazení do sitemap. To 
 Cílené jednotkové testy ekonomiky, URL parseru a PDF definice; prohlížečové testy interakcí, kontaktu/PDF, mobilu a rout; lint; produkční build a potom TypeScript. Prohlédnout skutečné screenshoty a renderovaný PDF report, ne jen zdrojový kód. Produkční GET ověří obsah stejného commitu; testovací kontakty neposílat na skutečnou produkci. Netvrdit plnou regresní sadu všech ostatních aplikací, pokud běží jen cílené testy.
 
 Před finálním přesunem na `/` vlastník ověří skutečnou připravenost aplikace, párování a E2E implementace, schvalování, dostupný onboarding a smluvní podmínky. Cílové znění stránky tyto technické a obchodní kontroly nenahrazuje; tato změna je neimplementuje uvnitř enginu.
+
+## Mobilní doladění — 17. října 2026
+
+Ukázky mají souvislý světle modrošedý pás přes šířku stránky, další hlavní sekce jemné dělicí linky. Nevznikají oddělené tmavé ostrovy. Mobilní nadpisy a bezpečnostní schéma jsou vycentrované; ceník je pod 760 px v jednom sloupci. Texty uvnitř pracovních ukázek zůstávají čitelné, jejich ovládání je dostupné nad scénou. Časové přehrávání se na kompaktních displejích nespouští samo. Ověření musí zahrnovat skutečné vykreslení při šířkách telefonu, tabletu a desktopu; samotná desktopová kontrola nestačí. Náhledy různých CSS viewportů nejsou test fyzických zařízení ani jiných prohlížečových enginů.
