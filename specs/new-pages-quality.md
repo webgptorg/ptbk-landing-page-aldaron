@@ -58,3 +58,9 @@ Před finálním přesunem na `/` vlastník ověří skutečnou připravenost ap
 ## Mobilní doladění — 17. října 2026
 
 Ukázky mají souvislý světle modrošedý pás přes šířku stránky, další hlavní sekce jemné dělicí linky. Nevznikají oddělené tmavé ostrovy. Mobilní nadpisy a bezpečnostní schéma jsou vycentrované; ceník je pod 760 px v jednom sloupci. Texty uvnitř pracovních ukázek zůstávají čitelné, jejich ovládání je dostupné nad scénou. Časové přehrávání se na kompaktních displejích nespouští samo. Ověření musí zahrnovat skutečné vykreslení při šířkách telefonu, tabletu a desktopu; samotná desktopová kontrola nestačí. Náhledy různých CSS viewportů nejsou test fyzických zařízení ani jiných prohlížečových enginů.
+
+## Vizuální návaznost na whitepaper — 18. října 2026
+
+Referencí pro `/new` je `/cs/whitepaper`: nadpisy používají stávající Outfit s vahou 500, text Inter, hero výrazné měřítko a další sekce velkorysé rozestupy. Barevnost zůstává modrá podle původního loga: inkoustové akce, tlumený modrý druhý řádek hlavního sdělení a bílé či velmi světle modrošedé plochy. Navigace a přepínač jazyka mají klidnější hierarchii. Prostorové objekty mají tenké světlé hrany a měkké stíny; tvrdé tmavé extruze se nepoužívají. Schéma vlastního serveru a aplikace tvoří dva samostatné prostorové objekty na otevřeném pozadí.
+
+Na úvodu střídají bílé sekce souvislé jemně tónované pásy ukázek, vhodnosti produktu a kalkulačky. Ceník zůstává otevřený; kalkulačka je výraznou samostatnou kartou. Pod 760 px se zachová mobilní kompozice, dostupné přehrávání, vodorovný pás sociálních sítí i samostatné cenové sloupce pod sebou. Pohybové chování se touto vizuální úpravou nemění. Text, ceny, měny, odkazy, formuláře a rozbalitelné podrobnosti zůstávají zachované. Whitepaper slouží jako reference; jeho vlastní implementace se nemění.

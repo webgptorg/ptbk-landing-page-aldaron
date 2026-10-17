@@ -36,7 +36,7 @@ export function NewLandingPage({ partnership = false }: { partnership?: boolean 
         <SecuritySection />
         <AudienceSection />
         <div className={s.wideLink}><div><h3>{t("Ne každý proces potřebuje stejný nástroj.")}</h3></div><Link className={s.textLink} href={path('srovnani')}>{t("Najít správný přístup ")}<ArrowRight size={18}/></Link></div>
-        <section className={s.section} id="cenik"><div className={s.sectionTitle}><h2>{t("Začněte jednou agendou.")}</h2></div><PricingCards /></section>
+        <section className={`${s.section} ${s.pricingSection}`} id="cenik"><div className={s.sectionTitle}><h2>{t("Začněte jednou agendou.")}</h2></div><PricingCards /></section>
         <EconomicsCalculator />
         <section className={s.section}><div className={s.sectionTitle}><h2>{t("Za Promptbookem stojíme oba.")}</h2><div className={s.actions}><Link className={s.textLink} href={path('o-nas')}>{t("Náš příběh ")}<ArrowRight size={17}/></Link></div></div><Founders compact /></section>
         <ClosingCta />
