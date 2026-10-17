@@ -3,6 +3,13 @@ import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry'
 import { describe, expect, it } from 'vitest';
 
 describe('getLanguageFromPathname', () => {
+    it('recognizes the isolated bilingual launch site without prefix collisions', () => {
+        expect(getLanguageFromPathname('/new')).toBe('cs');
+        expect(getLanguageFromPathname('/new/cenik')).toBe('cs');
+        expect(getLanguageFromPathname('/new/en')).toBe('en');
+        expect(getLanguageFromPathname('/new/en/cenik')).toBe('en');
+        expect(getLanguageFromPathname('/news')).toBe('en');
+    });
     it('agrees with every page about the language that page is written in', () => {
         const disagreements = INDEXED_PAGE_METADATA_DEFINITIONS.filter(
             (definition) => getLanguageFromPathname(definition.path) !== definition.language,

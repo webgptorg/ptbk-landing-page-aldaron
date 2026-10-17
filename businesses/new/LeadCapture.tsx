@@ -1,5 +1,6 @@
 'use client';
 
+import { useSiteLocale } from './LocaleProvider';
 import { createContext, useContext, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { subscribeToWaitlist } from '@/lib/subscription/subscribeToWaitlist';
@@ -20,6 +21,8 @@ export function useLeadCapture() {
 
 /** Uses the site's existing server-side Contact collection, not a parallel lead store. */
 export function LeadCaptureProvider({ children }: { children: ReactNode }) {
+    const { t, locale, path } = useSiteLocale();
+
     const [request, setRequest] = useState<LeadRequest | null>(null);
     const [email, setEmail] = useState('');
     const [fullname, setFullname] = useState('');
@@ -31,7 +34,7 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
     const submitting = useRef(false);
     const trigger = useRef<HTMLElement | null>(null);
     const id = useId();
-    const consent = getPersonalDataConsentNote('cs', 'formal');
+    const consent = getPersonalDataConsentNote(locale, 'formal');
     function open(next: LeadRequest) {
         trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         setRequest(next); setEmail(''); setFullname(''); setNote(''); setSaved(false); setDone(false); setError('');
@@ -57,18 +60,18 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
         } catch { setError('Akci se nepodařilo dokončit. Zkuste to znovu; zadané údaje zůstaly zachované.'); }
         finally { submitting.current = false; setBusy(false); }
     }
-    return <LeadContext.Provider value={open}>{children}
+    return <LeadContext.Provider value={open}>{t(children)}
         <Dialog open={request !== null} onOpenChange={(value) => { if (!value && !submitting.current) setRequest(null); }}>
-            <DialogContent className={s.leadDialog} closeLabel="Zavřít" onCloseAutoFocus={(event) => { event.preventDefault(); trigger.current?.focus(); }}>
-                <DialogHeader><DialogTitle>{done ? (request?.kind === 'pdf' ? 'Výpočet je připravený.' : 'Děkujeme. Ozveme se vám.') : request?.kind === 'pdf' ? 'Kam se vám můžeme ozvat?' : 'Pojďme to probrat.'}</DialogTitle>
-                    <DialogDescription>{request?.kind === 'pdf' ? 'Zadejte e-mail a stáhněte PDF. K žádosti uložíme váš kontakt a odkaz s parametry této kalkulace. Nepřihlašujeme vás k newsletteru.' : request?.topic}</DialogDescription></DialogHeader>
-                {done ? <div className={s.formSuccess}><Check size={28} /><p>{request?.kind === 'pdf' ? 'PDF se stahuje do vašeho zařízení. E-mail jsme uložili k vaší žádosti, samotné PDF neposíláme e-mailem.' : 'Vaše zpráva je v našem kontaktním systému. Obrátí se na vás příslušný člen týmu.'}</p><button className={s.button} onClick={() => setRequest(null)}>Hotovo</button></div> :
+            <DialogContent className={s.leadDialog} closeLabel={t("Zavřít")} onCloseAutoFocus={(event) => { event.preventDefault(); trigger.current?.focus(); }}>
+                <DialogHeader><DialogTitle>{t(done ? (request?.kind === 'pdf' ? 'Výpočet je připravený.' : 'Děkujeme. Ozveme se vám.') : request?.kind === 'pdf' ? 'Kam se vám můžeme ozvat?' : 'Pojďme to probrat.')}</DialogTitle>
+                    <DialogDescription>{t(request?.kind === 'pdf' ? 'Zadejte e-mail a stáhněte PDF. K žádosti uložíme váš kontakt a odkaz s parametry této kalkulace. Nepřihlašujeme vás k newsletteru.' : request?.topic)}</DialogDescription></DialogHeader>
+                {done ? <div className={s.formSuccess}><Check size={28} /><p>{t(request?.kind === 'pdf' ? 'PDF se stahuje do vašeho zařízení. E-mail jsme uložili k vaší žádosti, samotné PDF neposíláme e-mailem.' : 'Vaše zpráva je v našem kontaktním systému. Obrátí se na vás příslušný člen týmu.')}</p><button className={s.button} onClick={() => setRequest(null)}>{t("Hotovo")}</button></div> :
                     <form onSubmit={submit} className={s.leadForm} aria-busy={busy}>
-                        <label htmlFor={`${id}-email`}>Váš e-mail<input id={`${id}-email`} name="email" type="email" autoComplete="email" required maxLength={254} value={email} disabled={busy || saved} onChange={(event) => setEmail(event.target.value)} /></label>
-                        {request?.kind !== 'pdf' && <><label htmlFor={`${id}-name`}>Jméno <span>(nepovinné)</span><input id={`${id}-name`} autoComplete="name" maxLength={150} value={fullname} disabled={busy || saved} onChange={(event) => setFullname(event.target.value)} /></label><label htmlFor={`${id}-note`}>S čím chcete pomoci? <span>(nepovinné)</span><textarea id={`${id}-note`} rows={3} maxLength={2000} value={note} disabled={busy || saved} onChange={(event) => setNote(event.target.value)} /></label></>}
-                        <p className={s.small}>{consent.prefix}<Link href={sitePath('soukromi')}>{consent.privacyPolicyLinkText}</Link>. Údaje použijeme k vyřízení této žádosti.</p>
-                        {error && <p role="alert" className={s.error}>{saved ? 'Kontakt je uložený, ale PDF se nepodařilo vytvořit. Zkuste přípravu znovu, kontakt znovu neodešleme.' : error}</p>}
-                        <button type="submit" className={s.button} disabled={busy}>{busy && <Loader2 className={s.spin} size={18} />}{busy ? 'Zpracovávám…' : request?.kind === 'pdf' ? (saved ? 'Znovu připravit PDF' : 'Uložit e-mail a stáhnout PDF') : 'Odeslat zprávu'}<ArrowUpRight size={18} /></button>
+                        <label htmlFor={`${id}-email`}>{t("Váš e-mail")}<input id={`${id}-email`} name="email" type="email" autoComplete="email" required maxLength={254} value={email} disabled={busy || saved} onChange={(event) => setEmail(event.target.value)} /></label>
+                        {request?.kind !== 'pdf' && <><label htmlFor={`${id}-name`}>{t("Jméno ")}<span>{t("(nepovinné)")}</span><input id={`${id}-name`} autoComplete="name" maxLength={150} value={fullname} disabled={busy || saved} onChange={(event) => setFullname(event.target.value)} /></label><label htmlFor={`${id}-note`}>{t("S čím chcete pomoci? ")}<span>{t("(nepovinné)")}</span><textarea id={`${id}-note`} rows={3} maxLength={2000} value={note} disabled={busy || saved} onChange={(event) => setNote(event.target.value)} /></label></>}
+                        <p className={s.small}>{t(consent.prefix)}<Link href={path('soukromi')}>{t(consent.privacyPolicyLinkText)}</Link>{t(". Údaje použijeme k vyřízení této žádosti.")}</p>
+                        {error && <p role="alert" className={s.error}>{t(saved ? 'Kontakt je uložený, ale PDF se nepodařilo vytvořit. Zkuste přípravu znovu, kontakt znovu neodešleme.' : error)}</p>}
+                        <button type="submit" className={s.button} disabled={busy}>{busy && <Loader2 className={s.spin} size={18} />}{t(busy ? 'Zpracovávám…' : request?.kind === 'pdf' ? (saved ? 'Znovu připravit PDF' : 'Uložit e-mail a stáhnout PDF') : 'Odeslat zprávu')}<ArrowUpRight size={18} /></button>
                     </form>}
             </DialogContent>
         </Dialog>
@@ -76,6 +79,8 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
 }
 
 export function LeadButton({ children, topic = 'Zájem o nasazení Promptbooku', secondary = false, className = '' }: { children: ReactNode; topic?: string; secondary?: boolean; className?: string }) {
+    const { t, locale, path } = useSiteLocale();
+
     const open = useLeadCapture();
-    return <button type="button" className={`${secondary ? s.secondaryButton : s.button} ${className}`} onClick={() => open({ topic })}>{children}<ArrowUpRight size={17} aria-hidden="true" /></button>;
+    return <button type="button" className={`${secondary ? s.secondaryButton : s.button} ${className}`} onClick={() => open({ topic })}>{t(children)}<ArrowUpRight size={17} aria-hidden="true" /></button>;
 }

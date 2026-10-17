@@ -1,3 +1,5 @@
+import { formatCurrency, licencePrice, translator, type SiteLocale } from './localization';
+import { displayFieldValue, localizedFieldLabel } from './localizedCalculator';
 import type { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
 import { calculateEconomics, SCENARIOS } from './economics';
 import { COMMERCIAL_TERMS } from './commercialTerms';
@@ -6,38 +8,39 @@ import { FIELD_LABELS } from './calculatorFields';
 import { loadWorkshopPdfAssets } from '@/lib/workshops/workshopPdfAssets';
 import { WORKSHOP_PDF_FONT_FILES } from '@/lib/workshops/workshopPdfBrand';
 
-const money = (n: number) => new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 2 }).format(n) + ' Kč';
 const table = (rows: [string, string][]): Content => ({
     table: { widths: ['*', 165], dontBreakRows: true, body: rows.map(([name,value],i) => [
-        { text:name, fillColor:i % 2 ? '#ffffff':'#f1f6f2', margin:[7,6,7,6] },
-        { text:value, fillColor:i % 2 ? '#ffffff':'#f1f6f2', margin:[7,6,7,6], alignment:'right' },
+        { text:name, fillColor:i % 2 ? '#ffffff':'#f1f2f6', margin:[7,6,7,6] },
+        { text:value, fillColor:i % 2 ? '#ffffff':'#f1f2f6', margin:[7,6,7,6], alignment:'right' },
     ]) }, layout:'noBorders', margin:[0,10,0,18],
 });
 const heading = (text: string): Content => ({ text, font:'Outfit', fontSize:20, margin:[0,12,0,13], headlineLevel:1 });
 
 /** A real, self-contained A4 report. Snapshot includes inactive inputs; calculated values use normalized periods. */
-export function createCalculationPdfDefinition(state: CalculatorState): TDocumentDefinitions {
+export function createCalculationPdfDefinition(state: CalculatorState, locale: SiteLocale = 'cs'): TDocumentDefinitions {
+    const t = translator(locale);
+    const money = (n: number) => formatCurrency(n, locale, state.input.exchangeRate, 2);
     const r = calculateEconomics(state.input);
     const p = r.partner;
     const company = state.mode === 'company';
-    const period = r.isPilot ? '30 dní pilotu Start' : `${r.input.horizonMonths} měsíců Business`;
+    const period = r.isPilot ? t('30 dní pilotu Start') : `${r.input.horizonMonths} ${t('měsíců')} Business`;
     const amount = company ? r.horizonBenefit : p.horizonContribution;
-    const title = company ? 'Ekonomika vaší agendy' : 'Ekonomika partnerské služby';
+    const title = t(company ? 'Ekonomika vaší agendy' : 'Ekonomika partnerské služby');
     const inputRows: [string,string][] = NUMERIC_KEYS.map(key => [
-        key === 'volume' ? SCENARIOS[state.scenario].volumeLabel : key === 'unitsPerItem' ? SCENARIOS[state.scenario].unitsLabel : FIELD_LABELS[key], String(state.input[key]),
+        localizedFieldLabel(key, key === 'volume' ? SCENARIOS[state.scenario].volumeLabel : key === 'unitsPerItem' ? SCENARIOS[state.scenario].unitsLabel : FIELD_LABELS[key], locale), String(displayFieldValue(key,state.input[key],locale,state.input.exchangeRate)),
     ]);
-    return {
+    const definition: TDocumentDefinitions = {
         pageSize:'A4',pageMargins:[44,65,44,48],
-        defaultStyle:{font:'Inter',fontSize:9,color:'#203d34',lineHeight:1.25},
-        info:{title:`Promptbook — ${title}`,author:'Promptbook / AI Web s.r.o.',subject:SCENARIOS[state.scenario].title},
+        defaultStyle:{font:'Inter',fontSize:9,color:'#1e243f',lineHeight:1.25},
+        info:{title:`Promptbook — ${title}`,author:'Promptbook / AI Web s.r.o.',subject:t(SCENARIOS[state.scenario].title)},
         header:{columns:[{image:'promptbook-logo',width:24},{text:'promptbook.',font:'Outfit',fontSize:17,margin:[9,1,0,0]}],margin:[44,25,44,0]},
-        footer:(page,count) => ({columns:[{text:'Orientační kalkulace · AI Web s.r.o. · IČO 21012288',width:'*'},{text:`${page} / ${count}`,alignment:'right',width:50}],margin:[44,15,44,0],fontSize:8,color:'#627b6c'}),
+        footer:(page,count) => ({columns:[{text:t('Orientační kalkulace · AI Web s.r.o. · IČO 21012288'),width:'*'},{text:`${page} / ${count}`,alignment:'right',width:50}],margin:[44,15,44,0],fontSize:8,color:'#60667d'}),
         pageBreakBefore:(node,queries) => !!node.headlineLevel && queries.getFollowingNodesOnPage().length === 0,
         content:[
             {text:title,font:'Outfit',fontSize:30,margin:[0,10,0,12]},
-            {text:`${SCENARIOS[state.scenario].title} · ${period}`,fontSize:12,margin:[0,0,0,20]},
+            {text:`${t(SCENARIOS[state.scenario].title)} · ${period}`,fontSize:12,margin:[0,0,0,20]},
             {text:amount < 0 ? 'Náklady převýší přínos o' : company ? 'Můžete ušetřit v hodnotě práce' : 'Může vám zbýt po zadaných nákladech',fontSize:14},
-            {text:money(Math.abs(amount)),font:'Outfit',fontSize:38,color:amount < 0 ? '#913441':'#1c6d49',margin:[0,8,0,10]},
+            {text:money(Math.abs(amount)),font:'Outfit',fontSize:38,color:amount < 0 ? '#913441':'#172872',margin:[0,8,0,10]},
             {text:amount < 0 ? 'Při těchto předpokladech nasazení ekonomicky nevychází.' : 'Odhad za celé zvolené období včetně jednorázového nasazení.',margin:[0,0,0,15]},
             {text:company ? 'Uvolněná kapacita není automaticky hotovostní úspora mezd. Výsledek porovnává hodnotu ruční práce s provozem, zbývající lidskou prací a nasazením.' : 'Výsledek je před daní z příjmů. Počítá stálý počet aktivních klientů od začátku, bez růstu a odchodů. Tržby nejsou zisk.',margin:[0,0,0,15]},
             table(company ? [
@@ -51,10 +54,10 @@ export function createCalculationPdfDefinition(state: CalculatorState): TDocumen
                 ['Náklady nasazení a akvizice',money(p.setupCost)], ['Celkové tržby za horizont',money(p.horizonRevenue)],
                 ['Celkové náklady za horizont',money(p.horizonPartnerCost)], ['Opakované měsíční tržby (MRR)',money(p.recurringRevenue)],
             ]),
-            {text:'Otevřít a upravit tuto kalkulaci',link:calculationShareUrl(state),color:'#186a4c',decoration:'underline',fontSize:11,margin:[0,10,0,8]},
-            {text:'Odkaz obsahuje všechny parametry výpočtu, nikoli e-mail nebo jméno. Každý, komu jej předáte, uvidí vaše předpoklady.',fontSize:8,color:'#627b6c'},
+            {text:'Otevřít a upravit tuto kalkulaci',link:calculationShareUrl(state, locale),color:'#13246f',decoration:'underline',fontSize:11,margin:[0,10,0,8]},
+            {text:'Odkaz obsahuje všechny parametry výpočtu, nikoli e-mail nebo jméno. Každý, komu jej předáte, uvidí vaše předpoklady.',fontSize:8,color:'#60667d'},
             {text:'Náklady jedné klientské agendy',font:'Outfit',fontSize:23,pageBreak:'before',margin:[0,0,0,15]},
-            {text:`Všechny následující náklady jsou za ${r.isPilot ? 'jeden 30denní pilot' : 'jeden měsíc'} a celého klienta. Nasazení je jednorázové.`,margin:[0,0,0,10]},
+            {text:locale === 'cs' ? `Všechny následující náklady jsou za ${r.isPilot ? 'jeden 30denní pilot' : 'jeden měsíc'} a celého klienta. Nasazení je jednorázové.` : `The following costs cover ${r.isPilot ? 'one 30-day pilot' : 'one month'} and the whole client. Setup is one-off.`,margin:[0,0,0,10]},
             table([
                 ['Licence Promptbooku',money(r.licence)],['AI / předplatné',money(r.ai)],['Externí služby podle objemu',money(r.external)],['Rezerva',money(r.reserve)],
                 ['Server',money(r.input.hostingCzk)],['Databáze',money(r.input.databaseCzk)],['Zálohy a úložiště',money(r.input.backupCzk)],
@@ -64,8 +67,8 @@ export function createCalculationPdfDefinition(state: CalculatorState): TDocumen
             ]),
             {text:r.input.costPayer === 'partner' ? 'AI a infrastrukturu hradí partner v uvedené ceně servisu. Dílčí náklady se klientovi nepřičítají podruhé. Partner je má odečtené od vlastního výsledku.' : 'AI a infrastrukturu platí klient samostatně. Tyto platby nejsou tržbami partnera.'},
             heading('Obchodní předpoklady'),
-            {text:`Model ${COMMERCIAL_TERMS.version}. Start: 19 USD jednorázově na 30 dní, bez automatického pokračování. Business: 100 USD měsíčně za klientské prostředí. AI, infrastruktura a služby partnera se hradí odděleně.`,margin:[0,0,0,10]},
-            {text:`${COMMERCIAL_TERMS.share} ${COMMERCIAL_TERMS.shareTerm}`},
+            {text:locale === 'cs' ? `Model ${COMMERCIAL_TERMS.version}. Start: ${licencePrice('start',locale)} na 30 dní, bez automatického pokračování. Business: ${licencePrice('business',locale)} měsíčně za prostředí. Přepočet nabídky při 22 Kč/USD; výpočet používá zadaný kurz. AI, infrastruktura a partner se platí zvlášť.` : `Model ${COMMERCIAL_TERMS.version}. Start: $19 for 30 days, without renewal. Business: $100 monthly per client environment. AI, infrastructure and partner services are separate.`,margin:[0,0,0,10]},
+            {text:`${t(COMMERCIAL_TERMS.share)} ${t(COMMERCIAL_TERMS.shareTerm)}`},
             {text:'Všechny předpoklady výpočtu',font:'Outfit',fontSize:23,pageBreak:'before',margin:[0,0,0,15]},
             {text:'Částky jsou bez DPH. Kurz, pracovní náklady, spotřeba a sazby poskytovatelů jsou modelové odhady, nikoli ověřené cenové nabídky. Upravte je podle vlastního provozu.',margin:[0,0,0,10]},
             table([
@@ -77,14 +80,23 @@ export function createCalculationPdfDefinition(state: CalculatorState): TDocumen
             {text:'Výpočet nezakládá objednávku ani záruku úspory či výdělku. Nezahrnuje nezadané náklady, financování ani daň z příjmů.',margin:[0,12,0,0],fontSize:8},
         ],
     };
+    return translatePdfStrings(definition, t);
 }
 
-export async function downloadCalculationPdf(state: CalculatorState): Promise<void> {
+/** Only authored report values are translated; functions and numeric assumptions remain intact. */
+function translatePdfStrings<T>(value: T, t: ReturnType<typeof translator>): T {
+    if (typeof value === 'string') return t(value);
+    if (Array.isArray(value)) return value.map(item => translatePdfStrings(item, t)) as T;
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key,item]) => [key,translatePdfStrings(item,t)])) as T;
+    return value;
+}
+
+export async function downloadCalculationPdf(state: CalculatorState, locale: SiteLocale = 'cs'): Promise<void> {
     const [module,assets] = await Promise.all([import('pdfmake/build/pdfmake'),loadWorkshopPdfAssets()]);
     const pdfMake = module.default;
     pdfMake.addVirtualFileSystem(assets.fonts); pdfMake.addFonts(WORKSHOP_PDF_FONT_FILES);
-    const blob = await pdfMake.createPdf({ ...createCalculationPdfDefinition(state),images:{'promptbook-logo':assets.logo} }).getBlob();
+    const blob = await pdfMake.createPdf({ ...createCalculationPdfDefinition(state, locale),images:{'promptbook-logo':assets.logo} }).getBlob();
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a'); link.href=url; link.download=`promptbook-${state.mode}-${state.scenario}.pdf`;
+    const link = document.createElement('a'); link.href=url; link.download=`promptbook-${state.mode}-${state.scenario}-${locale}.pdf`;
     document.body.appendChild(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url),30000);
 }

@@ -1,4 +1,5 @@
 import { DEFAULT_INPUT, normalizeInput, SCENARIOS, type EconomicsInput, type ScenarioId } from './economics';
+import { localizedPath, type SiteLocale } from './localization';
 import { sitePath } from './siteConfig';
 
 export type CalculatorMode = 'company' | 'partner';
@@ -48,8 +49,8 @@ export function serializeCalculatorState(state: CalculatorState): string {
     return query.toString();
 }
 
-export const calculatorPath = (state: CalculatorState) => `${sitePath('kalkulacka')}?${serializeCalculatorState(state)}`;
-export const calculationShareUrl = (state: CalculatorState) => `https://ptbk.io${calculatorPath(state)}`;
+export const calculatorPath = (state: CalculatorState, locale: SiteLocale = 'cs') => `${localizedPath('kalkulacka', locale)}?${serializeCalculatorState(state)}`;
+export const calculationShareUrl = (state: CalculatorState, locale: SiteLocale = 'cs') => `https://ptbk.io${calculatorPath(state, locale)}`;
 export function changeScenario(state: CalculatorState, scenario: ScenarioId): CalculatorState {
     return { ...state, scenario, input: { ...state.input, ...SCENARIOS[scenario].defaults } };
 }

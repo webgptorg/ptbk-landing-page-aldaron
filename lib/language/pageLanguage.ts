@@ -57,6 +57,9 @@ export function getLanguageFromPathname(pathname: string | null): SupportedHomep
     }
 
     const normalizedPathname = normalizePathname(pathname);
+    // The isolated launch site has its own language prefix. Other brands keep their existing routing.
+    if (isPathnameWithinPath(normalizedPathname, '/new/en')) return 'en';
+    if (isPathnameWithinPath(normalizedPathname, '/new')) return 'cs';
     const isCzechPage = CZECH_PATH_PREFIXES.some((path) => isPathnameWithinPath(normalizedPathname, path));
 
     return isCzechPage ? 'cs' : fallbackHomepageLanguage;

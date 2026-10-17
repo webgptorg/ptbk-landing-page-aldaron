@@ -2,7 +2,7 @@
 
 ## Účel a struktura
 
-Na úvodu je pouze stručná cesta k výběru přístupu. `/new/srovnani` nabízí šest konkrétních srovnání. Každé má podstránku `/new/srovnani/{slug}`, otázku pro rozhodnutí, faktický popis alternativy, vymezení Promptbooku, doporučení kdy zvažovat který přístup, zdroj a datum kontroly.
+Na úvodu je pouze stručná cesta k výběru přístupu. `/new/srovnani` nabízí deset konkrétních srovnání a společnou tabulku zaměření, prostředí, automatizace a vhodného použití. Každé má podstránku `/new/srovnani/{slug}`, otázku pro rozhodnutí, faktický popis alternativy, vymezení Promptbooku, doporučení kdy zvažovat který přístup, zdroj a datum kontroly.
 
 Vlastní doporučení vhodnosti jsou odlišená od tvrzení výrobce a od měřených výsledků. Nejde o nezávislý výkonnostní test. Nesrovnávají se neověřené aktuální ceny, inference, garance bezpečnosti nebo marketingové počty klientů. Žádné univerzální zelené zaškrtnutí Promptbooku a křížek všem ostatním.
 
@@ -23,6 +23,13 @@ Claude Code ani Codex se nepopisují jako nástroje, u kterých člověk musí s
 
 Kombinace nástrojů je legitimní možnost. Zdrojem potvrzená schopnost konkurenta se nesmí skrýt jen proto, že oslabuje slogan. Co zdroj neuvádí, se nesmí označit za nemožné. Každý faktický odstavec o alternativě má dostupný primární zdroj na stránce; doporučení Promptbooku je označeno jako vlastní pohled.
 
-Z briefingových neověřených názvů Grok Bot a AI Dots se v tomto vydání nevytváří tvrzení ani prázdné srovnávací stránky. Před doplněním je potřeba ověřit konkrétní produkt, jeho dokumentaci a aktuální rozsah. Nepublikují se letní ceny z podkladů bez ověření.
+Doplněno podle primárních zdrojů ověřených 17. října 2026:
+
+- `grok-bot`: https://docs.x.ai/grok-bot/overview — trvalý cloudový počítač, paralelní boti, dovednosti a rutiny.
+- `openai-dots`: https://openai.com/index/introducing-dots/ — průběžně dostupní agenti; specializované podnikové piloty včetně IT prostředí. Netvrdit, že Dots nemohou pracovat s firemní infrastrukturou.
+- `meta-muse`: https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/ — osobní agent, Muse Secure VM, aplikace a WhatsApp; nezaměňovat s Muse Code ani názvy modelů.
+- `chatgpt`: https://openai.com/business/workspace-agents/ — plánované postupy, propojené aplikace, oprávnění a schvalování; workspace agenti jsou označeni jako research preview.
+
+Nové detaily mají datum 17. října, původní detaily si zachovávají kontrolu 15. října. Souhrn uvádí rozsah 15.–17. října. Tabulka není matice ano/ne; všechny přístupy mají vlastní formu automatizace. Každý řádek alternativy odkazuje na detail i oficiální zdroj. Tabulka má skutečné hlavičky, přístupný vodorovný posun a na úzké obrazovce pevný sloupec produktu. Texty i tabulka jsou v obou jazycích. Nepublikují se neověřené konkurenční ceny.
 
 Při změně popisu aktualizovat zdroj, datum a odpovídající srovnávací text. Samotné zobrazení aktuálního kalendářního data není nová kontrola. Při rozhodování doporučit ověřit stejný proces na vlastních podkladech, včetně kontroly, provozu a celkových nákladů.

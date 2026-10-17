@@ -1,6 +1,6 @@
 /** Commercial proposal v1.0. Public pricing, calculations and exports share these exact terms. */
 export const COMMERCIAL_TERMS = {
-    version: '2026-10-15-v1', startUsd: 19, startDays: 30, businessUsd: 100,
+    version: '2026-10-15-v1', displayCzkPerUsd: 22, startUsd: 19, startDays: 30, businessUsd: 100,
     partnerSharePercent: 20, responseWorkingHours: 16, contact: 'jiri@ptbk.io',
     supportWindow: 'Pondělí–pátek, 9:00–17:00, Europe/Prague, mimo české státní a ostatní svátky.',
     instance: 'Instance je samostatné prostředí jednoho koncového klienta, nikoli fyzický server. Může obsahovat více agentů. Více klientských prostředí na společném serveru vyžaduje více licencí; další samostatná produkční instance se účtuje zvlášť.',

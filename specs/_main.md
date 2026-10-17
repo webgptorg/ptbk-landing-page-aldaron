@@ -19,7 +19,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 
 ## Rozsah cest
 
-`/new`, `/new/partnership`, `/new/kalkulacka`, `/new/cenik`, `/new/agendy`, `/new/agendy/{email|documents|social|video|coding}`, `/new/srovnani`, `/new/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip}`, `/new/o-nas`, `/new/bezpecnost`, `/new/faq`, `/new/soukromi`, `/new/podminky`.
+`/new`, `/new/partnership`, `/new/kalkulacka`, `/new/cenik`, `/new/agendy`, `/new/agendy/{email|documents|social|video|coding}`, `/new/srovnani`, `/new/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip|grok-bot|openai-dots|meta-muse|chatgpt}`, `/new/o-nas`, `/new/bezpecnost`, `/new/faq`, `/new/soukromi`, `/new/podminky`.
 
 Všechny interní marketingové odkazy zůstávají pod `/new`. GitHub, zdroje srovnání, obchodní rejstřík a sociální profily jsou záměrně externí. Právní dokumenty používají existující společný obsah a zachovávají jeho právní odkazy. Údaje o firmě a fotografie pocházejí ze stávajícího webu, nevytvářejí se nové identity.
 
@@ -28,3 +28,11 @@ Všechny interní marketingové odkazy zůstávají pod `/new`. GitHub, zdroje s
 Každý blok má jeden účel. Bez prázdných štítků, opakování téže výhody v mnoha místech a technických vysvětlivek v hero. `book` se nepřekládá a není vstupním požadavkem ani tématem zákaznického webu. Uživatel předává práci a pravidla, ne interní souborový formát.
 
 Navenek není rozlišení „dnes / připravujeme / vize“, termín dokončení aplikace ani odkaz „současný web“. Jde o cílové znění pro uvedení kompletního produktu. Interní kontrola připravenosti a technický `noindex` tím nezanikají. Smluvní podmínky se tím nemění.
+
+## Jazyky a měny — zadání 17. října 2026
+
+Český web zůstává pod `/new`, plná anglická verze pod `/new/en` se stejnými suffixy cest. Přepínač zachovává protějšek stránky, query výpočtu a fragment. Překlady zahrnují ukázky, formuláře, kalkulačku, právní texty a PDF; serverový výstup má správný jazyk už před hydratací. Metadata uvádějí canonical a jazykové alternativy, technický noindex zůstává.
+
+České částky se zobrazují v Kč, anglické v USD. Základ nabídky 19/100 USD se nemění; česká prezentace používá stávající modelový kurz 22 Kč/USD (418 / 2 200 Kč) s uvedeným přepočtem. Kalkulačka zachovává původní jednotky uložených parametrů a převádí zobrazení i vstupy podle jazyka, včetně tokenových sazeb. Její zadaný kurz je odhad, ne živý kurz. Podíl zůstává pevný 20 %.
+
+Barevnost vychází z původního modrého loga Promptbooku: indigo, inkoustová modrá, ledově modré odlesky a neutrální světlé plochy. Prostorové scény, řízení scrollem a přístupnost pohybu zůstávají zachované.

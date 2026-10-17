@@ -1,5 +1,5 @@
 /** Primary-source review on 2026-10-15. Editorial fit judgments are distinguished from vendor capabilities. */
-export const COMPARISON_REVIEW_DATE = '15. října 2026';
+export const COMPARISON_REVIEW_DATE = '15.–17. října 2026';
 export const COMPARISONS = [
     { slug:'claude-code', name:'Claude Code', category:'Vývoj a programovatelní agenti',
         capability:'Claude Code nabízí práci s kódem i neinteraktivní běh. Přes CLI a Agent SDK ho lze zapojit do skriptů a CI/CD; není odkázaný jen na ruční zadávání v chatu.',
@@ -43,4 +43,52 @@ export const COMPARISONS = [
         question:'Potřebujete především organizační řízení agentů, nebo dodat jednu konkrétní klientskou agendu?',
         source:'https://paperclip.ing/', sourceTitle:'Paperclip: funkce, cíle a heartbeats',
     },
+{
+    "slug": "grok-bot",
+    "name": "Grok Bot",
+    "source": "https://docs.x.ai/grok-bot/overview",
+    "sourceTitle": "Grok Bot — official overview",
+    "reviewed": "17. října 2026",
+    "category": "AI kolegové napříč aplikacemi",
+    "capability": "Grok Bot používá trvalý cloudový počítač s prohlížečem, soubory a terminálem. Boti si uchovávají kontext, spolupracují paralelně a mohou spouštět naučené dovednosti podle plánu.",
+    "fit": "Zvažte jej, když chcete přímo zadávat práci AI kolegům a řídit je napříč aplikacemi.",
+    "difference": "Promptbook se soustředí na konkrétní firemní agendu v prostředí klienta a její zavedení i průběžnou péči partnera. Rozdílem je způsob nasazení a dodání služby, nikoli samotná schopnost samostatně pracovat.",
+    "question": "Chcete přímo řídit AI kolegy, nebo si nechat zavést a udržovat konkrétní firemní agendu?"
+},
+{
+    "slug": "openai-dots",
+    "name": "OpenAI Dots",
+    "source": "https://openai.com/index/introducing-dots/",
+    "sourceTitle": "OpenAI — Introducing Dots",
+    "reviewed": "17. října 2026",
+    "category": "Průběžně dostupní AI agenti",
+    "capability": "Dots pracují na cloudovém počítači, propojují aplikace a učí se z kontextu a zpětné vazby. OpenAI také pilotuje specializované firemní Dots s vlastní identitou, IT prostředím a hlubšími integracemi.",
+    "fit": "Zvažte je pro delegování rozmanité průběžné práce v prostředí OpenAI. Rozsah specializovaného firemního nasazení ověřte v aktuální nabídce.",
+    "difference": "Promptbook staví nabídku na vymezené agendě, prostředí klienta a partnerské implementaci i péči. Dots mají také dlouhodobou práci a firemní integrace; při výběru porovnejte konkrétní prostředí a odpovědnost za provoz.",
+    "question": "Potřebujete široce využitelného agenta, nebo partnera pro zavedení jedné konkrétní agendy?"
+},
+{
+    "slug": "meta-muse",
+    "name": "Meta Muse",
+    "source": "https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/",
+    "sourceTitle": "Meta — Introducing Muse",
+    "reviewed": "17. října 2026",
+    "category": "Osobní úkoly a dlouhodobé cíle",
+    "capability": "Meta Muse je osobní agent na vyhrazeném cloudovém počítači Muse Secure VM. Pracuje s prohlížečem a připojenými aplikacemi, pokračuje na pozadí a je dostupný přes aplikaci nebo WhatsApp.",
+    "fit": "Zvažte jej pro osobní organizaci a každodenní delegované úkoly. Dostupnost se může lišit podle regionu.",
+    "difference": "Promptbook se zaměřuje na opakující se firemní agendu provozovanou v prostředí klienta s podporou implementačního partnera. Rozhoduje, zda hledáte osobního pomocníka, nebo konkrétní zavedené firemní řešení.",
+    "question": "Hledáte osobního asistenta, nebo dlouhodobě provozovanou agendu pro firmu?"
+},
+{
+    "slug": "chatgpt",
+    "name": "ChatGPT",
+    "source": "https://openai.com/business/workspace-agents/",
+    "sourceTitle": "OpenAI — Workspace agents",
+    "reviewed": "17. října 2026",
+    "category": "AI pracovní prostředí pro jednotlivce i týmy",
+    "capability": "ChatGPT pracuje s textem, soubory a připojenými aplikacemi. Workspace agenti v research preview mohou spouštět postupy podle plánu a provádět kroky v týmových nástrojích s nastavenými oprávněními a schvalováním.",
+    "fit": "Zvažte jej pro každodenní práci v širokém AI prostředí i vlastní automatizace týmu. Konkrétní funkce závisejí na plánu a nastavení.",
+    "difference": "Promptbook nabízí konkrétní agendu s vlastním pracovním kontextem a partnerem, který řeší zavedení a další péči. ChatGPT není jen ručně ovládaný chat; porovnejte také vlastnictví prostředí a způsob, jakým řešení uvedete do provozu.",
+    "question": "Chcete si osvojit široké AI prostředí, nebo předat zavedení opakované práce partnerovi?"
+},
 ] as const;

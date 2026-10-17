@@ -9,3 +9,5 @@ Use `commercialTerms.ts` for prices, share and support. The partner share is fix
 Comparisons need primary sources and a review date. Do not deny competitors' automation capabilities to make the positioning stronger. Story, screenshots and customer evidence must not be invented. Security wording separates E2E app communication from external model/tool data. Launch-ready copy does not establish a completed audit or authorize moving the routes to `/`.
 
 Keep specs, focused tests and public behavior aligned. Never submit test leads to the production contact database.
+
+The launch site is bilingual: Czech under `/new`, English under `/new/en`, with identical suffixes. Keep localized navigation, canonical/alternate metadata, forms, demo copy and PDF aligned. Do not change stored calculator units or query semantics to switch currencies. Czech public offer display uses the documented 22 Kč/USD model rate from `commercialTerms.ts`; English uses USD. Palette follows the original indigo logo. Each comparison detail retains its own actual source review date.
