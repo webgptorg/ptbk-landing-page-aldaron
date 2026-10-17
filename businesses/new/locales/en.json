@@ -699,5 +699,9 @@
   "Tuhle stránku jsme nenašli.": "We could not find that page.",
   "Vraťte se k přehledu agend nebo se podívejte na hlavní stránku.": "Return to the workflows or visit the home page.",
   "Na úvod Promptbooku": "Promptbook home",
-  "Prohlédnout agendy": "Explore workflows"
+  "Prohlédnout agendy": "Explore workflows",
+  "Posouvejte stránku": "Scroll to explore",
+  "Agenti a soubory zůstávají na vašem serveru. Spojení s aplikací chrání end-to-end šifrování.": "Agents and files stay on your server. The connection to the app is end-to-end encrypted.",
+  "Opakovaná práce, vlastní data a jasná pravidla. Nastavení i péči můžete svěřit partnerovi.": "Recurring work, your own data and clear rules. A partner can handle setup and ongoing care.",
+  "Hledáte jednorázovou odpověď nebo očekáváte bezchybnost bez lidské kontroly.": "You need a one-off answer or expect flawless results without human oversight."
 }

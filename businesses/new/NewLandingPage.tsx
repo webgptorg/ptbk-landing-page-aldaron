@@ -30,15 +30,15 @@ export function NewLandingPage({ partnership = false }: { partnership?: boolean 
         <div className={s.faq}><details><summary>{t("Jak funguje partnerský podíl?")}</summary><p>{t("20 % ze skutečně uhrazených licenčních plateb bez DPH po odečtení vratek. Pro Start i Business, po dobu placeného užívání a trvání dohody. Podíl se nepočítá z hostingu, AI ani vaší práce. Přiřazení klientů a splatnost stanoví partnerská dohoda.")}</p></details><details><summary>{t("Musím předem kupovat licence?")}</summary><p>{t("Ne. Žádný partnerský paušál ani povinný balík licencí. Klient platí přímo Promptbooku; vlastní produkční používání partnera se řídí stejnou licencí.")}</p></details><details><summary>{t("Chci Promptbook pouze doporučovat.")}</summary><p>{t("Ozvěte se nám a probereme formu spolupráce. Podmínky implementačního partnerství nepřenášíme automaticky na každého tvůrce nebo doporučovací kanál.")}</p><div className={s.actions}><LeadButton secondary topic={t("Doporučování Promptbooku — spolupráce tvůrce")}>{t("Probrat doporučování")}</LeadButton></div></details></div>
         <section className={s.section}><div className={s.wideLink}><div><h3>{t("Stejná technologie. Jasná cena pro klienta.")}</h3><p>Start {licencePrice('start', locale)} {t('na 30 dní. Business')} {licencePrice('business', locale)} {t('měsíčně za klientské prostředí.')}</p></div><Link className={s.textLink} href={path('cenik')}>{t("Ceník a podpora ")}<ArrowRight size={18}/></Link></div></section><ClosingCta partner />
     </>;
-    return <>
-        <section className={s.hero}><h1>{t("Dřív jste AI úkolovali.")}<br /><em>{t("Teď pracuje pro vás.")}</em></h1><p>{t("E-maily, doklady, obsah a údržba webu. Předáte agendu, nastavíte pravidla a Promptbook se vrací k práci za vás.")}</p><div className={s.actions}><LeadButton>{t("Vybrat první agendu")}</LeadButton><Link className={s.secondaryButton} href={path('partnership')}>{t("Nasazuji řešení klientům ")}<ArrowRight size={17}/></Link></div></section>
+    return <div className={s.homepage}>
+        <section className={s.hero}><h1>{t("Dřív jste AI úkolovali.")}<br /><em>{t("Teď pracuje pro vás.")}</em></h1><p>{t("E-maily, doklady, obsah a údržba webu. Předáte agendu, nastavíte pravidla a Promptbook se vrací k práci za vás.")}</p><div className={s.actions}><LeadButton>{t("Vybrat první agendu")}</LeadButton><Link className={s.textLink} href={path('partnership')}>{t("Nasazuji řešení klientům ")}<ArrowRight size={17}/></Link></div></section>
         <AgendaShowcase />
         <SecuritySection />
         <AudienceSection />
-        <div className={s.wideLink}><div><h3>{t("Ne každý proces potřebuje stejný nástroj.")}</h3><p>{t("Porovnejte Promptbook s vývojovými agenty, workflow platformami a osobními asistenty.")}</p></div><Link className={s.textLink} href={path('srovnani')}>{t("Najít správný přístup ")}<ArrowRight size={18}/></Link></div>
+        <div className={s.wideLink}><div><h3>{t("Ne každý proces potřebuje stejný nástroj.")}</h3></div><Link className={s.textLink} href={path('srovnani')}>{t("Najít správný přístup ")}<ArrowRight size={18}/></Link></div>
         <section className={s.section} id="cenik"><div className={s.sectionTitle}><h2>{t("Začněte jednou agendou.")}</h2></div><PricingCards /></section>
         <EconomicsCalculator />
-        <section className={s.section}><div className={s.sectionTitle}><h2>{t("Za Promptbookem stojíme oba.")}</h2><p>{t("Jiří Jahn a Pavol Hejný. Dva spoluzakladatelé, jeden cíl: aby se AI posunula od odpovědí ke skutečné práci.")}</p><div className={s.actions}><Link className={s.textLink} href={path('o-nas')}>{t("Náš příběh ")}<ArrowRight size={17}/></Link></div></div><Founders /></section>
+        <section className={s.section}><div className={s.sectionTitle}><h2>{t("Za Promptbookem stojíme oba.")}</h2><div className={s.actions}><Link className={s.textLink} href={path('o-nas')}>{t("Náš příběh ")}<ArrowRight size={17}/></Link></div></div><Founders compact /></section>
         <ClosingCta />
-    </>;
+    </div>;
 }

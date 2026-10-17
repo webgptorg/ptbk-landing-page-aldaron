@@ -14,12 +14,57 @@
 .site .button:hover,.leadDialog .button:hover{background:#2420b3}
 .hero h1 em{color:#2e4fd0}
 .hero{position:relative}
-.hero:before{content:"";position:absolute;inset:0 -6% -80px;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,#e9edff80,transparent 64%)}
+
 .hero>*{position:relative}
 .site .textLink{color:#303fa8!important}
-.security{background:linear-gradient(135deg,#111630,#1b2854)}
-.security .textLink{color:#c6d6ff!important}
-.securityNode{background:#ffffff08;border-color:#ffffff20}
+/* An open data section continues the same canvas as the demonstrations. */
+.security{background:none;color:var(--ink);border-radius:0;padding:130px 0 80px;margin:0 auto;max-width:1040px;gap:90px}
+.security h2{font-size:clamp(38px,4.4vw,56px);letter-spacing:-.055em}
+.security p{color:var(--muted);font-size:18px;line-height:1.7;margin:25px 0}
+.security .textLink{color:#303fa8!important}
+.securityDiagram{grid-template-columns:1fr 100px 1fr;gap:20px 0;align-items:start}
+.securityNode{padding:12px 0;background:none;border:0;border-radius:0;flex-direction:column;gap:20px;text-align:center}
+.securityNode>svg{width:48px;height:48px;color:#3450bc;stroke-width:1.2}
+.securityNode b{font-size:15px;font-weight:550}
+.encryptedLine{position:relative;flex-direction:column;align-items:center;text-align:center;padding:26px 0 0;gap:22px;font-size:10px;line-height:1.5;color:#77819a}
+.encryptedLine:before{content:'';position:absolute;top:34px;left:0;right:0;height:1px;background:#cbd4e9}
+.encryptedLine svg{position:relative;box-sizing:content-box;padding:0 12px;background:var(--paper);color:#4b63ad}
+.securityDiagram .small{grid-column:1/-1;font-size:12px;line-height:1.65;text-align:center;margin:5px auto 0;max-width:340px}
+/* On the overview, typography and spacing replace card chrome. */
+.homepage .hero{padding-bottom:72px}
+.homepage .hero .actions{gap:28px}
+.homepage .hero .textLink{font-size:14px;font-weight:550;min-height:44px}
+.homepage>.section{padding:96px 0}
+.homepage .sectionTitle{margin-bottom:40px}
+.homepage .audience{gap:100px;max-width:1000px}
+.homepage .audience>div{padding:0;border:0}
+.homepage .audience h3{font-size:21px}
+.homepage .audience p{max-width:440px}
+.homepage .wideLink{border-bottom:0;padding:34px 0}
+.homepage .wideLink h3{font-size:22px}
+.homepage .pricingSummary{gap:64px;margin-top:45px}
+.homepage .priceCard,.homepage .priceCard:last-child{background:none;border:0;border-radius:0;padding:0 0 10px;gap:20px}
+.homepage .priceCard+.priceCard{border-left:1px solid var(--line);padding-left:64px}
+.homepage .price{font-size:48px}
+.homepage .price span{display:block;font-size:14px}
+.homepage .priceNote+.priceNote{margin-top:6px!important}
+.homepage .founder{background:none;border-radius:0;padding:0;grid-template-columns:175px 1fr;gap:28px}
+.homepage .founderPortrait{height:240px}
+.homepage .founder .secondaryButton{display:flex;min-height:44px;margin-top:16px;padding:0;background:none;border:0;justify-content:flex-start;color:#303fa8;font-size:13px}
+.homepage .ctaBand{display:block;text-align:center;padding:70px 0}
+.homepage .ctaBand h2{font-size:clamp(30px,3.4vw,44px);text-wrap:balance}
+.homepage .ctaBand .button{margin-top:28px}
+@media(max-width:1050px){.security{gap:45px}.homepage .founder{grid-template-columns:120px 1fr;gap:20px}}
+@media(max-width:760px){
+ .security{padding:80px 0 35px;gap:45px;grid-template-columns:1fr;max-width:580px}
+ .security p{font-size:16px}.securityDiagram{max-width:430px;width:100%;justify-self:center}.securityDiagram .small{font-size:12px}
+ .homepage .hero{padding-bottom:48px}.homepage .hero .actions{gap:12px 24px}
+ .homepage>.section{padding:62px 0}.homepage .sectionTitle{margin-bottom:28px}.homepage .audience{gap:30px}
+ .homepage .pricingSummary{gap:26px;margin-top:32px}.homepage .priceCard+.priceCard{padding-left:26px}.homepage .price{font-size:36px}.homepage .price span{font-size:12px}
+ .homepage .founders{gap:36px}.homepage .founder{grid-template-columns:125px 1fr;gap:24px}.homepage .founderPortrait{height:190px}
+ .homepage .ctaBand{padding:45px 0}
+}
+@media(max-width:420px){.homepage .pricingSummary{gap:18px}.homepage .priceCard+.priceCard{padding-left:18px}.homepage .price{font-size:32px}.homepage .priceCard h3{font-size:21px}.homepage .founder{grid-template-columns:105px 1fr;gap:18px}.securityDiagram{grid-template-columns:1fr 90px 1fr}}
 .priceCard:last-child{background:linear-gradient(135deg,#f3f5ff,#eef2fd);border-color:#cbd4f0}
 .languageSwitch{display:flex;gap:2px;padding:3px;border:1px solid #e0e4ef;border-radius:999px;flex-shrink:0;font-size:11px;font-weight:650;letter-spacing:.02em}
 .languageSwitch a{padding:5px 8px;border-radius:999px;color:#697187}

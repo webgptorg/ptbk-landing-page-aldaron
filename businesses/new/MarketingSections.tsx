@@ -12,7 +12,7 @@ import s from './site.module.css';
 export function SecuritySection() {
     const { t, locale, path } = useSiteLocale();
 
-    return <section className={s.security} aria-labelledby="security-title"><div><h2 id="security-title">{t("Vaše data.")}<br />{t("Opravdu vaše.")}</h2><p>{t("Agenti i pracovní soubory běží na vašem serveru. Obsah mezi enginem a aplikací chrání end-to-end šifrování: rozšifruje se až na vašem zařízení.")}</p><Link className={s.textLink} href={path('bezpecnost')}>{t("Jak chráníme vaše data ")}<ArrowRight size={18} /></Link></div><div className={s.securityDiagram}><div className={s.securityNode}><Server size={30} /><div><b>{t("Váš server")}</b><span>{t("Agenti · soubory · firemní kontext")}</span></div></div><div className={s.encryptedLine}><LockKeyhole size={17} />{t(" End-to-end šifrovaný přenos")}</div><div className={s.securityNode}><Smartphone size={30} /><div><b>{t("Vaše aplikace")}</b><span>{t("Přehled a ovládání na vašem zařízení")}</span></div></div><p className={s.small}>{t("AI si vybíráte sami. Externí model dostává jen vstupy, které mu vaše agenda odešle.")}</p></div></section>;
+    return <section className={s.security} aria-labelledby="security-title"><div><h2 id="security-title">{t("Vaše data.")}<br />{t("Opravdu vaše.")}</h2><p>{t("Agenti a soubory zůstávají na vašem serveru. Spojení s aplikací chrání end-to-end šifrování.")}</p><Link className={s.textLink} href={path('bezpecnost')}>{t("Jak chráníme vaše data ")}<ArrowRight size={18} /></Link></div><div className={s.securityDiagram}><div className={s.securityNode}><Server size={30} /><div><b>{t("Váš server")}</b></div></div><div className={s.encryptedLine}><LockKeyhole size={17} />{t(" End-to-end šifrovaný přenos")}</div><div className={s.securityNode}><Smartphone size={30} /><div><b>{t("Vaše aplikace")}</b></div></div><p className={s.small}>{t("AI si vybíráte sami. Externí model dostává jen vstupy, které mu vaše agenda odešle.")}</p></div></section>;
 }
 
 export function PricingCards({ full = false }: { full?: boolean }) {
@@ -27,9 +27,9 @@ export function PricingCards({ full = false }: { full?: boolean }) {
 export function AudienceSection() {
     const { t, locale, path } = useSiteLocale();
 
-    return <section className={s.section}><div className={s.sectionTitle}><h2>{t("Máte práci, která se pořád vrací?")}</h2><p>{t("Právě tam dává dlouhodobá agenda největší smysl.")}</p></div><div className={s.audience}>
-        <div><h3>{t("Pro vás, když…")}</h3><p>{t("Se pravidelně vracíte k e-mailům, dokladům, obsahu nebo údržbě webu.")}</p><p>{t("Chcete mít data pod kontrolou a nastavení i péči svěřit sobě nebo partnerovi.")}</p></div>
-        <div><h3>{t("Spíš ne, když…")}</h3><p>{t("Potřebujete jen jednorázovou odpověď nebo si chcete popovídat s AI.")}</p><p>{t("Očekáváte bezchybnost bez pravidel, kontroly citlivých kroků a odpovědného člověka.")}</p></div>
+    return <section className={s.section}><div className={s.sectionTitle}><h2>{t("Máte práci, která se pořád vrací?")}</h2></div><div className={s.audience}>
+        <div><h3>{t("Pro vás, když…")}</h3><p>{t("Opakovaná práce, vlastní data a jasná pravidla. Nastavení i péči můžete svěřit partnerovi.")}</p></div>
+        <div><h3>{t("Spíš ne, když…")}</h3><p>{t("Hledáte jednorázovou odpověď nebo očekáváte bezchybnost bez lidské kontroly.")}</p></div>
     </div></section>;
 }
 

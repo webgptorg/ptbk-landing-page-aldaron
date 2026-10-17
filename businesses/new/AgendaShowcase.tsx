@@ -2,10 +2,9 @@
 
 import { useSiteLocale } from './LocaleProvider';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { ArrowDown, ArrowRight, Check, Code2, FileText, Mail, Pause, Play, RotateCcw, Share2, Video } from 'lucide-react';
+import { ArrowDown, ArrowRight, Code2, FileText, Mail, Pause, Play, RotateCcw, Share2, Video } from 'lucide-react';
 import Link from 'next/link';
-import { SCENARIOS, type ScenarioId } from './economics';
-import { sitePath } from './siteConfig';
+import { type ScenarioId } from './economics';
 import { AgendaScene } from './AgendaScenes';
 import { useShowcaseMotion } from './useShowcaseMotion';
 import s from './agenda-showcase.module.css';
@@ -59,12 +58,12 @@ export function AgendaShowcase({ initialScenario = 'email' }: { initialScenario?
             </button>)}
         </div>
         <div ref={panel} className={s.panel} role="tabpanel" tabIndex={0} id={`${id}-panel`} aria-labelledby={`${id}-${active}`} data-scenario={active} data-stage={shownStage} data-still={reduced || paused || !visible} data-scroll-driven={scrollDriven}>
-            <div className={s.heading}><div className={s.sceneLabel}><span>{t("0")}{tabs.findIndex(item => item.id === active) + 1}{t(" / 05")}</span><span>{t("Ukázka")}</span></div><h2>{t(tab.title)}</h2></div>
+            <div className={s.heading}><span className={s.sceneLabel}>{t("Ukázka")}</span><h2>{t(tab.title)}</h2></div>
             <div className={s.perspective}><AgendaScene key={active} scenario={active} stage={shownStage} /></div>
             <div className={s.playback}>
                 <ol className={s.steps} aria-label={t("Průběh ukázky")}>{tab.steps.map((step, index) => <li key={step}>
                     <button type="button" aria-current={index === shownStage ? 'step' : undefined} disabled={reduced} onClick={() => { setStage(index); setMode('paused'); }} data-complete={index < shownStage}>
-                        <span>{index < shownStage ? <Check size={13} /> : `0${index + 1}`}</span>{t(step)}
+                        {t(step)}
                     </button>
                 </li>)}</ol>
                 {!reduced && <button className={s.transport} type="button" aria-label={t(scrollDriven ? 'Přehrát ukázku' : stage >= 3 ? 'Přehrát ukázku znovu' : paused ? 'Pokračovat v ukázce' : 'Pozastavit ukázku')} onClick={() => {
@@ -74,12 +73,13 @@ export function AgendaShowcase({ initialScenario = 'email' }: { initialScenario?
                     {scrollDriven ? <Play size={17} /> : stage >= 3 ? <RotateCcw size={17} /> : paused ? <Play size={17} /> : <Pause size={17} />}
                 </button>}
             </div>
-            <div className={s.scrollCue}>
-                {immersive && !reduced ? <><button type="button" onClick={() => setMode('scroll')}><ArrowDown size={13} />{t(scrollDriven ? 'Příběh pokračuje scrollováním' : 'Procházet scrollováním')}</button><a href={`#${id}-after`}>{t("Přeskočit ukázku ")}<ArrowDown size={12} /></a></> : <span>{t("Od prvního kroku k hotové práci.")}</span>}
-            </div>
+            {immersive && !reduced && <div className={s.scrollCue}>
+                {scrollDriven ? <span><ArrowDown size={13} />{t('Posouvejte stránku')}</span> : <button type="button" onClick={() => setMode('scroll')}><ArrowDown size={13} />{t('Procházet scrollováním')}</button>}
+                <a href={`#${id}-after`}>{t("Přeskočit ukázku ")}<ArrowDown size={12} /></a>
+            </div>}
         </div>
         </div>
         </section>
-        <div id={`${id}-after`} className={s.caption}><p>{t(SCENARIOS[active].description)}</p><Link href={path(`agendy/${active}`)}>{t("Jak funguje tato agenda ")}<ArrowRight size={17} /></Link></div>
+        <div id={`${id}-after`} className={s.caption}><Link href={path(`agendy/${active}`)}>{t("Jak funguje tato agenda ")}<ArrowRight size={17} /></Link></div>
     </section>;
 }

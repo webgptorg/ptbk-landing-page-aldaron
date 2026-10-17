@@ -23,7 +23,6 @@ function EmailScene({ stage }: SceneProps) {
             <div className={s.replyText}><span>{t("Re: Dotaz na dodání")}</span><p>{t("Dobrý den,")}<br /><br />{t("objednávka je připravená k expedici. Doručení očekáváme ")}<strong>{t("ve čtvrtek.")}</strong>{t(" Jakmile bude na cestě, pošleme vám sledovací odkaz.")}</p></div>
             <div className={s.replyFooter}><ShieldCheck size={16} /><span>{t(stage === 3 ? 'Vyřízeno podle vašich pravidel' : 'Odeslání podle vašich pravidel')}</span>{stage === 3 ? <CheckCheck size={18} /> : <Send size={17} />}</div>
         </div>
-        <div className={s.sceneFootnote}><span className={s.liveDot} />{t(['Nový dotaz čeká ve schránce.', 'Odpověď vychází z objednávky a vašich pravidel.', 'Odpověď je připravená. Zbývá krok podle pravidel.', 'Dotaz je vyřízený. Agenda čeká na další zprávu.'][stage])}</div>
     </div>;
 }
 
@@ -54,28 +53,27 @@ function SocialScene({ stage }: SceneProps) {
     const { t, locale, path } = useSiteLocale();
 
     return <div className={`${s.scene} ${s.socialScene}`}>
-        <div className={s.topic}><span className={s.topicLabel}>{t("JEDNO TÉMA")}</span><strong>{t("Méně rutiny. Více času.")}</strong><ArrowDown size={16} /></div>
+        <div className={s.topic}><strong>{t("Méně rutiny. Více času.")}</strong><ArrowDown size={16} /></div>
         <div className={s.socialFan} data-revealed={stage >= 1} aria-hidden={stage < 1}>
             <article className={s.facebookPost}>
-                <header className={s.socialHeader}><span className={s.networkMark}>{t("f")}</span><div><strong>{t("Facebook")}</strong><small>{t("Pro vaši komunitu")}</small></div></header>
+                <header className={s.socialHeader}><span className={s.networkMark}>{t("f")}</span><div><strong>{t("Facebook")}</strong></div></header>
                 <p>{t("Pět drobností, které vám usnadní pracovní den. Kterou vyzkoušíte jako první?")}</p>
                 <div className={s.facebookArtwork}><span>{t("Malé změny.")}</span><strong>{t("Velký")}<br />{t("rozdíl.")}</strong><div className={s.orbit} aria-hidden="true" /></div>
                 <div className={s.socialReactions}><Heart size={14} /><MessageCircle size={14} /><span>{t("Začněme jedním krokem.")}</span></div>
-                <footer>{stage === 3 ? <><Check size={14} />{t(" Naplánováno · 9:00")}</> : stage === 2 ? <><ShieldCheck size={14} />{t(" Ke schválení")}</> : 'Návrh příspěvku'}</footer>
+                <footer>{stage === 3 ? <><Check size={14} />{t(" Naplánováno · 9:00")}</> : stage === 2 ? <><ShieldCheck size={14} />{t(" Ke schválení")}</> : t('Návrh příspěvku')}</footer>
             </article>
             <article className={s.instagramPost}>
-                <header className={s.socialHeader}><span className={s.networkMark}>{t("◎")}</span><div><strong>{t("Instagram")}</strong><small>{t("Příběh ve vizuálu")}</small></div></header>
+                <header className={s.socialHeader}><span className={s.networkMark}>{t("◎")}</span><div><strong>{t("Instagram")}</strong></div></header>
                 <div className={s.instagramArtwork}><span>{t("MÉNĚ RUTINY")}</span><strong>{t("Prostor")}<br />{t("pro to")}<br /><em>{t("důležité.")}</em></strong><div className={s.stackedDiscs} aria-hidden="true"><i /><i /><i /></div><small>{t("01 / 05")}</small></div>
                 <p>{t("Začněte jedním malým krokem. ✨")}</p>
-                <footer>{stage === 3 ? <><Check size={14} />{t(" Naplánováno · 12:00")}</> : stage === 2 ? <><ShieldCheck size={14} />{t(" Ke schválení")}</> : 'Návrh vizuálu'}</footer>
+                <footer>{stage === 3 ? <><Check size={14} />{t(" Naplánováno · 12:00")}</> : stage === 2 ? <><ShieldCheck size={14} />{t(" Ke schválení")}</> : t('Návrh vizuálu')}</footer>
             </article>
             <article className={s.linkedinPost}>
-                <header className={s.socialHeader}><span className={s.networkMark}>{t("in")}</span><div><strong>{t("LinkedIn")}</strong><small>{t("Pro váš profesní svět")}</small></div></header>
-                <div className={s.linkedinText}><span className={s.eyebrow}>{t("PRÁCE, KTERÁ DÁVÁ SMYSL")}</span><h3>{t("Rutina nemusí")}<br />{t("zabrat celý den.")}</h3><p>{t("Jak dát svému týmu více času na skutečnou práci.")}</p><div className={s.editorialRule} /><strong>{t("5 malých změn")}<br />{t("pro váš tým.")}</strong></div>
-                <footer>{stage === 3 ? <><Check size={14} />{t(" Naplánováno · 15:00")}</> : stage === 2 ? <><ShieldCheck size={14} />{t(" Ke schválení")}</> : 'Návrh textu'}</footer>
+                <header className={s.socialHeader}><span className={s.networkMark}>{t("in")}</span><div><strong>{t("LinkedIn")}</strong></div></header>
+                <div className={s.linkedinText}><h3>{t("Rutina nemusí")}<br />{t("zabrat celý den.")}</h3><p>{t("Jak dát svému týmu více času na skutečnou práci.")}</p><div className={s.editorialRule} /><strong>{t("5 malých změn")}<br />{t("pro váš tým.")}</strong></div>
+                <footer>{stage === 3 ? <><Check size={14} />{t(" Naplánováno · 15:00")}</> : stage === 2 ? <><ShieldCheck size={14} />{t(" Ke schválení")}</> : t('Návrh textu')}</footer>
             </article>
         </div>
-        <div className={s.sceneFootnote}><span className={s.liveDot} />{t(['Téma je připravené pro tři různé formáty.', 'Každá síť má vlastní text, vizuál i tón.', 'Texty a vizuály čekají na vaše schválení.', 'Schválené příspěvky mají své místo v plánu.'][stage])}</div>
     </div>;
 }
 
@@ -89,7 +87,7 @@ function VideoScene({ stage }: SceneProps) {
             <div className={s.transcript} data-revealed={stage >= 1} aria-hidden={stage < 1}><span>{t("02:14")}</span><p>{t("„Začněte prací, která se ve firmě opakuje. Právě tam se vám čas vrátí nejdřív.“")}</p></div>
         </div>
         <div className={s.videoOutputs} data-revealed={stage >= 2} aria-hidden={stage < 2}>
-            <article className={s.articleOutput}><span className={s.eyebrow}>{t("ČLÁNEK NA WEB")}</span><h3>{t("Pět způsobů,")}<br />{t("jak omezit rutinu")}<br />{t("ve firmě.")}</h3><p>{t("Více prostoru pro práci, která potřebuje právě vás.")}</p><div className={s.articleLines} aria-hidden="true" /><span className={s.articleStatus}>{stage === 3 ? <><Check size={14} />{t(" Připraveno k publikaci")}</> : 'Koncept článku'}</span></article>
+            <article className={s.articleOutput}><span className={s.eyebrow}>{t("ČLÁNEK NA WEB")}</span><h3>{t("Pět způsobů,")}<br />{t("jak omezit rutinu")}<br />{t("ve firmě.")}</h3><p>{t("Více prostoru pro práci, která potřebuje právě vás.")}</p><div className={s.articleLines} aria-hidden="true" /><span className={s.articleStatus}>{stage === 3 ? <><Check size={14} />{t(" Připraveno k publikaci")}</> : t('Koncept článku')}</span></article>
             <div className={s.outputFormats}><span><FileText size={15} />{t(" Přepis")}</span><span><MessageCircle size={15} />{t(" Popis videa")}</span><span><Send size={15} />{t(" Příspěvky")}</span></div>
         </div>
     </div>;
@@ -109,9 +107,8 @@ function CodingScene({ stage }: SceneProps) {
         <div className={s.browserPreview}>
             <div className={s.browserBar}><span className={s.windowDots}><i /><i /><i /></span><span>{t("váš-web.cz / kontakt")}</span></div>
             <div className={s.browserContent}><span className={s.eyebrow}>{t("VAŠE FIRMA")}</span><h3>{t("Jsme tu")}<br />{t("pro vás.")}</h3><span className={s.inputLabel}>{t("Váš e-mail")}</span><div className={s.fakeInput}>{t("jmeno@firma.cz")}</div><div className={stage >= 3 ? s.formSuccess : s.formPending}>{stage >= 3 ? <><Check size={17} />{t(" Zpráva byla přijata")}</> : <>{t("Odeslat zprávu ")}<ArrowRight size={16} /></>}</div></div>
-            <div className={s.browserFooter}>{stage >= 3 ? <><Check size={14} />{t(" Náhled opraveného formuláře")}</> : 'Náhled kontaktního formuláře'}</div>
+            <div className={s.browserFooter}>{stage >= 3 ? <><Check size={14} />{t(" Náhled opraveného formuláře")}</> : t('Náhled kontaktního formuláře')}</div>
         </div>
-        <div className={s.sceneFootnote}><span className={s.liveDot} />{t(['Úkol: doplnit potvrzení odeslané zprávy.', 'Úprava kódu doplňuje validaci i potvrzení.', 'Automatické testy ověřují upravený formulář.', 'Ověřená změna je připravena k nasazení.'][stage])}</div>
     </div>;
 }
 

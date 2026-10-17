@@ -14,6 +14,8 @@ V horní navigaci logo/úvod, agendy, partnerství, ceník, srovnání, příbě
 
 Kalkulačka je samostatná výrazná karta s velkým zaoblením a stínem, ne další nerozlišený blok. Výsledná částka tvoří větu s benefitem a obdobím. Pokročilé parametry netvoří vstupní formulář homepage.
 
+Zjednodušení podle zadání 17. října 2026: hero, ukázky i sekce o datech plynou na stejném světlém pozadí. Ukázky a bezpečnost nemají vlastní tmavý zaoblený kontejner; žádné úzké bílé mezery mezi tmavými ostrovy. Hloubku tvoří jednotlivé pracovní objekty, jemné stíny a stávající 3D scroll. Ovládání ukázek používá jednoduché podtržení a čtyři kroky bez číselných odznaků. Zůstává čitelné označení „Ukázka“, přehrávání, přeskočení připnuté scény a odkaz na detail; zmizí dekorativní čítač, opakované stavové věty a vysvětlení pod plátnem. Ceník a portréty na úvodu jsou otevřené kompozice, dominantní samostatnou kartou zůstává kalkulačka. České i anglické texty se zkracují společně.
+
 ## Zakladatelé a firma
 
 Pavol Hejný a Jiří Jahn jsou rovnocenní spoluzakladatelé. Oba mají stejnou vizuální prioritu, skutečný portrét, jméno, roli a možnost kontaktu. Pavol: technologie; Jiří: obchod. Jediné jméno v konfiguraci SLA nesmí znamenat jediného zakladatele na webu.
