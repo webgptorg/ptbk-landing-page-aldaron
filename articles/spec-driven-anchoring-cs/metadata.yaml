@@ -1,0 +1,15 @@
+id: spec-driven-anchoring-cs
+translationGroupId: spec-driven-anchoring
+authorId: pavol-hejny
+language: cs
+slug: co-prichazi-po-generovani-kodu
+title: '„Novinka“, kterou děláme už 50 let: Co přichází po generování kódu?'
+perex: 'Jak jsem nechal AI agenta přepsat sám sebe, proč generování kódu není novinka a co budou dělat programátoři budoucnosti.'
+publishedAt: '2026-10-20T21:00:00+02:00'
+status: published
+tags:
+  - AI
+  - Programování
+  - Specifikace
+  - Anchoring
+  - Promptbook

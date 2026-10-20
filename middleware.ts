@@ -35,7 +35,7 @@ export function middleware(request: NextRequest) {
             });
         }
 
-        if (request.nextUrl.pathname === '/sitemap.xml') {
+        if (request.nextUrl.pathname === '/sitemap.xml' && publicDomainRoute.notFound.appearance !== 'personal') {
             return new NextResponse(createPublicDomainSitemapXml(publicDomainRoute), {
                 headers: { 'Content-Type': 'application/xml; charset=utf-8' },
             });

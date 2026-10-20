@@ -1,3 +1,4 @@
+import { getAllArticles } from '@/lib/articles/load';
 import sitemap from '@/app/sitemap';
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
 import { PRIMARY_SITE_URL, createPublicUrl } from '@/lib/domains/publicDomainRouting';
@@ -10,7 +11,7 @@ describe('sitemap', () => {
             (definition) => new URL(createPublicUrl(definition.path)).origin === PRIMARY_SITE_URL,
         );
 
-        expect(entries).toHaveLength(primaryDefinitions.length);
+        expect(entries).toHaveLength(primaryDefinitions.length + 2 + getAllArticles().length);
         expect(entries.map((entry) => entry.url)).not.toContain('https://ai-ta-krajta.cz/');
         expect(entries.map((entry) => entry.url)).not.toContain('https://pavolhejny.cz/');
         expect(entries.map((entry) => entry.url)).not.toContain('https://pavolhejny.com/');
@@ -19,6 +20,9 @@ describe('sitemap', () => {
     });
 
     it('does not pretend that every page changed when the site is deployed', () => {
-        expect(sitemap().every((entry) => entry.lastModified === undefined)).toBe(true);
+        expect(sitemap().filter((entry) => !entry.url.includes('/articles/')).every((entry) => entry.lastModified === undefined)).toBe(true);
+        for (const article of getAllArticles()) {
+            expect(sitemap().find((entry) => entry.url.endsWith(`/articles/${article.slug}`))?.lastModified).toBe(article.updatedAt ?? article.publishedAt);
+        }
     });
 });

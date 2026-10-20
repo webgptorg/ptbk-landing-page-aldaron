@@ -5,6 +5,19 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,
+  committed PDF, and separately prepared audio assets. Promptbook lists all authors by language at `/cs/articles` and
+  `/en/articles`; Pavol's personal domains publish only his matching-language variants at `/articles`. Canonicals use
+  the author's language-specific domain. Missing translations are never invented. Article text is server-rendered
+  under the existing host-sensitive shell. Four `articles/podcast.xml` routes are deterministic static build outputs;
+  only reviewed, existing audio becomes an episode. ElevenLabs and manifest auditing are explicit editorial commands
+  in `scripts/articles`, never build hooks. The root audio provider owns one persistent media element, local per-track
+  history, paused refresh restoration and Media Session. AI ta Krajta retains its original visible controls; article
+  tracking uses reviewed real word timing and a single toggle, with manual scrolling releasing automatic follow.
+  Articles count as complete on the real `ended` event; AI ta Krajta keeps its established 30-second outro tolerance
+  and five-second resume rewind. Reload restores the exact saved position in pause. Direct public-path Next links
+  keep the root owner alive when opening the podcast's media and branding pages.
+
 - Sharing cards use the shared 1200×630 PNG renderer in `lib/metadata`, with local Inter/Outfit fonts, real brand
   marks, page-specific copy and colors, and the canonical public hostname. Public supporting pages, including
   legal pages and podcast kits, have their own image routes. Both Open Graph and X use the same image and alt text.

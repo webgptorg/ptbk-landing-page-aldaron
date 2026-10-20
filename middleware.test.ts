@@ -118,3 +118,28 @@ describe('domain middleware', () => {
         expect(response.headers.get('location')).toBe('http://localhost:4009/en');
     });
 });
+
+describe('article publication boundaries', () => {
+    it('rewrites personal articles and podcast feeds to the matching language only', () => {
+        const cs = middleware(createRequest('https://pavolhejny.cz/articles/co-prichazi-po-generovani-kodu'));
+        const en = middleware(createRequest('https://pavolhejny.com/articles/podcast.xml'));
+        expect(cs.headers.get('x-middleware-rewrite')).toBe('https://pavolhejny.cz/cs/pavol/articles/co-prichazi-po-generovani-kodu');
+        expect(en.headers.get('x-middleware-rewrite')).toBe('https://pavolhejny.com/en/pavol/articles/podcast.xml');
+    });
+
+    it('serves each personal sitemap as a build-time route including published variants', () => {
+        const response = middleware(createRequest('https://pavolhejny.cz/sitemap.xml'));
+        expect(response.headers.get('x-middleware-rewrite')).toBe('https://pavolhejny.cz/cs/pavol/sitemap.xml');
+    });
+
+    it('never adds article routes or new feeds to AI ta Krajta', () => {
+        expect(middleware(createRequest('https://ai-ta-krajta.cz/articles')).status).toBe(404);
+        expect(middleware(createRequest('https://ai-ta-krajta.cz/articles/podcast.xml')).status).toBe(404);
+    });
+
+    it('shares static article downloads without allowing unrelated dotted paths', () => {
+        expect(middleware(createRequest('https://pavolhejny.cz/article-assets/spec-driven-anchoring-cs/article.pdf')).status).toBe(200);
+        expect(middleware(createRequest('https://pavolhejny.cz/article-podcasts/pavol-hejny.png')).status).toBe(200);
+        expect(middleware(createRequest('https://pavolhejny.cz/articles/unknown.pdf')).status).toBe(404);
+    });
+});

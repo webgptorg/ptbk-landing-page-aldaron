@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "article.pdf",
+      "sha256": "5bf37967b16103797aab1bd4c4c0feb1643d04a3944957e08443767d4ec57baa",
+      "bytes": 100659,
+      "mimeType": "application/pdf"
+    },
+    {
+      "path": "audio/script.txt",
+      "sha256": "af3333db44a160de73656d8ba97474037ce6818566182b05de45192ad3ddfab0",
+      "bytes": 32138,
+      "mimeType": "text/plain"
+    },
+    {
+      "path": "content.md",
+      "sha256": "31acf4bbb0462ac0cf26010e7185a87c7f1d1db5e857d4815d1ae836586a6bb7",
+      "bytes": 31940,
+      "mimeType": "text/markdown"
+    },
+    {
+      "path": "metadata.yaml",
+      "sha256": "640a74050385b81a7cdc5f38c9a52dc727fa95b69fd348e1199306edd43de27c",
+      "bytes": 509,
+      "mimeType": "application/yaml"
+    }
+  ],
+  "audio": {
+    "status": "pending",
+    "file": "audio/narration.mp3",
+    "voiceName": "Pavol Hejný 2026",
+    "scriptStatus": "prepared-not-submitted",
+    "note": "The spoken script is prepared. Generation, listening review and real alignment require authorized ElevenLabs access. No audio or timing is fabricated."
+  }
+}

@@ -82,6 +82,10 @@ const AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes']
 
 const PAVOL_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes'] = [
     { path: '', isIndexed: true },
+    { path: '/articles', isIndexed: true },
+    { path: '/articles/opengraph-image' },
+    { path: '/articles/podcast.xml' },
+    { path: '/sitemap.xml' },
     { path: '/opengraph-image' },
 ];
 
@@ -236,6 +240,11 @@ export function getInternalPathname(publicDomainRoute: PublicDomainRoute, public
     );
 
     if (publicPathSuffix === undefined) {
+        // Article variants are resolved by the statically generated route. A missing variant receives this
+        // personal site's own localized 404, including Czech-only articles requested on the English domain.
+        if (publicDomainRoute.notFound.appearance === 'personal' && /^\/articles\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\/opengraph-image)?$/.test(normalizedPublicPathname)) {
+            return `${publicDomainRoute.internalPath}${normalizedPublicPathname}`;
+        }
         return undefined;
     }
 
@@ -253,6 +262,10 @@ export function isSharedDeploymentAssetPath(pathname: string): boolean {
         return true;
     }
 
+    // Article assets are emitted by static routes, not located under public/. Only these bounded namespaces
+    // are shared; ordinary foreign pages and arbitrary file-looking paths still receive a branded 404.
+    if (/^\/article-assets\/[a-z0-9][a-z0-9-]*\/(?:content\.md|article\.pdf|images\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|avif)|audio\/(?:narration\.mp3|subtitles\.vtt|words\.json))$/.test(pathname)) return true;
+    if (/^\/article-podcasts\/(?:promptbook|pavol-hejny)\.png$/.test(pathname)) return true;
     return SHARED_PUBLIC_ASSET_PATH_SET.has(pathname);
 }
 

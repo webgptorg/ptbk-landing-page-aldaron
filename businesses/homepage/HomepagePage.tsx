@@ -27,6 +27,7 @@ export function HomepagePage({ language }: { readonly language: SupportedHomepag
         { href: '#agendas', label: content.examples },
         { href: '#control', label: content.control },
         { href: whitepaperUrl, label: 'Whitepaper' },
+        { href: createPublicUrl(`/${language}/articles`), label: language === 'cs' ? 'Články' : 'Articles' },
     ];
     const navigationLinks = navigation.map((item) => (
         <a key={item.href} href={item.href}>

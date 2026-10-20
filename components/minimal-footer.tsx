@@ -36,6 +36,9 @@ export function MinimalFooter({ language = 'cs' }: { readonly language?: Support
                         <Link href={createPublicUrl(WHITEPAPER_PATHS[language])} className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
                             Whitepaper
                         </Link>
+                        <Link href={createPublicUrl(`/${language}/articles`)} className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
+                            {language === 'cs' ? 'Články a podcast' : 'Articles & podcast'}
+                        </Link>
                         <Link href="/branding" className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
                             Branding
                         </Link>

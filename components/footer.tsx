@@ -70,7 +70,7 @@ const footerDefaultsByLanguage: Record<FooterLanguage, FooterContent> = {
                 text: 'AI Web s.r.o.',
             },
             { href: 'https://ptbk.io/about', text: 'About Us' },
-            { href: 'https://ptbk.io/blog', text: 'Blog' },
+            { href: 'https://ptbk.io/en/articles', text: 'Articles' },
         ],
         connectHeader: 'Connect',
         connectLinks: [
@@ -176,9 +176,13 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
 
     // Keep the localized whitepaper discoverable even when a landing page supplies its own product links.
     const whitepaperUrl = createPublicUrl(WHITEPAPER_PATHS[language]);
-    const productLinksWithWhitepaper = productLinks.some(
+    const linksWithWhitepaper = productLinks.some(
         (link) => link.href === whitepaperUrl || link.href === WHITEPAPER_PATHS[language],
     ) ? productLinks : [...productLinks, { href: whitepaperUrl, text: 'Whitepaper' }];
+    const articlesUrl = createPublicUrl(`/${language}/articles`);
+    const productLinksWithWhitepaper = linksWithWhitepaper.some((link) => link.href === articlesUrl)
+        ? linksWithWhitepaper
+        : [...linksWithWhitepaper, { href: articlesUrl, text: language === 'cs' ? 'Články a podcast' : 'Articles & podcast' }];
 
     const claim = overrides.claim ?? (
         language === 'cs'

@@ -1,3 +1,5 @@
+import { getAllArticles } from '@/lib/articles/load';
+import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import { createAbsoluteUrl } from '@/lib/metadata/site-config';
@@ -53,7 +55,18 @@ function createSitemapEntry(definition: PageMetadataDefinition): MetadataRoute.S
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-    return INDEXED_PAGE_METADATA_DEFINITIONS.filter(
+    const pages = INDEXED_PAGE_METADATA_DEFINITIONS.filter(
         (definition) => new URL(createAbsoluteUrl(definition.path)).origin === PRIMARY_SITE_URL,
     ).map(createSitemapEntry);
+    return [
+        ...pages,
+        ...(['cs', 'en'] as const).map((language) => ({ url: getArticleIndexUrl(language, 'promptbook'), changeFrequency: 'weekly' as const, priority: 0.6 })),
+        ...getAllArticles().map((article) => ({
+            url: getArticleUrl(article, 'promptbook'),
+            lastModified: article.updatedAt ?? article.publishedAt,
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+            ...(article.translations.length ? { alternates: { languages: Object.fromEntries([[article.language, article.canonicalUrl], ...article.translations.map((variant) => [variant.language, variant.url])]) } } : {}),
+        })),
+    ];
 }

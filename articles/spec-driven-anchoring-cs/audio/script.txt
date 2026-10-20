@@ -1,0 +1,251 @@
+„Novinka“, kterou děláme už padesát let: Co přichází po generování kódu?
+
+Jak jsem nechal ej aj agenta přepsat sám sebe, proč generování kódu není novinka a co budou dělat programátoři budoucnosti.
+
+Nechal jsem ej aj agenta vyvíjet sám sebe. A pak se to celé zamotalo.
+
+Vyvíjíme Promptbuk. Odkaz na jeho repozitář najdete v článku. Je to mimo jiné ej aj kódovací agent. A protože vyvíjíme kódovací agenta, napadlo nás něco přirozeného: co kdyby Promptbuk vyvíjel sám sebe?
+
+Začalo to nevinně. Přidej sí el aj fleg. Oprav bug. Přidej podporu dalšího modelu. Postupně jsme mu svěřovali celé funkce a moduly. A potom jsme udělali další krok: přestali jsme mu úkoly zadávat.
+
+Promptbuk už dokázal rozpoznávat práci, vytvářet úkoly, vykonávat je a pokračovat dál. Ne hodinu. Dny nebo týdny. Prakticky nepřetržitě. A fungovalo to. Jenže zatímco člověk vytváří technický dluh osm hodin denně, autonomní agent na něm může pracovat čtyřiadvacet hodin denně.
+
+Nové funkce. Nové abstrakce. Další závislosti. Další testy. Opravy testů. Opravy oprav testů. Pomalejší bild. Složitější projekt. Merdž konflikt. Další konflikt. Až jsem poprvé v životě řešil merdž tří různých komitů najednou.
+
+Tři větve změn. Jeden stále zamotanější projekt. … A dost!
+
+Nechtěl jsem další týden rozplétat technický dluh. Chtěl jsem zahodit implementaci a začít znovu.
+
+Starý Promptbuk vytvořil nový Promptbuk.
+
+Nechal jsem ze stávající aplikace vytvořit specifikaci. Ne seznam tříd ani kopii architektury, ale lidsky srozumitelný popis toho, co má softvér dělat – a co už dělat nemusí. Výsledkem byl relativně stručný Markdaun dokument.
+
+V Promptbuku máme také Buk, vlastní jazyk pro definování agentů, jejich cílů, pravidel a specifikací: jeden z pokusů o programování na vyšší úrovni abstrakce. Pro tento experiment ale není konkrétní syntaxe rozhodující.
+
+Spustil jsem starý, zašpagetizovaný Promptbuk nad novým projektem. Neměl přístup ke svému původnímu zdrojovému kódu. Dostal specifikaci a zadání: vytvoř podle ní aplikaci. A on ji vytvořil. Aniž by věděl, že píše vlastního nástupce.
+
+Podle mé zkušenosti vznikl softvér s prakticky stejnou požadovanou funkcionalitou, přibližně dvacetkrát rychlejší a stokrát menší. Nejde o nezávislý benchmark ani důkaz úplné ekvivalence, ale jako experiment to bylo přesvědčivé.
+
+Nejdřív jsem si říkal: tohle je úplně nový způsob vývoje. A pak mi došlo, že princip známe už desítky let.
+
+Vynalezl jsem něco nového. Nebo snad ne?
+
+Programátor napíše cé. Kompilátor vytvoří nižší reprezentaci a nakonec strojové instrukce. Programátor obvykle neřeší konkrétní registry nebo instrukce. Změní cé, spustí kompilaci a výstup klidně celý zahodí. Může použít novou verzi dží sí sí a dostat jiný strojový kód. Nikomu to nepřipadá revoluční. Zdroj pravdy je o úroveň výš.
+
+Z cé přes esembly až ke strojovému kódu. A v mém experimentu: ze specifikace přes Tajpskript a Džavaskript až ke strojovému kódu.
+
+Pro šťouraly: ano, překlad Tajpskriptu do Džavaskriptu se běžně označuje jako transpilace. Skutečný řetězec navíc obsahuje další mezikroky. Pointa je v posunu hranice mezi vyšší reprezentací a artefaktem.
+
+To, že starý Promptbuk vytvořil svou novou verzi, připomíná bútstreping kompilátoru. dží sí sí může kompilovat nové dží sí sí, aniž by potřebovalo vědět, že kompiluje samo sebe. Není to technická ekvivalence – ej aj interpretuje mnohem volnější zadání – ale analogie je silná.
+
+Ještě před zdrojovým kódem: lidé a fyzické stroje.
+
+Když se dnes řekne programování, vybaví se nám text v editoru. Ale tento obraz není samozřejmý. Slovo kompjůtr kdysi označovalo člověka, který prováděl výpočty. Algoritmus mohl být napsaný na papíře, zatímco jeho vykonavatelem byl člověk. Ještě před symbolickými jazyky tak existoval rozdíl mezi popisem postupu a jeho vykonáním, jen nebyl zabalený do dnešní softwarové infrastruktury.
+
+U některých raných elektronických strojů se výpočetní úloha nastavovala fyzickým propojováním kabelů a přepínačů. Program byl do značné míry konfigurací stroje. Není přesné říct, že se vždy „předrátovávaly elektronky“: konkrétní technologie se lišily. Podstatné je, že program ještě nebyl samozřejmým přenosným textovým artefaktem nezávislým na konkrétním stroji.
+
+Pak přišel strojový kód a symbolické zápisy instrukcí. Esembly dal lidem názvy instrukcí a symbolické adresy; assembler je převedl do reprezentace, které rozuměl procesor.
+
+Najednou existoval textový program a mechanismus jeho převodu na vykonatelné instrukce. První velké oddělení: program už nebyl jen fyzickým nastavením stroje.
+
+Vyšší jazyky: když přestaneme popisovat instrukce.
+
+Fortran, Kobol, cé a další jazyky posunuly hranici ještě výš. Místo toho, aby člověk rozhodoval o každém registru, začal zapisovat výrazy, funkce, datové struktury a algoritmy. Překladač měl za úkol rozhodnout, jak takový popis realizovat na konkrétním procesoru.
+
+Představme si jednoduché sčítání dvou čísel v cé. Výraz á plus bé není přímým příkazem použít určitý registr a konkrétní strojovou instrukci. Je to popis operace v jazyce, který má definovanou sémantiku. Překladač může zvolit různé implementace podle architektury, optimalizací a okolního programu. A přesto programátor nadále pracuje s jedním zdrojovým zápisem.
+
+Tady se odehrála zásadní výměna: část nízkoúrovňové kontroly jsme dobrovolně odevzdali, abychom mohli myslet ve větších celcích. V běžném programování nepovažujeme tuto ztrátu kontroly za selhání. Považujeme ji za výhodu abstrakce. Nikdo nechce do každé funkce v cé ručně přepisovat stovky instrukcí esembly jen proto, aby měl „všechno pod kontrolou“.
+
+Stejný posun najdeme mimo programovací jazyky. es kjú el vyjadřuje, jaká data požadujeme, a databázový optimalizátor volí plán dotazu. sí es es vyjadřuje pravidla vzhledu, nikoli posloupnost pixelových operací grafické karty. Vyšší reprezentace nechává nižší vrstvě prostor pro realizaci. Abstrakce tedy není jen pohodlnější syntaxe; je to delegace rozhodování.
+
+Druhá linie dějin: jak spolu vrstvy komunikují.
+
+Vedle historie jazyků běží druhá, stejně zajímavá historie: historie vztahu mezi vyšší a nižší vrstvou. Nejjednodušším modelem je překlad. Napíšu zdroj, přeložím ho a vykonávám výsledek. Ale už dávno existují také interpretery, které vyšší reprezentaci vykonávají za běhu, a virtuální stroje, které kombinují různé mezistupně.
+
+Interpretace nevznikla až s Pajtonem a džit nevznikl až s Javou. Tyto techniky mají dlouhou a překrývající se historii. Moderní Džavaskriptový endžin může nejprve vytvářet bajtkód, některé části interpretovat a často používané cesty později optimalizovat do strojového kódu. Podobně různé implementace Javy, sí šarp nebo Pajtonu volí různé kombinace překladů a vykonávání.
+
+Důležité není přiřadit každému jazyku jednu nálepku. Důležité je pochopit, že s vyšší abstrakcí přibývaly možnosti, kdy a jak ji převést do nižší. Kompilace předem, interpretace za běhu, džast in tajm materializace podle aktuální potřeby: všechny tyto vztahy mohou existovat vedle sebe.
+
+Nová vrstva: lidský záměr jako program.
+
+Dnes možná přidáváme další úroveň. Člověk už nemusí začínat Tajpskriptem. Může začínat popisem požadovaného chování, omezení a cíle. Model pak vytváří konkrétní implementaci. Přirozený jazyk samozřejmě nemá pevnou formální sémantiku cé a jedna specifikace může připouštět mnoho správných implementací. Proto je nutné výsledek ověřovat. Ale jako pracovní jazyk, v němž člověk programuje na vyšší úrovni, už fungovat může.
+
+V této perspektivě může být Tajpskript pro autora specifikace tím, čím je esembly pro autora programu v cé. Někdy ho čte, ladí a opravuje, ale jeho hlavním vyjádřením záměru je vyšší vrstva. Když programátor v cé přeloží projekt, neříká obvykle „vygeneroval jsem strojový kód“. Říká „napsal jsem program v cé“. Možná jednou nebudeme říkat „ej aj mi vygenerovala aplikaci“, ale „programoval jsem ve specifikaci“.
+
+Tím se ovšem mění i to, co od specifikace očekáváme. Pokud ji zahltíme detaily interní implementace, nevyužíváme vyšší abstrakci. Pouze jsme nižší kód přepsali do slov. Specifikace má vymezit důležité invarianty produktu, veřejné kontrakty a požadované výsledky. Nemá nahrazovat každou funkci a každý interní endpojnt.
+
+Tři důvody, proč ej aj není klasický kompilátor. Nebo možná je?
+
+Za prvé. „Kompilátor je deterministický. ej aj přece hází kostkou.“
+
+Když spustím dží sí sí nad stejným zdrojovým kódem, očekávám stejný výsledek. Když dám ej aj stejnou specifikaci, může napsat dva odlišné programy. Na první pohled zásadní rozdíl. Jenže výstup dží sí sí není určen pouze textem programu: závisí na verzi překladače, optimalizacích, cílové architektuře i sestavovacím prostředí. Kompilátory navíc obsahují chyby a jejich chování se v čase mění. To samozřejmě nesmazává zásadní rozdíl: jazyk cé má definovanou sémantiku, zatímco přirozený jazyk připouští mnoho výkladů.
+
+Ale ani náhodnost generativních modelů není nějaká metafyzická vlastnost ej aj. Sempling je mechanismus výběru; v některých prostředích jej lze omezit, nastavit síd, fixovat model a běhovou konfiguraci. Síd sám o sobě nezaručuje identické výsledky napříč hardvérem či službami, a reprodukovatelný výstup ještě neznamená správný výstup. Přesto je rozdíl méně černobílý než jednoduché „deterministické versus náhodné“. Je to rozdíl v míře předvídatelnosti, v garancích a v tom, co všechno musíme při reprodukci zafixovat. A tyto hranice se mohou měnit.
+
+Za druhé. „Kompilace je levná. ej aj generování je celý vývojový sprint.“
+
+Dnešní překladač běžně přeloží malý program během okamžiku. Agent může nad specifikací pracovat hodiny, spouštět testy, opravovat chyby a spotřebovat významné prostředky. To je skutečný rozdíl. Ale možná jej přeceňujeme jen proto, že žijeme v době rudimentárních „kompilátorů“ pro přirozený jazyk.
+
+Klasické překladače prošly desetiletími optimalizací, inkrementálních bildů, kešování a paralelizace. První překladače navíc vznikaly už v padesátých letech, kdy byly výpočetní zdroje nesrovnatelně vzácnější. Ani dnes není sestavení velkého projektu vždy levné. Nelze z toho vyvodit, že ej aj generování někdy dosáhne ceny kompilace cé: řeší otevřenější problém a musí hledat, ověřovat a rozhodovat. Ale současná pomalost není důkazem, že jde o principiálně nesouvisející proces. Může jít zčásti o vlastnost současného stupně technologie.
+
+Za třetí. „Vygenerovaný kód se neupravuje. Jenže s ej aj jej upravujeme pořád.“
+
+U cé se typicky vracíme ke zdrojovému souboru, nikoli k výslednému esembly. U ej aj často otevřeme vygenerovaný Tajpskript a pokračujeme přímo v něm. Ani tato hranice ale není absolutní. V cé existuje inlajn esembly, intrinziks, pragmata a další způsoby, jak z vyšší vrstvy ovlivnit nižší reprezentaci. A opačně: i v ej aj lze zafixovat veřejné rozhraní, referenční implementaci nebo test a nadále generovat ostatní části.
+
+Rozdíl však nespočívá pouze v tom, zda se nižší vrstvy někdy dotkneme. Podstatné je, jakou autoritu jí přiznáme. Musíme všechno popsat v horní specifikaci? Můžeme něco v nižší vrstvě zachovat, aniž bychom celou tuto vrstvu povýšili na nedotknutelný zdroj pravdy? Právě tato otázka nás dovede ke čtvrtému vztahu mezi abstrakcemi.
+
+Specifikace na dvě stě stran může být špatná specifikace.
+
+Vidím trend vytvářet stále delší specifikace. Padesát stran. Sto. Dvě stě. Někdy je celé generuje ej aj, jako by počet stránek dokazoval kvalitu. Podle mě je to často obráceně.
+
+Pokud specifikace popisuje každou interní funkci, endpojnt a implementační rozhodnutí, možná jsme nevytvořili vyšší abstrakci. Jen jsme přepsali zdrojový kód do angličtiny.
+
+Každá úroveň abstrakce má popisovat to, co jí přísluší. V cé nechci ručně určovat registry procesoru. V Tajpskriptu nechci ručně spravovat paměť. V produktové specifikaci nechci diktovat interní endpojnty, pokud nejsou samy důležitým kontraktem. Jeden příklad interfejsu může být užitečný, ale systematické přenášení implementace do specifikace popírá smysl abstrakce.
+
+Často za tím stojí strach: chci mít všechno pod kontrolou. Jenže vyšší jazyky jsme vytvořili právě proto, abychom všechno pod kontrolou mít nemuseli. Dobrá specifikace přesně vymezí to důležité a zbytek deleguje.
+
+A co když už v nižší vrstvě existuje něco cenného, co nechci ztratit?
+
+Tři známé vztahy mezi vyšší a nižší abstrakcí.
+
+Na dějinách programování mě zajímají dvě paralelní linie. První je růst abstrakce: od fyzického nastavení stroje přes instrukce a vyšší jazyky až k popisu lidského záměru. Druhá je proměna vztahu mezi těmito vrstvami. Není totiž jediný způsob, jak se z vyšší reprezentace stane nižší. A právě ve světě ej aj začínají být rozdíly mezi těmito způsoby překvapivě praktické.
+
+Než přidáme něco nového, stojí za to projít tři známé modely. Nejsou to výhradní kategorie jazyků: jeden rantajm může používat všechny tři. U každého se nejdřív podívejme na tradiční programování a teprve potom na jeho ej aj analogii.
+
+Za prvé. Kompilace: přeložit vyšší zápis do nižší reprezentace.
+
+Klasický svět. Napíšu cé a překladač vytvoří strojový program, případně cestou esembly. Nebo napíšu Tajpskript a nástroj jej převede do Džavaskriptu (pro šťouraly: obvykle tomu říkáme transpilace). Autor pracuje s vyšší reprezentací, zatímco výsledný program běží na reprezentaci nižší. Změním zdroj, sestavím nový výsledek; starý výstup mohu zahodit.
+
+Svět ej aj. Napíšu specifikaci aplikace v přirozeném jazyce. Agent vytvoří Tajpskript, testy a další soubory. Po ověření spouštím výslednou aplikaci bez účasti původního generátoru. To je čistá, nejpřímočařejší podoba spek drivn developmentu: specifikace plní roli zdroje, kód roli generovaného výstupu. Rozdíl proti dží sí sí je ve slabších sémantických zárukách; proto je nutné generovaný softvér testovat a ověřovat.
+
+Ze specifikace přes ej aj bild, Tajpskript a Džavaskript až k vykonávání.
+
+Za druhé. Interpretace: vykonávat vyšší zápis přímo.
+
+Klasický svět. Interpret čte program a vykonává jeho operace během běhu. Pěkným didaktickým příkladem je jednoduchý interpret jazyka Bejsik nebo šel, který postupně vyhodnocuje příkazy. U moderního Pajtonu se běžně nejprve vytváří bajtkód a ten vykonává virtuální stroj; ani „interpretovaný jazyk“ proto neznamená absenci mezireprezentace. Jde o způsob vykonávání, nikoli neměnnou vlastnost syntaxe.
+
+Svět ej aj. Mám agenta pro zákaznické e-maily a zadám mu: „Pročti nové zprávy, na běžné dotazy odpověz, složité případy předej člověku.“ Nevznikne nutně žádná trvalá e-mailová aplikace. Agent instrukci průběžně vyhodnocuje podle každé příchozí zprávy, volá ej pí aj a nástroje, případně si na okamžik vytvoří šelový příkaz nebo malý Džavaskript, který po dokončení zahodí. Uživatel spravuje instrukci, nikoli její trvale generovaný zdroják. To je interpretace přirozenojazyčného programu v praktickém smyslu.
+
+Instrukce a příchozí e-mail. Zpracuje je agent, zavolá nástroje a vytvoří odpověď.
+
+Za třetí. Džast in tajm: materializovat nižší vrstvu až ve chvíli potřeby.
+
+Klasický svět. Java je známý příklad, nikoli vynálezce džit. Džava virtuál mašín může začít vykonáváním bajtkódu a při opakovaném používání určité části programu ji přeložit do optimalizovaného strojového kódu. Profilování odhalí „horkou“ cestu a rantajm investuje do kompilace, protože další běhy budou levnější. Historie interpretace a džit sahá před Javu; podstatný je ekonomický princip: něco dražšího připravím teprve tehdy, když se mi to vyplatí.
+
+Svět ej aj. Agent zpracovává data a zjistí, že pořád dokola čistí stejný typ sí es ví. Namísto opakovaného uvažování nad každým řádkem si vytvoří skript a uloží jej pro další běhy. Nebo si vytvoří pomocnou knihovnu či algoritmus. Uživatel požádá o porovnání obchodních scénářů a agent na požádání sestaví dženerativ jú aj: interaktivní graf a ovládací prvky pro právě tento úkol. Tyto aplikace a utility nevznikají předem; materializují se podle aktuální potřeby. Mohou žít ve skryté pracovní složce rantajm, aniž by uživatel jejich zdrojový kód vůbec viděl.
+
+Když agent potřebuje spát: džit jako budík.
+
+Zajímavým příkladem jsou dlouhodobě běžící agenti. Představme si agenta, který má reagovat na příchozí e-mail nebo změnu webové stránky. Naivní řešení je probudit každou minutu celý jazykový model a nechat jej znovu kontrolovat, zda se něco nestalo. Funguje to, ale spotřebovává tokeny a výpočetní prostředky i tehdy, když není co dělat.
+
+Agent místo toho může vygenerovat malý nízkoúrovňový hlídač: kron úlohu, webhuk hendler, skript sledující schránku nebo heuristiku pro změnu stránky. Sám se uspí a nechá levný skript sledovat konkrétní podmínku. Jakmile nastane událost, skript probudí dražšího agenta. Je to podobné hardvérovým přerušením a nízkopříkonovým mechanismům, které probudí hlavní procesor až při relevantní události.
+
+V Promptbuku je takovým vyšším zadáním například dlouhodobý cíl agenta. Některé podmínky probuzení lze odvodit a materializovat jako jednoduchý skript, jiné vyžadují složitější posuzování samotným modelem. To, zda se vyplatí něco převést do klasického kódu, je optimalizační rozhodnutí. Stejně jako u džit v Javě investujeme jednou do nižší reprezentace, abychom ušetřili náklady při opakovaném běhu. Analogii nepovažuji za totožnou implementaci: džej ví em optimalizuje již definovaný program, zatímco agent může teprve navrhovat hlídací algoritmus.
+
+Z cíle agenta vznikne jednorázově vytvořený hlídač. Ten levně čeká. Jakmile nastane událost, probudí agenta.
+
+A právě tady vzniká další otázka. Co když uživatel ten vygenerovaný skript, komponentu nebo rozhraní chce vidět a některé jeho vlastnosti chce zachovat? Tím se dostáváme za hranici skrytého džit artefaktu.
+
+Ale počkat. Nemá ej aj ještě čtvrtý vztah?
+
+Enkoring: nižší vrstva získá omezenou autoritu.
+
+A teď to, co podle mě tyto tři modely doplňuje. Agent vygeneroval jú aj. Je krásné a vyladěné. Nebo vytvořil ej pí aj, na kterém už závisejí zákazníci. Nebo algoritmus, který konečně správně řeší obtížný okrajový případ. Při příštím generování nechci zahodit úplně všechno, ale nechci ani prohlásit celý dosavadní zdrojový kód za nedotknutelný.
+
+Vyberu proto konkrétní invarianty a ukotvím je. Někdy je invariantem přesný soubor. Jindy veřejné rozhraní, vizuální identita, chování nebo výsledek regresního testu. Vygenerovaný artefakt se nestane nejvyšším zdrojem pravdy, ale získá omezenou autoritu pro další transformace. To je enkoring: selektivní zachování hodnoty v nižší vrstvě.
+
+Kompilace se ptá: „Co vytvořit z vyššího zadání?“ Interpretace: „Jak zadání vykonat teď?“ džit: „Co se vyplatí vytvořit až v okamžiku potřeby?“ Enkoring přidává otázku: „Co z již vytvořeného musí přežít příští změnu?“ Právě proto ho nevnímám jen jako další způsob generování, ale jako čtvrtý vztah mezi abstrakčními vrstvami. Není to tvrzení, že před ej aj neexistovaly invarianty, referenční implementace nebo částečné regenerace. Nové je především to, jak zásadní roli mohou tyto hranice získat v generativním vývoji.
+
+Specifikace, vybrané enkory a nový úkol vstupují do ej aj transformace. Výsledkem je nový kód a zachované invarianty.
+
+Všechny čtyři vztahy mohou existovat v jednom projektu současně. Agent může interpretovat dlouhodobý cíl, džit vytvořit utilitu, ze specifikace zkompilovat novou aplikaci a přitom respektovat ukotvené ej pí aj. Nejde o čtyři konkurenční typy ej aj, ale o čtyři způsoby, jak vyšší a nižší reprezentace spolupracují.
+
+Enkoring: když vygenerovaný artefakt není jen odpad.
+
+Představte si, že ej aj vytvoří webovou aplikaci. Má nádhernou komponentu: přesný dyzajn, animace a vyladěné chování. Chcete přidat jinou funkci. Můžete všechno znovu vygenerovat a doufat, že komponenta dopadne stejně. Nebo ponechat celý projekt a jen přidávat kód. První cesta ztrácí detaily. Druhá konzervuje technický dluh.
+
+Potřebujeme třetí možnost: ukotvit jen to, na čem záleží.
+
+Enkoring je princip, při kterém určitým částem vygenerovaného nebo dříve existujícího artefaktu přiznáme hodnotu, kterou chceme zachovat při dalších transformacích. Nejsou primárním zdrojem pravdy. Ale nejsou ani zcela zahoditelné.
+
+Můžeme mluvit o koud enkoringu, jú aj enkoringu, dyzajn enkoringu, bihejvior enkoringu nebo fíčr enkoringu. Kotvou může být komponenta, interakce, vizuální detail, ej pí aj kontrakt nebo charakteristické chování.
+
+Ukotvení nemusí znamenat zachování identických bajtů. Design může přežít novou implementaci. Chování může být ukotveno testem. Kód konkrétním modulem. Není to jen keš, Git komit ani obyčejný bild artefakt: je to rozhodnutí, jakou autoritu má mít část výsledku při budoucí změně.
+
+Specifikace říká, co má vzniknout. Anchory říkají, co z toho, co už vzniklo, stojí za zachování.
+
+Ani zdroj pravdy, ani zahoditelný artefakt.
+
+V tradičním bildu bývá hranice relativně jasná: zdrojový kód uchováváme, bild výstup lze znovu vytvořit. V ej aj nejtyv vývoji vzniká spektrum. Některé části jsou nejvyšší specifikací. Jiné lze regenerovat. A některé jsou ukotvené: mají menší autoritu než specifikace, ale stále obsahují hodnotu.
+
+Enkoring proto není jen jiné jméno pro iterativní generování. Iterovat lze i nad zcela zahoditelným výstupem. Enkoring popisuje selektivní kontinuitu. A platí i pro starší projekty, které žádnou původní specifikaci neměly.
+
+Co přesně může být kotva?
+
+Začněme vizuálním návrhem. Agent vytvoří dešbord. Specifikace říká, že má být přehledný, ale konkrétní typografie, proporce a animace se podaří až při třetím pokusu. Můžu ukotvit celý návrh, konkrétní komponentu nebo jen vybrané vizuální invarianty. Neříkám tím, že každý sí es es řádek je nedotknutelný. Říkám, že při příštím generování nechci přijít o určitý výsledek.
+
+Druhý příklad je veřejné ej pí aj. Specifikace produktu může říkat „zákazníci mohou získat faktury přes ej pí aj“. Ale skutečný systém už používá konkrétní endpojnty, názvy polí a chování chybových odpovědí. Jestli na nich závisejí externí klienti, mají hodnotu i tehdy, když by nová implementace mohla být elegantnější. Kotvou není nutně starý kontroler; kotvou je kompatibilní kontrakt.
+
+Třetí příklad je algoritmus. Model vygeneruje optimalizaci, která po dlouhém ladění zvládá specifickou okrajovou situaci. Kdybych ji popsal do vyšší specifikace včetně každé implementační podrobnosti, zničil bych smysl abstrakce. Můžu ale zachovat referenční implementaci, sadu regresních testů nebo vlastnost, kterou má nová implementace prokazatelně splnit.
+
+Čtvrtý příklad je obsah. Agent připraví tón komunikace značky, ilustraci, video nebo konkrétní onbordingovou sekvenci. Výsledek je částečně generovaný, ale po schválení se stává cenným. Nechci jej při každém novém běhu přepsat jen proto, že jej lze znovu vytvořit. Tady mluvíme o dyzajn enkoringu, kontent enkoringu nebo bihejvior enkoringu, nikoli pouze o koud enkoringu.
+
+Pátý příklad je starší projekt, který nikdy žádnou vyšší specifikaci neměl. Jeho zdrojový kód může být jediným dochovaným záznamem určitých rozhodnutí. Teprve postupně z něj extrahuji vyšší záměr a rozlišuji, které existující vlastnosti jsou závazné a které pouze náhodně přežily. Enkoring tedy nemusí začínat vygenerováním artefaktu. Může být také způsobem, jak z již existujícího systému selektivně převzít hodnotu.
+
+Klíčové slovo je invariant. Někdy jím bude přesná podoba souboru. Jindy rozhraní, chování nebo výsledek, který může přežít kompletní přepis implementace. Kotva by proto měla vyjadřovat rozsah, důvod, způsob ověření a případně pravidla uvolnění. Jinak je „ukotvení“ jen hezčí jméno pro strach cokoliv změnit.
+
+A co na to Git?
+
+Dnešním Gitem výborně verzujeme soubory, ale jejich význam pro regeneraci typicky nezaznamenává. V praxi často rozlišujeme komitnutý zdroj a ignorovaný bild autput, jenže tato dvojice není úplná: i vygenerovaný lokfajl, schválený dyzajn nebo referenční komponenta mohou mít důvod zůstat v repozitáři. Samotný tečka gitignór navíc nerozhoduje, co je zdroj pravdy.
+
+Možná budeme potřebovat třetí sémantickou kategorii: enkor. Soubor nebo vlastnost, kterou lze technicky přegenerovat, ale její vybrané invarianty mají při další transformaci zůstat zachovány. Nemusí jít o novou funkci jádra Gitu; klidně to mohou být metadata, pravidla agentů a validační testy. Podstatné je, aby verzování jednou umělo zachytit nejen co uchováváme, ale i proč to nechceme ztratit.
+
+Končí věk frejmvorků?
+
+Knihovna a frejmvork jsou zvláštní případy abstrakce. Často jsou napsané ve stejném jazyce jako aplikace, ale nabízejí vyšší pojmy a hotová rozhodnutí: místo ruční práce s ejč tý tý pí rikvesty používám webový frejmvork, místo přímé manipulace s dé ó em komponentovou knihovnu. Nejde tedy jen o překlad mezi dvěma syntaxemi. Abstrakce může existovat uvnitř téhož jazyka jako sada konvencí, kontraktů a opakovaně použitelných mechanismů.
+
+Moje hypotéza je, že při programování přirozeným jazykem se hranice mezi jazykem, frejmvorkem a konkrétní aplikací začne více rozmazávat. Agent může část pravidel převzít jako „frejmvork“, část přímo interpretovat, část materializovat do kódu a část ukotvit. To však není dokázaný směr dějin ani tvrzení, že frejmvorky zmizí. Je to pracovní předpověď vycházející z toho, jak se v praxi prolínají instrukce, nástroje a generované artefakty.
+
+Co se vlastně stalo s Promptbukem?
+
+Autonomní agent dlouhodobě přidával funkce. Každý úkol vycházel ze stávajícího projektu. Protože jsme prakticky všechno zachovávali, nepozorovaně jsme ukotvovali skoro celý zdrojový kód. Ne proto, že každá komponenta byla cenná. Prostě jsme ji nechávali na místě.
+
+Z vygenerovaného výsledku se stal balík historických rozhodnutí. Když jsem nechal vytvořit specifikaci a Promptbuk přepsat, udělal jsem dvě věci: vytáhl důležitý záměr do vyšší abstrakce a zrušil většinu nechtěných ukotvení.
+
+Nevyměnil jsem princip autonomního vývoje. Nezavrhl jsem Ejdžent Prodžekt Tásk frejmvork. Jen jsem přestal předstírat, že každý řádek dosavadní implementace stojí za zachování.
+
+Ejdžent, Prodžekt, Tásk: kde tyto vrstvy žijí.
+
+V Promptbuku používáme Ejdžent Prodžekt Tásk frejmvork (ej pí tý), podrobněji popsaný ve vajtpejpru na webu Promptbuku. Odkaz najdete v článku.
+
+Agent nese roli, cíl, pravidla, znalosti a nástroje. V naší analogii částečně připomíná konfiguraci překladače, ale také samostatně rozhoduje o práci. Prodžekt je kontextová nádoba: obsahuje specifikace, soubory, historii a případné ukotvené artefakty. Tásk je konkrétní krok změny, který může zadat člověk nebo může vzniknout z cíle agenta či externí události.
+
+Tyto tři části tvoří živý kontext. ej pí tý byl stejný před přepsáním Promptbuku i po něm. Změnil se obsah projektu a míra ukotvení, nikoli princip frejmvorku.
+
+Dárk fektory a hranice autonomie.
+
+Naše dlouhodobá vize je něco jako dárk fektory: systém, v němž agenti rozvíjejí a provozují svěřenou agendu bez neustálého lidského zadávání. Projekt má cíl, agenti rozpoznávají práci, vytvářejí úkoly, ověřují výsledky a pokračují.
+
+Současně si myslím, že absolutní autonomie je v praxi nedosažitelný ideál. Ne proto, že modely nikdy nebudou dost chytré, ale protože hodnota není jen technická vlastnost výsledku. Někdo musí rozhodnout, co zachovat, který kompromis přijmout, kterou vlastnost už nikdo nepotřebuje a kdy je lepší implementaci zahodit.
+
+ej aj s těmito rozhodnutími může pomáhat. Ale odpovědnost za záměr a hodnoty projektu nikam magicky nezmizí.
+
+Programátor budoucnosti nebude hlavně psát další řádky.
+
+Myslím si, že mnoho lidí, jejichž práce dnes spočívá hlavně v produkování dalších funkcí, bude muset změnit způsob práce. Neznamená to ale, že programování končí. Pro mě je programování ve specifikacích pořád programování. Jen na jiné úrovni abstrakce.
+
+Klíčová dovednost nebude pouze umět vytvořit další funkci. Bude to umět poznat, co má skutečnou hodnotu, co má být zdrojem pravdy, co ukotvit a co bez lítosti zahodit. Jaký cíl má agent sledovat. Jaké hranice má respektovat. Kdy další generování pomáhá a kdy jen hromadí balast.
+
+Možná takovým lidem budeme dál říkat programátoři. Možná jim někdo vymyslí jiné označení. Mně připadá, že jde stále o programování: jen jsme se posunuli o další úroveň abstrakce.
+
+A právě proto se nebojím, že by se práce lidí jednoduše vypařila. Některé dnešní role nepochybně zaniknou nebo se promění. Ale schopnost rozhodovat o hodnotě, prioritách a správných hranicích abstrakce bude ještě důležitější.
+
+Když jsem přepsal Promptbuk, nebylo největším úspěchem to, že ej aj dokázala napsat nový kód. To už uměla dávno.
+
+Nejdůležitější bylo, že jsem konečně dokázal říct, který starý kód už nemá cenu zachovávat.
+
+Budoucnost programování možná nebude o tom, kolik kódu dokážeme vytvořit. Bude o tom, kolik ho dokážeme s klidným svědomím pustit.
+
+O autorovi.
+
+Pavol Hejný je softwarový vývojář a zakladatel projektů v oblasti ej aj. Vývoji softwaru se věnuje přibližně patnáct let a poslední čtyři roky se intenzivně zabývá využitím ej aj při programování. Pracuje na Promptbuku a dalších projektech na pomezí webových technologií, agentů a automatizace. Tento článek je osobní technologická úvaha: historické analogie jsou vysvětlením, enkoring a výhled do budoucna jsou hypotézy otevřené diskusi.
