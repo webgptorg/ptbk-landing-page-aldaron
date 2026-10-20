@@ -7,7 +7,6 @@ import { AiTaKrajtaEpisodeList } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpiso
 import { AiTaKrajtaFooter } from '@/businesses/ai-ta-krajta/AiTaKrajtaFooter';
 import { AiTaKrajtaHeader } from '@/businesses/ai-ta-krajta/AiTaKrajtaHeader';
 import { AiTaKrajtaHero } from '@/businesses/ai-ta-krajta/AiTaKrajtaHero';
-import { AiTaKrajtaMiniPlayer } from '@/businesses/ai-ta-krajta/AiTaKrajtaMiniPlayer';
 import { AiTaKrajtaPageStateProvider } from '@/businesses/ai-ta-krajta/AiTaKrajtaPageState';
 import { AiTaKrajtaPeopleSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaPeopleSection';
 import { PromptbookCoderBadge } from '@/components/promptbook-coder/PromptbookCoderBadge';
@@ -42,7 +41,6 @@ export function AiTaKrajtaPage({ archive }: { readonly archive: AiTaKrajtaArchiv
                     obstacleSelector={CODER_BADGE_OBSTACLE_SELECTOR}
                     playmateSelector={CODER_BADGE_PLAYMATE_SELECTOR}
                 />
-                <AiTaKrajtaMiniPlayer />
             </div>
         </AiTaKrajtaPageStateProvider>
     );

@@ -10,7 +10,7 @@ import {
 } from '@/businesses/ai-ta-krajta/config';
 import { cn } from '@/lib/utils';
 import { Pause, Play } from 'lucide-react';
-import Link from 'next/link';
+import { AiTaKrajtaLink as Link } from './AiTaKrajtaLink';
 import { useEffect, useState } from 'react';
 
 /**

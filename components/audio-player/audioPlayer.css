@@ -1,0 +1,25 @@
+.article-global-player { position: fixed; z-index: 50; inset: auto 0 0; padding-bottom: env(safe-area-inset-bottom); border-top: 1px solid #deddd7; background: rgba(251,250,246,.98); color: #173e35; box-shadow: 0 -6px 32px #102c2210; font-family: var(--font-inter),sans-serif; }
+.article-global-player__inner { display:flex; align-items:center; gap:14px; max-width:1100px; margin:auto; padding:13px 22px; }
+.article-global-player button { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; border:0; }
+.article-global-player button:focus-visible,.article-global-player input:focus-visible,.article-global-player a:focus-visible { outline:2px solid #9b722e; outline-offset:4px; }
+.article-global-player__play { width:44px; height:44px; border-radius:50%; background:#173e35; color:white; }
+.article-global-player__skip,.article-global-player__close { width:36px;height:36px;background:transparent;color:inherit;border-radius:50%; }
+.article-global-player__recording { flex:1;min-width:0; }
+.article-global-player__title { display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.article-global-player__timeline { display:flex;align-items:center;gap:10px;margin-top:6px;font-size:11px;font-variant-numeric:tabular-nums; }
+.article-global-player input { width:100%;height:4px;accent-color:#173e35;cursor:pointer; }
+.article-global-player__tracking { background:#e7e9e2;color:#294c40;border-radius:20px;padding:9px 12px;font-size:12px; }
+.article-global-player__tracking[aria-pressed=true] { background:#173e35;color:white; }
+.article-global-player__completed { font-size:10px; }
+.article-global-player p[role=status] { font-size:12px;color:#9b3426;margin-top:4px; }
+body:has([data-article-player]) { padding-bottom:100px; }
+@media(max-width:600px) { .article-global-player__inner { padding:12px;gap:8px;flex-wrap:wrap; }.article-global-player__skip { display:none!important; }.article-global-player__tracking { order:5;margin-left:52px; }.article-global-player__recording { flex-basis:calc(100% - 104px); } }
+@media(prefers-reduced-motion:reduce) { .article-global-player * { scroll-behavior:auto!important;transition:none!important; } }
+
+.article-global-player[data-appearance=promptbook] { background:rgba(250,252,255,.98);color:#163774;border-color:#d9e3f2; }
+.article-global-player[data-appearance=promptbook] .article-global-player__play,.article-global-player[data-appearance=promptbook] .article-global-player__tracking[aria-pressed=true] { background:#244fbd;color:#fff; }
+.article-global-player[data-appearance=promptbook] input { accent-color:#244fbd; }
+.article-global-player[data-appearance=promptbook] .article-global-player__tracking:not([aria-pressed=true]) { background:#e9effb;color:#244fbd; }
+
+/* Only the newly persistent player needs extra clearance on supporting pages; the show's existing pb-24 stays exact. */
+body:has([data-ai-ta-krajta-mini-player]) .ai-ta-krajta-supporting-page { padding-bottom:calc(6rem + env(safe-area-inset-bottom)); }

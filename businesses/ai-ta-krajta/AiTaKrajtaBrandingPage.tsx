@@ -24,7 +24,7 @@ import {
     createAiTaKrajtaMediaKitCollaborationPath,
 } from '@/businesses/ai-ta-krajta/config';
 import { ArrowDown, ArrowUpRight, Check, Download, ExternalLink, X } from 'lucide-react';
-import Link from 'next/link';
+import { AiTaKrajtaLink as Link } from './AiTaKrajtaLink';
 
 /**
  * Anchors of the sections of the brand kit, so a link can point straight at the files or at the rules
@@ -63,7 +63,7 @@ function AiTaKrajtaLogoPreview({ backgroundColor }: { readonly backgroundColor: 
  */
 export function AiTaKrajtaBrandingPage() {
     return (
-        <div className="min-h-screen bg-[#232a25] font-sans antialiased">
+        <div className="ai-ta-krajta-supporting-page min-h-screen bg-[#232a25] font-sans antialiased">
             <AiTaKrajtaSubpageHeader subpage={AI_TA_KRAJTA_BRANDING_SUBPAGE} />
 
             <main>

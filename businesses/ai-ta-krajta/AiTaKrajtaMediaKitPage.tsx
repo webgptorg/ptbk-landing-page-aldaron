@@ -23,7 +23,7 @@ import {
     createAiTaKrajtaMediaKitCollaborationPath,
 } from '@/businesses/ai-ta-krajta/config';
 import { ArrowDown, ArrowUpRight, Check, ExternalLink, MessageCircle } from 'lucide-react';
-import Link from 'next/link';
+import { AiTaKrajtaLink as Link } from './AiTaKrajtaLink';
 import { Suspense } from 'react';
 
 /**
@@ -66,7 +66,7 @@ function AiTaKrajtaCollaborationFormFallback() {
  */
 export function AiTaKrajtaMediaKitPage() {
     return (
-        <div className="min-h-screen bg-[#232a25] font-sans antialiased">
+        <div className="ai-ta-krajta-supporting-page min-h-screen bg-[#232a25] font-sans antialiased">
             <AiTaKrajtaSubpageHeader subpage={AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE} />
 
             <main>

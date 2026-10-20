@@ -13,7 +13,7 @@ import {
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { PromptbookCoderCredit } from '@/components/promptbook-coder/PromptbookCoderBadge';
 import { ORGANIZATION_LEGAL_NAME } from '@/lib/metadata/site-config';
-import Link from 'next/link';
+import { AiTaKrajtaLink as Link } from './AiTaKrajtaLink';
 
 const FOOTER_LINK_CLASS_NAME = 'text-sm text-white/50 transition-colors hover:text-white';
 

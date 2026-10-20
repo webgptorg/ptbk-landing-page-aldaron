@@ -1,4 +1,6 @@
 import { Analytics } from '@/components/analytics';
+import { AudioPlayerProvider } from '@/components/audio-player/AudioPlayerProvider';
+import { GlobalAudioPlayer } from '@/components/audio-player/GlobalAudioPlayer';
 import { SiteStructuredData } from '@/components/site-structured-data';
 import { SITE_METADATA, SITE_VIEWPORT } from '@/lib/metadata/site-metadata';
 import { getPublicDomainRouteByHostname, getPublicRequestHostname } from '@/lib/domains/publicDomainRouting';
@@ -38,13 +40,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </head>
             <body className={`${inter.variable} ${outfit.variable} font-sans`}>
                 <ClientWrapper publicHostname={publicHostname}>
-                    <Analytics />
-                    {children}
-                    <Chatbot isBrandedSite={isBrandedSite} />
-                    <CookiesBar
-                        brandedLanguage={publicDomainRoute?.notFound.language}
-                        isPodcastDomain={publicDomainRoute?.notFound.appearance === 'podcast'}
-                    />
+                    <AudioPlayerProvider>
+                        <Analytics />
+                        {children}
+                        <Chatbot isBrandedSite={isBrandedSite} />
+                        <CookiesBar
+                            brandedLanguage={publicDomainRoute?.notFound.language}
+                            isPodcastDomain={publicDomainRoute?.notFound.appearance === 'podcast'}
+                        />
+                        <GlobalAudioPlayer />
+                    </AudioPlayerProvider>
                 </ClientWrapper>
             </body>
         </html>

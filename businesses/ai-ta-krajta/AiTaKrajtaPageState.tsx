@@ -13,14 +13,12 @@ import {
     serializeAiTaKrajtaViewState,
     type AiTaKrajtaViewState,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
-import {
-    AI_TA_KRAJTA_PLAYBACK_PROGRESS_STORAGE_KEY,
-} from '@/businesses/ai-ta-krajta/config';
-import { usePodcastPlaybackProgress } from '@/hooks/usePodcastPlaybackProgress';
+import { useAudioPlayerControls, type AudioTrack } from '@/components/audio-player/AudioPlayerProvider';
+import { createAiTaKrajtaEpisodePath } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
 import { useUrlSynchronizedViewState } from '@/hooks/useUrlSynchronizedViewState';
-import type { PodcastEpisodePlayback, PodcastEpisodePlaybackProgress } from '@/lib/podcast/podcastPlaybackProgress';
+import type { PodcastEpisodePlaybackProgress } from '@/lib/podcast/podcastPlaybackProgress';
 import type { PodcastPlaybackProgressByEpisodeSlug } from '@/lib/podcast/podcastPlaybackProgressStorage';
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 /**
  * Everything the sections of the page share, which is the archive of the show and what the visitor did with it
@@ -72,11 +70,6 @@ type AiTaKrajtaPageStateValue = {
     readonly getEpisodePlaybackProgress: (episodeSlug: string | null) => PodcastEpisodePlaybackProgress | null;
 
     /**
-     * Writes down where the listener got to in one episode
-     */
-    readonly recordEpisodePlaybackProgress: (episodeSlug: string, playback: PodcastEpisodePlayback) => void;
-
-    /**
      * Loads one episode into the mini player and starts it
      */
     readonly playEpisode: (episode: PlayableAiTaKrajtaEpisode) => void;
@@ -112,19 +105,24 @@ export function AiTaKrajtaPageStateProvider({
     readonly archive: AiTaKrajtaArchive;
     readonly children: ReactNode;
 }) {
-    const [viewState, changeViewState] = useUrlSynchronizedViewState<AiTaKrajtaViewState>({
+    const [urlViewState, changeViewState] = useUrlSynchronizedViewState<AiTaKrajtaViewState>({
         parseViewState: parseAiTaKrajtaViewState,
         serializeViewState: serializeAiTaKrajtaViewState,
     });
 
-    // Note: What was played is deliberately not in the address bar. A link is shared with somebody else, while what a
-    //       listener already heard belongs to their browser alone.
-    const {
-        playbackProgressByEpisodeSlug,
-        isPlaybackProgressRestored,
-        getEpisodePlaybackProgress,
-        recordEpisodePlaybackProgress,
-    } = usePodcastPlaybackProgress(AI_TA_KRAJTA_PLAYBACK_PROGRESS_STORAGE_KEY);
+    const audio = useAudioPlayerControls();
+    const { track, isPlaying, isRestored: isPlaybackProgressRestored, history } = audio;
+    const [isPlayerConnected, setIsPlayerConnected] = useState(false);
+    const lastObservedEpisodeRef = useRef<string | null>(null);
+    const viewState = {
+        ...urlViewState,
+        playingEpisodeSlug: track?.kind === 'podcast' ? track.podcastEpisode?.slug ?? null : null,
+        isPlaying: track?.kind === 'podcast' && isPlaying,
+    };
+    const playbackProgressByEpisodeSlug = useMemo<PodcastPlaybackProgressByEpisodeSlug>(() => Object.fromEntries(
+        Object.entries(history).filter(([id]) => id.startsWith('ai-ta-krajta:')).map(([id, progress]) => [id.slice('ai-ta-krajta:'.length), progress]),
+    ), [history]);
+    const getEpisodePlaybackProgress = useCallback((slug: string | null) => slug ? audio.getProgress(`ai-ta-krajta:${slug}`) : null, [audio.getProgress]);
 
     const { transcriptMatchingEpisodeSlugs, isTranscriptSearchPending } = useAiTaKrajtaEpisodeTranscriptSearch(
         viewState.searchQuery,
@@ -145,39 +143,52 @@ export function AiTaKrajtaPageStateProvider({
         [archive.episodes],
     );
 
-    // Note: The player exists to play a recording, so a link naming an episode which has none simply opens the page
-    //       with the player closed instead of showing a player with nothing in it.
-    const playingEpisode = useMemo(
-        () => playableEpisodes.find((episode) => episode.slug === viewState.playingEpisodeSlug) ?? null,
-        [playableEpisodes, viewState.playingEpisodeSlug],
-    );
-
+    const playingEpisode = track?.kind === 'podcast' ? track.podcastEpisode ?? null : null;
     const newestPlayableEpisode = playableEpisodes[0] ?? null;
+    const toTrack = useCallback((episode: PlayableAiTaKrajtaEpisode): AudioTrack => ({
+        id: `ai-ta-krajta:${episode.slug}`, src: episode.audioUrl, title: episode.shortTitle,
+        author: 'AI ta Krajta', href: createAiTaKrajtaEpisodePath(episode.slug), language: 'cs',
+        kind: 'podcast', podcastEpisode: episode, durationInSeconds: episode.durationInSeconds,
+        artwork: '/ai-ta-krajta/logo.png',
+    }), []);
 
-    const playEpisode = useCallback(
-        (episode: PlayableAiTaKrajtaEpisode) =>
-            changeViewState((previousViewState) => ({
-                ...previousViewState,
-                playingEpisodeSlug: episode.slug,
-                isPlaying: true,
-            })),
-        [changeViewState],
-    );
+    // A shared link selects its recording, while a reload always restores it paused.
+    useEffect(() => {
+        if (!isPlaybackProgressRestored) return;
+        if (!isPlayerConnected || urlViewState.playingEpisodeSlug !== lastObservedEpisodeRef.current) {
+            const episode = playableEpisodes.find((item) => item.slug === urlViewState.playingEpisodeSlug);
+            if (episode && track?.id !== `ai-ta-krajta:${episode.slug}`) audio.playTrack(toTrack(episode), false);
+            lastObservedEpisodeRef.current = urlViewState.playingEpisodeSlug;
+            setIsPlayerConnected(true);
+        }
+    }, [isPlaybackProgressRestored, isPlayerConnected, urlViewState.playingEpisodeSlug, playableEpisodes, track?.id, audio.playTrack, toTrack]);
 
-    const setIsPlaying = useCallback(
-        (isPlaying: boolean) => changeViewState((previousViewState) => ({ ...previousViewState, isPlaying })),
-        [changeViewState],
-    );
+    // The persistent player also changes from system controls and from another subpage.
+    useEffect(() => {
+        if (!isPlayerConnected) return;
+        const slug = track?.kind === 'podcast' ? track.podcastEpisode?.slug ?? null : null;
+        lastObservedEpisodeRef.current = slug;
+        if (urlViewState.playingEpisodeSlug !== slug || urlViewState.isPlaying !== isPlaying) {
+            changeViewState((previous) => ({ ...previous, playingEpisodeSlug: slug, isPlaying: !!slug && isPlaying }));
+        }
+    }, [isPlayerConnected, track?.id, isPlaying, changeViewState]);
 
-    const closePlayer = useCallback(
-        () =>
-            changeViewState((previousViewState) => ({
-                ...previousViewState,
-                playingEpisodeSlug: null,
-                isPlaying: false,
-            })),
-        [changeViewState],
-    );
+    const playEpisode = useCallback((episode: PlayableAiTaKrajtaEpisode) => {
+        lastObservedEpisodeRef.current = episode.slug;
+        audio.playTrack(toTrack(episode));
+        changeViewState((previous) => ({ ...previous, playingEpisodeSlug: episode.slug, isPlaying: true }));
+    }, [audio.playTrack, changeViewState, toTrack]);
+
+    const setIsPlaying = useCallback((playing: boolean) => {
+        audio.setIsPlaying(playing);
+        changeViewState((previous) => ({ ...previous, isPlaying: playing }));
+    }, [audio.setIsPlaying, changeViewState]);
+
+    const closePlayer = useCallback(() => {
+        lastObservedEpisodeRef.current = null;
+        audio.closePlayer();
+        changeViewState((previous) => ({ ...previous, playingEpisodeSlug: null, isPlaying: false }));
+    }, [audio.closePlayer, changeViewState]);
 
     const togglePersonFilter = useCallback(
         (personId: string) =>
@@ -209,7 +220,6 @@ export function AiTaKrajtaPageStateProvider({
             playbackProgressByEpisodeSlug,
             isPlaybackProgressRestored,
             getEpisodePlaybackProgress,
-            recordEpisodePlaybackProgress,
             playEpisode,
             setIsPlaying,
             closePlayer,
@@ -227,7 +237,6 @@ export function AiTaKrajtaPageStateProvider({
             playbackProgressByEpisodeSlug,
             isPlaybackProgressRestored,
             getEpisodePlaybackProgress,
-            recordEpisodePlaybackProgress,
             playEpisode,
             setIsPlaying,
             closePlayer,
