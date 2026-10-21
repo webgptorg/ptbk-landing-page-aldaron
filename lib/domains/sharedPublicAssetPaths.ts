@@ -1,6 +1,7 @@
 /**
  * Files in `public/` which branded sites may load from this deployment.
  * Keep this list in step with `public/`; the routing test checks that no asset is missed.
+ * Copied article downloads use the separate bounded /article-assets/ allowlist.
  */
 export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/CNAME',

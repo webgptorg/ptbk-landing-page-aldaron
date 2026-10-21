@@ -43,7 +43,6 @@ const nextConfig = {
         '/en/pavol/articles/**': ['./articles/**/*'],
         '/cs/pavol/sitemap.xml': ['./articles/**/*'],
         '/en/pavol/sitemap.xml': ['./articles/**/*'],
-        '/article-assets/**': ['./articles/**/*'],
         '/article-podcasts/**': ['./articles/_podcasts/*.png'],
         '/cs/whitepaper': ['./prompts/2026-10-0000-whitepaper.md'],
         '/cs/whitepaper/download': ['./prompts/2026-10-0000-whitepaper.md'],
@@ -59,6 +58,23 @@ const nextConfig = {
         ],
     },
     devIndicators: false,
+    async headers() {
+        return [
+            {
+                source: '/article-assets/:path*',
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
+                    { key: 'Access-Control-Allow-Origin', value: '*' },
+                    { key: 'Access-Control-Expose-Headers', value: 'Accept-Ranges, Content-Length, Content-Range' },
+                    { key: 'X-Content-Type-Options', value: 'nosniff' },
+                ],
+            },
+            {
+                source: '/article-assets/:id/article.pdf',
+                headers: [{ key: 'Content-Disposition', value: 'attachment' }],
+            },
+        ];
+    },
     async redirects() {
         return [
             {

@@ -262,7 +262,7 @@ export function isSharedDeploymentAssetPath(pathname: string): boolean {
         return true;
     }
 
-    // Article assets are emitted by static routes, not located under public/. Only these bounded namespaces
+    // Committed article downloads are copied unchanged into public/ before compilation. Only these bounded namespaces
     // are shared; ordinary foreign pages and arbitrary file-looking paths still receive a branded 404.
     if (/^\/article-assets\/[a-z0-9][a-z0-9-]*\/(?:content\.md|article\.pdf|images\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|avif)|audio\/(?:narration\.mp3|subtitles\.vtt|words\.json))$/.test(pathname)) return true;
     if (/^\/article-podcasts\/(?:promptbook|pavol-hejny)\.png$/.test(pathname)) return true;

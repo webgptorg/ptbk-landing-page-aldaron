@@ -23,7 +23,7 @@ jobs:
             - name: 🔽 Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: '18'
+                  node-version: '22'
                   cache: 'npm'
 
             - name: 🔽 Install dependencies
@@ -46,8 +46,16 @@ jobs:
                   SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
             - name: 🧪 Check build output
               run: |
-                  if [ ! -d "out" ]; then
-                    echo "Build output directory 'out' not found!"
-                    exit 1
-                  fi
-                  echo "Build successful - output directory exists"
+                  node --input-type=module <<'NODE'
+                  import { existsSync, readFileSync } from 'node:fs';
+                  if (!existsSync('.next/BUILD_ID')) throw new Error('Next.js production build is missing.');
+                  const { routes } = JSON.parse(readFileSync('.next/prerender-manifest.json', 'utf8'));
+                  const feeds = [
+                      '/cs/articles/podcast.xml', '/en/articles/podcast.xml',
+                      '/cs/pavol/articles/podcast.xml', '/en/pavol/articles/podcast.xml',
+                  ];
+                  for (const feed of feeds) {
+                      if (!routes[feed]) throw new Error(`Podcast feed is not a static build output: ${feed}`);
+                  }
+                  console.log('Next.js production build and all four static podcast feeds are present.');
+                  NODE

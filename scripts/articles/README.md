@@ -1,8 +1,13 @@
 # Manual article publishing and audio production
 
-These are explicitly invoked editorial commands. They are never imported by a Next.js build,
-`prebuild`, a request handler or a file watcher. Ordinary builds neither contact ElevenLabs nor
+The audio, mapping and manifest commands below are explicitly invoked editorial commands. They are
+never imported by a Next.js build, `prebuild`, a request handler or a file watcher. Ordinary builds neither contact ElevenLabs nor
 validate the passive hash manifest. Changing Markdown does not regenerate or invalidate audio.
+
+`publish-assets.ts` is only a file-copy packaging step before dev/build: it copies the published
+download allowlist into ignored `public/article-assets/`, leaving the committed originals untouched.
+Audio is served directly as a static CDN file with byte ranges, without Next.js's 20 MB ISR body limit.
+This packaging step never generates audio, captions, PDFs or hashes and never compares the manifest.
 
 ## Current first article
 
