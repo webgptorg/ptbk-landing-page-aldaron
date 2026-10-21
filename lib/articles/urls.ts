@@ -18,5 +18,10 @@ export function getArticlePodcastUrl(language: ArticleLanguage, publication: Art
 }
 
 export function getArticleAssetUrl(id: string, file: string): string {
-    return `${ARTICLE_ASSET_ORIGIN}/article-assets/${encodeURIComponent(id)}/${file.split('/').map(encodeURIComponent).join('/')}`;
+    return `${ARTICLE_ASSET_ORIGIN}${getArticleAssetPath(id, file)}`;
+}
+
+/** JSON is fetched from the current publication, avoiding canonical-host redirects and cross-origin policy. */
+export function getArticleAssetPath(id: string, file: string): string {
+    return `/article-assets/${encodeURIComponent(id)}/${file.split('/').map(encodeURIComponent).join('/')}`;
 }

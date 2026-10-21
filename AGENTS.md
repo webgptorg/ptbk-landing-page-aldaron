@@ -18,7 +18,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   separately computed acoustic CTC word alignment of the final MP3. Its reviewed map covers title (`t…`), perex
   (`p…`) and body (`w…`) without renumbering body words. Cue intervals are never subdivided into guessed timings.
   A restored player's tracking capability refreshes when that article's valid alignment loads, without autoplay or
-  a seek. Written text and IDs must both match before tracking attaches. Explicit editorial binary import can use the manual
+  a seek. Timing JSON uses a same-origin static asset path on every publication; narration keeps its shared stable URL.
+  Written text and IDs must both match before tracking attaches. Explicit editorial binary import can use the manual
   `article-audio-import` workflow; it verifies transfer integrity and never runs during a normal build or generates speech.
   `publish-assets.ts` copies only allowed downloads of published articles unchanged into ignored `public/article-assets/`
   before dev/build. Large MP3s must be CDN static files, never force-static route bodies (Vercel's ISR size limit).

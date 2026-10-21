@@ -40,6 +40,16 @@ describe('committed article publication', () => {
         }
     });
 
+    it('loads timing JSON on each publication origin while retaining the shared narration URL', () => {
+        const article = getArticles('cs')[0];
+        expect(article.audio?.wordsUrl).toBe('/article-assets/spec-driven-anchoring-cs/audio/words.json');
+        for (const origin of ['https://www.ptbk.io', 'https://www.pavolhejny.cz']) {
+            expect(new URL(article.audio!.wordsUrl!, origin).origin).toBe(origin);
+        }
+        expect(article.audio?.url).toBe('https://ptbk.io/article-assets/spec-driven-anchoring-cs/audio/narration.mp3');
+        expect(getPublicArticleAsset(article.id, 'audio/words.json')?.mimeType).toBe('application/json; charset=utf-8');
+    });
+
     it('uses the author canonical on both publications and a real committed PDF', () => {
         const article = getArticles('cs')[0];
         const canonical = 'https://pavolhejny.cz/articles/co-prichazi-po-generovani-kodu';

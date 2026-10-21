@@ -4,7 +4,7 @@ import { load as loadYaml } from 'js-yaml';
 import { z } from 'zod';
 import { getArticleAuthor } from './authors';
 import type { Article, ArticleLanguage, ArticlePublication, ArticleTechnicalMetadata } from './types';
-import { getArticleAssetUrl } from './urls';
+import { getArticleAssetPath, getArticleAssetUrl } from './urls';
 
 const editorialSchema = z.object({
     id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
@@ -56,9 +56,9 @@ function loadArticle(id: string): Article | undefined {
         && Number.isFinite(recording.durationSeconds)
         && recording.durationSeconds > 0
         && recordingFile && existsSync(recordingFile);
-    const optionalAsset = (file?: string) => {
+    const optionalAsset = (file?: string, sameOrigin = false) => {
         const path = file ? getArticleFilePath(id, file) : undefined;
-        return file && path && existsSync(path) ? getArticleAssetUrl(id, file) : undefined;
+        return file && path && existsSync(path) ? (sameOrigin ? getArticleAssetPath(id, file) : getArticleAssetUrl(id, file)) : undefined;
     };
     return {
         ...metadata,
@@ -74,7 +74,7 @@ function loadArticle(id: string): Article | undefined {
             duration: recording!.durationSeconds!,
             byteLength: statSync(recordingFile).size,
             mimeType: 'audio/mpeg',
-            wordsUrl: optionalAsset(recording!.wordsFile),
+            wordsUrl: optionalAsset(recording!.wordsFile, true),
             subtitlesUrl: optionalAsset(recording!.subtitlesFile),
         } : undefined,
         translations: [],
