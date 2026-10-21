@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useAudioPlayer } from '@/components/audio-player/AudioPlayerProvider';
-import { findArticleWordAtTime, getArticleTimedSentences, getArticleWordStartTimes, parseArticleWordTimings, type ArticleWordTimings } from './articleTiming';
+import { findArticleWordAtTime, getArticleTimedSentences, getArticleWordSeekTimes, parseArticleWordTimings, type ArticleWordTimings } from './articleTiming';
 
 interface TrackingDom {
     readonly words: Map<string, HTMLElement>;
@@ -57,7 +57,7 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
         if (!container || !active || !timings) return;
         const words = getTrackingWords(container, timings);
         if (!words) return;
-        const starts = getArticleWordStartTimes(timings.words);
+        const starts = getArticleWordSeekTimes(timings.words);
         // A stale alignment is unavailable; do not seek to unrelated or missing visual words.
         dom.current = { words, starts };
         following.current = true;

@@ -19,6 +19,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   (`p…`) and body (`w…`) without renumbering body words. Cue intervals are never subdivided into guessed timings.
   A restored player's tracking capability refreshes when that article's valid alignment loads, without autoplay or
   a seek. Timing JSON uses a same-origin static asset path on every publication; narration keeps its shared stable URL.
+  Text seeks land at most one millisecond inside the aligned interval so a paused media clock cannot round below it.
   Written text and IDs must both match before tracking attaches. Explicit editorial binary import can use the manual
   `article-audio-import` workflow; it verifies transfer integrity and never runs during a normal build or generates speech.
   `publish-assets.ts` copies only allowed downloads of published articles unchanged into ignored `public/article-assets/`

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findArticleWordAtTime, getArticleTimedSentences, getArticleWordStartTimes, parseArticleWordTimings } from './articleTiming';
+import { findArticleWordAtTime, getArticleTimedSentences, getArticleWordSeekTimes, getArticleWordStartTimes, parseArticleWordTimings } from './articleTiming';
 
 const words = [
     { start: 0, end: 0.4, text: 'AI', wordId: 'w0', sentenceId: 's0' },
@@ -9,6 +9,15 @@ const words = [
 ];
 
 describe('article narration alignment', () => {
+    it('keeps paused word seeks inside the interval after media-clock rounding', () => {
+        const aligned = [{ start: 2.0334, end: 2.577, text: '50', wordId: 't4', sentenceId: 's0' }];
+        const seek = getArticleWordSeekTimes(aligned).get('t4')!;
+        const mediaClock = Math.floor(seek * 1_000_000) / 1_000_000 - 0.000001;
+        expect(findArticleWordAtTime(aligned, mediaClock)?.wordId).toBe('t4');
+        const short = [{ ...aligned[0], start: 0, end: 0.0002 }];
+        expect(getArticleWordSeekTimes(short).get('t4')).toBe(0.0001);
+        expect(getArticleWordSeekTimes(words).get('w0')).toBe(0.001);
+    });
     it('accepts explicit many-to-one visual mappings and keeps the first seek timestamp', () => {
         expect(parseArticleWordTimings({ version: 1, words })).toEqual({ version: 1, words });
         expect(getArticleWordStartTimes(words).get('w0')).toBe(0);

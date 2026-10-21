@@ -78,7 +78,7 @@ describe('article text tracking interactions', () => {
         expect(view.getByText('píše.').getAttribute('data-active-sentence')).toBe('true');
         expect(paragraph.tabIndex).toBe(0);
         fireEvent.click(view.getByText('píše.'));
-        expect(player.seekTo).toHaveBeenCalledWith(2);
+        expect(player.seekTo).toHaveBeenCalledWith(2.001);
         player.seekTo.mockClear();
         player.trackingEnabled = false;
         view.rerender(<Reader />);
@@ -103,7 +103,7 @@ describe('article text tracking interactions', () => {
         expect(player.seekTo).not.toHaveBeenCalled();
         selection?.removeAllRanges();
         fireEvent.keyDown(view.getByTestId('paragraph'), { key: 'Enter' });
-        expect(player.seekTo).toHaveBeenCalledWith(0);
+        expect(player.seekTo).toHaveBeenCalledWith(0.001);
         expect(view.container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     });
 

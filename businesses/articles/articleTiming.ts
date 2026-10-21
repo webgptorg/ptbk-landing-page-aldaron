@@ -57,6 +57,15 @@ export function getArticleWordStartTimes(words: readonly ArticleTimedWord[]): Re
     return starts;
 }
 
+/** Media clocks can round a seek a microsecond below its target; land just inside the actual word interval. */
+export function getArticleWordSeekTimes(words: readonly ArticleTimedWord[]): ReadonlyMap<string, number> {
+    const times = new Map<string, number>();
+    for (const word of words) if (!times.has(word.wordId)) {
+        times.set(word.wordId, word.start + Math.min(0.001, (word.end - word.start) / 2));
+    }
+    return times;
+}
+
 export interface ArticleTimedSentence {
     readonly id: string;
     readonly start: number;
