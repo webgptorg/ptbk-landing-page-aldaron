@@ -213,6 +213,10 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
     return <AudioPlayerControlsContext.Provider value={controls}><AudioPlayerContext.Provider value={value}>
         {children}
         <audio ref={audioRef} src={track?.src} preload="metadata" data-global-audio
+            onDurationChange={(event) => {
+                const actualDuration = event.currentTarget.duration;
+                if (Number.isFinite(actualDuration) && actualDuration > 0) setDuration(actualDuration);
+            }}
             onLoadedMetadata={(event) => {
                 const audio = event.currentTarget;
                 const actualDuration = Number.isFinite(audio.duration) ? audio.duration : trackRef.current?.durationInSeconds ?? 0;

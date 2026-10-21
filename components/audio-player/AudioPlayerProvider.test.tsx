@@ -76,6 +76,21 @@ describe('persistent shared audio owner', () => {
         expect(result.current.currentTime).toBe(65);
         expect(result.current.getProgress('a')?.positionInSeconds).toBe(65);
     });
+    it('updates the timeline and system controls when the browser refines MP3 duration after seeking', () => {
+        const { result } = setup();
+        act(() => result.current.playTrack(trackA, false));
+        const audio = loadedAudio();
+        act(() => result.current.seekTo(99));
+        Object.defineProperty(audio, 'duration', { configurable: true, value: 104 });
+        fireEvent.durationChange(audio);
+        expect(result.current.duration).toBe(104);
+        expect(result.current.currentTime).toBe(99);
+        expect(result.current.isPlaying).toBe(false);
+        expect(navigator.mediaSession.setPositionState).toHaveBeenLastCalledWith({ duration: 104, playbackRate: 1, position: 99 });
+        Object.defineProperty(audio, 'duration', { configurable: true, value: Infinity });
+        fireEvent.durationChange(audio);
+        expect(result.current.duration).toBe(104);
+    });
     it('restarts a completed recording only when the listener presses play', () => {
         const { result } = setup();
         act(() => result.current.playTrack(trackA));

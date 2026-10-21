@@ -20,6 +20,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `publish-assets.ts` copies only allowed downloads of published articles unchanged into ignored `public/article-assets/`
   before dev/build. Large MP3s must be CDN static files, never force-static route bodies (Vercel's ISR size limit).
   This file copy performs no hash audit or generation; stable download URLs support cross-origin reads and byte ranges.
+  Media duration changes after MP3 seeking update the shared timeline and Media Session without seeking or autoplaying.
   Articles count as complete on the real `ended` event; AI ta Krajta keeps its established 30-second outro tolerance
   and five-second resume rewind. Reload restores the exact saved position in pause. Direct public-path Next links
   keep the root owner alive when opening the podcast's media and branding pages.
