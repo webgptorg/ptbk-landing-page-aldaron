@@ -1,0 +1,3358 @@
+WEBVTT
+
+s0
+00:00:00.140 --> 00:00:02.900
+Novinka, kterou děláme už padesát let.
+
+s1
+00:00:03.500 --> 00:00:05.540
+Co přichází po generování kódu?
+
+s2
+00:00:06.180 --> 00:00:08.620
+Jak jsem nechal AI agenta přepsat sám
+
+s3
+00:00:08.720 --> 00:00:12.240
+sebe? Proč generování kódu není novinka a
+
+s4
+00:00:12.380 --> 00:00:14.700
+co budou dělat programátoři budoucnosti?
+
+s5
+00:00:15.280 --> 00:00:18.840
+Nechal jsem AI agenta vyvíjet sám sebe a
+
+s6
+00:00:19.000 --> 00:00:20.540
+pak se to celé zamotalo.
+
+s7
+00:00:21.620 --> 00:00:24.080
+Vyvíjíme Promptbook. Odkaz na jeho
+
+s8
+00:00:24.120 --> 00:00:27.000
+repozitář najdete v článku. Je to mimo
+
+s9
+00:00:27.020 --> 00:00:30.900
+jiné AI kódovací agent. A protože vyvíjíme
+
+s10
+00:00:30.940 --> 00:00:33.480
+kódovací agenta, napadlo nás něco
+
+s11
+00:00:33.520 --> 00:00:34.300
+přirozeného.
+
+s12
+00:00:34.920 --> 00:00:37.280
+Co kdyby Promptbook vyvíjel sám sebe?
+
+s13
+00:00:37.920 --> 00:00:41.940
+Začalo to nevinně. Přidej CLI flag, oprav
+
+s14
+00:00:42.040 --> 00:00:42.300
+bug,
+
+s15
+00:00:42.920 --> 00:00:45.800
+přidej podporu dalšího modelu. Postupně
+
+s16
+00:00:45.840 --> 00:00:48.900
+jsme mu svěřovali celé funkce a moduly. A
+
+s17
+00:00:49.000 --> 00:00:51.860
+potom jsme udělali další krok. Přestali
+
+s18
+00:00:51.920 --> 00:00:53.320
+jsme mu úkoly zadávat.
+
+s19
+00:00:54.160 --> 00:00:56.840
+Promptbook už dokázal rozpoznávat práci,
+
+s20
+00:00:57.120 --> 00:01:00.240
+vytvářet úkoly, vykonávat je a pokračovat
+
+s21
+00:01:00.320 --> 00:01:04.580
+dál. Ne hodinu, dny nebo týdny, prakticky
+
+s22
+00:01:04.660 --> 00:01:06.860
+nepřetržitě. A fungovalo to.
+
+s23
+00:01:07.380 --> 00:01:10.200
+Jenže zatímco člověk vytváří technický
+
+s24
+00:01:10.260 --> 00:01:13.380
+dluh osm hodin denně, autonomní agent na
+
+s25
+00:01:13.420 --> 00:01:15.720
+něm může pracovat čtyřiadvacet hodin
+
+s26
+00:01:15.780 --> 00:01:19.960
+denně. Nové funkce, nové abstrakce, další
+
+s27
+00:01:20.020 --> 00:01:23.480
+závislosti, další testy, opravy testů,
+
+s28
+00:01:23.920 --> 00:01:25.400
+opravy oprav testů,
+
+s29
+00:01:26.100 --> 00:01:29.640
+pomalejší build, složitější projekt, merge
+
+s30
+00:01:29.700 --> 00:01:33.020
+konflikt, další konflikt. Až jsem poprvé
+
+s31
+00:01:33.060 --> 00:01:35.640
+v životě řešil merge tří různých commitů
+
+s32
+00:01:35.680 --> 00:01:36.220
+najednou.
+
+s33
+00:01:37.240 --> 00:01:40.620
+Tři větve změn, jeden stále zamotanější
+
+s34
+00:01:40.740 --> 00:01:42.440
+projekt. A dost!
+
+s35
+00:01:43.480 --> 00:01:45.480
+Nechtěl jsem další týden rozplétat
+
+s36
+00:01:45.600 --> 00:01:48.000
+technický dluh. Chtěl jsem zahodit
+
+s37
+00:01:48.040 --> 00:01:50.020
+implementaci a začít znovu.
+
+s38
+00:01:50.860 --> 00:01:53.700
+Starý Promptbook vytvořil nový Promptbook.
+
+s39
+00:01:54.740 --> 00:01:57.160
+Nechal jsem ze stávající aplikace vytvořit
+
+s40
+00:01:57.240 --> 00:02:00.660
+specifikaci. Ne seznam tříd ani kopii
+
+s41
+00:02:00.720 --> 00:02:03.400
+architektury, ale lidsky srozumitelný
+
+s42
+00:02:03.460 --> 00:02:06.680
+popis toho, co má software dělat a co už
+
+s43
+00:02:06.700 --> 00:02:07.600
+dělat nemusí.
+
+s44
+00:02:08.300 --> 00:02:10.900
+Výsledkem byl relativně stručný Markdown
+
+s45
+00:02:10.940 --> 00:02:11.540
+dokument.
+
+s46
+00:02:12.220 --> 00:02:15.380
+V Promptbooku máme také Buk, vlastní jazyk
+
+s47
+00:02:15.400 --> 00:02:17.920
+pro definování agentů, jejich cílů,
+
+s48
+00:02:18.100 --> 00:02:19.760
+pravidel a specifikací.
+
+s49
+00:02:20.380 --> 00:02:23.000
+Jeden z pokusů o programování na vyšší
+
+s50
+00:02:23.060 --> 00:02:26.060
+úrovni abstrakce. Pro tento experiment ale
+
+s51
+00:02:26.140 --> 00:02:28.400
+není konkrétní syntaxe rozhodující.
+
+s52
+00:02:29.100 --> 00:02:31.560
+Spustil jsem starý zašpagetizovaný
+
+s53
+00:02:31.720 --> 00:02:33.680
+Promptbook nad novým projektem.
+
+s54
+00:02:34.400 --> 00:02:36.580
+Neměl přístup ke svému původnímu
+
+s55
+00:02:36.640 --> 00:02:39.700
+zdrojovému kódu. Dostal specifikaci a
+
+s56
+00:02:39.780 --> 00:02:43.280
+zadání: „Vytvoř podle ní aplikaci.“ A on
+
+s57
+00:02:43.320 --> 00:02:46.020
+ji vytvořil, aniž by věděl, že píše
+
+s58
+00:02:46.080 --> 00:02:47.320
+vlastního nástupce.
+
+s59
+00:02:48.360 --> 00:02:50.840
+Podle mé zkušenosti vznikl software s
+
+s60
+00:02:50.920 --> 00:02:52.740
+prakticky stejnou požadovanou
+
+s61
+00:02:52.780 --> 00:02:55.460
+funkcionalitou, přibližně dvacetkrát
+
+s62
+00:02:55.500 --> 00:02:57.800
+rychlejší a stokrát menší.
+
+s63
+00:02:58.480 --> 00:03:01.080
+Nejde o nezávislý benchmark ani důkaz
+
+s64
+00:03:01.240 --> 00:03:04.260
+úplné ekvivalence, ale jako experiment to
+
+s65
+00:03:04.300 --> 00:03:05.260
+bylo přesvědčivé.
+
+s66
+00:03:06.000 --> 00:03:08.700
+Nejdřív jsem si říkal: „Tohle je úplně
+
+s67
+00:03:08.780 --> 00:03:12.000
+nový způsob vývoje.“ A pak mi došlo, že
+
+s68
+00:03:12.140 --> 00:03:14.220
+princip známe už desítky let.
+
+s69
+00:03:14.900 --> 00:03:18.140
+Vynalezl jsem něco nového? Nebo snad ne?
+
+s70
+00:03:18.920 --> 00:03:20.300
+Programátor napíše C,
+
+s71
+00:03:21.040 --> 00:03:23.960
+kompilátor vytvoří nižší reprezentaci a
+
+s72
+00:03:24.000 --> 00:03:26.780
+nakonec strojové instrukce. Programátor
+
+s73
+00:03:26.880 --> 00:03:29.320
+obvykle neřeší konkrétní registry nebo
+
+s74
+00:03:29.360 --> 00:03:33.140
+instrukce. Změní C, spustí kompilaci a
+
+s75
+00:03:33.180 --> 00:03:36.060
+výstup klidně celý zahodí. Může použít
+
+s76
+00:03:36.160 --> 00:03:39.300
+novou verzi GCC a dostat jiný strojový
+
+s77
+00:03:39.400 --> 00:03:42.740
+kód. Nikomu to nepřipadá revoluční. Zdroj
+
+s78
+00:03:42.840 --> 00:03:44.580
+pravdy je o úroveň výš.
+
+s79
+00:03:45.280 --> 00:03:48.780
+Z C přes Assembly až ke strojovému kódu. A
+
+s80
+00:03:48.840 --> 00:03:51.640
+v mém experimentu ze specifikace přes
+
+s81
+00:03:51.720 --> 00:03:54.660
+TypeScript a JavaScript až ke strojovému
+
+s82
+00:03:54.700 --> 00:03:55.060
+kódu.
+
+s83
+00:03:55.740 --> 00:03:59.180
+Prošťourali. Ano, překlad TypeScriptu do
+
+s84
+00:03:59.240 --> 00:04:01.960
+JavaScriptu se běžně označuje jako
+
+s85
+00:04:02.000 --> 00:04:02.780
+transpilace.
+
+s86
+00:04:03.460 --> 00:04:06.040
+Skutečný řetězec navíc obsahuje další
+
+s87
+00:04:06.100 --> 00:04:06.680
+mezikroky.
+
+s88
+00:04:07.420 --> 00:04:10.200
+Pointa je v posunu hranice mezi vyšší
+
+s89
+00:04:10.240 --> 00:04:12.360
+reprezentací a artefaktem.
+
+s90
+00:04:12.980 --> 00:04:15.480
+To, že starý Promptbook vytvořil svou
+
+s91
+00:04:15.500 --> 00:04:18.019
+novou verzi, připomíná bootstrapping
+
+s92
+00:04:18.140 --> 00:04:18.880
+kompilátoru.
+
+s93
+00:04:19.560 --> 00:04:23.380
+GCC může kompilovat nové GCC, aniž by
+
+s94
+00:04:23.420 --> 00:04:26.100
+potřebovalo vědět, že kompiluje samo sebe.
+
+s95
+00:04:26.800 --> 00:04:29.420
+Není to technická ekvivalence. AI
+
+s96
+00:04:29.760 --> 00:04:32.960
+interpretuje mnohem volnější zadání, ale
+
+s97
+00:04:33.020 --> 00:04:34.500
+analogie je silná.
+
+s98
+00:04:35.160 --> 00:04:38.660
+Ještě před zdrojovým kódem: lidé a fyzické
+
+s99
+00:04:38.760 --> 00:04:39.180
+stroje.
+
+s100
+00:04:39.980 --> 00:04:42.700
+Když se dnes řekne programování, vybaví se
+
+s101
+00:04:42.740 --> 00:04:45.860
+nám text v editoru. Ale tento obraz není
+
+s102
+00:04:45.900 --> 00:04:48.640
+samozřejmý. Slovo computer kdysi
+
+s103
+00:04:48.680 --> 00:04:51.060
+označovalo člověka, který prováděl
+
+s104
+00:04:51.100 --> 00:04:54.020
+výpočty. Algoritmus mohl být napsaný na
+
+s105
+00:04:54.080 --> 00:04:56.860
+papíře, zatímco jeho vykonavatelem byl
+
+s106
+00:04:56.920 --> 00:05:00.160
+člověk. Ještě před symbolickými jazyky tak
+
+s107
+00:05:00.200 --> 00:05:03.120
+existoval rozdíl mezi popisem postupu a
+
+s108
+00:05:03.140 --> 00:05:05.880
+jeho vykonáním. Jen nebyl zabalený do
+
+s109
+00:05:05.920 --> 00:05:07.960
+dnešní softwarové infrastruktury.
+
+s110
+00:05:08.560 --> 00:05:11.000
+U některých raných elektronických strojů
+
+s111
+00:05:11.420 --> 00:05:14.020
+se výpočetní úloha nastavovala fyzickým
+
+s112
+00:05:14.100 --> 00:05:16.320
+propojováním kabelů a přepínačů.
+
+s113
+00:05:17.020 --> 00:05:19.500
+Program byl do značné míry konfigurací
+
+s114
+00:05:19.600 --> 00:05:19.980
+stroje.
+
+s115
+00:05:20.680 --> 00:05:22.580
+Není přesné říct, že se vždy
+
+s116
+00:05:22.900 --> 00:05:25.720
+předrátovávaly elektronky. Konkrétní
+
+s117
+00:05:25.760 --> 00:05:28.840
+technologie se lišily. Podstatné je, že
+
+s118
+00:05:28.880 --> 00:05:31.500
+program ještě nebyl samozřejmým přenosným
+
+s119
+00:05:31.580 --> 00:05:34.060
+textovým artefaktem nezávislým na
+
+s120
+00:05:34.100 --> 00:05:35.160
+konkrétním stroji.
+
+s121
+00:05:36.340 --> 00:05:39.040
+Pak přišel strojový kód a symbolické
+
+s122
+00:05:39.100 --> 00:05:40.280
+zápisy instrukcí.
+
+s123
+00:05:40.900 --> 00:05:43.380
+Assembly dal lidem názvy instrukcí a
+
+s124
+00:05:43.480 --> 00:05:44.640
+symbolické adresy.
+
+s125
+00:05:45.240 --> 00:05:47.500
+Assembler je převedl do reprezentace,
+
+s126
+00:05:47.840 --> 00:05:49.320
+které rozuměl procesor.
+
+s127
+00:05:50.120 --> 00:05:52.700
+Najednou existoval textový program a
+
+s128
+00:05:52.800 --> 00:05:55.220
+mechanismus jeho převodu na vykonatelné
+
+s129
+00:05:55.260 --> 00:05:55.900
+instrukce.
+
+s130
+00:05:56.860 --> 00:05:58.260
+První velké oddělení.
+
+s131
+00:05:58.860 --> 00:06:01.500
+Program už nebyl jen fyzickým nastavením
+
+s132
+00:06:01.660 --> 00:06:02.000
+stroje.
+
+s133
+00:06:02.780 --> 00:06:05.820
+Vyšší jazyky. Když přestaneme popisovat
+
+s134
+00:06:05.920 --> 00:06:06.600
+instrukce.
+
+s135
+00:06:07.616 --> 00:06:11.556
+Fortran, Cobol, C a další jazyky posunuly
+
+s136
+00:06:11.576 --> 00:06:14.476
+hranici ještě výš. Místo toho, aby
+
+s137
+00:06:14.516 --> 00:06:17.616
+člověk rozhodoval o každém registru, začal
+
+s138
+00:06:17.656 --> 00:06:20.276
+zapisovat výrazy, funkce, datové
+
+s139
+00:06:20.416 --> 00:06:23.416
+struktury a algoritmy. Překladač měl za
+
+s140
+00:06:23.456 --> 00:06:25.856
+úkol rozhodnout, jak takový popis
+
+s141
+00:06:25.976 --> 00:06:28.076
+realizovat na konkrétním procesoru.
+
+s142
+00:06:28.736 --> 00:06:31.176
+Představme si jednoduché sčítání dvou
+
+s143
+00:06:31.276 --> 00:06:32.096
+čísel v C.
+
+s144
+00:06:32.716 --> 00:06:36.596
+Výraz A plus B není přímým příkazem použít
+
+s145
+00:06:36.716 --> 00:06:39.376
+určitý registr a konkrétní strojovou
+
+s146
+00:06:39.416 --> 00:06:40.055
+instrukci.
+
+s147
+00:06:40.656 --> 00:06:43.316
+Je to popis operace v jazyce, který má
+
+s148
+00:06:43.396 --> 00:06:44.796
+definovanou sémantiku.
+
+s149
+00:06:45.436 --> 00:06:48.116
+Překladač může zvolit různé implementace
+
+s150
+00:06:48.456 --> 00:06:51.136
+podle architektury, optimalizací a
+
+s151
+00:06:51.256 --> 00:06:54.576
+okolního programu, a přesto programátor
+
+s152
+00:06:54.636 --> 00:06:57.596
+nadále pracuje s jedním zdrojovým zápisem.
+
+s153
+00:06:58.216 --> 00:07:00.436
+Tady se odehrála zásadní výměna.
+
+s154
+00:07:01.036 --> 00:07:03.376
+Část nízkoúrovňové kontroly jsme
+
+s155
+00:07:03.496 --> 00:07:06.476
+dobrovolně odevzdali, abychom mohli myslet
+
+s156
+00:07:06.516 --> 00:07:07.796
+ve větších celcích.
+
+s157
+00:07:08.396 --> 00:07:11.056
+V běžném programování nepovažujeme tuto
+
+s158
+00:07:11.076 --> 00:07:14.136
+ztrátu kontroly za selhání. Považujeme ji
+
+s159
+00:07:14.216 --> 00:07:17.476
+za výhodu abstrakce. Nikdo nechce do každé
+
+s160
+00:07:17.516 --> 00:07:20.316
+funkce v C ručně přepisovat stovky
+
+s161
+00:07:20.356 --> 00:07:23.256
+instrukcí Assembleru jen proto, aby měl
+
+s162
+00:07:23.556 --> 00:07:24.876
+všechno pod kontrolou.
+
+s163
+00:07:25.996 --> 00:07:28.436
+Stejný posun najdeme mimo programovací
+
+s164
+00:07:28.496 --> 00:07:28.916
+jazyky.
+
+s165
+00:07:29.736 --> 00:07:33.676
+SQL vyjadřuje, jaká data požadujeme a
+
+s166
+00:07:33.736 --> 00:07:36.556
+databázový optimalizátor volí plán dotazu.
+
+s167
+00:07:37.336 --> 00:07:37.936
+CSS
+
+s168
+00:07:38.596 --> 00:07:40.916
+vyjadřuje pravidla vzhledu, nikoli
+
+s169
+00:07:40.956 --> 00:07:43.316
+posloupnost pixelových operací grafické
+
+s170
+00:07:43.436 --> 00:07:43.776
+karty.
+
+s171
+00:07:44.456 --> 00:07:47.056
+Vyšší reprezentace nechává nižší vrstvě
+
+s172
+00:07:47.096 --> 00:07:48.436
+prostor pro realizaci.
+
+s173
+00:07:49.096 --> 00:07:51.876
+Abdukce tedy není jen pohodlnější syntaxe.
+
+s174
+00:07:52.356 --> 00:07:54.136
+Je to delegace rozhodování.
+
+s175
+00:07:54.856 --> 00:07:56.036
+Druhá linie dějin.
+
+s176
+00:07:56.636 --> 00:07:58.476
+Jak spolu vrstvy komunikují?
+
+s177
+00:07:59.376 --> 00:08:02.536
+Vedle historie jazyků běží druhá, stejně
+
+s178
+00:08:02.576 --> 00:08:05.536
+zajímavá historie. Historie vztahu mezi
+
+s179
+00:08:05.596 --> 00:08:07.376
+vyšší a nižší vrstvou.
+
+s180
+00:08:08.116 --> 00:08:11.216
+Nejjednodušším modelem je překlad. Napíšu
+
+s181
+00:08:11.276 --> 00:08:14.296
+zdroj, přeložím ho a vykonávám výsledek.
+
+s182
+00:08:14.836 --> 00:08:17.396
+Ale už dávno existují také interpretery,
+
+s183
+00:08:17.776 --> 00:08:20.056
+které vyšší reprezentaci vykonávají za
+
+s184
+00:08:20.116 --> 00:08:23.336
+běhu a virtuální stroje, které kombinují
+
+s185
+00:08:23.396 --> 00:08:24.556
+různé mezistupně.
+
+s186
+00:08:25.256 --> 00:08:28.216
+Interpretace nevznikla až s Pythonem a JIT
+
+s187
+00:08:28.336 --> 00:08:31.236
+nevznikl až s Javou. Tyto techniky mají
+
+s188
+00:08:31.336 --> 00:08:33.676
+dlouhou a překrývající se historii.
+
+s189
+00:08:34.376 --> 00:08:37.056
+Moderní JavaScriptový engine může nejprve
+
+s190
+00:08:37.076 --> 00:08:39.556
+vytvářet bytecode, některé části
+
+s191
+00:08:39.676 --> 00:08:42.496
+interpretovat a často používané cesty
+
+s192
+00:08:42.676 --> 00:08:45.316
+později optimalizovat do strojového kódu.
+
+s193
+00:08:46.036 --> 00:08:48.896
+Podobně různé implementace Javy, C Sharp
+
+s194
+00:08:48.936 --> 00:08:52.036
+nebo Pythonu volí různé kombinace překladů
+
+s195
+00:08:52.136 --> 00:08:53.076
+a vykonávání.
+
+s196
+00:08:53.776 --> 00:08:56.256
+Důležité není přiřadit každému jazyku
+
+s197
+00:08:56.356 --> 00:08:59.636
+jednu nálepku. Důležité je pochopit, že s
+
+s198
+00:08:59.676 --> 00:09:03.036
+vyšší abstrakcí přibývaly možnosti, kdy a
+
+s199
+00:09:03.116 --> 00:09:04.676
+jak ji převést do nižší.
+
+s200
+00:09:05.336 --> 00:09:07.916
+Kompilace předem, interpretace za běhu,
+
+s201
+00:09:08.336 --> 00:09:11.496
+just in time, materializace podle aktuální
+
+s202
+00:09:11.576 --> 00:09:14.176
+potřeby. Všechny tyto vztahy mohou
+
+s203
+00:09:14.216 --> 00:09:15.436
+existovat vedle sebe.
+
+s204
+00:09:16.056 --> 00:09:16.896
+Nová vrstva.
+
+s205
+00:09:17.496 --> 00:09:19.516
+Lidský záměr jako program.
+
+s206
+00:09:20.316 --> 00:09:23.596
+Dnes možná přidáváme další úroveň. Člověk
+
+s207
+00:09:23.636 --> 00:09:26.356
+už nemusí začínat Typescriptem. Může
+
+s208
+00:09:26.396 --> 00:09:28.836
+začínat popisem požadovaného chování,
+
+s209
+00:09:29.096 --> 00:09:30.376
+omezení a cíle.
+
+s210
+00:09:31.016 --> 00:09:33.616
+Model pak vytváří konkrétní implementaci.
+
+s211
+00:09:34.056 --> 00:09:36.596
+Přirozený jazyk samozřejmě nemá pevnou
+
+s212
+00:09:36.716 --> 00:09:40.076
+formální sémantiku C a jedna specifikace
+
+s213
+00:09:40.156 --> 00:09:41.976
+může připouštět mnoho správných
+
+s214
+00:09:42.016 --> 00:09:44.756
+implementací. Proto je nutné výsledek
+
+s215
+00:09:44.856 --> 00:09:47.876
+ověřovat. Ale jako pracovní jazyk, v němž
+
+s216
+00:09:47.896 --> 00:09:50.416
+člověk programuje na vyšší úrovni, už
+
+s217
+00:09:50.456 --> 00:09:51.236
+fungovat může.
+
+s218
+00:09:51.876 --> 00:09:54.696
+V této perspektivě může být Typescript pro
+
+s219
+00:09:54.756 --> 00:09:57.716
+autora specifikace tím, čím je Assembler
+
+s220
+00:09:57.836 --> 00:09:59.236
+pro autora programu v C.
+
+s221
+00:10:00.116 --> 00:10:03.396
+Někdy ho čte, ladí a opravuje, ale jeho
+
+s222
+00:10:03.456 --> 00:10:06.476
+hlavním vyjádřením záměru je vyšší vrstva.
+
+s223
+00:10:07.176 --> 00:10:09.616
+Když programátor v C přeloží projekt,
+
+s224
+00:10:09.936 --> 00:10:12.756
+neříká obvykle: „Vygeneroval jsem strojový
+
+s225
+00:10:12.856 --> 00:10:16.796
+kód.“ Říká: „Napsal jsem program v C.“
+
+s226
+00:10:16.836 --> 00:10:19.336
+Možná jednou nebudeme říkat: „AI mi
+
+s227
+00:10:19.376 --> 00:10:22.196
+vygenerovala aplikaci,“ ale: „Programoval
+
+s228
+00:10:22.256 --> 00:10:25.736
+jsem ve specifikaci.“ Tím se ovšem mění i
+
+s229
+00:10:25.856 --> 00:10:28.256
+to, co od specifikace očekáváme.
+
+s230
+00:10:28.876 --> 00:10:30.896
+Pokud ji zahltíme detaily interní
+
+s231
+00:10:30.936 --> 00:10:34.036
+implementace, nevyužíváme vyšší abstrakci.
+
+s232
+00:10:34.576 --> 00:10:37.056
+Pouze jsme nižší kód přepsali do slov.
+
+s233
+00:10:37.656 --> 00:10:40.416
+Specifikace má vymezit důležité invarianty
+
+s234
+00:10:40.516 --> 00:10:43.476
+produktu, veřejné kontrakty a požadované
+
+s235
+00:10:43.516 --> 00:10:46.876
+výsledky. Nemá nahrazovat každou funkci a
+
+s236
+00:10:46.996 --> 00:10:48.516
+každý interní endpoint.
+
+s237
+00:10:49.156 --> 00:10:51.976
+Tři důvody, proč AI není klasický
+
+s238
+00:10:52.056 --> 00:10:54.476
+kompilátor. Nebo možná je?
+
+s239
+00:10:55.476 --> 00:10:55.976
+Za prvé,
+
+s240
+00:10:56.596 --> 00:10:59.776
+kompilátor je deterministický. AI přece
+
+s241
+00:10:59.816 --> 00:11:00.716
+hází kostkou.
+
+s242
+00:11:01.656 --> 00:11:04.796
+Když spustím GCC nad stejným zdrojovým
+
+s243
+00:11:04.876 --> 00:11:08.536
+kódem, očekávám stejný výsledek. Když dám
+
+s244
+00:11:08.756 --> 00:11:11.956
+AI stejnou specifikaci, může napsat dva
+
+s245
+00:11:12.096 --> 00:11:15.116
+odlišné programy. Na první pohled zásadní
+
+s246
+00:11:15.156 --> 00:11:19.296
+rozdíl. Jenže výstup GCC není určen pouze
+
+s247
+00:11:19.416 --> 00:11:21.836
+textem programu. Závisí na verzi
+
+s248
+00:11:21.856 --> 00:11:24.656
+překladače, optimalizacích, cílové
+
+s249
+00:11:24.716 --> 00:11:27.276
+architektuře i sestavovacím prostředí.
+
+s250
+00:11:27.896 --> 00:11:30.576
+Kompilátory navíc obsahují chyby a jejich
+
+s251
+00:11:30.616 --> 00:11:32.136
+chování se v čase mění.
+
+s252
+00:11:32.796 --> 00:11:35.416
+To samozřejmě nesmazává zásadní rozdíl.
+
+s253
+00:11:35.916 --> 00:11:39.296
+Jazyk C má definovanou sémantiku, zatímco
+
+s254
+00:11:39.336 --> 00:11:42.116
+přirozený jazyk připouští mnoho výkladů.
+
+s255
+00:11:42.856 --> 00:11:45.356
+Ale ani náhodnost generativních modelů
+
+s256
+00:11:45.416 --> 00:11:48.376
+není nějaká metafyzická vlastnost AI.
+
+s257
+00:11:49.156 --> 00:11:51.776
+Sampling je mechanismus výběru. V
+
+s258
+00:11:51.816 --> 00:11:54.056
+některých prostředích jej lze omezit,
+
+s259
+00:11:54.356 --> 00:11:57.256
+nastavit seed, fixovat model a běhovou
+
+s260
+00:11:57.316 --> 00:11:58.056
+konfiguraci.
+
+s261
+00:11:58.896 --> 00:12:01.496
+Seed sám o sobě nezaručuje identické
+
+s262
+00:12:01.516 --> 00:12:04.436
+výsledky napříč hardwarem či službami a
+
+s263
+00:12:04.476 --> 00:12:07.216
+reprodukovatelný výstup ještě neznamená
+
+s264
+00:12:07.276 --> 00:12:08.336
+správný výstup.
+
+s265
+00:12:09.072 --> 00:12:11.352
+Přesto je rozdíl méně černobílý než
+
+s266
+00:12:11.372 --> 00:12:14.552
+jednoduché deterministické versus náhodné.
+
+s267
+00:12:15.232 --> 00:12:17.812
+Je to rozdíl v míře předvídatelnosti, v
+
+s268
+00:12:17.892 --> 00:12:20.832
+garancích a v tom, co všechno musíme při
+
+s269
+00:12:20.872 --> 00:12:23.832
+reprodukci zafixovat. A tyto hranice se
+
+s270
+00:12:23.892 --> 00:12:24.612
+mohou měnit.
+
+s271
+00:12:25.812 --> 00:12:26.352
+Za druhé:
+
+s272
+00:12:26.952 --> 00:12:30.392
+Kompilace je levná. AI generování je celý
+
+s273
+00:12:30.432 --> 00:12:31.532
+vývojový sprint.
+
+s274
+00:12:32.532 --> 00:12:34.992
+Dnešní překladač běžně přeloží malý
+
+s275
+00:12:35.012 --> 00:12:36.472
+program během okamžiku.
+
+s276
+00:12:37.132 --> 00:12:39.292
+Agent může nad specifikací pracovat
+
+s277
+00:12:39.372 --> 00:12:42.912
+hodiny, spouštět testy, opravovat chyby a
+
+s278
+00:12:42.992 --> 00:12:45.732
+spotřebovat významné prostředky. To je
+
+s279
+00:12:45.812 --> 00:12:46.852
+skutečný rozdíl,
+
+s280
+00:12:47.512 --> 00:12:50.372
+ale možná jej přeceňujeme jen proto, že
+
+s281
+00:12:50.432 --> 00:12:53.332
+žijeme v době rudimentárních kompilátorů
+
+s282
+00:12:53.372 --> 00:12:54.512
+pro přirozený jazyk.
+
+s283
+00:12:55.232 --> 00:12:57.872
+Klasické překladače prošly desetiletími
+
+s284
+00:12:58.012 --> 00:13:00.692
+optimalizací, inkrementálních buildů,
+
+s285
+00:13:00.872 --> 00:13:02.812
+cachování a paralelizace.
+
+s286
+00:13:03.512 --> 00:13:05.652
+První překladače navíc vznikaly už v
+
+s287
+00:13:05.672 --> 00:13:08.152
+padesátých letech, kdy byly výpočetní
+
+s288
+00:13:08.212 --> 00:13:10.232
+zdroje nesrovnatelně vzácnější.
+
+s289
+00:13:10.892 --> 00:13:13.392
+Ani dnes není sestavení velkého projektu
+
+s290
+00:13:13.411 --> 00:13:14.012
+vždy levné.
+
+s291
+00:13:14.692 --> 00:13:17.832
+Nelze z toho vyvodit, že AI generování
+
+s292
+00:13:17.892 --> 00:13:19.872
+někdy dosáhne ceny kompilace C.
+
+s293
+00:13:20.752 --> 00:13:23.732
+Řeší otevřenější problém a musí hledat,
+
+s294
+00:13:23.952 --> 00:13:26.772
+ověřovat a rozhodovat. Ale současná
+
+s295
+00:13:26.932 --> 00:13:29.252
+pomalost není důkazem, že jde o
+
+s296
+00:13:29.352 --> 00:13:32.372
+principiálně nesouvisející proces. Může
+
+s297
+00:13:32.392 --> 00:13:35.352
+jít zčásti o vlastnost současného stupně
+
+s298
+00:13:35.412 --> 00:13:36.112
+technologie.
+
+s299
+00:13:36.812 --> 00:13:37.392
+Za třetí:
+
+s300
+00:13:38.052 --> 00:13:41.672
+Vygenerovaný kód se neupravuje. Jenže s AI
+
+s301
+00:13:42.152 --> 00:13:44.012
+jej upravujeme pořád.
+
+s302
+00:13:45.012 --> 00:13:47.592
+U C se typicky vracíme ke zdrojovému
+
+s303
+00:13:47.692 --> 00:13:50.252
+souboru, nikoli k výslednému assembly.
+
+s304
+00:13:50.852 --> 00:13:53.252
+U AI často otevřeme vygenerovaný
+
+s305
+00:13:53.372 --> 00:13:55.932
+TypeScript a pokračujeme přímo v něm.
+
+s306
+00:13:56.632 --> 00:13:59.972
+Ani tato hranice ale není absolutní. V C
+
+s307
+00:14:00.012 --> 00:14:02.712
+existuje inline assembly, intrinsics,
+
+s308
+00:14:02.932 --> 00:14:05.892
+pragmata a další způsoby, jak z vyšší
+
+s309
+00:14:05.932 --> 00:14:08.772
+vrstvy ovlivnit nižší reprezentaci. A
+
+s310
+00:14:08.812 --> 00:14:12.072
+opačně. I v AI lze zafixovat veřejné
+
+s311
+00:14:12.092 --> 00:14:14.952
+rozhraní, referenční implementaci nebo
+
+s312
+00:14:15.032 --> 00:14:17.952
+test a nadále generovat ostatní části.
+
+s313
+00:14:19.032 --> 00:14:21.772
+Rozdíl však nespočívá pouze v tom, zda se
+
+s314
+00:14:21.792 --> 00:14:23.432
+nižší vrstvě někdy dotkneme.
+
+s315
+00:14:24.032 --> 00:14:27.032
+Podstatné je, jakou autoritu jí přiznáme.
+
+s316
+00:14:27.672 --> 00:14:30.152
+Musíme všechno popsat v horní specifikaci?
+
+s317
+00:14:30.812 --> 00:14:33.412
+Můžeme něco v nižší vrstvě zachovat, aniž
+
+s318
+00:14:33.452 --> 00:14:35.592
+bychom celou tuto vrstvu povýšili na
+
+s319
+00:14:35.692 --> 00:14:37.172
+nedotknutelný zdroj pravdy?
+
+s320
+00:14:37.772 --> 00:14:40.692
+Právě tato otázka nás dovede ke čtvrtému
+
+s321
+00:14:40.732 --> 00:14:42.192
+vztahu mezi abstrakcemi.
+
+s322
+00:14:42.812 --> 00:14:45.492
+Specifikace na dvě stě stran může být
+
+s323
+00:14:45.632 --> 00:14:46.992
+špatná specifikace.
+
+s324
+00:14:47.632 --> 00:14:50.152
+Vidím trend vytvářet stále delší
+
+s325
+00:14:50.192 --> 00:14:54.192
+specifikace. Padesát stran, sto, dvě stě.
+
+s326
+00:14:54.832 --> 00:14:57.932
+Někdy je celé generuje AI, jako by počet
+
+s327
+00:14:57.952 --> 00:15:01.252
+stránek dokazoval kvalitu. Podle mě je to
+
+s328
+00:15:01.292 --> 00:15:02.352
+často obráceně.
+
+s329
+00:15:02.972 --> 00:15:05.612
+Pokud specifikace popisuje každou interní
+
+s330
+00:15:05.712 --> 00:15:08.332
+funkci, endpoint a implementační
+
+s331
+00:15:08.372 --> 00:15:11.292
+rozhodnutí, možná jsme nevytvořili vyšší
+
+s332
+00:15:11.332 --> 00:15:14.232
+abstrakci. Jen jsme přepsali zdrojový kód
+
+s333
+00:15:14.352 --> 00:15:15.152
+do angličtiny.
+
+s334
+00:15:15.832 --> 00:15:18.892
+Každá úroveň abstrakce má popisovat to, co
+
+s335
+00:15:18.912 --> 00:15:19.732
+jí přísluší.
+
+s336
+00:15:20.352 --> 00:15:22.792
+V C nechci ručně určovat registry
+
+s337
+00:15:22.872 --> 00:15:23.452
+procesoru.
+
+s338
+00:15:24.052 --> 00:15:26.372
+V TypeScriptu nechci ručně spravovat
+
+s339
+00:15:26.452 --> 00:15:26.892
+paměť.
+
+s340
+00:15:27.552 --> 00:15:29.972
+V produktové specifikaci nechci diktovat
+
+s341
+00:15:30.092 --> 00:15:32.592
+interní endpointy, pokud nejsou samy
+
+s342
+00:15:32.632 --> 00:15:33.832
+důležitým kontraktem.
+
+s343
+00:15:34.432 --> 00:15:36.332
+Jeden příklad interfaceu může být
+
+s344
+00:15:36.372 --> 00:15:39.272
+užitečný, ale systematické přenášení
+
+s345
+00:15:39.292 --> 00:15:42.352
+implementace do specifikace popírá smysl
+
+s346
+00:15:42.392 --> 00:15:43.012
+abstrakce.
+
+s347
+00:15:43.612 --> 00:15:46.192
+Často za tím stojí strach. Chci mít
+
+s348
+00:15:46.252 --> 00:15:47.612
+všechno pod kontrolou.
+
+s349
+00:15:48.312 --> 00:15:50.752
+Jenže vyšší jazyky jsme vytvořili právě
+
+s350
+00:15:50.852 --> 00:15:53.492
+proto, abychom všechno pod kontrolou mít
+
+s351
+00:15:53.552 --> 00:15:54.132
+nemuseli.
+
+s352
+00:15:54.792 --> 00:15:57.092
+Dobrá specifikace přesně vymezí to
+
+s353
+00:15:57.132 --> 00:15:59.312
+důležité a zbytek deleguje.
+
+s354
+00:16:00.312 --> 00:16:02.752
+A co když už v nižší vrstvě existuje něco
+
+s355
+00:16:02.892 --> 00:16:04.752
+cenného, co nechci ztratit?
+
+s356
+00:16:05.812 --> 00:16:08.492
+Tři známé vztahy mezi vyšší a nižší
+
+s357
+00:16:08.532 --> 00:16:09.252
+abstrakcí.
+
+s358
+00:16:09.892 --> 00:16:12.572
+Na dějinách programování mě zajímají dvě
+
+s359
+00:16:12.712 --> 00:16:16.272
+paralelní linie. První je růst abstrakce.
+
+s360
+00:16:16.892 --> 00:16:19.152
+Od fyzického nastavení stroje přes
+
+s361
+00:16:19.212 --> 00:16:22.092
+instrukce a vyšší jazyky až k popisu
+
+s362
+00:16:22.112 --> 00:16:23.132
+lidského záměru.
+
+s363
+00:16:23.852 --> 00:16:26.452
+Druhá je proměna vztahu mezi těmito
+
+s364
+00:16:26.471 --> 00:16:27.012
+vrstvami.
+
+s365
+00:16:27.612 --> 00:16:30.372
+Není totiž jediný způsob, jak se z vyšší
+
+s366
+00:16:30.411 --> 00:16:32.212
+reprezentace stane nižší.
+
+s367
+00:16:32.812 --> 00:16:36.052
+A právě ve světě AI začínají být rozdíly
+
+s368
+00:16:36.092 --> 00:16:38.812
+mezi těmito způsoby překvapivě praktické.
+
+s369
+00:16:39.452 --> 00:16:41.992
+Než přidáme něco nového, stojí za to
+
+s370
+00:16:42.072 --> 00:16:43.712
+projít tři známé modely.
+
+s371
+00:16:44.412 --> 00:16:47.412
+Nejsou to výhradní kategorie jazyků. Jeden
+
+s372
+00:16:47.492 --> 00:16:49.732
+runtime může používat všechny tři.
+
+s373
+00:16:50.712 --> 00:16:53.332
+U každého se nejdřív podívejme na tradiční
+
+s374
+00:16:53.352 --> 00:16:56.872
+programování a teprve potom na jeho AI
+
+s375
+00:16:56.912 --> 00:16:57.532
+analogii.
+
+s376
+00:16:58.312 --> 00:17:02.072
+Za prvé: Kompilace. Přeložit vyšší zápis
+
+s377
+00:17:02.232 --> 00:17:03.692
+do nižší reprezentace.
+
+s378
+00:17:04.372 --> 00:17:07.792
+Klasický svět. Napíšu C a překladač
+
+s379
+00:17:07.832 --> 00:17:10.532
+vytvoří strojový program, případně cestou
+
+s380
+00:17:10.632 --> 00:17:14.192
+assembly. Nebo napíšu TypeScript a nástroj
+
+s381
+00:17:14.332 --> 00:17:16.992
+jej převede do JavaScriptu. Pro šťouraly,
+
+s382
+00:17:17.532 --> 00:17:19.672
+obvykle tomu říkáme transpylace.
+
+s383
+00:17:20.372 --> 00:17:22.632
+Autor pracuje s vyšší reprezentací,
+
+s384
+00:17:23.032 --> 00:17:25.152
+zatímco výsledný program běží na
+
+s385
+00:17:25.192 --> 00:17:28.692
+reprezentaci nižší. Změním zdroj, sestavím
+
+s386
+00:17:28.732 --> 00:17:31.612
+nový výsledek. Starý výstup mohu zahodit.
+
+s387
+00:17:32.392 --> 00:17:35.812
+Svět AI. Napíšu specifikaci aplikace v
+
+s388
+00:17:35.912 --> 00:17:38.372
+přirozeném jazyce. Agent vytvoří
+
+s389
+00:17:38.412 --> 00:17:41.512
+TypeScript, testy a další soubory. Po
+
+s390
+00:17:41.572 --> 00:17:44.232
+ověření spouštím výslednou aplikaci bez
+
+s391
+00:17:44.272 --> 00:17:47.372
+účasti původního generátoru. To je čistá,
+
+s392
+00:17:47.632 --> 00:17:49.832
+nejpřímočařejší podoba spec-driven
+
+s393
+00:17:49.872 --> 00:17:52.532
+developmentu. Specifikace plní roli
+
+s394
+00:17:52.592 --> 00:17:55.432
+zdroje, kód roli generovaného výstupu.
+
+s395
+00:17:56.012 --> 00:17:58.492
+Rozdíl proti GCC je ve slabších
+
+s396
+00:17:58.592 --> 00:18:01.292
+sémantických zárukách. Proto je nutné
+
+s397
+00:18:01.352 --> 00:18:04.012
+generovaný software testovat a ověřovat.
+
+s398
+00:18:04.752 --> 00:18:08.212
+Ze specifikace přes AI build, TypeScript a
+
+s399
+00:18:08.292 --> 00:18:10.572
+JavaScript až k vykonávání.
+
+s400
+00:18:11.352 --> 00:18:14.832
+Za druhé: Interpretace. Vykonávat vyšší
+
+s401
+00:18:14.892 --> 00:18:15.832
+zápis přímo.
+
+s402
+00:18:16.688 --> 00:18:19.888
+Klasický svět. Interpret čte program a
+
+s403
+00:18:19.928 --> 00:18:22.108
+vykonává jeho operace během běhu.
+
+s404
+00:18:22.788 --> 00:18:25.428
+Pěkným didaktickým příkladem je jednoduchý
+
+s405
+00:18:25.548 --> 00:18:28.588
+interpret jazyka Basic nebo Shell, který
+
+s406
+00:18:28.608 --> 00:18:30.408
+postupně vyhodnocuje příkazy.
+
+s407
+00:18:31.068 --> 00:18:33.388
+U moderního Pythonu se běžně nejprve
+
+s408
+00:18:33.428 --> 00:18:36.748
+vytváří bytecode a ten vykonává virtuální
+
+s409
+00:18:36.908 --> 00:18:40.028
+stroj. Ani interpretovaný jazyk proto
+
+s410
+00:18:40.088 --> 00:18:42.308
+neznamená absenci mezireprezentace.
+
+s411
+00:18:42.928 --> 00:18:46.008
+Jde o způsob vykonávání, nikoli neměnnou
+
+s412
+00:18:46.048 --> 00:18:47.188
+vlastnost syntaxe.
+
+s413
+00:18:47.948 --> 00:18:49.068
+Svět AI.
+
+s414
+00:18:49.748 --> 00:18:52.788
+Mám agenta pro zákaznické emaily a zadám
+
+s415
+00:18:52.908 --> 00:18:56.148
+mu: „Pročti nové zprávy, na běžné dotazy
+
+s416
+00:18:56.188 --> 00:19:00.048
+odpověz, složité případy předej člověku.“
+
+s417
+00:19:00.088 --> 00:19:02.788
+Nevznikne nutně žádná trvalá emailová
+
+s418
+00:19:02.828 --> 00:19:03.428
+aplikace.
+
+s419
+00:19:04.108 --> 00:19:06.948
+Agent instrukci průběžně vyhodnocuje podle
+
+s420
+00:19:07.068 --> 00:19:10.268
+každé příchozí zprávy. Volá API
+
+s421
+00:19:11.128 --> 00:19:13.988
+a nástroje, případně si na okamžik vytvoří
+
+s422
+00:19:14.008 --> 00:19:16.468
+shellový příkaz nebo malý JavaScript,
+
+s423
+00:19:16.748 --> 00:19:18.348
+který po dokončení zahodí.
+
+s424
+00:19:19.108 --> 00:19:22.007
+Uživatel spravuje instrukci, nikoli její
+
+s425
+00:19:22.128 --> 00:19:23.788
+trvale generovaný zdroják.
+
+s426
+00:19:24.468 --> 00:19:26.708
+To je interpretace přirozenojazyčného
+
+s427
+00:19:26.808 --> 00:19:30.208
+programu v praktickém smyslu. Instrukce a
+
+s428
+00:19:30.308 --> 00:19:33.828
+příchozí email. Zpracuje je agent, zavolá
+
+s429
+00:19:33.868 --> 00:19:35.928
+nástroje a vytvoří odpověď.
+
+s430
+00:19:36.668 --> 00:19:40.168
+Za třetí: Just in time. Materializovat
+
+s431
+00:19:40.248 --> 00:19:42.708
+nižší vrstvu až ve chvíli potřeby.
+
+s432
+00:19:43.408 --> 00:19:46.368
+Klasický svět. Java je známý příklad,
+
+s433
+00:19:46.748 --> 00:19:49.928
+nikoli vynálezce JIT. Java Virtual Machine
+
+s434
+00:19:50.028 --> 00:19:52.888
+může začít vykonáváním bytecode a při
+
+s435
+00:19:52.928 --> 00:19:55.868
+opakovaném používání určité části programu
+
+s436
+00:19:56.208 --> 00:19:58.148
+ji přeložit do optimalizovaného
+
+s437
+00:19:58.248 --> 00:20:01.668
+strojového kódu. Profilování odhalí horkou
+
+s438
+00:20:01.788 --> 00:20:04.648
+cestu a runtime investuje do kompilace,
+
+s439
+00:20:04.968 --> 00:20:07.108
+protože další běhy budou levnější.
+
+s440
+00:20:07.508 --> 00:20:10.148
+Historie interpretace a JIT sahá před
+
+s441
+00:20:10.208 --> 00:20:12.868
+Javu. Podstatný je ekonomický princip.
+
+s442
+00:20:13.228 --> 00:20:16.068
+Něco dražšího připravím teprve tehdy, když
+
+s443
+00:20:16.108 --> 00:20:16.948
+se mi to vyplatí.
+
+s444
+00:20:17.648 --> 00:20:18.708
+Svět AI.
+
+s445
+00:20:19.328 --> 00:20:22.828
+Agent zpracovává data a zjistí, že pořád
+
+s446
+00:20:22.848 --> 00:20:25.187
+dokola čistí stejný typ CSV.
+
+s447
+00:20:25.908 --> 00:20:28.588
+Namísto opakovaného uvažování nad každým
+
+s448
+00:20:28.648 --> 00:20:31.828
+řádkem si vytvoří skript a uloží jej pro
+
+s449
+00:20:31.868 --> 00:20:32.608
+další běhy.
+
+s450
+00:20:33.268 --> 00:20:35.428
+Nebo si vytvoří pomocnou knihovnu či
+
+s451
+00:20:35.488 --> 00:20:36.168
+algoritmus.
+
+s452
+00:20:36.908 --> 00:20:39.328
+Uživatel požádá o porovnání obchodních
+
+s453
+00:20:39.388 --> 00:20:42.628
+scénářů a agent na požádání sestaví
+
+s454
+00:20:42.888 --> 00:20:44.048
+generative UI,
+
+s455
+00:20:44.688 --> 00:20:47.488
+interaktivní graf a ovládací prvky pro
+
+s456
+00:20:47.508 --> 00:20:48.608
+právě tento úkol.
+
+s457
+00:20:49.308 --> 00:20:52.168
+Tyto aplikace a utility nevznikají předem.
+
+s458
+00:20:52.728 --> 00:20:55.208
+Materializují se podle aktuální potřeby.
+
+s459
+00:20:55.908 --> 00:20:57.948
+Mohou žít ve skryté pracovní složce
+
+s460
+00:20:57.988 --> 00:21:00.728
+runtime, aniž by uživatel jejich zdrojový
+
+s461
+00:21:00.828 --> 00:21:02.008
+kód vůbec viděl.
+
+s462
+00:21:02.688 --> 00:21:06.388
+Když agent potřebuje spát. JIT jako budík.
+
+s463
+00:21:07.148 --> 00:21:09.988
+Zajímavým příkladem jsou dlouhodobě běžící
+
+s464
+00:21:10.028 --> 00:21:10.528
+agenti.
+
+s465
+00:21:11.148 --> 00:21:13.988
+Představme si agenta, který má reagovat na
+
+s466
+00:21:14.068 --> 00:21:17.128
+příchozí email nebo změnu webové stránky.
+
+s467
+00:21:17.868 --> 00:21:20.828
+Naivní řešení je probudit každou minutu
+
+s468
+00:21:20.988 --> 00:21:23.568
+celý jazykový model a nechat jej znovu
+
+s469
+00:21:23.608 --> 00:21:25.608
+kontrolovat, zda se něco nestalo.
+
+s470
+00:21:26.208 --> 00:21:29.308
+Funguje to, ale spotřebovává tokeny a
+
+s471
+00:21:29.348 --> 00:21:32.348
+výpočetní prostředky i tehdy, když není co
+
+s472
+00:21:32.388 --> 00:21:32.788
+dělat.
+
+s473
+00:21:33.428 --> 00:21:36.148
+Agent místo toho může vygenerovat malý
+
+s474
+00:21:36.228 --> 00:21:39.848
+nízkoúrovňový hlídač, cron úlohu, webhook
+
+s475
+00:21:39.888 --> 00:21:43.148
+handler, skript sledující schránku nebo
+
+s476
+00:21:43.208 --> 00:21:45.028
+heuristiku pro změnu stránky.
+
+s477
+00:21:45.728 --> 00:21:48.808
+Sám se uspí a nechá levný skript sledovat
+
+s478
+00:21:48.908 --> 00:21:50.068
+konkrétní podmínku.
+
+s479
+00:21:50.768 --> 00:21:53.568
+Jakmile nastane událost, skript probudí
+
+s480
+00:21:53.688 --> 00:21:54.708
+dražšího agenta.
+
+s481
+00:21:55.388 --> 00:21:58.008
+Je to podobné hardwarovým přerušením a
+
+s482
+00:21:58.068 --> 00:22:00.908
+nízkopříkonovým mechanismům, které probudí
+
+s483
+00:22:00.948 --> 00:22:03.308
+hlavní procesor až při relevantní
+
+s484
+00:22:03.328 --> 00:22:04.008
+události.
+
+s485
+00:22:04.708 --> 00:22:07.128
+V promptbooku je takovým vyšším zadáním
+
+s486
+00:22:07.188 --> 00:22:09.428
+například dlouhodobý cíl agenta.
+
+s487
+00:22:10.048 --> 00:22:12.748
+Některé podmínky probuzení lze odvodit a
+
+s488
+00:22:12.828 --> 00:22:15.108
+materializovat jako jednoduchý skript,
+
+s489
+00:22:15.628 --> 00:22:18.048
+jiné vyžadují složitější posuzování
+
+s490
+00:22:18.168 --> 00:22:19.248
+samotným modelem.
+
+s491
+00:22:19.868 --> 00:22:22.028
+To, zda se vyplatí něco převést do
+
+s492
+00:22:22.068 --> 00:22:24.528
+klasického kódu, je optimalizační
+
+s493
+00:22:24.568 --> 00:22:25.268
+rozhodnutí.
+
+s494
+00:22:25.968 --> 00:22:28.288
+Stejně jako u JIT v Javě investujeme
+
+s495
+00:22:28.348 --> 00:22:30.788
+jednou do nižší reprezentace, abychom
+
+s496
+00:22:30.828 --> 00:22:33.108
+ušetřili náklady při opakovaném běhu.
+
+s497
+00:22:33.748 --> 00:22:35.788
+Analogii nepovažuji za totožnou
+
+s498
+00:22:35.827 --> 00:22:39.228
+implementaci. JVM optimalizuje již
+
+s499
+00:22:39.248 --> 00:22:42.068
+definovaný program, zatímco agent může
+
+s500
+00:22:42.088 --> 00:22:44.468
+teprve navrhovat hlídací algoritmus.
+
+s501
+00:22:45.148 --> 00:22:47.548
+Z cíle agenta vznikne jednorázově
+
+s502
+00:22:47.588 --> 00:22:50.588
+vytvořený hlídač. Ten levně čeká.
+
+s503
+00:22:51.288 --> 00:22:54.068
+Jakmile nastane událost, probudí agenta.
+
+s504
+00:22:55.088 --> 00:22:57.608
+A právě tady vzniká další otázka.
+
+s505
+00:22:58.288 --> 00:23:00.908
+Co když uživatel ten vygenerovaný skript,
+
+s506
+00:23:01.048 --> 00:23:04.088
+komponentu nebo rozhraní chce vidět a
+
+s507
+00:23:04.128 --> 00:23:06.168
+některé jeho vlastnosti chce zachovat?
+
+s508
+00:23:06.788 --> 00:23:09.548
+Tím se dostáváme za hranici skrytého JIT
+
+s509
+00:23:09.588 --> 00:23:13.008
+artefaktu. Ale počkat, nemá AI ještě
+
+s510
+00:23:13.088 --> 00:23:16.728
+čtvrtý vztah? Anchoring. Nižší vrstva
+
+s511
+00:23:16.788 --> 00:23:18.588
+získá omezenou autoritu.
+
+s512
+00:23:19.488 --> 00:23:21.928
+A teď to, co podle mě tyto tři modely
+
+s513
+00:23:21.968 --> 00:23:22.548
+doplňuje.
+
+s514
+00:23:23.288 --> 00:23:26.908
+Agent vygeneroval UI. Je krásné a
+
+s515
+00:23:26.988 --> 00:23:30.128
+vyladěné. Nebo vytvořil API,
+
+s516
+00:23:30.888 --> 00:23:33.728
+na kterém už závisejí zákazníci. Nebo
+
+s517
+00:23:34.208 --> 00:23:37.048
+algoritmus, který konečně správně řeší
+
+s518
+00:23:37.088 --> 00:23:38.848
+obtížný okrajový případ.
+
+s519
+00:23:39.508 --> 00:23:41.848
+Při příštím generování nechci zahodit
+
+s520
+00:23:41.968 --> 00:23:44.728
+úplně všechno, ale nechci ani prohlásit
+
+s521
+00:23:44.908 --> 00:23:46.748
+celý dosavadní zdrojový kód za
+
+s522
+00:23:46.788 --> 00:23:47.708
+nedotknutelný.
+
+s523
+00:23:48.728 --> 00:23:51.068
+Vyberu proto konkrétní invarianty a
+
+s524
+00:23:51.228 --> 00:23:51.908
+ukotvím je.
+
+s525
+00:23:52.528 --> 00:23:55.628
+Někdy je invariantem přesný soubor, jindy
+
+s526
+00:23:55.808 --> 00:23:58.388
+veřejné rozhraní, vizuální identita,
+
+s527
+00:23:58.748 --> 00:24:01.468
+chování nebo výsledek regresního testu.
+
+s528
+00:24:02.168 --> 00:24:04.888
+Vygenerovaný artefakt se nestane nejvyšším
+
+s529
+00:24:04.968 --> 00:24:07.428
+zdrojem pravdy, ale získá omezenou
+
+s530
+00:24:07.468 --> 00:24:10.168
+autoritu pro další transformace. To je
+
+s531
+00:24:10.288 --> 00:24:13.388
+anchoring. Selektivní zachování hodnoty v
+
+s532
+00:24:13.448 --> 00:24:14.288
+nižší vrstvě.
+
+s533
+00:24:14.988 --> 00:24:17.868
+Kompilace se ptá, co vytvořit z vyššího
+
+s534
+00:24:17.908 --> 00:24:18.408
+zadání?
+
+s535
+00:24:19.020 --> 00:24:22.859
+Interpretace: jak zadání vykonat teď. JIT:
+
+s536
+00:24:23.380 --> 00:24:25.700
+co se vyplatí vytvořit až v okamžiku
+
+s537
+00:24:25.740 --> 00:24:29.360
+potřeby. Anchoring přidává otázku: co z
+
+s538
+00:24:29.400 --> 00:24:32.320
+již vytvořeného musí přežít příští změnu?
+
+s539
+00:24:32.940 --> 00:24:35.380
+Právě proto ho nevnímám jen jako další
+
+s540
+00:24:35.440 --> 00:24:38.580
+způsob generování, ale jako čtvrtý vztah
+
+s541
+00:24:38.640 --> 00:24:40.420
+mezi abstraktními vrstvami.
+
+s542
+00:24:41.140 --> 00:24:44.200
+Není to tvrzení, že před AI neexistovaly
+
+s543
+00:24:44.220 --> 00:24:47.240
+invarianty, referenční implementace nebo
+
+s544
+00:24:47.280 --> 00:24:48.580
+částečné regenerace.
+
+s545
+00:24:49.260 --> 00:24:52.220
+Nové je především to, jak zásadní roli
+
+s546
+00:24:52.280 --> 00:24:54.820
+mohou tyto hranice získat v generativním
+
+s547
+00:24:54.860 --> 00:24:55.300
+vývoji.
+
+s548
+00:24:55.940 --> 00:24:59.440
+Specifikace, vybrané anchory a nový úkol
+
+s549
+00:24:59.800 --> 00:25:02.000
+vstupují do AI transformace.
+
+s550
+00:25:02.720 --> 00:25:05.260
+Výsledkem je nový kód a zachované
+
+s551
+00:25:05.280 --> 00:25:06.000
+invarianty.
+
+s552
+00:25:06.860 --> 00:25:09.240
+Všechny čtyři vztahy mohou existovat v
+
+s553
+00:25:09.300 --> 00:25:10.780
+jednom projektu současně.
+
+s554
+00:25:11.380 --> 00:25:13.920
+Agent může interpretovat dlouhodobý cíl,
+
+s555
+00:25:14.400 --> 00:25:17.260
+JIT vytvořit utilitu, ze specifikace
+
+s556
+00:25:17.320 --> 00:25:19.780
+zkompilovat novou aplikaci a přitom
+
+s557
+00:25:19.820 --> 00:25:23.520
+respektovat ukotvené API. Nejde o čtyři
+
+s558
+00:25:23.560 --> 00:25:27.080
+konkurenční typy AI, ale o čtyři způsoby,
+
+s559
+00:25:27.420 --> 00:25:29.400
+jak vyšší a nižší reprezentace
+
+s560
+00:25:29.480 --> 00:25:30.300
+spolupracují.
+
+s561
+00:25:30.980 --> 00:25:34.340
+Anchoring: když vygenerovaný artefakt není
+
+s562
+00:25:34.400 --> 00:25:35.140
+jen odpad.
+
+s563
+00:25:36.140 --> 00:25:39.000
+Představte si, že AI vytvoří webovou
+
+s564
+00:25:39.040 --> 00:25:42.620
+aplikaci. Má nádhernou komponentu, přesný
+
+s565
+00:25:42.700 --> 00:25:45.580
+design, animace a vyladěné chování.
+
+s566
+00:25:46.180 --> 00:25:47.760
+Chcete přidat jinou funkci.
+
+s567
+00:25:48.440 --> 00:25:51.100
+Můžete všechno znovu vygenerovat a doufat,
+
+s568
+00:25:51.400 --> 00:25:54.020
+že komponenta dopadne stejně. Nebo
+
+s569
+00:25:54.200 --> 00:25:57.060
+ponechat celý projekt a jen přidávat kód.
+
+s570
+00:25:57.780 --> 00:26:00.420
+První cesta ztrácí detaily, druhá
+
+s571
+00:26:00.820 --> 00:26:02.400
+konzervuje technický dluh.
+
+s572
+00:26:03.420 --> 00:26:06.560
+Potřebujeme třetí možnost: ukotvit jen to,
+
+s573
+00:26:06.820 --> 00:26:07.780
+na čem záleží.
+
+s574
+00:26:08.700 --> 00:26:11.380
+Anchoring je princip, při kterém určitým
+
+s575
+00:26:11.500 --> 00:26:13.960
+částem vygenerovaného nebo dříve
+
+s576
+00:26:14.060 --> 00:26:17.040
+existujícího artefaktu přiznáme hodnotu,
+
+s577
+00:26:17.400 --> 00:26:19.280
+kterou chceme zachovat při dalších
+
+s578
+00:26:19.340 --> 00:26:20.240
+transformacích.
+
+s579
+00:26:20.900 --> 00:26:23.460
+Nejsou primárním zdrojem pravdy, ale
+
+s580
+00:26:23.500 --> 00:26:25.360
+nejsou ani zcela zahoditelné.
+
+s581
+00:26:26.140 --> 00:26:29.020
+Můžeme mluvit o code anchoringu, UI
+
+s582
+00:26:29.120 --> 00:26:32.400
+anchoringu, design anchoringu, behavior
+
+s583
+00:26:32.480 --> 00:26:35.920
+anchoringu nebo feature anchoring. Kotvou
+
+s584
+00:26:35.980 --> 00:26:39.160
+může být komponenta, interakce, vizuální
+
+s585
+00:26:39.200 --> 00:26:42.700
+detail, API kontrakt nebo charakteristické
+
+s586
+00:26:42.740 --> 00:26:43.320
+chování.
+
+s587
+00:26:44.040 --> 00:26:46.300
+Ukotvení nemusí znamenat zachování
+
+s588
+00:26:46.420 --> 00:26:47.560
+identických bajtů.
+
+s589
+00:26:48.160 --> 00:26:50.580
+Design může přežít novou implementaci.
+
+s590
+00:26:51.080 --> 00:26:54.000
+Chování může být ukotveno testem, kód
+
+s591
+00:26:54.200 --> 00:26:57.320
+konkrétním modulem. Není to jen cache, Git
+
+s592
+00:26:57.400 --> 00:27:00.440
+commit ani obyčejný build artefakt. Je to
+
+s593
+00:27:00.500 --> 00:27:03.380
+rozhodnutí, jakou autoritu má mít část
+
+s594
+00:27:03.420 --> 00:27:05.260
+výsledku při budoucí změně.
+
+s595
+00:27:05.880 --> 00:27:09.460
+Specifikace říká, co má vzniknout. Anchory
+
+s596
+00:27:09.520 --> 00:27:12.880
+říkají, co z toho, co už vzniklo, stojí
+
+s597
+00:27:12.940 --> 00:27:13.760
+za zachování.
+
+s598
+00:27:14.440 --> 00:27:16.800
+Ani zdroj pravdy, ani zahoditelný
+
+s599
+00:27:16.900 --> 00:27:17.560
+artefakt.
+
+s600
+00:27:18.200 --> 00:27:20.920
+V tradičním buildu bývá hranice relativně
+
+s601
+00:27:20.940 --> 00:27:24.400
+jasná. Zdrojový kód uchováváme, build
+
+s602
+00:27:24.480 --> 00:27:27.980
+výstup lze znovu vytvořit. V AI native
+
+s603
+00:27:28.040 --> 00:27:31.420
+vývoji vzniká spektrum. Některé části jsou
+
+s604
+00:27:31.440 --> 00:27:34.000
+nejvyšší specifikací, jiné lze
+
+s605
+00:27:34.040 --> 00:27:37.400
+regenerovat a některé jsou ukotvené. Mají
+
+s606
+00:27:37.460 --> 00:27:40.600
+menší autoritu než specifikace, ale stále
+
+s607
+00:27:40.640 --> 00:27:41.660
+obsahují hodnotu.
+
+s608
+00:27:42.300 --> 00:27:44.960
+Anchoring proto není jen jiné jméno pro
+
+s609
+00:27:45.000 --> 00:27:46.480
+iterativní generování.
+
+s610
+00:27:47.100 --> 00:27:49.700
+Iterovat lze i nad zcela zahoditelným
+
+s611
+00:27:49.780 --> 00:27:50.380
+výstupem.
+
+s612
+00:27:51.080 --> 00:27:54.500
+Anchoring popisuje selektivní kontinuitu a
+
+s613
+00:27:54.580 --> 00:27:57.360
+platí i pro starší projekty, které žádnou
+
+s614
+00:27:57.400 --> 00:27:59.100
+původní specifikaci neměly.
+
+s615
+00:28:00.200 --> 00:28:01.720
+Co přesně může být kotva?
+
+s616
+00:28:02.700 --> 00:28:04.580
+Začněme vizuálním návrhem.
+
+s617
+00:28:05.180 --> 00:28:08.480
+Agent vytvoří dashboard. Specifikace říká,
+
+s618
+00:28:08.700 --> 00:28:11.280
+že má být přehledný, ale konkrétní
+
+s619
+00:28:11.380 --> 00:28:14.760
+typografie, proporce a animace se podaří
+
+s620
+00:28:14.800 --> 00:28:16.180
+až při třetím pokusu.
+
+s621
+00:28:16.900 --> 00:28:19.280
+Můžu ukotvit celý návrh, konkrétní
+
+s622
+00:28:19.360 --> 00:28:22.020
+komponentu nebo jen vybrané vizuální
+
+s623
+00:28:22.120 --> 00:28:22.820
+invarianty.
+
+s624
+00:28:23.440 --> 00:28:26.260
+Neříkám tím, že každý CSS řádek je
+
+s625
+00:28:26.300 --> 00:28:29.400
+nedotknutelný. Říkám, že při příštím
+
+s626
+00:28:29.480 --> 00:28:31.840
+generování nechci přijít o určitý
+
+s627
+00:28:31.880 --> 00:28:32.480
+výsledek.
+
+s628
+00:28:33.600 --> 00:28:35.960
+Druhý příklad je veřejné API.
+
+s629
+00:28:37.040 --> 00:28:39.060
+Specifikace produktu může říkat:
+
+s630
+00:28:39.540 --> 00:28:43.240
+„Zákazníci mohou získat faktury přes API.“
+
+s631
+00:28:43.260 --> 00:28:46.120
+Ale skutečný systém už používá konkrétní
+
+s632
+00:28:46.200 --> 00:28:49.440
+endpointy, názvy polí a chování chybových
+
+s633
+00:28:49.480 --> 00:28:50.120
+odpovědí.
+
+s634
+00:28:50.780 --> 00:28:53.100
+Jestli na nich závisejí externí klienti,
+
+s635
+00:28:53.500 --> 00:28:55.880
+mají hodnotu i tehdy, když by nová
+
+s636
+00:28:55.900 --> 00:28:58.200
+implementace mohla být elegantnější.
+
+s637
+00:28:58.820 --> 00:29:02.040
+Kotvou není nutně starý controller. Kotvou
+
+s638
+00:29:02.100 --> 00:29:03.780
+je kompatibilní kontrakt.
+
+s639
+00:29:04.380 --> 00:29:06.480
+Třetí příklad je algoritmus.
+
+s640
+00:29:07.100 --> 00:29:09.760
+Model vygeneruje optimalizaci, která po
+
+s641
+00:29:09.840 --> 00:29:12.360
+dlouhém ladění zvládá specifickou
+
+s642
+00:29:12.500 --> 00:29:13.700
+okrajovou situaci.
+
+s643
+00:29:14.380 --> 00:29:16.620
+Kdybych ji popsal do vyšší specifikace,
+
+s644
+00:29:16.940 --> 00:29:19.400
+včetně každé implementační podrobnosti,
+
+s645
+00:29:19.940 --> 00:29:21.600
+zničil bych smysl abstrakce.
+
+s646
+00:29:22.300 --> 00:29:24.820
+Můžu ale zachovat referenční implementaci,
+
+s647
+00:29:25.260 --> 00:29:27.820
+sadu regresních testů nebo vlastnost,
+
+s648
+00:29:28.160 --> 00:29:30.740
+kterou má nová implementace prokazatelně
+
+s649
+00:29:30.820 --> 00:29:31.320
+splnit.
+
+s650
+00:29:31.940 --> 00:29:33.760
+Čtvrtý příklad je obsah.
+
+s651
+00:29:34.380 --> 00:29:36.780
+Agent připraví tón komunikace značky,
+
+s652
+00:29:37.100 --> 00:29:39.840
+ilustraci, video nebo konkrétní
+
+s653
+00:29:39.880 --> 00:29:42.520
+onboardingovou sekvenci. Výsledek je
+
+s654
+00:29:42.580 --> 00:29:45.340
+částečně generovaný, ale po schválení se
+
+s655
+00:29:45.460 --> 00:29:48.380
+stává cenným. Nechci jej při každém novém
+
+s656
+00:29:48.440 --> 00:29:51.240
+běhu přepsat jen proto, že jej lze znovu
+
+s657
+00:29:51.280 --> 00:29:54.240
+vytvořit. Tady mluvíme o design anchoring,
+
+s658
+00:29:54.560 --> 00:29:56.720
+content anchoring nebo behavior
+
+s659
+00:29:56.800 --> 00:29:59.760
+anchoring, nikoli pouze o code anchoring.
+
+s660
+00:30:00.360 --> 00:30:02.860
+Pátý příklad je starší projekt, který
+
+s661
+00:30:02.960 --> 00:30:05.380
+nikdy žádnou vyšší specifikaci neměl.
+
+s662
+00:30:06.040 --> 00:30:08.180
+Jeho zdrojový kód může být jediným
+
+s663
+00:30:08.240 --> 00:30:10.800
+dochovaným záznamem určitých rozhodnutí.
+
+s664
+00:30:11.480 --> 00:30:13.900
+Teprve postupně z něj extrahuji vyšší
+
+s665
+00:30:13.960 --> 00:30:17.140
+záměr a rozlišuji, které existující
+
+s666
+00:30:17.180 --> 00:30:20.020
+vlastnosti jsou závazné a které pouze
+
+s667
+00:30:20.080 --> 00:30:21.080
+náhodně přežily.
+
+s668
+00:30:21.880 --> 00:30:23.720
+Anchoring tedy nemusí začínat
+
+s669
+00:30:23.780 --> 00:30:25.300
+vygenerováním artefaktu.
+
+s670
+00:30:25.940 --> 00:30:28.380
+Může být také způsobem, jak z již
+
+s671
+00:30:28.440 --> 00:30:31.360
+existujícího systému selektivně převzít
+
+s672
+00:30:31.380 --> 00:30:31.880
+hodnotu.
+
+s673
+00:30:32.560 --> 00:30:36.000
+Klíčové slovo je invariant. Někdy jím bude
+
+s674
+00:30:36.020 --> 00:30:38.920
+přesná podoba souboru, jindy rozhraní,
+
+s675
+00:30:39.120 --> 00:30:42.240
+chování nebo výsledek, který může přežít
+
+s676
+00:30:42.380 --> 00:30:44.220
+kompletní přepis implementace.
+
+s677
+00:30:44.860 --> 00:30:47.260
+Kotva by proto měla vyjadřovat rozsah,
+
+s678
+00:30:47.600 --> 00:30:51.220
+důvod, způsob ověření a případně pravidla
+
+s679
+00:30:51.260 --> 00:30:54.780
+uvolnění. Jinak je ukotvení jen hezčí
+
+s680
+00:30:54.820 --> 00:30:57.880
+jméno pro strach cokoliv změnit. A co na
+
+s681
+00:30:57.940 --> 00:30:58.380
+to Git?
+
+s682
+00:30:59.320 --> 00:31:02.140
+Dnešním Gitem výborně verzujeme soubory,
+
+s683
+00:31:02.620 --> 00:31:05.160
+ale jejich význam pro regeneraci typicky
+
+s684
+00:31:05.200 --> 00:31:08.100
+nezaznamenává. V praxi často rozlišujeme
+
+s685
+00:31:08.220 --> 00:31:10.660
+commitnutý zdroj a ignorovaný build
+
+s686
+00:31:10.760 --> 00:31:14.400
+output. Jenže tato dvojice není úplná. I
+
+s687
+00:31:14.460 --> 00:31:17.120
+vygenerovaný log file, schválený design
+
+s688
+00:31:17.420 --> 00:31:20.300
+nebo referenční komponenta mohou mít důvod
+
+s689
+00:31:20.340 --> 00:31:23.900
+zůstat v repozitáři. Samotný .gitignore
+
+s690
+00:31:23.940 --> 00:31:26.259
+navíc nerozhoduje, co je zdroj pravdy.
+
+s691
+00:31:26.920 --> 00:31:29.500
+Možná budeme potřebovat třetí sémantickou
+
+s692
+00:31:29.560 --> 00:31:31.120
+kategorii, anchor,
+
+s693
+00:31:31.760 --> 00:31:34.240
+soubor nebo vlastnost, kterou lze
+
+s694
+00:31:34.360 --> 00:31:37.300
+technicky přegenerovat, ale její vybrané
+
+s695
+00:31:37.340 --> 00:31:40.080
+invarianty mají při další transformaci
+
+s696
+00:31:40.140 --> 00:31:42.820
+zůstat zachovány. Nemusí jít o novou
+
+s697
+00:31:42.920 --> 00:31:45.420
+funkci jádra Gitu. Klidně to mohou být
+
+s698
+00:31:45.500 --> 00:31:48.360
+metadata, pravidla agentů a validační
+
+s699
+00:31:48.420 --> 00:31:51.860
+testy. Podstatné je, aby verzování jednou
+
+s700
+00:31:51.900 --> 00:31:55.260
+umělo zachytit nejen co uchováváme, ale i
+
+s701
+00:31:55.440 --> 00:31:56.980
+proč to nechceme ztratit.
+
+s702
+00:31:57.660 --> 00:31:59.000
+Končí věk frameworků?
+
+s703
+00:31:59.820 --> 00:32:02.620
+Knihovna a framework jsou zvláštní případy
+
+s704
+00:32:02.660 --> 00:32:03.300
+abstrakce.
+
+s705
+00:32:03.920 --> 00:32:06.280
+Často jsou napsané ve stejném jazyce jako
+
+s706
+00:32:06.320 --> 00:32:09.400
+aplikace, ale nabízejí vyšší pojmy a
+
+s707
+00:32:09.440 --> 00:32:12.440
+hotová rozhodnutí. Místo ruční práce s
+
+s708
+00:32:12.700 --> 00:32:15.940
+HTTP requesty používám webový framework,
+
+s709
+00:32:16.380 --> 00:32:19.840
+místo přímé manipulace s DOM komponentovou
+
+s710
+00:32:19.920 --> 00:32:22.520
+knihovnu. Nejde tedy jen o překlad mezi
+
+s711
+00:32:22.580 --> 00:32:25.600
+dvěma syntaxemi. Abstraktce může existovat
+
+s712
+00:32:25.700 --> 00:32:28.660
+uvnitř téhož jazyka jako sada konvencí,
+
+s713
+00:32:28.920 --> 00:32:31.520
+kontraktů a opakovaně použitelných
+
+s714
+00:32:31.560 --> 00:32:32.180
+mechanismů.
+
+s715
+00:32:32.880 --> 00:32:35.500
+Moje hypotéza je, že při programování
+
+s716
+00:32:35.620 --> 00:32:38.080
+přirozeným jazykem se hranice mezi
+
+s717
+00:32:38.140 --> 00:32:41.440
+jazykem, frameworkem a konkrétní aplikací
+
+s718
+00:32:41.800 --> 00:32:43.340
+začne více rozmazávat.
+
+s719
+00:32:43.980 --> 00:32:46.380
+Agent může část pravidel převzít jako
+
+s720
+00:32:46.440 --> 00:32:49.820
+framework, část přímo interpretovat, část
+
+s721
+00:32:49.900 --> 00:32:52.780
+materializovat do kódu a část ukotvit.
+
+s722
+00:32:53.380 --> 00:32:55.840
+To však není dokázaný směr dějin ani
+
+s723
+00:32:55.900 --> 00:32:58.740
+tvrzení, že frameworky zmizí. Je to
+
+s724
+00:32:58.760 --> 00:33:01.760
+pracovní předpověď vycházející z toho, jak
+
+s725
+00:33:01.800 --> 00:33:04.720
+se v praxi prolínají instrukce, nástroje
+
+s726
+00:33:05.080 --> 00:33:06.560
+a generované artefakty.
+
+s727
+00:33:07.240 --> 00:33:09.240
+Co se vlastně stalo s Promptbookem?
+
+s728
+00:33:09.880 --> 00:33:12.400
+Autonomní agent dlouhodobě přidával
+
+s729
+00:33:12.500 --> 00:33:12.960
+funkce.
+
+s730
+00:33:13.620 --> 00:33:16.020
+Každý úkol vycházel ze stávajícího
+
+s731
+00:33:16.120 --> 00:33:18.700
+projektu. Protože jsme prakticky všechno
+
+s732
+00:33:18.760 --> 00:33:21.700
+zachovávali, nepozorovaně jsme ukotvovali
+
+s733
+00:33:21.800 --> 00:33:23.440
+skoro celý zdrojový kód.
+
+s734
+00:33:24.100 --> 00:33:26.600
+Ne proto, že každá komponenta byla cenná.
+
+s735
+00:33:27.160 --> 00:33:29.020
+Prostě jsme ji nechávali na místě.
+
+s736
+00:33:30.100 --> 00:33:32.700
+Z vygenerovaného výsledku se stal balík
+
+s737
+00:33:32.740 --> 00:33:35.380
+historických rozhodnutí. Když jsem nechal
+
+s738
+00:33:35.400 --> 00:33:38.240
+vytvořit specifikaci a Promptbook přepsat,
+
+s739
+00:33:38.620 --> 00:33:41.520
+udělal jsem dvě věci. Vytáhl důležitý
+
+s740
+00:33:41.640 --> 00:33:44.800
+záměr do vyšší abstrakce a zrušil většinu
+
+s741
+00:33:44.840 --> 00:33:46.020
+nechtěných ukotvení.
+
+s742
+00:33:46.680 --> 00:33:49.360
+Nevyměnil jsem princip autonomního vývoje.
+
+s743
+00:33:49.940 --> 00:33:52.400
+Nezavrhl jsem Agent Project Task
+
+s744
+00:33:52.480 --> 00:33:55.720
+Framework. Jen jsem přestal předstírat, že
+
+s745
+00:33:55.760 --> 00:33:58.640
+každý řádek dosavadní implementace stojí
+
+s746
+00:33:58.700 --> 00:33:59.560
+za zachování.
+
+s747
+00:34:00.180 --> 00:34:03.800
+Agent, project, task. Kde tyto vrstvy
+
+s748
+00:34:03.860 --> 00:34:04.220
+žijí?
+
+s749
+00:34:05.000 --> 00:34:08.020
+V Promptbooku používáme Agent Project Task
+
+s750
+00:34:08.120 --> 00:34:11.580
+Framework, APT, podrobněji popsaný ve
+
+s751
+00:34:11.620 --> 00:34:14.280
+whitepaperu na webu Promptbooku. Odkaz
+
+s752
+00:34:14.320 --> 00:34:15.260
+najdete v článku.
+
+s753
+00:34:15.980 --> 00:34:20.020
+Agent nese roli, cíl, pravidla, znalosti a
+
+s754
+00:34:20.080 --> 00:34:20.680
+nástroje.
+
+s755
+00:34:21.420 --> 00:34:23.920
+V naší analogii částečně připomíná
+
+s756
+00:34:23.960 --> 00:34:26.300
+konfiguraci překladače, ale také
+
+s757
+00:34:26.400 --> 00:34:28.320
+samostatně rozhoduje o práci.
+
+s758
+00:34:29.060 --> 00:34:32.140
+Project je kontextová nádoba. Obsahuje
+
+s759
+00:34:32.220 --> 00:34:36.020
+specifikace, soubory, historii a případné
+
+s760
+00:34:36.060 --> 00:34:37.300
+ukotvené artefakty.
+
+s761
+00:34:38.020 --> 00:34:41.119
+Task je konkrétní krok změny, který může
+
+s762
+00:34:41.160 --> 00:34:43.820
+zadat člověk nebo může vzniknout z cíle
+
+s763
+00:34:43.860 --> 00:34:46.060
+agenta či externí události.
+
+s764
+00:34:46.680 --> 00:34:50.740
+Tyto tři části tvoří živý kontext. APT byl
+
+s765
+00:34:50.840 --> 00:34:53.400
+stejný před přepsáním Promptbooku i po
+
+s766
+00:34:53.440 --> 00:34:53.680
+něm.
+
+s767
+00:34:54.320 --> 00:34:57.040
+Změnil se obsah projektu a míra ukotvení,
+
+s768
+00:34:57.420 --> 00:34:58.980
+nikoli princip frameworku.
+
+s769
+00:34:59.660 --> 00:35:02.120
+Dark factory a hranice autonomie.
+
+s770
+00:35:02.940 --> 00:35:05.780
+Naše dlouhodobá vize je něco jako dark
+
+s771
+00:35:05.820 --> 00:35:09.560
+factory. Systém, v němž agenti rozvíjejí a
+
+s772
+00:35:09.680 --> 00:35:12.880
+provozují svěřenou agendu bez neustálého
+
+s773
+00:35:12.920 --> 00:35:14.200
+lidského zadávání.
+
+s774
+00:35:14.820 --> 00:35:18.140
+Projekt má cíl. Agenti rozpoznávají práci,
+
+s775
+00:35:18.520 --> 00:35:21.600
+vytvářejí úkoly, ověřují výsledky a
+
+s776
+00:35:21.660 --> 00:35:22.320
+pokračují.
+
+s777
+00:35:23.000 --> 00:35:26.120
+Současně si myslím, že absolutní autonomie
+
+s778
+00:35:26.180 --> 00:35:28.220
+je v praxi nedosažitelný ideál.
+
+s779
+00:35:28.840 --> 00:35:31.120
+Ne proto, že modely nikdy nebudou dost
+
+s780
+00:35:31.140 --> 00:35:33.980
+chytré, ale proto, že hodnota není jen
+
+s781
+00:35:34.020 --> 00:35:35.660
+technická vlastnost výsledku.
+
+s782
+00:35:36.280 --> 00:35:38.900
+Někdo musí rozhodnout, co zachovat, který
+
+s783
+00:35:38.940 --> 00:35:41.520
+kompromis přijmout, kterou vlastnost už
+
+s784
+00:35:41.560 --> 00:35:43.920
+nikdo nepotřebuje a kdy je lepší
+
+s785
+00:35:43.960 --> 00:35:45.220
+implementaci zahodit.
+
+s786
+00:35:45.940 --> 00:35:49.380
+AI s těmito rozhodnutími může pomáhat, ale
+
+s787
+00:35:49.440 --> 00:35:52.180
+odpovědnost za záměr a hodnoty projektu
+
+s788
+00:35:52.600 --> 00:35:54.240
+nikam magicky nezmizí.
+
+s789
+00:35:54.840 --> 00:35:57.720
+Programátor budoucnosti nebude hlavně psát
+
+s790
+00:35:57.800 --> 00:35:58.720
+další řádky.
+
+s791
+00:35:59.720 --> 00:36:02.540
+Myslím si, že mnoho lidí, jejichž práce
+
+s792
+00:36:02.580 --> 00:36:05.200
+dnes spočívá hlavně v produkování dalších
+
+s793
+00:36:05.260 --> 00:36:08.360
+funkcí, bude muset změnit způsob práce.
+
+s794
+00:36:09.080 --> 00:36:11.680
+Neznamená to ale, že programování končí.
+
+s795
+00:36:12.260 --> 00:36:14.800
+Pro mě je programování ve specifikacích
+
+s796
+00:36:14.960 --> 00:36:17.900
+pořád programování, jen na jiné úrovni
+
+s797
+00:36:17.960 --> 00:36:21.400
+abstrakce. Klíčová dovednost nebude pouze
+
+s798
+00:36:21.440 --> 00:36:24.620
+umět vytvořit další funkci. Bude to umět
+
+s799
+00:36:24.660 --> 00:36:27.900
+poznat, co má skutečnou hodnotu, co má být
+
+s800
+00:36:27.960 --> 00:36:30.940
+zdrojem pravdy, co ukotvit a co bez
+
+s801
+00:36:30.980 --> 00:36:32.000
+lítosti zahodit.
+
+s802
+00:36:32.640 --> 00:36:35.840
+Jaký cíl má agent sledovat, jaké hranice
+
+s803
+00:36:35.900 --> 00:36:38.720
+má respektovat, kdy další generování
+
+s804
+00:36:38.760 --> 00:36:41.360
+pomáhá a kdy jen hromadí balast.
+
+s805
+00:36:42.080 --> 00:36:44.520
+Možná takovým lidem budeme dál říkat
+
+s806
+00:36:44.620 --> 00:36:47.680
+programátoři. Možná jim někdo vymyslí jiné
+
+s807
+00:36:47.720 --> 00:36:50.740
+označení. Mně připadá, že jde stále o
+
+s808
+00:36:50.820 --> 00:36:53.940
+programování. Jen jsme se posunuli o další
+
+s809
+00:36:54.000 --> 00:36:55.020
+úroveň abstrakce.
+
+s810
+00:36:55.700 --> 00:36:58.340
+A právě proto se nebojím, že by se práce
+
+s811
+00:36:58.380 --> 00:37:01.340
+lidí jednoduše vypařila. Některé dnešní
+
+s812
+00:37:01.380 --> 00:37:04.260
+role nepochybně zaniknou nebo se promění,
+
+s813
+00:37:04.840 --> 00:37:06.900
+ale schopnost rozhodovat o hodnotě,
+
+s814
+00:37:07.160 --> 00:37:10.260
+prioritách a správných hranicích abstrakce
+
+s815
+00:37:10.660 --> 00:37:12.180
+bude ještě důležitější.
+
+s816
+00:37:12.780 --> 00:37:15.040
+Když jsem přepsal Promptbook, nebylo
+
+s817
+00:37:15.080 --> 00:37:18.020
+největším úspěchem to, že AI dokázala
+
+s818
+00:37:18.060 --> 00:37:20.580
+napsat nový kód. To už uměla dávno.
+
+s819
+00:37:21.680 --> 00:37:24.220
+Nejdůležitější bylo, že jsem konečně
+
+s820
+00:37:24.240 --> 00:37:27.740
+dokázal říct, který starý kód už nemá cenu
+
+s821
+00:37:27.780 --> 00:37:28.520
+zachovávat.
+
+s822
+00:37:29.180 --> 00:37:31.660
+Budoucnost programování možná nebude o
+
+s823
+00:37:31.760 --> 00:37:35.000
+tom, kolik kódu dokážeme vytvořit. Bude o
+
+s824
+00:37:35.100 --> 00:37:38.000
+tom, kolik ho dokážeme s klidným svědomím
+
+s825
+00:37:38.160 --> 00:37:38.680
+pustit.
+
+s826
+00:37:39.380 --> 00:37:40.140
+O autorovi.
+
+s827
+00:37:41.340 --> 00:37:44.080
+Pavol Hejný je softwarový vývojář a
+
+s828
+00:37:44.140 --> 00:37:47.500
+zakladatel projektů v oblasti AI. Vývoji
+
+s829
+00:37:47.600 --> 00:37:50.620
+softwaru se věnuje přibližně patnáct let a
+
+s830
+00:37:50.720 --> 00:37:53.440
+poslední čtyři roky se intenzivně zabývá
+
+s831
+00:37:53.500 --> 00:37:56.800
+využitím AI při programování. Pracuje na
+
+s832
+00:37:56.900 --> 00:37:59.640
+Promptbooku a dalších projektech na pomezí
+
+s833
+00:37:59.680 --> 00:38:01.840
+webových technologií, agentů a
+
+s834
+00:38:01.940 --> 00:38:02.780
+automatizace.
+
+s835
+00:38:03.480 --> 00:38:05.900
+Tento článek je osobní technologická
+
+s836
+00:38:06.020 --> 00:38:08.500
+úvaha. Historické analogie jsou
+
+s837
+00:38:08.540 --> 00:38:11.180
+vysvětlením. Anchoring a výhled do
+
+s838
+00:38:11.220 --> 00:38:14.160
+budoucna jsou hypotézy otevřené diskusi.
+

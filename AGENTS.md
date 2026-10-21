@@ -14,6 +14,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in `scripts/articles`, never build hooks. The root audio provider owns one persistent media element, local per-track
   history, paused refresh restoration and Media Session. AI ta Krajta retains its original visible controls; article
   tracking uses reviewed real word timing and a single toggle, with manual scrolling releasing automatic follow.
+  The first Czech narration is a committed ElevenLabs Studio recording with real Scribe sentence/cue captions.
+  Cue intervals are never subdivided into guessed word timings. Explicit editorial binary import can use the manual
+  `article-audio-import` workflow; it verifies transfer integrity and never runs during a normal build or generates speech.
   Articles count as complete on the real `ended` event; AI ta Krajta keeps its established 30-second outro tolerance
   and five-second resume rewind. Reload restores the exact saved position in pause. Direct public-path Next links
   keep the root owner alive when opening the podcast's media and branding pages.

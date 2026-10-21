@@ -8,10 +8,23 @@ validate the passive hash manifest. Changing Markdown does not regenerate or inv
 
 `articles/spec-driven-anchoring-cs/content.md` contains the complete Czech original, with its
 technical caveats and author biography. `article.pdf` is the original supplied PDF.
-`audio/script.txt` is a **prepared, not yet submitted** adaptation for speech. Its pronunciation,
-emphasis and pauses still need an actual listening review using the author's selected voice.
-No recording or timing file is fabricated while credentials are absent. Consequently the audio
-metadata stays `pending`, the article remains readable, and RSS does not claim an unavailable enclosure.
+`audio/script.txt` is the exact speech adaptation submitted to ElevenLabs Studio on 2026-10-21.
+The complete narration uses the verified **Pavol Hejný 2026** voice (`I2zA26JYXwtZmPCZflQY`)
+and Eleven v4. `audio/generation.json` records the Studio project, exact script hash, source export,
+and normalization to one continuous 128 kbps mono MP3 with a seek index. The actual duration is
+2294.778776 seconds. Both Czech feeds and the website use that identical committed file.
+
+`subtitles.vtt` contains 839 real ElevenLabs Scribe cue intervals. They are **not individual word
+intervals**. The full provider word-level JSON export still needs importing and mapping to visual
+words; until then tracking is unavailable and the player remains an ordinary podcast player.
+Never invent word timestamps by subdividing these cues.
+
+The already produced binary can be transferred through the manual **Import reviewed article audio**
+GitHub Actions workflow. `audio/import.json` identifies ordered Git blobs and the exact file's byte
+length, SHA-256 and Git object hash. `import-audio-blobs.mjs` verifies the complete transfer before
+writing and refuses a different existing recording. This is a one-time editorial file import,
+never a build hook, a speech generator or a hash check during ordinary builds. Re-running with the
+exact file already present is a no-op. It requires only the same repository's scoped `GITHUB_TOKEN`.
 
 ## Passive SHA-256 manifest
 

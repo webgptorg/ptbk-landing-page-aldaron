@@ -8,10 +8,34 @@
       "mimeType": "application/pdf"
     },
     {
+      "path": "audio/generation.json",
+      "sha256": "d306bb11bf7731c128cc3e80d4c3421089e4b39a933fde27448227a3b25cbf30",
+      "bytes": 1686,
+      "mimeType": "application/json"
+    },
+    {
+      "path": "audio/import.json",
+      "sha256": "5ac8a7e93178b1d0a131c2ccf6038e11a7a61c106d53a1ecc8ad571868367a28",
+      "bytes": 4791,
+      "mimeType": "application/json"
+    },
+    {
+      "path": "audio/narration.mp3",
+      "sha256": "c42bf0fa7c76f9b3a1db374384252e67e4f54f8ee8d45476ca14cd5a049e8ba3",
+      "bytes": 36716922,
+      "mimeType": "audio/mpeg"
+    },
+    {
       "path": "audio/script.txt",
       "sha256": "af3333db44a160de73656d8ba97474037ce6818566182b05de45192ad3ddfab0",
       "bytes": 32138,
       "mimeType": "text/plain"
+    },
+    {
+      "path": "audio/subtitles.vtt",
+      "sha256": "dfb48631a92b77df1cdaeb4529a77fac55452aa1e7f73f8151226f9d64a05566",
+      "bytes": 61687,
+      "mimeType": "text/vtt"
     },
     {
       "path": "content.md",
@@ -27,10 +51,55 @@
     }
   ],
   "audio": {
-    "status": "pending",
+    "status": "ready",
     "file": "audio/narration.mp3",
+    "durationSeconds": 2294.778776,
+    "subtitlesFile": "audio/subtitles.vtt",
     "voiceName": "Pavol Hejný 2026",
-    "scriptStatus": "prepared-not-submitted",
-    "note": "The spoken script is prepared. Generation, listening review and real alignment require authorized ElevenLabs access. No audio or timing is fabricated."
+    "voiceId": "I2zA26JYXwtZmPCZflQY",
+    "modelId": "eleven_v4",
+    "createdAt": "2026-10-21T12:46:38.928166Z",
+    "scriptStatus": "submitted",
+    "provenance": {
+      "provider": "ElevenLabs",
+      "generationMethod": "Studio UI; one explicit editorial generation",
+      "studioProjectId": "i1LaOaPudlYasatVJrU4",
+      "studioChapterId": "1Ohr5et1bmkZAXeIw7S6",
+      "studioProjectUrl": "https://elevenlabs.io/app/studio/i1LaOaPudlYasatVJrU4?chapterId=1Ohr5et1bmkZAXeIw7S6",
+      "generatedOn": "2026-10-21",
+      "voiceName": "Pavol Hejný 2026",
+      "voiceId": "I2zA26JYXwtZmPCZflQY",
+      "modelId": "eleven_v4",
+      "modelName": "Eleven v4",
+      "language": "cs",
+      "voiceSettings": "Studio defaults, per-clip override disabled",
+      "scriptSha256": "af3333db44a160de73656d8ba97474037ce6818566182b05de45192ad3ddfab0",
+      "submittedScript": "audio/script.txt",
+      "sourceAudioSha256": "d0f43027ddcd9efdac0c14f8e7c62a027946b1cbf361fbd221ac7596ddf396b9",
+      "sourceAudioBytes": 55242413,
+      "normalization": {
+        "tool": "ffmpeg",
+        "codec": "libmp3lame",
+        "bitrate": 128000,
+        "sampleRate": 44100,
+        "channels": 1,
+        "seekIndex": "Xing",
+        "note": "Decode the Studio export once and encode one continuous MP3; remove concatenated clip headers. No speech is regenerated."
+      },
+      "createdAt": "2026-10-21T12:46:38.928166Z",
+      "durationSeconds": 2294.778776,
+      "audioSha256": "c42bf0fa7c76f9b3a1db374384252e67e4f54f8ee8d45476ca14cd5a049e8ba3",
+      "outputFile": "audio/narration.mp3",
+      "captions": {
+        "provider": "ElevenLabs Scribe v2",
+        "transcriptId": "Vj0WHLKfbvTjS6VrjZX3",
+        "source": "Transcript editor copy/export with actual cue timestamps",
+        "file": "audio/subtitles.vtt",
+        "cueCount": 839,
+        "wordTimingsStatus": "not-imported; cue intervals are not word intervals"
+      },
+      "visualMapping": "not-yet-available; no estimated word highlighting"
+    },
+    "wordTimingsStatus": "awaiting-provider-word-export"
   }
 }
