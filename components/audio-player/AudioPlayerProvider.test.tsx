@@ -27,6 +27,20 @@ function loadedAudio() {
 }
 
 describe('persistent shared audio owner', () => {
+    it('refreshes tracking on an older remembered recording without seeking or autoplay', () => {
+        localStorage.setItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify({ ...trackA, trackingAvailable: false }));
+        const { result } = setup();
+        const audio = loadedAudio();
+        act(() => result.current.seekTo(42));
+        act(() => result.current.setTrackTrackingAvailable('a', true));
+        expect(result.current.track?.trackingAvailable).toBe(true);
+        expect(audio.currentTime).toBe(42);
+        expect(result.current.isPlaying).toBe(false);
+        expect(play).not.toHaveBeenCalled();
+        expect(JSON.parse(localStorage.getItem(AUDIO_PLAYER_STORAGE_KEY)!)).toMatchObject({ trackingAvailable: true });
+        act(() => result.current.setTrackTrackingAvailable('other', false));
+        expect(result.current.track?.trackingAvailable).toBe(true);
+    });
     it('restores the last open recording at its position, always paused', () => {
         localStorage.setItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify(trackA));
         localStorage.setItem(AUDIO_HISTORY_STORAGE_KEY, JSON.stringify({ a: { positionInSeconds: 42.25, durationInSeconds: 100, isPlayed: false, updatedAt: 1 } }));

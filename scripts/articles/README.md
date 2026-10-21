@@ -107,8 +107,9 @@ Metadata remains pending after generation.
 ## Explicit mapping to visual words and publication
 
 The server renderer `businesses/articles/articleDocument.ts` is the source of stable visual IDs:
-`w0`, `w1`, …, excluding title/perex only when they exactly match the cover metadata. Reuse that
-renderer rather than another Markdown tokenizer.
+`w0`, `w1`, … for body words and `renderArticleCover`'s `t0`, `t1`, … / `p0`, `p1`, … for the
+narrated title/perex. Cover IDs never renumber body words. New mapping templates include the cover;
+legacy body-only maps remain supported. Reuse these renderers rather than another Markdown tokenizer.
 
 ```sh
 npx tsx scripts/articles/map-alignment.mjs spec-driven-anchoring-cs --template
@@ -130,9 +131,25 @@ Those numbers are an example of the shape, **not a mapping for the first article
 example values into a published map. Adapted-only speech, title/perex narration and visual symbols
 not spoken must be accounted for explicitly in `excludedSpokenWords` (`index`, `text`, `reason`)
 or `excludedVisualWords` (`wordId`, `text`, `reason`). Do not use exclusions to hide missing alignment.
-Sentence IDs come from the actual spoken transcript and its real character timing, not invented
-intervals on the original prose. Set `reviewed`, `listeningReviewed`, `reviewedBy`, `reviewedAt`
-only after a person/editor has verified the mapping and listened to the result.
+Sentence IDs come from the actual spoken transcript and its real timing, not invented
+intervals on the original prose. Set `reviewed`, `reviewedBy`, `reviewedAt` only after the mapping
+has been checked. Record `listeningReviewed` only for an actual listening review; `timingReviewed`
+can instead record an explicit acoustic alignment review. State the review method and scope in
+the mapping; never attribute an automated review to the author.
+
+When a Studio recording has only cue captions, word times can be obtained separately by acoustic
+forced alignment of the **existing final MP3**. Preserve the model, parameters, audio/script/caption
+hashes, inferred intervals, confidence and any transcript corrections in `alignment.raw.json`.
+Use `source` to identify this method honestly: these are inferred acoustic word boundaries, not
+ElevenLabs-exported word timestamps. Never divide cue durations evenly or guess missing times.
+Publication checks the final recording hash when the raw alignment supplies `audioSha256`.
+
+The first Czech article uses TorchAudio 2.8's `MMS_FA` CTC aligner on 16 kHz mono PCM decoded
+from its unchanged MP3, with 120 ms cue context and approximately 20 ms acoustic frames. Its
+`text-map.json` records the reviewed correspondences for numbers, acronyms, translated technical
+terms, spoken diagram arrows, reordered headings and links. One Scribe-fused phrase was split
+according to the submitted script and acoustically aligned again. The model runs only in this
+explicit editorial preparation; no Python/model dependency is added to the website or build.
 
 ```sh
 npx tsx scripts/articles/map-alignment.mjs spec-driven-anchoring-cs --publish-reviewed

@@ -14,8 +14,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in `scripts/articles`, never build hooks. The root audio provider owns one persistent media element, local per-track
   history, paused refresh restoration and Media Session. AI ta Krajta retains its original visible controls; article
   tracking uses reviewed real word timing and a single toggle, with manual scrolling releasing automatic follow.
-  The first Czech narration is a committed ElevenLabs Studio recording with real Scribe sentence/cue captions.
-  Cue intervals are never subdivided into guessed word timings. Explicit editorial binary import can use the manual
+  The first Czech narration is a committed ElevenLabs Studio recording with Scribe sentence/cue captions and
+  separately computed acoustic CTC word alignment of the final MP3. Its reviewed map covers title (`t…`), perex
+  (`p…`) and body (`w…`) without renumbering body words. Cue intervals are never subdivided into guessed timings.
+  A restored player's tracking capability refreshes when that article's valid alignment loads, without autoplay or
+  a seek. Written text and IDs must both match before tracking attaches. Explicit editorial binary import can use the manual
   `article-audio-import` workflow; it verifies transfer integrity and never runs during a normal build or generates speech.
   `publish-assets.ts` copies only allowed downloads of published articles unchanged into ignored `public/article-assets/`
   before dev/build. Large MP3s must be CDN static files, never force-static route bodies (Vercel's ISR size limit).

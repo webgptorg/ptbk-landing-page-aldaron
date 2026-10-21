@@ -11,6 +11,22 @@ function decodeText(value: string): string {
     return value.replace(/&(amp|lt|gt|quot|#39);/g, (_, entity: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity] ?? '');
 }
 
+/** Cover words have their own stable IDs, so adding cover tracking never renumbers body words. */
+export function renderArticleCover(title: string, perex: string) {
+    const words: ArticleDocumentWord[] = [];
+    const annotate = (text: string, prefix: string) => {
+        let index = 0;
+        return text.replace(/\S+/g, (word) => {
+            const id = `${prefix}${index++}`;
+            words.push({ id, text: word });
+            return `<span data-article-word="${id}">${escapeHtml(word)}</span>`;
+        });
+    };
+    const titleHtml = annotate(title, 't');
+    const perexHtml = annotate(perex, 'p');
+    return { titleHtml, perexHtml, words };
+}
+
 /** Strip duplicated cover copy only when it is the article's actual authored title/perex. */
 export function getArticleBody(markdown: string, title: string, perex: string): string {
     let body = markdown.trim();

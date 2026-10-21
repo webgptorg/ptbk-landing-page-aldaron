@@ -8,6 +8,12 @@
       "mimeType": "application/pdf"
     },
     {
+      "path": "audio/alignment.raw.json",
+      "sha256": "34a8f28728aedaf50dd55b6201ca315adcccb3450a4c3c73497a14618725c850",
+      "bytes": 739066,
+      "mimeType": "application/json"
+    },
+    {
       "path": "audio/generation.json",
       "sha256": "d306bb11bf7731c128cc3e80d4c3421089e4b39a933fde27448227a3b25cbf30",
       "bytes": 1686,
@@ -38,6 +44,18 @@
       "mimeType": "text/vtt"
     },
     {
+      "path": "audio/text-map.json",
+      "sha256": "8993f37984d3149e8acbf52dca5f17a5431978e3bfb21f54ed27f0a2fa837057",
+      "bytes": 466436,
+      "mimeType": "application/json"
+    },
+    {
+      "path": "audio/words.json",
+      "sha256": "fad6314b6860247a4ea7988636f0e588c0571514fb588c2f554b2fc6cb4f8517",
+      "bytes": 560320,
+      "mimeType": "application/json"
+    },
+    {
       "path": "content.md",
       "sha256": "31acf4bbb0462ac0cf26010e7185a87c7f1d1db5e857d4815d1ae836586a6bb7",
       "bytes": 31940,
@@ -54,12 +72,12 @@
     "status": "ready",
     "file": "audio/narration.mp3",
     "durationSeconds": 2294.778776,
+    "wordsFile": "audio/words.json",
     "subtitlesFile": "audio/subtitles.vtt",
     "voiceName": "Pavol Hejný 2026",
     "voiceId": "I2zA26JYXwtZmPCZflQY",
     "modelId": "eleven_v4",
     "createdAt": "2026-10-21T12:46:38.928166Z",
-    "scriptStatus": "submitted",
     "provenance": {
       "provider": "ElevenLabs",
       "generationMethod": "Studio UI; one explicit editorial generation",
@@ -100,6 +118,9 @@
       },
       "visualMapping": "not-yet-available; no estimated word highlighting"
     },
-    "wordTimingsStatus": "awaiting-provider-word-export"
+    "wordTimingsStatus": "ready",
+    "wordTimingsSource": "mms-ctc-acoustic-forced-alignment-with-reviewed-visual-mapping",
+    "reviewedBy": "Codex",
+    "reviewedAt": "2026-10-21"
   }
 }

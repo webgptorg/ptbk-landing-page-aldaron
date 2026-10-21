@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { findArticleWordAtTime, getArticleTimedSentences, getArticleWordStartTimes, parseArticleWordTimings } from './articleTiming';
 
 const words = [
-    { start: 0, end: 0.4, text: 'ej', wordId: 'w0', sentenceId: 's0' },
-    { start: 0.4, end: 0.8, text: 'áj', wordId: 'w0', sentenceId: 's0' },
+    { start: 0, end: 0.4, text: 'AI', wordId: 'w0', sentenceId: 's0' },
+    { start: 0.4, end: 0.8, text: 'AI', wordId: 'w0', sentenceId: 's0' },
     { start: 1.2, end: 2, text: 'píše.', wordId: 'w1', sentenceId: 's0' },
     { start: 3, end: 4, text: 'Dál.', wordId: 'w2', sentenceId: 's1' },
 ];

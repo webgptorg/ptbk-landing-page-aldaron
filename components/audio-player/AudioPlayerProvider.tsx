@@ -19,6 +19,7 @@ type AudioPlayerValue = {
     history: AudioHistory;
     trackingEnabled: boolean;
     setTrackingEnabled: (enabled: boolean) => void;
+    setTrackTrackingAvailable: (id: string, available: boolean) => void;
     playTrack: (track: AudioTrack, autoplay?: boolean) => void;
     setIsPlaying: (playing: boolean) => void;
     seekTo: (seconds: number) => void;
@@ -157,6 +158,17 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         writeBrowserLocalStorageItem(AUDIO_TRACKING_STORAGE_KEY, enabled ? 'on' : 'off');
     }, []);
 
+    // A recording restored from an older visit may predate its published word timing.
+    // Refresh this capability without restarting, seeking or changing playback intent.
+    const setTrackTrackingAvailable = useCallback((id: string, available: boolean) => {
+        const current = trackRef.current;
+        if (!current || current.id !== id || current.kind !== 'article' || current.trackingAvailable === available) return;
+        const updated = { ...current, trackingAvailable: available };
+        trackRef.current = updated;
+        setTrack(updated);
+        writeBrowserLocalStorageItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify(updated));
+    }, []);
+
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio || !track || !isPlaying) return;
@@ -167,13 +179,14 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         });
     }, [track?.id, isPlaying]);
 
-    // timeupdate can be 250 ms apart. Sampling the real media clock makes every aligned spoken word visible.
+    // timeupdate can be 250 ms apart. Follow the real media clock each frame for short aligned words.
     useEffect(() => {
         if (!isPlaying) return;
+        const interval = track?.kind === 'article' && track.trackingAvailable && trackingEnabled ? 16 : 40;
         let frame = 0;
         let previous = 0;
         const update = (timestamp: number) => {
-            if (timestamp - previous >= 40 && audioRef.current && pendingPositionRef.current === null) {
+            if (timestamp - previous >= interval && audioRef.current && pendingPositionRef.current === null) {
                 setCurrentTime(audioRef.current.currentTime);
                 previous = timestamp;
             }
@@ -181,7 +194,7 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         };
         frame = requestAnimationFrame(update);
         return () => cancelAnimationFrame(frame);
-    }, [isPlaying]);
+    }, [isPlaying, track?.kind, track?.trackingAvailable, trackingEnabled]);
 
     useEffect(() => {
         if (!('mediaSession' in navigator)) return;
@@ -206,9 +219,9 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         }
     }, [track?.id, isPlaying, currentTime, duration]);
 
-    const value = useMemo<AudioPlayerValue>(() => ({ track, isPlaying, currentTime, duration, error, isRestored, history, trackingEnabled, setTrackingEnabled, playTrack, setIsPlaying, seekTo, closePlayer, getProgress }), [track, isPlaying, currentTime, duration, error, isRestored, history, trackingEnabled, setTrackingEnabled, playTrack, setIsPlaying, seekTo, closePlayer, getProgress]);
+    const value = useMemo<AudioPlayerValue>(() => ({ track, isPlaying, currentTime, duration, error, isRestored, history, trackingEnabled, setTrackingEnabled, setTrackTrackingAvailable, playTrack, setIsPlaying, seekTo, closePlayer, getProgress }), [track, isPlaying, currentTime, duration, error, isRestored, history, trackingEnabled, setTrackingEnabled, setTrackTrackingAvailable, playTrack, setIsPlaying, seekTo, closePlayer, getProgress]);
 
-    const controls = useMemo<AudioPlayerControls>(() => ({ track, isPlaying, error, isRestored, history, trackingEnabled, setTrackingEnabled, playTrack, setIsPlaying, seekTo, closePlayer, getProgress }), [track, isPlaying, error, isRestored, history, trackingEnabled, setTrackingEnabled, playTrack, setIsPlaying, seekTo, closePlayer, getProgress]);
+    const controls = useMemo<AudioPlayerControls>(() => ({ track, isPlaying, error, isRestored, history, trackingEnabled, setTrackingEnabled, setTrackTrackingAvailable, playTrack, setIsPlaying, seekTo, closePlayer, getProgress }), [track, isPlaying, error, isRestored, history, trackingEnabled, setTrackingEnabled, setTrackTrackingAvailable, playTrack, setIsPlaying, seekTo, closePlayer, getProgress]);
 
     return <AudioPlayerControlsContext.Provider value={controls}><AudioPlayerContext.Provider value={value}>
         {children}

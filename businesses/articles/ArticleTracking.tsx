@@ -9,13 +9,22 @@ interface TrackingDom {
     readonly starts: ReadonlyMap<string, number>;
 }
 
+function getTrackingWords(container: HTMLElement, timings: ArticleWordTimings): Map<string, HTMLElement> | null {
+    const words = new Map<string, HTMLElement>();
+    for (const element of Array.from(container.querySelectorAll<HTMLElement>('[data-article-word]'))) {
+        if (element.dataset.articleWord) words.set(element.dataset.articleWord, element);
+    }
+    // IDs alone survive edits at the same position. Verify the written text as well.
+    return timings.words.some((word) => words.get(word.wordId)?.textContent !== word.text) ? null : words;
+}
+
 /** The article itself stays server rendered. This boundary only decorates a real, reviewed alignment. */
 export function ArticleTracking({ articleId, wordsUrl, children }: {
     readonly articleId: string;
     readonly wordsUrl?: string;
     readonly children: ReactNode;
 }) {
-    const { track, currentTime, isPlaying, trackingEnabled, seekTo } = useAudioPlayer();
+    const { track, currentTime, isPlaying, trackingEnabled, seekTo, setTrackTrackingAvailable } = useAudioPlayer();
     const root = useRef<HTMLDivElement>(null);
     const [timings, setTimings] = useState<ArticleWordTimings | null>(null);
     const dom = useRef<TrackingDom | null>(null);
@@ -38,21 +47,24 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
     }, [wordsUrl]);
 
     useEffect(() => {
+        const available = Boolean(root.current && timings && getTrackingWords(root.current, timings));
+        setTrackTrackingAvailable(articleId, available);
+        return () => setTrackTrackingAvailable(articleId, false);
+    }, [articleId, track?.id, timings, setTrackTrackingAvailable]);
+
+    useEffect(() => {
         const container = root.current;
         if (!container || !active || !timings) return;
-        const words = new Map<string, HTMLElement>();
-        for (const element of Array.from(container.querySelectorAll<HTMLElement>('[data-article-word]'))) {
-            if (element.dataset.articleWord) words.set(element.dataset.articleWord, element);
-        }
+        const words = getTrackingWords(container, timings);
+        if (!words) return;
         const starts = getArticleWordStartTimes(timings.words);
         // A stale alignment is unavailable; do not seek to unrelated or missing visual words.
-        if (timings.words.some((word) => !words.has(word.wordId))) return;
         dom.current = { words, starts };
         following.current = true;
         container.dataset.tracking = 'true';
         const focusableBlocks: Array<{ element: HTMLElement; tabIndex: string | null; shortcut: string | null }> = [];
-        for (const element of Array.from(container.querySelectorAll<HTMLElement>('p, li, h2, h3, h4, h5, h6, pre'))) {
-            if (element.querySelector('p, li, h2, h3, h4, h5, h6, pre')) continue;
+        for (const element of Array.from(container.querySelectorAll<HTMLElement>('p, li, h1, h2, h3, h4, h5, h6, pre'))) {
+            if (element.querySelector('p, li, h1, h2, h3, h4, h5, h6, pre')) continue;
             const mappedWord = Array.from(element.querySelectorAll<HTMLElement>('[data-article-word]')).find((word) => starts.has(word.dataset.articleWord ?? ''));
             if (!mappedWord) continue;
             focusableBlocks.push({ element, tabIndex: element.getAttribute('tabindex'), shortcut: element.getAttribute('aria-keyshortcuts') });

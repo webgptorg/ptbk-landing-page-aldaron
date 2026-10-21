@@ -2,6 +2,7 @@
 export interface ArticleTimedWord {
     readonly start: number;
     readonly end: number;
+    /** Exact written word from the renderer; the spoken transcript is mapped editorially, not compared at runtime. */
     readonly text: string;
     readonly wordId: string;
     readonly sentenceId: string;
@@ -25,7 +26,7 @@ export function parseArticleWordTimings(value: unknown): ArticleWordTimings | nu
             typeof word.start !== 'number' || !Number.isFinite(word.start) || word.start < 0 ||
             typeof word.end !== 'number' || !Number.isFinite(word.end) || word.end <= word.start ||
             word.start < previousStart || typeof word.text !== 'string' || !word.text.trim() ||
-            typeof word.wordId !== 'string' || !/^w\d+$/.test(word.wordId) ||
+            typeof word.wordId !== 'string' || !/^[wtp]\d+$/.test(word.wordId) ||
             typeof word.sentenceId !== 'string' || !word.sentenceId.trim()
         ) return null;
         previousStart = word.start;

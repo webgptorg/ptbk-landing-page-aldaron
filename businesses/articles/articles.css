@@ -93,9 +93,9 @@
 .article-prose th, .article-prose td { padding: .8rem 1rem; border-bottom: 1px solid var(--article-line); text-align: left; }
 .article-prose th { font-weight: 650; }
 .article-prose [data-article-word] { border-radius: .13em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-[data-tracking='true'] .article-prose [data-article-word] { cursor: pointer; }
-.article-prose [data-active-sentence='true'] { background: var(--article-soft); }
-.article-prose [data-active-word='true'] { color: var(--article-ink); background: var(--article-highlight); box-shadow: 0 0 0 .12em var(--article-highlight); }
+[data-tracking='true'] [data-article-word] { cursor: pointer; }
+.article-site [data-active-sentence='true'] { background: var(--article-soft); }
+.article-site [data-active-word='true'] { color: var(--article-ink); background: var(--article-highlight); box-shadow: 0 0 0 .12em var(--article-highlight); }
 .article-authored-bio { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 1.7rem; border-block: 1px solid var(--article-line); margin-top: 4rem; padding-block: 2.5rem; }
 .article-authored-bio > img { width: 84px; height: 84px; object-fit: cover; object-position: top; padding-top: .6rem; border-radius: 50%; background: var(--article-soft); margin: 0; }
 .article-authored-bio h2 { margin: 0 0 .6rem; padding: 0; border: 0; font-size: 1.5rem; }

@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { getArticleBody, renderArticleDocument } from './articleDocument';
+import { getArticleBody, renderArticleCover, renderArticleDocument } from './articleDocument';
 
 describe('article document rendering and narration word identity', () => {
+    it('gives cover copy escaped, stable IDs without renumbering body words', () => {
+        const cover = renderArticleCover('AI & <kód>', 'Co bude dál?');
+        expect(cover.words.map((word) => word.id)).toEqual(['t0', 't1', 't2', 'p0', 'p1', 'p2']);
+        expect(cover.titleHtml).toContain('&amp;');
+        expect(cover.titleHtml).toContain('&lt;kód&gt;');
+        expect(renderArticleDocument('Text.', '', '').words[0].id).toBe('w0');
+    });
     it('removes matching cover copy while preserving all original body and biography', () => {
         const source = '# Titulek\n\nPodtitulek.\n\n## Kapitola\n\nText a nuance.\n\n## O autorovi.\n\nHistorické analogie jsou vysvětlením; anchoring je hypotéza.';
         const result = renderArticleDocument(source, 'Titulek', 'Podtitulek.');

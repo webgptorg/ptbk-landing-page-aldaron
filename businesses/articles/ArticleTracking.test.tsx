@@ -9,6 +9,7 @@ const player = vi.hoisted(() => ({
     currentTime: 0.2,
     isPlaying: false,
     trackingEnabled: true,
+    setTrackTrackingAvailable: vi.fn(),
     seekTo: vi.fn(),
 }));
 vi.mock('@/components/audio-player/AudioPlayerProvider', () => ({ useAudioPlayer: () => player }));
@@ -48,6 +49,7 @@ beforeEach(() => {
     player.isPlaying = false;
     player.trackingEnabled = true;
     player.seekTo.mockReset();
+    player.setTrackTrackingAvailable.mockReset();
     clock = 1_000;
     frames = [];
     scrollIntoView = vi.fn();
@@ -111,6 +113,32 @@ describe('article text tracking interactions', () => {
         expect(fetch).not.toHaveBeenCalled();
         expect(view.container.querySelector('[data-tracking]')).toBeNull();
         expect(view.getByText('Čitelný text.').hasAttribute('tabindex')).toBe(false);
+    });
+
+    it('tracks the narrated title before reaching the article body', async () => {
+        vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ version: 1, words: [
+            { start: 0, end: 1, text: 'Titulek', wordId: 't0', sentenceId: 's0' },
+        ] }) } as Response);
+        const view = render(<ArticleTracking articleId="article-cs" wordsUrl="/words.json">
+            <h1><span data-article-word="t0">Titulek</span></h1>
+        </ArticleTracking>);
+        await ready();
+        expect(view.getByText('Titulek').getAttribute('data-active-word')).toBe('true');
+        expect(view.getByRole('heading').tabIndex).toBe(0);
+        expect(player.setTrackTrackingAvailable).toHaveBeenCalledWith('article-cs', true);
+    });
+
+    it('rejects a stale map even when its word IDs still exist', async () => {
+        vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ ...alignment,
+            words: [{ ...alignment.words[0], text: 'Changed text' }],
+        }) } as Response);
+        const view = render(<Reader />);
+        await waitFor(() => expect(fetch).toHaveBeenCalled());
+        await act(async () => {});
+        expect(view.container.querySelector('[data-tracking]')).toBeNull();
+        expect(player.setTrackTrackingAvailable).not.toHaveBeenCalledWith('article-cs', true);
+        fireEvent.click(view.getByText('AI'));
+        expect(player.seekTo).not.toHaveBeenCalled();
     });
 
     it('allows scrolling away with the native scrollbar and resumes follow only after the reader returns', async () => {
