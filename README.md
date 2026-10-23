@@ -32,7 +32,7 @@ This is a production Next.js application, not a collection of static marketing p
 
 | Area | Main paths |
 | --- | --- |
-| Homepages | `/` publishes the Czech marketing website and `/en` its English version. Old `/new` URLs permanently redirect without losing queries; `/cs` retains the earlier Czech page. |
+| Homepages | `/cs` and `/en` publish the Czech and English website, with `/` retained as a Czech alias. Old `/new` URLs permanently redirect without losing queries. |
 | Audience pages | `/pro-mesta`, `/for-agro`, `/for-industry`, `/ai-supervize`, `/ai-supervize-mini`, and related campaign routes. |
 | Workshops and community | `/cs/online-workshop`, `/cs/online-workshop/participant`, `/cs/komunita`, and `/cs/komunita/projects`. |
 | Operations | `/admin`, `/admin/workshops`, `/admin/community`, `/admin/studio`, `/admin/contacts`, `/admin/discount-codes`, and `/admin/shortener`. |

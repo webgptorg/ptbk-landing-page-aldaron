@@ -2,9 +2,9 @@
 
 ## Veřejné cesty po přepnutí 23. října 2026
 
-Na výslovný pokyn vlastníka žije český web na `/` a anglický na `/en`, včetně marketingových podstránek bez prefixu `/new`. Původní `/new` adresy se trvale přesměrují se zachováním query parametrů. Značkové domény, články, workshopy, administrace a jiné formuláře se nemění. Sdílené kontaktní a právní mechanismy se používají beze změny kontraktu.
+Na výslovný pokyn vlastníka žije český web na `/cs` i na `/` a anglický na `/en`, včetně marketingových podstránek bez prefixu `/new`. Původní `/new` adresy se trvale přesměrují se zachováním query parametrů. Značkové domény, články, workshopy, administrace a jiné formuláře se nemění. Sdílené kontaktní a právní mechanismy se používají beze změny kontraktu.
 
-Veřejné cesty mají jeden zdroj. České routy žijí přímo v kořenové skupině `app/(marketing)` a anglické mají samostatnou catch-all routu vedle explicitních existujících článků a whitepaperu. Ostatní stránky zachovávají své směrování. Kořen již nepřesměrovává podle Accept-Language. Canonical, jazykové alternativy, sociální obrázky a sdílené kalkulace používají veřejné cesty. Neznámý detail agendy nebo srovnání vrátí 404 s cestou zpět do nového webu.
+Veřejné cesty mají jeden zdroj. České `/cs` routy sdílejí implementaci kořenové skupiny `app/(marketing)` a anglické mají samostatnou catch-all routu vedle explicitních existujících článků a whitepaperu. Ostatní stránky zachovávají své směrování. Kořen již nepřesměrovává podle Accept-Language. Canonical, jazykové alternativy, sociální obrázky, navigace a sdílené kalkulace používají `/cs` a `/en`. Neznámý detail agendy nebo srovnání vrátí 404 s cestou zpět do nového webu.
 
 ## Vzhled a navigace
 

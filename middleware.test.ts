@@ -121,7 +121,7 @@ describe('domain middleware', () => {
     });
 
     it.each(['https://ptbk.io', 'https://www.ptbk.io'])('publishes the marketing site at %s without the old prefix', origin => {
-        for (const path of ['/', '/en', '/cenik', '/en/agendy/email', '/srovnani/chatgpt', '/opengraph-image', '/en/opengraph-image']) {
+        for (const path of ['/', '/cs', '/en', '/cs/cenik', '/cs/agendy/email', '/cenik', '/en/agendy/email', '/srovnani/chatgpt', '/opengraph-image', '/en/opengraph-image']) {
             const response = middleware(createRequest(`${origin}${path}?volume=47`));
             expect(response.headers.get('location')).toBeNull();
             expect(response.headers.get('x-middleware-rewrite')).toBeNull();

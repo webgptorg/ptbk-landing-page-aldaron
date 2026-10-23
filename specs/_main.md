@@ -1,6 +1,6 @@
 # Web Promptbooku
 
-Specifikace hlavního webu publikovaného na `/` (česky) a `/en` (anglicky). Vlastník výslovně schválil přepnutí 23. října 2026. Staré cesty `/new` se trvale přesměrují na odpovídající cesty bez prefixu se zachováním query parametrů. České routy žijí v `app/(marketing)`, anglické v samostatné catch-all routě vedle existujících článků a whitepaperu. Ostatní značkové weby, články, workshopy a administrace si zachovávají své cesty.
+Specifikace hlavního webu publikovaného na `/cs` (česky) a `/en` (anglicky). Kořen `/` a marketingové cesty bez prefixu zůstávají českými aliasy s canonical URL pod `/cs`. Vlastník výslovně schválil přepnutí 23. října 2026. Staré cesty `/new` se trvale přesměrují na odpovídající cesty bez prefixu se zachováním query parametrů. České `/cs` routy znovu používají stránky v `app/(marketing)`, anglické v samostatné catch-all routě vedle existujících článků a whitepaperu. Ostatní značkové weby, články, workshopy a administrace si zachovávají své cesty.
 
 ## Produkt a publikum
 
@@ -21,7 +21,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 
 `/`, `/partnership`, `/kalkulacka`, `/cenik`, `/agendy`, `/agendy/{email|documents|social|video|coding}`, `/srovnani`, `/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip|grok-bot|openai-dots|meta-muse|chatgpt}`, `/o-nas`, `/bezpecnost`, `/faq`, `/soukromi`, `/podminky`.
 
-Všechny interní marketingové odkazy používají kořenové veřejné cesty. GitHub, zdroje srovnání, obchodní rejstřík a sociální profily jsou záměrně externí. Právní dokumenty používají existující společný obsah a zachovávají jeho právní odkazy. Údaje o firmě a fotografie pocházejí ze stávajícího webu, nevytvářejí se nové identity.
+Interní marketingové odkazy používají jazykové prefixy `/cs` a `/en`; přepínač zachová cestu, query a fragment. GitHub, zdroje srovnání, obchodní rejstřík a sociální profily jsou záměrně externí. Právní dokumenty používají existující společný obsah a zachovávají jeho právní odkazy. Údaje o firmě a fotografie pocházejí ze stávajícího webu, nevytvářejí se nové identity.
 
 ## Závazné redakční principy
 
@@ -31,7 +31,7 @@ Navenek není rozlišení „dnes / připravujeme / vize“, termín dokončení
 
 ## Jazyky a měny — zadání 17. října 2026
 
-Český web je na `/`, plná anglická verze pod `/en` se stejnými suffixy cest. Přepínač zachovává protějšek stránky, query výpočtu a fragment. Překlady zahrnují ukázky, formuláře, kalkulačku, právní texty a PDF; serverový výstup má správný jazyk už před hydratací. Metadata uvádějí canonical a jazykové alternativy, veřejné stránky jsou indexovatelné a uvedené v sitemap.
+Český web je na `/cs` i na `/`, plná anglická verze pod `/en` se stejnými suffixy cest. Přepínač zachovává protějšek stránky, query výpočtu a fragment. Překlady zahrnují ukázky, formuláře, kalkulačku, právní texty a PDF; serverový výstup má správný jazyk už před hydratací. Metadata uvádějí canonical a jazykové alternativy, veřejné stránky jsou indexovatelné a uvedené v sitemap.
 
 České částky se zobrazují v Kč, anglické v USD. Základ nabídky 19/100 USD se nemění; česká prezentace používá stávající modelový kurz 22 Kč/USD (418 / 2 200 Kč) s uvedeným přepočtem. Kalkulačka zachovává původní jednotky uložených parametrů a převádí zobrazení i vstupy podle jazyka, včetně tokenových sazeb. Její zadaný kurz je odhad, ne živý kurz. Podíl zůstává pevný 20 %.
 

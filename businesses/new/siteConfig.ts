@@ -1,6 +1,6 @@
 /** Public marketing URLs after the owner-authorized root cutover. */
-export const NEW_SITE_BASE = '';
-export const sitePath = (path = '') => `${NEW_SITE_BASE}/${path.replace(/^\/+/, '')}`;
+export const NEW_SITE_BASE = '/cs';
+export const sitePath = (path = '') => `${NEW_SITE_BASE}${path ? `/${path.replace(/^\/+/, '')}` : ''}`;
 export const NEW_SITE_SECTIONS = [
     'agendy', 'partnership', 'cenik', 'srovnani', 'o-nas', 'kalkulacka',
     'bezpecnost', 'faq', 'soukromi', 'podminky',
@@ -8,7 +8,7 @@ export const NEW_SITE_SECTIONS = [
 
 /** Identifies public marketing paths without claiming existing workshop, article or admin routes. */
 export function isNewSitePublicPath(pathname: string): boolean {
-    const suffix = pathname.replace(/^\/en(?=\/|$)/, '') || '/';
+    const suffix = pathname.replace(/^\/(?:cs|en)(?=\/|$)/, '') || '/';
     if (suffix === '/' || suffix === '/opengraph-image' || NEW_SITE_SECTIONS.some(
         section => suffix === `/${section}` || suffix.startsWith(`/${section}/`),
     )) {

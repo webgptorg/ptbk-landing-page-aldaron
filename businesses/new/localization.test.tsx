@@ -23,11 +23,13 @@ describe('bilingual launch site', () => {
     it('keeps language paths and complete calculation state across language changes', () => {
         expect(localeFromPath('/en/cenik')).toBe('en');
         expect(localeFromPath('/engine')).toBe('cs');
-        expect(localizedPath('/en/agendy/social','cs')).toBe('/agendy/social');
-        expect(localizedPath('/new/en/agendy/social','cs')).toBe('/agendy/social');
+        expect(localizedPath('/en/agendy/social','cs')).toBe('/cs/agendy/social');
+        expect(localizedPath('/new/en/agendy/social','cs')).toBe('/cs/agendy/social');
         expect(localizedPath('/','en')).toBe('/en');
-        expect(localizedPath('/en','cs')).toBe('/');
-        expect(localizedPath('/new/en/kalkulacka?volume=47#vysledek','cs')).toBe('/kalkulacka?volume=47#vysledek');
+        expect(localizedPath('/cs/agendy/email?volume=47#detail','en')).toBe('/en/agendy/email?volume=47#detail');
+        expect(localizedPath('/cs/cenik','cs')).toBe('/cs/cenik');
+        expect(localizedPath('/en','cs')).toBe('/cs');
+        expect(localizedPath('/new/en/kalkulacka?volume=47#vysledek','cs')).toBe('/cs/kalkulacka?volume=47#vysledek');
         const state=defaultCalculatorState('partner'); state.input.hostingCzk=654; state.input.exchangeRate=24;
         const url=new URL(calculationShareUrl(state,'en'));
         expect(url.pathname).toBe('/en/kalkulacka');

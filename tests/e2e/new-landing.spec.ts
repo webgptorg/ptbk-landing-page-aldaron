@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 const visit = async (page: Page, path: string) => {
     const response = await page.goto(path, {waitUntil:'load'});
     await page.evaluate(() => document.fonts.ready);
-    if ((path === '/' || path === '/en') && !await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    if ((path === '/' || path === '/cs' || path === '/en') && !await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)) {
         // Playback appears after the homepage's client controls are initialized.
         await expect(page.getByRole('button',{name:/^(Přehrát ukázku|Play example)$/})).toBeVisible();
     }
@@ -29,14 +29,14 @@ test('root cutover serves both languages with public metadata and preserves old 
     const destination = new URL(legacy.headers().location, legacy.url());
     expect(destination.pathname).toBe('/kalkulacka');
     expect(destination.search).toBe('?volume=47&mode=partner');
-    for (const [path,language] of [['/','cs'],['/en','en']]) {
+    for (const [path,language] of [['/','cs'],['/cs','cs'],['/en','en']]) {
         const response = await visit(page, path);
         expect(response?.status()).toBe(200);
         await expect(page).toHaveURL(new URL(path, page.url()).toString());
         await expect(page.locator('html')).toHaveAttribute('lang',language);
-        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',`https://ptbk.io${path === '/' ? '' : path}`);
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',`https://ptbk.io/${language}`);
         expect(await page.locator('meta[name="robots"]').getAttribute('content')).not.toContain('noindex');
-        await expect(page.getByRole('navigation',{name:'Language / Jazyk'}).getByRole('link',{name:'CZ',exact:true})).toHaveAttribute('href','/');
+        await expect(page.getByRole('navigation',{name:'Language / Jazyk'}).getByRole('link',{name:'CZ',exact:true})).toHaveAttribute('href','/cs');
         await expect(page.getByRole('navigation',{name:'Language / Jazyk'}).getByRole('link',{name:/EN$/})).toHaveAttribute('href','/en');
     }
 });
@@ -58,6 +58,26 @@ test('homepage has five interactive examples, equal founders and no draft framin
     await expect(page.getByText('Datová schránka: hzuu4yn',{exact:true})).toBeVisible();
     const text=await page.locator('main').innerText();
     for(const forbidden of ['Napíšete knihu','MangoWeb','připravujeme','Současný web','AI zaměstnanci pro vás','Instance je samostatné'])expect(text).not.toContain(forbidden);
+});
+
+test('Czech marketing pages and language switching retain the page, calculation and anchor', async ({page}) => {
+    for (const path of ['/cs/cenik','/cs/partnership','/cs/agendy/email','/cs/srovnani/chatgpt']) {
+        const response = await visit(page,path);
+        expect(response?.status()).toBe(200);
+        await expect(page.locator('main h1')).toHaveCount(1);
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',`https://ptbk.io${path}`);
+    }
+    await visit(page,'/cs/kalkulacka?volume=47');
+    await expect(page).toHaveURL(/\/cs\/kalkulacka\?v=2&.*volume=47/);
+    await page.evaluate(() => { window.location.hash = 'vysledek'; });
+    await page.getByRole('navigation',{name:'Language / Jazyk'}).getByRole('link',{name:/EN$/}).click();
+    await expect(page).toHaveURL(/\/en\/kalkulacka\?.*volume=47.*#vysledek$/);
+    await page.waitForLoadState('load');
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.getByRole('navigation',{name:'Language / Jazyk'})).toBeVisible();
+    await page.getByRole('navigation',{name:'Language / Jazyk'}).getByRole('link',{name:'CZ',exact:true}).click();
+    await expect(page).toHaveURL(/\/cs\/kalkulacka\?.*volume=47.*#vysledek$/);
+    await expect(page.getByLabel('Dokladů za měsíc',{exact:true})).toHaveValue('47');
 });
 
 test('quick calculator transfers all assumptions and URL restores edits',async({page})=>{

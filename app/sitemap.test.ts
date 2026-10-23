@@ -14,7 +14,7 @@ describe('sitemap', () => {
         const urls = entries.map(entry => entry.url);
         expect(new Set(urls).size).toBe(urls.length);
         for (const definition of primaryDefinitions) expect(urls).toContain(createPublicUrl(definition.path));
-        for (const path of ['/', '/en', '/cenik', '/en/cenik', '/agendy/email', '/en/srovnani/chatgpt']) {
+        for (const path of ['/cs', '/en', '/cs/cenik', '/en/cenik', '/cs/agendy/email', '/en/srovnani/chatgpt']) {
             const entry = entries.find(entry => entry.url === `https://ptbk.io${path}`);
             expect(entry).toBeDefined();
             expect(entry?.alternates?.languages).toHaveProperty('cs');

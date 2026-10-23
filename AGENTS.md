@@ -48,21 +48,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   with admin APIs still authenticated. Only the primary domain redirects the legacy branded
   paths across sites; a same-brand nested path normalizes to that brand's public path.
   Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
-- `/` publishes the Czech launch website from `businesses/new`; `/en` is its full English localization.
+- `/cs` publishes the Czech website from `businesses/new`; `/en` is its full English localization.
+  `/` and the unprefixed marketing pages serve the same Czech content with `/cs` canonical URLs.
   Marketing subpages use root paths, canonical/alternate metadata and indexable sitemap entries.
   `/new` and its children permanently redirect to the corresponding public paths, preserving queries.
-  Public marketing routes live in `app/(marketing)` and the dedicated `/en` catch-all;
+  Czech `/cs` routes re-export the shared `app/(marketing)` pages; English uses its dedicated `/en` catch-all;
   article, workshop, administration and independently branded routes keep their owners.
-- `/cs` retains the earlier Czech homepage. Its composition in `businesses/homepage` presents: ongoing responsibilities,
-  concrete benefits and an enquiry about deployment. Their three fictional stories (software care, customer
-  communication and accounting inputs) share localized definitions with the server-rendered summaries. One finite
-  state model owns scenario/step selection; direct controls never execute work, and scroll changes only visual depth.
-  Layered surfaces keep their own readable space at narrow widths; contact anchors remain usable before the enquiry handler is ready.
-  Optional motion stops offscreen, in hidden tabs and for reduced motion. Drafts, approval, continuation and waiting
-  remain distinct. The configured qualification presentation retains drafts, uses the existing contact source and
-  consent infrastructure, and reaches a localized `/dekujeme?source=autonomous-agendas&lang=…` confirmation.
-  The full footer retains legal and funding information. Homepage-only social content revisions supplement the
-  shared image design version without changing other pages' cards or authored image URLs.
 - `/cs/whitepaper` and `/en/whitepaper` share a light interactive APT whitepaper in `businesses/whitepaper`.
   Its scroll-linked CSS 3D layers, controlled-cycle simulation, commit/revert example and domain scenarios explain
   the authored principles without running agents or external actions. Reduced motion keeps the model still; the full

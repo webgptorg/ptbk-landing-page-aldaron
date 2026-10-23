@@ -26,6 +26,6 @@ export const PARTNERSHIP_PREVIEW = createSocialPreviewOptions(PARTNERSHIP_PAGE_D
 /** Public root website metadata. Query values never enter metadata. */
 export function newPageMetadata(path:string,title:string,description:string,locale:SiteLocale = 'cs') {
     const metadata=createPageMetadata({ ...NEW_PAGE_DEFINITION,language:locale,languageAlternates:{cs:localizedPath(path,'cs'),en:localizedPath(path,'en')},path:localizedPath(path,locale),title:`${title} | Promptbook`,socialTitle:title,description,isSocialPreviewImageGenerated:false });
-    const imageUrl = `https://ptbk.io${locale === 'en' ? '/en' : ''}/opengraph-image`;
+    const imageUrl = `https://ptbk.io/${locale}/opengraph-image`;
     return { ...metadata,openGraph:{...metadata.openGraph,images:[{url:imageUrl,width:1200,height:630,alt:'Promptbook'}]},twitter:{...metadata.twitter,images:[imageUrl]} };
 }
