@@ -1,5 +1,5 @@
 /* One light section, with stable controls and independently layered objects. */
-.showcase{--stage-surface:#f5f7fb;--object-shadow:1px 2px 0 #dce5f0,0 20px 45px -15px #28476921;position:relative;isolation:isolate;margin:0 auto;padding:42px 0 48px;scroll-margin-top:84px}
+.showcase{--stage-surface:var(--agenda-surface,#f5f7fb);--object-shadow:var(--agenda-shadow,1px 2px 0 #dce5f0,0 20px 45px -15px #28476921);position:relative;isolation:isolate;margin:0 auto;padding:42px 0 48px;scroll-margin-top:84px}
 .showcase::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);background:var(--stage-surface);border-block:1px solid #edf0f5}
 /* overflow:clip preserves the viewport as the sticky scroll container. */
 :global(html):has(.showcase),:global(body):has(.showcase){overflow-x:clip}
@@ -8,10 +8,10 @@
 .scrollTrack[data-immersive=true] .stageShell{position:sticky;top:84px}
 .stageShell{position:relative;background:var(--stage-surface)}
 .tabs{display:flex;justify-content:center;margin:0 auto 20px;border-radius:0;background:none;padding:0;max-width:850px;gap:20px}
-.tabs button{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;min-height:56px;border:0;background:none;font-size:12px!important;font-weight:500!important;position:relative;border-radius:0;padding:14px 8px;color:#697184;box-shadow:none;transition:color .2s}
+.tabs button{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;min-height:56px;border:0;background:none;font-size:var(--agenda-tab-size,12px)!important;font-weight:500!important;position:relative;border-radius:0;padding:14px 8px;color:#697184;box-shadow:none;transition:color .2s}
 .tabs button:hover{background:none;color:#2c4e84}
 .tabs button[aria-selected=true],.tabs button[aria-selected=true]:hover{background:none;color:#2c4e84;box-shadow:none}
-.tabs button::after{content:'';position:absolute;bottom:0;left:18%;right:18%;height:1px;background:transparent}
+.tabs button::after{content:'';position:absolute;bottom:0;left:18%;right:18%;height:var(--agenda-tab-stroke,1px);background:transparent}
 .tabs button[aria-selected=true]::after{background:#2c4e84}
 .panel{--orbit:0deg;--lift:0px;--light:50%;--progress:0;position:relative;background:none;border:0;border-radius:0;padding:30px 24px 0;overflow:visible;color:var(--ink,#141a30);box-shadow:none}
 .panel[data-scenario=documents],.panel[data-scenario=social],.panel[data-scenario=video],.panel[data-scenario=coding]{background:none}

@@ -1,7 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
-const visit = (page: Page, path: string) => page.goto(path, {waitUntil:'domcontentloaded'});
+const visit = async (page: Page, path: string) => {
+    const response = await page.goto(path, {waitUntil:'load'});
+    await page.evaluate(() => document.fonts.ready);
+    if ((path === '/' || path === '/en') && !await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        // Playback appears after the homepage's client controls are initialized.
+        await expect(page.getByRole('button',{name:/^(Přehrát ukázku|Play example)$/})).toBeVisible();
+    }
+    return response;
+};
 
 test.beforeEach(async ({page,baseURL}) => {
     page.setDefaultNavigationTimeout(30_000);
@@ -18,8 +26,9 @@ test.beforeEach(async ({page,baseURL}) => {
 test('root cutover serves both languages with public metadata and preserves old calculation links', async ({page,request}) => {
     const legacy = await request.get('/new/kalkulacka?volume=47&mode=partner', {maxRedirects:0});
     expect(legacy.status()).toBe(308);
-    expect(new URL(legacy.headers().location).pathname).toBe('/kalkulacka');
-    expect(new URL(legacy.headers().location).search).toBe('?volume=47&mode=partner');
+    const destination = new URL(legacy.headers().location, legacy.url());
+    expect(destination.pathname).toBe('/kalkulacka');
+    expect(destination.search).toBe('?volume=47&mode=partner');
     for (const [path,language] of [['/','cs'],['/en','en']]) {
         const response = await visit(page, path);
         expect(response?.status()).toBe(200);

@@ -31,14 +31,21 @@ export function NewLandingPage({ partnership = false }: { partnership?: boolean 
         <section className={s.section}><div className={s.wideLink}><div><h3>{t("Stejná technologie. Jasná cena pro klienta.")}</h3><p>Start {licencePrice('start', locale)} {t('na 30 dní. Business')} {licencePrice('business', locale)} {t('měsíčně za klientské prostředí.')}</p></div><Link className={s.textLink} href={path('cenik')}>{t("Ceník a podpora ")}<ArrowRight size={18}/></Link></div></section><ClosingCta partner />
     </>;
     return <div className={s.homepage}>
-        <section className={s.hero}><h1>{t("Dřív jste AI úkolovali.")}<br /><em>{t("Teď pracuje pro vás.")}</em></h1><p>{t("E-maily, doklady, obsah a údržba webu. Předáte agendu, nastavíte pravidla a Promptbook se vrací k práci za vás.")}</p><div className={s.actions}><LeadButton>{t("Vybrat první agendu")}</LeadButton><Link className={s.textLink} href={path('partnership')}>{t("Nasazuji řešení klientům ")}<ArrowRight size={17}/></Link></div></section>
+        <section className={s.hero}>
+            <h1><span className={s.heroOpening}>{t("Dřív jste AI úkolovali.")}</span>{' '}<em>{t("Teď pracuje pro vás.")}</em></h1>
+            <p>{t("E-maily, doklady, obsah a údržba webu. Předáte agendu, nastavíte pravidla a Promptbook se vrací k práci za vás.")}</p>
+            <div className={s.actions}>
+                <LeadButton>{t("Vybrat první agendu")}</LeadButton>
+                <Link className={s.textLink} href={path('partnership')}>{t("Nasazuji řešení klientům ")}<ArrowRight size={17}/></Link>
+            </div>
+        </section>
         <AgendaShowcase />
         <SecuritySection />
         <AudienceSection />
         <div className={s.wideLink}><div><h3>{t("Ne každý proces potřebuje stejný nástroj.")}</h3></div><Link className={s.textLink} href={path('srovnani')}>{t("Najít správný přístup ")}<ArrowRight size={18}/></Link></div>
         <section className={`${s.section} ${s.pricingSection}`} id="cenik"><div className={s.sectionTitle}><h2>{t("Začněte jednou agendou.")}</h2></div><PricingCards /></section>
         <EconomicsCalculator />
-        <section className={s.section}><div className={s.sectionTitle}><h2>{t("Za Promptbookem stojíme oba.")}</h2><div className={s.actions}><Link className={s.textLink} href={path('o-nas')}>{t("Náš příběh ")}<ArrowRight size={17}/></Link></div></div><Founders compact /></section>
+        <section className={`${s.section} ${s.foundersSection}`}><div className={s.sectionTitle}><h2>{t("Za Promptbookem stojíme oba.")}</h2><div className={s.actions}><Link className={s.textLink} href={path('o-nas')}>{t("Náš příběh ")}<ArrowRight size={17}/></Link></div></div><Founders compact /></section>
         <ClosingCta />
     </div>;
 }
