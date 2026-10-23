@@ -1,10 +1,11 @@
 import english from './locales/en.json';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 export type SiteLocale = 'cs' | 'en';
-export const localeFromPath = (pathname: string): SiteLocale => /^\/new\/en(?:\/|$)/.test(pathname) ? 'en' : 'cs';
+export const localeFromPath = (pathname: string): SiteLocale => /^\/(?:new\/)?en(?:\/|$)/.test(pathname) ? 'en' : 'cs';
 export function localizedPath(path = '', locale: SiteLocale = 'cs') {
-    const suffix = path.replace(/^\/new(?:\/en)?(?=\/|\?|#|$)/, '').replace(/^\/+/, '');
-    return `/new${locale === 'en' ? '/en' : ''}${suffix ? `${/^[?#]/.test(suffix) ? '' : '/'}${suffix}` : ''}`;
+    const suffix = path.replace(/^\/new(?=\/|\?|#|$)/, '').replace(/^\/en(?=\/|\?|#|$)/, '').replace(/^\/+/, '');
+    const base = locale === 'en' ? '/en' : '';
+    return `${base}${suffix ? `${/^[?#]/.test(suffix) ? (base ? '' : '/') : '/'}${suffix}` : (base ? '' : '/')}`;
 }
 const dictionary: Record<string, string> = english;
 /** Translates authored copy only. User drafts and calculation inputs are never sent to a translation service. */

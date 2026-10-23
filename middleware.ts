@@ -12,6 +12,7 @@ import {
 import { createPublicDomainNotFoundHtml } from './lib/domains/publicDomainNotFound';
 import { createPublicDomainRobotsText, createPublicDomainSitemapXml } from './lib/domains/publicDomainMetadata';
 import { getPreferredHomepageLanguage } from './lib/homepage-language';
+import { isNewSitePublicPath } from './businesses/new/siteConfig';
 
 /**
  * Builds a redirect to an independently branded site's public URL while retaining the browser's query parameters.
@@ -88,16 +89,19 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl);
     }
 
-    if (request.nextUrl.pathname !== '/') {
-        return NextResponse.next();
+    if (/^\/new(?:\/|$)/.test(request.nextUrl.pathname)) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = request.nextUrl.pathname.slice('/new'.length) || '/';
+        return NextResponse.redirect(redirectUrl, 308);
     }
 
-    const language = getPreferredHomepageLanguage(request.headers.get('accept-language'));
-    const redirectUrl = request.nextUrl.clone();
+    if (isNewSitePublicPath(request.nextUrl.pathname)) {
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-promptbook-page-language', /^\/en(?:\/|$)/.test(request.nextUrl.pathname) ? 'en' : 'cs');
+        return NextResponse.next({ request: { headers: requestHeaders } });
+    }
 
-    redirectUrl.pathname = `/${language}`;
-
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.next();
 }
 
 export const config = {

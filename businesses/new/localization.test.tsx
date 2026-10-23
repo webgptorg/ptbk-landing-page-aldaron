@@ -21,12 +21,16 @@ function text(node: ReactNode) { const element = document.createElement('div'); 
 const remainingCzech = (value: string) => value.replaceAll('Jiří Jahn','').replaceAll('Pavol Hejný','').replaceAll('Jiří','').match(/[^.!?\n]*[čďěňřšťůž][^.!?\n]*/gi) ?? [];
 describe('bilingual launch site', () => {
     it('keeps language paths and complete calculation state across language changes', () => {
-        expect(localeFromPath('/new/en/cenik')).toBe('en');
-        expect(localeFromPath('/new/engine')).toBe('cs');
-        expect(localizedPath('/new/en/agendy/social','cs')).toBe('/new/agendy/social');
+        expect(localeFromPath('/en/cenik')).toBe('en');
+        expect(localeFromPath('/engine')).toBe('cs');
+        expect(localizedPath('/en/agendy/social','cs')).toBe('/agendy/social');
+        expect(localizedPath('/new/en/agendy/social','cs')).toBe('/agendy/social');
+        expect(localizedPath('/','en')).toBe('/en');
+        expect(localizedPath('/en','cs')).toBe('/');
+        expect(localizedPath('/new/en/kalkulacka?volume=47#vysledek','cs')).toBe('/kalkulacka?volume=47#vysledek');
         const state=defaultCalculatorState('partner'); state.input.hostingCzk=654; state.input.exchangeRate=24;
         const url=new URL(calculationShareUrl(state,'en'));
-        expect(url.pathname).toBe('/new/en/kalkulacka');
+        expect(url.pathname).toBe('/en/kalkulacka');
         expect(parseCalculatorState(url.searchParams)).toEqual(state);
     });
     it('shows matching prices and converts editable input units without changing the economic model', () => {
@@ -47,21 +51,21 @@ describe('bilingual launch site', () => {
     ])('renders %s in English from the initial render', (_name,node) => {
         expect(remainingCzech(text(node)), String(_name)).toEqual([]);
         const element=document.createElement('div'); element.innerHTML=html(node);
-        const links=Array.from(element.querySelectorAll('a[href^="/new"]')).map(a=>a.getAttribute('href'));
-        expect(links.every(link=>link?.startsWith('/new/en'))).toBe(true);
+        const links=Array.from(element.querySelectorAll('a[href^="/"]')).map(a=>a.getAttribute('href'));
+        expect(links.every(link=>link?.startsWith('/en'))).toBe(true);
     });
     it('retains localized legal documents and a sourced comparison table with all ten alternatives', () => {
         expect(text(<NewLegalPage kind="privacyPolicy"/>)).toContain('Privacy');
         const element=document.createElement('div');element.innerHTML=html(<ComparisonsPage/>);
         expect(element.querySelectorAll('tbody tr').length).toBe(11);
-        for (const slug of ['grok-bot','openai-dots','meta-muse','chatgpt']) expect(element.querySelector(`a[href="/new/en/srovnani/${slug}"]`)).not.toBeNull();
+        for (const slug of ['grok-bot','openai-dots','meta-muse','chatgpt']) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();
         expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(10);
     });
     it('exports the same calculation in localized currency, language and share URL', () => {
         const state=defaultCalculatorState();const before=calculateEconomics(state.input);
         const en=JSON.stringify(createCalculationPdfDefinition(state,'en'));
         const cs=JSON.stringify(createCalculationPdfDefinition(state,'cs'));
-        expect(en).toContain('/new/en/kalkulacka?');expect(en).toContain('$100');expect(en).not.toContain(' Kč');
+        expect(en).toContain('/en/kalkulacka?');expect(en).toContain('$100');expect(en).not.toContain(' Kč');
         expect(cs).toContain('2 200');expect(cs).toContain('Kč');
         expect(remainingCzech(en)).toEqual([]);
         expect(calculateEconomics(state.input)).toEqual(before);

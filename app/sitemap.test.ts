@@ -11,7 +11,16 @@ describe('sitemap', () => {
             (definition) => new URL(createPublicUrl(definition.path)).origin === PRIMARY_SITE_URL,
         );
 
-        expect(entries).toHaveLength(primaryDefinitions.length + 2 + getAllArticles().length);
+        const urls = entries.map(entry => entry.url);
+        expect(new Set(urls).size).toBe(urls.length);
+        for (const definition of primaryDefinitions) expect(urls).toContain(createPublicUrl(definition.path));
+        for (const path of ['/', '/en', '/cenik', '/en/cenik', '/agendy/email', '/en/srovnani/chatgpt']) {
+            const entry = entries.find(entry => entry.url === `https://ptbk.io${path}`);
+            expect(entry).toBeDefined();
+            expect(entry?.alternates?.languages).toHaveProperty('cs');
+            expect(entry?.alternates?.languages).toHaveProperty('en');
+        }
+        expect(urls.some(url => new URL(url).pathname.startsWith('/new'))).toBe(false);
         expect(entries.map((entry) => entry.url)).not.toContain('https://ai-ta-krajta.cz/');
         expect(entries.map((entry) => entry.url)).not.toContain('https://pavolhejny.cz/');
         expect(entries.map((entry) => entry.url)).not.toContain('https://pavolhejny.com/');

@@ -115,7 +115,7 @@ describe('agenda demonstrations', () => {
         render(<AgendaShowcase />);
         fireEvent.keyDown(screen.getByRole('tab', { name: 'E-maily' }), { key: 'End' });
         expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Údržba webu' }));
-        expect(screen.getByRole('link', { name: 'Jak funguje tato agenda' }).getAttribute('href')).toBe('/new/agendy/coding');
+        expect(screen.getByRole('link', { name: 'Jak funguje tato agenda' }).getAttribute('href')).toBe('/agendy/coding');
         act(() => changeMotion(true));
         expect(screen.getByRole('tabpanel').getAttribute('data-stage')).toBe('3');
         expect(screen.queryByRole('button', { name: 'Přehrát ukázku znovu' })).toBeNull();

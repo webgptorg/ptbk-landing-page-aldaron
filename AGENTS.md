@@ -48,10 +48,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   with admin APIs still authenticated. Only the primary domain redirects the legacy branded
   paths across sites; a same-brand nested path normalizes to that brand's public path.
   Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
-- `/` redirects to `/cs` or `/en` using `Accept-Language`.
-- `/cs` is the Czech homepage and source of truth for homepage structure and copy.
-- `/en` is its English localization.
-- Both homepages share the business-facing composition in `businesses/homepage`: ongoing responsibilities,
+- `/` publishes the Czech launch website from `businesses/new`; `/en` is its full English localization.
+  Marketing subpages use root paths, canonical/alternate metadata and indexable sitemap entries.
+  `/new` and its children permanently redirect to the corresponding public paths, preserving queries.
+  Public marketing routes live in `app/(marketing)` and the dedicated `/en` catch-all;
+  article, workshop, administration and independently branded routes keep their owners.
+- `/cs` retains the earlier Czech homepage. Its composition in `businesses/homepage` presents: ongoing responsibilities,
   concrete benefits and an enquiry about deployment. Their three fictional stories (software care, customer
   communication and accounting inputs) share localized definitions with the server-rendered summaries. One finite
   state model owns scenario/step selection; direct controls never execute work, and scroll changes only visual depth.

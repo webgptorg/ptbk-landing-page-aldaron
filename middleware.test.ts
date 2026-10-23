@@ -112,10 +112,38 @@ describe('domain middleware', () => {
         expect(shortLinkResponse.status).toBe(404);
     });
 
-    it('keeps the language redirect on unbranded roots for development and other hostnames', () => {
+    it('serves the new Czech root without an Accept-Language redirect, including development', () => {
         const response = middleware(createRequest('http://localhost:4009/', { 'accept-language': 'en-US,en;q=0.9' }));
 
-        expect(response.headers.get('location')).toBe('http://localhost:4009/en');
+        expect(response.headers.get('location')).toBeNull();
+        expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+        expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe('cs');
+    });
+
+    it.each(['https://ptbk.io', 'https://www.ptbk.io'])('publishes the marketing site at %s without the old prefix', origin => {
+        for (const path of ['/', '/en', '/cenik', '/en/agendy/email', '/srovnani/chatgpt', '/opengraph-image', '/en/opengraph-image']) {
+            const response = middleware(createRequest(`${origin}${path}?volume=47`));
+            expect(response.headers.get('location')).toBeNull();
+            expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+            expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe(path.startsWith('/en') ? 'en' : 'cs');
+        }
+    });
+
+    it.each(['/new', '/new/en', '/new/kalkulacka', '/new/en/agendy/email'])('permanently redirects %s while preserving query parameters', path => {
+        const response = middleware(createRequest(`https://www.ptbk.io${path}?volume=47&mode=partner`));
+        expect(response.status).toBe(308);
+        expect(response.headers.get('location')).toBe(`https://www.ptbk.io${path.slice(4) || '/'}?volume=47&mode=partner`);
+        expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+    });
+
+    it('keeps existing articles, workshops, administration and unrelated paths outside marketing rewrites', () => {
+        for (const path of ['/cs', '/en/articles', '/en/whitepaper', '/cs/online-workshop', '/admin/contacts', '/newsletter']) {
+            const response = middleware(createRequest(`https://ptbk.io${path}`));
+            expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+            expect(response.headers.get('location')).toBeNull();
+        }
+        expect(middleware(createRequest('https://ai-ta-krajta.cz/new')).status).toBe(404);
+        expect(middleware(createRequest('https://pavolhejny.com/cenik')).status).toBe(404);
     });
 });
 

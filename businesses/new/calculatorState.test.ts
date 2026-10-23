@@ -37,7 +37,7 @@ describe('complete public calculator state', () => {
         const state = defaultCalculatorState('partner');state.input.partnerHours=99;state.input.inputPriceUsd=19;state.input.plan='start';
         const changed=changeScenario(state,'email');
         expect(changed.input.partnerHours).toBe(99);expect(changed.input.inputPriceUsd).toBe(19);expect(changed.input.plan).toBe('start');
-        expect(calculatorPath(changed)).toMatch(/^\/new\/kalkulacka\?/);
+        expect(calculatorPath(changed)).toMatch(/^\/kalkulacka\?/);
     });
 });
 

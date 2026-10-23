@@ -3,7 +3,11 @@ import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry'
 import { describe, expect, it } from 'vitest';
 
 describe('getLanguageFromPathname', () => {
-    it('recognizes the isolated bilingual launch site without prefix collisions', () => {
+    it('recognizes public and legacy bilingual marketing paths without prefix collisions', () => {
+        expect(getLanguageFromPathname('/')).toBe('cs');
+        expect(getLanguageFromPathname('/cenik')).toBe('cs');
+        expect(getLanguageFromPathname('/en')).toBe('en');
+        expect(getLanguageFromPathname('/en/cenik')).toBe('en');
         expect(getLanguageFromPathname('/new')).toBe('cs');
         expect(getLanguageFromPathname('/new/cenik')).toBe('cs');
         expect(getLanguageFromPathname('/new/en')).toBe('en');
@@ -35,7 +39,6 @@ describe('getLanguageFromPathname', () => {
 
     it('falls back to the language of the site when the page is unknown or not known yet', () => {
         expect(getLanguageFromPathname('/branding')).toBe('en');
-        expect(getLanguageFromPathname('/')).toBe('en');
         expect(getLanguageFromPathname(null)).toBe('en');
     });
 });

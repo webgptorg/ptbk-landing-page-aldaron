@@ -1,16 +1,16 @@
 # Společná kvalita a akceptace webu
 
-## Izolovaný rozsah
+## Veřejné cesty po přepnutí 23. října 2026
 
-Veškerý nový web žije pod `/new`. Změny se týkají jeho rout, vlastní obchodní prezentace, kalkulačky a příslušných specifikací/testů. Stávající homepage, značkové domény, administrace a jiné formuláře se nemění. Sdílené kontaktní a právní mechanismy se používají beze změny kontraktu.
+Na výslovný pokyn vlastníka žije český web na `/` a anglický na `/en`, včetně marketingových podstránek bez prefixu `/new`. Původní `/new` adresy se trvale přesměrují se zachováním query parametrů. Značkové domény, články, workshopy, administrace a jiné formuláře se nemění. Sdílené kontaktní a právní mechanismy se používají beze změny kontraktu.
 
-Prefix cest má jeden zdroj, aby budoucí přesun nebyl ruční hledání desítek odkazů. Přesun rout, canonical URL a změna indexace na `/` je samostatná operace. Do té doby žádné přesměrování původní homepage. Neznámý detail agendy nebo srovnání vrátí 404 s cestou zpět do nového webu.
+Veřejné cesty mají jeden zdroj. České routy žijí přímo v kořenové skupině `app/(marketing)` a anglické mají samostatnou catch-all routu vedle explicitních existujících článků a whitepaperu. Ostatní stránky zachovávají své směrování. Kořen již nepřesměrovává podle Accept-Language. Canonical, jazykové alternativy, sociální obrázky a sdílené kalkulace používají veřejné cesty. Neznámý detail agendy nebo srovnání vrátí 404 s cestou zpět do nového webu.
 
 ## Vzhled a navigace
 
 Jednotný prémiový světlý vizuální jazyk: téměř bílé pozadí, tmavý text, indigově modré akcenty vycházející z existujícího loga, výrazná typografická hierarchie a dostatek prostoru. Inspirace produktovými landing pages Applu spočívá v čistotě a soustředění na ukázku, nikoli v kopírování značky. Méně vnořených rámečků; každá agenda má vlastní kompozici s jemnou prostorovou hloubkou. Žádné prázdné marketingové štítky, přehnané poznámky pod každou kartou nebo dlouhý technický manuál v úvodu. Vlastní formát book se na marketingových stránkách nevysvětluje ani nevyžaduje.
 
-V horní navigaci logo/úvod, agendy, partnerství, ceník, srovnání, příběh a kontaktní akce. Mobil má přístupné rozbalitelné menu, ne zcela zmizelou navigaci. Interní marketingové odkazy zůstávají pod `/new`. Žádný odkaz „současný web“ a žádné veřejné označení „dnes / připravujeme / vize“.
+V horní navigaci logo/úvod, agendy, partnerství, ceník, srovnání, příběh a kontaktní akce. Mobil má přístupné rozbalitelné menu, ne zcela zmizelou navigaci. Interní marketingové odkazy používají kořenové cesty podle jazyka. Žádný odkaz „současný web“ a žádné veřejné označení „dnes / připravujeme / vize“.
 
 Kalkulačka je samostatná výrazná karta s velkým zaoblením a stínem, ne další nerozlišený blok. Výsledná částka tvoří větu s benefitem a obdobím. Pokročilé parametry netvoří vstupní formulář homepage.
 
@@ -30,9 +30,9 @@ Každé pole má label a jednotku, výsledky mají slovní interpretaci. Modál 
 
 ## Metadata a URL
 
-Každá stránka má vlastní titulek, popis a canonical URL bez výpočtových parametrů. Podstránky používají sdílený značkový social preview; hlavní stránka a partnerství vlastní existující renderer. Nenahlašovat neexistující jazykové alternativy. Nový obsah je český.
+Každá stránka má vlastní titulek, popis a canonical URL bez výpočtových parametrů. Podstránky používají sdílený značkový social preview; hlavní stránka a partnerství vlastní existující renderer. Nenahlašovat neexistující jazykové alternativy. Obsah má českou a anglickou verzi.
 
-Pod `/new` zůstává technický `noindex` a žádné zařazení do sitemap. To není veřejný badge ani zajištění utajení. Referrer pro nové stránky je omezen na stejný origin, aby finanční parametry nebyly běžným referrerem externích odkazů. Kalkulace v URL je přesto viditelná držiteli odkazu, prohlížeči a provozním logům; není to tajné úložiště.
+Po přepnutí jsou veřejné marketingové stránky indexovatelné a zahrnuté v sitemap s jazykovými alternativami; staré `/new` URL jsou přesměrování. Referrer pro nové stránky je omezen na stejný origin, aby finanční parametry nebyly běžným referrerem externích odkazů. Kalkulace v URL je přesto viditelná držiteli odkazu, prohlížeči a provozním logům; není to tajné úložiště.
 
 ## Akceptace
 

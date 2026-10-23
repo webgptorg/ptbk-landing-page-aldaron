@@ -10,7 +10,7 @@ export const NEW_PAGE_DEFINITION: PageMetadataDefinition = {
     description:'AI agendy pro e-maily, doklady, obsah a údržbu webu. Vlastní data, end-to-end šifrované ovládání a nasazení s partnerem.',
     socialTitle:'Dřív jste AI úkolovali. Teď pracuje pro vás.',
     socialPreviewImageAlt:'Promptbook — firemní agendy pod vaší kontrolou',
-    isSocialPreviewImageGenerated:true,isIndexed:false,
+    isSocialPreviewImageGenerated:true,isIndexed:true,
 };
 export const PARTNERSHIP_PAGE_DEFINITION: PageMetadataDefinition = {
     ...NEW_PAGE_DEFINITION,languageAlternates:{cs:sitePath('partnership'),en:localizedPath('partnership','en')},path:sitePath('partnership'),title:'Partnerství s Promptbookem — vaše služby, naše technologie',
@@ -23,8 +23,9 @@ export const PARTNERSHIP_METADATA = createPageMetadata(PARTNERSHIP_PAGE_DEFINITI
 export const NEW_PREVIEW = createSocialPreviewOptions(NEW_PAGE_DEFINITION,{eyebrow:'Promptbook',artwork:'knowledge',paletteSeed:NEW_BLUE_PALETTE});
 export const PARTNERSHIP_PREVIEW = createSocialPreviewOptions(PARTNERSHIP_PAGE_DEFINITION,{eyebrow:'Partnerství',artwork:'knowledge',paletteSeed:NEW_BLUE_PALETTE});
 
-/** Future root website lives only under /new until an explicit cutover. Query values never enter metadata. */
+/** Public root website metadata. Query values never enter metadata. */
 export function newPageMetadata(path:string,title:string,description:string,locale:SiteLocale = 'cs') {
     const metadata=createPageMetadata({ ...NEW_PAGE_DEFINITION,language:locale,languageAlternates:{cs:localizedPath(path,'cs'),en:localizedPath(path,'en')},path:localizedPath(path,locale),title:`${title} | Promptbook`,socialTitle:title,description,isSocialPreviewImageGenerated:false });
-    return { ...metadata,openGraph:{...metadata.openGraph,images:[{url:`https://ptbk.io/new${locale === 'en' ? '/en' : ''}/opengraph-image`,width:1200,height:630,alt:'Promptbook'}]},twitter:{...metadata.twitter,images:[`https://ptbk.io/new${locale === 'en' ? '/en' : ''}/opengraph-image`]} };
+    const imageUrl = `https://ptbk.io${locale === 'en' ? '/en' : ''}/opengraph-image`;
+    return { ...metadata,openGraph:{...metadata.openGraph,images:[{url:imageUrl,width:1200,height:630,alt:'Promptbook'}]},twitter:{...metadata.twitter,images:[imageUrl]} };
 }

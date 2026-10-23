@@ -15,7 +15,9 @@ test.beforeEach(async ({ page }) => {
     });
 });
 
-for (const language of ['cs', 'en'] as const) {
+// The previous Czech homepage remains at /cs; /en now publishes the new marketing website.
+const legacyHomepageLanguages: ('cs' | 'en')[] = ['cs'];
+for (const language of legacyHomepageLanguages) {
     const CONTENT = HOMEPAGE_CONTENT[language];
     const SCENARIOS = HOMEPAGE_SCENARIOS[language];
     const ENQUIRY = getHomepageEnquiry(language);
@@ -321,19 +323,17 @@ test('failed client scripts leave the complete static offer and native navigatio
     await expect(page.getByRole('heading', { name: HOMEPAGE_CONTENT.en.closing.title })).toBeInViewport();
 });
 
-test('Promptbook keeps language routing, the legacy company redirect and independent sitemap entries', async ({
+test('Promptbook publishes the root website, the legacy company redirect and independent sitemap entries', async ({
     request,
 }) => {
-    for (const [acceptedLanguages, language] of [
-        ['cs-CZ,cs;q=0.9,en;q=0.5', 'cs'],
-        ['en-US,en;q=0.9', 'en'],
-    ]) {
+    for (const acceptedLanguages of ['cs-CZ,cs;q=0.9,en;q=0.5', 'en-US,en;q=0.9']) {
         const response = await request.get('/', {
             headers: { 'x-forwarded-host': 'ptbk.io', 'Accept-Language': acceptedLanguages },
             maxRedirects: 0,
         });
-        expect(response.status()).toBe(307);
-        expect(response.headers().location).toBe(`/${language}`);
+        expect(response.status()).toBe(200);
+        expect(response.headers().location).toBeUndefined();
+        expect(await response.text()).toContain('Teď pracuje pro vás.');
     }
     const companyRedirect = await request.get('/pro-firmy', { maxRedirects: 0 });
     expect(companyRedirect.status()).toBe(301);
@@ -342,7 +342,7 @@ test('Promptbook keeps language routing, the legacy company redirect and indepen
     const sitemap = await request.get('/sitemap.xml', { headers: { 'x-forwarded-host': 'ptbk.io' } });
     expect(sitemap.status()).toBe(200);
     const xml = await sitemap.text();
-    for (const path of ['/cs', '/en', '/cs/pro-firmy', '/cs/whitepaper', '/en/whitepaper']) {
+    for (const path of ['/', '/en', '/cenik', '/en/cenik', '/cs', '/cs/pro-firmy', '/cs/whitepaper', '/en/whitepaper']) {
         expect(xml).toContain(`<loc>https://ptbk.io${path}</loc>`);
     }
     expect(xml).not.toContain('<loc>https://ptbk.io/en/pro-firmy</loc>');

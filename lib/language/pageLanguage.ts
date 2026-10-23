@@ -1,4 +1,5 @@
 import { fallbackHomepageLanguage, type SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { isNewSitePublicPath } from '@/businesses/new/siteConfig';
 
 /**
  * Paths whose page - and every page nested under it - is written in Czech
@@ -57,9 +58,10 @@ export function getLanguageFromPathname(pathname: string | null): SupportedHomep
     }
 
     const normalizedPathname = normalizePathname(pathname);
-    // The isolated launch site has its own language prefix. Other brands keep their existing routing.
+    // Both old links and the public root paths share the same marketing language.
     if (isPathnameWithinPath(normalizedPathname, '/new/en')) return 'en';
     if (isPathnameWithinPath(normalizedPathname, '/new')) return 'cs';
+    if (isNewSitePublicPath(normalizedPathname)) return isPathnameWithinPath(normalizedPathname, '/en') ? 'en' : 'cs';
     const isCzechPage = CZECH_PATH_PREFIXES.some((path) => isPathnameWithinPath(normalizedPathname, path));
 
     return isCzechPage ? 'cs' : fallbackHomepageLanguage;

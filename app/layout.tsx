@@ -29,9 +29,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     const publicHostname = getPublicRequestHostname(requestHeaders);
     const publicDomainRoute = getPublicDomainRouteByHostname(publicHostname);
     const isBrandedSite = publicDomainRoute !== undefined;
+    const marketingLanguage = requestHeaders.get('x-promptbook-page-language');
 
     return (
-        <html lang={publicDomainRoute?.notFound.language ?? 'en'} suppressHydrationWarning>
+        <html lang={publicDomainRoute?.notFound.language ?? (marketingLanguage === 'cs' ? 'cs' : 'en')} suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -1,6 +1,21 @@
-/** One prefix for the launch website. Moving it to / is a separate, explicit deployment. */
-export const NEW_SITE_BASE = '/new';
-export const sitePath = (path = '') => `${NEW_SITE_BASE}${path ? `/${path.replace(/^\/+/, '')}` : ''}`;
+/** Public marketing URLs after the owner-authorized root cutover. */
+export const NEW_SITE_BASE = '';
+export const sitePath = (path = '') => `${NEW_SITE_BASE}/${path.replace(/^\/+/, '')}`;
+export const NEW_SITE_SECTIONS = [
+    'agendy', 'partnership', 'cenik', 'srovnani', 'o-nas', 'kalkulacka',
+    'bezpecnost', 'faq', 'soukromi', 'podminky',
+] as const;
+
+/** Identifies public marketing paths without claiming existing workshop, article or admin routes. */
+export function isNewSitePublicPath(pathname: string): boolean {
+    const suffix = pathname.replace(/^\/en(?=\/|$)/, '') || '/';
+    if (suffix === '/' || suffix === '/opengraph-image' || NEW_SITE_SECTIONS.some(
+        section => suffix === `/${section}` || suffix.startsWith(`/${section}/`),
+    )) {
+        return true;
+    }
+    return false;
+}
 export const NEW_SITE_NAVIGATION = [
     ['Agendy', 'agendy'], ['Pro partnery', 'partnership'], ['Ceník', 'cenik'],
     ['Srovnání', 'srovnani'], ['Náš příběh', 'o-nas'],
