@@ -9,7 +9,8 @@ import type { LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 import { AgendaShowcase } from './AgendaShowcase';
 import { Founders } from './Founders';
 import { LeadButton } from './LeadCapture';
-import { ClosingCta, PricingCards, SecuritySection } from './MarketingSections';
+import { ClosingCta, PricingCards } from './MarketingSections';
+import { OwnershipScene } from './OwnershipScene';
 import { COMMERCIAL_TERMS, ENGINE_REPOSITORY } from './commercialTerms';
 import { SCENARIOS, type ScenarioId } from './economics';
 import { changeScenario, defaultCalculatorState, calculatorPath } from './calculatorState';
@@ -37,15 +38,44 @@ export function StoryPage(){
 return <><PageIntro title={t("Nechtěli jsme jen další chat.")}>{t("Promptbook stavíme pro chvíli, kdy nestačí dostat odpověď. Kdy potřebujete, aby se práce opravdu udělala — a příště znovu.")}</PageIntro><div className={s.prose}><h2>{t("Od odpovědí k odpovědnosti za agendu.")}</h2><p>{t("Začínali jsme u chatbotů na webu. Následovali agenti, kteří uměli splnit zadaný úkol. Pořád ale zůstával stejný problém: někdo jim musel znovu a znovu říkat, co mají dělat.")}</p><p>{t("Proto jsme začali stavět Promptbook kolem dlouhodobých agend. Nejde jen o delší odpověď nebo větší jednorázový úkol. Jde o práci, která se ve firmě opakuje: přijde doklad, objeví se e-mail, vznikne video nebo je potřeba udržovat web.")}</p><p>{t("Technologický základ stavíme na výkonných coding harnesses. Stejný způsob práce se soubory a kontextem využíváme i mimo programování. Pro uživatele ale rozhoduje výsledek, ne znalost vnitřního formátu.")}</p><h2>{t("Technologie od nás. Řešení od partnera.")}</h2><p>{t("Nechceme být agenturou pro každou jednotlivou firmu. Chceme dát technologii lidem, kteří už klientům pomáhají — agenturám, freelancerům a integrátorům. Oni znají klienta. My se soustředíme na Promptbook.")}</p><p>{t("Stejně důležité je pro nás vlastnictví. Pracovní kontext má být u klienta, model má být volba a ovládání má být oddělené od místa, kde se práce skutečně děje.")}</p></div><section className={s.section}><div className={s.sectionTitle}><h2>{t("Dva rovnocenní spoluzakladatelé.")}</h2><p>{t("Jiří vede obchodní spolupráci. Pavol vede technologii. Promptbook tvoříme společně.")}</p></div><Founders/></section><ClosingCta/></>;}
 
 export function SecurityPage(){
-    const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t("Kontext zůstává váš.")}>{t("Vlastní soubory a agenti. Oddělené ovládání. Jasná hranice mezi přenosem do aplikace a použitím AI modelu.")}</PageIntro><SecuritySection/><div className={s.prose}><h2>{t("Engine pracuje ve vašem prostředí")}</h2><p>{t("Na vašem počítači, firemním serveru nebo pronajatém serveru pod vaší kontrolou. Tady jsou pracovní soubory, pravidla a kontext agend. Engine může pracovat i bez otevřené aplikace; stroj, na kterém běží, musí být dostupný.")}</p><h2>{t("Aplikace není úložiště vašich pracovních dat")}</h2><p>{t("Aplikaci spárujete s enginem. Přenos pracovního obsahu mezi nimi je end-to-end šifrovaný a dešifrování probíhá na klientském zařízení. Účet, předplatné a kontaktní údaje jsou od pracovního obsahu oddělené.")}</p><h2>{t("Model si vybíráte vy")}</h2><p>{t("Při použití externího modelu se potřebné vstupy odesílají přímo jeho poskytovateli z vašeho prostředí. End-to-end šifrování ovládacího kanálu neznamená, že poskytovatel AI tyto vstupy nevidí. Totéž platí pro nástroje, kterým dovolíte s daty pracovat.")}</p><p>{t("Lokální model odstraňuje potřebu posílat vstupy externímu modelovému poskytovateli. Jeho vhodnost závisí na schopnostech modelu, hardwaru a úloze; napojené externí nástroje se tím automaticky nestávají lokálními.")}</p><h2>{t("Oprávnění a kontrola patří vám")}</h2><p>{t("S partnerem nastavíte, ke kterým účtům agenda smí, co může provést sama a kdy si vyžádá schválení. Návrh odpovědi a její odeslání jsou odlišné kroky. Citlivé operace nemusíte pouštět bez kontroly.")}</p><p>{t("Vlastní provoz znamená také odpovědnost za přístupová práva, aktualizace, zálohy a zařízení, na kterém obsah zobrazujete. Veřejný kód umožňuje kontrolu implementace; sám o sobě není bezpečnostní certifikací.")}</p><h2>{t("Data v této kalkulačce")}</h2><p>{t("Výpočet probíhá v prohlížeči. Sdílený odkaz pokročilé kalkulačky obsahuje zadané parametry. Po vyžádání PDF uložíme e-mail a odkaz na výpočet do našeho kontaktního systému; nejde o přihlášení k newsletteru. E-mail do sdíleného odkazu ani PDF nevkládáme.")}</p><Link href={path('soukromi')}>{t("Jak zpracováváme osobní údaje →")}</Link></div><ClosingCta/></>;}
+    const { t, path } = useSiteLocale();
+    return <>
+        <PageIntro title={t("Kontext zůstává váš.")}>{t("Vlastní soubory a agenti. Oddělené ovládání. Jasná hranice mezi přenosem do aplikace a použitím AI modelu.")}</PageIntro>
+        <OwnershipScene />
+        <div className={s.prose}>
+            <h2>{t("Engine pracuje ve vašem prostředí")}</h2>
+            <p>{t("Na vašem počítači, firemním serveru nebo pronajatém serveru pod vaší kontrolou. Tady jsou pracovní soubory, pravidla a kontext agend. Engine může pracovat i bez otevřené aplikace; stroj, na kterém běží, musí být dostupný.")}</p>
+            <h2>{t("Soubory, které otevřete i bez Promptbooku")}</h2>
+            <p>{t("Agenti, úkoly a konverzace jsou čitelné soubory ve složkách agents/, tasks/ a chats/. Nastavení projektu najdete v ptbk.json. Obsah můžete prohlížet, upravovat, zálohovat a přenést na jiný stroj běžnými nástroji.")}</p>
+            <h2>{t("Změny mají historii")}</h2>
+            <p>{t("Engine standardně ukládá dokončené změny projektu do Gitu. Můžete porovnat verze souborů a dohledat, co se při práci změnilo. Dostupné záznamy úloh pomáhají vysvětlit jejich průběh. Návrat k předchozí verzi souborů ale nevezme zpět už odeslaný e-mail nebo jinou akci v externím systému.")}</p>
+            <h2>{t("Dva vaše konce. Šifrované spojení mezi nimi.")}</h2>
+            <p>{t("Připravovanou aplikaci navrhujeme s end-to-end šifrováním mezi vaším zařízením a vaším enginem. Klíče zůstávají na koncových zařízeních. Přenosová služba předává šifrovaný obsah a nemá jej číst. Účet, předplatné a kontaktní údaje jsou od pracovního obsahu oddělené.")}</p>
+            <p>{t("Současný dashboard enginu můžete otevřít lokálně nebo přes chráněný vzdálený tunel. Přístup vyžaduje spárování a ověření zařízení. Tento tunel má vlastní hranice důvěry vůči přenosové službě; samotné HTTPS není zárukou, že služba obsah nemůže číst. Schéma výše ukazuje architekturu připravované aplikace.")}</p>
+            <h2>{t("Model si vybíráte vy")}</h2>
+            <p>{t("Promptbook není vázaný na jediného poskytovatele AI. Volíte podporovaný harness a model; vaše role, pravidla a soubory zůstávají součástí projektu. Lokální model lze zapojit přes kompatibilní napojení podporovaného harnessu. Vhodnost pro konkrétní agendu závisí na modelu, hardwaru a nástrojích.")}</p>
+            <p>{t("Při použití externího modelu se potřebné vstupy odesílají přímo jeho poskytovateli z vašeho prostředí. End-to-end šifrování ovládacího kanálu neznamená, že poskytovatel AI tyto vstupy nevidí. Totéž platí pro nástroje, kterým dovolíte s daty pracovat.")}</p>
+            <p>{t("Lokální model odstraňuje potřebu posílat vstupy externímu modelovému poskytovateli. Jeho vhodnost závisí na schopnostech modelu, hardwaru a úloze; napojené externí nástroje se tím automaticky nestávají lokálními.")}</p>
+            <h2>{t("Oprávnění a kontrola patří vám")}</h2>
+            <p>{t("S partnerem nastavíte, ke kterým účtům agenda smí, co může provést sama a kdy si vyžádá schválení. Návrh odpovědi a její odeslání jsou odlišné kroky. Citlivé operace nemusíte pouštět bez kontroly.")}</p>
+            <p>{t("Vlastní provoz znamená také odpovědnost za přístupová práva, aktualizace, zálohy a zařízení, na kterém obsah zobrazujete. Veřejný kód umožňuje kontrolu implementace; sám o sobě není bezpečnostní certifikací.")}</p>
+            <h2>{t("Data v této kalkulačce")}</h2>
+            <p>{t("Výpočet probíhá v prohlížeči. Sdílený odkaz pokročilé kalkulačky obsahuje zadané parametry. Po vyžádání PDF uložíme e-mail a odkaz na výpočet do našeho kontaktního systému; nejde o přihlášení k newsletteru. E-mail do sdíleného odkazu ani PDF nevkládáme.")}</p>
+            <Link href={path('soukromi')}>{t("Jak zpracováváme osobní údaje →")}</Link>
+        </div>
+        <ClosingCta />
+    </>;
+}
 
 const FAQ = [
     ['Musím umět programovat?', 'Pro běžné ovládání ne. Technické nastavení a připojení vašich systémů může vyřešit partner. Vy určíte práci, pravidla a hranice schvalování.'],
     ['Čím se agenda liší od chatbota?', 'Chat obvykle začíná otázkou. Agenda má vymezenou dlouhodobou práci a reaguje na další podklady nebo naplánované úkoly. Není potřeba znovu popisovat každý jednotlivý krok.'],
     ['Funguje to i s vypnutým notebookem?', 'Ano, pokud engine běží na jiném dostupném stroji, například na vašem serveru. Když vypnete přímo počítač s enginem, zastaví se i jeho práce.'],
     ['Co když AI udělá chybu?', 'Nastavíte oprávnění a schvalování citlivých kroků, počítáte s kontrolou výstupů a řešením výjimek. Autonomie neznamená bezchybnost ani převzetí odborné odpovědnosti.'],
-    ['Kam jdou naše data?', 'Pracovní kontext a soubory jsou ve vašem prostředí. Ovládací kanál aplikace a enginu je end-to-end šifrovaný. Externí modely a nástroje ale dostávají vstupy, které jim při práci odešlete.'],
+    ['Kam jdou naše data?', 'Pracovní kontext a soubory zůstávají ve vašem prostředí. Externí modely a připojené nástroje dostávají vstupy potřebné k práci. Pro připravovanou aplikaci navrhujeme end-to-end šifrované spojení s enginem; současný vzdálený dashboard používá chráněný tunel s vlastními hranicemi důvěry.'],
+    ['Mohu si své agenty a práci odnést?', 'Ano. Agenti, úkoly, konverzace a nastavení jsou čitelné soubory ve vašem projektu. Můžete je otevřít běžným editorem, zálohovat a přenést. Promptbook při dokončených změnách standardně vytváří Git historii, takže vidíte i předchozí verze.'],
+    ['Mohu změnit AI nebo použít lokální model?', 'Ano, v rámci podporovaných harnessů a modelů. Role, pravidla a soubory přitom zůstávají ve vašem projektu. Lokální model vyžaduje kompatibilní napojení harnessu a odpovídající hardware; kvalitu a schopnost pracovat s nástroji ověřte na své agendě. Externí nástroje mohou data odesílat i při použití lokálního modelu.'],
+    ['Je aplikace už dostupná?', 'Samostatnou aplikaci pro pohodlné ovládání připravujeme. Zanechte nám nezávazný zájem a ozveme se s dostupností. Engine už má vlastní lokální a vzdálený dashboard; jeho dnešní tunel není totožný s end-to-end šifrovaným spojením navrhovaným pro aplikaci.'],
     ['Je engine zdarma?', 'Veřejný kód má vlastní licenční podmínky. Samostatný vývoj a neprodukční testování jsou bez licenčního poplatku podle licence dané verze. Produkční použití se řídí právy konkrétní verze a případnou komerční licencí Start či Business.'],
     ['Co znamená jedno klientské prostředí?', COMMERCIAL_TERMS.instance],
     ['Znamená 24/7 provoz i podporu v noci?', 'Ne. Business má první věcnou reakci do 16 pracovních hodin v definovaném pracovním okně, nikoli nepřetržitou pohotovost, garanci opravy nebo dostupnosti. Podrobnosti jsou v ceníku.'],

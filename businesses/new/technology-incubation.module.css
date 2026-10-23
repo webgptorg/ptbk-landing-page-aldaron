@@ -1,0 +1,36 @@
+.sponsorship {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 42px;
+    padding: 28px 0 8px;
+    border-top: 1px solid #e3e8ef;
+}
+
+.logo {
+    display: block;
+    width: 200px;
+    height: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.acknowledgement {
+    max-width: 600px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #687383;
+}
+
+@media (max-width: 600px) {
+    .sponsorship {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .logo {
+        width: 180px;
+    }
+}

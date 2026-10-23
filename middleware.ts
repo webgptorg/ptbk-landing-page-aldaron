@@ -96,6 +96,17 @@ export function middleware(request: NextRequest) {
     }
 
     if (isNewSitePublicPath(request.nextUrl.pathname)) {
+        // Explicit locale URLs are stable. Entry pages without a locale follow the browser language;
+        // keep the response private because shared caching must not send another visitor to our choice.
+        if (!/^\/(?:cs|en)(?:\/|$)/.test(request.nextUrl.pathname) && !request.nextUrl.pathname.endsWith('/opengraph-image')) {
+            const redirectUrl = request.nextUrl.clone();
+            const language = getPreferredHomepageLanguage(request.headers.get('accept-language'));
+            redirectUrl.pathname = `/${language}${request.nextUrl.pathname === '/' ? '' : request.nextUrl.pathname}`;
+            const response = NextResponse.redirect(redirectUrl, 307);
+            response.headers.set('Vary', 'Accept-Language');
+            response.headers.set('Cache-Control', 'private, no-store');
+            return response;
+        }
         const requestHeaders = new Headers(request.headers);
         requestHeaders.set('x-promptbook-page-language', /^\/en(?:\/|$)/.test(request.nextUrl.pathname) ? 'en' : 'cs');
         return NextResponse.next({ request: { headers: requestHeaders } });

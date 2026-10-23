@@ -49,7 +49,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   paths across sites; a same-brand nested path normalizes to that brand's public path.
   Cross-site navigation uses canonical absolute URLs from `createPublicUrl`.
 - `/cs` publishes the Czech website from `businesses/new`; `/en` is its full English localization.
-  `/` and the unprefixed marketing pages serve the same Czech content with `/cs` canonical URLs.
+  `/` and unprefixed marketing pages redirect to `/cs` or `/en` according to `Accept-Language`, preserving queries.
+  Language-dependent redirects are temporary and private; explicit language URLs stay stable.
+  `/cs/open-source` and `/en/open-source` explain self-hosting with npm, a Bash/Zsh walkthrough and Windows EXE releases.
   Marketing subpages use root paths, canonical/alternate metadata and indexable sitemap entries.
   `/new` and its children permanently redirect to the corresponding public paths, preserving queries.
   Czech `/cs` routes re-export the shared `app/(marketing)` pages; English uses its dedicated `/en` catch-all;

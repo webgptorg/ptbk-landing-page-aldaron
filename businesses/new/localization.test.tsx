@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { SiteLocaleProvider } from './LocaleProvider';
 import { LeadCaptureProvider } from './LeadCapture';
 import { NewLandingPage } from './NewLandingPage';
+import { OpenSourcePage } from './OpenSourcePage';
 import { AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage, NewLegalPage } from './InformationPages';
 import { EconomicsCalculator } from './EconomicsCalculator';
 import { createCalculationPdfDefinition } from './calculationPdf';
@@ -18,7 +19,8 @@ function html(node: ReactNode, locale: SiteLocale = 'en') {
     return renderToStaticMarkup(<SiteLocaleProvider locale={locale}><LeadCaptureProvider>{node}</LeadCaptureProvider></SiteLocaleProvider>);
 }
 function text(node: ReactNode) { const element = document.createElement('div'); element.innerHTML = html(node); return element.textContent ?? ''; }
-const remainingCzech = (value: string) => value.replaceAll('Jiří Jahn','').replaceAll('Pavol Hejný','').replaceAll('Jiří','').match(/[^.!?\n]*[čďěňřšťůž][^.!?\n]*/gi) ?? [];
+// People keep their names in either language; only untranslated surrounding prose is a defect.
+const remainingCzech = (value: string) => ['Jiří Jahn', 'Pavol Hejný', 'Jiří', 'Tomáš Studeník', 'Jan Šedo', 'Tereza Texlová', 'VŠEM', 'Šimon Podhajský', 'Lucie Benešová', 'ŠP'].reduce((text, name) => text.replaceAll(name, ''), value).match(/[^.!?\n]*[čďěňřšťůž][^.!?\n]*/gi) ?? [];
 describe('bilingual launch site', () => {
     it('keeps language paths and complete calculation state across language changes', () => {
         expect(localeFromPath('/en/cenik')).toBe('en');
@@ -47,9 +49,9 @@ describe('bilingual launch site', () => {
         expect(displayFieldValue('volume',300,'en',22)).toBe(300);
     });
     it.each([
-        ['home',<NewLandingPage/>],['partners',<NewLandingPage partnership/>],['pricing',<PricingPage/>],['story',<StoryPage/>],['security',<SecurityPage/>],['FAQ',<FaqPage/>],['comparisons',<ComparisonsPage/>],['calculator',<EconomicsCalculator advanced/>],
-        ...Object.keys(SCENARIOS).map(id=>[id,<AgendaPage scenarioId={id as ScenarioId}/>]),
-        ...COMPARISONS.map(item=>[item.slug,<ComparisonPage slug={item.slug}/>]),
+        ['home',<NewLandingPage key="home"/>],['partners',<NewLandingPage key="partners" partnership/>],['open-source',<OpenSourcePage key="open-source"/>],['pricing',<PricingPage key="pricing"/>],['story',<StoryPage key="story"/>],['security',<SecurityPage key="security"/>],['FAQ',<FaqPage key="faq"/>],['comparisons',<ComparisonsPage key="comparisons"/>],['calculator',<EconomicsCalculator key="calculator" advanced/>],
+        ...Object.keys(SCENARIOS).map(id=>[id,<AgendaPage key={id} scenarioId={id as ScenarioId}/>]),
+        ...COMPARISONS.map(item=>[item.slug,<ComparisonPage key={item.slug} slug={item.slug}/>]),
     ])('renders %s in English from the initial render', (_name,node) => {
         expect(remainingCzech(text(node)), String(_name)).toEqual([]);
         const element=document.createElement('div'); element.innerHTML=html(node);

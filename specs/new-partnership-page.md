@@ -1,21 +1,22 @@
-# Partnerství `/new/partnership`
+# Partnerství `/cs/partnership` a `/en/partnership`
 
-## Smysl
+## Smysl a rozsah
 
-Pro majitele agentur, freelancery a integrátory, kteří chtějí nasazovat firemní agendy. Agentura dodává konkrétní službu, komunikuje s klientem a zajišťuje běžnou péči; Promptbook dodává technologii a sjednanou produktovou podporu. Není to jen affiliate odkaz ani prodej neomezeného servisu od Promptbooku.
+Pro agentury, freelancery a integrátory, kteří nasazují a dlouhodobě spravují firemní AI agendy. Partner vlastní klientský vztah a nacenění implementace/servisu, Promptbook dodává technologii a sjednanou produktovou podporu. Velikost týmu nerozhoduje, schopnost dodat řešení a pečovat o klienta ano.
 
-Stránka není druhá kopie celého úvodu. Příklady agend, bezpečnost a podrobný ceník mají vlastní odkazy v navigaci. Partnerství se prezentuje jako hotová nabídka, bez označení připravovaného programu, falešného přihlášení nebo automatického uzavření smlouvy.
+Zadání z 23. října 2026 požaduje plnohodnotnou partnerskou landing page ve stejném vzdušném indigovém 2.5D stylu jako hlavní stránka. Sdílí všechny tři nové pracovní příběhy a dvojitou scénu aplikace/enginu podle [hlavní specifikace](new-product-page.md). Původní pětizáložkové demo zůstává na přehledu agend a detailech.
 
-## Pořadí
+## Pořadí a akce
 
-1. Hero **„Vaši klienti. Vaše služby. Naše technologie.“** Popis dlouhodobých AI agend a rozdělení rolí. Akce **Stát se partnerem** otevře kontaktní formulář, **Spočítat můj přínos** přejde na rychlou kalkulačku na téže stránce.
-2. Tři konkrétní přínosy: klientský vztah a vlastní cena služeb; technologický základ Promptbooku; průběžné příjmy ze servisu a licenčního podílu.
-3. **20 % pro vás. Bez partnerského paušálu.** Klient platí licenci Promptbooku, Promptbook vyplácí partnerovi podíl. Číselný příklad Business 100 USD → 20 USD bez DPH a vratek. Vlastní služby jsou další fakturací partnera.
-4. Tři kroky: vybrat proces, nastavit provoz/přístupy/pravidla a dlouhodobě dodávat službu. Začít lze na vlastní agendě a poté u klienta.
-5. Rychlá kalkulačka ve výchozím partnerském tabu. Primární výsledek je částka, která může partnerovi zbýt po zadaných nákladech za uvedené období; ne nepopsané číslo ani garantovaný zisk.
-6. Pro koho partnerství je a není. Velikost týmu nerozhoduje, schopnost zajistit nasazení a péči ano. Není to bezpracná provize.
-7. Krátké rozbalitelné odpovědi o podílu, licencích a samotném doporučování.
-8. Stručná návaznost na přesný ceník a podporu, závěrečný kontakt a společná patička.
+1. Hero **„Vaši klienti. Vaše služby. Naše technologie.“** a společné sdělení o vlastní AI, stroji a kontrole. Jedno výrazné tlačítko **Chci nasazovat klientům** otevře nezávazný zájem s partnerským tématem. Pod ním je menší odkaz na instalaci enginu a poznámka o kontaktu nyní a informaci o dostupnosti aplikace. Odkaz na hlavní produkt je textová návaznost.
+2. Tři příběhy: podcast, kontextový CRM e-mail a noční oprava, zasazené do služby pro klienty.
+3. Nezávislá volba místa aplikace a enginu, pokračování práce po zavření aplikace, E2E přenos s přesnými hranicemi a vlastní soubory/Git/modely.
+4. Tři přínosy: vlastní klientský vztah a služby; engine, aplikace a podpora; průběžný servis a podíl. **20 % pro vás. Bez partnerského paušálu.** Příklad Business 100 USD → 20 USD, v češtině se společným modelovým kurzem 22 Kč/USD. Tři kroky od první agendy přes nastavení k dlouhodobé péči.
+5. Rychlá kalkulačka ve výchozím partnerském režimu. Výsledek je odhad po zadaných nákladech za uvedené období, nikoli garantovaný zisk. Pokročilý výpočet zachovává všechny předpoklady.
+6. Stručné rozbalitelné odpovědi o podílu, licencích, podpoře a pouhém doporučování; odkazy na přesné podmínky. Noční práce enginu nemění pracovní okno lidské podpory.
+7. Oddělené produktové a osobní reference, oba rovnocenní zakladatelé, závěrečný nezávazný kontakt se stejným menším instalačním odkazem a společná patička včetně Technologické inkubace.
+
+Formulář nezakládá účet, objednávku ani partnerskou smlouvu; používá [stávající kontaktní evidenci](new-contact-and-pdf.md). Vlastní instalaci popisuje [instalační stránka](new-open-source-page.md).
 
 ## Podíl a platby
 

@@ -2,13 +2,19 @@
 
 ## Kontaktní akce
 
-Všechny marketingové kontaktní CTA pod `/new` otevírají jeden společný modál. Nevedou na `mailto`, nesimulují přihlášení do aplikace, neodesílají e-mail a nevytvářejí objednávku.
+Všechny marketingové kontaktní CTA pod `/cs` a `/en` otevírají jeden společný modál. Nevedou na `mailto`, nesimulují přihlášení do aplikace, neodesílají e-mail a nevytvářejí objednávku.
 
 Používají stávající serverovou cestu `/api/waitlist` a existující evidenci Contact v administraci. Nevzniká nová tabulka, duplicitní CRM, soukromý export kontaktů ani změna způsobu ukládání jiných stránek.
 
 Běžná žádost: povinný validní e-mail, nepovinné jméno a zpráva. Kontext tlačítka se ukládá jako téma, například Start, Business, partnerství, konkrétní agenda nebo Pavol/technologie či Jiří/obchod. Zachová se stávající provenance stránky a referrer. Identifikátor místa: `new-website-contact`.
 
-Před odesláním je vidět společné znění o zpracování osobních údajů s odkazem na `/new/soukromi` a účelem vyřízení žádosti. Žádný automatický souhlas s newsletterem. Úspěch se zobrazí až po přijetí kontaktního záznamu backendem. Systém tím neslibuje doručený e-mail nebo konkrétní lhůtu odpovědi mimo sjednané SLA.
+Před odesláním je vidět společné znění o zpracování osobních údajů s odkazem na lokalizovanou stránku `/cs/soukromi` nebo `/en/soukromi` a účelem vyřízení žádosti. Žádný automatický souhlas s newsletterem. Úspěch se zobrazí až po přijetí kontaktního záznamu backendem. Systém tím neslibuje doručený e-mail nebo konkrétní lhůtu odpovědi mimo sjednané SLA.
+
+## Nezávazný zájem a vlastní instalace
+
+Hlavní a partnerská landing page mají v každém hlavním kontaktním bloku jedno výrazné tlačítko zájmu a pod ním menší textový odkaz na lokalizovanou `/open-source`. Nejsou to dvě rovnocenné akce vedle sebe. Hlavní tlačítko používá téma Promptbooku nebo nasazování klientům; instalační pomoc zůstává běžným tematickým kontaktem.
+
+Před odesláním je jasné, že jde o nezávazný zájem: tým se ozve k potřebám návštěvníka a následně dá vědět o dostupnosti aplikace. Formulář může nabídnout pomoc s vlastním enginem už nyní. Režim zájmu a jeho účel se zapíší do poznámky existujícího kontaktu. Úspěch po potvrzení backendem říká, že zájem byl zaznamenán; nesimuluje okamžitý přístup k aplikaci, registraci, odeslaný e-mail ani objednávku. Není to newsletter a nevzniká nový kontaktní systém.
 
 ## E-mailová brána PDF
 

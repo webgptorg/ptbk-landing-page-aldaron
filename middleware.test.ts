@@ -112,20 +112,34 @@ describe('domain middleware', () => {
         expect(shortLinkResponse.status).toBe(404);
     });
 
-    it('serves the new Czech root without an Accept-Language redirect, including development', () => {
-        const response = middleware(createRequest('http://localhost:4009/', { 'accept-language': 'en-US,en;q=0.9' }));
-
-        expect(response.headers.get('location')).toBeNull();
-        expect(response.headers.get('x-middleware-rewrite')).toBeNull();
-        expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe('cs');
+    it.each([
+        ['cs-CZ,cs;q=0.9,en;q=0.8', 'cs'],
+        ['en-US,en;q=0.9', 'en'],
+        ['de-DE,de;q=0.9,cs;q=0.8', 'cs'],
+        ['cs;q=0.3,en;q=0.9', 'en'],
+        ['', 'en'],
+    ])('chooses the root language from %s without a shared cache', (accepted, language) => {
+        const response = middleware(createRequest('http://localhost:4009/?from=launch', { 'accept-language': accepted }));
+        expect(response.status).toBe(307);
+        expect(response.headers.get('location')).toBe(`http://localhost:4009/${language}?from=launch`);
+        expect(response.headers.get('vary')).toBe('Accept-Language');
+        expect(response.headers.get('cache-control')).toBe('private, no-store');
     });
 
-    it.each(['https://ptbk.io', 'https://www.ptbk.io'])('publishes the marketing site at %s without the old prefix', origin => {
-        for (const path of ['/', '/cs', '/en', '/cs/cenik', '/cs/agendy/email', '/cenik', '/en/agendy/email', '/srovnani/chatgpt', '/opengraph-image', '/en/opengraph-image']) {
-            const response = middleware(createRequest(`${origin}${path}?volume=47`));
+    it.each(['https://ptbk.io', 'https://www.ptbk.io'])('keeps explicit marketing language URLs at %s stable', origin => {
+        for (const path of ['/cs', '/en', '/cs/cenik', '/cs/agendy/email', '/en/agendy/email', '/cs/partnership', '/en/partnership', '/cs/open-source', '/en/open-source', '/opengraph-image', '/en/opengraph-image']) {
+            const response = middleware(createRequest(`${origin}${path}?volume=47`, { 'accept-language': 'en-US' }));
             expect(response.headers.get('location')).toBeNull();
             expect(response.headers.get('x-middleware-rewrite')).toBeNull();
             expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe(path.startsWith('/en') ? 'en' : 'cs');
+        }
+    });
+
+    it.each(['/open-source', '/partnership', '/kalkulacka', '/agendy/email', '/srovnani/chatgpt'])('localizes the unprefixed marketing entry %s and preserves its query', path => {
+        for (const language of ['cs', 'en']) {
+            const response = middleware(createRequest(`https://www.ptbk.io${path}?volume=47&mode=partner`, { 'accept-language': language }));
+            expect(response.status).toBe(307);
+            expect(response.headers.get('location')).toBe(`https://www.ptbk.io/${language}${path}?volume=47&mode=partner`);
         }
     });
 
@@ -144,6 +158,8 @@ describe('domain middleware', () => {
         }
         expect(middleware(createRequest('https://ai-ta-krajta.cz/new')).status).toBe(404);
         expect(middleware(createRequest('https://pavolhejny.com/cenik')).status).toBe(404);
+        expect(middleware(createRequest('https://pavolhejny.com/open-source')).status).toBe(404);
+        expect(middleware(createRequest('https://ai-ta-krajta.cz/en/open-source')).status).toBe(404);
     });
 });
 

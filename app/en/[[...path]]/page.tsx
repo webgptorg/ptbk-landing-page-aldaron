@@ -1,17 +1,18 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { NewLandingPage } from '@/businesses/new/NewLandingPage';
+import { OpenSourcePage } from '@/businesses/new/OpenSourcePage';
 import { AgendasPage, AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage, NewLegalPage, PageIntro } from '@/businesses/new/InformationPages';
 import { EconomicsCalculator } from '@/businesses/new/EconomicsCalculator';
 import { CalculatorUrlSync } from '@/businesses/new/CalculatorUrlSync';
 import { COMPARISONS } from '@/businesses/new/comparisons';
 import { SCENARIOS, type ScenarioId } from '@/businesses/new/economics';
-import { newPageMetadata } from '@/businesses/new/newMetadata';
+import { newPageMetadata, OPEN_SOURCE_PAGE_COPY, NEW_PAGE_DEFINITIONS, PARTNERSHIP_PAGE_DEFINITIONS, NEW_EN_METADATA, PARTNERSHIP_EN_METADATA } from '@/businesses/new/newMetadata';
 import { translate } from '@/businesses/new/localization';
 import s from '@/businesses/new/site.module.css';
 const pages: Record<string, [string, string]> = {
-    '': ['Promptbook — Now AI works for you.', 'Ongoing AI workflows for email, invoices, content and website care. Your data, your rules, deployed with a partner.'],
-    partnership: ['Partnership — Your clients. Our technology.', 'Deliver ongoing AI services with Promptbook. Your implementation, your service fees and a fixed 20% licence share.'],
+    '': [NEW_PAGE_DEFINITIONS.en.title, NEW_PAGE_DEFINITIONS.en.description],
+    partnership: [PARTNERSHIP_PAGE_DEFINITIONS.en.title, PARTNERSHIP_PAGE_DEFINITIONS.en.description],
     agendy: ['Choose your workflow', 'Explore email, accounting documents, social content, video and website maintenance workflows.'],
     cenik: ['Pricing and support', 'Start: $19 for one 30-day pilot. Business: $100 monthly per client environment. Full terms and product support.'],
     kalkulacka: ['Cost and benefit calculator', 'Calculate the complete economics of your workflow or partner service. Edit assumptions, share a link and download a PDF.'],
@@ -21,6 +22,7 @@ const pages: Record<string, [string, string]> = {
     faq: ['Questions and answers', 'Practical answers about deployment, data, models, licences and support before your first workflow.'],
     soukromi: ['Privacy policy', 'Personal data processing policy of AI Web s.r.o., operator of Promptbook.'],
     podminky: ['Website terms', 'Terms of use for the Promptbook website operated by AI Web s.r.o.'],
+    'open-source': [...OPEN_SOURCE_PAGE_COPY.en],
 };
 type Props = { params: Promise<{ path?: string[] }> };
 export function generateStaticParams() {
@@ -29,6 +31,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props) {
     const route = (await params).path ?? [];
     const key = route.join('/');
+    if (key === '') return NEW_EN_METADATA;
+    if (key === 'partnership') return PARTNERSHIP_EN_METADATA;
     if (pages[key]) return newPageMetadata(key, ...pages[key], 'en');
     if (route.length === 2 && route[0] === 'agendy' && Object.hasOwn(SCENARIOS, route[1])) {
         const item = SCENARIOS[route[1] as ScenarioId];
@@ -45,6 +49,7 @@ export default async function Page({ params }: Props) {
     switch (key) {
         case '': return <NewLandingPage/>;
         case 'partnership': return <NewLandingPage partnership/>;
+        case 'open-source': return <OpenSourcePage/>;
         case 'agendy': return <AgendasPage/>;
         case 'cenik': return <PricingPage/>;
         case 'srovnani': return <ComparisonsPage/>;

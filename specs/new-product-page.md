@@ -1,24 +1,41 @@
-# Hlavní web, agendy a podpůrné stránky
+# Hlavní web, příběhy a podpůrné stránky
 
-## Hlavní stránka `/new`
+## Hlavní stránka `/cs` a `/en`
 
-Úvod musí jít pochopit rychlým prohlédnutím. Nepřepisuje dokumentaci, obchodní smlouvu ani všechny otázky do jedné dlouhé stránky. Podrobnosti patří na navazující podstránky.
+Nejnovější zadání z 23. října 2026 nahrazuje původní pětizáložkové demo na hlavní a partnerské stránce třemi samostatnými pracovními příběhy. Původní demo zůstává na přehledu agend a detailech. Úvod rychle vysvětluje dlouhodobé AI agendy, vlastní pracovní prostředí a oddělenou aplikaci; podrobnosti mají samostatné cesty. Primárním distribučním publikem jsou agentury, freelanceři a integrátoři, ale nasazení musí pochopit i jejich klient.
 
 ### Pořadí bloků
 
-1. Společná navigace a hero: **„Dřív jste AI úkolovali. Teď pracuje pro vás.“** Jedna věta o e-mailech, dokladech, obsahu a údržbě. Hlavní akce **Vybrat první agendu** otevře kontakt; vedle vede odkaz **Nasazuji řešení klientům** na partnerství. Bez nadpisových marketingových štítků, upozornění na vývoj aplikace nebo požadavku psát book.
-2. Přepínatelné názorné ukázky pěti agend. Příklady mají vysvětlit výstup pohledem na práci, nikoli dalšími slogany.
-3. Jeden hlavní blok **„Vaše data. Opravdu vaše.“** Obsahuje vlastní server a end-to-end šifrovaný kanál do aplikace. Jednoduché schéma server → šifrovaný přenos → aplikace. Jasně odliší vstupy odeslané externímu modelu. Odkaz na bezpečnost; bezpečnostní argument se znovu nerozepisuje v každém následujícím bloku.
-4. **Pro koho / pro koho ne.** Vhodné pro opakovanou firemní práci, klientovo vlastnictví dat a ochotu nastavit pravidla a provoz. Nevhodné pro pouhý jednorázový chat nebo očekávání bezchybnosti bez kontrol a odpovědné péče.
-5. Stručný přechod ke srovnání přístupů. Bez šestisloupcové tabulky, cen konkurence nebo konkurentů v hero.
-6. Krátký ceník ve dvou otevřených sloupcích Start/Business. Zachovat cenu, období, účel a kontakt; jednou uvést DPH a samostatné AI/provoz/služby. Vysvětlení instance, práv, všech výluk a pracovního okna podpory je na `/new/cenik`, ne na úvodu.
-7. Samostatná výrazná karta rychlé kalkulačky podle [specifikace ekonomiky](new-economics-calculator.md).
-8. Oba zakladatelé ve stejném vizuálním postavení, reálné portréty, role, kontaktní akce a odkaz **Náš příběh**.
-9. Krátká závěrečná kontaktní výzva a společná patička.
+1. Hero **„Dřív jste AI úkolovali. Teď pracuje pro vás.“** a společné sdělení **„Vaše AI. Na vašem stroji. Pod vaší kontrolou.“** Jedno výrazné tlačítko **Chci Promptbook** otevírá nezávazný zájem. Pod ním je menší textový odkaz na vlastní instalaci enginu a stručná informace o následném kontaktu a dostupnosti aplikace. Textový odkaz na partnerství uvádí stávající 20% podíl; není druhým rovnocenným hero tlačítkem.
+2. Tři velké názorné příběhy: propagace podcastu, osobní oslovení z CRM a noční oprava webu.
+3. Dvojitá interaktivní scéna aplikace a vlastního enginu: nezávislé volby obou umístění, šifrovaný přenos, pokračování práce při zavření aplikace, čitelné soubory, Git a volba modelu.
+4. Stručné vysvětlení enginu, aplikace a APT frameworku (Agent–Project–Task) s odkazy na podrobnosti. Otevřená nabídka Start/Business čerpá ze společných obchodních konstant; práva, výluky a SLA zůstávají na ceníku.
+5. Výrazná rychlá kalkulačka ve firemním režimu podle [specifikace ekonomiky](new-economics-calculator.md).
+6. Oddělená produktová reference Slezské univerzity a osobní reference o spolupráci s Pavolem.
+7. Oba rovnocenní zakladatelé se skutečnými portréty, rolemi, kontakty a odkazem na příběh.
+8. Závěrečná nezávazná kontaktní výzva se stejnou hierarchií tlačítka a menšího instalačního odkazu; společná patička včetně Technologické inkubace.
 
-Nad rámec této struktury nepřidávat na úvod plné SLA, dlouhé FAQ, kapitoly o interním formátu, podrobnou roadmapu nebo opakované výhrady. Hlavní stránka nepoužívá výraz „instance není server ani agent“. Úvodní portréty ukazují jména, rovnocenné role a kontaktní akce; medailonky a adresy zůstávají na stránce příběhu. Srovnání má krátký přechod, publikum dvě stručné odpovědi. Podstránky a rozbalitelné podrobnosti zůstávají dostupné.
+Úvod neobsahuje plné SLA, dlouhé FAQ, roadmapové odznaky ani pokyn psát knihu. [Partnerství](new-partnership-page.md) má stejnou vizuální péči, příběhy a scénu vlastnictví. Instalace má vlastní [specifikaci](new-open-source-page.md).
 
-## Ukázky agend
+## Tři nové pracovní příběhy
+
+Každý příběh má vlastní prostorovou pracovní kompozici a čtyři kroky. Jde o označené modelové ukázky s nastavenými přístupy a pravidly, nikoli živé účty nebo doložené zákaznické výsledky. Ukázka neprovádí skutečné publikování, odesílání ani nasazení.
+
+- **Podcast AI ta Krajta:** nový díl, pochopení obsahu, osobité texty pro jednotlivé lidi a kanály, propagace/publikace podle pravidel. Osobní sítě, YouTube a tematické skupiny mají vlastní výstupy.
+- **CRM a nová pobočka:** zpráva o otevření pobočky, dohledaný kontext předchozího kontaktu, osobní e-mail v prostředí připomínajícím Gmail a další krok v CRM. Modelová firma ani osoba nejsou klientskou referencí; odeslání podléhá nastaveným oprávněním.
+- **Noční oprava:** večerní upozornění na nefunkční formulář, nalezení a oprava chyby, ověření a nasazení podle pravidel, ráno vyřešený problém. Noční práce enginu neznamená nepřetržitou lidskou podporu ani záruku bezchybnosti.
+
+Na dostatečně širokém a vysokém desktopu scéna postupuje přirozeným scrollem vpřed i zpět, bez přebírání kolečka nebo dotykových gest. Ruční výběr kroku zastaví řízení scrollem; ovládání umožní návrat ke scrollu a odkaz dovolí příběhy přeskočit. Taby podporují šipky a Home/End, aktivní stav a vazbu na panel. Na kompaktním displeji a při redukovaném pohybu je výchozí dokončený stav a všechny kroky zůstávají ručně dostupné. Nové příběhy nevyžadují časové přehrávání. Pohyb nesmí skrýt podstatný obsah.
+
+## Aplikace a engine pod vlastní kontrolou
+
+Volby aplikace jsou notebook u stolu/v kavárně, telefon venku a telefon ve vlaku. Volby enginu jsou notebook v kuchyni, mini-PC na polici a VPS. Obě sady lze kombinovat nezávisle, s aktivním stavem a ovládáním klávesnicí. Zavření aplikace ponechá engine pracovat na dostupném hostitelském stroji.
+
+Relay předává end-to-end šifrovaný obsah mezi aplikací a enginem; klíče jsou na koncových zařízeních. Vlastní pracovní soubory jsou čitelné a mohou mít historii v Gitu. Volba cloudového/lokálního modelu ukáže rozdíl toku dat. Externí modely a nástroje dostávají vstupy určené pro jejich práci; E2E ovládacího kanálu je před jejich příjemcem neskrývá. Lokální model automaticky neodstraňuje ostatní externí nástroje. Odkaz vede na bezpečnost.
+
+Scéna je interaktivní ilustrací vlastníkem potvrzené cílové architektury, nikoli ovladačem skutečného stroje nebo kryptografickým auditem. Při redukovaném pohybu se vypne paralaxa a perspektivní animace.
+
+## Původní demo na přehledu agend a detailech
 
 Vizuální princip: přehledné záložky podobné volbě nástroje v Canvě a pod nimi velké živě působící pracovní plátno. Nejde o screenshot dostupného klientského účtu, videopřehrávač bez videa ani produkční telemetrii. Označení **Ukázka** je malé, ale čitelné. Data jsou syntetická.
 
@@ -32,13 +49,13 @@ Záložky: **E-maily**, **Účetní podklady**, **Sociální sítě**, **Video �
 
 Každá záložka ukáže čtyři kroky, které mění samotnou práci na plátně, nejen indikátor postupu. E-mail propojí dotaz, kontext a odpověď; papírová faktura se přemění na strukturovaná data; každá sociální síť dostane vlastní kompozici a schvalovací stav; video přejde přes časovou osu a přepis k článku; úprava kódu přes testy k opravenému formuláři. Na dostatečně širokém a vysokém viewportu se ukázka přidrží pod navigací: přirozený scroll posouvá čtyři kroky vpřed i zpět. Připnutí se použije pouze tehdy, když se celá scéna včetně ovládání vejde do výšky okna; scéna má stabilní výšku napříč záložkami. Místo pro scrollové ovládání na desktopu se rezervuje i bez připnutí, aby se jeho výška nepřepínala při měření dostupného místa. Při změně záložky se zachová pozice v příběhu. Odkaz dovolí ukázku přeskočit. Na menších obrazovkách je po načtení i přepnutí záložky rovnou vidět dokončená kompozice. Časový průchod se spouští pouze tlačítkem přehrávání. Tlačítko přehrávání spustí jeden průchod i na desktopu, s pozastavením a opakováním. Kliknutí na krok zastaví přehrávání a dovolí výsledek prohlédnout. Přehrávání se pozastaví mimo viewport i na skryté kartě. Prostorové vrstvy mají samostatnou perspektivu, boční hrany, stíny a odlišnou paralaxu; hloubka ve scéně sleduje scroll. Ovládání „Procházet scrollováním“ vrátí ruční nebo časové přehrávání ke scrollu. Pohyb nepřebírá kolečko ani dotyková gesta. Mobil zachová vstupy i všechny tři sociální sítě v čitelné kompozici. Sociální karty mají vlastní vodorovně posuvný pás se zachytáváním a klávesovým fokusem; nepřetéká celá stránka. Ovládání kroků je na mobilu nad scénou. Mobilní perspektiva je jemnější, žádný vstup neodjíždí mimo svou pozici a budoucí kroky při ručním přehrávání zůstávají slabě naznačené. Redukovaný pohyb zobrazí dokončený stav bez časové animace, perspektivy, připnutí i dodatečné scrollovací vzdálenosti. Šipky, Home/End a fokus fungují podle vzoru tabů. Pod plátnem je pouze odkaz na odpovídající detail agendy; vysvětlení patří na detail. Dekorativní čítač a duplicitní stavové věty kolem scény se nezobrazují.
 
-## `/new/agendy` a detaily
+## `/[locale]/agendy` a detaily
 
 Přehled obsahuje stejné ukázky a odkazy na pět agend. Detail uvádí vstup, postup a výstup, zobrazí správnou výchozí záložku a nabídne kontakt s názvem agendy i kalkulačku předvyplněnou pro tento scénář. Po přepnutí scénáře přímo v ukázce odkaz pod plátnem vždy odpovídá aktivní záložce.
 
 Všechny scénáře počítají s nakonfigurovanými přístupy a pravidly, ne s univerzálním přístupem ke každé službě. Nezobrazovat logo externí platformy jako důkaz certifikovaného konektoru nebo smluvního partnerství.
 
-## `/new/bezpecnost`
+## `/[locale]/bezpecnost`
 
 Plný popis: pracovní prostředí na klientově počítači/serveru/VPS; oddělená aplikace; párování; end-to-end šifrování pracovního obsahu v ovládacím kanálu; dešifrování na klientském zařízení; odlišení účtu/předplatného od pracovního obsahu. Engine může běžet bez otevřeného ovládání, ale hostitelský stroj musí být dostupný.
 
@@ -48,7 +65,7 @@ Oprávnění, schvalování, aktualizace, zálohy a bezpečnost zařízení pat�
 
 Samostatně vysvětlit údaje v kalkulačce, veřejnost sdíleného odkazu a uložení kontaktní žádosti při vyžádání PDF.
 
-## `/new/o-nas`
+## `/[locale]/o-nas`
 
 Příběh vychází z popisu zakladatele v konverzaci: od chatbotů na webu přes jednotlivé agentní úkoly k dlouhodobým agendám. Opakované zadávání zůstávalo problémem, proto má agent průběžný okruh práce. Technologie stojí na coding harnesses a pracovních souborech; partner zajišťuje konkrétní klientské řešení. Vlastní pracovní kontext a možnost volby modelu jsou záměr produktu.
 
@@ -56,10 +73,12 @@ Nevymýšlet letopočty, první zákazníky, obraty, osobní historky ani přím
 
 **Jiří Jahn — spoluzakladatel · obchod** a **Pavol Hejný — spoluzakladatel · technologie** mají stejnou velikost karty, portrétu, jména a CTA. Oba jsou rovnocenní zakladatelé. Použít fotografie a e-maily ze stávajícího webu. Marketingová tlačítka jsou kontaktní formuláře s tématem a jménem adresáta, nikoli `mailto`.
 
-## `/new/faq`
+## `/[locale]/faq`
 
 Běžná obsluha bez programování; agenda vs. chatbot; vypnutý notebook vs. server; chyby a schvalování; kam jdou data; veřejná licence; klientské prostředí; SLA vs. noční běh; partnerské nasazení; kombinace s ostatními nástroji. Odpovědi odkazují na ceník, bezpečnost a srovnání a neobnovují zamítnutou roadmapu nebo požadavek znalosti book.
 
 ## Právní stránky
 
-`/new/soukromi` a `/new/podminky` vykreslují stejné stávající právní dokumenty společnosti v novém rámu. Žádné zkrácení práv, nová licence nebo nové právní tvrzení odvozené pouze z marketingového copy. Právní odkazy v původním obsahu se zachovávají.
+`/[locale]/soukromi` a `/[locale]/podminky` vykreslují stejné stávající právní dokumenty společnosti v novém rámu. Žádné zkrácení práv, nová licence nebo nové právní tvrzení odvozené pouze z marketingového copy. Právní odkazy v původním obsahu se zachovávají.
+
+`[locale]` znamená `cs` nebo `en`; obě verze mají rovnocenný obsah a funkční lokalizované odkazy.

@@ -3,7 +3,7 @@ export const NEW_SITE_BASE = '/cs';
 export const sitePath = (path = '') => `${NEW_SITE_BASE}${path ? `/${path.replace(/^\/+/, '')}` : ''}`;
 export const NEW_SITE_SECTIONS = [
     'agendy', 'partnership', 'cenik', 'srovnani', 'o-nas', 'kalkulacka',
-    'bezpecnost', 'faq', 'soukromi', 'podminky',
+    'bezpecnost', 'faq', 'soukromi', 'podminky', 'open-source',
 ] as const;
 
 /** Identifies public marketing paths without claiming existing workshop, article or admin routes. */
