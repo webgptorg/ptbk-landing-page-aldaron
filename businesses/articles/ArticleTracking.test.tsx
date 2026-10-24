@@ -32,16 +32,11 @@ function Reader({ wordsUrl = '/words.json' }: { wordsUrl?: string }) {
 }
 
 let clock = 1_000;
-let frames: FrameRequestCallback[];
-let scrollIntoView: ReturnType<typeof vi.fn>;
+let scrollBy: ReturnType<typeof vi.fn>;
 let bounds: DOMRect;
 
 async function ready() {
     await waitFor(() => expect(document.querySelector('[data-tracking="true"]')).not.toBeNull());
-}
-
-function flushFrame() {
-    act(() => { const queued = frames.splice(0); queued.forEach((callback) => callback(clock)); });
 }
 
 beforeEach(() => {
@@ -51,15 +46,12 @@ beforeEach(() => {
     player.seekTo.mockReset();
     player.setTrackTrackingAvailable.mockReset();
     clock = 1_000;
-    frames = [];
-    scrollIntoView = vi.fn();
+    scrollBy = vi.fn();
     bounds = { top: 250, bottom: 280, left: 0, right: 100, width: 100, height: 30, x: 0, y: 250, toJSON: () => ({}) };
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => alignment }));
     vi.spyOn(performance, 'now').mockImplementation(() => clock);
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(() => bounds);
-    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => { frames.push(callback); return frames.length; }));
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
-    Object.defineProperty(Element.prototype, 'scrollIntoView', { value: scrollIntoView, configurable: true });
+    vi.stubGlobal('scrollBy', scrollBy);
     vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })));
     Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
     Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
@@ -141,30 +133,89 @@ describe('article text tracking interactions', () => {
         expect(player.seekTo).not.toHaveBeenCalled();
     });
 
-    it('allows scrolling away with the native scrollbar and resumes follow only after the reader returns', async () => {
+    it('yields throughout a scrollbar drag and resumes automatically after release', async () => {
         player.isPlaying = true;
         const view = render(<Reader />);
         await ready();
-        // The native right-hand gutter is outside the document content width.
         fireEvent(window, new MouseEvent('pointerdown', { clientX: 1010, bubbles: true }));
         bounds = { ...bounds, top: -200, bottom: -170 };
         fireEvent.scroll(window);
-        flushFrame();
-        clock += 2_000; // A held scrollbar drag remains intentional beyond the wheel intent timeout.
-        fireEvent.scroll(window);
-        flushFrame();
+        clock += 2_000; // A held drag must not be interrupted even after the grace period.
         player.currentTime = 2.3;
         view.rerender(<Reader />);
         expect(view.getByText('píše.').getAttribute('data-active-word')).toBe('true');
-        expect(scrollIntoView).not.toHaveBeenCalled();
-        bounds = { ...bounds, top: 250, bottom: 280 };
-        fireEvent.scroll(window);
-        flushFrame();
+        expect(scrollBy).not.toHaveBeenCalled();
         fireEvent(window, new MouseEvent('pointerup', { bubbles: true }));
         clock += 1_000;
-        bounds = { ...bounds, top: 700, bottom: 730 };
         player.currentTime = 2.5;
         view.rerender(<Reader />);
-        expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center', behavior: 'auto' });
+        expect(scrollBy).toHaveBeenCalledWith({ top: expect.any(Number), behavior: 'auto' });
+        expect(scrollBy.mock.calls[0][0].top).toBeLessThan(0);
+    });
+
+    it('waits for touch momentum to finish, then follows without a second toggle', async () => {
+        player.isPlaying = true;
+        const view = render(<Reader />);
+        await ready();
+        fireEvent.touchMove(window);
+        bounds = { ...bounds, top: 700, bottom: 730 };
+        clock += 2_000;
+        player.currentTime = 1.2;
+        view.rerender(<Reader />);
+        expect(scrollBy).not.toHaveBeenCalled();
+        fireEvent.touchEnd(window);
+        clock += 600;
+        fireEvent.scroll(window); // Inertial scroll extends the manual gesture's grace period.
+        clock += 400;
+        player.currentTime = 1.5;
+        view.rerender(<Reader />);
+        expect(scrollBy).not.toHaveBeenCalled();
+        clock += 500;
+        player.currentTime = 2.2;
+        view.rerender(<Reader />);
+        expect(scrollBy).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the reading position above the player in a reduced mobile viewport', async () => {
+        player.isPlaying = true;
+        bounds = { ...bounds, top: 420, bottom: 450 };
+        vi.stubGlobal('visualViewport', { offsetTop: 20, height: 600 });
+        const playerElement = document.createElement('aside');
+        playerElement.dataset.articlePlayer = '';
+        playerElement.getBoundingClientRect = () => ({ ...bounds, top: 500, bottom: 620 });
+        document.body.append(playerElement);
+        try {
+            render(<Reader />);
+            await ready();
+            const request = scrollBy.mock.calls[0][0];
+            expect(request.behavior).toBe('auto');
+            const wordTopAfterScroll = bounds.top - request.top;
+            expect(wordTopAfterScroll).toBeGreaterThan(52);
+            expect(wordTopAfterScroll + bounds.height).toBeLessThan(500);
+        } finally { playerElement.remove(); }
+    });
+
+    it('follows smoothly without restarting each frame and stops when tracking is off or paused', async () => {
+        player.isPlaying = true;
+        bounds = { ...bounds, top: 700, bottom: 730 };
+        vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+        const view = render(<Reader />);
+        await ready();
+        expect(scrollBy).toHaveBeenCalledWith({ top: expect.any(Number), behavior: 'smooth' });
+        clock += 16;
+        player.currentTime = .3;
+        view.rerender(<Reader />);
+        expect(scrollBy).toHaveBeenCalledOnce();
+        clock += 600;
+        player.trackingEnabled = false;
+        view.rerender(<Reader />);
+        expect(scrollBy).toHaveBeenCalledOnce();
+        player.trackingEnabled = true;
+        player.isPlaying = false;
+        view.rerender(<Reader />);
+        expect(scrollBy).toHaveBeenCalledOnce();
+        player.isPlaying = true;
+        view.rerender(<Reader />);
+        expect(scrollBy).toHaveBeenCalledTimes(2);
     });
 });

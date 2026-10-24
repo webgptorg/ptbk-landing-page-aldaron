@@ -30,8 +30,9 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
     const dom = useRef<TrackingDom | null>(null);
     const highlightedWords = useRef<HTMLElement[]>([]);
     const activeWord = useRef<HTMLElement | null>(null);
-    const following = useRef(true);
+    const manualScrollActive = useRef(false);
     const userIntentUntil = useRef(0);
+    const lastScrollAt = useRef(-Infinity);
     const active = track?.id === articleId && track.kind === 'article' && trackingEnabled;
     const sentences = useMemo(() => getArticleTimedSentences(timings?.words ?? []), [timings]);
 
@@ -60,7 +61,9 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
         const starts = getArticleWordSeekTimes(timings.words);
         // A stale alignment is unavailable; do not seek to unrelated or missing visual words.
         dom.current = { words, starts };
-        following.current = true;
+        manualScrollActive.current = false;
+        userIntentUntil.current = 0;
+        lastScrollAt.current = -Infinity;
         container.dataset.tracking = 'true';
         const focusableBlocks: Array<{ element: HTMLElement; tabIndex: string | null; shortcut: string | null }> = [];
         for (const element of Array.from(container.querySelectorAll<HTMLElement>('p, li, h1, h2, h3, h4, h5, h6, pre'))) {
@@ -88,36 +91,28 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
             const start = id ? starts.get(id) : undefined;
             if (start !== undefined) { event.preventDefault(); seekTo(start); }
         };
-        const hasActiveInViewport = () => {
-            if (!activeWord.current) return false;
-            const bounds = activeWord.current.getBoundingClientRect();
-            return bounds.bottom > 90 && bounds.top < window.innerHeight - 150;
-        };
+        // Give touch/wheel/scrollbar gestures room to finish, without silently switching off the toggle.
         const markUserIntent = () => { userIntentUntil.current = performance.now() + 800; };
-        let draggingScrollbar = false;
         const onPointerDown = (event: PointerEvent) => {
             // The native gutter is outside documentElement.clientWidth. A held drag remains intentional
             // even when it takes longer than wheel/touch momentum; ordinary content clicks do not suspend follow.
             const contentWidth = document.documentElement.clientWidth;
             if (contentWidth > 0 && window.innerWidth > contentWidth && event.clientX >= contentWidth) {
-                draggingScrollbar = true;
+                manualScrollActive.current = true;
                 markUserIntent();
             }
         };
-        const onPointerMove = () => { if (draggingScrollbar) markUserIntent(); };
-        const onPointerUp = () => { if (draggingScrollbar) { markUserIntent(); draggingScrollbar = false; } };
+        const onPointerMove = () => { if (manualScrollActive.current) markUserIntent(); };
+        const onPointerUp = () => { if (manualScrollActive.current) { markUserIntent(); manualScrollActive.current = false; } };
+        const onTouchMove = () => { manualScrollActive.current = true; markUserIntent(); };
         const markKeyboardIntent = (event: KeyboardEvent) => {
             const target = getSeekTarget(event.target);
             if (target?.closest('input,textarea,select,[contenteditable="true"]')) return;
             if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) markUserIntent();
         };
-        let scrollFrame = 0;
         const onScroll = () => {
-            if ((!draggingScrollbar && performance.now() > userIntentUntil.current) || scrollFrame) return;
-            scrollFrame = window.requestAnimationFrame(() => {
-                scrollFrame = 0;
-                following.current = hasActiveInViewport();
-            });
+            // Include touch momentum, but never mistake our own smooth scroll for a manual gesture.
+            if (manualScrollActive.current || performance.now() < userIntentUntil.current) markUserIntent();
         };
         container.addEventListener('click', onClick);
         container.addEventListener('keydown', onKeyDown);
@@ -126,7 +121,9 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
         window.addEventListener('pointerup', onPointerUp, { passive: true });
         window.addEventListener('pointercancel', onPointerUp, { passive: true });
         window.addEventListener('wheel', markUserIntent, { passive: true });
-        window.addEventListener('touchmove', markUserIntent, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: true });
+        window.addEventListener('touchend', onPointerUp, { passive: true });
+        window.addEventListener('touchcancel', onPointerUp, { passive: true });
         window.addEventListener('keydown', markKeyboardIntent);
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => {
@@ -148,10 +145,11 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
             window.removeEventListener('pointerup', onPointerUp);
             window.removeEventListener('pointercancel', onPointerUp);
             window.removeEventListener('wheel', markUserIntent);
-            window.removeEventListener('touchmove', markUserIntent);
+            window.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchend', onPointerUp);
+            window.removeEventListener('touchcancel', onPointerUp);
             window.removeEventListener('keydown', markKeyboardIntent);
             window.removeEventListener('scroll', onScroll);
-            window.cancelAnimationFrame(scrollFrame);
         };
     }, [active, timings, seekTo]);
 
@@ -172,10 +170,21 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
             nextSentence.forEach((element) => element.setAttribute('data-active-sentence', 'true'));
             highlightedWords.current = nextSentence;
         }
-        if (!nextWord || !following.current || !isPlaying || performance.now() < userIntentUntil.current) return;
+        const now = performance.now();
+        if (!nextWord || !isPlaying || manualScrollActive.current || now < userIntentUntil.current || now - lastScrollAt.current < 500) return;
+        // Mobile browser chrome and the persistent player both reduce the area available for reading.
+        const viewport = window.visualViewport;
+        const viewportTop = viewport?.offsetTop ?? 0;
+        const viewportBottom = viewportTop + (viewport?.height ?? window.innerHeight);
+        const playerTop = document.querySelector('[data-article-player]')?.getBoundingClientRect().top ?? viewportBottom;
+        const top = viewportTop + 32;
+        const bottom = Math.max(top + 40, Math.min(viewportBottom, playerTop) - 24);
+        const height = bottom - top;
         const bounds = nextWord.getBoundingClientRect();
-        if (bounds.top < 110 || bounds.bottom > window.innerHeight - 180) {
-            nextWord.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        if (bounds.top < top + height * .2 || bounds.bottom > top + height * .7) {
+            // Throttle smooth requests so the media clock cannot restart the same animation every frame.
+            lastScrollAt.current = now;
+            window.scrollBy({ top: bounds.top - (top + height * .35), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
         }
     }, [active, currentTime, isPlaying, sentences, timings]);
 
