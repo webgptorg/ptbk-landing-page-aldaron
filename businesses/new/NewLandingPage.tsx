@@ -16,7 +16,7 @@ import { InlineContactForm } from './InlineContactForm';
 import b from './brand.module.css';
 
 /** One product story, adapted to people running agendas and partners delivering them. */
-export function NewLandingPage({ partnership = false }: { partnership?: boolean }) {
+export function NewLandingPage({ partnership = false, showTestimonials = true }: { partnership?: boolean; showTestimonials?: boolean }) {
     const { locale, path } = useSiteLocale();
     const en = locale === 'en';
     return <div className={b.brandPage}>
@@ -40,7 +40,7 @@ export function NewLandingPage({ partnership = false }: { partnership?: boolean 
         </section>
         <EconomicsCalculator initialMode={partnership ? 'partner' : 'company'}/>
         {partnership && <PartnerQuestions/>}
-        <BrandTestimonials/>
+        {showTestimonials && <BrandTestimonials/>}
         <section className={b.founders} id="kontakt" aria-labelledby="contact-heading">
             <div className={b.foundersIntro}><h2 id="contact-heading">{en ? 'Contact' : 'Kontakt'}</h2><Link href={path('o-nas')}>{en ? 'Our story' : 'Náš příběh'}<ArrowRight size={16}/></Link></div>
             <Founders compact/>
