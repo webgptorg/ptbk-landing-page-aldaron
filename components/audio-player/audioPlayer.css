@@ -13,7 +13,26 @@
 .article-global-player__completed { font-size:10px; }
 .article-global-player p[role=status] { font-size:12px;color:#9b3426;margin-top:4px; }
 body:has([data-article-player]) { padding-bottom:100px; }
-@media(max-width:600px) { .article-global-player__inner { padding:12px;gap:8px;flex-wrap:wrap; }.article-global-player__skip { display:none!important; }.article-global-player__tracking { order:5;margin-left:52px; }.article-global-player__recording { flex-basis:calc(100% - 104px); } }
+@media(max-width:600px) {
+    .article-global-player__inner {
+        display:grid;
+        grid-template-columns:44px minmax(0,1fr) auto 44px;
+        grid-template-areas:"play title title close" "timeline timeline tracking tracking";
+        padding:10px 12px;
+        gap:6px 8px;
+    }
+    .article-global-player__play { grid-area:play; }
+    .article-global-player__close { grid-area:close;width:44px;height:44px; }
+    .article-global-player__skip { display:none!important; }
+    .article-global-player__recording { display:contents; }
+    .article-global-player__title { grid-area:title; }
+    .article-global-player__timeline { grid-area:timeline;min-width:0;margin:0;gap:6px; }
+    .article-global-player__timeline > span { flex-shrink:0; }
+    .article-global-player__timeline input { flex:1;min-width:0; }
+    .article-global-player__tracking { grid-area:tracking;min-height:44px;padding:10px;white-space:nowrap; }
+    .article-global-player__completed,.article-global-player p[role=status] { grid-column:1 / -1; }
+    body:has([data-article-player]) { padding-bottom:calc(120px + env(safe-area-inset-bottom)); }
+}
 @media(prefers-reduced-motion:reduce) { .article-global-player * { scroll-behavior:auto!important;transition:none!important; } }
 
 .article-global-player[data-appearance=promptbook] { background:rgba(250,252,255,.98);color:#163774;border-color:#d9e3f2; }
