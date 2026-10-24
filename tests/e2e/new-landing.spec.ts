@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 
 const visit = async (page: Page, path: string) => {
     const response = await page.goto(path, {waitUntil:'load'});
@@ -39,7 +39,7 @@ test('localized pages retain public metadata and legacy calculation queries', as
     }
 });
 
-test('home and partnership have three navigable stories and one primary hero enquiry',async({page})=>{
+test('home and partnership share a compact keyboard carousel and ungrouped testimonials',async({page})=>{
     await page.emulateMedia({reducedMotion:'reduce'});
     for (const [path,cta] of [['/cs','Chci Promptbook'],['/cs/partnership','Chci nasazovat klientům']]) {
         await visit(page,path);
@@ -47,37 +47,51 @@ test('home and partnership have three navigable stories and one primary hero enq
         await expect(hero.getByRole('button')).toHaveCount(1);
         await expect(hero.getByRole('button',{name:cta,exact:true})).toBeVisible();
         await expect(hero.getByRole('link',{name:'nebo si nainstalujte engine u sebe'})).toHaveAttribute('href','/cs/open-source');
-        await expect(page.getByRole('tablist',{name:'Vyberte ukázku agendy'})).toHaveCount(0);
-        await expect(page.locator('article[data-story]')).toHaveCount(3);
-        for (const story of ['podcast','relationships','development']) {
-            const article = page.locator(`article[data-story="${story}"]`);
-            const steps = article.getByRole('tab');
+        const carousel = page.getByTestId('brand-carousel');
+        const choices = carousel.getByRole('tab');
+        const article = carousel.locator('article[data-story]');
+        await expect(article).toHaveCount(1);
+        await expect(choices).toHaveCount(3);
+        await choices.first().focus();
+        await page.keyboard.press('ArrowRight');
+        await expect(choices.nth(1)).toBeFocused();
+        await expect(article).toHaveAttribute('data-story','relationships');
+        await page.keyboard.press('End');
+        await expect(choices.last()).toBeFocused();
+        await expect(article).toHaveAttribute('data-story','development');
+        await page.keyboard.press('Home');
+        await expect(choices.first()).toBeFocused();
+        await expect(article).toHaveAttribute('data-story','podcast');
+        for (const [index,story] of ['podcast','relationships','development'].map((story,index)=>[index,story] as const)) {
+            await choices.nth(index).click();
+            await expect(article).toHaveAttribute('data-story',story);
+            await expect(article).toHaveAttribute('data-step','3');
+            const steps = article.getByRole('group',{name:'Kroky ukázky'}).getByRole('button');
             await expect(steps).toHaveCount(4);
-            await expect(article).toHaveAttribute('data-scroll','false');
+            await steps.first().click();
+            await expect(article).toHaveAttribute('data-step','0');
+            await steps.last().click();
             await expect(article).toHaveAttribute('data-step','3');
-            await steps.last().focus();
-            await page.keyboard.press('Home');
-            await expect(steps.first()).toBeFocused();
-            await expect(steps.first()).toHaveAttribute('aria-selected','true');
-            await page.keyboard.press('ArrowRight');
-            await expect(article).toHaveAttribute('data-step','1');
-            await page.keyboard.press('End');
-            await expect(steps.last()).toBeFocused();
-            await expect(article).toHaveAttribute('data-step','3');
-            await expect(article.getByRole('tabpanel')).toBeVisible();
+            await expect(article).toBeVisible();
         }
-        await expect(page.getByRole('heading',{name:'Důvěra vzniká při práci.',exact:true})).toBeVisible();
-        await expect(page.getByRole('heading',{name:'Zkušenosti se spoluprací s Pavolem',exact:true})).toBeVisible();
+        await carousel.getByRole('button',{name:'Další ukázka',exact:true}).click();
+        await expect(article).toHaveAttribute('data-story','podcast');
+        await carousel.getByRole('button',{name:'Předchozí ukázka',exact:true}).click();
+        await expect(article).toHaveAttribute('data-story','development');
+        expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
+        await expect(page.getByRole('heading',{name:'Zkušenosti se spoluprací s Pavolem',exact:true})).toHaveCount(0);
         await expect(page.getByText('Promptbook nás od sebe neodstřihl. Naopak. Konečně máme čas řešit opravdovou práci, za kterou jsme placeni.',{exact:true})).toBeVisible();
         for (const name of ['Tomáš Studeník','Jan Šedo','Max Kozlov','Bob Kartous','Tereza Texlová']) await expect(page.locator('figcaption').getByText(name,{exact:true})).toBeVisible();
         await expect(page.getByRole('img',{name:'CzechInvest — Technologická inkubace',exact:true})).toBeVisible();
-        expect(await page.locator('main').innerText()).not.toMatch(/Praha\s*13/);
+        const text = await page.locator('main').innerText();
+        expect(text).not.toMatch(/Praha\s*13/);
+        for (const removed of ['Agenda, která pokračuje','O tisíc připomínek méně','Všechno pro její provoz','Za Promptbookem stojíme oba','Kterou agendu předáte jako první','Přepočet při']) expect(text).not.toContain(removed);
     }
     for(const [name,role] of [['Jiří Jahn','obchod'],['Pavol Hejný','technologie']]){
         await expect(page.getByText(`Spoluzakladatel · ${role}`,{exact:true})).toBeVisible();
         await expect(page.getByRole('img',{name,exact:true})).toBeVisible();
     }
-    await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
+    for (const email of ['jiri@ptbk.io','pavol@ptbk.io']) await expect(page.locator(`a[href="mailto:${email}"]`).first()).toBeVisible();
     await expect(page.getByText('Datová schránka: hzuu4yn',{exact:true})).toBeVisible();
     const text=await page.locator('main').innerText();
     for(const forbidden of ['Napíšete knihu','MangoWeb','Současný web','AI zaměstnanci pro vás','Instance je samostatné'])expect(text).not.toContain(forbidden);
@@ -108,26 +122,24 @@ test('app location and engine location are independent and the engine continues 
     await expect(models.getByRole('button',{name:'Lokální model',exact:true})).toHaveAttribute('aria-pressed','true');
 });
 
-test('desktop stories follow native scrolling and let readers pause on a chosen step',async({page})=>{
+test('desktop scene moves with the page instead of pinning or consuming the scroll',async({page})=>{
     await page.setViewportSize({width:1440,height:900});
     await page.emulateMedia({reducedMotion:'no-preference'});
     await visit(page,'/cs');
-    const story=page.locator('article[data-story="podcast"]');
-    await expect(story).toHaveAttribute('data-scroll','true');
-    const scrollToProgress=async(progress:number)=>story.evaluate((element,progress)=>{
-        const rect=element.getBoundingClientRect();
-        const travel=rect.height-Math.min(window.innerHeight-96,720);
-        window.scrollTo({top:window.scrollY+rect.top-104+travel*progress,behavior:'instant'});
-    },progress);
-    await scrollToProgress(0.4);
-    await expect(story).toHaveAttribute('data-step','1');
-    await scrollToProgress(0.9);
-    await expect(story).toHaveAttribute('data-step','3');
-    await story.getByRole('tab',{name:'Nový díl',exact:true}).click();
-    await scrollToProgress(0.4);
+    const carousel = page.getByTestId('brand-carousel');
+    const story=carousel.locator('article[data-story="podcast"]');
+    await carousel.scrollIntoViewIfNeeded();
+    expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
+    const before = await carousel.evaluate(element=>({top:element.getBoundingClientRect().top,scroll:window.scrollY}));
+    await page.mouse.wheel(0,280);
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(before.scroll+200);
+    const after = await carousel.evaluate(element=>({top:element.getBoundingClientRect().top,scroll:window.scrollY}));
+    // A native-flow panel moves by the same distance as the document, rather than remaining pinned.
+    expect(Math.abs((before.top-after.top)-(after.scroll-before.scroll))).toBeLessThan(3);
+    expect(await carousel.evaluate(element=>[element,...Array.from(element.querySelectorAll('*'))].some(node=>['sticky','fixed'].includes(getComputedStyle(node).position)))).toBe(false);
+    await story.getByRole('button',{name:'Nový díl',exact:true}).click();
+    await page.mouse.wheel(0,120);
     await expect(story).toHaveAttribute('data-step','0');
-    await story.getByRole('button',{name:'Pokračovat scrollováním',exact:true}).click();
-    await expect(story).toHaveAttribute('data-step','1');
 });
 
 test('product interest preserves failed drafts and saves one nonbinding CRM enquiry',async({page})=>{
@@ -228,10 +240,10 @@ test('PDF requires accepted contact and retains failed form entries',async({page
     await page.route('**/api/waitlist',async route=>{writes++;bodies.push(route.request().postDataJSON());await route.fulfill({status:writes===1?503:200,contentType:'application/json',body:writes===1?'{"error":"Unavailable"}':'{"success":true}'});});
     await visit(page, '/cs');await page.getByRole('button',{name:'Stáhnout PDF výpočet',exact:true}).click();
     await expect(page.getByRole('dialog')).toBeVisible();expect(downloads).toBe(0);
-    await page.getByLabel('Váš e-mail',{exact:true}).fill('calculator-test@example.com');
+    await page.getByRole('dialog').getByLabel('Váš e-mail',{exact:true}).fill('calculator-test@example.com');
     await page.getByRole('button',{name:'Uložit e-mail a stáhnout PDF',exact:true}).click();
     await expect(page.getByRole('alert')).toBeVisible();expect(downloads).toBe(0);
-    await expect(page.getByLabel('Váš e-mail',{exact:true})).toHaveValue('calculator-test@example.com');
+    await expect(page.getByRole('dialog').getByLabel('Váš e-mail',{exact:true})).toHaveValue('calculator-test@example.com');
     const pending=page.waitForEvent('download');await page.getByRole('button',{name:'Uložit e-mail a stáhnout PDF',exact:true}).click();
     await (await pending).saveAs('/tmp/ptbk-calculation-company.pdf');
     const data=await readFile('/tmp/ptbk-calculation-company.pdf');expect(data.subarray(0,5).toString()).toBe('%PDF-');expect(data.length).toBeGreaterThan(10000);
@@ -282,7 +294,106 @@ test('mobile pages, keyboard tabs and reduced motion remain usable',async({page}
     await expect(page.getByRole('tab',{name:'Windows EXE',exact:true})).toHaveAttribute('aria-selected','true');
     await expect(page.getByRole('link',{name:'Choose a Windows EXE',exact:true})).toHaveAttribute('href','https://github.com/webgptorg/promptbook/releases');
     await visit(page, '/cs');
-    await expect(page.locator('article[data-story][data-step="3"][data-scroll="false"]')).toHaveCount(3);
+    await expect(page.getByTestId('brand-carousel').locator('article[data-story][data-step="3"]')).toHaveCount(1);
     await page.getByRole('tab',{name:'Nasazuji klientům',exact:true}).focus();await page.keyboard.press('Home');
     await expect(page.getByRole('tab',{name:'Pro mou firmu',exact:true})).toHaveAttribute('aria-selected','true');
+});
+
+test('wordmark, pricing controls and mirrored founder cards fit desktop, tablet and phone',async({page})=>{
+    await page.emulateMedia({reducedMotion:'reduce'});
+    for (const width of [1440,768,375]) {
+        await page.setViewportSize({width,height:900});
+        for (const path of ['/cs','/en/partnership']) {
+            await visit(page,path);
+            expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),`${path} at ${width}px`).toBe(true);
+            const marks = page.locator('header a,footer a').filter({has:page.locator('img[src*="promptbook-logo"]')});
+            await expect(marks).toHaveCount(2);
+            for (const mark of await marks.all()) {
+                await expect(mark).toHaveText('promptbook');
+                const colors=await mark.locator('span>span').evaluateAll(parts=>parts.map(part=>getComputedStyle(part).color));
+                expect(colors).toHaveLength(2);
+                expect(colors[0]).not.toBe(colors[1]);
+            }
+            const heading=await page.getByTestId('brand-hero').getByRole('heading',{level:1}).innerText();
+            expect(heading).not.toMatch(/\.(?:\s*\n|$)/);
+            const reset=page.getByRole('button',{name:path==='/cs'?'Obnovit příklad':'Reset example',exact:true});
+            await expect(reset).toBeVisible();
+            const geometry=await reset.evaluate(button=>{
+                const icon=button.querySelector('svg')!.getBoundingClientRect();
+                const label=button.querySelector('span')!;
+                const text=label.getBoundingClientRect();
+                const range=document.createRange();range.selectNodeContents(label);
+                return {centerDiff:Math.abs(icon.y+icon.height/2-text.y-text.height/2),lines:range.getClientRects().length,button:button.getBoundingClientRect().width,content:button.scrollWidth};
+            });
+            expect(geometry.centerDiff).toBeLessThan(3);
+            expect(geometry.lines).toBe(1);
+            expect(geometry.content).toBeLessThanOrEqual(Math.ceil(geometry.button));
+            const founders=page.getByTestId('founder-card');
+            for (const image of await founders.getByRole('img').all()) {
+                await image.scrollIntoViewIfNeeded();
+                await expect.poll(()=>image.evaluate(element=>(element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+            }
+            await page.evaluate(()=>{ if(document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
+            await mkdir('/tmp/ptbk-qa',{recursive:true});
+            const capture=`/tmp/ptbk-qa/${width}-${path==='/cs'?'home-cs':'partner-en'}`;
+            const carousel=page.getByTestId('brand-carousel');
+            for (const [index,name] of ['podcast','crm','development'].map((name,index)=>[index,name] as const)) {
+                await carousel.getByRole('tab').nth(index).click();
+                await carousel.locator('[data-story-step="3"]').click();
+                await carousel.screenshot({path: `${capture}-${name}.png`});
+            }
+            await carousel.getByRole('tab').first().click();
+            await carousel.locator('[data-story-step="3"]').click();
+            await carousel.screenshot({path: `${capture}-carousel.png`});
+            await page.evaluate(()=>{ if(document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
+            await page.locator('#your-ai').screenshot({path: `${capture}-architecture.png`,style:'header[class*=header],a[href="#obsah"]{visibility:hidden}'});
+            await page.locator('#kontakt').screenshot({path: `${capture}-contacts.png`});
+            await page.screenshot({path: `${capture}-full.png`,fullPage:true});
+            await expect(founders).toHaveCount(2);
+            for (const [index,card] of (await founders.all()).map((card,index)=>[index,card] as const)) {
+                const positions=await card.evaluate(element=>{
+                    const card=element.getBoundingClientRect();
+                    const portrait=element.querySelector('img')!.getBoundingClientRect();
+                    const name=element.querySelector('h3')!.getBoundingClientRect();
+                    return {bottom:Math.abs(card.bottom-portrait.bottom),imageX:portrait.x,nameX:name.x};
+                });
+                expect(positions.bottom).toBeLessThan(2);
+                expect(index===0?positions.imageX<positions.nameX:positions.imageX>positions.nameX).toBe(true);
+            }
+        }
+    }
+});
+
+test('inline contact keeps failed drafts and shares the existing CRM without replacing the modal',async({page})=>{
+    let writes=0;const bodies:Record<string,string>[]=[];
+    let release:()=>void=()=>{};
+    const pending=new Promise<void>(resolve=>{release=resolve;});
+    await page.route('**/api/waitlist',async route=>{
+        writes++;bodies.push(route.request().postDataJSON());
+        if(writes===2) await pending;
+        await route.fulfill({status:writes===1?503:200,contentType:'application/json',body:writes===1?'{"error":"Unavailable"}':'{"success":true}'});
+    });
+    await visit(page,'/cs/partnership');
+    const form=page.getByTestId('inline-contact-form');
+    await expect(form).toBeVisible();
+    await form.getByLabel('Váš e-mail',{exact:true}).fill('inline-test@example.com');
+    await form.getByLabel('Jméno (nepovinné)',{exact:true}).fill('Test Partner');
+    await form.getByRole('textbox',{name:'Zpráva (nepovinné)',exact:true}).fill('Potřebuji nasadit Promptbook klientům.');
+    await form.getByRole('button',{name:'Odeslat zprávu',exact:true}).click();
+    await expect(form.getByRole('alert')).toBeVisible();
+    await expect(form.getByRole('textbox',{name:'Zpráva (nepovinné)',exact:true})).toHaveValue('Potřebuji nasadit Promptbook klientům.');
+    await form.getByRole('button',{name:'Odeslat zprávu',exact:true}).click();
+    await expect(form.getByRole('button',{name:'Odesílám…',exact:true})).toBeDisabled();
+    await expect(form.getByLabel('Váš e-mail',{exact:true})).toBeDisabled();
+    await expect(form.getByRole('status')).toHaveCount(0);
+    release();
+    await expect(form.getByRole('status')).toContainText('Děkujeme. Ozveme se vám.');
+    expect(writes).toBe(2);
+    expect(bodies[1].placeName).toBe('new-website-contact');
+    expect(bodies[1].userNote).toContain('Partnerství — kontaktní formulář');
+    expect(bodies[1].userNote).toContain('Potřebuji nasadit Promptbook klientům.');
+    expect(bodies[1].userNote).toContain('Nejde o přihlášení k newsletteru.');
+    await page.getByTestId('brand-hero').getByRole('button',{name:'Chci nasazovat klientům',exact:true}).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('dialog').getByLabel('Váš e-mail',{exact:true})).toHaveValue('');
 });

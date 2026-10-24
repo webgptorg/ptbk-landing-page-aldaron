@@ -2,17 +2,17 @@
 
 ## Kontaktní akce
 
-Všechny marketingové kontaktní CTA pod `/cs` a `/en` otevírají jeden společný modál. Nevedou na `mailto`, nesimulují přihlášení do aplikace, neodesílají e-mail a nevytvářejí objednávku.
+Marketingová kontaktní tlačítka pod `/cs` a `/en` zachovávají společný modál. Hlavní a partnerská stránka navíc obsahují na konci přímo viditelný formulář **Napište nám**. Návštěvník k němu může dojít běžným scrollováním bez otevření pop-upu. Inline formulář modál nenahrazuje; oba používají stejný kontaktní kontrakt. Tlačítka nesimulují přihlášení do aplikace, neodesílají e-mail a nevytvářejí objednávku. Běžné e-mailové a telefonní odkazy u zakladatelů zůstávají samostatnými přímými kontakty.
 
 Používají stávající serverovou cestu `/api/waitlist` a existující evidenci Contact v administraci. Nevzniká nová tabulka, duplicitní CRM, soukromý export kontaktů ani změna způsobu ukládání jiných stránek.
 
-Běžná žádost: povinný validní e-mail, nepovinné jméno a zpráva. Kontext tlačítka se ukládá jako téma, například Start, Business, partnerství, konkrétní agenda nebo Pavol/technologie či Jiří/obchod. Zachová se stávající provenance stránky a referrer. Identifikátor místa: `new-website-contact`.
+Běžná žádost v modálu i inline formuláři: povinný validní e-mail, nepovinné jméno a zpráva. Kontext tlačítka nebo stránky se ukládá jako téma, například Start, Business, partnerství, konkrétní agenda nebo Pavol/technologie či Jiří/obchod. Zachová se stávající provenance stránky a referrer. Obě podoby mají stejný identifikátor místa `new-website-contact`. Odesílání zamkne pole a tlačítko, zabrání souběžnému zápisu a při chybě zachová rozepsanou zprávu.
 
 Před odesláním je vidět společné znění o zpracování osobních údajů s odkazem na lokalizovanou stránku `/cs/soukromi` nebo `/en/soukromi` a účelem vyřízení žádosti. Žádný automatický souhlas s newsletterem. Úspěch se zobrazí až po přijetí kontaktního záznamu backendem. Systém tím neslibuje doručený e-mail nebo konkrétní lhůtu odpovědi mimo sjednané SLA.
 
 ## Nezávazný zájem a vlastní instalace
 
-Hlavní a partnerská landing page mají v každém hlavním kontaktním bloku jedno výrazné tlačítko zájmu a pod ním menší textový odkaz na lokalizovanou `/open-source`. Nejsou to dvě rovnocenné akce vedle sebe. Hlavní tlačítko používá téma Promptbooku nebo nasazování klientům; instalační pomoc zůstává běžným tematickým kontaktem.
+Hero hlavní a partnerské landing page má jedno výrazné tlačítko zájmu a pod ním menší textový odkaz na lokalizovanou `/open-source`. Nejsou to dvě rovnocenné akce vedle sebe. Hlavní tlačítko používá téma Promptbooku nebo nasazování klientům; instalační pomoc zůstává běžným tematickým kontaktem. Závěrečnou sloganovou výzvu nahrazuje samotný viditelný formulář, nikoli druhá kopie hero CTA.
 
 Před odesláním je jasné, že jde o nezávazný zájem: tým se ozve k potřebám návštěvníka a následně dá vědět o dostupnosti aplikace. Formulář může nabídnout pomoc s vlastním enginem už nyní. Režim zájmu a jeho účel se zapíší do poznámky existujícího kontaktu. Úspěch po potvrzení backendem říká, že zájem byl zaznamenán; nesimuluje okamžitý přístup k aplikaci, registraci, odeslaný e-mail ani objednávku. Není to newsletter a nevzniká nový kontaktní systém.
 
@@ -53,4 +53,4 @@ Parser přijímá pouze allowlist polí. Nikdy nemění obchodní konstantu 20 %
 
 ## Přístupnost
 
-Modál má název, popis, viditelné labely, validaci, stav práce a chyby. Fokus zůstává uvnitř modálu, Escape zavírá při neprobíhajícím požadavku a po zavření se vrací na původní spouštěč. Úspěch a chyba se nesdělují pouze barvou. Tlačítko pro PDF má stejné chování v obou velikostech kalkulačky.
+Inline formulář i modál mají srozumitelný nadpis, viditelné labely, validaci, stav práce a přístupné oznámení úspěchu nebo chyby. Fokus zůstává uvnitř modálu, Escape zavírá při neprobíhajícím požadavku a po zavření se vrací na původní spouštěč. Úspěch a chyba se nesdělují pouze barvou. Tlačítko pro PDF má stejné chování v obou velikostech kalkulačky.

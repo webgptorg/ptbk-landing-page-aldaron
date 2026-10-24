@@ -1,0 +1,188 @@
+.pricing {
+    max-width: 1020px;
+    margin-inline: auto;
+}
+
+.plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    align-items: stretch;
+}
+
+.plan {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: clamp(26px, 3.7vw, 44px);
+    border: 1px solid #d8e0ec;
+    border-radius: 24px;
+    background: #fff;
+}
+
+.business {
+    border-color: #9baed0;
+    background: linear-gradient(145deg, #f4f7fd 0%, #fff 76%);
+    box-shadow: 0 16px 48px -35px #1d367b70;
+}
+
+.planHeading {
+    min-height: 94px;
+}
+
+.planHeading h3 {
+    margin: 0 0 12px;
+    color: #151e2d;
+    font-size: 29px;
+    font-weight: 550;
+    letter-spacing: -.035em;
+}
+
+.plan .planHeading p {
+    max-width: 290px;
+    margin: 0;
+    color: #637086;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.priceBlock {
+    display: grid;
+    gap: 8px;
+    margin: 30px 0;
+}
+
+.amount {
+    color: #172c58;
+    font-family: var(--font-outfit), sans-serif;
+    font-size: clamp(40px, 4.5vw, 59px);
+    font-weight: 500;
+    letter-spacing: -.055em;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.period {
+    min-height: 40px;
+    color: #64718a;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.plan .action {
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 50px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.plan .action svg {
+    flex-shrink: 0;
+}
+
+.features {
+    display: grid;
+    gap: 17px;
+    margin: 30px 0 25px;
+    padding: 25px 0 0;
+    border-top: 1px solid #dfe6f0;
+    list-style: none;
+}
+
+.features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #35435c;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.features svg,
+.dash {
+    flex: 0 0 17px;
+    width: 17px;
+    margin-top: 2px;
+    color: #31518c;
+}
+
+.features .excluded,
+.excluded .dash {
+    color: #6f7a8d;
+}
+
+.dash {
+    text-align: center;
+    line-height: 17px;
+}
+
+.plan .planNote {
+    margin: auto 0 0;
+    color: #748096;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.terms {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px 20px;
+    margin-top: 21px;
+}
+
+.terms p {
+    margin: 0;
+    color: #69768a;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.terms a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #243f77;
+    font-size: 12px;
+    min-height: 32px;
+}
+
+.terms a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+    .plans {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .plan {
+        padding: 28px;
+    }
+
+    .planHeading {
+        min-height: 0;
+    }
+
+    .priceBlock {
+        margin: 24px 0;
+    }
+
+    .amount {
+        font-size: 49px;
+    }
+
+    .period {
+        min-height: 0;
+    }
+
+    .features {
+        margin-top: 25px;
+        gap: 14px;
+    }
+}

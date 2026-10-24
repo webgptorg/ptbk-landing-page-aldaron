@@ -1,106 +1,28 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { ArrowDown, ArrowRight, AudioLines, Check, CheckCheck, ChevronRight, CircleCheck, Code2, GitCommitHorizontal, Headphones, Mail, MessageCircle, Moon, Play, Search, Send, ShieldCheck, Sparkles, Sun, Users, Youtube } from 'lucide-react';
+import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { ArrowLeft, ArrowRight, AudioLines, Check, CheckCheck, ChevronRight, CircleCheck, Code2, GitCommitHorizontal, Headphones, Mail, MessageCircle, Moon, Play, Search, Send, ShieldCheck, Sparkles, Sun, Users, Youtube } from 'lucide-react';
 import { useSiteLocale } from './LocaleProvider';
 import s from './brand-stories.module.css';
+import { useLocalSceneMotion } from './useLocalSceneMotion';
 
-/** Author-owned, fictional narratives illustrating work within configured permissions. */
+/** Short scenario labels keep the surrounding UI quieter than the work itself. */
 const stories = {
     cs: [
-        { id: 'podcast', number: '01', eyebrow: 'Obsah, který nezůstane v šuplíku', title: 'Díl je venku.\nA příběh pokračuje.', description: 'Vydáte AI ta Krajta. Vaše agenda si díl poslechne, najde to podstatné a postará se, aby se dostal k lidem.', steps: ['Nový díl', 'Porozumění', 'Vlastní texty', 'Publikováno'], captions: ['Nový díl odstartuje práci. Bez dalšího zadání.', 'Agent zpracuje obsah, souvislosti i zmíněné lidi.', 'Každý kanál dostane svůj text a správný kontext.', 'YouTube, osobní sítě i skupiny. Podle vašich pravidel.'], outcome: 'Vy tvoříte. Propagace má svou agendu.' },
-        { id: 'relationships', number: '02', eyebrow: 'Správný důvod ozvat se', title: 'Vztah pokračuje.\nI mezi schůzkami.', description: 'Nová pobočka, minulý rozhovor a dobrá příležitost navázat. Vaše agenda spojí souvislosti a napíše osobně.', steps: ['Příležitost', 'Souvislosti', 'Osobní zpráva', 'Další krok'], captions: ['V CRM je kontakt. Nová událost mu dá aktuální význam.', 'Agenda se vrátí k tomu, co jste spolu skutečně řešili.', 'Konkrétní e-mail naváže na rozhovor, ne na šablonu.', 'Odeslání i následná péče se řídí vaším mandátem.'], outcome: 'Méně zapomenutých kontaktů. Více návaznosti.' },
-        { id: 'development', number: '03', eyebrow: 'Klidnější ráno vývojáře', title: 'Večer přišel problém.\nRáno už řešení.', description: 'Hlášení dorazí, když máte jiný program. Agent najde příčinu, opraví kód, ověří změnu a podle pravidel ji nasadí.', steps: ['Hlášení', 'Oprava', 'Ověření', 'Dobré ráno'], captions: ['22:14. Přichází zpráva o nefunkčním formuláři.', 'Agent dohledá příčinu a připraví konkrétní změnu.', 'Testy ověří opravu. Historie zachová její kontext.', '07:30. Otevřete zprávu: opraveno, ověřeno, nasazeno.'], outcome: 'Práce pokračovala. Vy jste mohli vypnout.' },
+        { id: 'podcast', label: 'Podcast', title: 'Od nového dílu k publikovaným příspěvkům', steps: ['Nový díl', 'Souvislosti', 'Příspěvky', 'Publikováno'], Icon: Headphones },
+        { id: 'relationships', label: 'CRM', title: 'Od nové příležitosti k osobnímu oslovení', steps: ['Příležitost', 'Kontext', 'E-mail', 'Další krok'], Icon: Users },
+        { id: 'development', label: 'Vývoj', title: 'Od večerního hlášení k rannímu řešení', steps: ['Hlášení', 'Oprava', 'Testy', 'Vyřešeno'], Icon: Code2 },
     ],
     en: [
-        { id: 'podcast', number: '01', eyebrow: 'Content that reaches people', title: 'The episode is out.\nThe story keeps going.', description: 'You publish AI ta Krajta. Your agenda listens, finds what matters and helps the episode reach its audience.', steps: ['New episode', 'Understanding', 'Original posts', 'Published'], captions: ['A new episode sets work in motion. No new assignment needed.', 'The agent processes the ideas, context and people mentioned.', 'Each channel gets its own message and the right context.', 'YouTube, personal networks and groups. Following your rules.'], outcome: 'You create. Promotion has an agenda of its own.' },
-        { id: 'relationships', number: '02', eyebrow: 'A good reason to reconnect', title: 'Relationships grow.\nBetween meetings, too.', description: 'A new branch, an earlier conversation and a reason to reconnect. Your agenda joins the dots and writes personally.', steps: ['Opportunity', 'Context', 'Personal email', 'Next step'], captions: ['A contact is in your CRM. A new event makes it relevant today.', 'The agenda revisits what you actually discussed together.', 'A specific email continues a conversation, not a template.', 'Sending and follow-up stay within the authority you set.'], outcome: 'Fewer forgotten contacts. More follow-through.' },
-        { id: 'development', number: '03', eyebrow: 'A calmer morning for developers', title: 'An issue at night.\nA solution by morning.', description: 'A report arrives while you are away. An agent finds the cause, fixes the code, checks the change and deploys within your rules.', steps: ['Issue report', 'Fix', 'Verification', 'Good morning'], captions: ['22:14. An email reports a broken contact form.', 'The agent traces the cause and prepares a precise change.', 'Tests verify the fix. History preserves its context.', '07:30. Your inbox says: fixed, checked, deployed.'], outcome: 'The work continued. You could switch off.' },
+        { id: 'podcast', label: 'Podcast', title: 'From a new episode to published posts', steps: ['Episode', 'Context', 'Posts', 'Published'], Icon: Headphones },
+        { id: 'relationships', label: 'CRM', title: 'From a new opportunity to a personal email', steps: ['Opportunity', 'Context', 'Email', 'Follow-up'], Icon: Users },
+        { id: 'development', label: 'Development', title: 'From an evening report to a morning fix', steps: ['Report', 'Fix', 'Tests', 'Resolved'], Icon: Code2 },
     ],
 } as const;
-
-/** A single localized narrative, kept independent of its animation state. */
-type Story = (typeof stories)['cs'][number] | (typeof stories)['en'][number];
-
-/** Four manual steps remain available when motion or viewport constraints disable scroll effects. */
-function StoryFrame({ story, children }: { story: Story; children: (step: number) => ReactNode }) {
-    const { locale } = useSiteLocale();
-    const english = locale === 'en';
-    const id = useId();
-    const root = useRef<HTMLElement>(null);
-    const [step, setStep] = useState(3);
-    const [scrolling, setScrolling] = useState(false);
-    const [manual, setManual] = useState(false);
-
-    useEffect(() => {
-        const allowed = window.matchMedia('(min-width: 1000px) and (min-height: 760px) and (prefers-reduced-motion: no-preference)');
-        const update = () => { setScrolling(allowed.matches); if (!allowed.matches) setStep(3); };
-        update();
-        allowed.addEventListener('change', update);
-        return () => allowed.removeEventListener('change', update);
-    }, []);
-
-    useEffect(() => {
-        if (!scrolling || manual) return;
-        let frame = 0;
-        const measure = () => {
-            frame = 0;
-            const element = root.current;
-            if (!element) return;
-            const rect = element.getBoundingClientRect();
-            const travel = Math.max(1, rect.height - Math.min(window.innerHeight - 96, 720));
-            const progress = Math.min(1, Math.max(0, (104 - rect.top) / travel));
-            element.style.setProperty('--story-progress', String(progress));
-            setStep(Math.min(3, Math.floor(progress * 4)));
-        };
-        const request = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
-        measure();
-        window.addEventListener('scroll', request, { passive: true });
-        window.addEventListener('resize', request);
-        return () => { window.removeEventListener('scroll', request); window.removeEventListener('resize', request); window.cancelAnimationFrame(frame); };
-    }, [manual, scrolling]);
-
-    /** Native tab keyboard behavior; deliberate inspection stops scroll from changing the chosen step. */
-    function selectStep(index: number, keyboard?: KeyboardEvent<HTMLButtonElement>) {
-        setManual(true);
-        setStep(index);
-        if (keyboard) root.current?.querySelector<HTMLButtonElement>(`[data-story-step="${index}"]`)?.focus();
-    }
-
-    /** Arrow keys move between steps without moving the page. */
-    function navigate(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-        const next = event.key === 'ArrowRight' ? (index + 1) % 4 : event.key === 'ArrowLeft' ? (index + 3) % 4 : event.key === 'Home' ? 0 : event.key === 'End' ? 3 : null;
-        if (next !== null) { event.preventDefault(); selectStep(next, event); }
-    }
-
-    return <article ref={root} className={s.story} data-scroll={scrolling} data-story={story.id} data-step={step} id={`story-${story.id}`}>
-        <div className={s.sticky}>
-            <div className={s.storyCopy}>
-                <span className={s.eyebrow}><span>{story.number}</span>{story.eyebrow}</span>
-                <h3>{story.title.split('\n').map((line, index) => <span key={line} className={index ? s.softLine : undefined}>{line}</span>)}</h3>
-                <p>{story.description}</p>
-                <div className={s.caption} aria-live={manual ? 'polite' : 'off'}><span className={s.captionMark} /><p key={step}>{story.captions[step]}</p></div>
-                <p className={s.outcome}>{story.outcome}</p>
-            </div>
-            <div className={s.storyWork}>
-                <div className={s.steps} role="tablist" aria-label={`${english ? 'Steps' : 'Kroky'}: ${story.title.replace('\n', ' ')}`}>
-                    {story.steps.map((label, index) => <button type="button" role="tab" id={`${id}-step-${index}`} aria-controls={`${id}-scene`} aria-selected={step === index} tabIndex={step === index ? 0 : -1} data-story-step={index} key={label} onClick={() => selectStep(index)} onKeyDown={event => navigate(event, index)}><span>{label}</span></button>)}
-                </div>
-                <div id={`${id}-scene`} className={s.scene} role="tabpanel" aria-labelledby={`${id}-step-${step}`} tabIndex={0}>{children(step)}</div>
-                <div className={s.sceneFooter}><span>{english ? 'Illustrative scenario · configured access and rules' : 'Modelová ukázka · nastavené přístupy a pravidla'}</span>{scrolling ? manual ? <button type="button" onClick={() => setManual(false)}>{english ? 'Follow scroll' : 'Pokračovat scrollováním'}<ArrowDown size={13}/></button> : <span className={s.scrollHint}><ArrowDown size={13}/>{english ? 'Scroll to continue' : 'Pokračujte scrollováním'}</span> : <span>{english ? 'Explore the steps above' : 'Projděte si kroky nahoře'}</span>}</div>
-            </div>
-        </div>
-    </article>;
-}
 
 /** Quiet window chrome makes the illustrations recognizable as work surfaces. */
 function WindowBar({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
     return <div className={s.windowBar}><span className={s.windowDots}><i/><i/><i/></span><span>{icon}{children}</span><span className={s.windowCorner}/></div>;
-}
-
-/** An autonomous processing card connects the input with its result. */
-function Processing({ label, complete = false, children }: { label: string; complete?: boolean; children: ReactNode }) {
-    return <div className={s.processing} data-complete={complete}><span className={s.agentMark}>{complete ? <Check size={19}/> : <Sparkles size={19}/>}</span><div><strong>{label}</strong><span>{children}</span></div><div className={s.processingDots} aria-hidden="true"><i/><i/><i/></div></div>;
 }
 
 /** Podcast material unfolds into channel-specific text and published distribution. */
@@ -132,7 +54,6 @@ function PodcastScene({ step }: { step: number }) {
             <p>{en ? '08:24 — what an agent needs to work on its own. What would you hand over first?' : '08:24 — co agent potřebuje, aby mohl pracovat sám. Jakou agendu byste mu svěřili jako první?'}</p>
         </div>
         <div className={s.distribution} data-visible={step === 3} aria-hidden={step !== 3}><span><Youtube size={16}/>YouTube<Check size={13}/></span><span><Users size={16}/>{en ? 'Groups' : 'Skupiny'}<Check size={13}/></span><span><MessageCircle size={16}/>{en ? 'Personal networks' : 'Osobní sítě'}<Check size={13}/></span></div>
-        <div className={s.podcastProcessing}><Processing label={step === 0 ? (en ? 'New episode detected' : 'Nový díl zachycen') : step === 1 ? (en ? 'Finding ideas and connections' : 'Hledá myšlenky a souvislosti') : step === 2 ? (en ? 'Writing for each audience' : 'Píše pro každé publikum') : (en ? 'Promotion taken care of' : 'Propagace vyřízena')} complete={step === 3}>{step === 3 ? (en ? 'The agenda continues with the next episode.' : 'Agenda pokračuje s dalším dílem.') : (en ? 'Your voice. Your publishing rules.' : 'Váš hlas. Vaše publikační pravidla.')}</Processing></div>
     </div>;
 }
 
@@ -160,7 +81,6 @@ function RelationshipScene({ step }: { step: number }) {
             <div className={s.emailBottom}><span className={s.sendPill}>{step === 3 ? <CheckCheck size={15}/> : <Send size={15}/>} {step === 3 ? (en ? 'Sent within your rules' : 'Odesláno podle pravidel') : (en ? 'Ready in your voice' : 'Připraveno vaším hlasem')}</span><span className={s.emailAccount}>P</span></div>
         </div>
         <div className={s.followup} data-visible={step === 3} aria-hidden={step !== 3}><CircleCheck size={19}/><div><strong>{en ? 'The next step is in your CRM' : 'Další krok je v CRM'}</strong><span>{en ? 'Conversation saved · follow-up scheduled' : 'Komunikace uložena · návaznost naplánována'}</span></div></div>
-        <div className={s.crmProcessing}><Processing label={step === 0 ? (en ? 'A reason to reconnect' : 'Důvod znovu se ozvat') : step === 1 ? (en ? 'Connecting the context' : 'Spojuje souvislosti') : step === 2 ? (en ? 'A conversation, continued' : 'Pokračování rozhovoru') : (en ? 'Relationship kept moving' : 'Vztah se posunul dál')} complete={step === 3}>{en ? 'A specific person. A specific reason.' : 'Konkrétní člověk. Konkrétní důvod.'}</Processing></div>
     </div>;
 }
 
@@ -182,18 +102,55 @@ function DevelopmentScene({ step }: { step: number }) {
         </div>
         <div className={`${s.surface} ${s.testRun}`} data-visible={step === 2} aria-hidden={step !== 2}><span className={s.documentEyebrow}><ShieldCheck size={16}/>{en ? 'Verification' : 'Ověření'}</span><h4>{en ? 'The fix holds up.' : 'Oprava obstála.'}</h4>{[en ? 'Input validation' : 'Validace vstupu', en ? 'Form submission' : 'Odeslání formuláře', en ? 'Production build' : 'Produkční build'].map(label=><div key={label}><Check size={15}/><span>{label}</span></div>)}<p>{en ? 'Deployment allowed by project rules' : 'Nasazení povoleno pravidly projektu'}</p></div>
         <div className={s.gitReceipt} data-visible={step === 3} aria-hidden={step !== 3}><GitCommitHorizontal size={17}/><span>{en ? 'One change. A clear history.' : 'Jedna změna. Jasná historie.'}</span></div>
-        <div className={s.developmentProcessing}><Processing label={step === 0 ? (en ? 'The agent picks up the issue' : 'Agent přebírá problém') : step === 1 ? (en ? 'A precise fix' : 'Konkrétní oprava') : step === 2 ? (en ? 'Checks before deployment' : 'Kontrola před nasazením') : (en ? 'Ready before you are' : 'Hotovo dřív, než vstanete')} complete={step === 3}>{en ? 'Your repository. Your release rules.' : 'Váš repozitář. Vaše pravidla nasazování.'}</Processing></div>
     </div>;
 }
 
-/** Three linked work narratives share the same visual language on product and partner pages. */
+/** One compact carousel; native page scrolling only turns the camera and advances the example. */
 export function BrandStories({ partnership = false }: { partnership?: boolean }) {
     const { locale } = useSiteLocale();
     const en = locale === 'en';
-    return <section className={s.stories} aria-labelledby="brand-stories-title">
-        <div className={s.sectionIntro}><div><span className={s.sectionKicker}>{en ? 'An agenda keeps going' : 'Agenda, která pokračuje'}</span><h2 id="brand-stories-title">{partnership ? (en ? 'What you can take care of\nfor your clients.' : 'Co můžete převzít\nza své klienty.') : (en ? 'One responsibility.\nA thousand fewer reminders.' : 'Jedna svěřená agenda.\nO tisíc připomínek méně.')}</h2></div><p>{en ? 'Give your agents a goal, context and rules. They find the next useful step and keep the work moving.' : 'Dejte agentům cíl, kontext a pravidla. Sami hledají další smysluplný krok a posouvají práci dál.'}</p></div>
-        <a className={s.skipStories} href="#after-brand-stories">{en ? 'Skip the stories' : 'Přeskočit příběhy'}<ArrowDown size={14}/></a>
-        {stories[locale].map(story=><StoryFrame key={story.id} story={story}>{step=>story.id === 'podcast' ? <PodcastScene step={step}/> : story.id === 'relationships' ? <RelationshipScene step={step}/> : <DevelopmentScene step={step}/>}</StoryFrame>)}
-        <span id="after-brand-stories" className={s.afterStories}/>
+    const id = useId();
+    const root = useRef<HTMLElement>(null);
+    const [active, setActive] = useState(0);
+    const [manualStep, setManualStep] = useState<number | null>(null);
+    const { step: scrollStep } = useLocalSceneMotion(root);
+    const step = manualStep ?? scrollStep;
+    const story = stories[locale][active];
+
+    function select(index: number, focus = false) {
+        const next = (index + stories[locale].length) % stories[locale].length;
+        setActive(next);
+        setManualStep(null);
+        if (focus) root.current?.querySelector<HTMLButtonElement>(`[data-story-choice="${next}"]`)?.focus();
+    }
+
+    function navigate(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+        const next = event.key === 'ArrowRight' ? index + 1 : event.key === 'ArrowLeft' ? index - 1 : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : null;
+        if (next !== null) { event.preventDefault(); select(next, true); }
+    }
+
+    return <section ref={root} className={s.stories} aria-label={en ? 'Work examples' : 'Ukázky práce'} aria-roledescription={en ? 'carousel' : 'karusel'} data-testid="brand-carousel" data-partnership={partnership}>
+        <div className={s.carouselBar}>
+            <div className={s.storyChoices} role="tablist" aria-label={en ? 'Choose an example' : 'Vyberte ukázku'}>
+                {stories[locale].map(({ id: storyId, label, Icon }, index) => <button key={storyId} type="button" role="tab" id={`${id}-choice-${index}`} aria-selected={active === index} aria-controls={`${id}-panel`} tabIndex={active === index ? 0 : -1} data-story-choice={index} onClick={() => select(index)} onKeyDown={event => navigate(event, index)}><Icon size={18} strokeWidth={1.6}/><span>{label}</span></button>)}
+            </div>
+            <div className={s.carouselArrows}>
+                <button type="button" aria-label={en ? 'Previous example' : 'Předchozí ukázka'} onClick={() => select(active - 1)}><ArrowLeft size={18}/></button>
+                <button type="button" aria-label={en ? 'Next example' : 'Další ukázka'} onClick={() => select(active + 1)}><ArrowRight size={18}/></button>
+            </div>
+        </div>
+        <article id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-choice-${active}`} tabIndex={0} className={s.story} data-story={story.id} data-step={step}>
+            <h2 className={s.sceneTitle}>{story.title}</h2>
+            <div className={s.scene}>
+                <div className={s.sceneFloor} aria-hidden="true"/>
+                <div className={s.camera}>
+                    {story.id === 'podcast' ? <PodcastScene step={step}/> : story.id === 'relationships' ? <RelationshipScene step={step}/> : <DevelopmentScene step={step}/>}
+                </div>
+            </div>
+            <div className={s.timeline} role="group" aria-label={en ? 'Scenario steps' : 'Kroky ukázky'}>
+                {story.steps.map((label, index) => <button key={label} type="button" aria-pressed={step === index} onClick={() => setManualStep(index)} data-story-step={index}><span className={s.timelineDot} data-complete={step >= index}/><span>{label}</span></button>)}
+            </div>
+        </article>
+        <div className={s.sceneFooter}><span>{en ? 'Illustrative scenarios · configured access and rules' : 'Modelové ukázky · nastavené přístupy a pravidla'}</span><span aria-live="polite">{String(active + 1).padStart(2, '0')} / 03</span></div>
     </section>;
 }

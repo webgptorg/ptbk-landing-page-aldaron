@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowUpRight, Check, CheckCheck, Circle, Coffee, FileText, Folder, GitCommitHorizontal, KeyRound, Laptop, LockKeyhole, Moon, Server, ShieldCheck, Smartphone, Sparkles, Sun, TrainFront, Trees, Wifi } from 'lucide-react';
+import { useId, useRef, useState } from 'react';
+import { ArrowUpRight, Check, CheckCheck, Circle, Coffee, FileText, Folder, GitCommitHorizontal, Laptop, LockKeyhole, Moon, Server, ShieldCheck, Sparkles, Sun, TrainFront, Trees, Wifi } from 'lucide-react';
 import { useSiteLocale } from './LocaleProvider';
 import s from './ownership-scene.module.css';
+import { useLocalSceneMotion } from './useLocalSceneMotion';
 
 /** Authored labels for the interactive product architecture, independent of live account data. */
 const COPY = {
@@ -47,54 +48,11 @@ const COPY = {
 /** The component's local text has the same semantic shape in both languages. */
 type SceneCopy = (typeof COPY)[keyof typeof COPY];
 
-/** Clamped passive scroll movement updates only a CSS variable, never page scrolling. */
-function useSceneParallax() {
-    const ref = useRef<HTMLElement>(null);
-    useEffect(() => {
-        const element = ref.current;
-        if (!element) return;
-        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        let frame = 0;
-        let visible = true;
-        const update = () => {
-            frame = 0;
-            if (!visible || motion.matches) return;
-            const bounds = element.getBoundingClientRect();
-            const progress = Math.max(-1, Math.min(1, (window.innerHeight / 2 - (bounds.top + bounds.height / 2)) / window.innerHeight));
-            element.style.setProperty('--ownership-parallax', `${progress * 18}px`);
-        };
-        const schedule = () => {
-            if (!frame && visible && !motion.matches) frame = window.requestAnimationFrame(update);
-        };
-        const changeMotion = () => {
-            if (motion.matches) element.style.setProperty('--ownership-parallax', '0px');
-            else schedule();
-        };
-        const observer = typeof IntersectionObserver === 'undefined' ? undefined : new IntersectionObserver(([entry]) => {
-            visible = entry.isIntersecting;
-            if (visible) schedule();
-        }, { rootMargin: '100px' });
-        observer?.observe(element);
-        window.addEventListener('scroll', schedule, { passive: true });
-        window.addEventListener('resize', schedule, { passive: true });
-        motion.addEventListener('change', changeMotion);
-        schedule();
-        return () => {
-            observer?.disconnect();
-            window.cancelAnimationFrame(frame);
-            window.removeEventListener('scroll', schedule);
-            window.removeEventListener('resize', schedule);
-            motion.removeEventListener('change', changeMotion);
-        };
-    }, []);
-    return ref;
-}
-
 /** A small, recognizable app display. This is an illustration, never account telemetry. */
 function AppDisplay({ copy, asleep }: { copy: SceneCopy; asleep: boolean }) {
     return <div className={`${s.appDisplay} ${asleep ? s.asleep : ''}`}>
         {asleep ? <div className={s.sleepDisplay}><Moon size={28} strokeWidth={1.3} /><span>22:41</span></div> : <>
-            <div className={s.appTop}><span className={s.appMark}>p.</span><span>promptbook.</span><span className={s.tinyAvatar}>J</span></div>
+            <div className={s.appTop}><span className={s.appMark}>p</span><span>prompt<span className={s.wordmarkBlue}>book</span></span><span className={s.tinyAvatar}>J</span></div>
             <div className={s.appGreeting}><small>{copy.workspace}</small><strong>{copy.allGood}</strong></div>
             <div className={s.appAgenda}><span className={s.appAgendaIcon}><Sparkles size={17} /></span><div><b>{copy.agenda}</b><span><i />{copy.engineIdle}</span></div></div>
             <div className={s.appMessage}><CheckCheck size={16} /><p>{copy.answer}</p></div>
@@ -122,7 +80,6 @@ function AppEnvironment({ place, asleep, copy }: { place: number; asleep: boolea
             <AppDisplay copy={copy} asleep={asleep} />
             {place === 0 ? <div className={s.laptopBase} aria-hidden="true"><span /></div> : <div className={s.phoneCamera} aria-hidden="true" />}
         </div>
-        <div className={`${s.endpointKey} ${s.appEndpoint}`}><KeyRound size={13} />{copy.appKey}</div>
     </div>;
 }
 
@@ -150,7 +107,6 @@ function EngineEnvironment({ place, copy }: { place: number; copy: SceneCopy }) 
             <div className={s.workFile}><FileText size={12} /><span>tasks/</span><Check size={12} /></div>
             <div className={s.workStatus}><span className={s.workPulse} />{copy.engineTask}</div>
         </div>
-        <div className={`${s.endpointKey} ${s.engineEndpoint}`}><KeyRound size={13} />{copy.engineKey}</div>
     </div>;
 }
 
@@ -172,42 +128,32 @@ export function OwnershipScene() {
     const [enginePlace, setEnginePlace] = useState(0);
     const [asleep, setAsleep] = useState(false);
     const [localModel, setLocalModel] = useState(false);
-    const sectionRef = useSceneParallax();
+    const sectionRef = useRef<HTMLElement>(null);
+    useLocalSceneMotion(sectionRef);
     const titleId = useId();
     return <section className={s.section} id="your-ai" ref={sectionRef} aria-labelledby={titleId}>
-        <div className={s.heading}>
-            <p className={s.eyebrow}>{copy.eyebrow}</p>
-            <h2 id={titleId}>{copy.title}<br /><span>{copy.titleSoft}</span></h2>
-            <p className={s.intro}>{copy.intro}</p>
-            <p className={s.architectureNote}>{copy.architectureNote}</p>
-        </div>
-        <div className={s.architecture} aria-label={copy.illustration}>
+        <h2 id={titleId} className={s.srOnly}>{copy.app} &amp; {copy.engine}</h2>
+        <div className={s.architecture} aria-label={copy.illustration} data-testid="ownership-scene">
+            <div className={s.sharedFloor} aria-hidden="true"/>
             <div className={s.side}>
-                <div className={s.sideTitle}><span className={s.sideNumber}>01</span><h3>{copy.app}</h3><Smartphone size={19} strokeWidth={1.4} /></div>
+                <div className={s.sideTitle}><h3>{copy.app}</h3></div>
                 <PlaceChoices label={copy.appChoices} choices={copy.appPlaces} active={appPlace} onChange={setAppPlace} icons={[Coffee, Trees, TrainFront]} />
                 <AppEnvironment place={appPlace} asleep={asleep} copy={copy} />
-                <p className={s.locationCaption}>{copy.appDescriptions[appPlace]}</p>
-                <div className={s.appControl}>
-                    <button type="button" onClick={() => setAsleep(value => !value)} aria-pressed={asleep}>{asleep ? <Sun size={16} /> : <Moon size={16} />}{asleep ? copy.wake : copy.sleep}</button>
-                    <span role="status">{asleep ? copy.sleepingHint : copy.awakeHint}</span>
-                </div>
+                <button className={s.powerControl} type="button" onClick={() => setAsleep(value => !value)} aria-pressed={asleep} aria-label={asleep ? copy.wake : copy.sleep} title={asleep ? copy.wake : copy.sleep}>{asleep ? <Sun size={19} /> : <Moon size={19} />}</button>
             </div>
             <div className={`${s.bridge} ${asleep ? s.bridgeSleeping : ''}`}>
-                <span className={s.connectionLabel}>{copy.connection}</span>
                 <div className={s.connectionTrack} aria-hidden="true"><span /><span /><span /></div>
-                <div className={s.relay}><LockKeyhole size={24} strokeWidth={1.25} /><b>{copy.relay}</b><span>•••</span></div>
-                <div className={s.cipher} aria-hidden="true">a7 f2 9c<br />04 b8 e1</div>
-                <span className={s.encrypted}>{copy.ciphertext}</span>
-                <p>{copy.relayNote}</p>
+                <div className={s.relay} title={copy.connection}><LockKeyhole size={25} strokeWidth={1.4} /><b>E2E</b></div>
+                <span className={s.srOnly}>{copy.connection}. {copy.relayNote}</span>
             </div>
             <div className={s.side}>
-                <div className={s.sideTitle}><span className={s.sideNumber}>02</span><h3>{copy.engine}</h3><Server size={19} strokeWidth={1.4} /></div>
+                <div className={s.sideTitle}><h3>{copy.engine}</h3></div>
                 <PlaceChoices label={copy.engineChoices} choices={copy.enginePlaces} active={enginePlace} onChange={setEnginePlace} icons={[Laptop, Server, ShieldCheck]} />
                 <EngineEnvironment place={enginePlace} copy={copy} />
-                <p className={s.locationCaption}>{copy.engineDescriptions[enginePlace]}</p>
-                <div className={s.engineControl}><span className={s.engineRunning}><i />{copy.running}</span><span>{copy.engineHint}</span></div>
+                <span className={s.srOnly} role="status">{copy.running}</span>
             </div>
         </div>
+        <p className={s.architectureNote}>{copy.architectureNote}</p>
         <div className={s.evidence}>
             <article>
                 <div className={s.evidenceIcon}><Folder size={21} strokeWidth={1.4} /></div><h3>{copy.files}</h3><p>{copy.filesText}</p>

@@ -8,7 +8,7 @@ Oba režimy používají stejný model. **Pro mou firmu** porovnává ruční pr
 
 ## Rychlá kalkulačka
 
-Na `/new` výchozí firemní režim; na `/new/partnership` partnerský. Výchozí scénář účetní podklady, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, vlastní světlý povrch, oddělený kontrastní výsledkový blok. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
+Na `/[locale]` výchozí firemní režim; na `/[locale]/partnership` partnerský. Výchozí scénář účetní podklady, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, vlastní světlý povrch, oddělený kontrastní výsledkový blok. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
 
 Viditelné vstupy jsou pouze scénář a nejdůležitější čísla. Firma: objem práce a náklad na člověka za hodinu. Partner: počet aktivních klientů a servis za klienta. Objem/počet klientů lze upravit číslem i posuvníkem. Partnerský podíl je viditelně **pevně 20 %**, bez výběru.
 
@@ -16,9 +16,9 @@ Přínos musí být zřejmý při rychlém skenování: **„Za 12 měsíců mů
 
 Doplňkové metriky: u firmy uvolněné hodiny a provoz bez interní práce; u partnera tržby a náklady obsluhy za období. Stručná poznámka vysvětluje odhad a rozdíl mezi kapacitou/hotovostí nebo tržbami/ziskem. Není zde plný formulář tokenů, vratek, režie, akvizice a implementace.
 
-**Pokročilá kalkulačka** otevře `/new/kalkulacka` se všemi rozpracovanými hodnotami v GET, ne prázdný nový příklad. **Stáhnout PDF výpočet** otevře kontaktní e-mailovou bránu. **Obnovit příklad** vrátí výchozí odhady a scénář, zachová režim.
+**Pokročilá kalkulačka** otevře `/[locale]/kalkulacka` se všemi rozpracovanými hodnotami v GET, ne prázdný nový příklad. **Stáhnout PDF výpočet** otevře kontaktní e-mailovou bránu. **Obnovit příklad** vrátí výchozí odhady a scénář, zachová režim. Ikona a text jsou uvnitř jednoho tlačítka na jednom řádku, bez zalomení či odděleného klikacího prvku i na mobilu.
 
-## Pokročilá kalkulačka `/new/kalkulacka`
+## Pokročilá kalkulačka `/[locale]/kalkulacka`
 
 Přebírá stejné primární ovládání a výsledkovou kartu. K tomu plán a logicky pojmenované rozbalovací skupiny: práce a kontrola; AI a externí služby; server a provoz; nasazení, servis a licence; partnerovy náklady a úhrady. Partner má navíc objem práce jednoho klienta. V každé skupině jsou významy a jednotky vstupů.
 

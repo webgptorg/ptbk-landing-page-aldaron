@@ -1,0 +1,25 @@
+.inlineAction {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    gap: 7px;
+    min-height: 44px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.inlineAction svg {
+    display: block;
+    flex: 0 0 auto;
+}
+
+.inlineAction:focus-visible {
+    outline: 2px solid #31518c;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+.inlineAction:hover {
+    color: #172c58;
+}

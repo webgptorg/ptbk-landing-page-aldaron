@@ -1,18 +1,66 @@
 'use client';
 
-import { useSiteLocale } from './LocaleProvider';
+import { Mail, Phone } from 'lucide-react';
 import Image from 'next/image';
+import { useSiteLocale } from './LocaleProvider';
 import { LeadButton } from './LeadCapture';
-import s from './site.module.css';
+import s from './founders.module.css';
 
-/** Equal cofounder prominence; photos and email addresses are the existing site's public assets. */
+/** Public contacts and original portrait assets from components/team-section.tsx. */
+const founders = [
+    {
+        name: 'Jiří Jahn',
+        role: 'Spoluzakladatel · obchod',
+        image: 'jiri-jahn',
+        email: 'jiri@ptbk.io',
+        phone: '+420 777 090 067',
+        phoneHref: '+420777090067',
+        description: 'Řeší partnerství, obchodní spolupráci a to, aby nasazení dávalo firmě smysl.',
+        action: 'Probrat spolupráci',
+    },
+    {
+        name: 'Pavol Hejný',
+        role: 'Spoluzakladatel · technologie',
+        image: 'pavol-hejny',
+        email: 'pavol@ptbk.io',
+        phone: '+420 777 759 767',
+        phoneHref: '+420777759767',
+        description: 'Staví technologii Promptbooku a řeší architekturu, vývoj a technické nasazení.',
+        action: 'Probrat technologii',
+    },
+] as const;
+
+/** Equal, mirrored cards: both portraits end at the bottom of their card. */
 export function Founders({ compact = false }: { compact?: boolean }) {
-    const { t, locale, path } = useSiteLocale();
+    const { t } = useSiteLocale();
 
-    return <div className={s.founders}>
-        {[{ name: 'Jiří Jahn', role: 'Spoluzakladatel · obchod', image: 'jiri-jahn', email: 'jiri@ptbk.io', description: 'Řeší partnerství, obchodní spolupráci a to, aby nasazení dávalo firmě smysl.', action: 'Probrat spolupráci' },
-          { name: 'Pavol Hejný', role: 'Spoluzakladatel · technologie', image: 'pavol-hejny', email: 'pavol@ptbk.io', description: 'Staví technologii Promptbooku a řeší architekturu, vývoj a technické nasazení.', action: 'Probrat technologii' }].map(person => <article className={s.founder} key={person.name}>
-            <div className={s.founderPortrait}><Image src={`/people/${person.image}-transparent.png`} width={320} height={360} alt={person.name} /></div><div><h3>{t(person.name)}</h3><strong>{t(person.role)}</strong>{!compact && <><p>{t(person.description)}</p><span className={s.founderEmail}>{t(person.email)}</span></>}<LeadButton secondary topic={t(`${person.name} — ${t(person.action)}`)}>{t(person.action)}</LeadButton></div>
-        </article>)}
-    </div>;
+    return (
+        <div className={s.founders}>
+            {founders.map((person, index) => (
+                <article className={`${s.founder} ${index === 1 ? s.reverse : ''}`} key={person.name} data-testid="founder-card">
+                    <div className={s.portrait}>
+                        <Image
+                            src={`/people/${person.image}-transparent.png`}
+                            width={person.image === 'jiri-jahn' ? 669 : 545}
+                            height={person.image === 'jiri-jahn' ? 1080 : 950}
+                            alt={person.name}
+                            sizes="(max-width: 500px) 40vw, (max-width: 900px) 220px, 240px"
+                        />
+                    </div>
+                    <div className={s.content}>
+                        <h3>{person.name}</h3>
+                        <p className={s.role}>{t(person.role)}</p>
+                        {!compact && <p className={s.description}>{t(person.description)}</p>}
+                        <address className={s.contacts}>
+                            <a href={`mailto:${person.email}`}><Mail size={15} aria-hidden="true" />{person.email}</a>
+                            <a href={`tel:${person.phoneHref}`}><Phone size={15} aria-hidden="true" />{person.phone}</a>
+                        </address>
+                        <LeadButton secondary className={s.action} topic={`${person.name} — ${t(person.action)}`}>
+                            {t(person.action)}
+                        </LeadButton>
+                    </div>
+                </article>
+            ))}
+        </div>
+    );
 }

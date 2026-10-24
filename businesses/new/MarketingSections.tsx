@@ -8,6 +8,7 @@ import { licencePrice } from './localization';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 import { sitePath } from './siteConfig';
 import s from './site.module.css';
+import pricing from './pricing.module.css';
 
 export function SecuritySection() {
     const { t, locale, path } = useSiteLocale();
@@ -15,13 +16,70 @@ export function SecuritySection() {
     return <section className={s.security} aria-labelledby="security-title"><div><h2 id="security-title">{t("Vaše data.")}<br /><span className={s.softHeading}>{t("Opravdu vaše.")}</span></h2><p>{t("Agenti a soubory zůstávají na vašem serveru. Spojení s aplikací chrání end-to-end šifrování.")}</p><Link className={s.textLink} href={path('bezpecnost')}>{t("Jak chráníme vaše data ")}<ArrowRight size={18} /></Link></div><div className={s.securityDiagram}><div className={s.securityNode}><Server size={30} /><div><b>{t("Váš server")}</b></div></div><div className={s.encryptedLine}><LockKeyhole size={17} />{t(" End-to-end šifrovaný přenos")}</div><div className={s.securityNode}><Smartphone size={30} /><div><b>{t("Vaše aplikace")}</b></div></div><p className={s.small}>{t("AI si vybíráte sami. Externí model dostává jen vstupy, které mu vaše agenda odešle.")}</p></div></section>;
 }
 
+/** The same two commercial plans are shown on the product, partner and pricing pages. */
 export function PricingCards({ full = false }: { full?: boolean }) {
     const { t, locale, path } = useSiteLocale();
+    const en = locale === 'en';
+    const plans = [
+        {
+            id: 'start' as const,
+            name: 'Start',
+            purpose: en ? 'Try one agenda in real operations' : 'Vyzkoušejte jednu agendu v provozu',
+            period: en ? 'one-off · 30 days' : 'jednorázově · 30 dní',
+            features: [
+                en ? 'One client environment' : 'Jedno klientské prostředí',
+                en ? 'A 30-day production pilot' : 'Produkční pilot na 30 dní',
+                en ? 'No automatic renewal' : 'Bez automatické obnovy',
+            ],
+            support: en ? 'Product support and SLA not included' : 'Bez produktové podpory a SLA',
+            note: en ? 'Available once per end client' : 'Jednou pro koncového klienta',
+            action: t('Začít se Startem'),
+            topic: `${t('Start — produkční pilot')} · ${licencePrice('start', locale)} / ${t('30 dní')}`,
+        },
+        {
+            id: 'business' as const,
+            name: 'Business',
+            purpose: en ? 'Ongoing operations with product support' : 'Průběžný provoz s produktovou podporou',
+            period: en ? 'per month · per client environment' : 'měsíčně · za klientské prostředí',
+            features: [
+                en ? 'One client environment' : 'Jedno klientské prostředí',
+                en ? 'Multiple agents in one environment' : 'Více agentů v jednom prostředí',
+                en ? 'No annual commitment' : 'Bez ročního závazku',
+            ],
+            support: en ? `First substantive response within ${COMMERCIAL_TERMS.responseWorkingHours} working hours` : `První věcná reakce do ${COMMERCIAL_TERMS.responseWorkingHours} pracovních hodin`,
+            note: en ? 'Cancel for the next billing period' : 'Ukončení pro další fakturační období',
+            action: t('Probrat Business'),
+            topic: t('Business — firemní provoz Promptbooku'),
+        },
+    ];
 
-    return <><div className={s.pricingSummary}>
-        <article className={s.priceCard}><h3>{t("Start")}</h3><div className={s.price}>{licencePrice('start', locale)} <span>{t("/ 30 dní jednorázově")}</span></div><p>{t("Vyzkoušejte jednu agendu v reálném provozu.")}</p>{full && <ul>{['Jedno klientské prostředí', 'Bez automatické obnovy', 'Bez produktové podpory a SLA'].map(item => <li key={item}><Check size={16}/>{t(item)}</li>)}</ul>}<LeadButton topic={`${t('Start — produkční pilot')} · ${licencePrice('start',locale)} / ${t('30 dní')}`}>{t("Začít se Startem")}</LeadButton></article>
-        <article className={s.priceCard}><h3>{t("Business")}</h3><div className={s.price}>{licencePrice('business', locale)} <span>{t("/ měsíc za klientské prostředí")}</span></div><p>{t("Průběžný provoz s produktovou podporou.")}</p>{full && <ul>{['Více agentů v jednom prostředí', 'Bez ročního závazku', 'První věcná reakce do 16 pracovních hodin'].map(item => <li key={item}><Check size={16}/>{t(item)}</li>)}</ul>}<LeadButton topic={t("Business — firemní provoz Promptbooku")}>{t("Probrat Business")}</LeadButton></article>
-    </div><p className={s.priceNote}>{t("Bez DPH. AI, server a práce partnera se platí zvlášť. ")}{!full && <Link className={s.textLink} href={path('cenik')}>{t("Celý ceník a podmínky ")}<ArrowRight size={14}/></Link>}</p>{locale === 'cs' && <p className={s.priceNote}>Přepočet nabídky při 22 Kč/USD. Konečné platební podmínky stanoví objednávka.</p>}</>;
+    return <div className={pricing.pricing}>
+        <div className={pricing.plans}>
+            {plans.map(plan => <article key={plan.id} className={`${pricing.plan} ${plan.id === 'business' ? pricing.business : ''}`} data-plan={plan.id}>
+                <div className={pricing.planHeading}>
+                    <h3>{plan.name}</h3>
+                    <p>{plan.purpose}</p>
+                </div>
+                <div className={pricing.priceBlock}>
+                    <strong className={pricing.amount}>{licencePrice(plan.id, locale)}</strong>
+                    <span className={pricing.period}>{plan.period}</span>
+                </div>
+                <LeadButton secondary={plan.id === 'start'} className={pricing.action} topic={plan.topic}>{plan.action}</LeadButton>
+                <ul className={pricing.features}>
+                    {plan.features.map(feature => <li key={feature}><Check size={17} aria-hidden="true"/><span>{feature}</span></li>)}
+                    <li className={plan.id === 'start' ? pricing.excluded : ''}>
+                        {plan.id === 'start' ? <span className={pricing.dash} aria-hidden="true">—</span> : <Check size={17} aria-hidden="true"/>}
+                        <span>{plan.support}</span>
+                    </li>
+                </ul>
+                <p className={pricing.planNote}>{plan.note}</p>
+            </article>)}
+        </div>
+        <div className={pricing.terms}>
+            <p>{en ? 'Excluding VAT. AI, infrastructure and partner services are charged separately.' : 'Bez DPH. AI, infrastruktura a práce partnera se hradí zvlášť.'}</p>
+            {!full && <Link href={path('cenik')}>{en ? 'Full pricing and terms' : 'Celý ceník a podmínky'}<ArrowRight size={15} aria-hidden="true"/></Link>}
+        </div>
+    </div>;
 }
 
 export function AudienceSection() {

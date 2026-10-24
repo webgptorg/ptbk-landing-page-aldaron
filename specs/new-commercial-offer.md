@@ -58,6 +58,6 @@ Pro produkční provoz včetně vlastního hostingu se nabízí Start nebo Busin
 
 Více instancí a nestandardní požadavky vedou k individuální nabídce, nikoli ke třetí kartě s vymyšlenou cenou nebo vyšším SLA. Nepřetržitou podporu nenabízíme. Kontaktem je Jiří Jahn, jiri@ptbk.io.
 
-## Jazykové zobrazení cen — 17. října 2026
+## Jazykové zobrazení cen — 24. října 2026
 
-Na českých stránkách se nabídka prezentuje přepočtená do Kč při 22 Kč/USD: Start 418 Kč, Business 2 200 Kč. Kurz je uvedený, nejde o živé FX ani novou slevu. Anglická verze používá původních 19 / 100 USD. Partnerský příklad je 2 200 → 440 Kč, respektive 100 → 20 USD. Výpočet, zadaný kurz, zaokrouhlení a uložené parametry se nemění; jen zobrazení a editace peněžních vstupů a PDF používají jazykovou měnu. Konečné platební podmínky stanoví objednávka.
+Hlavní, partnerská a cenová stránka používají klasické porovnatelné karty dvou plánů Start a Business. Na českých stránkách se nabídka prezentuje přímo jako Start 418 Kč na 30 dní a Business 2 200 Kč měsíčně za prostředí, bez DPH. Bez poznámky „přepočet při 22 Kč/USD“ a bez výplňkových vysvětlivek o převodu. Anglická verze používá původních 19 / 100 USD. Partnerský příklad je 2 200 → 440 Kč, respektive 100 → 20 USD. Ceny, obsah nabídky, interní převodní konstanta, výpočet, editovatelný modelový kurz, zaokrouhlení a uložené parametry zůstávají beze změny. Kalkulačka a PDF zachovávají podstatné výpočetní předpoklady. Konečné platební podmínky stanoví objednávka.

@@ -1,250 +1,96 @@
 .section {
-    padding: clamp(72px, 9vw, 136px) 0;
+    padding: clamp(48px, 7vw, 96px) 0;
     color: #152041;
 }
 
 .heading {
-    max-width: 780px;
-    margin-bottom: 52px;
-}
-
-.heading h2 {
-    font-size: clamp(34px, 4.6vw, 58px);
+    margin: 0 0 32px !important;
+    font-size: clamp(30px, 4vw, 48px);
     letter-spacing: -.045em;
-    line-height: 1.08;
+    line-height: 1.1;
 }
 
-.university {
+.quotes {
     display: grid;
-    grid-template-columns: .9fr 1.4fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.quote {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    margin: 0;
+    padding: 26px;
+    border: 1px solid #e4e8f0;
+    border-radius: 20px;
+    background: #fafbfe;
+}
+
+.quoteMark {
+    flex-shrink: 0;
+    margin-bottom: 16px;
+    color: #8192bf;
+}
+
+.quote blockquote {
+    margin: 0 0 26px;
+    color: #34415a;
+    font-size: 14px;
+    line-height: 1.8;
+    text-wrap: pretty;
+}
+
+.author {
+    display: flex;
     align-items: center;
-    gap: clamp(36px, 6vw, 88px);
-    padding: clamp(28px, 4.5vw, 58px);
-    border: 1px solid #e3e8f4;
-    border-radius: 28px;
-    background: linear-gradient(130deg, #f7f9ff, #fdfdff 70%);
-    box-shadow: 0 32px 64px -54px #3443744d, inset 0 1px 0 #fff;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.avatar,
+.universityMark {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eaf0fa;
 }
 
 .universityMark {
     display: grid;
     place-items: center;
-    width: 56px;
-    height: 56px;
-    margin-bottom: 25px;
-    border: 1px solid #e2e7f3;
-    border-radius: 17px;
-    background: #fff;
-    box-shadow: 0 7px 15px -9px #23387852, 0 3px 0 #e7ebf5;
-    color: #40558f;
-    transform: rotate(-6deg);
-}
-
-.universityMark svg {
-    width: 29px;
-    height: 29px;
-}
-
-.section .eyebrow {
-    margin: 0 0 10px;
-    color: #5b6784;
-    font-size: 12px;
-    font-weight: 550;
-    letter-spacing: .025em;
-}
-
-.universityIdentity h3 {
-    max-width: 310px;
-    font-size: clamp(23px, 2.8vw, 34px);
-    line-height: 1.17;
-}
-
-.productQuote {
-    margin: 0;
-}
-
-.productQuote blockquote {
-    margin: 0;
-    font-size: clamp(21px, 2.4vw, 29px);
-    font-weight: 450;
-    letter-spacing: -.025em;
-    line-height: 1.52;
-    text-wrap: pretty;
-    quotes: '“' '”';
-}
-
-.productQuote blockquote:lang(cs) {
-    quotes: '„' '“';
-}
-
-.productQuote blockquote::before {
-    content: open-quote;
-}
-
-.productQuote blockquote::after {
-    content: close-quote;
-}
-
-.productQuote figcaption {
-    margin-top: 24px;
-    font-size: 12px;
-    color: #65718a;
-}
-
-.personalHeading {
-    margin: 76px 0 30px;
-}
-
-.personalHeading h3 {
-    font-size: clamp(23px, 3vw, 34px);
-}
-
-.section .personalHeading p {
-    margin-top: 12px;
-    color: #67728a;
-    font-size: 14px;
-}
-
-.quotes {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: clamp(30px, 6vw, 88px);
-}
-
-.quote,
-.featuredQuote {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin: 0;
-    padding: 36px 0 38px;
-    border-top: 1px solid #e3e8f1;
-}
-
-.featuredQuote {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 260px;
-    gap: 0 56px;
-}
-
-.quoteMark {
-    margin-bottom: 19px;
-    color: #8996b8;
-}
-
-.quote blockquote,
-.featuredQuote blockquote {
-    margin: 0 0 28px;
-    font-size: 16px;
-    line-height: 1.85;
-    color: #34415a;
-    text-wrap: pretty;
-}
-
-.featuredQuote blockquote {
-    grid-column: 1;
-    margin-bottom: 0;
-    font-size: 19px;
-    line-height: 1.75;
-    letter-spacing: -.015em;
-}
-
-.author {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    margin-top: auto;
-}
-
-.featuredQuote .author {
-    grid-column: 2;
-    grid-row: 1 / 3;
-    margin: 0;
-    align-self: center;
-}
-
-.avatar {
-    flex-shrink: 0;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #eff2f8;
-    box-shadow: 0 0 0 4px #fff, 0 5px 12px -8px #3d456655;
+    color: #344d87;
 }
 
 .section .authorName {
     margin: 0;
     color: #202c48;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
 .section .authorRole {
-    margin: 5px 0 0;
+    margin: 4px 0 0;
     color: #66728b;
-    font-size: 12px;
-    line-height: 1.55;
+    font-size: 11px;
+    line-height: 1.5;
 }
 
-@media (max-width: 760px) {
-    .heading {
-        margin-bottom: 32px;
-    }
+@media (max-width: 1000px) {
+    .quotes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
-    .university {
-        grid-template-columns: 1fr;
-        gap: 28px;
-        padding: 28px 25px;
-        border-radius: 23px;
-    }
-
-    .universityIdentity h3 {
-        max-width: none;
-    }
-
-    .universityMark {
-        margin-bottom: 20px;
-    }
-
-    .personalHeading {
-        margin-top: 54px;
-    }
-
-    .quotes {
-        grid-template-columns: 1fr;
-    }
-
-    .featuredQuote {
-        display: flex;
-        gap: 0;
-    }
-
-    .featuredQuote blockquote {
-        font-size: 17px;
-        margin-bottom: 28px;
-    }
-
-    .featuredQuote .author {
-        align-self: flex-start;
-    }
-
-    .quote,
-    .featuredQuote {
-        padding: 28px 0 32px;
-    }
+@media (max-width: 600px) {
+    .quotes { grid-template-columns: 1fr; gap: 14px; }
+    .quote { padding: 24px; }
+    .heading { margin-bottom: 24px !important; }
 }
 
 @media (forced-colors: active) {
-    .university,
-    .universityMark {
-        border-color: CanvasText;
-    }
-
-    .quote,
-    .featuredQuote {
-        border-top-color: CanvasText;
-    }
+    .quote { border-color: CanvasText; }
+    .quoteMark, .universityMark { color: CanvasText; }
 }
