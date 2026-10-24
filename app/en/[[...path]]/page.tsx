@@ -24,7 +24,7 @@ const pages: Record<string, [string, string]> = {
     podminky: ['Website terms', 'Terms of use for the Promptbook website operated by AI Web s.r.o.'],
     'open-source': [...OPEN_SOURCE_PAGE_COPY.en],
 };
-type Props = { params: Promise<{ path?: string[] }> };
+type Props = { params: Promise<{ path?: string[] }>; searchParams: Promise<{ testimonials?: string | string[] }> };
 export function generateStaticParams() {
     return [...Object.keys(pages).map(path => ({ path: path ? path.split('/') : [] })), ...Object.keys(SCENARIOS).map(id => ({ path: ['agendy', id] })), ...COMPARISONS.map(item => ({ path: ['srovnani', item.slug] }))];
 }
@@ -41,13 +41,14 @@ export async function generateMetadata({ params }: Props) {
     const item = route.length === 2 && route[0] === 'srovnani' ? COMPARISONS.find(item => item.slug === route[1]) : undefined;
     return item ? newPageMetadata(key, `Promptbook and ${item.name}`, translate(item.question, 'en'), 'en') : {};
 }
-export default async function Page({ params }: Props) {
+export default async function Page({ params, searchParams }: Props) {
     const route = (await params).path ?? [];
     const key = route.join('/');
+    const query = await searchParams;
     if (route.length === 2 && route[0] === 'agendy' && Object.hasOwn(SCENARIOS, route[1])) return <AgendaPage scenarioId={route[1] as ScenarioId}/>;
     if (route.length === 2 && route[0] === 'srovnani' && COMPARISONS.some(item => item.slug === route[1])) return <ComparisonPage slug={route[1]}/>;
     switch (key) {
-        case '': return <NewLandingPage/>;
+        case '': return <NewLandingPage showTestimonials={query.testimonials === '1'}/>;
         case 'partnership': return <NewLandingPage partnership/>;
         case 'open-source': return <OpenSourcePage/>;
         case 'agendy': return <AgendasPage/>;
