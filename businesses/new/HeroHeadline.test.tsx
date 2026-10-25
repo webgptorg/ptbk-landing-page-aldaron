@@ -69,7 +69,7 @@ describe('hero working headline', () => {
         expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('works');
         act(() => { reduced = false; changeMotion(); });
         act(() => vi.advanceTimersByTime(6000));
-        expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('does the books');
+        expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('plans');
         act(() => { reduced = true; changeMotion(); });
         expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('works');
     });

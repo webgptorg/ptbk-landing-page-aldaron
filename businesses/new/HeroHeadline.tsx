@@ -5,8 +5,8 @@ import { useSiteLocale } from './LocaleProvider';
 import s from './hero-headline.module.css';
 
 const COPY = {
-    cs: { prefix: 'Teď', suffix: 'pro', you: 'Vás', activities: ['pracuje', 'účtuje', 'vyvíjí', 'přepisuje', 'plánuje', 'píše zákazníkům'] },
-    en: { prefix: 'Now it', suffix: 'for', you: 'you', activities: ['works', 'does the books', 'develops', 'transcribes', 'plans', 'writes to customers'] },
+    cs: { prefix: 'Teď', suffix: 'pro', you: 'Vás', activities: ['pracuje', 'účtuje', 'vyvíjí', 'přepisuje', 'plánuje', 'píše'] },
+    en: { prefix: 'Now it', suffix: 'for', you: 'you', activities: ['works', 'plans', 'writes', 'codes', 'files', 'replies'] },
 } as const;
 const FIRST_CHANGE_MS = 5400;
 const CHANGE_PERIOD_MS = 4200;

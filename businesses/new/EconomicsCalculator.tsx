@@ -98,7 +98,7 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
     const quickMax = company ? Math.max(100, Number(SCENARIOS[state.scenario].defaults.volume || 300) * 4, input.volume) : Math.max(100, input.clients);
     return <section className={s.calculatorSection} id="kalkulacka" aria-label={t("Kalkulačka nákladů a přínosů")}>
         <div className={`${s.calculatorCard} ${panel.panel}`}>
-            <div className={s.calculatorTop}><h2>{t(advanced ? 'Vaše kalkulace' : 'Vyplatí se vám Promptbook?')}</h2><div className={s.modeTabs} role="tablist" aria-label={t("Režim kalkulačky")}>
+            <div className={s.calculatorTop}><h2>{t(advanced ? 'Vaše kalkulace' : 'Vyplatí se Vám Promptbook?')}</h2><div className={s.modeTabs} role="tablist" aria-label={t("Režim kalkulačky")}>
                 {(['company','partner'] as const).map(mode => <button type="button" role="tab" key={mode} id={`${id}-${mode}`} aria-controls={`${id}-panel`} aria-selected={state.mode === mode} tabIndex={state.mode === mode ? 0 : -1} onClick={() => update({ ...state, mode })} onKeyDown={tabKey}>{t(mode === 'company' ? 'Pro mou firmu' : 'Nasazuji klientům')}</button>)}
             </div></div>
             <div className={s.calculatorGrid} role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${state.mode}`}>

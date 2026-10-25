@@ -15,10 +15,10 @@ export const NEW_PAGE_DEFINITIONS: Record<SiteLocale, PageMetadataDefinition> = 
     cs: {
         path: localizedPath('', 'cs'), language: 'cs',
         languageAlternates: { cs: localizedPath('', 'cs'), en: localizedPath('', 'en') },
-        title: 'Promptbook — Dřív jste AI úkolovali. Teď pracuje pro vás.',
-        socialTitle: 'Dřív jste AI úkolovali. Teď pracuje pro vás.',
-        description: 'Vaše AI. Na vašem stroji. Pod vaší kontrolou. Předáte agendu, nastavíte pravidla a agenti pracují dál. Vlastní engine, aplikace a podpora.',
-        socialPreviewImageAlt: 'Promptbook — vaše AI, na vašem stroji, pod vaší kontrolou',
+        title: 'Promptbook — Dřív jste AI úkolovali. Teď pracuje pro Vás.',
+        socialTitle: 'Dřív jste AI úkolovali. Teď pracuje pro Vás.',
+        description: 'Vaše AI. Na Vašem stroji. Pod Vaší kontrolou. Předáte agendu, nastavíte pravidla a agenti pracují dál. Vlastní engine, aplikace a podpora.',
+        socialPreviewImageAlt: 'Promptbook — Vaše AI, na Vašem stroji, pod Vaší kontrolou',
         isSocialPreviewImageGenerated: true, isIndexed: true,
     },
     en: {
@@ -41,7 +41,7 @@ export const PARTNERSHIP_PAGE_DEFINITIONS: Record<SiteLocale, PageMetadataDefini
         title: 'Partnerství s Promptbookem — Vaši klienti. Naše technologie.',
         socialTitle: 'Vaši klienti. Vaše služby. Naše technologie.',
         description: 'Dodávejte klientům vlastní AI engine, aplikaci a podporu. Vydělávejte na implementaci, servisu a pevném 20% podílu z licence. Bez partnerského předplatného.',
-        socialPreviewImageAlt: 'Partnerství s Promptbookem — vaši klienti, vaše služby, naše technologie',
+        socialPreviewImageAlt: 'Partnerství s Promptbookem — Vaši klienti, Vaše služby, naše technologie',
     },
     en: {
         ...NEW_PAGE_DEFINITIONS.en,
