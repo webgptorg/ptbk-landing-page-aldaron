@@ -15,7 +15,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   history, paused refresh restoration and Media Session. AI ta Krajta retains its original visible controls; article
   tracking uses reviewed real word timing and a single toggle. While enabled, it keeps narrated text in the readable
   viewport above the player, briefly yielding to manual gestures and resuming after they finish. Turning the toggle
-  off disables both highlighting and automatic follow. Mobile controls use two explicit grid rows.
+  off disables both highlighting and automatic follow. Mobile article controls form a floating card with a compact
+  follow toggle under the title and a full-width timeline; touch controls keep their own hit areas.
   The first Czech narration is a committed ElevenLabs Studio recording with Scribe sentence/cue captions and
   separately computed acoustic CTC word alignment of the final MP3. Its reviewed map covers title (`t…`), perex
   (`p…`) and body (`w…`) without renumbering body words. Cue intervals are never subdivided into guessed timings.

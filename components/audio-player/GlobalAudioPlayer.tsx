@@ -5,6 +5,7 @@ import { useAudioPlayer } from './AudioPlayerProvider';
 import { formatPodcastEpisodeDuration } from '@/lib/podcast/podcastEpisodeDuration';
 import { Pause, Play, RotateCcw, RotateCw, X } from 'lucide-react';
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import './audioPlayer.css';
 
 // The podcast's portrait roster and artwork are unnecessary on article/product pages until that skin is opened.
@@ -27,7 +28,7 @@ export function GlobalAudioPlayer() {
                 <Link href={track.href} className="article-global-player__title">{track.title}</Link>
                 <div className="article-global-player__timeline">
                     <span>{formatPodcastEpisodeDuration(currentTime)}</span>
-                    <input type="range" min={0} max={Math.max(1, duration)} step={0.1} value={Math.min(currentTime, duration || currentTime)} onChange={(event) => seekTo(Number(event.target.value))} aria-label={en ? 'Audio position' : 'Pozice v nahrávce'} />
+                    <input type="range" min={0} max={Math.max(1, duration)} step={0.1} value={Math.min(currentTime, duration || currentTime)} style={{ '--audio-progress': `${duration > 0 ? Math.max(0, Math.min(100, currentTime / duration * 100)) : 0}%` } as CSSProperties} onChange={(event) => seekTo(Number(event.target.value))} aria-label={en ? 'Audio position' : 'Pozice v nahrávce'} />
                     <span>{duration ? formatPodcastEpisodeDuration(duration) : '–:–'}</span>
                 </div>
                 {error && <p role="status">{error}</p>}
