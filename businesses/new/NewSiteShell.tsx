@@ -29,7 +29,7 @@ function LocalizedShell({ children }: { children: ReactNode }) {
         </div></header>
         <main id="obsah" className={s.container}>{t(children)}</main>
         <footer className={s.footer}><div className={s.footerGrid}>
-            <div><BrandLogo/><p>{t("Vaše AI.")}<br />{t("Opravdu vaše.")}</p></div>
+            <div><BrandLogo/><p>{t("Vaše AI.")}<br />{t("Opravdu Vaše.")}</p></div>
             <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('cenik')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link></nav>
             <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('srovnani')}>{t("Srovnání")}</Link><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
             <div className={s.legalContact}><strong>{t(ORGANIZATION_LEGAL_NAME)}</strong><span>{t("IČO: ")}{t(ORGANIZATION_REGISTRATION_NUMBER)}</span><span>{t("Datová schránka: ")}{t(ORGANIZATION_DATA_BOX_ID)}</span><span>{t(LEGAL_CONTACT_EMAIL)}</span><span>{t(PRIVACY_CONTACT_EMAIL)}</span><a href="https://or-justice-cz.translate.goog/ias/ui/rejstrik-firma.vysledky?subjektId=1223693&typ=UPLNY&_x_tr_sl=cs&_x_tr_tl=en&_x_tr_hl=en-US&_x_tr_pto=wapp">{t("Obchodní rejstřík ↗")}</a></div>

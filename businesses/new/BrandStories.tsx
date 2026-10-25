@@ -21,7 +21,7 @@ export function BrandStories({ partnership = false }: { partnership?: boolean })
         if (next !== null) { event.preventDefault(); select(next, true); }
     }
     return <section ref={root} className={s.stories} aria-labelledby={id+'-heading'} data-testid="brand-carousel" data-partnership={partnership} data-running={playback.running}>
-        <header className={s.storyHeading}><h2 id={id+'-heading'}>{en ? 'What your agents can take care of' : 'Co za vás agenti zvládnou'}</h2><p>{en ? 'One technology. An agenda of your choice.' : 'Jedna technologie. Agenda podle vás.'}</p></header>
+        <header className={s.storyHeading}><h2 id={id+'-heading'}>{en ? 'Use cases' : 'Příklady použití'}</h2></header>
         <div className={s.toolbar}>
             <div className={s.tabs} role="tablist" aria-label={en ? 'Choose an example' : 'Vyberte ukázku'}>
                 {choices.map(({ id: storyId, Icon }, index) => <button key={storyId} type="button" role="tab" id={id+'-'+index} aria-selected={active === index} aria-controls={id+'-panel'} tabIndex={active === index ? 0 : -1} data-story-choice={index} onClick={() => select(index)} onKeyDown={event => navigate(event, index)}><Icon size={17} strokeWidth={1.5} aria-hidden="true"/>{labels[index]}</button>)}

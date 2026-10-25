@@ -726,5 +726,16 @@
   "Ano, v rámci podporovaných harnessů a modelů. Role, pravidla a soubory přitom zůstávají ve vašem projektu. Lokální model vyžaduje kompatibilní napojení harnessu a odpovídající hardware; kvalitu a schopnost pracovat s nástroji ověřte na své agendě. Externí nástroje mohou data odesílat i při použití lokálního modelu.": "Yes, within the supported harnesses and models. Your roles, rules and files stay in your project. A local model requires a compatible harness integration and suitable hardware; check its quality and ability to use tools on your own workflow. External tools may still send data out when you use a local model.",
   "Je aplikace už dostupná?": "Is the app available yet?",
   "Samostatnou aplikaci pro pohodlné ovládání připravujeme. Zanechte nám nezávazný zájem a ozveme se s dostupností. Engine už má vlastní lokální a vzdálený dashboard; jeho dnešní tunel není totožný s end-to-end šifrovaným spojením navrhovaným pro aplikaci.": "We are preparing a standalone app for convenient control. Register your interest with no commitment and we will let you know when it is available. The engine already has a local and remote dashboard; its current tunnel is different from the end-to-end encrypted connection being designed for the app.",
-  "Vaše AI.": "Your AI."
+  "Vaše AI.": "Your AI.",
+  "pro Vás.": "for you.",
+  "Děkujeme. Ozveme se Vám.": "Thank you. We will be in touch.",
+  "Kam se Vám můžeme ozvat?": "Where can we reach you?",
+  "Zadejte e-mail a stáhněte PDF. K žádosti uložíme Váš kontakt a odkaz s parametry této kalkulace. Nepřihlašujeme Vás k newsletteru.": "Enter your email to download the PDF. We save your contact and a link containing this calculation's parameters with the request. We do not subscribe you to a newsletter.",
+  "PDF se stahuje do Vašeho zařízení. E-mail jsme uložili k Vaší žádosti, samotné PDF neposíláme e-mailem.": "The PDF is downloading to your device. Your email was saved with your request; the PDF itself is not sent by email.",
+  "Vaše zpráva je v našem kontaktním systému. Obrátí se na Vás příslušný člen týmu.": "Your message is in our contact system. The relevant team member will get in touch.",
+  "Opravdu Vaše.": "Truly yours.",
+  "20 % pro Vás.": "20% for you.",
+  "Pojďme najít Vaši první agendu.": "Let’s find your first ongoing workflow.",
+  "Nezávazný zájem. Ozveme se Vám k Vašemu tématu a později s dostupností aplikace. Pokud potřebujete pomoc už teď, napište nám.": "No commitment. We’ll follow up about your needs and later about app availability. Tell us if you need help now.",
+  "Váš zájem jsme zaznamenali. Ozveme se, probereme Vaše potřeby a dáme Vám vědět, až bude aplikace dostupná.": "We’ve recorded your interest. We’ll get in touch, discuss your needs and let you know when the app is available."
 }

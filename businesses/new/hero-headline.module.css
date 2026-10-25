@@ -1,0 +1,37 @@
+.headline{display:block;color:#000080;margin-top:.06em;font-size:.9em;line-height:1.15}
+.visualLine{display:flex;align-items:baseline;justify-content:center;column-gap:.2em}
+.workPhrase{display:inline-flex;align-items:baseline;gap:.2em;white-space:nowrap}
+.activitySlot{display:inline-grid;grid-template-areas:'word';text-align:left;position:relative;isolation:isolate}
+.wordSizer,.activity,.peelOut{grid-area:word;white-space:nowrap}
+.wordSizer{visibility:hidden;pointer-events:none}
+.activity{position:relative}
+.forYou{display:inline-flex;align-items:baseline;gap:.15em;position:relative;white-space:nowrap;padding-right:.84em}
+.you{position:relative}
+.underline{position:absolute;left:0;bottom:-.09em;width:100%;height:.13em;overflow:visible;stroke:#6388c4;stroke-width:2.2;stroke-linecap:round}
+.robot{position:absolute;right:0;bottom:.02em;width:.7em;height:.7em;line-height:0;transform-origin:50% 100%}
+.robot svg{width:100%;height:100%}
+.robotNod{display:block;transform-origin:50% 90%}
+.check{position:absolute;right:.08em;top:-.17em;width:.23em;height:.23em;stroke:#284d80;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.headline[data-animated=true] .initialLetter{position:relative;opacity:0;animation:letter-in 0s linear calc(.35s + var(--letter)*.055s) both}
+.headline[data-animated=true][data-stage=writing] .initialLetter::after{content:'';position:absolute;right:-.04em;top:.16em;height:.8em;border-right:2px solid #6388c4;opacity:0;animation:caret-in .055s step-end calc(.35s + var(--letter)*.055s)}
+.headline[data-animated=true] .robot{animation:robot-arrive .5s cubic-bezier(.16,1,.3,1) both}
+.headline[data-animated=true][data-stage=writing] .robotNod{animation:robot-write .35s ease-in-out infinite alternate}
+.headline[data-animated=true][data-stage=checking] .robotNod{animation:robot-nod .6s ease-in-out both}
+.headline[data-animated=true][data-stage=swapping] .robotNod{animation:robot-swap .48s ease-in-out both}
+.headline[data-animated=true] .underline path,.headline[data-animated=true] .check path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw-line .5s cubic-bezier(.16,1,.3,1) 1.9s both}
+.headline[data-animated=true] .check path{animation-delay:2.2s}
+.replaceWord{animation:word-replace .48s cubic-bezier(.16,1,.3,1) both}
+.peelOut{animation:word-peel .32s ease-in both;transform-origin:100% 100%;pointer-events:none}
+.headline[data-running=false] *,.headline[data-running=false] *::after{animation-play-state:paused!important}
+.srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@keyframes letter-in{to{opacity:1}}
+@keyframes caret-in{0%,99%{opacity:1}100%{opacity:0}}
+@keyframes draw-line{to{stroke-dashoffset:0}}
+@keyframes robot-arrive{from{opacity:0;transform:translateY(10px) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes robot-write{from{transform:rotate(-3deg)}to{transform:rotate(2deg)}}
+@keyframes robot-nod{0%,100%{transform:none}45%{transform:translateY(3px) rotate(7deg)}}
+@keyframes robot-swap{0%,100%{transform:none}40%{transform:translate(-3px,-4px) rotate(-9deg)}}
+@keyframes word-replace{from{opacity:0;transform:translateY(.5em);clip-path:inset(0 0 100%)}to{opacity:1;transform:none;clip-path:inset(0)}}
+@keyframes word-peel{to{opacity:0;transform:translateY(-.4em) rotate(-4deg);clip-path:inset(100% 0 0)}}
+@media(max-width:760px){.visualLine{flex-wrap:wrap;row-gap:.02em}.workPhrase{justify-content:center;flex-basis:100%}.headline{font-size:.88em}.forYou{margin-left:.84em}}
+@media(prefers-reduced-motion:reduce){.headline *, .headline *::after{animation:none!important;opacity:1!important;transform:none!important}.underline path,.check path{stroke-dashoffset:0!important}.peelOut{display:none}}

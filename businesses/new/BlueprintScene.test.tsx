@@ -43,7 +43,7 @@ describe('light blueprint stories', () => {
     it('uses the requested order and keyboard navigation in both languages, without playback controls', () => {
         const { rerender } = render(<BrandStories />);
         expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual(['Péče o kontakty', 'Správa podcastů', 'Údržba webu']);
-        expect(screen.getByRole('heading', { name: 'Co za vás agenti zvládnou' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Příklady použití' })).toBeTruthy();
         expect(screen.getByRole('tabpanel').textContent).toContain('Jana Nováková');
         fireEvent.keyDown(screen.getByRole('tab', { name: 'Péče o kontakty' }), { key: 'ArrowRight' });
         expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Správa podcastů' }));

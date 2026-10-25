@@ -41,7 +41,7 @@ test('localized pages retain public metadata and legacy calculation queries', as
 
 test('home and partnership share a compact keyboard carousel and ungrouped testimonials',async({page})=>{
     await page.emulateMedia({reducedMotion:'reduce'});
-    for (const [path,cta] of [['/cs','Chci Promptbook'],['/cs/partnership','Chci nasazovat klientům']]) {
+    for (const [path,cta] of [['/cs','Chci uvolnit ruce'],['/cs/partnership','Chci nasazovat klientům']]) {
         await visit(page,path);
         const hero = page.getByTestId('brand-hero');
         await expect(hero.getByRole('button')).toHaveCount(1);
@@ -72,7 +72,7 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
         }
         await expect(carousel.getByRole('button',{name:/Přehrát animaci|Pozastavit animaci/})).toHaveCount(0);
         await expect(page.locator('#your-ai')).toHaveCount(0);
-        await expect(page.getByRole('link',{name:/Vaše data jsou opravdu vaše/})).toHaveAttribute('href','/cs/bezpecnost');
+        await expect(page.getByRole('link',{name:/Vaše data jsou opravdu Vaše/})).toHaveAttribute('href','/cs/bezpecnost');
         await expect(hero).not.toContainText('Nezávazně. Ozveme se vám');
         expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
         await expect(page.getByRole('heading',{name:'Zkušenosti se spoluprací s Pavolem',exact:true})).toHaveCount(0);
@@ -147,10 +147,10 @@ test('product interest preserves failed drafts and saves one nonbinding CRM enqu
         await route.fulfill({status:writes===1?503:200,contentType:'application/json',body:writes===1?'{"error":"Unavailable"}':'{"success":true}'});
     });
     await visit(page,'/cs');
-    const trigger = page.getByTestId('brand-hero').getByRole('button',{name:'Chci Promptbook',exact:true});
+    const trigger = page.getByTestId('brand-hero').getByRole('button',{name:'Chci uvolnit ruce',exact:true});
     await trigger.click();
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByRole('heading',{name:'Pojďme najít vaši první agendu.',exact:true})).toBeVisible();
+    await expect(dialog.getByRole('heading',{name:'Co za Vás má AI převzít?',exact:true})).toBeVisible();
     await dialog.getByLabel('Váš e-mail',{exact:true}).fill('interest-test@example.com');
     await dialog.getByLabel('Jméno').fill('Test User');
     await dialog.getByLabel('S čím chcete pomoci?').fill('Potřebuji pomoci s navazováním na klienty.');
@@ -163,8 +163,8 @@ test('product interest preserves failed drafts and saves one nonbinding CRM enqu
     await expect(dialog.getByRole('button',{name:'Zpracovávám…',exact:true})).toBeDisabled();
     await expect(dialog.getByLabel('Váš e-mail',{exact:true})).toBeDisabled();
     completeSecondRequest();
-    await expect(dialog.getByRole('heading',{name:'Děkujeme. Ozveme se vám.',exact:true})).toBeVisible();
-    await expect(dialog).toContainText('Váš zájem jsme zaznamenali. Ozveme se, probereme vaše potřeby a dáme vám vědět, až bude aplikace dostupná.');
+    await expect(dialog.getByRole('heading',{name:'Děkujeme. Ozveme se Vám.',exact:true})).toBeVisible();
+    await expect(dialog).toContainText('Váš zájem jsme zaznamenali. Ozveme se, probereme Vaše potřeby a dáme Vám vědět, až bude aplikace dostupná.');
     expect(writes).toBe(2);expect(bodies[1].placeName).toBe('new-website-contact');
     expect(bodies[1].userNote).toContain('Nezávazný zájem o Promptbook');
     expect(bodies[1].userNote).toContain('Potřebuji pomoci s navazováním na klienty.');
@@ -269,7 +269,7 @@ test('founder CTA uses the contact system and restores focus after success',asyn
     await visit(page, '/cs/o-nas');await page.getByRole('button',{name:'Probrat technologii',exact:true}).click();
     await page.getByLabel('Váš e-mail',{exact:true}).fill('founder-test@example.com');
     await page.getByRole('button',{name:'Odeslat zprávu',exact:true}).click();
-    await expect(page.getByRole('heading',{name:'Děkujeme. Ozveme se vám.',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Děkujeme. Ozveme se Vám.',exact:true})).toBeVisible();
     expect(body.placeName).toBe('new-website-contact');expect(body.userNote).toContain('Pavol Hejný');
     await page.getByRole('button',{name:'Hotovo',exact:true}).click();
     await expect(page.getByRole('button',{name:'Probrat technologii',exact:true})).toBeFocused();
@@ -384,7 +384,7 @@ test('inline contact keeps failed drafts and shares the existing CRM without rep
     await expect(form.getByLabel('Váš e-mail',{exact:true})).toBeDisabled();
     await expect(form.getByRole('status')).toHaveCount(0);
     release();
-    await expect(form.getByRole('status')).toContainText('Děkujeme. Ozveme se vám.');
+    await expect(form.getByRole('status')).toContainText('Děkujeme. Ozveme se Vám.');
     expect(writes).toBe(2);
     expect(bodies[1].placeName).toBe('new-website-contact');
     expect(bodies[1].userNote).toContain('Partnerství — kontaktní formulář');

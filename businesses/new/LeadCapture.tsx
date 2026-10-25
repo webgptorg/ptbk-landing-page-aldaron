@@ -11,7 +11,7 @@ import { ArrowUpRight, Check, Loader2 } from 'lucide-react';
 import { sitePath } from './siteConfig';
 import s from './site.module.css';
 
-type LeadRequest = { topic: string; kind?: 'contact' | 'pdf'; interest?: boolean; note?: string; afterSave?: () => Promise<void> };
+type LeadRequest = { topic: string; heading?: string; kind?: 'contact' | 'pdf'; interest?: boolean; note?: string; afterSave?: () => Promise<void> };
 const LeadContext = createContext<((request: LeadRequest) => void) | null>(null);
 export function useLeadCapture() {
     const open = useContext(LeadContext);
@@ -64,13 +64,13 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
     return <LeadContext.Provider value={open}>{t(children)}
         <Dialog open={request !== null} onOpenChange={(value) => { if (!value && !submitting.current) setRequest(null); }}>
             <DialogContent className={s.leadDialog} closeLabel={t("Zavřít")} onCloseAutoFocus={(event) => { event.preventDefault(); trigger.current?.focus(); }}>
-                <DialogHeader><DialogTitle>{t(done ? (request?.kind === 'pdf' ? 'Výpočet je připravený.' : 'Děkujeme. Ozveme se vám.') : request?.kind === 'pdf' ? 'Kam se vám můžeme ozvat?' : request?.interest ? 'Pojďme najít vaši první agendu.' : 'Pojďme to probrat.')}</DialogTitle>
-                    <DialogDescription>{t(request?.kind === 'pdf' ? 'Zadejte e-mail a stáhněte PDF. K žádosti uložíme váš kontakt a odkaz s parametry této kalkulace. Nepřihlašujeme vás k newsletteru.' : request?.topic)}</DialogDescription></DialogHeader>
-                {done ? <div className={s.formSuccess}><Check size={28} /><p>{t(request?.kind === 'pdf' ? 'PDF se stahuje do vašeho zařízení. E-mail jsme uložili k vaší žádosti, samotné PDF neposíláme e-mailem.' : request?.interest ? 'Váš zájem jsme zaznamenali. Ozveme se, probereme vaše potřeby a dáme vám vědět, až bude aplikace dostupná.' : 'Vaše zpráva je v našem kontaktním systému. Obrátí se na vás příslušný člen týmu.')}</p><button className={s.button} onClick={() => setRequest(null)}>{t("Hotovo")}</button></div> :
+                <DialogHeader><DialogTitle>{t(done ? (request?.kind === 'pdf' ? 'Výpočet je připravený.' : 'Děkujeme. Ozveme se Vám.') : request?.kind === 'pdf' ? 'Kam se Vám můžeme ozvat?' : request?.heading ?? (request?.interest ? 'Pojďme najít Vaši první agendu.' : 'Pojďme to probrat.'))}</DialogTitle>
+                    <DialogDescription>{t(request?.kind === 'pdf' ? 'Zadejte e-mail a stáhněte PDF. K žádosti uložíme Váš kontakt a odkaz s parametry této kalkulace. Nepřihlašujeme Vás k newsletteru.' : request?.topic)}</DialogDescription></DialogHeader>
+                {done ? <div className={s.formSuccess}><Check size={28} /><p>{t(request?.kind === 'pdf' ? 'PDF se stahuje do Vašeho zařízení. E-mail jsme uložili k Vaší žádosti, samotné PDF neposíláme e-mailem.' : request?.interest ? 'Váš zájem jsme zaznamenali. Ozveme se, probereme Vaše potřeby a dáme Vám vědět, až bude aplikace dostupná.' : 'Vaše zpráva je v našem kontaktním systému. Obrátí se na Vás příslušný člen týmu.')}</p><button className={s.button} onClick={() => setRequest(null)}>{t("Hotovo")}</button></div> :
                     <form onSubmit={submit} className={s.leadForm} aria-busy={busy}>
                         <label htmlFor={`${id}-email`}>{t("Váš e-mail")}<input id={`${id}-email`} name="email" type="email" autoComplete="email" required maxLength={254} value={email} disabled={busy || saved} onChange={(event) => setEmail(event.target.value)} /></label>
                         {request?.kind !== 'pdf' && <><label htmlFor={`${id}-name`}>{t("Jméno ")}<span>{t("(nepovinné)")}</span><input id={`${id}-name`} autoComplete="name" maxLength={150} value={fullname} disabled={busy || saved} onChange={(event) => setFullname(event.target.value)} /></label><label htmlFor={`${id}-note`}>{t("S čím chcete pomoci? ")}<span>{t("(nepovinné)")}</span><textarea id={`${id}-note`} rows={3} maxLength={2000} value={note} disabled={busy || saved} onChange={(event) => setNote(event.target.value)} /></label></>}
-                        {request?.interest && <p className={s.small}>{t('Nezávazný zájem. Ozveme se vám k vašemu tématu a později s dostupností aplikace. Pokud potřebujete pomoc už teď, napište nám.')}</p>}
+                        {request?.interest && <p className={s.small}>{t('Nezávazný zájem. Ozveme se Vám k Vašemu tématu a později s dostupností aplikace. Pokud potřebujete pomoc už teď, napište nám.')}</p>}
                         <p className={s.small}>{t(consent.prefix)}<Link href={path('soukromi')}>{t(consent.privacyPolicyLinkText)}</Link>{t(". Údaje použijeme k vyřízení této žádosti.")}</p>
                         {error && <p role="alert" className={s.error}>{t(saved ? 'Kontakt je uložený, ale PDF se nepodařilo vytvořit. Zkuste přípravu znovu, kontakt znovu neodešleme.' : error)}</p>}
                         <button type="submit" className={s.button} disabled={busy}>{busy && <Loader2 className={s.spin} size={18} />}{t(busy ? 'Zpracovávám…' : request?.kind === 'pdf' ? (saved ? 'Znovu připravit PDF' : 'Uložit e-mail a stáhnout PDF') : request?.interest ? 'Zapsat nezávazný zájem' : 'Odeslat zprávu')}<ArrowUpRight size={18} /></button>
@@ -80,9 +80,9 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
     </LeadContext.Provider>;
 }
 
-export function LeadButton({ children, topic = 'Zájem o nasazení Promptbooku', secondary = false, interest = false, className = '' }: { children: ReactNode; topic?: string; secondary?: boolean; interest?: boolean; className?: string }) {
+export function LeadButton({ children, topic = 'Zájem o nasazení Promptbooku', secondary = false, interest = false, className = '', heading }: { children: ReactNode; topic?: string; secondary?: boolean; interest?: boolean; className?: string; heading?: string }) {
     const { t, locale, path } = useSiteLocale();
 
     const open = useLeadCapture();
-    return <button type="button" className={`${secondary ? s.secondaryButton : s.button} ${className}`} onClick={() => open({ topic, interest })}>{t(children)}<ArrowUpRight size={17} aria-hidden="true" /></button>;
+    return <button type="button" className={`${secondary ? s.secondaryButton : s.button} ${className}`} onClick={() => open({ topic, interest, heading })}>{t(children)}<ArrowUpRight size={17} aria-hidden="true" /></button>;
 }

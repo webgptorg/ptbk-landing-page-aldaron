@@ -58,12 +58,12 @@ export function InlineContactForm({ partnership = false }: { partnership?: boole
     return <section className={s.section} aria-labelledby={`${id}-title`}>
         <div className={s.intro}>
             <h2 id={`${id}-title`}>{en ? 'Write to us' : 'Napište nám'}</h2>
-            <p>{en ? 'Tell us what you need help with.' : 'S čím vám můžeme pomoci?'}</p>
+            <p>{en ? 'Tell us what you need help with.' : 'S čím Vám můžeme pomoci?'}</p>
         </div>
         <form className={s.form} onSubmit={submit} aria-labelledby={`${id}-title`} aria-busy={busy} data-testid="inline-contact-form">
             {done ? <div className={s.success} role="status">
                 <Check size={26} aria-hidden="true"/>
-                <h3>{en ? 'Thank you. We’ll be in touch.' : 'Děkujeme. Ozveme se vám.'}</h3>
+                <h3>{en ? 'Thank you. We’ll be in touch.' : 'Děkujeme. Ozveme se Vám.'}</h3>
                 <p>{en ? 'Your message is saved in our contact system.' : 'Vaše zpráva je v našem kontaktním systému.'}</p>
             </div> : <>
                 <div className={s.fields}>
