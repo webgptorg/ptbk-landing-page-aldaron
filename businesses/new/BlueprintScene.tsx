@@ -97,7 +97,7 @@ function Development({ step, mobile, en }: { step: number; mobile: boolean; en: 
     return <>
         <g transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label="22:14">
-                <path d="M228 57a21 21 0 1 0 22 27 24 24 0 0 1-22-27Z" className={s.strong}/>
+                <path d="M240 6a9 9 0 1 0 10 12 10 10 0 0 1-10-12Z" className={s.strong}/>
                 <Copy x={20} y={86} lines={en ? ['The contact form','returns an error.'] : ['Kontaktní formulář','vrací chybu.']} variant="title" gap={29}/>
                 <Copy x={20} y={151} lines={en ? ['Customers cannot send','an enquiry. The campaign','starts tomorrow morning.'] : ['Zákazníci nemohou odeslat','poptávku. Ráno spouštíme','kampaň.']}/>
                 <rect x="20" y="218" width="230" height="26" rx="3" className={s.panel}/><Copy x={29} y={236} lines={['!  '+(en ? 'Validation error' : 'Chyba validace')]} variant="small"/>
@@ -151,7 +151,6 @@ function Engine({ mobile, en, appPlace, enginePlace, asleep }: { mobile: boolean
             <Copy x={8} y={-57} lines={en ? ['Your app'] : ['Vaše aplikace']} variant="title"/>
             {appPlace === 0 ? <>
                 <path d="M-45 233H307v14H-45Zm17 14v103m308-103v103" className={s.strong}/>
-                <path d="M-45-30V-75H150M17-75v45M-45-53H150" className={s.dim}/>
                 <Laptop asleep={asleep} en={en}/>
             </> : <>
                 <path d={appPlace === 1 ? 'M-44 254Q50 195 122 250T309 245M-18 275l5-20 4 20m271-4 5-24 6 24M-10 140v-65m-32 25 32-55 32 55Z' : 'M-39-19V-60H306v210M-39 115H306M-39 95H306M-18 281H279M-5 281v50m269-50v50'} className={s.dim}/>
