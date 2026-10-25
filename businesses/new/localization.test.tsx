@@ -20,7 +20,7 @@ function html(node: ReactNode, locale: SiteLocale = 'en') {
 }
 function text(node: ReactNode) { const element = document.createElement('div'); element.innerHTML = html(node); return element.textContent ?? ''; }
 // People keep their names in either language; only untranslated surrounding prose is a defect.
-const remainingCzech = (value: string) => ['Jiří Jahn', 'Pavol Hejný', 'Jiří', 'Tomáš Studeník', 'Jan Šedo', 'Tereza Texlová', 'VŠEM', 'Šimon Podhajský', 'Lucie Benešová', 'ŠP'].reduce((text, name) => text.replaceAll(name, ''), value).match(/[^.!?\n]*[čďěňřšťůž][^.!?\n]*/gi) ?? [];
+const remainingCzech = (value: string) => ['Jiří Jahn', 'Pavol Hejný', 'Jiří', 'Tomáš Studeník', 'Jan Šedo', 'Tereza Texlová', 'VŠEM', 'Šimon Podhajský', 'Šimon', 'Lucie Benešová', 'ŠP'].reduce((text, name) => text.replaceAll(name, ''), value).match(/[^.!?\n]*[čďěňřšťůž][^.!?\n]*/gi) ?? [];
 describe('bilingual launch site', () => {
     it('keeps language paths and complete calculation state across language changes', () => {
         expect(localeFromPath('/en/cenik')).toBe('en');

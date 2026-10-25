@@ -66,18 +66,11 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
             await choices.nth(index).click();
             await expect(article).toHaveAttribute('data-story',story);
             await expect(article).toHaveAttribute('data-step','3');
-            const steps = article.getByRole('group',{name:'Kroky ukázky'}).getByRole('button');
-            await expect(steps).toHaveCount(4);
-            await steps.first().click();
-            await expect(article).toHaveAttribute('data-step','0');
-            await steps.last().click();
-            await expect(article).toHaveAttribute('data-step','3');
+            await expect(article.locator('svg[data-bp-variant="light"]')).toHaveCount(1);
+            await expect(article.getByRole('button')).toHaveCount(0);
             await expect(article).toBeVisible();
         }
-        await carousel.getByRole('button',{name:'Další ukázka',exact:true}).click();
-        await expect(article).toHaveAttribute('data-story','podcast');
-        await carousel.getByRole('button',{name:'Předchozí ukázka',exact:true}).click();
-        await expect(article).toHaveAttribute('data-story','development');
+        await expect(carousel.getByRole('button',{name:'Přehrát animaci',exact:true})).toBeDisabled();
         expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
         await expect(page.getByRole('heading',{name:'Zkušenosti se spoluprací s Pavolem',exact:true})).toHaveCount(0);
         await expect(page.getByText('Promptbook nás od sebe neodstřihl. Naopak. Konečně máme čas řešit opravdovou práci, za kterou jsme placeni.',{exact:true})).toBeVisible();
@@ -98,28 +91,28 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
 });
 
 test('app location and engine location are independent and the engine continues with the app closed',async({page})=>{
+    await page.emulateMedia({reducedMotion:'reduce'});
     await visit(page,'/cs');
-    const architecture = page.getByLabel('Interaktivní schéma architektury aplikace',{exact:true});
-    const appLocations = architecture.getByRole('group',{name:'Odkud ovládáte aplikaci',exact:true});
-    const engineLocations = architecture.getByRole('group',{name:'Kde provozujete engine',exact:true});
-    for (const app of ['U kávy','Venku','Ve vlaku']) {
-        await appLocations.getByRole('button',{name:app,exact:true}).click();
-        for (const engine of ['V kuchyni','Na poličce','Na VPS']) {
-            await engineLocations.getByRole('button',{name:engine,exact:true}).click();
-            await expect(appLocations.getByRole('button',{name:app,exact:true})).toHaveAttribute('aria-pressed','true');
-            await expect(engineLocations.getByRole('button',{name:engine,exact:true})).toHaveAttribute('aria-pressed','true');
-            await expect(appLocations.locator('[aria-pressed="true"]')).toHaveCount(1);
-            await expect(engineLocations.locator('[aria-pressed="true"]')).toHaveCount(1);
+    const architecture = page.locator('#your-ai');
+    const appLocations = architecture.getByLabel('Odkud ovládáte aplikaci',{exact:true});
+    const engineLocations = architecture.getByLabel('Kde provozujete engine',{exact:true});
+    const scene = architecture.locator('svg[data-blueprint="engine"]');
+    for (const app of ['0','1','2']) {
+        await appLocations.selectOption(app);
+        for (const engine of ['0','1','2']) {
+            await engineLocations.selectOption(engine);
+            await expect(scene).toHaveAttribute('data-app-place',app);
+            await expect(scene).toHaveAttribute('data-engine-place',engine);
+            await expect(appLocations).toHaveValue(app);
+            await expect(engineLocations).toHaveValue(engine);
         }
     }
-    await architecture.getByRole('button',{name:'Zavřít aplikaci',exact:true}).click();
-    await expect(architecture.getByRole('button',{name:'Otevřít aplikaci',exact:true})).toHaveAttribute('aria-pressed','true');
-    await expect(architecture.getByText('Engine pracuje dál',{exact:true})).toBeVisible();
+    await expect(scene).toHaveAttribute('data-asleep','true');
     await architecture.getByRole('button',{name:'Otevřít aplikaci',exact:true}).click();
-    await expect(architecture.getByRole('button',{name:'Zavřít aplikaci',exact:true})).toHaveAttribute('aria-pressed','false');
-    const models = page.getByRole('group',{name:'Váš výběr AI',exact:true});
-    await models.getByRole('button',{name:'Lokální model',exact:true}).click();
-    await expect(models.getByRole('button',{name:'Lokální model',exact:true})).toHaveAttribute('aria-pressed','true');
+    await expect(scene).toHaveAttribute('data-asleep','false');
+    await architecture.getByRole('button',{name:'Zavřít aplikaci',exact:true}).click();
+    await expect(scene).toHaveAttribute('data-asleep','true');
+    await expect(architecture.getByRole('status')).toHaveText('Engine pracuje dál');
 });
 
 test('desktop scene moves with the page instead of pinning or consuming the scroll',async({page})=>{
@@ -137,9 +130,10 @@ test('desktop scene moves with the page instead of pinning or consuming the scro
     // A native-flow panel moves by the same distance as the document, rather than remaining pinned.
     expect(Math.abs((before.top-after.top)-(after.scroll-before.scroll))).toBeLessThan(3);
     expect(await carousel.evaluate(element=>[element,...Array.from(element.querySelectorAll('*'))].some(node=>['sticky','fixed'].includes(getComputedStyle(node).position)))).toBe(false);
-    await story.getByRole('button',{name:'Nový díl',exact:true}).click();
+    await carousel.getByRole('button',{name:'Pozastavit animaci',exact:true}).click();
+    const pausedStep = await story.getAttribute('data-step');
     await page.mouse.wheel(0,120);
-    await expect(story).toHaveAttribute('data-step','0');
+    await expect(story).toHaveAttribute('data-step',pausedStep!);
 });
 
 test('product interest preserves failed drafts and saves one nonbinding CRM enquiry',async({page})=>{
@@ -339,11 +333,9 @@ test('wordmark, pricing controls and mirrored founder cards fit desktop, tablet 
             const carousel=page.getByTestId('brand-carousel');
             for (const [index,name] of ['podcast','crm','development'].map((name,index)=>[index,name] as const)) {
                 await carousel.getByRole('tab').nth(index).click();
-                await carousel.locator('[data-story-step="3"]').click();
                 await carousel.screenshot({path: `${capture}-${name}.png`});
             }
             await carousel.getByRole('tab').first().click();
-            await carousel.locator('[data-story-step="3"]').click();
             await carousel.screenshot({path: `${capture}-carousel.png`});
             await page.evaluate(()=>{ if(document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
             await page.locator('#your-ai').screenshot({path: `${capture}-architecture.png`,style:'header[class*=header],a[href="#obsah"]{visibility:hidden}'});

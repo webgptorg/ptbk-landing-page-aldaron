@@ -2,13 +2,13 @@
 
 ## Hlavní stránka `/cs` a `/en`
 
-Nejnovější zadání z 24. října 2026 sdružuje tři pracovní příběhy hlavní i partnerské stránky do jednoho kompaktního karuselu s prostorovými scénami. Původní demo zůstává na přehledu agend a detailech. Úvod rychle vysvětluje dlouhodobé AI agendy, vlastní pracovní prostředí a oddělenou aplikaci; podrobnosti mají samostatné cesty. Primárním distribučním publikem jsou agentury, freelanceři a integrátoři, ale nasazení musí pochopit i jejich klient.
+Nejnovější zadání z 25. října 2026 vybírá světlý blueprint pro tři pracovní příběhy v jednom karuselu a společnou scénu aplikace a enginu. Okolní vysvětlující texty se odstraní a změna se nasadí přímo na main. Původní demo zůstává na přehledu agend a detailech. Úvod rychle vysvětluje dlouhodobé AI agendy, vlastní pracovní prostředí a oddělenou aplikaci; podrobnosti mají samostatné cesty. Primárním distribučním publikem jsou agentury, freelanceři a integrátoři, ale nasazení musí pochopit i jejich klient.
 
 ### Pořadí bloků
 
 1. Hero **„Dřív jste AI úkolovali / Teď pracuje pro vás“**, na dvou řádcích bez závěrečných teček, a zachované společné sdělení **„Vaše AI. Na vašem stroji. Pod vaší kontrolou.“** Jedno výrazné tlačítko **Chci Promptbook** otevírá nezávazný zájem. Pod ním je menší odkaz na vlastní instalaci, stručná informace o následném kontaktu a dostupnosti aplikace a textový odkaz na partnerství se stávajícím 20% podílem.
 2. Přímo pod hero jeden kompaktní karusel tří ukázek: propagace podcastu, osobní oslovení z CRM a noční oprava webu. Bez úvodu „Agenda, která pokračuje“ nebo „Jedna svěřená agenda / O tisíc připomínek méně“.
-3. Jedna společná interaktivní scéna aplikace a vlastního enginu s nezávislými volbami umístění. Principy ukazuje především vizuálně. Zachovává se navazující trojice **Čitelné soubory / Dohledatelná práce / Váš výběr AI**.
+3. Jedna společná interaktivní scéna aplikace a vlastního enginu s nezávislými volbami umístění. Principy ukazuje především vizuálně. Navazující trojice soubory/historie/modely se odstraní; text obsahu zůstává uvnitř vizualizace.
 4. Porovnatelné cenové karty Start a Business ze společných obchodních konstant. Opakující sekce „Jedna agenda / Všechno pro její provoz“ se nevykresluje; podrobnosti jsou na samostatných stránkách.
 5. Rychlá kalkulačka ve firemním režimu podle [specifikace ekonomiky](new-economics-calculator.md).
 6. Jedna mřížka všech šesti referencí: jeden autor a citace v jedné kartě. Slezská univerzita je další kartou ve stejném uspořádání, bez dělení na produktové a osobní nadpisy.
@@ -19,19 +19,19 @@ Nejnovější zadání z 24. října 2026 sdružuje tři pracovní příběhy hl
 
 ## Tři nové pracovní příběhy
 
-Každý příběh má vlastní prostorovou pracovní kompozici a čtyři kroky, ale v jednom společném kompaktním karuselu je vždy vybraná jedna ukázka. Scéna obsahuje konkrétní pracovní vstupy a výstupy, kolem ní je jen krátký název a nezbytné ovládání. Nejsou zde tři dlouhé sekce pod sebou. Jde o označené modelové ukázky s nastavenými přístupy a pravidly, nikoli živé účty nebo doložené zákaznické výsledky. Ukázka neprovádí skutečné publikování, odesílání ani nasazení.
+Každý příběh má vlastní prostorovou pracovní kompozici a čtyři kroky, ale v jednom společném kompaktním karuselu je vždy vybraná jedna ukázka. Scéna obsahuje konkrétní pracovní vstupy a výstupy, kolem ní jsou pouze tři taby a tlačítko pozastavení. Nadpisy, popisy, časová osa a patičky ukázky se nevykreslují; označení modelové ukázky je uvnitř obrazu. Nejsou zde tři dlouhé sekce pod sebou. Jde o označené modelové ukázky s nastavenými přístupy a pravidly, nikoli živé účty nebo doložené zákaznické výsledky. Ukázka neprovádí skutečné publikování, odesílání ani nasazení.
 
 - **Podcast AI ta Krajta:** nový díl, pochopení obsahu, osobité texty pro jednotlivé lidi a kanály, propagace/publikace podle pravidel. Osobní sítě, YouTube a tematické skupiny mají vlastní výstupy.
 - **CRM a nová pobočka:** zpráva o otevření pobočky, dohledaný kontext předchozího kontaktu, osobní e-mail v prostředí připomínajícím Gmail a další krok v CRM. Modelová firma ani osoba nejsou klientskou referencí; odeslání podléhá nastaveným oprávněním.
 - **Noční oprava:** večerní upozornění na nefunkční formulář, nalezení a oprava chyby, ověření a nasazení podle pravidel, ráno vyřešený problém. Noční práce enginu neznamená nepřetržitou lidskou podporu ani záruku bezchybnosti.
 
-Scroll vždy posouvá celou stránku běžným způsobem vpřed i zpět; ukázka reaguje na svou aktuální polohu ve viewportu plynulým pohybem kamery a vrstev. Žádné připnutí, vyhrazený vysoký scrollovací úsek, zachytávání kolečka/dotyku ani vynucené přechody mezi ukázkami. Návštěvník volí příběh pomocí přístupného ovládání karuselu, dostupného i klávesnicí; ruční výběr fáze dovolí obsah prohlédnout. Na mobilu je kompozice stále kompaktní a čitelná. Při redukovaném pohybu se vypne paralaxa a animovaný pohyb, obsah i ovládání zůstanou dostupné. Pohyb nesmí skrýt podstatný obsah.
+Scroll vždy posouvá celou stránku běžným způsobem vpřed i zpět, bez připnutí, zachytávání kolečka/dotyku a vynucených přechodů mezi ukázkami. Návštěvník volí příběh taby ovladatelnými šipkami a Home/End. Jemná automatická animace ukazuje čtyři fáze práce; lze ji pozastavit a při opuštění viewportu či skrytí karty se zastaví. Na mobilu se kompozice skládá svisle, aby text zůstal čitelný. Redukovaný pohyb ukáže dokončený stav bez časové animace.
 
 ## Aplikace a engine pod vlastní kontrolou
 
-Volby aplikace jsou notebook u stolu/v kavárně, telefon venku a telefon ve vlaku. Volby enginu jsou notebook v kuchyni, mini-PC na polici a VPS. Obě sady lze kombinovat nezávisle, s aktivním stavem a ovládáním klávesnicí. Uspání aplikace ponechá engine vizuálně pracovat na dostupném hostitelském stroji. Oba objekty patří do jedné propojené prostorové scény, ne do dvou textově vysvětlovaných boxů. Krátké názvy zařízení a přístupné názvy ovladačů nahrazují okolní věty typu „telefon na cestě ven“, „klíč u vás“ nebo „stroj s enginem zůstává zapnutý“.
+Volby aplikace jsou notebook v kanceláři, telefon venku a telefon ve vlaku. Volby enginu jsou notebook ve skříňce, notebook na polici a vlastní VPS. Dva nativní selecty lze kombinovat nezávisle a ovládat klávesnicí. Vedle nich je uspání aplikace a pozastavení animace. Uspání aplikace ponechá engine vizuálně pracovat na dostupném hostitelském stroji. Oba objekty patří do jedné propojené prostorové scény, ne do dvou textově vysvětlovaných boxů. Krátké názvy zařízení a přístupné názvy ovladačů nahrazují okolní věty typu „telefon na cestě ven“, „klíč u vás“ nebo „stroj s enginem zůstává zapnutý“.
 
-Relay předává end-to-end šifrovaný obsah mezi aplikací a enginem; klíče jsou na koncových zařízeních. Vlastní pracovní soubory jsou čitelné a mohou mít historii v Gitu. Volba cloudového/lokálního modelu ukáže rozdíl toku dat. Externí modely a nástroje dostávají vstupy určené pro jejich práci; E2E ovládacího kanálu je před jejich příjemcem neskrývá. Lokální model automaticky neodstraňuje ostatní externí nástroje. Odkaz vede na bezpečnost.
+Relay předává end-to-end šifrovaný obsah mezi aplikací a enginem; klíče jsou na koncových zařízeních. Vlastní pracovní soubory jsou čitelné a mohou mít historii v Gitu. Externí modely a nástroje dostávají vstupy určené pro jejich práci; E2E ovládacího kanálu je před jejich příjemcem neskrývá. Lokální model automaticky neodstraňuje ostatní externí nástroje. Přístupný popis SVG rozlišuje E2E a externí vstupy; nenápadný ikonový odkaz vede na bezpečnost.
 
 Scéna je interaktivní ilustrací vlastníkem potvrzené cílové architektury, nikoli ovladačem skutečného stroje nebo kryptografickým auditem. Při redukovaném pohybu se vypne paralaxa a perspektivní animace.
 

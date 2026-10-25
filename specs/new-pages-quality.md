@@ -10,7 +10,7 @@ Veřejné cesty mají jeden zdroj. České `/cs` routy sdílejí implementaci ko
 
 Hlavní i partnerská landing page mají stejný světlý vizuální jazyk: téměř bílé pozadí, černý text, modrá původního loga (`#000080`), Outfit pro nadpisy a Inter pro text. Hlavička i patička obsahují původní symbol a slovo `promptbook` bez tečky; `prompt` je černě a `book` modře. Hero nadpisy nemají závěrečné tečky. Otevřené kompozice a jemně tónované pásy neskládají stránku do řady tmavých krabic. Prostorové objekty mají tenké světlé hrany, měkké stíny a jemnou paralaxu, bez tvrdých extruzí. Technické podrobnosti nepřebírají hero.
 
-Tři pracovní příběhy jsou v jediném kompaktním karuselu hned za hero. Každý má vlastní 3D kompozici, konkrétní vstup, práci i výsledek. Nepředchází jim výplňkový nadpis a doprovodný text je minimální. Scroll vždy normálně posouvá stránku a pouze lokálně reaguje kamera či vrstvy viditelné scény, bez připnutí a dlouhého vynuceného průchodu. Samostatná propojená scéna aplikace a enginu používá stejný vizuální jazyk; oba objekty mají nezávisle volitelné umístění. Zachovává se trojice čitelných souborů, historie a výběru modelu. Opakovaný blok „Jedna agenda / Všechno pro její provoz“ se odstraní. Modelová povaha ukázek a podmínka nastavených přístupů/pravidel zůstávají čitelné. Původní pětizáložkové demo má nadále místo na přehledu agend a detailech; jeho ovládání upravuje [specifikace produktu](new-product-page.md).
+Tři pracovní příběhy jsou v jediném kompaktním karuselu hned za hero. Nejnovější zadání z 25. října 2026 vybírá světlý blueprint: konkrétní vstup, práce a výsledek jsou přímo ve vizualizaci. Kolem jsou pouze taby a pozastavení, bez titulků, popisů, časové osy či patičky. Čtvrtá propojená scéna aplikace a enginu používá stejný styl a dva nezávislé selecty zařízení; související feature trio se odstraní. Scroll normálně posouvá stránku bez připnutí. Modelový charakter ukázek se označuje uvnitř SVG, přístupný popis obsahuje podmínku nastavených přístupů/pravidel. Původní pětizáložkové demo zůstává na přehledu agend a detailech podle [specifikace produktu](new-product-page.md).
 
 Hero má jedno výrazné tlačítko nezávazného zájmu, pod ním menší instalační odkaz a stručnou informaci o kontaktu a dostupnosti aplikace. Na konci stránky je navíc přímo viditelný formulář, který zachovává stávající modál a používá stejnou kontaktní evidenci. Žádné roadmapové odznaky, termín dokončení nebo odkaz „současný web“. Formulář nepředstírá dostupný účet. Navigace i mobilní rozbalitelné menu poskytují podstránky a instalaci. Všechny interní odkazy používají správný jazykový prefix.
 
@@ -30,9 +30,9 @@ Společná patička zachovává původní obrázek `public/sponsors/CI-Technolog
 
 ## Přístupnost a pohyb
 
-Jeden H1, logická hierarchie, označené navigace, přeskočení na obsah a viditelný fokus. Taby mají aktivní stav, vazbu na panel a klávesy šipky/Home/End. Volby aplikace a enginu mají srozumitelný stisknutý stav. Karusel je ovladatelný klávesnicí a viditelné ovladače mají srozumitelné názvy. Scroll se nikdy nepřebírá, stránka se při každém běžném scrollování pohybuje a ukázky nepřipínají uživatele na místě. Ručně zvolený krok lze prohlížet bez nuceného pokračování.
+Jeden H1, logická hierarchie, označené navigace, přeskočení na obsah a viditelný fokus. Taby mají aktivní stav, vazbu na panel a klávesy šipky/Home/End. Selecty aplikace a enginu mají přístupné názvy a vybranou hodnotu; uspání a pozastavení mají stisknutý stav. Karusel je ovladatelný klávesnicí a viditelné ovladače mají srozumitelné názvy. Scroll se nikdy nepřebírá, stránka se při každém běžném scrollování pohybuje a ukázky nepřipínají uživatele na místě. Pozastavený stav lze prohlížet bez nuceného pokračování.
 
-Na všech velikostech jsou nové příběhy bez připnutí, nucené časové animace a nadbytečné scrollovací vzdálenosti. Na telefonu/tabletu a při redukovaném pohybu zůstávají čitelné a ručně ovladatelné. Redukovaný pohyb vypíná perspektivní animace/paralaxu. Od šířky 375 px nepřetéká celá stránka; široké dílčí prvky mohou mít vlastní ovladatelný kontejner. Ověřit čitelnost obsahu, oba jazyky a režim vynucených barev.
+Na všech velikostech jsou nové příběhy bez připnutí a nadbytečné scrollovací vzdálenosti. Automatickou animaci lze zastavit; mimo viewport a ve skryté kartě se zastaví sama. Na telefonu/tabletu a při redukovaném pohybu zůstávají čitelné a ručně ovladatelné. Redukovaný pohyb vypíná animace a ukazuje dokončený stav. Od šířky 375 px nepřetéká celá stránka; široké dílčí prvky mohou mít vlastní ovladatelný kontejner. Ověřit čitelnost obsahu, oba jazyky a režim vynucených barev.
 
 Pole mají labely a jednotky, výsledky slovní interpretaci. Modál má titulek, popis, fokus, validaci, chyby a stav práce; chyba zachová údaje. Rychlé změny výpočtu ani selhání PDF nesmějí zničit vstupy. Instalační taby a kopírování příkazů jsou dostupné klávesnicí a při nedostupné schránce zůstávají příkazy ručně kopírovatelné.
 
@@ -44,7 +44,7 @@ Po přepnutí jsou veřejné marketingové stránky indexovatelné a zahrnuté v
 
 ## Akceptace
 
-- Hlavní i partnerská stránka mají jeden kompaktní karusel se všemi třemi příběhy a vlastními čtyřkrokovými scénami. Celá stránka se při scrollu normálně posouvá, bez připnutí nebo vynucených tabů. Ruční, scrollové, mobilní a redukované zobrazení dávají smysl; samostatná scéna zachovává nezávislé volby aplikace/enginu.
+- Hlavní i partnerská stránka mají jeden kompaktní karusel se všemi třemi příběhy a vlastními čtyřkrokovými scénami. Celá stránka se při scrollu normálně posouvá, bez připnutí nebo vynucených tabů. Taby, pozastavení, mobilní a redukované zobrazení dávají smysl; samostatná scéna zachovává nezávislé volby aplikace/enginu.
 - Zavření aplikace ilustruje pokračování enginu na dostupném hostiteli. E2E kanál, vlastní soubory/Git a externí modelové/nástrojové vstupy jsou přesně rozlišené; scéna není skutečný ovladač nebo audit.
 - Původních pět agend a jejich správné detaily zůstává funkčních. Modelová data se nevydávají za zákaznické výsledky.
 - Hlavní kontaktní akce sbírá nezávazný zájem a uvádí dostupnost aplikace; menší odkaz vede na lokalizovanou instalaci s npm, shell a Windows EXE volbami.
@@ -60,6 +60,6 @@ Po přepnutí jsou veřejné marketingové stránky indexovatelné a zahrnuté v
 
 ## Ověření
 
-Cílené kontroly změněného chování, ekonomiky, URL parseru a PDF; lint, produkční build a TypeScript podle pracovního postupu. Prohlédnout skutečně vykreslený desktop, tablet a telefon v obou jazycích, ruční/scrollové kroky, nezávislé volby vlastnictví, redukovaný pohyb, inline i modální formulář, jednorádkové tlačítko obnovy a instalační taby. Kontaktní backend v prohlížečových testech mockovat; nikdy neposílat testovací leady na produkci. U PDF ověřit renderovaný soubor, ne jen definici.
+Cílené kontroly změněného chování, ekonomiky, URL parseru a PDF; lint, produkční build a TypeScript podle pracovního postupu. Prohlédnout skutečně vykreslený desktop, tablet a telefon v obou jazycích, taby, pozastavení a nezávislé volby zařízení, redukovaný pohyb, inline i modální formulář, jednorádkové tlačítko obnovy a instalační taby. Kontaktní backend v prohlížečových testech mockovat; nikdy neposílat testovací leady na produkci. U PDF ověřit renderovaný soubor, ne jen definici.
 
 Ověření webu neprokazuje dokončené párování/E2E v enginu ani plnou regresní sadu ostatních aplikací. Zveřejnění je již autorizované; nejnovější kontaktní text poctivě rozlišuje zájem a informaci o dostupnosti aplikace.
