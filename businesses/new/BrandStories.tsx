@@ -9,9 +9,9 @@ const choices = [{ id: 'podcast', Icon: Headphones }, { id: 'relationships', Ico
 /** The work itself is the explanation; only story selection and pause surround it. */
 export function BrandStories({ partnership = false }: { partnership?: boolean }) {
     const { locale } = useSiteLocale(); const en = locale === 'en'; const id = useId();
-    const root = useRef<HTMLElement>(null); const [active, setActive] = useState(0);
-    const playback = useBlueprintPlayback(root, active);
-    const labels = ['Podcast', 'CRM', en ? 'Development' : 'Vývoj'];
+    const root = useRef<HTMLElement>(null); const scene = useRef<HTMLDivElement>(null); const [active, setActive] = useState(0);
+    const playback = useBlueprintPlayback(scene, active, { scrollSteps: true });
+    const labels = en ? ['Podcast management', 'Contact follow-up', 'Website maintenance'] : ['Správa podcastu', 'Péče o kontakty', 'Údržba webu'];
     function select(index: number, focus = false) {
         setActive(index);
         if (focus) root.current?.querySelector<HTMLButtonElement>('[data-story-choice="'+index+'"]')?.focus();
@@ -27,8 +27,8 @@ export function BrandStories({ partnership = false }: { partnership?: boolean })
             </div>
             <button className={s.iconButton} type="button" onClick={playback.toggle} disabled={playback.reduced} aria-label={playback.paused ? (en ? 'Play animation' : 'Přehrát animaci') : (en ? 'Pause animation' : 'Pozastavit animaci')} aria-pressed={playback.paused}>{playback.paused ? <Play size={16}/> : <Pause size={16}/>}</button>
         </div>
-        <article id={id+'-panel'} role="tabpanel" aria-labelledby={id+'-'+active} data-story={choices[active].id} data-step={playback.step}>
-            <BlueprintScene kind={choices[active].id} step={playback.step}/>
+        <article ref={scene} id={id+'-panel'} role="tabpanel" aria-labelledby={id+'-'+active} data-story={choices[active].id} data-step={playback.step}>
+            <BlueprintScene kind={choices[active].id} step={playback.step} visibleStage={playback.visibleStage}/>
         </article>
     </section>;
 }

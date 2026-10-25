@@ -1,0 +1,7 @@
+.timeline{list-style:none;padding:20px 0 45px;margin:0 auto;max-width:880px}
+.timeline li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:35px;padding:34px 0;position:relative}
+.timeline time{font-family:var(--font-outfit),sans-serif;font-size:36px;line-height:1.2;color:#42699e;letter-spacing:-.04em}
+.timeline li>div{border-left:1px solid #ccd8e8;padding:0 0 10px 35px}
+.timeline h2{font-size:clamp(24px,3vw,34px)!important;line-height:1.2!important;margin:0 0 17px!important}
+.timeline p{font-size:16px;line-height:1.85;max-width:650px}
+@media(max-width:600px){.timeline{padding-top:5px}.timeline li{grid-template-columns:66px minmax(0,1fr);gap:13px;padding:27px 0}.timeline time{font-size:27px}.timeline li>div{padding-left:18px}.timeline h2{font-size:24px!important}.timeline p{font-size:14px}}

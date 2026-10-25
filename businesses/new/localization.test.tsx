@@ -38,7 +38,7 @@ describe('bilingual launch site', () => {
         expect(parseCalculatorState(url.searchParams)).toEqual(state);
     });
     it('shows matching prices and converts editable input units without changing the economic model', () => {
-        expect(licencePrice('start','cs').replace(/\s/g,' ')).toBe('418 Kč');
+        expect(licencePrice('start','cs').replace(/\s/g,' ')).toBe('400 Kč');
         expect(licencePrice('business','cs').replace(/\s/g,' ')).toBe('2 200 Kč');
         expect(licencePrice('start','en')).toBe('$19');
         expect(licencePrice('business','en')).toBe('$100');

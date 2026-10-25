@@ -5,7 +5,7 @@ import { useSiteLocale } from './LocaleProvider';
 import s from './blueprint-scene.module.css';
 
 export type BlueprintKind = 'podcast' | 'relationships' | 'development' | 'engine';
-type Props = { kind: BlueprintKind; step: number; appPlace?: number; enginePlace?: number; asleep?: boolean };
+type Props = { kind: BlueprintKind; step: number; visibleStage?: number; appPlace?: number; enginePlace?: number; asleep?: boolean };
 const titles = {
     cs: { podcast: 'Od nového dílu k publikovaným příspěvkům', relationships: 'Od nové příležitosti k osobnímu oslovení', development: 'Od večerního hašení k rannímu řešení', engine: 'Vaše aplikace a váš engine' },
     en: { podcast: 'From a new episode to published posts', relationships: 'From a new opportunity to a personal email', development: 'From an evening report to a morning fix', engine: 'Your app and your engine' },
@@ -31,7 +31,7 @@ function Waveform({ y = 203 }: { y?: number }) {
 }
 function Podcast({ step, mobile, en }: { step: number; mobile: boolean; en: boolean }) {
     return <>
-        <g transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
+        <g data-bp-stage="0" transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label={en ? 'New episode' : 'Nový díl'}>
                 <Copy x={20} y={68} lines={['AI ta Krajta']} variant="label"/>
                 <Copy x={20} y={110} lines={en ? ['What can AI','do for you?'] : ['Co už AI','umí za vás?']} variant="title" gap={29}/>
@@ -39,7 +39,7 @@ function Podcast({ step, mobile, en }: { step: number; mobile: boolean; en: bool
                 <Waveform/><Copy x={20} y={240} lines={[en ? 'Published episode' : 'Zveřejněný díl']} variant="small"/>
             </Panel>
         </g>
-        <g transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
+        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
             <Panel label={en ? 'Listening in context' : 'Poslouchá v kontextu'}>
                 <Copy x={20} y={77} lines={en ? ['Ideas worth','sharing'] : ['Myšlenky, které','stojí za sdílení']} variant="title" gap={28}/>
                 <path d="M20 127H250" className={s.dim}/>
@@ -48,7 +48,7 @@ function Podcast({ step, mobile, en }: { step: number; mobile: boolean; en: bool
                 <Copy x={20} y={235} lines={['17:06  '+(en ? 'Your own context' : 'Vlastní kontext')]} variant="small"/>
             </Panel>
         </g>
-        <g transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
+        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
             <Panel label={step === 3 ? (en ? 'Published' : 'Publikováno') : (en ? 'Posts' : 'Příspěvky')} height={300}>
                 <circle cx="34" cy="66" r="16" className={s.panel}/><Copy x={24} y={71} lines={['PH']} variant="small"/>
                 <Copy x={59} y={63} lines={['Pavol Hejný']} variant="label"/><Copy x={59} y={83} lines={['LinkedIn']} variant="small"/><Copy x={231} y={71} lines={['in']} variant="title"/>
@@ -63,7 +63,7 @@ function Podcast({ step, mobile, en }: { step: number; mobile: boolean; en: bool
 }
 function CRM({ step, mobile, en }: { step: number; mobile: boolean; en: boolean }) {
     return <>
-        <g transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
+        <g data-bp-stage="0" transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label={en ? 'Your contacts' : 'Vaše kontakty'}>
                 <circle cx="40" cy="79" r="20" className={s.panel}/><Copy x={29} y={84} lines={['JN']} variant="label"/>
                 <Copy x={76} y={75} lines={['Jana Nováková']} variant="label"/><Copy x={76} y={96} lines={['Studio North']} variant="small"/>
@@ -75,14 +75,14 @@ function CRM({ step, mobile, en }: { step: number; mobile: boolean; en: boolean 
             </Panel>
             <path d="M-14 45v225h270M-7 45v217h270" className={s.dim}/>
         </g>
-        <g transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
+        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
             <Panel label={en ? 'Earlier conversation · 14 Sep' : 'Předchozí rozhovor · 14. 9.'}>
                 <Copy x={20} y={84} lines={en ? ['“Let’s revisit this','when we grow.”'] : ['„Vraťme se k tomu,','až budeme růst.“']} variant="title" gap={30}/>
                 <Copy x={20} y={157} lines={en ? ['Route enquiries from','the new branch to','the right person.'] : ['Dotazy z nové pobočky','směrovat ke správnému','člověku.']}/>
                 <Check x={29} y={235}/><Copy x={50} y={240} lines={en ? ['Relevant context found'] : ['Souvislost nalezena']} variant="small"/>
             </Panel>
         </g>
-        <g transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
+        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
             <Panel label={step === 3 ? (en ? 'Sent within your rules' : 'Odesláno podle pravidel') : (en ? 'Personal email' : 'Osobní e-mail')} height={300}>
                 <Copy x={20} y={65} lines={[(en ? 'To: ' : 'Komu: ')+'Jana Nováková']} variant="label"/>
                 <path d="M16 82H254" className={s.dim}/>
@@ -95,7 +95,7 @@ function CRM({ step, mobile, en }: { step: number; mobile: boolean; en: boolean 
 }
 function Development({ step, mobile, en }: { step: number; mobile: boolean; en: boolean }) {
     return <>
-        <g transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
+        <g data-bp-stage="0" transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label="22:14">
                 <path d="M240 6a9 9 0 1 0 10 12 10 10 0 0 1-10-12Z" className={s.strong}/>
                 <Copy x={20} y={86} lines={en ? ['The contact form','returns an error.'] : ['Kontaktní formulář','vrací chybu.']} variant="title" gap={29}/>
@@ -103,7 +103,7 @@ function Development({ step, mobile, en }: { step: number; mobile: boolean; en: 
                 <rect x="20" y="218" width="230" height="26" rx="3" className={s.panel}/><Copy x={29} y={236} lines={['!  '+(en ? 'Validation error' : 'Chyba validace')]} variant="small"/>
             </Panel>
         </g>
-        <g transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
+        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
             <Panel label="contact-form.ts">
                 <Copy x={18} y={74} lines={['const email =','  input.email.trim();']} variant="mono"/>
                 <path d="M16 114H254" className={s.dim}/>
@@ -114,7 +114,7 @@ function Development({ step, mobile, en }: { step: number; mobile: boolean; en: 
                 <Copy x={18} y={242} lines={['Git  ·  +1 −1']} variant="small"/>
             </Panel>
         </g>
-        <g transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
+        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
             <Panel label={step === 3 ? '07:30' : '22:26'} height={300}>
                 <Copy x={20} y={83} lines={step === 3 ? (en ? ['The form works','again.'] : ['Formulář už','funguje.']) : (en ? ['Checking','the fix'] : ['Ověření','opravy'])} variant="title" gap={29}/>
                 <circle cx="231" cy="76" r="14" className={s.strong}/>
@@ -182,7 +182,7 @@ function Engine({ mobile, en, appPlace, enginePlace, asleep }: { mobile: boolean
 }
 
 /** Native vector artwork derived from the approved light blueprint, with actual website story content. */
-export function BlueprintScene({ kind, step, appPlace = 0, enginePlace = 0, asleep = false }: Props) {
+export function BlueprintScene({ kind, step, visibleStage, appPlace = 0, enginePlace = 0, asleep = false }: Props) {
     const { locale } = useSiteLocale(); const en = locale === 'en';
     const prefix = 'blueprint-'+useId().replace(/:/g,'');
     const [mobile,setMobile] = useState(false);
@@ -192,7 +192,7 @@ export function BlueprintScene({ kind, step, appPlace = 0, enginePlace = 0, asle
     },[]);
     const height = mobile ? (kind === 'engine' ? 890 : 1030) : 600;
     const width = mobile ? (kind === 'engine' ? 380 : 340) : 1000;
-    return <svg className={s.canvas} viewBox={'0 0 '+width+' '+height} role="img" aria-labelledby={prefix+'-title '+prefix+'-description'} data-blueprint={kind} data-bp-variant="light" data-app-place={appPlace} data-engine-place={enginePlace} data-asleep={asleep}>
+    return <svg className={s.canvas} viewBox={'0 0 '+width+' '+height} role="img" aria-labelledby={prefix+'-title '+prefix+'-description'} data-blueprint={kind} data-visible-stage={visibleStage} data-bp-variant="light" data-app-place={appPlace} data-engine-place={enginePlace} data-asleep={asleep}>
         <title id={prefix+'-title'}>{titles[locale][kind]}</title>
         <desc id={prefix+'-description'}>{en ? 'Illustrative scenario with configured access and rules. ' : 'Modelová ukázka s nastavenými přístupy a pravidly. '}{kind === 'engine' ? (en ? 'The app and engine are separate devices. The engine continues when the app is closed. E2E protects their connection, not data provided to external AI or tools. Architecture of the forthcoming app.' : 'Aplikace a engine jsou oddělená zařízení. Engine pokračuje i po zavření aplikace. E2E chrání jejich spojení, nikoli data předávaná externí AI a nástrojům. Architektura připravované aplikace.') : titles[locale][kind]}</desc>
         <defs><pattern id={prefix+'-grid'} width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" stroke="#c8d8ea" strokeWidth=".65"/></pattern><radialGradient id={prefix+'-fade'}><stop offset=".5" stopColor="white"/><stop offset="1" stopColor="black"/></radialGradient><mask id={prefix+'-mask'}><rect width="100%" height="100%" fill={'url(#'+prefix+'-fade)'}/></mask></defs>

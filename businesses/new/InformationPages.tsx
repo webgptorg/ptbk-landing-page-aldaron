@@ -8,6 +8,7 @@ import { getLegalDocument } from '@/lib/legal/legalDocuments';
 import type { LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 import { AgendaShowcase } from './AgendaShowcase';
 import { Founders } from './Founders';
+import { StoryTimeline } from './StoryTimeline';
 import { LeadButton } from './LeadCapture';
 import { ClosingCta, PricingCards } from './MarketingSections';
 import { OwnershipScene } from './OwnershipScene';
@@ -34,8 +35,15 @@ return <><PageIntro title={t("Licence pro vaši firemní agendu.")}>{t("Vyzkouš
 </div></>;}
 
 export function StoryPage(){
-    const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t("Nechtěli jsme jen další chat.")}>{t("Promptbook stavíme pro chvíli, kdy nestačí dostat odpověď. Kdy potřebujete, aby se práce opravdu udělala — a příště znovu.")}</PageIntro><div className={s.prose}><h2>{t("Od odpovědí k odpovědnosti za agendu.")}</h2><p>{t("Začínali jsme u chatbotů na webu. Následovali agenti, kteří uměli splnit zadaný úkol. Pořád ale zůstával stejný problém: někdo jim musel znovu a znovu říkat, co mají dělat.")}</p><p>{t("Proto jsme začali stavět Promptbook kolem dlouhodobých agend. Nejde jen o delší odpověď nebo větší jednorázový úkol. Jde o práci, která se ve firmě opakuje: přijde doklad, objeví se e-mail, vznikne video nebo je potřeba udržovat web.")}</p><p>{t("Technologický základ stavíme na výkonných coding harnesses. Stejný způsob práce se soubory a kontextem využíváme i mimo programování. Pro uživatele ale rozhoduje výsledek, ne znalost vnitřního formátu.")}</p><h2>{t("Technologie od nás. Řešení od partnera.")}</h2><p>{t("Nechceme být agenturou pro každou jednotlivou firmu. Chceme dát technologii lidem, kteří už klientům pomáhají — agenturám, freelancerům a integrátorům. Oni znají klienta. My se soustředíme na Promptbook.")}</p><p>{t("Stejně důležité je pro nás vlastnictví. Pracovní kontext má být u klienta, model má být volba a ovládání má být oddělené od místa, kde se práce skutečně děje.")}</p></div><section className={s.section}><div className={s.sectionTitle}><h2>{t("Dva rovnocenní spoluzakladatelé.")}</h2><p>{t("Jiří vede obchodní spolupráci. Pavol vede technologii. Promptbook tvoříme společně.")}</p></div><Founders/></section><ClosingCta/></>;}
+    const { t, locale } = useSiteLocale();
+    const en = locale === 'en';
+    return <>
+        <PageIntro title={en ? 'Our story' : 'Náš příběh'}>{en ? 'From the first AI-generated websites to agents that take care of ongoing work.' : 'Od prvních webů vytvořených AI k agentům, kteří se průběžně starají o práci.'}</PageIntro>
+        <StoryTimeline/>
+        <section className={s.section}><div className={s.sectionTitle}><h2>{t("Dva rovnocenní spoluzakladatelé.")}</h2><p>{t("Jiří vede obchodní spolupráci. Pavol vede technologii. Promptbook tvoříme společně.")}</p></div><Founders/></section>
+        <ClosingCta/>
+    </>;
+}
 
 export function SecurityPage(){
     const { t, path } = useSiteLocale();

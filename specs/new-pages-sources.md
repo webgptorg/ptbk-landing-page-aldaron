@@ -30,7 +30,7 @@ Originální PDF se nevkládají do veřejného repozitáře nebo downloadů. Za
 | Srovnání | C nově žádá výzkum. Nepravdivé zkratky W o permanentním hlídání konkurentů se nepřebírají; používají se skutečné schopnosti z E. |
 | Úvod vs. podrobnosti | C schvaluje samostatné podstránky. Nejnovější C odstraňuje výplňkový úvod před příběhy a opakující blok celého řešení. Smluvní a technické vysvětlení patří do ceníku/FAQ/bezpečnosti. |
 | Scroll | Nejnovější C odmítá připnutí scén a vynucené taby. Tři ukázky sdílejí jeden kompaktní karusel; scroll vždy pokračuje stránkou a jen lokálně ovládá prostorovou scénu. |
-| České ceny | C potvrzuje ceny 418 / 2 200 Kč a mění pouze prezentaci do klasických plánů. Kurzová vysvětlivka se nezobrazuje; uložené jednotky a výpočetní model kalkulačky se nemění. |
+| České ceny | C potvrzuje ceny 400 / 2 200 Kč a mění pouze prezentaci do klasických plánů. Kurzová vysvětlivka se nezobrazuje; uložené jednotky a výpočetní model kalkulačky se nemění. |
 | Reference | Nejnovější C ruší samostatné vizuální oddělení univerzity a osobních referencí. Všech šest karet sdílí mřížku, citace a atribuce zůstávají přesné. |
 
 ## Reference a přesné zdroje
@@ -43,10 +43,19 @@ Originální PDF se nevkládají do veřejného repozitáře nebo downloadů. Za
 
 ## Příběh a důkazy
 
-Příběh popisuje pouze vlastníkem uvedený vývoj od webových chatbotů k jednotlivým úkolům a dlouhodobým agendám, použití coding harnesses, vlastní soubory a partnerskou distribuci. Bez nových letopočtů, osobních příhod, citací, jmen klientů nebo smyšlených metrik.
+Příběh popisuje pouze vlastníkem uvedený vývoj od webových chatbotů k jednotlivým úkolům a dlouhodobým agendám, použití coding harnesses, vlastní soubory a partnerskou distribuci. Bez neověřených letopočtů, osobních příhod, citací, jmen klientů nebo smyšlených metrik.
 
 Žádné tvrzení „Neonmedia běží na Promptbooku“ bez schváleného pilotu, žádné převzaté procentní tržní statistiky a žádné falešné reference/videa. Ilustrace agend používají syntetické podklady a jsou označené jako ukázka. Výsledky kalkulací vycházejí z odhadů, ne z měřených klientských úspor.
 
 ## Rozsah této změny
 
 Aktuální branding zahrnuje web, instalační prezentaci, kontaktní texty a specifikace; navazující schválená práce v repozitáři Promptbooku sjednocuje README a veřejné vysvětlení CLI. Zachovává stávající kalkulačku/PDF, obchodní podmínky, platby, partnerskou atribuci a podporované runtime. Nemění BUSL ani jiné licenční soubory a neimplementuje kryptografický protokol. Modelové příběhy nejsou dokladem produkčního nasazení; skutečný provoz a konkrétní objednávky zůstávají součástí dodání.
+
+## Ověřené podklady časové osy — 25. října 2026
+
+- 2023, WebGPT: zakladatelé jsou na https://webgpt.cz/; Pavolův veřejný profil https://cz.linkedin.com/in/hejny/cs uvádí WebGPT od září 2023 do května 2024 a přechod na Promptbook. Jiřího veřejný profil https://cz.linkedin.com/in/jirkajahn sdílí zakladatelův popis začátku generování webů v srpnu 2023. Nejde o výzkumný projekt OpenAI stejného jména.
+- 2024, Promptbook a propojené postupy: https://github.com/webgptorg/promptbook/discussions/118 (5. září a odpověď 29. listopadu 2024) a /discussions/111 popisují orchestraci zadání a řízené postupy.
+- 2025, agenti s kontextem: Pavolův vlastní popis v Data Talk #157, zveřejněno 16. října 2025: https://www.datatalk.cz/podcast/epizoda-157, úvodní představení popisuje AI kolegy, znalostní bázi a pravidla.
+- 2026, dlouhodobé agendy, vlastní engine a ovládání: aktuální vlastníkovo zadání a specifikace tohoto repozitáře. Připravovaná aplikace se nepovažuje za hotovou jen kvůli zobrazení na časové ose.
+
+Nové večerní zadání nahrazuje dřívější textovou esej chronologií po těchto doložených letech a schvaluje změnu české veřejné ceny Start na 400 Kč. Původní USD model kalkulačky, Business a anglické ceny se nemění.

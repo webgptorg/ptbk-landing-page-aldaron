@@ -7,9 +7,9 @@ The specification entry is [`../../specs/_main.md`](../../specs/_main.md). The l
 ## Shared presentation
 
 - The header and footer pair the original mark with `promptbook`: black `prompt`, logo-blue `book` (`#000080`), no trailing dot.
-- The hero leads directly into one compact carousel with podcast, CRM outreach and overnight repair scenes. Local scroll changes depth and progress while the page keeps moving normally. No pinned story tracks or forced tab progression.
-- A separate app/engine scene shows independent device choices and continuing engine work when the app sleeps. The files, Git history and model-choice section remains.
-- Start and Business use conventional plan cards. Czech prices are 418 Kč / 2 200 Kč; English prices are $19 / $100. Public pricing contains no exchange-rate disclaimer.
+- The hero leads directly into one compact carousel with podcast, CRM outreach and overnight repair scenes. Playback starts when the scene becomes readable; on mobile each panel reveals on reaching it. The page keeps moving normally. No pinned story tracks or forced tab progression.
+- A separate app/engine scene shows independent device choices and continuing engine work when the app sleeps. The former files, Git history and model-choice feature trio is removed.
+- Start and Business use conventional plan cards. Czech prices are 400 Kč / 2 200 Kč; English prices are $19 / $100. Public pricing contains no exchange-rate disclaimer.
 - All six unchanged testimonials share one grid. Founders have mirrored, enlarged portraits flush with the card bottoms and verified email/phone contacts.
 - A visible contact form supplements the existing modal at the bottom of both pages.
 
@@ -28,3 +28,5 @@ Both cofounders retain equal prominence, the original quotes and Technology Incu
 Run focused Vitest tests in `businesses/new`, applicable Playwright landing/branding tests, lint, the production build and then TypeScript. Inspect desktop/mobile layouts in both languages, normal scroll through the carousel, keyboard and reduced-motion behavior, inline/modal forms, pricing and reset-button wrapping. Mock contact submissions during browser tests. Inspect generated PDF when export changes.
 
 `LocaleProvider` and `locales/en.json` localize initial React renders. `localization.ts` owns localized links and display currency; `localizedCalculator.ts` converts input presentation while query v2 and stored CZK units remain stable. The language switch preserves path, query and fragment. Comparison facts retain their own source review dates.
+
+The evening 25 October refinement stages the hero text without moving its layout, uses descriptive work tabs, presents one elevated calculator surface and anchors Jiří’s mobile contact block at the bottom right. The story link follows the founders; `/[locale]/o-nas` shows sourced milestones for 2023, 2024, 2025 and 2026. The 400 Kč Start price is the Czech public offer; the editable USD-based calculation model remains unchanged.

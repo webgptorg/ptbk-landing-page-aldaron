@@ -21,8 +21,8 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
     const en = locale === 'en';
     return <div className={b.brandPage}>
         <section className={b.hero} aria-labelledby="brand-heading" data-testid="brand-hero">
-            <h1 id="brand-heading">{partnership ? (en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby') : (en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali')}<span>{partnership ? (en ? 'Our technology' : 'Naše technologie') : (en ? 'Now it works for you' : 'Teď pracuje pro vás')}</span></h1>
-            <p className={b.promise}>{en ? 'Your AI. On your machine. Under your control.' : 'Vaše AI. Na vašem stroji. Pod vaší kontrolou.'}</p>
+            <h1 id="brand-heading">{partnership ? (en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby') : (en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali')}<span className={b.heroReveal}>{partnership ? (en ? 'Our technology' : 'Naše technologie') : (en ? 'Now it works for you' : 'Teď pracuje pro vás')}</span></h1>
+            <p className={`${b.promise} ${b.heroPromise}`}>{en ? 'Your AI. On your machine. Under your control.' : 'Vaše AI. Na vašem stroji. Pod vaší kontrolou.'}</p>
             <p className={b.intro}>{partnership
                 ? (en ? 'Bring clients AI that takes care of ongoing work. You know their business. We provide the engine, app and product support. You earn from your services and a share of their licence.' : 'Dodávejte klientům AI, která se průběžně stará o jejich práci. Vy znáte jejich podnikání. My dodáváme engine, aplikaci a produktovou podporu. Vyděláváte na svých službách i podílu z licence.')
                 : (en ? 'Hand over a responsibility, set the rules and let work move forward. Your agents follow up, find the next step and bring you the decisions that need you.' : 'Předáte agendu, nastavíte pravidla a práce pokračuje. Vaši agenti navazují, hledají další kroky a přinášejí vám rozhodnutí, ke kterým potřebují vás.')}</p>
@@ -42,8 +42,9 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
         {partnership && <PartnerQuestions/>}
         {showTestimonials && <BrandTestimonials/>}
         <section className={b.founders} id="kontakt" aria-labelledby="contact-heading">
-            <div className={b.foundersIntro}><h2 id="contact-heading">{en ? 'Contact' : 'Kontakt'}</h2><Link href={path('o-nas')}>{en ? 'Our story' : 'Náš příběh'}<ArrowRight size={16}/></Link></div>
+            <div className={b.foundersIntro}><h2 id="contact-heading">{en ? 'Contact' : 'Kontakt'}</h2></div>
             <Founders compact/>
+            <div className={b.storyLink}><Link href={path('o-nas')}>{en ? 'Our story' : 'Náš příběh'}<ArrowRight size={16}/></Link></div>
         </section>
         <InlineContactForm partnership={partnership}/>
     </div>;

@@ -17,3 +17,9 @@
 @media(max-width:600px){.toolbar{gap:8px}.tabs{gap:0}.tabs button{padding:9px 12px;font-size:12px;gap:6px}.canvas .small{font-size:13px}.stories{padding-bottom:14px}.ownership{padding-bottom:30px}.deviceChoice{gap:6px;display:grid;grid-template-columns:minmax(0,1fr) 40px;max-width:360px}.deviceChoice label{max-width:none}.deviceChoice select{font-size:11px;padding-left:3px}.iconButton{width:40px;height:40px}.canvas{max-width:560px}}
 @media(prefers-reduced-motion:reduce){.canvas *{animation:none!important;transition:none!important}}
 @media(forced-colors:active){.canvas{stroke:CanvasText}.canvas text{fill:CanvasText}.fill,.panel{fill:Canvas}.tabs button[aria-selected=true]{border-color:Highlight}.route,.dim,.ground{stroke:CanvasText}.accent,.signal{stroke:Highlight}}
+
+@media(max-width:600px){
+ .toolbar{align-items:center;gap:6px}.tabs{flex:1;min-width:0;justify-content:space-between}.tabs button{flex:1;justify-content:center;text-align:left;padding:8px 5px;font-size:11px;line-height:1.35;gap:5px}.tabs button svg{flex-shrink:0;width:15px}.tabs button{max-width:145px}
+ .canvas[data-visible-stage="0"] [data-bp-stage="1"],.canvas[data-visible-stage="0"] [data-bp-stage="2"],.canvas[data-visible-stage="1"] [data-bp-stage="2"]{opacity:.28}
+ .canvas[data-visible-stage="0"] [data-bp-stage="1"] *,.canvas[data-visible-stage="0"] [data-bp-stage="2"] *,.canvas[data-visible-stage="1"] [data-bp-stage="2"] *{animation-play-state:paused!important}
+}

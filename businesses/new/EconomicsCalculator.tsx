@@ -14,6 +14,7 @@ import { FIELD_GROUPS, FIELD_LABELS, numericFieldBounds } from './calculatorFiel
 import { useLeadCapture } from './LeadCapture';
 import s from './site.module.css';
 import controls from './calculator-controls.module.css';
+import panel from './calculator-panel.module.css';
 
 export const formatMoney = (n: number) => new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 0 }).format(n) + ' Kč';
 const decimal = (n: number) => new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 1 }).format(n);
@@ -96,7 +97,7 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
     const quickKey = company ? 'volume' : 'clients';
     const quickMax = company ? Math.max(100, Number(SCENARIOS[state.scenario].defaults.volume || 300) * 4, input.volume) : Math.max(100, input.clients);
     return <section className={s.calculatorSection} id="kalkulacka" aria-label={t("Kalkulačka nákladů a přínosů")}>
-        <div className={s.calculatorCard}>
+        <div className={`${s.calculatorCard} ${panel.panel}`}>
             <div className={s.calculatorTop}><h2>{t(advanced ? 'Vaše kalkulace' : 'Vyplatí se vám Promptbook?')}</h2><div className={s.modeTabs} role="tablist" aria-label={t("Režim kalkulačky")}>
                 {(['company','partner'] as const).map(mode => <button type="button" role="tab" key={mode} id={`${id}-${mode}`} aria-controls={`${id}-panel`} aria-selected={state.mode === mode} tabIndex={state.mode === mode ? 0 : -1} onClick={() => update({ ...state, mode })} onKeyDown={tabKey}>{t(mode === 'company' ? 'Pro mou firmu' : 'Nasazuji klientům')}</button>)}
             </div></div>
@@ -126,7 +127,7 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                         </details>)}
                     </>}
                 </div>
-                <div className={s.resultsColumn}><div className={`${s.calcResult} ${amount < 0 ? s.negative : ''}`} aria-live="polite" aria-atomic="true">
+                <div className={`${s.resultsColumn} ${panel.results}`}><div className={`${s.calcResult} ${panel.result} ${amount < 0 ? `${s.negative} ${panel.negative}` : ''}`} aria-live="polite" aria-atomic="true">
                     <p>{t("Za ")}{t(period)}</p><div className={s.resultSentence}>
                         {t(amount < 0 ? 'náklady převýší přínos o' : company ? 'můžete ušetřit v hodnotě práce' : 'vám může zbýt po nákladech')}
                         <strong data-testid={company ? 'net-benefit' : 'partner-benefit'}>{formatMoney(Math.abs(amount))}</strong>

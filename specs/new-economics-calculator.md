@@ -8,7 +8,7 @@ Oba režimy používají stejný model. **Pro mou firmu** porovnává ruční pr
 
 ## Rychlá kalkulačka
 
-Na `/[locale]` výchozí firemní režim; na `/[locale]/partnership` partnerský. Výchozí scénář účetní podklady, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, vlastní světlý povrch, oddělený kontrastní výsledkový blok. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
+Na `/[locale]` výchozí firemní režim; na `/[locale]/partnership` partnerský. Výchozí scénář účetní podklady, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, jeden společný tmavě modrý povrch pro nadpis, vstupy, výsledek a akce. Výsledek odděluje jemná linka, nemá další zaoblenou kartu ani vlastní stín. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
 
 Viditelné vstupy jsou pouze scénář a nejdůležitější čísla. Firma: objem práce a náklad na člověka za hodinu. Partner: počet aktivních klientů a servis za klienta. Objem/počet klientů lze upravit číslem i posuvníkem. Partnerský podíl je viditelně **pevně 20 %**, bez výběru.
 
@@ -117,3 +117,5 @@ Běžná čísla 0–1e9; kurz 0,01–1 000; Business horizont celé 1–120; pr
 Rozpracované prázdné číselné pole nesmí vyvolat NaN/Infinity. Záporné výsledky jsou skutečně zobrazené a doplněné správným slovním významem. Nuloví klienti mají nulové tržby, ale zachovanou fixní režii. Nulový objem práce nevynuluje fixní náklady a dohled.
 
 Kč v UI zaokrouhlit na celé koruny, čas/návratnost na jedno desetinné místo. Výpočet zachovává přesné hodnoty, PDF může ukázat haléře. Součet jednotlivě zaokrouhlených řádků se může o korunu lišit; mezisoučty se znovu nepřičítají jako další náklady. Výše úspor není slibem nových tržeb z publikovaného obsahu.
+
+Večerní upřesnění 25. října 2026: „pop-up“ zde znamená vizuálně vystupující panel v běžném toku stránky, nikoli modální okno. Formulář, jeho chování a původní jednotky/model zůstávají zachované; sjednocuje se prezentace celého nástroje.

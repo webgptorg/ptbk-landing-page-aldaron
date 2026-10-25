@@ -1,0 +1,30 @@
+/* One elevated surface for the whole calculator, including its result and actions. */
+.panel{--panel-muted:#c0cddd;--panel-line:#ffffff26;background:radial-gradient(ellipse at 0 0,#344e74,transparent 65%),#1c2b46;color:#f4f7fd;border-color:#324768!important;box-shadow:0 6px 16px #1b284815,0 34px 72px -28px #1c2b4659!important}
+.panel h2,.panel h3,.panel label{color:#f4f7fd}
+.panel p,.panel small{color:var(--panel-muted)}
+.panel [role=tablist]{background:#ffffff0c;border-color:var(--panel-line)}
+.panel [role=tab]{color:#d4deed}
+.panel [role=tab][aria-selected=true]{background:#f3f6fb;color:#142540;box-shadow:none}
+.panel input,.panel select{background:#f6f8fc;color:#182b48;border-color:#aabbd1}
+.panel input[type=range]{accent-color:#aacbff;background:transparent}
+.panel :focus-visible{outline-color:#b9d9ff}
+.panel.panel a{color:#e0eaff!important}
+.panel button{color:#e0eaff}
+.panel button:not([role=tab]){border-color:#617694}
+.panel button:not([role=tab]):hover{color:#fff}
+.panel :global(button[class*="secondaryButton"]){background:#edf3fc;color:#182b48}
+.panel :global(button[class*="secondaryButton"]):hover{background:#fff;color:#182b48}
+.panel .results{border-inline-start:1px solid var(--panel-line);padding-inline-start:32px}
+.panel .result{background:transparent!important;border-radius:0!important;box-shadow:none!important;padding:0!important}
+.panel .result p,.panel .result small{color:var(--panel-muted)}
+.panel .result strong{color:#f4f7fd}
+.panel .result.negative{color:#ffd2c2}
+.panel .result.negative strong{color:#ffd2c2}
+.panel details,.panel dl>div{border-color:var(--panel-line)}
+.panel details p{color:var(--panel-muted)}
+.panel :global([class*="fixedShare"]){background:#ffffff0c}
+.panel :global([class*="calcMetrics"]){border-color:var(--panel-line)}
+@media(max-width:760px){
+ .panel .results{border-inline-start:0;border-block-start:1px solid var(--panel-line);padding-inline-start:0;padding-block-start:26px}
+}
+@media(forced-colors:active){.panel{background:Canvas;color:CanvasText;border:1px solid CanvasText!important}.panel h2,.panel h3,.panel label,.panel p,.panel small,.panel .result strong{color:CanvasText}.panel .results{border-color:CanvasText}}

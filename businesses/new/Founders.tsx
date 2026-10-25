@@ -51,6 +51,7 @@ export function Founders({ compact = false }: { compact?: boolean }) {
                         <h3>{person.name}</h3>
                         <p className={s.role}>{t(person.role)}</p>
                         {!compact && <p className={s.description}>{t(person.description)}</p>}
+                        <div className={s.contactBlock}>
                         <address className={s.contacts}>
                             <a href={`mailto:${person.email}`}><Mail size={15} aria-hidden="true" />{person.email}</a>
                             <a href={`tel:${person.phoneHref}`}><Phone size={15} aria-hidden="true" />{person.phone}</a>
@@ -58,6 +59,7 @@ export function Founders({ compact = false }: { compact?: boolean }) {
                         <LeadButton secondary className={s.action} topic={`${person.name} — ${t(person.action)}`}>
                             {t(person.action)}
                         </LeadButton>
+                        </div>
                     </div>
                 </article>
             ))}

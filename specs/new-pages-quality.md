@@ -49,7 +49,7 @@ Po přepnutí jsou veřejné marketingové stránky indexovatelné a zahrnuté v
 - Původních pět agend a jejich správné detaily zůstává funkčních. Modelová data se nevydávají za zákaznické výsledky.
 - Hlavní kontaktní akce sbírá nezávazný zájem a uvádí dostupnost aplikace; menší odkaz vede na lokalizovanou instalaci s npm, shell a Windows EXE volbami.
 - Oba zakladatelé mají rovnocenné role, větší zrcadlové portréty u spodní hrany karet a kontakty. Všech šest nezměněných referencí je v jedné mřížce se správnými atribucemi. Praha 13 se veřejně nevyskytuje a Technologická inkubace zůstává v patičce. Hlavička i patička mají původní logo a dvoubarevné `promptbook` bez tečky.
-- Ceny v kartách zůstávají Start 418 Kč / 19 USD na 30 dní a Business 2 200 Kč / 100 USD za prostředí/měsíc. Česká veřejná nabídka neobsahuje vysvětlivku o přepočtu; interní převodní konstanta a model kalkulačky se nemění. Podíl 20 %, smluvní podmínky, SLA a BUSL se brandingem nemění.
+- Ceny v kartách zůstávají Start 400 Kč / 19 USD na 30 dní a Business 2 200 Kč / 100 USD za prostředí/měsíc. Česká veřejná nabídka neobsahuje vysvětlivku o přepočtu; interní převodní konstanta a model kalkulačky se nemění. Podíl 20 %, smluvní podmínky, SLA a BUSL se brandingem nemění.
 - Srovnání mají primární zdroje a skutečné datum kontroly, bez popírání schopností alternativ.
 - Mini kalkulačka má jen hlavní vstupy, správně popsaný benefit a přechod na pokročilou. Parametry se zachovají včetně neviditelných.
 - URL round-trip, reload a historie obnoví všechna známá pole. Neznámé hodnoty, NaN/Infinity, prototype keys a přepis provize jsou odmítnuté/normalizované.

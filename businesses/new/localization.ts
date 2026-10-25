@@ -33,5 +33,6 @@ export function formatCurrency(czk: number, locale: SiteLocale, exchangeRate: nu
     }).format(locale === 'cs' ? czk : czk / exchangeRate);
 }
 export function licencePrice(plan: 'start' | 'business', locale: SiteLocale) {
+    if (locale === 'cs' && plan === 'start') return formatCurrency(COMMERCIAL_TERMS.startCzk, locale);
     return formatCurrency(COMMERCIAL_TERMS[plan === 'start' ? 'startUsd' : 'businessUsd'] * COMMERCIAL_TERMS.displayCzkPerUsd, locale);
 }

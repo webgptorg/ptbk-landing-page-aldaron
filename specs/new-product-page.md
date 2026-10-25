@@ -12,7 +12,7 @@ Nejnovější zadání z 25. října 2026 vybírá světlý blueprint pro tři p
 4. Porovnatelné cenové karty Start a Business ze společných obchodních konstant. Opakující sekce „Jedna agenda / Všechno pro její provoz“ se nevykresluje; podrobnosti jsou na samostatných stránkách.
 5. Rychlá kalkulačka ve firemním režimu podle [specifikace ekonomiky](new-economics-calculator.md).
 6. Jedna mřížka všech šesti referencí: jeden autor a citace v jedné kartě. Slezská univerzita je další kartou ve stejném uspořádání, bez dělení na produktové a osobní nadpisy.
-7. Jednoduchý nadpis **Kontakt**, oba rovnocenní zakladatelé s většími zrcadlovými portréty, rolemi, e-maily, telefony a odkazem na příběh. Jiří vlevo s textem vpravo; Pavol vpravo s textem vlevo. Spodní okraj postavy lícuje se spodním okrajem karty.
+7. Jednoduchý nadpis **Kontakt**, oba rovnocenní zakladatelé s většími zrcadlovými portréty, rolemi, e-maily a telefony; odkaz na příběh je až pod jejich kartami. Jiří vlevo s textem vpravo; Pavol vpravo s textem vlevo. Spodní okraj postavy lícuje se spodním okrajem karty.
 8. Viditelný formulář **Napište nám** přímo na stránce, který doplňuje existující pop-up. Společná patička obsahuje původní logo i Technologickou inkubaci.
 
 Úvod neobsahuje plné SLA, dlouhé FAQ, roadmapové odznaky ani pokyn psát knihu. [Partnerství](new-partnership-page.md) má stejnou vizuální péči, příběhy a scénu vlastnictví. Instalace má vlastní [specifikaci](new-open-source-page.md).
@@ -69,7 +69,7 @@ Samostatně vysvětlit údaje v kalkulačce, veřejnost sdíleného odkazu a ulo
 
 Příběh vychází z popisu zakladatele v konverzaci: od chatbotů na webu přes jednotlivé agentní úkoly k dlouhodobým agendám. Opakované zadávání zůstávalo problémem, proto má agent průběžný okruh práce. Technologie stojí na coding harnesses a pracovních souborech; partner zajišťuje konkrétní klientské řešení. Vlastní pracovní kontext a možnost volby modelu jsou záměr produktu.
 
-Nevymýšlet letopočty, první zákazníky, obraty, osobní historky ani přímé citace. Bez cizích referencí či statistik jako náhražky příběhu.
+Letopočty použít pouze z ověřených zdrojů; nevymýšlet první zákazníky, obraty, osobní historky ani přímé citace. Bez cizích referencí či statistik jako náhražky příběhu.
 
 **Jiří Jahn — spoluzakladatel · obchod** a **Pavol Hejný — spoluzakladatel · technologie** mají stejnou velikost karty, portrétu, jména a CTA. Oba jsou rovnocenní zakladatelé. Použít fotografie a ověřené kontakty ze stávajícího webu: Jiří `jiri@ptbk.io`, `+420 777 090 067`; Pavol `pavol@ptbk.io`, `+420 777 759 767` (zdroj `components/team-section.tsx`). Kontakty jsou čitelné a použitelné jako běžné e-mailové/telefonní odkazy. Marketingová tlačítka nadále otevírají kontaktní formulář s tématem a jménem adresáta. Portréty jsou větší, zrcadlově rozmístěné a lícují se spodní hranou karet.
 
@@ -82,3 +82,9 @@ Běžná obsluha bez programování; agenda vs. chatbot; vypnutý notebook vs. s
 `/[locale]/soukromi` a `/[locale]/podminky` vykreslují stejné stávající právní dokumenty společnosti v novém rámu. Žádné zkrácení práv, nová licence nebo nové právní tvrzení odvozené pouze z marketingového copy. Právní odkazy v původním obsahu se zachovávají.
 
 `[locale]` znamená `cs` nebo `en`; obě verze mají rovnocenný obsah a funkční lokalizované odkazy.
+
+## Večerní zpřesnění — 25. října 2026
+
+Druhý řádek hero nastoupí se zpožděním jako pointa, za ním sdělení o vlastní AI a kontrole. Místo pro text je rezervované, při redukovaném pohybu je vše viditelné ihned. Taby ukázek pojmenovávají práci: Správa podcastu / Péče o kontakty / Údržba webu a anglické protějšky. Na desktopu se celý příběh rozehraje od začátku po dosažení čitelné části obrazovky a dokončí se jednou. Na mobilu se jednotlivé části odhalují až při doscrollování k nim; výsledek nedoběhne mimo obrazovku. Návrat k opuštěné ukázce začne znovu.
+
+U Jiřího se na mobilu kontaktní blok zarovná dolů doprava s odstupem od postavy a okrajů. Siluety vystupující z karet a jejich spodní zarovnání zůstávají. Stránka příběhu nově obsahuje stručnou chronologii po ověřených letech 2023–2026 od WebGPT; nahrazuje předchozí abstraktní esej. Podklady letopočtů jsou v new-pages-sources.md.
