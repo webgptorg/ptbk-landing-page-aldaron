@@ -13,8 +13,9 @@ beforeEach(() => {
     vi.useFakeTimers();
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
     const motionUpdates: Array<(value: boolean) => void> = [], widthUpdates: Array<(value: boolean) => void> = [];
-    changeMotion = value => motionUpdates.forEach(update => update(value));
-    changeWidth = value => widthUpdates.forEach(update => update(value));
+    let reducedValue = false, mobileValue = false;
+    changeMotion = value => { reducedValue = value; motionUpdates.forEach(update => update(value)); };
+    changeWidth = value => { mobileValue = value; widthUpdates.forEach(update => update(value)); };
     vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
     vi.stubGlobal('IntersectionObserver', class {
         constructor(callback: IntersectionObserverCallback) {
@@ -25,7 +26,7 @@ beforeEach(() => {
     });
     vi.stubGlobal('matchMedia', (query: string) => {
         const media = {
-            matches: false,
+            matches: query.includes('reduced-motion') ? reducedValue : mobileValue,
             addEventListener: (_: string, callback: () => void) => {
                 const update = (matches: boolean) => { media.matches = matches; callback(); };
                 if (query.includes('reduced-motion')) motionUpdates.push(update);
@@ -39,51 +40,71 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('light blueprint stories', () => {
-    it('allows keyboard story selection and keeps the work inside the illustration in both languages', () => {
+    it('uses the requested order and keyboard navigation in both languages, without playback controls', () => {
         const { rerender } = render(<BrandStories />);
-        const panel = () => screen.getByRole('tabpanel');
-        expect(panel().textContent).toContain('Zveřejněný díl');
-        fireEvent.keyDown(screen.getByRole('tab', { name: 'Správa podcastu' }), { key: 'ArrowRight' });
-        expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Péče o kontakty' }));
-        expect(panel().textContent).toContain('Jana Nováková');
+        expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual(['Péče o kontakty', 'Správa podcastů', 'Údržba webu']);
+        expect(screen.getByRole('heading', { name: 'Co za vás agenti zvládnou' })).toBeTruthy();
+        expect(screen.getByRole('tabpanel').textContent).toContain('Jana Nováková');
+        fireEvent.keyDown(screen.getByRole('tab', { name: 'Péče o kontakty' }), { key: 'ArrowRight' });
+        expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Správa podcastů' }));
+        const panel = screen.getByRole('tabpanel');
+        expect(panel.textContent).toContain('AI ta Krajta');
+        expect(panel.textContent).not.toMatch(/Zveřejněný díl|PG|ŠP|UKÁZKA/);
+        expect(screen.queryByRole('button', { name: /animaci/ })).toBeNull();
         fireEvent.keyDown(document.activeElement!, { key: 'End' });
-        expect(panel().textContent).toContain('contact-form.ts');
-        expect(panel().querySelectorAll('button,h2,p')).toHaveLength(0);
+        expect(panel.textContent).toContain('contact-form.ts');
         rerender(<SiteLocaleProvider locale="en"><BrandStories /></SiteLocaleProvider>);
-        expect(screen.getByRole('tab', { name: 'Website maintenance' })).toBeTruthy();
-        expect(panel().textContent).toContain('Published episode');
+        expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual(['Contact follow-up', 'Podcast management', 'Website maintenance']);
     });
 
-    it('waits until readable, pauses, restarts on re-entry and stops at the completed result', () => {
+    it('types actual content only when readable, pauses while hidden and retains the completed scene', () => {
         render(<BrandStories />);
         const panel = screen.getByRole('tabpanel');
+        const typed = () => Array.from(panel.querySelectorAll('[data-typing]')).map(node => node.textContent).join('');
         act(() => intersect(true, .15));
         act(() => vi.advanceTimersByTime(20000));
-        expect(panel.getAttribute('data-step')).toBe('0');
+        expect(typed()).toBe('');
         act(() => intersect(true));
-        act(() => vi.advanceTimersByTime(4500));
-        expect(panel.getAttribute('data-step')).toBe('1');
-        fireEvent.click(screen.getByRole('button', { name: 'Pozastavit animaci' }));
-        act(() => vi.advanceTimersByTime(20000));
-        expect(panel.getAttribute('data-step')).toBe('1');
-        fireEvent.click(screen.getByRole('button', { name: 'Přehrát animaci' }));
-        act(() => intersect(false));
-        act(() => vi.advanceTimersByTime(20000));
-        expect(panel.getAttribute('data-step')).toBe('0');
-        act(() => intersect(true));
+        act(() => vi.advanceTimersByTime(2200));
+        const partial = typed();
+        expect(partial.length).toBeGreaterThan(0);
+        expect(partial).not.toContain('Dobrý den, Jano,');
         Object.defineProperty(document, 'hidden', { configurable: true, value: true });
         fireEvent(document, new Event('visibilitychange'));
         act(() => vi.advanceTimersByTime(20000));
-        expect(panel.getAttribute('data-step')).toBe('0');
+        expect(typed()).toBe(partial);
         Object.defineProperty(document, 'hidden', { configurable: true, value: false });
         fireEvent(document, new Event('visibilitychange'));
-        act(() => vi.advanceTimersByTime(13500));
+        act(() => vi.advanceTimersByTime(6000));
         expect(panel.getAttribute('data-step')).toBe('3');
-        act(() => vi.advanceTimersByTime(20000));
+        expect(typed()).toContain('Dobrý den, Jano,');
+        const complete = typed();
+        act(() => intersect(false));
+        act(() => intersect(true));
+        act(() => vi.advanceTimersByTime(10000));
+        expect(typed()).toBe(complete);
+    });
+
+    it('restarts a partially seen desktop scene and really generates code and the form', () => {
+        render(<BrandStories />);
+        fireEvent.click(screen.getByRole('tab', { name: 'Údržba webu' }));
+        const panel = screen.getByRole('tabpanel');
+        act(() => vi.advanceTimersByTime(1800));
+        expect(panel.textContent).toContain('con');
+        expect(panel.textContent).not.toContain('validate(email)');
+        act(() => intersect(false));
+        expect(panel.getAttribute('data-step')).toBe('0');
+        act(() => intersect(true));
+        act(() => vi.advanceTimersByTime(5000));
+        expect(panel.textContent).toContain('validate(email)');
+        expect(panel.textContent).not.toContain('Poptávka odeslána');
+        act(() => vi.advanceTimersByTime(3000));
+        expect(panel.textContent).toContain('jana@example.cz');
+        expect(panel.textContent).toContain('Poptávka odeslána');
         expect(panel.getAttribute('data-step')).toBe('3');
     });
 
-    it('waits for each mobile panel instead of playing the unseen remainder on a timer', () => {
+    it('waits for each mobile panel and never types an offscreen result', () => {
         let reached = 0;
         vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
             const index = this.getAttribute('data-bp-stage');
@@ -95,36 +116,41 @@ describe('light blueprint stories', () => {
         act(() => changeWidth(true));
         act(() => vi.advanceTimersByTime(32));
         const panel = screen.getByRole('tabpanel');
+        const result = () => panel.querySelector('[data-bp-stage="2"] [data-typing]')?.textContent;
         act(() => vi.advanceTimersByTime(20000));
         expect(panel.getAttribute('data-step')).toBe('0');
+        expect(result()).toBe('');
         reached = 1; fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
+        act(() => vi.advanceTimersByTime(5000));
         expect(panel.getAttribute('data-step')).toBe('1');
-        act(() => vi.advanceTimersByTime(20000));
-        expect(panel.getAttribute('data-step')).toBe('1');
+        expect(result()).toBe('');
         reached = 2; fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
-        expect(panel.getAttribute('data-step')).toBe('2');
+        const partial = result();
+        expect(partial?.length).toBeGreaterThan(0);
         reached = 0; fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
         act(() => vi.advanceTimersByTime(5000));
+        expect(result()).toBe(partial);
         expect(panel.getAttribute('data-step')).toBe('2');
         reached = 2; fireEvent.scroll(window);
         act(() => vi.advanceTimersByTime(32));
-        act(() => vi.advanceTimersByTime(4500));
+        act(() => vi.advanceTimersByTime(4000));
         expect(panel.getAttribute('data-step')).toBe('3');
+        expect(result()).toContain('Dobrý den, Jano,');
     });
 
-    it('shows the completed story with reduced motion and rearranges mobile artwork', () => {
+    it('shows complete static text with reduced motion and rearranges mobile artwork', () => {
         render(<BrandStories />);
         act(() => { changeMotion(true); changeWidth(true); });
         fireEvent.click(screen.getByRole('tab', { name: 'Údržba webu' }));
-        act(() => vi.advanceTimersByTime(30000));
         const panel = screen.getByRole('tabpanel');
         expect(panel.getAttribute('data-step')).toBe('3');
-        expect((screen.getByRole('button', { name: 'Přehrát animaci' }) as HTMLButtonElement).disabled).toBe(true);
         expect(panel.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 340 1030');
         expect(panel.textContent).toContain('07:30');
+        expect(panel.textContent).toContain('validate(email)');
+        expect(panel.textContent).toContain('Poptávka odeslána');
     });
 
     it('keeps app and engine choices independent and the engine present when the app sleeps', () => {

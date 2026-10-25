@@ -4,6 +4,14 @@ import { calculatorPath, changeScenario, defaultCalculatorState, NUMERIC_KEYS, p
 import { createCalculationPdfDefinition } from './calculationPdf';
 
 describe('complete public calculator state', () => {
+    it('starts with the social preset while preserving explicit saved scenarios', () => {
+        const state = defaultCalculatorState();
+        expect(state.scenario).toBe('social');
+        expect(state.input).toMatchObject(SCENARIOS.social.defaults);
+        const saved = parseCalculatorState(new URLSearchParams('scenario=documents'));
+        expect(saved.scenario).toBe('documents');
+        expect(saved.input).toMatchObject(SCENARIOS.documents.defaults);
+    });
     it('round-trips all fields, mode, scenario and hidden values', () => {
         const state = changeScenario(defaultCalculatorState('partner'),'video');
         state.input = { ...state.input, plan:'start', aiBilling:'subscription', costPayer:'partner',
@@ -24,7 +32,7 @@ describe('complete public calculator state', () => {
     });
     it('bounds URL numbers and falls back for non-finite input', () => {
         const state = parseCalculatorState(new URLSearchParams('volume=NaN&clients=-2&refundPercent=150&horizonMonths=24.9&exchangeRate=Infinity&hostingCzk=-1'));
-        expect(state.input.volume).toBe(300);expect(state.input.clients).toBe(0);
+        expect(state.input.volume).toBe(20);expect(state.input.clients).toBe(0);
         expect(state.input.refundPercent).toBe(100);expect(state.input.horizonMonths).toBe(24);
         expect(state.input.exchangeRate).toBe(22);expect(state.input.hostingCzk).toBe(0);
     });

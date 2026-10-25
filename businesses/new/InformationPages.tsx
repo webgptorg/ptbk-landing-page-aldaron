@@ -46,7 +46,7 @@ export function StoryPage(){
 }
 
 export function SecurityPage(){
-    const { t, path } = useSiteLocale();
+    const { t, path, locale } = useSiteLocale();
     return <>
         <PageIntro title={t("Kontext zůstává váš.")}>{t("Vlastní soubory a agenti. Oddělené ovládání. Jasná hranice mezi přenosem do aplikace a použitím AI modelu.")}</PageIntro>
         <OwnershipScene />
@@ -67,6 +67,9 @@ export function SecurityPage(){
             <h2>{t("Oprávnění a kontrola patří vám")}</h2>
             <p>{t("S partnerem nastavíte, ke kterým účtům agenda smí, co může provést sama a kdy si vyžádá schválení. Návrh odpovědi a její odeslání jsou odlišné kroky. Citlivé operace nemusíte pouštět bez kontroly.")}</p>
             <p>{t("Vlastní provoz znamená také odpovědnost za přístupová práva, aktualizace, zálohy a zařízení, na kterém obsah zobrazujete. Veřejný kód umožňuje kontrolu implementace; sám o sobě není bezpečnostní certifikací.")}</p>
+            <h2>{locale === 'en' ? 'Want to look under the hood?' : 'Chcete znát technické detaily?'}</h2>
+            <p><a href={ENGINE_REPOSITORY}>{locale === 'en' ? 'Explore the public code on GitHub' : 'Prohlédněte si veřejný kód na GitHubu'} ↗</a></p>
+            <div className={s.actions}><LeadButton topic={locale === 'en' ? 'Architecture and data control — a question for Pavol' : 'Architektura a kontrola nad daty — dotaz pro Pavola'}>{locale === 'en' ? 'Ask Pavol about the architecture' : 'Probrat architekturu s Pavolem'}</LeadButton></div>
             <h2>{t("Data v této kalkulačce")}</h2>
             <p>{t("Výpočet probíhá v prohlížeči. Sdílený odkaz pokročilé kalkulačky obsahuje zadané parametry. Po vyžádání PDF uložíme e-mail a odkaz na výpočet do našeho kontaktního systému; nejde o přihlášení k newsletteru. E-mail do sdíleného odkazu ani PDF nevkládáme.")}</p>
             <Link href={path('soukromi')}>{t("Jak zpracováváme osobní údaje →")}</Link>

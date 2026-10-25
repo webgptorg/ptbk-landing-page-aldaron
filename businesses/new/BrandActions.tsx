@@ -16,10 +16,7 @@ export function BrandActions({ partner = false }: { partner?: boolean }) {
             {en ? (partner ? 'Bring Promptbook to my clients' : 'I’m interested in Promptbook') : (partner ? 'Chci nasazovat klientům' : 'Chci Promptbook')}
         </LeadButton>
         <Link className={s.installLink} href={path('open-source')}>
-            {en ? 'or install the engine yourself' : 'nebo si nainstalujte engine u sebe'} <span aria-hidden="true">↗</span>
+            <span>{en ? 'or install the engine yourself' : 'nebo si nainstalujte engine u sebe'}</span><span aria-hidden="true">↗</span>
         </Link>
-        <p className={s.enquiryNote}>{en
-            ? 'No commitment. We’ll get in touch and let you know when the app is available.'
-            : 'Nezávazně. Ozveme se vám a dáme vědět, až bude aplikace dostupná.'}</p>
     </div>;
 }

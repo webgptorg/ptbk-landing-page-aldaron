@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Handshake, Layers, Users } from 'lucide-react';
+import { ArrowRight, Handshake, Layers, ShieldCheck, Users } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { useSiteLocale } from './LocaleProvider';
 import { licencePrice, formatCurrency } from './localization';
 import { COMMERCIAL_TERMS } from './commercialTerms';
@@ -9,7 +10,6 @@ import { EconomicsCalculator } from './EconomicsCalculator';
 import { Founders } from './Founders';
 import { BrandActions } from './BrandActions';
 import { BrandStories } from './BrandStories';
-import { OwnershipScene } from './OwnershipScene';
 import { BrandTestimonials } from './BrandTestimonials';
 import { PricingCards } from './MarketingSections';
 import { InlineContactForm } from './InlineContactForm';
@@ -19,20 +19,23 @@ import b from './brand.module.css';
 export function NewLandingPage({ partnership = false, showTestimonials = true }: { partnership?: boolean; showTestimonials?: boolean }) {
     const { locale, path } = useSiteLocale();
     const en = locale === 'en';
+    const reveal = partnership ? (en ? 'Our technology' : 'Naše technologie') : (en ? 'Now it works for you' : 'Teď pracuje pro vás');
+    const promise = en ? ['Your AI.', 'On your machine.', 'Under your control.'] : ['Vaše AI.', 'Na vašem stroji.', 'Pod vaší kontrolou.'];
+    const intro = partnership
+        ? (en ? 'Bring clients AI that takes care of ongoing work. You know their business. We provide the engine, app and product support. You earn from your services and a share of their licence.' : 'Dodávejte klientům AI, která se průběžně stará o jejich práci. Vy znáte jejich podnikání. My dodáváme engine, aplikaci a produktovou podporu. Vyděláváte na svých službách i podílu z licence.')
+        : (en ? 'Hand over a responsibility, set the rules and let work move forward. Your agents follow up, find the next step and bring you the decisions that need you.' : 'Předáte agendu, nastavíte pravidla a práce pokračuje. Vaši agenti navazují, hledají další kroky a přinášejí vám rozhodnutí, ke kterým potřebují vás.');
     return <div className={b.brandPage}>
         <section className={b.hero} aria-labelledby="brand-heading" data-testid="brand-hero">
-            <h1 id="brand-heading">{partnership ? (en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby') : (en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali')}<span className={b.heroReveal}>{partnership ? (en ? 'Our technology' : 'Naše technologie') : (en ? 'Now it works for you' : 'Teď pracuje pro vás')}</span></h1>
-            <p className={`${b.promise} ${b.heroPromise}`}>{en ? 'Your AI. On your machine. Under your control.' : 'Vaše AI. Na vašem stroji. Pod vaší kontrolou.'}</p>
-            <p className={b.intro}>{partnership
-                ? (en ? 'Bring clients AI that takes care of ongoing work. You know their business. We provide the engine, app and product support. You earn from your services and a share of their licence.' : 'Dodávejte klientům AI, která se průběžně stará o jejich práci. Vy znáte jejich podnikání. My dodáváme engine, aplikaci a produktovou podporu. Vyděláváte na svých službách i podílu z licence.')
-                : (en ? 'Hand over a responsibility, set the rules and let work move forward. Your agents follow up, find the next step and bring you the decisions that need you.' : 'Předáte agendu, nastavíte pravidla a práce pokračuje. Vaši agenti navazují, hledají další kroky a přinášejí vám rozhodnutí, ke kterým potřebují vás.')}</p>
+            <h1 id="brand-heading">{partnership ? (en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby') : (en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali')}<span className={b.heroReveal}>{reveal.split(' ').map((word, index) => <span key={index} className={b.heroWord} style={{ '--word': index } as CSSProperties}>{word}{' '}</span>)}</span></h1>
+            <p className={b.promise}><Link className={b.ownershipPromise} href={path('bezpecnost')}>{promise.map((phrase, index) => <span key={phrase} className={b.heroPhrase} style={{ '--phrase': index } as CSSProperties}>{phrase}{' '}</span>)}</Link></p>
+            <TypedIntro text={intro}/>
             <BrandActions partner={partnership}/>
             <Link className={b.partnerLink} href={path(partnership ? '' : 'partnership')}>
                 {partnership ? (en ? 'Explore Promptbook' : 'Prohlédnout Promptbook') : (en ? 'For partners · 20% licence share' : 'Pro partnery · 20% podíl z licencí')}<ArrowRight size={15}/>
             </Link>
         </section>
         <BrandStories partnership={partnership}/>
-        <OwnershipScene/>
+        <Link className={b.securityTeaser} href={path('bezpecnost')}><ShieldCheck size={22} strokeWidth={1.5} aria-hidden="true"/><span>{en ? 'Your data stays yours.' : 'Vaše data jsou opravdu vaše.'}</span><span className={b.securityTeaserLink}>{en ? 'How it works' : 'Jak to funguje'}<ArrowRight size={16}/></span></Link>
         {partnership && <PartnerOffer/>}
         <section className={b.pricing} id="cenik" aria-labelledby="pricing-heading">
             <h2 id="pricing-heading">{en ? 'Plans' : 'Ceník'}</h2>
@@ -48,6 +51,18 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
         </section>
         <InlineContactForm partnership={partnership}/>
     </div>;
+}
+
+/** Reserve the final line breaks while characters arrive. Assistive technology reads one complete sentence. */
+function TypedIntro({ text }: { text: string }) {
+    let index = 0;
+    return <p className={b.intro}>
+        <span className={b.srOnly}>{text}</span>
+        <span aria-hidden="true" className={b.heroTyping}>{text.split(/(\s+)/).map((word, wordIndex) => /^\s+$/.test(word) ? word : <span key={wordIndex} className={b.typedWord}>{Array.from(word).map(character => {
+            const letter = index++;
+            return <span key={letter} className={b.typedLetter} style={{ '--letter': letter } as CSSProperties}>{character}</span>;
+        })}</span>)}</span>
+    </p>;
 }
 
 /** Partner responsibilities and the existing, fixed commercial share. */

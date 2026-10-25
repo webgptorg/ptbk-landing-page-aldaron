@@ -5,7 +5,7 @@ import { useSiteLocale } from './LocaleProvider';
 import s from './blueprint-scene.module.css';
 
 export type BlueprintKind = 'podcast' | 'relationships' | 'development' | 'engine';
-type Props = { kind: BlueprintKind; step: number; visibleStage?: number; appPlace?: number; enginePlace?: number; asleep?: boolean };
+type Props = { kind: BlueprintKind; step: number; visibleStage?: number; progress?: number[]; appPlace?: number; enginePlace?: number; asleep?: boolean };
 const titles = {
     cs: { podcast: 'Od nového dílu k publikovaným příspěvkům', relationships: 'Od nové příležitosti k osobnímu oslovení', development: 'Od večerního hašení k rannímu řešení', engine: 'Vaše aplikace a váš engine' },
     en: { podcast: 'From a new episode to published posts', relationships: 'From a new opportunity to a personal email', development: 'From an evening report to a morning fix', engine: 'Your app and your engine' },
@@ -14,6 +14,21 @@ const titles = {
 function Copy({ x = 0, y = 0, lines, variant = 'body', gap = 23 }: { x?: number; y?: number; lines: string[]; variant?: 'body' | 'small' | 'title' | 'label' | 'mono' | 'accentText'; gap?: number }) {
     return <text x={x} y={y} className={s[variant]}>{lines.map((line, i) => <tspan key={i} x={x} dy={i ? gap : 0}>{line}</tspan>)}</text>;
 }
+
+/** Actual text content grows; no opacity mask can reveal an already written sentence. */
+function TypingCopy({ x = 0, y = 0, lines, progress, variant = 'body', gap = 23 }: { x?: number; y?: number; lines: string[]; progress: number; variant?: 'body' | 'small' | 'title' | 'label' | 'mono'; gap?: number }) {
+    const length = lines.reduce((sum, line) => sum + line.length, 0);
+    const count = Math.floor(Math.max(0, Math.min(1, progress)) * length);
+    let offset = 0;
+    const cursorLine = lines.findIndex((line, index) => count < lines.slice(0, index + 1).reduce((sum, value) => sum + value.length, 0) || index === lines.length - 1);
+    return <text x={x} y={y} className={s[variant]} xmlSpace="preserve" data-typing="true">{lines.map((line, index) => {
+        const text = line.slice(0, Math.max(0, count - offset));
+        offset += line.length;
+        return <tspan key={index} x={x} dy={index ? gap : 0} className={variant === 'mono' ? (line.startsWith('+') ? s.codeAdded : line.startsWith('−') ? s.codeRemoved : undefined) : undefined}>{text}{progress > 0 && progress < 1 && index === cursorLine && <tspan className={s.cursor}>▎</tspan>}</tspan>;
+    })}</text>;
+}
+const part = (progress: number, start: number, end: number) => Math.max(0, Math.min(1, (progress - start) / (end - start)));
+
 function Check({ x, y, active = true }: { x: number; y: number; active?: boolean }) {
     return <g transform={'translate('+x+' '+y+')'} className={s.working} data-active={active}><circle r="11" className={s.fill}/><path d="m-5 0 3.5 4 7-8" className={s.strong}/></g>;
 }
@@ -21,47 +36,48 @@ function Route({ d, active = true }: { d: string; active?: boolean }) {
     return <g><path d={d} className={s.route}/>{active && <path d={d} className={s.signal} pathLength="100"/>}</g>;
 }
 function Panel({ label, children, height = 260 }: { label: string; children: ReactNode; height?: number }) {
-    return <g><path d={'M0 0 12-9H282V'+(height-9)+'l-12 9'} className={s.dim}/><rect width="270" height={height} rx="6" className={s.fill}/><path d="M0 36H270" className={s.dim}/><circle cx="16" cy="18" r="2"/><circle cx="25" cy="18" r="2"/><circle cx="34" cy="18" r="2"/><Copy x={48} y={23} lines={[label]} variant="small"/>{children}</g>;
+    return <g className={s.window}><path d={'M0 0 12-9H282V'+(height-9)+'l-12 9'} className={s.dim}/><rect width="270" height={height} rx="6" className={s.fill}/><path d="M0 36H270" className={s.dim}/><circle cx="16" cy="18" r="2"/><circle cx="25" cy="18" r="2"/><circle cx="34" cy="18" r="2"/><Copy x={48} y={23} lines={[label]} variant="small"/>{children}</g>;
 }
 function Microphone() {
     return <g transform="translate(211 103)"><rect x="-17" y="-35" width="34" height="65" rx="17" className={s.panel}/><path d="M-25 8v8a25 25 0 0 0 50 0V8M0 42v21m-19 0h38" className={s.strong}/>{[-17,-7,3,13].map(y => <path key={y} d={'M-9 '+y+'H9'} className={s.dim}/>)}</g>;
 }
-function Waveform({ y = 203 }: { y?: number }) {
-    return <g>{Array.from({length:23},(_,i) => <path key={i} d={'M'+(24+i*9.5)+' '+(y+((i*17)%37)/2)+'v-'+(8+(i*17)%37)} className={s.wave} style={{'--i':i} as CSSProperties}/>)}</g>;
+function Waveform({ y = 205 }: { y?: number }) {
+    const peaks = [9,15,7,28,41,24,12,35,51,32,16,8,22,46,57,38,19,30,48,25,11,18,43,33,56,40,21,10,29,47,35,14,23,52,37,17,8,31,20,11];
+    return <g>{peaks.map((height, index) => <rect key={index} x={21 + index * 5.8} y={y - height / 2} width="3.2" height={height} rx="1.6" className={s.wave} style={{ '--i': index, '--a': .2 + (index * 13 % 31) / 40, '--b': .25 + (index * 19 % 29) / 40, '--c': .15 + (index * 7 % 37) / 45 } as CSSProperties}/>)}</g>;
 }
-function Podcast({ step, mobile, en }: { step: number; mobile: boolean; en: boolean }) {
+function Podcast({ step, progress, mobile, en }: { step: number; progress: number[]; mobile: boolean; en: boolean }) {
     return <>
         <g data-bp-stage="0" transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label={en ? 'New episode' : 'Nový díl'}>
                 <Copy x={20} y={68} lines={['AI ta Krajta']} variant="label"/>
                 <Copy x={20} y={110} lines={en ? ['What can AI','do for you?'] : ['Co už AI','umí za vás?']} variant="title" gap={29}/>
-                <Microphone/><Copy x={20} y={168} lines={['PH  ·  PG  ·  ŠP']} variant="small"/>
-                <Waveform/><Copy x={20} y={240} lines={[en ? 'Published episode' : 'Zveřejněný díl']} variant="small"/>
+                <Microphone/>
+                <Waveform/>
             </Panel>
         </g>
-        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
+        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} data-active={step >= 1}>
             <Panel label={en ? 'Listening in context' : 'Poslouchá v kontextu'}>
                 <Copy x={20} y={77} lines={en ? ['Ideas worth','sharing'] : ['Myšlenky, které','stojí za sdílení']} variant="title" gap={28}/>
                 <path d="M20 127H250" className={s.dim}/>
                 <Copy x={20} y={153} lines={['08:24']} variant="accentText"/>
-                <Copy x={20} y={178} lines={en ? ['An agent needs','a lasting goal.'] : ['Agent potřebuje','dlouhodobý cíl.']}/>
+                <TypingCopy x={20} y={178} progress={progress[1]} lines={en ? ['An agent needs','a lasting goal.'] : ['Agent potřebuje','dlouhodobý cíl.']}/>
                 <Copy x={20} y={235} lines={['17:06  '+(en ? 'Your own context' : 'Vlastní kontext')]} variant="small"/>
             </Panel>
         </g>
-        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
+        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} data-active={step >= 2}>
             <Panel label={step === 3 ? (en ? 'Published' : 'Publikováno') : (en ? 'Posts' : 'Příspěvky')} height={300}>
                 <circle cx="34" cy="66" r="16" className={s.panel}/><Copy x={24} y={71} lines={['PH']} variant="small"/>
                 <Copy x={59} y={63} lines={['Pavol Hejný']} variant="label"/><Copy x={59} y={83} lines={['LinkedIn']} variant="small"/><Copy x={231} y={71} lines={['in']} variant="title"/>
-                <Copy x={20} y={117} lines={en ? ['What changes when AI','takes on a whole agenda?','A conversation with','Petr and Šimon.'] : ['Co se změní, když AI','svěříte celou agendu?','Nový díl s Petrem','a Šimonem.']} gap={22}/>
+                <TypingCopy x={20} y={117} progress={part(progress[2], 0, .7)} lines={en ? ['What changes when AI','takes on a whole agenda?','A conversation with','Petr and Šimon.'] : ['Co se změní, když AI','svěříte celou agendu?','Nový díl s Petrem','a Šimonem.']} gap={22}/>
                 <path d="M20 204H250" className={s.dim}/>
                 <Copy x={20} y={231} lines={['YouTube  ·  '+(en ? 'Groups' : 'Skupiny')]} variant="label"/>
-                <Copy x={20} y={255} lines={en ? ['08:24 — what would you','hand over to an agent?'] : ['08:24 — co byste','svěřili agentovi vy?']} variant="small" gap={19}/>
+                <TypingCopy x={20} y={255} progress={part(progress[2], .7, 1)} lines={en ? ['08:24 — what would you','hand over to an agent?'] : ['08:24 — co byste','svěřili agentovi vy?']} variant="small" gap={19}/>
                 <Check x={240} y={282} active={step === 3}/>
             </Panel>
         </g>
     </>;
 }
-function CRM({ step, mobile, en }: { step: number; mobile: boolean; en: boolean }) {
+function CRM({ step, progress, mobile, en }: { step: number; progress: number[]; mobile: boolean; en: boolean }) {
     return <>
         <g data-bp-stage="0" transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label={en ? 'Your contacts' : 'Vaše kontakty'}>
@@ -75,52 +91,51 @@ function CRM({ step, mobile, en }: { step: number; mobile: boolean; en: boolean 
             </Panel>
             <path d="M-14 45v225h270M-7 45v217h270" className={s.dim}/>
         </g>
-        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
+        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} data-active={step >= 1}>
             <Panel label={en ? 'Earlier conversation · 14 Sep' : 'Předchozí rozhovor · 14. 9.'}>
                 <Copy x={20} y={84} lines={en ? ['“Let’s revisit this','when we grow.”'] : ['„Vraťme se k tomu,','až budeme růst.“']} variant="title" gap={30}/>
-                <Copy x={20} y={157} lines={en ? ['Route enquiries from','the new branch to','the right person.'] : ['Dotazy z nové pobočky','směrovat ke správnému','člověku.']}/>
-                <Check x={29} y={235}/><Copy x={50} y={240} lines={en ? ['Relevant context found'] : ['Souvislost nalezena']} variant="small"/>
+                <TypingCopy x={20} y={157} progress={progress[1]} lines={en ? ['Route enquiries from','the new branch to','the right person.'] : ['Dotazy z nové pobočky','směrovat ke správnému','člověku.']}/>
+                <Check x={29} y={235} active={progress[1] >= 1}/><Copy x={50} y={240} lines={progress[1] >= 1 ? [en ? 'Relevant context found' : 'Souvislost nalezena'] : []} variant="small"/>
             </Panel>
         </g>
-        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
+        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} data-active={step >= 2}>
             <Panel label={step === 3 ? (en ? 'Sent within your rules' : 'Odesláno podle pravidel') : (en ? 'Personal email' : 'Osobní e-mail')} height={300}>
                 <Copy x={20} y={65} lines={[(en ? 'To: ' : 'Komu: ')+'Jana Nováková']} variant="label"/>
                 <path d="M16 82H254" className={s.dim}/>
                 <Copy x={20} y={110} lines={en ? ['Congratulations on Brno'] : ['Gratulace k pobočce v Brně']} variant="label"/>
-                <Copy x={20} y={148} lines={en ? ['Hello Jana,','congratulations on opening','in Brno. In September,','we discussed routing','customer enquiries.','Shall we revisit that?'] : ['Dobrý den, Jano,','gratuluji k otevření v Brně.','V září jsme spolu řešili','směrování dotazů','zákazníků. Dávalo by smysl','se k tomu teď vrátit?']} gap={21}/>
-                <Check x={28} y={282} active={step === 3}/><Copy x={48} y={287} lines={en ? ['Follow-up saved in CRM'] : ['Další krok uložen v CRM']} variant="small"/>
+                <TypingCopy x={20} y={148} progress={progress[2]} lines={en ? ['Hello Jana,','congratulations on opening','in Brno. In September,','we discussed routing','customer enquiries.','Shall we revisit that?'] : ['Dobrý den, Jano,','gratuluji k otevření v Brně.','V září jsme spolu řešili','směrování dotazů','zákazníků. Dávalo by smysl','se k tomu teď vrátit?']} gap={21}/>
+                <Check x={28} y={282} active={step === 3}/><Copy x={48} y={287} lines={step === 3 ? [en ? 'Follow-up saved in CRM' : 'Další krok uložen v CRM'] : []} variant="small"/>
             </Panel>
         </g>
     </>;
 }
-function Development({ step, mobile, en }: { step: number; mobile: boolean; en: boolean }) {
+function Development({ step, progress, mobile, en }: { step: number; progress: number[]; mobile: boolean; en: boolean }) {
     return <>
         <g data-bp-stage="0" transform={mobile ? 'translate(27 28)' : 'translate(40 150)'}>
             <Panel label="22:14">
-                <path d="M240 6a9 9 0 1 0 10 12 10 10 0 0 1-10-12Z" className={s.strong}/>
                 <Copy x={20} y={86} lines={en ? ['The contact form','returns an error.'] : ['Kontaktní formulář','vrací chybu.']} variant="title" gap={29}/>
                 <Copy x={20} y={151} lines={en ? ['Customers cannot send','an enquiry. The campaign','starts tomorrow morning.'] : ['Zákazníci nemohou odeslat','poptávku. Ráno spouštíme','kampaň.']}/>
                 <rect x="20" y="218" width="230" height="26" rx="3" className={s.panel}/><Copy x={29} y={236} lines={['!  '+(en ? 'Validation error' : 'Chyba validace')]} variant="small"/>
             </Panel>
         </g>
-        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} className={s.working} data-active={step >= 1}>
+        <g data-bp-stage="1" transform={mobile ? 'translate(27 358)' : 'translate(365 80)'} data-active={step >= 1}>
             <Panel label="contact-form.ts">
-                <Copy x={18} y={74} lines={['const email =','  input.email.trim();']} variant="mono"/>
-                <path d="M16 114H254" className={s.dim}/>
-                <Copy x={18} y={140} lines={['− validate(input.email);']} variant="mono"/>
-                <rect x="13" y="154" width="244" height="32" rx="2" className={s.panel}/>
-                <Copy x={18} y={175} lines={['+ validate(email);']} variant="mono"/>
-                <Copy x={18} y={212} lines={['return { success: true };']} variant="mono"/>
-                <Copy x={18} y={242} lines={['Git  ·  +1 −1']} variant="small"/>
+                <TypingCopy x={18} y={74} progress={progress[1]} lines={['const email =', '  input.email.trim();', '', '− validate(input.email);', '+ validate(email);', '', 'return { success: true };']} variant="mono" gap={24}/>
+                <path d="M16 224H254" className={s.dim}/>
+                <Copy x={18} y={245} lines={['Git  ·  +1 −1']} variant="small"/>
             </Panel>
         </g>
-        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} className={s.working} data-active={step >= 2}>
+        <g data-bp-stage="2" transform={mobile ? 'translate(27 688)' : 'translate(690 155)'} data-active={step >= 2}>
             <Panel label={step === 3 ? '07:30' : '22:26'} height={300}>
-                <Copy x={20} y={83} lines={step === 3 ? (en ? ['The form works','again.'] : ['Formulář už','funguje.']) : (en ? ['Checking','the fix'] : ['Ověření','opravy'])} variant="title" gap={29}/>
-                <circle cx="231" cy="76" r="14" className={s.strong}/>
-                {[0,1,2].map((i) => <g key={i}><Check x={29} y={155+i*31} active={step >= 2}/><Copy x={50} y={160+i*31} lines={[(en ? ['Input validation','Form submission','Production build'] : ['Validace vstupu','Odeslání formuláře','Produkční build'])[i]]} variant="label"/></g>)}
-                <path d="M18 238H252" className={s.dim}/>
-                <Copy x={20} y={263} lines={en ? ['Deployment allowed by rules.','Change recorded in Git.'] : ['Nasazení povoleno pravidly.','Změna zaznamenaná v Gitu.']} variant="small" gap={19}/>
+                <TypingCopy x={20} y={77} progress={part(progress[2], 0, .2)} lines={en ? ['The form works','again.'] : ['Formulář už','funguje.']} variant="title" gap={29}/>
+                <rect x="20" y="125" width="230" height="34" rx="4" className={s.panel}/>
+                <TypingCopy x={30} y={147} progress={part(progress[2], .2, .45)} lines={['jana@example.cz']} variant="small"/>
+                <rect x="20" y="169" width="230" height="51" rx="4" className={s.panel}/>
+                <TypingCopy x={30} y={193} progress={part(progress[2], .45, .75)} lines={en ? ['I would like to know more.'] : ['Ráda se dozvím víc.']} variant="small"/>
+                <Check x={30} y={244} active={progress[2] >= .9}/>
+                <TypingCopy x={50} y={249} progress={part(progress[2], .8, 1)} lines={en ? ['Enquiry sent'] : ['Poptávka odeslána']} variant="label"/>
+                <path d="M18 267H252" className={s.dim}/>
+                <Copy x={20} y={287} lines={step === 3 ? [en ? 'Tests passed · change in Git' : 'Testy prošly · změna v Gitu'] : []} variant="small"/>
             </Panel>
         </g>
     </>;
@@ -182,7 +197,7 @@ function Engine({ mobile, en, appPlace, enginePlace, asleep }: { mobile: boolean
 }
 
 /** Native vector artwork derived from the approved light blueprint, with actual website story content. */
-export function BlueprintScene({ kind, step, visibleStage, appPlace = 0, enginePlace = 0, asleep = false }: Props) {
+export function BlueprintScene({ kind, step, visibleStage, progress = [1, 1, 1], appPlace = 0, enginePlace = 0, asleep = false }: Props) {
     const { locale } = useSiteLocale(); const en = locale === 'en';
     const prefix = 'blueprint-'+useId().replace(/:/g,'');
     const [mobile,setMobile] = useState(false);
@@ -203,7 +218,6 @@ export function BlueprintScene({ kind, step, visibleStage, appPlace = 0, engineP
             <Route d={mobile ? 'M162 288V358' : 'M310 272H335Q350 272 350 248V223H365'} active={step >= 1}/>
             <Route d={mobile ? 'M162 618V688' : 'M635 220H650Q670 220 670 242V280H690'} active={step >= 2}/>
         </>}
-        {kind === 'podcast' ? <Podcast step={step} mobile={mobile} en={en}/> : kind === 'relationships' ? <CRM step={step} mobile={mobile} en={en}/> : kind === 'development' ? <Development step={step} mobile={mobile} en={en}/> : <Engine mobile={mobile} en={en} appPlace={appPlace} enginePlace={enginePlace} asleep={asleep}/>}
-        <Copy x={mobile ? 37 : 65} y={height-22} lines={[en ? 'ILLUSTRATION' : 'UKÁZKA']} variant="small"/>
+        {kind === 'podcast' ? <Podcast step={step} progress={progress} mobile={mobile} en={en}/> : kind === 'relationships' ? <CRM step={step} progress={progress} mobile={mobile} en={en}/> : kind === 'development' ? <Development step={step} progress={progress} mobile={mobile} en={en}/> : <Engine mobile={mobile} en={en} appPlace={appPlace} enginePlace={enginePlace} asleep={asleep}/>}
     </svg>;
 }

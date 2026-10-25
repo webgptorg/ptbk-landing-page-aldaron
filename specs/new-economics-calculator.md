@@ -8,7 +8,7 @@ Oba režimy používají stejný model. **Pro mou firmu** porovnává ruční pr
 
 ## Rychlá kalkulačka
 
-Na `/[locale]` výchozí firemní režim; na `/[locale]/partnership` partnerský. Výchozí scénář účetní podklady, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, jeden společný tmavě modrý povrch pro nadpis, vstupy, výsledek a akce. Výsledek odděluje jemná linka, nemá další zaoblenou kartu ani vlastní stín. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
+Na `/[locale]` výchozí firemní režim; na `/[locale]/partnership` partnerský. Výchozí scénář sociální sítě (včetně jejich pracovních odhadů), první také v seznamu, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, jeden společný tmavě modrý povrch pro nadpis, vstupy, výsledek a akce. Výsledek odděluje jemná linka, nemá další zaoblenou kartu ani vlastní stín. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
 
 Viditelné vstupy jsou pouze scénář a nejdůležitější čísla. Firma: objem práce a náklad na člověka za hodinu. Partner: počet aktivních klientů a servis za klienta. Objem/počet klientů lze upravit číslem i posuvníkem. Partnerský podíl je viditelně **pevně 20 %**, bez výběru.
 

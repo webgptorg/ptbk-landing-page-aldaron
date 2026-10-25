@@ -55,14 +55,14 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
         await choices.first().focus();
         await page.keyboard.press('ArrowRight');
         await expect(choices.nth(1)).toBeFocused();
-        await expect(article).toHaveAttribute('data-story','relationships');
+        await expect(article).toHaveAttribute('data-story','podcast');
         await page.keyboard.press('End');
         await expect(choices.last()).toBeFocused();
         await expect(article).toHaveAttribute('data-story','development');
         await page.keyboard.press('Home');
         await expect(choices.first()).toBeFocused();
-        await expect(article).toHaveAttribute('data-story','podcast');
-        for (const [index,story] of ['podcast','relationships','development'].map((story,index)=>[index,story] as const)) {
+        await expect(article).toHaveAttribute('data-story','relationships');
+        for (const [index,story] of ['relationships','podcast','development'].map((story,index)=>[index,story] as const)) {
             await choices.nth(index).click();
             await expect(article).toHaveAttribute('data-story',story);
             await expect(article).toHaveAttribute('data-step','3');
@@ -70,7 +70,10 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
             await expect(article.getByRole('button')).toHaveCount(0);
             await expect(article).toBeVisible();
         }
-        await expect(carousel.getByRole('button',{name:'Přehrát animaci',exact:true})).toBeDisabled();
+        await expect(carousel.getByRole('button',{name:/Přehrát animaci|Pozastavit animaci/})).toHaveCount(0);
+        await expect(page.locator('#your-ai')).toHaveCount(0);
+        await expect(page.getByRole('link',{name:/Vaše data jsou opravdu vaše/})).toHaveAttribute('href','/cs/bezpecnost');
+        await expect(hero).not.toContainText('Nezávazně. Ozveme se vám');
         expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
         await expect(page.getByRole('heading',{name:'Zkušenosti se spoluprací s Pavolem',exact:true})).toHaveCount(0);
         await expect(page.getByText('Promptbook nás od sebe neodstřihl. Naopak. Konečně máme čas řešit opravdovou práci, za kterou jsme placeni.',{exact:true})).toBeVisible();
@@ -92,7 +95,7 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
 
 test('app location and engine location are independent and the engine continues with the app closed',async({page})=>{
     await page.emulateMedia({reducedMotion:'reduce'});
-    await visit(page,'/cs');
+    await visit(page,'/cs/bezpecnost');
     const architecture = page.locator('#your-ai');
     const appLocations = architecture.getByLabel('Odkud ovládáte aplikaci',{exact:true});
     const engineLocations = architecture.getByLabel('Kde provozujete engine',{exact:true});
@@ -120,7 +123,7 @@ test('desktop scene moves with the page instead of pinning or consuming the scro
     await page.emulateMedia({reducedMotion:'no-preference'});
     await visit(page,'/cs');
     const carousel = page.getByTestId('brand-carousel');
-    const story=carousel.locator('article[data-story="podcast"]');
+    const story=carousel.locator('article[data-story="relationships"]');
     await carousel.scrollIntoViewIfNeeded();
     expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
     const before = await carousel.evaluate(element=>({top:element.getBoundingClientRect().top,scroll:window.scrollY}));
@@ -130,10 +133,8 @@ test('desktop scene moves with the page instead of pinning or consuming the scro
     // A native-flow panel moves by the same distance as the document, rather than remaining pinned.
     expect(Math.abs((before.top-after.top)-(after.scroll-before.scroll))).toBeLessThan(3);
     expect(await carousel.evaluate(element=>[element,...Array.from(element.querySelectorAll('*'))].some(node=>['sticky','fixed'].includes(getComputedStyle(node).position)))).toBe(false);
-    await carousel.getByRole('button',{name:'Pozastavit animaci',exact:true}).click();
-    const pausedStep = await story.getAttribute('data-step');
-    await page.mouse.wheel(0,120);
-    await expect(story).toHaveAttribute('data-step',pausedStep!);
+    await expect(carousel.getByRole('button',{name:/Přehrát animaci|Pozastavit animaci/})).toHaveCount(0);
+    await expect(story).toBeVisible();
 });
 
 test('product interest preserves failed drafts and saves one nonbinding CRM enquiry',async({page})=>{
@@ -188,15 +189,19 @@ test('Czech marketing pages and language switching retain the page, calculation 
     await expect(page.getByRole('navigation',{name:'Language / Jazyk'})).toBeVisible();
     await page.getByRole('navigation',{name:'Language / Jazyk'}).getByRole('link',{name:'CZ',exact:true}).click();
     await expect(page).toHaveURL(/\/cs\/kalkulacka\?.*volume=47.*#vysledek$/);
-    await expect(page.getByLabel('Dokladů za měsíc',{exact:true})).toHaveValue('47');
+    await expect(page.getByLabel('Témat příspěvků za měsíc',{exact:true})).toHaveValue('47');
 });
 
 test('quick calculator transfers all assumptions and URL restores edits',async({page})=>{
-    await visit(page, '/cs');await page.getByLabel('Dokladů za měsíc',{exact:true}).fill('47');
+    await visit(page, '/cs');
+    const scenario = page.getByLabel('Co chcete automatizovat?',{exact:true});
+    await expect(scenario).toHaveValue('social');
+    await expect(scenario.locator('option').first()).toHaveAttribute('value','social');
+    await page.getByLabel('Témat příspěvků za měsíc',{exact:true}).fill('47');
     await expect(page.getByLabel('Interní náklad partnera (Kč/h)')).toHaveCount(0);
     await page.getByRole('link',{name:'Pokročilá kalkulačka',exact:true}).click();
     await expect(page).toHaveURL(/\/kalkulacka\?.*volume=47/);
-    await expect(page.getByLabel('Dokladů za měsíc',{exact:true})).toHaveValue('47');
+    await expect(page.getByLabel('Témat příspěvků za měsíc',{exact:true})).toHaveValue('47');
     await page.getByText('AI a externí služby',{exact:true}).click();
     await page.getByLabel('Vstup (Kč / milion tokenů)',{exact:true}).fill('159.5');
     await expect(page).toHaveURL(/inputPriceUsd=7.25/);await page.reload();
@@ -225,7 +230,7 @@ test('Start preserves inactive Business inputs without monthly revenue or share 
     const url=await page.getByLabel('Odkaz se všemi parametry',{exact:true}).inputValue();
     expect(url).not.toContain('commissionPercent');expect(url).toContain('horizonMonths=24');
     await visit(page, '/cs/kalkulacka?volume=5');await visit(page, '/cs/kalkulacka?volume=90');await page.goBack();
-    await expect(page.getByLabel('Dokladů za měsíc',{exact:true})).toHaveValue('5');
+    await expect(page.getByLabel('Témat příspěvků za měsíc',{exact:true})).toHaveValue('5');
 });
 
 test('PDF requires accepted contact and retains failed form entries',async({page})=>{

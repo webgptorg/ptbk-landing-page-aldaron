@@ -2,38 +2,38 @@
 
 ## Hlavní stránka `/cs` a `/en`
 
-Nejnovější zadání z 25. října 2026 vybírá světlý blueprint pro tři pracovní příběhy v jednom karuselu a společnou scénu aplikace a enginu. Okolní vysvětlující texty se odstraní a změna se nasadí přímo na main. Původní demo zůstává na přehledu agend a detailech. Úvod rychle vysvětluje dlouhodobé AI agendy, vlastní pracovní prostředí a oddělenou aplikaci; podrobnosti mají samostatné cesty. Primárním distribučním publikem jsou agentury, freelanceři a integrátoři, ale nasazení musí pochopit i jejich klient.
+Nejnovější večerní zadání z 25. října 2026 platí shodně pro českou a anglickou hlavní i partnerskou stránku. Zachovává světlý blueprint, jednoduchost a prémiový, plynulý dojem. Původní pětizáložkové demo zůstává pouze na přehledu agend a detailech.
 
 ### Pořadí bloků
 
-1. Hero **„Dřív jste AI úkolovali / Teď pracuje pro vás“**, na dvou řádcích bez závěrečných teček, a zachované společné sdělení **„Vaše AI. Na vašem stroji. Pod vaší kontrolou.“** Jedno výrazné tlačítko **Chci Promptbook** otevírá nezávazný zájem. Pod ním je menší odkaz na vlastní instalaci, stručná informace o následném kontaktu a dostupnosti aplikace a textový odkaz na partnerství se stávajícím 20% podílem.
-2. Přímo pod hero jeden kompaktní karusel tří ukázek: propagace podcastu, osobní oslovení z CRM a noční oprava webu. Bez úvodu „Agenda, která pokračuje“ nebo „Jedna svěřená agenda / O tisíc připomínek méně“.
-3. Jedna společná interaktivní scéna aplikace a vlastního enginu s nezávislými volbami umístění. Principy ukazuje především vizuálně. Navazující trojice soubory/historie/modely se odstraní; text obsahu zůstává uvnitř vizualizace.
-4. Porovnatelné cenové karty Start a Business ze společných obchodních konstant. Opakující sekce „Jedna agenda / Všechno pro její provoz“ se nevykresluje; podrobnosti jsou na samostatných stránkách.
-5. Rychlá kalkulačka ve firemním režimu podle [specifikace ekonomiky](new-economics-calculator.md).
-6. Jedna mřížka všech šesti referencí: jeden autor a citace v jedné kartě. Slezská univerzita je další kartou ve stejném uspořádání, bez dělení na produktové a osobní nadpisy.
-7. Jednoduchý nadpis **Kontakt**, oba rovnocenní zakladatelé s většími zrcadlovými portréty, rolemi, e-maily a telefony; odkaz na příběh je až pod jejich kartami. Jiří vlevo s textem vpravo; Pavol vpravo s textem vlevo. Spodní okraj postavy lícuje se spodním okrajem karty.
-8. Viditelný formulář **Napište nám** přímo na stránce, který doplňuje existující pop-up. Společná patička obsahuje původní logo i Technologickou inkubaci.
+1. Hero **„Dřív jste AI úkolovali / Teď pracuje pro vás“** bez závěrečných teček. Pointa nastoupí krátkým postupným odhalením slov. **„Vaše AI.“**, **„Na vašem stroji.“** a **„Pod vaší kontrolou.“** přijdou jednotlivě, s pauzami. Následující vysvětlení „Předáte agendu, nastavíte pravidla…“ se píše po znacích. Celý text má místo rezervované od prvního vykreslení a čtečka dostane úplný obsah. Redukovaný pohyb ukáže vše ihned. Sdělení o vlastnictví odkazuje na bezpečnost.
+2. Jedno výrazné tlačítko **Chci Promptbook** (na partnerství partnerské CTA) a menší instalační odkaz, s konzistentní velikostí a souvislým podtržením textu bez podtržené mezery před šipkou. Odstranit doprovodnou větu „Nezávazně. Ozveme se vám…“; samotný kontaktní formulář zachovává poctivé informace o zájmu a dostupnosti. Textový odkaz na partnerství ponechává 20% podíl.
+3. Jeden kompaktní karusel pod nadpisem **„Co za vás agenti zvládnou“** a krátkým upřesněním **„Jedna technologie. Agenda podle vás.“** Zřejmé příklady využití společné technologie, bez dlouhého doprovodného textu.
+4. Pouze stručný odkaz **„Vaše data jsou opravdu vaše. / Jak to funguje“** na `/[locale]/bezpecnost`. Velká scéna aplikace a enginu na hlavní ani partnerské stránce není.
+5. Porovnatelné cenové karty Start a Business, následované kalkulačkou s výchozími sociálními sítěmi podle [specifikace ekonomiky](new-economics-calculator.md).
+6. Schválené reference respektují stávající pravidla viditelnosti; všech šest zůstává v jedné mřížce se zachovaným zněním a atribucí.
+7. **Kontakt**, oba rovnocenní zakladatelé se zrcadlovými portréty a ověřenými kontakty. Na mobilu jsou Jiřího jméno i role zarovnané doprava stejně jako kontakty; kontaktní blok zůstává dole vpravo. Siluety stále vystupují z karet a lícují s jejich spodním okrajem. Odkaz na příběh je až pod kartami.
+8. Viditelný formulář **Napište nám** doplňuje existující modál; společná patička zachovává logo a Technologickou inkubaci i odkaz na bezpečnost.
 
-Úvod neobsahuje plné SLA, dlouhé FAQ, roadmapové odznaky ani pokyn psát knihu. [Partnerství](new-partnership-page.md) má stejnou vizuální péči, příběhy a scénu vlastnictví. Instalace má vlastní [specifikaci](new-open-source-page.md).
+## Tři pracovní příběhy
 
-## Tři nové pracovní příběhy
+Pořadí tabů: **Péče o kontakty**, **Správa podcastů**, **Údržba webu**; výchozí je péče o kontakty. Anglické protějšky: Contact follow-up, Podcast management, Website maintenance. Taby mají jednotné zarovnání a jednorádkové názvy; na úzké obrazovce mohou mít vlastní vodorovné posouvání, celá stránka nepřetéká. Podcast používá mikrofon. Ovládání respektuje šipky a Home/End. Tlačítko play/pause není přítomné.
 
-Každý příběh má vlastní prostorovou pracovní kompozici a čtyři kroky, ale v jednom společném kompaktním karuselu je vždy vybraná jedna ukázka. Scéna obsahuje konkrétní pracovní vstupy a výstupy, kolem ní jsou pouze tři taby a tlačítko pozastavení. Nadpisy, popisy, časová osa a patičky ukázky se nevykreslují; označení modelové ukázky je uvnitř obrazu. Nejsou zde tři dlouhé sekce pod sebou. Jde o označené modelové ukázky s nastavenými přístupy a pravidly, nikoli živé účty nebo doložené zákaznické výsledky. Ukázka neprovádí skutečné publikování, odesílání ani nasazení.
+Konkrétní práce patří do světlé prostorové vizualizace. Viditelný štítek „Ukázka“ se odstraní; přístupný SVG popis nadále výslovně uvádí modelový scénář s nastavenými přístupy a pravidly. Nejde o skutečné účty, doložené zákaznické výsledky ani živé odesílání nebo publikování.
 
-- **Podcast AI ta Krajta:** nový díl, pochopení obsahu, osobité texty pro jednotlivé lidi a kanály, propagace/publikace podle pravidel. Osobní sítě, YouTube a tematické skupiny mají vlastní výstupy.
-- **CRM a nová pobočka:** zpráva o otevření pobočky, dohledaný kontext předchozího kontaktu, osobní e-mail v prostředí připomínajícím Gmail a další krok v CRM. Modelová firma ani osoba nejsou klientskou referencí; odeslání podléhá nastaveným oprávněním.
-- **Noční oprava:** večerní upozornění na nefunkční formulář, nalezení a oprava chyby, ověření a nasazení podle pravidel, ráno vyřešený problém. Noční práce enginu neznamená nepřetržitou lidskou podporu ani záruku bezchybnosti.
+- **Kontakty:** nová pobočka, dřívější rozhovor a osobní oslovení. Souvislosti a e-mail se opravdu píší po znacích s kurzorem; hotový e-mail se pouze neodšedňuje.
+- **Podcast AI ta Krajta:** nový díl, přepis a příspěvky pro jednotlivé kanály. Nepravidelná živá amplitudová vizualizace připomíná řeč; nepřehrává skutečný zvuk. Přepis i příspěvky skutečně přibývají s kurzorem. Z prvního panelu odstranit iniciály „PH · PG · ŠP“ a „Zveřejněný díl“.
+- **Údržba webu:** večerní chyba, postupně generovaný kód a opravený formulář. Kód přibývá po znacích jako v coding harnessu; formulář se skutečně vyplňuje a dokončí úspěšným odesláním. Bez dekorativního měsíce. Modelové testy nejsou zárukou bezchybnosti nebo nepřetržité lidské podpory.
 
-Scroll vždy posouvá celou stránku běžným způsobem vpřed i zpět, bez připnutí, zachytávání kolečka/dotyku a vynucených přechodů mezi ukázkami. Návštěvník volí příběh taby ovladatelnými šipkami a Home/End. Jemná automatická animace ukazuje čtyři fáze práce; lze ji pozastavit a při opuštění viewportu či skrytí karty se zastaví. Na mobilu se kompozice skládá svisle, aby text zůstal čitelný. Redukovaný pohyb ukáže dokončený stav bez časové animace.
+Desktop spouští scénu od začátku, až když je čitelná, a jednou ji dokončí. Částečně opuštěná scéna začne při návratu znovu; dokončená zůstane k přečtení. Mobil má pro každý panel vlastní postup: psaní běží pouze v právě čitelné části a scroll jej přirozeně posouvá. Předchozí panely si ponechají výsledek, další neproběhnou mimo obrazovku. Skrytá karta zastaví hodiny. Redukovaný pohyb ukáže dokončené statické scény.
 
-## Aplikace a engine pod vlastní kontrolou
+Scroll vždy posouvá celou stránku nativně vpřed i zpět, bez připnutí, zachytávání kolečka nebo dotyku a bez vynuceného přepínání tabů. Žádné nadbytečné smyčky a přeplněné efekty.
 
-Volby aplikace jsou notebook v kanceláři, telefon venku a telefon ve vlaku. Volby enginu jsou notebook ve skříňce, notebook na polici a vlastní VPS. Dva nativní selecty lze kombinovat nezávisle a ovládat klávesnicí. Vedle nich je uspání aplikace a pozastavení animace. Uspání aplikace ponechá engine vizuálně pracovat na dostupném hostitelském stroji. Oba objekty patří do jedné propojené prostorové scény, ne do dvou textově vysvětlovaných boxů. Krátké názvy zařízení a přístupné názvy ovladačů nahrazují okolní věty typu „telefon na cestě ven“, „klíč u vás“ nebo „stroj s enginem zůstává zapnutý“.
+## Vlastní kontrola a bezpečnost
 
-Relay předává end-to-end šifrovaný obsah mezi aplikací a enginem; klíče jsou na koncových zařízeních. Vlastní pracovní soubory jsou čitelné a mohou mít historii v Gitu. Externí modely a nástroje dostávají vstupy určené pro jejich práci; E2E ovládacího kanálu je před jejich příjemcem neskrývá. Lokální model automaticky neodstraňuje ostatní externí nástroje. Přístupný popis SVG rozlišuje E2E a externí vstupy; nenápadný ikonový odkaz vede na bezpečnost.
+Interaktivní scéna aplikace a enginu je pouze na `/[locale]/bezpecnost`, se zachovanými nezávislými volbami zařízení a ilustrací práce enginu při zavřené aplikaci. Aplikace: notebook v kanceláři, telefon venku nebo ve vlaku. Engine: notebook ve skříňce, na polici nebo vlastní VPS. Zařízení se ovládají nativními selecty; uspání a pozastavení scény zůstávají na podstránce.
 
-Scéna je interaktivní ilustrací vlastníkem potvrzené cílové architektury, nikoli ovladačem skutečného stroje nebo kryptografickým auditem. Při redukovaném pohybu se vypne paralaxa a perspektivní animace.
+Text vysvětluje princip pro laiky. Pracovní soubory a historie patří uživateli, engine běží na jeho dostupném stroji, relay přenáší E2E šifrované spojení připravované aplikace. Vstupy zaslané externím modelům a nástrojům nejsou tímto šifrováním skryté před jejich příjemci. Scéna ilustruje potvrzenou cílovou architekturu, není kryptografickým auditem ani ovladačem skutečného zařízení. Technické detaily odkazují na GitHub a dotaz na Pavola. Hlavní stránka, partnerství, hero sdělení o vlastnictví a patička sem odkazují v příslušném jazyce.
 
 ## Původní demo na přehledu agend a detailech
 
@@ -83,8 +83,6 @@ Běžná obsluha bez programování; agenda vs. chatbot; vypnutý notebook vs. s
 
 `[locale]` znamená `cs` nebo `en`; obě verze mají rovnocenný obsah a funkční lokalizované odkazy.
 
-## Večerní zpřesnění — 25. října 2026
+## Příběh a zakladatelé — 25. října 2026
 
-Druhý řádek hero nastoupí se zpožděním jako pointa, za ním sdělení o vlastní AI a kontrole. Místo pro text je rezervované, při redukovaném pohybu je vše viditelné ihned. Taby ukázek pojmenovávají práci: Správa podcastu / Péče o kontakty / Údržba webu a anglické protějšky. Na desktopu se celý příběh rozehraje od začátku po dosažení čitelné části obrazovky a dokončí se jednou. Na mobilu se jednotlivé části odhalují až při doscrollování k nim; výsledek nedoběhne mimo obrazovku. Návrat k opuštěné ukázce začne znovu.
-
-U Jiřího se na mobilu kontaktní blok zarovná dolů doprava s odstupem od postavy a okrajů. Siluety vystupující z karet a jejich spodní zarovnání zůstávají. Stránka příběhu nově obsahuje stručnou chronologii po ověřených letech 2023–2026 od WebGPT; nahrazuje předchozí abstraktní esej. Podklady letopočtů jsou v new-pages-sources.md.
+Stránka příběhu obsahuje stručnou chronologii po ověřených letech 2023–2026 od WebGPT. Podklady letopočtů jsou v new-pages-sources.md. Portréty a kontakty zůstávají zachované; Jiřího jméno i role se na mobilu zarovnávají doprava jako jeho kontakty.

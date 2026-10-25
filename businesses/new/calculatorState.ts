@@ -9,7 +9,7 @@ export type NumericKey = Exclude<keyof EconomicsInput, 'plan' | 'aiBilling' | 'c
 export const NUMERIC_KEYS = Object.keys(DEFAULT_INPUT).filter((key) => typeof DEFAULT_INPUT[key as keyof EconomicsInput] === 'number') as NumericKey[];
 
 export function defaultCalculatorState(mode: CalculatorMode = 'company'): CalculatorState {
-    return { mode, scenario: 'documents', input: { ...DEFAULT_INPUT } };
+    return { mode, scenario: 'social', input: { ...DEFAULT_INPUT, ...SCENARIOS.social.defaults } };
 }
 
 /** Preserve inactive Business settings during a Start preview; the calculation itself still clamps Start. */
