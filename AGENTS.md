@@ -17,6 +17,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   viewport above the player, briefly yielding to manual gestures and resuming after they finish. Turning the toggle
   off disables both highlighting and automatic follow. Mobile article controls form a floating card with a compact
   follow toggle under the title and a full-width timeline; touch controls keep their own hit areas.
+  Sentence highlighting uses native text ranges to include authored spaces across inline links and emphasis;
+  the current word paints above it. Browsers without Custom Highlight API retain per-word highlighting.
   The first Czech narration is a committed ElevenLabs Studio recording with Scribe sentence/cue captions and
   separately computed acoustic CTC word alignment of the final MP3. Its reviewed map covers title (`t…`), perex
   (`p…`) and body (`w…`) without renumbering body words. Cue intervals are never subdivided into guessed timings.

@@ -27,7 +27,7 @@ function Reader({ wordsUrl = '/words.json' }: { wordsUrl?: string }) {
     return <ArticleTracking articleId="article-cs" wordsUrl={wordsUrl}>
         <p data-testid="paragraph"><span data-article-word="w0">AI</span>{' '}
             <a href="#destination"><span data-article-word="w1">agent</span></a>{' '}
-            <span data-article-word="w2">píše.</span></p>
+            <strong><span data-article-word="w2">píše.</span></strong></p>
     </ArticleTracking>;
 }
 
@@ -61,6 +61,48 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); window.getSelection()?.removeAllRanges(); });
 
 describe('article text tracking interactions', () => {
+    it('paints one native sentence range including spaces, links and emphasis, with the current word above it', async () => {
+        class TextHighlight extends Set<Range> { priority = 0; }
+        const highlights = new Map<string, TextHighlight>();
+        vi.stubGlobal('Highlight', TextHighlight);
+        vi.stubGlobal('CSS', { highlights });
+        const view = render(<Reader />);
+        await ready();
+        const sentence = highlights.get('article-sentence')!;
+        expect(Array.from(sentence)[0].toString()).toBe('AI agent píše.');
+        expect(Array.from(highlights.get('article-word')!)[0].toString()).toBe('AI');
+        expect(highlights.get('article-word')!.priority).toBeGreaterThan(sentence.priority);
+        expect(view.container.querySelector('[data-range-highlights="true"]')).not.toBeNull();
+        expect(view.getByRole('link').getAttribute('href')).toBe('#destination');
+        expect(view.getByText('píše.').parentElement?.tagName).toBe('STRONG');
+        player.currentTime = 1.5;
+        view.rerender(<Reader />);
+        expect(highlights.get('article-sentence')).toBe(sentence);
+        expect(Array.from(highlights.get('article-word')!)[0].toString()).toBe('agent');
+        player.trackingEnabled = false;
+        view.rerender(<Reader />);
+        expect(highlights.size).toBe(0);
+        expect(view.container.querySelector('[data-range-highlights]')).toBeNull();
+    });
+
+    it('clears native ranges between sentences and on unmount', async () => {
+        class TextHighlight extends Set<Range> { priority = 0; }
+        const highlights = new Map<string, TextHighlight>();
+        vi.stubGlobal('Highlight', TextHighlight);
+        vi.stubGlobal('CSS', { highlights });
+        const view = render(<Reader />);
+        await ready();
+        player.currentTime = 5;
+        view.rerender(<Reader />);
+        expect(highlights.get('article-sentence')!.size).toBe(0);
+        expect(highlights.get('article-word')!.size).toBe(0);
+        player.currentTime = .5;
+        view.rerender(<Reader />);
+        expect(Array.from(highlights.get('article-sentence')!)[0].toString()).toBe('AI agent píše.');
+        view.unmount();
+        expect(highlights.size).toBe(0);
+    });
+
     it('highlights real word and sentence, then removes highlighting, focus and seeking when tracking is off', async () => {
         const view = render(<Reader />);
         await ready();

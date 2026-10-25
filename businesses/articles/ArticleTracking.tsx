@@ -9,6 +9,31 @@ interface TrackingDom {
     readonly starts: ReadonlyMap<string, number>;
 }
 
+interface TextHighlight {
+    add(range: Range): void;
+    clear(): void;
+    priority: number;
+}
+
+interface HighlightRegistry {
+    get(name: string): TextHighlight | undefined;
+    set(name: string, highlight: TextHighlight): void;
+    delete(name: string): void;
+}
+
+/** A Range includes the authored whitespace and inline markup without rewriting the server-rendered text. */
+function setHighlight(highlight: TextHighlight | undefined, words: readonly HTMLElement[]) {
+    if (!highlight) return;
+    highlight.clear();
+    const first = words[0];
+    const last = words[words.length - 1];
+    if (!first || !last) return;
+    const range = document.createRange();
+    range.setStart(first, 0);
+    range.setEnd(last, last.childNodes.length);
+    highlight.add(range);
+}
+
 function getTrackingWords(container: HTMLElement, timings: ArticleWordTimings): Map<string, HTMLElement> | null {
     const words = new Map<string, HTMLElement>();
     for (const element of Array.from(container.querySelectorAll<HTMLElement>('[data-article-word]'))) {
@@ -30,6 +55,7 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
     const dom = useRef<TrackingDom | null>(null);
     const highlightedWords = useRef<HTMLElement[]>([]);
     const activeWord = useRef<HTMLElement | null>(null);
+    const textHighlights = useRef<{ sentence: TextHighlight; word: TextHighlight } | null>(null);
     const manualScrollActive = useRef(false);
     const userIntentUntil = useRef(0);
     const lastScrollAt = useRef(-Infinity);
@@ -65,6 +91,17 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
         userIntentUntil.current = 0;
         lastScrollAt.current = -Infinity;
         container.dataset.tracking = 'true';
+        const HighlightConstructor = (window as Window & { Highlight?: new () => TextHighlight }).Highlight;
+        const registry = (window.CSS as (typeof CSS & { highlights?: HighlightRegistry }) | undefined)?.highlights;
+        if (HighlightConstructor && registry) {
+            const sentence = new HighlightConstructor();
+            const word = new HighlightConstructor();
+            word.priority = 1;
+            registry.set('article-sentence', sentence);
+            registry.set('article-word', word);
+            textHighlights.current = { sentence, word };
+            container.dataset.rangeHighlights = 'true';
+        }
         const focusableBlocks: Array<{ element: HTMLElement; tabIndex: string | null; shortcut: string | null }> = [];
         for (const element of Array.from(container.querySelectorAll<HTMLElement>('p, li, h1, h2, h3, h4, h5, h6, pre'))) {
             if (element.querySelector('p, li, h1, h2, h3, h4, h5, h6, pre')) continue;
@@ -127,6 +164,13 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
         window.addEventListener('keydown', markKeyboardIntent);
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => {
+            const highlights = textHighlights.current;
+            if (highlights) {
+                if (registry?.get('article-sentence') === highlights.sentence) registry.delete('article-sentence');
+                if (registry?.get('article-word') === highlights.word) registry.delete('article-word');
+                textHighlights.current = null;
+            }
+            delete container.dataset.rangeHighlights;
             dom.current = null;
             activeWord.current?.removeAttribute('data-active-word');
             activeWord.current = null;
@@ -163,12 +207,14 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
             activeWord.current?.removeAttribute('data-active-word');
             activeWord.current = nextWord;
             nextWord?.setAttribute('data-active-word', 'true');
+            setHighlight(textHighlights.current?.word, nextWord ? [nextWord] : []);
         }
         const nextSentence = sentence?.wordIds.map((id) => elements.words.get(id)).filter((element): element is HTMLElement => Boolean(element)) ?? [];
         if (nextSentence[0] !== highlightedWords.current[0]) {
             highlightedWords.current.forEach((element) => element.removeAttribute('data-active-sentence'));
             nextSentence.forEach((element) => element.setAttribute('data-active-sentence', 'true'));
             highlightedWords.current = nextSentence;
+            setHighlight(textHighlights.current?.sentence, nextSentence);
         }
         const now = performance.now();
         if (!nextWord || !isPlaying || manualScrollActive.current || now < userIntentUntil.current || now - lastScrollAt.current < 500) return;
