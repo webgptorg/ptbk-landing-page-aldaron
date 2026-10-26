@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useSiteLocale } from './LocaleProvider';
+import { PromptbookRobot } from './PromptbookRobot';
 import s from './hero-headline.module.css';
 
 const COPY = {
@@ -13,7 +14,7 @@ const CHANGE_PERIOD_MS = 4200;
 const SWAP_MS = 480;
 
 /** One quiet working character; the clock runs only while the headline is visible. */
-export function HeroHeadline() {
+export function HeroHeadline({ firstLine }: { firstLine?: string }) {
     const { locale } = useSiteLocale();
     const copy = COPY[locale];
     const root = useRef<HTMLSpanElement>(null);
@@ -64,12 +65,14 @@ export function HeroHeadline() {
     const cycle = elapsed < FIRST_CHANGE_MS ? -1 : Math.floor((elapsed - FIRST_CHANGE_MS) / CHANGE_PERIOD_MS);
     const index = cycle < 0 ? 0 : (cycle + 1) % copy.activities.length;
     const swapping = cycle >= 0 && (elapsed - FIRST_CHANGE_MS) % CHANGE_PERIOD_MS < SWAP_MS;
-    const stage = !animated ? 'still' : elapsed < 1900 ? 'writing' : elapsed < 2700 ? 'checking' : swapping ? 'swapping' : 'idle';
+    const stage = !animated ? 'still' : elapsed < 1000 ? 'writing' : elapsed < 1700 ? 'checking' : swapping ? 'swapping' : 'idle';
     const verbOffset = copy.prefix.length + 1;
     const suffixOffset = verbOffset + copy.activities[0].length + 1;
     const initial = `${copy.prefix} ${copy.activities[0]} ${copy.suffix} ${copy.you}`;
 
     return <span ref={root} className={s.headline} data-hero-heading data-animated={animated} data-running={running} data-stage={stage}>
+        <span className={s.robot} aria-hidden="true"><PromptbookRobot/></span>
+        {firstLine && <><span className={s.firstLine}>{firstLine}</span>{' '}</>}
         <span className={s.srOnly}>{initial}</span>
         <span className={s.visualLine} aria-hidden="true">
             <span className={s.workPhrase}>
@@ -83,29 +86,15 @@ export function HeroHeadline() {
                 </span>
             </span>
             <span className={s.forYou}>
-                <InitialText text={copy.suffix} offset={suffixOffset}/>{' '}
+                <InitialText text={copy.suffix} offset={suffixOffset}/>
                 <span className={s.you}><InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/>
                     <svg className={s.underline} viewBox="0 0 100 12" preserveAspectRatio="none" fill="none"><path d="M3 7Q49 11 95 4" pathLength="1"/></svg>
                 </span>
-                <span className={s.robot}><span className={s.robotNod}><WorkingRobot/></span></span>
                 <svg className={s.check} viewBox="0 0 24 24" fill="none"><path d="m4 12 5 5L20 6" pathLength="1"/></svg>
             </span>
         </span>
     </span>;
 }
-
 function InitialText({ text, offset = 0 }: { text: string; offset?: number }) {
     return <span>{Array.from(text).map((letter, index) => <span key={index} className={s.initialLetter} style={{ '--letter': offset + index } as CSSProperties}>{letter}</span>)}</span>;
-}
-
-/** Vector artwork follows the site's existing navy line-icon language. */
-function WorkingRobot() {
-    return <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-        <path d="M32 13V7" stroke="currentColor" strokeWidth="2"/><circle cx="32" cy="5" r="3" fill="currentColor"/>
-        <rect x="12" y="14" width="40" height="31" rx="11" fill="#edf4ff" stroke="currentColor" strokeWidth="2"/>
-        <path d="M8 25v10M56 25v10M22 48v6h20v-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="24" cy="28" r="3" fill="currentColor"/><circle cx="40" cy="28" r="3" fill="currentColor"/>
-        <path d="M26 37q6 4 12 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="m12 43-7 8 8 3M4 60l8-16 4 2-8 16Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-    </svg>;
 }

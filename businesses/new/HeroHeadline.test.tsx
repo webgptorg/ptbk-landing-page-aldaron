@@ -29,7 +29,7 @@ afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstub
 
 describe('hero working headline', () => {
     it('starts with the complete accessible promise and changes activities only after the introduction', () => {
-        const { container } = render(<h1>Dřív jste AI úkolovali <HeroHeadline/></h1>);
+        const { container } = render(<h1><HeroHeadline firstLine="Dřív jste AI úkolovali"/></h1>);
         const heading = screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' });
         const activity = () => container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity');
         expect(activity()).toBe('pracuje');

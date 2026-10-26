@@ -25,7 +25,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
         : (en ? ['Hand over a responsibility.', 'Set the rules.', 'Start your agents.', 'They work independently.', 'They ask only when they need you.', 'You can check in at any time.'] : ['Předáte agendu.', 'Nastavíte pravidla.', 'Spustíte agenty.', 'Pracují sami.', 'Ozvou se, jen když Vás potřebují.', 'Vy máte kdykoliv přehled.']);
     return <div className={b.brandPage}>
         <section className={b.hero} aria-labelledby="brand-heading" data-testid="brand-hero">
-            <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <>{en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali'}{' '}<HeroHeadline key={locale}/></>}</h1>
+            <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <HeroHeadline key={locale} firstLine={en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali'}/>}</h1>
             <StagedIntro sentences={intro}/>
             <BrandActions partner={partnership}/>
             <Link className={b.partnerLink} href={path(partnership ? '' : 'partnership')}>
