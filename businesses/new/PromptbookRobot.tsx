@@ -27,7 +27,7 @@ export function PromptbookRobot() {
             <path d="m32 33 20 8v19l-20-8Z" fill="#000080" stroke="#000080"/>
             <g fill="#fff" stroke="none"><path d="M36 41q0-2 1.6-1.4l.4.2q1.6.6 1.6 2.6v3q0 2-1.6 1.4l-.4-.2q-1.6-.6-1.6-2.6Z"/><path d="M45 44.5q0-2 1.6-1.4l.4.2q1.6.6 1.6 2.6v3q0 2-1.6 1.4l-.4-.2q-1.6-.6-1.6-2.6Z"/></g>
             <path d="m38 51 8 3" stroke="#a8c8ff" strokeLinecap="round"/>
-            <image href="/logo/promptbook-logo-white-transparent-128.png" width="16" height="16" transform="matrix(1 -.48 0 1 66 40)" opacity=".88"/>
+            <image href="/logo/promptbook-logo-white-transparent-1024.png" width="16" height="16" transform="matrix(1 -.48 0 1 66 40)" opacity=".88"/>
         </g>
         <g className={s.robotArm} stroke="#15276a" strokeWidth="1.2" strokeLinejoin="round">
             <path d="m36 72-10 3-8-9-4 4 9 14 13-2Z" fill={`url(#${id}-paper)`}/>
