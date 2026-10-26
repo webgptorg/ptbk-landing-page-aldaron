@@ -74,24 +74,18 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
         <span className={s.robot} aria-hidden="true"><PromptbookRobot/></span>
         {firstLine && <><span className={s.firstLine}>{firstLine}</span>{' '}</>}
         <span className={s.srOnly}>{initial}</span>
-        <span className={s.visualLine} aria-hidden="true">
-            <span className={s.workPhrase}>
-                <InitialText text={copy.prefix}/>
-                <span className={s.activitySlot} data-hero-activity={copy.activities[index]}>
-                    {copy.activities.map(activity => <span className={s.wordSizer} key={activity}>{activity}</span>)}
-                    {cycle < 0 ? <span className={s.activity}><InitialText text={copy.activities[0]} offset={verbOffset}/></span> : <>
-                        {swapping && <span key={`old-${cycle}`} className={s.peelOut}>{copy.activities[cycle % copy.activities.length]}</span>}
-                        <span key={cycle} className={`${s.activity} ${s.replaceWord}`}>{copy.activities[index]}</span>
-                    </>}
+        <span className={s.visualLine} aria-hidden="true" data-hero-activity={copy.activities[index]}>
+            {copy.activities.map((activity, phraseIndex) => <span key={activity} className={s.phrase} data-active={phraseIndex === index} data-swapping={phraseIndex === index && swapping}>
+                {cycle < 0 && phraseIndex === 0 ? <InitialText text={copy.prefix}/> : copy.prefix}{' '}
+                <span className={s.activity}>{cycle < 0 && phraseIndex === 0 ? <InitialText text={activity} offset={verbOffset}/> : activity}</span>{' '}
+                <span className={s.forYou}>
+                    {cycle < 0 && phraseIndex === 0 ? <InitialText text={copy.suffix} offset={suffixOffset}/> : copy.suffix}{' '}
+                    <span className={s.you}>{cycle < 0 && phraseIndex === 0 ? <InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/> : copy.you}
+                        <svg className={s.underline} viewBox="0 0 100 12" preserveAspectRatio="none" fill="none"><path d="M3 7Q49 11 95 4" pathLength="1"/></svg>
+                    </span>
+                    <svg className={s.check} viewBox="0 0 24 24" fill="none"><path d="m4 12 5 5L20 6" pathLength="1"/></svg>
                 </span>
-            </span>
-            <span className={s.forYou}>
-                <InitialText text={copy.suffix} offset={suffixOffset}/>
-                <span className={s.you}><InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/>
-                    <svg className={s.underline} viewBox="0 0 100 12" preserveAspectRatio="none" fill="none"><path d="M3 7Q49 11 95 4" pathLength="1"/></svg>
-                </span>
-                <svg className={s.check} viewBox="0 0 24 24" fill="none"><path d="m4 12 5 5L20 6" pathLength="1"/></svg>
-            </span>
+            </span>)}
         </span>
     </span>;
 }
