@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import s from './hero-headline.module.css';
 
-/** A folded character built from Promptbook's blue cube and original mark. */
+/** A folded blue-cube character with a small arrow cue from the original mark. */
 export function PromptbookRobot() {
     const id = useId().replace(/:/g, '');
     return <svg viewBox="0 0 112 112" fill="none" aria-hidden="true" focusable="false" data-promptbook-robot>
@@ -18,16 +18,15 @@ export function PromptbookRobot() {
             <path d="m36 67 21 6 23-4M57 73v26" stroke="#9badcf"/>
             <path d="m80 72 6 4-1 11-5 4-4-5 4-5Z" fill="#000080"/>
         </g>
-        <image href="/logo/promptbook-logo-blue-transparent-128.png" x="41" y="74" width="14" height="16"/>
         <g className={s.robotHead} strokeLinejoin="round" strokeWidth="1.15">
             <path d="M26 25 56 10l31 14v34L57 74 26 59Z" fill={`url(#${id}-paper)`} stroke="#153078"/>
             <path d="m26 25 31 13 30-14-31-14Z" fill="#eef3ff" stroke="#153078"/>
+            <path d="m44 27 18-10v10Z" fill="#000080" stroke="none" opacity=".85"/>
             <path d="m57 38 30-14v34L57 74Z" fill={`url(#${id}-blue)`} stroke="#15276a"/>
             <path d="m30 28 27 11 26-13M57 39v31" stroke="white" strokeOpacity=".6"/>
             <path d="m32 33 20 8v19l-20-8Z" fill="#000080" stroke="#000080"/>
             <g fill="#fff" stroke="none"><path d="M36 41q0-2 1.6-1.4l.4.2q1.6.6 1.6 2.6v3q0 2-1.6 1.4l-.4-.2q-1.6-.6-1.6-2.6Z"/><path d="M45 44.5q0-2 1.6-1.4l.4.2q1.6.6 1.6 2.6v3q0 2-1.6 1.4l-.4-.2q-1.6-.6-1.6-2.6Z"/></g>
             <path d="m38 51 8 3" stroke="#a8c8ff" strokeLinecap="round"/>
-            <image href="/logo/promptbook-logo-white-transparent-1024.png" width="16" height="16" transform="matrix(1 -.48 0 1 66 40)" opacity=".88"/>
         </g>
         <g className={s.robotArm} stroke="#15276a" strokeWidth="1.2" strokeLinejoin="round">
             <path d="m36 72-10 3-8-9-4 4 9 14 13-2Z" fill={`url(#${id}-paper)`}/>
