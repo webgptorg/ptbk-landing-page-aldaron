@@ -29,6 +29,9 @@ import { StudioCompositePreview } from './StudioCompositePreview';
 import { StudioAssemblyEditor } from './StudioAssemblyEditor';
 import { StudioSceneEditor } from './StudioSceneEditor';
 import { StudioSourceLibrary } from './StudioSourceLibrary';
+import { useStudioProjectArtwork } from './useStudioProjectArtwork';
+import { StudioCompositionControls, StudioLayoutButtons } from './StudioCompositionControls';
+import { removeStudioSelection } from '@/lib/recording-studio/studioSimpleEdits';
 
 const PROJECT_HISTORY_LIMIT = 50;
 
@@ -39,6 +42,7 @@ export function StudioProjectEditor({
     isDisabled,
     onAssetChange,
     onProjectSaved,
+    onBusyChange,
 }: {
     readonly initialProject: StudioProject;
     readonly assets: readonly StudioAsset[];
@@ -46,6 +50,7 @@ export function StudioProjectEditor({
     readonly isDisabled: boolean;
     readonly onAssetChange: (asset: StudioAsset) => void;
     readonly onProjectSaved: (project: StudioProject) => void;
+    readonly onBusyChange?: (value: boolean) => void;
 }) {
     const [project, setProject] = useState(initialProject);
     const projectReference = useRef(project);
@@ -53,6 +58,7 @@ export function StudioProjectEditor({
     const [history, setHistory] = useState<StudioProject[]>([]);
     const isTimelineEditReference = useRef(false);
     const [isWorking, setIsWorking] = useState(false);
+    useEffect(() => { onBusyChange?.(isWorking); return () => onBusyChange?.(false); }, [isWorking, onBusyChange]);
     const [selectedSceneId, setSelectedSceneId] = useState<string | null>(null);
     const [isRawAudio, setIsRawAudio] = useState(false);
     const [audibleMonitorId, setAudibleMonitorId] = useState<string | null>(null);
@@ -110,16 +116,14 @@ export function StudioProjectEditor({
     return (
         <form ref={autosave.formRef} className="space-y-6" onSubmit={(event) => event.preventDefault()}>
             <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-bold">Střižna · workshop</h2>
+                <h2 className="text-2xl font-bold">Náhled a střih</h2>
                 <AdminAutosaveStatus {...autosave} />
             </div>
-            <p className="break-all text-xs text-slate-500">
-                Projekt {project.id} · metadata a média jsou místní pro tento profil, dokud výslovně nenahrajete zdroj
-                na CDN. Adresa nesynchronizuje projekt mezi počítači.
-            </p>
+            <StudioCompositionControls project={project} assets={assets} isDisabled={isDisabled || isWorking}
+                onBusyChange={setIsWorking} onChange={(next) => { rememberProjectRevision(); setProject(next); }} />
             <fieldset disabled={isDisabled || isWorking} className="space-y-5">
                 <label className="block text-sm">
-                    Název workshopu
+                    Název záznamu
                     <input
                         className="mt-1 w-full rounded border p-3"
                         value={project.title}
@@ -200,19 +204,11 @@ export function StudioProjectEditor({
                     </p>
                 )}
             </fieldset>
-            <StudioSourceLibrary
-                project={project}
-                assets={assets}
-                recordings={recordings}
-                isDisabled={isDisabled}
-                onChange={(next) => {
-                    // Source operations finish while the rest of the editor is locked, then register their metadata as one undo step.
-                    rememberProjectRevision();
-                    setProject(next);
-                }}
-                onAssetChange={onAssetChange}
-                onBusyChange={setIsWorking}
-            />
+
+            <details className="rounded-xl border bg-white p-4"><summary className="cursor-pointer text-sm">Připojit další zdroje</summary><div className="mt-4">
+                <StudioSourceLibrary project={project} assets={assets} recordings={recordings} isDisabled={isDisabled || isWorking}
+                    onChange={(next) => { rememberProjectRevision(); setProject(next); }} onAssetChange={onAssetChange} onBusyChange={setIsWorking} />
+            </div></details>
         </form>
     );
 }
@@ -253,6 +249,7 @@ function StudioProjectPlayback({
     readonly onCompositionAudio: () => void;
 }) {
     const snapshot = useSyncExternalStore(transport.subscribe, transport.getSnapshot, transport.getSnapshot);
+    const [cutError, setCutError] = useState<string | null>(null);
     const durationSeconds = getStudioProjectDuration(project);
     const scene = getStudioSceneAt(project, snapshot.seconds);
     const metadata = useMemo(() => mapStudioProjectMetadata(project), [project]);
@@ -265,6 +262,7 @@ function StudioProjectPlayback({
         label: `${project.groups.find((group) => group.id === scene.groupId)?.label} · ${project.tracks.find((track) => track.id === scene.backgroundTrackId)?.label ?? 'Bez obrazu'}${scene.overlayTrackId ? (scene.mask === 'circle' ? ' + kruh' : ' + kamera') : ''}`,
     }));
     const availableRanges = getStudioAvailableRanges(project, assets);
+    const artwork = useStudioProjectArtwork(project, assets);
     return (
         <>
             <div
@@ -274,6 +272,7 @@ function StudioProjectPlayback({
                 <Button type="button" onClick={snapshot.isPlayRequested ? transport.pause : transport.play}>
                     {snapshot.isPlayRequested ? 'Pozastavit vše' : 'Přehrát vše'}
                 </Button>
+                <Button type="button" variant="outline" onClick={() => transport.seek(0)}>Na začátek</Button>
                 <output aria-label="Společný čas" className="font-mono" data-session-seconds={snapshot.seconds}>
                     {formatRecordingTimecode(snapshot.seconds)} / {formatRecordingTimecode(durationSeconds)}
                 </output>
@@ -309,6 +308,7 @@ function StudioProjectPlayback({
                 </span>
             </div>
             <StudioCompositePreview project={project} snapshot={snapshot} media={media} />
+            <StudioLayoutButtons project={project} seconds={snapshot.seconds} onChange={onChange} />
             <RecordingTimeline
                 tracks={tracks}
                 derivedTracks={metadata.derivedTracks}
@@ -319,7 +319,7 @@ function StudioProjectPlayback({
                 durationSeconds={durationSeconds}
                 seconds={snapshot.seconds}
                 selection={project.selection}
-                artwork={{}}
+                artwork={artwork}
                 availableRanges={availableRanges}
                 onSeek={transport.seek}
                 onSelection={(selection) => onChange({ ...project, selection })}
@@ -329,7 +329,7 @@ function StudioProjectPlayback({
             <div className="flex flex-wrap items-center gap-3">
                 {(['startSeconds', 'endSeconds'] as const).map((field) => (
                     <label key={field} className="text-xs">
-                        {field === 'startSeconds' ? 'Projekt IN (s)' : 'Projekt OUT (s)'}
+                        {field === 'startSeconds' ? 'Začátek (sekundy)' : 'Konec (sekundy)'}
                         <input
                             type="number"
                             step="any"
@@ -351,19 +351,16 @@ function StudioProjectPlayback({
                     </label>
                 ))}
             </div>
-            <StudioSceneEditor
-                project={project}
-                seconds={snapshot.seconds}
-                selectedSceneId={selectedSceneId}
-                onSelect={onSceneSelect}
-                onChange={onChange}
-            />
-            <StudioAssemblyEditor
-                project={project}
-                seconds={snapshot.seconds}
-                onChange={onChange}
-                onSeek={transport.seek}
-            />
+            <div className="flex flex-wrap gap-3">
+                <Button type="button" variant="outline" onClick={() => { try { onChange(removeStudioSelection(project)); transport.seek(project.selection.startSeconds); setCutError(null); } catch (error) { setCutError(error instanceof Error ? error.message : 'Úsek nelze vystřihnout.'); } }}>Vystřihnout vybraný úsek</Button>
+                <Button type="button" variant="outline" onClick={() => onChange({ ...project, selection: { startSeconds: 0, endSeconds: durationSeconds } })}>Vybrat celý záznam</Button>
+            </div>
+            {cutError && <p role="alert" className="text-sm text-red-700">{cutError}</p>}
+            <p className="text-xs text-slate-500">Výběr určuje rozsah exportu. Vystřižení odstraní úsek ze všech stop a spojí zbytek.</p>
+            <details className="rounded-xl border bg-white p-4"><summary className="cursor-pointer text-sm font-medium">Další možnosti střihu a rozložení</summary><div className="mt-4 space-y-4">
+                <StudioSceneEditor project={project} seconds={snapshot.seconds} selectedSceneId={selectedSceneId} onSelect={onSceneSelect} onChange={onChange} />
+                <StudioAssemblyEditor project={project} seconds={snapshot.seconds} onChange={onChange} onSeek={transport.seek} />
+            </div></details>
             <section aria-label="Surové stopy" className="space-y-3">
                 <div className="flex flex-wrap items-center gap-3">
                     <h3 className="font-semibold">Surové stopy · monitor</h3>
@@ -412,6 +409,7 @@ function StudioProjectPlayback({
                                     Kontrolní poslech
                                 </Button>
                             </div>
+                            <details><summary className="cursor-pointer text-xs">Nastavení stopy</summary>
                             <label className="block text-xs">
                                 Role
                                 <select
@@ -483,6 +481,7 @@ function StudioProjectPlayback({
                                     Odebrat prázdnou stopu
                                 </Button>
                             )}
+                            </details>
                         </div>
                     ))}
                 </div>
@@ -491,8 +490,7 @@ function StudioProjectPlayback({
                 <summary className="cursor-pointer">Mapovaná workshopová metadata a časování</summary>
                 <p className="my-2">
                     Události, řeč, soukromé titulky a commit anchors čtou připnuté revize a stejný trim/sestavení jako
-                    obraz. Cíl po ustálení zůstává 100 ms; skutečné odchylky měří browser testy. Publikace do místnosti
-                    je samostatná akce v původním editoru záznamu.
+                    obraz. Cíl po ustálení zůstává 100 ms; skutečné odchylky měří browser testy. Metadata zůstávají součástí místního projektu a předpisu.
                 </p>
                 {metadata.events.map((event) => (
                     <button

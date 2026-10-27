@@ -258,7 +258,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   overwrite existing tracks, and no participant endpoint or public database role exposes subtitles.
 - `/admin/community` manages the permanent community, including polls, project
   moderation, participants, memberships, payments, and room analytics.
-- `/admin/studio` contains addressable `Nahrávání` at `/admin/studio/recording` and `Střižna` at
+- `/admin/studio` contains addressable `Nahrávání` at `/admin/studio/recording` and `Uložené projekty` at
   `/admin/studio/editor`, with individual recording/project URLs. Legacy recording-studio URLs permanently redirect
   to their recording views; the capture probe and transcription API retain their addresses. One mounted owner,
   browser lock and save/takeover protection span both sections. Section navigation flushes drafts while retaining
@@ -270,8 +270,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   upload manifests and indexes chunk byte offsets; external media is never copied just to import it. Read-only file
   handles recheck permission, session Files require reselection after reload, and changed or missing sources retain
   explicit relink errors. HTTPS sources require progressive CORS/range reads; direct Google Drive is explicitly
-  unsupported until authorized large-file ranges and native synchronized seeks are proven. The composite scene track
-  draws shared decoders with normalized fullscreen/rectangular/circular presets, hard cuts and one saved audio source;
+  unsupported until authorized large-file ranges and native synchronized seeks are proven. Recording URLs and existing project URLs now use the same preview-based editor. Its composite scene track
+  draws shared decoders with normalized fullscreen/rectangular/circular presets, a single saved global smooth/fade/cut transition and one audio source;
   monitor audio stays separate and gaps never hold old frames. Metadata and portable recipes map original/project/
   prepared coordinates consistently, retaining unavailable mappings and excluding credentials/serialized permissions.
   Explicit post-capture CDN upload uses bounded direct browser-to-S3 multipart PUTs, short-lived part/read signatures,
@@ -279,7 +279,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Only successful verification changes a stable asset's location; local originals remain. Its private asset/reference
   migration and separate cleanup namespace protect project objects and never publish to participants. Local editing
   works without S3/Drive configuration. Design, actual long-container measurements, provider CORS and integration
-  limits are in `docs/studio-workshop-editor.md`.
+  limits are in `docs/studio-workshop-editor.md`. The simple editor's shared selection trims export; removing it
+  ripple-cuts every synchronized source through immutable group mappings with undo. Scene settings, source mapping,
+  imports and original downloads stay behind disclosures. Smart layout samples at most 120 small screen frames per
+  group locally and proposes camera introduction then screen plus circular camera; ambiguous static introductions
+  remain camera until manually placed. It never infers the speech's meaning or uploads frames. Preview and local
+  WebM export share `studioComposition.ts`; export streams decoded 1080p/30 fps VP8 and one 48 kHz stereo Opus
+  audio track into OPFS, checks duration, then saves to disk (buffered downloads are capped at 256 MiB).
+  Export, cancellation, autosave and takeover use the existing work/authority boundaries. Details and verification
+  are in `docs/studio-simple-editor.md`.
 - `/admin/studio/recording` records any number of available cameras, screen shares,
   and optional microphones. A newly configured camera defaults to recording its selected
   system-default or chosen microphone inside the same video file; video-only is an explicit

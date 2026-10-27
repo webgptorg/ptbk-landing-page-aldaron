@@ -108,6 +108,8 @@ export type StudioProject = {
     readonly groups: readonly StudioPartGroup[];
     readonly clips: readonly StudioClip[];
     readonly scenes: readonly StudioScene[];
+    /** One transition choice for the complete composition; older projects use the same smooth default. */
+    readonly transition?: { readonly type: 'smooth' | 'fade' | 'cut'; readonly durationSeconds: number };
     readonly selection: RecordingTrim;
     /** Small immutable snapshots pin mappings/derived metadata when a recorder later appends material. */
     readonly recordingSnapshots: readonly { readonly revision: string; readonly recording: StudioRecording }[];

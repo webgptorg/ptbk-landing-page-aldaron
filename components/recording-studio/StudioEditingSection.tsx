@@ -32,11 +32,13 @@ export function StudioEditingSection({
     recordings,
     isReady,
     isDisabled,
+    onBusyChange,
 }: {
     readonly projectId?: string;
     readonly recordings: readonly StudioRecording[];
     readonly isReady: boolean;
     readonly isDisabled: boolean;
+    readonly onBusyChange?: (value: boolean) => void;
 }) {
     const [projects, setProjects] = useState<StudioProject[]>([]);
     const [assets, setAssets] = useState<StudioAsset[]>([]);
@@ -120,6 +122,7 @@ export function StudioEditingSection({
                     <StudioProjectEditor
                         key={selected.id}
                         initialProject={selected}
+                        onBusyChange={onBusyChange}
                         assets={assets}
                         recordings={recordings}
                         isDisabled={isDisabled}

@@ -10,14 +10,14 @@ import { deleteStudioRecording, readStudioRecording } from '@/lib/recording-stud
 import { flushAdminEditorSaves } from '@/lib/admin/adminPendingSaves';
 import { formatRecordingBytes, formatRecordingDuration, getRecordingByteLength, getRecordingMissingRanges } from '@/lib/recording-studio/recordingStudioTiming';
 import type { RecordingTrack, StudioRecording } from '@/lib/recording-studio/recordingStudioTypes';
-import { Download, Scissors } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { getRecordingWorkspacePath } from '@/lib/recording-studio/recordingStudioSessionTime';
 import { getRecordingMediaParts } from '@/lib/recording-studio/recordingStudioSessionTime';
 import type { RecordingMediaPart } from '@/lib/recording-studio/recordingStudioTypes';
 
-export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration, onOpenEditor }: {
+export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, onDelete, onBusyChange, onStorageChange, onUseSourceConfiguration }: {
     readonly isWorkspace?: boolean;
     readonly recordings: readonly StudioRecording[];
     readonly isDisabled: boolean;
@@ -25,7 +25,6 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
     readonly onBusyChange: (isBusy: boolean) => void;
     readonly onStorageChange: () => Promise<void>;
     readonly onUseSourceConfiguration: (recording: StudioRecording, reportSuccess?: (message: string) => void) => void;
-    readonly onOpenEditor?: (recording: StudioRecording) => void;
 }) {
     const [workingId, setWorkingId] = useState<string | null>(null);
     const [progress, setProgress] = useState('');
@@ -117,22 +116,17 @@ export function RecordingLibrary({ recordings, isDisabled, isWorkspace = false, 
                     <ul className="divide-y divide-slate-100 text-sm">
                         {recording.tracks.map((track, index) => {
                             const parts = getRecordingMediaParts(track);
-                            const isPreparationPossible = Boolean(recording.trim && parts.some((part) => part.sessionStartSeconds <= recording.trim!.startSeconds && part.sessionStartSeconds + part.durationSeconds >= recording.trim!.endSeconds));
                             return <li key={track.id} className="flex flex-wrap items-center justify-between gap-3 py-2"><span className="min-w-0 truncate" title={track.label}>{index + 1}. {track.label}{track.kind === 'microphone' ? ' · zvuk' : track.isAudioIncluded ? ` · obraz i zvuk${track.audioSourceLabel ? ` (${track.audioSourceLabel})` : ''}` : ''} · {parts.length} částí</span><span className="shrink-0 tabular-nums text-slate-500">{formatRecordingBytes(track.byteLength)}</span>
                                 {parts.length <= 1 ? <Button type="button" variant="outline" size="sm" disabled={isBusy || track.byteLength === 0} onClick={() => download(recording, false, track)}>Stáhnout originál {index + 1}</Button>
                                     : parts.map((part, partIndex) => <Button key={part.id} type="button" variant="outline" size="sm" disabled={isBusy || part.byteLength === 0} onClick={() => download(recording, false, track, part)}>Originál {index + 1} · část {partIndex + 1}</Button>)}
-                                {recording.trim && isPreparationPossible && <Button type="button" variant="outline" size="sm" disabled={isBusy || track.byteLength === 0} onClick={() => download(recording, true, track)}>Stáhnout ořez {index + 1}</Button>}
                             </li>;
                         })}
                     </ul>
-                    {recording.trim && <p className="text-sm text-cyan-800">Společný ořez: {formatRecordingDuration(recording.trim.startSeconds)} – {formatRecordingDuration(recording.trim.endSeconds)}</p>}
                     <div className="flex flex-wrap gap-2">
-                        {onOpenEditor && <Button type="button" disabled={isBusy || recording.status === 'recording'} onClick={() => onOpenEditor(recording)}>Otevřít ve střižně</Button>}
                         <Button type="button" variant="outline" disabled={isBusy || recording.tracks.length === 0} onClick={() => onUseSourceConfiguration(recording)}>Použít tuto konfiguraci zdrojů</Button>
-                        {!isWorkspace && (isBusy ? <Button type="button" variant="outline" disabled>Náhled a ořez</Button> : <Button variant="outline" asChild><Link href={getRecordingWorkspacePath(recording.id)}>Náhled a ořez</Link></Button>)}
+                        {!isWorkspace && (isBusy ? <Button type="button" variant="outline" disabled>Náhled a střih</Button> : <Button variant="outline" asChild><Link href={getRecordingWorkspacePath(recording.id)}>Náhled a střih</Link></Button>)}
                         <Button type="button" variant="outline" disabled={isBusy || getRecordingByteLength(recording) === 0} onClick={() => download(recording, false)}><Download className="mr-2 h-4 w-4" />Originály ZIP</Button>
                         <Button type="button" variant="outline" disabled={isBusy} onClick={() => { void downloadManifest(recording.id); }}>Stáhnout údaje o stopách</Button>
-                        {recording.trim && <Button type="button" disabled={isBusy} onClick={() => download(recording, true)}><Scissors className="mr-2 h-4 w-4" />ZIP s ořezem</Button>}
                         <AdminEditorButton label="Smazat" title="Smazat místní záznam" errorMessage={errorMessage} buttonProps={{ disabled: isBusy, className: 'text-red-700' }}>
                             {(closeEditor) => <div className="space-y-4"><p className="text-sm text-slate-600">Záznam „{recording.title}“ a všechny jeho potvrzené části budou odstraněny z tohoto prohlížeče. Stažené ZIP soubory zůstanou zachované.</p><Button type="button" variant="destructive" disabled={isBusy} onClick={() => remove(recording, closeEditor)}>Smazat záznam a všechny stopy</Button></div>}
                         </AdminEditorButton>

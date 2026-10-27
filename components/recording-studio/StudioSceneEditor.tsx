@@ -171,7 +171,7 @@ export function StudioSceneEditor({
                                     type="number"
                                     min="0"
                                     max="1"
-                                    step="0.01"
+                                    step="any"
                                     required
                                     value={Number.isFinite(selected.rectangle[field]) ? selected.rectangle[field] : ''}
                                     onChange={(event) =>
@@ -202,7 +202,7 @@ export function StudioSceneEditor({
                         </Button>
                     </div>
                     <p className="text-xs text-slate-600">
-                        Rozložení je uložené v souřadnicích 0–1. Scény mají tvrdé řezy. Každá část/scéna vybírá jediný
+                        Rozložení je uložené v souřadnicích 0–1. Všechny scény používají společný přechod kompozice. Každá část/scéna vybírá jediný
                         zvuk; volby poslechu monitoru se do předpisu neukládají.
                     </p>
                 </>

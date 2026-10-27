@@ -104,10 +104,10 @@ export function createStudioScene(
             null,
         overlayTrackId: tracks.find((track) => track.role === 'webcam')?.id ?? null,
         audioTrackId: tracks.find((track) => track.role === 'audio')?.id ?? null,
-        mask: 'rectangle',
+        mask: 'circle',
         fit: 'contain',
         overlayFit: 'cover',
-        rectangle: { x: 0.74, y: 0.72, width: 0.24, height: 0.24 },
+        rectangle: { x: 0.78, y: 0.60, width: 0.20, height: 0.3555555556 },
     };
 }
 

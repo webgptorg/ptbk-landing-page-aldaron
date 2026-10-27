@@ -273,6 +273,9 @@ export function splitStudioGroup(project: StudioProject, groupId: string, projec
 export function validateStudioProject(project: StudioProject): void {
     if (project.schemaVersion !== 1 || !project.id || !project.title.trim())
         throw new Error('Projekt potřebuje podporovanou verzi a název.');
+    if (project.transition && (!['smooth', 'fade', 'cut'].includes(project.transition.type) ||
+        !Number.isFinite(project.transition.durationSeconds) || project.transition.durationSeconds < 0.1 || project.transition.durationSeconds > 3))
+        throw new Error('Zvolte platný přechod a délku od 0,1 do 3 sekund.');
     const duration = getStudioProjectDuration(project);
     const ids = [...project.tracks, ...project.groups, ...project.clips, ...project.scenes].map((value) => value.id);
     if (new Set(ids).size !== ids.length) throw new Error('Identifikátory projektu musí být jedinečné.');
