@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import s from './hero-headline.module.css';
 
-/** A folded blue-cube character with a small arrow cue from the original mark. */
+/** A folded blue cube with the original logo triangle along its back-left top edge. */
 export function PromptbookRobot() {
     const id = useId().replace(/:/g, '');
     return <svg viewBox="0 0 112 112" fill="none" aria-hidden="true" focusable="false" data-promptbook-robot>
@@ -21,7 +21,7 @@ export function PromptbookRobot() {
         <g className={s.robotHead} strokeLinejoin="round" strokeWidth="1.15">
             <path d="M26 25 56 10l31 14v34L57 74 26 59Z" fill={`url(#${id}-paper)`} stroke="#153078"/>
             <path d="m26 25 31 13 30-14-31-14Z" fill="#eef3ff" stroke="#153078"/>
-            <path d="m44 27 18-10v10Z" fill="#000080" stroke="none" opacity=".85"/>
+            <path d="M26 25 56 10v15Z" fill="#000080" stroke="none" opacity=".85"/>
             <path d="m57 38 30-14v34L57 74Z" fill={`url(#${id}-blue)`} stroke="#15276a"/>
             <path d="m30 28 27 11 26-13M57 39v31" stroke="white" strokeOpacity=".6"/>
             <path d="m32 33 20 8v19l-20-8Z" fill="#000080" stroke="#000080"/>
