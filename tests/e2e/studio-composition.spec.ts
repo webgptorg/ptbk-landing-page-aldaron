@@ -1,11 +1,55 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
-import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
+import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input } from 'mediabunny';
 import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 import { createAdminSessionValueOrNull } from '@/lib/admin/adminSession';
+import { getStudioCompositionLayers } from '@/lib/recording-studio/studioComposition';
+import type { StudioProject } from '@/lib/recording-studio/studioProjectTypes';
 import { EDITOR_FIXTURE_ID, storeRecordingEditorFixture } from './recordingStudioEditorFixtures';
 
 test.use({ serviceWorkers: 'allow' });
+
+/** Inspect every decoded output frame, including the intervals between keyframes. */
+async function inspectCompositionFrames(page: Page, bytes: Uint8Array) {
+    const input = new Input({ formats: ALL_FORMATS, source: new BufferSource(bytes) });
+    try {
+        const track = await input.getPrimaryVideoTrack();
+        const configuration = await track!.getDecoderConfig();
+        const packets = [];
+        for await (const packet of new EncodedPacketSink(track!).packets()) packets.push({
+            data: Buffer.from(packet.data).toString('base64'), type: packet.type,
+            timestamp: Math.round(packet.timestamp * 1_000_000), duration: Math.round(packet.duration * 1_000_000),
+        });
+        return await page.evaluate(async ({ configuration, packets }) => {
+            const canvas = document.createElement('canvas'); canvas.width = 160; canvas.height = 90;
+            const context = canvas.getContext('2d')!;
+            const frames: { seconds: number; brightPixels: number; timecode: number }[] = [];
+            let failure: DOMException | undefined;
+            const decoder = new VideoDecoder({ error: (error) => { failure = error; }, output: (frame) => {
+                try {
+                    context.drawImage(frame, 0, 0, 160, 90);
+                    const pixels = context.getImageData(0, 0, 160, 90).data;
+                    let brightPixels = 0, ticks = 0;
+                    for (let index = 0; index < pixels.length; index += 4) if (pixels[index] > 180) brightPixels++;
+                    for (let bit = 0; bit < 12; bit++) if (pixels[(20 * 160 + 13 + bit * 12) * 4] > 128) ticks += 1 << bit;
+                    frames.push({ seconds: frame.timestamp / 1_000_000, brightPixels, timecode: ticks / 100 });
+                } finally { frame.close(); }
+            } });
+            try {
+                decoder.configure(configuration!);
+                for (const packet of packets) {
+                    decoder.decode(new EncodedVideoChunk({ ...packet, data: Uint8Array.from(atob(packet.data), (character) => character.charCodeAt(0)) }));
+                    // Bound decoded frames even when inspecting a longer fixture.
+                    if (decoder.decodeQueueSize > 8) await new Promise<void>((resolve) => decoder.addEventListener('dequeue', () => resolve(), { once: true }));
+                    if (failure) throw failure;
+                }
+                await decoder.flush();
+                if (failure) throw failure;
+                return frames.sort((a, b) => a.seconds - b.seconds);
+            } finally { if (decoder.state !== 'closed') decoder.close(); }
+        }, { configuration, packets });
+    } finally { input.dispose(); }
+}
 
 async function projectState(page: Page) {
     return page.evaluate(async () => {
@@ -77,6 +121,19 @@ test('one local studio cuts all tracks, saves a smooth camera-to-circle composit
         expect(await video!.computeDuration()).toBeCloseTo(3.5, 1);
         expect(await audio!.computeDuration()).toBeCloseTo(3.5, 1);
     } finally { input.dispose(); }
+    const frames = await inspectCompositionFrames(page, new Uint8Array(bytes));
+    expect(frames).toHaveLength(105);
+    expect(frames.filter((frame) => frame.brightPixels < 10), 'No unexpected black frames anywhere in the exported composition').toEqual([]);
+    // Read full-size source bands across keyframes/cuts. During a morph the moving, cropped bands
+    // cannot be interpreted as a timecode; picture continuity is still checked on every such frame above.
+    const readableFrames = frames.filter((frame) => getStudioCompositionLayers(saved.projects[0] as StudioProject, frame.seconds + 0.5).every((layer) =>
+        layer.opacity === 1 && (layer.rectangle.width === 1 && layer.rectangle.height === 1 || layer.rectangle.y > 40 / 90)));
+    expect(readableFrames.length).toBeGreaterThan(30);
+    for (const frame of readableFrames) {
+        const projectSeconds = frame.seconds + 0.5;
+        const originalSeconds = projectSeconds + (projectSeconds >= 2 ? 1 : 0);
+        expect(Math.abs(frame.timecode - originalSeconds), JSON.stringify(frame)).toBeLessThan(0.09);
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath('unified-studio-mobile.png'), fullPage: true });
@@ -89,4 +146,31 @@ test('one local studio cuts all tracks, saves a smooth camera-to-circle composit
     const after = await projectState(page);
     expect(after.projects).toHaveLength(1); expect(after.rawBytes).toBe(before.rawBytes); expect(after.hashes).toEqual(before.hashes);
     expect(errors).toEqual([]);
+});
+
+test('exports every frame of a variable-cadence recorder camera across GOP boundaries without black dropouts', async ({ page, baseURL }) => {
+    test.skip(!process.env.ADMIN_PASSWORD, 'Needs the isolated test admin password.');
+    await page.context().addCookies([{ name: ADMIN_SESSION_COOKIE_NAME, value: createAdminSessionValueOrNull()!, url: baseURL!, httpOnly: true, sameSite: 'Lax' }]);
+    await page.addInitScript(() => { Object.defineProperty(window, 'showSaveFilePicker', { value: undefined, configurable: true }); });
+    await page.goto('/admin/studio/editor');
+    await expect(page.getByRole('button', { name: 'Nový projekt', exact: true })).toBeEnabled();
+    const acceptCookies = page.getByRole('button', { name: /^(Accept all|Přijmout vše)$/ });
+    if (await acceptCookies.count()) await acceptCookies.click();
+    await storeRecordingEditorFixture(page, { isVariableFrameRate: true });
+    await page.goto(`/admin/studio/recording/${EDITOR_FIXTURE_ID}`);
+    await expect(page.getByRole('button', { name: 'Exportovat kompozici', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'Na začátek', exact: true }).click();
+    await page.getByRole('button', { name: 'Kamera', exact: true }).click();
+    await page.getByRole('spinbutton', { name: 'Začátek (sekundy)', exact: true }).fill('0.5');
+    await page.getByRole('spinbutton', { name: 'Konec (sekundy)', exact: true }).fill('4.5');
+    const before = await projectState(page);
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Exportovat kompozici', exact: true }).click();
+    const download = await downloadPromise;
+    await expect(page.getByRole('status').filter({ hasText: /Kompozice je vyexportovaná/ })).toBeVisible();
+    const bytes = new Uint8Array(await readFile((await download.path())!));
+    const frames = await inspectCompositionFrames(page, bytes);
+    expect(frames).toHaveLength(120);
+    expect(frames.filter((frame) => frame.brightPixels < 10), 'The recorder fixture has visible white text on every original frame').toEqual([]);
+    expect((await projectState(page)).hashes).toEqual(before.hashes);
 });

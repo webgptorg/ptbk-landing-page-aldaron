@@ -35,7 +35,12 @@ recognition of speech. It changes only scene metadata, supports undo, and sends 
 ## Local export
 
 `studioCompositionExport.ts` reads original IndexedDB media or an explicitly connected local file in bounded
-ranges. It decodes active visible sources at the shared mapped time and encodes a 1920×1080, 30 fps VP8 WebM.
+ranges. It decodes active visible sources sequentially in presentation order and resamples their mapped times into
+a 1920×1080, 30 fps VP8 WebM. The current frame stays visible until the next source frame, including variable
+camera cadence and static screen intervals. Each clip/layout decoder owns only its current/next samples and closes
+them on cuts, hidden layers, cancellation or failure; frames never carry across a missing clip. Sparse timestamp
+retrieval is deliberately avoided: it can yield null GOP batches on real variable-cadence recorder files. A missing
+decoded frame inside an available video interval stops export with an explicit error instead of encoding black.
 A single selected scene audio source is trimmed/mapped through the same edits, normalized to 48 kHz stereo Opus;
 missing source intervals are silence. Rendering never relies on wall-clock MediaRecorder playback or screen capture.
 A temporary seekable OPFS file holds output, so a long output is not accumulated in memory. After duration checks
@@ -54,4 +59,8 @@ is added. Physical browser/device testing and a long recording/export soak remai
 repeated linked cuts, smart layout availability/gaps and transition validation.
 `studio-composition.spec.ts` uses real recorded fixture containers to cut all tracks, set camera-to-circle layout,
 save/reload, export and check audio/video dimensions and duration, while confirming original stored byte counts.
+It also decodes every exported frame to check picture continuity and reads binary timecodes through linked cuts.
+A separate VP9/Opus variable-cadence MediaRecorder regression checks every frame across GOP boundaries; the old
+sparse export produces black dropouts on this fixture. `studioVideoFrames.test.ts` covers irregular/static frame
+durations, bounded sample ownership, early iterator return, cancellation and decoder failure.
 Existing project and transport unit tests cover pinned mappings and asynchronous seek synchronization.

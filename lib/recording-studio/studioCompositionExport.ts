@@ -5,6 +5,7 @@ import { createStudioRangeInput, readStudioLocalRangeSource } from './studioMedi
 import { drawStudioComposition, getStudioCompositionLayers, type StudioCompositionFrame } from './studioComposition';
 import { getStudioClipAt, placeStudioClips, placeStudioScenes, validateStudioProject } from './studioProjectTimeline';
 import type { StudioAsset, StudioPlacedClip, StudioProject } from './studioProjectTypes';
+import { resampleStudioVideoFrames } from './studioVideoFrames';
 
 const FPS = 30, SAMPLE_RATE = 48_000;
 
@@ -37,7 +38,7 @@ export async function renderStudioComposition(project: StudioProject, assets: re
             const input = createStudioRangeInput(await readStudioLocalRangeSource(asset), signal);
             return { input, asset };
         };
-        const decoders = new Map<string, { clipId: string; input: Input; samples: AsyncGenerator<VideoSample | null, void, unknown> }>();
+        const decoders = new Map<string, { clipId: string; input: Input; origin: number; firstTimestamp: number; endTimestamp: number; samples: AsyncGenerator<VideoSample | null, void, unknown> }>();
         const audioInputs = new Set<Input>();
         try {
             signal.throwIfAborted(); await output.start();
@@ -60,18 +61,29 @@ export async function renderStudioComposition(project: StudioProject, assets: re
                             if (!clip) continue;
                             if (!decoder) {
                                 const { input, asset } = await open(clip);
-                                const video = await input.getPrimaryVideoTrack();
-                                if (!video || !await video.canDecode()) { input.dispose(); throw new Error(`Obraz stopy „${track.label}“ nelze dekódovat.`); }
-                                const timestamps = function* () { for (let frame = index; frame < framesCount; frame++) {
-                                    const time = project.selection.startSeconds + frame / FPS;
-                                    if (time >= clip.projectEndSeconds) break;
-                                    yield asset.bounds.firstTimestampSeconds + clip.sourceStartSeconds + time - clip.projectStartSeconds;
-                                } };
-                                decoder = { clipId: clip.id, input, samples: new VideoSampleSink(video).samplesAtTimestamps(timestamps()) };
-                                decoders.set(track.id, decoder);
+                                try {
+                                    const video = await input.getPrimaryVideoTrack();
+                                    if (!video || !await video.canDecode()) throw new Error(`Obraz stopy „${track.label}“ nelze dekódovat.`);
+                                    const timestamps = function* () { for (let frame = index; frame < framesCount; frame++) {
+                                        const time = project.selection.startSeconds + frame / FPS;
+                                        if (time >= clip.projectEndSeconds) break;
+                                        yield asset.bounds.firstTimestampSeconds + clip.sourceStartSeconds + time - clip.projectStartSeconds;
+                                    } };
+                                    const origin = asset.bounds.firstTimestampSeconds + clip.sourceStartSeconds - clip.projectStartSeconds;
+                                    decoder = { clipId: clip.id, input, origin, firstTimestamp: await video.getFirstTimestamp(),
+                                        endTimestamp: asset.bounds.components.find((component) => component.kind === 'video')?.endTimestampSeconds ?? asset.bounds.endTimestampSeconds,
+                                        samples: resampleStudioVideoFrames(new VideoSampleSink(video).samples(origin + seconds, origin + clip.projectEndSeconds), timestamps(), signal) };
+                                    decoders.set(track.id, decoder);
+                                } catch (error) { input.dispose(); throw error; }
                             }
                             const sample = (await decoder.samples.next()).value;
-                            if (sample) { samples.push(sample); frames.set(track.id, { image: sample.toCanvasImageSource(), width: sample.displayWidth, height: sample.displayHeight }); }
+                            if (sample) samples.push(sample);
+                            const timestamp = decoder.origin + seconds;
+                            if (timestamp + 0.000001 >= decoder.firstTimestamp && timestamp < decoder.endTimestamp) {
+                                if (!sample)
+                                    throw new Error(`Obraz stopy „${track.label}“ v čase ${seconds.toFixed(3)} s chybí. Export byl zastaven, aby nevzniklo video s černými výpadky.`);
+                                frames.set(track.id, { image: sample.toCanvasImageSource(), width: sample.displayWidth, height: sample.displayHeight });
+                            }
                         }
                         drawStudioComposition(context, canvas.width, canvas.height, project, seconds, frames);
                         await videoSource.add(index / FPS, Math.min(1 / FPS, duration - index / FPS));

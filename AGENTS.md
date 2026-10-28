@@ -284,7 +284,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   imports and original downloads stay behind disclosures. Smart layout samples at most 120 small screen frames per
   group locally and proposes camera introduction then screen plus circular camera; ambiguous static introductions
   remain camera until manually placed. It never infers the speech's meaning or uploads frames. Preview and local
-  WebM export share `studioComposition.ts`; export streams decoded 1080p/30 fps VP8 and one 48 kHz stereo Opus
+  WebM export share `studioComposition.ts`; export resamples sequential decoded frames (never sparse GOP timestamp
+  batches) to 1080p/30 fps VP8 and one 48 kHz stereo Opus
   audio track into OPFS, checks duration, then saves to disk (buffered downloads are capped at 256 MiB).
   Export, cancellation, autosave and takeover use the existing work/authority boundaries. Details and verification
   are in `docs/studio-simple-editor.md`.
