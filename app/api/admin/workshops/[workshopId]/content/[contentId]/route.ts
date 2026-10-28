@@ -31,7 +31,7 @@ async function getWorkshopOrResponse(workshopId: string) {
 }
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopContentItemRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -80,7 +80,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopContentI
 }
 
 export async function DELETE(request: NextRequest, context: AdminWorkshopContentItemRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

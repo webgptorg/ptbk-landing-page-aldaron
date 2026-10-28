@@ -7,7 +7,7 @@ import { z } from 'zod';
 export type WorkshopSubtitleRouteContext = { readonly params: Promise<{ readonly workshopId: string; readonly subtitleId?: string }> };
 
 export async function getAdminWorkshopSubtitleRequest(request: NextRequest, workshopId: string) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return { response: unauthorizedResponse };
     if (!z.string().uuid().safeParse(workshopId).success) {
         return { response: NextResponse.json({ error: 'Neplatný workshop.' }, { status: 400 }) };

@@ -2,7 +2,7 @@ import { ADMIN_USERNAME } from '@/lib/admin/adminConstants';
 import { isSecretEqual } from '@/lib/admin/isSecretEqual';
 
 /**
- * The admin token of this server, which is the password of the one administrator
+ * The admin token of this server, which is the password of the environment-backed superadmin
  */
 export function getConfiguredAdminTokenOrNull(): string | null {
     return process.env.ADMIN_PASSWORD || null;
@@ -19,7 +19,7 @@ export function isAdminTokenValid(token: string | null | undefined): boolean {
 }
 
 /**
- * Whether the filled in login form names the one administrator and their token
+ * Whether the filled in login form names the environment-backed superadmin and their token
  */
 export function isAdminSignInAllowed(
     username: string | null | undefined,

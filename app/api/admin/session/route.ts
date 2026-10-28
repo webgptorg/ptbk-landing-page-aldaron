@@ -4,12 +4,14 @@ import {
     ADMIN_SESSION_COOKIE_NAME,
     ADMIN_USERNAME_FIELD_NAME,
 } from '@/lib/admin/adminConstants';
-import { isAdminSignInAllowed } from '@/lib/admin/adminCredentials';
+import { signInAdmin } from '@/lib/admin/adminSignIn';
+import { canAccessAdminPath } from '@/lib/admin/adminPermissions';
+import { AdminUserDatabaseError } from '@/lib/admin/adminUserDatabase';
 import { buildAdminLoginPath, getAdminRedirectPath } from '@/lib/admin/adminLoginRedirect';
-import { createAdminSessionValueOrNull, getAdminSessionCookieOptions } from '@/lib/admin/adminSession';
+import { getAdminSessionCookieOptions } from '@/lib/admin/adminSession';
 import { redirectAfterAdminForm } from '@/lib/admin/redirectAfterAdminForm';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 function readFormFieldOrNull(formData: FormData, fieldName: string): string | null {
     const fieldValue = formData.get(fieldName);
@@ -18,7 +20,7 @@ function readFormFieldOrNull(formData: FormData, fieldName: string): string | nu
 }
 
 /**
- * Opens the session of the administration for the one administrator whose password is the admin token of this server
+ * Opens a signed superadmin or delegated-account session after checking its credentials on the server
  *
  * Note: The credentials are sent in a form and answered by a redirect, so that they never end up in an address which a
  *       browser would keep in its history or repeat on a reload
@@ -36,13 +38,19 @@ export async function POST(request: NextRequest) {
         readFormFieldOrNull(formData, ADMIN_REDIRECT_PATH_FIELD_NAME) ?? undefined,
     );
 
-    const sessionValue = isAdminSignInAllowed(username, password) ? createAdminSessionValueOrNull() : null;
-    if (sessionValue === null) {
+    let signIn;
+    try {
+        signIn = await signInAdmin(username, password);
+    } catch (error) {
+        if (!(error instanceof AdminUserDatabaseError)) throw error;
+        return NextResponse.json({ error: error.message }, { status: error.status, headers: { 'Cache-Control': 'no-store' } });
+    }
+    if (signIn === null) {
         return redirectAfterAdminForm(buildAdminLoginPath(redirectPath, true));
     }
 
-    const response = redirectAfterAdminForm(redirectPath);
-    response.cookies.set(ADMIN_SESSION_COOKIE_NAME, sessionValue, getAdminSessionCookieOptions());
+    const response = redirectAfterAdminForm(canAccessAdminPath(signIn.identity, redirectPath) ? redirectPath : '/admin');
+    response.cookies.set(ADMIN_SESSION_COOKIE_NAME, signIn.sessionValue, getAdminSessionCookieOptions());
 
     return response;
 }

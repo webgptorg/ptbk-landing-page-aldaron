@@ -16,7 +16,7 @@ type AdminCommunityProjectRouteContext = {
  * Uses the same project moderation service as a community moderator, behind the separate administrator session.
  */
 export async function PATCH(request: NextRequest, context: AdminCommunityProjectRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

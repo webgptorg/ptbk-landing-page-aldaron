@@ -58,7 +58,7 @@ function readContactChanges(body: Readonly<Record<string, unknown>>): ContactCha
 }
 
 export async function GET(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -114,7 +114,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

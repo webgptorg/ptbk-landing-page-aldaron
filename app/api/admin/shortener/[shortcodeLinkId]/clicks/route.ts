@@ -21,7 +21,7 @@ async function readShortcodeLinkId(context: ShortcodeLinkClickRouteContext): Pro
  * its individual IP addresses and request metadata are sent only after an administrator explicitly opens one link.
  */
 export async function GET(request: NextRequest, context: ShortcodeLinkClickRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

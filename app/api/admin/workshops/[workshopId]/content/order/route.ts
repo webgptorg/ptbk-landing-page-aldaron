@@ -17,7 +17,7 @@ type WorkshopContentOrderResult = {
 };
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopContentOrderRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return unauthorizedResponse;
 
     const body = await readJsonObjectOrNull(request);

@@ -23,7 +23,7 @@ async function createDeploymentResponse(action: () => Promise<WorkshopVercelDepl
 
 /** Deploy the form's repository. The completed URL is saved through the ordinary workshop settings form. */
 export async function POST(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse !== null) return unauthorizedResponse;
     const parsed = DEPLOYMENT_REQUEST_SCHEMA.safeParse(await readJsonObjectOrNull(request));
     if (!parsed.success) {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse !== null) return unauthorizedResponse;
     const parsed = WORKSHOP_VERCEL_DEPLOYMENT_SCHEMA.shape.id.safeParse(request.nextUrl.searchParams.get('deploymentId'));
     if (!parsed.success) return NextResponse.json({ error: 'Neplatné ID nasazení.' }, { status: 400 });

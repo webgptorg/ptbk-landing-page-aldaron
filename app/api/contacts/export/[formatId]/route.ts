@@ -34,7 +34,7 @@ type ContactsExportRouteContext = {
  *       exports the contacts as they are whenever it is opened again
  */
 export async function GET(request: NextRequest, context: ContactsExportRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

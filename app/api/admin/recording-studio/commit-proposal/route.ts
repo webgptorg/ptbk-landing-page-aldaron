@@ -17,7 +17,7 @@ const PROPOSAL_SCHEMA = z.object({
 
 /** Commit dates offer review candidates only; they cannot prove when a push or edit appeared in the recording. */
 export async function POST(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse !== null) return unauthorizedResponse;
     const parsed = PROPOSAL_SCHEMA.safeParse(await readJsonObjectOrNull(request));
     if (!parsed.success || parsed.data.calibration.sessionSeconds >= parsed.data.durationSeconds) {

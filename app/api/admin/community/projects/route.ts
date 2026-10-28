@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * rejected cards, while this route deliberately does so an administrator can audit every decision.
  */
 export async function GET(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

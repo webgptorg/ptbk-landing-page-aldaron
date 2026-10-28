@@ -14,7 +14,7 @@ type AdminWorkshopFeedbackRouteContext = {
  * list of free-text answers is loaded only while an administrator is reading it.
  */
 export async function GET(request: NextRequest, context: AdminWorkshopFeedbackRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

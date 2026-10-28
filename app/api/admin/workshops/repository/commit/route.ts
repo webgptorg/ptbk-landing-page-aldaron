@@ -16,7 +16,7 @@ const COMMIT_LOOKUP_SCHEMA = z.object({
 
 /** A preview of unsaved project settings; this endpoint never changes a workshop. */
 export async function POST(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse !== null) return unauthorizedResponse;
     const parsed = COMMIT_LOOKUP_SCHEMA.safeParse(await readJsonObjectOrNull(request));
     if (!parsed.success) return NextResponse.json({ error: 'Ověřte repozitář, větve, ID commitu a datum.' }, { status: 400 });

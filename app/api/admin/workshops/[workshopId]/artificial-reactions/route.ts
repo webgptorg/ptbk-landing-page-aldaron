@@ -11,7 +11,7 @@ type AdminWorkshopArtificialReactionsRouteContext = {
 };
 
 export async function POST(request: NextRequest, context: AdminWorkshopArtificialReactionsRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

@@ -33,7 +33,7 @@ export function isAdminHostedRecordingContext(value: AdminHostedRecordingContext
 
 export async function getAdminHostedRecordingContext(request: NextRequest, workshopId: string):
     Promise<AdminHostedRecordingContext | NextResponse> {
-    const unauthorized = getUnauthorizedResponseOrNull(request);
+    const unauthorized = await getUnauthorizedResponseOrNull(request);
     if (unauthorized) return unauthorized;
     const supabase = getWorkshopDatabaseOrNull();
     if (!supabase) return NextResponse.json({ error: 'Workshop database unavailable' }, { status: 503 });

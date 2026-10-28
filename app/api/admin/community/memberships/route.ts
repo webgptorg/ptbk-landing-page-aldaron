@@ -14,7 +14,7 @@ const COMMUNITY_MEMBERSHIP_DATABASE_UNAVAILABLE_MESSAGE =
  * community-room snapshot, because a payment belongs to an address and may outlive any individual room session.
  */
 export async function GET(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse !== null) {
         return unauthorizedResponse;
     }

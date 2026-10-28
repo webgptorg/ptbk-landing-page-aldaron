@@ -20,7 +20,7 @@ const INVALID_SHORTCODE_LINK_ERROR_MESSAGE = 'Invalid short link';
  * Lists every short link for the administration, which is the only reader allowed to see them all at once.
  */
 export async function GET(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
  * Creates a public short link after the session of the administrator and the supplied values have both been verified.
  */
 export async function POST(request: NextRequest) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

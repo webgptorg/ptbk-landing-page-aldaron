@@ -13,7 +13,7 @@ type AdminWorkshopParticipantRouteContext = {
 };
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopParticipantRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -49,7 +49,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopParticip
 }
 
 export async function DELETE(request: NextRequest, context: AdminWorkshopParticipantRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

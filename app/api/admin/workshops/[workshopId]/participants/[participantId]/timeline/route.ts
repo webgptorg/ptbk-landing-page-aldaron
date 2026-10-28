@@ -13,7 +13,7 @@ type AdminWorkshopParticipantTimelineRouteContext = {
  * Serves the full event history only after an administrator opens a participant's detail.
  */
 export async function GET(request: NextRequest, context: AdminWorkshopParticipantTimelineRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

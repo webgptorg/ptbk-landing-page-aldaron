@@ -31,7 +31,7 @@ function createWorkshopExportErrorResponse(errorMessage: string | null): NextRes
  * deliberately omit pagination, so an administrator never downloads only the currently visible page.
  */
 export async function GET(request: NextRequest, context: AdminWorkshopExportRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

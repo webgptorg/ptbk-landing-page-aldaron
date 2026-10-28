@@ -8,16 +8,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ADMIN_NAVIGATION_ITEMS } from './adminNavigationConfig';
 
-export function AdminNavigation() {
+export function AdminNavigation({ allowedPaths, username }: { readonly allowedPaths: readonly string[]; readonly username?: string }) {
     const pathname = usePathname();
+    const navigationItems = ADMIN_NAVIGATION_ITEMS.filter((item) => allowedPaths.includes(item.path));
 
     // The login page lives below the same Next.js layout, but it is not an authenticated admin page and must not
     // expose navigation or a sign-out action before the administrator has signed in.
-    if (pathname === null || pathname === ADMIN_LOGIN_PATH) {
+    if (pathname === null || pathname === ADMIN_LOGIN_PATH || navigationItems.length === 0) {
         return null;
     }
 
-    const currentPage = ADMIN_NAVIGATION_ITEMS.find((item) => item.path === pathname);
+    const currentPage = navigationItems.find((item) => item.path === pathname);
 
     return (
         <header className="border-b border-slate-200 bg-white shadow-sm">
@@ -40,13 +41,14 @@ export function AdminNavigation() {
                     </h1>
 
                     <div className="ml-auto shrink-0">
+                        {username && <span className="mr-3 hidden text-sm text-slate-500 sm:inline">{username}</span>}
                         <AdminSignOutButton />
                     </div>
                 </div>
 
                 <nav aria-label="Navigace administrace" className="-mx-1 overflow-x-auto pb-3">
                     <ul className="flex min-w-max items-center gap-1">
-                        {ADMIN_NAVIGATION_ITEMS.map((item) => {
+                        {navigationItems.map((item) => {
                             const isActive =
                                 pathname === item.path ||
                                 (item.path !== ADMIN_DASHBOARD_PATH && pathname.startsWith(`${item.path}/`));

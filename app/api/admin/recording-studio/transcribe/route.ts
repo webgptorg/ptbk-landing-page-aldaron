@@ -8,7 +8,7 @@ const MULTIPART_OVERHEAD_BYTES = 20_000;
 
 /** Browser-local audio is sent only after an administrator explicitly starts subtitle generation. */
 export async function POST(request: NextRequest) {
-    const unauthorized = getUnauthorizedResponseOrNull(request);
+    const unauthorized = await getUnauthorizedResponseOrNull(request);
     if (unauthorized) return unauthorized;
     if (!process.env.OPENAI_API_KEY?.trim()) return NextResponse.json({ error: 'Přepis není nastavený. Správce serveru musí nastavit OPENAI_API_KEY.' }, { status: 503 });
     if (Number(request.headers.get('content-length')) > MAXIMAL_SUBTITLE_AUDIO_BYTES + MULTIPART_OVERHEAD_BYTES) {

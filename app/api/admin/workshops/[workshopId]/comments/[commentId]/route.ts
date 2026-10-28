@@ -12,7 +12,7 @@ type AdminWorkshopCommentRouteContext = {
 };
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopCommentRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopCommentR
 }
 
 export async function DELETE(request: NextRequest, context: AdminWorkshopCommentRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

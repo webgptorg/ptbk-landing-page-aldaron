@@ -35,7 +35,7 @@ function createShortcodeLinkNotFoundResponse(): NextResponse {
  * being replaced by a second one.
  */
 export async function PATCH(request: NextRequest, context: ShortcodeLinkRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -79,7 +79,7 @@ export async function PATCH(request: NextRequest, context: ShortcodeLinkRouteCon
  * Removes one short link for good, together with the clicks which were measured on it.
  */
 export async function DELETE(request: NextRequest, context: ShortcodeLinkRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

@@ -25,34 +25,34 @@ describe('the guard of the administration API', () => {
         }
     });
 
-    it('lets a request of a signed in administrator through', () => {
+    it('lets a request of a signed in administrator through', async () => {
         const request = createAdminApiRequest({ cookie: createAdminSessionCookieHeader() });
 
-        expect(getUnauthorizedResponseOrNull(request)).toBeNull();
+        expect(await getUnauthorizedResponseOrNull(request)).toBeNull();
     });
 
-    it('refuses a request without a session before it reaches the database', () => {
-        expect(getUnauthorizedResponseOrNull(createAdminApiRequest())?.status).toBe(401);
+    it('refuses a request without a session before it reaches the database', async () => {
+        expect((await getUnauthorizedResponseOrNull(createAdminApiRequest()))?.status).toBe(401);
     });
 
-    it('refuses a made up session', () => {
+    it('refuses a made up session', async () => {
         const request = createAdminApiRequest({ cookie: `${ADMIN_SESSION_COOKIE_NAME}=made-up-session` });
 
-        expect(getUnauthorizedResponseOrNull(request)?.status).toBe(401);
+        expect((await getUnauthorizedResponseOrNull(request))?.status).toBe(401);
     });
 
-    it('no longer opens the administration by a token written into the address', () => {
+    it('no longer opens the administration by a token written into the address', async () => {
         const request = new NextRequest(`${ADMIN_API_URL}?token=${ADMIN_PASSWORD}`);
 
-        expect(getUnauthorizedResponseOrNull(request)?.status).toBe(401);
+        expect((await getUnauthorizedResponseOrNull(request))?.status).toBe(401);
     });
 
-    it('refuses a request which another site sends with the session of the administrator', () => {
+    it('refuses a request which another site sends with the session of the administrator', async () => {
         const request = createAdminApiRequest({
             cookie: createAdminSessionCookieHeader(),
             origin: 'https://example.com',
         });
 
-        expect(getUnauthorizedResponseOrNull(request)?.status).toBe(403);
+        expect((await getUnauthorizedResponseOrNull(request))?.status).toBe(403);
     });
 });

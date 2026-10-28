@@ -64,7 +64,7 @@ export async function getStudioAssetContext(
     | { readonly response: NextResponse }
     | { readonly database: SupabaseClient; readonly asset: StudioMediaAssetRow | null }
 > {
-    const unauthorized = getUnauthorizedResponseOrNull(request);
+    const unauthorized = await getUnauthorizedResponseOrNull(request);
     if (unauthorized) return { response: unauthorized };
     if (assetId && !z.string().uuid().safeParse(assetId).success)
         return { response: studioControlResponse({ error: 'Invalid asset identity.' }, 400) };

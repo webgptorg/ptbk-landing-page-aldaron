@@ -19,7 +19,7 @@ type AdminWorkshopParticipantsRouteContext = {
  * Serves one filtered and sorted page instead of the entire audience of a workshop.
  */
 export async function GET(request: NextRequest, context: AdminWorkshopParticipantsRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

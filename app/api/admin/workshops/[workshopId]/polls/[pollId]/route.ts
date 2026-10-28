@@ -13,7 +13,7 @@ type AdminWorkshopPollRouteContext = {
 };
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopPollRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -80,7 +80,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopPollRout
 }
 
 export async function DELETE(request: NextRequest, context: AdminWorkshopPollRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

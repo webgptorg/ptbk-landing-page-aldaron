@@ -11,7 +11,7 @@ type AdminWorkshopAnalyticsRouteContext = {
  * Delivers compact activity buckets which can power both the overview and the reactions section.
  */
 export async function GET(request: NextRequest, context: AdminWorkshopAnalyticsRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

@@ -417,9 +417,17 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
   by `/[shortcode]`; `/shortener` redirects to the admin page.
-- `/admin/login` authenticates the single `admin` account with `ADMIN_PASSWORD`
-  and a signed session cookie. All `/admin/*` pages and APIs require
-  `requireAdminSignedIn`. `/admin` is the post-login dashboard.
+- `/admin/login` authenticates the environment-backed `admin` superadmin with `ADMIN_PASSWORD`, or a private
+  `admin_users` account with its salted scrypt password hash. Only the environment account manages `/admin/users`;
+  it cannot be renamed, disabled or deleted in the website. Delegated accounts get explicit section permissions,
+  which filter navigation and dashboard cards and are enforced by `requireAdminSignedIn` on pages and the awaited
+  `getUnauthorizedResponseOrNull` in API handlers. Unknown API sections remain superadmin-only. Shared workshop APIs
+  check the stored room kind rather than a caller's hint. Read current account permissions on every request;
+  never cache them between requests or trust them in cookies. Password/enabled-state changes rotate the database
+  session version, and deletion revokes the account. The separate signed user-cookie format never grants superadmin
+  access. All cookies still depend on `ADMIN_PASSWORD`; legacy environment-admin cookies retain their meaning.
+  Account/password creation is explicit, profile/access edits use the shared autosave/dialog conventions, and private
+  account projections never return password hashes or session versions. `/admin` is the post-login dashboard.
 - Other public/legal routes include `/contact`, `/data-deletion`, `/privacy`,
   `/terms`, `/dekujeme`, `/branding`, and the routes under `/k`, `/old`, and
   `/test`.

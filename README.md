@@ -292,7 +292,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY
 # Required by server-side workflows that access protected Supabase data
 SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
 
-# Enables the single /admin account (username: admin)
+# Enables the environment-backed superadmin (username: admin) and signs all admin sessions
 ADMIN_PASSWORD=CHOOSE_A_LONG_RANDOM_VALUE
 
 # Optional convenience switch for preview URLs; it is public, not access control
@@ -300,6 +300,25 @@ NEXT_PUBLIC_SKIP_WAITLIST_TOKEN=
 ```
 
 `NEXT_PUBLIC_` variables are included in the browser bundle. Never place database passwords, service-role keys, or administrator credentials in them. With no `ADMIN_PASSWORD`, the administration remains closed.
+
+### Administrator accounts and section access
+
+Sign in at `/admin/login` as `admin` with `ADMIN_PASSWORD`. This environment-backed account always has full access;
+it is never stored in the user table and cannot be renamed, disabled or deleted from the website.
+After applying `2026-10-2800-admin-users.sql` through the ordinary migration runner, open **Administrátoři** at
+`/admin/users` to create additional accounts. A private service-role database connection is required.
+
+Each additional account has a unique username, a password of at least 12 characters, an enabled switch, and independent
+access to workshops, community, studio, contacts, short links and discount codes. For a short-link operator, select only
+**Zkracovač odkazů**. No selected sections means an empty dashboard. Only the environment superadmin may manage accounts,
+even when an additional account has all section permissions. Creating an account and resetting a password are explicit
+actions; profile and access edits use the shared autosave editor. There is no public registration.
+
+Section checks run in pages and API handlers, including contact exports and the shared workshop/community endpoints.
+Permissions are read from the private database on every request. Password changes, disabling/re-enabling an account and
+deleting it invalidate its existing sessions. Passwords are stored as independently salted scrypt hashes; neither hashes
+nor session versions are returned to the browser. Existing superadmin cookies keep working. Rotating `ADMIN_PASSWORD`
+invalidates all admin cookies. Keep it long and random, and keep `admin_users` in the ordinary private database backups.
 
 ### Branded domains
 

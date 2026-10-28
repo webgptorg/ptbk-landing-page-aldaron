@@ -1,5 +1,5 @@
 /**
- * The one account which opens the administration, its password being the admin token of the server
+ * The environment-backed superadmin, which cannot be replaced by a delegated database account
  */
 export const ADMIN_USERNAME = 'admin';
 

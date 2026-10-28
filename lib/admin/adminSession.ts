@@ -100,3 +100,35 @@ export function getAdminSessionCookieOptions(): AdminSessionCookieOptions {
 export function getExpiredAdminSessionCookieOptions(): AdminSessionCookieOptions {
     return { ...getAdminSessionCookieOptions(), maxAge: 0 };
 }
+
+export type AdminUserSession = {
+    readonly userId: string;
+    readonly sessionVersion: string;
+};
+
+const UUID_PATTERN = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+const USER_SESSION_NAMESPACE = 'promptbook-admin-user-session:';
+
+function signAdminUserSession(payload: string): string | null {
+    const secret = getConfiguredAdminTokenOrNull();
+    return secret === null ? null : createHmac('sha256', secret).update(USER_SESSION_NAMESPACE + payload).digest('hex');
+}
+
+/** A separate format and signature namespace prevent a delegated cookie from becoming a superadmin cookie. */
+export function createAdminUserSessionValueOrNull(session: AdminUserSession, issuedAt = Date.now()): string | null {
+    if (!UUID_PATTERN.test(session.userId) || !UUID_PATTERN.test(session.sessionVersion)) return null;
+    const payload = `u1.${session.userId}.${session.sessionVersion}.${issuedAt}`;
+    const signature = signAdminUserSession(payload);
+    return signature === null ? null : `${payload}.${signature}`;
+}
+
+export function readAdminUserSessionOrNull(value: string | null | undefined, now = Date.now()): AdminUserSession | null {
+    if (!value || value.length > 256) return null;
+    const parts = value.split('.');
+    if (parts.length !== 5 || parts[0] !== 'u1' || !UUID_PATTERN.test(parts[1]) || !UUID_PATTERN.test(parts[2])
+        || !/^\d{1,16}$/.test(parts[3])) return null;
+    const issuedAt = Number(parts[3]);
+    if (!Number.isSafeInteger(issuedAt) || now < issuedAt || now - issuedAt > ADMIN_SESSION_MAX_AGE_MILLISECONDS) return null;
+    if (!isSecretEqual(parts[4], signAdminUserSession(parts.slice(0, 4).join('.')))) return null;
+    return { userId: parts[1], sessionVersion: parts[2] };
+}

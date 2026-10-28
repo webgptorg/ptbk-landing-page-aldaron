@@ -19,7 +19,7 @@ type AdminWorkshopStageCommentRouteContext = {
  * Selects the one comment everyone sees above the live stream, or clears it when the host is ready for the next one.
  */
 export async function POST(request: NextRequest, context: AdminWorkshopStageCommentRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

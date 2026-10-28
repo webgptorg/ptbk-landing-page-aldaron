@@ -15,7 +15,7 @@ type AdminWorkshopLinkPreviewRouteContext = {
 
 /** Returns only a title, never fetched HTML or arbitrary response bodies. */
 export async function GET(request: NextRequest, context: AdminWorkshopLinkPreviewRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return unauthorizedResponse;
 
     const submittedUrl = request.nextUrl.searchParams.get('url') ?? '';

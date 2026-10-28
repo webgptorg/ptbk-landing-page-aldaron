@@ -7,7 +7,8 @@ import {
 } from '@/lib/admin/adminConstants';
 import { ADMIN_SHORTENER_PATH } from '@/lib/shortener/shortcodeLinkConstants';
 import { STUDIO_PATH } from '@/lib/recording-studio/studioProjectTypes';
-import { ContactRound, LayoutDashboard, Link2, Radio, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
+import { ADMIN_USERS_PATH } from '@/lib/admin/adminUserSchemas';
+import { ContactRound, LayoutDashboard, Link2, Radio, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
 
 export type AdminNavigationItem = {
     readonly path: string;
@@ -67,5 +68,11 @@ export const ADMIN_NAVIGATION_ITEMS: readonly AdminNavigationItem[] = [
         label: 'Slevové kódy',
         description: 'Platnost, místa a použití slevových kódů pro placené registrace.',
         icon: TicketPercent,
+    },
+    {
+        path: ADMIN_USERS_PATH,
+        label: 'Administrátoři',
+        description: 'Účty administrátorů a jejich přístup do jednotlivých sekcí.',
+        icon: ShieldCheck,
     },
 ];

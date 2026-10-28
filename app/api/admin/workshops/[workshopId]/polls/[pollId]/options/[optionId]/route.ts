@@ -43,7 +43,7 @@ function createFailedPollOptionResponse(
  * Approves, rejects, or corrects one answer a member wrote into a community poll.
  */
 export async function PATCH(request: NextRequest, context: AdminWorkshopPollOptionRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopPollOpti
 }
 
 export async function DELETE(request: NextRequest, context: AdminWorkshopPollOptionRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

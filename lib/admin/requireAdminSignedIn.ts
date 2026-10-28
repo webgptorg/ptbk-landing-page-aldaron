@@ -1,5 +1,6 @@
 import { buildAdminLoginPath } from '@/lib/admin/adminLoginRedirect';
-import { isAdminSignedIn } from '@/lib/admin/isAdminSignedIn';
+import { getCurrentAdminIdentity } from './getCurrentAdminIdentity';
+import { canAccessAdminPath, type AdminIdentity } from './adminPermissions';
 import { redirect } from 'next/navigation';
 
 /**
@@ -7,8 +8,11 @@ import { redirect } from 'next/navigation';
  *
  * Note: The page names itself, so that the sign in returns to the very page which was asked for
  */
-export async function requireAdminSignedIn(currentAdminPath: string): Promise<void> {
-    if (!(await isAdminSignedIn())) {
+export async function requireAdminSignedIn(currentAdminPath: string): Promise<AdminIdentity> {
+    const identity = await getCurrentAdminIdentity();
+    if (identity === null) {
         redirect(buildAdminLoginPath(currentAdminPath));
     }
+    if (!canAccessAdminPath(identity, currentAdminPath)) redirect('/admin?access=denied');
+    return identity;
 }

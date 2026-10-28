@@ -24,7 +24,7 @@ type AdminWorkshopRouteContext = {
 };
 
 export async function GET(request: NextRequest, context: AdminWorkshopRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, context: AdminWorkshopRouteConte
 }
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -136,7 +136,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopRouteCon
  * polls attached to it. The attachment rows deliberately remain: they belong to polls which the community owns.
  */
 export async function DELETE(request: NextRequest, context: AdminWorkshopRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

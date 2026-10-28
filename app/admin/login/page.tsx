@@ -1,6 +1,7 @@
 import { AdminLoginForm } from '@/components/admin/AdminLoginForm';
 import { getAdminRedirectPath, isAdminSignInRefused } from '@/lib/admin/adminLoginRedirect';
-import { isAdminSignedIn } from '@/lib/admin/isAdminSignedIn';
+import { getCurrentAdminIdentity } from '@/lib/admin/getCurrentAdminIdentity';
+import { canAccessAdminPath } from '@/lib/admin/adminPermissions';
 import { redirect } from 'next/navigation';
 
 type AdminLoginPageProps = {
@@ -17,8 +18,9 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
     const resolvedSearchParams = await searchParams;
     const redirectPath = getAdminRedirectPath(resolvedSearchParams.redirectPath);
 
-    if (await isAdminSignedIn()) {
-        redirect(redirectPath);
+    const identity = await getCurrentAdminIdentity();
+    if (identity) {
+        redirect(canAccessAdminPath(identity, redirectPath) ? redirectPath : '/admin');
     }
 
     return (

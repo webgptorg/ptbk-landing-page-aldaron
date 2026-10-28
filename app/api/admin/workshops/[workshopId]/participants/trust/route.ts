@@ -19,7 +19,7 @@ const AUTOMATIC_TRUST_SETTING_SCHEMA = z.object({ isAutomaticTrustEnabled: z.boo
 const BULK_TRUST_CONFIRMATION_SCHEMA = z.object({ eligibilityToken: z.string().regex(/^[a-f0-9]{32}$/) }).strict();
 
 export async function GET(request: NextRequest, context: AdminWorkshopParticipantTrustRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return unauthorizedResponse;
 
     const { workshopId } = await context.params;
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, context: AdminWorkshopParticipan
 }
 
 export async function PATCH(request: NextRequest, context: AdminWorkshopParticipantTrustRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return unauthorizedResponse;
 
     const parsed = AUTOMATIC_TRUST_SETTING_SCHEMA.safeParse(await readJsonObjectOrNull(request));
@@ -58,7 +58,7 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopParticip
 }
 
 export async function POST(request: NextRequest, context: AdminWorkshopParticipantTrustRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return unauthorizedResponse;
 
     const parsed = BULK_TRUST_CONFIRMATION_SCHEMA.safeParse(await readJsonObjectOrNull(request));

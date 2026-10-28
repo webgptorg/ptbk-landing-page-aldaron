@@ -2,7 +2,6 @@ import {
     ADMIN_PASSWORD_FIELD_NAME,
     ADMIN_REDIRECT_PATH_FIELD_NAME,
     ADMIN_SESSION_API_PATH,
-    ADMIN_USERNAME,
     ADMIN_USERNAME_FIELD_NAME,
 } from '@/lib/admin/adminConstants';
 import { ShieldCheck } from 'lucide-react';
@@ -40,8 +39,7 @@ export function AdminLoginForm({ redirectPath, isSignInRefused }: AdminLoginForm
                 </div>
                 <h1 className="mt-3 text-3xl font-bold">Přihlášení</h1>
                 <p className="mt-3 text-sm leading-6 text-slate-400">
-                    Přihlaste se jménem <strong className="font-semibold text-slate-200">{ADMIN_USERNAME}</strong> a
-                    admin tokenem tohoto serveru.
+                    Přihlaste se svým uživatelským jménem a heslem.
                 </p>
 
                 <input type="hidden" name={ADMIN_REDIRECT_PATH_FIELD_NAME} value={redirectPath} />
@@ -54,9 +52,9 @@ export function AdminLoginForm({ redirectPath, isSignInRefused }: AdminLoginForm
                     name={ADMIN_USERNAME_FIELD_NAME}
                     type="text"
                     autoComplete="username"
+                    autoFocus
                     autoCapitalize="none"
                     spellCheck={false}
-                    defaultValue={ADMIN_USERNAME}
                     className={ADMIN_LOGIN_FIELD_CLASS_NAME}
                     required
                 />
@@ -69,7 +67,6 @@ export function AdminLoginForm({ redirectPath, isSignInRefused }: AdminLoginForm
                     name={ADMIN_PASSWORD_FIELD_NAME}
                     type="password"
                     autoComplete="current-password"
-                    autoFocus
                     className={ADMIN_LOGIN_FIELD_CLASS_NAME}
                     required
                 />

@@ -4,7 +4,7 @@ import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabil
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function getAdminWorkshopAgentRequest(request: NextRequest, workshopId: string) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) return { response: unauthorizedResponse };
     const workshopData = await getAdminWorkshopDataOrResponse(workshopId);
     if ('response' in workshopData) return workshopData;

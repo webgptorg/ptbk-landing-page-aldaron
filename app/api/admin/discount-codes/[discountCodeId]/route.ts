@@ -27,7 +27,7 @@ async function readDiscountCodeId(context: DiscountCodeRouteContext): Promise<st
 }
 
 export async function PATCH(request: NextRequest, context: DiscountCodeRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest, context: DiscountCodeRouteCont
 }
 
 export async function DELETE(request: NextRequest, context: DiscountCodeRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

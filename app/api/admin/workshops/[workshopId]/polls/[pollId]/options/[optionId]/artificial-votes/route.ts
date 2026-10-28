@@ -18,7 +18,7 @@ export async function POST(
     request: NextRequest,
     context: AdminWorkshopPollOptionArtificialVotesRouteContext,
 ) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }

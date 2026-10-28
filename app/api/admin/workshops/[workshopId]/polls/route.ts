@@ -16,7 +16,7 @@ type AdminWorkshopPollsRouteContext = {
  * admin-session route: a moderator of the chat can guide the discussion, but cannot create an organisation-wide poll.
  */
 export async function POST(request: NextRequest, context: AdminWorkshopPollsRouteContext) {
-    const unauthorizedResponse = getUnauthorizedResponseOrNull(request);
+    const unauthorizedResponse = await getUnauthorizedResponseOrNull(request);
     if (unauthorizedResponse) {
         return unauthorizedResponse;
     }
