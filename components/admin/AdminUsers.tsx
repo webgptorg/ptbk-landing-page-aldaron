@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AdminEditorDialog } from './AdminEditorDialog';
 import { AdminUserForm } from './AdminUserForm';
-import { ADMIN_PERMISSION_DEFINITIONS } from '@/lib/admin/adminPermissions';
+import { ADMIN_PERMISSION_DEFINITIONS, ADMIN_SHORTENER_PERMISSION_DEFINITIONS } from '@/lib/admin/adminPermissions';
 import { ADMIN_USERS_API_PATH, type AdminUser } from '@/lib/admin/adminUserSchemas';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
@@ -39,7 +39,10 @@ export function AdminUsers({ initialUsers }: { readonly initialUsers: readonly A
             {users.length === 0 && <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">Zatím nejsou vytvoření další administrátoři.</p>}
             {users.map((user) => <article key={user.id} className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="min-w-0 flex-1"><h3 className="break-words font-semibold text-slate-950">{user.username} <span className={`ml-2 text-xs font-normal ${user.isEnabled ? 'text-emerald-700' : 'text-slate-500'}`}>{user.isEnabled ? 'Aktivní' : 'Vypnutý'}</span></h3>
-                    <p className="mt-2 text-sm text-slate-500">{ADMIN_PERMISSION_DEFINITIONS.filter((item) => user.permissions.includes(item.id)).map((item) => item.label).join(', ') || 'Žádné povolené sekce'}</p>
+                    <p className="mt-2 text-sm text-slate-500">{[
+                        ...ADMIN_PERMISSION_DEFINITIONS.filter((item) => user.permissions.includes(item.id)).map((item) => item.label),
+                        ...(!user.permissions.includes('shortener') ? ADMIN_SHORTENER_PERMISSION_DEFINITIONS.filter((item) => user.permissions.includes(item.id)).map((item) => `Zkracovač: ${item.label.toLowerCase()}`) : []),
+                    ].join(', ') || 'Žádné povolené sekce'}</p>
                 </div>
                 <div className="flex gap-2"><Button variant="outline" onClick={() => void runAfterAdminSaves(() => setEditor(user))}>Upravit</Button><Button variant="outline" disabled={deletingId !== null} onClick={() => void runAfterAdminSaves(() => deleteUser(user))}>{deletingId === user.id ? 'Mažu…' : 'Smazat'}</Button></div>
             </article>)}

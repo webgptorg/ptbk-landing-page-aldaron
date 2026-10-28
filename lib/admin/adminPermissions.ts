@@ -8,7 +8,19 @@ export const ADMIN_PERMISSION_DEFINITIONS = [
     { id: 'discount-codes', label: 'Slevové kódy', path: '/admin/discount-codes' },
 ] as const;
 
-export type AdminPermission = (typeof ADMIN_PERMISSION_DEFINITIONS)[number]['id'];
+export const ADMIN_SHORTENER_PERMISSION_DEFINITIONS = [
+    { id: 'shortener:view', label: 'Zobrazovat odkazy' },
+    { id: 'shortener:create', label: 'Vytvářet odkazy' },
+    { id: 'shortener:update', label: 'Upravovat odkazy' },
+    { id: 'shortener:delete', label: 'Mazat odkazy' },
+    { id: 'shortener:clicks', label: 'Číst historii kliknutí' },
+] as const;
+
+export const ADMIN_PERMISSION_VALUES = [
+    ...ADMIN_PERMISSION_DEFINITIONS.map((definition) => definition.id),
+    ...ADMIN_SHORTENER_PERMISSION_DEFINITIONS.map((definition) => definition.id),
+] as const;
+export type AdminPermission = (typeof ADMIN_PERMISSION_VALUES)[number];
 export type AdminIdentity = {
     readonly id: string | null;
     readonly username: string;
@@ -17,7 +29,18 @@ export type AdminIdentity = {
 };
 
 export function hasAdminPermission(identity: AdminIdentity, permission: AdminPermission): boolean {
-    return identity.isSuperAdmin || identity.permissions.includes(permission);
+    if (identity.isSuperAdmin || identity.permissions.includes(permission)) return true;
+    // The legacy section grant retains full access. Any action includes enough read access to use the section.
+    if (permission.startsWith('shortener:') && identity.permissions.includes('shortener')) return true;
+    return (permission === 'shortener' || permission === 'shortener:view')
+        && identity.permissions.some((value) => value.startsWith('shortener:'));
+}
+
+/** Expand legacy full access in the editor so removing one action cannot leave a hidden full-access grant. */
+export function expandAdminPermissions(permissions: readonly AdminPermission[]): readonly AdminPermission[] {
+    return permissions.includes('shortener')
+        ? Array.from(new Set([...permissions.filter((value) => value !== 'shortener'), ...ADMIN_SHORTENER_PERMISSION_DEFINITIONS.map((item) => item.id)]))
+        : permissions;
 }
 
 export function isPathWithin(pathname: string, root: string): boolean {

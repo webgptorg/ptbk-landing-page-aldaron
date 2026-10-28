@@ -7,12 +7,12 @@ import { Suspense } from 'react';
 export const metadata = ADMIN_SHORTENER_METADATA;
 
 export default async function AdminShortenerPage() {
-    await requireAdminSignedIn(ADMIN_SHORTENER_PATH);
+    const identity = await requireAdminSignedIn(ADMIN_SHORTENER_PATH);
 
     return (
         <main className="min-h-screen bg-slate-50">
             <Suspense>
-                <ShortcodeLinkAdmin />
+                <ShortcodeLinkAdmin identity={identity} />
             </Suspense>
         </main>
     );

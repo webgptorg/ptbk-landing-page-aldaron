@@ -1,6 +1,7 @@
 'use client';
 
 import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { hasAdminPermission, type AdminIdentity } from '@/lib/admin/adminPermissions';
 
 import { ShortcodeLinkClickTable } from '@/components/shortener/ShortcodeLinkClickTable';
 import { ShortcodeLinkEditForm } from '@/components/shortener/ShortcodeLinkEditForm';
@@ -103,7 +104,11 @@ function sortShortcodeLinks(
  * Holds the list of every short link and the writes which change it, while the creation of a new link stays in the
  * shortener form, editing stays in its own form, and one selected link reveals its click history.
  */
-export function ShortcodeLinkAdmin() {
+export function ShortcodeLinkAdmin({ identity }: { readonly identity: AdminIdentity }) {
+    const canCreate = hasAdminPermission(identity, 'shortener:create');
+    const canUpdate = hasAdminPermission(identity, 'shortener:update');
+    const canDelete = hasAdminPermission(identity, 'shortener:delete');
+    const canViewClicks = hasAdminPermission(identity, 'shortener:clicks');
     const {
         searchQuery,
         creationFilter,
@@ -146,8 +151,8 @@ export function ShortcodeLinkAdmin() {
     }, [loadShortcodeLinks]);
 
     const selectedShortcodeLink = useMemo(
-        () => shortcodeLinks.find((shortcodeLink) => shortcodeLink.id === selectedShortcodeLinkId),
-        [selectedShortcodeLinkId, shortcodeLinks],
+        () => canViewClicks ? shortcodeLinks.find((shortcodeLink) => shortcodeLink.id === selectedShortcodeLinkId) : undefined,
+        [canViewClicks, selectedShortcodeLinkId, shortcodeLinks],
     );
 
     useEffect(() => {
@@ -190,7 +195,7 @@ export function ShortcodeLinkAdmin() {
     }, [selectedShortcodeLink]);
 
     const handleSave = async (values: ShortcodeLinkValues): Promise<boolean> => {
-        if (editedShortcodeLink === null) {
+        if (!canUpdate || editedShortcodeLink === null) {
             return false;
         }
 
@@ -205,7 +210,7 @@ export function ShortcodeLinkAdmin() {
     };
 
     const handleDelete = async (shortcodeLink: ShortcodeLink) => {
-        if (deletingShortcodeLinkIdReference.current !== null) return;
+        if (!canDelete || deletingShortcodeLinkIdReference.current !== null) return;
         const isDeletionConfirmed = window.confirm(
             `Delete ${createPublicShortcodeLinkUrl(shortcodeLink.shortcode)} for good, together with the clicks measured on it?`,
         );
@@ -244,11 +249,11 @@ export function ShortcodeLinkAdmin() {
 
     return (
         <div className="mx-auto max-w-6xl space-y-10 px-6 py-10">
-            <AdminEditorButton label="New short link" title="New short link">
+            {canCreate && <AdminEditorButton label="New short link" title="New short link">
                 <UrlShortener onShortcodeLinkCreated={() => void loadShortcodeLinks()} />
-            </AdminEditorButton>
+            </AdminEditorButton>}
 
-            {editedShortcodeLink !== null && (
+            {canUpdate && editedShortcodeLink !== null && (
                 <AdminEditorDialog isOpen onClose={() => setEditedShortcodeLink(null)} title={`Edit short link: ${editedShortcodeLink.shortcode}`} errorMessage={errorMessage}>
                     <ShortcodeLinkEditForm
                         key={editedShortcodeLink.id}
@@ -300,7 +305,7 @@ export function ShortcodeLinkAdmin() {
                 </section>
             )}
 
-            {isShortcodeLinksLoaded && selectedShortcodeLinkId !== null && selectedShortcodeLink === undefined && (
+            {canViewClicks && isShortcodeLinksLoaded && selectedShortcodeLinkId !== null && selectedShortcodeLink === undefined && (
                 <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-5 text-sm text-amber-900">
                     <p>The short link whose click history was requested no longer exists.</p>
                     <Button
@@ -421,6 +426,9 @@ export function ShortcodeLinkAdmin() {
                         shortcodeLinks={shownShortcodeLinks}
                         editedShortcodeLinkId={editedShortcodeLink?.id ?? null}
                         deletedShortcodeLinkId={deletedShortcodeLinkId}
+                        canUpdate={canUpdate}
+                        canDelete={canDelete}
+                        canViewClicks={canViewClicks}
                         onEdit={(link) => void runAfterAdminSaves(() => setEditedShortcodeLink(link))}
                         onDelete={(shortcodeLink) => void handleDelete(shortcodeLink)}
                         onShowClicks={(shortcodeLink) =>

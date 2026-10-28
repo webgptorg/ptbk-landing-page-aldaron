@@ -23,6 +23,9 @@ type ShortcodeLinkTableProps = {
     readonly shortcodeLinks: readonly ShortcodeLinkSummary[];
     readonly editedShortcodeLinkId: number | null;
     readonly deletedShortcodeLinkId: number | null;
+    readonly canUpdate: boolean;
+    readonly canDelete: boolean;
+    readonly canViewClicks: boolean;
     readonly onEdit: (shortcodeLink: ShortcodeLink) => void;
     readonly onDelete: (shortcodeLink: ShortcodeLink) => void;
     readonly onShowClicks: (shortcodeLink: ShortcodeLinkSummary) => void;
@@ -35,6 +38,9 @@ export function ShortcodeLinkTable({
     shortcodeLinks,
     editedShortcodeLinkId,
     deletedShortcodeLinkId,
+    canUpdate,
+    canDelete,
+    canViewClicks,
     onEdit,
     onDelete,
     onShowClicks,
@@ -119,7 +125,7 @@ export function ShortcodeLinkTable({
                                     {getShortcodeLinkSourceAppLabel(shortcodeLink.sourceApp)}
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-right">
-                                    <Button
+                                    {canViewClicks ? <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
@@ -129,7 +135,7 @@ export function ShortcodeLinkTable({
                                     >
                                         <MousePointerClick className="mr-1.5 h-4 w-4" />
                                         {getShortcodeLinkClickLabel(shortcodeLink.clickCount)}
-                                    </Button>
+                                    </Button> : <span className="text-slate-600">{getShortcodeLinkClickLabel(shortcodeLink.clickCount)}</span>}
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-slate-600">
                                     {formatShortcodeLinkDateTime(shortcodeLink.createdAt)}
@@ -141,7 +147,7 @@ export function ShortcodeLinkTable({
                                                 <ExternalLink className="h-4 w-4" />
                                             </a>
                                         </Button>
-                                        <Button
+                                        {canUpdate && <Button
                                             type="button"
                                             variant="outline"
                                             size="sm"
@@ -149,8 +155,8 @@ export function ShortcodeLinkTable({
                                             onClick={() => onEdit(shortcodeLink)}
                                         >
                                             <Pencil className="mr-1.5 h-4 w-4" /> Edit
-                                        </Button>
-                                        <Button
+                                        </Button>}
+                                        {canDelete && <Button
                                             type="button"
                                             variant="destructive"
                                             size="sm"
@@ -159,7 +165,7 @@ export function ShortcodeLinkTable({
                                         >
                                             <Trash2 className="mr-1.5 h-4 w-4" />
                                             {isDeleted ? 'Deleting…' : 'Delete'}
-                                        </Button>
+                                        </Button>}
                                     </div>
                                 </td>
                             </tr>

@@ -32,6 +32,15 @@ describe('private administrator migration', () => {
             for (const permissions of [['superadmin'], ['users'], [null]]) {
                 await expect(database.query('UPDATE admin_users SET permissions=$1', [permissions])).rejects.toThrow();
             }
+            const actionName = '2026-10-2801-admin-shortener-permissions.sql';
+            const actionMigration = createMigrationFile(actionName, readFileSync(`migrations/${actionName}`, 'utf8'));
+            expect((await applyDatabaseMigrations(client, [INITIALIZE, MIGRATION, actionMigration], quietLogger)).appliedMigrations).toEqual([actionName]);
+            expect((await database.query('SELECT permissions FROM admin_users')).rows).toEqual([{ permissions: ['shortener'] }]);
+            await database.query('UPDATE admin_users SET permissions=$1', [['shortener:create']]);
+            expect((await applyDatabaseMigrations(client, [INITIALIZE, MIGRATION, actionMigration], quietLogger)).appliedMigrations).toEqual([]);
+            for (const permissions of [['shortener:superadmin'], ['superadmin'], [null]]) {
+                await expect(database.query('UPDATE admin_users SET permissions=$1', [permissions])).rejects.toThrow();
+            }
             const { rows } = await database.query<{ rls: boolean; anon_access: boolean; authenticated_access: boolean; service_access: boolean }>(`
                 SELECT relrowsecurity AS rls,
                     has_table_privilege('anon', 'public.admin_users', 'SELECT') AS anon_access,

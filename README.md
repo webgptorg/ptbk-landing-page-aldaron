@@ -303,6 +303,14 @@ NEXT_PUBLIC_SKIP_WAITLIST_TOKEN=
 
 ### Administrator accounts and section access
 
+Shortener permissions can be granted separately for viewing, creation, editing, deletion and private click history.
+Every action includes list access. For example, enable only **Vytvářet odkazy** to allow creation without editing,
+deleting or viewing visitors' IP addresses. The server checks the action on every request, including direct API calls;
+the UI hides unavailable actions. Apply `2026-10-2801-admin-shortener-permissions.sql` using the normal runner.
+Existing `shortener` section grants keep full access; the editor expands them into actions before an individual action
+is removed. Other section grants and the environment superadmin retain their existing meaning.
+
+
 Sign in at `/admin/login` as `admin` with `ADMIN_PASSWORD`. This environment-backed account always has full access;
 it is never stored in the user table and cannot be renamed, disabled or deleted from the website.
 After applying `2026-10-2800-admin-users.sql` through the ordinary migration runner, open **Administrátoři** at

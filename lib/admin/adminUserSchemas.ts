@@ -1,4 +1,4 @@
-import { ADMIN_PERMISSION_DEFINITIONS } from './adminPermissions';
+import { ADMIN_PERMISSION_VALUES } from './adminPermissions';
 import type { AdminPermission } from './adminPermissions';
 import { z } from 'zod';
 
@@ -13,9 +13,9 @@ const username = z.string().trim().toLowerCase().min(3).max(64)
     .regex(/^[a-z0-9][a-z0-9._-]*$/, 'Použijte písmena a–z, číslice, tečku, pomlčku nebo podtržítko.')
     .refine((value) => value !== 'admin', 'Jméno admin je vyhrazené superadminovi.');
 const permission = z.custom<AdminPermission>(
-    (value) => ADMIN_PERMISSION_DEFINITIONS.some((definition) => definition.id === value), 'Neznámé oprávnění.',
+    (value) => ADMIN_PERMISSION_VALUES.some((permission) => permission === value), 'Neznámé oprávnění.',
 );
-const permissions = z.array(permission).max(ADMIN_PERMISSION_DEFINITIONS.length)
+const permissions = z.array(permission).max(ADMIN_PERMISSION_VALUES.length)
     .refine((values) => new Set(values).size === values.length, 'Oprávnění se nesmí opakovat.');
 const password = z.string().min(ADMIN_USER_MINIMUM_PASSWORD_LENGTH, 'Heslo musí mít alespoň 12 znaků.')
     .max(ADMIN_USER_MAXIMUM_PASSWORD_LENGTH, 'Heslo může mít nejvýše 256 znaků.');

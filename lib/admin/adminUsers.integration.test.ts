@@ -48,6 +48,7 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         database = new PGlite();
         await database.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;');
         await database.exec(readFileSync('migrations/2026-10-2800-admin-users.sql', 'utf8'));
+        await database.exec(readFileSync('migrations/2026-10-2801-admin-shortener-permissions.sql', 'utf8'));
         await database.exec('CREATE TABLE workshops (id uuid PRIMARY KEY, room_kind text);');
     }, 20_000);
     beforeEach(async () => {
@@ -80,6 +81,34 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         expect((await LIST_USERS(request('/api/admin/users', 'GET', undefined, cookie))).status).toBe(403);
         expect((await CREATE_USER(request('/api/admin/users', 'POST', { username: 'elevated' }, cookie))).status).toBe(403);
         expect((await login('short-links', PASSWORD, '/admin/contacts')).headers.get('location')).toBe('/admin');
+    });
+
+
+    it('checks every shortener action independently and applies revocation to an existing cookie', async () => {
+        const user = await createUser(['shortener:create']);
+        const value = (await login()).cookies.get(ADMIN_SESSION_COOKIE_NAME)!.value;
+        const cookie = `${ADMIN_SESSION_COOKIE_NAME}=${value}`;
+        expect(canAccessAdminPath((await getAdminIdentityForSession(value))!, '/admin/shortener')).toBe(true);
+        const actions = [
+            ['shortener:view', '/api/admin/shortener', 'GET'],
+            ['shortener:create', '/api/admin/shortener', 'POST'],
+            ['shortener:update', '/api/admin/shortener/1', 'PATCH'],
+            ['shortener:delete', '/api/admin/shortener/1', 'DELETE'],
+            ['shortener:clicks', '/api/admin/shortener/1/clicks', 'GET'],
+        ];
+        for (const grant of actions.map(([permission]) => permission)) {
+            expect((await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: [grant] }), userContext(user))).status).toBe(200);
+            for (const [permission, path, method] of actions) {
+                const result = await getUnauthorizedResponseOrNull(request(path, method, undefined, cookie));
+                if (permission === grant || permission === 'shortener:view') expect(result).toBeNull();
+                else expect(result?.status).toBe(403);
+            }
+        }
+        // Calling the actual destructive handler is denied before any link can be removed.
+        const { DELETE } = await import('@/app/api/admin/shortener/[shortcodeLinkId]/route');
+        expect((await DELETE(request('/api/admin/shortener/1', 'DELETE', undefined, cookie), { params: Promise.resolve({ shortcodeLinkId: '1' }) })).status).toBe(403);
+        await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: [] }), userContext(user));
+        expect((await getUnauthorizedResponseOrNull(request('/api/admin/shortener', 'GET', undefined, cookie)))?.status).toBe(403);
     });
 
     it('applies a changed permission to an existing cookie on its next request', async () => {

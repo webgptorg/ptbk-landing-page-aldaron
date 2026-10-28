@@ -419,8 +419,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   by `/[shortcode]`; `/shortener` redirects to the admin page.
 - `/admin/login` authenticates the environment-backed `admin` superadmin with `ADMIN_PASSWORD`, or a private
   `admin_users` account with its salted scrypt password hash. Only the environment account manages `/admin/users`;
-  it cannot be renamed, disabled or deleted in the website. Delegated accounts get explicit section permissions,
-  which filter navigation and dashboard cards and are enforced by `requireAdminSignedIn` on pages and the awaited
+  it cannot be renamed, disabled or deleted in the website. Delegated accounts get explicit section permissions. Shortener access additionally separates
+  view/create/update/delete/click-history actions; each action includes list access, and the legacy `shortener` grant
+  retains full access. The account editor expands that grant before removing individual actions. These grants
+  filter navigation and dashboard cards and are enforced by `requireAdminSignedIn` on pages and the awaited
   `getUnauthorizedResponseOrNull` in API handlers. Unknown API sections remain superadmin-only. Shared workshop APIs
   check the stored room kind rather than a caller's hint. Read current account permissions on every request;
   never cache them between requests or trust them in cookies. Password/enabled-state changes rotate the database

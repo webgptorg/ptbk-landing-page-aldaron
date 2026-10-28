@@ -90,9 +90,30 @@ afterEach(() => {
 });
 
 describe('shortcode link administration', () => {
+    it('lets a creator open the creation dialog but hides editing, deletion and private click history', async () => {
+        window.history.replaceState(null, '', '/admin/shortener?clicksFor=1');
+        fetchAdminShortcodeLinksMock.mockResolvedValue(SHORTCODE_LINKS);
+        render(<ShortcodeLinkAdmin identity={{ id: 'creator', username: 'creator', isSuperAdmin: false, permissions: ['shortener:create'] }} />);
+        await screen.findByRole('link', { name: 'manual-link' });
+        expect(screen.getByRole('button', { name: 'New short link' })).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
+        expect(screen.queryByRole('button', { name: /Show .*click/ })).toBeNull();
+        expect(fetchAdminShortcodeLinkClicksMock).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('button', { name: 'New short link' }));
+        expect(await screen.findByTestId('url-shortener')).not.toBeNull();
+    });
+
+    it('keeps a viewer read-only', async () => {
+        fetchAdminShortcodeLinksMock.mockResolvedValue(SHORTCODE_LINKS);
+        render(<ShortcodeLinkAdmin identity={{ id: 'viewer', username: 'viewer', isSuperAdmin: false, permissions: ['shortener:view'] }} />);
+        await screen.findByRole('link', { name: 'manual-link' });
+        for (const name of ['New short link', 'Edit', 'Delete']) expect(screen.queryByRole('button', { name })).toBeNull();
+    });
+
     it('filters and sorts links by their immutable creation provenance', async () => {
         fetchAdminShortcodeLinksMock.mockResolvedValue(SHORTCODE_LINKS);
-        render(<ShortcodeLinkAdmin />);
+        render(<ShortcodeLinkAdmin identity={{ id: 'test-admin', username: 'links', isSuperAdmin: false, permissions: ['shortener'] }} />);
 
         await screen.findByRole('link', { name: 'manual-link' });
         expect(screen.getByRole('cell', { name: 'Created manually' })).not.toBeNull();
@@ -128,7 +149,7 @@ describe('shortcode link administration', () => {
     it('opens one click history and saves the history and list filters into the URL', async () => {
         fetchAdminShortcodeLinksMock.mockResolvedValue(SHORTCODE_LINKS);
         fetchAdminShortcodeLinkClicksMock.mockResolvedValue(SHORTCODE_LINK_CLICKS);
-        render(<ShortcodeLinkAdmin />);
+        render(<ShortcodeLinkAdmin identity={{ id: 'test-admin', username: 'links', isSuperAdmin: false, permissions: ['shortener'] }} />);
 
         await screen.findByRole('button', { name: 'Show 1 click for manual-link' });
         fireEvent.click(screen.getByRole('button', { name: 'Show 1 click for manual-link' }));
@@ -156,7 +177,7 @@ describe('shortcode link administration', () => {
         fetchAdminShortcodeLinksMock.mockResolvedValue(SHORTCODE_LINKS);
         fetchAdminShortcodeLinkClicksMock.mockResolvedValue(SHORTCODE_LINK_CLICKS);
 
-        render(<ShortcodeLinkAdmin />);
+        render(<ShortcodeLinkAdmin identity={{ id: 'test-admin', username: 'links', isSuperAdmin: false, permissions: ['shortener'] }} />);
 
         await screen.findByRole('heading', { name: 'Click history for manual-link' });
         expect((screen.getByRole('searchbox') as HTMLInputElement).value).toBe('manual');

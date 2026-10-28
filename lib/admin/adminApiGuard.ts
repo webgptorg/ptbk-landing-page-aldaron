@@ -36,7 +36,21 @@ function accessError(error: string, status: number): NextResponse {
 async function getRequestPermission(request: NextRequest, identity: AdminIdentity): Promise<AdminPermission | null> {
     const pathname = request.nextUrl.pathname;
     if (isPathWithin(pathname, '/api/contacts')) return 'contacts';
-    for (const permission of ['shortener', 'discount-codes', 'community', 'studio', 'recording-studio'] as const) {
+    if (isPathWithin(pathname, '/api/admin/shortener')) {
+        if (/^\/api\/admin\/shortener\/[1-9]\d*\/clicks$/.test(pathname)) {
+            return request.method === 'GET' || request.method === 'HEAD' ? 'shortener:clicks' : null;
+        }
+        if (pathname === '/api/admin/shortener') {
+            if (request.method === 'GET' || request.method === 'HEAD') return 'shortener:view';
+            return request.method === 'POST' ? 'shortener:create' : null;
+        }
+        if (/^\/api\/admin\/shortener\/[1-9]\d*$/.test(pathname)) {
+            if (request.method === 'PATCH') return 'shortener:update';
+            if (request.method === 'DELETE') return 'shortener:delete';
+        }
+        return null;
+    }
+    for (const permission of ['discount-codes', 'community', 'studio', 'recording-studio'] as const) {
         if (isPathWithin(pathname, `/api/admin/${permission}`)) return permission === 'recording-studio' ? 'studio' : permission;
     }
     if (!isPathWithin(pathname, '/api/admin/workshops')) return null; // New and unknown routes stay superadmin-only.

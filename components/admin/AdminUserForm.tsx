@@ -5,7 +5,7 @@ import { AdminAutosaveStatus } from './AdminAutosaveStatus';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
-import { ADMIN_PERMISSION_DEFINITIONS, type AdminPermission } from '@/lib/admin/adminPermissions';
+import { ADMIN_PERMISSION_DEFINITIONS, ADMIN_SHORTENER_PERMISSION_DEFINITIONS, expandAdminPermissions, type AdminPermission } from '@/lib/admin/adminPermissions';
 import { ADMIN_USERS_API_PATH, adminUserCreateSchema, adminUserUpdateSchema, type AdminUser } from '@/lib/admin/adminUserSchemas';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ type AdminUserFormProps = {
 /** Profile and access edits share the existing autosave queue. Password changes require an explicit submit. */
 export function AdminUserForm({ user, onSaved, onCreated, onBusyChange }: AdminUserFormProps) {
     const [username, setUsername] = useState(user?.username ?? '');
-    const [permissions, setPermissions] = useState<readonly AdminPermission[]>(user?.permissions ?? []);
+    const [permissions, setPermissions] = useState<readonly AdminPermission[]>(() => expandAdminPermissions(user?.permissions ?? []));
     const [isEnabled, setIsEnabled] = useState(user?.isEnabled ?? true);
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -84,11 +84,29 @@ export function AdminUserForm({ user, onSaved, onCreated, onBusyChange }: AdminU
                     <legend className="text-sm font-semibold">Povolené sekce</legend>
                     <p className="mt-1 text-sm text-slate-500">Uživatel může spravovat pouze vybrané sekce. Správa administrátorů zůstává superadminovi.</p>
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                        {ADMIN_PERMISSION_DEFINITIONS.map((definition) => <label key={definition.id} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-sm">
+                        {ADMIN_PERMISSION_DEFINITIONS.filter((definition) => definition.id !== 'shortener').map((definition) => <label key={definition.id} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-sm">
                             <input type="checkbox" checked={permissions.includes(definition.id)} onChange={(event) => setPermissions((current) => event.target.checked ? [...current, definition.id] : current.filter((value) => value !== definition.id))} className="h-4 w-4 accent-cyan-600" />
                             {definition.label}
                         </label>)}
                     </div>
+                    <fieldset className="mt-3 rounded-lg border border-slate-200 p-3">
+                        <legend className="px-1 text-sm font-semibold">Zkracovač odkazů</legend>
+                        <label className="flex items-center gap-3 text-sm">
+                            <input type="checkbox" className="h-4 w-4 accent-cyan-600"
+                                checked={ADMIN_SHORTENER_PERMISSION_DEFINITIONS.every((item) => permissions.includes(item.id))}
+                                onChange={(event) => setPermissions((current) => [
+                                    ...current.filter((value) => value !== 'shortener' && !value.startsWith('shortener:')),
+                                    ...(event.target.checked ? ADMIN_SHORTENER_PERMISSION_DEFINITIONS.map((item) => item.id) : []),
+                                ])} />Plný přístup ke zkracovači
+                        </label>
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                            {ADMIN_SHORTENER_PERMISSION_DEFINITIONS.map((definition) => <label key={definition.id} className="flex items-center gap-3 text-sm">
+                                <input type="checkbox" checked={permissions.includes(definition.id)} onChange={(event) => setPermissions((current) => event.target.checked ? [...current, definition.id] : current.filter((value) => value !== definition.id))} className="h-4 w-4 accent-cyan-600" />
+                                {definition.label}
+                            </label>)}
+                        </div>
+                        <p className="mt-3 text-xs text-slate-500">Každá povolená akce zahrnuje zobrazení seznamu odkazů. Historie kliknutí se povoluje samostatně.</p>
+                    </fieldset>
                     {permissions.length === 0 && <p className="mt-2 text-xs text-slate-500">Bez povolených sekcí bude dostupný pouze prázdný dashboard.</p>}
                 </fieldset>
             </fieldset>
