@@ -212,7 +212,7 @@ export function ShortcodeLinkAdmin({ identity }: { readonly identity: AdminIdent
     const handleDelete = async (shortcodeLink: ShortcodeLink) => {
         if (!canDelete || deletingShortcodeLinkIdReference.current !== null) return;
         const isDeletionConfirmed = window.confirm(
-            `Delete ${createPublicShortcodeLinkUrl(shortcodeLink.shortcode)} for good, together with the clicks measured on it?`,
+            `Delete ${createPublicShortcodeLinkUrl(shortcodeLink.shortcode, shortcodeLink.domains)} for good, together with the clicks measured on it?`,
         );
         if (!isDeletionConfirmed) {
             return;
@@ -274,7 +274,7 @@ export function ShortcodeLinkAdmin({ identity }: { readonly identity: AdminIdent
                             <p className="mt-1 text-sm text-slate-500">
                                 {selectedShortcodeLink.clickCount} recorded{' '}
                                 {selectedShortcodeLink.clickCount === 1 ? 'navigation' : 'navigations'} of{' '}
-                                {createPublicShortcodeLinkUrl(selectedShortcodeLink.shortcode)}
+                                {createPublicShortcodeLinkUrl(selectedShortcodeLink.shortcode, selectedShortcodeLink.domains)}
                             </p>
                         </div>
                         <Button

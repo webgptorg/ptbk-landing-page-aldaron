@@ -12,6 +12,7 @@ import {
     type ShortcodeLinkSummary,
 } from '@/lib/shortener/shortcodeLink';
 import { ExternalLink, MousePointerClick, Pencil, Trash2 } from 'lucide-react';
+import { SHORTCODE_LINK_DOMAINS } from '@/lib/shortener/shortcodeLinkDomains';
 
 const CZECH_SHORTCODE_LINK_CLICK_COUNT_FORMAT = new Intl.NumberFormat('cs-CZ');
 
@@ -65,7 +66,7 @@ export function ShortcodeLinkTable({
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                     {shortcodeLinks.map((shortcodeLink) => {
-                        const publicUrl = createPublicShortcodeLinkUrl(shortcodeLink.shortcode);
+                        const publicUrl = createPublicShortcodeLinkUrl(shortcodeLink.shortcode, shortcodeLink.domains);
                         const isDeleted = deletedShortcodeLinkId === shortcodeLink.id;
                         const isEdited = editedShortcodeLinkId === shortcodeLink.id;
 
@@ -82,6 +83,13 @@ export function ShortcodeLinkTable({
                                             {shortcodeLink.shortcode}
                                         </a>
                                         <CopyTextButton text={publicUrl} label={`Copy ${publicUrl}`} />
+                                    </div>
+                                    <div className="mt-2 space-y-1 text-xs text-slate-500">
+                                        <p>{shortcodeLink.domains == null ? 'All domains' : 'Selected domains'}</p>
+                                        {(shortcodeLink.domains ?? SHORTCODE_LINK_DOMAINS).map((domain) => <a
+                                            key={domain} className="block hover:text-cyan-700 hover:underline" target="_blank" rel="noreferrer"
+                                            href={`https://${domain}/${shortcodeLink.shortcode}`}
+                                        >{domain}/{shortcodeLink.shortcode}</a>)}
                                     </div>
                                 </td>
                                 <td className="max-w-sm px-6 py-4">

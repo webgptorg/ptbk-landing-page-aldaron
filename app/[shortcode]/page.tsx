@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import Script from 'next/script';
 import { spaceTrim } from 'spacetrim';
+import { getShortcodeLinkRequestHostname } from '@/lib/shortener/shortcodeLinkDomains';
 
 interface PageProps {
     params: Promise<{ shortcode: string }>;
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         };
     }
 
-    return createShortcodeLandingPageMetadata(shortcode, data.landingPage);
+    return createShortcodeLandingPageMetadata(shortcode, data.landingPage, getShortcodeLinkRequestHostname(await headers()));
 }
 
 export default async function Page({ params }: PageProps) {

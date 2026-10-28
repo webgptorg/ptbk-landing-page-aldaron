@@ -7,6 +7,8 @@ import { generateShortcode } from '@/lib/shortener/generateShortcode';
 import { createPublicShortcodeLinkUrl, type ShortcodeLink } from '@/lib/shortener/shortcodeLink';
 import { createAdminShortcodeLink } from '@/lib/shortener/shortcodeLinkAdminApiClient';
 import { isAbsoluteUrl } from '@/lib/shortener/isAbsoluteUrl';
+import { ShortcodeLinkDomainInput } from '@/components/shortener/ShortcodeLinkDomainInput';
+import { SHORTCODE_LINK_VALUES_SCHEMA } from '@/lib/shortener/shortcodeLinkSchema';
 import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { titleToName } from '@promptbook/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -67,6 +69,7 @@ export function UrlShortener(props: UrlShortenerProps) {
     const { className, onShortcodeLinkCreated } = props;
 
     const [urls, setUrls] = useState<readonly string[]>(['']);
+    const [domains, setDomains] = useState<readonly string[] | null>(null);
     const [displayText, setDisplayText] = useState('');
     const [error, setError] = useState('');
     const [createdLink, setCreatedLink] = useState<CreatedLink | null>(null);
@@ -86,7 +89,7 @@ export function UrlShortener(props: UrlShortenerProps) {
     });
     const isCreatingReference = useRef(false);
     const { acceptDraftValue } = useAdminDraftProtection({
-        urls, displayText, isShortener, useUtm, customPrefix, utmParams,
+        urls, domains, displayText, isShortener, useUtm, customPrefix, utmParams,
         selectedShortcode: isShortcodeSelectedByUser ? selectedShortcode : null,
     }, onShortcodeLinkCreated !== undefined);
 
@@ -161,14 +164,17 @@ export function UrlShortener(props: UrlShortenerProps) {
 
             if (isShortener) {
                 // Use the selected shortcode or generate a new one if none selected
-                const createdShortcodeLink = await createAdminShortcodeLink({
+                const parsed = SHORTCODE_LINK_VALUES_SCHEMA.safeParse({
                     shortcode: selectedShortcode || generateShortcode(),
                     urls: processedUrls,
                     note: null,
                     landingPage: null,
+                    domains,
                 });
+                if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Check the short link values');
+                const createdShortcodeLink = await createAdminShortcodeLink(parsed.data);
                 setCreatedLink({
-                    url: createPublicShortcodeLinkUrl(createdShortcodeLink.shortcode),
+                    url: createPublicShortcodeLinkUrl(createdShortcodeLink.shortcode, createdShortcodeLink.domains),
                     text,
                     shortcode: createdShortcodeLink.shortcode,
                 });
@@ -182,6 +188,7 @@ export function UrlShortener(props: UrlShortenerProps) {
             setIsShortcodeSelectedByUser(false);
             acceptDraftValue({
                 urls,
+                domains,
                 displayText,
                 isShortener,
                 useUtm,
@@ -354,11 +361,13 @@ export function UrlShortener(props: UrlShortenerProps) {
                             </div>
                             {selectedShortcode && (
                                 <p className="text-sm text-gray-500">
-                                    Preview URL: {createPublicShortcodeLinkUrl(selectedShortcode)}
+                                    Preview URL: {createPublicShortcodeLinkUrl(selectedShortcode, domains)}
                                 </p>
                             )}
                         </div>
                     )}
+
+                    {isShortener && <ShortcodeLinkDomainInput domains={domains} onChange={setDomains} disabled={isLoading} />}
 
                     <div className="space-y-4 rounded-md border border-gray-200 bg-white p-6 shadow-sm">
                         <div className="flex items-center justify-between">

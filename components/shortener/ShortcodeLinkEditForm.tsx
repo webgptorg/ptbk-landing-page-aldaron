@@ -17,6 +17,8 @@ import {
 } from '@/lib/shortener/shortcodeLink';
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import { ShortcodeLinkDomainInput } from './ShortcodeLinkDomainInput';
+import { SHORTCODE_LINK_VALUES_SCHEMA } from '@/lib/shortener/shortcodeLinkSchema';
 
 const LANDING_PAGE_PLACEHOLDER = '# Title\n> Description shown when the link is shared\n\n[Go to link](#url)';
 
@@ -32,6 +34,7 @@ function createShortcodeLinkValues(shortcodeLink: ShortcodeLink): ShortcodeLinkV
         urls: shortcodeLink.urls.length === 0 ? [''] : shortcodeLink.urls,
         note: shortcodeLink.note,
         landingPage: shortcodeLink.landingPage,
+        domains: shortcodeLink.domains ?? null,
     };
 }
 
@@ -64,8 +67,14 @@ export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }
             throw new AdminSaveValidationError(errorMessage);
         }
 
+        const parsed = SHORTCODE_LINK_VALUES_SCHEMA.safeParse({ ...values, urls: filledUrls });
+        if (!parsed.success) {
+            const message = parsed.error.issues[0]?.message ?? 'Check the short link values';
+            setValidationError(message);
+            throw new AdminSaveValidationError(message);
+        }
         setValidationError(null);
-        return onSave({ ...values, urls: filledUrls });
+        return onSave(parsed.data);
     };
 
     const autosave = useAdminAutosave({ value: values, onSave: saveValues });
@@ -95,9 +104,11 @@ export function ShortcodeLinkEditForm({ shortcodeLink, onSave, onCancelEditing }
                         required
                     />
                     <span className="mt-1 block text-xs font-normal text-slate-500">
-                        {createPublicShortcodeLinkUrl(values.shortcode)}
+                        {createPublicShortcodeLinkUrl(values.shortcode, values.domains)}
                     </span>
                 </label>
+
+                <ShortcodeLinkDomainInput domains={values.domains ?? null} onChange={(domains) => updateValue('domains', domains)} />
 
                 <div className="text-sm font-medium text-slate-700">
                     URLs

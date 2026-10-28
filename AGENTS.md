@@ -48,7 +48,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `pavolhejny.com`, including `www.` aliases) share one build but serve only their own pages.
   The three branded domains answer unknown, Promptbook-only, foreign-branded, and unknown
   file-looking page paths with their own localized HTML and HTTP 404 at the requested URL.
-  Their own robots files and sitemaps list only their pages; Promptbook's sitemap lists only
+  Registered short links are shared across hosts according to their per-link domain scope; the middleware checks
+  their existence before rewriting to the dedicated short-link route, and the page/image recheck the current host.
+  Middleware overwrites `x-promptbook-shortlink-host` on every page request to retain that host across Next rewrites;
+  shortcode names beginning with api remain covered while actual `/api` routes bypass middleware.
+  Unknown links still receive the requested brand’s 404. Their own robots files and sitemaps list only their pages; Promptbook's sitemap lists only
   Promptbook pages. Shared build output, known public assets and used APIs remain available,
   with admin APIs still authenticated. Only the primary domain redirects the legacy branded
   paths across sites; a same-brand nested path normalizes to that brand's public path.
@@ -416,7 +420,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   do not publish media or turn transcripts into participant subtitles.
 - `/admin/shortener` manages public short links, QR/UTM output, destinations,
   notes, search/filter/sort state, and private click history. Links are served
-  by `/[shortcode]`; `/shortener` redirects to the admin page.
+  by `/[shortcode]`; `/shortener` redirects to the admin page. A nullable `domains` array means all domains for every
+  existing and newly created link, including automatic room links. Creation/editing may select a nonempty subset of
+  the configured public sites; www and the existing new.ptbk.io alias follow their canonical scope. Copy/open/QR and
+  room material references use an enabled domain. Scope checks precede redirects, click recording and metadata/image
+  generation; omission by a legacy PATCH client preserves an existing scope. Public page routes keep precedence.
 - `/admin/login` authenticates the environment-backed `admin` superadmin with `ADMIN_PASSWORD`, or a private
   `admin_users` account with its salted scrypt password hash. Only the environment account manages `/admin/users`;
   it cannot be renamed, disabled or deleted in the website. Delegated accounts get explicit section permissions. Shortener access additionally separates
@@ -703,7 +711,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Community analytics cover all measured time and member details show seen times.
 - Shortener search, provenance filters, sorting, and selected click history live
   in GET parameters. Editing changes only shortcode, destinations, note, and
-  landing page; deletion also deletes recorded clicks.
+  landing page and domain scope; deletion also deletes recorded clicks.
 
 ### Database and verification
 

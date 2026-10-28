@@ -27,6 +27,7 @@ const SHORTCODE_LINK_ROW = {
 };
 
 const SHORTCODE_LINK = {
+    domains: null,
     id: 42,
     createdAt: '2026-08-21T10:00:00.000Z',
     shortcode: 'campaign-abc123',
@@ -165,6 +166,7 @@ describe('admin shortcode link collection', () => {
         expect(await response.json()).toEqual({ shortcodeLink: SHORTCODE_LINK });
         expect(database.from).toHaveBeenCalledWith('ShortcodeLink');
         expect(database.insert).toHaveBeenCalledWith({
+            domains: null,
             shortcode: 'campaign-abc123',
             url: ['https://example.com/offer'],
             note: 'Autumn campaign',

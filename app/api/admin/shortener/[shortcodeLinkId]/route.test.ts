@@ -28,6 +28,7 @@ const SHORTCODE_LINK_ROW = {
 };
 
 const SHORTCODE_LINK = {
+    domains: null,
     id: SHORTCODE_LINK_ID,
     createdAt: '2026-08-21T10:00:00.000Z',
     shortcode: 'campaign-abc123',

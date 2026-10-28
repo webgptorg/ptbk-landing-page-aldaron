@@ -1,3 +1,4 @@
+import { getPublicShortcodeLinkAddressOrNull, isShortcodeLinkAvailableOnHostname } from '@/lib/shortener/shortcodeLinkDomains';
 import { createAdHocShortcodeLink } from '@/lib/shortener/shortcodeLinkAdHoc';
 import {
     createPublicShortcodeLinkUrl,
@@ -51,6 +52,7 @@ type WorkshopShortcodeLinkOwner = {
 };
 
 type ShortcodeLinkReferenceRow = {
+    readonly domains?: readonly string[] | null;
     readonly id: number | string;
     readonly shortcode: string;
 };
@@ -426,7 +428,7 @@ export async function loadWorkshopMaterialTrackedDestination(
     if (
         requestedUrl.username !== '' ||
         requestedUrl.password !== '' ||
-        requestedUrl.origin !== new URL(SHORTCODE_LINK_PUBLIC_BASE_URL).origin
+        getPublicShortcodeLinkAddressOrNull(shortUrl) === null
     ) {
         return { destinationUrl: null, errorMessage: null };
     }
@@ -457,20 +459,20 @@ export async function loadWorkshopMaterialTrackedDestination(
 
     const { data: shortcodeLinkData, error: shortcodeLinkError } = await supabase
         .from(SHORTCODE_LINK_TABLE_NAME)
-        .select('id, shortcode, url')
+        .select('id, shortcode, url, domains')
         .in('id', shortcodeLinkIds);
     if (shortcodeLinkError) {
         return { destinationUrl: null, errorMessage: shortcodeLinkError.message };
     }
 
-    const requestedPath = requestedUrl.origin + requestedUrl.pathname;
     const matchingShortcodeLink = ((shortcodeLinkData ?? []) as readonly {
         readonly id: number | string;
         readonly shortcode: string;
         readonly url: readonly string[] | null;
+        readonly domains?: readonly string[] | null;
     }[]).find((shortcodeLink) =>
         shortcodeLinkIds.includes(Number(shortcodeLink.id)) &&
-        createPublicShortcodeLinkUrl(shortcodeLink.shortcode) === requestedPath,
+        `/${shortcodeLink.shortcode}` === requestedUrl.pathname && isShortcodeLinkAvailableOnHostname(shortcodeLink.domains, requestedUrl.hostname),
     );
     const destinationUrls = matchingShortcodeLink?.url;
     if (destinationUrls === null || destinationUrls === undefined || destinationUrls.length !== 1) {
@@ -598,18 +600,18 @@ async function loadWorkshopShortcodeLinks(
 
     const { data: shortcodeLinkData, error: shortcodeLinkError } = await supabase
         .from(SHORTCODE_LINK_TABLE_NAME)
-        .select('id, shortcode')
+        .select('id, shortcode, domains')
         .in('id', shortcodeLinkIds);
     if (shortcodeLinkError) {
         return { shortcodeLinkByDestination: null, errorMessage: shortcodeLinkError.message };
     }
 
-    const shortcodeById = new Map<number, string>(
+    const shortUrlById = new Map<number, string>(
         ((shortcodeLinkData ?? []) as ShortcodeLinkReferenceRow[])
             .map((shortcodeLink) => {
                 const shortcodeLinkId = getShortcodeLinkId(shortcodeLink.id);
 
-                return shortcodeLinkId === null ? null : ([shortcodeLinkId, shortcodeLink.shortcode] as const);
+                return shortcodeLinkId === null ? null : ([shortcodeLinkId, createPublicShortcodeLinkUrl(shortcodeLink.shortcode, shortcodeLink.domains)] as const);
             })
             .filter((shortcodeLink): shortcodeLink is readonly [number, string] => shortcodeLink !== null),
     );
@@ -617,11 +619,11 @@ async function loadWorkshopShortcodeLinks(
 
     for (const mapping of mappings) {
         const shortcodeLinkId = getShortcodeLinkId(mapping.shortcode_link_id);
-        const shortcode = shortcodeLinkId === null ? undefined : shortcodeById.get(shortcodeLinkId);
-        if (shortcode !== undefined) {
+        const shortUrl = shortcodeLinkId === null ? undefined : shortUrlById.get(shortcodeLinkId);
+        if (shortUrl !== undefined) {
             const storedTitle = getStoredWorkshopShortcodeLinkTitle(mapping.destination_title);
             shortcodeLinkByDestination.set(mapping.destination_url, {
-                shortUrl: createPublicShortcodeLinkUrl(shortcode),
+                shortUrl,
                 title: storedTitle ?? getWorkshopShortcodeLinkFallbackTitle(mapping.destination_url),
                 isTitleStored: storedTitle !== null,
             });

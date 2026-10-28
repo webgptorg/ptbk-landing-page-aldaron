@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { SHORTCODE_LINK_PUBLIC_BASE_URL } from '@/lib/shortener/shortcodeLinkConstants';
+import { SHORTCODE_LINK_DOMAINS, getPublicShortcodeLinkAddressOrNull } from '@/lib/shortener/shortcodeLinkDomains';
 
 type WorkshopCommentMarkdownProps = {
     readonly content: string;
@@ -19,7 +19,7 @@ function escapeRegularExpression(text: string): string {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const SHORTCODE_LINK_URL_PATTERN = `${escapeRegularExpression(SHORTCODE_LINK_PUBLIC_BASE_URL)}[^\\s<>()\\[\\]"']+`;
+const SHORTCODE_LINK_URL_PATTERN = `https://(?:www\\.)?(?:${SHORTCODE_LINK_DOMAINS.map(escapeRegularExpression).join('|')})/[^\\s<>()\\[\\]"']+`;
 const ACTIVE_LINK_TOKEN_PATTERN = new RegExp(
     `\\[([^\\]\\n]+)\\]\\((${SHORTCODE_LINK_URL_PATTERN})\\)|<(${SHORTCODE_LINK_URL_PATTERN})>|(${SHORTCODE_LINK_URL_PATTERN})`,
     'g',
@@ -112,7 +112,7 @@ function getBareUrlWithoutTrailingPunctuation(url: string): string {
 }
 
 function isPublicShortcodeLinkUrl(url: string): boolean {
-    return url.startsWith(SHORTCODE_LINK_PUBLIC_BASE_URL) && url.length > SHORTCODE_LINK_PUBLIC_BASE_URL.length;
+    return getPublicShortcodeLinkAddressOrNull(url) !== null;
 }
 
 /**

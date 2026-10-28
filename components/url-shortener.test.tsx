@@ -54,6 +54,20 @@ afterEach(() => {
 });
 
 describe('url shortener result', () => {
+    it('defaults new links to all domains and uses an enabled domain in restricted links and QR codes', async () => {
+        createAdminShortcodeLinkMock.mockResolvedValue({ ...CREATED_SHORTCODE_LINK, domains: ['pavolhejny.cz'] });
+        const { typeDestinationUrl, createLink } = renderUrlShortener();
+        expect((screen.getByLabelText('All domains') as HTMLInputElement).checked).toBe(true);
+        fireEvent.click(screen.getByLabelText('All domains'));
+        for (const domain of ['ptbk.io', 'ai-ta-krajta.cz', 'pavolhejny.com']) fireEvent.click(screen.getByLabelText(domain));
+        typeDestinationUrl(DESTINATION_URL);
+        createLink();
+        const expectedUrl = 'https://pavolhejny.cz/2qBvih';
+        expect((await screen.findByRole('link', { name: expectedUrl })).getAttribute('href')).toBe(expectedUrl);
+        expect(createAdminShortcodeLinkMock.mock.calls[0][0].domains).toEqual(['pavolhejny.cz']);
+        expect(screen.getByTestId('qr-code').getAttribute('data-value')).toBe(expectedUrl);
+    });
+
     it('shows the shortened link itself instead of the destination it leads to', async () => {
         createAdminShortcodeLinkMock.mockResolvedValue(CREATED_SHORTCODE_LINK);
         const { typeDestinationUrl, createLink } = renderUrlShortener();
@@ -63,6 +77,7 @@ describe('url shortener result', () => {
 
         const resultLink = await screen.findByRole('link', { name: SHORT_URL });
         expect(resultLink.getAttribute('href')).toBe(SHORT_URL);
+        expect(createAdminShortcodeLinkMock.mock.calls[0][0].domains).toBeNull();
         expect(screen.queryByRole('link', { name: DESTINATION_TEXT })).toBeNull();
     });
 

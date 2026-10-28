@@ -1,6 +1,8 @@
 import { SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
 import { supabase } from '@/lib/supabase';
 import { cache } from 'react';
+import { headers } from 'next/headers';
+import { getShortcodeLinkRequestHostname, isShortcodeLinkAvailableOnHostname } from './shortcodeLinkDomains';
 
 /**
  * The small, non-sensitive slice a public short-link route needs.
@@ -27,13 +29,15 @@ export const loadPublicShortcodeLink = cache(async (shortcode: string): Promise<
 
     const { data, error } = await supabase
         .from(SHORTCODE_LINK_TABLE_NAME)
-        .select('id, url, landingPage')
+        .select('id, url, landingPage, domains')
         .eq('shortcode', shortcode)
         .maybeSingle();
 
     if (error !== null || data === null || !Array.isArray(data.url)) {
         return null;
     }
+
+    if (!isShortcodeLinkAvailableOnHostname(data.domains, getShortcodeLinkRequestHostname(await headers()))) return null;
 
     const urls = data.url.filter((url): url is string => typeof url === 'string' && url.length > 0);
     if (urls.length === 0) {

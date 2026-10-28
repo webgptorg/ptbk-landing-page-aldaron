@@ -1,6 +1,7 @@
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
-import { SHORTCODE_LINK_PUBLIC_BASE_URL, SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
+import { SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
+import { getPublicShortcodeLinkAddressOrNull, isShortcodeLinkAvailableOnHostname } from '@/lib/shortener/shortcodeLinkDomains';
 import { WORKSHOP_CONTENT_TABLE_NAME } from '@/lib/workshops/workshopConstants';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { loadWorkshopMaterialTrackedDestination } from '@/lib/workshops/workshopMaterialLinks';
@@ -29,32 +30,10 @@ type WorkshopContentPreviewAccessRow = {
 };
 
 type ShortcodePreviewRow = {
+    readonly domains?: readonly string[] | null;
     readonly shortcode: string;
     readonly url: readonly string[] | null;
 };
-
-function getShortcodeFromPublicUrl(value: string): string | null {
-    let parsedUrl: URL;
-    let publicBaseUrl: URL;
-    try {
-        parsedUrl = new URL(value);
-        publicBaseUrl = new URL(SHORTCODE_LINK_PUBLIC_BASE_URL);
-    } catch {
-        return null;
-    }
-
-    if (
-        parsedUrl.origin !== publicBaseUrl.origin ||
-        parsedUrl.username !== '' ||
-        parsedUrl.password !== '' ||
-        !parsedUrl.pathname.startsWith(publicBaseUrl.pathname)
-    ) {
-        return null;
-    }
-
-    const shortcode = parsedUrl.pathname.slice(publicBaseUrl.pathname.length);
-    return shortcode !== '' && !shortcode.includes('/') ? shortcode : null;
-}
 
 /** Resolves our own short links by reading their stored target, never by requesting the click-tracking route. */
 async function resolveShortcodeDestinationReadOnly(
@@ -65,10 +44,11 @@ async function resolveShortcodeDestinationReadOnly(
     const visitedShortcodes = new Set<string>();
 
     for (let redirectCount = 0; redirectCount <= MAXIMAL_SHORTCODE_PREVIEW_HOPS; redirectCount += 1) {
-        const shortcode = getShortcodeFromPublicUrl(currentUrl);
-        if (shortcode === null) {
+        const address = getPublicShortcodeLinkAddressOrNull(currentUrl);
+        if (address === null) {
             return { targetUrl: normalizePublicWebPageUrl(currentUrl), errorMessage: null };
         }
+        const { shortcode, hostname } = address;
         if (visitedShortcodes.has(shortcode) || redirectCount === MAXIMAL_SHORTCODE_PREVIEW_HOPS) {
             return { targetUrl: null, errorMessage: null };
         }
@@ -76,7 +56,7 @@ async function resolveShortcodeDestinationReadOnly(
 
         const { data, error } = await supabase
             .from(SHORTCODE_LINK_TABLE_NAME)
-            .select('shortcode, url')
+            .select('shortcode, url, domains')
             .eq('shortcode', shortcode)
             .maybeSingle();
         if (error) {
@@ -84,7 +64,7 @@ async function resolveShortcodeDestinationReadOnly(
         }
 
         const shortcodeLink = data as ShortcodePreviewRow | null;
-        if (shortcodeLink === null || shortcodeLink.url?.length !== 1 || !shortcodeLink.url[0]) {
+        if (shortcodeLink === null || !isShortcodeLinkAvailableOnHostname(shortcodeLink.domains, hostname) || shortcodeLink.url?.length !== 1 || !shortcodeLink.url[0]) {
             return { targetUrl: null, errorMessage: null };
         }
         currentUrl = shortcodeLink.url[0];

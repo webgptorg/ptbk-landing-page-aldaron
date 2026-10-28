@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const DATABASE = vi.hoisted(() => ({ current: null as SupabaseClient | null }));
 
 // Next supplies its server React build in production; unit tests do not have a server render cache.
+vi.mock('next/headers', () => ({ headers: async () => new Headers({ host: 'ptbk.io' }) }));
 vi.mock('react', async (importOriginal) => ({
     ...(await importOriginal<typeof import('react')>()),
     cache: (callback: unknown) => callback,

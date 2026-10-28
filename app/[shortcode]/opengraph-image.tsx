@@ -7,6 +7,8 @@ import {
 import { loadPublicShortcodeLink } from '@/lib/shortener/publicShortcodeLink';
 import { createShortcodeLandingPageDefinition } from '@/lib/shortener/shortcodeLandingPageMetadata';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
+import { getShortcodeLinkRequestHostname } from '@/lib/shortener/shortcodeLinkDomains';
 
 export const dynamic = 'force-dynamic';
 export const alt = 'Shared link from Promptbook';
@@ -22,7 +24,7 @@ export default async function ShortcodeImage({ params }: { readonly params: Prom
     }
 
     return createSocialPreviewImage(
-        createSocialPreviewOptions(createShortcodeLandingPageDefinition(shortcode, link.landingPage), {
+        createSocialPreviewOptions(createShortcodeLandingPageDefinition(shortcode, link.landingPage, getShortcodeLinkRequestHostname(await headers())), {
             eyebrow: 'Shared with Promptbook',
             artwork: 'launch',
         }),

@@ -1,4 +1,5 @@
 import { SHORTCODE_LINK_PUBLIC_BASE_URL } from '@/lib/shortener/shortcodeLinkConstants';
+import { getPreferredShortcodeLinkHostname } from './shortcodeLinkDomains';
 
 /**
  * The application which created a short link. The list deliberately describes
@@ -41,6 +42,8 @@ export function getShortcodeLinkCreationLabel(isAdHoc: boolean): string {
  *       enough for both.
  */
 export type ShortcodeLinkValues = {
+    /** null means every domain. Omission keeps existing scope when an older API client edits a link. */
+    readonly domains?: readonly string[] | null;
     /**
      * The part of the public address which follows {@link SHORTCODE_LINK_PUBLIC_BASE_URL}
      */
@@ -111,8 +114,8 @@ export type ShortcodeLinkClick = {
 /**
  * The address which is handed out for a shortcode
  */
-export function createPublicShortcodeLinkUrl(shortcode: string): string {
-    return SHORTCODE_LINK_PUBLIC_BASE_URL + shortcode;
+export function createPublicShortcodeLinkUrl(shortcode: string, domains?: readonly string[] | null): string {
+    return `https://${getPreferredShortcodeLinkHostname(domains)}/${shortcode}`;
 }
 
 /**

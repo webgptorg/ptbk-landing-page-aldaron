@@ -559,3 +559,21 @@ Keep the generic homepage in sync across languages: `/cs` defines its structure 
 ## License
 
 This repository is available under the [Apache License 2.0](./LICENSE.md).
+
+
+### Short-link domains
+
+Short links share one shortcode, destination list and click history across `ptbk.io`, `pavolhejny.cz`,
+`pavolhejny.com` and `ai-ta-krajta.cz`. **All domains** is selected by default for new links. The additive
+`2026-10-2802-shortener-domain-scopes.sql` migration leaves every existing row with `domains = NULL`, meaning all
+current and future deployment hosts. Automatic workshop/community links use that same default.
+
+Uncheck **All domains** in creation or editing to choose a nonempty subset. Each www alias shares its apex's scope;
+`new.ptbk.io` already redirects to Promptbook and therefore shares the `ptbk.io` scope. Copy/open links and QR codes
+use an enabled domain. The domain is checked by the public page, metadata/image loader and branded-domain routing
+before any destination is revealed or a click is recorded. Unknown or disabled branded links keep the brand's 404.
+Existing real site pages take precedence over shortcode names. Older PATCH clients which omit `domains` preserve
+an existing restriction; sending explicit `null` enables all domains again.
+
+Domains are defined in `lib/domains/publicDomainHosts.json`. When adding a new independent site, extend the domain
+constraint in a new immutable migration for explicit subsets; all-domain links already include the new site.

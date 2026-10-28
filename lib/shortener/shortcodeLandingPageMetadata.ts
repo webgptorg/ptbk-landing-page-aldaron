@@ -2,6 +2,7 @@ import { shortenText } from '@/lib/language/shortenText';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { Metadata } from 'next';
+import { SHORTCODE_LINK_DOMAINS, normalizeShortcodeLinkHostname } from './shortcodeLinkDomains';
 
 /** The longest title we place in a browser tab or a sharing card. */
 const MAXIMUM_TITLE_LENGTH = 120;
@@ -204,12 +205,14 @@ export function extractShortcodeLandingPageMetadata(landingPage: string): Shortc
  * documents, so they receive a canonical URL and rich social preview while
  * staying out of the sitemap and search index.
  */
-export function createShortcodeLandingPageDefinition(shortcode: string, landingPage: string): PageMetadataDefinition {
+export function createShortcodeLandingPageDefinition(shortcode: string, landingPage: string, hostname?: string): PageMetadataDefinition {
     const extractedMetadata = extractShortcodeLandingPageMetadata(landingPage);
     const socialTitle = extractedMetadata.title ?? DEFAULT_SHORTCODE_TITLE;
+    const domain = hostname && SHORTCODE_LINK_DOMAINS.includes(normalizeShortcodeLinkHostname(hostname))
+        ? normalizeShortcodeLinkHostname(hostname) : null;
 
     return {
-        path: `/${shortcode}`,
+        path: domain ? `https://${domain}/${shortcode}` : `/${shortcode}`,
         language: 'en',
         title: `${socialTitle} | Promptbook`,
         socialTitle,
@@ -217,11 +220,11 @@ export function createShortcodeLandingPageDefinition(shortcode: string, landingP
         socialDescription: extractedMetadata.description ?? DEFAULT_SHORTCODE_DESCRIPTION,
         socialPreviewImageAlt: socialTitle,
         isSocialPreviewImageGenerated: true,
-        ...(extractedMetadata.image === null ? {} : { socialPreviewImagePath: extractedMetadata.image }),
+        ...(extractedMetadata.image === null ? {} : { socialPreviewImagePath: domain ? new URL(extractedMetadata.image, `https://${domain}`).toString() : extractedMetadata.image }),
         isIndexed: false,
     };
 }
 
-export function createShortcodeLandingPageMetadata(shortcode: string, landingPage: string): Metadata {
-    return createPageMetadata(createShortcodeLandingPageDefinition(shortcode, landingPage));
+export function createShortcodeLandingPageMetadata(shortcode: string, landingPage: string, hostname?: string): Metadata {
+    return createPageMetadata(createShortcodeLandingPageDefinition(shortcode, landingPage, hostname));
 }

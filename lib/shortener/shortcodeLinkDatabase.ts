@@ -27,9 +27,10 @@ const POSTGRES_FOREIGN_KEY_VIOLATION_CODE = '23503';
  * the `appId` of the old Promptbook Studio system, none of which the administration decides. The new provenance
  * columns remain here because the administration uses them to filter the links it owns and the links other apps made.
  */
-export const SHORTCODE_LINK_SELECTED_COLUMNS = 'id, createdAt, shortcode, url, note, landingPage, isAdHoc, sourceApp';
+export const SHORTCODE_LINK_SELECTED_COLUMNS = 'id, createdAt, shortcode, url, note, landingPage, isAdHoc, sourceApp, domains';
 
 export type ShortcodeLinkRow = {
+    readonly domains?: readonly string[] | null;
     readonly id: number;
     readonly createdAt: string;
     readonly shortcode: string;
@@ -92,6 +93,7 @@ export function mapShortcodeLinkRow(shortcodeLinkRow: ShortcodeLinkRow): Shortco
         id: shortcodeLinkRow.id,
         createdAt: shortcodeLinkRow.createdAt,
         shortcode: shortcodeLinkRow.shortcode,
+        domains: shortcodeLinkRow.domains ?? null,
         urls: shortcodeLinkRow.url ?? [],
         note: shortcodeLinkRow.note,
         landingPage: shortcodeLinkRow.landingPage,
@@ -111,6 +113,7 @@ export function createShortcodeLinkDatabaseValues(values: ShortcodeLinkValues): 
         url: values.urls,
         note: values.note,
         landingPage: values.landingPage,
+        ...(values.domains === undefined ? {} : { domains: values.domains }),
     };
 }
 
@@ -123,6 +126,7 @@ export function createShortcodeLinkDatabaseValues(values: ShortcodeLinkValues): 
 export function createShortcodeLinkInsertValues(values: ShortcodeLinkValues): Readonly<Record<string, unknown>> {
     return {
         ...createShortcodeLinkDatabaseValues(values),
+        domains: values.domains ?? null,
         type: CUSTOM_SHORTCODE_LINK_TYPE,
         ownerEmail: null,
         isAdHoc: false,

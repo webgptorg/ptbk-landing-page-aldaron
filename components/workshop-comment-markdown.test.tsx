@@ -3,11 +3,19 @@
  */
 
 import { WorkshopCommentMarkdown } from '@/components/workshop-comment-markdown';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+
+afterEach(cleanup);
 
 describe('workshop comment Markdown', () => {
+    it('keeps trusted short links active on each supported public domain and refuses lookalike hosts', () => {
+        const urls = ['https://ptbk.io/code', 'https://pavolhejny.cz/code', 'https://www.pavolhejny.com/code', 'https://ai-ta-krajta.cz/code'];
+        const { container } = render(<WorkshopCommentMarkdown isLinksEnabled content={urls.join(' ') + ' https://pavolhejny.cz.attacker.example/code'} />);
+        expect(Array.from(container.querySelectorAll('a')).map((link) => link.href)).toEqual(urls);
+    });
+
     it('renders only the supported text formatting and leaves rich content inert', () => {
         const { container } = render(
             <WorkshopCommentMarkdown content={'**tučně** *kurzíva* __podtržení__ <img src="bad"> ![obrázek](https://bad.example)'} />,
