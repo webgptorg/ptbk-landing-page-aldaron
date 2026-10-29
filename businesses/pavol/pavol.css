@@ -348,3 +348,26 @@
         transition: none !important;
     }
 }
+
+.pavol-article-card, .pavol-podcast-card { min-width:0; overflow:hidden; border:1px solid var(--pavol-border); border-radius:1rem; background:white; }
+.pavol-article-card { padding:clamp(1.25rem,3vw,2rem); }
+.pavol-article-card h4, .pavol-podcast-card h4 { margin-top:1rem; font-size:1.4rem; font-weight:500; line-height:1.35; letter-spacing:-.025em; text-wrap:balance; overflow-wrap:anywhere; }
+.pavol-article-card p, .pavol-podcast-card p { margin-top:.8rem; color:var(--pavol-muted); font-size:.875rem; line-height:1.75; }
+.pavol-recording-meta { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .8rem; color:var(--pavol-muted); font-size:.75rem; font-variant-numeric:tabular-nums; }
+.pavol-recording-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem 1.25rem; margin-top:1.5rem; }
+.pavol-play-button, .pavol-site .article-button { display:inline-flex; min-height:44px; align-items:center; justify-content:center; gap:.5rem; padding:.65rem 1rem; border:1px solid var(--pavol-ink); border-radius:999px; background:var(--pavol-ink); color:white; font-size:.8rem; font-weight:600; cursor:pointer; }
+.pavol-play-button:hover, .pavol-site .article-button:hover { background:var(--pavol-accent); }
+.pavol-source-link { display:inline-flex; min-height:44px; align-items:center; gap:.4rem; color:var(--pavol-accent); font-size:.8rem; font-weight:600; }
+.pavol-podcast-card { display:flex; flex-direction:column; }
+.pavol-podcast-art { position:relative; display:flex; aspect-ratio:16/9; align-items:center; justify-content:center; gap:1rem; overflow:hidden; background:var(--pavol-warm); color:var(--pavol-accent); }
+.pavol-podcast-art img { padding:.75rem; }
+.pavol-podcast-content { display:flex; flex:1; flex-direction:column; align-items:flex-start; padding:1.5rem; }
+.pavol-podcast-content .pavol-recording-actions { margin-top:auto; padding-top:1.25rem; }
+.pavol-podcast-card--compact h4 { font-size:1.2rem; }
+.pavol-podcast-card .pavol-recording-note { margin-top:.25rem; font-size:.75rem; }
+.pavol-language-badge { display:inline-flex; align-items:center; gap:.35rem; border:1px solid var(--pavol-border); border-radius:999px; padding:.2rem .5rem; color:var(--pavol-ink); }
+.pavol-podcast-archive { border-block:1px solid var(--pavol-border); padding-block:1.25rem; }
+.pavol-podcast-archive summary { display:flex; min-height:44px; align-items:center; gap:.6rem; font-size:.875rem; font-weight:600; list-style:none; cursor:pointer; }
+.pavol-podcast-archive summary::-webkit-details-marker { display:none; }
+.pavol-podcast-archive summary > svg { margin-left:auto; }
+.pavol-podcast-archive[open] summary > svg { transform:rotate(180deg); }

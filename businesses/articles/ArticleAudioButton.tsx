@@ -1,7 +1,7 @@
 'use client';
 
 import { Headphones, Pause, Play } from 'lucide-react';
-import { useAudioPlayer } from '@/components/audio-player/AudioPlayerProvider';
+import { useAudioPlayerControls } from '@/components/audio-player/AudioPlayerProvider';
 import type { Article, ArticlePublication } from '@/lib/articles/types';
 
 type PlayableArticle = Pick<Article, 'id' | 'title' | 'language' | 'coverImage' | 'audio'> & {
@@ -9,7 +9,7 @@ type PlayableArticle = Pick<Article, 'id' | 'title' | 'language' | 'coverImage' 
 };
 
 export function ArticleAudioButton({ article, href, publication }: { readonly article: PlayableArticle; readonly href: string; readonly publication: ArticlePublication }) {
-    const player = useAudioPlayer();
+    const player = useAudioPlayerControls();
     if (!article.audio) return null;
     const isCurrent = player.track?.id === article.id;
     const isPlaying = isCurrent && player.isPlaying;

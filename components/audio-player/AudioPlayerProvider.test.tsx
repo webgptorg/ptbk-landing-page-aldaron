@@ -16,7 +16,7 @@ beforeEach(() => {
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
     Object.defineProperty(navigator, 'mediaSession', { configurable: true, value: { setActionHandler: (action: string, handler: MediaSessionActionHandler | null) => mediaHandlers.set(action, handler), setPositionState: vi.fn(), playbackState: 'none', metadata: null } });
 });
-afterEach(() => { cleanup(); vi.restoreAllMocks(); mediaHandlers.clear(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); mediaHandlers.clear(); });
 function setup() { return renderHook(() => useAudioPlayer(), { wrapper: AudioPlayerProvider }); }
 function loadedAudio() {
     const audio = document.querySelector('audio')!;
@@ -27,6 +27,12 @@ function loadedAudio() {
 }
 
 describe('persistent shared audio owner', () => {
+    it('names the actual podcast publisher in lock-screen media metadata', () => {
+        vi.stubGlobal('MediaMetadata', class { constructor(value: MediaMetadataInit) { Object.assign(this, value); } });
+        const { result } = setup();
+        act(() => result.current.playTrack({ ...trackA, kind: 'podcast', appearance: 'personal', author: 'Data Talk' }));
+        expect(navigator.mediaSession.metadata).toMatchObject({ artist: 'Data Talk', album: 'Data Talk' });
+    });
     it('refreshes tracking on an older remembered recording without seeking or autoplay', () => {
         localStorage.setItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify({ ...trackA, trackingAvailable: false }));
         const { result } = setup();

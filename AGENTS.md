@@ -91,6 +91,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
 - Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
+  Their homepages server-render published matching-language personal articles with the existing audio button.
+  Podcasts live separately at `#podcasts`: reviewed external episodes refresh their selected RSS enclosures and
+  retain verified recordings during outages; AI ta Krajta reads the shared merged episodes without audience-profile
+  fetches and filters by the resolved `pavol-hejny` roster entry. Both homepages revalidate hourly, so new credited
+  episodes appear without a second editorial entry or deployment. Show links stay canonical on `ai-ta-krajta.cz`.
+  The English homepage marks original Czech recordings with a flag. Personal podcasts use the persistent article
+  player and shared history; AI ta Krajta keeps its own controls. Missing public audio retains a publisher link.
+  Provenance and unresolved research are documented in `businesses/pavol/pavolPodcastSources.md`.
   Their shared ivory, forest-green and gold design uses the existing portrait and project marks, with a featured
   project, static editorial testimonials and responsive section layouts; visual tokens stay in `layout.ts` and `pavol.css`.
   Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu.

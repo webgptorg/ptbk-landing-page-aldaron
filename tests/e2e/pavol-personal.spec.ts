@@ -7,6 +7,17 @@ const PERSONAL_SITES = [
     { hostname: 'pavolhejny.com', language: 'en', otherLanguage: 'Čeština', otherUrl: 'https://pavolhejny.cz/' },
 ] as const;
 
+/** A real recording with byte ranges keeps transport checks independent of publisher availability. */
+function createTestRecording(): Buffer {
+    const samples = 8000 * 45;
+    const audio = Buffer.alloc(44 + samples * 2);
+    audio.write('RIFF', 0); audio.writeUInt32LE(audio.length - 8, 4); audio.write('WAVEfmt ', 8);
+    audio.writeUInt32LE(16, 16); audio.writeUInt16LE(1, 20); audio.writeUInt16LE(1, 22);
+    audio.writeUInt32LE(8000, 24); audio.writeUInt32LE(16000, 28); audio.writeUInt16LE(2, 32); audio.writeUInt16LE(16, 34);
+    audio.write('data', 36); audio.writeUInt32LE(samples * 2, 40);
+    return audio;
+}
+
 test.use({
     launchOptions: {
         args: ['--host-resolver-rules=MAP pavolhejny.cz 127.0.0.1,MAP pavolhejny.com 127.0.0.1', '--no-proxy-server'],
@@ -124,6 +135,44 @@ for (const SITE of PERSONAL_SITES) {
         await expect(MESSAGE).toHaveValue('');
     });
 
+    test(`${SITE.hostname} plays a podcast through the article-style player and restores it paused`, async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.route('https://www.buzzsprout.com/**/*.mp3*', (route) => {
+            const recording = createTestRecording();
+            const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '');
+            const start = range ? Number(range[1]) : 0;
+            const end = range?.[2] ? Math.min(Number(range[2]), recording.length - 1) : recording.length - 1;
+            return route.fulfill({ status: range ? 206 : 200, contentType: 'audio/wav',
+                headers: { 'Accept-Ranges': 'bytes', ...(range ? { 'Content-Range': `bytes ${start}-${end}/${recording.length}` } : {}) },
+                body: recording.subarray(start, end + 1),
+            });
+        });
+        await page.goto(SITE_URL.toString());
+        const CARD = page.locator('#podcasts article').filter({ has: page.getByRole('heading', { name: 'Podcastový průřez feat. AI ta Krajta' }) });
+        if (SITE.language === 'en') await expect(CARD.getByLabel('Audio in Czech', { exact: true })).toBeVisible();
+        await CARD.getByRole('button', { name: /^(Poslechnout|Listen):/ }).click();
+        const PLAYER = page.locator('[data-article-player]');
+        const AUDIO = page.locator('audio');
+        await expect(PLAYER).toBeVisible();
+        await expect(page.locator('[data-ai-ta-krajta-mini-player]')).toHaveCount(0);
+        await expect.poll(() => AUDIO.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
+        await PLAYER.getByRole('button', { name: SITE.language === 'cs' ? 'Pozastavit' : 'Pause', exact: true }).click();
+        const RANGE = PLAYER.getByRole('slider');
+        const RANGE_BOUNDS = await RANGE.boundingBox();
+        await RANGE.click({ position: { x: RANGE_BOUNDS!.width * 0.3, y: RANGE_BOUNDS!.height / 2 } });
+        await expect.poll(() => AUDIO.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(10);
+        await expect(PLAYER.getByRole('link')).toHaveAttribute('href', 'https://www.datatalk.cz/podcast/epizoda-157');
+        await page.reload();
+        await expect(PLAYER).toBeVisible();
+        await expect(PLAYER.getByRole('button', { name: SITE.language === 'cs' ? 'Přehrát' : 'Play', exact: true })).toBeVisible();
+        await expect.poll(() => AUDIO.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(10);
+        expect(await AUDIO.evaluate((element: HTMLAudioElement) => element.paused)).toBe(true);
+        await expect(AUDIO).toHaveCount(1);
+        const BOUNDS = await PLAYER.boundingBox();
+        expect(BOUNDS!.x).toBeGreaterThanOrEqual(0);
+        expect(BOUNDS!.x + BOUNDS!.width).toBeLessThanOrEqual(390);
+    });
+
     test.describe(`${SITE.hostname} without JavaScript`, () => {
         test.use({ javaScriptEnabled: false });
         test('keeps its content and media archive readable', async ({ page }) => {
@@ -132,8 +181,9 @@ for (const SITE of PERSONAL_SITES) {
             await expect(page.locator('#testimonials blockquote').first().locator('..')).toHaveCSS('opacity', '1');
             const ARCHIVE = page.locator('#media details');
             await ARCHIVE.locator('summary').click();
-            await expect(ARCHIVE.getByRole('heading', { name: /Data Talk/ })).toBeVisible();
-            await expect(ARCHIVE.locator('article')).toHaveCount(6);
+            await expect(ARCHIVE.getByRole('heading', { name: /Most interesting browser APIs/ })).toBeVisible();
+            await expect(ARCHIVE.locator('article')).toHaveCount(4);
+            await expect(page.locator('#podcasts').getByRole('heading', { name: /Podcastový průřez/ })).toBeVisible();
             const FALLBACK = page.locator('#contact noscript p');
             await expect(FALLBACK).toBeVisible();
             await expect(FALLBACK).toHaveText(CONTENT.contact.javascriptRequiredMessage);

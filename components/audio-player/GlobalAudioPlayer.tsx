@@ -15,10 +15,10 @@ const AiTaKrajtaMiniPlayer = dynamic(() => import('@/businesses/ai-ta-krajta/AiT
 export function GlobalAudioPlayer() {
     const { track, isPlaying, currentTime, duration, error, trackingEnabled, setTrackingEnabled, setIsPlaying, seekTo, closePlayer, history } = useAudioPlayer();
     if (!track) return null;
-    if (track.kind === 'podcast') return <AiTaKrajtaMiniPlayer />;
+    if (track.kind === 'podcast' && track.appearance !== 'personal') return <AiTaKrajtaMiniPlayer />;
     const en = track.language === 'en';
     const completed = history[track.id]?.isPlayed;
-    return <aside className="article-global-player" data-appearance={track.appearance ?? 'personal'} data-fixed-bottom-control data-article-player aria-label={en ? 'Article audio player' : 'Přehrávač článku'}>
+    return <aside className="article-global-player" data-appearance={track.appearance ?? 'personal'} data-fixed-bottom-control data-article-player aria-label={track.kind === 'podcast' ? en ? 'Podcast audio player' : 'Přehrávač podcastu' : en ? 'Article audio player' : 'Přehrávač článku'}>
         <div className="article-global-player__inner">
             <button type="button" className="article-global-player__play" onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? en ? 'Pause' : 'Pozastavit' : en ? 'Play' : 'Přehrát'}>
                 {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}

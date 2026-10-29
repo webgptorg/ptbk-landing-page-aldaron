@@ -6,16 +6,16 @@ import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
 import { PavolContactSection } from '@/businesses/pavol/PavolContactSection';
 import { PavolHeader } from '@/businesses/pavol/PavolHeader';
 import { PavolHero } from '@/businesses/pavol/PavolHero';
-import { PavolMediaSection } from '@/businesses/pavol/PavolMediaSection';
 import { PavolNumbersSection } from '@/businesses/pavol/PavolNumbersSection';
 import { PavolProjectsSection } from '@/businesses/pavol/PavolProjectsSection';
 import { PavolServicesSection } from '@/businesses/pavol/PavolServicesSection';
 import { PavolTestimonialsSection } from '@/businesses/pavol/PavolTestimonialsSection';
 import { usePavolContactForm } from '@/businesses/pavol/usePavolContactForm';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import type { ReactNode } from 'react';
 import './pavol.css';
 
-export function PavolPage({ language }: { readonly language: SupportedHomepageLanguage }) {
+export function PavolPage({ language, media }: { readonly language: SupportedHomepageLanguage; readonly media: ReactNode }) {
     const FORM = usePavolContactForm(language);
 
     return (
@@ -27,7 +27,7 @@ export function PavolPage({ language }: { readonly language: SupportedHomepageLa
                 <PavolServicesSection language={language} form={FORM} />
                 <PavolProjectsSection language={language} />
                 <PavolTestimonialsSection language={language} />
-                <PavolMediaSection language={language} />
+                {media}
                 <PavolContactSection language={language} form={FORM} />
             </main>
             <PavolFooter language={language} />
