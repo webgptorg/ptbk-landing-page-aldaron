@@ -12,6 +12,8 @@ Windows odkazuje na veřejná GitHub Releases včetně předběžných vydání.
 
 Příkazy jsou vždy čitelné a označitelné. Kopírování používá společný clipboard helper, potvrzuje pouze skutečný úspěch a při chybě nabízí ruční kopírování. `ptbk init` připraví projekt a spustí agendu na pozadí. `ptbk dashboard`, `ptbk chat`, `ptbk stop` a `ptbk start` vysvětlují základní ovládání. Zavření dashboardu neukončuje engine.
 
+DigitalOcean je první a hlavní cloudová volba: tlačítko vede na `deploy/README.md#digitalocean` s připraveným `deploy/digitalocean/user-data.sh`. Návštěvník zvolí Ubuntu 24.04 x64, veřejný SSH klíč a vloží skript s vlastní veřejnou IPv4 `/32`. AWS odkazuje na `deploy/README.md#aws`: návštěvník nahraje `deploy/aws/cloudformation.json` do CloudFormation. EC2 má soukromé porty enginu, šifrovaný trvalý EBS disk a čeká na úspěch instalátoru. Web explicitně uvádí vložení skriptu / nahrání šablony. Nenabízí App Platform bez trvalého lokálního úložiště ani nefunkční Launch Stack URL se šablonou na GitHubu. Zničení Dropletu smaže lokální disk; ponechaný EBS disk zůstává placený.
+
 ## Důvěra a návaznost
 
 Stránka vysvětluje čitelné soubory, Git historii a volbu podporovaných AI napojení. Účet poskytovatele, modelové vstupy a provozní náklady jsou oddělené. Odkazy vedou na zdrojový kód, README, whitepaper a partnerství. Podmínky BUSL-1.1 se nemění a odkazují na licenční soubor konkrétního repozitáře; stránka neslibuje neomezené produkční oprávnění.

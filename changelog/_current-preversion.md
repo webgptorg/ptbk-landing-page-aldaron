@@ -1,5 +1,7 @@
 # Current preversion
 
+- Made DigitalOcean Droplet the primary cloud option on both self-hosting pages, linking to the engine startup-script guide. Added AWS EC2 CloudFormation setup alongside Azure, with explicit copy/upload steps and preserved private SSH setup and attended AI initialization.
+
 - Replaced `/cs` and `/en` with a shared, light business homepage for ongoing AI responsibilities. Three localized,
   fictional stories show software care, customer communication and accounting-document preparation through incoming
   needs, checked drafts, human decisions, follow-up work and waiting. Layered project, AI-care and work surfaces respond

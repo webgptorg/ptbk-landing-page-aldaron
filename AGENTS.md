@@ -61,8 +61,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `/` and unprefixed marketing pages redirect to `/cs` or `/en` according to `Accept-Language`, preserving queries.
   Language-dependent redirects are temporary and private; explicit language URLs stay stable.
   `/cs/open-source` and `/en/open-source` explain self-hosting with npm, a Bash/Zsh walkthrough, Windows EXE releases
-  and the engine's shared Azure VPS template/Ubuntu installer guide. The cloud button opens the provider's paid
-  deployment form; AI sign-in and agenda setup remain attended over SSH. Both languages use the same engine resources.
+  and the engine's shared Ubuntu installer guide. DigitalOcean is the first cloud option and opens its Droplet
+  startup-script guide; Azure opens the paid deployment form and AWS opens the EC2 CloudFormation upload guide.
+  Label the copy/upload steps. AI sign-in and agenda setup remain attended over SSH; both languages share resources.
   Marketing subpages use root paths, canonical/alternate metadata and indexable sitemap entries.
   `/new` and its children permanently redirect to the corresponding public paths, preserving queries.
   Czech `/cs` routes re-export the shared `app/(marketing)` pages; English uses its dedicated `/en` catch-all;

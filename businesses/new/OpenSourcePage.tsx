@@ -31,7 +31,9 @@ const COPY = {
         shellText: 'Zkopírujte příkazy do Bash nebo Zsh. Používají npm; Node.js a Git musí být nainstalované předem.',
         windowsTitle: 'Průvodce instalací pro Windows.',
         serverTab: 'VPS / cloud', serverTitle: 'Vlastní server. Připravený k nastavení.',
-        serverText: 'Tlačítko otevře nasazení Ubuntu serveru ve Vašem účtu Azure. Připraví trvalý disk, Node.js, Git, Chrome a engine. Máte VPS u DigitalOcean, Hetzner nebo jiného poskytovatele? Použijte stejný instalátor podle návodu.',
+        serverText: 'Začněte s DigitalOcean Dropletem, nebo zvolte Azure či AWS. Všechny postupy připraví Ubuntu server s trvalými daty a enginem. DigitalOcean vyžaduje vložení startovacího skriptu, Azure otevře přímo formulář a AWS potřebuje nahrát šablonu.',
+        serverDigitalOcean: 'Připravit DigitalOcean Droplet', serverDigitalOceanHint: 'Vložte připravený startovací skript do formuláře nového Dropletu.',
+        serverAws: 'Připravit AWS EC2', serverAwsHint: 'Nahrajte připravenou šablonu do CloudFormation.',
         serverDeploy: 'Nasadit na Azure', serverGuide: 'Mám vlastní VPS — otevřít návod',
         serverSetup: 'Po nasazení se připojte přes SSH a dokončete ptbk init i přihlášení k vybranému AI nástroji. Samotné tlačítko ještě nespustí Vaši agendu.',
         serverCost: 'Server, disk a IP adresa jsou placené služby poskytovatele. Před potvrzením zkontrolujte cenu. Zadáváte veřejný SSH klíč a svou IP adresu; přístup k dashboardu zůstává soukromý. Projektová data přežijí běžný restart, zálohy si zajistěte zvlášť.',
@@ -63,7 +65,9 @@ const COPY = {
         shellText: 'Copy these commands into Bash or Zsh. They use npm; Node.js and Git must already be installed.',
         windowsTitle: 'Guided installation for Windows.',
         serverTab: 'VPS / cloud', serverTitle: 'Your own server. Ready for setup.',
-        serverText: 'The button opens an Ubuntu server deployment in your Azure account. It prepares a persistent disk, Node.js, Git, Chrome and the engine. Already have a VPS on DigitalOcean, Hetzner or another provider? Follow the guide to use the same installer.',
+        serverText: 'Start with a DigitalOcean Droplet, or choose Azure or AWS. Every path prepares an Ubuntu server with persistent data and the engine. DigitalOcean requires pasting a startup script, Azure opens its form directly and AWS requires a template upload.',
+        serverDigitalOcean: 'Prepare a DigitalOcean Droplet', serverDigitalOceanHint: 'Paste the prepared startup script into the new Droplet form.',
+        serverAws: 'Prepare AWS EC2', serverAwsHint: 'Upload the prepared template to CloudFormation.',
         serverDeploy: 'Deploy to Azure', serverGuide: 'I have a VPS — open the guide',
         serverSetup: 'After deployment, connect over SSH and complete ptbk init and sign-in to your chosen AI tool. The button alone does not start your agenda.',
         serverCost: 'The server, disk and IP address are paid provider services. Review the cost before confirming. Supply your public SSH key and client IP; dashboard access stays private. Project data survives a normal restart; arrange backups separately.',
@@ -148,7 +152,11 @@ export function OpenSourcePage() {
                     </div>
                     {item === 'server' ? <div className={s.windows}>
                         <div className={s.downloadIcon}><Server size={34} strokeWidth={1.3} aria-hidden="true" /></div>
-                        <a href={AZURE_DEPLOY} className={s.downloadLink}>{copy.serverDeploy}<ArrowRight size={17} aria-hidden="true" /></a>
+                        <a href={`${SERVER_GUIDE}#digitalocean`} className={s.downloadLink} aria-describedby={`${id}-digitalocean-hint`}>{copy.serverDigitalOcean}<ArrowRight size={17} aria-hidden="true" /></a>
+                        <small id={`${id}-digitalocean-hint`}>{copy.serverDigitalOceanHint}</small>
+                        <a href={AZURE_DEPLOY} className={s.repoLink}>{copy.serverDeploy}<ArrowRight size={17} aria-hidden="true" /></a>
+                        <a href={`${SERVER_GUIDE}#aws`} className={s.repoLink} aria-describedby={`${id}-aws-hint`}>{copy.serverAws}<ArrowRight size={17} aria-hidden="true" /></a>
+                        <small id={`${id}-aws-hint`}>{copy.serverAwsHint}</small>
                         <p>{copy.serverSetup}</p>
                         <a href={SERVER_GUIDE} className={s.repoLink}>{copy.serverGuide}<ArrowRight size={15} aria-hidden="true" /></a>
                         <small>{copy.serverCost}</small>

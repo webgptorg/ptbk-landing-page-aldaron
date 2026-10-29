@@ -57,6 +57,12 @@ describe('self-hosted installation entry point', () => {
         const deploy = panel.getByRole('link', { name: locale === 'en' ? 'Deploy to Azure' : 'Nasadit na Azure' });
         const href = deploy.getAttribute('href')!;
         expect(decodeURIComponent(href.split('/uri/')[1])).toBe('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json');
+        const digitalOcean = panel.getByRole('link', { name: locale === 'en' ? 'Prepare a DigitalOcean Droplet' : 'Připravit DigitalOcean Droplet' });
+        expect(digitalOcean.getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md#digitalocean');
+        expect(panel.getAllByRole('link')[0]).toBe(digitalOcean);
+        expect(panel.getByRole('link', { name: locale === 'en' ? 'Prepare AWS EC2' : 'Připravit AWS EC2' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md#aws');
+        expect(panel.getByText(locale === 'en' ? /Paste the prepared startup script/ : /Vložte připravený startovací skript/)).toBeTruthy();
+        expect(panel.getByText(locale === 'en' ? /Upload the prepared template/ : /Nahrajte připravenou šablonu/)).toBeTruthy();
         expect(panel.getByRole('link', { name: locale === 'en' ? 'I have a VPS — open the guide' : 'Mám vlastní VPS — otevřít návod' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md');
         expect(panel.getByText(locale === 'en' ? /paid provider services/ : /placené služby poskytovatele/)).toBeTruthy();
         expect(panel.getByText(locale === 'en' ? /complete ptbk init and sign-in/ : /dokončete ptbk init i přihlášení/)).toBeTruthy();
