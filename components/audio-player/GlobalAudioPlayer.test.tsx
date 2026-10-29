@@ -44,19 +44,19 @@ describe('shared player appearance', () => {
     it('switches from internal source navigation to following text only on the playing article', () => {
         state.track = { ...track, kind: 'article', href: '/articles/recording', trackingAvailable: true };
         const view = render(<GlobalAudioPlayer />);
-        const source = screen.getByRole('link', { name: 'Go to source', exact: true });
+        const source = screen.getByRole('link', { name: 'Go to source' });
         expect(source.getAttribute('href')).toBe('/articles/recording');
         expect(source.getAttribute('target')).toBeNull();
         expect(screen.queryByRole('button', { name: 'Follow text' })).toBeNull();
         state.pathname = '/articles/recording';
         view.rerender(<GlobalAudioPlayer />);
         expect(screen.queryByRole('link', { name: /Go to source/ })).toBeNull();
-        fireEvent.click(screen.getByRole('button', { name: 'Follow text', exact: true }));
+        fireEvent.click(screen.getByRole('button', { name: 'Follow text' }));
         expect(state.setTrackingEnabled).toHaveBeenCalledWith(true);
         expect(state.setIsPlaying).not.toHaveBeenCalled();
         state.pathname = '/articles/another';
         view.rerender(<GlobalAudioPlayer />);
-        expect(screen.getByRole('link', { name: 'Go to source', exact: true })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Go to source' })).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Follow text' })).toBeNull();
     });
     it('does not offer tracking when the current article has no reviewed timing', () => {
