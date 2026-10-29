@@ -101,6 +101,7 @@ describe('public domain routing', () => {
     it('shares build output and known static locations without treating every dotted page as an asset', () => {
         expect(isSharedDeploymentAssetPath('/_next/static/chunks/main.js')).toBe(true);
         expect(isSharedDeploymentAssetPath('/logo/pavol-hejny-ph.svg')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/install.sh')).toBe(true);
         expect(isSharedDeploymentAssetPath('/people/ai-ta-krajta/pavol-hejny.png')).toBe(true);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/narration.mp3')).toBe(true);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/words.json')).toBe(true);

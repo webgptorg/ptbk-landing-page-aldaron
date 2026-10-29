@@ -25,6 +25,7 @@ export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/fonts/workshop/outfit-OFL.txt',
     '/icon-192x192.png',
     '/icon-512x512.png',
+    '/install.sh',
     '/integrations/_boilerplate.png',
     '/integrations/chat.png',
     '/integrations/default.svg',

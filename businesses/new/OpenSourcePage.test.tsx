@@ -35,8 +35,8 @@ describe('self-hosted installation entry point', () => {
         const shell = screen.getByRole('tab', { name: 'Shell' });
         expect(shell.getAttribute('aria-selected')).toBe('true');
         expect(document.activeElement).toBe(shell);
-        expect(screen.getByRole('tabpanel').textContent).toContain('mkdir my-agenda && cd my-agenda');
-        expect(screen.getByRole('tabpanel').textContent).not.toContain('curl');
+        expect(screen.getByRole('tabpanel').textContent).toContain('curl -fsSL https://www.ptbk.io/install.sh | bash');
+        expect(screen.getByRole('tabpanel').textContent).not.toContain('node --version');
 
         fireEvent.keyDown(shell, { key: 'ArrowRight' });
         const windows = screen.getByRole('tab', { name: 'Windows EXE' });
@@ -47,7 +47,7 @@ describe('self-hosted installation entry point', () => {
         fireEvent.keyDown(windows, { key: 'End' });
         const server = screen.getByRole('tab', { name: 'VPS / cloud' });
         expect(document.activeElement).toBe(server);
-        expect(screen.getByRole('tabpanel').textContent).toContain('The button alone does not start your agenda.');
+        expect(screen.getByRole('tabpanel').textContent).toContain('connect over SSH and finish setup');
         fireEvent.keyDown(server, { key: 'ArrowRight' });
         expect(document.activeElement).toBe(ai);
         fireEvent.keyDown(ai, { key: 'ArrowLeft' });
@@ -96,7 +96,7 @@ describe('self-hosted installation entry point', () => {
         render(page());
         const panel = within(screen.getByRole('tabpanel'));
         fireEvent.click(panel.getByRole('button', { name: 'Copy prompt' }));
-        expect(await panel.findByText('Copying failed. Select the prompt and copy it manually.')).toBeTruthy();
+        expect(await panel.findByText('Copying failed. Select the text and copy it manually.')).toBeTruthy();
         expect(panel.getByText(/Install Promptbook on this computer/).getAttribute('tabindex')).toBe('0');
     });
 
@@ -104,18 +104,17 @@ describe('self-hosted installation entry point', () => {
         render(page(locale));
         fireEvent.click(screen.getByRole('tab', { name: 'VPS / cloud' }));
         const panel = within(screen.getByRole('tabpanel'));
-        const deploy = panel.getByRole('link', { name: locale === 'en' ? 'Deploy to Azure' : 'Nasadit na Azure' });
+        const deploy = panel.getByRole('link', { name: /Azure/ });
         const href = deploy.getAttribute('href')!;
         expect(decodeURIComponent(href.split('/uri/')[1])).toBe('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json');
-        const digitalOcean = panel.getByRole('link', { name: locale === 'en' ? 'Prepare a DigitalOcean Droplet' : 'Připravit DigitalOcean Droplet' });
+        const digitalOcean = panel.getByRole('link', { name: /DigitalOcean/ });
         expect(digitalOcean.getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md#digitalocean');
         expect(panel.getAllByRole('link')[0]).toBe(digitalOcean);
-        expect(panel.getByRole('link', { name: locale === 'en' ? 'Prepare AWS EC2' : 'Připravit AWS EC2' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md#aws');
-        expect(panel.getByText(locale === 'en' ? /Paste the prepared startup script/ : /Vložte připravený startovací skript/)).toBeTruthy();
-        expect(panel.getByText(locale === 'en' ? /Upload the prepared template/ : /Nahrajte připravenou šablonu/)).toBeTruthy();
-        expect(panel.getByRole('link', { name: locale === 'en' ? 'I have a VPS — open the guide' : 'Mám vlastní VPS — otevřít návod' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md');
-        expect(panel.getByText(locale === 'en' ? /paid provider services/ : /placené služby poskytovatele/)).toBeTruthy();
-        expect(panel.getByText(locale === 'en' ? /complete ptbk init and sign-in/ : /dokončete ptbk init i přihlášení/)).toBeTruthy();
+        expect(panel.getByRole('link', { name: /AWS/ }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md#aws');
+        expect(panel.getByText(locale === 'en' ? 'Paste the startup script' : 'Vložit startovací skript')).toBeTruthy();
+        expect(panel.getByText(locale === 'en' ? 'Upload the CloudFormation template' : 'Nahrát CloudFormation šablonu')).toBeTruthy();
+        expect(panel.getByRole('link', { name: locale === 'en' ? 'VPS guide' : 'Návod pro VPS' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md');
+        expect(panel.getByText(locale === 'en' ? /You pay the provider/ : /Server platíte poskytovateli/)).toBeTruthy();
     });
 
     it('copies executable commands and leaves them selectable when the browser refuses the clipboard', async () => {
@@ -125,16 +124,16 @@ describe('self-hosted installation entry point', () => {
         render(page());
         fireEvent.click(screen.getByRole('tab', { name: 'npm' }));
         const panel = within(screen.getByRole('tabpanel'));
-        fireEvent.click(panel.getByRole('button', { name: 'Copy commands' }));
-        expect(await panel.findByText('Copying failed. Select the commands and copy them manually.')).toBeTruthy();
-        expect(writeText).toHaveBeenCalledWith('npm install --global ptbk\nptbk --version\n\nmkdir my-agenda\ncd my-agenda\nptbk init');
+        fireEvent.click(panel.getByRole('button', { name: 'Copy command' }));
+        expect(await panel.findByText('Copying failed. Select the text and copy it manually.')).toBeTruthy();
+        expect(writeText).toHaveBeenCalledWith('npm install --global ptbk\nptbk init');
         expect(panel.getByText(/npm install --global ptbk/).tagName).toBe('CODE');
     });
 
     it('opens the existing contact dialog with the self-hosting context instead of submitting a lead', () => {
         const fetch = vi.spyOn(globalThis, 'fetch');
         render(page());
-        fireEvent.click(screen.getByRole('button', { name: 'Help me get started' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Installation help' }));
         expect(screen.getByRole('dialog').textContent).toContain('Help with self-hosted engine installation — open-source page');
         expect(fetch).not.toHaveBeenCalled();
     });
@@ -143,13 +142,32 @@ describe('self-hosted installation entry point', () => {
         const element = document.createElement('div');
         element.innerHTML = renderToStaticMarkup(page(locale));
         expect(element.querySelectorAll('h1').length).toBe(1);
-        expect(element.textContent).toContain(locale === 'en' ? 'On your machine.' : 'Na vašem stroji.');
-        expect(element.textContent).toContain('Business Source License 1.1 (BUSL-1.1)');
+        expect(element.querySelector('h1')?.textContent).toBe(locale === 'en' ? 'Install Promptbook' : 'Instalace Promptbooku');
+        expect(element.textContent).toContain('BUSL-1.1');
         const internalLinks = Array.from(element.querySelectorAll('a[href^="/"]'));
         expect(internalLinks.every(link => link.getAttribute('href')?.startsWith(`/${locale}`))).toBe(true);
         const [title, description] = OPEN_SOURCE_PAGE_COPY[locale];
         const metadata = newPageMetadata('open-source', title, description, locale);
         expect(metadata.alternates?.canonical).toBe(`https://ptbk.io/${locale}/open-source`);
         expect(metadata.alternates?.languages).toMatchObject({ cs: 'https://ptbk.io/cs/open-source', en: 'https://ptbk.io/en/open-source' });
+    });
+
+    it.each(['cs', 'en'] as const)('copies the same complete VPS installer from the %s Shell tab', async locale => {
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+        render(page(locale));
+        fireEvent.click(screen.getByRole('tab', { name: 'Shell' }));
+        const panel = within(screen.getByRole('tabpanel'));
+        const command = panel.getByText('curl -fsSL https://www.ptbk.io/install.sh | bash');
+        const commandBlock = within(command.closest('pre')!.parentElement!);
+        fireEvent.click(commandBlock.getByRole('button', { name: locale === 'en' ? 'Copy command' : 'Kopírovat příkaz' }));
+        expect(writeText).toHaveBeenCalledWith('curl -fsSL https://www.ptbk.io/install.sh | bash');
+        await commandBlock.findAllByText(locale === 'en' ? 'Copied' : 'Zkopírováno');
+        expect(panel.getByText(/Ubuntu 24.04 x64/)).toBeTruthy();
+        const details = screen.getByText(locale === 'en' ? 'AI sign-in on a VPS' : 'Přihlášení AI na VPS').closest('details')!;
+        fireEvent.click(within(details).getByText(locale === 'en' ? 'AI sign-in on a VPS' : 'Přihlášení AI na VPS'));
+        expect(details.textContent).toContain('codex login --device-auth');
+        expect(details.textContent).toContain('claude auth login');
+        expect(details.textContent).toContain('promptbook');
     });
 });

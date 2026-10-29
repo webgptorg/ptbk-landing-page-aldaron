@@ -6,8 +6,8 @@ export const NEW_BLUE_PALETTE = {backgroundStart:'#10152f',backgroundEnd:'#202c6
 
 /** The installation page's matching Czech and English metadata. */
 export const OPEN_SOURCE_PAGE_COPY = {
-    cs: ['Vlastní instalace Promptbook Engine', 'Nainstalujte Promptbook na svůj počítač nebo server přes npm, shell nebo Windows EXE. Vlastní soubory, historie v Gitu a pomoc s nasazením.'],
-    en: ['Install your own Promptbook Engine', 'Install Promptbook on your computer or server with npm, shell commands or the Windows EXE. Your files, Git history and help getting started.'],
+    cs: ['Instalace Promptbooku', 'Instalace přes AI agenta, npm, Windows EXE nebo jedním příkazem na čisté Ubuntu VPS.'],
+    en: ['Install Promptbook', 'Install with your AI agent, npm, the Windows EXE or one command on a fresh Ubuntu VPS.'],
 } as const;
 
 /** Search and sharing copy follows each page's visible headline and ownership promise. */
