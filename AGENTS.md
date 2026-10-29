@@ -102,7 +102,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   episodes appear without a second editorial entry or deployment. Show links stay canonical on `ai-ta-krajta.cz`.
   The English homepage marks original Czech recordings with a flag. Personal podcasts use the persistent article
   player and shared history; AI ta Krajta keeps its own controls. Missing public audio retains a publisher link.
-  All personal podcast appearances share one list ordered by publication date, newest first, across every show.
+  All personal podcast appearances share one list with Smart ordering by default: the newest episode stays first,
+  then each position takes the newest remaining episode from a different show whenever possible. Each show's own
+  order stays newest first; after other shows run out, the remaining episodes continue by date. A localized native
+  selector also offers strict newest-first and oldest-first ordering, without changing playback or open descriptions.
+  Ordering receives only metadata and server-rendered episode content; the default list is readable without JavaScript.
   Small covers, short excerpts and native full-description disclosures sit in simple separator rows, without
   show-specific groups, archives or nested cards. Full descriptions also remain readable without JavaScript.
   Provenance and unresolved research are documented in `businesses/pavol/pavolPodcastSources.md`.

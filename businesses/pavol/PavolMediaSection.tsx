@@ -16,6 +16,7 @@ import { getArticles } from '@/lib/articles/load';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
+import { PavolPodcastList } from './PavolPodcastList';
 
 function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAppearance }) {
     const IS_HIGHLIGHT = appearance.importance === 'highlight';
@@ -121,9 +122,10 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
         <section id="podcasts" tabIndex={-1} className="pavol-section outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={cs ? 'Do sluchátek' : 'For your headphones'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'Conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
-                <div className="pavol-podcast-list">
-                    {podcasts.map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}
-                </div>
+                <PavolPodcastList language={language} items={podcasts.map((podcast) => ({
+                    id: podcast.id, source: podcast.source, publishedAt: podcast.publishedAt,
+                    content: <PavolPodcastCard podcast={podcast} language={language} />,
+                }))} />
             </div>
         </section>
     </>;
