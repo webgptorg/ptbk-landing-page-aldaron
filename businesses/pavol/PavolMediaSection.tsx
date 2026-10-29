@@ -125,21 +125,21 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={cs ? 'Do sluchátek' : 'For your headphones'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'Conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
                 <h3 className="mt-10 text-xl font-medium">{cs ? 'Jako host' : 'Guest appearances'}</h3>
-                <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">{appearances.slice(0, 3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}</div>
+                <div className="pavol-podcast-grid mt-6">{appearances.slice(0, 3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}</div>
                 {appearances.length > 3 && <details className="pavol-podcast-archive mt-6">
                     <summary>{cs ? 'Starší rozhovory' : 'Earlier interviews'} <span>({appearances.length - 3})</span><ChevronDown size={18} aria-hidden="true" /></summary>
-                    <div className="mt-5 space-y-4">{appearances.slice(3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} compact />)}</div>
+                    <div className="pavol-podcast-archive-list mt-5">{appearances.slice(3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} compact />)}</div>
                 </details>}
-                <div className="mt-14 border-t border-[var(--pavol-border)] pt-10">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="pavol-podcast-show">
+                    <div className="pavol-podcast-show-heading">
                         <h3 className="text-2xl font-medium">AI ta Krajta</h3>
-                        <a href={showUrl} className="pavol-source-link">{cs ? 'Všechny moje díly na AI ta Krajta' : 'All my episodes on AI ta Krajta'}<ArrowUpRight size={16} aria-hidden="true" /></a>
+                        <a href={showUrl} className="pavol-source-link">{cs ? 'Všechny moje díly' : 'All my episodes'}<ArrowUpRight size={16} aria-hidden="true" /></a>
                     </div>
-                    <p className="mt-3 max-w-3xl text-[var(--pavol-muted)]">{cs ? 'Moje nejnovější díly z AI ta Krajta. Nové epizody, kterých se účastním, se sem přidávají automaticky.' : 'My latest appearances on AI ta Krajta. New episodes featuring me are added automatically, in their original Czech.'}</p>
-                    <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">{aiTaKrajta.slice(0, 3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}</div>
+                    <p className="mt-3 max-w-3xl text-[var(--pavol-muted)]">{cs ? 'Nejnovější epizody se mnou. Další díly se sem přidávají automaticky.' : 'The latest episodes featuring me, in their original Czech. New appearances are added automatically.'}</p>
+                    <div className="pavol-podcast-grid mt-6">{aiTaKrajta.slice(0, 3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}</div>
                     {aiTaKrajta.length > 3 && <details className="pavol-podcast-archive mt-6">
                         <summary>{cs ? 'Další díly se mnou' : 'More episodes featuring me'} <span>({aiTaKrajta.length - 3})</span><ChevronDown size={18} aria-hidden="true" /></summary>
-                        <div className="mt-5 space-y-4">{aiTaKrajta.slice(3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} compact />)}</div>
+                        <div className="pavol-podcast-archive-list mt-5">{aiTaKrajta.slice(3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} compact />)}</div>
                     </details>}
                 </div>
             </div>
