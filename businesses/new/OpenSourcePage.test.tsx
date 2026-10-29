@@ -31,15 +31,35 @@ describe('self-hosted installation entry point', () => {
         expect(screen.getByRole('tabpanel').textContent).toContain('mkdir my-agenda && cd my-agenda');
         expect(screen.getByRole('tabpanel').textContent).not.toContain('curl');
 
-        fireEvent.keyDown(shell, { key: 'End' });
+        fireEvent.keyDown(shell, { key: 'ArrowRight' });
         const windows = screen.getByRole('tab', { name: 'Windows EXE' });
         expect(document.activeElement).toBe(windows);
         expect(screen.getByRole('link', { name: 'Choose a Windows EXE' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/releases');
         expect(screen.getByRole('tabpanel').textContent).toContain('Promptbook-Setup-<version>-windows-x64.exe');
 
-        fireEvent.keyDown(windows, { key: 'Home' });
+        fireEvent.keyDown(windows, { key: 'End' });
+        const server = screen.getByRole('tab', { name: 'VPS / cloud' });
+        expect(document.activeElement).toBe(server);
+        expect(screen.getByRole('tabpanel').textContent).toContain('The button alone does not start your agenda.');
+        fireEvent.keyDown(server, { key: 'ArrowRight' });
+        expect(document.activeElement).toBe(npm);
+        fireEvent.keyDown(npm, { key: 'ArrowLeft' });
+        expect(document.activeElement).toBe(server);
+        fireEvent.keyDown(server, { key: 'Home' });
         expect(document.activeElement).toBe(npm);
         expect(npm.getAttribute('aria-selected')).toBe('true');
+    });
+
+    it.each(['cs', 'en'] as const)('links the %s cloud option to the engine template and shared VPS guide', locale => {
+        render(page(locale));
+        fireEvent.click(screen.getByRole('tab', { name: 'VPS / cloud' }));
+        const panel = within(screen.getByRole('tabpanel'));
+        const deploy = panel.getByRole('link', { name: locale === 'en' ? 'Deploy to Azure' : 'Nasadit na Azure' });
+        const href = deploy.getAttribute('href')!;
+        expect(decodeURIComponent(href.split('/uri/')[1])).toBe('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json');
+        expect(panel.getByRole('link', { name: locale === 'en' ? 'I have a VPS — open the guide' : 'Mám vlastní VPS — otevřít návod' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md');
+        expect(panel.getByText(locale === 'en' ? /paid provider services/ : /placené služby poskytovatele/)).toBeTruthy();
+        expect(panel.getByText(locale === 'en' ? /complete ptbk init and sign-in/ : /dokončete ptbk init i přihlášení/)).toBeTruthy();
     });
 
     it('copies executable commands and leaves them selectable when the browser refuses the clipboard', async () => {

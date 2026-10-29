@@ -2,19 +2,21 @@
 
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Check, Copy, Download, FolderOpen, GitBranch, Github, Terminal } from 'lucide-react';
+import { ArrowRight, Check, Copy, Download, FolderOpen, GitBranch, Github, Server, Terminal } from 'lucide-react';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
 import s from './open-source.module.css';
 
 /** Installation methods supported by the published engine and release workflow. */
-type InstallMethod = 'npm' | 'shell' | 'windows';
+type InstallMethod = 'npm' | 'shell' | 'windows' | 'server';
 
 /** Stable repository destinations, including prereleases that /releases/latest would omit. */
 const REPOSITORY = 'https://github.com/webgptorg/promptbook';
 const RELEASES = `${REPOSITORY}/releases`;
-const METHODS: readonly InstallMethod[] = ['npm', 'shell', 'windows'];
+const SERVER_GUIDE = `${REPOSITORY}/blob/reborn/2026-10/deploy/README.md`;
+const AZURE_DEPLOY = `https://portal.azure.com/#create/Microsoft.Template/uri/${encodeURIComponent('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json')}`;
+const METHODS: readonly InstallMethod[] = ['npm', 'shell', 'windows', 'server'];
 
 /** Authored translations keep technical commands identical in both languages. */
 const COPY = {
@@ -28,6 +30,11 @@ const COPY = {
         shellTitle: 'Od prázdné složky k první agendě.',
         shellText: 'Zkopírujte příkazy do Bash nebo Zsh. Používají npm; Node.js a Git musí být nainstalované předem.',
         windowsTitle: 'Průvodce instalací pro Windows.',
+        serverTab: 'VPS / cloud', serverTitle: 'Vlastní server. Připravený k nastavení.',
+        serverText: 'Tlačítko otevře nasazení Ubuntu serveru ve Vašem účtu Azure. Připraví trvalý disk, Node.js, Git, Chrome a engine. Máte VPS u DigitalOcean, Hetzner nebo jiného poskytovatele? Použijte stejný instalátor podle návodu.',
+        serverDeploy: 'Nasadit na Azure', serverGuide: 'Mám vlastní VPS — otevřít návod',
+        serverSetup: 'Po nasazení se připojte přes SSH a dokončete ptbk init i přihlášení k vybranému AI nástroji. Samotné tlačítko ještě nespustí Vaši agendu.',
+        serverCost: 'Server, disk a IP adresa jsou placené služby poskytovatele. Před potvrzením zkontrolujte cenu. Zadáváte veřejný SSH klíč a svou IP adresu; přístup k dashboardu zůstává soukromý. Projektová data přežijí běžný restart, zálohy si zajistěte zvlášť.',
         windowsText: 'Na stránce vydání vyberte EXE pro Windows x64. Instalátor doplní chybějící Node.js, npm a Git, nainstaluje engine a nabídne vytvoření prvního projektu.',
         download: 'Vybrat Windows EXE', releaseHint: 'U zvolené verze otevřete Assets a stáhněte soubor:',
         releaseNote: 'Některá vydání jsou označená jako předběžná. Vyberte verzi podle poznámek k vydání.',
@@ -55,6 +62,11 @@ const COPY = {
         shellTitle: 'From an empty folder to your first workflow.',
         shellText: 'Copy these commands into Bash or Zsh. They use npm; Node.js and Git must already be installed.',
         windowsTitle: 'Guided installation for Windows.',
+        serverTab: 'VPS / cloud', serverTitle: 'Your own server. Ready for setup.',
+        serverText: 'The button opens an Ubuntu server deployment in your Azure account. It prepares a persistent disk, Node.js, Git, Chrome and the engine. Already have a VPS on DigitalOcean, Hetzner or another provider? Follow the guide to use the same installer.',
+        serverDeploy: 'Deploy to Azure', serverGuide: 'I have a VPS — open the guide',
+        serverSetup: 'After deployment, connect over SSH and complete ptbk init and sign-in to your chosen AI tool. The button alone does not start your agenda.',
+        serverCost: 'The server, disk and IP address are paid provider services. Review the cost before confirming. Supply your public SSH key and client IP; dashboard access stays private. Project data survives a normal restart; arrange backups separately.',
         windowsText: 'Choose the Windows x64 EXE on the releases page. The installer adds missing Node.js, npm and Git, installs the engine and offers to create your first project.',
         download: 'Choose a Windows EXE', releaseHint: 'Open Assets for your chosen version and download:',
         releaseNote: 'Some releases are marked as prereleases. Choose a version using its release notes.',
@@ -127,14 +139,20 @@ export function OpenSourcePage() {
                         id={`${id}-${item}`} type="button" role="tab" aria-selected={method === item}
                         aria-controls={`${id}-panel-${item}`} tabIndex={method === item ? 0 : -1}
                         onClick={() => setMethod(item)} onKeyDown={event => moveTab(event, index)}>
-                        {item === 'npm' ? 'npm' : item === 'shell' ? 'Shell' : 'Windows EXE'}
+                        {item === 'npm' ? 'npm' : item === 'shell' ? 'Shell' : item === 'server' ? copy.serverTab : 'Windows EXE'}
                     </button>)}
                 </div>
                 {METHODS.map(item => <div key={item} hidden={method !== item} id={`${id}-panel-${item}`} role="tabpanel" aria-labelledby={`${id}-${item}`} tabIndex={0} className={s.panel}>
-                    <div className={s.methodIntro}><h3>{item === 'npm' ? copy.npmTitle : item === 'shell' ? copy.shellTitle : copy.windowsTitle}</h3>
-                        <p>{item === 'npm' ? copy.npmText : item === 'shell' ? copy.shellText : copy.windowsText}</p>
+                    <div className={s.methodIntro}><h3>{item === 'npm' ? copy.npmTitle : item === 'shell' ? copy.shellTitle : item === 'server' ? copy.serverTitle : copy.windowsTitle}</h3>
+                        <p>{item === 'npm' ? copy.npmText : item === 'shell' ? copy.shellText : item === 'server' ? copy.serverText : copy.windowsText}</p>
                     </div>
-                    {item === 'windows' ? <div className={s.windows}>
+                    {item === 'server' ? <div className={s.windows}>
+                        <div className={s.downloadIcon}><Server size={34} strokeWidth={1.3} aria-hidden="true" /></div>
+                        <a href={AZURE_DEPLOY} className={s.downloadLink}>{copy.serverDeploy}<ArrowRight size={17} aria-hidden="true" /></a>
+                        <p>{copy.serverSetup}</p>
+                        <a href={SERVER_GUIDE} className={s.repoLink}>{copy.serverGuide}<ArrowRight size={15} aria-hidden="true" /></a>
+                        <small>{copy.serverCost}</small>
+                    </div> : item === 'windows' ? <div className={s.windows}>
                         <div className={s.downloadIcon}><Download size={34} strokeWidth={1.3} aria-hidden="true" /></div>
                         <p>{copy.releaseHint}</p><code>Promptbook-Setup-&lt;version&gt;-windows-x64.exe</code>
                         <a href={RELEASES} className={s.downloadLink}>{copy.download}<ArrowRight size={17} aria-hidden="true" /></a>
