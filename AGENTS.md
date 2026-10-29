@@ -102,9 +102,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   episodes appear without a second editorial entry or deployment. Show links stay canonical on `ai-ta-krajta.cz`.
   The English homepage marks original Czech recordings with a flag. Personal podcasts use the persistent article
   player and shared history; AI ta Krajta keeps its own controls. Missing public audio retains a publisher link.
-  Podcast cards use small covers, three-line excerpts and native full-description disclosures that also work without
-  JavaScript; the show's latest episodes have their own inset section. Archive and description summary styles stay
-  scoped to their own direct summary so expanding one never restyles the other.
+  All personal podcast appearances share one list ordered by publication date, newest first, across every show.
+  Small covers, short excerpts and native full-description disclosures sit in simple separator rows, without
+  show-specific groups, archives or nested cards. Full descriptions also remain readable without JavaScript.
   Provenance and unresolved research are documented in `businesses/pavol/pavolPodcastSources.md`.
   Their shared ivory, forest-green and gold design uses the existing portrait and project marks, with a featured
   project, static editorial testimonials and responsive section layouts; visual tokens stay in `layout.ts` and `pavol.css`.

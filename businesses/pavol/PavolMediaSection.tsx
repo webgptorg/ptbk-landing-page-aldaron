@@ -16,8 +16,6 @@ import { getArticles } from '@/lib/articles/load';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
-import { createPublicUrl } from '@/lib/domains/publicDomainRouting';
-import { AI_TA_KRAJTA_SECTION_IDS } from '@/businesses/ai-ta-krajta/config';
 
 function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAppearance }) {
     const IS_HIGHLIGHT = appearance.importance === 'highlight';
@@ -89,8 +87,7 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
     const cs = language === 'cs';
     const content = PAVOL_PAGE_CONTENT[language].media;
     const articles = getArticles(language, 'personal');
-    const { appearances, aiTaKrajta } = await fetchPavolPodcasts(language, revalidateSeconds);
-    const showUrl = createPublicUrl(`/ai-ta-krajta?person=pavol-hejny&archive=1#${AI_TA_KRAJTA_SECTION_IDS.EPISODES}`);
+    const podcasts = await fetchPavolPodcasts(language, revalidateSeconds);
     return <>
         <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
@@ -124,23 +121,8 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
         <section id="podcasts" tabIndex={-1} className="pavol-section outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={cs ? 'Do sluchátek' : 'For your headphones'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'Conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
-                <h3 className="mt-10 text-xl font-medium">{cs ? 'Jako host' : 'Guest appearances'}</h3>
-                <div className="pavol-podcast-grid mt-6">{appearances.slice(0, 3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}</div>
-                {appearances.length > 3 && <details className="pavol-podcast-archive mt-6">
-                    <summary>{cs ? 'Starší rozhovory' : 'Earlier interviews'} <span>({appearances.length - 3})</span><ChevronDown size={18} aria-hidden="true" /></summary>
-                    <div className="pavol-podcast-archive-list mt-5">{appearances.slice(3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} compact />)}</div>
-                </details>}
-                <div className="pavol-podcast-show">
-                    <div className="pavol-podcast-show-heading">
-                        <h3 className="text-2xl font-medium">AI ta Krajta</h3>
-                        <a href={showUrl} className="pavol-source-link">{cs ? 'Všechny moje díly' : 'All my episodes'}<ArrowUpRight size={16} aria-hidden="true" /></a>
-                    </div>
-                    <p className="mt-3 max-w-3xl text-[var(--pavol-muted)]">{cs ? 'Nejnovější epizody se mnou. Další díly se sem přidávají automaticky.' : 'The latest episodes featuring me, in their original Czech. New appearances are added automatically.'}</p>
-                    <div className="pavol-podcast-grid mt-6">{aiTaKrajta.slice(0, 3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}</div>
-                    {aiTaKrajta.length > 3 && <details className="pavol-podcast-archive mt-6">
-                        <summary>{cs ? 'Další díly se mnou' : 'More episodes featuring me'} <span>({aiTaKrajta.length - 3})</span><ChevronDown size={18} aria-hidden="true" /></summary>
-                        <div className="pavol-podcast-archive-list mt-5">{aiTaKrajta.slice(3).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} compact />)}</div>
-                    </details>}
+                <div className="pavol-podcast-list">
+                    {podcasts.map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}
                 </div>
             </div>
         </section>

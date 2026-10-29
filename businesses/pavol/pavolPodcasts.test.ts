@@ -1,10 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import { parsePodcastRssFeed } from '@/lib/podcast/parsePodcastRssFeed';
 import { resolveAiTaKrajtaEpisodePersonIds } from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodePeople';
-import { getPavolAiTaKrajtaPodcasts, createPavolPodcastTrack, resolvePavolPodcastAppearance } from './pavolPodcasts';
+import { getPavolAiTaKrajtaPodcasts, createPavolPodcastTrack, mergePavolPodcasts, resolvePavolPodcastAppearance } from './pavolPodcasts';
 import { PAVOL_PODCAST_APPEARANCES } from './pavolPodcastAppearances';
 
 describe('personal podcast sources', () => {
+    it('interleaves every show by publication date without grouping or changing source arrays', () => {
+        const appearances = PAVOL_PODCAST_APPEARANCES.slice(0, 2).map((appearance) =>
+            resolvePavolPodcastAppearance(appearance, [], 'en'),
+        );
+        const show = [
+            { ...appearances[1], id: 'krajta:older', source: 'AI ta Krajta', publishedAt: '2026-06-01T10:00:00Z' },
+            { ...appearances[1], id: 'krajta:newest', source: 'AI ta Krajta', publishedAt: '2026-10-28T10:00:00Z' },
+        ];
+        const combined = mergePavolPodcasts(appearances, show);
+        expect(combined.map((episode) => episode.id)).toEqual([
+            'krajta:newest', appearances[0].id, 'krajta:older', appearances[1].id,
+        ]);
+        expect(show[0].id).toBe('krajta:older');
+        expect(combined[3]).toBe(appearances[1]);
+        expect(mergePavolPodcasts([], show)).toHaveLength(2);
+        expect(mergePavolPodcasts()).toEqual([]);
+    });
+
     it('adds a new credited RSS episode without a second list, excludes another cast, and preserves canonical links', () => {
         const feed = parsePodcastRssFeed(`<rss><channel><title>AI ta Krajta</title>
             <item><guid>future</guid><title>AI ta Krajta #999 | Nový díl</title><pubDate>Wed, 28 Oct 2026 10:00:00 GMT</pubDate><description>Hosté: Pavol Hejný</description><enclosure url="https://example.com/999.mp3" type="audio/mpeg" /></item>

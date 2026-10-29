@@ -74,3 +74,8 @@ export function createPavolPodcastTrack(podcast: PavolPodcast, language: Support
         language, kind: 'podcast', appearance: 'personal', durationInSeconds: podcast.durationInSeconds, artwork: podcast.imageSrc,
     };
 }
+
+/** Every show belongs to one timeline; sorting never changes a source's cached order. */
+export function mergePavolPodcasts(...sources: ReadonlyArray<readonly PavolPodcast[]>): PavolPodcast[] {
+    return sources.flat().sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+}

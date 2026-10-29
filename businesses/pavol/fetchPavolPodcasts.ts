@@ -3,7 +3,7 @@ import { fetchAiTaKrajtaEpisodes } from '@/businesses/ai-ta-krajta/aiTaKrajtaArc
 import { fetchPodcastFeed } from '@/lib/podcast/fetchPodcastFeed';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { PAVOL_PODCAST_APPEARANCES } from './pavolPodcastAppearances';
-import { getPavolAiTaKrajtaPodcasts, resolvePavolPodcastAppearance } from './pavolPodcasts';
+import { getPavolAiTaKrajtaPodcasts, mergePavolPodcasts, resolvePavolPodcastAppearance } from './pavolPodcasts';
 
 /** The page and its server-only sources share the same hourly revalidation window. */
 const fetchPodcastSources = cache(async (revalidateSeconds: number) => {
@@ -18,10 +18,8 @@ const fetchPodcastSources = cache(async (revalidateSeconds: number) => {
 
 export async function fetchPavolPodcasts(language: SupportedHomepageLanguage, revalidateSeconds: number) {
     const { episodes, feeds } = await fetchPodcastSources(revalidateSeconds);
-    return {
-        appearances: PAVOL_PODCAST_APPEARANCES.map((appearance, index) =>
-            resolvePavolPodcastAppearance(appearance, feeds[index].episodes, language),
-        ).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)),
-        aiTaKrajta: getPavolAiTaKrajtaPodcasts(episodes),
-    };
+    const appearances = PAVOL_PODCAST_APPEARANCES.map((appearance, index) =>
+        resolvePavolPodcastAppearance(appearance, feeds[index].episodes, language),
+    );
+    return mergePavolPodcasts(appearances, getPavolAiTaKrajtaPodcasts(episodes));
 }
