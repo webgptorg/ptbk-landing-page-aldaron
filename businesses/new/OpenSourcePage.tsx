@@ -2,21 +2,24 @@
 
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Check, Copy, Download, FolderOpen, GitBranch, Github, Server, Terminal } from 'lucide-react';
+import { ArrowRight, Check, Copy, Download, FolderOpen, GitBranch, Github, Server, Sparkles, Terminal } from 'lucide-react';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
 import s from './open-source.module.css';
 
 /** Installation methods supported by the published engine and release workflow. */
-type InstallMethod = 'npm' | 'shell' | 'windows' | 'server';
+type InstallMethod = 'ai' | 'npm' | 'shell' | 'windows' | 'server';
+
+/** Where the user's local coding agent should install the engine. */
+type InstallTarget = 'local' | 'server';
 
 /** Stable repository destinations, including prereleases that /releases/latest would omit. */
 const REPOSITORY = 'https://github.com/webgptorg/promptbook';
 const RELEASES = `${REPOSITORY}/releases`;
 const SERVER_GUIDE = `${REPOSITORY}/blob/reborn/2026-10/deploy/README.md`;
 const AZURE_DEPLOY = `https://portal.azure.com/#create/Microsoft.Template/uri/${encodeURIComponent('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json')}`;
-const METHODS: readonly InstallMethod[] = ['npm', 'shell', 'windows', 'server'];
+const METHODS: readonly InstallMethod[] = ['ai', 'npm', 'shell', 'windows', 'server'];
 
 /** Authored translations keep technical commands identical in both languages. */
 const COPY = {
@@ -26,6 +29,33 @@ const COPY = {
         repository: 'Prohlédnout zdrojový kód', star: 'Líbí se vám tento přístup? Dejte nám hvězdičku na GitHubu.',
         install: 'Začněte u sebe.', installIntro: 'Vyberte si způsob instalace. Průvodce pak připraví projekt, připojení AI a první agendu.',
         methods: 'Způsob instalace', npmTitle: 'Pár příkazů. Vlastní engine.',
+        aiTitle: 'Nechte instalaci na svém AI agentovi.',
+        aiText: 'Zkopírujte prompt do Claude Code, Codexu nebo jiného AI agenta s přístupem k terminálu na Vašem počítači. Vyberte, kam má Promptbook nainstalovat.',
+        aiTarget: 'Kam nainstalovat Promptbook', aiLocal: 'Váš počítač', aiServer: 'VPS přes SSH',
+        aiPromptTitle: 'Prompt pro Vašeho AI agenta', copyPrompt: 'Kopírovat prompt',
+        copyPromptFailed: 'Kopírování se nezdařilo. Označte prompt a zkopírujte jej ručně.',
+        aiLocalPrompt: `Nainstaluj mi Promptbook na tento počítač a proveď mě založením prvního projektu až k funkčnímu terminálovému dashboardu.
+
+Nejprve si přečti aktuální README enginu: ${REPOSITORY}/blob/reborn/2026-10/README.md. Použij publikovaný balíček ptbk, nikoliv vývojovou kopii zdrojového kódu.
+
+Zjisti operační systém a zkontroluj Node.js, npm, Git a podporovaný prohlížeč. Doplň pouze chybějící nebo nekompatibilní předpoklady podle README a ověř jejich verze. Nainstaluj Promptbook globálně a ověř ptbk --version a dostupné příkazy.
+
+Zeptej se mě, jakou agendu chci předat agentům. Spusť běžný průvodce ptbk init, předej mu moje zadání beze změn a nech mě potvrdit umístění nového projektu. Zachovej existující projekty, nastavení a přihlášení.
+
+Pomoz mi vybrat a připravit podporovaný AI nástroj. Využij dostupné nativní přihlášení; nepředpokládej, že je potřeba placený API klíč. Pokud je nutné přihlášení nebo interaktivní volba, otevři mi příslušný krok nebo přesně vysvětli, co mám dokončit, a potom pokračuj. Hesla, tokeny ani obnovovací slova po mně nechtěj v chatu.
+
+Dokonči inicializaci, ověř skutečný stav spuštěného enginu a předej mi terminálový dashboard. Pokud ho neumíš otevřít v mém terminálu, uveď přesnou složku projektu a příkaz ptbk dashboard. Stručně vysvětli ptbk chat, ptbk stop a ptbk start. Neoznačuj neověřený nebo nedokončený krok za hotový.`,
+        aiServerPrompt: `Z tohoto počítače mi pomoz nainstalovat Promptbook na existující VPS a založit první projekt až k funkčnímu terminálovému dashboardu přes SSH.
+
+Přečti si aktuální návod ${SERVER_GUIDE} a README enginu ${REPOSITORY}/blob/reborn/2026-10/README.md. Zjisti ode mě SSH host, uživatele a případný port nebo existující název z SSH konfigurace. Použij moje místní SSH připojení; soukromý klíč ani heslo po mně nechtěj vložit do chatu. Nezakládej nový placený server.
+
+Ověř cílový server a systém. Sdílený VPS instalátor podporuje Ubuntu 24.04 x86-64 se systemd. Před spuštěním si jeho aktuální obsah stáhni a prohlédni. Při jiném systému nebo konfliktu s existující instalací mi vysvětli překážku a navrhni další postup. Doplň potřebné předpoklady a spusť instalátor podle návodu; nepředpokládej předem nainstalované Node.js, npm ani Git.
+
+Engine, instalaci vybraného AI nástroje i jeho přihlášení prováděj pod stejným běžným účtem promptbook podle návodu. Oprávnění správce použij jen pro přípravu systému. Zachovej existující data a nech dashboard, API i porty prohlížeče soukromé.
+
+Zeptej se mě na první agendu a spusť běžný ptbk init v interaktivním SSH terminálu. Pro prohlížeč zvol headless. Přihlášení AI nástroje musí fungovat bez grafického prohlížeče na serveru: u Codexu použij codex login --device-auth a nech mě dokončit odkaz a jednorázový kód na tomto počítači nebo telefonu. Pokud tento způsob není dostupný, nabídni dokumentované SSH přesměrování přihlašovacího návratu. U Claude Code použij jeho nativní přihlašovací odkaz a případný kód vložený do terminálu. U jiných nástrojů nejdřív ověř jejich oficiální postup. Hesla a tokeny nepatří do chatu ani Gitu.
+
+Ověř, že přihlášení i nástroje fungují pod účtem enginu, dokonči init a zkontroluj skutečný stav enginu a registraci automatického spuštění při startu serveru. Otevři terminálový dashboard přes SSH, nebo mi dej přesný příkaz pro připojení do projektu. Vysvětli, že zavření dashboardu či SSH práci nezastaví a ptbk stop ji zastaví. Co zbývá dokončit ručně nebo co nelze ověřit, jasně pojmenuj.`,
         npmText: 'Pro macOS, Linux i Windows. Před instalací potřebujete Node.js 22.13+ v řadě 22 nebo verzi 24+, npm 10+ a Git.',
         shellTitle: 'Od prázdné složky k první agendě.',
         shellText: 'Zkopírujte příkazy do Bash nebo Zsh. Používají npm; Node.js a Git musí být nainstalované předem.',
@@ -60,6 +90,33 @@ const COPY = {
         repository: 'Explore the source code', star: 'Like this approach? Give us a star on GitHub.',
         install: 'Start on your machine.', installIntro: 'Choose an installation method. The setup guide prepares your project, AI connection and first workflow.',
         methods: 'Installation method', npmTitle: 'A few commands. Your own engine.',
+        aiTitle: 'Let your AI agent handle installation.',
+        aiText: 'Paste the prompt into Claude Code, Codex or another AI agent with terminal access on your computer. Choose where it should install Promptbook.',
+        aiTarget: 'Where to install Promptbook', aiLocal: 'Your computer', aiServer: 'VPS over SSH',
+        aiPromptTitle: 'Prompt for your AI agent', copyPrompt: 'Copy prompt',
+        copyPromptFailed: 'Copying failed. Select the prompt and copy it manually.',
+        aiLocalPrompt: `Install Promptbook on this computer and guide me through creating my first project, ending with a working terminal dashboard.
+
+First read the current engine README: ${REPOSITORY}/blob/reborn/2026-10/README.md. Use the published ptbk package rather than a development checkout of its source code.
+
+Detect the operating system and check Node.js, npm, Git and a supported browser. Add only missing or incompatible prerequisites according to the README and verify their versions. Install Promptbook globally and verify ptbk --version and the available commands.
+
+Ask what ongoing responsibility I want to give my agents. Run the normal ptbk init wizard, preserve my brief exactly and let me confirm the new project's location. Preserve existing projects, settings and sign-ins.
+
+Help me choose and prepare a supported AI tool. Reuse available native authentication; do not assume that a paid API key is needed. If login or an interactive choice needs my input, open the relevant step or explain exactly what I must finish, then continue. Do not ask me to paste passwords, tokens or recovery words into chat.
+
+Complete initialization, verify the actual running engine state and hand over the terminal dashboard. If you cannot open it in my terminal, give me the exact project directory and the ptbk dashboard command. Briefly explain ptbk chat, ptbk stop and ptbk start. Do not report an unverified or incomplete step as done.`,
+        aiServerPrompt: `From this computer, help me install Promptbook on an existing VPS and create my first project, ending with a working terminal dashboard over SSH.
+
+Read the current guide ${SERVER_GUIDE} and engine README ${REPOSITORY}/blob/reborn/2026-10/README.md. Ask for the SSH host, user and any custom port or existing SSH configuration name. Use my local SSH connection; do not ask me to paste a private key or password into chat. Do not provision a new paid server.
+
+Verify the target server and operating system. The shared VPS installer supports Ubuntu 24.04 x86-64 with systemd. Download and inspect its current contents before running it. For another system or a conflicting existing installation, explain the blocker and propose the next step. Prepare the prerequisites and run the installer according to the guide; do not assume Node.js, npm or Git are already installed.
+
+Run the engine, selected AI tool installation and its authentication as the same ordinary promptbook account described in the guide. Use administrator privileges only for system preparation. Preserve existing data and keep the dashboard, API and browser ports private.
+
+Ask about my first ongoing responsibility and run the normal ptbk init in an interactive SSH terminal. Choose a headless browser. AI authentication must work without a graphical browser on the server: for Codex, use codex login --device-auth and have me complete the link and one-time code on this computer or my phone. If that method is unavailable, offer the documented SSH callback forwarding. For Claude Code, use its native login URL and any code pasted back into the terminal. Check the official procedure before using another tool. Keep passwords and tokens out of chat and Git.
+
+Verify that authentication and tools work under the engine account, finish init and check the actual engine state and boot-start registration. Open the terminal dashboard over SSH, or give me the exact command to connect to the project. Explain that closing the dashboard or SSH leaves work running and ptbk stop stops it. Clearly identify any remaining manual steps or results you cannot verify.`,
         npmText: 'For macOS, Linux and Windows. Install Node.js 22.13+ in the 22.x release line or version 24+, npm 10+ and Git first.',
         shellTitle: 'From an empty folder to your first workflow.',
         shellText: 'Copy these commands into Bash or Zsh. They use npm; Node.js and Git must already be installed.',
@@ -91,17 +148,17 @@ const COPY = {
 } as const;
 
 /** A real clipboard action with selectable source and an explicit failure state. */
-function CommandBlock({ commands, title, labels, copyable = true }: { commands: string; title: string; labels: typeof COPY.cs | typeof COPY.en; copyable?: boolean }) {
+function CommandBlock({ commands, title, labels, copyable = true, prompt = false }: { commands: string; title: string; labels: typeof COPY.cs | typeof COPY.en; copyable?: boolean; prompt?: boolean }) {
     const { copyStatus, copyText } = useCopyTextToClipboard();
-    return <div className={s.terminal}>
-        <div className={s.terminalHeader}><span><Terminal size={15} aria-hidden="true" />{title}</span>
-            {copyable && <button type="button" onClick={() => void copyText(commands)} aria-label={labels.copy}>
+    return <div className={prompt ? `${s.terminal} ${s.prompt}` : s.terminal}>
+        <div className={s.terminalHeader}><span>{prompt ? <Sparkles size={15} aria-hidden="true" /> : <Terminal size={15} aria-hidden="true" />}{title}</span>
+            {copyable && <button type="button" onClick={() => void copyText(commands)} aria-label={prompt ? labels.copyPrompt : labels.copy}>
                 {copyStatus === 'copied' ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
-                {copyStatus === 'copied' ? labels.copied : labels.copy}
+                {copyStatus === 'copied' ? labels.copied : prompt ? labels.copyPrompt : labels.copy}
             </button>}
         </div>
-        <pre tabIndex={0}><code>{commands}</code></pre>
-        <span className={s.copyStatus} role="status">{copyStatus === 'failed' ? labels.copyFailed : copyStatus === 'copied' ? labels.copied : ''}</span>
+        {prompt ? <div className={s.promptText} tabIndex={0}>{commands}</div> : <pre tabIndex={0}><code>{commands}</code></pre>}
+        <span className={s.copyStatus} role="status">{copyStatus === 'failed' ? (prompt ? labels.copyPromptFailed : labels.copyFailed) : copyStatus === 'copied' ? labels.copied : ''}</span>
     </div>;
 }
 
@@ -109,7 +166,8 @@ function CommandBlock({ commands, title, labels, copyable = true }: { commands: 
 export function OpenSourcePage() {
     const { locale, path } = useSiteLocale();
     const copy = COPY[locale];
-    const [method, setMethod] = useState<InstallMethod>('npm');
+    const [method, setMethod] = useState<InstallMethod>('ai');
+    const [target, setTarget] = useState<InstallTarget>('local');
     const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const id = useId();
 
@@ -143,14 +201,23 @@ export function OpenSourcePage() {
                         id={`${id}-${item}`} type="button" role="tab" aria-selected={method === item}
                         aria-controls={`${id}-panel-${item}`} tabIndex={method === item ? 0 : -1}
                         onClick={() => setMethod(item)} onKeyDown={event => moveTab(event, index)}>
-                        {item === 'npm' ? 'npm' : item === 'shell' ? 'Shell' : item === 'server' ? copy.serverTab : 'Windows EXE'}
+                        {item === 'ai' ? 'Claude Code / Codex / AI' : item === 'npm' ? 'npm' : item === 'shell' ? 'Shell' : item === 'server' ? copy.serverTab : 'Windows EXE'}
                     </button>)}
                 </div>
                 {METHODS.map(item => <div key={item} hidden={method !== item} id={`${id}-panel-${item}`} role="tabpanel" aria-labelledby={`${id}-${item}`} tabIndex={0} className={s.panel}>
-                    <div className={s.methodIntro}><h3>{item === 'npm' ? copy.npmTitle : item === 'shell' ? copy.shellTitle : item === 'server' ? copy.serverTitle : copy.windowsTitle}</h3>
-                        <p>{item === 'npm' ? copy.npmText : item === 'shell' ? copy.shellText : item === 'server' ? copy.serverText : copy.windowsText}</p>
+                    <div className={s.methodIntro}><h3>{item === 'ai' ? copy.aiTitle : item === 'npm' ? copy.npmTitle : item === 'shell' ? copy.shellTitle : item === 'server' ? copy.serverTitle : copy.windowsTitle}</h3>
+                        <p>{item === 'ai' ? copy.aiText : item === 'npm' ? copy.npmText : item === 'shell' ? copy.shellText : item === 'server' ? copy.serverText : copy.windowsText}</p>
                     </div>
-                    {item === 'server' ? <div className={s.windows}>
+                    {item === 'ai' ? <div className={s.aiInstall}>
+                        <fieldset className={s.targetChoice}>
+                            <legend>{copy.aiTarget}</legend>
+                            {(['local', 'server'] as const).map(value => <label key={value}>
+                                <input type="radio" name={`${id}-target`} value={value} checked={target === value} onChange={() => setTarget(value)} />
+                                <span>{value === 'local' ? copy.aiLocal : copy.aiServer}</span>
+                            </label>)}
+                        </fieldset>
+                        <CommandBlock key={target} title={copy.aiPromptTitle} labels={copy} prompt commands={target === 'local' ? copy.aiLocalPrompt : copy.aiServerPrompt} />
+                    </div> : item === 'server' ? <div className={s.windows}>
                         <div className={s.downloadIcon}><Server size={34} strokeWidth={1.3} aria-hidden="true" /></div>
                         <a href={`${SERVER_GUIDE}#digitalocean`} className={s.downloadLink} aria-describedby={`${id}-digitalocean-hint`}>{copy.serverDigitalOcean}<ArrowRight size={17} aria-hidden="true" /></a>
                         <small id={`${id}-digitalocean-hint`}>{copy.serverDigitalOceanHint}</small>

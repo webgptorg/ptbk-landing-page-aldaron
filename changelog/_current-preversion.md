@@ -1,5 +1,7 @@
 # Current preversion
 
+- Added the default Claude Code / Codex / AI installation tab to both self-hosting pages. Localized prompts guide a local coding agent through installation on the user's computer or an existing VPS over SSH, including prerequisites, native headless AI login and terminal dashboard handoff. Preserved npm, shell, Windows EXE and cloud options; kept prompts selectable with honest clipboard feedback.
+
 - Made DigitalOcean Droplet the primary cloud option on both self-hosting pages, linking to the engine startup-script guide. Added AWS EC2 CloudFormation setup alongside Azure, with explicit copy/upload steps and preserved private SSH setup and attended AI initialization.
 
 - Replaced `/cs` and `/en` with a shared, light business homepage for ongoing AI responsibilities. Three localized,

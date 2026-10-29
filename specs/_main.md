@@ -9,7 +9,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 ## Rozcestník specifikace
 
 - [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
-- [Vlastní instalace](new-open-source-page.md): npm, shell, Windows EXE, VPS/cloud a pomoc s nasazením.
+- [Vlastní instalace](new-open-source-page.md): prompty pro instalaci pomocí AI na počítač nebo VPS, npm, shell, Windows EXE, VPS/cloud a pomoc s nasazením.
 - [Partnerství](new-partnership-page.md): vlastní služby, role, 20% podíl a cesta prvního nasazení.
 - [Cena, licence a podpora](new-commercial-offer.md): přesné podmínky Start/Business, plátci, instance, výluky a SLA.
 - [Kalkulačka](new-economics-calculator.md): rychlý a pokročilý pohled, kompletní model, parametry a ekonomika.

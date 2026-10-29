@@ -17,8 +17,15 @@ function page(locale: 'cs' | 'en' = 'en') {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('self-hosted installation entry point', () => {
-    it('starts with usable npm instructions and moves through all methods from the keyboard', () => {
+    it('starts with the AI prompt and moves through all five methods from the keyboard', () => {
         render(page());
+        const ai = screen.getByRole('tab', { name: 'Claude Code / Codex / AI' });
+        expect(screen.getAllByRole('tab')[0]).toBe(ai);
+        expect(ai.getAttribute('aria-selected')).toBe('true');
+        expect((screen.getByRole('radio', { name: 'Your computer' }) as HTMLInputElement).checked).toBe(true);
+        expect(screen.getByRole('tabpanel').textContent).toContain('Install Promptbook on this computer');
+
+        fireEvent.keyDown(ai, { key: 'ArrowRight' });
         const npm = screen.getByRole('tab', { name: 'npm' });
         expect(npm.getAttribute('aria-selected')).toBe('true');
         expect(screen.getByRole('tabpanel').textContent).toContain('npm install --global ptbk');
@@ -42,12 +49,55 @@ describe('self-hosted installation entry point', () => {
         expect(document.activeElement).toBe(server);
         expect(screen.getByRole('tabpanel').textContent).toContain('The button alone does not start your agenda.');
         fireEvent.keyDown(server, { key: 'ArrowRight' });
-        expect(document.activeElement).toBe(npm);
-        fireEvent.keyDown(npm, { key: 'ArrowLeft' });
+        expect(document.activeElement).toBe(ai);
+        fireEvent.keyDown(ai, { key: 'ArrowLeft' });
         expect(document.activeElement).toBe(server);
         fireEvent.keyDown(server, { key: 'Home' });
-        expect(document.activeElement).toBe(npm);
-        expect(npm.getAttribute('aria-selected')).toBe('true');
+        expect(document.activeElement).toBe(ai);
+        expect(ai.getAttribute('aria-selected')).toBe('true');
+    });
+
+    it.each(['cs', 'en'] as const)('copies the selected %s installation prompt and resets copy feedback when the destination changes', async locale => {
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+        render(page(locale));
+        const panel = within(screen.getByRole('tabpanel'));
+        const copyLabel = locale === 'en' ? 'Copy prompt' : 'Kopírovat prompt';
+        fireEvent.click(panel.getByRole('button', { name: copyLabel }));
+        await panel.findByRole('button', { name: copyLabel });
+        expect(await panel.findAllByText(locale === 'en' ? 'Copied' : 'Zkopírováno')).toHaveLength(2);
+        const localPrompt = writeText.mock.calls[0][0];
+        expect(localPrompt).toContain(locale === 'en' ? 'Install Promptbook on this computer' : 'Nainstaluj mi Promptbook na tento počítač');
+        expect(localPrompt).not.toContain('codex login --device-auth');
+
+        fireEvent.click(panel.getByRole('radio', { name: locale === 'en' ? 'VPS over SSH' : 'VPS přes SSH' }));
+        expect(panel.queryByText(locale === 'en' ? 'Copied' : 'Zkopírováno')).toBeNull();
+        expect((panel.getByRole('radio', { name: locale === 'en' ? 'VPS over SSH' : 'VPS přes SSH' }) as HTMLInputElement).checked).toBe(true);
+        fireEvent.click(panel.getByRole('button', { name: copyLabel }));
+        expect(writeText).toHaveBeenCalledTimes(2);
+        const serverPrompt = writeText.mock.calls[1][0];
+        expect(serverPrompt).toContain('Ubuntu 24.04 x86-64');
+        expect(serverPrompt).toContain('codex login --device-auth');
+        expect(serverPrompt).toContain('promptbook');
+        expect(serverPrompt).toContain('https://github.com/webgptorg/promptbook/blob/reborn/2026-10/deploy/README.md');
+        expect(serverPrompt).not.toBe(localPrompt);
+        expect(panel.getByText(/codex login --device-auth/).tagName).toBe('DIV');
+        await panel.findAllByText(locale === 'en' ? 'Copied' : 'Zkopírováno');
+
+        fireEvent.click(screen.getByRole('tab', { name: 'npm' }));
+        fireEvent.click(screen.getByRole('tab', { name: 'Claude Code / Codex / AI' }));
+        expect((panel.getByRole('radio', { name: locale === 'en' ? 'VPS over SSH' : 'VPS přes SSH' }) as HTMLInputElement).checked).toBe(true);
+    });
+
+    it('keeps the readable prompt available when copying is refused', async () => {
+        const writeText = vi.fn().mockRejectedValue(new Error('Clipboard denied'));
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        render(page());
+        const panel = within(screen.getByRole('tabpanel'));
+        fireEvent.click(panel.getByRole('button', { name: 'Copy prompt' }));
+        expect(await panel.findByText('Copying failed. Select the prompt and copy it manually.')).toBeTruthy();
+        expect(panel.getByText(/Install Promptbook on this computer/).getAttribute('tabindex')).toBe('0');
     });
 
     it.each(['cs', 'en'] as const)('links the %s cloud option to the engine template and shared VPS guide', locale => {
@@ -73,6 +123,7 @@ describe('self-hosted installation entry point', () => {
         Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
         vi.spyOn(console, 'error').mockImplementation(() => undefined);
         render(page());
+        fireEvent.click(screen.getByRole('tab', { name: 'npm' }));
         const panel = within(screen.getByRole('tabpanel'));
         fireEvent.click(panel.getByRole('button', { name: 'Copy commands' }));
         expect(await panel.findByText('Copying failed. Select the commands and copy them manually.')).toBeTruthy();
