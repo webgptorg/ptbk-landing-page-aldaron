@@ -161,7 +161,9 @@ for (const SITE of PERSONAL_SITES) {
         const RANGE_BOUNDS = await RANGE.boundingBox();
         await RANGE.click({ position: { x: RANGE_BOUNDS!.width * 0.3, y: RANGE_BOUNDS!.height / 2 } });
         await expect.poll(() => AUDIO.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(10);
-        await expect(PLAYER.getByRole('link')).toHaveAttribute('href', 'https://www.datatalk.cz/podcast/epizoda-157');
+        const SOURCE = PLAYER.getByRole('link', { name: SITE.language === 'cs' ? /Přejít na zdroj/ : /Go to source/ });
+        await expect(SOURCE).toHaveAttribute('href', 'https://www.datatalk.cz/podcast/epizoda-157');
+        await expect(SOURCE).toHaveAttribute('target', '_blank');
         await page.reload();
         await expect(PLAYER).toBeVisible();
         await expect(PLAYER.getByRole('button', { name: SITE.language === 'cs' ? 'Přehrát' : 'Play', exact: true })).toBeVisible();
@@ -171,6 +173,43 @@ for (const SITE of PERSONAL_SITES) {
         const BOUNDS = await PLAYER.boundingBox();
         expect(BOUNDS!.x).toBeGreaterThanOrEqual(0);
         expect(BOUNDS!.x + BOUNDS!.width).toBeLessThanOrEqual(390);
+    });
+
+    if (SITE.language === 'cs') test('article source navigation keeps the original audio element playing', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.route('**/article-assets/**/audio/narration.mp3', (route) => {
+            const recording = createTestRecording();
+            const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '');
+            const start = range ? Number(range[1]) : 0;
+            const end = range?.[2] ? Math.min(Number(range[2]), recording.length - 1) : recording.length - 1;
+            return route.fulfill({ status: range ? 206 : 200, contentType: 'audio/wav',
+                headers: { 'Accept-Ranges': 'bytes', ...(range ? { 'Content-Range': `bytes ${start}-${end}/${recording.length}` } : {}) },
+                body: recording.subarray(start, end + 1),
+            });
+        });
+        const articleUrl = new URL('/articles/co-prichazi-po-generovani-kodu', SITE_URL);
+        // Warm the article's development compilation before starting the finite test recording.
+        await page.goto(articleUrl.toString());
+        await page.goto(SITE_URL.toString());
+        await page.locator('#media').getByRole('button', { name: 'Poslechnout článek', exact: true }).click();
+        const player = page.locator('[data-article-player]');
+        const audio = page.locator('audio');
+        await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
+        const originalAudio = await audio.elementHandle();
+        const source = player.getByRole('link', { name: 'Přejít na zdroj', exact: true });
+        await expect(source).not.toHaveAttribute('target', '_blank');
+        await expect(player.getByRole('button', { name: 'Sledovat text', exact: true })).toHaveCount(0);
+        await source.click();
+        await expect(page).toHaveURL(articleUrl.toString());
+        await expect(player.getByRole('button', { name: 'Sledovat text', exact: true })).toBeVisible();
+        expect(await originalAudio!.evaluate((element) => element.isConnected)).toBe(true);
+        expect(await audio.evaluate((element: HTMLAudioElement) => element.paused)).toBe(false);
+        await expect(audio).toHaveCount(1);
+        await page.getByRole('link', { name: 'Články a myšlenky', exact: true }).click();
+        await expect(player.getByRole('link', { name: 'Přejít na zdroj', exact: true })).toBeVisible();
+        await expect(player.getByRole('button', { name: 'Sledovat text', exact: true })).toHaveCount(0);
+        expect(await originalAudio!.evaluate((element) => element.isConnected)).toBe(true);
+        expect(await audio.evaluate((element: HTMLAudioElement) => element.paused)).toBe(false);
     });
 
     test.describe(`${SITE.hostname} without JavaScript`, () => {

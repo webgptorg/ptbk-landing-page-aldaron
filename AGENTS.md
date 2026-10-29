@@ -13,7 +13,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   only reviewed, existing audio becomes an episode. ElevenLabs and manifest auditing are explicit editorial commands
   in `scripts/articles`, never build hooks. The root audio provider owns one persistent media element, local per-track
   history, paused refresh restoration and Media Session. AI ta Krajta retains its original visible controls; article
-  tracking uses reviewed real word timing and a single toggle. While enabled, it keeps narrated text in the readable
+  and personal-podcast controls offer source navigation in the same place as the follow-text toggle. Follow text
+  appears only on the currently playing article with reviewed timing. Elsewhere, same-site source links use Next
+  navigation and keep the audio owner mounted; other sites open a new tab with noopener/noreferrer. Canonical www
+  aliases count as the same site. The recording title follows the same navigation rules.
+  Article tracking uses reviewed real word timing and a single toggle. While enabled, it keeps narrated text in the readable
   viewport above the player, briefly yielding to manual gestures and resuming after they finish. Turning the toggle
   off disables both highlighting and automatic follow. Mobile article controls form a floating card with a compact
   follow toggle under the title and a full-width timeline; touch controls keep their own hit areas.
