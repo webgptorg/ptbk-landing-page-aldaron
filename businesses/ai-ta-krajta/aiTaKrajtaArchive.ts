@@ -108,12 +108,17 @@ async function fetchAiTaKrajtaEpisodeSources(
  * @param revalidateSeconds how long a fetched source may be reused, which the route decides together with how long it
  *                          reuses the page built from it
  */
+export const fetchAiTaKrajtaEpisodes = cache(async (revalidateSeconds: number): Promise<readonly AiTaKrajtaEpisode[]> => {
+    const sources = await fetchAiTaKrajtaEpisodeSources(revalidateSeconds);
+    return mergePodcastEpisodes(sources, AI_TA_KRAJTA_SHOW_CONVENTIONS).map(createAiTaKrajtaEpisode);
+});
+
+/** Consumers listing recordings alone never fetch audience profiles. */
 export const fetchAiTaKrajtaArchive = cache(async (revalidateSeconds: number): Promise<AiTaKrajtaArchive> => {
-    const [sources, platformStatistics] = await Promise.all([
-        fetchAiTaKrajtaEpisodeSources(revalidateSeconds),
+    const [episodes, platformStatistics] = await Promise.all([
+        fetchAiTaKrajtaEpisodes(revalidateSeconds),
         fetchAiTaKrajtaPublicPlatformStatistics(revalidateSeconds),
     ]);
-    const episodes = mergePodcastEpisodes(sources, AI_TA_KRAJTA_SHOW_CONVENTIONS).map(createAiTaKrajtaEpisode);
 
     return {
         episodes,

@@ -4,6 +4,12 @@ import { createAudioProgress, readAudioHistory, readRememberedAudioTrack, type A
 const article: AudioTrack = { id: 'a', src: '/a.mp3', title: 'Article', author: 'Author', href: '/articles/a', language: 'cs', kind: 'article' };
 
 describe('shared audio history', () => {
+    it('restores a personal podcast while retaining validation for the show-specific skin', () => {
+        const podcast: AudioTrack = { ...article, kind: 'podcast', appearance: 'personal' };
+        expect(readRememberedAudioTrack(JSON.stringify(podcast))).toEqual(podcast);
+        expect(readRememberedAudioTrack(JSON.stringify({ ...podcast, appearance: undefined }))).toBeNull();
+        expect(readRememberedAudioTrack(JSON.stringify({ ...podcast, podcastEpisode: { slug: 5 } }))).toBeNull();
+    });
     it('only marks an article complete when the recording actually ends', () => {
         expect(createAudioProgress(article, { positionInSeconds: 99, durationInSeconds: 100, isEnded: false }).isPlayed).toBe(false);
         expect(createAudioProgress(article, { positionInSeconds: 100, durationInSeconds: 100, isEnded: true }).isPlayed).toBe(true);

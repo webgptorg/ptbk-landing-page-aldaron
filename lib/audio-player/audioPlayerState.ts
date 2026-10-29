@@ -59,7 +59,10 @@ export function readRememberedAudioTrack(value: string | null): AudioTrack | nul
         if (track.durationInSeconds !== undefined && track.durationInSeconds !== null && (!Number.isFinite(track.durationInSeconds) || track.durationInSeconds < 0)) return null;
         if (track.artwork !== undefined && !isMediaUrl(track.artwork)) return null;
         // A remembered show skin needs the same safe episode structure as a freshly selected show recording.
-        if (track.kind === 'podcast' && (!track.podcastEpisode || !Array.isArray(track.podcastEpisode.personIds) || typeof track.podcastEpisode.slug !== 'string')) return null;
+        if (track.kind === 'podcast') {
+            if (track.podcastEpisode && (!Array.isArray(track.podcastEpisode.personIds) || typeof track.podcastEpisode.slug !== 'string')) return null;
+            if (!track.podcastEpisode && track.appearance !== 'personal') return null;
+        }
         return track;
     } catch { return null; }
 }

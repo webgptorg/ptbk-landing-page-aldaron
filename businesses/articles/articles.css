@@ -228,3 +228,5 @@
     .article-index-subscribe h2 { font-size: 1.85rem; }
 }
 @media (prefers-reduced-motion: reduce) { .article-site *, .article-site *::before, .article-site *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+
+.article-index-audio { margin-top: 1.25rem; }

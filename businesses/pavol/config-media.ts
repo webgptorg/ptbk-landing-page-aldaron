@@ -1,16 +1,4 @@
-import {
-    AI_TA_KRAJTA_COLORS,
-    AI_TA_KRAJTA_COVER_IMAGE_PATH,
-    AI_TA_KRAJTA_NAME,
-    AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
-    AI_TA_KRAJTA_YOUTUBE_CHANNEL_URL,
-} from '@/businesses/ai-ta-krajta/config';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-
-/**
- * How the media list of a personal page names the format of the show, which is not how the show names itself
- */
-const AI_TA_KRAJTA_KIND = 'Video podcast';
 
 export type PavolMediaImportance = 'highlight' | 'rest';
 
@@ -43,66 +31,6 @@ type SharedMediaAppearance = Omit<PavolMediaAppearance, 'kind' | 'title' | 'desc
 export const pavolMediaMoreHref = 'https://www.linkedin.com/in/hejny/';
 
 const sharedMediaAppearances: SharedMediaAppearance[] = [
-    {
-        href: AI_TA_KRAJTA_YOUTUBE_CHANNEL_URL,
-        imageSrc: AI_TA_KRAJTA_COVER_IMAGE_PATH,
-        source: 'YouTube',
-        importance: 'highlight',
-        thumbnailBackgroundColor: AI_TA_KRAJTA_COLORS.MOSS,
-        copy: {
-            cs: {
-                kind: AI_TA_KRAJTA_KIND,
-                title: AI_TA_KRAJTA_NAME,
-                description: AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE.cs,
-            },
-            en: {
-                kind: AI_TA_KRAJTA_KIND,
-                title: AI_TA_KRAJTA_NAME,
-                description: AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE.en,
-            },
-        },
-    },
-    {
-        href: 'https://ceskepodcasty.cz/podcast/zatisi/zatisi-3-1-2024-pavol-hejny-tomas-studenik',
-        imageSrc: '/pavol/media/radio-1.svg',
-        source: 'Rádio 1',
-        importance: 'highlight',
-        thumbnailClassName: 'bg-[#ed1c24] text-white',
-        copy: {
-            cs: {
-                kind: 'Podcast',
-                title: 'Zátiší: Pavol Hejný & Tomáš Studeník',
-                description:
-                    'Rozhovor v pořadu Zátiší o budoucnosti AI, jejím použití v každodenním životě a o tom, kde je na místě opatrnost.',
-            },
-            en: {
-                kind: 'Podcast',
-                title: 'Zátiší: Pavol Hejný & Tomáš Studeník',
-                description:
-                    'An interview on Zátiší about where AI may be heading, how to use it in everyday life, and where to be cautious.',
-            },
-        },
-    },
-    {
-        href: 'https://www.datatalk.cz/podcast/epizoda-157',
-        imageSrc: '/pavol/media/datatalk-podcast.jpg',
-        source: 'DataTalk',
-        importance: 'rest',
-        copy: {
-            cs: {
-                kind: 'Podcast',
-                title: 'Data Talk #speciál: Podcastový průřez feat. AI ta Krajta',
-                description:
-                    'Dlouhý rozhovor o AI ve vývoji softwaru, budoucnosti vývojářských nástrojů a o tom, proč vznikla AI ta Krajta.',
-            },
-            en: {
-                kind: 'Podcast',
-                title: 'Data Talk Special: Podcast crossover feat. AI ta Krajta',
-                description:
-                    'A long conversation about AI in software development, the future of developer tools, and how AI ta Krajta came to be.',
-            },
-        },
-    },
     {
         href: 'https://devconfcz2023.sched.com/event/1MYeB/2023s-most-interesting-browser-apis',
         source: 'DevConf.CZ',
@@ -141,26 +69,6 @@ const sharedMediaAppearances: SharedMediaAppearance[] = [
                 title: 'Building modular apps for online education',
                 description:
                     'A talk about modular applications and the technology behind digital products for education.',
-            },
-        },
-    },
-    {
-        href: 'https://www.youtube.com/watch?v=V9Jd2VfMZoA',
-        imageSrc: '/pavol/media/sit-port-podcast.jpg',
-        source: 'SIT Port',
-        importance: 'rest',
-        copy: {
-            cs: {
-                kind: 'Podcast',
-                title: 'Pavol Hejný a Collboard',
-                description:
-                    'Rozhovor o Collboardu, vzdělávání a vzniku produktů na pomezí technologií a společenského dopadu.',
-            },
-            en: {
-                kind: 'Podcast',
-                title: 'Podcast: Pavol Hejný and Collboard',
-                description:
-                    'An interview about Collboard, education, and building products where technology meets social impact.',
             },
         },
     },

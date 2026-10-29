@@ -200,7 +200,7 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         if (!('mediaSession' in navigator)) return;
         const session = navigator.mediaSession;
         if (!track) { session.metadata = null; session.playbackState = 'none'; return; }
-        if (typeof MediaMetadata !== 'undefined') session.metadata = new MediaMetadata({ title: track.title, artist: track.author, album: track.kind === 'podcast' ? 'AI ta Krajta' : 'Články', artwork: track.artwork ? [{ src: new URL(track.artwork, window.location.origin).href }] : [] });
+        if (typeof MediaMetadata !== 'undefined') session.metadata = new MediaMetadata({ title: track.title, artist: track.author, album: track.kind === 'podcast' ? track.author : 'Články', artwork: track.artwork ? [{ src: new URL(track.artwork, window.location.origin).href }] : [] });
         const handlers: Partial<Record<MediaSessionAction, MediaSessionActionHandler>> = {
             play: () => setIsPlaying(true), pause: () => setIsPlaying(false), stop: closePlayer,
             seekbackward: (details) => seekTo((audioRef.current?.currentTime ?? 0) - (details.seekOffset ?? 15)),

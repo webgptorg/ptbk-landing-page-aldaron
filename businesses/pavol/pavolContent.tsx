@@ -113,6 +113,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 { label: 'Projekty', href: '#projects' },
                 { label: 'Čísla', href: '#numbers' },
                 { label: 'Média', href: '#media' },
+                { label: 'Podcasty', href: '#podcasts' },
                 { label: 'Články', href: '/articles' },
                 { label: 'Kontakt', href: '#contact' },
             ],
@@ -188,10 +189,10 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         },
         media: {
             eyebrow: 'Média',
-            title: 'Rozhovory, podcasty a přednášky',
-            description: 'O AI, vývoji a digitálních produktech mluvím v rozhovorech, podcastech a na přednáškách.',
+            title: 'Články a mediální zmínky',
+            description: 'Píšu a přednáším o AI, vývoji a digitálních produktech. Tady najdete moje texty i výstupy v médiích.',
             highlightsLabel: 'Vybrané výstupy',
-            restLabel: 'Další výstupy',
+            restLabel: 'Přednášky a zmínky v médiích',
             moreLabel: 'Další výstupy na LinkedIn',
         },
         contact: {
@@ -244,6 +245,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 { label: 'Projects', href: '#projects' },
                 { label: 'By the numbers', href: '#numbers' },
                 { label: 'In the media', href: '#media' },
+                { label: 'Podcasts', href: '#podcasts' },
                 { label: 'Articles', href: '/articles' },
                 { label: 'Contact', href: '#contact' },
             ],
@@ -318,10 +320,10 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         },
         media: {
             eyebrow: 'In the media',
-            title: 'Interviews, podcasts, and talks',
-            description: 'I talk about AI, development, and digital products on podcasts, in interviews, and at talks.',
+            title: 'Articles and media coverage',
+            description: 'I write and speak about AI, software development, and digital products. Here are my articles and media appearances.',
             highlightsLabel: 'Selected appearances',
-            restLabel: 'Other appearances',
+            restLabel: 'Talks and media coverage',
             moreLabel: 'More on LinkedIn',
         },
         contact: {
