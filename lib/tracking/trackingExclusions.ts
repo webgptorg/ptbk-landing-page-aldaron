@@ -1,6 +1,6 @@
 import { ONLINE_WORKSHOP_PARTICIPANT_PATH } from '@/businesses/online-workshop/config';
 
-const ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES = ['/admin'] as const;
+const ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES = ['/admin', '/messages', '/cs/pavol/messages', '/api/messages'] as const;
 const SENSITIVE_TRACKING_QUERY_PARAMETERS = ['email', 'fullname', 'token'] as const;
 
 function isWorkshopParticipantPath(pathname: string): boolean {
@@ -44,6 +44,8 @@ export function removeSensitiveTrackingParameters(url: string): string {
             url,
             typeof window === 'undefined' ? 'https://www.promptbook.studio' : window.location.origin,
         );
+        // A capability is in the path, not a query parameter. Never disclose it to third-party collectors.
+        parsedUrl.pathname = parsedUrl.pathname.replace(/(\/(?:cs\/pavol\/|api\/)?messages)\/[^/]+/g, '$1/[private]');
         SENSITIVE_TRACKING_QUERY_PARAMETERS.forEach((parameterName) => parsedUrl.searchParams.delete(parameterName));
         return parsedUrl.toString();
     } catch {

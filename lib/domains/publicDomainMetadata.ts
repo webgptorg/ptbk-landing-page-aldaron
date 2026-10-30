@@ -16,5 +16,5 @@ export function createPublicDomainSitemapXml(publicDomainRoute: PublicDomainRout
 
 /** Keep crawlers on the requested public domain and point them to its own sitemap. */
 export function createPublicDomainRobotsText(publicDomainRoute: PublicDomainRoute): string {
-    return `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nSitemap: ${publicDomainRoute.origin}/sitemap.xml\n`;
+    return `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nDisallow: /messages/\nSitemap: ${publicDomainRoute.origin}/sitemap.xml\n`;
 }

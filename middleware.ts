@@ -31,6 +31,7 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     // Never accept a client-supplied scope header. Preserve the original host across Next's internal rewrites.
     requestHeaders.set(SHORTCODE_LINK_HOST_HEADER, requestHostname);
+    requestHeaders.set('x-promptbook-private-message', /^(?:\/cs\/pavol)?\/messages(?:\/|$)/.test(request.nextUrl.pathname) ? '1' : '0');
     const publicDomainRoute = getPublicDomainRouteByHostname(requestHostname);
 
     // A custom domain keeps its concise public path in the address bar while Next renders the existing nested route.

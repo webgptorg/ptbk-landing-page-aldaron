@@ -5,6 +5,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- `/messages/<192-bit-capability>` on the Czech personal domain renders one Git-backed, unlisted message, outside
+  articles, feeds and sitemaps. `messages/<sha256>/` contains only AES-GCM encrypted editorial payload/audio; never
+  commit a capability, plaintext context, narration script or URL registry to this public repository. The explicit
+  `scripts/messages/seal-message.ts` command reads editorial input and a capability file outside the checkout.
+  Every page/download is dynamic, no-store, noindex and no-referrer, with no analytics, session recording or cookie
+  panel. Real prepared narration reuses article playback, rendering and reviewed word tracking. A small stateless
+  chat uses the existing production OpenAI configuration, with store:false, bounded requests and quoted source
+  context; it must preserve attribution, open questions and historical snapshot limitations. There is no database
+  or shared visitor history. The bearer URL grants access and can be forwarded; it is not account authentication.
+
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,
   committed PDF, and separately prepared audio assets. Promptbook lists all authors by language at `/cs/articles` and
   `/en/articles`; Pavol's personal domains publish only his matching-language variants at `/articles`. Canonicals use

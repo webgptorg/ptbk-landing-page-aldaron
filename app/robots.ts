@@ -9,7 +9,7 @@ export const dynamic = 'force-static';
  * Note: Pages which merely must not appear in search results are missing here on purpose - they say so with a `noindex`
  *       directive, which crawlers can only read when they are allowed to fetch the page.
  */
-const DISALLOWED_PATHS: readonly string[] = ['/admin/', '/api/'];
+const DISALLOWED_PATHS: readonly string[] = ['/admin/', '/api/', '/cs/pavol/messages/', '/messages/'];
 
 /**
  * Tells crawlers what they may fetch and where to find the sitemap

@@ -24,6 +24,7 @@ export function CookiesBar({
     readonly brandedLanguage?: SupportedHomepageLanguage;
     readonly isPodcastDomain?: boolean;
 } = {}) {
+    const pathname = usePathname();
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -45,7 +46,7 @@ export function CookiesBar({
         return () => window.removeEventListener('hashchange', showBarWhenSettingsRequested);
     }, []);
 
-    if (!isVisible) {
+    if (!isVisible || /^(?:\/cs\/pavol)?\/messages(?:\/|$)/.test(pathname)) {
         return null;
     }
 

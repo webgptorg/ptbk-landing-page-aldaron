@@ -30,6 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     const publicDomainRoute = getPublicDomainRouteByHostname(publicHostname);
     const isBrandedSite = publicDomainRoute !== undefined;
     const marketingLanguage = requestHeaders.get('x-promptbook-page-language');
+    const isPrivateMessage = requestHeaders.get('x-promptbook-private-message') === '1';
 
     return (
         <html lang={publicDomainRoute?.notFound.language ?? (marketingLanguage === 'cs' ? 'cs' : 'en')} suppressHydrationWarning>
@@ -42,13 +43,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <body className={`${inter.variable} ${outfit.variable} font-sans`}>
                 <ClientWrapper publicHostname={publicHostname}>
                     <AudioPlayerProvider>
-                        <Analytics />
+                        {!isPrivateMessage && <Analytics />}
                         {children}
-                        <Chatbot isBrandedSite={isBrandedSite} />
-                        <CookiesBar
+                        <Chatbot isBrandedSite={isBrandedSite || isPrivateMessage} />
+                        {!isPrivateMessage && <CookiesBar
                             brandedLanguage={publicDomainRoute?.notFound.language}
                             isPodcastDomain={publicDomainRoute?.notFound.appearance === 'podcast'}
-                        />
+                        />}
                         <GlobalAudioPlayer />
                     </AudioPlayerProvider>
                 </ClientWrapper>
