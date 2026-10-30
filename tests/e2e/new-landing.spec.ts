@@ -72,7 +72,7 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
         }
         await expect(carousel.getByRole('button',{name:/Přehrát animaci|Pozastavit animaci/})).toHaveCount(0);
         await expect(page.locator('#your-ai')).toHaveCount(0);
-        await expect(page.getByRole('link',{name:/Vaše data jsou opravdu Vaše/})).toHaveAttribute('href','/cs/bezpecnost');
+        await expect(page.getByRole('link',{name:/Vaše data i pravidla zůstávají Vaše/})).toHaveAttribute('href','/cs/bezpecnost');
         await expect(hero).not.toContainText('Nezávazně. Ozveme se vám');
         expect((await carousel.boundingBox())!.height).toBeLessThan(1000);
         await expect(page.getByRole('heading',{name:'Zkušenosti se spoluprací s Pavolem',exact:true})).toHaveCount(0);
@@ -164,7 +164,7 @@ test('product interest preserves failed drafts and saves one nonbinding CRM enqu
     await expect(dialog.getByLabel('Váš e-mail',{exact:true})).toBeDisabled();
     completeSecondRequest();
     await expect(dialog.getByRole('heading',{name:'Děkujeme. Ozveme se Vám.',exact:true})).toBeVisible();
-    await expect(dialog).toContainText('Váš zájem jsme zaznamenali. Ozveme se, probereme Vaše potřeby a dáme Vám vědět, až bude aplikace dostupná.');
+    await expect(dialog).toContainText('Váš zájem jsme zaznamenali. Ozveme se a probereme Vaše potřeby i nasazení první agendy.');
     expect(writes).toBe(2);expect(bodies[1].placeName).toBe('new-website-contact');
     expect(bodies[1].userNote).toContain('Nezávazný zájem o Promptbook');
     expect(bodies[1].userNote).toContain('Potřebuji pomoci s navazováním na klienty.');

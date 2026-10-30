@@ -13,7 +13,9 @@ The specification entry is [`../../specs/_main.md`](../../specs/_main.md). The l
 - All six unchanged testimonials share one grid. Founders have mirrored, enlarged portraits flush with the card bottoms and verified email/phone contacts.
 - A visible contact form supplements the existing modal at the bottom of both pages.
 
-Scenes remain keyboard-operable, responsive and usable with reduced motion. Sample data is labeled. The original five-agenda demo in `AgendaScenes.tsx` remains on agenda overview/detail routes, with its existing playback and scrolling behavior. Target paired/E2E architecture is distinguished from data sent to external models and tools; a website illustration is not a security audit.
+Scenes remain keyboard-operable, responsive and usable with reduced motion. Sample data is labeled. The original five-agenda demo in `AgendaScenes.tsx` remains on agenda overview/detail routes, with its existing playback and scrolling behavior. Authenticated remote E2E access is distinct from the loopback-only local dashboard without pairing. External models and tools receive the inputs the agenda sends them; a website illustration is not a security audit.
+
+The 30 October copy follows [`new-security-and-autonomy.md`](../../specs/new-security-and-autonomy.md): present-tense App and zero-trust explanations, work continuing without a connected client, learning within fixed user rules and engine-owned automatic updates. Security and FAQ explain stable minor/patch defaults, the existing-prerelease transition, version pins and preserved pause/stop. Product/partner teasers and the pricing update link lead to those details. Contact dialogs collect interest in deployment without promising future app availability or creating an account.
 
 ## Commercial and contact contracts
 

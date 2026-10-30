@@ -33,7 +33,7 @@ Scroll vždy posouvá celou stránku nativně vpřed i zpět, bez připnutí, za
 
 Interaktivní scéna aplikace a enginu je pouze na `/[locale]/bezpecnost`, se zachovanými nezávislými volbami zařízení a ilustrací práce enginu při zavřené aplikaci. Aplikace: notebook v kanceláři, telefon venku nebo ve vlaku. Engine: notebook ve skříňce, na polici nebo vlastní VPS. Zařízení se ovládají nativními selecty; uspání a pozastavení scény zůstávají na podstránce.
 
-Text vysvětluje princip pro laiky. Pracovní soubory a historie patří uživateli, engine běží na jeho dostupném stroji, relay přenáší E2E šifrované spojení připravované aplikace. Vstupy zaslané externím modelům a nástrojům nejsou tímto šifrováním skryté před jejich příjemci. Scéna ilustruje potvrzenou cílovou architekturu, není kryptografickým auditem ani ovladačem skutečného zařízení. Technické detaily odkazují na GitHub a dotaz na Pavola. Hlavní stránka, partnerství, stručný odkaz na vlastnictví a patička sem odkazují v příslušném jazyce.
+Text vysvětluje princip pro laiky podle [bezpečnosti a autonomie](new-security-and-autonomy.md). Pracovní soubory a historie patří uživateli, engine běží na jeho dostupném stroji a relay přenáší E2E šifrované spojení aplikace. Relay ani centrální backend pracovní obsah nedešifrují. Vstupy zaslané externím modelům a nástrojům nejsou tímto šifrováním skryté před jejich příjemci. Scéna ilustruje architekturu, není kryptografickým auditem ani ovladačem skutečného zařízení. Technické detaily odkazují na GitHub a dotaz na Pavola. Hlavní stránka, partnerství, stručný odkaz na vlastnictví a patička sem odkazují v příslušném jazyce.
 
 ## Původní demo na přehledu agend a detailech
 
@@ -61,7 +61,9 @@ Plný popis: pracovní prostředí na klientově počítači/serveru/VPS; odděl
 
 Externí AI dostává potřebné vstupy z klientova prostředí. Šifrované ovládání neukrývá tyto vstupy před zvoleným poskytovatelem modelu ani před nástrojem, kterému jsou odeslané. Lokální inference tento externí modelový tok odstraňuje, ne automaticky všechny další externí nástroje. Vhodnost lokálního modelu závisí na úloze a hardwaru.
 
-Oprávnění, schvalování, aktualizace, zálohy a bezpečnost zařízení patří do nasazení. Veřejný kód není sám o sobě bezpečnostní certifikace. Popis šifrování vychází z vlastníkem potvrzené cílové architektury; implementace webu nepředstavuje kryptografický audit.
+Lokální dashboard/API zůstávají omezené na stroj s enginem bez párování; vzdálená Appka má samostatné ověřené E2E spojení. Pracovní obsah chatů, souborů, Walletu i případného servisního terminálu je oddělený od účtu a provozních metadat. Zavření Appky, odhlášení, ztráta zařízení nebo spojení samy neruší agendu.
+
+Oprávnění, schvalování, zálohy a bezpečnost zařízení patří do nasazení. Výklad doplňuje učení v uživatelem stanovených mezích, pravidla, která agent nesmí sám měnit, a výchozí automatické aktualizace podle [samostatného kontraktu](new-security-and-autonomy.md). Veřejný kód není sám o sobě bezpečnostní certifikace; implementace webu nepředstavuje kryptografický audit.
 
 Samostatně vysvětlit údaje v kalkulačce, veřejnost sdíleného odkazu a uložení kontaktní žádosti při vyžádání PDF.
 
@@ -75,7 +77,7 @@ Letopočty použít pouze z ověřených zdrojů; nevymýšlet první zákazník
 
 ## `/[locale]/faq`
 
-Běžná obsluha bez programování; agenda vs. chatbot; vypnutý notebook vs. server; chyby a schvalování; kam jdou data; veřejná licence; klientské prostředí; SLA vs. noční běh; partnerské nasazení; kombinace s ostatními nástroji. Odpovědi odkazují na ceník, bezpečnost a srovnání a neobnovují zamítnutou roadmapu nebo požadavek znalosti book.
+Běžná obsluha bez programování; agenda vs. chatbot; vypnutý notebook vs. server; chyby a schvalování; kam jdou data; pevná pravidla a učení; chat a ovládání projektu; zavřená Appka a nedostupné spojení; automatické aktualizace; App-first VPS onboarding; veřejná licence; klientské prostředí; SLA vs. noční běh; partnerské nasazení; kombinace s ostatními nástroji. Odpovědi odkazují na ceník, bezpečnost a srovnání a neobnovují zamítnutou roadmapu nebo požadavek znalosti book.
 
 ## Právní stránky
 

@@ -21,10 +21,10 @@ Originální PDF se nevkládají do veřejného repozitáře nebo downloadů. Za
 | Cena a podíl | L má přednost před starším Starter 10 USD, volitelnými provizemi nebo trialovými hypotézami W. Start 19 USD / 30 dní, Business 100 USD / prostředí/měsíc, pevně 20 %. |
 | Předmět licence | Software a produkční klientské prostředí podle L; nepřepisuje se zpět na pouhý poplatek za UI. |
 | Open source / zdarma | Veřejná licence konkrétní verze a již udělená práva; veřejný kód se nevydává za neomezené produkční oprávnění. |
-| Dostupnost na webu | Nejnovější C požaduje nezávazný zájem: tým návštěvníka kontaktuje a informuje o dostupnosti aplikace. Dřívější zákaz této informace je překonaný. Roadmapové odznaky a termín dokončení se nevracejí; formulář neaktivuje účet. |
+| Dostupnost na webu | Zadání z 30. října 2026 má přednost: veřejný web popisuje Appku a probírané funkce v přítomném čase. Formulář stále sbírá nezávazný zájem o kontakt a nasazení; nečeká na budoucí dostupnost, neaktivuje účet a nevytváří objednávku. |
 | Book / kniha | Poslední C ruší metaforu „napište knihu“. Book se nepřekládá a veřejný web jej vůbec nevyžaduje. Konfiguraci může vytvořit systém nebo partner. |
 | CTA a kontakt | Hero zachovává tlačítko zájmu a menší instalační odkaz. Nejnovější C přidává viditelný formulář na stránce vedle stávajícího modálu, oba se stejným endpointem/evidencí R. Přímé ověřené e-mailové/telefonní kontakty u zakladatelů jsou samostatné. Bez falešné objednávky či registrace. |
-| Data a E2E | C výslovně potvrzuje cílovou architekturu a chce hlavní bezpečnostní sdělení. Popsat ovládací kanál přesně, nezamlčet externí modelové vstupy a nevydávat webový úkol za audit. |
+| Data a E2E | Zadání z 30. října 2026 sjednocuje celý web se specifikacemi Rebornu: lokální dashboard bez párování, samostatná ověřená E2E Appka, relay/backend bez dešifrování pracovního obsahu včetně Walletu a servisního fallbacku. Nezamlčet metadata ani externí modelové/nástrojové vstupy; webový úkol není audit. |
 | Kontaktní osoba | L určuje Jiřího pro SLA. C určuje oba rovnocenné spoluzakladatele v prezentaci: Pavol technologie, Jiří obchod. Nejde o změnu adresy eskalačního SLA. |
 | Firma | Nepřesný hlasový název se nenahrazuje novou identitou. Právní údaje jsou z existujícího R: AI Web s.r.o. |
 | Srovnání | C nově žádá výzkum. Nepravdivé zkratky W o permanentním hlídání konkurentů se nepřebírají; používají se skutečné schopnosti z E. |
@@ -56,6 +56,10 @@ Aktuální branding zahrnuje web, instalační prezentaci, kontaktní texty a sp
 - 2023, WebGPT: zakladatelé jsou na https://webgpt.cz/; Pavolův veřejný profil https://cz.linkedin.com/in/hejny/cs uvádí WebGPT od září 2023 do května 2024 a přechod na Promptbook. Jiřího veřejný profil https://cz.linkedin.com/in/jirkajahn sdílí zakladatelův popis začátku generování webů v srpnu 2023. Nejde o výzkumný projekt OpenAI stejného jména.
 - 2024, Promptbook a propojené postupy: https://github.com/webgptorg/promptbook/discussions/118 (5. září a odpověď 29. listopadu 2024) a /discussions/111 popisují orchestraci zadání a řízené postupy.
 - 2025, agenti s kontextem: Pavolův vlastní popis v Data Talk #157, zveřejněno 16. října 2025: https://www.datatalk.cz/podcast/epizoda-157, úvodní představení popisuje AI kolegy, znalostní bázi a pravidla.
-- 2026, dlouhodobé agendy, vlastní engine a ovládání: aktuální vlastníkovo zadání a specifikace tohoto repozitáře. Připravovaná aplikace se nepovažuje za hotovou jen kvůli zobrazení na časové ose.
+- 2026, dlouhodobé agendy, vlastní engine a ovládání: aktuální vlastníkovo zadání a specifikace tohoto repozitáře. Přítomný čas veřejné prezentace vychází z výslovného zadání z 30. října 2026, nikoli ze samotného zobrazení na časové ose.
 
 Nové večerní zadání nahrazuje dřívější textovou esej chronologií po těchto doložených letech a schvaluje změnu české veřejné ceny Start na 400 Kč. Původní USD model kalkulačky, Business a anglické ceny se nemění.
+
+## Sladění s Rebornem — 30. října 2026
+
+Vlastník schválil úpravu FAQ, bezpečnosti a dalších souvisejících textů celého webu a push přímo do `main`. Nový [kontrakt bezpečnosti a autonomie](new-security-and-autonomy.md) vychází z publikovaných specifikací enginu ve větvi `reborn/2026-10`, commit [`7da13b7`](https://github.com/webgptorg/promptbook/commit/7da13b7e6d4838cfea79c26cc2bdede78fe5bf4e). Přítomný čas platí i pro kontaktní dialogy a přístupné popisy scén. Doplněné učení v mezích pevných pravidel a automatické aktualizace nemění ceny, licence, právní dokumenty, původní citace ani backend kontaktů. Neimplementuje se engine ani Appka.

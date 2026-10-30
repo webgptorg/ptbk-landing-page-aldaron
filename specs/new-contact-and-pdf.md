@@ -14,7 +14,7 @@ Před odesláním je vidět společné znění o zpracování osobních údajů 
 
 Hero hlavní a partnerské landing page má jedno výrazné tlačítko zájmu a pod ním menší textový odkaz na lokalizovanou `/open-source`. Nejsou to dvě rovnocenné akce vedle sebe. Hlavní tlačítko používá téma Promptbooku nebo nasazování klientům; instalační pomoc zůstává běžným tematickým kontaktem. Závěrečnou sloganovou výzvu nahrazuje samotný viditelný formulář, nikoli druhá kopie hero CTA.
 
-Před odesláním je jasné, že jde o nezávazný zájem: tým se ozve k potřebám návštěvníka a následně dá vědět o dostupnosti aplikace. Formulář může nabídnout pomoc s vlastním enginem už nyní. Režim zájmu a jeho účel se zapíší do poznámky existujícího kontaktu. Úspěch po potvrzení backendem říká, že zájem byl zaznamenán; nesimuluje okamžitý přístup k aplikaci, registraci, odeslaný e-mail ani objednávku. Není to newsletter a nevzniká nový kontaktní systém.
+Před odesláním je jasné, že jde o nezávazný zájem: tým se ozve k potřebám návštěvníka a domluví další postup nasazení. Podle zadání z 30. října 2026 se už neslibuje budoucí dostupnost aplikace. Režim zájmu a jeho účel se zapíší do poznámky existujícího kontaktu. Úspěch po potvrzení backendem říká, že zájem byl zaznamenán; nesimuluje okamžitý přístup k aplikaci, registraci, odeslaný e-mail ani objednávku. Není to newsletter a nevzniká nový kontaktní systém.
 
 ## E-mailová brána PDF
 

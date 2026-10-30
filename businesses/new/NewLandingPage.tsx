@@ -33,7 +33,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
             </Link>
         </section>
         <BrandStories partnership={partnership}/>
-        <Link className={b.securityTeaser} href={path('bezpecnost')}><ShieldCheck size={22} strokeWidth={1.5} aria-hidden="true"/><span>{en ? 'Your data stays yours.' : 'Vaše data jsou opravdu Vaše.'}</span><span className={b.securityTeaserLink}>{en ? 'How it works' : 'Jak to funguje'}<ArrowRight size={16}/></span></Link>
+        <Link className={b.securityTeaser} href={path('bezpecnost')}><ShieldCheck size={22} strokeWidth={1.5} aria-hidden="true"/><span>{en ? 'Your data. Your rules.' : 'Vaše data i pravidla zůstávají Vaše.'}</span><span className={b.securityTeaserLink}>{en ? 'How it works' : 'Jak to funguje'}<ArrowRight size={16}/></span></Link>
         {partnership && <PartnerOffer/>}
         <section className={b.pricing} id="cenik" aria-labelledby="pricing-heading">
             <h2 id="pricing-heading">{en ? 'Plans' : 'Ceník'}</h2>
@@ -64,8 +64,8 @@ function PartnerOffer() {
     const { locale, t } = useSiteLocale();
     const en = locale === 'en';
     const values = [
-        {Icon:Users,title:en?'Your client. Your expertise.':'Váš klient. Vaše odbornost.',text:en?'Choose a useful responsibility, connect the client’s systems and define what the agents may do. You deliver setup, training and ongoing care.':'Vyberete smysluplnou agendu, připojíte klientovy systémy a nastavíte, co agenti smějí. Dodáte nasazení, zaškolení i průběžnou péči.'},
-        {Icon:Layers,title:en?'Engine, app and support.':'Engine, aplikace a podpora.',text:en?'A common foundation for each deployment. The engine works in the client’s environment, the app provides control, and we provide the agreed product support.':'Společný základ pro každé nasazení. Engine pracuje u klienta, aplikace slouží k ovládání a my zajišťujeme sjednanou produktovou podporu.'},
+        {Icon:Users,title:en?'Your client. Your expertise.':'Váš klient. Vaše odbornost.',text:en?'Choose an agenda, connect the client’s systems and set fixed goals and boundaries. Agents can improve their methods within them. You deliver setup, training and ongoing care.':'Vyberete agendu, připojíte klientovy systémy a nastavíte pevné cíle a hranice. Agenti v nich mohou zlepšovat své postupy. Dodáte nasazení, zaškolení i průběžnou péči.'},
+        {Icon:Layers,title:en?'Engine, app and support.':'Engine, aplikace a podpora.',text:en?'The engine works in the client’s environment and continues without an open app. The app provides end-to-end encrypted control; we provide the agreed product support.':'Engine pracuje u klienta a pokračuje i bez otevřené aplikace. Aplikace poskytuje end-to-end šifrované ovládání; my zajišťujeme sjednanou produktovou podporu.'},
         {Icon:Handshake,title:en?'A service that continues.':'Služba, která pokračuje.',text:en?'Charge for your implementation and ongoing work. Alongside it, receive a fixed share of paid Promptbook licences from clients you bring.':'Fakturujete vlastní implementaci a průběžnou práci. Vedle toho získáváte pevný podíl z uhrazených licencí Promptbooku od klientů, které přivedete.'},
     ];
     return <>

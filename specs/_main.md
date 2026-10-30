@@ -9,6 +9,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 ## Rozcestník specifikace
 
 - [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
+- [Bezpečnost a autonomie](new-security-and-autonomy.md): zero trust, lokální a vzdálené ovládání, pevná pravidla, učení a aktualizace enginu.
 - [Vlastní instalace](new-open-source-page.md): prompty pro instalaci pomocí AI na počítač nebo VPS, npm, shell, Windows EXE, VPS/cloud a pomoc s nasazením.
 - [Partnerství](new-partnership-page.md): vlastní služby, role, 20% podíl a cesta prvního nasazení.
 - [Cena, licence a podpora](new-commercial-offer.md): přesné podmínky Start/Business, plátci, instance, výluky a SLA.
@@ -28,7 +29,9 @@ Interní marketingové odkazy používají jazykové prefixy `/cs` a `/en`; pře
 
 Každý blok má jeden účel. Bez prázdných štítků, opakování téže výhody v mnoha místech a technických vysvětlivek v hero. `book` se nepřekládá a není vstupním požadavkem ani tématem zákaznického webu. Uživatel předává práci a pravidla, ne interní souborový formát.
 
-Zadání z 26. října 2026 navazuje na schválené úpravy přímo na main. Hero má jeden podnadpis s krátkými větami o předání agendy a samostatné práci; celé věty nastupují s pauzami. Robůtek napíše pointu „Teď pracuje pro Vás“, zaškrtne adresáta a potom mění činnost v nadpisu, bez posunu rozložení. Redukovaný pohyb ukáže statické úplné znění. Hlavní CTA „Chci uvolnit ruce“ otevírá existující formulář s otázkou „Co za Vás má AI převzít?“. Pod CTA zůstává menší instalační odkaz. Dostupnost se poctivě vysvětluje ve formuláři.
+Zadání z 26. října 2026 navazuje na schválené úpravy přímo na main. Hero má jeden podnadpis s krátkými větami o předání agendy a samostatné práci; celé věty nastupují s pauzami. Robůtek napíše pointu „Teď pracuje pro Vás“, zaškrtne adresáta a potom mění činnost v nadpisu, bez posunu rozložení. Redukovaný pohyb ukáže statické úplné znění. Hlavní CTA „Chci uvolnit ruce“ otevírá existující formulář s otázkou „Co za Vás má AI převzít?“. Pod CTA zůstává menší instalační odkaz. Formulář sbírá nezávaznou žádost o kontakt a nasazení.
+
+Zadání z 30. října 2026 sjednocuje celý marketingový web s novými specifikacemi Rebornu. Appka, zero trust, autonomie, učení v uživatelských mezích a automatické aktualizace se veřejně popisují v přítomném čase jako produktové funkce, bez označení „připravujeme“ nebo čekání na dostupnost. Lokální loopback dashboard bez párování se odlišuje od ověřeného E2E vzdáleného spojení. Toto redakční zadání nepožaduje implementaci enginu ani kryptografický audit. Podrobnosti jsou v [bezpečnosti a autonomii](new-security-and-autonomy.md).
 
 Sekce „Příklady použití“ bez dalšího podnadpisu ukazuje společnou technologii na příkladech v pořadí péče o kontakty, správa podcastů a údržba webu. Taby jsou jednorádkové a bez play/pause; podcast má mikrofon. Přepisy, zprávy a kód se skutečně píší, formulář se vyplňuje a zvuk má nepravidelný živý průběh. Mobil postupuje pouze v právě čitelném panelu podle scrollu a psaní; skryté panely ani karta nepostupují. Běžný scroll se nepřebírá. Modelový charakter zůstává v přístupném popisu, viditelný štítek „Ukázka“ odpadá.
 
