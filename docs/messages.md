@@ -21,7 +21,10 @@ and author, not excerpts of the wider context. A receiving platform can cache it
 The public summary does not contain its own sharing URL. The export and admin **Kopírovat zprávu s odkazem** action
 add it after an opening greeting, or at the start otherwise. The full context is exported unchanged. Public chat
 combines the current shared Book with the current message and wider context; histories remain browser-memory only.
-`/admin/agents` edits the same definitions used by workshop assignments, with no public agent endpoint. Deleting a
+`/admin/agents` edits the same definitions used by workshop assignments, with no public agent endpoint.
+Messages compile those Books with `@promptbook/core` and call Responses directly with `store: false`, preserving the
+Book's model, personality and rules. The adapter omits sampling defaults rejected by reasoning models. It does not
+execute Book tools or retrieve additional hosted knowledge: the message's supplied context is its factual source. Deleting a
 referenced agent returns a conflict; disable it or change the reference first.
 
 ## Storage
