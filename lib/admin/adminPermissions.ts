@@ -5,6 +5,8 @@ export const ADMIN_PERMISSION_DEFINITIONS = [
     { id: 'studio', label: 'Studio', path: '/admin/studio' },
     { id: 'contacts', label: 'Kontakty a leady', path: '/admin/contacts' },
     { id: 'shortener', label: 'Zkracovač odkazů', path: '/admin/shortener' },
+    { id: 'messages', label: 'Messages', path: '/admin/messages' },
+    { id: 'agents', label: 'Agents', path: '/admin/agents' },
     { id: 'discount-codes', label: 'Slevové kódy', path: '/admin/discount-codes' },
 ] as const;
 

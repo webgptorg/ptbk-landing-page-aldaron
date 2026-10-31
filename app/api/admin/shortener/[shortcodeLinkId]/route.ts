@@ -62,6 +62,7 @@ export async function PATCH(request: NextRequest, context: ShortcodeLinkRouteCon
     const { data, error } = await supabase
         .from(SHORTCODE_LINK_TABLE_NAME)
         .update(createShortcodeLinkDatabaseValues(parsedResult.data))
+        .neq('sourceApp', 'messages')
         .eq('id', shortcodeLinkId)
         .select(SHORTCODE_LINK_SELECTED_COLUMNS)
         .maybeSingle();
@@ -97,6 +98,7 @@ export async function DELETE(request: NextRequest, context: ShortcodeLinkRouteCo
     const { data, error } = await supabase
         .from(SHORTCODE_LINK_TABLE_NAME)
         .delete()
+        .neq('sourceApp', 'messages')
         .eq('id', shortcodeLinkId)
         .select('id')
         .maybeSingle();

@@ -5,19 +5,29 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
-- `/messages/<192-bit-capability>` on the Czech personal domain renders one Git-backed, unlisted message, outside
-  articles, feeds and sitemaps. `messages/<sha256>/` contains only AES-GCM encrypted editorial payload/audio; never
-  commit a capability, plaintext context, narration script or URL registry to this public repository. The explicit
-  `scripts/messages/seal-message.ts` command reads editorial input and a capability file outside the checkout.
-  Every page/download is dynamic, no-store, noindex and no-referrer, with no analytics, session recording or cookie
-  panel. The author links home without changing appearance. A compact two-row control downloads or copies the
-  exact message and full context separately; copying fetches the corresponding private Markdown lazily. The
-  avatar launcher opens a non-modal floating conversation, retains its draft/history while collapsed, restores
-  keyboard focus and stays above the persistent audio player. Real prepared narration reuses article playback, rendering and reviewed word tracking. A small stateless
-  chat uses the existing production OpenAI configuration, with store:false, bounded requests and quoted source
-  context; it explains documented viewpoints in Pavol's voice, preserves attribution, open questions and historical
-  snapshot limitations, and never claims a live connection or invents new decisions. There is no database
-  or shared visitor history. The bearer URL grants access and can be forwarded; it is not account authentication.
+- Messages are database-backed, unlisted pages at `/<prefix>-<shortcode>` on one selected personal domain.
+  They reserve the same eight-character codes with `generateShortcode()` and the same unique `ShortcodeLink` registry
+  as ordinary links, with `sourceApp=messages`. Middleware and public routes recheck domain scope; messages render
+  in place instead of redirecting. `/admin/messages` owns their two-step editor, explicit creation/deletion and
+  immediate shared autosave, with no draft/publish states. Context stays separate from the title, short Markdown
+  message and message-specific chat introduction. Explicit generation uses the selected shared Book agent.
+  The sender's copy/export adds the current URL at the start or after a greeting; the public text remains clean.
+  Shortener lists message entries with a Messages edit link; its mutation API cannot edit/delete them. Private
+  `messages` rows and their codes are hidden from anonymous database enumeration; a known URL alone grants access.
+  No old `/messages/<capability>` route or compatibility redirect is retained. Pages stay outside sitemaps and feeds,
+  noindex/no-store with no third-party analytics or cookie panel. Dynamic social cards use the actual subject,
+  expansion arrows and Pavol's portrait. Metadata/image requests do not record a tracked navigation.
+  Audio is optional and generated only by its authenticated button, never autosave or build. Supabase Storage's
+  private shared `OBJECT_STORAGE_BUCKET` holds immutable MP3s, with short signed CDN reads and native byte ranges.
+  A text hash hides stale audio and timing after text edits. Exact provider character alignment maps to renderer
+  words; absent or incompatible alignment disables tracking. Explicit migration reuses the original recording and
+  reviewed timings with checksum verification. The public player and floating, draft-preserving chat retain the
+  article components and existing design. Chat combines the current agent Book and this message's current context;
+  it cannot claim new decisions or a live connection to the author. See `docs/messages.md` for configuration.
+- `/admin/agents` administers the existing shared `workshop_agents` Books, including Pavol Hejný. Internal UUIDs
+  have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents
+  cannot be deleted out from under messages/history; they can be disabled or reassigned. Separate `messages` and
+  `agents` delegated permissions guard their pages and APIs.
 
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,
   committed PDF, and separately prepared audio assets. Promptbook lists all authors by language at `/cs/articles` and

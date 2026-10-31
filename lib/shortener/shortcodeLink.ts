@@ -6,7 +6,7 @@ import { getPreferredShortcodeLinkHostname } from './shortcodeLinkDomains';
  * the product surface rather than a database table, so the administration can
  * answer where a link came from without reviving the retired `App` relation.
  */
-export const SHORTCODE_LINK_SOURCE_APP_VALUES = ['admin-shortener', 'online-workshop', 'community'] as const;
+export const SHORTCODE_LINK_SOURCE_APP_VALUES = ['admin-shortener', 'online-workshop', 'community', 'messages'] as const;
 
 export type ShortcodeLinkSourceApp = (typeof SHORTCODE_LINK_SOURCE_APP_VALUES)[number];
 
@@ -16,6 +16,7 @@ const SHORTCODE_LINK_SOURCE_APP_LABELS: Readonly<Record<ShortcodeLinkSourceApp, 
     'admin-shortener': 'Admin shortener',
     'online-workshop': 'Online workshop',
     community: 'Community',
+    messages: 'Zpráva',
 };
 
 /**

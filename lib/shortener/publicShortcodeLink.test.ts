@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+vi.mock('server-only', () => ({}));
 const mocks = vi.hoisted(() => ({ read: vi.fn(), insert: vi.fn(), headers: vi.fn() }));
 vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof import('react')>()), cache: (callback: unknown) => callback }));
 vi.mock('next/headers', () => ({ headers: mocks.headers }));

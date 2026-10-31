@@ -5,6 +5,7 @@ import { SHORTCODE_LINK_CLICK_TABLE_NAME, SHORTCODE_LINK_TABLE_NAME } from '@/li
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('server-only', () => ({}));
 const DATABASE = vi.hoisted(() => ({ current: null as SupabaseClient | null }));
 
 // Next supplies its server React build in production; unit tests do not have a server render cache.

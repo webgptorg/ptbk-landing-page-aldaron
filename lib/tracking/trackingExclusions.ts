@@ -18,7 +18,7 @@ function isPathExcluded(pathname: string, excludedPathPrefixes: readonly string[
  * data. Neither page may receive normal page tracking or session recording.
  */
 export function isThirdPartyTrackingAllowed(pathname: string): boolean {
-    return !isPathExcluded(pathname, ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES) && !isWorkshopParticipantPath(pathname);
+    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES) && !isWorkshopParticipantPath(pathname);
 }
 
 /**
@@ -27,7 +27,7 @@ export function isThirdPartyTrackingAllowed(pathname: string): boolean {
  * temporarily contain a prefilled e-mail address or full name.
  */
 export function isGoogleAnalyticsAllowed(pathname: string): boolean {
-    return !isPathExcluded(pathname, ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES);
+    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES);
 }
 
 export function isGoogleAnalyticsPageViewAllowed(pathname: string): boolean {
@@ -45,6 +45,7 @@ export function removeSensitiveTrackingParameters(url: string): string {
             typeof window === 'undefined' ? 'https://www.promptbook.studio' : window.location.origin,
         );
         // A capability is in the path, not a query parameter. Never disclose it to third-party collectors.
+        if (/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(parsedUrl.pathname)) parsedUrl.pathname = '/[unlisted]';
         parsedUrl.pathname = parsedUrl.pathname.replace(/(\/(?:cs\/pavol\/|api\/)?messages)\/[^/]+/g, '$1/[private]');
         SENSITIVE_TRACKING_QUERY_PARAMETERS.forEach((parameterName) => parsedUrl.searchParams.delete(parameterName));
         return parsedUrl.toString();

@@ -13,7 +13,7 @@ import { createPublicDomainNotFoundHtml } from './lib/domains/publicDomainNotFou
 import { createPublicDomainRobotsText, createPublicDomainSitemapXml } from './lib/domains/publicDomainMetadata';
 import { getPreferredHomepageLanguage } from './lib/homepage-language';
 import { isNewSitePublicPath } from './businesses/new/siteConfig';
-import { hasPublicShortcodeLinkOnHostname } from './lib/shortener/shortcodeLinkMiddleware';
+import { getPublicShortcodeLinkOnHostname } from './lib/shortener/shortcodeLinkMiddleware';
 import { SHORTCODE_LINK_HOST_HEADER } from './lib/shortener/shortcodeLinkDomains';
 
 /**
@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     // Never accept a client-supplied scope header. Preserve the original host across Next's internal rewrites.
     requestHeaders.set(SHORTCODE_LINK_HOST_HEADER, requestHostname);
-    requestHeaders.set('x-promptbook-private-message', /^(?:\/cs\/pavol)?\/messages(?:\/|$)/.test(request.nextUrl.pathname) ? '1' : '0');
+    requestHeaders.set('x-promptbook-private-message', '0');
     const publicDomainRoute = getPublicDomainRouteByHostname(requestHostname);
 
     // A custom domain keeps its concise public path in the address bar while Next renders the existing nested route.
@@ -70,10 +70,18 @@ export async function middleware(request: NextRequest) {
         }
 
         const shortcodePath = request.nextUrl.pathname.match(/^\/([A-Za-z0-9-]+)(\/opengraph-image)?\/?$/);
-        if (shortcodePath && await hasPublicShortcodeLinkOnHostname(shortcodePath[1]!, requestHostname)) {
+        const shortLink = shortcodePath ? await getPublicShortcodeLinkOnHostname(shortcodePath[1]!, requestHostname) : null;
+        if (shortcodePath && shortLink) {
+            requestHeaders.set('x-promptbook-private-message', shortLink.isMessage ? '1' : '0');
             const rewriteUrl = request.nextUrl.clone();
             rewriteUrl.pathname = `/short-links/${shortcodePath[1]}${shortcodePath[2] ?? ''}`;
-            return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
+            const response = NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
+            if (shortLink.isMessage) {
+                response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+                response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+                response.headers.set('Referrer-Policy', 'no-referrer');
+            }
+            return response;
         }
 
         return new NextResponse(createPublicDomainNotFoundHtml(publicDomainRoute), {

@@ -48,7 +48,7 @@ function createShortcodeLinkUpdateDatabase(result: MutationResult) {
     const maybeSingle = vi.fn().mockResolvedValue(result);
     const select = vi.fn(() => ({ maybeSingle }));
     const equals = vi.fn(() => ({ select }));
-    const update = vi.fn(() => ({ eq: equals }));
+    const update = vi.fn(() => ({ neq: () => ({ eq: equals }) }));
     const from = vi.fn(() => ({ update }));
 
     return { from, update, equals };
@@ -58,7 +58,7 @@ function createShortcodeLinkDeletionDatabase(result: MutationResult) {
     const maybeSingle = vi.fn().mockResolvedValue(result);
     const select = vi.fn(() => ({ maybeSingle }));
     const equals = vi.fn(() => ({ select }));
-    const deleteRow = vi.fn(() => ({ eq: equals }));
+    const deleteRow = vi.fn(() => ({ neq: () => ({ eq: equals }) }));
     const from = vi.fn(() => ({ delete: deleteRow }));
 
     return { from, deleteRow, equals };

@@ -18,6 +18,7 @@ export const SOCIAL_PREVIEW_ARTWORK_KINDS = [
     'podcast',
     'person',
     'launch',
+    'message',
 ] as const;
 
 export type SocialPreviewArtworkKind = (typeof SOCIAL_PREVIEW_ARTWORK_KINDS)[number];

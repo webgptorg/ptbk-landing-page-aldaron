@@ -149,6 +149,22 @@ function SocialPreviewFeature({
     readonly logo: string;
     readonly portrait?: string;
 }) {
+    if (options.artwork === 'message') {
+        return <div style={{ display: 'flex', position: 'absolute', right: 52, top: 138, width: 420, height: 410 }}>
+            <div style={{ display: 'flex', position: 'absolute', left: 18, top: 36, width: 350, height: 282, borderRadius: 30,
+                border: `2px solid ${options.palette.chipBorder}`, background: 'rgba(255,255,255,0.06)', flexDirection: 'column', padding: 36, gap: 18 }}>
+                <svg width="92" height="92" viewBox="0 0 64 64" fill="none">
+                    <path d="M25 25L9 9M9 9H23M9 9V23M39 25L55 9M55 9H41M55 9V23M25 39L9 55M9 55H23M9 55V41M39 39L55 55M55 55H41M55 55V41" stroke={options.palette.accent} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div style={{ display: 'flex', fontFamily: 'Outfit', fontWeight: 700, fontSize: 28 }}>Rozbalit zprávu</div>
+                <div style={{ display: 'flex', width: 190, height: 7, background: options.palette.chipBorder, borderRadius: 5 }} />
+            </div>
+            {portrait && <div style={{ display: 'flex', position: 'absolute', right: 0, bottom: 0, width: 160, height: 160,
+                borderRadius: 999, overflow: 'hidden', background: options.palette.accent, border: '6px solid #10232b' }}>
+                <img src={portrait} alt="" width={150} height={150} style={{ objectFit: 'contain' }} />
+            </div>}
+        </div>;
+    }
     if (portrait) {
         return (
             <div

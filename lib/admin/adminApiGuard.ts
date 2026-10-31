@@ -50,7 +50,7 @@ async function getRequestPermission(request: NextRequest, identity: AdminIdentit
         }
         return null;
     }
-    for (const permission of ['discount-codes', 'community', 'studio', 'recording-studio'] as const) {
+    for (const permission of ['discount-codes', 'community', 'studio', 'recording-studio', 'messages', 'agents'] as const) {
         if (isPathWithin(pathname, `/api/admin/${permission}`)) return permission === 'recording-studio' ? 'studio' : permission;
     }
     if (!isPathWithin(pathname, '/api/admin/workshops')) return null; // New and unknown routes stay superadmin-only.

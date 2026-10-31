@@ -15,6 +15,7 @@ export type PublicShortcodeLink = {
     readonly id: number;
     readonly url: readonly string[];
     readonly landingPage: string | null;
+    readonly sourceApp?: string;
 };
 
 /**
@@ -29,7 +30,7 @@ export const loadPublicShortcodeLink = cache(async (shortcode: string): Promise<
 
     const { data, error } = await supabase
         .from(SHORTCODE_LINK_TABLE_NAME)
-        .select('id, url, landingPage, domains')
+        .select('id, url, landingPage, domains, sourceApp')
         .eq('shortcode', shortcode)
         .maybeSingle();
 
@@ -40,12 +41,13 @@ export const loadPublicShortcodeLink = cache(async (shortcode: string): Promise<
     if (!isShortcodeLinkAvailableOnHostname(data.domains, getShortcodeLinkRequestHostname(await headers()))) return null;
 
     const urls = data.url.filter((url): url is string => typeof url === 'string' && url.length > 0);
-    if (urls.length === 0) {
+    if (urls.length === 0 && data.sourceApp !== 'messages') {
         return null;
     }
 
     return {
         id: data.id,
+        sourceApp: data.sourceApp,
         url: urls,
         landingPage: typeof data.landingPage === 'string' && data.landingPage.trim() !== '' ? data.landingPage : null,
     };

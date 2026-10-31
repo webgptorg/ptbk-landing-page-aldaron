@@ -16,7 +16,7 @@ describe('branded short-link existence check', () => {
         const [url, options] = fetchMock.mock.calls[0];
         expect(url.pathname).toBe('/rest/v1/ShortcodeLink');
         expect(url.searchParams.get('shortcode')).toBe('eq.abc');
-        expect(url.searchParams.get('select')).toBe('id,domains');
+        expect(url.searchParams.get('select')).toBe('id,domains,sourceApp');
         expect(options.cache).toBe('no-store');
     });
     it('allows a legacy all-domain link and fails closed on missing or malformed rows and outages', async () => {

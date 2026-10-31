@@ -9,9 +9,9 @@ import type { MessageChatTurn } from '@/lib/messages/messageTypes';
 const avatar = '/people/pavol-hejny-transparent-square.png';
 
 /** One private, in-memory conversation, available without leaving the message. */
-export function MessageChat({ messageId }: { readonly messageId: string }) {
+export function MessageChat({ messageId, introduction = '' }: { readonly messageId: string; readonly introduction?: string }) {
     const [open, setOpen] = useState(false);
-    const [turns, setTurns] = useState<MessageChatTurn[]>([]);
+    const [turns, setTurns] = useState<MessageChatTurn[]>(() => introduction ? [{ role: 'assistant', content: introduction }] : []);
     const [draft, setDraft] = useState('');
     const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
     const [error, setError] = useState('');

@@ -40,10 +40,11 @@ type WorkshopAgentEditorProps = {
     readonly isSaving: boolean;
     readonly onSave: (values: WorkshopAgentWriteValues) => Promise<boolean>;
     readonly onCancel: () => void;
+    readonly globalOnly?: boolean;
 };
 
 /** The draft is separate from the polling state, so refreshes cannot overwrite an edited Book. */
-export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSaving, onSave, onCancel }: WorkshopAgentEditorProps) {
+export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSaving, onSave, onCancel, globalOnly = false }: WorkshopAgentEditorProps) {
     const [values, setValues] = useState<WorkshopAgentWriteValues>(() => initialValues ?? { ...DEFAULT_WORKSHOP_AGENT_VALUES });
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const isCreatingReference = useRef(false);
@@ -73,7 +74,7 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
 
     return (
         <form ref={autosave.formRef} onSubmit={submit} className="space-y-5">
-            <p className="text-sm text-slate-500">Jméno a Book jsou společné pro všechny místnosti. Book určuje osobnost, názory, cíle a pravidla agenta.</p>
+            <p className="text-sm text-slate-500">Jméno a Book jsou společné pro zprávy i místnosti. Book určuje osobnost, názory, cíle a pravidla agenta.</p>
             <label className="block text-sm font-medium">
                 Jméno v chatu
                 <Input value={values.name} maxLength={200} required disabled={isSaving} onChange={(event) => setValues({ ...values, name: event.target.value })} className="mt-1" />
@@ -87,7 +88,7 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
                 <BOOK_EDITOR value={values.bookSource as BookEditorProps['value']} onChange={(bookSource) => setValues((current) => ({ ...current, bookSource }))}
                     height="420px" isReadonly={initialValues === null && isSaving} isUploadButtonShown={false} isCameraButtonShown={false} />
             </div>
-            <fieldset disabled={initialValues === null && isSaving} className="space-y-4 rounded-xl border border-slate-200 p-4">
+            {!globalOnly && <fieldset disabled={initialValues === null && isSaving} className="space-y-4 rounded-xl border border-slate-200 p-4">
                 <legend className="px-2 text-sm font-semibold">V této místnosti</legend>
                 <label className="flex items-center gap-2 text-sm">
                     <input type="checkbox" checked={values.isReplyEnabled} onChange={(event) => setValues({ ...values, isReplyEnabled: event.target.checked })} />
@@ -107,7 +108,7 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
                         <Input type="number" min={60} max={3600} required value={values.questionIntervalSeconds} onChange={(event) => setValues({ ...values, questionIntervalSeconds: Number(event.target.value) })} className="mt-1 max-w-40" />
                     </label>
                 </>}
-            </fieldset>
+            </fieldset>}
             {errorMessage && <p role="alert" className="text-sm text-red-700">{errorMessage}</p>}
             <div className="flex gap-2">
                 {initialValues === null && <Button type="submit" disabled={isSaving}>{isSaving ? 'Vytvářím…' : 'Vytvořit agenta'}</Button>}

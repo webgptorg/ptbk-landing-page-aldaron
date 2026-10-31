@@ -13,6 +13,7 @@ import {
 } from '@/lib/shortener/shortcodeLink';
 import { ExternalLink, MousePointerClick, Pencil, Trash2 } from 'lucide-react';
 import { SHORTCODE_LINK_DOMAINS } from '@/lib/shortener/shortcodeLinkDomains';
+import Link from 'next/link';
 
 const CZECH_SHORTCODE_LINK_CLICK_COUNT_FORMAT = new Intl.NumberFormat('cs-CZ');
 
@@ -107,7 +108,8 @@ export function ShortcodeLinkTable({
                                                 </a>
                                             </li>
                                         ))}
-                                        {shortcodeLink.urls.length === 0 && (
+                                        {shortcodeLink.sourceApp === 'messages' && <li className="text-slate-600">Zpráva s širším kontextem</li>}
+                                        {shortcodeLink.urls.length === 0 && shortcodeLink.sourceApp !== 'messages' && (
                                             <li className="text-rose-600">No destination</li>
                                         )}
                                     </ul>
@@ -118,7 +120,7 @@ export function ShortcodeLinkTable({
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    {shortcodeLink.landingPage === null ? (
+                                    {shortcodeLink.sourceApp === 'messages' ? <span className="inline-flex rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-semibold text-cyan-800">Zpráva</span> : shortcodeLink.landingPage === null ? (
                                         <span className="text-slate-400">Redirect</span>
                                     ) : (
                                         <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -155,7 +157,8 @@ export function ShortcodeLinkTable({
                                                 <ExternalLink className="h-4 w-4" />
                                             </a>
                                         </Button>
-                                        {canUpdate && <Button
+                                        {shortcodeLink.sourceApp === 'messages' && <Button variant="outline" size="sm" asChild><Link href={`/admin/messages?shortcodeLinkId=${shortcodeLink.id}`}><Pencil className="mr-1.5 h-4 w-4" />Messages</Link></Button>}
+                                        {canUpdate && shortcodeLink.sourceApp !== 'messages' && <Button
                                             type="button"
                                             variant="outline"
                                             size="sm"
@@ -164,7 +167,7 @@ export function ShortcodeLinkTable({
                                         >
                                             <Pencil className="mr-1.5 h-4 w-4" /> Edit
                                         </Button>}
-                                        {canDelete && <Button
+                                        {canDelete && shortcodeLink.sourceApp !== 'messages' && <Button
                                             type="button"
                                             variant="destructive"
                                             size="sm"

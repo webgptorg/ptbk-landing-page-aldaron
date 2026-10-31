@@ -36,8 +36,6 @@ const nextConfig = {
     images: { unoptimized: true },
     serverExternalPackages: ['pg', '@promptbook/node'],
     outputFileTracingIncludes: {
-        '/cs/pavol/messages/**': ['./messages/**/*.enc'],
-        '/api/messages/**': ['./messages/**/*.enc'],
         '/*': ['./migrations/**/*.sql'],
         '/cs/pavol': ['./articles/**/*'],
         '/en/pavol': ['./articles/**/*'],

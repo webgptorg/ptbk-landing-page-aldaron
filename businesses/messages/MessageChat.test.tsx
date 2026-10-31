@@ -16,6 +16,13 @@ describe('floating message conversation', () => {
     });
     afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
+    it('opens with the authored introduction for this specific message', () => {
+        render(<MessageChat messageId="test-message" introduction="Můžeme probrat registraci nebo první použití." />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        expect(screen.getByRole('log')).toHaveTextContent('Můžeme probrat registraci nebo první použití.');
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     it('retains a draft when collapsed, focuses the editor and returns focus on Escape', () => {
         render(<MessageChat messageId="test-message" />);
         const launcher = screen.getByRole('button', { name: 'Otevřít chat s Pavolem' });

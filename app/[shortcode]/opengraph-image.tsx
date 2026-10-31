@@ -1,3 +1,5 @@
+import { loadMessageByShortcode } from '@/lib/messages/messageDatabase';
+import { createSocialPreviewPalette } from '@/lib/metadata/social-preview-palette';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import {
     createSocialPreviewImage,
@@ -19,6 +21,16 @@ export const size = SOCIAL_PREVIEW_IMAGE_SIZE;
 export default async function ShortcodeImage({ params }: { readonly params: Promise<{ readonly shortcode: string }> }) {
     const { shortcode } = await params;
     const link = await loadPublicShortcodeLink(shortcode);
+    if (link?.sourceApp === 'messages') {
+        const message = await loadMessageByShortcode(shortcode, getShortcodeLinkRequestHostname(await headers()));
+        if (!message) notFound();
+        return createSocialPreviewImage({
+            alt: `${message.title} — rozbalit zprávu`, brandLabel: 'Pavol Hejný', brandKind: 'personal',
+            eyebrow: 'ŠIRŠÍ KONTEXT TÉHLE ZPRÁVY', title: message.title,
+            description: 'Přečtěte si souvislosti. Zeptejte se. Poslechněte si zprávu.', hostname: `${message.domain}/${message.shortcode}`, artwork: 'message',
+            palette: createSocialPreviewPalette({ backgroundStart: '#071c24', backgroundEnd: '#183b45', accent: '#7ae9d7', accentSoft: '#9dd7fa' }),
+        }, { 'Cache-Control': 'no-store' });
+    }
     if (link === null || link.landingPage === null) {
         notFound();
     }

@@ -1,3 +1,6 @@
+import { MessagePage } from '@/businesses/messages/MessagePage';
+import { loadMessageByShortcode } from '@/lib/messages/messageDatabase';
+import { createMessageMetadata } from '@/lib/messages/messageMetadata';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { MarkdownContent } from '@/components/markdown-content';
@@ -19,6 +22,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { shortcode } = await params;
     const data = await loadPublicShortcodeLink(shortcode);
 
+    if (data?.sourceApp === 'messages') {
+        const message = await loadMessageByShortcode(shortcode, getShortcodeLinkRequestHostname(await headers()));
+        return message ? createMessageMetadata(message) : { robots: { index: false, follow: false } };
+    }
     if (data?.landingPage === null || data === null) {
         return {
             robots: {
@@ -41,6 +48,11 @@ export default async function Page({ params }: PageProps) {
     try {
         const data = await loadPublicShortcodeLink(shortcode);
 
+        if (data?.sourceApp === 'messages') {
+            const message = await loadMessageByShortcode(shortcode, getShortcodeLinkRequestHostname(await headers()));
+            if (!message) notFound();
+            return <MessagePage message={message} />;
+        }
         if (!data || !data.url || data.url.length === 0) {
             notFound();
         }
