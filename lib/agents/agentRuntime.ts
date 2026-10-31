@@ -15,7 +15,7 @@ export async function runManagedAgent(agent: ManagedAgent, instruction: string, 
         return await Promise.race([
             (async () => {
                 const { createAgentModelRequirements } = await import('@promptbook/core');
-                const book = await createAgentModelRequirements(agent.bookSource);
+                const book = await createAgentModelRequirements(agent.bookSource as Parameters<typeof createAgentModelRequirements>[0]);
                 const model = book.modelName || 'gpt-6-luna';
                 // Messages only explain quoted context. No Book tools, actions or hosted knowledge are executed here.
                 // Sampling parameters are deliberately omitted: reasoning models can reject even SDK default values.
