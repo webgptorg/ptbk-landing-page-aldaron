@@ -7,12 +7,12 @@ export const runtime = 'nodejs';
 export async function GET(request: Request, { params }: { params: Promise<{ messageId: string; asset: string }> }) {
     const { messageId, asset } = await params;
     const missing = () => new Response(null, { status: 404, headers: MESSAGE_RESPONSE_HEADERS });
-    if (!isMessageHostname(getPublicRequestHostname(request.headers)) || !['context.md', 'words.json', 'audio.mp3'].includes(asset)) return missing();
+    if (!isMessageHostname(getPublicRequestHostname(request.headers)) || !['message.md', 'context.md', 'words.json', 'audio.mp3'].includes(asset)) return missing();
     const message = await getSharedMessage(messageId);
     if (!message) return missing();
-    if (asset === 'context.md') return new Response(message.context, { headers: {
+    if (asset === 'context.md' || asset === 'message.md') return new Response(asset === 'message.md' ? message.markdown : message.context, { headers: {
         ...MESSAGE_RESPONSE_HEADERS, 'Content-Type': 'text/markdown; charset=utf-8',
-        'Content-Disposition': 'attachment; filename="promptbook-mangoweb-kontext.md"',
+        'Content-Disposition': `attachment; filename="promptbook-mangoweb-${asset === 'message.md' ? 'zprava' : 'kontext'}.md"`,
     } });
     if (asset === 'words.json') return message.timings ? Response.json(message.timings, { headers: MESSAGE_RESPONSE_HEADERS }) : missing();
     if (!message.audio) return missing();

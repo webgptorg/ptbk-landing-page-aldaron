@@ -10,9 +10,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   commit a capability, plaintext context, narration script or URL registry to this public repository. The explicit
   `scripts/messages/seal-message.ts` command reads editorial input and a capability file outside the checkout.
   Every page/download is dynamic, no-store, noindex and no-referrer, with no analytics, session recording or cookie
-  panel. Real prepared narration reuses article playback, rendering and reviewed word tracking. A small stateless
+  panel. The author links home without changing appearance. A compact two-row control downloads or copies the
+  exact message and full context separately; copying fetches the corresponding private Markdown lazily. The
+  avatar launcher opens a non-modal floating conversation, retains its draft/history while collapsed, restores
+  keyboard focus and stays above the persistent audio player. Real prepared narration reuses article playback, rendering and reviewed word tracking. A small stateless
   chat uses the existing production OpenAI configuration, with store:false, bounded requests and quoted source
-  context; it must preserve attribution, open questions and historical snapshot limitations. There is no database
+  context; it explains documented viewpoints in Pavol's voice, preserves attribution, open questions and historical
+  snapshot limitations, and never claims a live connection or invents new decisions. There is no database
   or shared visitor history. The bearer URL grants access and can be forwarded; it is not account authentication.
 
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,

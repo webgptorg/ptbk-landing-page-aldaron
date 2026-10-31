@@ -241,7 +241,7 @@ export function getInternalPathname(publicDomainRoute: PublicDomainRoute, public
 
     if (publicPathSuffix === undefined) {
         // Capability-only messages are Czech personal pages, with no index/listing or public registry.
-        if (publicDomainRoute.internalPath === PAVOL_CZECH_INTERNAL_PATH && /^\/messages\/[A-Za-z0-9_-]{32}(?:\/(?:context\.md|audio\.mp3|words\.json))?$/.test(normalizedPublicPathname)) {
+        if (publicDomainRoute.internalPath === PAVOL_CZECH_INTERNAL_PATH && /^\/messages\/[A-Za-z0-9_-]{32}(?:\/(?:message\.md|context\.md|audio\.mp3|words\.json))?$/.test(normalizedPublicPathname)) {
             return `${publicDomainRoute.internalPath}${normalizedPublicPathname}`;
         }
         // Article variants are resolved by the statically generated route. A missing variant receives this

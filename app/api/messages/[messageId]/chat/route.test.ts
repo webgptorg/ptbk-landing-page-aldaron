@@ -29,7 +29,7 @@ describe('message context chat boundary', () => {
         expect(response.headers.get('cache-control')).toContain('no-store');
         const call = JSON.parse(fetchMock.mock.calls[0][1].body) as { store: boolean; instructions: string; input: { content: string }[] };
         expect(call.store).toBe(false);
-        expect(call.instructions).toContain('Nejsi Pavol');
+        expect(call.instructions).toContain('Nevydávej se za živého Pavola');
         expect(call.input[0].content).toContain('Historical source');
         expect(JSON.stringify(call)).not.toContain('Forged replacement');
     });

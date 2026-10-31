@@ -1,12 +1,13 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Download } from 'lucide-react';
 import { ArticleAudioButton } from '@/businesses/articles/ArticleAudioButton';
 import { ArticleTracking } from '@/businesses/articles/ArticleTracking';
 import { renderArticleDocument } from '@/businesses/articles/articleDocument';
 import { MessageChat } from '@/businesses/messages/MessageChat';
+import { MessageActions } from '@/businesses/messages/MessageActions';
 import { getSharedMessage, isMessageHostname } from '@/lib/messages/messageStore';
 import { getPublicRequestHostname } from '@/lib/domains/publicDomainRouting';
 import '@/businesses/articles/articles.css';
@@ -36,11 +37,11 @@ export default async function MessagePage({ params }: { params: Promise<{ messag
     } : undefined;
     return <main className="article-site message-site" data-publication="personal" lang="cs">
         <header className="message-header">
-            <div className="message-author">
+            <Link href="/" className="message-author" aria-label="Pavol Hejný – úvodní stránka">
                 <Image src="/people/pavol-hejny-transparent-square.png" width={40} height={40} alt="" />
                 <div><strong>Pavol Hejný</strong><time dateTime={message.createdAt}>{new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(message.createdAt))}</time></div>
-            </div>
-            <a className="message-download" href={`${href}/context.md`} download aria-label="Stáhnout celý kontext zprávy"><Download size={18} aria-hidden="true" /><span>Celý kontext</span></a>
+            </Link>
+            <MessageActions href={href} />
         </header>
         <h1>{message.title}</h1>
         {audio && <div className="message-play"><ArticleAudioButton

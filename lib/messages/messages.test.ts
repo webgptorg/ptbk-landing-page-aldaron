@@ -23,7 +23,7 @@ describe('unlisted message capabilities', () => {
     it('routes only Czech personal capabilities and excludes their registry from sitemaps', () => {
         const cs = getPublicDomainRouteByHostname('www.pavolhejny.cz')!;
         const en = getPublicDomainRouteByHostname('pavolhejny.com')!;
-        for (const suffix of ['', '/context.md', '/audio.mp3', '/words.json']) {
+        for (const suffix of ['', '/message.md', '/context.md', '/audio.mp3', '/words.json']) {
             expect(getInternalPathname(cs, `/messages/${id}${suffix}`)).toBe(`/cs/pavol/messages/${id}${suffix}`);
             expect(getInternalPathname(en, `/messages/${id}${suffix}`)).toBeUndefined();
         }
