@@ -58,7 +58,11 @@ export async function generateMessageAudio(id: string, requestSignal: AbortSigna
     const { data: claim, error: claimError } = await client.from('messages')
         .update({ audio_generation_token: token, audio_generation_until: new Date(now.getTime() + 10 * 60_000).toISOString() })
         .eq('id', id).or(`audio_generation_until.is.null,audio_generation_until.lt.${now.toISOString()}`).select('id').maybeSingle();
-    if (claimError) throw new Error('Generování se nepodařilo zahájit.');
+    if (claimError) {
+        // Keep the database diagnosis in private server logs; do not log row details, context or credentials.
+        console.error('Message audio lease failed.', { code: claimError.code, message: claimError.message });
+        throw new Error('Generování se nepodařilo zahájit.');
+    }
     if (!claim) throw Object.assign(new Error('Nahrávka této zprávy se již generuje.'), { status: 409 });
     let uploadedKey: string | null = null;
     let attached = false;
