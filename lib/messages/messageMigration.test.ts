@@ -3,9 +3,37 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { PAVOL_MESSAGE_AGENT_ID } from './messageModel';
 const migration = readFileSync('migrations/2026-10-3100-expanded-messages.sql', 'utf8');
+const audioLeaseMigration = readFileSync('migrations/2026-11-0100-message-audio-generation-lease.sql', 'utf8');
 const make = (code: string) => `SELECT save_expanded_message(NULL,'Subject','Message','Large context','Specific opening','subject','pavolhejny.cz','${PAVOL_MESSAGE_AGENT_ID}','${code}') AS id`;
 
 describe('messages and the shared shortcode registry', () => {
+    it.each([
+        [false, false], [true, false], [false, true], [true, true],
+    ])('repairs audio lease columns without losing recordings or active leases (token=%s, expiry=%s)', async (hasToken, hasExpiry) => {
+        const db = new PGlite();
+        try {
+            await db.exec(`CREATE TABLE messages (id uuid PRIMARY KEY, markdown text, audio jsonb);
+                ${hasToken ? 'ALTER TABLE messages ADD COLUMN audio_generation_token uuid;' : ''}
+                ${hasExpiry ? 'ALTER TABLE messages ADD COLUMN audio_generation_until timestamptz;' : ''}`);
+            const id = 'ad4985af-0789-4927-ad14-5e21f5ec5660';
+            const token = '3fec229c-724d-498d-b5c7-f53196f36051';
+            const audio = { key: 'messages/existing.mp3' };
+            await db.query('INSERT INTO messages (id,markdown,audio) VALUES ($1,$2,$3)', [id, 'Existing message', audio]);
+            await db.exec(audioLeaseMigration);
+            const claim = (claimToken: string) => db.query(`UPDATE messages SET audio_generation_token=$2,
+                audio_generation_until=now() + interval '10 minutes' WHERE id=$1
+                AND (audio_generation_until IS NULL OR audio_generation_until < now()) RETURNING id`, [id, claimToken]);
+            expect((await claim(token)).rows).toEqual([{ id }]);
+            // Replaying the repair on an up-to-date deployment must not unlock a running generation.
+            await db.exec(audioLeaseMigration);
+            expect((await claim('593e330f-9886-43ea-ab93-c26934d38938')).rows).toEqual([]);
+            expect((await db.query('SELECT markdown,audio,audio_generation_token FROM messages WHERE id=$1', [id])).rows)
+                .toEqual([{ markdown: 'Existing message', audio, audio_generation_token: token }]);
+            await db.exec("UPDATE messages SET audio_generation_until=now() - interval '1 minute'");
+            expect((await claim(token)).rows).toEqual([{ id }]);
+        } finally { await db.close(); }
+    }, 30000);
+
     it('reserves atomically, protects unlisted content, keeps suffixes and deletes the same registry entry', async () => {
         const db = new PGlite();
         try {

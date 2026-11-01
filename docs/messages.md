@@ -82,6 +82,8 @@ capability route is removed, with no compatibility redirect.
 The SQL migration is immutable and runs through the existing startup migration runner. Tests cover transaction
 rollback/collisions, shared suffix retention and domain changes, anonymous read restrictions, Book/context chat
 isolation, stale audio, character timing, exports, and normal Shortener behavior.
+`2026-11-0100-message-audio-generation-lease.sql` also repairs deployed Messages tables missing either audio lease
+column, preserving existing content, recordings and active leases. It reloads the PostgREST schema after the repair.
 
 References: [Supabase S3 compatibility](https://supabase.com/docs/guides/storage/s3/compatibility),
 [S3 authentication](https://supabase.com/docs/guides/storage/s3/authentication),
