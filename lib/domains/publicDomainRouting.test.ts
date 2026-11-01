@@ -75,6 +75,12 @@ describe('public domain routing', () => {
         expect(getInternalPathname(podcastDomainRoute!, '/media-kit/')).toBe(`${AI_TA_KRAJTA_INTERNAL_PATH}/media-kit`);
         expect(getInternalPathname(podcastDomainRoute!, '/people/ai-ta-krajta/pavol.png')).toBeUndefined();
         expect(getInternalPathname(czechPavolDomainRoute!, '/')).toBe(PAVOL_CZECH_INTERNAL_PATH);
+        for (const hostname of ['pavolhejny.cz', 'www.pavolhejny.com']) {
+            const route = getPublicDomainRouteByHostname(hostname)!;
+            expect(getInternalPathname(route, '/podcasts')).toBe(`${route.internalPath}/podcasts`);
+            expect(getInternalPathname(route, '/podcasts/opengraph-image')).toBe(`${route.internalPath}/podcasts/opengraph-image`);
+            expect(route.publicPathSuffixes).toContainEqual({ path: '/podcasts', isIndexed: true });
+        }
     });
 
     it('recognizes nested legacy routes without mistaking a similar prefix for one', () => {

@@ -31,8 +31,9 @@ function FooterLinkColumn({ title, links }: { title: string; links: PavolLink[] 
     );
 }
 
-export function PavolFooter({ language }: { language: SupportedHomepageLanguage }) {
+export function PavolFooter({ language, isHomepage = true }: { language: SupportedHomepageLanguage; readonly isHomepage?: boolean }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language];
+    const sectionPrefix = isHomepage ? '' : '/';
 
     return (
         <footer className="border-t border-[var(--pavol-border)] bg-[var(--pavol-ink)] text-white">
@@ -63,14 +64,14 @@ export function PavolFooter({ language }: { language: SupportedHomepageLanguage 
                             size="lg"
                             className="mt-8 rounded-full bg-white px-7 text-[var(--pavol-ink)] hover:bg-white/90"
                         >
-                            <Link href="#contact">
+                            <Link href={`${sectionPrefix}#contact`}>
                                 {CONTENT.footer.primaryAction}
                                 <Send className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>
                     </div>
 
-                    <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={CONTENT.header.navItems} />
+                    <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={CONTENT.header.navItems.map((item) => ({ ...item, href: `${sectionPrefix}${item.href}` }))} />
                     <FooterLinkColumn title={CONTENT.footer.connectTitle} links={CONTENT.contact.links} />
                 </div>
 

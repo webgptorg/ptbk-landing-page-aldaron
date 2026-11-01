@@ -5,8 +5,9 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { createPavolPodcastTrack, type PavolPodcast } from './pavolPodcasts';
 import { PavolPodcastAudioButton } from './PavolPodcastAudioButton';
 
-export function PavolPodcastCard({ podcast, language }: {
+export function PavolPodcastCard({ podcast, language, headingAs: Heading = 'h3' }: {
     readonly podcast: PavolPodcast; readonly language: SupportedHomepageLanguage;
+    readonly headingAs?: 'h2' | 'h3';
 }) {
     const cs = language === 'cs';
     const track = createPavolPodcastTrack(podcast, language);
@@ -29,7 +30,7 @@ export function PavolPodcastCard({ podcast, language }: {
                 {podcast.durationInSeconds !== null && <span className="pavol-podcast-duration"><Clock3 size={12} aria-hidden="true" />{formatPodcastEpisodeDuration(podcast.durationInSeconds)}</span>}
                 {language !== podcast.language && <span className="pavol-language-badge" aria-label={podcast.language === 'cs' ? 'Audio in Czech' : 'Audio in English'}>{podcast.language === 'cs' ? <svg viewBox="0 0 30 20" width="18" height="12" className="shrink-0 rounded-[1px]" aria-hidden="true"><rect width="30" height="20" fill="#fff" /><path d="M0 10h30v10H0z" fill="#d7141a" /><path d="M0 0l15 10L0 20z" fill="#11457e" /></svg> : <span aria-hidden="true">EN</span>} {podcast.language === 'cs' ? 'Czech' : 'English'}</span>}
             </div>
-            <h3 lang={podcast.language}><a href={podcast.href}>{podcast.title}</a></h3>
+            <Heading lang={podcast.language}><a href={podcast.href}>{podcast.title}</a></Heading>
             {hasFullDescription ? <details className="pavol-podcast-description">
                 <summary>
                     <span className="pavol-podcast-excerpt" lang={descriptionLanguage}>{preview}</span>

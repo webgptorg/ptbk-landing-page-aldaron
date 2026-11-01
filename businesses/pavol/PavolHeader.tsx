@@ -19,8 +19,9 @@ const LANGUAGE_LINKS = [
     { language: 'en', label: 'English', shortLabel: 'EN', href: createPublicUrl(PAVOL_ENGLISH_INTERNAL_PATH) },
 ] as const;
 
-export function PavolHeader({ language }: { readonly language: SupportedHomepageLanguage }) {
+export function PavolHeader({ language, pagePath = '/' }: { readonly language: SupportedHomepageLanguage; readonly pagePath?: string }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language].header;
+    const sectionPrefix = pagePath === '/' ? '' : '/';
     const MENU_REF = useRef<HTMLDetailsElement>(null);
 
     function closeMenu() {
@@ -45,13 +46,13 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                 </Link>
                 <nav aria-label={CONTENT.navigationLabel} className="hidden items-center gap-1 xl:flex">
                     {CONTENT.navItems.map((ITEM) => (
-                        <a
+                        <Link
                             key={ITEM.href}
-                            href={ITEM.href}
+                            href={`${sectionPrefix}${ITEM.href}`}
                             className="rounded-full px-2.5 py-3 text-xs font-medium text-[var(--pavol-muted)] transition-colors hover:bg-[var(--pavol-warm)] hover:text-[var(--pavol-ink)]"
                         >
                             {ITEM.label}
-                        </a>
+                        </Link>
                     ))}
                 </nav>
                 <div className="flex shrink-0 items-center gap-2 sm:gap-4">
@@ -62,7 +63,7 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                         {LANGUAGE_LINKS.map((ITEM) => (
                             <a
                                 key={ITEM.language}
-                                href={ITEM.href}
+                                href={new URL(pagePath, ITEM.href).toString()}
                                 hrefLang={ITEM.language}
                                 lang={ITEM.language}
                                 aria-label={ITEM.label}
@@ -77,10 +78,10 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                         asChild
                         className="pavol-primary-button hidden h-11 rounded-full px-5 sm:inline-flex"
                     >
-                        <a href="#contact">
+                        <Link href={`${sectionPrefix}#contact`}>
                             {CONTENT.primaryAction}
                             <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4" />
-                        </a>
+                        </Link>
                     </Button>
                     <details
                         ref={MENU_REF}
@@ -106,15 +107,15 @@ export function PavolHeader({ language }: { readonly language: SupportedHomepage
                         >
                             <div className="mx-auto grid max-w-2xl gap-1">
                                 {CONTENT.navItems.map((ITEM) => (
-                                    <a
+                                    <Link
                                         key={ITEM.href}
-                                        href={ITEM.href}
+                                        href={`${sectionPrefix}${ITEM.href}`}
                                         onClick={closeMenu}
                                         className="flex items-center justify-between rounded-xl px-4 py-3 text-base hover:bg-[var(--pavol-warm)]"
                                     >
                                         {ITEM.label}
                                         <ArrowRight aria-hidden="true" className="h-4 w-4 text-[var(--pavol-accent)]" />
-                                    </a>
+                                    </Link>
                                 ))}
                             </div>
                         </nav>

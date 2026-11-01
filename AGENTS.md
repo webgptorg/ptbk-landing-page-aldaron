@@ -128,14 +128,19 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
 - Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
-  Their homepages server-render published matching-language personal articles with the existing audio button.
+  Their homepages show `#articles` before `#podcasts`, each limited to ten server-rendered items with a localized
+  Show more link. Articles retain newest-first matching-language publication and the existing audio button;
+  podcasts apply Smart ordering to the full archive before taking ten. Header and footer links scroll to those
+  homepage sections. `/articles` and `/podcasts` list only their own complete type; the podcast archive retains
+  its sort selector, hourly sources, shared player, localized metadata and sitemap entries. Archive navigation
+  returns to homepage anchors and preserves client-side playback, while language links keep the archive path.
   Podcasts live separately at `#podcasts`: reviewed external episodes refresh their selected RSS enclosures and
   retain verified recordings during outages; AI ta Krajta reads the shared merged episodes without audience-profile
   fetches and filters by the resolved `pavol-hejny` roster entry. Both homepages revalidate hourly, so new credited
   episodes appear without a second editorial entry or deployment. Show links stay canonical on `ai-ta-krajta.cz`.
   The English homepage marks original Czech recordings with a flag. Personal podcasts use the persistent article
   player and shared history; AI ta Krajta keeps its own controls. Missing public audio retains a publisher link.
-  All personal podcast appearances share one list with Smart ordering by default: the newest episode stays first,
+  All personal podcast appearances share Smart ordering by default: the newest episode stays first,
   then each position takes the newest remaining episode from a different show whenever possible. Each show's own
   order stays newest first; after other shows run out, the remaining episodes continue by date. A localized native
   selector also offers strict newest-first and oldest-first ordering, without changing playback or open descriptions.

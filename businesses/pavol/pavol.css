@@ -361,7 +361,7 @@
     padding: clamp(1.25rem, 3vw, 2rem);
 }
 
-.pavol-article-card h4 {
+.pavol-article-card h3 {
     margin-top: 1rem;
     font-size: 1.4rem;
     font-weight: 500;
@@ -510,7 +510,7 @@
     white-space: nowrap;
 }
 
-.pavol-podcast-card h3 {
+.pavol-podcast-card :is(h2, h3) {
     margin-top: 0.5rem;
     font-size: 1.1875rem;
     font-weight: 500;
@@ -519,7 +519,7 @@
     overflow-wrap: anywhere;
 }
 
-.pavol-podcast-card h3 a:hover {
+.pavol-podcast-card :is(h2, h3) a:hover {
     color: var(--pavol-accent);
     text-decoration: underline;
     text-underline-offset: 0.2em;
@@ -613,7 +613,7 @@
         column-gap: 2rem;
     }
 
-    .pavol-podcast-content > :is(.pavol-recording-meta, h3, .pavol-podcast-description, .pavol-podcast-excerpt, .pavol-recording-note) {
+    .pavol-podcast-content > :is(.pavol-recording-meta, h2, h3, .pavol-podcast-description, .pavol-podcast-excerpt, .pavol-recording-note) {
         grid-column: 1;
     }
 

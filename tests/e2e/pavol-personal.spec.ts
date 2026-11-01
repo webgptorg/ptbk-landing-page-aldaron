@@ -191,7 +191,7 @@ for (const SITE of PERSONAL_SITES) {
         // Warm the article's development compilation before starting the finite test recording.
         await page.goto(articleUrl.toString());
         await page.goto(SITE_URL.toString());
-        await page.locator('#media').getByRole('button', { name: 'Poslechnout článek', exact: true }).click();
+        await page.locator('#articles').getByRole('button', { name: 'Poslechnout článek', exact: true }).click();
         const player = page.locator('[data-article-player]');
         const audio = page.locator('audio');
         await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);

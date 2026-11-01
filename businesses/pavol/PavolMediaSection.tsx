@@ -16,7 +16,9 @@ import { getArticles } from '@/lib/articles/load';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
-import { PavolPodcastList } from './PavolPodcastList';
+import { sortPavolPodcasts } from './pavolPodcastOrder';
+
+const HOMEPAGE_ITEM_LIMIT = 10;
 
 function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAppearance }) {
     const IS_HIGHLIGHT = appearance.importance === 'highlight';
@@ -87,28 +89,12 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
 }) {
     const cs = language === 'cs';
     const content = PAVOL_PAGE_CONTENT[language].media;
-    const articles = getArticles(language, 'personal');
+    const articles = getArticles(language, 'personal').slice(0, HOMEPAGE_ITEM_LIMIT);
     const podcasts = await fetchPavolPodcasts(language, revalidateSeconds);
     return <>
         <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={content.eyebrow} title={content.title} description={content.description} />
-                <h3 className="mt-10 text-xl font-medium">{cs ? 'Moje články' : 'My articles'}</h3>
-                {articles.length ? <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    {articles.map((article) => {
-                        const href = new URL(getArticleUrl(article, 'personal')).pathname;
-                        return <article key={article.id} className="pavol-article-card">
-                            <time dateTime={article.publishedAt} className="pavol-recording-meta">{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(article.publishedAt))}</time>
-                            <h4><Link href={href}>{article.title}</Link></h4>
-                            <p>{article.perex}</p>
-                            <div className="pavol-recording-actions">
-                                <ArticleAudioButton article={{ id: article.id, title: article.title, language: article.language, coverImage: article.coverImage, audio: article.audio, author: { name: article.author.name, photoUrl: article.author.photoUrl } }} href={href} publication="personal" />
-                                <Link href={href} className="pavol-source-link">{cs ? 'Číst článek' : 'Read article'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-                            </div>
-                        </article>;
-                    })}
-                </div> : <p className="mt-5 text-[var(--pavol-muted)]">{cs ? 'Nové články se objeví zde.' : 'English articles are still ahead. You can already read and listen to the Czech edition.'}{!cs && <> <a href={getArticleIndexUrl('cs', 'personal')} className="underline underline-offset-4">České články ↗</a></>}</p>}
-                <Link href="/articles" className="pavol-source-link mt-6">{cs ? 'Všechny články' : 'All articles'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
                 <details className="group/media mt-8 border-y border-[var(--pavol-border)] py-6">
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-base font-medium [&::-webkit-details-marker]:hidden">
                         <span>{content.restLabel} <span className="ml-2 font-mono text-sm font-normal text-[var(--pavol-muted)]">({PAVOL_MEDIA_APPEARANCES[language].length})</span></span>
@@ -119,13 +105,33 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
                 <a href={PAVOL_MEDIA_MORE_URL} className="pavol-source-link mt-5">{content.moreLabel}<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
             </div>
         </section>
-        <section id="podcasts" tabIndex={-1} className="pavol-section outline-none">
+        <section id="articles" tabIndex={-1} className="pavol-section outline-none">
+            <div className={PAVOL_CONTAINER_CLASS_NAME}>
+                <PavolSectionHeading eyebrow={cs ? 'Články' : 'Articles'} title={cs ? 'Moje články a myšlenky' : 'My articles and thoughts'} description={cs ? 'O AI, vývoji softwaru a rozhodnutích kolem nich. Čtěte, nebo si články poslechněte přímo tady.' : 'On AI, software development, and the decisions around them. Read or listen right here.'} />
+                {articles.length ? <div className="mt-6 grid gap-6 md:grid-cols-2">
+                    {articles.map((article) => {
+                        const href = new URL(getArticleUrl(article, 'personal')).pathname;
+                        return <article key={article.id} className="pavol-article-card">
+                            <time dateTime={article.publishedAt} className="pavol-recording-meta">{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(article.publishedAt))}</time>
+                            <h3><Link href={href}>{article.title}</Link></h3>
+                            <p>{article.perex}</p>
+                            <div className="pavol-recording-actions">
+                                <ArticleAudioButton article={{ id: article.id, title: article.title, language: article.language, coverImage: article.coverImage, audio: article.audio, author: { name: article.author.name, photoUrl: article.author.photoUrl } }} href={href} publication="personal" />
+                                <Link href={href} className="pavol-source-link">{cs ? 'Číst článek' : 'Read article'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+                            </div>
+                        </article>;
+                    })}
+                </div> : <p className="mt-5 text-[var(--pavol-muted)]">{cs ? 'Nové články se objeví zde.' : 'English articles are still ahead. You can already read and listen to the Czech edition.'}{!cs && <> <a href={getArticleIndexUrl('cs', 'personal')} className="underline underline-offset-4">České články ↗</a></>}</p>}
+                <Link href="/articles" className="pavol-source-link mt-6" aria-label={cs ? 'Zobrazit víc článků' : 'Show more articles'}>{cs ? 'Zobrazit víc' : 'Show more'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+            </div>
+        </section>
+        <section id="podcasts" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={cs ? 'Do sluchátek' : 'For your headphones'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'Conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
-                <PavolPodcastList language={language} items={podcasts.map((podcast) => ({
-                    id: podcast.id, source: podcast.source, publishedAt: podcast.publishedAt,
-                    content: <PavolPodcastCard podcast={podcast} language={language} />,
-                }))} />
+                <div className="pavol-podcast-list mt-8" data-podcast-order="smart">
+                    {sortPavolPodcasts(podcasts).slice(0, HOMEPAGE_ITEM_LIMIT).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}
+                </div>
+                <Link href="/podcasts" className="pavol-source-link mt-6" aria-label={cs ? 'Zobrazit víc podcastů' : 'Show more podcasts'}>{cs ? 'Zobrazit víc' : 'Show more'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
             </div>
         </section>
     </>;
