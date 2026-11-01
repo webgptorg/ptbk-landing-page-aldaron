@@ -1,0 +1,158 @@
+AGENT External action impact
+FROM @Void
+
+NOTE Release 1.0.0, published 2026-11-01.
+Latest source: https://ptbk.io/book/external-action-impact.book
+Immutable source: https://ptbk.io/book/external-action-impact/1.0.0.book
+This reusable knowledge has a release cycle independent of the Promptbook engine.
+
+RULE When evaluating an external action, use this methodology and the action's actual context. The executing agent estimates impact; the engine calculates aggregate impact, filtering and priority. These rules do not grant authority to perform an action or replace the project's constraints.
+
+KNOWLEDGE
+## What impact means
+
+Impact estimates the consequence an external action would have **if it succeeds**.
+It is independent of success probability, observed outcome and technical effort.
+A failed payment attempt has the impact of the intended successful payment.
+Keep its failed outcome separate; never imply that the payment was completed.
+
+Estimate impact yourself as the executing agent, using the content, recipient,
+scale, reversibility and possible consequences. Do not score only by operation
+type: a routine confirmation email and an email creating a major obligation can
+have very different impacts. Record a short contextual reason for the estimate.
+
+## What belongs in the external activity log
+
+Record meaningful operations that change or attempt to change external state:
+sending a message, attempting payment, submitting a document, publishing content
+or editing an external record. Include meaningful rejected attempts.
+
+Pure reading, searching and harmless downloads are not external actions.
+Reading Wikipedia without changing state creates no entry. Opening an email
+that marks it read is a state-changing action. Login, including data-box login,
+can change session/service state or trigger other consequences; identify the
+actual effect rather than assuming every login has the same impact.
+
+Internal project edits, planning, agent communication, engine operation, local
+Wallet maintenance and the engine's own project Git synchronization are outside
+this log. An explicit task publishing work to an external service is different
+from that internal synchronization. Supporting work with an external effect is
+still recorded. Preserve uncertainty and keep secrets out of audit records.
+
+## A decimal logarithmic scale
+
+Each additional point means **ten times the linear weight**:
+
+```text
+weight = 10^impact
+```
+
+Use finite nonnegative numbers; fractional estimates are valid. Zero is the
+lowest reference level and has weight 1, not zero weight. **6 is not a maximum.**
+An unusually consequential action can exceed it.
+
+The decimal base makes one point one familiar order of magnitude. Natural
+logarithms could express the same relationship in other units, but baseline,
+cutoff and aging would all need consistent conversion.
+
+## Reference examples
+
+| Context | Indicative impact |
+| --- | --- |
+| Reading Wikipedia without a state change | No log entry |
+| Opening an email whose only effect is marking it read | 0 |
+| Routine confirmation | 1 |
+| Emailing an export | 1-2 |
+| Action concerning an important customer | 2-3 |
+| Creating a significant obligation | 3-4 |
+| Extensive irreversible intervention | 4-6, or higher when justified |
+
+These are contextual calibration examples, never fixed scores by tool or action
+type. Projects can deliberately customize the methodology. Use a shared scale
+within a project so agent and task totals remain meaningful.
+
+## Unknown is different from zero
+
+If a defensible estimate or applicable methodology is unavailable, preserve
+**unknown** explicitly. Never substitute zero. Unknown actions remain visible in
+the default view. A group with unknown members shows its known subtotal and the
+unknown count, explicitly incomplete. An all-unknown or empty group has no
+invented numeric total.
+
+## Logical actions, retries and batches
+
+Three failed attempts and then success of the same intended payment are one
+logical action, ultimately successful. Keep the attempts in its detail. Retries
+do not multiply impact. Two actually executed payments are two actions, even if
+the second is accidental or came from a retry.
+
+Sending 1,000 campaign emails is 1,000 logical actions. When they form one bulk
+operation, assign a shared group ID and keep each action's content and outcome.
+Default grouping collapses that batch; ungrouping does not erase membership.
+Batches contain actions, never other batches. Task/agent grouping adds navigation
+levels and aggregates the same underlying actions, each counted once.
+
+## Aggregate weights, not logarithmic scores
+
+For a set of distinct logical actions with known impacts:
+
+```text
+group_impact = log10(sum(10^action_impact))
+```
+
+Use this formula for batches, tasks and agents. Do not count both a group and its
+members or count technical retries as new actions. Retain unrounded intermediate
+values so regrouping the same actions gives the same total; round only display.
+
+| Group | Aggregate impact |
+| --- | ---: |
+| 10 actions with impact 1 | 2 |
+| 100 actions with impact 1 | 3 |
+| 1,000 actions with impact 1 | 4 |
+| 10 actions with impact 0 | 1 |
+
+For numerical stability, let m be the largest member score and calculate
+`m + log10(sum(10^(score-m)))`. Handle empty and unknown sets explicitly.
+
+The default visibility cutoff is **impact >= 1**, applied after aggregation.
+Ten impact-0 actions therefore form a visible impact-1 batch. Show all and
+ungrouping are separate controls. Opening a group permits inspecting every
+member, including the small actions that explain its total. A selected subset,
+such as failed actions, has a clearly labelled filtered subtotal.
+
+## Priority: 30 days per impact point
+
+Saved impact never decreases with time. Smart sorting uses a separate priority:
+
+```text
+action_priority = impact - age_in_elapsed_days / 30
+group_priority = log10(sum(10^(impact - age_in_elapsed_days / 30)))
+```
+
+A 30-day-old impact-4 action ties a fresh impact-3 action. At the same age and
+impact, failed and successful variants tie. Thirty days is an elapsed duration,
+not a calendar month. Use the recorded action time, not task completion or the
+time a view/cache was opened or rebuilt.
+
+Age every action **before** summing its weight. A new small action must not
+rejuvenate the complete history of an agent or long-running task. Cutoff uses
+original aggregate impact, never decayed priority. A negative priority does not
+mean negative impact. Unknown priorities stay explicitly unknown.
+
+## Sources, updates and user control
+
+Preserve the effective methodology URL, release, content hash and relevant local
+Book revision/overrides with each evaluation. Keep sufficient durable source
+evidence to explain the estimate even if a remote source later changes.
+
+The latest URL can advance independently of engine releases. An immutable
+version URL stays fixed. A new release affects subsequent evaluations when
+resolved; it never silently rewrites historical impacts or replaces project
+Adam. Cached verified knowledge can remain usable during an outage with honest
+provenance; unavailable knowledge is not an impact-0 default.
+
+You can keep the reference and add local rules, pin a version, replace the URL,
+or copy this knowledge and adapt it. A modified copy has its own provenance.
+Shared guidance never overrides explicit project authority or safety limits.
+
+CLOSED

@@ -5,6 +5,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- `/book` is the primary-domain common-knowledge catalogue with English source Books. Readable topics live at
+  `/book/<slug>`; latest `/book/<slug>.book` and immutable `/book/<slug>/<version>.book` return identical
+  committed UTF-8 source for the current release, with public CORS, SHA-256 ETags and distinct caching.
+  Knowledge releases are independent of engine versions. Preserve released source bytes; publish revisions as
+  new files through `lib/common-knowledge/catalog.ts`. Unknown topics/releases return 404. Pages share brand
+  assets, dedicated social cards and sitemap entries. No account, premium billing or engine implementation is
+  introduced. See `docs/common-knowledge.md`.
+
 - Messages are database-backed, unlisted pages at `/<prefix>-<shortcode>` on one selected personal domain.
   They reserve the same eight-character codes with `generateShortcode()` and the same unique `ShortcodeLink` registry
   as ordinary links, with `sourceApp=messages`. Middleware and public routes recheck domain scope; messages render

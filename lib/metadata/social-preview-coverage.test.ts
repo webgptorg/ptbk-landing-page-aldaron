@@ -1,4 +1,5 @@
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
+import { COMMON_KNOWLEDGE_BOOKS } from '@/lib/common-knowledge/catalog';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import { createGeneratedSocialPreviewImagePath } from '@/lib/metadata/social-preview-image-path';
@@ -29,7 +30,9 @@ describe('public sharing preview coverage', () => {
             const domain = getPublicDomainRouteByHostname(imageUrl.hostname);
 
             expect(definition.isSocialPreviewImageGenerated).toBe(true);
-            expect(existsSync(join(process.cwd(), 'app', definition.path, 'opengraph-image.tsx'))).toBe(true);
+            const knownBook = COMMON_KNOWLEDGE_BOOKS.some((book) => definition.path === `/book/${book.slug}`);
+            const imageSource = knownBook ? '/book/[slug]/opengraph-image.tsx' : `${definition.path}/opengraph-image.tsx`;
+            expect(existsSync(join(process.cwd(), 'app', imageSource))).toBe(true);
             if (domain) {
                 expect(getInternalPathname(domain, imageUrl.pathname)).toBe(imagePath);
             }

@@ -42,6 +42,9 @@ export function MinimalFooter({ language = 'cs' }: { readonly language?: Support
                         <Link href="/branding" className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
                             Branding
                         </Link>
+                        <Link href="/book" className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
+                            Common knowledge
+                        </Link>
                         <LegalFooterLinks
                             language={language}
                             className="gap-x-6"

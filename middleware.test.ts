@@ -1,9 +1,9 @@
 import { config, middleware } from '@/middleware';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { hasPublicShortcodeLinkOnHostname } from '@/lib/shortener/shortcodeLinkMiddleware';
-vi.mock('@/lib/shortener/shortcodeLinkMiddleware', () => ({ hasPublicShortcodeLinkOnHostname: vi.fn() }));
-beforeEach(() => vi.mocked(hasPublicShortcodeLinkOnHostname).mockResolvedValue(false));
+import { getPublicShortcodeLinkOnHostname } from '@/lib/shortener/shortcodeLinkMiddleware';
+vi.mock('@/lib/shortener/shortcodeLinkMiddleware', () => ({ getPublicShortcodeLinkOnHostname: vi.fn() }));
+beforeEach(() => vi.mocked(getPublicShortcodeLinkOnHostname).mockResolvedValue(null));
 
 function createRequest(url: string, headers: HeadersInit = {}): NextRequest {
     return new NextRequest(url, { headers });
@@ -21,7 +21,7 @@ describe('domain middleware', () => {
     });
 
     it('rewrites an enabled short link on each branded hostname without changing its query', async () => {
-        vi.mocked(hasPublicShortcodeLinkOnHostname).mockResolvedValue(true);
+        vi.mocked(getPublicShortcodeLinkOnHostname).mockResolvedValue({ isMessage: false });
         for (const hostname of ['pavolhejny.cz', 'www.pavolhejny.com', 'ai-ta-krajta.cz']) {
             const response = await middleware(createRequest(`https://${hostname}/campaign-abc?utm_source=test`));
             expect(response.headers.get('x-middleware-rewrite')).toBe(`https://${hostname}/short-links/campaign-abc?utm_source=test`);
@@ -32,11 +32,11 @@ describe('domain middleware', () => {
         expect(image.headers.get('x-middleware-rewrite')).toBe('https://pavolhejny.cz/short-links/campaign-abc/opengraph-image?v=1');
     });
     it('keeps real branded pages and shared assets ahead of short-link lookup', async () => {
-        vi.mocked(hasPublicShortcodeLinkOnHostname).mockResolvedValue(true);
-        vi.mocked(hasPublicShortcodeLinkOnHostname).mockClear();
+        vi.mocked(getPublicShortcodeLinkOnHostname).mockResolvedValue({ isMessage: false });
+        vi.mocked(getPublicShortcodeLinkOnHostname).mockClear();
         const page = await middleware(createRequest('https://ai-ta-krajta.cz/branding'));
         expect(page.headers.get('x-middleware-rewrite')).toBe('https://ai-ta-krajta.cz/ai-ta-krajta/branding');
-        expect(hasPublicShortcodeLinkOnHostname).not.toHaveBeenCalled();
+        expect(getPublicShortcodeLinkOnHostname).not.toHaveBeenCalled();
     });
 
     it('permanently redirects legacy Promptbook paths to their independent domains and retains their query', async () => {
