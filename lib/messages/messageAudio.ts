@@ -7,6 +7,7 @@ import { getAgentDatabase } from '@/lib/agents/agentDatabase';
 import { putStoredObject, removeStoredObject } from '@/lib/storage/objectStorage';
 import { loadManagedMessage, messageTextHash } from './messageDatabase';
 import type { ManagedMessage, MessageAudio } from './messageModel';
+import { claimMessageAudioLease } from './messageAudioLease';
 
 export type CharacterAlignment = { characters: string[]; character_start_times_seconds: number[]; character_end_times_seconds: number[] };
 /** Only provider-measured character intervals can attach to exact written words; missing alignment stays absent. */
@@ -54,16 +55,7 @@ export async function generateMessageAudio(id: string, requestSignal: AbortSigna
     if (!script || script.length > 10_000) throw Object.assign(new Error('Pro namluvení musí mít zpráva nejvýše 10 000 znaků čitelného textu.'), { status: 400 });
     const client = getAgentDatabase();
     const token = randomUUID();
-    const now = new Date();
-    const { data: claim, error: claimError } = await client.from('messages')
-        .update({ audio_generation_token: token, audio_generation_until: new Date(now.getTime() + 10 * 60_000).toISOString() })
-        .eq('id', id).or(`audio_generation_until.is.null,audio_generation_until.lt.${now.toISOString()}`).select('id').maybeSingle();
-    if (claimError) {
-        // Keep the database diagnosis in private server logs; do not log row details, context or credentials.
-        console.error('Message audio lease failed.', { code: claimError.code, message: claimError.message });
-        throw new Error('Generování se nepodařilo zahájit.');
-    }
-    if (!claim) throw Object.assign(new Error('Nahrávka této zprávy se již generuje.'), { status: 409 });
+    await claimMessageAudioLease(client, id, token, new Date());
     let uploadedKey: string | null = null;
     let attached = false;
     try {

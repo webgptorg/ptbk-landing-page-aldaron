@@ -84,6 +84,11 @@ rollback/collisions, shared suffix retention and domain changes, anonymous read 
 isolation, stale audio, character timing, exports, and normal Shortener behavior.
 `2026-11-0100-message-audio-generation-lease.sql` also repairs deployed Messages tables missing either audio lease
 column, preserving existing content, recordings and active leases. It reloads the PostgREST schema after the repair.
+The speech lease uses two atomic conditional updates (unclaimed, then expired), avoiding PostgREST issue
+[#3707](https://github.com/PostgREST/postgrest/issues/3707). Older versions reapply mutation OR filters to the returned
+row: this can report a nonexistent column or hide a successful claim after updating its expiry. Selecting the expiry
+alone does not fix that second failure. Regression checks exercise the serialized Supabase requests against PostgreSQL,
+including simultaneous claims and expired leases.
 
 References: [Supabase S3 compatibility](https://supabase.com/docs/guides/storage/s3/compatibility),
 [S3 authentication](https://supabase.com/docs/guides/storage/s3/authentication),
