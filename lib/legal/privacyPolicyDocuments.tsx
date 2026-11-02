@@ -1,7 +1,7 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { COOKIE_SETTINGS_HASH } from '@/lib/legal/cookieSettingsHash';
 import type { LegalDocument } from '@/lib/legal/legalDocument';
-import { getOperatorIdentification, PRIVACY_CONTACT_EMAIL } from '@/lib/legal/legalOperator';
+import { getOperatorIdentification, PRIVACY_CONTACT_EMAIL, NEONMEDIA_IDENTIFICATION } from '@/lib/legal/legalOperator';
 import { ORGANIZATION_DATA_BOX_ID, SITE_URL } from '@/lib/metadata/site-config';
 import Link from 'next/link';
 
@@ -21,6 +21,7 @@ const SUPERVISORY_AUTHORITY_URL = 'https://uoou.gov.cz';
 export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Ochrana osobních údajů',
+        publication: { date: '2026-11-02', isDraft: false },
         perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
         sections: [
             {
@@ -38,7 +39,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
             {
                 heading: 'Jaké údaje zpracováváme',
                 paragraphs: [
-                    'Zpracováváme jen údaje, které nám sami dáte, a údaje, které o návštěvě webu vzniknou automaticky.',
+                    'Zpracováváme údaje, které nám dáte, údaje o návštěvě webu a nezbytné pracovní kontaktní údaje předané v rámci poptávky či partnerského obchodu. U kontaktu získaného jinak než přímo od vás sdělíme také dostupnou informaci o jeho zdroji.',
                 ],
                 bullets: [
                     'Údaje z formulářů: jméno a příjmení, e-mailová adresa, telefonní číslo, název firmy, fakturační údaje a text zprávy, kterou nám napíšete.',
@@ -71,7 +72,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
             {
                 heading: 'Komu údaje předáváme',
                 paragraphs: [
-                    'Osobní údaje neprodáváme. Předáváme je pouze zpracovatelům, kteří nám pomáhají provozovat web a služby, a vždy jen v nezbytném rozsahu.',
+                    'Osobní údaje neprodáváme. V nezbytném rozsahu je zpřístupňujeme níže uvedeným dodavatelům a určeným obchodním partnerům pro popsané účely. Příjemce není automaticky zpracovatelem; jeho role závisí na skutečné činnosti.',
                 ],
                 bullets: [
                     'Supabase - databáze, ve které jsou uložené kontakty z formulářů.',
@@ -80,6 +81,16 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'LogRocket - záznam chování na webu, který nám pomáhá odhalovat chyby.',
                     'YouTube - přehrávání vložených videí.',
                     'Poskytovatelé e-mailových, kalendářních a fakturačních služeb, které používáme pro běžný provoz.',
+                ],
+            },
+            {
+                heading: 'Spolupráce s Neonmedia a partnerskými agenturami',
+                paragraphs: [
+                    `Na získávání a obsluze partnerských agentur spolupracujeme se společností ${NEONMEDIA_IDENTIFICATION.cs}, kontakt krystof@neonmedia.cz. Pro vyřízení příslušné poptávky, domluvení nasazení, podporu a ověření partnerských odměn mají obě společnosti přístup k nezbytným údajům tohoto společného projektu.`,
+                    'Jde zejména o jméno a pracovní kontakt, firmu, téma poptávky, relevantní historii domluvy, přiřazenou agenturu, stav licence a platební údaje nutné pro vyúčtování. Nikoli o celé účetnictví jiných projektů, přístupové klíče nebo automatický přístup k pracovnímu obsahu klientského enginu. Údaje příslušného klienta můžeme v nezbytném rozsahu sdělit také jeho určené agentuře; její totožnost je uvedena při sjednání spolupráce.',
+                    'Účelem je společné vyřízení konkrétního požadavku, fungování partnerství a jeho doložitelné vypořádání. Právním základem je nezbytné jednání o smlouvě či její plnění, pokud jste její stranou; u pracovních kontaktů zástupců firem náš oprávněný zájem na vyřízení a evidenci obchodního vztahu. Zákonné účetní povinnosti mají vlastní právní základ. Na nesouvisející nabídky se tento účel automaticky nevztahuje.',
+                    'Pokud příjemce pracuje pouze podle našich pokynů, je zapotřebí zpracovatelské ujednání. Pokud účely a podstatné prostředky určujeme společně, je zapotřebí ujednání společných správců a zpřístupnění jeho podstaty dotčeným osobám. Samotná sdílená evidence ani tento informační text tyto smlouvy nenahrazují. Konkrétní roli a informace musí strany vyjasnit před takovým zpracováním.',
+                    'Přístup je omezen na pověřené osoby a potřebnou část projektu. Platí výše uvedené doby uchování podle účelu; spolupráce nezakládá novou neomezenou dobu uchování. Proti zpracování na oprávněném zájmu můžete vznést námitku na privacy@ptbk.io nebo kontaktovat Neonmedia. Ukončení spolupráce znamená omezení přístupů a vypořádání povinného uchování, nikoli automatické další využití kontaktů.',
                 ],
             },
             {
@@ -145,6 +156,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     },
     en: {
         title: 'Privacy Policy',
+        publication: { date: '2026-11-02', isDraft: false },
         perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or use the Promptbook services, why we do it, and which rights you have.`,
         sections: [
             {
@@ -162,7 +174,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
             {
                 heading: 'Which data we process',
                 paragraphs: [
-                    'We process only the data you give us yourself and the data which arises automatically from your visit.',
+                    'We process information you provide, website-visit information and necessary business contacts supplied for an enquiry or partner deal. Where information was not obtained directly from you, we also provide available information about its source.',
                 ],
                 bullets: [
                     'Data from forms: name, e-mail address, phone number, company name, billing details, and the message you write to us.',
@@ -195,7 +207,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
             {
                 heading: 'Who we share the data with',
                 paragraphs: [
-                    'We do not sell personal data. We share it only with processors who help us run the website and the services, and always only to the extent needed.',
+                    'We do not sell personal data. Necessary information is disclosed to the suppliers and designated business partners described below for the stated purposes. A recipient is not automatically a processor; its role follows its actual activities.',
                 ],
                 bullets: [
                     'Supabase - the database which holds the contacts from the forms.',
@@ -204,6 +216,16 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'LogRocket - a recording of behaviour on the website which helps us find bugs.',
                     'YouTube - playback of embedded videos.',
                     'Providers of the e-mail, calendar, and invoicing services we use to run the company.',
+                ],
+            },
+            {
+                heading: 'Cooperation with Neonmedia and partner agencies',
+                paragraphs: [
+                    `We cooperate in recruiting and supporting partner agencies with ${NEONMEDIA_IDENTIFICATION.en}, contact krystof@neonmedia.cz. Both companies access necessary information for this shared project to handle the relevant enquiry, arrange deployment, provide support and verify partner remuneration.`,
+                    'This includes name and business contact, company, enquiry subject, relevant communication history, assigned agency, licence status and payment information necessary for settlement. It does not include unrelated project accounts, access keys or automatic access to the client engine’s working content. Necessary client information may also be disclosed to its assigned agency, whose identity is stated when cooperation is agreed.',
+                    'The purposes are handling the specific request, operating the partnership and evidencing its settlement. The basis is necessary pre-contractual steps or contract performance where you are a party; for company representatives’ business contacts, our legitimate interest in handling and recording the business relationship. Statutory accounting has its own basis. Unrelated offers are not automatically covered.',
+                    'A recipient acting only on our instructions requires a processor agreement. Joint determination of purposes and essential means requires a joint-controller arrangement and access to its essence for affected persons. Neither shared records nor this notice replaces those agreements. The actual roles and information must be resolved before such processing.',
+                    'Access is restricted to authorised people and the necessary project scope. The purpose-specific retention periods above apply; cooperation creates no new unlimited retention. You may object to legitimate-interest processing at privacy@ptbk.io or contact Neonmedia. Ending cooperation requires restricting access and handling mandatory retention, not automatic continued reuse of contacts.',
                 ],
             },
             {

@@ -4,8 +4,6 @@ import { useSiteLocale } from './LocaleProvider';
 import { ComparisonTable } from './ComparisonTable';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { getLegalDocument } from '@/lib/legal/legalDocuments';
-import type { LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 import { AgendaShowcase } from './AgendaShowcase';
 import { Founders } from './Founders';
 import { StoryTimeline } from './StoryTimeline';
@@ -30,7 +28,7 @@ return <><PageIntro title={t("Licence pro vaši firemní agendu.")}>{t("Vyzkouš
     <h3>{t("Co je klientské prostředí?")}</h3><p>{t(COMMERCIAL_TERMS.instance)}</p>
     <h2>{t("Celkové náklady, ne jen licence")}</h2><p>{t(COMMERCIAL_TERMS.exclusions)}</p><p>{t("AI a infrastrukturu hradí klient, případně partner podle dohody. Promptbook neprodává spravovaný hosting. Cena nezahrnuje správu serveru, instalaci aktualizací, zakázkový vývoj ani neomezené konzultace.")}</p><p>{t("Aktualizace vycházejí ve standardních vydáních. Předplatné není objednávkou samostatné distribuce ani individuálního plánu oprav.")}</p><p>{t("Automatické aktualizace enginu řídí nastavení projektu. Lidská správa serveru a servisní práce partnera jsou samostatné služby.")} <Link href={path('bezpecnost#aktualizace')}>{t("Jak fungují automatické aktualizace →")}</Link></p><Link href={path('kalkulacka')}>{t("Spočítat kompletní náklady a přínosy →")}</Link>
     <h2>{t("Podpora Business")}</h2><p>{t(COMMERCIAL_TERMS.support)}</p><p>{t(COMMERCIAL_TERMS.supportWindow)}</p><p>{t("Běžnou péči zajišťuje partner. Za klientské prostředí s námi komunikuje jeden pověřený technický kontakt. Hlášení problémů platformy přijímáme na ")}{t(COMMERCIAL_TERMS.contact)}{t(".")}</p><p>{t(COMMERCIAL_TERMS.supportLimits)}</p>
-    <h2>{t("Veřejný kód a vlastní nasazení")}</h2><p>{t(COMMERCIAL_TERMS.publicLicence)}</p><p>{t(COMMERCIAL_TERMS.productionLicence)}</p><p><a href={`${ENGINE_REPOSITORY}/blob/main/LICENSE.md`}>{t("Veřejná licence enginu ↗")}</a></p>
+    <h2>{t("Veřejný kód a vlastní nasazení")}</h2><p>{t(COMMERCIAL_TERMS.publicLicence)}</p><p>{t(COMMERCIAL_TERMS.productionLicence)}</p><p><Link href={path('licence')}>{locale === 'en' ? 'Engine licence and proposed commercial terms →' : 'Licence enginu a návrh komerčních podmínek →'}</Link></p>
     <h2>{t("Více prostředí nebo jiný rozsah?")}</h2><p>{t("Připravíme individuální nabídku. Nepřetržitou lidskou podporu nenabízíme. Přesná oprávnění a podmínky stanoví objednávka, licenční smlouva a případně partnerská dohoda.")}</p><div className={s.actions}><LeadButton topic={t("Individuální rozsah a více klientských prostředí")}>{t("Probrat požadavky")}</LeadButton></div>
 </div></>;}
 
@@ -130,8 +128,3 @@ return <><PageIntro title={t("Vyberte přístup. Ne nálepku.")}>{t("Vývojový 
 export function ComparisonPage({slug}:{slug:string}){
     const { t, locale, path } = useSiteLocale();
 const item=COMPARISONS.find(item=>item.slug===slug)!;return <><PageIntro title={t(`Promptbook a ${item.name}`)}>{t(item.question)}</PageIntro><div className={s.twoColumns}><article className={s.card}><h2>{t(item.name)}</h2><p style={{marginTop:20}}>{t(item.capability)}</p><div className={s.sources}><a href={item.source}>{t(item.sourceTitle)}{t(" ↗")}</a></div></article><article className={s.card}><h2>{t("Promptbook")}</h2><p style={{marginTop:20}}>{t("Dlouhodobá agenda nad vašimi pracovními soubory a kontextem. Engine běží ve vašem prostředí, ovládání je oddělené a nasazení může zajistit partner, který zná vaši firmu.")}</p></article></div><div className={s.prose}><h2>{t("Kdy zvažovat ")}{t(item.name)}</h2><p>{t(item.fit)}</p><h2>{t("Kdy zvažovat Promptbook")}</h2><p>{t(item.difference)}</p><h2>{t("Vyzkoušejte stejný proces")}</h2><p>{t("Porovnejte na vlastních podkladech kvalitu výsledku, potřebný dohled, celkové náklady a způsob předání do provozu. Nejen cenu licence nebo jeden hezký výstup.")}</p><div className={s.actions}><LeadButton topic={t(`Srovnání Promptbooku a ${item.name}`)}>{t("Probrat můj use case")}</LeadButton><Link className={s.textLink} href={path('srovnani')}>{t("Všechna srovnání ")}<ArrowRight size={17}/></Link></div><div className={s.sources}><p>{t("Podklad: ")}<a href={item.source}>{t(item.sourceTitle)}</a>{t(". Kontrola ")}{t('reviewed' in item ? item.reviewed : '15. října 2026')}{t(". Popis alternativy vychází z jejího zdroje; vhodnost a vymezení Promptbooku jsou naše produktové doporučení. Nejde o nezávislý test nebo přehled všech funkcí.")}</p></div></div></>;}
-
-/** Reuse the canonical legal document data unchanged, inside the /new navigation shell. */
-export function NewLegalPage({kind}:{kind:LegalDocumentKind}){
-    const { t, locale, path } = useSiteLocale();
-const doc=getLegalDocument(kind,locale);return <><PageIntro title={t(doc.title)}/><article className={s.prose}><div>{t(doc.perex)}</div>{doc.sections.map((section,i) => <section key={section.heading}><h2>{i+1}{t(". ")}{t(section.heading)}</h2>{section.paragraphs?.map((paragraph,j)=><p key={j}>{t(paragraph)}</p>)}{section.bullets && <ul>{section.bullets.map((bullet,j)=><li key={j}>{t(bullet)}</li>)}</ul>}</section>)}</article></>;}

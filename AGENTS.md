@@ -5,6 +5,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- The owner's 2 November 2026 instruction authorizes legal proposal pages and their footer links on `main`.
+  `/cs|en/podminky-produktu`, `/cs|en/partnerske-podminky` and `/cs|en/licence` distinguish non-effective
+  discussion drafts from the existing version-specific licence and accepted contracts. Drafts are publicly readable
+  but noindex and excluded from sitemap; no bilateral coordinator economics are published. Legal text renders on
+  the server in `businesses/new/NewLegalPage.tsx` from the shared bilingual `lib/legal` registry. Privacy notices name
+  Neonmedia and the limited project-data purposes without claiming a notice replaces controller/processor contracts.
+  See `specs/new-contractual-pages.md`. Earlier marketing-task bans on licence edits do not override this instruction.
+
 - `/book` is the primary-domain common-knowledge catalogue with English source Books. Readable topics live at
   `/book/<slug>`; latest `/book/<slug>.book` and immutable `/book/<slug>/<version>.book` return identical
   committed UTF-8 source for the current release, with public CORS, SHA-256 ETags and distinct caching.

@@ -34,4 +34,15 @@ describe('sitemap', () => {
             expect(sitemap().find((entry) => entry.url.endsWith(`/articles/${article.slug}`))?.lastModified).toBe(article.updatedAt ?? article.publishedAt);
         }
     });
+
+    it('excludes readable legal discussion drafts from search discovery in both languages', () => {
+        const paths = sitemap().map((page) => new URL(page.url).pathname);
+        for (const language of ['cs', 'en']) {
+            expect(paths).toContain(`/${language}`);
+            expect(paths).toContain(`/${language}/soukromi`);
+            for (const draft of ['licence', 'partnerske-podminky', 'podminky-produktu']) {
+                expect(paths).not.toContain(`/${language}/${draft}`);
+            }
+        }
+    });
 });

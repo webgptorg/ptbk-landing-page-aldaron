@@ -3,7 +3,7 @@ import { Header } from '@/components/header';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getLegalDocument } from '@/lib/legal/legalDocuments';
 import type { LegalDocumentSection } from '@/lib/legal/legalDocument';
-import { getLegalDocumentEffectiveDateLabel } from '@/lib/legal/legalDocumentEffectiveDate';
+import { getLegalDocumentPublicationLabel } from '@/lib/legal/legalDocumentPublication';
 import type { LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 
 /**
@@ -64,12 +64,18 @@ export function LegalDocumentPage({
 
             <main className={`mx-auto max-w-3xl px-6 pb-24 pt-32 sm:pt-36 ${LEGAL_TEXT_CLASS_NAME}`}>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                    {getLegalDocumentEffectiveDateLabel(language)}
+                    {getLegalDocumentPublicationLabel(document, language)}
                 </p>
 
                 <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">{document.title}</h1>
 
                 <p className="mt-5 text-lg leading-relaxed text-slate-600">{document.perex}</p>
+
+                {document.publication?.notice && (
+                    <aside className="mt-6 rounded-xl border border-slate-300 bg-slate-50 p-5 text-sm leading-relaxed text-slate-700">
+                        {document.publication.notice}
+                    </aside>
+                )}
 
                 <div className="mt-12 space-y-10 border-t border-slate-200 pt-10">
                     {document.sections.map((section, sectionIndex) => (

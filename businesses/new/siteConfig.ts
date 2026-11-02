@@ -4,6 +4,7 @@ export const sitePath = (path = '') => `${NEW_SITE_BASE}${path ? `/${path.replac
 export const NEW_SITE_SECTIONS = [
     'agendy', 'partnership', 'cenik', 'srovnani', 'o-nas', 'kalkulacka',
     'bezpecnost', 'faq', 'soukromi', 'podminky', 'open-source',
+    'podminky-produktu', 'partnerske-podminky', 'licence',
 ] as const;
 
 /** Identifies public marketing paths without claiming existing workshop, article or admin routes. */

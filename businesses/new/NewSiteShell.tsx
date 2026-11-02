@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { ORGANIZATION_DATA_BOX_ID, ORGANIZATION_LEGAL_NAME, ORGANIZATION_REGISTRATION_NUMBER } from '@/lib/metadata/site-config';
 import { LEGAL_CONTACT_EMAIL, PRIVACY_CONTACT_EMAIL } from '@/lib/legal/legalOperator';
+import { getLegalLink } from '@/lib/legal/legalLinks';
 import { LeadButton, LeadCaptureProvider } from './LeadCapture';
 import { NEW_SITE_NAVIGATION, sitePath } from './siteConfig';
 import { TechnologyIncubation } from './TechnologyIncubation';
@@ -33,7 +34,7 @@ function LocalizedShell({ children }: { children: ReactNode }) {
             <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('cenik')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link></nav>
             <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('srovnani')}>{t("Srovnání")}</Link><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
             <div className={s.legalContact}><strong>{t(ORGANIZATION_LEGAL_NAME)}</strong><span>{t("IČO: ")}{t(ORGANIZATION_REGISTRATION_NUMBER)}</span><span>{t("Datová schránka: ")}{t(ORGANIZATION_DATA_BOX_ID)}</span><span>{t(LEGAL_CONTACT_EMAIL)}</span><span>{t(PRIVACY_CONTACT_EMAIL)}</span><a href="https://or-justice-cz.translate.goog/ias/ui/rejstrik-firma.vysledky?subjektId=1223693&typ=UPLNY&_x_tr_sl=cs&_x_tr_tl=en&_x_tr_hl=en-US&_x_tr_pto=wapp">{t("Obchodní rejstřík ↗")}</a></div>
-        </div><div className={s.footerBottom}><span>{t("© ")}{new Date().getFullYear()} {t(ORGANIZATION_LEGAL_NAME)}</span><div><Link href={path('soukromi')}>{t("Ochrana osobních údajů")}</Link><Link href={path('podminky')}>{t("Podmínky webu")}</Link><a href="https://linkedin.com/company/promptbook">{t("LinkedIn")}</a><a href="https://discord.gg/x3QWNaa89N">{t("Discord")}</a></div></div><TechnologyIncubation/></footer>
+        </div><div className={s.footerBottom}><span>{t("© ")}{new Date().getFullYear()} {t(ORGANIZATION_LEGAL_NAME)}</span><div><Link href={path('soukromi')}>{t("Ochrana osobních údajů")}</Link><Link href={path('podminky')}>{t("Podmínky webu")}</Link>{(['productTerms','partnerTerms','engineLicense'] as const).map(kind => { const link=getLegalLink(kind,locale); return <Link key={kind} href={link.href}>{link.text}</Link>; })}<a href="https://linkedin.com/company/promptbook">{t("LinkedIn")}</a><a href="https://discord.gg/x3QWNaa89N">{t("Discord")}</a></div></div><TechnologyIncubation/></footer>
     </div></LeadCaptureProvider>;
 }
 

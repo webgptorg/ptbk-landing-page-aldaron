@@ -1,0 +1,205 @@
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import type { LegalDocument } from '@/lib/legal/legalDocument';
+import { getOperatorIdentification, NEONMEDIA_IDENTIFICATION } from '@/lib/legal/legalOperator';
+
+/** Public agency programme proposal; it does not publish the coordinator's bilateral commercial agreement. */
+export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
+    cs: {
+        title: 'Partnerské podmínky Promptbook',
+        publication: {
+            date: '2026-11-02', isDraft: true,
+            notice: 'Neúčinný návrh pro připomínky. Nevytváří partnerský účet, provizní nárok ani smlouvu a nemění starší dohody. Konkrétní partner, přijatá verze, území, platby a případné odchylky musí být potvrzeny v partnerské smlouvě. Číselné lhůty níže jsou návrhy k jednání.',
+        },
+        perex: 'Pravidla pro agentury a integrátory, kteří přivádějí a dlouhodobě obsluhují konkrétní klientská prostředí. Odměna za software je oddělená od vlastní práce partnera a od samostatné dohody s koordinátorem programu.',
+        sections: [
+            {
+                heading: 'Strany, role a nevýhradnost',
+                paragraphs: [
+                    `Poskytovatelem produktu a plátcem sjednané provize je ${getOperatorIdentification('cs')} („AI Web“). Partnerem je podnikatel s názvem, IČO, sídlem a kontakty uvedenými v podepsané smlouvě. Koordinátorem programu může být ${NEONMEDIA_IDENTIFICATION.cs}; tím se automaticky nestává stranou každé partnerské smlouvy.`,
+                    'Partner poskytuje klientovi vlastní implementaci, první kontakt, běžnou péči a případné školení podle samostatné objednávky. AI Web dodává produkt a sjednanou produktovou podporu. Partner nesmí zavazovat AI Web bez pověření. Spolupráce je nevýhradní: obě strany mohou dodávat jiným klientům, využívat jiné technologie a spolupracovat s dalšími dodavateli.',
+                    'Kontakty podle tématu: příklady použití a partnerská koordinace — Kryštof, krystof@neonmedia.cz; obchod — Jiří Jahn, jiri@ptbk.io; technologie — Pavol Hejný, pavol@ptbk.io. Vlastník konkrétního otevřeného obchodu se určuje samostatně v evidenci.',
+                    'Program je určen pro dohodnutý produkt a kanál v České republice a na Slovensku; odlišný trh, další produkt nebo podstatně jiný distribuční model vyžaduje dohodu. Kosmetické přejmenování stejného plnění není důvodem obejít existující nárok.',
+                ],
+            },
+            {
+                heading: 'Jak se přiřazuje obchod',
+                paragraphs: [
+                    'Partner před uzavřením obchodu registruje v dohodnuté evidenci zákaznickou právnickou osobu, vymezené klientské prostředí či agendu, odpovědný kontakt a doložený původ obchodu. AI Web přiřazení potvrdí. Samotný kontakt ve firemním adresáři, cookie nebo shodné IČO nárok nezakládá.',
+                    'Přiřazení se váže na konkrétní licenci a její ekonomicky navazující předplatné, nikoli automaticky na celou skupinu firem či všechny útvary zákazníka. Tři oddělené projekty jedné velké firmy mohou mít tři partnery, pokud mají skutečně oddělené licence a doložený rozsah. Umělé dělení nebo přeznačení jediné licence nesmí vytvářet dvojí provizi.',
+                    'Při souběhu doporučení se vychází z potvrzeného obchodu a doloženého přínosu. Sporný obchod se vyřeší podle záznamů před výplatou sporné části; nesporné provize zůstávají splatné. Technická změna ID, migrace projektu nebo změna tarifu sama přiřazení neruší.',
+                ],
+            },
+            {
+                heading: 'Základní provize a vyloučené služby',
+                paragraphs: [
+                    'Základní provize je 20 % skutečně uhrazené softwarové licenční složky přivedeného a potvrzeného prostředí, bez DPH a po slevách, dobropisech, vratkách a chargebacku. Běžný poplatek platební brány základ partnera nesnižuje. U karty je rozhodující úspěšně dokončená a zachycená platba, nikoli pouhá autorizace, vytvořená objednávka nebo neuhrazená faktura.',
+                    'V základní nabídce se podíl vztahuje na Start i Business. Nevztahuje se na AI tokeny a kredity, vlastní nebo cizí infrastrukturu, platební daně ani na implementaci, konzultace, kurzy, individuální školení a jinou práci. Příjmy z vlastní práce náleží jejímu poskytovateli. Pro vlastní nákup partnera a víceúrovňové doporučování nevzniká automaticky provize.',
+                    'U balíčku obsahujícího software a spotřební služby musí být předem popsána cena způsobilé softwarové složky a skutečné odlišné plnění. Nelze dodatečně libovolně přeznačit licence na infrastrukturu jen kvůli snížení provize. Nový tarif neslibuje stejné procento z celé smíšené ceny.',
+                ],
+            },
+            {
+                heading: 'Roční předplatné a výslovný bonus',
+                paragraphs: [
+                    'Roční platba se pro výplaty rozvrhne po měsících poskytování služby. Celoroční provize se nevyplatí předem. Tento draft nezavádí roční tarif; použije se jen tehdy, pokud byl roční plán skutečně objednán a zaplacen.',
+                    'Navržená výjimka pro roční plán za cenu deseti měsíců: po dobu dvanácti hrazených měsíců partner dostává za každý měsíc 20 % referenční měsíční ceny způsobilé softwarové licenční složky bez DPH uvedené v objednávce při nákupu ročního plánu. Dva měsíce navíc tvoří zvláštní partnerský bonus. Roční příjem 10 000 Kč při referenční měsíční ceně 1 000 Kč znamená 12 × 200 Kč = 2 400 Kč, tedy 24 % roční platby. Není to 20 % skutečně zaplacené roční částky.',
+                    'Referenční cena se během tohoto předplaceného roku zpětně nemění. Další slevy, přechod na jiný plán a mimořádná roční nabídka vyžadují předem uvedený provizní základ. Vratka za neposkytnuté budoucí měsíce ruší odpovídající budoucí provizi a bonus. Již vyplacená odměna se opraví pouze v rozsahu vrácené platby za období, za které byla vyplacena; stejnou částku nelze krátit dvakrát. Povinná zákonná práva zůstávají zachována.',
+                ],
+            },
+            {
+                heading: 'Vyúčtování a opravy',
+                paragraphs: [
+                    'Navržený postup: přehled za předchozí kalendářní měsíc do 10. dne, připomínky do dalších 10 dní, zaplacení nesporné částky do 15 dní od doručení řádného dokladu, pokud jej právní a daňové nastavení vyžaduje. Není sjednáno minimální výplatní saldo. Datum 10. dne je provozní volba programu, nikoli obecný tržní standard.',
+                    'Přehled rozlišuje klientské prostředí, platbu, období, tarif, slevu, vratku, bonus, sazbu a opravy předchozích období. Partner poskytne správné fakturační a bankovní údaje. DPH z jeho odměny se řeší podle jeho skutečného daňového postavení.',
+                    'Vratka či chargeback se promítne do následujícího vyúčtování. Případný přeplatek lze započíst proti další splatné provizi; pokud další provize nevznikají, partner vrátí doložený přeplatek do 30 dní od doručení jeho vyúčtování. Jiné splátky lze sjednat individuálně. Není-li chyba partnera, nevzniká automaticky nárok přenést na něj všechny provozní poplatky nebo jiné škody.',
+                ],
+            },
+            {
+                heading: 'Kontinuita předplatného a změna partnera',
+                paragraphs: [
+                    'Pozdní platba sama neruší přiřazení. Po navrženou třicetidenní toleranci od splatnosti se pouze odloží provize; po doplacení se zúčtuje v dalším období. Delší doložená administrativní prodleva u jinak nepřerušené licence může být potvrzena v evidenci. Skutečně ukončená a později nově objednaná služba vyžaduje nové posouzení přivedení; původní partner nemá trvalou rezervaci celé firmy.',
+                    'Změna tarifu zvýší nebo sníží provizi podle nové způsobilé zaplacené částky. Již potvrzený roční bonus se řídí vlastními pravidly výše. Prostá technická migrace není odchod zákazníka.',
+                    'Zákazník může požádat o změnu obsluhující agentury. AI Web ověří žádost a datum předání, vyslechne dosavadního partnera a zachová již vzniklé nároky. AI Web potvrdí datum a budoucí přiřazení podle předem sjednaných pravidel; nesouhlas původní agentury sám neblokuje zákazníkovu změnu péče ani předání. Za stejné období se neplatí dvakrát. Není dovoleno jednostranně přepsat přiřazení jen pro úsporu provize.',
+                ],
+            },
+            {
+                heading: 'Průběžná péče a doba nároku',
+                paragraphs: [
+                    'Průběžný podíl je spojen s nepřerušenou hrazenou licencí, trváním sjednané partnerské role a skutečnou dostupností péče. Běžná automatizovaná nebo efektivní péče je řádným plněním; nevyžaduje zbytečné odpracované hodiny. Nárok není bezpodmínečný doživotní závazek.',
+                    'Pevný limit v měsících ani automatické snížení procenta zatím nejsou sjednány. Případné oddělení časově omezené akviziční odměny a obnovované odměny za péči musí mít předem konkrétní parametry ve smlouvě. Skončení akvizičního období nemá samo trestat partnera, který nadále řádně pečuje o klienta.',
+                    'Při nečinnosti následuje doložená výzva, konkrétní náprava a navržená lhůta 30 dní, pokud nejde o naléhavé porušení. Slabý výsledek při poctivém plnění není automaticky nečinnost. Již vydělané odměny nelze zpětně odebrat jen kvůli změně strategie nebo ceny.',
+                ],
+            },
+            {
+                heading: 'Ceny, slevy a změny programu',
+                paragraphs: [
+                    'Partner používá schválený ceník a slevový rámec. Odchylka potřebuje potvrzení AI Webu před příslibem klientovi. Provize standardně vychází ze skutečné ceny po slevě; roční bonus je jedinou výše popsanou výjimkou.',
+                    'Změny budoucích podmínek a cen se oznamují nejméně 60 dní předem a nekrátí vzniklé nároky ani již předplacené období. Zdražení i zlevnění může změnit budoucí výnos partnera. Konkrétní běžný cenový koridor a vypořádání mimořádné změny musí být doplněny do smlouvy; tento draft nevytváří neurčitou garanci stejného výdělku ani libovolné právo přepsat starou sazbu.',
+                    'Partner může změnu odmítnout a před její účinností ukončit budoucí účast s dohodnutým předáním. Samotné nové znění stránky automaticky nenahrazuje verzi, kterou partner přijal.',
+                ],
+            },
+            {
+                heading: 'Transparentnost a osobní údaje',
+                paragraphs: [
+                    'AI Web a oprávněný koordinátor sdílejí potřebné projektové kontakty, historii domluvy, stav licencí a finanční podklady k ověření nároků. Partner má přístup k údajům vztahujícím se k jeho obchodům; nevzniká mu přístup ke všem zákazníkům nebo celému účetnictví AI Webu. Přehled s doklady může nahradit přímé oprávnění k platebnímu účtu.',
+                    'Sdílené CRM samo neuděluje právo na jiné marketingové využití. Před zpracováním se určí skutečné role a uzavře odpovídající ujednání správců či zpracovatele. Kontakty se nesmějí používat pro nesouvisející zakázky bez právního důvodu. Pracovní soubory enginu, přístupové klíče a osobní údaje nesouvisející s programem nejsou automaticky sdílenou evidencí.',
+                    'Partner odpovídá za zákonnost svého oslovování, informování a případné souhlasy. Veřejně uvedená e-mailová adresa ani obecný oprávněný zájem samy nedávají univerzální oprávnění k rozesílání obchodních sdělení.',
+                ],
+            },
+            {
+                heading: 'Ukončení, převod produktu a odkup',
+                paragraphs: [
+                    'Běžná navržená výpověď je 60 dní, nejméně však doba vyžadovaná použitelným právem. Strany předají otevřené případy, nezbytné podklady a přístupy; zákaznická péče nesmí být zadržována kvůli vzájemnému sporu. Podstatné porušení má vlastní postup výzvy a nápravy.',
+                    'Při skončení nevznikají automaticky nové nároky z nových klientů. Dosavadní vzniklé odměny, schválené rozpracované obchody a případný omezený doběh se vypořádají podle konkrétní smlouvy. Rozsah doběhu není tímto návrhem definitivně sjednán.',
+                    'Partner předem souhlasí s postoupením smlouvy spolu s produktem nebo závodem nabyvateli, který převezme dohodnuté povinnosti; postoupení mu bude oznámeno. Nabyvatel může spolupráci převzít, nebo sjednat finanční vypořádání. Prodej samotné technologie automaticky neruší licence ani dluhy a nedává partnerovi podíl na celé kupní ceně.',
+                    'Právo jednostranně vykoupit budoucí provize musí být výslovně sjednáno s určitelným výpočtem, rozhodným dnem, lhůtou a vypořádáním již vzniklých částek. Bez této doložky lze odkup provést jen dohodou. Libovolný násobek obratu není ověřený tržní standard; neomezený závazek nelze bez další dohody vydávat za dvanáctiměsíční nárok.',
+                ],
+            },
+            {
+                heading: 'Práva k produktu a zákonné hranice',
+                paragraphs: [
+                    'Partner nezískává výhradní právo k produktu, značce, zdrojovému kódu ani zákaznické firmě. Kód smí provozovat, upravovat a zadat jinému vývojáři jen v rozsahu licence konkrétní verze. Koncem partnerské role se samy neruší práva zákazníka platně nabytá dříve.',
+                    'Použije se české právo. Pokud skutečný obsah spolupráce naplní obchodní zastoupení nebo jiný chráněný režim, tento návrh nevylučuje povinné informační povinnosti, provize, výpovědní lhůty ani zvláštní odměnu. Ujednání o zaplacených příjmech a vratkách neobchází nároky při zmaření obchodu z důvodů na straně zastoupeného.',
+                ],
+            },
+        ],
+    },
+    en: {
+        title: 'Promptbook partner terms',
+        publication: {
+            date: '2026-11-02', isDraft: true,
+            notice: 'Non-effective discussion draft. It creates no partner account, commission entitlement or agreement and does not amend earlier contracts. The specific partner, version, territory, payments and exceptions require a confirmed partner agreement. Numeric notice periods below are proposals.',
+        },
+        perex: 'Proposed rules for agencies and integrators sourcing and caring for specific client environments. Software commission is separate from the partner’s own work and the programme coordinator’s bilateral agreement.',
+        sections: [
+            {
+                heading: 'Parties, roles and non-exclusivity',
+                paragraphs: [
+                    `The product supplier and agreed commission payer is ${getOperatorIdentification('en')} ("AI Web"). The partner is the business identified by name, registration number, registered office and contacts in the signed agreement. The programme may be coordinated by ${NEONMEDIA_IDENTIFICATION.en}; this does not automatically make it a party to every partner agreement.`,
+                    'The partner supplies its own implementation, first contact, ordinary customer care and training under separate orders. AI Web supplies the product and agreed product support. The partner cannot bind AI Web without authority. Cooperation is non-exclusive: both parties may serve other customers, use other technologies and work with other suppliers.',
+                    'Contacts by topic: use cases and partner coordination — Kryštof, krystof@neonmedia.cz; sales — Jiří Jahn, jiri@ptbk.io; technology — Pavol Hejný, pavol@ptbk.io. The owner of each open deal is assigned separately in the shared records.',
+                    'The programme covers the agreed product and channel in Czechia and Slovakia. Another market, product or materially different distribution model requires agreement. Cosmetic relabelling of identical services cannot be used to avoid existing entitlements.',
+                ],
+            },
+            {
+                heading: 'Deal attribution',
+                paragraphs: [
+                    'Before closing, the partner records the customer legal entity, defined client environment or workflow, responsible contact and evidenced origin of the deal. AI Web confirms attribution. An address-book entry, cookie or matching company number alone does not create commission.',
+                    'Attribution follows the specific licence and its economically continuous subscription, not automatically the whole corporate group or every department. Three separate licensed projects at one company may have three partners with evidenced scope. Artificially splitting or relabelling one licence must not create duplicate commission.',
+                    'Competing claims are resolved from the confirmed deal and evidenced contribution before paying the disputed portion; undisputed commission remains payable. Technical ID changes, project migration or plan changes do not by themselves cancel attribution.',
+                ],
+            },
+            {
+                heading: 'Base commission and excluded services',
+                paragraphs: [
+                    'Base commission is 20% of the actually paid software licence component of the sourced, confirmed environment, excluding VAT and after discounts, credits, refunds and chargebacks. Ordinary payment-processing fees do not reduce the partner base. Card payment means successfully completed capture, not an authorisation, order or unpaid invoice.',
+                    'The base offer includes Start and Business. AI tokens and credits, infrastructure, payment taxes, implementation, consulting, courses, individual training and other work are excluded. Service income belongs to its provider. The partner’s own purchase and multi-level referrals do not automatically earn commission.',
+                    'A mixed software and consumption plan must identify the eligible software price and genuinely different services in advance. Licence revenue cannot later be arbitrarily relabelled as infrastructure to reduce commission. New plans do not promise the same rate on the entire blended price.',
+                ],
+            },
+            {
+                heading: 'Annual prepayment and express bonus',
+                paragraphs: [
+                    'Annual payments are allocated across months of service for commission payouts; the whole year is not paid to the partner immediately. This draft does not launch an annual plan and applies only if one is actually ordered and paid.',
+                    'Proposed exception for an annual plan priced at ten monthly payments: for twelve paid service months, the partner receives 20% of the reference monthly price of the eligible software licence component excluding VAT, stated in the order at annual purchase. The extra two months are a specific partner bonus. Annual receipts of 10,000 CZK at a reference monthly price of 1,000 CZK produce 12 × 200 CZK = 2,400 CZK, or 24% of annual receipts. This is not 20% of the actual annual payment.',
+                    'The reference price is not retrospectively changed during that prepaid year. Additional discounts, plan changes and special annual offers require an identified commission base in advance. A refund for unprovided future months cancels the corresponding future commission and bonus. Paid remuneration is adjusted only for refunded payment attributable to the period it covered; the same amount is not reduced twice. Mandatory rights remain intact.',
+                ],
+            },
+            {
+                heading: 'Statements and adjustments',
+                paragraphs: [
+                    'Proposed procedure: prior calendar-month statement by day 10, comments within the next 10 days, and undisputed payment within 15 days of receipt of a valid document where required by the applicable tax arrangements. No minimum payout balance is specified. Day 10 is a programme operating choice, not a universal market standard.',
+                    'Statements identify the environment, payment, period, plan, discount, refund, bonus, rate and prior adjustments. Partners provide accurate billing and bank details; VAT on their remuneration follows their actual tax status.',
+                    'Refunds and chargebacks are corrected in the next statement. A documented overpayment may be offset against future payable commission; absent further commission, the partner repays the evidenced overpayment within 30 days of its statement. Different instalments may be individually agreed. Without partner fault, all operating fees and other losses are not automatically shifted to the partner.',
+                ],
+            },
+            {
+                heading: 'Subscription continuity and partner changes',
+                paragraphs: [
+                    'Late payment alone does not cancel attribution. During the proposed 30-day tolerance from the due date, commission is deferred and paid in a following statement once collected. Longer evidenced administrative delay on an otherwise uninterrupted licence can be confirmed in the records. Genuine termination and a later new order require attribution to be reassessed; the old partner does not permanently reserve the whole company.',
+                    'Upgrades and downgrades adjust commission to the eligible paid price. A confirmed annual bonus follows its separate rules above. A technical migration is not customer churn.',
+                    'Customers may request a different servicing agency. AI Web verifies the request and handover date, hears the existing partner and preserves accrued rights. AI Web confirms the date and future attribution under the previously agreed rules; the old agency’s disagreement alone does not block the customer’s change or handover. The same period is not paid twice. Attribution cannot be changed merely to save commission.',
+                ],
+            },
+            {
+                heading: 'Ongoing care and entitlement duration',
+                paragraphs: [
+                    'Recurring share is linked to an uninterrupted paid licence, the agreed partner role and actual availability of care. Efficient or automated care is proper performance; unnecessary working hours are not required. The entitlement is not an unconditional lifetime promise.',
+                    'No fixed monthly cap or automatic rate reduction has yet been agreed. Any split between limited acquisition remuneration and renewable care remuneration needs explicit contract parameters in advance. Expiry of acquisition remuneration should not itself penalise a partner still properly caring for a customer.',
+                    'Inactivity triggers an evidenced notice, specific remedy and proposed 30-day cure period unless the breach is urgent. Honest work with weak results is not automatically inactivity. Earned amounts cannot be retrospectively confiscated merely because strategy or pricing changes.',
+                ],
+            },
+            {
+                heading: 'Prices, discounts and programme changes',
+                paragraphs: [
+                    'Partners use the approved price list and discount authority. Exceptions need AI Web confirmation before a customer promise. Commission normally follows the actual discounted price; the annual bonus is the express exception above.',
+                    'Future price and programme changes require at least 60 days’ notice and do not reduce accrued entitlements or prepaid periods. Increases and reductions may both change future partner income. A specific ordinary pricing corridor and extraordinary-change settlement must be added to the agreement; this draft creates neither an indefinite same-income guarantee nor arbitrary power to rewrite an old rate.',
+                    'A partner may reject a change and end future participation with an agreed handover before it takes effect. A new webpage does not automatically replace the version previously accepted.',
+                ],
+            },
+            {
+                heading: 'Transparency and personal data',
+                paragraphs: [
+                    'AI Web and the authorised coordinator share necessary project contacts, communication history, licence status and financial evidence. Partners access records for their own deals, not all customers or AI Web’s entire accounts. A statement with supporting records can replace direct payment-account access.',
+                    'Shared CRM does not authorise unrelated marketing. Actual roles and the necessary controller or processor arrangement are established before processing. Contacts cannot be reused for unrelated projects without a lawful basis. Engine working files, access keys and unrelated personal data are not automatically shared records.',
+                    'Partners are responsible for lawful outreach, transparency and required consents. A publicly listed email address or general legitimate interest alone does not universally authorise sending commercial messages.',
+                ],
+            },
+            {
+                heading: 'Termination, product transfer and buyout',
+                paragraphs: [
+                    'Ordinary proposed notice is 60 days, or longer where applicable law requires. Parties hand over open matters, necessary records and access; customer care must not be withheld because of their dispute. Material breach has a separate notice and cure procedure.',
+                    'Termination does not automatically create new entitlements for new customers. Accrued remuneration, approved open deals and any limited tail follow the specific agreement. This draft does not finally agree the tail scope.',
+                    'Partners give advance consent to assignment with the product or business to an acquirer assuming the agreed duties, with notice of assignment. An acquirer may continue cooperation or agree a settlement. Selling the technology alone does not cancel licences or debts and grants no automatic share in the whole purchase price.',
+                    'Unilateral purchase of future commission requires an express clause with a determinable calculation, valuation date, notice and separate settlement of accrued amounts. Without it, buyout is by agreement only. An arbitrary revenue multiple is not a verified market standard; an unlimited entitlement cannot simply be treated as a twelve-month claim.',
+                ],
+            },
+            {
+                heading: 'Product rights and mandatory law',
+                paragraphs: [
+                    'Partners acquire no exclusive ownership of the product, brand, source or customer company. Running, modifying or engaging another developer follows the licence of the specific version. Ending a partner role does not by itself terminate rights a customer already validly acquired.',
+                    'Czech law applies. If the actual activities constitute commercial agency or another protected relationship, this proposal does not waive mandatory information duties, commissions, notice or termination compensation. Paid-receipt and refund clauses do not circumvent rights where the principal caused non-performance of a deal.',
+                ],
+            },
+        ],
+    },
+};

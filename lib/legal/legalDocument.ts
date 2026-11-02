@@ -27,6 +27,13 @@ export type LegalDocumentSection = {
  *       legal page of the site looks the same.
  */
 export type LegalDocument = {
+    /** Versioned publication status; a draft never becomes binding just by being displayed. */
+    readonly publication?: {
+        readonly date: string;
+        readonly isDraft: boolean;
+        readonly notice?: string;
+    };
+
     /**
      * Headline of the document
      */

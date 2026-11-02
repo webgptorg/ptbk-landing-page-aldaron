@@ -42,6 +42,18 @@ const LEGAL_PAGE_METADATA_TEXTS: Readonly<
                 'The rules for using the Promptbook website and services, community membership, event registrations, payments, and withdrawal.',
         },
     },
+    productTerms: {
+        cs: { title: 'Podmínky produktu · návrh | Promptbook', description: 'Návrh B2B pravidel předplatného, podpory, cenových změn a převodu produktu. Dosud neúčinný.' },
+        en: { title: 'Product terms · draft | Promptbook', description: 'Non-effective B2B proposal covering subscriptions, support, price changes and product transfers.' },
+    },
+    partnerTerms: {
+        cs: { title: 'Partnerské podmínky · návrh | Promptbook', description: 'Návrh pravidel přivedení klienta, licenčních provizí, ročních plateb a předání péče. Dosud neúčinný.' },
+        en: { title: 'Partner terms · draft | Promptbook', description: 'Non-effective proposal covering deal attribution, licence commission, annual payments and customer handover.' },
+    },
+    engineLicense: {
+        cs: { title: 'Licence enginu | Promptbook', description: 'Dosavadní licence konkrétní verze a neúčinný návrh komerčního použití a pokračování vlastního provozu.' },
+        en: { title: 'Engine licence | Promptbook', description: 'Existing version-specific licensing and a non-effective proposal for commercial use and independent operation.' },
+    },
 };
 
 /**
@@ -70,6 +82,7 @@ function createLegalPageDefinition(
         languageAlternates: LEGAL_PAGE_PATHS[kind],
         sitemapPriority: LEGAL_PAGE_SITEMAP_PRIORITY,
         sitemapChangeFrequency: 'yearly',
+        isIndexed: kind === 'privacyPolicy' || kind === 'termsAndConditions',
     };
 }
 
@@ -84,6 +97,18 @@ export const LEGAL_PAGE_DEFINITIONS: Readonly<
         cs: createLegalPageDefinition('termsAndConditions', 'cs'),
         en: createLegalPageDefinition('termsAndConditions', 'en'),
     },
+    productTerms: {
+        cs: createLegalPageDefinition('productTerms', 'cs'),
+        en: createLegalPageDefinition('productTerms', 'en'),
+    },
+    partnerTerms: {
+        cs: createLegalPageDefinition('partnerTerms', 'cs'),
+        en: createLegalPageDefinition('partnerTerms', 'en'),
+    },
+    engineLicense: {
+        cs: createLegalPageDefinition('engineLicense', 'cs'),
+        en: createLegalPageDefinition('engineLicense', 'en'),
+    },
 };
 
 /**
@@ -94,6 +119,12 @@ export const LEGAL_PAGE_DEFINITION_LIST: readonly PageMetadataDefinition[] = [
     LEGAL_PAGE_DEFINITIONS.privacyPolicy.en,
     LEGAL_PAGE_DEFINITIONS.termsAndConditions.cs,
     LEGAL_PAGE_DEFINITIONS.termsAndConditions.en,
+    LEGAL_PAGE_DEFINITIONS.productTerms.cs,
+    LEGAL_PAGE_DEFINITIONS.productTerms.en,
+    LEGAL_PAGE_DEFINITIONS.partnerTerms.cs,
+    LEGAL_PAGE_DEFINITIONS.partnerTerms.en,
+    LEGAL_PAGE_DEFINITIONS.engineLicense.cs,
+    LEGAL_PAGE_DEFINITIONS.engineLicense.en,
 ];
 
 /**
@@ -109,5 +140,17 @@ export const LEGAL_PAGE_METADATA: Readonly<
     termsAndConditions: {
         cs: createPageMetadata(LEGAL_PAGE_DEFINITIONS.termsAndConditions.cs),
         en: createPageMetadata(LEGAL_PAGE_DEFINITIONS.termsAndConditions.en),
+    },
+    productTerms: {
+        cs: createPageMetadata(LEGAL_PAGE_DEFINITIONS.productTerms.cs),
+        en: createPageMetadata(LEGAL_PAGE_DEFINITIONS.productTerms.en),
+    },
+    partnerTerms: {
+        cs: createPageMetadata(LEGAL_PAGE_DEFINITIONS.partnerTerms.cs),
+        en: createPageMetadata(LEGAL_PAGE_DEFINITIONS.partnerTerms.en),
+    },
+    engineLicense: {
+        cs: createPageMetadata(LEGAL_PAGE_DEFINITIONS.engineLicense.cs),
+        en: createPageMetadata(LEGAL_PAGE_DEFINITIONS.engineLicense.en),
     },
 };

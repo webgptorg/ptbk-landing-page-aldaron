@@ -2,13 +2,15 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { NewLandingPage } from '@/businesses/new/NewLandingPage';
 import { OpenSourcePage } from '@/businesses/new/OpenSourcePage';
-import { AgendasPage, AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage, NewLegalPage, PageIntro } from '@/businesses/new/InformationPages';
+import { AgendasPage, AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage, PageIntro } from '@/businesses/new/InformationPages';
 import { EconomicsCalculator } from '@/businesses/new/EconomicsCalculator';
 import { CalculatorUrlSync } from '@/businesses/new/CalculatorUrlSync';
 import { COMPARISONS } from '@/businesses/new/comparisons';
 import { SCENARIOS, type ScenarioId } from '@/businesses/new/economics';
 import { newPageMetadata, OPEN_SOURCE_PAGE_COPY, NEW_PAGE_DEFINITIONS, PARTNERSHIP_PAGE_DEFINITIONS, NEW_EN_METADATA, PARTNERSHIP_EN_METADATA } from '@/businesses/new/newMetadata';
 import { translate } from '@/businesses/new/localization';
+import { NewLegalPage } from '@/businesses/new/NewLegalPage';
+import { LEGAL_PAGE_METADATA } from '@/lib/legal/legalPageMetadata';
 import s from '@/businesses/new/site.module.css';
 const pages: Record<string, [string, string]> = {
     '': [NEW_PAGE_DEFINITIONS.en.title, NEW_PAGE_DEFINITIONS.en.description],
@@ -23,6 +25,9 @@ const pages: Record<string, [string, string]> = {
     soukromi: ['Privacy policy', 'Personal data processing policy of AI Web s.r.o., operator of Promptbook.'],
     podminky: ['Website terms', 'Terms of use for the Promptbook website operated by AI Web s.r.o.'],
     'open-source': [...OPEN_SOURCE_PAGE_COPY.en],
+    'podminky-produktu': ['Product terms · draft', 'Non-effective subscription and support proposal.'],
+    'partnerske-podminky': ['Partner terms · draft', 'Non-effective agency programme proposal.'],
+    licence: ['Engine licence', 'Version-specific licensing and a commercial proposal.'],
 };
 type Props = { params: Promise<{ path?: string[] }>; searchParams: Promise<{ testimonials?: string | string[] }> };
 export function generateStaticParams() {
@@ -33,6 +38,9 @@ export async function generateMetadata({ params }: Props) {
     const key = route.join('/');
     if (key === '') return NEW_EN_METADATA;
     if (key === 'partnership') return PARTNERSHIP_EN_METADATA;
+    if (key === 'podminky-produktu') return LEGAL_PAGE_METADATA.productTerms.en;
+    if (key === 'partnerske-podminky') return LEGAL_PAGE_METADATA.partnerTerms.en;
+    if (key === 'licence') return LEGAL_PAGE_METADATA.engineLicense.en;
     if (pages[key]) return newPageMetadata(key, ...pages[key], 'en');
     if (route.length === 2 && route[0] === 'agendy' && Object.hasOwn(SCENARIOS, route[1])) {
         const item = SCENARIOS[route[1] as ScenarioId];
@@ -57,8 +65,11 @@ export default async function Page({ params, searchParams }: Props) {
         case 'o-nas': return <StoryPage/>;
         case 'bezpecnost': return <SecurityPage/>;
         case 'faq': return <FaqPage/>;
-        case 'soukromi': return <NewLegalPage kind="privacyPolicy"/>;
-        case 'podminky': return <NewLegalPage kind="termsAndConditions"/>;
+        case 'soukromi': return <NewLegalPage kind="privacyPolicy" language="en"/>;
+        case 'podminky': return <NewLegalPage kind="termsAndConditions" language="en"/>;
+        case 'podminky-produktu': return <NewLegalPage kind="productTerms" language="en"/>;
+        case 'partnerske-podminky': return <NewLegalPage kind="partnerTerms" language="en"/>;
+        case 'licence': return <NewLegalPage kind="engineLicense" language="en"/>;
         case 'kalkulacka': return <><PageIntro title="See the whole picture.">Licence, AI, operations, your time and setup. Every assumption in one place.</PageIntro><Suspense fallback={null}><CalculatorUrlSync/></Suspense><div className={s.calculatorPage}><EconomicsCalculator advanced/></div></>;
         default: notFound();
     }

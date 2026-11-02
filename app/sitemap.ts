@@ -9,6 +9,7 @@ import { NEW_SITE_SECTIONS } from '@/businesses/new/siteConfig';
 import { localizedPath } from '@/businesses/new/localization';
 import { SCENARIOS } from '@/businesses/new/economics';
 import { COMPARISONS } from '@/businesses/new/comparisons';
+import { LEGAL_PAGE_DEFINITION_LIST } from '@/lib/legal/legalPageMetadata';
 
 export const dynamic = 'force-static';
 
@@ -59,6 +60,10 @@ function createSitemapEntry(definition: PageMetadataDefinition): MetadataRoute.S
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
 export default function sitemap(): MetadataRoute.Sitemap {
+    // Navigable marketing routes can also be non-indexed discussion drafts.
+    const excludedLegalUrls = new Set(LEGAL_PAGE_DEFINITION_LIST
+        .filter((definition) => definition.isIndexed === false)
+        .map((definition) => createAbsoluteUrl(definition.path)));
     const marketingPaths = ['', ...NEW_SITE_SECTIONS,
         ...Object.keys(SCENARIOS).map(id => `agendy/${id}`),
         ...COMPARISONS.map(item => `srovnani/${item.slug}`),
@@ -71,7 +76,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             cs: createAbsoluteUrl(localizedPath(path, 'cs')),
             en: createAbsoluteUrl(localizedPath(path, 'en')),
         } },
-    })));
+    }))).filter((page) => !excludedLegalUrls.has(page.url));
     const marketingUrls = new Set(marketingPages.map(page => page.url));
     const pages = INDEXED_PAGE_METADATA_DEFINITIONS.filter(
         (definition) => new URL(createAbsoluteUrl(definition.path)).origin === PRIMARY_SITE_URL &&

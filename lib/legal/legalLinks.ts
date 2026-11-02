@@ -23,12 +23,17 @@ const LEGAL_LINK_TEXTS: Readonly<Record<LegalDocumentKind, Readonly<Record<Suppo
         cs: 'Obchodní podmínky',
         en: 'Terms and Conditions',
     },
+    productTerms: { cs: 'Podmínky produktu · návrh', en: 'Product terms · draft' },
+    partnerTerms: { cs: 'Partnerské podmínky · návrh', en: 'Partner terms · draft' },
+    engineLicense: { cs: 'Licence enginu', en: 'Engine licence' },
 };
 
 /**
  * Order in which the legal documents are listed wherever all of them are offered at once
  */
-const LEGAL_DOCUMENT_KINDS: readonly LegalDocumentKind[] = ['privacyPolicy', 'termsAndConditions'];
+const LEGAL_DOCUMENT_KINDS: readonly LegalDocumentKind[] = [
+    'privacyPolicy', 'termsAndConditions', 'productTerms', 'partnerTerms', 'engineLicense',
+];
 
 /**
  * Builds the link to one legal document

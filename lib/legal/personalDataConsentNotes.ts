@@ -31,21 +31,21 @@ const PERSONAL_DATA_CONSENT_NOTES: Readonly<
 > = {
     cs: {
         formal: {
-            prefix: 'Odesláním souhlasíte se zpracováním osobních údajů podle ',
-            privacyPolicyLinkText: 'zásad ochrany osobních údajů',
+            prefix: 'Jak zpracováváme osobní údaje a s kým je sdílíme, popisují naše ',
+            privacyPolicyLinkText: 'zásady ochrany osobních údajů',
         },
         informal: {
-            prefix: 'Odesláním souhlasíš se zpracováním osobních údajů podle ',
-            privacyPolicyLinkText: 'zásad ochrany osobních údajů',
+            prefix: 'Jak zpracováváme osobní údaje a s kým je sdílíme, popisují naše ',
+            privacyPolicyLinkText: 'zásady ochrany osobních údajů',
         },
     },
     en: {
         formal: {
-            prefix: 'By submitting, you agree to the processing of your personal data under our ',
+            prefix: 'How we process and share personal data is explained in our ',
             privacyPolicyLinkText: 'privacy policy',
         },
         informal: {
-            prefix: 'By submitting, you agree to the processing of your personal data under our ',
+            prefix: 'How we process and share personal data is explained in our ',
             privacyPolicyLinkText: 'privacy policy',
         },
     },

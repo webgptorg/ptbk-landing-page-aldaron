@@ -8,6 +8,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 
 ## Rozcestník specifikace
 
+- [Smluvní a licenční návrhy](new-contractual-pages.md): výslovně schválené zveřejnění návrhů z 2. listopadu, stav účinnosti, partnerství, licence a informační povinnost při sdílení údajů.
 - [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
 - [Bezpečnost a autonomie](new-security-and-autonomy.md): zero trust, lokální a vzdálené ovládání, pevná pravidla, učení a aktualizace enginu.
 - [Vlastní instalace](new-open-source-page.md): prompty pro instalaci pomocí AI na počítač nebo VPS, npm, shell, Windows EXE, VPS/cloud a pomoc s nasazením.

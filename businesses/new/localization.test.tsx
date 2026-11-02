@@ -6,7 +6,8 @@ import { SiteLocaleProvider } from './LocaleProvider';
 import { LeadCaptureProvider } from './LeadCapture';
 import { NewLandingPage } from './NewLandingPage';
 import { OpenSourcePage } from './OpenSourcePage';
-import { AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage, NewLegalPage } from './InformationPages';
+import { AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage } from './InformationPages';
+import { NewLegalPage } from './NewLegalPage';
 import { EconomicsCalculator } from './EconomicsCalculator';
 import { createCalculationPdfDefinition } from './calculationPdf';
 import { COMPARISONS } from './comparisons';
@@ -59,7 +60,13 @@ describe('bilingual launch site', () => {
         expect(links.every(link=>link?.startsWith('/en'))).toBe(true);
     });
     it('retains localized legal documents and a sourced comparison table with all ten alternatives', () => {
-        expect(text(<NewLegalPage kind="privacyPolicy"/>)).toContain('Privacy');
+        expect(text(<NewLegalPage kind="privacyPolicy" language="en"/>)).toContain('Privacy');
+        for (const kind of ['productTerms', 'partnerTerms', 'engineLicense'] as const) {
+            const rendered=text(<NewLegalPage kind={kind} language="en"/>);
+            expect(rendered).toContain('Draft for discussion');
+            expect(rendered).toContain('2026');
+            expect(rendered).not.toContain('Návrh k projednání');
+        }
         const element=document.createElement('div');element.innerHTML=html(<ComparisonsPage/>);
         expect(element.querySelectorAll('tbody tr').length).toBe(11);
         for (const slug of ['grok-bot','openai-dots','meta-muse','chatgpt']) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();

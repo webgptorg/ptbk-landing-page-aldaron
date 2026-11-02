@@ -26,7 +26,7 @@ describe('message audio claims through Supabase requests', () => {
             const url = new URL(String(input));
             requests.push(url);
             expect(init?.method).toBe('PATCH');
-            const body = JSON.parse(String(init?.body));
+            const body = JSON.parse(String(init?.body)) as { audio_generation_token: string; audio_generation_until: string };
             const columns = (url.searchParams.get('select') || '').split(',');
             expect(columns.every((column) => ['id', 'audio_generation_until'].includes(column))).toBe(true);
             const or = url.searchParams.get('or');
