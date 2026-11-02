@@ -1,3 +1,4 @@
+import { getPavolEpisodeCopy, getPavolAppearanceCopy } from './pavolPodcastCopy';
 import type { AiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
 import { AI_TA_KRAJTA_COVER_IMAGE_PATH, AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
 import { createAiTaKrajtaEpisodePath } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
@@ -11,6 +12,9 @@ export type PavolPodcast = {
     readonly prominence?: number;
     readonly source: string;
     readonly title: string;
+    readonly originalTitle?: string;
+    readonly episodeLabel?: string;
+    readonly textLanguage?: SupportedHomepageLanguage;
     readonly description: string;
     readonly href: string;
     readonly publishedAt: string;
@@ -30,13 +34,14 @@ export type PavolPodcastAppearance = Omit<PavolPodcast, 'description'> & {
 };
 
 /** The show's resolved roster remains the single authority for participation. */
-export function getPavolAiTaKrajtaPodcasts(episodes: readonly AiTaKrajtaEpisode[]): PavolPodcast[] {
+export function getPavolAiTaKrajtaPodcasts(episodes: readonly AiTaKrajtaEpisode[], language: SupportedHomepageLanguage = 'cs'): PavolPodcast[] {
     return episodes.filter((episode) => episode.personIds.includes('pavol-hejny')).map((episode) => ({
         id: `ai-ta-krajta:${episode.slug}`,
         source: AI_TA_KRAJTA_NAME,
         prominence: 2,
-        title: episode.shortTitle,
-        description: episode.summary,
+        ...getPavolEpisodeCopy(episode, language),
+        episodeLabel: /^\d+(?:-\d+)?$/.test(episode.slug) ? `#${episode.slug}` : episode.number !== null ? `#${episode.number}` : undefined,
+        textLanguage: language,
         href: createPublicUrl(createAiTaKrajtaEpisodePath(episode.slug)),
         publishedAt: episode.publishedAt,
         language: 'cs' as const,
@@ -60,7 +65,8 @@ export function resolvePavolPodcastAppearance(
         id: appearance.id,
         source: appearance.source,
         prominence: appearance.prominence,
-        title: appearance.title,
+        title: getPavolAppearanceCopy(appearance.id, language)?.title ?? appearance.title,
+        textLanguage: language,
         description: appearance.description[language],
         href: appearance.href,
         publishedAt: appearance.publishedAt,

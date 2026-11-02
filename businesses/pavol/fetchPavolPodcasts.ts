@@ -21,5 +21,5 @@ export async function fetchPavolPodcasts(language: SupportedHomepageLanguage, re
     const appearances = PAVOL_PODCAST_APPEARANCES.map((appearance, index) =>
         resolvePavolPodcastAppearance(appearance, feeds[index].episodes, language),
     );
-    return mergePavolPodcasts(appearances, getPavolAiTaKrajtaPodcasts(episodes));
+    return mergePavolPodcasts(appearances, getPavolAiTaKrajtaPodcasts(episodes, language));
 }

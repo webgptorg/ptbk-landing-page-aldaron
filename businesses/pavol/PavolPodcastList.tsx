@@ -21,7 +21,7 @@ export function PavolPodcastList({ items, language }: {
     const [query, setQuery] = useState('');
     const [source, setSource] = useState('');
     const words = createSearchWords(query);
-    const sources = [...new Set(items.map(item => item.source))].sort();
+    const sources = Array.from(new Set(items.map(item => item.source))).sort();
     const filtered = items.filter(item => (!source || item.source === source) && isTextMatchingSearchWords(item.searchText ?? item.source, words));
     const descriptionId = useId();
     const cs = language === 'cs';

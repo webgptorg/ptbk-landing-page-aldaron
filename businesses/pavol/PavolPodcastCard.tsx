@@ -11,7 +11,7 @@ export function PavolPodcastCard({ podcast, language, headingAs: Heading = 'h3' 
 }) {
     const cs = language === 'cs';
     const track = createPavolPodcastTrack(podcast, language);
-    const descriptionLanguage = podcast.source === 'AI ta Krajta' ? 'cs' : language;
+    const descriptionLanguage = podcast.textLanguage ?? language;
     const hasFullDescription = podcast.description.length > 180;
     const preview = hasFullDescription
         ? podcast.description.slice(0, 180).replace(/\s+\S*$/, '').trimEnd() + '…'
@@ -25,12 +25,12 @@ export function PavolPodcastCard({ podcast, language, headingAs: Heading = 'h3' 
         </div>
         <div className="pavol-podcast-content">
             <div className="pavol-recording-meta">
-                <span className="pavol-podcast-source">{podcast.source}</span>
+                <span className="pavol-podcast-source">{podcast.source} {podcast.episodeLabel}</span>
                 <time dateTime={podcast.publishedAt}>{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(podcast.publishedAt))}</time>
                 {podcast.durationInSeconds !== null && <span className="pavol-podcast-duration"><Clock3 size={12} aria-hidden="true" />{formatPodcastEpisodeDuration(podcast.durationInSeconds)}</span>}
                 {language !== podcast.language && <span className="pavol-language-badge" aria-label={podcast.language === 'cs' ? 'Audio in Czech' : 'Audio in English'}>{podcast.language === 'cs' ? <svg viewBox="0 0 30 20" width="18" height="12" className="shrink-0 rounded-[1px]" aria-hidden="true"><rect width="30" height="20" fill="#fff" /><path d="M0 10h30v10H0z" fill="#d7141a" /><path d="M0 0l15 10L0 20z" fill="#11457e" /></svg> : <span aria-hidden="true">EN</span>} {podcast.language === 'cs' ? 'Czech' : 'English'}</span>}
             </div>
-            <Heading lang={podcast.language}><a href={podcast.href}>{podcast.title}</a></Heading>
+            <Heading lang={podcast.textLanguage ?? podcast.language}><a href={podcast.href}>{podcast.title}</a></Heading>
             {hasFullDescription ? <details className="pavol-podcast-description">
                 <summary>
                     <span className="pavol-podcast-excerpt" lang={descriptionLanguage}>{preview}</span>

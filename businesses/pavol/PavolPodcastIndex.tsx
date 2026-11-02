@@ -28,7 +28,7 @@ export async function PavolPodcastIndex({ language, revalidateSeconds }: {
                     <PavolSectionHeading as="h1" eyebrow={cs ? 'Podcasty' : 'Podcasts'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Všechny rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'All conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
                     <div className="my-6"><ArticleRssLink language={language} url={getArticlePodcastUrl(language, 'personal')} /></div>
                     <PavolPodcastList language={language} items={podcasts.map((podcast) => ({
-                        searchText: `${podcast.source} ${podcast.title} ${podcast.description}`,
+                        searchText: `${podcast.source} ${podcast.title} ${podcast.originalTitle ?? ""} ${podcast.description}`,
                         id: podcast.id, source: podcast.source, publishedAt: podcast.publishedAt, prominence: podcast.prominence,
                         content: <PavolPodcastCard podcast={podcast} language={language} headingAs="h2" />,
                     }))} />
