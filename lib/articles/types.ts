@@ -31,6 +31,7 @@ export type Article = {
     readonly perex: string;
     readonly publishedAt: string;
     readonly updatedAt?: string;
+    readonly prominence?: number;
     readonly tags: readonly string[];
     readonly coverImage?: string;
     readonly markdown: string;
@@ -46,6 +47,7 @@ export type ArticleEditorialMetadata = Pick<Article, 'id' | 'translationGroupId'
     readonly updatedAt?: string;
     readonly tags?: readonly string[];
     readonly coverImage?: string;
+    readonly prominence?: number;
     readonly status?: 'published' | 'draft';
 };
 

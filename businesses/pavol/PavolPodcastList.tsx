@@ -5,7 +5,7 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { sortPavolPodcasts, type PavolPodcastOrder } from './pavolPodcastOrder';
 import type { PavolPodcast } from './pavolPodcasts';
 
-type PodcastListItem = Pick<PavolPodcast, 'id' | 'source' | 'publishedAt'> & {
+type PodcastListItem = Pick<PavolPodcast, 'id' | 'source' | 'publishedAt' | 'prominence'> & {
     readonly content: ReactNode;
 };
 
@@ -18,11 +18,11 @@ export function PavolPodcastList({ items, language }: {
     const descriptionId = useId();
     const cs = language === 'cs';
     const descriptions = cs ? {
-        smart: 'Nejnovější díl první, pak střídání pořadů.',
+        smart: 'Kombinace aktuálnosti, redakční relevance a různých pořadů.',
         newest: 'Všechny díly podle data od nejnovějšího.',
         oldest: 'Všechny díly podle data od nejstaršího.',
     } : {
-        smart: 'Newest episode first, then alternating shows.',
+        smart: 'A mix of recency, editorial relevance, and different shows.',
         newest: 'All episodes by date, newest first.',
         oldest: 'All episodes by date, oldest first.',
     };

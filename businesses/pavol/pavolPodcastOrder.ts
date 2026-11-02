@@ -1,9 +1,10 @@
+import { rankContent } from '@/lib/content/contentRanking';
 import type { PavolPodcast } from './pavolPodcasts';
 
 export type PavolPodcastOrder = 'smart' | 'newest' | 'oldest';
 
 /** Keep recency within each show, promoting the newest alternative when a show would repeat. */
-export function sortPavolPodcasts<T extends Pick<PavolPodcast, 'source' | 'publishedAt'>>(
+export function sortPavolPodcasts<T extends Pick<PavolPodcast, 'source' | 'publishedAt' | 'prominence'>>(
     podcasts: readonly T[],
     order: PavolPodcastOrder = 'smart',
 ): T[] {
@@ -13,6 +14,8 @@ export function sortPavolPodcasts<T extends Pick<PavolPodcast, 'source' | 'publi
     );
     if (order !== 'smart') return remaining;
 
+    const ranked = rankContent(remaining);
+    remaining.splice(0, remaining.length, ...ranked);
     const result: T[] = [];
     let previousSource: string | undefined;
     while (remaining.length) {
@@ -23,4 +26,13 @@ export function sortPavolPodcasts<T extends Pick<PavolPodcast, 'source' | 'publi
         previousSource = next.source;
     }
     return result;
+}
+
+/** Keep one of Pavol's own show episodes visible among the four editorial highlights. */
+export function selectPavolHomepagePodcasts(podcasts: readonly PavolPodcast[], limit = 4): PavolPodcast[] {
+    const ranked = sortPavolPodcasts(podcasts.filter(podcast => podcast.prominence !== 0));
+    const selected = ranked.slice(0, limit);
+    const ownShow = ranked.find(podcast => podcast.source === 'AI ta Krajta');
+    if (limit > 0 && ownShow && !selected.includes(ownShow)) selected.splice(Math.max(0, selected.length - 1), 1, ownShow);
+    return selected;
 }

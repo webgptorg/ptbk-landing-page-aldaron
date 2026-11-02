@@ -16,6 +16,7 @@ const editorialSchema = z.object({
     perex: z.string().min(1),
     publishedAt: z.string().refine((value) => Number.isFinite(Date.parse(value)), 'A quoted ISO publication date is required'),
     updatedAt: z.string().refine((value) => Number.isFinite(Date.parse(value))).optional(),
+    prominence: z.number().min(0).max(100).optional(),
     tags: z.array(z.string()).default([]),
     coverImage: z.string().optional(),
     status: z.enum(['published', 'draft']).default('published'),

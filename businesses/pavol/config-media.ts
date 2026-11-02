@@ -4,6 +4,8 @@ export type PavolMediaImportance = 'highlight' | 'rest';
 
 export type PavolMediaAppearance = {
     href: string;
+    prominence?: number;
+    publishedAt?: string;
     imageSrc?: string;
     source: string;
     kind: string;
@@ -33,7 +35,7 @@ export const pavolMediaMoreHref = 'https://www.linkedin.com/in/hejny/';
 const sharedMediaAppearances: SharedMediaAppearance[] = [
     {
         href: 'https://devconfcz2023.sched.com/event/1MYeB/2023s-most-interesting-browser-apis',
-        source: 'DevConf.CZ',
+        source: 'DevConf.CZ', prominence: 3,
         importance: 'rest',
         thumbnailLabel: 'dc',
         thumbnailClassName: 'bg-[#6f3cc3] text-white',
@@ -55,7 +57,7 @@ const sharedMediaAppearances: SharedMediaAppearance[] = [
     {
         href: 'https://www.youtube.com/watch?v=K0eMvbSID44',
         imageSrc: '/pavol/media/openalt-talk.jpg',
-        source: 'OpenAlt',
+        source: 'OpenAlt', prominence: 2,
         importance: 'rest',
         copy: {
             cs: {
@@ -75,7 +77,7 @@ const sharedMediaAppearances: SharedMediaAppearance[] = [
     {
         href: 'https://www.youtube.com/watch?v=i7gQtatWSKc',
         imageSrc: '/pavol/media/linuxdays-talk.jpg',
-        source: 'LinuxDays',
+        source: 'LinuxDays', prominence: 2,
         importance: 'rest',
         copy: {
             cs: {

@@ -3,6 +3,7 @@ import {
     pavolMediaMoreHref as PAVOL_MEDIA_MORE_URL,
     type PavolMediaAppearance,
 } from '@/businesses/pavol/config-media';
+import { rankContent } from '@/lib/content/contentRanking';
 import { PAVOL_CONTAINER_CLASS_NAME } from '@/businesses/pavol/layout';
 import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
 import { PavolSectionHeading } from '@/businesses/pavol/PavolSectionHeading';
@@ -16,7 +17,7 @@ import { getArticles } from '@/lib/articles/load';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
-import { sortPavolPodcasts } from './pavolPodcastOrder';
+import { selectPavolHomepagePodcasts } from './pavolPodcastOrder';
 
 const HOMEPAGE_ITEM_LIMIT = 10;
 
@@ -89,19 +90,23 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
 }) {
     const cs = language === 'cs';
     const content = PAVOL_PAGE_CONTENT[language].media;
-    const articles = getArticles(language, 'personal').slice(0, HOMEPAGE_ITEM_LIMIT);
+    const articles = rankContent(getArticles(language, 'personal').filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
+    const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0));
+    const highlights = appearances.slice(0, 3);
+    const rest = appearances.slice(3);
     const podcasts = await fetchPavolPodcasts(language, revalidateSeconds);
     return <>
         <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={content.eyebrow} title={content.title} description={content.description} />
-                <details className="group/media mt-8 border-y border-[var(--pavol-border)] py-6">
+                <div className="mt-8 grid gap-5 md:grid-cols-3">{highlights.map(appearance => <MediaAppearanceCard key={appearance.href} appearance={appearance} />)}</div>
+                {rest.length > 0 && <details className="group/media mt-8 border-y border-[var(--pavol-border)] py-6">
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-base font-medium [&::-webkit-details-marker]:hidden">
-                        <span>{content.restLabel} <span className="ml-2 font-mono text-sm font-normal text-[var(--pavol-muted)]">({PAVOL_MEDIA_APPEARANCES[language].length})</span></span>
+                        <span>{content.restLabel} <span className="ml-2 font-mono text-sm font-normal text-[var(--pavol-muted)]">({rest.length})</span></span>
                         <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 transition-transform group-open/media:rotate-180" />
                     </summary>
-                    <div className="mt-6 space-y-4">{PAVOL_MEDIA_APPEARANCES[language].map((appearance) => <MediaAppearanceCard key={appearance.href} appearance={appearance} />)}</div>
-                </details>
+                    <div className="mt-6 space-y-4">{rest.map((appearance) => <MediaAppearanceCard key={appearance.href} appearance={appearance} />)}</div>
+                </details>}
                 <a href={PAVOL_MEDIA_MORE_URL} className="pavol-source-link mt-5">{content.moreLabel}<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
             </div>
         </section>
@@ -129,7 +134,7 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={cs ? 'Do sluchátek' : 'For your headphones'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'Conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
                 <div className="pavol-podcast-list mt-8" data-podcast-order="smart">
-                    {sortPavolPodcasts(podcasts).slice(0, HOMEPAGE_ITEM_LIMIT).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}
+                    {selectPavolHomepagePodcasts(podcasts).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}
                 </div>
                 <Link href="/podcasts" className="pavol-source-link mt-6" aria-label={cs ? 'Zobrazit víc podcastů' : 'Show more podcasts'}>{cs ? 'Zobrazit víc' : 'Show more'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
             </div>

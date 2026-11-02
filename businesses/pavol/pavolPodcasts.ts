@@ -8,6 +8,7 @@ import type { PodcastEpisode } from '@/lib/podcast/PodcastFeed';
 
 export type PavolPodcast = {
     readonly id: string;
+    readonly prominence?: number;
     readonly source: string;
     readonly title: string;
     readonly description: string;
@@ -32,6 +33,7 @@ export function getPavolAiTaKrajtaPodcasts(episodes: readonly AiTaKrajtaEpisode[
     return episodes.filter((episode) => episode.personIds.includes('pavol-hejny')).map((episode) => ({
         id: `ai-ta-krajta:${episode.slug}`,
         source: AI_TA_KRAJTA_NAME,
+        prominence: 2,
         title: episode.shortTitle,
         description: episode.summary,
         href: createPublicUrl(createAiTaKrajtaEpisodePath(episode.slug)),
@@ -55,6 +57,7 @@ export function resolvePavolPodcastAppearance(
     return {
         id: appearance.id,
         source: appearance.source,
+        prominence: appearance.prominence,
         title: appearance.title,
         description: appearance.description[language],
         href: appearance.href,
