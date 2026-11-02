@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { ArrowUpRight, CheckCircle2, Loader2, Send } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function PavolContactSection({
     language,
@@ -19,6 +19,7 @@ export function PavolContactSection({
     readonly language: SupportedHomepageLanguage;
     readonly form: PavolContactForm;
 }) {
+    const [copyStatus, setCopyStatus] = useState('');
     const CONTENT = PAVOL_PAGE_CONTENT[language];
     const CONTACT = CONTENT.contact;
     const SUCCESS_REF = useRef<HTMLDivElement>(null);
@@ -62,6 +63,14 @@ export function PavolContactSection({
                         title={CONTACT.title}
                         description={CONTACT.description}
                     />
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                        <a href="mailto:pavol@ptbk.io" className="pavol-source-link text-lg">pavol@ptbk.io</a>
+                        <button type="button" className="rounded-full border border-[var(--pavol-border)] px-4 py-2 text-sm" onClick={async () => {
+                            try { await navigator.clipboard.writeText('pavol@ptbk.io'); setCopyStatus(language === 'cs' ? 'E-mail zkopírován' : 'Email copied'); }
+                            catch { setCopyStatus(language === 'cs' ? 'Adresu označte a zkopírujte ručně.' : 'Select the address and copy it manually.'); }
+                        }}>{language === 'cs' ? 'Kopírovat e-mail' : 'Copy email'}</button>
+                        <span role="status" className="w-full text-sm text-[var(--pavol-muted)]">{copyStatus}</span>
+                    </div>
                     <div className="mt-10 border-t border-[var(--pavol-border)] pt-7 lg:mt-16">
                         <h3 className="text-sm font-semibold text-[var(--pavol-ink)]">{CONTACT.otherContactsTitle}</h3>
                         <ul className="mt-4 flex flex-wrap gap-2">
