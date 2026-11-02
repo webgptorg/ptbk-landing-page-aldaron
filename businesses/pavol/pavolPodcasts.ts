@@ -16,6 +16,7 @@ export type PavolPodcast = {
     readonly publishedAt: string;
     readonly language: SupportedHomepageLanguage;
     readonly audioUrl: string | null;
+    readonly audioByteLength?: number;
     readonly durationInSeconds: number | null;
     readonly imageSrc?: string;
 };
@@ -40,6 +41,7 @@ export function getPavolAiTaKrajtaPodcasts(episodes: readonly AiTaKrajtaEpisode[
         publishedAt: episode.publishedAt,
         language: 'cs' as const,
         audioUrl: episode.audioUrl,
+        audioByteLength: episode.audioByteLength,
         durationInSeconds: episode.durationInSeconds,
         imageSrc: AI_TA_KRAJTA_COVER_IMAGE_PATH,
     })).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
@@ -65,6 +67,7 @@ export function resolvePavolPodcastAppearance(
         language: appearance.language,
         imageSrc: appearance.imageSrc,
         audioUrl: episode?.audioUrl ?? appearance.audioUrl,
+        audioByteLength: episode?.audioByteLength ?? appearance.audioByteLength,
         durationInSeconds: episode?.durationInSeconds ?? appearance.durationInSeconds,
     };
 }

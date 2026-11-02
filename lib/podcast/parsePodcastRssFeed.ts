@@ -80,6 +80,7 @@ function parsePodcastEpisode(itemXml: string, options: ParsePodcastRssFeedOption
         descriptionText,
         hosts: options.readEpisodeHostNames?.(descriptionHtml) ?? [],
         audioUrl,
+        ...(Number(readXmlTagAttribute(itemXml, 'enclosure', 'length')) > 0 ? { audioByteLength: Number(readXmlTagAttribute(itemXml, 'enclosure', 'length')) } : {}),
         videoUrl: null,
         pageUrl: readXmlTagText(itemXml, 'link'),
         publishedAt: readPublishedAt(itemXml),

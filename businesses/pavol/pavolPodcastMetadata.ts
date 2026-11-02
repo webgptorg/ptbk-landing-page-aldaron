@@ -1,3 +1,4 @@
+import { getArticlePodcastUrl } from '@/lib/articles/urls';
 import type { Metadata } from 'next';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
@@ -35,8 +36,8 @@ const definitions: Readonly<Record<SupportedHomepageLanguage, PageMetadataDefini
 };
 
 export const PAVOL_PODCAST_METADATA: Readonly<Record<SupportedHomepageLanguage, Metadata>> = {
-    cs: createPageMetadata(definitions.cs),
-    en: createPageMetadata(definitions.en),
+    cs: { ...createPageMetadata(definitions.cs), alternates: { ...createPageMetadata(definitions.cs).alternates, types: { 'application/rss+xml': getArticlePodcastUrl('cs', 'personal') } } },
+    en: { ...createPageMetadata(definitions.en), alternates: { ...createPageMetadata(definitions.en).alternates, types: { 'application/rss+xml': getArticlePodcastUrl('en', 'personal') } } },
 };
 
 export const PAVOL_PODCAST_SOCIAL_PREVIEW_OPTIONS = {

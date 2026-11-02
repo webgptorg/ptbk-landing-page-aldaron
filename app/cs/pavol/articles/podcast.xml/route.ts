@@ -1,11 +1,12 @@
 import { getArticles } from '@/lib/articles/load';
-import { createArticlePodcastFeed } from '@/lib/articles/podcast';
+import { createPavolFeed } from '@/businesses/pavol/pavolFeed';
+import { fetchPavolPodcasts } from '@/businesses/pavol/fetchPavolPodcasts';
 
-export const dynamic = 'force-static';
+export const revalidate = 3600;
 
-/** Next emits this deterministic XML once at build time; no request-time publishing or TTS. */
-export function GET() {
-    return new Response(createArticlePodcastFeed(getArticles('cs', 'personal'), 'cs', 'personal'), {
+/** Hourly source refresh shares exactly the personal archive's participation filter. */
+export async function GET() {
+    return new Response(createPavolFeed(getArticles('cs', 'personal'), await fetchPavolPodcasts('cs', revalidate), 'cs'), {
         headers: { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400', 'X-Content-Type-Options': 'nosniff' },
     });
 }

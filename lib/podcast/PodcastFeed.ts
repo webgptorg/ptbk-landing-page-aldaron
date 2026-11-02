@@ -60,6 +60,8 @@ export type PodcastEpisode = {
      *       cannot be read.
      */
     readonly audioUrl: string | null;
+    /** Original publisher enclosure size; absent when the source does not report it. */
+    readonly audioByteLength?: number;
 
     /**
      * Address of the video of the episode, which is where a listener is sent to watch it

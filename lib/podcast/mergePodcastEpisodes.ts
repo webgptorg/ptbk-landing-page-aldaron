@@ -119,6 +119,7 @@ function completePodcastEpisode(
         descriptionText,
         hosts: mergePodcastEpisodeHostNames(episode.hosts),
         audioUrl: episode.audioUrl ?? null,
+        ...(episode.audioByteLength ? { audioByteLength: episode.audioByteLength } : {}),
         videoUrl: episode.videoUrl ?? null,
         pageUrl: episode.pageUrl ?? null,
         publishedAt: episode.publishedAt ?? UNKNOWN_PUBLISHED_AT,

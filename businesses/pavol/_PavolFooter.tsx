@@ -6,7 +6,8 @@ import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { Button } from '@/components/ui/button';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-import { Send } from 'lucide-react';
+import { getArticlePodcastUrl } from '@/lib/articles/urls';
+import { Send, Rss } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -72,7 +73,7 @@ export function PavolFooter({ language, isHomepage = true }: { language: Support
                     </div>
 
                     <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={[...CONTENT.header.navItems, { label: language === 'cs' ? 'Čísla' : 'By the numbers', href: '#numbers' }, { label: language === 'cs' ? 'Média' : 'Media', href: '#media' }].map((item) => ({ ...item, href: `${sectionPrefix}${item.href}` }))} />
-                    <FooterLinkColumn title={CONTENT.footer.connectTitle} links={CONTENT.contact.links} />
+                    <FooterLinkColumn title={CONTENT.footer.connectTitle} links={[...CONTENT.contact.links, { label: language === 'cs' ? 'Odebírat články a podcasty (RSS)' : 'Subscribe to articles and podcasts (RSS)', href: getArticlePodcastUrl(language, 'personal'), icon: Rss }]} />
                 </div>
 
                 <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
