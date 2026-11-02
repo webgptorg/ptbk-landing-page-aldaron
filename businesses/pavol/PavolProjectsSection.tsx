@@ -92,9 +92,15 @@ export function PavolProjectsSection({ language, isArchive = false }: { readonly
                                         ]).map(([label, text]) => <div key={label}><dt className="font-semibold">{label}</dt><dd className="mt-1 opacity-85">{text}</dd></div>)}
                                     </dl>
                                 </details>}
-                                {PROJECT.screenshot && <a href={PROJECT.links[0]?.href} className="mb-6 block overflow-hidden rounded-xl bg-white">
+                                {PROJECT.screenshot && <a href={PROJECT.links[0]?.href} className={cn('mb-6 block overflow-hidden rounded-xl bg-white', PROJECT.title === 'H-edu' && 'pavol-education-preview')}>
+                                    {PROJECT.title === 'H-edu' && <div className="pavol-education-caption">
+                                        <span>H-edu</span><strong>{language === 'cs' ? 'Od úlohy k pochopení' : 'From a problem to understanding'}</strong>
+                                    </div>}
                                     <Image src={PROJECT.screenshot.src} alt={PROJECT.screenshot.alt} width={1040} height={590}
                                         sizes="(min-width: 768px) 45vw, 90vw" className="h-auto w-full" />
+                                    {PROJECT.title === 'H-edu' && <div className="pavol-education-links" aria-hidden="true">
+                                        {(language === 'cs' ? ['Úlohy', 'Souvislosti', 'Metodika'] : ['Exercises', 'Connections', 'Teaching guide']).map(label => <span key={label}>{label}</span>)}
+                                    </div>}
                                 </a>}
                                 <div className="mt-auto flex flex-wrap gap-3">
                                     {PROJECT.links.map((LINK) => (

@@ -620,3 +620,10 @@
 @media (prefers-reduced-motion: reduce) { .pavol-menu-icon span, .pavol-mobile-menu::details-content { transition: none; } }
 
 .pavol-site { --article-paper: var(--pavol-paper); --article-ink: var(--pavol-ink); --article-muted: var(--pavol-muted); --article-soft: var(--pavol-warm); --article-line: var(--pavol-border); --article-accent: var(--pavol-accent); }
+.pavol-education-preview { padding: 20px; background: #e8f2f0; color: #203932; }
+.pavol-education-caption { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.pavol-education-caption > span { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: #606b63; }
+.pavol-education-caption strong { font-family: var(--font-outfit), sans-serif; font-size: 22px; font-weight: 500; }
+.pavol-education-preview img { border-radius: 8px; box-shadow: 0 6px 22px #20393218; transform: rotate(-1deg); }
+.pavol-education-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.pavol-education-links span { border: 1px solid #cbded7; padding: 5px 10px; border-radius: 30px; background: #ffffff90; font-size: 11px; }
