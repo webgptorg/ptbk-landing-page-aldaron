@@ -13,6 +13,7 @@ const { playTrack } = vi.hoisted(() => ({ playTrack: vi.fn() }));
 vi.mock('@/components/audio-player/AudioPlayerProvider', () => ({
     useAudioPlayerControls: () => ({ track: null, isPlaying: false, getProgress: () => undefined, playTrack }),
 }));
+vi.mock('@/lib/workshops/workshopPublic', () => ({ loadPublishedWorkshopSummaries: vi.fn().mockResolvedValue([]) }));
 vi.mock('@/lib/articles/load', () => ({ getArticles: vi.fn() }));
 vi.mock('./fetchPavolPodcasts', () => ({ fetchPavolPodcasts: vi.fn() }));
 
@@ -44,9 +45,9 @@ describe('personal homepage previews and archives', () => {
         const { container } = render(await PavolMediaSection({ language, revalidateSeconds: 3600 }));
         const articleSection = container.querySelector<HTMLElement>('#articles')!;
         const podcastSection = container.querySelector<HTMLElement>('#podcasts')!;
-        expect(Array.from(container.querySelectorAll('section'), (section) => section.id)).toEqual(['media', 'articles', 'podcasts']);
+        expect(Array.from(container.querySelectorAll('section'), (section) => section.id)).toEqual(['talks', 'media', 'articles', 'podcasts']);
         expect(within(articleSection).getAllByRole('article')).toHaveLength(10);
-        expect(within(podcastSection).getAllByRole('article')).toHaveLength(10);
+        expect(within(podcastSection).getAllByRole('article')).toHaveLength(4);
         // The older alternative show must enter the preview before the ten-item cut.
         expect(within(podcastSection).getAllByRole('heading')[2].textContent).toBe('Other show episode');
         expect(within(articleSection).getByRole('link', { name: language === 'cs' ? 'Zobrazit víc článků' : 'Show more articles' }).getAttribute('href')).toBe('/articles');
@@ -62,7 +63,7 @@ describe('personal homepage previews and archives', () => {
         expect(screen.getAllByRole('article')).toHaveLength(13);
         expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
         expect(screen.queryByText('Article 0')).toBeNull();
-        expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('smart');
+        expect((screen.getByRole('combobox', { name: language === 'cs' ? 'Řazení' : 'Sort by' }) as HTMLSelectElement).value).toBe('smart');
         expect(container.querySelector('header a[href="/#articles"]')).not.toBeNull();
         expect(container.querySelector('footer a[href="/#podcasts"]')).not.toBeNull();
         expect(container.querySelector('a[hreflang="en"]')?.getAttribute('href')).toBe('https://pavolhejny.com/podcasts');

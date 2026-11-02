@@ -51,3 +51,9 @@ describe('personal podcast ordering', () => {
         expect(sortPavolPodcasts(input, 'oldest').map((episode) => episode.id)).toEqual(['earlier', 'later', 'tie']);
     });
 });
+
+it('lets an editorial coefficient promote an older appearance without changing chronological sorting', () => {
+    const older = { id: 'radio', source: 'Rádio 1', publishedAt: '2024-01-04T10:00:00Z', prominence: 12 };
+    expect(sortPavolPodcasts([...episodes, older])[0]).toBe(older);
+    expect(sortPavolPodcasts([...episodes, older], 'newest')[0]).toBe(episodes[0]);
+});
