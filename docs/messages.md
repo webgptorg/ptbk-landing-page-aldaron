@@ -20,7 +20,17 @@ and author, not excerpts of the wider context. A receiving platform can cache it
 
 The public summary does not contain its own sharing URL. The export and admin **Kopírovat zprávu s odkazem** action
 add it after an opening greeting, or at the start otherwise. The full context is exported unchanged. Public chat
-combines the current shared Book with the current message and wider context; histories remain browser-memory only.
+combines the current shared Book with the current message and wider context; every new submitted question and actual server reply is stored privately in `message_chat_turns`. The Messages list
+offers **Konverzace** for each message, with separate anonymous conversations, Prague timestamps, full paginated
+transcripts, generation failures and copying. The public UI and anonymous access stay the same. Each opened page
+gets a random chat identifier; closing/reopening its floating chat keeps the conversation, while reloading the page
+starts a new one. No identity, IP address or account is recorded with the transcript. Client history is only model
+input: its assistant turns are never imported as genuine replies. Questions are committed before generation and
+replies before returning success; interrupted requests remain visibly incomplete. Request IDs deduplicate uncertain
+network retries without calling the model again. Histories are available only to the existing `messages` admin
+permission; neither public chat nor public Supabase roles expose a history-reading API. The additive migration
+`2026-11-0200-message-chat-history.sql` runs through the existing startup runner. Deleting a message also deletes
+its conversations. Conversations made before this feature was deployed cannot be recovered.
 `/admin/agents` edits the same definitions used by workshop assignments, with no public agent endpoint.
 Messages compile those Books with `@promptbook/core` and call Responses directly with `store: false`, preserving the
 Book's model, personality and rules. The adapter omits sampling defaults rejected by reasoning models. It does not

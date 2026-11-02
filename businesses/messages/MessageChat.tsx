@@ -8,7 +8,7 @@ import type { MessageChatTurn } from '@/lib/messages/messageTypes';
 
 const avatar = '/people/pavol-hejny-transparent-square.png';
 
-/** One private, in-memory conversation, available without leaving the message. */
+/** Anonymous chat keeps its existing UI; the server records each submitted question and actual answer. */
 export function MessageChat({ messageId, introduction = '' }: { readonly messageId: string; readonly introduction?: string }) {
     const [open, setOpen] = useState(false);
     const [turns, setTurns] = useState<MessageChatTurn[]>(() => introduction ? [{ role: 'assistant', content: introduction }] : []);
@@ -20,6 +20,8 @@ export function MessageChat({ messageId, introduction = '' }: { readonly message
     const input = useRef<HTMLTextAreaElement>(null);
     const historyElement = useRef<HTMLDivElement>(null);
     const inFlight = useRef<AbortController | null>(null);
+    const conversation = useRef<{ messageId: string; id: string } | null>(null);
+    const retry = useRef<{ history: string; id: string } | null>(null);
     const { clearance } = useFixedControlClearance(root, '[data-article-player]');
     const pending = pendingQuestion !== null;
 
@@ -51,13 +53,21 @@ export function MessageChat({ messageId, introduction = '' }: { readonly message
             length += turn.content.length;
         }
         const history = [...previous, { role: 'user' as const, content: question }];
+        if (conversation.current?.messageId !== messageId) conversation.current = { messageId, id: crypto.randomUUID() };
+        const serializedHistory = JSON.stringify(history);
+        if (retry.current?.history !== serializedHistory) retry.current = { history: serializedHistory, id: crypto.randomUUID() };
         try {
             const response = await fetch(`/api/messages/${encodeURIComponent(messageId)}/chat`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: history }), signal: controller.signal,
+                body: JSON.stringify({ messages: history, conversationId: conversation.current.id, requestId: retry.current.id }), signal: controller.signal,
             });
-            const result = await response.json() as { reply?: unknown; error?: unknown };
-            if (!response.ok || typeof result.reply !== 'string') throw new Error(typeof result.error === 'string' ? result.error : 'Odpověď se nepodařilo načíst. Zkus to prosím znovu.');
+            const result = await response.json() as { reply?: unknown; error?: unknown; retryAsNew?: unknown };
+            if (!response.ok || typeof result.reply !== 'string') {
+                // Explicit server failures may be retried as a new attempt; uncertain network outcomes reuse the ID.
+                if (result.retryAsNew === true || (response.status !== 409 && response.status !== 503)) retry.current = null;
+                throw new Error(typeof result.error === 'string' ? result.error : 'Odpověď se nepodařilo načíst. Zkus to prosím znovu.');
+            }
+            retry.current = null;
             setTurns([...history, { role: 'assistant', content: result.reply }]);
             setDraft('');
         } catch (failure) {

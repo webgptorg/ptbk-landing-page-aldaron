@@ -39,7 +39,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   words; absent or incompatible alignment disables tracking. Explicit migration reuses the original recording and
   reviewed timings with checksum verification. The public player and floating, draft-preserving chat retain the
   article components and existing design. Chat combines the current agent Book and this message's current context;
-  it cannot claim new decisions or a live connection to the author. See `docs/messages.md` for configuration.
+  it cannot claim new decisions or a live connection to the author. New anonymous chat questions and actual server
+  replies are persisted in private `message_chat_turns`, grouped by an in-memory random conversation ID and shown
+  through the Messages row's Konverzace action. Request IDs deduplicate retries; questions save before generation,
+  replies before success. Failure/interruption stays visible. History APIs require the existing messages permission;
+  public/database anonymous roles cannot read transcripts. Pagination retains complete history independently of the
+  model context window. Message deletion cascades to its history. No login or public UI change is introduced. See `docs/messages.md` for configuration.
 - `/admin/agents` administers the existing shared `workshop_agents` Books, including Pavol Hejný. Internal UUIDs
   have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents
   cannot be deleted out from under messages/history; they can be disabled or reassigned. Separate `messages` and

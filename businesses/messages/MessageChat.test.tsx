@@ -8,6 +8,7 @@ vi.mock('@/hooks/useFixedControlClearance', () => ({ useFixedControlClearance: (
 import { MessageChat } from './MessageChat';
 
 const fetchMock = vi.fn();
+const sent = (index: number) => JSON.parse(fetchMock.mock.calls[index][1].body) as { conversationId: string; requestId: string; messages: unknown[] };
 describe('floating message conversation', () => {
     beforeEach(() => {
         vi.stubGlobal('fetch', fetchMock);
@@ -54,8 +55,8 @@ describe('floating message conversation', () => {
         resolve(Response.json({ reply: 'Chci jeden dotažený průchod od instalace k prvnímu použití.' }));
         expect(await screen.findByText('Chci jeden dotažený průchod od instalace k prvnímu použití.')).toBeVisible();
         expect(screen.getByRole('textbox')).toHaveValue('');
-        const body = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(body).toEqual({ messages: [{ role: 'user', content: 'Co má zvládnout první verze?' }] });
+        const body = sent(0);
+        expect(body).toEqual({ messages: [{ role: 'user', content: 'Co má zvládnout první verze?' }], conversationId: expect.any(String), requestId: expect.any(String) });
     });
 
     it('preserves a failed question for retry without inventing a conversation turn', async () => {
@@ -70,6 +71,29 @@ describe('floating message conversation', () => {
         await waitFor(() => expect(screen.getByRole('button', { name: 'Odeslat otázku' })).toBeEnabled());
         fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
         expect(await screen.findByText('Odpověď po opakování.')).toBeVisible();
-        expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ messages: [{ role: 'user', content: 'Proč?' }] });
+        const first = sent(0), second = sent(1);
+        expect(second).toEqual({ messages: [{ role: 'user', content: 'Proč?' }], conversationId: first.conversationId, requestId: expect.any(String) });
+        expect(second.requestId).not.toBe(first.requestId);
+    });
+    it('reuses an uncertain network request and keeps the same chat for subsequent questions', async () => {
+        fetchMock.mockRejectedValueOnce(new TypeError('Network interrupted'));
+        fetchMock.mockResolvedValueOnce(Response.json({ reply: 'First answer' }));
+        fetchMock.mockResolvedValueOnce(Response.json({ reply: 'Second answer' }));
+        render(<MessageChat messageId="test-message" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'First question' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByRole('alert');
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Odeslat otázku' })).toBeEnabled());
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByText('First answer');
+        const first = sent(0), retry = sent(1);
+        expect(retry).toEqual(first);
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Second question' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByText('Second answer');
+        const second = sent(2);
+        expect(second.conversationId).toBe(first.conversationId); expect(second.requestId).not.toBe(first.requestId);
+        expect(second.messages).toHaveLength(3);
     });
 });
