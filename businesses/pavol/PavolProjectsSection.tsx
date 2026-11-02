@@ -33,7 +33,7 @@ function ProjectMark({ project }: { readonly project: PavolProject }) {
     );
 }
 
-export function PavolProjectsSection({ language }: { readonly language: SupportedHomepageLanguage }) {
+export function PavolProjectsSection({ language, isArchive = false }: { readonly language: SupportedHomepageLanguage; readonly isArchive?: boolean }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language].projects;
     return (
         <section
@@ -97,7 +97,7 @@ export function PavolProjectsSection({ language }: { readonly language: Supporte
                         );
                     })}
                 </div>
-                <Link href="/projects" className="mt-8 inline-flex min-h-11 items-center gap-3 rounded-full border border-white/30 px-6 py-3 text-sm">{language === 'cs' ? 'Všechny projekty' : 'All projects'} →</Link>
+                {!isArchive && <Link href="/projects" className="mt-8 inline-flex min-h-11 items-center gap-3 rounded-full border border-white/30 px-6 py-3 text-sm">{language === 'cs' ? 'Všechny projekty' : 'All projects'} →</Link>}
             </div>
         </section>
     );

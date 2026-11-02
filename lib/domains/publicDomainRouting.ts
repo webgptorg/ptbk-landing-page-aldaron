@@ -84,6 +84,8 @@ const PAVOL_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes'] = [
     { path: '', isIndexed: true },
     { path: '/articles', isIndexed: true },
     { path: '/podcasts', isIndexed: true },
+    { path: '/projects', isIndexed: true },
+    { path: '/talks', isIndexed: true },
     { path: '/podcasts/opengraph-image' },
     { path: '/articles/opengraph-image' },
     { path: '/articles/podcast.xml' },
