@@ -16,6 +16,7 @@ type PavolService = {
     topics: string[];
     buttonLabel: string;
     prefillMessage: string;
+    formats?: { title: string; description: string }[];
 };
 
 export type PavolPageContent = {
@@ -165,6 +166,10 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                     id: 'ai-workshops-talks',
                     icon: Presentation,
                     title: 'Přednášky a školení',
+                    formats: [
+                        { title: 'Přednáška · přibližně 60 minut', description: 'Ukázky použití AI, souvislosti a prostor pro otázky.' },
+                        { title: 'Workshop · přibližně 3-4 hodiny', description: 'Práce nad úlohami vašeho týmu, vlastní výstup a postup pro další práci.' },
+                    ],
                     description:
                         'Přednášky, workshopy a školení pro firmy, produktové týmy a vývojáře. Ukážeme konkrétní použití AI a společně si ho vyzkoušíme.',
                     topics: [
@@ -302,6 +307,10 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                     id: 'ai-workshops-talks',
                     icon: Presentation,
                     title: 'Talks and training',
+                    formats: [
+                        { title: 'Talk · around 60 minutes', description: 'Practical examples, context and time for questions.' },
+                        { title: 'Workshop · around 3-4 hours', description: 'Work on your team’s tasks, create a concrete result and take away a method you can use again.' },
+                    ],
                     description:
                         'Talks, workshops and training for companies, product teams and developers. We show practical uses of AI and work through them together.',
                     topics: [

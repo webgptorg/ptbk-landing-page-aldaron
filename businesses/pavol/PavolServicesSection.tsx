@@ -41,6 +41,13 @@ export function PavolServicesSection({
                                     </li>
                                 ))}
                             </ul>
+                            {SERVICE.formats && <details className="mb-6 rounded-xl border border-[var(--pavol-border)] p-4 text-sm">
+                                <summary className="cursor-pointer font-medium">{language === 'cs' ? 'Jak může vzdělávání vypadat' : 'Example formats'}</summary>
+                                <dl className="mt-4 space-y-4">{SERVICE.formats.map(format => <div key={format.title}>
+                                    <dt className="font-medium">{format.title}</dt>
+                                    <dd className="mt-1 leading-relaxed text-[var(--pavol-muted)]">{format.description}</dd>
+                                </div>)}</dl>
+                            </details>}
                             <a
                                 href="#contact"
                                 aria-disabled={form.isSubmitting}
