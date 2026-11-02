@@ -13,7 +13,7 @@ export function PavolNumbersSection({ language }: { readonly language: Supported
                     <h2 className="text-lg font-medium tracking-tight">{CONTENT.title}</h2>
                     <p className="max-w-md text-sm leading-relaxed text-[var(--pavol-muted)]">{CONTENT.description}</p>
                 </div>
-                <dl className="pavol-numbers mt-9 grid grid-cols-2 gap-y-8 lg:grid-cols-4">
+                <dl className="pavol-numbers mt-9 grid grid-cols-1 gap-y-8 sm:grid-cols-3">
                     {PAVOL_NUMBERS[language].map((ITEM) => (
                         <div key={ITEM.label} className="flex flex-col">
                             <dt className="mt-3 max-w-[15rem] text-xs leading-relaxed text-[var(--pavol-muted)] sm:text-sm">

@@ -1,6 +1,6 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import type { LucideIcon } from 'lucide-react';
-import { Bot, BriefcaseBusiness, FolderKanban, Users } from 'lucide-react';
+import { Bot, BriefcaseBusiness, FolderKanban } from 'lucide-react';
 
 export type PavolNumber = {
     icon: LucideIcon;
@@ -13,44 +13,34 @@ export const pavolNumbers: Record<SupportedHomepageLanguage, PavolNumber[]> = {
         {
             icon: BriefcaseBusiness,
             value: '15+',
-            label: 'let praxe ve vývoji softwaru a product managementu',
+            label: 'let vývoje',
         },
         {
             icon: Bot,
             value: '3+',
-            label: 'roky práce s AI nástroji na skutečných projektech',
+            label: 'roky s AI v praxi',
         },
         {
             icon: FolderKanban,
             value: '10+',
-            label: 'úspěšných projektů od prototypu po produkci',
-        },
-        {
-            icon: Users,
-            value: '4500+',
-            label: 'proškolených lidí na workshopech, přednáškách, v podcastech a dalších výstupech',
+            label: 'projektů od prototypu ke spuštění',
         },
     ],
     en: [
         {
             icon: BriefcaseBusiness,
             value: '15+',
-            label: 'years working in software development and product management',
+            label: 'years building software',
         },
         {
             icon: Bot,
             value: '3+',
-            label: 'years using AI tools on real projects',
+            label: 'years applying AI',
         },
         {
             icon: FolderKanban,
             value: '10+',
-            label: 'successful projects taken from prototype to production',
-        },
-        {
-            icon: Users,
-            value: '4500+',
-            label: 'people reached through workshops, talks, podcasts, and other events',
+            label: 'projects from prototype to launch',
         },
     ],
 };
