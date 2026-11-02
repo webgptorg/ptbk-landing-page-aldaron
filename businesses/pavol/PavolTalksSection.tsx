@@ -6,6 +6,7 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getPavolTalks } from './pavolTalks';
 import { PAVOL_CONTAINER_CLASS_NAME } from './layout';
 import { PavolSectionHeading } from './PavolSectionHeading';
+import { EventDescription } from '@/components/events/EventDescription';
 
 export async function PavolTalksSection({ language, isArchive = false }: { readonly language: SupportedHomepageLanguage; readonly isArchive?: boolean }) {
     const cs = language === 'cs';
@@ -18,7 +19,7 @@ export async function PavolTalksSection({ language, isArchive = false }: { reado
             <div className="mt-8 grid gap-5 md:grid-cols-2">{talks.map(talk => <article key={talk.id} className="overflow-hidden rounded-2xl border border-[var(--pavol-border)] bg-white p-6">
                 <p className="text-xs text-[var(--pavol-muted)]">{talk.source}{talk.publishedAt && <> · <time dateTime={talk.publishedAt}>{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { dateStyle: 'medium', timeZone: 'Europe/Prague' }).format(new Date(talk.publishedAt))}</time></>}</p>
                 <h3 className="mt-3 text-2xl font-medium" lang={talk.textLanguage}><a href={talk.href}>{talk.title}</a></h3>
-                <p className="my-4 text-sm leading-relaxed text-[var(--pavol-muted)]" lang={talk.textLanguage}>{talk.description}</p>
+                <div lang={talk.textLanguage}><EventDescription className="my-4 text-sm leading-relaxed text-[var(--pavol-muted)]" description={talk.description} /></div>
                 <a href={talk.href} className="pavol-source-link">{cs ? 'Podrobnosti a záznam' : 'Details and recording'} ↗</a>
             </article>)}</div>
             {!isArchive && <Link href="/talks" className="pavol-source-link mt-6">{cs ? 'Všechny přednášky a workshopy' : 'All talks and workshops'} →</Link>}
