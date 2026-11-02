@@ -30,9 +30,9 @@ describe('floating message conversation', () => {
     });
 
     it('passes raw Markdown to the renderer without changing chat request data', async () => {
-        const introduction = '### Úvod\\n**Důležité**';
-        const question = '- První bod\\n- Druhý bod';
-        const reply = '### Priorita\\n**Platící zákazníci**\\n- Další krok';
+        const introduction = '### Úvod\n**Důležité**';
+        const question = '- První bod\n- Druhý bod';
+        const reply = '### Priorita\n**Platící zákazníci**\n- Další krok';
         fetchMock.mockResolvedValueOnce(Response.json({ reply }));
         render(<MessageChat messageId="test-message" introduction={introduction} />);
         fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
