@@ -69,7 +69,7 @@ export function PavolContactSection({
                             try { await navigator.clipboard.writeText('pavol@ptbk.io'); setCopyStatus(language === 'cs' ? 'E-mail zkopírován' : 'Email copied'); }
                             catch { setCopyStatus(language === 'cs' ? 'Adresu označte a zkopírujte ručně.' : 'Select the address and copy it manually.'); }
                         }}>{language === 'cs' ? 'Kopírovat e-mail' : 'Copy email'}</button>
-                        <span role="status" className="w-full text-sm text-[var(--pavol-muted)]">{copyStatus}</span>
+                        {copyStatus && <span role="status" className="w-full text-sm text-[var(--pavol-muted)]">{copyStatus}</span>}
                     </div>
                     <div className="mt-10 border-t border-[var(--pavol-border)] pt-7 lg:mt-16">
                         <h3 className="text-sm font-semibold text-[var(--pavol-ink)]">{CONTACT.otherContactsTitle}</h3>
