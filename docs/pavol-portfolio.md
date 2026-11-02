@@ -16,7 +16,9 @@ Pavol's preview/archive reads loadPublishedWorkshopSummaries(), the same public 
 
 ## Bilingual articles
 
-Publish a Czech and English variant for each new Pavol article, with one translationGroupId, reciprocal canonical language links, an actual PDF and separately prepared narration in each language. Translation is editorial, never a build-time provider call. Narration must remain pending until an actual recording exists; do not reuse Czech speech as English or invent word alignment. The first English article is fully translated but its narration needs an authorized ElevenLabs runtime credential before explicit generation/review.
+Publish a Czech and English variant for each new Pavol article, with one translationGroupId, reciprocal canonical language links, an actual PDF and separately prepared narration in each language. Translation is editorial, never a build-time provider call. Narration must remain pending until an actual recording exists; do not reuse Czech speech as English or invent word alignment.
+
+On 2 November 2026 the first English narration was generated in the owner's signed-in ElevenLabs Studio, using the exact committed English script and the existing Pavol Hejný 2026 voice. The project is named `Promptbook - What comes after code generation - English narration`. Export completed and offered an MP3 download. Browser access disconnected during the download; the recording has not been imported, reviewed or added to the article/feed. Recover that existing export before doing anything that charges for another generation.
 
 ## Recent event gallery
 
@@ -25,3 +27,11 @@ The gallery links to the corresponding event rather than the raw image. These ar
 - /pavol/gallery/prg-tinkerers-0.jpg: https://www.linkedin.com/posts/prgai_ai-tinkerers-prague-successfully-kicked-off-activity-7238952458255761408-9FTh; event: https://fel.cvut.cz/cs/aktualne/novinky/35902-iniciativa-ai-tinkerers-dorazila-ze-silicon-valley-na-cvut-vytvori-prostor-pro-setkavani-vedcu-i-nadsencu-do-umele-inteligence
 - /pavol/gallery/cassini-0.jpg: https://www.linkedin.com/posts/hejny_great-to-be-a-judge-at-this-wonderful-event-activity-7241118995829915649-A2Yf; event: https://www.linkedin.com/posts/esa-bic-czech-republic_thank-you-for-a-successful-hackathon-and-activity-7241425842365505536-KYDa
 - /pavol/gallery/rakathon-2025-6.jpg: https://cz.linkedin.com/posts/hejny_rakathon-aiprotirakovine-zpracovanitextu-activity-7317473932570230786-1GAf; event: https://cz.linkedin.com/posts/hejny_rakathon-aiprotirakovine-zpracovanitextu-activity-7317473932570230786-1GAf
+
+## Publication gate, 2 November 2026
+
+The approved portfolio changes are committed separately on `main`. Build, TypeScript and 129 relevant tests passed. Production deployment `dpl_AcMGjELZE1i4Vzqwpck26H1uw8GU` served the new pages and artwork, but the personal-chat smoke request returned 503 before generation because its question could not be stored. Startup logged the pending `2026-11-0201-personal-chat-sources.sql` migration and then PostgreSQL statement timeout `57014` after three minutes. Local PostgreSQL-compatible migration tests pass; the production blocker is not yet diagnosed.
+
+Commit `80106041aaa7622858628b286177fc75abe0f6da` adds slow-migration lock diagnostics without logging SQL text, credentials or application records. It passed the migration tests and TypeScript, but Vercel refused its deployment with HTTP 402, `api-deployments-free-per-day`, reporting more than 100 deployments and a one-day retry interval. No billing or plan changes were made.
+
+Production was therefore rolled back to the preceding deployment `dpl_7xoZyX5VXUMZZxyFdNivArQcce7h` (commit `723c4d3e2fd45d89009baaae85a8721ce43e42fb`). Both personal domains, ptbk.io and AI ta Krajta returned HTTP 200 afterward. The new portfolio changes remain on `main`, not on the restored production version. Once deployment capacity is available, inspect the migration lock diagnostics, fix the actual blocker and verify a persisted chat question, generated reply and authenticated history before promoting this release again.
