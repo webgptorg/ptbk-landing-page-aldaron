@@ -18,6 +18,7 @@ type CookieConsentContent = {
     readonly privacyPolicyLinkText: string;
     readonly customizeButton: string;
     readonly acceptAllButton: string;
+    readonly necessaryOnlyButton: string;
     readonly settingsTitle: string;
     readonly settingsDescription: string;
     readonly saveButton: string;
@@ -33,11 +34,12 @@ const COOKIE_CONSENT_CONTENTS: Readonly<Record<SupportedHomepageLanguage, Cookie
     cs: {
         barTitle: 'Cookies',
         barDescription:
-            'Cookies používáme, aby web fungoval, abychom rozuměli návštěvnosti a měřili účinnost reklamy. Tlačítkem „Přijmout vše“ nám k tomu dáte souhlas.',
+            'Nutné cookies zajišťují chod webu. Analytické a reklamní zapneme jen s vaším souhlasem.',
         privacyNotePrefix: 'Podrobnosti najdete v ',
         privacyPolicyLinkText: 'zásadách ochrany osobních údajů',
         customizeButton: 'Nastavit',
         acceptAllButton: 'Přijmout vše',
+        necessaryOnlyButton: 'Jen nutné',
         settingsTitle: 'Nastavení cookies',
         settingsDescription:
             'Vyberte, které cookies smíme ukládat. Nutné cookies web potřebuje k fungování, a proto je vypnout nelze.',
@@ -58,11 +60,12 @@ const COOKIE_CONSENT_CONTENTS: Readonly<Record<SupportedHomepageLanguage, Cookie
     en: {
         barTitle: 'Cookies',
         barDescription:
-            'We use cookies to keep the website working, to understand its traffic, and to measure the effectiveness of our advertising. The "Accept all" button gives us your consent.',
+            'Necessary cookies keep the site working. Analytics and advertising cookies need your consent.',
         privacyNotePrefix: 'The details are in our ',
         privacyPolicyLinkText: 'privacy policy',
         customizeButton: 'Customize',
         acceptAllButton: 'Accept all',
+        necessaryOnlyButton: 'Necessary only',
         settingsTitle: 'Cookie settings',
         settingsDescription:
             'Choose which cookies we may store. Necessary cookies keep the website working and cannot be turned off.',

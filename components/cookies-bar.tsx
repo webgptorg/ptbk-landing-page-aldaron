@@ -4,7 +4,7 @@ import { useFixedControlClearance } from '@/hooks/useFixedControlClearance';
 import { getLanguageFromPathname } from '@/lib/language/pageLanguage';
 import { getCookieConsentTheme, PODCAST_COOKIE_CONSENT_STYLE } from '@/lib/legal/cookieConsentAppearance';
 import { getCookieConsentContent } from '@/lib/legal/cookieConsentContent';
-import { ALL_COOKIES_ALLOWED, isCookieChoiceMade, saveCookiePreferences } from '@/lib/legal/cookieConsentStorage';
+import { ALL_COOKIES_ALLOWED, ONLY_NECESSARY_COOKIES_ALLOWED, isCookieChoiceMade, saveCookiePreferences } from '@/lib/legal/cookieConsentStorage';
 import { COOKIE_SETTINGS_HASH } from '@/lib/legal/cookieSettingsHash';
 import { getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
@@ -107,21 +107,24 @@ function CookieConsentPanel({
                         </h2>
                     </div>
                     <p id="cookie-consent-description" className={styles.description}>
-                        {content.barDescription}
-                    </p>
-                    <p className={styles.privacy}>
-                        {content.privacyNotePrefix}
+                        {content.barDescription}{' '}
                         <Link href={privacyPolicyUrl}>
                             {content.privacyPolicyLinkText}
                         </Link>.
                     </p>
                 </div>
                 <div className={styles.actions}>
-                    <Button type="button" className={styles.action} onClick={() => setIsModalOpen(true)}>
-                        {content.customizeButton}
+                    <Button type="button" className={styles.action} onClick={() => {
+                        saveCookiePreferences(ONLY_NECESSARY_COOKIES_ALLOWED);
+                        onDismiss();
+                    }}>
+                        {content.necessaryOnlyButton}
                     </Button>
-                    <Button type="button" className={`${styles.action} ${styles.primary}`} onClick={handleAcceptAll}>
+                    <Button type="button" className={styles.action} onClick={handleAcceptAll}>
                         {content.acceptAllButton}
+                    </Button>
+                    <Button type="button" className={`${styles.action} ${styles.settings}`} onClick={() => setIsModalOpen(true)}>
+                        {content.customizeButton}
                     </Button>
                 </div>
             </section>
