@@ -8,6 +8,12 @@ const episodes = mergePodcastEpisodes([createAiTaKrajtaInternalEpisodes()], { sh
     personIds: episode.hosts.some(name => name.includes('Pavol')) ? ['pavol-hejny'] : [] }));
 
 describe('reviewed English episode metadata', () => {
+    it('does not change any source titles or episode numbers for the original publication', () => {
+        const before = structuredClone(episodes);
+        getPavolAiTaKrajtaPodcasts(episodes, 'cs');
+        getPavolAiTaKrajtaPodcasts(episodes, 'en');
+        expect(episodes).toEqual(before);
+    });
     it('covers every internally credited appearance without changing recording language or participation', () => {
         const selected = getPavolAiTaKrajtaPodcasts(episodes, 'en');
         const expected = AI_TA_KRAJTA_INTERNAL_EPISODES.filter(episode => episode.hosts.some(name => name.includes('Pavol')));

@@ -82,6 +82,7 @@ export function AiTaKrajtaEpisodeList() {
                     </div>
 
                     <ArchiveSearchField value={viewState.searchQuery} onChange={setSearchQuery}
+                        wrapperClassName="w-full md:w-72" iconClassName="text-white/35"
                         label="Hledat v dílech" placeholder="Hledat téma, model, jméno nebo slovo z dílu"
                         maxLength={MAXIMAL_AI_TA_KRAJTA_EPISODE_SEARCH_QUERY_LENGTH}
                         className="border-white/10 bg-white/[0.04] text-white placeholder:text-white/35 focus:border-white/40" />
