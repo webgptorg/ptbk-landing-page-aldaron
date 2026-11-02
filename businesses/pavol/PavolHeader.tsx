@@ -9,7 +9,7 @@ import {
     createPublicUrl,
 } from '@/lib/domains/publicDomainRouting';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-import { ArrowRight, Menu } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
@@ -99,7 +99,7 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                             aria-label={CONTENT.menuLabel}
                             className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[var(--pavol-border)]"
                         >
-                            <Menu aria-hidden="true" className="h-5 w-5" />
+                            <span className="pavol-menu-icon" aria-hidden="true"><span /><span /><span /></span>
                         </summary>
                         <nav
                             aria-label={CONTENT.navigationLabel}

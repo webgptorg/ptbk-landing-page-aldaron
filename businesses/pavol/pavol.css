@@ -610,3 +610,11 @@
         height: 2.5rem;
     }
 }
+.pavol-menu-icon { display: grid; gap: 4px; width: 20px; }
+.pavol-menu-icon span { display: block; height: 2px; border-radius: 2px; background: currentColor; transition: transform .24s ease, opacity .18s ease; transform-origin: center; }
+.pavol-mobile-menu[open] .pavol-menu-icon span:first-child { transform: translateY(6px) rotate(45deg); }
+.pavol-mobile-menu[open] .pavol-menu-icon span:nth-child(2) { opacity: 0; transform: scaleX(.3); }
+.pavol-mobile-menu[open] .pavol-menu-icon span:last-child { transform: translateY(-6px) rotate(-45deg); }
+.pavol-mobile-menu::details-content { opacity: 0; transform: translateY(-8px); transition: opacity .24s ease, transform .24s ease, content-visibility .24s allow-discrete; }
+.pavol-mobile-menu[open]::details-content { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .pavol-menu-icon span, .pavol-mobile-menu::details-content { transition: none; } }
