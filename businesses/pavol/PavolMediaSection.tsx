@@ -17,12 +17,13 @@ import { getArticles } from '@/lib/articles/load';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
+import { PavolTalksSection } from './PavolTalksSection';
 import { selectPavolHomepagePodcasts } from './pavolPodcastOrder';
 
 const HOMEPAGE_ITEM_LIMIT = 10;
 
 function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAppearance }) {
-    const IS_HIGHLIGHT = appearance.importance === 'highlight';
+    const IS_HIGHLIGHT = true;
     return (
         <article className="h-full">
             <a
@@ -91,11 +92,13 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
     const cs = language === 'cs';
     const content = PAVOL_PAGE_CONTENT[language].media;
     const articles = rankContent(getArticles(language, 'personal').filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
-    const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0));
+    const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0 && appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
     const highlights = appearances.slice(0, 3);
     const rest = appearances.slice(3);
+    const talks = await PavolTalksSection({ language });
     const podcasts = await fetchPavolPodcasts(language, revalidateSeconds);
     return <>
+        {talks}
         <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading eyebrow={content.eyebrow} title={content.title} description={content.description} />

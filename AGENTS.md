@@ -144,9 +144,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
 - Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
-  Their homepages show `#articles` before `#podcasts`, each limited to ten server-rendered items with a localized
+  Their homepages show `#articles` before `#podcasts`, articles limited to ten and podcasts to four server-rendered items with a localized
   Show more link. Articles retain newest-first matching-language publication and the existing audio button;
-  podcasts apply Smart ordering to the full archive before taking ten. Header and footer links scroll to those
+  podcasts combine editorial prominence, recency and show diversity before taking four, including one AI ta Krajta episode. Header and footer links scroll to those
   homepage sections. `/articles` and `/podcasts` list only their own complete type; the podcast archive retains
   its sort selector, hourly sources, shared player, localized metadata and sitemap entries. Archive navigation
   returns to homepage anchors and preserves client-side playback, while language links keep the archive path.
@@ -166,6 +166,17 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Provenance and unresolved research are documented in `businesses/pavol/pavolPodcastSources.md`.
   Their shared ivory, forest-green and gold design uses the existing portrait and project marks, with a featured
   project, static editorial testimonials and responsive section layouts; visual tokens stay in `layout.ts` and `pavol.css`.
+  `/projects` lists the verified public project catalogue; private Sites and unresolved authorship stay out of the publication.
+  Collboard and H-edu have separate real interface screenshots. Project feature selection, articles, media and podcasts
+  accept editorial `prominence` (1 neutral, 0 omitted from homepage); two years halves temporal rank. Chronological
+  podcast sorting remains available. Both podcast archives share ArchiveSearchField and accent-insensitive matching.
+  `/talks` and its homepage preview read the same public workshop summaries as the community calendar. Only the
+  online-workshop kind (whose lecturer is Pavol) and explicit PAVOL_EVENT_PARTICIPATION slugs enter his personal list;
+  another community speaker's event never implies his participation. Three real owned archival speaking photos are
+  captioned without an invented venue, date or photographer. Public sources are in docs/pavol-portfolio.md.
+  Personal articles/podcast.xml subscriptions now combine matching-language articles with Pavol's filtered appearances,
+  refresh hourly, preserve article GUIDs and canonical source audio, and identify original recording languages.
+  They are linked from both archives and the footer; Promptbook article-only feeds stay independent.
   Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu.
   The introduction, projects, testimonials, and media remain readable without animated reveals; older media
   appearances open through a native disclosure. Service enquiries use the existing `/api/waitlist` contact source,

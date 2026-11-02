@@ -111,6 +111,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 { label: 'Jak vám pomohu', href: '#services' },
                 { label: 'Reference', href: '#testimonials' },
                 { label: 'Projekty', href: '#projects' },
+                { label: 'Přednášky', href: '#talks' },
                 { label: 'Články', href: '#articles' },
                 { label: 'Podcasty', href: '#podcasts' },
                 { label: 'Kontakt', href: '#contact' },
@@ -187,7 +188,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         },
         media: {
             eyebrow: 'Média',
-            title: 'Přednášky a mediální zmínky',
+            title: 'Mediální zmínky',
             description: 'Přednášky a výstupy v médiích o AI, vývoji a digitálních produktech.',
             highlightsLabel: 'Vybrané výstupy',
             restLabel: 'Přednášky a zmínky v médiích',
@@ -241,6 +242,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 { label: 'How I can help', href: '#services' },
                 { label: 'What people say', href: '#testimonials' },
                 { label: 'Projects', href: '#projects' },
+                { label: 'Talks', href: '#talks' },
                 { label: 'Articles', href: '#articles' },
                 { label: 'Podcasts', href: '#podcasts' },
                 { label: 'Contact', href: '#contact' },
@@ -316,7 +318,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         },
         media: {
             eyebrow: 'In the media',
-            title: 'Talks and media coverage',
+            title: 'Media coverage',
             description: 'Talks and media appearances about AI, software development, and digital products.',
             highlightsLabel: 'Selected appearances',
             restLabel: 'Talks and media coverage',
