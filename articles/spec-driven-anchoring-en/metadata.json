@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "article.pdf",
+      "sha256": "211c8fd06947eb708298a1dfcb424abce0f5ac33e4d387da70e8688ce8a99a65",
+      "bytes": 61710,
+      "mimeType": "application/pdf"
+    },
+    {
+      "path": "audio/script.txt",
+      "sha256": "4eeda21e76bdfe136bb261bf1c32e8dbd575465622045892c28623ea70df0441",
+      "bytes": 31982,
+      "mimeType": "text/plain"
+    },
+    {
+      "path": "content.md",
+      "sha256": "6cce240cbdeb30d6529527f1be7a2649afa2a9fcc36be48f59feda91352f955f",
+      "bytes": 32156,
+      "mimeType": "text/markdown"
+    },
+    {
+      "path": "metadata.yaml",
+      "sha256": "eff024095de344cebc9c86e8be06a8467dc489f355bfa2d9ab8ff42f89e7d4c6",
+      "bytes": 543,
+      "mimeType": "application/yaml"
+    }
+  ],
+  "audio": {
+    "status": "pending",
+    "voiceName": "Pavol Hejný 2026"
+  }
+}

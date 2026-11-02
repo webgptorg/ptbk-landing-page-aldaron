@@ -1,0 +1,16 @@
+id: spec-driven-anchoring-en
+translationGroupId: spec-driven-anchoring
+authorId: pavol-hejny
+language: en
+slug: what-comes-after-code-generation
+title: 'The “new thing” we have been doing for 50 years: What comes after code generation?'
+perex: 'How I let an AI agent rewrite itself, why code generation is nothing new, and what programmers will do in the future.'
+publishedAt: '2026-10-20T21:00:00+02:00'
+updatedAt: '2026-11-02T13:28:00+01:00'
+status: published
+tags:
+  - AI
+  - Programming
+  - Specifications
+  - Anchoring
+  - Promptbook
