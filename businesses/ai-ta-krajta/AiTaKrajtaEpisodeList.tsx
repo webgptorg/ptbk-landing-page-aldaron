@@ -11,7 +11,8 @@ import {
     AI_TA_KRAJTA_SECTION_IDS,
 } from '@/businesses/ai-ta-krajta/config';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
-import { Search, X } from 'lucide-react';
+import { ArchiveSearchField } from '@/components/podcast/ArchiveSearchField';
+import { X } from 'lucide-react';
 
 /**
  * What the section says when the filter matches nothing
@@ -80,18 +81,10 @@ export function AiTaKrajtaEpisodeList() {
                         </p>
                     </div>
 
-                    <label className="relative w-full md:w-72">
-                        <span className="sr-only">Hledat v dílech</span>
-                        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
-                        <input
-                            type="search"
-                            value={viewState.searchQuery}
-                            onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder="Hledat téma, model, jméno nebo slovo z dílu"
-                            maxLength={MAXIMAL_AI_TA_KRAJTA_EPISODE_SEARCH_QUERY_LENGTH}
-                            className="h-11 w-full rounded-full border border-white/10 bg-white/[0.04] pl-11 pr-4 text-sm text-white placeholder:text-white/35 outline-none transition-colors focus:border-white/40"
-                        />
-                    </label>
+                    <ArchiveSearchField value={viewState.searchQuery} onChange={setSearchQuery}
+                        label="Hledat v dílech" placeholder="Hledat téma, model, jméno nebo slovo z dílu"
+                        maxLength={MAXIMAL_AI_TA_KRAJTA_EPISODE_SEARCH_QUERY_LENGTH}
+                        className="border-white/10 bg-white/[0.04] text-white placeholder:text-white/35 focus:border-white/40" />
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-white/50">
