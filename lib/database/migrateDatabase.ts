@@ -303,12 +303,45 @@ async function createPostgresClient(databaseUrl: string): Promise<MigrationDatab
 
     return {
         query: async (queryText, values) => {
-            const result = values === undefined ? await client.query(queryText) : await client.query(queryText, [...values]);
-
-            return { rows: result.rows as readonly Record<string, unknown>[] };
+            const slowQueryTimer = setTimeout(() => {
+                void logMigrationLockWaits(databaseUrl);
+            }, 15_000);
+            slowQueryTimer.unref();
+            try {
+                const result = values === undefined ? await client.query(queryText) : await client.query(queryText, [...values]);
+                return { rows: result.rows as readonly Record<string, unknown>[] };
+            } finally {
+                clearTimeout(slowQueryTimer);
+            }
         },
         end: () => client.end(),
     };
+}
+
+/** Diagnose a slow startup without logging SQL text, credentials or application records. */
+async function logMigrationLockWaits(databaseUrl: string): Promise<void> {
+    const diagnostics = new Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5_000, query_timeout: 5_000 });
+    try {
+        await diagnostics.connect();
+        const result = await diagnostics.query(`
+            SELECT activity.pid, activity.state, activity.wait_event_type, activity.wait_event,
+                extract(epoch FROM now() - activity.xact_start)::int AS transaction_age_seconds,
+                pg_blocking_pids(activity.pid) AS blocking_pids,
+                locks.locktype, locks.mode, locks.granted, locks.relation::regclass::text AS relation
+            FROM pg_stat_activity AS activity
+            LEFT JOIN pg_locks AS locks ON locks.pid = activity.pid
+            WHERE activity.datname = current_database()
+                AND (cardinality(pg_blocking_pids(activity.pid)) > 0
+                    OR activity.pid IN (SELECT unnest(pg_blocking_pids(pid)) FROM pg_stat_activity))
+            ORDER BY activity.pid, locks.granted, locks.relation
+            LIMIT 60;
+        `);
+        console.warn('Slow database migration lock diagnostics:', JSON.stringify(result.rows));
+    } catch (error) {
+        console.warn('Database migration lock diagnostics unavailable:', error instanceof Error ? error.name : 'Unknown error');
+    } finally {
+        await diagnostics.end().catch(() => undefined);
+    }
 }
 
 /**
