@@ -5,7 +5,7 @@ import { useSiteLocale } from './LocaleProvider';
 import s from './blueprint-scene.module.css';
 
 export type BlueprintKind = 'podcast' | 'relationships' | 'development' | 'engine';
-type Props = { kind: BlueprintKind; step: number; visibleStage?: number; progress?: number[]; appPlace?: number; enginePlace?: number; asleep?: boolean };
+type Props = { kind: BlueprintKind; step: number; visibleStage?: number; progress?: number[]; appPlace?: number; enginePlace?: number; asleep?: boolean; compact?: boolean };
 const titles = {
     cs: { podcast: 'Od nového dílu k publikovaným příspěvkům', relationships: 'Od nové příležitosti k osobnímu oslovení', development: 'Od večerního hašení k rannímu řešení', engine: 'Vaše aplikace a váš engine' },
     en: { podcast: 'From a new episode to published posts', relationships: 'From a new opportunity to a personal email', development: 'From an evening report to a morning fix', engine: 'Your app and your engine' },
@@ -197,14 +197,15 @@ function Engine({ mobile, en, appPlace, enginePlace, asleep }: { mobile: boolean
 }
 
 /** Native vector artwork derived from the approved light blueprint, with actual website story content. */
-export function BlueprintScene({ kind, step, visibleStage, progress = [1, 1, 1], appPlace = 0, enginePlace = 0, asleep = false }: Props) {
+export function BlueprintScene({ kind, step, visibleStage, progress = [1, 1, 1], appPlace = 0, enginePlace = 0, asleep = false, compact = false }: Props) {
     const { locale } = useSiteLocale(); const en = locale === 'en';
     const prefix = 'blueprint-'+useId().replace(/:/g,'');
     const [mobile,setMobile] = useState(false);
     useEffect(() => {
+        if (compact) return;
         const media = window.matchMedia('(max-width: 600px)'); const update = () => setMobile(media.matches);
         update(); media.addEventListener('change',update); return () => media.removeEventListener('change',update);
-    },[]);
+    },[compact]);
     const height = mobile ? (kind === 'engine' ? 890 : 1030) : 600;
     const width = mobile ? (kind === 'engine' ? 380 : 340) : 1000;
     return <svg className={s.canvas} viewBox={'0 0 '+width+' '+height} role="img" aria-labelledby={prefix+'-title '+prefix+'-description'} data-blueprint={kind} data-visible-stage={visibleStage} data-bp-variant="light" data-app-place={appPlace} data-engine-place={enginePlace} data-asleep={asleep}>

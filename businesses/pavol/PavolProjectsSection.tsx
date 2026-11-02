@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { rankContent } from '@/lib/content/contentRanking';
+import { BlueprintScene } from '@/businesses/new/BlueprintScene';
+import { SiteLocaleProvider } from '@/businesses/new/LocaleProvider';
 
 function ProjectMark({ project }: { readonly project: PavolProject }) {
     return (
@@ -54,7 +56,7 @@ export function PavolProjectsSection({ language, isArchive = false }: { readonly
                                     IS_FEATURED && 'pavol-project-featured',
                                 )}
                             >
-                                {IS_FEATURED && PROJECT.logos?.[0] && (
+                                {IS_FEATURED && PROJECT.title !== 'Promptbook' && PROJECT.logos?.[0] && (
                                     <Image
                                         src={PROJECT.logos[0].src}
                                         alt=""
@@ -77,6 +79,9 @@ export function PavolProjectsSection({ language, isArchive = false }: { readonly
                                 <p className="pavol-project-description mb-7 mt-3 max-w-lg text-sm leading-relaxed sm:text-base">
                                     {PROJECT.description}
                                 </p>
+                                {PROJECT.title === 'Promptbook' && <div className="mb-6 overflow-hidden rounded-xl bg-[#f1f6fc]">
+                                    <SiteLocaleProvider locale={language}><BlueprintScene kind="development" step={2} visibleStage={2} compact /></SiteLocaleProvider>
+                                </div>}
                                 {PROJECT.caseStudy && <details open={isArchive} className="mb-6 border-t border-current/20 pt-4 text-sm">
                                     <summary className="cursor-pointer font-medium">{language === 'cs' ? 'Moje role a výsledek' : 'My role and the outcome'}</summary>
                                     <dl className="mt-4 space-y-3 leading-relaxed">
