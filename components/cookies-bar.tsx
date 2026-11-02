@@ -1,6 +1,5 @@
 'use client';
 
-import { useFixedControlClearance } from '@/hooks/useFixedControlClearance';
 import { getLanguageFromPathname } from '@/lib/language/pageLanguage';
 import { getCookieConsentTheme, PODCAST_COOKIE_CONSENT_STYLE } from '@/lib/legal/cookieConsentAppearance';
 import { getCookieConsentContent } from '@/lib/legal/cookieConsentContent';
@@ -8,133 +7,64 @@ import { ALL_COOKIES_ALLOWED, ONLY_NECESSARY_COOKIES_ALLOWED, isCookieChoiceMade
 import { COOKIE_SETTINGS_HASH } from '@/lib/legal/cookieSettingsHash';
 import { getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
+import { FloatingConversation } from '@/components/floating/FloatingConversation';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { Cookie } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './cookie-consent.module.css';
 import { CookieSettingsModal } from './cookie-settings-modal';
-import { Button } from './ui/button';
 
-export function CookiesBar({
-    brandedLanguage,
-    isPodcastDomain = false,
-}: {
-    readonly brandedLanguage?: SupportedHomepageLanguage;
-    readonly isPodcastDomain?: boolean;
+/** A quiet launcher first; only a still-unanswered choice opens one predefined message. */
+export function CookiesBar({ brandedLanguage, isPodcastDomain = false }: {
+    readonly brandedLanguage?: SupportedHomepageLanguage; readonly isPodcastDomain?: boolean;
 } = {}) {
     const pathname = usePathname();
-    const [isVisible, setIsVisible] = useState(false);
-
+    const [visible, setVisible] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [settings, setSettings] = useState(false);
     useEffect(() => {
-        // Note: A visitor who follows the cookie settings link gets the bar back, even though they answered it before -
-        //       withdrawing a consent has to be as easy as giving it.
-        const showBarWhenSettingsRequested = () => {
-            if (window.location.hash === COOKIE_SETTINGS_HASH) {
-                setIsVisible(true);
-            }
-        };
-
-        if (!isCookieChoiceMade()) {
-            setIsVisible(true);
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        let cancelled = false;
+        function requestSettings() {
+            if (window.location.hash === COOKIE_SETTINGS_HASH) { setVisible(true); setOpen(true); }
         }
-
-        showBarWhenSettingsRequested();
-
-        window.addEventListener('hashchange', showBarWhenSettingsRequested);
-        return () => window.removeEventListener('hashchange', showBarWhenSettingsRequested);
+        function prompt() {
+            if (cancelled || isCookieChoiceMade()) return;
+            // Do not interrupt a conversation the visitor deliberately opened.
+            if (document.querySelector('[data-floating-open]')) { timer = setTimeout(prompt, 3000); return; }
+            setOpen(true);
+        }
+        if (!isCookieChoiceMade()) { setVisible(true); timer = setTimeout(prompt, 6000); }
+        requestSettings();
+        window.addEventListener('hashchange', requestSettings);
+        return () => { cancelled = true; clearTimeout(timer); window.removeEventListener('hashchange', requestSettings); };
     }, []);
-
-    if (!isVisible || /^(?:\/cs\/pavol)?\/messages(?:\/|$)/.test(pathname)) {
-        return null;
-    }
-
-    return (
-        <CookieConsentPanel
-            onDismiss={() => setIsVisible(false)}
-            brandedLanguage={brandedLanguage}
-            isPodcastDomain={isPodcastDomain}
-        />
-    );
-}
-
-/** Mount the measurements with the visible panel, so a saved choice leaves no observers or reserved space. */
-function CookieConsentPanel({
-    onDismiss,
-    brandedLanguage,
-    isPodcastDomain,
-}: {
-    readonly onDismiss: () => void;
-    readonly brandedLanguage?: SupportedHomepageLanguage;
-    readonly isPodcastDomain: boolean;
-}) {
-    const pathname = usePathname();
     const language = brandedLanguage ?? getLanguageFromPathname(pathname);
     const content = getCookieConsentContent(language);
-    const privacyPolicyUrl = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
+    const privacyUrl = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
     const theme = isPodcastDomain ? 'podcast' : getCookieConsentTheme(pathname);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const panelReference = useRef<HTMLElement>(null);
-    const { height, clearance } = useFixedControlClearance(panelReference, '[data-fixed-bottom-control]');
-    const appearanceStyle = theme === 'podcast' ? PODCAST_COOKIE_CONSENT_STYLE : undefined;
-    const layoutStyle = {
-        ...appearanceStyle,
-        '--cookie-panel-height': `${height}px`,
-        '--cookie-clearance': `${clearance}px`,
-    } as CSSProperties;
-
-    const handleAcceptAll = () => {
-        saveCookiePreferences(ALL_COOKIES_ALLOWED);
-        onDismiss();
-    };
-
-    return (
-        <div className={`${styles.appearance} ${styles.layout}`} data-theme={theme} style={layoutStyle}>
-            <div className={styles.spacer} aria-hidden="true" />
-            <section
-                ref={panelReference}
-                className={`cookie-consent__panel ${styles.panel}`}
-                data-cookie-consent-panel
-                aria-labelledby="cookie-consent-title"
-                aria-describedby="cookie-consent-description"
-            >
-                <div>
-                    <div className={styles.heading}>
-                        <Cookie className={styles.icon} aria-hidden="true" />
-                        <h2 id="cookie-consent-title" className={styles.title}>
-                            {content.barTitle}
-                        </h2>
-                    </div>
-                    <p id="cookie-consent-description" className={styles.description}>
-                        {content.barDescription}{' '}{content.privacyNotePrefix}
-                        <Link href={privacyPolicyUrl}>
-                            {content.privacyPolicyLinkText}
-                        </Link>.
-                    </p>
+    function dismiss() { setVisible(false); setOpen(false); }
+    function choose(all: boolean) {
+        saveCookiePreferences(all ? ALL_COOKIES_ALLOWED : ONLY_NECESSARY_COOKIES_ALLOWED);
+        dismiss();
+    }
+    if (!visible || /^(?:\/cs\/pavol)?\/messages(?:\/|$)/.test(pathname)) return null;
+    return <div className={styles.appearance} data-theme={theme} style={theme === 'podcast' ? PODCAST_COOKIE_CONSENT_STYLE : undefined}>
+        <FloatingConversation id="cookie-choice" open={open} onOpenChange={setOpen} title={content.barTitle}
+            side="left" compact icon={<Cookie size={25} strokeWidth={1.6} aria-hidden="true" />}
+            launcherLabel={language === 'cs' ? 'Nastavení cookies' : 'Cookie preferences'} closeLabel={language === 'cs' ? 'Sbalit cookies' : 'Minimize cookies'}>
+            <div className="cookie-conversation-body">
+                <p className="cookie-conversation-message">{content.barDescription}</p>
+                <div className="cookie-conversation-actions">
+                    <button type="button" onClick={() => choose(false)}>{content.necessaryOnlyButton}</button>
+                    <button type="button" onClick={() => choose(true)}>{content.acceptAllButton}</button>
+                    <button type="button" className="cookie-conversation-settings" onClick={() => { setOpen(false); setSettings(true); }}>{content.customizeButton}</button>
                 </div>
-                <div className={styles.actions}>
-                    <Button type="button" className={styles.action} onClick={() => {
-                        saveCookiePreferences(ONLY_NECESSARY_COOKIES_ALLOWED);
-                        onDismiss();
-                    }}>
-                        {content.necessaryOnlyButton}
-                    </Button>
-                    <Button type="button" className={styles.action} onClick={handleAcceptAll}>
-                        {content.acceptAllButton}
-                    </Button>
-                    <Button type="button" className={`${styles.action} ${styles.settings}`} onClick={() => setIsModalOpen(true)}>
-                        {content.customizeButton}
-                    </Button>
-                </div>
-            </section>
-            <CookieSettingsModal
-                language={language}
-                theme={theme}
-                isOpen={isModalOpen}
-                onOpenChange={setIsModalOpen}
-                onSave={onDismiss}
-            />
-        </div>
-    );
+                <Link href={privacyUrl} className="cookie-conversation-privacy">{language === 'cs' ? 'Ochrana osobních údajů' : 'Privacy policy'}</Link>
+            </div>
+        </FloatingConversation>
+        <CookieSettingsModal language={language} theme={theme} isOpen={settings} onOpenChange={setSettings} onSave={dismiss} />
+    </div>;
 }
