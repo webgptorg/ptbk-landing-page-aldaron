@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import type { ArticleLanguage, ArticlePublication } from '@/lib/articles/types';
-import { getArticleIndexUrl } from '@/lib/articles/urls';
+import { getArticleIndexUrl, getArticlePodcastUrl } from '@/lib/articles/urls';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 
 export function ArticleHeader({ language, publication, translations = [] }: {
@@ -36,6 +36,7 @@ export function ArticleFooter({ language, publication }: { readonly language: Ar
     return (
         <footer className="article-footer article-container">
             <Link className="article-text-link" href={new URL(getArticleIndexUrl(language, publication)).pathname}><ArrowLeft size={16} aria-hidden="true" />{cs ? 'Všechny články' : 'All articles'}</Link>
+            {publication === 'personal' && <a className="article-text-link" href={getArticlePodcastUrl(language, publication)}>{cs ? 'Odebírat články a podcasty (RSS)' : 'Subscribe to articles and podcasts (RSS)'}</a>}
             <div><span>{publication === 'personal' ? 'Pavol Hejný' : 'Promptbook'}</span><LegalFooterLinks language={language} /></div>
         </footer>
     );

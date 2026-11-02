@@ -95,8 +95,7 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
     const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0 && appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
     const highlights = appearances.slice(0, 3);
     const rest = appearances.slice(3);
-    const talks = await PavolTalksSection({ language });
-    const podcasts = await fetchPavolPodcasts(language, revalidateSeconds);
+    const [talks, podcasts] = await Promise.all([PavolTalksSection({ language }), fetchPavolPodcasts(language, revalidateSeconds)]);
     return <>
         {talks}
         <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
