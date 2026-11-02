@@ -19,8 +19,8 @@ export async function PavolTalksSection({ language, isArchive = false }: { reado
                 description={cs ? 'Od webových technologií po AI agenty. Záznamy přednášek a termíny workshopů, které vedu.' : 'From web technologies to AI agents. Talk recordings and dates of workshops I teach. Event details may be in Czech.'} />
             <div className="mt-8 grid gap-5 md:grid-cols-2">{talks.map(talk => <article key={talk.id} className="overflow-hidden rounded-2xl border border-[var(--pavol-border)] bg-white p-6">
                 <p className="text-xs text-[var(--pavol-muted)]">{talk.source}{talk.publishedAt && <> · <time dateTime={talk.publishedAt}>{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { dateStyle: 'medium', timeZone: 'Europe/Prague' }).format(new Date(talk.publishedAt))}</time></>}</p>
-                <h3 className="mt-3 text-2xl font-medium" lang={talk.textLanguage}><a href={talk.href}>{talk.title}</a></h3>
-                <div lang={talk.textLanguage}><EventDescription className="my-4 text-sm leading-relaxed text-[var(--pavol-muted)]" description={talk.description} /></div>
+                <h3 className="mt-3 text-2xl font-medium" lang={talk.textLanguage}><a href={talk.href}>{talk.title.replace(/\u2014/g, '-')}</a></h3>
+                <div lang={talk.textLanguage}><EventDescription className="my-4 text-sm leading-relaxed text-[var(--pavol-muted)]" description={talk.description.replace(/\u2014/g, '-')} /></div>
                 <a href={talk.href} className="pavol-source-link">{cs ? 'Podrobnosti a záznam' : 'Details and recording'} ↗</a>
             </article>)}</div>
             {!isArchive && <Link href="/talks" className="pavol-source-link mt-6">{cs ? 'Všechny akce' : 'All events'} →</Link>}

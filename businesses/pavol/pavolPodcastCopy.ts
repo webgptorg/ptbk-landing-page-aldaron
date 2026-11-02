@@ -68,7 +68,7 @@ const EPISODE_COPY: readonly EpisodeCopy[] = [
         "sourceTitle": "AI ta Krajta #60 | Konec jedné éry? Proč se AI vrací k terminálu a co umí čínská Kimi 3 | 1. část",
         "videoId": "7So2NSC-UEw",
         "csTitle": "Konec jedné éry? Proč se AI vrací k terminálu a co umí čínská Kimi 3 | 1. část",
-        "enTitle": "Why AI is returning to the terminal — and what Kimi 3 can do",
+        "enTitle": "Why AI is returning to the terminal - and what Kimi 3 can do",
         "enDescription": "A discussion of terminal-based AI workflows and the capabilities of Kimi 3. First part."
     },
     {
@@ -484,7 +484,7 @@ const EPISODE_COPY: readonly EpisodeCopy[] = [
         "sourceTitle": "AI ta Krajta #10 | AI novinky, implementace AI ve firmách, kdy budeme mít AGI?",
         "videoId": "x8jGleNWbGM",
         "csTitle": "AI novinky, implementace AI ve firmách, kdy budeme mít AGI?",
-        "enTitle": "Putting AI to work in companies — and the AGI question",
+        "enTitle": "Putting AI to work in companies - and the AGI question",
         "enDescription": "AI news, practical implementation in companies, and a discussion of when artificial general intelligence might arrive."
     },
     {
@@ -580,7 +580,7 @@ const EPISODE_COPY: readonly EpisodeCopy[] = [
         "sourceTitle": "AI agenti utrženi ze řetězu. A kdo platí \"AI zdarma\"? | AItaKrajta #69",
         "videoId": null,
         "csTitle": "AI agenti utrženi ze řetězu. A kdo platí \"AI zdarma\"?",
-        "enTitle": "Agents off the leash — and who pays for “free AI”?",
+        "enTitle": "Agents off the leash - and who pays for “free AI”?",
         "enDescription": "Cloud agents, hidden incentives, credential protection, sandbox escapes, and the economics of autonomous assistants."
     },
     {
