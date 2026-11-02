@@ -52,7 +52,7 @@ export function CookiesBar({ brandedLanguage, isPodcastDomain = false }: {
     }
     if (!visible || /^(?:\/cs\/pavol)?\/messages(?:\/|$)/.test(pathname)) return null;
     return <div className={styles.appearance} data-theme={theme} style={theme === 'podcast' ? PODCAST_COOKIE_CONSENT_STYLE : undefined}>
-        <FloatingConversation id="cookie-choice" open={open} onOpenChange={setOpen} title={content.barTitle}
+        {!settings && <FloatingConversation id="cookie-choice" open={open} onOpenChange={setOpen} title={content.barTitle}
             side="left" compact icon={<Cookie size={25} strokeWidth={1.6} aria-hidden="true" />}
             launcherLabel={language === 'cs' ? 'Nastavení cookies' : 'Cookie preferences'} closeLabel={language === 'cs' ? 'Sbalit cookies' : 'Minimize cookies'}>
             <div className="cookie-conversation-body">
@@ -64,7 +64,7 @@ export function CookiesBar({ brandedLanguage, isPodcastDomain = false }: {
                 </div>
                 <Link href={privacyUrl} className="cookie-conversation-privacy">{language === 'cs' ? 'Ochrana osobních údajů' : 'Privacy policy'}</Link>
             </div>
-        </FloatingConversation>
+        </FloatingConversation>}
         <CookieSettingsModal language={language} theme={theme} isOpen={settings} onOpenChange={setSettings} onSave={dismiss} />
     </div>;
 }

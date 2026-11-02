@@ -2,7 +2,7 @@
     --floating-paper: var(--cookie-surface, var(--article-paper, #faf8f2));
     --floating-ink: var(--cookie-text, var(--article-ink, #193b31));
     --floating-line: var(--cookie-border, var(--article-line, #dfdfd4));
-    position: fixed; z-index: 110; bottom: calc(var(--floating-clearance, 0px) + 12px + env(safe-area-inset-bottom, 0px));
+    position: fixed; z-index: 40; bottom: calc(var(--floating-clearance, 0px) + 12px + env(safe-area-inset-bottom, 0px));
     display: flex; flex-direction: column; gap: 10px; width: min(390px, calc(100vw - 24px)); pointer-events: none;
     color: var(--floating-ink); font-family: var(--font-inter), sans-serif;
 }
