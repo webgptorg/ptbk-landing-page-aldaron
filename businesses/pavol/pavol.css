@@ -152,8 +152,8 @@
 }
 
 .pavol-project-featured h3 {
-    margin-top: auto;
-    padding-top: 5rem;
+    margin-top: 1.5rem;
+    padding-top: 0;
     font-size: clamp(2.25rem, 4vw, 3.5rem);
     line-height: 1.1;
 }
@@ -284,7 +284,7 @@
     }
 
     .pavol-project-featured {
-        grid-row: span 2;
+        grid-row: auto;
     }
 
     .pavol-project-watermark {
@@ -292,37 +292,6 @@
         right: -2rem;
         width: 23rem;
         height: 23rem;
-    }
-
-    .pavol-project:last-child {
-        grid-column: 1 / -1;
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        column-gap: 1.5rem;
-        align-items: center;
-    }
-
-    .pavol-project:last-child > div:first-child {
-        grid-row: 1 / 3;
-    }
-
-    .pavol-project:last-child .pavol-project-number {
-        display: none;
-    }
-
-    .pavol-project:last-child h3 {
-        margin-top: 0;
-    }
-
-    .pavol-project:last-child .pavol-project-description {
-        grid-column: 2;
-        margin-bottom: 0;
-    }
-
-    .pavol-project:last-child > div:last-child {
-        grid-column: 3;
-        grid-row: 1 / 3;
-        margin-top: 0;
     }
 
     .pavol-testimonials {
