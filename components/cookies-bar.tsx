@@ -107,7 +107,7 @@ function CookieConsentPanel({
                         </h2>
                     </div>
                     <p id="cookie-consent-description" className={styles.description}>
-                        {content.barDescription}{' '}
+                        {content.barDescription}{' '}{content.privacyNotePrefix}
                         <Link href={privacyPolicyUrl}>
                             {content.privacyPolicyLinkText}
                         </Link>.
