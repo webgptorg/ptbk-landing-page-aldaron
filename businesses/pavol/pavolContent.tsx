@@ -127,10 +127,10 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         hero: {
             eyebrow: 'AI konzultace, workshopy a vývoj',
             title: 'Pavol Hejný',
-            introduction: 'Stavím produkty.\nPomáhám týmům s AI.',
+            introduction: 'Navrhuji AI agentní týmy.\nA stavím s nimi produkty.',
             portraitCaption: 'Vývojář · AI konzultant · Lektor',
             description:
-                'Pomáhám firmám a týmům nasadit AI do vývoje, produktů a interních procesů tak, aby jim v praxi přinášela užitek.',
+                'Vyvíjím Promptbook a pomáhám firmám zapojit AI agenty do skutečné práce. Od návrhu jejich rolí a pravidel přes první prototyp až po každodenní provoz.',
             badges: ['AI konzultace', 'Workshopy a přednášky', '15+ let vývoje'],
             primaryAction: 'Probrat AI',
             secondaryAction: 'Moje projekty',
@@ -259,9 +259,9 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         hero: {
             eyebrow: 'AI consulting, workshops, and software development',
             title: 'Pavol Hejný',
-            introduction: 'I build products.\nI help teams work with AI.',
+            introduction: 'I design AI agent teams.\nAnd build products with them.',
             portraitCaption: 'Developer · AI consultant · Educator',
-            description: 'I help companies and teams put AI to work in development, products, and internal processes.',
+            description: 'I develop Promptbook and help companies put AI agents to work. From defining their roles and rules to a first prototype and everyday use.',
             badges: ['AI consulting', 'Workshops and talks', '15+ years building software'],
             primaryAction: "Let's talk about AI",
             secondaryAction: 'See my projects',
