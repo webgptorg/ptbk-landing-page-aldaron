@@ -77,6 +77,16 @@ export function PavolProjectsSection({ language, isArchive = false }: { readonly
                                 <p className="pavol-project-description mb-7 mt-3 max-w-lg text-sm leading-relaxed sm:text-base">
                                     {PROJECT.description}
                                 </p>
+                                {PROJECT.caseStudy && <details open={isArchive} className="mb-6 border-t border-current/20 pt-4 text-sm">
+                                    <summary className="cursor-pointer font-medium">{language === 'cs' ? 'Moje role a výsledek' : 'My role and the outcome'}</summary>
+                                    <dl className="mt-4 space-y-3 leading-relaxed">
+                                        {([
+                                            [language === 'cs' ? 'Zadání' : 'The problem', PROJECT.caseStudy.problem],
+                                            [language === 'cs' ? 'Moje role' : 'My role', PROJECT.caseStudy.role],
+                                            [language === 'cs' ? 'Výsledek' : 'The outcome', PROJECT.caseStudy.result],
+                                        ]).map(([label, text]) => <div key={label}><dt className="font-semibold">{label}</dt><dd className="mt-1 opacity-85">{text}</dd></div>)}
+                                    </dl>
+                                </details>}
                                 {PROJECT.screenshot && <a href={PROJECT.links[0]?.href} className="mb-6 block overflow-hidden rounded-xl bg-white">
                                     <Image src={PROJECT.screenshot.src} alt={PROJECT.screenshot.alt} width={1040} height={590}
                                         sizes="(min-width: 768px) 45vw, 90vw" className="h-auto w-full" />
