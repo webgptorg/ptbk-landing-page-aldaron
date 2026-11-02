@@ -24,19 +24,26 @@ export function usePavolContactForm(language: SupportedHomepageLanguage) {
     const [isReady, setIsReady] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const IS_REQUEST_PENDING = useRef(false);
+    const callMessage = language === 'cs' ? 'Dobrý den, Pavole. Rád bych si domluvil úvodní hovor.' : 'Hi Pavol, I would like to arrange an introductory call.';
 
-    useEffect(() => setIsReady(true), []);
+    useEffect(() => {
+        setIsReady(true);
+        if (new URLSearchParams(window.location.search).get('inquiry') === 'intro-call') {
+            setSelectedServiceId('intro-call');
+            setFields(current => current.message.trim() ? current : { ...current, message: callMessage });
+        }
+    }, [callMessage]);
 
     function selectService(serviceId: string) {
         if (IS_REQUEST_PENDING.current) return;
         const SERVICE = CONTENT.services.items.find((ITEM) => ITEM.id === serviceId);
-        setSelectedServiceId(SERVICE?.id ?? '');
+        setSelectedServiceId(serviceId === 'intro-call' ? serviceId : SERVICE?.id ?? '');
         setIsSubmitted(false);
         setError(null);
         setFields((CURRENT) => {
-            const IS_TEMPLATE_MESSAGE = CONTENT.services.items.some((ITEM) => ITEM.prefillMessage === CURRENT.message);
+            const IS_TEMPLATE_MESSAGE = CURRENT.message === callMessage || CONTENT.services.items.some((ITEM) => ITEM.prefillMessage === CURRENT.message);
             if (CURRENT.message.trim() && !IS_TEMPLATE_MESSAGE) return CURRENT;
-            return { ...CURRENT, message: SERVICE?.prefillMessage ?? '' };
+            return { ...CURRENT, message: serviceId === 'intro-call' ? callMessage : SERVICE?.prefillMessage ?? '' };
         });
     }
 

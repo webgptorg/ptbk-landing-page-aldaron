@@ -20,9 +20,9 @@ export function PavolPage({ language, media }: { readonly language: SupportedHom
 
     return (
         <div className="pavol-site min-h-screen bg-[var(--pavol-paper)] text-[var(--pavol-ink)]" style={PAVOL_SITE_STYLE}>
-            <PavolHeader language={language} />
+            <PavolHeader language={language} onPrimaryAction={() => FORM.selectService('intro-call')} />
             <main id="main-content" tabIndex={-1} className="outline-none">
-                <PavolHero content={PAVOL_PAGE_CONTENT[language].hero} />
+                <PavolHero content={PAVOL_PAGE_CONTENT[language].hero} onPrimaryAction={() => FORM.selectService('intro-call')} />
                 <PavolNumbersSection language={language} />
                 <PavolServicesSection language={language} form={FORM} />
                 <PavolProjectsSection language={language} />

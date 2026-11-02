@@ -19,7 +19,7 @@ const LANGUAGE_LINKS = [
     { language: 'en', label: 'English', shortLabel: 'EN', href: createPublicUrl(PAVOL_ENGLISH_INTERNAL_PATH) },
 ] as const;
 
-export function PavolHeader({ language, pagePath = '/' }: { readonly language: SupportedHomepageLanguage; readonly pagePath?: string }) {
+export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { readonly language: SupportedHomepageLanguage; readonly pagePath?: string; readonly onPrimaryAction?: () => void }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language].header;
     const sectionPrefix = pagePath === '/' ? '' : '/';
     const MENU_REF = useRef<HTMLDetailsElement>(null);
@@ -78,7 +78,7 @@ export function PavolHeader({ language, pagePath = '/' }: { readonly language: S
                         asChild
                         className="pavol-primary-button hidden h-11 rounded-full px-5 sm:inline-flex"
                     >
-                        <Link href={`${sectionPrefix}#contact`}>
+                        <Link href={onPrimaryAction ? '#contact' : '/?inquiry=intro-call#contact'} onClick={onPrimaryAction}>
                             {CONTENT.primaryAction}
                             <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4" />
                         </Link>

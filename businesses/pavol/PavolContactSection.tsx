@@ -140,6 +140,7 @@ export function PavolContactSection({
                                         className="mt-2 h-12 w-full min-w-0 rounded-md border border-slate-200 bg-white px-3 text-sm"
                                     >
                                         <option value="">{CONTACT.generalInquiryLabel}</option>
+                                        <option value="intro-call">{language === 'cs' ? 'Úvodní hovor' : 'Introductory call'}</option>
                                         {CONTENT.services.items.map((SERVICE) => (
                                             <option key={SERVICE.id} value={SERVICE.id}>
                                                 {SERVICE.title}

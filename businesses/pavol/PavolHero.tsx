@@ -5,7 +5,7 @@ import PAVOL_PORTRAIT from '@/public/people/pavol-hejny-transparent.png';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 
-export function PavolHero({ content }: { readonly content: PavolPageContent['hero'] }) {
+export function PavolHero({ content, onPrimaryAction }: { readonly content: PavolPageContent['hero']; readonly onPrimaryAction?: () => void }) {
     return (
         <section className="pavol-hero relative overflow-hidden pb-12 pt-28 sm:pb-16 sm:pt-36">
             <div
@@ -32,7 +32,7 @@ export function PavolHero({ content }: { readonly content: PavolPageContent['her
                             size="lg"
                             className="pavol-primary-button h-14 rounded-full px-7 text-sm"
                         >
-                            <a href="#contact">
+                            <a href="#contact" onClick={onPrimaryAction}>
                                 {content.primaryAction}
                                 <ArrowUpRight aria-hidden="true" className="ml-2 h-5 w-5" />
                             </a>

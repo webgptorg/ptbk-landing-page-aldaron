@@ -116,7 +116,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 { label: 'Podcasty', href: '#podcasts' },
                 { label: 'Kontakt', href: '#contact' },
             ],
-            primaryAction: 'Napište mi',
+            primaryAction: 'Domluvit hovor',
             secondaryAction: 'CV',
             languageSwitcherLabel: 'Přepnout jazyk',
             navigationLabel: 'Navigace stránky',
@@ -131,7 +131,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             description:
                 'Vyvíjím Promptbook a pomáhám firmám zapojit AI agenty do skutečné práce. Od návrhu jejich rolí a pravidel přes první prototyp až po každodenní provoz.',
             badges: ['AI konzultace', 'Workshopy a přednášky', '15+ let vývoje'],
-            primaryAction: 'Probrat AI',
+            primaryAction: 'Domluvit hovor',
             secondaryAction: 'Moje projekty',
         },
         services: {
@@ -247,7 +247,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 { label: 'Podcasts', href: '#podcasts' },
                 { label: 'Contact', href: '#contact' },
             ],
-            primaryAction: 'Contact me',
+            primaryAction: "Let's talk",
             secondaryAction: 'CV',
             languageSwitcherLabel: 'Change language',
             navigationLabel: 'Page navigation',
@@ -261,7 +261,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             portraitCaption: 'Developer · AI consultant · Educator',
             description: 'I develop Promptbook and help companies put AI agents to work. From defining their roles and rules to a first prototype and everyday use.',
             badges: ['AI consulting', 'Workshops and talks', '15+ years building software'],
-            primaryAction: "Let's talk about AI",
+            primaryAction: "Let's talk",
             secondaryAction: 'See my projects',
         },
         services: {
