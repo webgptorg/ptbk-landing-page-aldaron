@@ -4,7 +4,7 @@ import { join } from 'node:path';
 export const dynamic = 'force-static';
 export const dynamicParams = false;
 
-const BRANDS = ['promptbook.png', 'pavol-hejny.png'] as const;
+const BRANDS = ['promptbook.png', 'pavol-hejny.png', 'pavol-hejny-v2.png'] as const;
 
 export function generateStaticParams() {
     return BRANDS.map((brand) => ({ brand }));

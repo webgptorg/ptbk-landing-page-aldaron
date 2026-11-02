@@ -27,7 +27,7 @@ export function getArticlePodcastDefinition(
                 ? `${brand}: autorské články o umělé inteligenci, programování a technologiích v audio podobě.`
                 : `${brand}: audio articles about artificial intelligence, programming and technology.`,
         author: brand,
-        imageUrl: `https://ptbk.io/article-podcasts/${isPersonal ? 'pavol-hejny' : 'promptbook'}.png`,
+        imageUrl: `https://ptbk.io/article-podcasts/${isPersonal ? 'pavol-hejny-v2' : 'promptbook'}.png`,
         websiteUrl: getArticleIndexUrl(language, publication),
         feedUrl: getArticlePodcastUrl(language, publication),
     };
