@@ -5,6 +5,11 @@
  */
 export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/CNAME',
+    '/pavol/projects/collboard-ui.png',
+    '/pavol/projects/h-edu-ui.png',
+    '/pavol/gallery/talk-1.jpg',
+    '/pavol/gallery/talk-2.jpg',
+    '/pavol/gallery/talk-3.jpg',
     '/apple-touch-icon.png',
     '/backgrounds/ai-supervize.svg',
     '/backgrounds/chat.svg',

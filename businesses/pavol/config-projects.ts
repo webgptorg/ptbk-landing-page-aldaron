@@ -15,6 +15,9 @@ export type PavolProjectLogo = {
 };
 
 export type PavolProject = {
+    prominence?: number;
+    publishedAt?: string;
+    screenshot?: { src: string; alt: string };
     icon?: LucideIcon;
     logos?: PavolProjectLogo[];
     logoText?: string;
@@ -32,20 +35,26 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
     cs: [
         {
             logos: [{ src: PROMPTBOOK_LOGO, className: 'h-7 w-7' }],
-            title: 'Promptbook',
+            title: 'Promptbook', prominence: 4,
             description:
                 'Ekosystém AI agentů, kteří si drží cíle, pravidla, znalosti a firemní kontext.',
             links: [{ href: createPublicUrl('/'), label: 'Otevřít Promptbook', icon: ArrowRight }],
         },
         {
             logos: [{ src: collboardLogo, className: 'h-7 w-7' }],
-            title: 'Collboard & H-edu',
+            title: 'Collboard', prominence: 3,
+            screenshot: { src: '/pavol/projects/collboard-ui.png', alt: 'Collboard: online tabule a výběr výukových šablon' },
             description:
-                'Produkty pro vzdělávání a spolupráci online, které se osvědčily ve školách i při rychlé změně okolností.',
+                'Sdílená online tabule pro výuku, kreslení a spolupráci. S rozšiřitelnými nástroji a výukovými šablonami.',
             links: [
                 { href: 'https://collboard.com/', label: 'Collboard', icon: ExternalLink },
-                { href: 'https://www.h-edu.cz/', label: 'H-edu', icon: ExternalLink },
             ],
+        },
+        {
+            logos: [{ src: hEduLogo }], title: 'H-edu', prominence: 3,
+            description: 'Interaktivní učebnice a materiály, které propojují úlohy, metodiku a přípravu na výuku.',
+            screenshot: { src: '/pavol/projects/h-edu-ui.png', alt: 'H-edu: matematická úloha a související materiály' },
+            links: [{ href: 'https://www.h-edu.cz/', label: 'H-edu', icon: ExternalLink }],
         },
         {
             logoText: 'AI*',
@@ -72,20 +81,26 @@ export const pavolProjects: Record<SupportedHomepageLanguage, PavolProject[]> = 
     en: [
         {
             logos: [{ src: PROMPTBOOK_LOGO, className: 'h-7 w-7' }],
-            title: 'Promptbook',
+            title: 'Promptbook', prominence: 4,
             description:
                 'AI agents that keep track of goals, rules, knowledge, and company context.',
             links: [{ href: createPublicUrl('/'), label: 'Open Promptbook', icon: ArrowRight }],
         },
         {
             logos: [{ src: collboardLogo, className: 'h-7 w-7' }],
-            title: 'Collboard & H-edu',
+            title: 'Collboard', prominence: 3,
+            screenshot: { src: '/pavol/projects/collboard-ui.png', alt: 'Collboard: shared whiteboard and educational templates' },
             description:
-                'Education and online collaboration products used in schools, including when circumstances changed quickly.',
+                'A shared online whiteboard for teaching, drawing, and collaboration, with extensible tools and educational templates.',
             links: [
                 { href: 'https://collboard.com/', label: 'Collboard', icon: ExternalLink },
-                { href: 'https://www.h-edu.cz/', label: 'H-edu', icon: ExternalLink },
             ],
+        },
+        {
+            logos: [{ src: hEduLogo }], title: 'H-edu', prominence: 3,
+            description: 'Interactive textbooks connecting exercises, teaching guidance, and lesson preparation.',
+            screenshot: { src: '/pavol/projects/h-edu-ui.png', alt: 'H-edu: a maths exercise and related teaching materials' },
+            links: [{ href: 'https://www.h-edu.cz/', label: 'H-edu', icon: ExternalLink }],
         },
         {
             logoText: 'AI*',

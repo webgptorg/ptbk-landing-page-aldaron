@@ -5,6 +5,8 @@ import { PavolSectionHeading } from '@/businesses/pavol/PavolSectionHeading';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import Link from 'next/link';
+import { rankContent } from '@/lib/content/contentRanking';
 
 function ProjectMark({ project }: { readonly project: PavolProject }) {
     return (
@@ -42,7 +44,7 @@ export function PavolProjectsSection({ language }: { readonly language: Supporte
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading {...CONTENT} />
                 <div className="pavol-project-grid mt-12 grid gap-5 md:grid-cols-2">
-                    {PAVOL_PROJECTS[language].map((PROJECT, index) => {
+                    {rankContent(PAVOL_PROJECTS[language].filter(project => project.icon !== undefined ? project.title !== 'Všechny projekty' && project.title !== 'All projects' : project.prominence !== 0)).map((PROJECT, index) => {
                         const IS_FEATURED = index === 0;
                         return (
                             <article
@@ -75,6 +77,10 @@ export function PavolProjectsSection({ language }: { readonly language: Supporte
                                 <p className="pavol-project-description mb-7 mt-3 max-w-lg text-sm leading-relaxed sm:text-base">
                                     {PROJECT.description}
                                 </p>
+                                {PROJECT.screenshot && <a href={PROJECT.links[0]?.href} className="mb-6 block overflow-hidden rounded-xl bg-white">
+                                    <Image src={PROJECT.screenshot.src} alt={PROJECT.screenshot.alt} width={1040} height={590}
+                                        sizes="(min-width: 768px) 45vw, 90vw" className="h-auto w-full" />
+                                </a>}
                                 <div className="mt-auto flex flex-wrap gap-3">
                                     {PROJECT.links.map((LINK) => (
                                         <a
@@ -91,6 +97,7 @@ export function PavolProjectsSection({ language }: { readonly language: Supporte
                         );
                     })}
                 </div>
+                <Link href="/projects" className="mt-8 inline-flex min-h-11 items-center gap-3 rounded-full border border-white/30 px-6 py-3 text-sm">{language === 'cs' ? 'Všechny projekty' : 'All projects'} →</Link>
             </div>
         </section>
     );
