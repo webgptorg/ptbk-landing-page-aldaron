@@ -17,3 +17,11 @@ Pavol's preview/archive reads loadPublishedWorkshopSummaries(), the same public 
 ## Bilingual articles
 
 Publish a Czech and English variant for each new Pavol article, with one translationGroupId, reciprocal canonical language links, an actual PDF and separately prepared narration in each language. Translation is editorial, never a build-time provider call. Narration must remain pending until an actual recording exists; do not reuse Czech speech as English or invent word alignment. The first English article is fully translated but its narration needs an authorized ElevenLabs runtime credential before explicit generation/review.
+
+## Recent event gallery
+
+The gallery links to the corresponding event rather than the raw image. These are real photographs from public posts; captions identify the event, not unidentified people.
+
+- /pavol/gallery/prg-tinkerers-0.jpg: https://www.linkedin.com/posts/prgai_ai-tinkerers-prague-successfully-kicked-off-activity-7238952458255761408-9FTh; event: https://fel.cvut.cz/cs/aktualne/novinky/35902-iniciativa-ai-tinkerers-dorazila-ze-silicon-valley-na-cvut-vytvori-prostor-pro-setkavani-vedcu-i-nadsencu-do-umele-inteligence
+- /pavol/gallery/cassini-0.jpg: https://www.linkedin.com/posts/hejny_great-to-be-a-judge-at-this-wonderful-event-activity-7241118995829915649-A2Yf; event: https://www.linkedin.com/posts/esa-bic-czech-republic_thank-you-for-a-successful-hackathon-and-activity-7241425842365505536-KYDa
+- /pavol/gallery/rakathon-2025-6.jpg: https://cz.linkedin.com/posts/hejny_rakathon-aiprotirakovine-zpracovanitextu-activity-7317473932570230786-1GAf; event: https://cz.linkedin.com/posts/hejny_rakathon-aiprotirakovine-zpracovanitextu-activity-7317473932570230786-1GAf
