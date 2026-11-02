@@ -22,6 +22,7 @@ export function MessagesAdmin() {
     const [query, setQuery] = useState('');
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
+    const [siteChat, setSiteChat] = useState<'cs' | 'en' | null>(null);
     const load = useCallback(async () => {
         try { setState(await requestAdminJson<State>('/api/admin/messages')); setError(''); }
         catch (e) { setError(e instanceof Error ? e.message : 'Zprávy se nepodařilo načíst.'); }
@@ -55,6 +56,14 @@ export function MessagesAdmin() {
         <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-bold text-slate-950">Messages</h1><p className="mt-2 text-sm text-slate-500">Krátká zpráva, celý kontext a prostor pro otázky.</p></div>
             <Button disabled={!state || busy} onClick={() => void runAfterAdminSaves(() => setEditing(null))}><Plus className="mr-2 h-4 w-4" />Nová zpráva</Button></header>
         <Input aria-label="Hledat zprávy" placeholder="Hledat zprávy…" value={query} onChange={(e) => setQuery(e.target.value)} className="max-w-md" />
+        <section className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-4" aria-label="Konverzace z osobního webu">
+            <span className="mr-auto text-sm font-medium">Chat na osobním webu</span>
+            {(['cs', 'en'] as const).map(language => <Button key={language} variant="outline" onClick={() => void runAfterAdminSaves(() => setSiteChat(language))}>
+                <MessageCircle className="mr-2 h-4 w-4" />{language === 'cs' ? 'Český web' : 'Anglický web'}</Button>)}
+        </section>
+        <AdminEditorDialog isOpen={siteChat !== null} onClose={() => setSiteChat(null)} title={`Chat na osobním webu · ${siteChat?.toUpperCase() ?? ''}`} className="max-w-4xl">
+            {siteChat && <MessageConversations key={siteChat} language={siteChat} />}
+        </AdminEditorDialog>
         {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error} <button className="underline" onClick={() => void load()}>Zkusit znovu</button></p>}
         {!state && !error && <p role="status">Načítám zprávy…</p>}
         <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">

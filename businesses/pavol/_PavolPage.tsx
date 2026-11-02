@@ -14,6 +14,7 @@ import { usePavolContactForm } from '@/businesses/pavol/usePavolContactForm';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import type { ReactNode } from 'react';
 import './pavol.css';
+import { MessageChat } from '@/businesses/messages/MessageChat';
 
 export function PavolPage({ language, media }: { readonly language: SupportedHomepageLanguage; readonly media: ReactNode }) {
     const FORM = usePavolContactForm(language);
@@ -31,6 +32,9 @@ export function PavolPage({ language, media }: { readonly language: SupportedHom
                 <PavolContactSection language={language} form={FORM} />
             </main>
             <PavolFooter language={language} />
+            <MessageChat language={language} introduction={language === 'cs'
+                ? 'Ptej se na moje projekty, AI agenty nebo spolupráci. Odpovídá můj AI asistent; konverzaci si mohu později přečíst.'
+                : 'Ask about my projects, AI agents or working together. My AI assistant replies; I can read this conversation later.'} />
         </div>
     );
 }

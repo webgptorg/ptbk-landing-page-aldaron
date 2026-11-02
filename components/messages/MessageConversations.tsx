@@ -9,8 +9,8 @@ import type { MessageConversation, MessageConversationPage, MessageConversationT
 const date = (value: string) => new Intl.DateTimeFormat('cs-CZ', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Europe/Prague' }).format(new Date(value));
 
 /** Read-only histories never share or replace the message editor's autosaved draft. */
-export function MessageConversations({ messageId }: { readonly messageId: string }) {
-    const base = `/api/admin/messages/${messageId}/conversations`;
+export function MessageConversations({ messageId, language }: { readonly messageId?: string; readonly language?: 'cs' | 'en' }) {
+    const base = language ? `/api/admin/messages/personal/${language}/conversations` : `/api/admin/messages/${messageId}/conversations`;
     const [conversations, setConversations] = useState<MessageConversation[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
     const [turns, setTurns] = useState<RecordedMessageChatTurn[]>([]);

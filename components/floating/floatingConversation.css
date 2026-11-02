@@ -1,0 +1,31 @@
+.floating-conversation {
+    --floating-paper: var(--cookie-surface, var(--article-paper, #faf8f2));
+    --floating-ink: var(--cookie-text, var(--article-ink, #193b31));
+    --floating-line: var(--cookie-border, var(--article-line, #dfdfd4));
+    position: fixed; z-index: 110; bottom: calc(var(--floating-clearance, 0px) + 12px + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; gap: 10px; width: min(390px, calc(100vw - 24px)); pointer-events: none;
+    color: var(--floating-ink); font-family: var(--font-inter), sans-serif;
+}
+.floating-conversation-right { right: max(12px, env(safe-area-inset-right, 0px)); align-items: flex-end; }
+.floating-conversation-left { left: max(12px, env(safe-area-inset-left, 0px)); align-items: flex-start; }
+.floating-conversation-panel, .floating-conversation-launcher { pointer-events: auto; background: var(--floating-paper); border: 1px solid var(--floating-line); box-shadow: 0 12px 45px #12251b20, 0 2px 8px #12251b0c; }
+.floating-conversation-panel { display: flex; flex-direction: column; width: 100%; overflow: hidden; border-radius: 20px; max-height: calc(100dvh - var(--floating-clearance, 0px) - 100px - env(safe-area-inset-bottom, 0px)); animation: floating-conversation-in .2s ease-out; }
+.floating-conversation-header { display: flex; flex-shrink: 0; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--floating-line); }
+.floating-conversation-header h2 { flex: 1; margin: 0; color: inherit; font-size: 14px; font-weight: 600; }
+.floating-conversation-header button { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; }
+.floating-conversation-header button:hover { background: var(--cookie-hover, #8881); }
+.floating-conversation-avatar { display: grid; place-items: center; flex: none; width: 36px; height: 36px; }
+.floating-conversation-avatar img { width: 36px; height: 36px; object-fit: cover; object-position: top; border-radius: 50%; background: #dbded3; }
+.floating-conversation-launcher { display: flex; align-items: center; gap: 10px; height: 52px; padding: 7px 15px 7px 7px; border-radius: 28px; font-size: 13px; }
+.floating-conversation-compact { width: 52px; padding: 7px; }
+.floating-conversation-launcher:hover { filter: brightness(.97); }
+.floating-conversation :is(button,a):focus-visible { outline: 2px solid var(--cookie-accent, #39745e); outline-offset: 3px; }
+.cookie-conversation-body { padding: 16px; overflow-y: auto; }
+.cookie-conversation-message { margin: 0 0 12px; padding: 12px; border-radius: 4px 14px 14px; background: var(--cookie-hover, #f0eee5); font-size: 13px; line-height: 1.6; }
+.cookie-conversation-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cookie-conversation-actions button { min-height: 44px; border: 1px solid var(--cookie-border); border-radius: 12px; padding: 8px; font-size: 13px; }
+.cookie-conversation-actions button:hover { background: var(--cookie-hover); }
+.cookie-conversation-actions .cookie-conversation-settings { grid-column: 1 / -1; border: 0; }
+.cookie-conversation-privacy { display: inline-block; margin-top: 12px; font-size: 12px; text-decoration: underline; color: var(--cookie-muted); }
+@keyframes floating-conversation-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .floating-conversation-panel { animation: none; } }
