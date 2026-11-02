@@ -7,11 +7,12 @@ import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 import { Button } from '@/components/ui/button';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getArticlePodcastUrl } from '@/lib/articles/urls';
-import { Send, Rss } from 'lucide-react';
+import { Send } from 'lucide-react';
+import { ArticleRssLink } from '@/businesses/articles/ArticleRssLink';
 import Image from 'next/image';
 import Link from 'next/link';
 
-function FooterLinkColumn({ title, links }: { title: string; links: PavolLink[] }) {
+function FooterLinkColumn({ title, links, subscription }: { title: string; links: PavolLink[]; subscription?: SupportedHomepageLanguage }) {
     return (
         <div>
             <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">{title}</h3>
@@ -27,6 +28,7 @@ function FooterLinkColumn({ title, links }: { title: string; links: PavolLink[] 
                         </Link>
                     </li>
                 ))}
+                {subscription && <li><ArticleRssLink language={subscription} url={getArticlePodcastUrl(subscription, 'personal')} label="Podcast" className="text-sm text-slate-200 hover:text-white" /></li>}
             </ul>
         </div>
     );
@@ -73,7 +75,7 @@ export function PavolFooter({ language, isHomepage = true }: { language: Support
                     </div>
 
                     <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={[...CONTENT.header.navItems, { label: language === 'cs' ? 'Čísla' : 'By the numbers', href: '#numbers' }, { label: language === 'cs' ? 'Média' : 'Media', href: '#media' }].map((item) => ({ ...item, href: `${sectionPrefix}${item.href}` }))} />
-                    <FooterLinkColumn title={CONTENT.footer.connectTitle} links={[...CONTENT.contact.links, { label: language === 'cs' ? 'Odebírat články a podcasty (RSS)' : 'Subscribe to articles and podcasts (RSS)', href: getArticlePodcastUrl(language, 'personal'), icon: Rss }]} />
+                    <FooterLinkColumn title={CONTENT.footer.connectTitle} links={CONTENT.contact.links} subscription={language} />
                 </div>
 
                 <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
