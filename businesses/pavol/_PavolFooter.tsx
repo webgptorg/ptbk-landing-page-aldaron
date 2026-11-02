@@ -71,7 +71,7 @@ export function PavolFooter({ language, isHomepage = true }: { language: Support
                         </Button>
                     </div>
 
-                    <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={CONTENT.header.navItems.map((item) => ({ ...item, href: `${sectionPrefix}${item.href}` }))} />
+                    <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={[...CONTENT.header.navItems, { label: language === 'cs' ? 'Čísla' : 'By the numbers', href: '#numbers' }, { label: language === 'cs' ? 'Média' : 'Media', href: '#media' }].map((item) => ({ ...item, href: `${sectionPrefix}${item.href}` }))} />
                     <FooterLinkColumn title={CONTENT.footer.connectTitle} links={CONTENT.contact.links} />
                 </div>
 
