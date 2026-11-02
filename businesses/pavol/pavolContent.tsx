@@ -1,6 +1,6 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import type { LucideIcon } from 'lucide-react';
-import { BrainCircuit, Facebook, FileText, Github, Linkedin, Presentation, Youtube } from 'lucide-react';
+import { Bot, BrainCircuit, Facebook, FileText, Github, Linkedin, Presentation, Youtube } from 'lucide-react';
 
 export type PavolLink = {
     label: string;
@@ -136,10 +136,17 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
         },
         services: {
             eyebrow: 'S čím pomohu',
-            title: 'S čím vám pomohu',
+            title: 'S čím vám pomůžeme',
             description:
-                'Každý tým řeší něco jiného. Pomohu vám najít konkrétní použití AI, nastavit proces a vybrat způsob práce, který sedne vašemu produktu.',
+                'AI agenty pro vás navrhneme a nasadíme, probereme vaše otázky nebo naučíme tým s AI pracovat. Na realizaci podle potřeby spolupracuji s našimi partnery.',
             items: [
+                {
+                    id: 'ai-agents', icon: Bot, title: 'AI agenti pro vaši firmu',
+                    description: 'Navrhneme a nasadíme AI agenty pro konkrétní práci ve vaší firmě. Napojíme je na vaše nástroje a ověříme je při skutečném používání.',
+                    topics: ['Návrh rolí a pravidel agentů', 'Propojení s vašimi nástroji', 'Nasazení a ověření v provozu'],
+                    buttonLabel: 'Probrat nasazení agentů',
+                    prefillMessage: 'Dobrý den, Pavole. Máme zájem o nasazení AI agentů v naší firmě.',
+                },
                 {
                     id: 'ai-consulting',
                     icon: BrainCircuit,
@@ -157,9 +164,9 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 {
                     id: 'ai-workshops-talks',
                     icon: Presentation,
-                    title: 'Workshopy a přednášky',
+                    title: 'Přednášky a školení',
                     description:
-                        'Přednášky a praktické workshopy pro firmy, produktové týmy a vývojáře. Zaměříme se na to, co můžete hned použít, jak udržet kvalitu a která rozhodnutí je potřeba udělat.',
+                        'Přednášky, workshopy a školení pro firmy, produktové týmy a vývojáře. Ukážeme konkrétní použití AI a společně si ho vyzkoušíme.',
                     topics: [
                         'Praktické příklady pro váš obor',
                         'Vývoj s AI a kontrola kvality',
@@ -268,8 +275,15 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             eyebrow: 'How I can help',
             title: 'What I can help with',
             description:
-                'Every team needs something different. I help you find a useful role for AI, set up the process, and choose an approach that fits your product.',
+                'We can design and deploy AI agents, help you make decisions, or teach your team to work with AI. I bring in our partners where their expertise fits the project.',
             items: [
+                {
+                    id: 'ai-agents', icon: Bot, title: 'AI agents for your company',
+                    description: 'We design and deploy AI agents for specific work in your company. We connect them to your tools and verify how they perform in everyday use.',
+                    topics: ['Agent roles and rules', 'Connections to your tools', 'Deployment and real-world validation'],
+                    buttonLabel: 'Discuss deploying agents',
+                    prefillMessage: 'Hi Pavol, we would like to discuss deploying AI agents in our company.',
+                },
                 {
                     id: 'ai-consulting',
                     icon: BrainCircuit,
@@ -287,9 +301,9 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                 {
                     id: 'ai-workshops-talks',
                     icon: Presentation,
-                    title: 'Workshops and talks',
+                    title: 'Talks and training',
                     description:
-                        'Talks and hands-on workshops for companies, product teams, and developers. We focus on what you can use right away, how to keep quality up, and the decisions you need to make.',
+                        'Talks, workshops and training for companies, product teams and developers. We show practical uses of AI and work through them together.',
                     topics: [
                         'Practical examples for your field',
                         'Development with AI and quality control',

@@ -18,16 +18,16 @@ export function PavolServicesSection({
         <section id="services" tabIndex={-1} className="pavol-section bg-white outline-none">
             <div className={PAVOL_CONTAINER_CLASS_NAME}>
                 <PavolSectionHeading {...CONTENT} />
-                <div className="mt-12 grid gap-5 md:grid-cols-2 lg:gap-8">
+                <div className="mt-12 grid gap-5 lg:grid-cols-3 lg:gap-5">
                     {CONTENT.items.map((SERVICE, index) => (
-                        <article key={SERVICE.id} className="pavol-service flex flex-col rounded-2xl p-6 sm:p-9">
+                        <article key={SERVICE.id} className="pavol-service flex flex-col rounded-2xl p-6 sm:p-7">
                             <div aria-hidden="true" className="flex items-center justify-between">
                                 <span className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--pavol-border)] text-[var(--pavol-accent)]">
                                     <SERVICE.icon className="h-6 w-6" strokeWidth={1.5} />
                                 </span>
                                 <span className="font-mono text-sm text-[var(--pavol-muted)]">0{index + 1}</span>
                             </div>
-                            <h3 className="mt-8 text-3xl font-medium tracking-tight sm:text-[2.25rem]">
+                            <h3 className="mt-6 text-2xl font-medium tracking-tight">
                                 {SERVICE.title}
                             </h3>
                             <p className="mt-4 text-base leading-relaxed text-[var(--pavol-muted)]">
