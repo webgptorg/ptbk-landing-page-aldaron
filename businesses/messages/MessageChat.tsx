@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { ArrowUp, LoaderCircle, MessageCircle, X } from 'lucide-react';
 import { useFixedControlClearance } from '@/hooks/useFixedControlClearance';
+import { MarkdownContent } from '@/components/markdown-content';
 import type { MessageChatTurn } from '@/lib/messages/messageTypes';
 
 const avatar = '/people/pavol-hejny-transparent-square.png';
@@ -89,10 +90,10 @@ export function MessageChat({ messageId, introduction = '' }: { readonly message
             <div ref={historyElement} className="message-chat-history" role="log" aria-live="polite" aria-label="Rozhovor s Pavolem Hejným">
                 {turns.map((turn, index) => <div key={index} className={`message-chat-turn message-chat-${turn.role}`}>
                     <span className="message-chat-speaker">{turn.role === 'user' ? 'Ty' : 'Pavol Hejný'}</span>
-                    <p>{turn.content}</p>
+                    <MarkdownContent className="message-chat-markdown" content={turn.content} />
                 </div>)}
                 {pendingQuestion && <>
-                    <div className="message-chat-turn message-chat-user"><span className="message-chat-speaker">Ty</span><p>{pendingQuestion}</p></div>
+                    <div className="message-chat-turn message-chat-user"><span className="message-chat-speaker">Ty</span><MarkdownContent className="message-chat-markdown" content={pendingQuestion} /></div>
                     <div className="message-chat-pending" role="status" aria-label="Připravuji odpověď"><LoaderCircle size={17} className="message-chat-loading" aria-hidden="true" /></div>
                 </>}
             </div>

@@ -5,6 +5,11 @@ import '@testing-library/jest-dom/vitest';
 
 vi.mock('next/image', () => ({ default: (props: { src: string; alt: string }) => <img {...props} /> }));
 vi.mock('@/hooks/useFixedControlClearance', () => ({ useFixedControlClearance: () => ({ clearance: 80, height: 50 }) }));
+vi.mock('@/components/markdown-content', () => ({
+    MarkdownContent: ({ content, className }: { content: string; className?: string }) => (
+        <div className={className} data-testid="message-markdown" data-markdown={content}>{content}</div>
+    ),
+}));
 import { MessageChat } from './MessageChat';
 
 const fetchMock = vi.fn();
@@ -22,6 +27,29 @@ describe('floating message conversation', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
         expect(screen.getByRole('log')).toHaveTextContent('Můžeme probrat registraci nebo první použití.');
         expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('passes raw Markdown to the renderer without changing chat request data', async () => {
+        const introduction = '### Úvod\\n**Důležité**';
+        const question = '- První bod\\n- Druhý bod';
+        const reply = '### Priorita\\n**Platící zákazníci**\\n- Další krok';
+        fetchMock.mockResolvedValueOnce(Response.json({ reply }));
+        render(<MessageChat messageId="test-message" introduction={introduction} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        expect(screen.getByTestId('message-markdown')).toHaveAttribute('data-markdown', introduction);
+
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: question } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        expect(screen.getAllByTestId('message-markdown').at(-1)).toHaveAttribute('data-markdown', question);
+
+        await waitFor(() => expect(screen.getAllByTestId('message-markdown')).toHaveLength(3));
+        expect(screen.getAllByTestId('message-markdown').map((element) => element.getAttribute('data-markdown'))).toEqual([
+            introduction, question, reply,
+        ]);
+        expect(sent(0).messages).toEqual([
+            { role: 'assistant', content: introduction },
+            { role: 'user', content: question },
+        ]);
     });
 
     it('retains a draft when collapsed, focuses the editor and returns focus on Escape', () => {
