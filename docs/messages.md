@@ -6,6 +6,21 @@ full context. The explicit generation button derives a subject, editable message
 selected Book. Step two also offers the domain, editable kebab-case prefix and optional speech. Long contexts are
 fetched only when opening an editor, rather than with every row in the list.
 
+Step one also accepts a selected or dropped audio file (including Samsung Recorder M4A, up to 2 GB). Selecting one
+explicitly starts ElevenLabs Scribe transcription with automatic language detection, speaker diarization and verbatim
+output. The result is appended to the existing editable context under `Následuje přepsané audio: <filename>`; source
+text and non-speech annotations are preserved, with stable numbered speaker labels rather than guessed identities.
+The ordinary summary button still starts the next step. Source audio is never attached as the summary's narration.
+
+The authenticated `/api/admin/messages/transcribe` endpoint uses the existing `messages` permission and server-only
+`ELEVENLABS_API_KEY` to issue a 15-minute, single-use `batch_scribe` token. The browser uploads original audio directly
+to ElevenLabs; large files never pass through a Vercel request body or a serverless transcription timeout. Progress
+and failures stay in the editor, in-flight work participates in admin navigation/reload protection, and billed requests
+are never retried automatically. The source file/token live only in memory and are not stored with a message. Only
+the resulting context follows ordinary explicit creation/autosave. An oversized combined context retains its completed
+transcript for copying or insertion after shortening the existing text, without paying for another transcription.
+The original audio is sent to ElevenLabs when selected, using that service's configured retention settings.
+
 The subject's normalized prefix is limited to 40 characters. `generateShortcode()` supplies the same eight-character
 suffix as Shortener. `save_expanded_message` reserves the unique registry entry and message in one transaction,
 retrying a creation collision without leaving orphan links. Editing a prefix or domain changes the address;
@@ -67,6 +82,8 @@ New speech requires server-only `ELEVENLABS_API_KEY`. Optional settings:
 - `ELEVENLABS_VOICE_NAME` defaults to `Pavol Hejný 2026`. If `ELEVENLABS_VOICE_ID` is absent, generation resolves one
   exact matching voice before charging for speech. Set `ELEVENLABS_VOICE_ID` if that name is ambiguous.
 - `ELEVENLABS_MODEL_ID` defaults to `eleven_multilingual_v2`, using the timestamps endpoint.
+- `ELEVENLABS_TRANSCRIPTION_MODEL_ID` defaults to `scribe_v2`, independently of the narration model. The existing
+  ElevenLabs key must allow Speech to Text and single-use token creation. Transcription needs no object-storage setup.
 
 The control reports missing configuration and messages work without audio. No generation happens on save, page
 load, migration or build. A database lease prevents simultaneous billable requests for the same message. Requests
@@ -103,3 +120,5 @@ including simultaneous claims and expired leases.
 References: [Supabase S3 compatibility](https://supabase.com/docs/guides/storage/s3/compatibility),
 [S3 authentication](https://supabase.com/docs/guides/storage/s3/authentication),
 [ElevenLabs timestamp synthesis](https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps).
+Audio context uses [single-use tokens](https://elevenlabs.io/docs/api-reference/tokens/create) and
+[batch transcription](https://elevenlabs.io/docs/api-reference/speech-to-text/convert).

@@ -9,6 +9,7 @@ export function GET(request: NextRequest) {
         const [messages, agents] = await Promise.all([listManagedMessages(), listManagedAgents()]);
         return NextResponse.json({ messages, agents: agents.map(({ id, name, isEnabled }) => ({ id, name, isEnabled })),
             audioConfigured: Boolean(process.env.ELEVENLABS_API_KEY?.trim() && process.env.OBJECT_STORAGE_BUCKET?.trim()),
+            transcriptionConfigured: Boolean(process.env.ELEVENLABS_API_KEY?.trim()),
         }, { headers: { 'Cache-Control': 'no-store' } });
     });
 }

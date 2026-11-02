@@ -49,6 +49,11 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         await database.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;');
         await database.exec(readFileSync('migrations/2026-10-2800-admin-users.sql', 'utf8'));
         await database.exec(readFileSync('migrations/2026-10-2801-admin-shortener-permissions.sql', 'utf8'));
+        // Use the deployed permission constraint, without setting up the unrelated message/short-link tables here.
+        const messagePermissionMigration = readFileSync('migrations/2026-10-3100-expanded-messages.sql', 'utf8')
+            .match(/ALTER TABLE public\.admin_users DROP CONSTRAINT[\s\S]*?(?=NOTIFY pgrst)/)?.[0];
+        if (!messagePermissionMigration) throw new Error('Missing Messages administration permission migration.');
+        await database.exec(messagePermissionMigration);
         await database.exec('CREATE TABLE workshops (id uuid PRIMARY KEY, room_kind text);');
     }, 20_000);
     beforeEach(async () => {
@@ -75,7 +80,7 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
             expect(canAccessAdminPath(identity, path)).toBe(false);
         }
         expect(await getUnauthorizedResponseOrNull(request('/api/admin/shortener', 'GET', undefined, cookie))).toBeNull();
-        for (const path of ['/api/contacts', '/api/contacts/export/csv', '/api/admin/users', '/api/admin/discount-codes', '/api/admin/studio/access', '/api/admin/recording-studio/transcribe', '/api/admin/workshops', '/api/admin/community/memberships', '/api/admin/future-section']) {
+        for (const path of ['/api/contacts', '/api/contacts/export/csv', '/api/admin/users', '/api/admin/discount-codes', '/api/admin/studio/access', '/api/admin/recording-studio/transcribe', '/api/admin/messages/transcribe', '/api/admin/workshops', '/api/admin/community/memberships', '/api/admin/future-section']) {
             expect((await getUnauthorizedResponseOrNull(request(path, 'GET', undefined, cookie)))?.status).toBe(403);
         }
         expect((await LIST_USERS(request('/api/admin/users', 'GET', undefined, cookie))).status).toBe(403);
@@ -120,6 +125,15 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         expect(canAccessAdminPath(identity, '/admin/shortener')).toBe(false);
         expect(canAccessAdminPath(identity, '/admin/contacts')).toBe(true);
         expect((await getUnauthorizedResponseOrNull(request('/api/admin/shortener', 'GET', undefined, `${ADMIN_SESSION_COOKIE_NAME}=${value}`)))?.status).toBe(403);
+    });
+
+    it('requires the current messages permission for transcription and refuses revoked access', async () => {
+        const user = await createUser(['messages']);
+        const value = (await login()).cookies.get(ADMIN_SESSION_COOKIE_NAME)!.value;
+        const cookie = `${ADMIN_SESSION_COOKIE_NAME}=${value}`;
+        expect(await getUnauthorizedResponseOrNull(request('/api/admin/messages/transcribe', 'POST', undefined, cookie))).toBeNull();
+        await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: ['contacts'] }), userContext(user));
+        expect((await getUnauthorizedResponseOrNull(request('/api/admin/messages/transcribe', 'POST', undefined, cookie)))?.status).toBe(403);
     });
 
     it('revokes old sessions when disabling, re-enabling, changing passwords and deleting', async () => {

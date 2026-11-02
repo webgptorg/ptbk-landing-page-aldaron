@@ -27,6 +27,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in place instead of redirecting. `/admin/messages` owns their two-step editor, explicit creation/deletion and
   immediate shared autosave, with no draft/publish states. Context stays separate from the title, short Markdown
   message and message-specific chat introduction. Explicit generation uses the selected shared Book agent.
+  Context may also come from a selected/dropped audio file (including Samsung M4A, up to 2 GB). The authenticated
+  messages API issues an ElevenLabs `batch_scribe` single-use token; original bytes upload directly from the browser,
+  never through Vercel's media body limits. Scribe v2 verbatim text and numbered diarized speakers append to existing
+  context under a filename heading. Missing/incompatible diarization preserves the original text. Transcription is
+  explicit, protected as pending admin work and never retried automatically. Retain completed text if it exceeds the
+  context limit. Source audio/token are not stored or reused for summary narration; subsequent summary/speech controls
+  retain their existing behavior. Transcription uses the existing server-only ElevenLabs key independently of storage.
   The sender's copy/export adds the current URL at the start or after a greeting; the public text remains clean.
   Shortener lists message entries with a Messages edit link; its mutation API cannot edit/delete them. Private
   `messages` rows and their codes are hidden from anonymous database enumeration; a known URL alone grants access.

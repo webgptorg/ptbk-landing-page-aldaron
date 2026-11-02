@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { loadManagedAgent } from '@/lib/agents/agentDatabase';
 import { runManagedAgent } from '@/lib/agents/agentRuntime';
 import { withMessagesAdmin, readValidatedBody } from '@/lib/messages/messageAdminApi';
+import { MESSAGE_CONTEXT_MAX_LENGTH } from '@/lib/messages/messageModel';
 export const maxDuration = 120;
-const inputSchema = z.object({ context: z.string().min(1).max(1_500_000), agentId: z.string().uuid() }).strict();
+const inputSchema = z.object({ context: z.string().min(1).max(MESSAGE_CONTEXT_MAX_LENGTH), agentId: z.string().uuid() }).strict();
 const outputSchema = z.object({ title: z.string().trim().min(1).max(200), markdown: z.string().trim().min(1).max(50_000), introduction: z.string().trim().min(1).max(4000) }).strict();
 export function POST(request: NextRequest) {
     return withMessagesAdmin(request, async () => {

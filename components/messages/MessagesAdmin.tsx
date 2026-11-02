@@ -13,7 +13,7 @@ import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 import { ExternalLink, MessageCircle, Pencil, Plus, Trash2 } from 'lucide-react';
 
-type State = { messages: MessageListItem[]; agents: Pick<ManagedAgent, 'id' | 'name' | 'isEnabled'>[]; audioConfigured: boolean };
+type State = { messages: MessageListItem[]; agents: Pick<ManagedAgent, 'id' | 'name' | 'isEnabled'>[]; audioConfigured: boolean; transcriptionConfigured: boolean };
 export function MessagesAdmin() {
     const search = useSearchParams();
     const [state, setState] = useState<State | null>(null);
@@ -69,7 +69,7 @@ export function MessagesAdmin() {
         </AdminEditorDialog>
         <AdminEditorDialog isOpen={editing !== undefined && state !== null} onClose={() => { setEditing(undefined); if (search.has('shortcodeLinkId')) window.history.replaceState(null, '', '/admin/messages'); }} canClose={() => !busy}
             title={editing ? 'Upravit zprávu' : 'Nová zpráva'} className="max-w-4xl">
-            {state && editing !== undefined && <MessageEditor key={editing?.id ?? 'new'} message={editing} agents={state.agents} audioConfigured={state.audioConfigured} onSaved={saved} onBusy={setBusy} />}
+            {state && editing !== undefined && <MessageEditor key={editing?.id ?? 'new'} message={editing} agents={state.agents} audioConfigured={state.audioConfigured} transcriptionConfigured={state.transcriptionConfigured} onSaved={saved} onBusy={setBusy} />}
         </AdminEditorDialog>
     </div>;
 }
