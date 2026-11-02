@@ -99,7 +99,7 @@ describe('article podcast RSS', () => {
         expect(getArticlePodcastDefinition('en', 'promptbook').feedUrl).toBe('https://ptbk.io/en/articles/podcast.xml');
         expect(getArticlePodcastDefinition('cs', 'personal')).toMatchObject({
             feedUrl: 'https://pavolhejny.cz/articles/podcast.xml',
-            imageUrl: 'https://ptbk.io/article-podcasts/pavol-hejny.png',
+            imageUrl: 'https://ptbk.io/article-podcasts/pavol-hejny-v2.png',
         });
         expect(getArticlePodcastDefinition('en', 'personal').feedUrl).toBe('https://pavolhejny.com/articles/podcast.xml');
     });

@@ -179,17 +179,17 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Their shared ivory, forest-green and gold design uses the existing portrait and project marks, with a featured
   project, static editorial testimonials and responsive section layouts; visual tokens stay in `layout.ts` and `pavol.css`.
   `/projects` lists the verified public project catalogue; private Sites and unresolved authorship stay out of the publication.
-  Collboard and H-edu have separate real interface screenshots. Project feature selection, articles, media and podcasts
+  The three compact service cards cover agent delivery with partners, consulting, and training. Approved training formats are behind a disclosure; the consulting deliverables and a separate process section await editorial approval. Introductory-call actions preselect a call while preserving custom drafts. Three concise experience metrics replace the combined audience/training count. Collboard and H-edu have separate real interface screenshots; H-edu has an editorial teaching frame and Promptbook reuses the existing blueprint scenario in compact landscape form. Three case studies are integrated into project cards and expanded in the archive. Project feature selection, articles, media and podcasts
   accept editorial `prominence` (1 neutral, 0 omitted from homepage); two years halves temporal rank. Chronological
   podcast sorting remains available. Both podcast archives share ArchiveSearchField and accent-insensitive matching.
   `/talks` and its homepage preview read the same public workshop summaries as the community calendar. Only the
   online-workshop kind (whose lecturer is Pavol) and explicit PAVOL_EVENT_PARTICIPATION slugs enter his personal list;
   another community speaker's event never implies his participation. Three real owned archival speaking photos are
-  captioned without an invented venue, date or photographer. Public sources are in docs/pavol-portfolio.md.
+  captioned without an invented venue, date or photographer. The event gallery now uses three varied real photographs from AI Tinkerers and CASSINI in 2024 and Rakathon in 2025, linking to documented events/posts rather than image files. Public sources are in docs/pavol-portfolio.md.
   Personal articles/podcast.xml subscriptions now combine matching-language articles with Pavol's filtered appearances,
   refresh hourly, preserve article GUIDs and canonical source audio, and identify original recording languages.
-  They are linked from both archives and the footer; Promptbook article-only feeds stay independent.
-  Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu.
+  They are linked from both archives and the footer through a subscription dialog with copy, explicit XML and supported Subscribe on Android actions. The footer label is Podcast. Personal feeds use the versioned portrait-led podcast cover; feed URLs and GUIDs stay stable. Promptbook article-only feeds stay independent.
+  Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu with reduced-motion-aware icon and panel transitions.
   The introduction, projects, testimonials, and media remain readable without animated reveals; older media
   appearances open through a native disclosure. Service enquiries use the existing `/api/waitlist` contact source,
   prefill only an empty or unchanged template message, preserve custom drafts when the service changes or sending
@@ -572,12 +572,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   portalled membership/project dialogs and cookie controls. Public landing pages and administration keep their own
   appearance.
 
-- The global cookie banner shares its page palette with its settings dialog, uses
-  a shallow bottom strip on desktop and an inset panel on phones, and reserves its
-  measured height so the end of each page stays reachable. Fixed bottom controls
-  such as the podcast player and admin table scrollbar opt into clearance through
-  `data-fixed-bottom-control`; the banner, booking notice, and coder badge measure
-  their neighbors through `hooks/useFixedControlClearance.ts`.
+- Global cookie consent starts as a 52-pixel cookie launcher, with a predefined conversation-style message after six seconds if no choice exists. It shares FloatingConversation's React shell, size and appearance with the message/homepage chat, but never calls an AI model. Necessary-only, all, and settings remain explicit choices; no optional tracking is enabled by opening or closing the panel. A saved choice removes the launcher; the footer #cookies link can reopen it. The automatic message waits while another floating conversation is open. Settings keep the page palette. The launcher measures fixed players and other bottom controls through useFixedControlClearance; launchers remain below modal overlays. Private message pages still have no cookie controls.
 
 - Rooms lead to each other in both directions, through one identity hand-off. The
   community lists the terms and opens the room of each; an invited workshop room
