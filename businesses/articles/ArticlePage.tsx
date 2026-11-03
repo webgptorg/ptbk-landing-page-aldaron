@@ -7,6 +7,7 @@ import { ArticleHeader, ArticleFooter } from './ArticleShell';
 import { ArticleAudioButton } from './ArticleAudioButton';
 import { ArticleRssLink } from './ArticleRssLink';
 import { ArticleTracking } from './ArticleTracking';
+import { ArticleContents } from './ArticleContents';
 import { AnchoringExplorer } from './AnchoringExplorer';
 import { renderArticleCover, renderArticleDocument } from './articleDocument';
 import './articles.css';
@@ -43,9 +44,7 @@ export function ArticlePage({ article, publication }: { readonly article: Articl
                         {!article.audio && <p className="article-audio-note">{cs ? 'Audio verze se připravuje.' : 'The audio edition is being prepared.'}</p>}
                     </header>
                     <div className="article-reading-layout article-container">
-                        <aside className="article-contents" id="article-contents">
-                            <details open><summary>{cs ? 'V tomto článku' : 'In this article'}</summary><nav aria-label={cs ? 'Kapitoly článku' : 'Article chapters'}>{document.chapters.map((chapter, index) => <a key={chapter.id} href={`#${chapter.id}`}><span>{(index + 1).toString().padStart(2, '0')}</span>{chapter.title}</a>)}</nav></details>
-                        </aside>
+                        <ArticleContents chapters={document.chapters} language={article.language} />
                         <div className="article-reading-column">
                             <article className="article-prose" aria-label={article.title}>
                                 {document.sections.map((section, index) => {

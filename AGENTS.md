@@ -83,6 +83,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Articles count as complete on the real `ended` event; AI ta Krajta keeps its established 30-second outro tolerance
   and five-second resume rewind. Reload restores the exact saved position in pause. Direct public-path Next links
   keep the root owner alive when opening the podcast's media and branding pages.
+  The shared desktop outline stays sticky beside the text, highlights the current chapter while scrolling, and
+  reveals that link by scrolling only its own list. Its bounded height clears the measured fixed audio player;
+  article pages use clipped horizontal overflow so the body cannot trap sticky positioning. Narrow screens keep
+  the native inline disclosure and a bounded chapter list. Chapter links and text remain server-rendered.
 
 - Sharing cards use the shared 1200×630 PNG renderer in `lib/metadata`, with local Inter/Outfit fonts, real brand
   marks, page-specific copy and colors, and the canonical public hostname. Public supporting pages, including
