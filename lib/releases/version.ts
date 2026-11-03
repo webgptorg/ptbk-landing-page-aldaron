@@ -7,7 +7,7 @@ export function parseReleaseVersion(value: string) {
 
 export function isCurrentGeneration(value: string) {
     const version = parseReleaseVersion(value);
-    return !!version && (version.major > 0 || version.minor >= 118);
+    return !!version && (version.major > 0 || version.minor >= 115);
 }
 
 export function compareReleaseVersions(a: string, b: string): number {

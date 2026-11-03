@@ -13,11 +13,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Keep bilateral Neonmedia economics, buyouts and negotiating questions outside this public repository.
   Referral commission is a uniform 20% of actually paid eligible software prices excluding VAT, for all
   current/future plans and billing schedules. Pay within 30 days of receipt, subject to earlier mandatory law;
-  annual commission is not paid in twelve portions. The accepted partner sheet defines duration: no
-  unapproved 12/24/36-month default is activated. New, unconfirmed referrals may be closed prospectively
+  annual commission is not paid in twelve portions. The 3 November follow-up approves 24 calendar months from first paid activation per licence,
+  without restarting for tariff changes or payment interruptions; preserve older accepted rights. New, unconfirmed referrals may be closed prospectively
   on 30 days' notice while confirmed deals retain their agreed rights. Calculators and exports use 20%.
   The main footer puts all legal documents in one dedicated column; releases belong with product resources.
-  Release lines group major.minor with the latest stable patch and hidden prerelease candidates. Support
+  Release lines start at 0.115 and group major.minor with the latest stable patch. Prerelease candidates
+  stay explicitly labelled and open by default if no stable release exists; do not invent stable 0.115.0. Support
   runs at least 90 days from the first actual stable publication, not restarted by patches; existing higher
   promises remain. LTS is informational. Never turn prereleases into stable versions or claim a stable
   release exists when the catalogue has none. Six-hourly sync preserves history and support extensions.

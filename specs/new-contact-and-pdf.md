@@ -39,7 +39,7 @@ Report obsahuje:
 5. Všechny uložené vstupy včetně názvů a jednotek. Neaktivní hodnoty se uchovávají kvůli znovuotevření; report výslovně říká, že například tokenové parametry při předplatném nevstupují do ceny.
 6. Klikací odkaz otevře stejné parametry na pokročilé kalkulačce. E-mail se do odkazu nedostane. Příjemce odkazu vidí celý finanční model.
 
-U Startu je skutečné období 30 dní, jedna instance a MRR nula. Dříve nastavený Business horizont se může uchovat mezi vstupy, ale není použit pro projekci Startu. Tabulky nesmějí useknout text nebo částky; řádky se nerozdělují přes stránky. Dlouhý odkaz se zobrazuje jako čitelný popisek, nikoli nekonečný řetězec přes okraj stránky.
+Start i Business používají zvolený počet prostředí a celý měsíční horizont; oba vytvářejí MRR. Partnerská provize se ve výhledu počítá nejvýše za prvních 24 měsíců od první aktivace, servisní tržby mohou pokračovat. Tabulky nesmějí useknout text nebo částky; řádky se nerozdělují přes stránky. Dlouhý odkaz se zobrazuje jako čitelný popisek, nikoli nekonečný řetězec přes okraj stránky.
 
 ## GET parametry a sdílení
 

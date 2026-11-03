@@ -13,7 +13,7 @@ export function ReleasesPage({ language }: { language: SupportedHomepageLanguage
     const candidates = lines.filter(line => line.latestPrerelease);
     const sources = (release: ProductRelease) => <p className={r.sources}>{release.npmUrl && <a href={release.npmUrl} target="_blank" rel="noopener noreferrer">npm ↗</a>}{release.githubUrl && <a href={release.githubUrl} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</p>;
     return <>
-        <header className={s.pageIntro}><Link className={s.breadcrumb} href={`/${language}`}>← Promptbook</Link><h1>{cs ? 'Vydání a podpora' : 'Releases and support'}</h1><p>{cs ? 'Řady Promptbooku od 0.118. Každá řada major.minor ukazuje svůj nejnovější stabilní patch.' : 'Promptbook lines from 0.118 onwards. Each major.minor line shows its latest stable patch.'}</p></header>
+        <header className={s.pageIntro}><Link className={s.breadcrumb} href={`/${language}`}>← Promptbook</Link><h1>{cs ? 'Vydání a podpora' : 'Releases and support'}</h1><p>{cs ? 'Řady Promptbooku od 0.115. Každá řada major.minor ukazuje svůj nejnovější stabilní patch.' : 'Promptbook lines from 0.115 onwards. Each major.minor line shows its latest stable patch.'}</p></header>
         <article className={s.prose}>
             <h2>{cs ? 'Jak číst přehled' : 'Reading the catalogue'}</h2>
             <p>{cs ? 'Původní vydání je datum zveřejnění na npm nebo GitHubu. Zveřejněno zde označuje první zařazení řady do tohoto přehledu. Jednotlivé patche se nesčítají do samostatných řádků; úplná historie zůstává ve zdrojích.' : 'Original release means publication on npm or GitHub. Listed here records the line’s first entry in this catalogue. Patches are grouped rather than shown as separate rows; the complete history remains available at the sources.'}</p>
@@ -22,7 +22,7 @@ export function ReleasesPage({ language }: { language: SupportedHomepageLanguage
             <p>{cs ? 'Poslední změna evidence' : 'Latest catalogue change'}: {format(RELEASE_CATALOG_UPDATED_AT)} · <a href="https://www.npmjs.com/package/ptbk?activeTab=versions">{cs ? 'Úplná historie na npm' : 'Complete npm history'} ↗</a></p>
         </article>
         <section className={r.list} aria-label={cs ? 'Stabilní řady' : 'Stable release lines'}>
-            {stableLines.length === 0 && <p className={r.release}><strong>{cs ? 'Zatím není zveřejněna žádná stabilní řada.' : 'No stable line has been published yet.'}</strong> {cs ? 'Před přijetím závazku stabilní podpory musí být skutečně vydána alespoň jedna. Kandidáty lze zobrazit níže.' : 'At least one must actually be released before accepting a stable-support commitment. Candidates can be shown below.'}</p>}
+            {stableLines.length === 0 && <p className={r.release}><strong>{cs ? 'Vydané řady od 0.115 jsou uvedeny níže.' : 'Published lines from 0.115 are listed below.'}</strong> {cs ? 'Zveřejněná čísla vydání mají ve zdrojích označení prerelease; garance stabilní podpory se na ně nevztahuje.' : 'The published versions are marked as prereleases in the sources; stable-support guarantees do not apply to them.'}</p>}
             {stableLines.map(line => {
                 const release = line.latestStable!;
                 const support = getReleaseSupport(release, PRODUCT_RELEASES);
@@ -35,10 +35,10 @@ export function ReleasesPage({ language }: { language: SupportedHomepageLanguage
                 </article>;
             })}
         </section>
-        {candidates.length > 0 && <details className={r.candidates}><summary>{cs ? 'Zobrazit i prerelease' : 'Show prereleases'} ({candidates.length})</summary><div className={r.list}>
+        {candidates.length > 0 && <details className={r.candidates} open={stableLines.length === 0}><summary>{cs ? (stableLines.length ? 'Zobrazit i prerelease' : 'Vydané řady · prerelease') : (stableLines.length ? 'Show prereleases' : 'Published lines · prereleases')} ({candidates.length})</summary><div className={r.list}>
             {candidates.map(line => {
                 const release = line.latestPrerelease!;
-                return <article className={`${r.release} ${r.candidate}`} key={line.line} id={`v${release.version}`}><div className={r.heading}><h2>Promptbook {line.line}</h2><span className={r.badge}>Prerelease</span></div><p>{cs ? 'Poslední kandidát' : 'Latest candidate'}: <strong>{release.version}</strong> · <time dateTime={release.publishedAt}>{format(release.publishedAt)}</time></p><p>{cs ? 'Bez garance stabilní podpory; není určeno pro komerční provoz.' : 'No stable-support guarantee; not intended for commercial production.'}</p>{sources(release)}</article>;
+                return <article className={`${r.release} ${r.candidate}`} key={line.line} id={`v${line.line}`}><div className={r.heading}><h2>Promptbook {line.line}</h2><span className={r.badge}>Prerelease</span></div><p>{cs ? 'Poslední kandidát' : 'Latest candidate'}: <strong id={`v${release.version}`}>{release.version}</strong> · <time dateTime={release.publishedAt}>{format(release.publishedAt)}</time></p><p>{cs ? 'Bez garance stabilní podpory; není určeno pro komerční provoz.' : 'No stable-support guarantee; not intended for commercial production.'}</p>{sources(release)}</article>;
             })}
         </div></details>}
         <LegalNavigation language={language}/>

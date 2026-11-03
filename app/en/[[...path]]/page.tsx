@@ -16,7 +16,7 @@ const pages: Record<string, [string, string]> = {
     '': [NEW_PAGE_DEFINITIONS.en.title, NEW_PAGE_DEFINITIONS.en.description],
     partnership: [PARTNERSHIP_PAGE_DEFINITIONS.en.title, PARTNERSHIP_PAGE_DEFINITIONS.en.description],
     agendy: ['Choose your workflow', 'Explore email, accounting documents, social content, video and website maintenance workflows.'],
-    cenik: ['Pricing and support', 'Start: $19 for one 30-day pilot. Business: $100 monthly per client environment. Full terms and product support.'],
+    cenik: ['Pricing and support', 'Start: $19 and Business: $100 monthly per client environment. Ongoing subscriptions, full terms and product support.'],
     kalkulacka: ['Cost and benefit calculator', 'Calculate the complete economics of your workflow or partner service. Edit assumptions, share a link and download a PDF.'],
     srovnani: ['Compare AI approaches', 'Compare Promptbook with coding agents, workflow platforms and personal assistants in one table and individual guides.'],
     'o-nas': ['Our story and founders', 'Jiří Jahn and Pavol Hejný, equal cofounders of Promptbook. From website chatbots to ongoing business workflows.'],
@@ -25,9 +25,9 @@ const pages: Record<string, [string, string]> = {
     soukromi: ['Privacy policy', 'Personal data processing policy of AI Web s.r.o., operator of Promptbook.'],
     podminky: ['Website terms', 'Terms of use for the Promptbook website operated by AI Web s.r.o.'],
     'open-source': [...OPEN_SOURCE_PAGE_COPY.en],
-    'podminky-produktu': ['Product terms · draft', 'Non-effective subscription and support proposal.'],
-    'partnerske-podminky': ['Partner terms · draft', 'Non-effective agency programme proposal.'],
-    licence: ['Engine licence', 'Version-specific licensing and a commercial proposal.'],
+    'podminky-produktu': ['Product terms', 'Current subscription and product support terms.'],
+    'partnerske-podminky': ['Partner terms', 'Current agency programme terms.'],
+    licence: ['Engine licence', 'Version-specific licensing and commercial terms.'],
 };
 type Props = { params: Promise<{ path?: string[] }>; searchParams: Promise<{ testimonials?: string | string[] }> };
 export function generateStaticParams() {

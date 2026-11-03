@@ -63,3 +63,7 @@ Nové večerní zadání nahrazuje dřívější textovou esej chronologií po t
 ## Sladění s Rebornem — 30. října 2026
 
 Vlastník schválil úpravu FAQ, bezpečnosti a dalších souvisejících textů celého webu a push přímo do `main`. Nový [kontrakt bezpečnosti a autonomie](new-security-and-autonomy.md) vychází z publikovaných specifikací enginu ve větvi `reborn/2026-10`, commit [`7da13b7`](https://github.com/webgptorg/promptbook/commit/7da13b7e6d4838cfea79c26cc2bdede78fe5bf4e). Přítomný čas platí i pro kontaktní dialogy a přístupné popisy scén. Doplněné učení v mezích pevných pravidel a automatické aktualizace nemění ceny, licence, právní dokumenty, původní citace ani backend kontaktů. Neimplementuje se engine ani Appka.
+
+## Rozhodnutí vlastníka z 3. listopadu 2026 — přednost před historickými cenami výše
+
+Start 399 Kč a Business 1 999 Kč měsíčně za prostředí, oba průběžně bez pilotu. Anglické ceny 19 / 100 USD zůstávají měsíčně. České licence se ve výpočtu používají přímo v Kč; USD náklady mají nadále zadaný kurz. Provize je 20 % na prvních 24 měsíců od placené aktivace. Podrobnosti v `new-commercial-offer.md`; dřívější říjnové ceny v tomto seznamu jsou pouze historické podklady.

@@ -24,17 +24,17 @@ export function PricingCards({ full = false }: { full?: boolean }) {
         {
             id: 'start' as const,
             name: 'Start',
-            purpose: en ? 'Try one agenda in real operations' : 'Vyzkoušejte jednu agendu v provozu',
-            period: en ? 'one-off · 30 days' : 'jednorázově · 30 dní',
+            purpose: en ? 'Ongoing operations with self-service setup' : 'Průběžný provoz ve vlastní režii',
+            period: en ? 'per month · per client environment' : 'měsíčně · za klientské prostředí',
             features: [
                 en ? 'One client environment' : 'Jedno klientské prostředí',
-                en ? 'A 30-day production pilot' : 'Produkční pilot na 30 dní',
-                en ? 'No automatic renewal' : 'Bez automatické obnovy',
+                en ? 'Multiple agents in one environment' : 'Více agentů v jednom prostředí',
+                en ? 'No annual commitment' : 'Bez ročního závazku',
             ],
             support: en ? 'Product support and SLA not included' : 'Bez produktové podpory a SLA',
-            note: en ? 'Available once per end client' : 'Jednou pro koncového klienta',
+            note: en ? 'Cancel for the next billing period' : 'Ukončení pro další fakturační období',
             action: t('Začít se Startem'),
-            topic: `${t('Start — produkční pilot')} · ${licencePrice('start', locale)} / ${t('30 dní')}`,
+            topic: `Start · ${licencePrice('start', locale)} / ${t('měsíc')}`,
         },
         {
             id: 'business' as const,

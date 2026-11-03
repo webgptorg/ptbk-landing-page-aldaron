@@ -20,10 +20,10 @@ const heading = (text: string): Content => ({ text, font:'Outfit', fontSize:20, 
 export function createCalculationPdfDefinition(state: CalculatorState, locale: SiteLocale = 'cs'): TDocumentDefinitions {
     const t = translator(locale);
     const money = (n: number) => formatCurrency(n, locale, state.input.exchangeRate, 2);
-    const r = calculateEconomics(state.input);
+    const r = calculateEconomics(state.input, locale);
     const p = r.partner;
     const company = state.mode === 'company';
-    const period = r.isPilot ? t('30 dní pilotu Start') : `${r.input.horizonMonths} ${t('měsíců')} Business`;
+    const period = `${r.input.horizonMonths} ${t('měsíců')} ${r.input.plan === 'start' ? 'Start' : 'Business'}`;
     const amount = company ? r.horizonBenefit : p.horizonContribution;
     const title = t(company ? 'Ekonomika vaší agendy' : 'Ekonomika partnerské služby');
     const inputRows: [string,string][] = NUMERIC_KEYS.map(key => [
@@ -57,7 +57,7 @@ export function createCalculationPdfDefinition(state: CalculatorState, locale: S
             {text:'Otevřít a upravit tuto kalkulaci',link:calculationShareUrl(state, locale),color:'#13246f',decoration:'underline',fontSize:11,margin:[0,10,0,8]},
             {text:'Odkaz obsahuje všechny parametry výpočtu, nikoli e-mail nebo jméno. Každý, komu jej předáte, uvidí vaše předpoklady.',fontSize:8,color:'#60667d'},
             {text:'Náklady jedné klientské agendy',font:'Outfit',fontSize:23,pageBreak:'before',margin:[0,0,0,15]},
-            {text:locale === 'cs' ? `Všechny následující náklady jsou za ${r.isPilot ? 'jeden 30denní pilot' : 'jeden měsíc'} a celého klienta. Nasazení je jednorázové.` : `The following costs cover ${r.isPilot ? 'one 30-day pilot' : 'one month'} and the whole client. Setup is one-off.`,margin:[0,0,0,10]},
+            {text:locale === 'cs' ? `Všechny následující náklady jsou za jeden měsíc a celého klienta. Nasazení je jednorázové.` : `The following costs cover one month and the whole client. Setup is one-off.`,margin:[0,0,0,10]},
             table([
                 ['Licence Promptbooku',money(r.licence)],['AI / předplatné',money(r.ai)],['Externí služby podle objemu',money(r.external)],['Rezerva',money(r.reserve)],
                 ['Server',money(r.input.hostingCzk)],['Databáze',money(r.input.databaseCzk)],['Zálohy a úložiště',money(r.input.backupCzk)],
@@ -67,16 +67,16 @@ export function createCalculationPdfDefinition(state: CalculatorState, locale: S
             ]),
             {text:r.input.costPayer === 'partner' ? 'AI a infrastrukturu hradí partner v uvedené ceně servisu. Dílčí náklady se klientovi nepřičítají podruhé. Partner je má odečtené od vlastního výsledku.' : 'AI a infrastrukturu platí klient samostatně. Tyto platby nejsou tržbami partnera.'},
             heading('Obchodní předpoklady'),
-            {text:locale === 'cs' ? `Model ${COMMERCIAL_TERMS.version}. Start: ${licencePrice('start',locale)} na 30 dní, bez automatického pokračování. Business: ${licencePrice('business',locale)} měsíčně za prostředí. Výpočet používá zadaný kurz. AI, infrastruktura a partner se platí zvlášť.` : `Model ${COMMERCIAL_TERMS.version}. Start: $19 for 30 days, without renewal. Business: $100 monthly per client environment. AI, infrastructure and partner services are separate.`,margin:[0,0,0,10]},
+            {text:locale === 'cs' ? `Model ${COMMERCIAL_TERMS.version}. Start: ${licencePrice('start',locale)} měsíčně. Business: ${licencePrice('business',locale)} měsíčně za prostředí. České licenční ceny jsou pevně v Kč; modelové USD náklady používají zadaný kurz. AI, infrastruktura a partner se platí zvlášť.` : `Model ${COMMERCIAL_TERMS.version}. Start: $19 monthly. Business: $100 monthly per client environment. AI, infrastructure and partner services are separate.`,margin:[0,0,0,10]},
             {text:`${t(COMMERCIAL_TERMS.share)} ${t(COMMERCIAL_TERMS.shareTerm)}`},
             {text:'Všechny předpoklady výpočtu',font:'Outfit',fontSize:23,pageBreak:'before',margin:[0,0,0,15]},
             {text:'Částky jsou bez DPH. Kurz, pracovní náklady, spotřeba a sazby poskytovatelů jsou modelové odhady, nikoli ověřené cenové nabídky. Upravte je podle vlastního provozu.',margin:[0,0,0,10]},
             table([
-                ['Scénář',SCENARIOS[state.scenario].title],['Režim',company?'Vlastní agenda':'Partnerství'],['Plán',r.isPilot?'Start':'Business'],
+                ['Scénář',SCENARIOS[state.scenario].title],['Režim',company?'Vlastní agenda':'Partnerství'],['Plán',r.input.plan === 'start'?'Start':'Business'],
                 ['Placení AI',state.input.aiBilling === 'tokens'?'Tokeny':state.input.aiBilling === 'subscription'?'Předplatné':'Lokální model'],
                 ['Plátce AI a provozu',state.input.costPayer === 'client'?'Klient samostatně':'Partner v ceně servisu'],['Měsíční partnerský podíl',`${COMMERCIAL_TERMS.partnerSharePercent} %`], ...inputRows,
             ]),
-            {text:'Vstupy měsíčních nákladů představují u Startu 30 dní. Start vždy počítá jednu instanci a jeden pilot, i když odkaz uchovává dřívější nastavení Business. Nepoužité tokenové / předplatné vstupy zůstávají uložené, ale nezapočítávají se. Zaokrouhlení je jen pro zobrazení.',fontSize:8},
+            {text:'Start i Business se počítají měsíčně přes celý zvolený horizont. Provize z licencí je omezena na prvních 24 měsíců od první aktivace; servisní tržby mohou pokračovat. Nepoužité tokenové / předplatné vstupy zůstávají uložené, ale nezapočítávají se. Zaokrouhlení je jen pro zobrazení.',fontSize:8},
             {text:'Výpočet nezakládá objednávku ani záruku úspory či výdělku. Nezahrnuje nezadané náklady, financování ani daň z příjmů.',margin:[0,12,0,0],fontSize:8},
         ],
     };

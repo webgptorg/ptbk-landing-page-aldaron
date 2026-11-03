@@ -1,6 +1,15 @@
 {
-  "checkedAt": "2026-11-03T13:36:00.000Z",
+  "checkedAt": "2026-11-03T18:41:40.768Z",
   "releases": [
+    {
+      "version": "0.119.0-54",
+      "publishedAt": "2026-11-03T15:04:28.257Z",
+      "listedAt": "2026-11-03T18:41:40.768Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-54",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-54",
+      "notes": "Promptbook 0.119.0-54 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-54` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-54-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-54 globally, offers the local desktop client (selected by default), Codex and Claude Code, and creates an empty first-project folder. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `0a26f9829fc6de32fb56830ce8a014cd472fb2675a2d0049b4bb2a8ac58fbff5`.\n"
+    },
     {
       "version": "0.119.0-47",
       "publishedAt": "2026-11-01T18:16:24.751Z",
@@ -183,6 +192,41 @@
       "listedAt": "2026-11-03",
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.118.0-1"
+    },
+    {
+      "version": "0.117.0-0",
+      "publishedAt": "2026-10-10T22:49:44.268Z",
+      "listedAt": "2026-11-03T18:41:40.768Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.117.0-0"
+    },
+    {
+      "version": "0.115.0-5",
+      "publishedAt": "2026-10-10T10:59:09.298Z",
+      "listedAt": "2026-11-03T18:41:40.768Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.115.0-5"
+    },
+    {
+      "version": "0.115.0-4",
+      "publishedAt": "2026-10-10T10:25:57.272Z",
+      "listedAt": "2026-11-03T18:41:40.768Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.115.0-4"
+    },
+    {
+      "version": "0.115.0-3",
+      "publishedAt": "2026-10-10T03:41:05.694Z",
+      "listedAt": "2026-11-03T18:41:40.768Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.115.0-3"
+    },
+    {
+      "version": "0.115.0-2",
+      "publishedAt": "2026-10-10T02:59:26.754Z",
+      "listedAt": "2026-11-03T18:41:40.768Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.115.0-2"
     }
   ]
 }

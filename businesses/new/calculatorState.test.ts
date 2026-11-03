@@ -19,8 +19,8 @@ describe('complete public calculator state', () => {
             databaseCzk:241, partnerSetupHours:22, clients:17, hardwareCzk:1749 };
         const restored = parseCalculatorState(new URLSearchParams(serializeCalculatorState(state)));
         expect(restored).toEqual(state);
-        expect(calculateEconomics(restored.input).input.horizonMonths).toBe(1);
-        expect(calculateEconomics(restored.input).input.instancesPerClient).toBe(1);
+        expect(calculateEconomics(restored.input).input.horizonMonths).toBe(24);
+        expect(calculateEconomics(restored.input).input.instancesPerClient).toBe(3);
         for (const key of Object.keys(DEFAULT_INPUT)) expect(new URLSearchParams(serializeCalculatorState(state)).has(key)).toBe(true);
     });
     it('ignores identity, prototypes, unknown enums and commission overrides', () => {
@@ -28,7 +28,7 @@ describe('complete public calculator state', () => {
         expect(state).toEqual(defaultCalculatorState());
         const serialized = serializeCalculatorState(state);
         expect(serialized).not.toContain('secret');expect(serialized).not.toContain('commissionPercent');
-        expect(calculateEconomics(state.input).partner.licenceShare).toBe(4400);
+        expect(calculateEconomics(state.input).partner.licenceShare).toBeCloseTo(3998);
     });
     it('bounds URL numbers and falls back for non-finite input', () => {
         const state = parseCalculatorState(new URLSearchParams('volume=NaN&clients=-2&refundPercent=150&horizonMonths=24.9&exchangeRate=Infinity&hostingCzk=-1'));
@@ -57,10 +57,10 @@ describe('self-contained PDF definition', () => {
         for (const key of NUMERIC_KEYS) expect(text).toContain(String(state.input[key]));
         expect(text).not.toContain('email@example.com');
     });
-    it('does not extrapolate Start revenue or payback into a year', () => {
+    it('exports recurring Start over the full selected horizon', () => {
         const state=defaultCalculatorState('partner');state.input.plan='start';state.input.horizonMonths=24;
         const text=JSON.stringify(createCalculationPdfDefinition(state));
-        expect(text).toContain('30 dní pilotu Start');expect(text).toContain('bez automatického pokračování');
+        expect(text).toContain('24 měsíců Start');expect(text).not.toContain('30 dní pilotu');
         expect(text).not.toContain('24 měsíců Business');
     });
 });

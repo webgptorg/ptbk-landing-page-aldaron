@@ -55,13 +55,13 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
     }
     const input = state.input;
     const scenario = SCENARIOS[state.scenario];
-    const result = calculateEconomics(input);
+    const result = calculateEconomics(input, locale);
     const formatMoney = (amount: number) => formatCurrency(amount, locale, input.exchangeRate);
     const partner = result.partner;
     const setInput = (change: Partial<EconomicsInput>) => update({ ...state, input: { ...input, ...change } });
     const field = (key: NumericKey, label = FIELD_LABELS[key]) => <NumberField key={key} name={key} label={localizedFieldLabel(key, label, locale)} value={displayFieldValue(key, input[key], locale, input.exchangeRate)} onChange={(value) => setInput({ [key]: storedFieldValue(key, value, locale, input.exchangeRate) })} />;
     const company = state.mode === 'company';
-    const period = result.isPilot ? t('30 dní pilotu') : `${result.input.horizonMonths} ${t('měsíců')}`;
+    const period = `${result.input.horizonMonths} ${t('měsíců')}`;
     const amount = company ? result.horizonBenefit : partner.horizonContribution;
     const costRows: Array<[string, number]> = [
         ['Licence Promptbooku', result.licence], ['AI / předplatné', result.ai],
@@ -105,20 +105,18 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                 <div className={s.calculatorControls}><p>{t(company ? 'Vyberte práci, kterou chcete předat agentům.' : 'Spočítejte si službu, kterou nabídnete klientům.')}</p>
                     <div className={s.fields}><label className={`${s.field} ${s.fullField}`} htmlFor={`${id}-scenario`}>{t("Co chcete automatizovat?")}<select id={`${id}-scenario`} value={state.scenario} onChange={(event) => update(changeScenario(state, event.target.value as ScenarioId))}>{(['social', 'email', 'documents', 'video', 'coding'] as const).map(key => [key, SCENARIOS[key]] as const).map(([key,value]) => <option value={key} key={key}>{t(value.title)}</option>)}</select></label>
                     {t(company ? field('hourlyCost') : field('serviceFeeCzk'))}
-                    {advanced && <label className={s.field} htmlFor={`${id}-plan`}>{t("Licenční plán")}<select id={`${id}-plan`} value={input.plan} onChange={(event) => setInput({ plan: event.target.value as EconomicsInput['plan'] })}><option value="business">Business · {licencePrice('business', locale)} / {t('měsíc')}</option><option value="start">Start · {licencePrice('start', locale)} / {t('30 dní')}</option></select></label>}
+                    {advanced && <label className={s.field} htmlFor={`${id}-plan`}>{t("Licenční plán")}<select id={`${id}-plan`} value={input.plan} onChange={(event) => setInput({ plan: event.target.value as EconomicsInput['plan'] })}><option value="business">Business · {licencePrice('business', locale)} / {t('měsíc')}</option><option value="start">Start · {licencePrice('start', locale)} / {t('měsíc')}</option></select></label>}
                     </div>
                     <div className={s.sliderField}><div><label htmlFor={`${id}-quick`}>{t(company ? scenario.volumeLabel : FIELD_LABELS.clients)}</label><input id={`${id}-quick`} type="number" min={0} max={company ? 1e9 : 5000} step={1} value={input[quickKey]} onChange={(event) => { const n = event.target.valueAsNumber; if (Number.isFinite(n)) setInput({ [quickKey]: Math.max(0, Math.min(company ? 1e9 : 5000, Math.floor(n))) }); }} /></div><input type="range" aria-label={t(`${company ? scenario.volumeLabel : 'Počet klientů'} — posuvník`)} min={0} max={quickMax} step={1} value={input[quickKey]} onChange={(event) => setInput({ [quickKey]: Number(event.target.value) })} /></div>
                     {!company && <div className={s.fixedShare}><strong>{t(COMMERCIAL_TERMS.partnerSharePercent)}{t(" %")}</strong><span>{t("pevný partnerský podíl")}<br />{t("z uhrazených licencí po vratkách")}</span></div>}
-                    {!advanced && <p className={s.advancedNote}>{t(result.isPilot ? 'Výpočet jednoho 30denního pilotu Start.' : 'Výpočet pro Business.')}{t(" Ostatní náklady a čas na obsluhu jsou předvyplněné odhady. ")}<Link className={s.textLink} href={calculatorPath(state, locale)}>{t("Upravit všechny předpoklady ")}<ArrowRight size={15} /></Link></p>}
+                    {!advanced && <p className={s.advancedNote}>{t(input.plan === 'start' ? 'Výpočet pro Start.' : 'Výpočet pro Business.')}{t(" Ostatní náklady a čas na obsluhu jsou předvyplněné odhady. ")}<Link className={s.textLink} href={calculatorPath(state, locale)}>{t("Upravit všechny předpoklady ")}<ArrowRight size={15} /></Link></p>}
                     {advanced && <>
-                        {result.isPilot && <p className={s.advancedNote}>{t("Start počítá pouze jeden 30denní pilot. Bez obnovy a bez automatického přechodu na Business; měsíční vstupy zde představují celých 30 dní.")}</p>}
                         {!company && <details className={s.advancedDetails}><summary>{t("Objem práce jednoho klienta")}</summary><div className={s.fields}>{field('volume',scenario.volumeLabel)}</div></details>}
                         {FIELD_GROUPS.filter(group => !group.partnerOnly || !company).map(group => <details className={s.advancedDetails} key={group.title}><summary>{t(group.title)}</summary><p>{t(group.description)}</p>
                             {group.title === 'AI a externí služby' && <label className={s.field} htmlFor={`${id}-ai`}>{t("Jak platíte za AI?")}<select id={`${id}-ai`} value={input.aiBilling} onChange={(event) => setInput({ aiBilling: event.target.value as EconomicsInput['aiBilling'] })}><option value="tokens">{t("Vlastní API — tokeny")}</option><option value="subscription">{t("Vlastní předplatné")}</option><option value="local">{t("Lokální model")}</option></select></label>}
                             {group.title === 'Server a ostatní provoz' && <label className={s.field} htmlFor={`${id}-payer`}>{t("Kdo hradí AI a provoz?")}<select id={`${id}-payer`} value={input.costPayer} onChange={(event) => setInput({ costPayer: event.target.value as EconomicsInput['costPayer'] })}><option value="client">{t("Klient samostatně")}</option><option value="partner">{t("Partner — zahrnuto v ceně servisu")}</option></select></label>}
                             <div className={s.fields}>{group.keys.filter(key => {
                                 if ((key === 'hourlyCost' && company) || (key === 'serviceFeeCzk' && !company)) return false;
-                                if (result.isPilot && ['horizonMonths','instancesPerClient'].includes(key)) return false;
                                 if (key === 'aiSubscriptionCzk') return input.aiBilling === 'subscription';
                                 if (['inputTokens','outputTokens','inputPriceUsd','outputPriceUsd'].includes(key)) return input.aiBilling === 'tokens';
                                 return true;
@@ -133,9 +131,9 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                         <strong data-testid={company ? 'net-benefit' : 'partner-benefit'}>{formatMoney(Math.abs(amount))}</strong>
                         {t(amount < 0 ? 'Při těchto předpokladech to nevychází.' : company ? 'Prostor pro to, co je důležité.' : 'Z nasazení, servisu a podílu z licencí.')}
                     </div><div className={s.calcMetrics}>
-                        <div><small>{t(company ? 'Uvolněná kapacita / období' : result.isPilot ? 'Tržby za pilot bez nasazení' : 'Opakované tržby / měsíc')}</small><strong data-testid={company ? 'saved-hours' : 'partner-revenue'}>{t(company ? `${decimal(result.savedHours)} h` : formatMoney(result.isPilot ? partner.periodRevenue : partner.recurringRevenue))}</strong></div>
+                        <div><small>{t(company ? 'Uvolněná kapacita / období' : 'Opakované tržby / měsíc')}</small><strong data-testid={company ? 'saved-hours' : 'partner-revenue'}>{t(company ? `${decimal(result.savedHours)} h` : formatMoney(partner.recurringRevenue))}</strong></div>
                         <div><small>{t(company ? 'Provoz bez lidské práce / období' : 'Obsluha a režie / období')}</small><strong>{formatMoney(company ? result.operatingCost : partner.deliveryCost)}</strong></div>
-                    </div><p className={s.small}>{t(company ? 'Odhad zahrnuje provoz, lidskou kontrolu i jednorázové nasazení. Hodnota uvolněného času není automaticky hotovostní úspora mezd.' : 'Odhad po zadaných nákladech, před daní z příjmů. Stálý počet klientů od začátku a trvající partnerská dohoda; nejde o zaručený výdělek.')}</p>
+                    </div><p className={s.small}>{t(company ? 'Odhad zahrnuje provoz, lidskou kontrolu i jednorázové nasazení. Hodnota uvolněného času není automaticky hotovostní úspora mezd.' : 'Odhad po zadaných nákladech, před daní z příjmů. Stálý počet klientů od první aktivace, provize nejvýše 24 měsíců; nejde o zaručený výdělek.')}</p>
                 </div>
                 {advanced && <div className={s.breakdown}>
                     {!company && <><h3>{t("Vaše partnerská ekonomika")}</h3><MoneyRows exchangeRate={input.exchangeRate} rows={[
@@ -144,13 +142,13 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                         ['Tržby za jednorázové nasazení',partner.setupRevenue], ['Náklady nasazení a získání klientů',partner.setupCost],
                         [`Tržby za ${period} celkem`,partner.horizonRevenue], [`Náklady za ${period} celkem`,partner.horizonPartnerCost],
                         ['Výsledek po zadaných nákladech',partner.horizonContribution],
-                    ]} />{result.isPilot && <p className={s.small}>{t("Start nevytváří opakované měsíční tržby (MRR = 0).")}</p>}</>}
+                    ]} /><p className={s.small}>{t("Licenční provize se počítá nejvýše za prvních 24 měsíců. Vlastní servis může pokračovat i potom; měsíční tržby výše odpovídají období s provizí.")}</p></>}
                     <details className={s.advancedDetails} open={company} key={state.mode}><summary>{t(company ? 'Celý rozpad nákladů vaší agendy' : 'Kolik platí jeden klient?')}</summary><MoneyRows exchangeRate={input.exchangeRate} rows={costRows} />
                         {input.costPayer === 'partner' && <p>{t("AI a provoz jsou zahrnuté v ceně servisu. Uvedené dílčí náklady se klientovi nepřičítají podruhé, ale jsou odečtené partnerovi.")}</p>}
                         <MoneyRows exchangeRate={input.exchangeRate} rows={[
                             ['Stejná práce ručně / období',result.baselineCost], ['Jednorázové nasazení',input.setupFeeCzk],
                             [`Celkové náklady klienta za ${period}`,result.horizonCost],
-                        ]} /><p>{t("Návratnost nasazení: ")}{t(result.paybackMonths === null ? 'Nevychází' : result.paybackMonths === 0 ? 'bez vstupního nákladu' : result.isPilot ? `${decimal(result.paybackMonths * 30)} dní` : `${decimal(result.paybackMonths)} měsíců`)}{t(". Dílčí částky jsou zaokrouhlené.")}</p></details>
+                       ]} /><p>{t("Návratnost nasazení: ")}{t(result.paybackMonths === null ? 'Nevychází' : result.paybackMonths === 0 ? 'bez vstupního nákladu' : `${decimal(result.paybackMonths)} měsíců`)}{t(". Dílčí částky jsou zaokrouhlené.")}</p></details>
                 </div>}
                 </div>
             </div>

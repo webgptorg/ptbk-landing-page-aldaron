@@ -39,8 +39,8 @@ describe('bilingual launch site', () => {
         expect(parseCalculatorState(url.searchParams)).toEqual(state);
     });
     it('shows matching prices and converts editable input units without changing the economic model', () => {
-        expect(licencePrice('start','cs').replace(/\s/g,' ')).toBe('400 Kč');
-        expect(licencePrice('business','cs').replace(/\s/g,' ')).toBe('2 200 Kč');
+        expect(licencePrice('start','cs').replace(/\s/g,' ')).toBe('399 Kč');
+        expect(licencePrice('business','cs').replace(/\s/g,' ')).toBe('1 999 Kč');
         expect(licencePrice('start','en')).toBe('$19');
         expect(licencePrice('business','en')).toBe('$100');
         expect(displayFieldValue('hourlyCost',550,'en',22)).toBe(25);
@@ -77,7 +77,7 @@ describe('bilingual launch site', () => {
         const en=JSON.stringify(createCalculationPdfDefinition(state,'en'));
         const cs=JSON.stringify(createCalculationPdfDefinition(state,'cs'));
         expect(en).toContain('/en/kalkulacka?');expect(en).toContain('$100');expect(en).not.toContain(' Kč');
-        expect(cs).toContain('2 200');expect(cs).toContain('Kč');
+        expect(cs).toContain('1 999');expect(cs).toContain('Kč');
         expect(remainingCzech(en)).toEqual([]);
         expect(calculateEconomics(state.input)).toEqual(before);
     });

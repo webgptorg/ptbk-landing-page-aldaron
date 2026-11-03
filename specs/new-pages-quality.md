@@ -49,11 +49,11 @@ Po přepnutí jsou veřejné marketingové stránky indexovatelné a zahrnuté v
 - Původních pět agend a jejich správné detaily zůstává funkčních. Modelová data se nevydávají za zákaznické výsledky.
 - Hlavní kontaktní akce sbírá nezávazný zájem o nasazení, bez duplicitní věty pod hero CTA a bez čekání na dostupnost Appky; menší odkaz vede na lokalizovanou instalaci s npm, shell a Windows EXE volbami.
 - Oba zakladatelé mají rovnocenné role, větší zrcadlové portréty u spodní hrany karet a kontakty. Všech šest nezměněných referencí je v jedné mřížce se správnými atribucemi. Praha 13 se veřejně nevyskytuje a Technologická inkubace zůstává v patičce. Hlavička i patička mají původní logo a dvoubarevné `promptbook` bez tečky.
-- Ceny v kartách zůstávají Start 400 Kč / 19 USD na 30 dní a Business 2 200 Kč / 100 USD za prostředí/měsíc. Česká veřejná nabídka neobsahuje vysvětlivku o přepočtu; interní převodní konstanta a model kalkulačky se nemění. Podíl 20 %, smluvní podmínky, SLA a BUSL se brandingem nemění.
+- Aktuální ceny od 3. listopadu jsou Start 399 Kč / 19 USD a Business 1 999 Kč / 100 USD za prostředí/měsíc. Oba plány jsou průběžné. České licence mají pevnou cenu v Kč a anglické používají modelový kurz pro interní přepočet; uložené jednotky zůstávají. Provize je 20 % na 24 měsíců; zachovat původní práva a licence.
 - Srovnání mají primární zdroje a skutečné datum kontroly, bez popírání schopností alternativ.
 - Mini kalkulačka má jen hlavní vstupy, správně popsaný benefit a přechod na pokročilou. Parametry se zachovají včetně neviditelných.
 - URL round-trip, reload a historie obnoví všechna známá pole. Neznámé hodnoty, NaN/Infinity, prototype keys a přepis provize jsou odmítnuté/normalizované.
-- Start nikdy negeneruje roční pilot, automatický Business, MRR nebo návratnost mimo dobu pilotu. 20 % je konstanta, nikoli uživatelská volba.
+- Start není pilot: vytváří MRR a používá celý zvolený horizont. Nenásleduje povinný přechod na Business. 20 % i limit 24 měsíců jsou konstanty, nikoli uživatelské volby.
 - Náklady na AI/provoz, implementaci a lidskou práci nejsou vynechané nebo započtené dvakrát. Režie při nule klientů zůstává. Záporný výsledek je vidět.
 - Inline formulář i stávající modál používají existující endpoint/evidenci a `new-website-contact`. Chyba zachová údaje; kontaktní úspěch se nepotvrdí před backendem. Opakované kliknutí během odesílání nepřidá další požadavek. Newsletter se nezapíná.
 - PDF brána vyžádá e-mail v obou kalkulačkách. Po chybě kontaktu se PDF nestáhne. Po chybě PDF lze opakovat bez druhého zápisu uloženého kontaktu. PDF je skutečný čitelný soubor s českými znaky, kompletním rozkladem a použitelným share linkem.

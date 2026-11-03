@@ -8,7 +8,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
         title: 'Partnerské podmínky Promptbook',
         publication: {
             date: '2026-11-03', isDraft: false,
-            notice: "Znění ze dne 3. listopadu 2026. Podmínky se stávají součástí konkrétní partnerské smlouvy jejím přijetím; samotné odeslání poptávky partnerství nezakládá. Partnerský list určuje partnera, rozsah a dobu nároku. Nové znění nepřepisuje dříve přijaté dohody.",
+            notice: "Znění 2026-11-03-v4 ze dne 3. listopadu 2026. Podmínky se stávají součástí konkrétní partnerské smlouvy jejím přijetím; samotné odeslání poptávky partnerství nezakládá. Partnerský list určuje partnera, rozsah a dobu nároku. Nové znění nepřepisuje dříve přijaté dohody.",
         },
         perex: 'Pravidla pro agentury a integrátory, kteří doporučují konkrétní klientská prostředí a mohou poskytovat vlastní samostatně objednané služby. Odměna za software je oddělená od vlastní práce partnera a od samostatné dohody s koordinátorem programu.',
         sections: [
@@ -65,7 +65,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Průběžná péče a doba nároku',
                 paragraphs: [
-                    'Podíl náleží za potvrzené doporučení při nepřerušené hrazené licenci a za podmínek přijaté partnerské smlouvy. Samostatná implementace ani péče se nestávají povinnou soustavnou obchodní akvizicí. Přesná doba nároku a pravidlo při změně péče se určí před vstupem partnera do programu; tato publikace nepřepisuje již sjednaná práva.',
+                    'U nově přijímaných partnerských smluv náleží 20% provize po dobu prvních 24 kalendářních měsíců od první placené aktivace konkrétní doporučené licence. Počítá se pouze zaplacená služba v tomto okně. Změna plánu, způsobu fakturace, technická migrace ani přerušení plateb lhůtu neobnovují a neprodlužují. Roční platba přesahující konec okna se do základu zahrne poměrně podle doby služby uvnitř okna; takto vypočtená provize se vyplatí do 30 dní od inkasa. Běžné ukončení partnerského rámce již potvrzené nároky do konce jejich okna neruší. Dříve přijaté odlišné dohody se tímto zveřejněním zpětně nemění.',
                     'Bez dohody nevzniká dodatečný bonus ani automatické snížení sazby. Pokud partner poskytuje i péči, její rozsah a cena se sjednávají samostatně a nevytvářejí další provizi z licence.',
                     'Při nečinnosti následuje doložená výzva, konkrétní náprava a lhůta 30 dní, pokud nejde o naléhavé porušení. Slabý výsledek při poctivém plnění není automaticky nečinnost. Již vydělané odměny nelze zpětně odebrat jen kvůli změně strategie nebo ceny.',
                 ],
@@ -109,7 +109,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
         title: 'Promptbook partner terms',
         publication: {
             date: '2026-11-03', isDraft: false,
-            notice: "Version dated 3 November 2026. These terms form part of a partner agreement when accepted; an enquiry alone does not create a partnership. The partner sheet identifies the partner, scope and commission period. A new version does not rewrite previously accepted agreements.",
+            notice: "Version dated 3 November 2026 (2026-11-03-v4). These terms form part of a partner agreement when accepted; an enquiry alone does not create a partnership. The partner sheet identifies the partner, scope and commission period. A new version does not rewrite previously accepted agreements.",
         },
         perex: 'Rules for agencies and integrators referring specific client environments and optionally providing separately ordered services. Software commission is separate from the partner’s own work and the programme coordinator’s bilateral agreement.',
         sections: [
@@ -166,7 +166,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Ongoing care and entitlement duration',
                 paragraphs: [
-                    'The share follows a confirmed referral, uninterrupted paid licence and the accepted partner agreement. Separately ordered implementation or care does not itself impose continuous sales acquisition. Entitlement duration and care-handover rules must be specified before enrolment; this publication does not rewrite accepted rights.',
+                    'For newly accepted partner agreements, the 20% commission covers the first 24 calendar months from the first paid activation of each referred licence, and only paid service within that window. Plan or billing changes, technical migration and payment interruptions do not restart or extend it. Annual payments crossing the end are included pro rata for service within the window; the resulting commission is paid within 30 days of receipt. Ordinary termination of the partner framework does not cancel confirmed rights before the end of their window. Previously accepted different agreements are not changed retrospectively.',
                     'There is no extra bonus or automatic rate reduction without agreement. If the partner also supplies customer care, its scope and price are agreed separately and do not create another licence commission.',
                     'Inactivity triggers an evidenced notice, specific remedy and 30-day cure period unless the breach is urgent. Honest work with weak results is not automatically inactivity. Earned amounts cannot be retrospectively confiscated merely because strategy or pricing changes.',
                 ],

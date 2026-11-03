@@ -18,7 +18,7 @@ Délku nároku stanoví individuální partnerská smlouva před potvrzením kli
 
 ## Podpora a licence
 
-Podpora stabilních řad od 0.118 trvá alespoň 90 dní od prvního skutečného stabilního vydání na npm/GitHubu a zahrnuje poslední stabilní patch. Nový patch lhůtu neobnovuje. Podpora vyžaduje alespoň jednu skutečně vydanou stabilní řadu; web nové vydání enginu nevytváří. Prerelease jsou volitelně viditelné a nevytvářejí stabilní podporu; LTS je informační označení. Starší platně nabyté licence a již slíbené vyšší minimum se nezkracují.
+Podpora stabilních řad od 0.115 trvá alespoň 90 dní od prvního skutečného stabilního vydání na npm/GitHubu a zahrnuje poslední stabilní patch. Nový patch lhůtu neobnovuje. Podpora vyžaduje alespoň jednu skutečně vydanou stabilní řadu; web nové vydání enginu nevytváří. Prerelease jsou volitelně viditelné a nevytvářejí stabilní podporu; LTS je informační označení. Starší platně nabyté licence a již slíbené vyšší minimum se nezkracují.
 
 ## Soukromé dokumenty a osobní údaje
 
@@ -43,3 +43,7 @@ Ověřeno 2. 11. 2026. Níže jsou příklady konkrétních programů; žádný 
 | Kogentní práva | [Občanský zákoník, státní publikace účinná k 1. 1. 2026](https://spu.gov.cz/frontend/webroot/uploads/files/2026/02/dokument_89_2012_sb25958._zakon_obcansky_zakonik25958.pdf) | Změny dlouhodobých podmínek, postoupení, případné zastoupení a limity odpovědnosti nelze libovolně obejít. |
 
 Identifikace AI Webu vychází z [Obchodního věstníku, zápis zveřejněný 8. 10. 2026](https://ov.gov.cz/zapis/25360448); údaje Neonmedia z [jejích vlastních zásad](https://www.neonmedia.cz/ochrana-osobnich-udaju). Zdroj jejich údajů neznamená přijetí všech jejich právních závěrů.
+
+## Navazující bríf 3. listopadu 2026
+
+Nové partnerské smlouvy mají 20% provizi na prvních 24 kalendářních měsíců od první placené aktivace licence, bez restartu při přerušení či změně plánu; poměrný základ pro přesahující roční platby, výplata do 30 dní od inkasa. Starší přijaté odlišné dohody se nemění zpětně. Start je průběžné předplatné za 399 Kč a Business za 1 999 Kč měsíčně. Vydání se evidují od 0.115; skutečná prerelease označení se nepřepisují na stabilní 0.115.0. Pokud katalog nemá stabilní řadu, přehled vydaných prerelease je rovnou otevřený. Patička má vyvážené sloupce: produkt sedm odkazů, zdroje šest a oddělenou sekci právních dokumentů.

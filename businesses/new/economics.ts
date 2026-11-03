@@ -103,7 +103,7 @@ export const SCENARIOS: Record<ScenarioId, {
     },
 };
 
-/** Sanitize direct calls as well as form input. A Start pilot is one environment for one 30-day period. */
+/** Sanitize direct calls as well as form input. Both plans recur monthly. */
 export function normalizeInput(input: EconomicsInput): EconomicsInput {
     const result = { ...input };
     for (const key of Object.keys(result) as (keyof EconomicsInput)[]) {
@@ -117,8 +117,8 @@ export function normalizeInput(input: EconomicsInput): EconomicsInput {
     result.aiBilling = ['tokens', 'subscription', 'local'].includes(input.aiBilling) ? input.aiBilling : 'tokens';
     result.costPayer = input.costPayer === 'partner' ? 'partner' : 'client';
     result.exchangeRate = Math.max(0.01, Math.min(1000, result.exchangeRate));
-    result.horizonMonths = result.plan === 'start' ? 1 : Math.max(1, Math.min(120, Math.floor(result.horizonMonths)));
-    result.instancesPerClient = result.plan === 'start' ? 1 : Math.max(1, Math.min(100, Math.floor(result.instancesPerClient)));
+    result.horizonMonths = Math.max(1, Math.min(120, Math.floor(result.horizonMonths)));
+    result.instancesPerClient = Math.max(1, Math.min(100, Math.floor(result.instancesPerClient)));
     result.clients = Math.min(5000, Math.floor(result.clients));
     result.retainedWorkPercent = Math.min(100, result.retainedWorkPercent);
     result.paidLicencePercent = Math.min(100, result.paidLicencePercent);
@@ -128,15 +128,17 @@ export function normalizeInput(input: EconomicsInput): EconomicsInput {
 }
 
 /**
- * CZK excluding VAT. Period = month for Business, the entire 30-day pilot for Start.
+ * CZK excluding VAT. Both plans use monthly periods and the selected horizon.
  * Workload and non-licence costs describe a WHOLE CLIENT, not each instance.
- * No automatic pilot renewal/conversion; partner share has no invented 12-month expiry.
+ * Czech licence prices are fixed CZK; English licence prices use USD.
+ * Referral commission applies for the first 24 months; separately priced services may continue.
  */
-export function calculateEconomics(raw: EconomicsInput) {
+export function calculateEconomics(raw: EconomicsInput, locale: 'cs' | 'en' = 'cs') {
     const i = normalizeInput(raw);
-    const isPilot = i.plan === 'start';
-    const licence = (isPilot ? COMMERCIAL_TERMS.startUsd : COMMERCIAL_TERMS.businessUsd)
-        * i.instancesPerClient * i.exchangeRate;
+    const monthlyPrice = locale === 'cs'
+        ? COMMERCIAL_TERMS[i.plan === 'start' ? 'startCzk' : 'businessCzk']
+        : COMMERCIAL_TERMS[i.plan === 'start' ? 'startUsd' : 'businessUsd'] * i.exchangeRate;
+    const licence = monthlyPrice * i.instancesPerClient;
     const units = i.volume * i.unitsPerItem;
     const tokenCost = units * (i.inputTokens * i.inputPriceUsd + i.outputTokens * i.outputPriceUsd)
         / 1_000_000 * i.exchangeRate;
@@ -157,9 +159,7 @@ export function calculateEconomics(raw: EconomicsInput) {
     const netBenefit = baselineCost - economicCost;
     const horizonCost = economicCost * i.horizonMonths + i.setupFeeCzk;
     const horizonBenefit = baselineCost * i.horizonMonths - horizonCost;
-    const rawPayback = netBenefit > 0 ? i.setupFeeCzk / netBenefit : null;
-    // Never extrapolate cheap pilot economics beyond the pilot's actual life.
-    const paybackMonths = isPilot && rawPayback !== null && rawPayback > 1 ? null : rawPayback;
+    const paybackMonths = netBenefit > 0 ? i.setupFeeCzk / netBenefit : null;
 
     const netPaidLicences = i.clients * licence * i.paidLicencePercent / 100 * (1 - i.refundPercent / 100);
     const licenceShare = netPaidLicences * COMMERCIAL_TERMS.partnerSharePercent / 100;
@@ -169,15 +169,16 @@ export function calculateEconomics(raw: EconomicsInput) {
     const deliveryCost = i.clients * i.partnerHours * i.partnerHourlyCost + i.partnerOverheadCzk + partnerThirdPartyCosts;
     const setupRevenue = i.clients * i.setupFeeCzk;
     const setupCost = i.clients * (i.partnerSetupHours * i.partnerHourlyCost + i.acquisitionPerClientCzk);
-    const horizonRevenue = periodRevenue * i.horizonMonths + setupRevenue;
+    const commissionMonths = Math.min(i.horizonMonths, COMMERCIAL_TERMS.partnerCommissionMonths);
+    const horizonRevenue = services * i.horizonMonths + licenceShare * commissionMonths + setupRevenue;
     const horizonPartnerCost = deliveryCost * i.horizonMonths + setupCost;
     return {
-        input: i, isPilot, licence, units, ai, external, reserve, infrastructure, thirdPartyCosts,
+        input: i, licence, units, ai, external, reserve, infrastructure, thirdPartyCosts,
         clientDirectCosts, operatingCost, baselineHours, remainingHours, savedHours, baselineCost,
         remainingWorkCost, economicCost, netBenefit, horizonCost, horizonBenefit, paybackMonths,
         partner: {
             netPaidLicences, licenceShare, services, periodRevenue,
-            recurringRevenue: isPilot ? 0 : periodRevenue,
+            recurringRevenue: periodRevenue, commissionMonths,
             partnerThirdPartyCosts, deliveryCost, periodContribution: periodRevenue - deliveryCost,
             setupRevenue, setupCost, setupContribution: setupRevenue - setupCost,
             horizonRevenue, horizonPartnerCost, horizonContribution: horizonRevenue - horizonPartnerCost,
@@ -192,12 +193,12 @@ export function exportEconomics(input: EconomicsInput, scenario: ScenarioId, mod
         'PROMPTBOOK — ORIENTAČNÍ KALKULACE',
         `Scénář: ${SCENARIOS[scenario].title}`,
         `Režim: ${mode === 'company' ? 'Vlastní agenda' : 'Partnerské nasazení'}`,
-        `Nabídka: ${COMMERCIAL_TERMS.version}. Start 19 USD / 30 dní jednorázově; Business 100 USD / instanci / měsíc.`,
-        `Období: ${result.isPilot ? 'jeden 30denní pilot, bez automatického pokračování' : `${result.input.horizonMonths} měsíců Business`}.`,
+        `Nabídka: ${COMMERCIAL_TERMS.version}. Start ${COMMERCIAL_TERMS.startCzk} Kč; Business ${COMMERCIAL_TERMS.businessCzk.toLocaleString('cs-CZ')} Kč / klientské prostředí / měsíc.`,
+        `Období: ${result.input.horizonMonths} měsíců ${result.input.plan === 'start' ? 'Start' : 'Business'}.`,
         'Částky CZK bez DPH; kurz, náklady a úspory jsou modelové předpoklady.',
         `${COMMERCIAL_TERMS.share} ${COMMERCIAL_TERMS.shareTerm}`,
         'Úspora kapacity není automaticky hotovostní úspora mezd. Tržby nejsou zisk.',
-        'Stálý počet klientů od začátku, bez růstu/odchodů a daně z příjmů. Podíl předpokládá trvající dohodu.',
+        'Stálý počet klientů od první placené aktivace, bez růstu/odchodů a daně z příjmů. Provize končí po 24 měsících; vlastní servis může pokračovat.',
         '', 'Všechny vstupy a výsledky (pojmenování podle výpočetního modelu):',
         JSON.stringify(result, null, 2),
     ].join('\n');

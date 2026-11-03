@@ -6,8 +6,8 @@ describe('release publication and support', () => {
     it('orders numeric prereleases and excludes the older generation', () => {
         expect(compareReleaseVersions('0.118.0-10', '0.118.0-2')).toBeGreaterThan(0);
         expect(compareReleaseVersions('0.118.0', '0.118.0-99')).toBeGreaterThan(0);
-        expect(isCurrentGeneration('0.117.99')).toBe(false);
-        expect(isCurrentGeneration('0.118.0-0')).toBe(true);
+        expect(isCurrentGeneration('0.114.99')).toBe(false);
+        expect(isCurrentGeneration('0.115.0-0')).toBe(true);
     });
     it('never grants stable support to a prerelease', () => {
         const item = release('0.118.0-0', '2026-11-03T00:00:00Z');

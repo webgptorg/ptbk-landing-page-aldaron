@@ -6,38 +6,40 @@ const calculate = (changes: Partial<EconomicsInput> = {}) => calculateEconomics(
 
 describe('commercial offer v1.0', () => {
     it('prices a Business environment, not agents or physical machines', () => {
-        expect(calculate().licence).toBe(2200);
+        expect(calculate().licence).toBe(1999);
         const three = calculate({ instancesPerClient: 3 });
-        expect(three.licence).toBe(6600);
+        expect(three.licence).toBe(5997);
         expect(three.thirdPartyCosts).toBe(calculate().thirdPartyCosts);
         expect(three.baselineCost).toBe(calculate().baselineCost);
     });
-    it('Start is 19 USD once for one environment and only 30 days', () => {
-        const pilot = calculate({ plan: 'start', horizonMonths: 24, instancesPerClient: 5 });
-        expect(pilot.licence).toBe(418);
-        expect(pilot.input.horizonMonths).toBe(1);
-        expect(pilot.input.instancesPerClient).toBe(1);
-        expect(pilot.horizonCost).toBe(pilot.economicCost + DEFAULT_INPUT.setupFeeCzk);
-        expect(pilot.partner.recurringRevenue).toBe(0);
-        expect(pilot.partner.licenceShare).toBeCloseTo(836);
+    it('treats Start as recurring with the selected horizon and environment count', () => {
+        const start = calculate({ plan: 'start', horizonMonths: 24, instancesPerClient: 5 });
+        expect(start.licence).toBe(1995);
+        expect(start.input.horizonMonths).toBe(24);
+        expect(start.input.instancesPerClient).toBe(5);
+        expect(start.horizonCost).toBe(start.economicCost * 24 + DEFAULT_INPUT.setupFeeCzk);
+        expect(start.partner.recurringRevenue).toBeGreaterThan(0);
     });
-    it('does not extrapolate pilot payback past its life', () => {
-        expect(calculate({ plan: 'start', setupFeeCzk: 1e8 }).paybackMonths).toBeNull();
-        expect(calculate({ plan: 'start', setupFeeCzk: 0 }).paybackMonths).toBe(0);
+    it('keeps Czech licence prices fixed when the model exchange rate changes', () => {
+        expect(calculate({ exchangeRate: 30 }).licence).toBe(1999);
+        expect(calculate({ plan: 'start', exchangeRate: 30 }).licence).toBe(399);
+        expect(calculateEconomics({ ...DEFAULT_INPUT, exchangeRate: 30 }, 'en').licence).toBe(3000);
+        expect(calculateEconomics({ ...DEFAULT_INPUT, plan: 'start', exchangeRate: 30 }, 'en').licence).toBe(570);
     });
-    it('uses the uniform 20 percent rate and never expires it arbitrarily after 12 months', () => {
-        const r = calculate({ horizonMonths: 24, exchangeRate: 1, clients: 1, serviceFeeCzk: 0, setupFeeCzk: 0 });
-        expect(r.partner.licenceShare).toBe(20);
-        expect(r.partner.horizonRevenue).toBe(480);
+    it('limits commission to 24 months while separately charged services continue', () => {
+        const r = calculate({ horizonMonths: 36, clients: 1, serviceFeeCzk: 100, setupFeeCzk: 0 });
+        expect(r.partner.licenceShare).toBeCloseTo(399.8);
+        expect(r.partner.horizonRevenue).toBeCloseTo(100 * 36 + 399.8 * 24);
+        expect(r.partner.commissionMonths).toBe(24);
         expect(COMMERCIAL_TERMS.partnerSharePercent).toBe(20);
     });
-    it('gives 3.8 USD from one paid Start', () => {
-        expect(calculate({ plan: 'start', exchangeRate: 1, clients: 1 }).partner.licenceShare).toBeCloseTo(3.8);
+    it('pays 20 percent of each paid Start month', () => {
+        expect(calculate({ plan: 'start', clients: 1 }).partner.licenceShare).toBeCloseTo(79.8);
     });
     it('excludes unpaid licences and deducts refunds from the paid amount', () => {
-        const r = calculate({ clients: 1, exchangeRate: 1, paidLicencePercent: 50, refundPercent: 20 });
-        expect(r.partner.netPaidLicences).toBe(40);
-        expect(r.partner.licenceShare).toBeCloseTo(8);
+        const r = calculate({ clients: 1, paidLicencePercent: 50, refundPercent: 20 });
+        expect(r.partner.netPaidLicences).toBeCloseTo(799.6);
+        expect(r.partner.licenceShare).toBeCloseTo(159.92);
     });
     it.each([{ paidLicencePercent: 0 }, { refundPercent: 100 }])('no share without net paid licence: %o', (change) => {
         expect(calculate(change).partner.licenceShare).toBe(0);
@@ -54,10 +56,10 @@ describe('whole-client economics', () => {
         expect(r.units).toBe(600);
         expect(r.ai).toBeCloseTo(356.4);
         expect(r.reserve).toBeCloseTo(89.1);
-        expect(r.operatingCost).toBeCloseTo(5745.5);
+        expect(r.operatingCost).toBeCloseTo(5544.5);
         expect(r.baselineHours).toBe(40);
         expect(r.remainingHours).toBe(12);
-        expect(r.netBenefit).toBeCloseTo(9654.5);
+        expect(r.netBenefit).toBeCloseTo(9855.5);
     });
     it('charges a subscription instead of tokens, without a retry markup', () => {
         const r = calculate({ aiBilling: 'subscription', externalPerUnitCzk: 1 });
@@ -83,14 +85,14 @@ describe('whole-client economics', () => {
     it('counts setup only once and never as monthly revenue', () => {
         const r = calculate();
         expect(r.horizonBenefit).toBeCloseTo(r.netBenefit * 12 - DEFAULT_INPUT.setupFeeCzk);
-        expect(r.partner.recurringRevenue).toBe(29400);
-        expect(r.partner.horizonRevenue).toBe(502800);
-        expect(r.partner.horizonContribution).toBe(242800);
+        expect(r.partner.recurringRevenue).toBe(28998);
+        expect(r.partner.horizonRevenue).toBe(497976);
+        expect(r.partner.horizonContribution).toBe(237976);
     });
     it('moves third-party costs to the partner without double billing the client', () => {
         const direct = calculate();
         const managed = calculate({ costPayer: 'partner' });
-        expect(managed.operatingCost).toBe(2200 + 2500);
+        expect(managed.operatingCost).toBe(1999 + 2500);
         expect(managed.partner.partnerThirdPartyCosts).toBeCloseTo(direct.thirdPartyCosts * 10);
         expect(managed.partner.periodContribution).toBeCloseTo(direct.partner.periodContribution - direct.thirdPartyCosts * 10);
         expect(managed.licence).toBe(direct.licence);
@@ -116,13 +118,13 @@ describe('whole-client economics', () => {
         expect(Number.isFinite(r.netBenefit)).toBe(true);
         expect(Number.isFinite(r.partner.horizonContribution)).toBe(true);
     });
-    it('exports the offer version, every input and every result with a one-period pilot', () => {
+    it('exports the offer version, every input and every result with a recurring Start', () => {
         const text = exportEconomics({ ...DEFAULT_INPUT, plan: 'start' }, 'documents', 'partner');
         expect(text).toContain(COMMERCIAL_TERMS.version);
-        expect(text).toContain('bez automatického pokračování');
-        expect(text).toContain('"horizonMonths": 1');
-        expect(text).toContain('"recurringRevenue": 0');
+        expect(text).toContain('24 kalendářních měsíců');
+        expect(text).toContain('"horizonMonths": 12');
+        expect(text).not.toContain('"recurringRevenue": 0');
         expect(text).toContain('"databaseCzk": 0');
-        expect(text).not.toContain('commissionMonths');
+        expect(text).toContain('commissionMonths');
     });
 });

@@ -28,15 +28,15 @@ GET a PDF jsou úplně specifikované v [kontaktu a exportu](new-contact-and-pdf
 
 ## Pevná nabídka
 
-Start **19 USD jednorázově na 30 dní**, Business **100 USD za prostředí a měsíc**, podíl **20 %**. Tyto hodnoty nejsou vstupy a URL je nesmí přepsat. Přesné právní podmínky určuje [obchodní nabídka](new-commercial-offer.md). V kalkulačce neexistuje třetí bezplatný ani libovolně nacenitelný tarif.
+Start **399 Kč**, Business **1 999 Kč za prostředí a měsíc**, oba průběžně; anglické ceny zůstávají **19 / 100 USD měsíčně**. Podíl je **20 % po 24 měsíců**. Tyto hodnoty nejsou vstupy a URL je nesmí přepsat. Přesné právní podmínky určuje [obchodní nabídka](new-commercial-offer.md). V kalkulačce neexistuje třetí bezplatný ani libovolně nacenitelný tarif.
 
 Ostatní hodnoty jsou editovatelné ilustrativní odhady, ne průzkum mezd, skutečné tarify providerů nebo zaručená úspora. Částky jsou v Kč bez DPH. USD převádí editovatelný modelový kurz, nikoli aktuální kurzová služba.
 
 ## Období a prostředí
 
-Business: měsíční období a zvolený horizont. Počet samostatných prostředí jednoho klienta násobí **jen licenci**. Veškerá práce, AI, hosting a jiné náklady se zadávají za **celého klienta**, ne automaticky za každou instanci.
+Start i Business: měsíční období a zvolený horizont. Počet samostatných prostředí jednoho klienta násobí **jen licenci**. Veškerá práce, AI, hosting a jiné náklady se zadávají za **celého klienta**, ne automaticky za každou instanci.
 
-Start: vždy jedna instance a jeden 30denní pilot. Měsíční pracovní/nákladové vstupy se interpretují za celých 30 dní. Skutečný výpočet normalizuje horizont a instance na 1 a tato pole při Startu nejsou aktivní. Formulář a URL ale uchovají předchozí Business hodnoty pro návrat k Business. Start se neprodlouží, nepřevede automaticky a nikdy nevytvoří MRR. Každý klient musí mít nárok na svůj jediný Start; kalkulačka oprávnění neuděluje ani neověřuje.
+Start používá stejnou práci s horizontem a počtem licencovaných prostředí jako Business. Není jednorázový pilot a vytváří MRR. Přepnutí plánu nesmaže zadané předpoklady. Kalkulačka nepřiznává oprávnění ani neimplementuje licenční omezení.
 
 ## Scénáře a odhady
 
@@ -58,7 +58,7 @@ Společné enumy: režim firma/partner; scénář výše; plán Business/Start; 
 
 | Skupina | Hodnoty |
 | --- | --- |
-| Období a licence | kurz USD/Kč 22; prostředí na klienta 1; horizont Business 12 měsíců |
+| Období a licence | kurz USD/Kč 22; prostředí na klienta 1; horizont obou plánů 12 měsíců |
 | Práce | objem, jednotky na položku, ruční minuty celé položky, celkový hodinový náklad, zbylá lidská práce %, dohled — podle scénáře |
 | AI | vstup 3 USD / milion; výstup 15 USD / milion; tokeny podle scénáře; předplatné 1 500 Kč/měsíc; rezerva 25 %; externí služba podle scénáře |
 | Provoz | server podle scénáře; databáze 0; zálohy/úložiště 100; jiné nástroje 0; elektřina 0; rozpočítaný hardware 0 Kč/měsíc |
@@ -71,9 +71,9 @@ AI předplatné **nahrazuje tokenový účet**, nepřičítá se. Příplatky a 
 
 ## Výpočet klienta
 
-`V` položek, `U` jednotek na položku, `I/O` tokenů na jednotku, `Pi/Po` cena USD/milion, `K` Kč/USD, `M` období, `N` licencovaných prostředí. U Startu `M=N=1`.
+`V` položek, `U` jednotek na položku, `I/O` tokenů na jednotku, `Pi/Po` cena USD/milion, `K` Kč/USD, `M` období, `N` licencovaných prostředí. Oba plány používají zvolené `M` a `N`.
 
-- Licence = `(Start 19 nebo Business 100) × N × K`.
+- Česká licence = `(Start 399 nebo Business 1999) × N`; anglická licence = `(Start 19 nebo Business 100) × N × K`.
 - Jednotky = `V × U`; tokenový účet = `V × U × (I×Pi + O×Po) / 1 000 000 × K`.
 - AI = tokenový účet, nebo cena předplatného, nebo 0 při lokálním modelu.
 - Externí služby = `V × U × cena služby za jednotku`.
@@ -89,7 +89,7 @@ AI předplatné **nahrazuje tokenový účet**, nepřičítá se. Příplatky a 
 - Přínos období = ruční náklad − celkový ekonomický náklad.
 - Náklad horizontu = ekonomický náklad × M + jednorázové nasazení.
 - Přínos horizontu = přínos období × M − nasazení.
-- Návratnost = nasazení / kladný přínos období. Při nekladném přínosu není. Při nasazení 0 a kladném přínosu je bez vstupního nákladu. Start neuvádí návratnost za více než 30 dní; vhodný podíl období převádí na dny.
+- Návratnost = nasazení / kladný přínos období. Při nekladném přínosu není. Při nasazení 0 a kladném přínosu je bez vstupního nákladu. Oba plány uvádějí návratnost v měsících.
 
 ## Výpočet partnera
 
@@ -103,16 +103,16 @@ AI předplatné **nahrazuje tokenový účet**, nepřičítá se. Příplatky a 
 - Náklad obsluhy = `C × hodiny obsluhy × interní náklad/h + režie portfolia + provoz hrazený partnerem`.
 - Příspěvek období = tržby období − náklad obsluhy.
 - Implementační tržby = `C × cena nasazení`; náklad implementace = `C × (implementační hodiny × interní náklad/h + akvizice)`.
-- Celkové tržby = tržby období × M + implementační tržby.
+- Celkové tržby = servisní tržby × M + licenční podíl × min(M, 24) + implementační tržby. Model začíná první placenou aktivací; provizní okno se neobnovuje.
 - Celkové náklady = náklad obsluhy × M + náklad implementace.
 - Výsledek horizontu = celkové tržby − celkové náklady, před daní z příjmů.
-- Business MRR = tržby období bez implementace; **Start MRR = 0**.
+- MRR obou plánů během provizního okna = tržby období bez implementace. Po 24 měsících zůstávají pouze servisní tržby; tuto mez uvádí UI a PDF.
 
 Podíl není další poplatek klientovi. Celá klientova licence není tržbou agentury. Při plátci partner je uvedený servis včetně AI/provozu; model tyto náklady nepřičte klientovi podruhé, ale odečte partnerovi. Více klientů neodstraňuje náklad času a servisu.
 
 ## Vstupní validace a zobrazení
 
-Běžná čísla 0–1e9; kurz 0,01–1 000; Business horizont celé 1–120; prostředí celé 1–100; klienti celí 0–5 000. Zbylá práce/úhrady/vratky 0–100 %, rezerva 0–500 %. Přímý výpočet normalizuje ne-konečné a záporné hodnoty; URL parser používá výchozí hodnoty pro nečíselné vstupy. Podíl není editable pole.
+Běžná čísla 0–1e9; kurz 0,01–1 000; horizont obou plánů celé 1–120; prostředí celé 1–100; klienti celí 0–5 000. Zbylá práce/úhrady/vratky 0–100 %, rezerva 0–500 %. Přímý výpočet normalizuje ne-konečné a záporné hodnoty; URL parser používá výchozí hodnoty pro nečíselné vstupy. Podíl není editable pole.
 
 Rozpracované prázdné číselné pole nesmí vyvolat NaN/Infinity. Záporné výsledky jsou skutečně zobrazené a doplněné správným slovním významem. Nuloví klienti mají nulové tržby, ale zachovanou fixní režii. Nulový objem práce nevynuluje fixní náklady a dohled.
 
