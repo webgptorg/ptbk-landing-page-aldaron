@@ -9,6 +9,7 @@ import './messageChat.css';
 import { MarkdownContent } from '@/components/markdown-content';
 import type { MessageChatTurn } from '@/lib/messages/messageTypes';
 import { useMessageChatSession } from '@/hooks/useMessageChatSession';
+import { MessageExportActions } from './MessageExportActions';
 
 const avatar = '/people/pavol-hejny-transparent-square.png';
 
@@ -85,7 +86,9 @@ function MessageChatSession({ messageId, introduction = '', language = 'cs' }: M
         launcherLabel={cs ? 'Otevřít chat s Pavolem' : 'Chat with Pavol'} closeLabel={cs ? 'Zavřít chat' : 'Close chat'} panelClassName="message-chat">
             <div className="message-chat-tools"><button type="button" disabled={pending || !ready} onClick={() => { reset(); setError(''); input.current?.focus(); }}>
                 <MessageSquarePlus size={15} aria-hidden="true" /> {cs ? 'Nový chat' : 'New chat'}
-            </button></div>
+            </button><MessageExportActions subject={cs ? 'konverzaci' : 'conversation'} filename={cs ? 'konverzace' : 'conversation'} language={language} disabled={pending || !ready || turns.length === 0}
+                loadDocument={async () => ({ kind: 'chat', title: cs ? 'Rozhovor s Pavolem Hejným' : 'Conversation with Pavol Hejný', language,
+                    createdAt: turns[0]?.createdAt ?? new Date().toISOString(), sourceUrl: `${window.location.origin}${window.location.pathname}`, turns })} /></div>
             <div ref={historyElement} className="message-chat-history" role="log" aria-live="polite" aria-label={cs ? 'Rozhovor s Pavolem Hejným' : 'Conversation with Pavol Hejný'}>
                 {turns.map((turn, index) => <div key={index} className={`message-chat-turn message-chat-${turn.role}`}>
                     <span className="message-chat-speaker">{turn.role === 'user' ? (cs ? 'Ty' : 'You') : 'Pavol Hejný'}</span>

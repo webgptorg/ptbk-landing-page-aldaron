@@ -54,6 +54,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   model context window. One current conversation per message or personal-homepage language, its draft and uncertain
   retry IDs survive refresh in localStorage. New chat replaces only that local conversation with a new ID; it never
   deletes the recorded administration history. Full visible history stays independent of the bounded model window.
+  Context and chat reuse the same Download/Copy format menus: Book first, Markdown, plain text, plus download-only
+  PDF. Book exports use canonical AGENT/KNOWLEDGE or CHAT/MEMBER/MESSAGE with safe literal content and NOTE provenance;
+  Markdown uses an attribution comment, plain text a footnote, PDF a subtle personal-domain footer. PDF rendering
+  reuses the workshop's local fonts and shared browser engine. Full context is fetched only on explicit export.
   Message deletion cascades to its history. No login is introduced. See `docs/messages.md` for configuration.
 - `/admin/agents` administers the existing shared `workshop_agents` Books, including Pavol Hejný. Internal UUIDs
   have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents

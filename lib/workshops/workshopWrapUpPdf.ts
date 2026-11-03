@@ -3,9 +3,9 @@ import { createGithubRepositoryUrl, formatGithubRepositoryName } from '@/lib/git
 import { SITE_NAME, SITE_URL } from '@/lib/metadata/site-config';
 import { extractMarkdownKeyPoints } from '@/lib/text/markdownText';
 import { formatCzechWorkshopMoment } from '@/lib/workshops/workshopDate';
-import { loadWorkshopPdfAssets } from '@/lib/workshops/workshopPdfAssets';
+import { renderBrowserPdf } from '@/lib/exports/browserPdf';
 import {
-    WORKSHOP_PDF_COLORS, WORKSHOP_PDF_CONTENT_WIDTH, WORKSHOP_PDF_FONT_FILES, WORKSHOP_PDF_PAGE_MARGIN,
+    WORKSHOP_PDF_COLORS, WORKSHOP_PDF_CONTENT_WIDTH, WORKSHOP_PDF_PAGE_MARGIN,
     createWorkshopPdfCard, createWorkshopPdfSection, shortenWorkshopPdfLabel,
 } from '@/lib/workshops/workshopPdfBrand';
 import { isWorkshopWrapUpAvailable, type WorkshopWrapUpExport, type WorkshopWrapUpSource } from '@/lib/workshops/workshopWrapUpExport';
@@ -170,9 +170,5 @@ export function createWorkshopWrapUpPdfDefinition(exportData: WorkshopWrapUpExpo
 
 /** The renderer, licensed fonts and brand image load only after the participant requests a PDF. */
 export async function renderWorkshopWrapUpPdf(definition: TDocumentDefinitions): Promise<Blob> {
-    const [pdfMakeModule, assets] = await Promise.all([import('pdfmake/build/pdfmake'), loadWorkshopPdfAssets()]);
-    const pdfMake = pdfMakeModule.default;
-    pdfMake.addVirtualFileSystem(assets.fonts);
-    pdfMake.addFonts(WORKSHOP_PDF_FONT_FILES);
-    return pdfMake.createPdf({ ...definition, images: { ...definition.images, 'promptbook-logo': assets.logo } }).getBlob();
+    return renderBrowserPdf(definition);
 }

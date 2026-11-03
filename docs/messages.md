@@ -100,6 +100,14 @@ window is sent to the model. `Nový chat` replaces that local conversation witho
 record. Interrupted network retries retain their original request ID even after refresh. Disabled/full browser
 storage leaves chat usable and reports that persistence failed. No server-side history retrieval is added.
 
+Context, short-message and current-chat exports share `MessageExportActions` and one document serializer. The
+always-visible Download/Copy buttons open format menus ordered Book, Markdown and plain text; only Download also
+offers PDF. Source context is fetched on demand through the same domain-scoped, no-store asset API. Context Books
+declare an agent with literal KNOWLEDGE; conversation Books use CHAT/MEMBER/MESSAGE and preserve speaker order.
+Literal fences grow beyond any pasted fence, so quoted Book controls stay data. NOTE, an HTML comment, a text
+footnote and a quiet PDF footer carry Pavol's attribution and the personal-domain source. Browser PDF generation
+shares the existing local Unicode fonts, Markdown renderer and PDF engine with workshop exports.
+
 The original recording, message and reviewed word map are imported once with:
 
 ```sh

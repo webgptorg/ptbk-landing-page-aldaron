@@ -21,25 +21,33 @@ describe('private message text actions', () => {
         else Reflect.deleteProperty(navigator, 'clipboard');
     });
 
-    it('offers four clearly scoped actions and reads the complete context only when requested', async () => {
+    it('keeps both actions visible, offers Book first, and loads context only after a format is selected', async () => {
         const context = '# Úplný kontext\n\n' + 'Pavolovo původní rozhodnutí.\n'.repeat(4000);
-        fetchMock.mockResolvedValue(new Response(context));
-        render(<MessageActions href="/messages/test-message" />);
-        expect(screen.getByRole('link', { name: 'Stáhnout zprávu' })).toHaveAttribute('href', '/messages/test-message/message.md');
-        expect(screen.getByRole('link', { name: 'Stáhnout celý kontext' })).toHaveAttribute('href', '/messages/test-message/context.md');
+        fetchMock.mockResolvedValue(Response.json({ kind: 'context', title: 'Úplný kontext', content: context,
+            language: 'cs', sourceUrl: 'https://pavolhejny.cz/test', createdAt: '2026-11-03T08:00:00Z' }));
+        render(<MessageActions href="/api/messages/test-message" />);
+        expect(screen.getByRole('button', { name: 'Stáhnout celý kontext' })).toBeVisible();
         expect(fetchMock).not.toHaveBeenCalled();
-        fireEvent.click(screen.getByRole('button', { name: 'Kopírovat celý kontext' }));
-        expect(await screen.findByRole('button', { name: 'Zkopírováno: celý kontext' })).toBeVisible();
-        expect(fetchMock.mock.calls[0][0]).toBe('/messages/test-message/context.md');
-        expect(writeText).toHaveBeenCalledWith(context);
+        fireEvent.keyDown(screen.getByRole('button', { name: 'Kopírovat celý kontext' }), { key: 'Enter' });
+        expect(await screen.findAllByRole('menuitem')).toHaveLength(3);
+        expect(screen.getAllByRole('menuitem')[0]).toHaveTextContent('Book (.book)');
+        expect(screen.queryByRole('menuitem', { name: 'PDF (.pdf)' })).toBeNull();
+        expect(fetchMock).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('menuitem', { name: 'Markdown (.md)' }));
+        await screen.findByText('Zkopírováno.');
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/messages/test-message/context.json');
+        expect(writeText).toHaveBeenCalledWith(expect.stringContaining(context));
+        expect(writeText).toHaveBeenCalledWith(expect.stringContaining('<!-- Zpráva od Pavola Hejného'));
     });
 
-    it('does not copy an error page or report a failed download as copied', async () => {
+    it('offers PDF only for downloading and never copies an error response', async () => {
         fetchMock.mockResolvedValue(new Response('Private error page', { status: 404 }));
-        render(<MessageActions href="/messages/test-message" />);
-        fireEvent.click(screen.getByRole('button', { name: 'Kopírovat zprávu' }));
-        expect(await screen.findByText('Kopírování se nepodařilo. Použij stažení.')).toBeVisible();
+        render(<MessageActions href="/api/messages/test-message" />);
+        fireEvent.keyDown(screen.getByRole('button', { name: 'Stáhnout zprávu' }), { key: 'Enter' });
+        expect(await screen.findAllByRole('menuitem')).toHaveLength(4);
+        expect(screen.getByRole('menuitem', { name: 'PDF (.pdf)' })).toBeVisible();
+        fireEvent.click(screen.getByRole('menuitem', { name: 'Book (.book)' }));
+        expect(await screen.findByText('Export se nepodařil. Zkus to prosím znovu.')).toBeVisible();
         expect(writeText).not.toHaveBeenCalled();
-        expect(screen.queryByRole('button', { name: /Zkopírováno/ })).toBeNull();
     });
 });

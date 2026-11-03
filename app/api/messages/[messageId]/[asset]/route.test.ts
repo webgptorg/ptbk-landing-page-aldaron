@@ -8,9 +8,9 @@ const get = (asset: string, host = 'pavolhejny.cz') => GET(new Request(`https://
 beforeEach(() => { mocks.load.mockResolvedValue(TEST_MESSAGE); mocks.audio.mockReturnValue(null); mocks.sign.mockResolvedValue('https://cdn.example/signed-audio'); });
 afterEach(() => vi.clearAllMocks());
 describe('message exports and CDN audio', () => {
-    it('exports the short message with its link while preserving the full context byte-for-byte', async () => {
+    it('exports branded text formats with the original content and source link', async () => {
         expect(await (await get('message.md')).text()).toContain(`Ahoj týme,\n\nhttps://pavolhejny.cz/${TEST_MESSAGE.shortcode}\n\n`);
-        const full = await get('context.md'); expect(await full.text()).toBe(TEST_MESSAGE.context); expect(full.headers.get('cache-control')).toContain('no-store');
+        const full = await get('context.md'); expect(await full.text()).toContain(TEST_MESSAGE.context); expect(await (await get('context.book')).text()).toContain('KNOWLEDGE'); expect(await (await get('context.txt')).text()).toContain('Pavola Hejného'); expect(full.headers.get('cache-control')).toContain('no-store');
     });
     it('rechecks domain and code before exposing data or signing any object', async () => {
         mocks.load.mockResolvedValue(null);
