@@ -40,7 +40,7 @@ export const PARTNERSHIP_PAGE_DEFINITIONS: Record<SiteLocale, PageMetadataDefini
         languageAlternates: { cs: localizedPath('partnership', 'cs'), en: localizedPath('partnership', 'en') },
         title: 'Partnerství s Promptbookem — Vaši klienti. Naše technologie.',
         socialTitle: 'Vaši klienti. Vaše služby. Naše technologie.',
-        description: 'Dodávejte klientům vlastní AI engine, aplikaci a podporu. Vydělávejte na implementaci, servisu a pevném 20% podílu z licence. Bez partnerského předplatného.',
+        description: 'Dodávejte klientům vlastní AI engine, aplikaci a podporu. Vydělávejte na implementaci, servisu a podílu až 20 % z licence. Bez partnerského předplatného.',
         socialPreviewImageAlt: 'Partnerství s Promptbookem — Vaši klienti, Vaše služby, naše technologie',
     },
     en: {
@@ -49,7 +49,7 @@ export const PARTNERSHIP_PAGE_DEFINITIONS: Record<SiteLocale, PageMetadataDefini
         languageAlternates: { cs: localizedPath('partnership', 'cs'), en: localizedPath('partnership', 'en') },
         title: 'Promptbook partnership — Your clients. Our technology.',
         socialTitle: 'Your clients. Your services. Our technology.',
-        description: 'Bring clients their own AI engine, app and support. Earn from implementation, ongoing service and a fixed 20% licence share. No partner subscription.',
+        description: 'Bring clients their own AI engine, app and support. Earn from implementation, ongoing service and up to 20% licence share. No partner subscription.',
         socialPreviewImageAlt: 'Promptbook partnership — your clients, your services, our technology',
     },
 };

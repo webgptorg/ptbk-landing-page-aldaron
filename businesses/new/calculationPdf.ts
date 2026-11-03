@@ -74,7 +74,7 @@ export function createCalculationPdfDefinition(state: CalculatorState, locale: S
             table([
                 ['Scénář',SCENARIOS[state.scenario].title],['Režim',company?'Vlastní agenda':'Partnerství'],['Plán',r.isPilot?'Start':'Business'],
                 ['Placení AI',state.input.aiBilling === 'tokens'?'Tokeny':state.input.aiBilling === 'subscription'?'Předplatné':'Lokální model'],
-                ['Plátce AI a provozu',state.input.costPayer === 'client'?'Klient samostatně':'Partner v ceně servisu'],['Pevný partnerský podíl','20 %'], ...inputRows,
+                ['Plátce AI a provozu',state.input.costPayer === 'client'?'Klient samostatně':'Partner v ceně servisu'],['Měsíční partnerský podíl',`${COMMERCIAL_TERMS.partnerSharePercent} %`], ...inputRows,
             ]),
             {text:'Vstupy měsíčních nákladů představují u Startu 30 dní. Start vždy počítá jednu instanci a jeden pilot, i když odkaz uchovává dřívější nastavení Business. Nepoužité tokenové / předplatné vstupy zůstávají uložené, ale nezapočítávají se. Zaokrouhlení je jen pro zobrazení.',fontSize:8},
             {text:'Výpočet nezakládá objednávku ani záruku úspory či výdělku. Nezahrnuje nezadané náklady, financování ani daň z příjmů.',margin:[0,12,0,0],fontSize:8},

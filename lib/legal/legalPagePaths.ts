@@ -3,7 +3,7 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 /**
  * Legal documents the site publishes
  */
-export type LegalDocumentKind = 'privacyPolicy' | 'termsAndConditions' | 'productTerms' | 'partnerTerms' | 'engineLicense';
+export type LegalDocumentKind = 'privacyPolicy' | 'termsAndConditions' | 'productTerms' | 'partnerTerms' | 'engineLicense' | 'jointPrivacy';
 
 /**
  * Site-relative path of every legal document in every language it is published in
@@ -14,17 +14,25 @@ export const LEGAL_PAGE_PATHS: Readonly<
     Record<LegalDocumentKind, Readonly<Record<SupportedHomepageLanguage, string>>>
 > = {
     privacyPolicy: {
-        cs: '/cs/ochrana-osobnich-udaju',
-        en: '/en/privacy-policy',
+        cs: '/cs/legal/ochrana-osobnich-udaju',
+        en: '/en/legal/privacy-policy',
     },
     termsAndConditions: {
-        cs: '/cs/obchodni-podminky',
-        en: '/en/terms-and-conditions',
+        cs: '/cs/legal/obchodni-podminky',
+        en: '/en/legal/terms-and-conditions',
     },
-    productTerms: { cs: '/cs/podminky-produktu', en: '/en/podminky-produktu' },
-    partnerTerms: { cs: '/cs/partnerske-podminky', en: '/en/partnerske-podminky' },
-    engineLicense: { cs: '/cs/licence', en: '/en/licence' },
+    productTerms: { cs: '/cs/legal/podminky-produktu', en: '/en/legal/product-terms' },
+    partnerTerms: { cs: '/cs/legal/partnerske-podminky', en: '/en/legal/partner-terms' },
+    engineLicense: { cs: '/cs/legal/licence', en: '/en/legal/engine-license' },
+    jointPrivacy: { cs: '/cs/legal/spolecne-zpracovani', en: '/en/legal/joint-processing' },
 };
+
+export const LEGAL_DOCUMENT_KINDS = Object.keys(LEGAL_PAGE_PATHS) as LegalDocumentKind[];
+export const getLegalHubPath = (language: SupportedHomepageLanguage) => `/${language}/legal`;
+export const getReleasesPath = (language: SupportedHomepageLanguage) => `/${language}/releases`;
+export function getLegalKindBySlug(slug: string, language: SupportedHomepageLanguage) {
+    return LEGAL_DOCUMENT_KINDS.find(kind => LEGAL_PAGE_PATHS[kind][language].split('/').at(-1) === slug);
+}
 
 /**
  * Resolves where a legal document lives

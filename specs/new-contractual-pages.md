@@ -11,7 +11,7 @@ Patička odkazuje na návrhy s jasným označením; uživatel schválil jejich v
 
 ## Obsah a hranice návrhu
 
-Pracovní sazby podle odpovědí z 3. listopadu jsou 17 % při měsíční a 20 % při roční platbě komerční aplikace. Základem je uhrazená způsobilá softwarová část bez DPH po slevách a přípustných opravách, bez poplatku brány. Dřívější samostatný roční bonus efektivně 24 % není automaticky přičten k nové sazbě: jeho souběh s tvrzením „až 20 %“ vyžaduje výslovné rozhodnutí. Jde o neúčinný návrh; starší přijaté dohody a stávající modelové kalkulace se samotnou právní stránkou nemění. Roční tarif se neaktivuje.
+Pracovní sazby podle odpovědí z 3. listopadu jsou 17 % při měsíční a 20 % při roční platbě komerční aplikace. Základem je uhrazená způsobilá softwarová část bez DPH po slevách a přípustných opravách, bez poplatku brány. Vlastník potvrdil, že nová sazba nahrazuje dřívější efektivní 24% bonus. Jde o neúčinný návrh; starší přijaté dohody se samotnou právní stránkou nemění; měsíční modelové kalkulace nyní používají 17 %. Roční tarif se neaktivuje.
 
 Atribuce identifikuje právnickou osobu, skutečné klientské prostředí a potvrzený obchod. Nejde o trvalou rezervaci celého IČO. Technická migrace nárok neruší; pozdní platba odloží výplatu a skutečné ukončení vyžaduje nové posouzení. Samostatně se řeší předání péče, doba nároku a případný odkup. Neodsouhlasený výkupní násobek ani cenový koridor nesmějí být vydávány za sjednané podmínky.
 
@@ -44,3 +44,13 @@ Ověřeno 2. 11. 2026. Níže jsou příklady konkrétních programů; žádný 
 | Kogentní práva | [Občanský zákoník, státní publikace účinná k 1. 1. 2026](https://spu.gov.cz/frontend/webroot/uploads/files/2026/02/dokument_89_2012_sb25958._zakon_obcansky_zakonik25958.pdf) | Změny dlouhodobých podmínek, postoupení, případné zastoupení a limity odpovědnosti nelze libovolně obejít. |
 
 Identifikace AI Webu vychází z [Obchodního věstníku, zápis zveřejněný 8. 10. 2026](https://ov.gov.cz/zapis/25360448); údaje Neonmedia z [jejích vlastních zásad](https://www.neonmedia.cz/ochrana-osobnich-udaju). Zdroj jejich údajů neznamená přijetí všech jejich právních závěrů.
+
+## Owner revision of 3 November 2026
+
+All legal documents have canonical language-prefixed URLs under `/cs/legal` and `/en/legal`; English document slugs are translated. Old public URLs redirect with queries preserved. The hub, document navigation and all shared footers link to the canonical documents and to `/cs|en/releases`. Releases are a product resource rather than a legal document. Discussion drafts remain non-effective and noindex; the new joint-processing outline does not claim a signed agreement or completed safeguards.
+
+Referral partners may simply recommend customers; customers purchase directly from AI Web and separately order an agency’s services. The 17% monthly / 20% annual proposal replaces the old effective 24% bonus. The monthly calculator and its exports use 17%. Mandatory rules follow the actual relationship, not its label.
+
+The catalogue mirrors every public npm/GitHub release with a version base at least 0.118.0, preserving publication dates separately from the first listing here. A six-hourly append-preserving sync commits source updates; failures do not erase history. The initial 23 versions are all prereleases. The proposed line support minimum is 90 days from the first stable listing here, latest stable patch only; a new patch does not reset the line’s clock. Existing support promises cannot be shortened by source edits. This policy remains a proposal pending the final agreement.
+
+The bilateral Neonmedia contract, its budget, buyout valuations, liability discussions and negotiating brief remain outside the repository.

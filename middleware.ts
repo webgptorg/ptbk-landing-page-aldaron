@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getLegacyLegalRedirect } from '@/lib/legal/legalRedirects';
 import {
     getInternalPathname,
     getPublicRequestHostname,
@@ -114,6 +115,16 @@ export async function middleware(request: NextRequest) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = request.nextUrl.pathname.slice('/new'.length) || '/';
         return NextResponse.redirect(redirectUrl, 308);
+    }
+
+    const legalDestination = getLegacyLegalRedirect(request.nextUrl.pathname, getPreferredHomepageLanguage(request.headers.get('accept-language')));
+    if (legalDestination) {
+        const url = request.nextUrl.clone();
+        url.pathname = legalDestination;
+        const explicitLanguage = /^\/(cs|en)\//.test(request.nextUrl.pathname);
+        const response = NextResponse.redirect(url, explicitLanguage ? 308 : 307);
+        if (!explicitLanguage) { response.headers.set('Vary', 'Accept-Language'); response.headers.set('Cache-Control', 'private, no-store'); }
+        return response;
     }
 
     if (isNewSitePublicPath(request.nextUrl.pathname)) {

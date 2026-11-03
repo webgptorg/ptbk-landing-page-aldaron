@@ -28,7 +28,7 @@ describe('complete public calculator state', () => {
         expect(state).toEqual(defaultCalculatorState());
         const serialized = serializeCalculatorState(state);
         expect(serialized).not.toContain('secret');expect(serialized).not.toContain('commissionPercent');
-        expect(calculateEconomics(state.input).partner.licenceShare).toBe(4400);
+        expect(calculateEconomics(state.input).partner.licenceShare).toBe(3740);
     });
     it('bounds URL numbers and falls back for non-finite input', () => {
         const state = parseCalculatorState(new URLSearchParams('volume=NaN&clients=-2&refundPercent=150&horizonMonths=24.9&exchangeRate=Infinity&hostingCzk=-1'));
@@ -52,7 +52,7 @@ describe('complete public calculator state', () => {
 describe('self-contained PDF definition', () => {
     it('includes every numeric assumption and no personal identity', () => {
         const state=defaultCalculatorState();const definition=createCalculationPdfDefinition(state);const text=JSON.stringify(definition);
-        expect(definition.pageSize).toBe('A4');expect(text).toContain('100');expect(text).toContain('20 %');
+        expect(definition.pageSize).toBe('A4');expect(text).toContain('100');expect(text).toContain('17 %');
         expect(text).toContain('Otevřít a upravit tuto kalkulaci');
         for (const key of NUMERIC_KEYS) expect(text).toContain(String(state.input[key]));
         expect(text).not.toContain('email@example.com');

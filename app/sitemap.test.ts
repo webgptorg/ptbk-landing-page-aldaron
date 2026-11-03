@@ -39,7 +39,9 @@ describe('sitemap', () => {
         const paths = sitemap().map((page) => new URL(page.url).pathname);
         for (const language of ['cs', 'en']) {
             expect(paths).toContain(`/${language}`);
-            expect(paths).toContain(`/${language}/soukromi`);
+            expect(paths).toContain(`/${language}/legal/${language === 'cs' ? 'ochrana-osobnich-udaju' : 'privacy-policy'}`);
+            expect(paths).toContain(`/${language}/releases`);
+            expect(paths).not.toContain(`/${language}/soukromi`);
             for (const draft of ['licence', 'partnerske-podminky', 'podminky-produktu']) {
                 expect(paths).not.toContain(`/${language}/${draft}`);
             }

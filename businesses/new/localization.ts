@@ -1,8 +1,11 @@
+import { LEGAL_PAGE_PATHS, LEGAL_DOCUMENT_KINDS } from '@/lib/legal/legalPagePaths';
 import english from './locales/en.json';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 export type SiteLocale = 'cs' | 'en';
 export const localeFromPath = (pathname: string): SiteLocale => /^\/(?:new\/)?en(?:\/|$)/.test(pathname) ? 'en' : 'cs';
 export function localizedPath(path = '', locale: SiteLocale = 'cs') {
+    const legalKind = LEGAL_DOCUMENT_KINDS.find(kind => Object.values(LEGAL_PAGE_PATHS[kind]).includes(path));
+    if (legalKind) return LEGAL_PAGE_PATHS[legalKind][locale];
     const suffix = path.replace(/^\/new(?=\/|\?|#|$)/, '').replace(/^\/(?:cs|en)(?=\/|\?|#|$)/, '').replace(/^\/+/, '');
     return `/${locale}${suffix ? `${/^[?#]/.test(suffix) ? '' : '/'}${suffix}` : ''}`;
 }

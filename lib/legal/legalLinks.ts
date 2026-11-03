@@ -1,5 +1,5 @@
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-import { getLegalPagePath, type LegalDocumentKind } from '@/lib/legal/legalPagePaths';
+import { getLegalPagePath, getLegalHubPath, getReleasesPath, LEGAL_DOCUMENT_KINDS, type LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 
 /**
  * Link to one legal document, shaped exactly like the links the footer already renders
@@ -26,14 +26,12 @@ const LEGAL_LINK_TEXTS: Readonly<Record<LegalDocumentKind, Readonly<Record<Suppo
     productTerms: { cs: 'Podmínky produktu · návrh', en: 'Product terms · draft' },
     partnerTerms: { cs: 'Partnerské podmínky · návrh', en: 'Partner terms · draft' },
     engineLicense: { cs: 'Licence enginu', en: 'Engine licence' },
+    jointPrivacy: { cs: 'Společné zpracování · návrh', en: 'Joint processing · draft' },
 };
 
 /**
  * Order in which the legal documents are listed wherever all of them are offered at once
  */
-const LEGAL_DOCUMENT_KINDS: readonly LegalDocumentKind[] = [
-    'privacyPolicy', 'termsAndConditions', 'productTerms', 'partnerTerms', 'engineLicense',
-];
 
 /**
  * Builds the link to one legal document
@@ -54,5 +52,9 @@ export function getLegalLink(kind: LegalDocumentKind, language: SupportedHomepag
  * @param language language the visitor is reading
  */
 export function getLegalLinks(language: SupportedHomepageLanguage): readonly LegalLink[] {
-    return LEGAL_DOCUMENT_KINDS.map((kind) => getLegalLink(kind, language));
+    return [
+        { href: getLegalHubPath(language), text: language === 'cs' ? 'Právní dokumenty' : 'Legal documents' },
+        ...LEGAL_DOCUMENT_KINDS.map((kind) => getLegalLink(kind, language)),
+        { href: getReleasesPath(language), text: language === 'cs' ? 'Vydání a podpora' : 'Releases and support' },
+    ];
 }

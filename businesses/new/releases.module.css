@@ -1,0 +1,14 @@
+.list { margin: 32px auto 64px; max-width: 920px; display: grid; gap: 20px; }
+.release { padding: clamp(20px, 4vw, 32px); border: 1px solid #dce3ea; border-radius: 16px; background: #fff; scroll-margin-top: 100px; }
+.heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; }
+.heading h2 { margin: 0; font-size: clamp(18px, 2.4vw, 24px); overflow-wrap: anywhere; }
+.heading h2 a { color: inherit; text-decoration: none; }
+.badge { display: inline-block; border-radius: 6px; padding: 6px 10px; background: #f1f4f7; font-size: 13px; color: #3b4b5d; }
+.badge[data-state='supported'] { color: #166534; background: #dcfce7; }
+.dates { display: flex; flex-wrap: wrap; gap: 14px 32px; margin: 24px 0; }
+.dates dt { font-size: 12px; color: #526275; margin-bottom: 4px; }
+.dates dd { margin: 0; font-size: 14px; }
+.notes { white-space: pre-wrap; overflow-wrap: anywhere; color: #3b4b5d; line-height: 1.7; }
+.sources { display: flex; gap: 24px; margin-bottom: 0; font-size: 14px; }
+.sources a { color: #075b83; text-decoration: underline; text-underline-offset: 3px; }
+.release summary { cursor: pointer; line-height: 1.6; }

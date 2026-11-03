@@ -31,7 +31,10 @@ describe('public sharing preview coverage', () => {
 
             expect(definition.isSocialPreviewImageGenerated).toBe(true);
             const knownBook = COMMON_KNOWLEDGE_BOOKS.some((book) => definition.path === `/book/${book.slug}`);
-            const imageSource = knownBook ? '/book/[slug]/opengraph-image.tsx' : `${definition.path}/opengraph-image.tsx`;
+            const legalPath = /^\/(cs|en)\/legal\/[^/]+$/.exec(definition.path);
+            const imageSource = knownBook ? '/book/[slug]/opengraph-image.tsx'
+                : legalPath ? `/${legalPath[1]}${legalPath[1] === 'cs' ? '/(marketing)' : ''}/legal/[document]/opengraph-image.tsx`
+                : `${definition.path}/opengraph-image.tsx`;
             expect(existsSync(join(process.cwd(), 'app', imageSource))).toBe(true);
             if (domain) {
                 expect(getInternalPathname(domain, imageUrl.pathname)).toBe(imagePath);

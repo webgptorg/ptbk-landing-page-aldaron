@@ -54,6 +54,10 @@ const LEGAL_PAGE_METADATA_TEXTS: Readonly<
         cs: { title: 'Licence enginu | Promptbook', description: 'Dosavadní licence konkrétní verze a neúčinný návrh komerčního použití a pokračování vlastního provozu.' },
         en: { title: 'Engine licence | Promptbook', description: 'Existing version-specific licensing and a non-effective proposal for commercial use and independent operation.' },
     },
+    jointPrivacy: {
+        cs: { title: 'Společné zpracování · návrh | Promptbook', description: 'Návrh pravidel společné práce AI Web a Neonmedia s projektovými údaji a nástroji.' },
+        en: { title: 'Joint processing · draft | Promptbook', description: 'Proposed rules for AI Web and Neonmedia handling project data and tools.' },
+    },
 };
 
 /**
@@ -109,6 +113,7 @@ export const LEGAL_PAGE_DEFINITIONS: Readonly<
         cs: createLegalPageDefinition('engineLicense', 'cs'),
         en: createLegalPageDefinition('engineLicense', 'en'),
     },
+    jointPrivacy: { cs: createLegalPageDefinition('jointPrivacy', 'cs'), en: createLegalPageDefinition('jointPrivacy', 'en') },
 };
 
 /**
@@ -125,6 +130,8 @@ export const LEGAL_PAGE_DEFINITION_LIST: readonly PageMetadataDefinition[] = [
     LEGAL_PAGE_DEFINITIONS.partnerTerms.en,
     LEGAL_PAGE_DEFINITIONS.engineLicense.cs,
     LEGAL_PAGE_DEFINITIONS.engineLicense.en,
+    LEGAL_PAGE_DEFINITIONS.jointPrivacy.cs,
+    LEGAL_PAGE_DEFINITIONS.jointPrivacy.en,
 ];
 
 /**
@@ -153,4 +160,5 @@ export const LEGAL_PAGE_METADATA: Readonly<
         cs: createPageMetadata(LEGAL_PAGE_DEFINITIONS.engineLicense.cs),
         en: createPageMetadata(LEGAL_PAGE_DEFINITIONS.engineLicense.en),
     },
+    jointPrivacy: { cs: createPageMetadata(LEGAL_PAGE_DEFINITIONS.jointPrivacy.cs), en: createPageMetadata(LEGAL_PAGE_DEFINITIONS.jointPrivacy.en) },
 };

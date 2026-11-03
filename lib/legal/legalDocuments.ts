@@ -6,6 +6,7 @@ import { TERMS_AND_CONDITIONS_DOCUMENTS } from '@/lib/legal/termsAndConditionsDo
 import { PRODUCT_TERMS_DOCUMENTS } from '@/lib/legal/productTermsDocuments';
 import { PARTNER_TERMS_DOCUMENTS } from '@/lib/legal/partnerTermsDocuments';
 import { ENGINE_LICENSE_DOCUMENTS } from '@/lib/legal/engineLicenseDocuments';
+import { JOINT_PRIVACY_DOCUMENTS } from './jointPrivacyDocuments';
 
 /**
  * Every legal document the site publishes, in every language it is published in
@@ -17,6 +18,7 @@ const LEGAL_DOCUMENTS: Readonly<Record<LegalDocumentKind, Readonly<Record<Suppor
         productTerms: PRODUCT_TERMS_DOCUMENTS,
         partnerTerms: PARTNER_TERMS_DOCUMENTS,
         engineLicense: ENGINE_LICENSE_DOCUMENTS,
+        jointPrivacy: JOINT_PRIVACY_DOCUMENTS,
     };
 
 /**

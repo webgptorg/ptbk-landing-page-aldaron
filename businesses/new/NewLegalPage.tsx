@@ -4,6 +4,7 @@ import { getLegalDocument } from '@/lib/legal/legalDocuments';
 import { getLegalDocumentPublicationLabel } from '@/lib/legal/legalDocumentPublication';
 import type { LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 import s from './site.module.css';
+import { LegalNavigation } from './LegalNavigation';
 
 /** Server-rendered legal content keeps complete bilingual contracts out of the marketing JavaScript bundle. */
 export function NewLegalPage({ kind, language = 'cs' }: {
@@ -17,6 +18,7 @@ export function NewLegalPage({ kind, language = 'cs' }: {
             <h1>{document.title}</h1>
         </header>
         <article className={s.prose}>
+            <LegalNavigation language={language}/>
             <p><strong>{getLegalDocumentPublicationLabel(document, language)}</strong></p>
             {document.publication?.notice && <aside className={s.card} style={{ marginBlock: 24 }}>{document.publication.notice}</aside>}
             <p>{document.perex}</p>
@@ -25,6 +27,7 @@ export function NewLegalPage({ kind, language = 'cs' }: {
                 {section.paragraphs?.map((paragraph, paragraphIndex) => <p key={paragraphIndex}>{paragraph}</p>)}
                 {section.bullets && <ul>{section.bullets.map((bullet, bulletIndex) => <li key={bulletIndex}>{bullet}</li>)}</ul>}
             </section>)}
+            <LegalNavigation language={language}/>
         </article>
     </>;
 }

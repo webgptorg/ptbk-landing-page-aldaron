@@ -1,3 +1,4 @@
+import { getLegacyLegalRedirect } from '@/lib/legal/legalRedirects';
 import { getAllArticles } from '@/lib/articles/load';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
@@ -76,7 +77,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             cs: createAbsoluteUrl(localizedPath(path, 'cs')),
             en: createAbsoluteUrl(localizedPath(path, 'en')),
         } },
-    }))).filter((page) => !excludedLegalUrls.has(page.url));
+    }))).filter((page) => !excludedLegalUrls.has(page.url) && !getLegacyLegalRedirect(new URL(page.url).pathname));
     const marketingUrls = new Set(marketingPages.map(page => page.url));
     const pages = INDEXED_PAGE_METADATA_DEFINITIONS.filter(
         (definition) => new URL(createAbsoluteUrl(definition.path)).origin === PRIMARY_SITE_URL &&

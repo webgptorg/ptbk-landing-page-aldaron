@@ -5,6 +5,19 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- The owner’s 3 November 2026 instruction consolidates documents at `/cs/legal/*` and `/en/legal/*`,
+  with translated English slugs, canonical metadata, a shared hub, cross-links and legacy redirects preserving queries.
+  New contractual proposals remain non-effective, noindex and outside sitemap. The public joint-processing outline
+  is also a proposal, not evidence of a signed Article 26 agreement. Both companies may select assessed tools under
+  the same safeguards; a public notice is not blanket permission to upload personal data anywhere.
+  `/cs/releases` and `/en/releases` publish the committed npm/GitHub catalogue from 0.118 onwards; older history links
+  to npm. Original publication and first listing here are distinct; automatic sync preserves existing records,
+  first-listing dates and support extensions. Prereleases never acquire stable support. The proposed 90-day line
+  minimum follows the first stable listing here and covers the latest stable patch; at least the latest stable line
+  remains available. This draft policy is not activated by publication. Six-hourly sync fails without deleting history.
+  Referral agencies need not continuously sell or supply care; customers contract directly with AI Web. Monthly
+  calculator assumptions are 17%, with a separately agreed annual rate of 20%; accepted older rights remain separate.
+
 - The owner's 2 November 2026 instruction authorizes legal proposal pages and their footer links on `main`.
   The 3 November revision proposes 17% monthly / 20% annual paid-application commission, separately agreed bonuses,
   30-day renewal-price notices, bounded discount authority and stable-only support from line 0.118. These remain

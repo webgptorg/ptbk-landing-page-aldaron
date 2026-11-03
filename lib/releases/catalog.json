@@ -1,0 +1,188 @@
+{
+  "checkedAt": "2026-11-03T13:36:00.000Z",
+  "releases": [
+    {
+      "version": "0.119.0-47",
+      "publishedAt": "2026-11-01T18:16:24.751Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-47",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-47",
+      "notes": "Promptbook 0.119.0-47 and its matching Book language extension."
+    },
+    {
+      "version": "0.119.0-45",
+      "publishedAt": "2026-11-01T01:04:14.207Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-45",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-45",
+      "notes": "Promptbook 0.119.0-45.\n\n- **npm:** `npm install -g ptbk@0.119.0-45` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-45-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-45 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `71f6e5c17ccf05dbd9cfd709e63be9a6ffea17f40fda1a14068d04c7d3269f45`."
+    },
+    {
+      "version": "0.119.0-44",
+      "publishedAt": "2026-10-31T00:10:42.943Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-44",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-44",
+      "notes": "Promptbook 0.119.0-44.\n\n- **npm:** `npm install -g ptbk@0.119.0-44` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-44-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-44 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `e2e4c15ad0224bb4791c10407c7eb773752d607d4dedab52116f6f5bd882f597`."
+    },
+    {
+      "version": "0.119.0-43",
+      "publishedAt": "2026-10-30T11:59:46.930Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-43",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-43",
+      "notes": "Promptbook 0.119.0-43.\n\n- **npm:** `npm install -g ptbk@0.119.0-43` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-43-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-43 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `833a55c04f31b3b87a8ad98ce4fed223b69772b00140b96bb6a107a75b14fbcc`."
+    },
+    {
+      "version": "0.119.0-42",
+      "publishedAt": "2026-10-30T09:48:29.549Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-42",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-42",
+      "notes": "Promptbook 0.119.0-42.\n\n- **npm:** `npm install -g ptbk@0.119.0-42` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-42-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-42 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `07b837d07a95ecb7fd1dd7f1951addb2cdeb56d35efd6b8658125dc622b3bdef`."
+    },
+    {
+      "version": "0.119.0-41",
+      "publishedAt": "2026-10-29T23:36:28.452Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-41",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-41",
+      "notes": "Promptbook 0.119.0-41.\n\n- **npm:** `npm install -g ptbk@0.119.0-41` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-41-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-41 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `ae71aeec4f23b256cc7ec60e1a64ecbab77214461d6ab60806d279279d33c2a7`."
+    },
+    {
+      "version": "0.119.0-40",
+      "publishedAt": "2026-10-29T23:24:04.077Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-40",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-40",
+      "notes": "Promptbook 0.119.0-40.\n\n- **npm:** `npm install -g ptbk@0.119.0-40` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-40-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-40 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `561022c8f3c03c7673b2928088100a64cb6459ac65b510455fc53836dbd1c15c`."
+    },
+    {
+      "version": "0.119.0-39",
+      "publishedAt": "2026-10-29T15:41:36.245Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-39",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-39",
+      "notes": "Promptbook 0.119.0-39.\n\n- **npm:** `npm install -g ptbk@0.119.0-39` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-39-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-39 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `7cc6c6863f93fba06bdfd0748fa0654595e4e323efe0496ee040da3860ee904c`."
+    },
+    {
+      "version": "0.119.0-38",
+      "publishedAt": "2026-10-28T18:12:03.629Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-38",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-38",
+      "notes": "Promptbook 0.119.0-38.\n\n- **npm:** `npm install -g ptbk@0.119.0-38` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-38-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-38 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `bf1fe8526ff3eb8155fcee33d6913bfcd64b76c376bb1bcb32c56f4f8525c2ce`."
+    },
+    {
+      "version": "0.119.0-37",
+      "publishedAt": "2026-10-28T16:56:29.897Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-37",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-37",
+      "notes": "Promptbook 0.119.0-37.\n\n- **npm:** `npm install -g ptbk@0.119.0-37` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-37-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-37 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `76222cc5ae7336307b2e199cb220e2ce94f6e259613d61316e0dd50cda4c4eb6`."
+    },
+    {
+      "version": "0.119.0-36",
+      "publishedAt": "2026-10-26T23:12:38.038Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-36"
+    },
+    {
+      "version": "0.119.0-26",
+      "publishedAt": "2026-10-21T13:24:45.484Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-26",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-26",
+      "notes": "Promptbook 0.119.0-26.\n\n- **npm:** `npm install -g ptbk@0.119.0-26` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-26-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-26 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `3ba56aacf37db6c7484d43843f3da18954b1fa560313a293486f05773b4124d6`."
+    },
+    {
+      "version": "0.119.0-21",
+      "publishedAt": "2026-10-19T14:18:44.468Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-21"
+    },
+    {
+      "version": "0.119.0-17",
+      "publishedAt": "2026-10-16T12:34:15.402Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-17"
+    },
+    {
+      "version": "0.119.0-16",
+      "publishedAt": "2026-10-16T09:19:36.603Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-16"
+    },
+    {
+      "version": "0.119.0-15",
+      "publishedAt": "2026-10-15T21:46:37.280Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-15"
+    },
+    {
+      "version": "0.119.0-14",
+      "publishedAt": "2026-10-15T08:34:42.511Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-14"
+    },
+    {
+      "version": "0.119.0-13",
+      "publishedAt": "2026-10-14T21:59:10.907Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-13"
+    },
+    {
+      "version": "0.119.0-8",
+      "publishedAt": "2026-10-14T09:31:04.681Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-8"
+    },
+    {
+      "version": "0.119.0-7",
+      "publishedAt": "2026-10-14T08:21:17.933Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-7"
+    },
+    {
+      "version": "0.119.0-5",
+      "publishedAt": "2026-10-13T22:16:17.645Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-5"
+    },
+    {
+      "version": "0.119.0-4",
+      "publishedAt": "2026-10-13T20:42:26.064Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-4"
+    },
+    {
+      "version": "0.118.0-1",
+      "publishedAt": "2026-10-11T21:17:51.332Z",
+      "listedAt": "2026-11-03",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.118.0-1"
+    }
+  ]
+}

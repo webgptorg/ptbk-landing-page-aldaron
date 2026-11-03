@@ -755,5 +755,8 @@
   "Váš zájem jsme zaznamenali. Ozveme se a probereme Vaše potřeby i nasazení první agendy.": "We have recorded your interest. We’ll get in touch to discuss your needs and setting up your first agenda.",
   "Nezávazný zájem. Ozveme se Vám k Vašemu tématu a domluvíme další postup nasazení. Odesláním formuláře nevzniká účet ani objednávka.": "No commitment. We’ll contact you about your request and agree on the next steps for deployment. Submitting this form does not create an account or an order.",
   "Automatické aktualizace enginu řídí nastavení projektu. Lidská správa serveru a servisní práce partnera jsou samostatné služby.": "Automatic engine updates follow the project’s settings. Human server administration and a partner’s service work are separate services.",
-  "Jak fungují automatické aktualizace →": "How automatic updates work →"
+  "Jak fungují automatické aktualizace →": "How automatic updates work →",
+  "Až 20 % z uhrazené softwarové licence: 17 % při měsíční platbě a 20 % při sjednané roční platbě. Bez DPH, po slevách a přípustných vratkách; poplatky platební brány podíl agentury nesnižují. Hosting, tokeny a vlastní práce jsou samostatné. Podmínky jednorázového pilotu Start určí objednávka.": "Up to 20% of paid software licences: 17% for monthly payments and 20% for an agreed annual payment. Excluding VAT, after discounts and valid refunds; payment-processing fees do not reduce the agency share. Hosting, tokens and your own services are separate. Start pilot terms follow its order.",
+  "Kalkulace používá 17 % z měsíčně uhrazených licencí bez DPH po vratkách. U sjednané roční platby je sazba 20 %. Hosting, AI ani vlastní služby do základu nepatří.": "This calculation uses 17% of paid monthly licence fees excluding VAT after refunds. Agreed annual payments use 20%. Hosting, AI and your own services are excluded.",
+  "Měsíční partnerský podíl": "Monthly partner share"
 }
