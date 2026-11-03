@@ -1,60 +1,35 @@
-# Meeting recorder in Messages
+# Meeting Studio for Messages
 
-The first context step in `/admin/messages` offers **Nahrát meeting** before the existing external-file upload.
-Name the meeting, start the microphone and keep the phone unlocked with the browser in front. The recorder shows
-elapsed recorded time, the microphone level when Web Audio is available, committed local block/byte counts and
-server acknowledgement counts. **Ukončit nahrávání** finalizes audio without starting any billable processing.
-Choose **Přepsat všechny části do kontextu** afterwards. External recordings still use their existing upload flow.
+`/admin/messages` leads with **Otevřít Meeting Studio**. Importing an audio file and writing/editing the long context are separate secondary views. Finishing a meeting returns the transcript to that editor and appends it to its existing context using the same ElevenLabs file transcription function.
 
-## Preservation and recovery
+## Recording screen
 
-- Delivered MediaRecorder blobs are split into at most 1 MiB blocks. Each block and its monotonically increasing
-  counters commit atomically with strict durability in the separate `ptbk-message-recordings-v1` IndexedDB database.
-  Capture requests two-second delivery; browsers can delay it. No delivery interval is a guarantee of captured bytes.
-- Five-minute recording containers limit the amount dependent on an unfinished container. The next encoder starts
-  before the previous one stops, allowing a short boundary overlap instead of an intentional capture gap. Times are
-  actual per-part wall-clock boundaries, not sample-accurate encoded timestamps. A refreshed/interrupted session
-  can be continued only by an explicit microphone action, retaining the group ID and creating a fresh part ID/header.
-  No recovery action replaces or concatenates separate containers as if they were one valid audio file.
-- A background queue sends original bounded blocks to the existing private `OBJECT_STORAGE_BUCKET`. The new private
-  `message_recording_parts` and `message_recording_chunks` tables retain grouping, ordering, SHA-256 and transcripts.
-  Upload identities contain part, sequence and digest. Lost responses retry idempotently; conflicting originals are
-  refused. Acknowledgements become local receipts only after successful server responses. Offline capture stays local.
-  Backup resumes when this editor is open and the connection returns; closed browsers cannot upload pending bytes.
-- The last uncommitted/delivered tail is retained in memory after a storage failure and has an emergency download
-  action including its committed container prefix. A hard browser/OS failure can still lose bytes never delivered or
-  committed; a damaged unfinished container may require media repair. Existing committed bytes are never rewritten.
-- Remote downloads verify sequence completeness, expected counts when known, byte lengths and SHA-256 before
-  assembling the original file. Open/interrupted server-only records may only contain the backed-up prefix. Their
-  unknown final count is not a claim that the whole meeting was recovered. Keep the original browser until backup
-  counts match. Raw audio and transcript downloads remain independent of context limits and message creation.
-- No automatic cleanup, message-delete cascade, public media route or audio narration reuse applies to these originals.
-  Library access uses the existing Messages administration permission; delegated administrators with that permission
-  can access this shared recording archive. Local data belongs to this browser profile and origin. Use one admin
-  hostname consistently; server backups appear across authorized hosts/devices.
+Meeting Studio is a fullscreen dialog in the current tab. It hides the underlying message editor, traps focus, has no backdrop dismissal or ordinary close icon, and starts with the microphone control rather than a focused text field/mobile keyboard. It shows the selected agent, meeting title, recorded-content timer, recording/paused/interrupted state, and microphone level. The large central control starts, pauses and resumes capture. Pausing freezes the timer and uses `MediaRecorder.pause()` / `resume()` on the same encoder and container. There is no five-minute rotation.
 
-## Interruption and processing
+**Dokončit a přepsat** first asks for confirmation; cancelling leaves capture running. Confirming stops the encoder, waits for its final data and local commits, and explicitly starts the shared paid transcription. The browser sends audio directly to ElevenLabs with the existing single-use token; no CDN copy is made. Successful transcripts are cached before applying the message context, so a full context or failed save does not require another paid request. An uncertain attempt requires an explicit retry confirmation. A failed result never removes the audio. **Zpět ke zprávě** requires confirmation while recording and saves without transcription. Escape and browser Back cannot dismiss an active recording. Administration's existing unload/sign-out protections remain active while capture, transcription or an uncommitted emergency tail is pending.
 
-Web Locks reject a second capture on the same origin. Screen Wake Lock is best effort and reacquired when visible.
-A muted/ended microphone, recorder error, excessive pending-write memory or a 20-second delivery stall stops capture.
-Stop waits for `dataavailable`, `stop`, and persistence before releasing the microphone/lock. Administration's existing
-draft protection and busy-dialog close guard prevent accidental controlled dismissal. Forced reload cannot be stopped
-reliably on mobile and never resumes microphone access silently.
+## One local audio backup, shared with Recording Studio
 
-Paid transcription is the existing direct browser-to-ElevenLabs one-use-token path. Parts process in time order.
-Each successful transcript is stored before adding it to context. Cached text is reusable without another provider
-request, including after a context-length failure. A previous attempt without stored text requires explicit confirmation
-before a new paid attempt. Speaker numbering is independent within each part; speaker identities are not inferred
-across separate files. No new API credential or provider is introduced.
+`MessageMeetingCapture` acquires Recording Studio's existing `promptbook-recording-studio` Web Lock and fenced storage authority. It never takes ownership from another active studio automatically. If that studio is open elsewhere, the user must finish its work and close it before recording here. Recording, recovery and ordinary studio edits/deletions cannot race.
+
+Each message recording is a normal `StudioRecording` containing one microphone track, titled `Messages recording · <agent name> · <meeting title>`. No special recording schema, project or saved source configuration is introduced. Meeting Studio never loads, saves or replaces the user's existing camera/microphone/screen setup. The standard Recording Studio library, editor, original download and export paths can read the new track.
+
+Two-second delivered chunks are saved in the studio's existing IndexedDB. Audio bytes and their counters commit in the same fenced transaction. The small `ptbk-message-recordings-v1` database stores only message associations and cached transcripts for new recordings, with a `studioRecordingId` reference. It does not hold a second copy of new audio. Chunk sequences are append-only. Every new recording gets a fresh UUID; a new meeting never overwrites previous recordings. After a genuine interruption, continuing a meeting creates another independent part under the same meeting UUID. Ordinary pauses do not split the file.
+
+Finishing, transcription, generating a message, closing the editor and deleting a message never delete the raw studio recording. Only explicit manual deletion in Recording Studio removes it. Browser-local storage means the same origin, browser profile and device; it is not synchronization between `ptbk.io` and personal domains, between www/non-www, or between devices. Clearing browser data removes the local recordings. Persistent-storage requests report the browser's behavior and cannot prevent explicit deletion.
+
+## Existing audio and migration
+
+On opening Meeting Studio or activating Recording Studio, `preserveMessageRecordingsInStudio` migrates the former recorder's local audio into ordinary studio recordings. The deterministic studio ID equals the old part ID; interruption resumes the committed prefix without duplication. Source byte counts are checked, chunk and description commits remain atomic, and the original legacy chunks and cached transcripts are retained. No original file is decoded, re-encoded or changed. Older captures without recorded agent provenance are labelled `původní záznam` rather than inventing an agent. Once linked, a manually deleted studio recording is never reconstructed by migration.
+
+Automatic server/CDN audio backup is disabled. The old client sync entry point does nothing, and authenticated POST/PUT backup requests return 410 so an older open tab cannot continue uploading. Historical private manifests/downloads remain available; no server data or immutable SQL migration is deleted. New studio-linked recordings never fall back to a server download when their local audio is missing. Message audio playback, chat attachments and other existing CDN features are unaffected.
+
+## Interruption and platform limits
+
+Chunk delivery is best effort. Android Chrome may delay `dataavailable` while the screen is locked; hiding a tab alone therefore never triggers a stop. The recorder flushes on visibility/pagehide where the browser allows it, requests Screen Wake Lock and reacquires it on return. A muted microphone is shown explicitly and can recover after unmute. A disconnected microphone, failed encoder, failed local write or bounded write-queue overflow stops capture and retains the committed prefix. Failed writes remain available as an emergency download containing the original prefix and uncommitted tail.
+
+Closing/reloading the document destroys its microphone stream. A website cannot continue recording after its tab closes; service workers cannot own this microphone recorder. Locking the screen, an incoming call, browser eviction or OS suspension can interrupt capture and delay both JS and storage. Wake Lock does not override manual locking. A crash may lose audio not yet delivered/committed. On return the existing audio remains available; the user can explicitly continue with a new part. The UI does not promise uninterrupted screen-off recording. A physical mobile/long-recording test remains necessary to characterize a particular browser and phone.
 
 ## Verification
 
-Vitest exercises durable reopen and ordered original bytes, rejected gaps/overwrites, final-event stop ordering,
-independent container rotation, interrupted continuation and cross-tab microphone exclusion. PGlite checks the real
-migration, database privacy and preservation constraints. Existing file-transcription/editor tests cover the shared
-processing flow. These checks do not establish physical Samsung/browser background behavior or a long-duration soak.
-
-Physical acceptance: record a few minutes on the intended phone, verify the microphone level and backup receipts,
-interrupt/reload, select the retained meeting, download both originals, continue, then transcribe the ordered parts.
-Repeat with lost network and restore it before leaving the editor. Do not use screen-lock behavior as an unattended
-recording guarantee.
+Targeted tests cover final-chunk ordering, shared-studio byte compatibility, one-file pause/resume and frozen pause clock, no periodic rotation, preservation across a second meeting, background delivery delays, microphone loss, exclusive capture, storage failure/emergency tail, idempotent legacy migration, manual deletion, cached paid transcript reuse, explicit stop/transcribe confirmation and cancellation, and retired server writes. Existing message editor/storage/transcription and Recording Studio storage/authority checks also apply. Mocked browser tests establish state transitions and committed bytes; they do not establish physical screen-lock or long-duration microphone behavior.

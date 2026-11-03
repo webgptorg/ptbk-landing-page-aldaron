@@ -9,21 +9,12 @@ import type { MessageRecordingPart } from './messageRecordingTypes';
 const part = (): MessageRecordingPart => ({ id: randomUUID(), recordingId: randomUUID(), scope: 'new', title: 'Offline meeting', mimeType: 'audio/webm', startedAt: new Date().toISOString(), endedAt: null, status: 'complete', chunkCount: 0, byteLength: 0 });
 afterEach(() => { vi.resetAllMocks(); vi.unstubAllGlobals(); });
 describe('meeting backup and recovery client', () => {
-    it('retains originals and retries uncertain upload receipts without marking an unconfirmed backup as saved', async () => {
+    it('keeps audio local without sending metadata or bytes to the former CDN backup API', async () => {
         const recording = part(); await saveRecordingPart(recording);
         await saveRecordingChunk({ partId: recording.id, sequence: 0, bytes: new Blob(['original']), synced: false });
-        let writes = 0;
-        mocks.request.mockImplementation(async (_url, options) => {
-            if (options.method === 'PUT' && ++writes === 1) throw new Error('Lost response after storage commit');
-            return { saved: true };
-        });
-        await expect(syncRecordingBackups()).rejects.toThrow('Lost response');
-        expect((await loadRecordingChunks(recording.id))[0].synced).toBe(false);
-        expect((await loadRecordingPart(recording.id))!.backedUpChunks ?? 0).toBe(0);
-        await syncRecordingBackups();
-        expect(writes).toBe(2); expect((await loadRecordingPart(recording.id))!.backedUpChunks).toBe(1);
+        await syncRecordingBackups(); await syncRecordingBackups();
+        expect(mocks.request).not.toHaveBeenCalled();
         expect(await (await recordingFile((await loadRecordingPart(recording.id))!)).text()).toBe('original');
-        await syncRecordingBackups(); expect(writes).toBe(2);
     });
     it('rejects incomplete or corrupt remote backups before handing bytes to paid transcription', async () => {
         const recording = part();

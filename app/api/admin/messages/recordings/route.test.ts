@@ -19,10 +19,11 @@ describe('private meeting recording API boundaries', () => {
         expect((await PUT(new NextRequest(`${base}/${id}?sequence=0`, { method: 'PUT', body: 'raw' }), context)).status).toBe(status);
         expect(mocks.list).not.toHaveBeenCalled(); expect(mocks.metadata).not.toHaveBeenCalled(); expect(mocks.bytes).not.toHaveBeenCalled(); expect(mocks.manifest).not.toHaveBeenCalled();
     });
-    it('rejects oversized or unnumbered blocks without reaching object storage', async () => {
+    it('retires every server audio write without reaching object storage', async () => {
         const base = `https://ptbk.io/api/admin/messages/recordings/${id}`;
-        expect((await PUT(new NextRequest(base, { method: 'PUT', body: 'raw' }), context)).status).toBe(400);
-        expect((await PUT(new NextRequest(`${base}?sequence=0`, { method: 'PUT', body: new Uint8Array(1024 * 1024 + 1) }), context)).status).toBe(413);
-        expect(mocks.bytes).not.toHaveBeenCalled();
+        expect((await PUT(new NextRequest(base, { method: 'PUT', body: 'raw' }), context)).status).toBe(410);
+        expect((await PUT(new NextRequest(`${base}?sequence=0`, { method: 'PUT', body: new Uint8Array(1024 * 1024 + 1) }), context)).status).toBe(410);
+        expect((await POST(new NextRequest('https://ptbk.io/api/admin/messages/recordings', { method: 'POST', body: '{}' }))).status).toBe(410);
+        expect(mocks.bytes).not.toHaveBeenCalled(); expect(mocks.metadata).not.toHaveBeenCalled();
     });
 });

@@ -12,9 +12,13 @@ export const recordingPartSchema = z.object({
     backedUpChunks: z.number().int().min(0).optional(), backupSignature: z.string().optional(),
     remoteOnly: z.boolean().optional(),
     lastSavedAt: z.string().datetime().optional(),
+    // Media lives in the existing Recording Studio. This database retains only message/transcript metadata.
+    studioRecordingId: z.string().uuid().optional(),
+    agentName: z.string().optional(),
+    durationSeconds: z.number().min(0).optional(),
 });
 export type MessageRecordingPart = z.infer<typeof recordingPartSchema>;
-export type MessageRecordingChunk = { partId: string; sequence: number; bytes: Blob; synced: boolean };
+export type MessageRecordingChunk = { partId: string; sequence: number; bytes: Blob; synced: boolean; durationSeconds?: number };
 export function recordingFilename(part: MessageRecordingPart): string {
     const title = part.title.replace(/[\\/:*?"<>|\x00-\x1f]/g, '-').slice(0, 80);
     return `${title}-${part.startedAt.replace(/[:.]/g, '-')}-${part.id.slice(0, 6)}.${part.mimeType.includes('mp4') ? 'm4a' : part.mimeType.includes('ogg') ? 'ogg' : 'webm'}`;

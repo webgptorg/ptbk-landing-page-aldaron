@@ -35,6 +35,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const [failedAudioFile, setFailedAudioFile] = useState<File | null>(null);
     const [pendingTranscript, setPendingTranscript] = useState('');
     const [recordingBusy, setRecordingBusy] = useState(false);
+    const [contextSource, setContextSource] = useState<'meeting' | 'file' | 'text'>(message ? 'text' : 'meeting');
     const recordingBusyRef = useRef(false);
     const valuesRef = useRef(values); valuesRef.current = values;
     useAdminDraftProtection(pendingTranscript);
@@ -69,6 +70,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
         const context = appendMessageTranscript(valuesRef.current.context, transcript);
         valuesRef.current = { ...valuesRef.current, context };
         update('context', context);
+        setContextSource('text');
     };
     const generate = () => run('Generuji texty…', async () => {
         if (!values.context.trim()) throw new Error('Nejprve vložte celý kontext.');
@@ -84,6 +86,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
         setSaved(result.message); onSaved(result.message);
     });
     const transcribe = (file: File) => run('Připravuji přepis…', async () => {
+        setContextSource('file');
         setTranscriptionNotice(''); setFailedAudioFile(null);
         let completed = false;
         try {
@@ -92,6 +95,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             // Retain the paid result even if the combined context exceeds its limit.
             setPendingTranscript(transcript);
             update('context', appendMessageTranscript(values.context, transcript));
+            setContextSource('text');
             setPendingTranscript('');
             setTranscriptionNotice(`Přepis souboru „${file.name}“ byl přidán do kontextu. Text můžete upravit a pokračovat jako obvykle.`);
         } catch (failure) {
@@ -109,11 +113,15 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             <Button type="button" variant={step === 2 ? 'default' : 'outline'} disabled={busy || !values.context.trim()} onClick={() => setStep(2)}>2. Zpráva</Button>
         </nav>
         <div hidden={step !== 1}>
-            <MessageMeetingRecorder scope={saved?.id ?? 'new'} disabled={Boolean(operation) || Boolean(pendingTranscript)}
+            <MessageMeetingRecorder scope={saved?.id ?? 'new'} agentName={agents.find(agent => agent.id === values.agentId)?.name ?? 'Vybraný agent'} disabled={Boolean(operation) || Boolean(pendingTranscript)}
                 transcriptionConfigured={transcriptionConfigured} onBusy={captureBusy} onTranscript={acceptRecordedTranscript} />
         </div>
         {step === 1 ? <>
-            <section aria-label="Kontext z audia" className="space-y-3 rounded-xl border border-dashed border-slate-300 p-4"
+            <div className="flex flex-wrap gap-2" aria-label="Další zdroje kontextu">
+                <Button type="button" variant={contextSource === 'file' ? 'secondary' : 'ghost'} disabled={busy} onClick={() => setContextSource(contextSource === 'file' ? 'meeting' : 'file')}>Importovat audio soubor</Button>
+                <Button type="button" variant={contextSource === 'text' ? 'secondary' : 'ghost'} disabled={busy} onClick={() => setContextSource(contextSource === 'text' ? 'meeting' : 'text')}>Napsat nebo upravit kontext{values.context ? ` (${new Intl.NumberFormat('cs-CZ').format(values.context.length)} znaků)` : ''}</Button>
+            </div>
+            <section hidden={contextSource !== 'file'} aria-label="Kontext z audia" className="space-y-3 rounded-xl border border-dashed border-slate-300 p-4"
                 onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = busy || !transcriptionConfigured || pendingTranscript ? 'none' : 'copy'; }}
                 onDrop={(event) => {
                     event.preventDefault();
@@ -134,13 +142,13 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                     ? 'Vyberte nebo sem přetáhněte nahrávku (např. M4A ze Samsung rekordéru, MP3 nebo WAV, do 2 GB). Výběrem spustíte přepis přes ElevenLabs včetně rozlišení řečníků; spotřebovává kredity. Přepis doplní stávající kontext.'
                     : 'Pro přepis chybí serverové nastavení ElevenLabs.'}</p>
                 {failedAudioFile && <Button type="button" variant="outline" disabled={busy || !transcriptionConfigured} onClick={() => void transcribe(failedAudioFile)}>Zkusit přepis znovu</Button>}
-                {transcriptionNotice && <p role="status" className="text-sm text-green-800">{transcriptionNotice}</p>}
             </section>
-            <label className="block text-sm font-medium">Celý kontext
+            {transcriptionNotice && <p role="status" className="text-sm text-green-800">{transcriptionNotice}</p>}
+            <div hidden={contextSource !== 'text'} className="space-y-2"><label className="block text-sm font-medium">Celý kontext
                 <Textarea value={values.context} onChange={(e) => update('context', e.target.value)} disabled={busy}
                     rows={17} maxLength={MESSAGE_CONTEXT_MAX_LENGTH} className="mt-2 font-mono text-sm" placeholder="Vložte konverzaci, podklady nebo celé myšlenky…" required />
             </label>
-            <p className="text-xs text-slate-500">{new Intl.NumberFormat('cs-CZ').format(values.context.length)} znaků</p>
+            <p className="text-xs text-slate-500">{new Intl.NumberFormat('cs-CZ').format(values.context.length)} znaků</p></div>
             {pendingTranscript && <section className="space-y-3 rounded-xl border border-slate-200 p-4">
                 <label className="block text-sm font-medium">Dokončený přepis
                     <Textarea value={pendingTranscript} readOnly rows={8} className="mt-2 font-mono text-sm" />

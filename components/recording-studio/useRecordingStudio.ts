@@ -151,6 +151,8 @@ export function useRecordingStudio() {
                 current.sourceConfigurations = loadRecordingSourceConfigurations();
                 setSourceConfigurations(current.sourceConfigurations);
                 setSourceReadiness(Object.fromEntries(current.sourceConfigurations.map(({ id }) => [id, 'needs-permission' as const])));
+                const { preserveMessageRecordingsInStudio } = await import('@/lib/messages/messageRecordingRecovery');
+                await preserveMessageRecordingsInStudio().catch(error => { setErrorMessage(getRecordingErrorMessage(error)); });
                 const recovered = await recoverStudioRecordings(activation.origin === 'forced' ? FORCED_INTERRUPTION_MESSAGE : undefined);
                 const { clearRecordingExportTemporaryFiles } = await import('@/lib/recording-studio/recordingStudioTemporaryFile');
                 await clearRecordingExportTemporaryFiles().catch(() => undefined);

@@ -83,6 +83,7 @@ describe('two-step message editor', () => {
         mocks.request.mockResolvedValue({ message: TEST_MESSAGE });
         render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured transcriptionConfigured onSaved={() => undefined} onBusy={busy} />);
         fireEvent.click(screen.getByRole('button', { name: '1. Celý kontext' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Importovat audio soubor' }));
         const dropzone = screen.getByRole('region', { name: 'Kontext z audia' });
         const dataTransfer = { files: [new File(['audio'], 'Call.mp3')] };
         fireEvent.drop(dropzone, { dataTransfer }); fireEvent.drop(dropzone, { dataTransfer });

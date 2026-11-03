@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withMessagesAdmin, readValidatedBody } from '@/lib/messages/messageAdminApi';
-import { recordingPartSchema } from '@/lib/messages/messageRecordingTypes';
-import { listRemoteRecordingParts, storeRecordingMetadata } from '@/lib/messages/messageRecordingServer';
+import { withMessagesAdmin } from '@/lib/messages/messageAdminApi';
+import { listRemoteRecordingParts } from '@/lib/messages/messageRecordingServer';
 import { z } from 'zod';
 
 export const maxDuration = 30;
@@ -14,9 +13,5 @@ export function GET(request: NextRequest) {
     });
 }
 export function POST(request: NextRequest) {
-    return withMessagesAdmin(request, async () => {
-        if (Number(request.headers.get('content-length') ?? 0) > 3_000_000) return NextResponse.json({ error: 'Požadavek je příliš velký.' }, { status: 413 });
-        await storeRecordingMetadata(await readValidatedBody(request, recordingPartSchema));
-        return NextResponse.json({ saved: true }, { headers });
-    });
+    return withMessagesAdmin(request, async () => NextResponse.json({ error: 'Serverové zálohování audia bylo vypnuto. Obnovte stránku; nové nahrávky se ukládají v prohlížeči do Recording Studia.' }, { status: 410, headers }));
 }

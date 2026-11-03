@@ -1,31 +1,17 @@
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
-import { loadRecordingChunks, loadRecordingPart, localRecordingFile, markRecordingChunkSynced, patchRecordingPart, listRecordingParts } from './messageRecordingStorage';
+import { loadRecordingPart, localRecordingFile, patchRecordingPart } from './messageRecordingStorage';
 import { recordingFilename, type MessageRecordingPart } from './messageRecordingTypes';
 
 const API = '/api/admin/messages/recordings';
-const signature = (part: MessageRecordingPart) => JSON.stringify([part.status, part.endedAt, part.transcript, part.attempted]);
+/** Retained for older callers; automatic server audio backups were retired. */
 export async function syncRecordingBackups(): Promise<void> {
-    for (const part of await listRecordingParts()) {
-        const receipt = signature(part);
-        if (part.backupSignature === receipt && part.backedUpChunks === part.chunkCount) continue;
-        const writeMetadata = (value: MessageRecordingPart) => requestAdminJson(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value), signal: AbortSignal.timeout(20_000) });
-        await writeMetadata(part);
-        let backedUp = part.remoteOnly ? part.chunkCount : 0;
-        for (const chunk of await loadRecordingChunks(part.id)) {
-            if (!chunk.synced) {
-                await requestAdminJson(`${API}/${part.id}?sequence=${chunk.sequence}`, { method: 'PUT', headers: { 'Content-Type': 'application/octet-stream' }, body: chunk.bytes, signal: AbortSignal.timeout(20_000) });
-                await markRecordingChunkSynced(part.id, chunk.sequence);
-            }
-            backedUp++;
-        }
-        // Snapshot counters must never overwrite newer microphone chunks or a paid transcript.
-        await patchRecordingPart(part.id, { backedUpChunks: backedUp, backupSignature: receipt });
-    }
+    // Recording Studio's IndexedDB is the backup. Media leaves it only for an explicit transcription/download.
 }
 export const listServerRecordingParts = (before?: string) => requestAdminJson<{ parts: MessageRecordingPart[] }>(`${API}${before ? `?before=${encodeURIComponent(before)}` : ''}`, { signal: AbortSignal.timeout(20_000) });
 export async function recordingFile(part: MessageRecordingPart): Promise<File> {
-    const local = await localRecordingFile(part).catch(() => null);
+    const local = part.studioRecordingId ? await localRecordingFile(part) : await localRecordingFile(part).catch(() => null);
     if (local) return local;
+    if (part.studioRecordingId) throw new Error('Audio není v tomto prohlížeči dostupné. Mohlo být ručně smazáno v Recording Studiu.');
     const manifest = await requestAdminJson<{ chunks: { sequence: number; byteLength: number; sha256: string; url: string }[]; expectedChunks: number | null }>(`${API}/${part.id}`);
     if (!manifest.chunks.length) throw new Error('Pro tuto část zatím nejsou dostupná audio data.');
     if (manifest.chunks.some((chunk, i) => chunk.sequence !== i) || (manifest.expectedChunks !== null && manifest.chunks.length !== manifest.expectedChunks)) throw new Error('Serverová záloha zatím není celá. Otevřete původní prohlížeč a dokončete zálohování; audio zůstalo zachované.');

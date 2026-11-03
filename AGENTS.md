@@ -44,16 +44,26 @@ use cases, and audiences. Keep these rules current when behavior changes.
   explicit, protected as pending admin work and never retried automatically. Retain completed text if it exceeds the
   context limit. External-file audio/token are not stored or reused for summary narration; subsequent summary/speech controls
   retain their existing behavior. Transcription uses the existing server-only ElevenLabs key independently of storage.
-  The context editor primarily offers a microphone meeting recorder. Two-second delivered chunks commit atomically
-  to a separate IndexedDB database before bounded, checksum-verified, idempotent private CDN backups. Five-minute
-  containers and interrupted/resumed parts share a meeting UUID; continuation always creates a new file. Raw bytes
-  and paid transcripts survive refresh, transcription and message deletion; nothing deletes them automatically.
-  Web Locks prevent simultaneous capture on one origin. Stop awaits final data and committed writes; device loss,
-  storage failure or a stalled recorder stop capture and preserve the committed prefix and an emergency tail download.
-  Wake Lock is best effort: the UI explains unlocked/foreground use and never promises mobile background capture.
-  Private recording APIs require messages permission and same-origin checks; raw media is never public message audio.
-  Original files and cached transcripts remain explicitly downloadable, and ordered transcription reuses the file
-  workflow without automatically retrying billed requests. See `docs/message-meeting-recorder.md` for limits and checks.
+  The context editor leads with Meeting Studio; file import and manual context are separate secondary views.
+  Meeting Studio is a fullscreen, focus-trapped recorder with a large record/pause/resume control, recorded-content
+  clock, microphone level, protected navigation and explicit confirmation before stopping for paid transcription.
+  Pause/resume uses the same MediaRecorder and container; there is no periodic file rotation. Actual interruptions
+  resume as new immutable parts of the same meeting. New meetings always use new IDs and never replace earlier audio.
+  Every delivered chunk commits directly to Recording Studio's existing IndexedDB together with its byte counters,
+  using its existing browser lock and fenced authority. Each message recording is an ordinary single-microphone take,
+  labelled `Messages recording · <agent> · <meeting>`; source preferences and existing studio setup are never changed.
+  Message metadata and cached paid transcripts remain separate; local legacy audio migrates idempotently into the
+  studio without deleting its earlier bytes. Manual deletion in Recording Studio is respected and never undone by
+  migration. Refresh/crash recovery retains the committed prefix. Storage failure stops capture, preserving that
+  prefix and offering an emergency tail download. Finalization waits for final dataavailable and committed writes.
+  Automatic server/CDN audio backup is retired, including writes from older tabs (authenticated 410 responses);
+  historical private backups stay readable. Raw audio leaves the browser only for explicit transcription or export.
+  Background visibility by itself does not stop recording. Wake Lock is best effort: closing/reloading a tab ends
+  microphone capture, and mobile screen locking or OS suspension can pause capture or chunk delivery. Never promise
+  uninterrupted recording across those events. Saved audio and paid text survive transcription and message deletion;
+  only the Recording Studio's ordinary explicit deletion removes its raw backup. The ordered transcription path
+  shares file-import logic, retains paid results before context validation, and never automatically retries billing.
+  See `docs/message-meeting-recorder.md` for implementation, recovery, limits and checks.
   The sender's copy/export adds the current URL at the start or after a greeting; the public text remains clean.
   Shortener lists message entries with a Messages edit link; its mutation API cannot edit/delete them. Private
   `messages` rows and their codes are hidden from anonymous database enumeration; a known URL alone grants access.
