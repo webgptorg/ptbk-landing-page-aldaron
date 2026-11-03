@@ -58,6 +58,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   PDF. Book exports use canonical AGENT/KNOWLEDGE or CHAT/MEMBER/MESSAGE with safe literal content and NOTE provenance;
   Markdown uses an attribution comment, plain text a footnote, PDF a subtle personal-domain footer. PDF rendering
   reuses the workshop's local fonts and shared browser engine. Full context is fetched only on explicit export.
+  Public chat accepts picked/dropped files and pasted screenshots: four images/PDFs/UTF-8 text files of at most
+  4 MiB per question (text at most 60,000 characters). Bounded same-origin/domain-scoped uploads use the existing
+  private CDN bucket. File records are private and scoped to the source/conversation; IDs are resolved server-side
+  before question recording or model use. Draft and sent-file metadata persist locally; original files appear on
+  their recorded admin question even after generation failure. Images/PDFs are actual Responses media inputs,
+  text is quoted input; the bounded model window retains at most eight files / 16 MiB. Never persist signed URLs.
+  Public random file-ID links recheck source domain; admin links require messages permission. Export links use
+  durable IDs. No account or storage/API credential changes are introduced.
   Message deletion cascades to its history. No login is introduced. See `docs/messages.md` for configuration.
 - `/admin/agents` administers the existing shared `workshop_agents` Books, including Pavol Hejný. Internal UUIDs
   have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents

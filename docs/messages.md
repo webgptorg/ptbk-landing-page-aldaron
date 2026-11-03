@@ -108,6 +108,23 @@ Literal fences grow beyond any pasted fence, so quoted Book controls stay data. 
 footnote and a quiet PDF footer carry Pavol's attribution and the personal-domain source. Browser PDF generation
 shares the existing local Unicode fonts, Markdown renderer and PDF engine with workshop exports.
 
+Chat file input accepts a picker, a drop anywhere in the conversation body and pasted screenshots (Ctrl/Cmd+V).
+Up to four PNG/JPEG/WebP/GIF images, PDFs or UTF-8 TXT/Markdown/Book/CSV/JSON files can accompany a question,
+each at most 4 MiB; text files additionally stay within 60,000 characters. The small-file upload route bounds
+the request before parsing it, validates actual bytes and stores immutable objects in the existing private
+`OBJECT_STORAGE_BUCKET`. Anonymous uploads use the same-origin/domain-scoped message or personal-homepage source
+and the existing per-instance rate bound. No storage configuration or new API key is introduced.
+
+`2026-11-0302-message-chat-attachments.sql` adds private, source/conversation-scoped file records and an attachments
+column on existing chat turns. The server resolves every file ID back to its authoritative metadata in that same
+chat before recording/generating. Current draft files and sent-file metadata survive local refresh. Only original
+file IDs and names/types/sizes are persisted; temporary CDN signatures are created on demand. Images and PDFs
+reach the existing Responses adapter as actual multimodal input, while text bytes are quoted source material.
+The recent model window includes at most eight attachments / 16 MiB, independently of the full visible history.
+Administration shows the attachments on the original question, including failed turns, with protected thumbnail
+and download links. Public file links are random unlisted capabilities rechecked against the source's domain;
+exports preserve these stable links. New chat and removing a draft attachment do not delete recorded history.
+
 The original recording, message and reviewed word map are imported once with:
 
 ```sh

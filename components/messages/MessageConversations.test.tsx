@@ -41,4 +41,13 @@ describe('message conversation viewer', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('Database unavailable');
         expect(screen.queryByText(/Zatím žádná/)).toBeNull();
     });
+    it('shows the recorded attachment through the authenticated CDN read route', async () => {
+        const attachment = { id: '6c21d70d-0991-4a1d-a2f9-39d599148b5b', name: 'screen.png', contentType: 'image/png', byteLength: 42 };
+        mocks.request.mockResolvedValueOnce({ conversations: [conversation], hasMore: false });
+        mocks.request.mockResolvedValueOnce({ turns: [{ ...turn, attachments: [attachment] }], hasMore: false });
+        render(<MessageConversations messageId="message" />);
+        fireEvent.click(await screen.findByRole('button', { name: /Anonymní konverzace/ }));
+        expect(await screen.findByRole('link', { name: /screen.png/ })).toHaveAttribute('href', `/api/admin/messages/attachments/${attachment.id}`);
+        expect(screen.getByRole('img', { name: 'screen.png' })).toHaveAttribute('src', `/api/admin/messages/attachments/${attachment.id}`);
+    });
 });

@@ -1,0 +1,9 @@
+.message-attachments { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.message-attachments li { display: flex; align-items: center; gap: .25rem; min-width: 0; max-width: 100%; border: 1px solid var(--article-line, #d8dfd4); border-radius: 9px; padding: .4rem; }
+.message-attachments a { display: flex; align-items: center; gap: .5rem; min-width: 0; color: inherit; font-size: .75rem; overflow-wrap: anywhere; }
+.message-attachments img { width: 56px; height: 48px; object-fit: contain; border-radius: 4px; }
+.message-attachments span { min-width: 0; }
+.message-attachments small { display: block; color: var(--article-muted, #65776e); font-size: .65rem; }
+.message-attachments button { flex-shrink: 0; padding: .3rem; border-radius: 4px; }
+.message-attachments :is(a, button):focus-visible { outline: 2px solid var(--article-accent, #256048); outline-offset: 2px; }
+.message-chat-draft-files { padding: 0 .75rem; flex-shrink: 0; max-height: 120px; overflow-y: auto; }

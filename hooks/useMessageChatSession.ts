@@ -5,7 +5,7 @@ import { messageChatStorageKey, readMessageChatSession, type MessageChatSession 
 
 export function useMessageChatSession(source: string, introduction: string) {
     const initial = (): MessageChatSession => ({ version: 1, conversationId: '',
-        turns: introduction ? [{ role: 'assistant', content: introduction }] : [], draft: '', retry: null });
+        turns: introduction ? [{ role: 'assistant', content: introduction }] : [], draft: '', retry: null, attachments: [] });
     const [session, setSession] = useState<MessageChatSession>(initial);
     const [ready, setReady] = useState(false);
     const [storageFailed, setStorageFailed] = useState(false);

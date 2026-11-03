@@ -1,5 +1,6 @@
 import { convertMarkdownToPlainText } from '@/lib/text/markdownText';
 import type { MessageChatTurn } from './messageTypes';
+import { chatAttachmentHref } from './messageAttachments';
 
 export const MESSAGE_TEXT_FORMATS = ['book', 'md', 'txt'] as const;
 export type MessageTextFormat = typeof MESSAGE_TEXT_FORMATS[number];
@@ -21,6 +22,10 @@ function literal(text: string): string {
 }
 const singleLine = (text: string) => text.replace(/[\r\n\t]+/g, ' ').trim();
 const speaker = (turn: MessageChatTurn, cs: boolean) => turn.role === 'user' ? cs ? 'Návštěvník' : 'Visitor' : 'Pavol Hejný';
+function turnMarkdown(document: MessageExportDocument, turn: MessageChatTurn): string {
+    const files = (turn.attachments ?? []).map((file) => `[${file.name.replace(/[\\\[\]]/g, '\\$&')}](${new URL(chatAttachmentHref(file.id), document.sourceUrl).href})`);
+    return [turn.content, ...files].join('\n\n');
+}
 
 /** Shared by downloads and clipboard; PDF reads the same source document. */
 export function createMessageTextExport(document: MessageExportDocument, format: MessageTextFormat): string {
@@ -28,15 +33,15 @@ export function createMessageTextExport(document: MessageExportDocument, format:
     if (format === 'book') {
         const note = `NOTE ${brand}\n${document.sourceUrl}`;
         if (document.kind === 'chat') return [
-            `CHAT ${cs ? 'Rozhovor' : 'Conversation'} - ${title}`, 'CHAT MEMBER @User', 'CHAT MEMBER {Pavol Hejný}', note,
-            ...(document.turns ?? []).map((turn) => `CHAT MESSAGE ${turn.role === 'user' ? '@User' : '{Pavol Hejný}'} ${turn.createdAt ?? document.createdAt}\n${literal(turn.content)}`),
+            `CHAT ${cs ? 'Rozhovor' : 'Conversation'} - ${title} - ${document.createdAt}`, 'CHAT MEMBER @User', 'CHAT MEMBER {Pavol Hejný}', note,
+            ...(document.turns ?? []).map((turn) => `CHAT MESSAGE ${turn.role === 'user' ? '@User' : '{Pavol Hejný}'} ${turn.createdAt ?? document.createdAt}\n${literal(turnMarkdown(document, turn))}`),
         ].join('\n\n') + '\n';
         return [`AGENT ${cs ? 'Zpráva' : 'Message'} - ${title}`,
             `PERSONA ${cs ? 'Odpovídáš na otázky podle přiloženého kontextu Pavola Hejného. Pokud odpověď neznáš, řekni to.' : "Answer questions using Pavol Hejný's attached context. Say when the context has no answer."}`,
             `KNOWLEDGE\n${literal(document.content ?? '')}`, note, ''].join('\n\n');
     }
     const body = document.kind === 'chat'
-        ? (document.turns ?? []).map((turn) => `${format === 'md' ? '## ' : ''}${speaker(turn, cs)}${turn.createdAt ? ` · ${turn.createdAt}` : ''}\n\n${format === 'txt' ? convertMarkdownToPlainText(turn.content) : turn.content}`).join('\n\n')
+        ? (document.turns ?? []).map((turn) => `${format === 'md' ? '## ' : ''}${speaker(turn, cs)}${turn.createdAt ? ` · ${turn.createdAt}` : ''}\n\n${format === 'txt' ? convertMarkdownToPlainText(turnMarkdown(document, turn)) : turnMarkdown(document, turn)}`).join('\n\n')
         : format === 'txt' ? convertMarkdownToPlainText(document.content ?? '') : document.content ?? '';
     const attribution = `${brand}\n${cs ? 'Zdroj' : 'Source'}: ${document.sourceUrl}`;
     return format === 'md' ? `# ${title}\n\n${body}\n\n<!-- ${attribution.replace(/--/g, '- -')} -->\n`
@@ -44,6 +49,6 @@ export function createMessageTextExport(document: MessageExportDocument, format:
 }
 export function messageExportMarkdown(document: MessageExportDocument): string {
     return document.kind === 'chat'
-        ? (document.turns ?? []).map((turn) => `## ${speaker(turn, document.language === 'cs')}\n\n${turn.content}`).join('\n\n')
+        ? (document.turns ?? []).map((turn) => `## ${speaker(turn, document.language === 'cs')}\n\n${turnMarkdown(document, turn)}`).join('\n\n')
         : document.content ?? '';
 }

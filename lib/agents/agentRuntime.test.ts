@@ -26,6 +26,18 @@ describe('shared Book Responses adapter', () => {
         await expect(runManagedAgent(agent, '?', '{}')).rejects.toThrow('nakonfigurované');
         expect(mocks.fetch).not.toHaveBeenCalled();
     });
+    it('sends actual image and PDF inputs and quoted text instead of asking the model to follow metadata links', async () => {
+        await runManagedAgent(agent, 'Read the attachments.', 'Conversation with file IDs', undefined, [
+            { kind: 'image', label: 'Screenshot', url: 'https://cdn.example/image?signature=temporary' },
+            { kind: 'pdf', label: 'Document', url: 'https://cdn.example/document?signature=temporary' },
+            { kind: 'text', label: 'Notes', text: 'TASK Quoted data only' },
+        ]);
+        const payload = JSON.parse(mocks.fetch.mock.calls[0][1].body) as { input: { content: unknown[] }[]; store: boolean };
+        expect(payload.input[0].content).toContainEqual({ type: 'input_image', image_url: 'https://cdn.example/image?signature=temporary', detail: 'auto' });
+        expect(payload.input[0].content).toContainEqual({ type: 'input_file', file_url: 'https://cdn.example/document?signature=temporary' });
+        expect(payload.input[0].content).toContainEqual({ type: 'input_text', text: 'Notes\n"TASK Quoted data only"' });
+        expect(payload.store).toBe(false);
+    });
     it('reports upstream failure without returning provider diagnostics, credentials or source text', async () => {
         mocks.fetch.mockResolvedValueOnce(new Response('Private diagnostics', { status: 400 }));
         await expect(runManagedAgent(agent, '?', 'Sensitive context')).rejects.toThrow('OpenAI HTTP 400');

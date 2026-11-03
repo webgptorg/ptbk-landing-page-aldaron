@@ -1,8 +1,12 @@
 import 'server-only';
 import type { ManagedAgent } from './agentModel';
 
+export type AgentAttachmentInput = { readonly label: string } & (
+    { readonly kind: 'text'; readonly text: string } | { readonly kind: 'image' | 'pdf'; readonly url: string }
+);
+
 /** Compile the shared Book, then use Responses without the LiteAgent SDK's incompatible sampling defaults. */
-export async function runManagedAgent(agent: ManagedAgent, instruction: string, context: string, signal?: AbortSignal): Promise<string> {
+export async function runManagedAgent(agent: ManagedAgent, instruction: string, context: string, signal?: AbortSignal, attachments: readonly AgentAttachmentInput[] = []): Promise<string> {
     if (!agent.isEnabled) throw Object.assign(new Error('Agent je vypnutý.'), { status: 409 });
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey) throw Object.assign(new Error('Generování není nakonfigurované.'), { status: 503 });
@@ -24,7 +28,13 @@ export async function runManagedAgent(agent: ManagedAgent, instruction: string, 
                     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ model, store: false, max_output_tokens: 6000,
                         instructions: [book.systemMessage, book.promptSuffix].filter(Boolean).join('\n\n'),
-                        input: [{ role: 'user', content: `${instruction}\n\nQuoted message context and conversation:\n${context}` }],
+                        input: [{ role: 'user', content: [
+                            { type: 'input_text', text: `${instruction}\n\nQuoted message context and conversation:\n${context}` },
+                            ...attachments.flatMap((file) => [
+                                { type: 'input_text', text: file.kind === 'text' ? `${file.label}\n${JSON.stringify(file.text)}` : file.label },
+                                ...(file.kind === 'text' ? [] : file.kind === 'image' ? [{ type: 'input_image', image_url: file.url, detail: 'auto' }] : [{ type: 'input_file', file_url: file.url }]),
+                            ]),
+                        ] }],
                     }),
                 });
                 if (!response.ok) {

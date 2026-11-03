@@ -7,17 +7,8 @@ import { z } from 'zod';
 import { beginMessageChatTurn, finishMessageChatTurn } from '@/lib/messages/messageConversationDatabase';
 
 import type { ChatConversationSource } from '@/lib/messages/messageConversationDatabase';
-// Best-effort per-instance abuse bound for these small, unlisted messages.
-const recentRequests = new Map<string, { count: number; until: number }>();
-function allowRequest(key: string): boolean {
-    const now = Date.now();
-    for (const [entry, value] of Array.from(recentRequests)) if (value.until < now) recentRequests.delete(entry);
-    const previous = recentRequests.get(key);
-    if (previous && previous.count >= 15) return false;
-    if (!previous && recentRequests.size >= 5000) return false;
-    recentRequests.set(key, { count: (previous?.count ?? 0) + 1, until: previous?.until ?? now + 300000 });
-    return true;
-}
+import { allowPublicChatRequest } from './publicChatRateLimit';
+import type { ChatAttachmentRow } from './messageAttachmentDatabase';
 
 async function boundedJson(request: Request): Promise<unknown> {
     const reader = request.body?.getReader();
@@ -45,16 +36,25 @@ export async function respondToPublicChat(request: Request, subject: {
     const origin = request.headers.get('origin');
     if (origin && origin !== new URL(request.url).origin) return json({ error: 'Neplatný požadavek.' }, 403);
     const body = await boundedJson(request) as { messages?: unknown; conversationId?: unknown; requestId?: unknown } | null;
-    const turns = parseMessageChatTurns(body?.messages);
+    let turns = parseMessageChatTurns(body?.messages);
     if (!turns) return json({ error: 'Otázka je příliš dlouhá nebo nemá správný formát.' }, 400);
     const ids = z.object({ conversationId: z.string().uuid().optional(), requestId: z.string().uuid().optional() })
         .safeParse({ conversationId: body?.conversationId, requestId: body?.requestId });
     if (!ids.success) return json({ error: 'Neplatný požadavek.' }, 400);
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-    if (!allowRequest(`${subject.rateKey}:${ip}`)) return json({ error: 'Chvilku prosím počkej a zkus otázku znovu.' }, 429);
+    if (!allowPublicChatRequest(`${subject.rateKey}:${ip}`)) return json({ error: 'Chvilku prosím počkej a zkus otázku znovu.' }, 429);
+    const conversationId = ids.data.conversationId ?? randomUUID();
+    let files: ChatAttachmentRow[] = [];
+    if (turns.some((turn) => turn.attachments?.length)) {
+        try {
+            const { resolveChatAttachments } = await import('./messageAttachmentDatabase');
+            const resolved = await resolveChatAttachments(subject.source, conversationId, turns);
+            turns = resolved.turns; files = resolved.files;
+        } catch { return json({ error: 'Některá příloha nepatří k tomuto chatu nebo už není dostupná.' }, 400); }
+    }
     let saved: Awaited<ReturnType<typeof beginMessageChatTurn>>;
     try {
-        saved = await beginMessageChatTurn(subject.source, ids.data.conversationId ?? randomUUID(),
+        saved = await beginMessageChatTurn(subject.source, conversationId,
             ids.data.requestId ?? randomUUID(), subject.introduction, turns);
     } catch { return json({ error: 'Otázku se nepodařilo uložit. Zkus to prosím znovu.' }, 503); }
     if (!saved.isNew) {
@@ -75,9 +75,10 @@ export async function respondToPublicChat(request: Request, subject: {
     try {
         const agent = await loadManagedAgent(subject.agentId);
         if (!agent || !agent.isEnabled) return fail('Chat teď není dostupný. Celý kontext si můžeš stáhnout nahoře.', 503);
+        const inputs = files.length ? await (await import('./messageAttachmentDatabase')).createChatAttachmentInputs(files) : [];
         reply = await runManagedAgent(agent, instructions, JSON.stringify({
             message: subject.markdown, fullContext: subject.context, conversation: turns,
-        }), request.signal);
+        }), request.signal, inputs);
     } catch { return fail('Odpověď se nepodařilo načíst. Zkus to prosím znovu.', 502); }
     if (!reply.trim() || reply.length > 12000) return fail('Odpověď se nepodařilo připravit.', 502);
     try { await finishMessageChatTurn(saved.turn.id, { reply: reply.trim() }); }

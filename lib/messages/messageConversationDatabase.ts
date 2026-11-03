@@ -8,13 +8,14 @@ type TurnRow = {
     id: string; question: string; introduction: string; reply: string | null;
     status: RecordedMessageChatTurn['status']; error_message: string | null;
     created_at: string; completed_at: string | null; request_hash: string;
+    attachments?: RecordedMessageChatTurn['attachments'];
 };
-const turnColumns = 'id,question,introduction,reply,status,error_message,created_at,completed_at,request_hash';
+const turnColumns = 'id,question,introduction,reply,status,error_message,created_at,completed_at,request_hash,attachments';
 export type ChatConversationSource = string | { readonly sourceKey: 'pavol-cs' | 'pavol-en' };
 const sourceFields = (source: ChatConversationSource) => typeof source === 'string' ? { message_id: source } : { source_key: source.sourceKey };
 function mapTurn(row: TurnRow): RecordedMessageChatTurn {
     return { id: row.id, question: row.question, introduction: row.introduction, reply: row.reply,
-        status: row.status, errorMessage: row.error_message, createdAt: row.created_at, completedAt: row.completed_at };
+        status: row.status, errorMessage: row.error_message, createdAt: row.created_at, completedAt: row.completed_at, attachments: row.attachments ?? [] };
 }
 
 /** Save before calling the model, including questions whose generation fails or is interrupted. */
@@ -25,6 +26,7 @@ export async function beginMessageChatTurn(messageId: ChatConversationSource, co
     const { data, error } = await client.from('message_chat_turns').insert({
         ...sourceFields(messageId), conversation_id: conversationId, request_id: requestId,
         request_hash: requestHash, question: turns[turns.length - 1].content, introduction,
+        attachments: turns[turns.length - 1].attachments ?? [],
     }).select(turnColumns).single();
     if (!error && data) return { turn: mapTurn(data as TurnRow), isNew: true };
     if (error?.code === '23505') {

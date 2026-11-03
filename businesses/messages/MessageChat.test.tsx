@@ -167,4 +167,37 @@ describe('floating message conversation', () => {
         await screen.findByText('Recovered');
         expect(sent(1)).toEqual(sent(0));
     });
+    it('pastes a screenshot, preserves it across refresh, and sends it with the question', async () => {
+        const attachment = { id: '6c21d70d-0991-4a1d-a2f9-39d599148b5b', name: 'screen.png', contentType: 'image/png', byteLength: 42 };
+        fetchMock.mockResolvedValueOnce(Response.json({ attachment }));
+        fetchMock.mockResolvedValueOnce(Response.json({ reply: 'I can see the screenshot.' }));
+        const view = render(<MessageChat messageId="files" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        fireEvent.paste(screen.getByRole('textbox'), { clipboardData: { files: [new File(['png'], 'screen.png', { type: 'image/png' })] } });
+        await screen.findByRole('link', { name: /screen.png/ });
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/messages/files/attachments');
+        expect(fetchMock.mock.calls[0][1].body.get('conversationId')).toEqual(expect.any(String));
+        view.unmount();
+        render(<MessageChat messageId="files" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        expect(screen.getByRole('link', { name: /screen.png/ })).toHaveAttribute('href', `/api/chat/attachments/${attachment.id}`);
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByText('I can see the screenshot.');
+        expect(sent(1).messages).toEqual([{ role: 'user', content: 'Podívej se prosím na přiložené soubory.', attachments: [attachment] }]);
+        expect(screen.queryByRole('button', { name: 'Odebrat screen.png' })).toBeNull();
+        expect(screen.getByRole('log')).toHaveTextContent('screen.png');
+    });
+    it('retains the complete visible transcript while sending only the bounded recent model window', async () => {
+        const turns = Array.from({ length: 20 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: `Old turn ${i}` }));
+        localStorage.setItem('pavol-chat:v1:long', JSON.stringify({ version: 1, conversationId: crypto.randomUUID(), turns, draft: '', retry: null }));
+        fetchMock.mockResolvedValueOnce(Response.json({ reply: 'Newest reply' }));
+        render(<MessageChat messageId="long" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Continue' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByText('Newest reply');
+        expect(screen.getByRole('log')).toHaveTextContent('Old turn 0');
+        expect(screen.getAllByTestId('message-markdown')).toHaveLength(22);
+        expect(sent(0).messages).toHaveLength(15);
+    });
 });

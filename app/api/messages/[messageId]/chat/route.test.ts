@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-const mocks = vi.hoisted(() => ({ source: vi.fn(), agent: vi.fn(), run: vi.fn(), begin: vi.fn(), finish: vi.fn() }));
+const mocks = vi.hoisted(() => ({ source: vi.fn(), agent: vi.fn(), run: vi.fn(), begin: vi.fn(), finish: vi.fn(), resolveFiles: vi.fn(), fileInputs: vi.fn() }));
 vi.mock('@/lib/messages/messageDatabase', () => ({ loadMessageByShortcode: mocks.source, MESSAGE_RESPONSE_HEADERS: { 'Cache-Control': 'private, no-store' } }));
 vi.mock('@/lib/agents/agentDatabase', () => ({ loadManagedAgent: mocks.agent }));
 vi.mock('@/lib/agents/agentRuntime', () => ({ runManagedAgent: mocks.run }));
 vi.mock('@/lib/messages/messageConversationDatabase', () => ({ beginMessageChatTurn: mocks.begin, finishMessageChatTurn: mocks.finish }));
+vi.mock('@/lib/messages/messageAttachmentDatabase', () => ({ resolveChatAttachments: mocks.resolveFiles, createChatAttachmentInputs: mocks.fileInputs }));
 import { POST } from './route';
 import { TEST_MESSAGE } from '@/lib/messages/messageTestFixtures';
 const params = { params: Promise.resolve({ messageId: TEST_MESSAGE.shortcode }) };
@@ -60,5 +61,21 @@ describe('message-specific Book chat', () => {
             method: 'POST', headers: { host: 'pavolhejny.cz' }, body: JSON.stringify({ messages: [{ role: 'user', content: '?' }], conversationId: 'not-a-uuid' }),
         }), params);
         expect(response.status).toBe(400); expect(mocks.begin).not.toHaveBeenCalled(); expect(mocks.run).not.toHaveBeenCalled();
+    });
+    it('records resolved attachments before generation and refuses files from a different chat', async () => {
+        const attachment = { id: '6c21d70d-0991-4a1d-a2f9-39d599148b5b', name: 'screen.png', contentType: 'image/png', byteLength: 42 };
+        const turns = [{ role: 'user', content: 'What is in the screenshot?', attachments: [attachment] }];
+        const files = [{ id: attachment.id, object_key: 'private/stored-image' }];
+        const inputs = [{ kind: 'image', label: 'Screenshot', url: 'https://cdn.example/temporary' }];
+        mocks.resolveFiles.mockResolvedValueOnce({ turns, files }); mocks.fileInputs.mockResolvedValueOnce(inputs);
+        const response = await POST(request(turns), params);
+        expect(response.status).toBe(200);
+        expect(mocks.resolveFiles).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), turns);
+        expect(mocks.begin).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), expect.any(String), TEST_MESSAGE.introduction, turns);
+        expect(mocks.begin.mock.invocationCallOrder[0]).toBeLessThan(mocks.fileInputs.mock.invocationCallOrder[0]);
+        expect(mocks.run.mock.calls[0][4]).toEqual(inputs);
+        mocks.begin.mockClear(); mocks.run.mockClear(); mocks.resolveFiles.mockRejectedValueOnce(new Error('Wrong scope'));
+        const denied = await POST(request(turns), params);
+        expect(denied.status).toBe(400); expect(mocks.begin).not.toHaveBeenCalled(); expect(mocks.run).not.toHaveBeenCalled();
     });
 });

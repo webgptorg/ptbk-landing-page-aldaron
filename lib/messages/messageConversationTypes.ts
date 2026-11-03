@@ -1,3 +1,5 @@
+import type { MessageChatAttachment } from './messageAttachments';
+
 export type MessageConversation = {
     readonly conversationId: string;
     readonly startedAt: string;
@@ -16,6 +18,7 @@ export type RecordedMessageChatTurn = {
     readonly errorMessage: string | null;
     readonly createdAt: string;
     readonly completedAt: string | null;
+    readonly attachments?: readonly MessageChatAttachment[];
 };
 
 export type MessageConversationPage = { conversations: MessageConversation[]; hasMore: boolean };
