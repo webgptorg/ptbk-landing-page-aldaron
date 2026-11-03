@@ -33,7 +33,7 @@ describe('public sharing preview coverage', () => {
             const knownBook = COMMON_KNOWLEDGE_BOOKS.some((book) => definition.path === `/book/${book.slug}`);
             const legalPath = /^\/(cs|en)\/legal\/[^/]+$/.exec(definition.path);
             const imageSource = knownBook ? '/book/[slug]/opengraph-image.tsx'
-                : legalPath ? `/${legalPath[1]}${legalPath[1] === 'cs' ? '/(marketing)' : ''}/legal/[document]/opengraph-image.tsx`
+                : legalPath ? `/${legalPath[1]}${legalPath[1] === 'cs' ? '/(marketing)' : ''}/legal/[document]/opengraph-image${legalPath[1] === 'cs' ? '/route.tsx' : '.tsx'}`
                 : `${definition.path}/opengraph-image.tsx`;
             expect(existsSync(join(process.cwd(), 'app', imageSource))).toBe(true);
             if (domain) {
