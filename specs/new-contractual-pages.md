@@ -1,21 +1,27 @@
-# Smluvní a licenční stránky — 2. listopadu 2026
+# Smluvní a licenční stránky — 3. listopadu 2026
 
 Vlastník výslovně požádal o zveřejnění návrhů na hlavním webu a push do `main`. Toto zadání nahrazuje dřívější omezení marketingových úkolů, které zakazovalo měnit právní texty. Nejde o přijetí návrhů smluv s třetí osobou.
 
 - `/cs/podminky-produktu` a `/en/podminky-produktu`: samostatný neúčinný návrh B2B produktu. Dosavadní smlouvy workshopů a komunity se nepřepisují.
 - `/cs/partnerske-podminky` a `/en/partnerske-podminky`: neúčinný návrh programu agentur, nikoli zveřejnění individuálních obchodních podmínek koordinátora.
-- `/cs/licence` a `/en/licence`: dosavadní verzované licenční oznámení a neúčinný návrh budoucího komerčního/continuity grantu. Rozpor placený engine versus obecný bezplatný komerční self-hosting zůstává výslovně otevřený.
+- `/cs/licence` a `/en/licence`: dosavadní verzované licenční oznámení a neúčinný návrh budoucích oprávnění. Placeným produktem programu je komerční aplikace. Návrh sám neuděluje nová trvalá ani neodvolatelná práva k enginu a neodebírá dřívější granty.
 - Obě existující varianty ochrany osobních údajů i jejich marketingové aliasy používají jeden aktualizovaný obsah. Jmenuje Neonmedia, účely, rozsah, právní základy a odděluje kontaktní evidenci od pracovního obsahu enginu. Text nenahrazuje potřebné smlouvy správců/zpracovatelů.
 
 Patička odkazuje na návrhy s jasným označením; uživatel schválil jejich veřejné zpřístupnění. Návrhy mají `noindex` a nejsou v sitemap, nejsou však neveřejné ani chráněné před přístupem. Žádné interní rozpočty, individuální podíly koordinátora nebo vyjednávací otázky se na těchto stránkách nezveřejňují.
 
 ## Obsah a hranice návrhu
 
-Partnerský základ je skutečně uhrazená způsobilá softwarová licence bez DPH po vratkách, bez odečtení běžného poplatku brány. Roční bonus musí být popsán zvlášť: při ceně deseti měsíců a dvanácti výplatách po 20 % měsíčního základu činí 24 % roční platby. Zveřejnění nezavádí roční tarif do existujícího ceníku ani kalkulačky.
+Pracovní sazby podle odpovědí z 3. listopadu jsou 17 % při měsíční a 20 % při roční platbě komerční aplikace. Základem je uhrazená způsobilá softwarová část bez DPH po slevách a přípustných opravách, bez poplatku brány. Dřívější samostatný roční bonus efektivně 24 % není automaticky přičten k nové sazbě: jeho souběh s tvrzením „až 20 %“ vyžaduje výslovné rozhodnutí. Jde o neúčinný návrh; starší přijaté dohody a stávající modelové kalkulace se samotnou právní stránkou nemění. Roční tarif se neaktivuje.
 
 Atribuce identifikuje právnickou osobu, skutečné klientské prostředí a potvrzený obchod. Nejde o trvalou rezervaci celého IČO. Technická migrace nárok neruší; pozdní platba odloží výplatu a skutečné ukončení vyžaduje nové posouzení. Samostatně se řeší předání péče, doba nároku a případný odkup. Neodsouhlasený výkupní násobek ani cenový koridor nesmějí být vydávány za sjednané podmínky.
 
-Podpora se nesmí omezit pouze na semver-stable verze: aktuální běžně distribuované verze mají číselné prerelease označení. Výslovně podporovaná produkční řada, frekvence vydávání, automatická aktualizace a lidské SLA jsou čtyři různé věci. Navržené lhůty nejsou tvrzením o dosavadní garanci.
+Vlastník nově výslovně vyloučil všechna prerelease vydání. Návrh politiky proto podporuje stabilní řady major.minor od 0.118, každou alespoň 90 dní od prvního stabilního vydání a vždy jen její nejnovější stabilní patch. Nový patch neobnovuje celou lhůtu. Nejméně jedna stabilní podporovaná řada musí existovat po dobu podpory. Historická `0.118.0-0` z 11. října 2026 a aktuální `0.119.0-47` jsou prerelease, nejsou přeznačeny jako stabilní. Před přijetím SLA je nutné skutečně vydat nebo doložit stabilní podporovanou řadu. Reborn cleanup probíhal již u 0.115; řada 0.118 je navržená obchodní hranice, nikoli tvrzení o prvním commitu celé větve.
+
+Návrh mění oznámení ceny při obnově na 30 dní bez pevného procentního koridoru; odděluje změnu ceny od změny sazby partnera. Pracovní slevová pravomoc je do 30 % na první objednané období bez automatického souběhu s jinými slevami. Pravidla zůstávají neúčinná do přijetí konkrétní verze.
+
+U skutečného obchodního zastoupení nelze interním měsíčním rozvrhem roční platby ani čekáním na bankovní payout obejít § 2504 odst. 2 a § 2505. Opravy provizí respektují § 2507 a § 2519. Návrh výpovědi 60 dní zachovává zákonná měsíční minima i konec kalendářního měsíce. Samostatná smlouva s koordinátorem, její rozpočet, výpočet výsledku a otázky zůstávají mimo veřejný repozitář.
+
+Zásady uvádějí podmíněné předání dat skutečně zvolenému AI poskytovateli a rozlišují naše funkce, zpracování podle pokynů zákazníka a přímý zákaznický účet. Zmínka OpenAI nebo Anthropic nedokládá použití v každém nasazení. Konkrétní smluvní subjekt, retence, region a předání mimo EHP se ověřují pro danou cestu. Úprava zásad neuzavírá za strany smlouvu podle čl. 26 nebo 28 GDPR.
 
 Texty jsou serverově vykreslené v `NewLegalPage`, sdílejí `lib/legal` a data publikace. Celý právní obsah se nepřibaluje do klientského JavaScriptu hlavních marketingových stránek. Jazykové varianty, canonical, social cards, stav návrhu a datum mají být stejné ve všech cestách.
 

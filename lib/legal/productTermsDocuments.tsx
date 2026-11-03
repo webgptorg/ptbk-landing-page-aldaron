@@ -7,7 +7,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
     cs: {
         title: 'Podmínky produktu Promptbook',
         publication: {
-            date: '2026-11-02', isDraft: true,
+            date: '2026-11-03', isDraft: true,
             notice: 'Pracovní návrh, dosud neúčinný. Zveřejnění není nabídkou k uzavření smlouvy ani změnou již sjednaných práv. Použije se až po výslovném přijetí konkrétní verze v objednávce. Ceny a otevřené varianty se tímto textem neaktivují.',
         },
         perex: 'Návrh pravidel pro firemní předplatné, produktovou podporu a vztah mezi klientem, jeho agenturou a dodavatelem Promptbooku. Podmínky workshopů a členství v komunitě zůstávají samostatné.',
@@ -22,7 +22,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Co předplatné obsahuje',
                 bullets: [
-                    'Oprávnění k produkčnímu použití enginu v rozsahu komerční licence, přístup k poskytované ovládací aplikaci a spojovací službě relay a sjednané produktové služby. Engine běží v prostředí zákazníka. Aplikace a relay nejsou náhradou jeho vlastního serveru.',
+                    'Placené oprávnění k užívání komerční ovládací aplikace Promptbook, sjednané spojovací služby relay a objednané produktové služby. Samostatný engine běží v prostředí zákazníka a jeho práva určuje licence konkrétní verze. Předplatné aplikace se automaticky nevydává za povinnou platbu za každé samostatné použití enginu.',
                     'Jedno klientské prostředí je konkrétní samostatný projekt zákazníka s vymezenou agendou a oprávněními, nikoli jeden fyzický počítač nebo jeden agent. Oddělená oddělení jedné firmy mohou mít různé samostatné licence. Pouhé přejmenování či technická migrace nové prostředí nevytváří.',
                     'Vlastní zdrojový kód a práva ke konkrétní verzi se řídí její přiloženou licencí. Předplatné samo nepřepisuje licence cizích komponent ani již udělená oprávnění. Pracovní návrh licenčních oprávnění je na stránce Licence enginu.',
                     'AI modely, tokeny, hosting klientského enginu, databáze, úložiště, externí nástroje, instalace, integrace, individuální školení, konzultace a zakázková práce se hradí zvlášť. Obecná dokumentace a zveřejněná výuková videa nejsou samostatným placeným školením.',
@@ -49,7 +49,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     'První věcnou reakci na řádně doručené hlášení problému platformy poskytneme do 16 pracovních hodin, pondělí až pátek 9:00–17:00 v časové zóně Europe/Prague mimo české svátky. Reakcí je první posouzení, žádost o nezbytné podklady nebo návrh dalšího postupu; automatická doručenka nestačí.',
                     'Objednávka určí jeden pověřený technický kontakt a kanál hlášení. Zákazník poskytne popis, relevantní verzi a dostupné podklady; čekání na nezbytnou součinnost se nezapočítává do doby následného řešení. První reakce není garancí opravy, dostupnosti ani konkrétního obchodního výsledku. Nejde o nepřetržitou pohotovost nebo servis cizích systémů.',
-                    'Podporována je vydávací řada výslovně označená AI Webem pro produkční podporu a sjednaná konfigurace. Číselná přípona prerelease sama podporu nevylučuje. Seznam je společný pro zákazníky stejného tarifu; nevzniká individuální větev ani neomezená údržba historických verzí. Návrh počítá s 90denním oznámením konce podpory a uvedením nástupnické řady. Toto období je navržený parametr, nikoli závěr z dosavadní frekvence vydávání.',
+                    "Navržená politika podpory se vztahuje na stabilní vydání řady 0.118 a novějších. Řada znamená dvojici major.minor. Každou takovou nově vydanou řadu podporujeme nejméně 90 kalendářních dní od prvního stabilního vydání této řady; v jejím rámci se podpora vztahuje vždy jen na nejnovější stabilní patch. Nový patch tuto devadesátidenní lhůtu celé řady nespouští znovu. Podpora zahrnuje posouzení hlášení a podle potřeby vydávání opravných patchů, nikoli garantovaný termín opravy nebo novou funkci.",
+                    "Po dobu poskytování této podpory musí být k dispozici nejméně jedna podporovaná stabilní řada a její nejnovější patch. Prerelease vydání včetně číselných přípon, alpha, beta a RC jsou z této politiky vyloučena. Uvedení řady 0.118 neprohlašuje její historická prerelease vydání za stabilní ani zpětně nezakládá SLA. Před přijetím tohoto návrhu musí být skutečně dostupná alespoň jedna stabilní podporovaná řada; seznam a konec podpory se zveřejní před objednávkou. Nevzniká individuální větev ani neomezená podpora historie.",
                 ],
             },
             {
@@ -62,8 +63,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Změny cen a podmínek',
                 paragraphs: [
-                    'Nová cena se použije nejdříve pro následující obnovované období po oznámení nejméně 60 dní předem. Již předplacené období nepřeceníme zpětně. Zákazník může obnovení před účinností změny bez sankce zrušit. Zlevnění a dočasné slevy se automaticky nepřepisují do jiných objednávek.',
-                    'Změny dlouhodobých podmínek lze oznámit v přiměřeném rozsahu z právních, bezpečnostních, technických a ekonomických důvodů nejméně 60 dní předem, s uvedením změn a práva změnu odmítnout a závazek ukončit před její účinností. Samotné vyvěšení jiného textu na webu nepřepisuje přijatou smlouvu. Nové granty licence nepůsobí zpětně.',
+                    'Nová cena se použije nejdříve pro následující obnovované období po oznámení nejméně 30 dní předem. Již předplacené období nepřeceníme zpětně. Zákazník může obnovení před účinností změny bez sankce zrušit. Zlevnění a dočasné slevy se automaticky nepřepisují do jiných objednávek.',
+                    'Změny dlouhodobých podmínek lze oznámit v přiměřeném rozsahu z právních, bezpečnostních, technických a ekonomických důvodů nejméně 30 dní předem, s uvedením změn a práva změnu odmítnout a závazek ukončit před její účinností. Samotné vyvěšení jiného textu na webu nepřepisuje přijatou smlouvu. Nové granty licence nepůsobí zpětně.',
                     'Budoucí plán zahrnující spotřebu AI nebo další infrastrukturu musí před objednáním oddělit cenu softwarové složky a spotřebních služeb. Partnerská provize se automaticky nevztahuje na tokeny, průtokové infrastrukturní platby nebo individuální práci.',
                 ],
             },
@@ -95,7 +96,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
     en: {
         title: 'Promptbook product terms',
         publication: {
-            date: '2026-11-02', isDraft: true,
+            date: '2026-11-03', isDraft: true,
             notice: 'Discussion draft, not yet effective. Publication is neither an offer nor a change to existing rights. It applies only when a specific version is expressly accepted in an order. This text does not activate prices or unresolved alternatives.',
         },
         perex: 'Proposed rules for business subscriptions, product support and the respective roles of the customer, its agency and Promptbook. Existing workshop and community terms remain separate.',
@@ -110,7 +111,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Subscription scope',
                 bullets: [
-                    'Production use of the engine within the commercial licence, access to the supplied control application and relay, and agreed product services. The engine runs in the customer environment. The application and relay do not replace the customer server.',
+                    'Paid permission to use the commercial Promptbook control application, agreed relay connectivity and ordered product services. The standalone engine runs in the customer’s environment under its version-specific licence. Application subscription is not automatically presented as compulsory payment for every independent engine use.',
                     'One client environment means a defined separate customer project with its own workflow and permissions, not a physical server or one agent. Separate departments may have separate licences. Renaming or a technical migration does not by itself create a new environment.',
                     'Rights to a particular source version follow its accompanying licence. A subscription does not rewrite third-party licences or rights already granted. The proposed commercial grant is described on the Engine licence page.',
                     'Models, tokens, engine hosting, databases, storage, external tools, installation, integration, individual training, consulting and custom work are charged separately. General documentation and published instructional videos are not separate paid training.',
@@ -137,7 +138,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     'We provide a first substantive response to a properly received platform issue within 16 working hours, Monday–Friday 09:00–17:00 Europe/Prague excluding Czech public holidays. A response is an initial assessment, request for necessary information or proposed next step; an automated receipt is insufficient.',
                     'The order identifies one authorised technical contact and reporting channel. The customer provides a description, relevant version and available evidence; time awaiting necessary cooperation is excluded from subsequent resolution time. The first response is not a guaranteed fix, availability commitment or business outcome. There is no continuous on-call service or support for third-party systems.',
-                    'A supported release line is expressly designated by AI Web for production support, with the agreed configuration. A numeric prerelease suffix does not itself exclude support. The policy is shared across customers on the same plan and does not establish an individual branch or unlimited historic maintenance. The proposal allows 90 days’ notice of support retirement and identifies a successor line. This is a proposed parameter, not an inference from past release frequency.',
+                    "The proposed support policy covers stable releases in line 0.118 and later. A line means the major.minor pair. Each newly released line receives at least 90 calendar days of support from its first stable release; within that line only its latest stable patch is supported. A new patch does not restart the line’s 90-day period. Support includes assessing reports and issuing corrective patches as needed, without a guaranteed repair deadline or new features.",
+                    "At least one supported stable line and its latest patch must remain available throughout the provision of this support. Prereleases, including numeric suffixes, alpha, beta and RC, are excluded. Naming line 0.118 does not reclassify historical prereleases as stable or create retrospective SLA. Before this proposal is accepted at least one stable supported line must actually be available; the list and retirement dates are disclosed before ordering. No individual branch or unlimited historic maintenance is included.",
                 ],
             },
             {
@@ -150,8 +152,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Price and contract changes',
                 paragraphs: [
-                    'A new price applies no earlier than the next renewal after at least 60 days’ notice. Prepaid periods are not repriced retrospectively. Customers may cancel renewal without penalty before a change takes effect. Price reductions and temporary offers do not automatically amend other orders.',
-                    'Reasonable changes to long-term terms for legal, security, technical or economic reasons require at least 60 days’ notice describing the changes and the right to reject them and terminate before effectiveness. Replacing a webpage does not itself amend an accepted agreement. New licence grants are not retrospective.',
+                    'A new price applies no earlier than the next renewal after at least 30 days’ notice. Prepaid periods are not repriced retrospectively. Customers may cancel renewal without penalty before a change takes effect. Price reductions and temporary offers do not automatically amend other orders.',
+                    'Reasonable changes to long-term terms for legal, security, technical or economic reasons require at least 30 days’ notice describing the changes and the right to reject them and terminate before effectiveness. Replacing a webpage does not itself amend an accepted agreement. New licence grants are not retrospective.',
                     'A future plan including AI usage or infrastructure must identify its software and consumption components before purchase. Partner commission does not automatically cover tokens, pass-through infrastructure charges or individual services.',
                 ],
             },

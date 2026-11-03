@@ -10,7 +10,7 @@ export const ENGINE_LICENSE_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     cs: {
         title: 'Licence enginu Promptbook',
         publication: {
-            date: '2026-11-02', isDraft: true,
+            date: '2026-11-03', isDraft: true,
             notice: 'Tato stránka rozlišuje dosavadní licenční oznámení a neúčinný návrh budoucích oprávnění. Návrh sám neuděluje novou licenci a nemění práva ke staženým verzím. Rozhodná zůstává licence přiložená ke konkrétní distribuci a skutečně přijatá smlouva.',
         },
         perex: 'Zdrojový kód, placené produktové služby a právo pokračovat ve vlastním provozu jsou různé věci. Zde uvádíme současný podklad a návrh jejich přesného oddělení.',
@@ -33,16 +33,16 @@ export const ENGINE_LICENSE_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
             {
                 heading: 'Pokračování již oprávněného provozu',
                 paragraphs: [
-                    'Navržená doložka: Zákazník, který oprávněně získal a zaplatil produkční použití konkrétní verze pro své prostředí, smí tuto verzi v tomto prostředí nadále samostatně provozovat, zálohovat a upravovat i po skončení předplatného nebo poskytování služeb AI Webu. Tato oprávnění k již pokryté verzi nejsou časově omezena a lze je vykonávat i s pomocí třetího vývojáře. Závažné porušení licence má samostatný postup nápravy; zákonná práva zůstávají zachována.',
+                    "Tento návrh neposkytuje nové obecné neodvolatelné nebo časově neomezené oprávnění ke všem verzím enginu. Zda konkrétní právo trvá i po skončení placené aplikace, určuje licence přiložená k dané verzi a výslovná individuální dohoda. Dříve platně získaná oprávnění nelze pouhou úpravou tohoto webu odebrat.",
                     'Pokračování neobsahuje bezplatné nové verze, lidskou podporu, SLA, správu serveru, přístup k ukončené hostované aplikaci, provoz relay ani účty a modely třetích stran. Zákazník musí mít potřebné zálohy, zdroje a vlastní přístupy. Fork nepřebírá automaticky ochranné známky ani všechny distribuční kanály.',
-                    'Změna vlastníka AI Webu nebo prodej produktu samy neruší takto dříve platně nabytá oprávnění. Tato navržená doložka chrání pokračování konkrétního oprávněného nasazení; není totožná s bezplatným komerčním self-hostingem pro kohokoli.',
+                    "Změna vlastníka AI Webu nebo prodej produktu samy neruší dříve platně nabytá oprávnění. Případná dlouhodobá licence pro konkrétního obchodního partnera musí samostatně vymezit verzi, účel, trvání, úpravy a pomoc dalšího vývojáře; nevzniká automaticky všem zákazníkům z tohoto návrhu.",
                 ],
             },
             {
-                heading: 'Otevřené rozhodnutí o bezplatném samostatném enginu',
+                heading: 'Placená aplikace a samostatný engine',
                 paragraphs: [
-                    'Před přijetím finální licence je třeba zvolit obchodní model: buď je produkční licence enginu placená s výše navrženým právem pokračovat na získané verzi, nebo má kdokoli právo na bezplatný samostatný komerční provoz bez aplikace a podpory a platí se produktové služby. Obě varianty nelze současně prezentovat jako povinnou platbu za stejné oprávnění.',
-                    'Tento draft ani obecný odkaz na BUSL mezi variantami nerozhoduje. Zvolená varianta musí být shodná v objednávce, licenčním souboru konkrétního vydání, ceníku a příslušných metadatech balíčku. Úplná licence vydané verze musí být uchovatelná a dostupná offline, nejen pod proměnlivou URL.',
+                    "Placeným produktem partnerského programu je komerční ovládací aplikace a objednané služby. Bezplatné samostatné použití enginu bez platby nevytváří partnerskou provizi. Tato volba provizního základu ale sama nerozšiřuje ani neomezuje práva enginu pod jeho dosavadní licencí.",
+                    "Úplné podmínky samostatného enginu musí být vymezeny pro každé příslušné vydání a shodovat se s objednávkou a metadaty balíčku. Musí být uchovatelné offline. Nevyplněné parametry BUSL ani tento návrh nelze vydávat za nově přijatou úplnou licenci.",
                 ],
             },
             {
@@ -65,7 +65,7 @@ export const ENGINE_LICENSE_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     en: {
         title: 'Promptbook engine licence',
         publication: {
-            date: '2026-11-02', isDraft: true,
+            date: '2026-11-03', isDraft: true,
             notice: 'This page distinguishes the existing licence notice from a non-effective proposal for future rights. The proposal grants no new licence and does not change downloaded versions. The notice supplied with the particular distribution and the actually accepted agreement remain controlling.',
         },
         perex: 'Source availability, paid product services and the right to continue independent operation are separate matters. This page identifies the current notice and proposes a clear separation.',
@@ -88,16 +88,16 @@ export const ENGINE_LICENSE_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
             {
                 heading: 'Continuity of an already authorised deployment',
                 paragraphs: [
-                    'Proposed clause: A customer that lawfully obtained and paid for production use of a specific version in its environment may continue independently to operate, back up and modify that version in that environment after subscription or AI Web service termination. These rights to the already covered version are not time-limited and may be exercised with another developer. Serious licence breach has a separate cure process; statutory rights remain.',
+                    "This proposal grants no new general irrevocable or perpetual permission for all engine versions. Any permission surviving the paid application follows the licence accompanying the specific version and an express individual agreement. Editing this website cannot withdraw previously validly acquired rights.",
                     'Continuity does not include free new versions, human support, SLA, server administration, access to a discontinued hosted application, relay operation or third-party accounts and models. Customers must retain the necessary backups, source and their own access. A fork does not automatically acquire trademarks or distribution channels.',
-                    'An AI Web ownership change or product sale does not itself cancel such previously validly acquired rights. This proposed clause protects a specific authorised deployment and is not equivalent to free commercial self-hosting for everyone.',
+                    "An ownership change or product sale does not itself cancel previously validly acquired rights. Any long-term licence for a specific business partner must separately define version, purpose, duration, modifications and assistance by another developer; this draft does not automatically give it to all customers.",
                 ],
             },
             {
-                heading: 'Open decision about a free standalone engine',
+                heading: 'Paid application and standalone engine',
                 paragraphs: [
-                    'Before adopting a final licence, the commercial model must be selected: either a paid production engine licence with the proposed right to continue an acquired version, or free standalone commercial operation for anyone without the application and support, with paid product services. Both cannot simultaneously be described as a compulsory payment for the same permission.',
-                    'Neither this draft nor a generic BUSL link resolves that choice. The selected model must match the order, versioned licence, pricing and package metadata. Released terms must be retainable offline, not available only at a changeable URL.',
+                    "The paid product covered by the partner programme is the commercial control application and ordered services. Free independent engine use without payment earns no partner commission. Defining that commission base does not itself extend or restrict rights under the existing engine licence.",
+                    "Complete standalone-engine terms must be defined for each relevant release and match the order and package metadata. They must be retainable offline. Unspecified BUSL parameters and this proposal are not a newly accepted complete licence.",
                 ],
             },
             {

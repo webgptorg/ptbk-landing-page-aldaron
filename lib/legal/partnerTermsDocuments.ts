@@ -7,7 +7,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
     cs: {
         title: 'Partnerské podmínky Promptbook',
         publication: {
-            date: '2026-11-02', isDraft: true,
+            date: '2026-11-03', isDraft: true,
             notice: 'Neúčinný návrh pro připomínky. Nevytváří partnerský účet, provizní nárok ani smlouvu a nemění starší dohody. Konkrétní partner, přijatá verze, území, platby a případné odchylky musí být potvrzeny v partnerské smlouvě. Číselné lhůty níže jsou návrhy k jednání.',
         },
         perex: 'Pravidla pro agentury a integrátory, kteří přivádějí a dlouhodobě obsluhují konkrétní klientská prostředí. Odměna za software je oddělená od vlastní práce partnera a od samostatné dohody s koordinátorem programu.',
@@ -32,23 +32,24 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Základní provize a vyloučené služby',
                 paragraphs: [
-                    'Základní provize je 20 % skutečně uhrazené softwarové licenční složky přivedeného a potvrzeného prostředí, bez DPH a po slevách, dobropisech, vratkách a chargebacku. Běžný poplatek platební brány základ partnera nesnižuje. U karty je rozhodující úspěšně dokončená a zachycená platba, nikoli pouhá autorizace, vytvořená objednávka nebo neuhrazená faktura.',
+                    "Navržené sazby jsou 17 % u měsíčního předplatného a 20 % u ročního předplatného komerční aplikace. Základem je skutečně uhrazená způsobilá softwarová složka potvrzeného prostředí, bez DPH, po slevách a po přípustných opravách. Běžné poplatky Stripe ani jiné platební brány základ agentury nesnižují. Rozhodující je zachycená úspěšná platba, nikoli pouhá autorizace nebo neuhrazená faktura; povinný zákonný vznik práva na provizi tím není odložen.",
+                    "Bezplatné užití samostatného enginu nevytváří provizi. Vrácení platby nebo chargeback opraví provizi jen v prokázaném rozsahu, v němž podle smlouvy a zákona nárok nevznikl nebo zanikl; nesplnění z důvodu na straně AI Webu není automatickým důvodem odebrat provizi obchodního zástupce.",
                     'V základní nabídce se podíl vztahuje na Start i Business. Nevztahuje se na AI tokeny a kredity, vlastní nebo cizí infrastrukturu, platební daně ani na implementaci, konzultace, kurzy, individuální školení a jinou práci. Příjmy z vlastní práce náleží jejímu poskytovateli. Pro vlastní nákup partnera a víceúrovňové doporučování nevzniká automaticky provize.',
                     'U balíčku obsahujícího software a spotřební služby musí být předem popsána cena způsobilé softwarové složky a skutečné odlišné plnění. Nelze dodatečně libovolně přeznačit licence na infrastrukturu jen kvůli snížení provize. Nový tarif neslibuje stejné procento z celé smíšené ceny.',
                 ],
             },
             {
-                heading: 'Roční předplatné a výslovný bonus',
+                heading: 'Roční předplatné a samostatný bonus',
                 paragraphs: [
-                    'Roční platba se pro výplaty rozvrhne po měsících poskytování služby. Celoroční provize se nevyplatí předem. Tento draft nezavádí roční tarif; použije se jen tehdy, pokud byl roční plán skutečně objednán a zaplacen.',
-                    'Navržená výjimka pro roční plán za cenu deseti měsíců: po dobu dvanácti hrazených měsíců partner dostává za každý měsíc 20 % referenční měsíční ceny způsobilé softwarové licenční složky bez DPH uvedené v objednávce při nákupu ročního plánu. Dva měsíce navíc tvoří zvláštní partnerský bonus. Roční příjem 10 000 Kč při referenční měsíční ceně 1 000 Kč znamená 12 × 200 Kč = 2 400 Kč, tedy 24 % roční platby. Není to 20 % skutečně zaplacené roční částky.',
-                    'Referenční cena se během tohoto předplaceného roku zpětně nemění. Další slevy, přechod na jiný plán a mimořádná roční nabídka vyžadují předem uvedený provizní základ. Vratka za neposkytnuté budoucí měsíce ruší odpovídající budoucí provizi a bonus. Již vyplacená odměna se opraví pouze v rozsahu vrácené platby za období, za které byla vyplacena; stejnou částku nelze krátit dvakrát. Povinná zákonná práva zůstávají zachována.',
+                    "Pracovní výpočet roční provize je 20 % skutečně zaplacené způsobilé roční ceny po dalších slevách. Roční tarif se tímto návrhem neaktivuje. Bonus nad tento výpočet vznikne jen samostatným výslovným ujednáním, které určí referenční cenu, celkovou odměnu a její vztah ke slevám; není automatickou součástí tvrzení „až 20 %“.",
+                    "Pro ekonomickou evidenci lze roční příjem rozvrhnout do měsíců služby. U spolupráce, která je podle skutečného obsahu obchodním zastoupením, však tento rozvrh neodkládá vznik a splatnost provize podle § 2504 odst. 2 a § 2505 občanského zákoníku. Zaplacení celého ročního závazku zákazníkem může založit nárok na provizi za celý zaplacený obchod; jeho splatnost nelze automaticky roztáhnout do dvanácti měsíců.",
+                    "Předplacenou cenu a potvrzený základ nelze zpětně měnit. Pokud byl samostatně sjednán bonus, jeho vypořádání popíše objednávka. Stejnou vratku nebo jiné přípustné snížení nelze započítat dvakrát. Zákonná práva obchodního zástupce mají přednost před podmínkou přijetí peněz nebo interním rozvrhem.",
                 ],
             },
             {
                 heading: 'Vyúčtování a opravy',
                 paragraphs: [
-                    'Navržený postup: přehled za předchozí kalendářní měsíc do 10. dne, připomínky do dalších 10 dní, zaplacení nesporné částky do 15 dní od doručení řádného dokladu, pokud jej právní a daňové nastavení vyžaduje. Není sjednáno minimální výplatní saldo. Datum 10. dne je provozní volba programu, nikoli obecný tržní standard.',
+                    "Navržený postup: přehled za předchozí měsíc do 10. dne, připomínky do dalších 10 dní a úhrada nesporné částky do 15 dní od řádného dokladu, je-li vyžadován. U obchodního zastoupení nejpozději poslední den měsíce následujícího po čtvrtletí vzniku nároku; nedoručení dokladu ani spor o jinou položku nesmějí tuto zákonnou mez posunout. Námitková lhůta nezbavuje partnera zákonného práva na kontrolu výpočtu. Není minimální výplatní saldo.",
                     'Přehled rozlišuje klientské prostředí, platbu, období, tarif, slevu, vratku, bonus, sazbu a opravy předchozích období. Partner poskytne správné fakturační a bankovní údaje. DPH z jeho odměny se řeší podle jeho skutečného daňového postavení.',
                     'Vratka či chargeback se promítne do následujícího vyúčtování. Případný přeplatek lze započíst proti další splatné provizi; pokud další provize nevznikají, partner vrátí doložený přeplatek do 30 dní od doručení jeho vyúčtování. Jiné splátky lze sjednat individuálně. Není-li chyba partnera, nevzniká automaticky nárok přenést na něj všechny provozní poplatky nebo jiné škody.',
                 ],
@@ -72,8 +73,8 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Ceny, slevy a změny programu',
                 paragraphs: [
-                    'Partner používá schválený ceník a slevový rámec. Odchylka potřebuje potvrzení AI Webu před příslibem klientovi. Provize standardně vychází ze skutečné ceny po slevě; roční bonus je jedinou výše popsanou výjimkou.',
-                    'Změny budoucích podmínek a cen se oznamují nejméně 60 dní předem a nekrátí vzniklé nároky ani již předplacené období. Zdražení i zlevnění může změnit budoucí výnos partnera. Konkrétní běžný cenový koridor a vypořádání mimořádné změny musí být doplněny do smlouvy; tento draft nevytváří neurčitou garanci stejného výdělku ani libovolné právo přepsat starou sazbu.',
+                    "AI Web a pověřený partner mohou pro novou objednávku nabídnout slevu až 30 % platného ceníku softwarové složky. Pracovní návrh ji omezuje na první objednané období; nesčítá se automaticky s roční ani jinou slevou. Vyšší, kombinovaná či trvalá výjimka vyžaduje předchozí potvrzení AI Webu. Sleva se eviduje před příslibem klientovi a provize vychází ze skutečně snížené způsobilé ceny.",
+                    "Cenu nových objednávek určuje aktuální ceník. Nová cena již běžícího předplatného se uplatní nejdříve při obnově po oznámení nejméně 30 dní předem, bez zpětného zásahu do předplaceného období. Návrh neobsahuje pevný desetiprocentní ani jiný cenový koridor; AI Web může pro budoucí obnovy změnit cenu oběma směry. Sazby 17 % a 20 % tím samy nejsou změněny. Změna budoucích podmínek potřebuje sjednaný mechanismus, odůvodněné oznámení a skutečnou možnost odmítnutí a ukončení před účinností.",
                     'Partner může změnu odmítnout a před její účinností ukončit budoucí účast s dohodnutým předáním. Samotné nové znění stránky automaticky nenahrazuje verzi, kterou partner přijal.',
                 ],
             },
@@ -88,7 +89,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Ukončení, převod produktu a odkup',
                 paragraphs: [
-                    'Běžná navržená výpověď je 60 dní, nejméně však doba vyžadovaná použitelným právem. Strany předají otevřené případy, nezbytné podklady a přístupy; zákaznická péče nesmí být zadržována kvůli vzájemnému sporu. Podstatné porušení má vlastní postup výzvy a nápravy.',
+                    "Běžná navržená výpověď je 60 dní. Je-li vztah obchodním zastoupením na dobu neurčitou, konec nastane až posledním dnem kalendářního měsíce, který splní jak těchto 60 dní, tak zákonné minimum jednoho měsíce v prvním roce, dvou ve druhém a tří ve třetím a dalších letech. Strany předají otevřené případy, podklady a přístupy; zákaznickou péči nezadrží kvůli sporu. Podstatné porušení má vlastní postup výzvy a nápravy.",
                     'Při skončení nevznikají automaticky nové nároky z nových klientů. Dosavadní vzniklé odměny, schválené rozpracované obchody a případný omezený doběh se vypořádají podle konkrétní smlouvy. Rozsah doběhu není tímto návrhem definitivně sjednán.',
                     'Partner předem souhlasí s postoupením smlouvy spolu s produktem nebo závodem nabyvateli, který převezme dohodnuté povinnosti; postoupení mu bude oznámeno. Nabyvatel může spolupráci převzít, nebo sjednat finanční vypořádání. Prodej samotné technologie automaticky neruší licence ani dluhy a nedává partnerovi podíl na celé kupní ceně.',
                     'Právo jednostranně vykoupit budoucí provize musí být výslovně sjednáno s určitelným výpočtem, rozhodným dnem, lhůtou a vypořádáním již vzniklých částek. Bez této doložky lze odkup provést jen dohodou. Libovolný násobek obratu není ověřený tržní standard; neomezený závazek nelze bez další dohody vydávat za dvanáctiměsíční nárok.',
@@ -106,7 +107,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
     en: {
         title: 'Promptbook partner terms',
         publication: {
-            date: '2026-11-02', isDraft: true,
+            date: '2026-11-03', isDraft: true,
             notice: 'Non-effective discussion draft. It creates no partner account, commission entitlement or agreement and does not amend earlier contracts. The specific partner, version, territory, payments and exceptions require a confirmed partner agreement. Numeric notice periods below are proposals.',
         },
         perex: 'Proposed rules for agencies and integrators sourcing and caring for specific client environments. Software commission is separate from the partner’s own work and the programme coordinator’s bilateral agreement.',
@@ -131,23 +132,24 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Base commission and excluded services',
                 paragraphs: [
-                    'Base commission is 20% of the actually paid software licence component of the sourced, confirmed environment, excluding VAT and after discounts, credits, refunds and chargebacks. Ordinary payment-processing fees do not reduce the partner base. Card payment means successfully completed capture, not an authorisation, order or unpaid invoice.',
+                    "The proposed rates are 17% for monthly subscriptions and 20% for annual subscriptions to the commercial application. The base is the actually paid eligible software component of the confirmed environment, excluding VAT, after discounts and permitted adjustments. Ordinary Stripe or other payment-processing fees do not reduce the agency base. Payment means successful capture, not authorisation or an unpaid invoice; mandatory statutory accrual of commission is not postponed.",
+                    "Free use of the standalone engine earns no commission. A refund or chargeback adjusts commission only to the evidenced extent the entitlement did not arise or ceased under the contract and law; non-performance caused by AI Web does not automatically remove a commercial agent’s commission.",
                     'The base offer includes Start and Business. AI tokens and credits, infrastructure, payment taxes, implementation, consulting, courses, individual training and other work are excluded. Service income belongs to its provider. The partner’s own purchase and multi-level referrals do not automatically earn commission.',
                     'A mixed software and consumption plan must identify the eligible software price and genuinely different services in advance. Licence revenue cannot later be arbitrarily relabelled as infrastructure to reduce commission. New plans do not promise the same rate on the entire blended price.',
                 ],
             },
             {
-                heading: 'Annual prepayment and express bonus',
+                heading: 'Annual prepayment and separate bonus',
                 paragraphs: [
-                    'Annual payments are allocated across months of service for commission payouts; the whole year is not paid to the partner immediately. This draft does not launch an annual plan and applies only if one is actually ordered and paid.',
-                    'Proposed exception for an annual plan priced at ten monthly payments: for twelve paid service months, the partner receives 20% of the reference monthly price of the eligible software licence component excluding VAT, stated in the order at annual purchase. The extra two months are a specific partner bonus. Annual receipts of 10,000 CZK at a reference monthly price of 1,000 CZK produce 12 × 200 CZK = 2,400 CZK, or 24% of annual receipts. This is not 20% of the actual annual payment.',
-                    'The reference price is not retrospectively changed during that prepaid year. Additional discounts, plan changes and special annual offers require an identified commission base in advance. A refund for unprovided future months cancels the corresponding future commission and bonus. Paid remuneration is adjusted only for refunded payment attributable to the period it covered; the same amount is not reduced twice. Mandatory rights remain intact.',
+                    "The working annual calculation is 20% of the actually paid eligible annual price after additional discounts. This proposal does not activate an annual plan. Any bonus above this calculation requires a separate express agreement defining the reference price, total remuneration and interaction with discounts; it is not an automatic part of the claim “up to 20%”.",
+                    "Annual receipts may be allocated across service months for management records. Where the actual relationship constitutes commercial agency, that allocation does not postpone accrual or payment under sections 2504(2) and 2505 of the Czech Civil Code. Full payment of the customer’s annual obligation may create commission on the entire paid transaction; payment cannot automatically be spread over twelve months.",
+                    "Prepaid prices and confirmed bases cannot be changed retrospectively. An expressly agreed separate bonus follows its order. The same refund or permitted reduction cannot be counted twice. Mandatory agency rights prevail over cash-receipt conditions and internal allocations.",
                 ],
             },
             {
                 heading: 'Statements and adjustments',
                 paragraphs: [
-                    'Proposed procedure: prior calendar-month statement by day 10, comments within the next 10 days, and undisputed payment within 15 days of receipt of a valid document where required by the applicable tax arrangements. No minimum payout balance is specified. Day 10 is a programme operating choice, not a universal market standard.',
+                    "Proposed procedure: statement for the previous month by the 10th, comments within another 10 days and undisputed payment within 15 days of a proper invoice if required. In commercial agency, payment is due no later than the last day of the month after the quarter in which entitlement arose; missing invoices and unrelated disputes cannot extend this statutory deadline. The comment period does not extinguish statutory inspection rights. There is no minimum payout balance.",
                     'Statements identify the environment, payment, period, plan, discount, refund, bonus, rate and prior adjustments. Partners provide accurate billing and bank details; VAT on their remuneration follows their actual tax status.',
                     'Refunds and chargebacks are corrected in the next statement. A documented overpayment may be offset against future payable commission; absent further commission, the partner repays the evidenced overpayment within 30 days of its statement. Different instalments may be individually agreed. Without partner fault, all operating fees and other losses are not automatically shifted to the partner.',
                 ],
@@ -171,8 +173,8 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Prices, discounts and programme changes',
                 paragraphs: [
-                    'Partners use the approved price list and discount authority. Exceptions need AI Web confirmation before a customer promise. Commission normally follows the actual discounted price; the annual bonus is the express exception above.',
-                    'Future price and programme changes require at least 60 days’ notice and do not reduce accrued entitlements or prepaid periods. Increases and reductions may both change future partner income. A specific ordinary pricing corridor and extraordinary-change settlement must be added to the agreement; this draft creates neither an indefinite same-income guarantee nor arbitrary power to rewrite an old rate.',
+                    "AI Web and an authorised partner may offer up to 30% off the current software list price for a new order. The working proposal limits this to the first ordered term; it does not automatically stack with annual or other discounts. Larger, combined or permanent exceptions need prior AI Web confirmation. The discount is recorded before the customer promise and commission follows the actual discounted eligible price.",
+                    "New orders follow the current list price. A changed price for an existing subscription applies no earlier than renewal after at least 30 days’ notice, without retrospective repricing of prepaid terms. The proposal includes no fixed 10% or other price corridor; AI Web may change future renewal prices in either direction. This does not itself amend the 17% or 20% commission rates. Future programme changes require an agreed mechanism, reasoned notice and a real opportunity to reject and terminate before effectiveness.",
                     'A partner may reject a change and end future participation with an agreed handover before it takes effect. A new webpage does not automatically replace the version previously accepted.',
                 ],
             },
@@ -187,7 +189,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Termination, product transfer and buyout',
                 paragraphs: [
-                    'Ordinary proposed notice is 60 days, or longer where applicable law requires. Parties hand over open matters, necessary records and access; customer care must not be withheld because of their dispute. Material breach has a separate notice and cure procedure.',
+                    "Ordinary proposed notice is 60 days. For indefinite commercial agency, termination falls on the final calendar-month day satisfying both that 60-day period and the statutory minimum of one month in year one, two in year two and three in subsequent years. Parties hand over open matters, records and access without withholding customer care over a dispute. Material breach has a separate notice and cure procedure.",
                     'Termination does not automatically create new entitlements for new customers. Accrued remuneration, approved open deals and any limited tail follow the specific agreement. This draft does not finally agree the tail scope.',
                     'Partners give advance consent to assignment with the product or business to an acquirer assuming the agreed duties, with notice of assignment. An acquirer may continue cooperation or agree a settlement. Selling the technology alone does not cancel licences or debts and grants no automatic share in the whole purchase price.',
                     'Unilateral purchase of future commission requires an express clause with a determinable calculation, valuation date, notice and separate settlement of accrued amounts. Without it, buyout is by agreement only. An arbitrary revenue multiple is not a verified market standard; an unlimited entitlement cannot simply be treated as a twelve-month claim.',

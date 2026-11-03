@@ -6,6 +6,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
 ### Public routes
 
 - The owner's 2 November 2026 instruction authorizes legal proposal pages and their footer links on `main`.
+  The 3 November revision proposes 17% monthly / 20% annual paid-application commission, separately agreed bonuses,
+  30-day renewal-price notices, bounded discount authority and stable-only support from line 0.118. These remain
+  non-effective proposals; no annual tariff or previously accepted commission is activated or amended. Agency
+  accrual/payment and notice clauses preserve mandatory Czech protections. AI-provider notices distinguish actual
+  processing routes. Keep the coordinator's bilateral draft and negotiating questions out of this public repository.
   `/cs|en/podminky-produktu`, `/cs|en/partnerske-podminky` and `/cs|en/licence` distinguish non-effective
   discussion drafts from the existing version-specific licence and accepted contracts. Drafts are publicly readable
   but noindex and excluded from sitemap; no bilateral coordinator economics are published. Legal text renders on

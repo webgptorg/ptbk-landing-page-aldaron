@@ -21,7 +21,7 @@ const SUPERVISORY_AUTHORITY_URL = 'https://uoou.gov.cz';
 export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Ochrana osobních údajů',
-        publication: { date: '2026-11-02', isDraft: false },
+        publication: { date: '2026-11-03', isDraft: false },
         perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
         sections: [
             {
@@ -94,6 +94,14 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 ],
             },
             {
+                heading: "AI modely a pracovní obsah",
+                paragraphs: [
+                    "Pokud použijete naši AI funkci, obsah vašeho dotazu a nezbytný kontext může být odeslán poskytovateli modelu, kterého daná funkce skutečně využívá, zejména OpenAI. Připojení v samostatném klientském enginu může podle jeho nastavení využívat také Anthropic nebo jiného zákazníkem zvoleného poskytovatele. Samotná zmínka o poskytovateli neznamená, že mu odesíláme všechny kontakty nebo že jej používá každé nasazení.",
+                    "Rozlišujeme námi provozovanou AI funkci, zpracování pro zákazníka podle jeho pokynů a přímé volání modelu zákazníkem na jeho vlastní účet. Ve druhém případě musí odpovídající zpracovatelské ujednání a seznam dalších zpracovatelů popsat konkrétní službu, smluvní subjekt, účel, kategorie dat, umístění, dobu uchování a použitelný mechanismus předání mimo EHP. U přímého zákaznického účtu volbu a smlouvu s poskytovatelem zpravidla zajišťuje zákazník; naše případné samostatné zpracování tím není vyloučeno.",
+                    "Použití modelu k internímu vývoji nebo reklamě samo neopravňuje vložit do něj osobní údaje z CRM či obsah zákaznického projektu. Přístup a rozsah předávání musí odpovídat účelu a skutečným rolím. Údaje o dodavatelích a zvoleném způsobu zpracování musí být dostupné před příslušným předáním; obecný seznam značek potřebnou smlouvu a informování nenahrazuje.",
+                ],
+            },
+            {
                 heading: 'Cookies a měřicí technologie',
                 paragraphs: [
                     'Nutné cookies zajišťují základní fungování webu a ukládáme je vždy. Analytické a marketingové cookies ukládáme jen s vaším souhlasem, který nám dáte v cookies liště.',
@@ -156,7 +164,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     },
     en: {
         title: 'Privacy Policy',
-        publication: { date: '2026-11-02', isDraft: false },
+        publication: { date: '2026-11-03', isDraft: false },
         perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or use the Promptbook services, why we do it, and which rights you have.`,
         sections: [
             {
@@ -226,6 +234,14 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'The purposes are handling the specific request, operating the partnership and evidencing its settlement. The basis is necessary pre-contractual steps or contract performance where you are a party; for company representatives’ business contacts, our legitimate interest in handling and recording the business relationship. Statutory accounting has its own basis. Unrelated offers are not automatically covered.',
                     'A recipient acting only on our instructions requires a processor agreement. Joint determination of purposes and essential means requires a joint-controller arrangement and access to its essence for affected persons. Neither shared records nor this notice replaces those agreements. The actual roles and information must be resolved before such processing.',
                     'Access is restricted to authorised people and the necessary project scope. The purpose-specific retention periods above apply; cooperation creates no new unlimited retention. You may object to legitimate-interest processing at privacy@ptbk.io or contact Neonmedia. Ending cooperation requires restricting access and handling mandatory retention, not automatic continued reuse of contacts.',
+                ],
+            },
+            {
+                heading: "AI models and working content",
+                paragraphs: [
+                    "When you use an AI feature we provide, your input and necessary context may be sent to the model provider actually used by that feature, particularly OpenAI. Connections in an independent customer engine may also use Anthropic or another provider selected in its settings. Naming a provider does not mean that it receives every contact or is used in every deployment.",
+                    "We distinguish an AI feature we operate, processing on a customer’s documented instructions, and direct model calls under the customer’s own account. The second route requires the appropriate processing agreement and subprocessor list identifying the actual service, contracting entity, purpose, data categories, location, retention and applicable mechanism for transfers outside the EEA. Customers ordinarily select and contract with providers for their direct accounts; this does not exclude our own separate processing where applicable.",
+                    "Internal use of a model for development or advertising does not itself authorise sending CRM personal data or customer project content. Access and disclosure must follow the purpose and actual roles. Supplier and processing-route information must be available before the relevant transfer; a generic list of brands does not replace the necessary agreement and transparency.",
                 ],
             },
             {
