@@ -43,20 +43,20 @@ const LEGAL_PAGE_METADATA_TEXTS: Readonly<
         },
     },
     productTerms: {
-        cs: { title: 'Podmínky produktu · návrh | Promptbook', description: 'Návrh B2B pravidel předplatného, podpory, cenových změn a převodu produktu. Dosud neúčinný.' },
-        en: { title: 'Product terms · draft | Promptbook', description: 'Non-effective B2B proposal covering subscriptions, support, price changes and product transfers.' },
+        cs: { title: 'Podmínky produktu | Promptbook', description: 'Podmínky firemního předplatného, podpory, cenových změn a převodu produktu.' },
+        en: { title: 'Product terms | Promptbook', description: 'Business subscription terms covering support, price changes and product transfers.' },
     },
     partnerTerms: {
-        cs: { title: 'Partnerské podmínky · návrh | Promptbook', description: 'Návrh pravidel přivedení klienta, licenčních provizí, ročních plateb a předání péče. Dosud neúčinný.' },
-        en: { title: 'Partner terms · draft | Promptbook', description: 'Non-effective proposal covering deal attribution, licence commission, annual payments and customer handover.' },
+        cs: { title: 'Partnerské podmínky | Promptbook', description: 'Pravidla přivedení klienta, jednotné 20% provize, plateb a předání péče.' },
+        en: { title: 'Partner terms | Promptbook', description: 'Partner terms covering deal attribution, uniform 20% commission, payments and customer handover.' },
     },
     engineLicense: {
-        cs: { title: 'Licence enginu | Promptbook', description: 'Dosavadní licence konkrétní verze a neúčinný návrh komerčního použití a pokračování vlastního provozu.' },
-        en: { title: 'Engine licence | Promptbook', description: 'Existing version-specific licensing and a non-effective proposal for commercial use and independent operation.' },
+        cs: { title: 'Licence enginu | Promptbook', description: 'Licence konkrétní verze, komerční použití a pokračování vlastního provozu.' },
+        en: { title: 'Engine licence | Promptbook', description: 'Version-specific licensing, commercial use and independent operation.' },
     },
     jointPrivacy: {
-        cs: { title: 'Společné zpracování · návrh | Promptbook', description: 'Návrh pravidel společné práce AI Web a Neonmedia s projektovými údaji a nástroji.' },
-        en: { title: 'Joint processing · draft | Promptbook', description: 'Proposed rules for AI Web and Neonmedia handling project data and tools.' },
+        cs: { title: 'Společné zpracování | Promptbook', description: 'Jak AI Web a Neonmedia pracují s projektovými údaji a nástroji.' },
+        en: { title: 'Joint processing | Promptbook', description: 'How AI Web and Neonmedia handle project data and tools.' },
     },
 };
 
@@ -86,7 +86,7 @@ function createLegalPageDefinition(
         languageAlternates: LEGAL_PAGE_PATHS[kind],
         sitemapPriority: LEGAL_PAGE_SITEMAP_PRIORITY,
         sitemapChangeFrequency: 'yearly',
-        isIndexed: kind === 'privacyPolicy' || kind === 'termsAndConditions',
+        isIndexed: true,
     };
 }
 

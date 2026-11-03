@@ -6,11 +6,11 @@ import { getOperatorIdentification, NEONMEDIA_IDENTIFICATION } from './legalOper
 export const JOINT_PRIVACY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Společné zpracování projektových údajů',
-        publication: { date: '2026-11-03', isDraft: true, notice: 'Návrh podstaty ujednání společných správců. Před zahájením příslušného zpracování musí obě společnosti přijmout úplné ujednání a ověřit provozní opatření. Tento návrh sám nepovoluje předání údajů ani obchodní rozesílku.' },
+        publication: { date: '2026-11-03', isDraft: false, notice: 'Informace o rozdělení rolí při projektové spolupráci. Pro konkrétní společné zpracování musí být předem účinné ujednání podle čl. 26 GDPR; pro práci podle pokynů smlouva podle čl. 28. Samotná veřejná informace nenahrazuje tato ujednání ani právní titul pro marketing.' },
         perex: 'Jak mohou AI Web a Neonmedia spolupracovat na projektových poptávkách, obchodní komunikaci a evidenci zákazníků. Konkrétní nástroje se mohou měnit při zachování účelu a ochrany údajů.',
         sections: [
             { heading: 'Společnosti a účely', paragraphs: [
-                `Zamýšlenými společnými správci společně určovaných kampaní a obchodní evidence jsou ${getOperatorIdentification('cs')} a ${NEONMEDIA_IDENTIFICATION.cs}. Vlastní účetnictví, personální agenda a jiné projekty mají samostatné účely.`,
+                `Při společném určování účelů a prostředků kampaní a obchodní evidence vystupují jako společní správci ${getOperatorIdentification('cs')} a ${NEONMEDIA_IDENTIFICATION.cs}. Vlastní účetnictví, personální agenda a jiné projekty mají samostatné účely.`,
                 'Rozsah zahrnuje pracovní kontakty, firmu a roli, zdroj a téma poptávky, související korespondenci, přiřazení agentury, stav licence a údaje nutné pro vyúčtování. Nezahrnuje automaticky obsah zákaznických agend ani zvláštní kategorie osobních údajů. Právním základem může být jednání o smlouvě nebo její plnění u její strany, posouzený oprávněný zájem u firemních kontaktů, zákonná povinnost nebo potřebný souhlas podle účelu.',
             ] },
             { heading: 'Přístup obou firem a změny pracovních rolí', paragraphs: [
@@ -23,18 +23,18 @@ export const JOINT_PRIVACY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 'Například zpracování kontaktu v podnikové AI službě a nahrání celého CRM do soukromého účtu mají odlišné smluvní a bezpečnostní podmínky. Obecná zmínka o AI nepovoluje oba postupy.',
             ] },
             { heading: 'Práva osob a odpovědnosti', paragraphs: [
-                'Navrženým společným kontaktem je privacy@ptbk.io. Práva lze uplatnit u kterékoli společnosti. AI Web koordinuje informování a evidenci žádostí; Neonmedia poskytne informace při získání kontaktu a předá žádost druhé straně do dvou pracovních dnů. Odpovědnosti za bezpečnost přidělených systémů a dodavatelů nese každá společnost ve svém rozsahu; převzetí úkolu se zaznamená.',
+                'Společným kontaktem je privacy@ptbk.io. Práva lze uplatnit u kterékoli společnosti. AI Web koordinuje informování a evidenci žádostí; Neonmedia poskytne informace při získání kontaktu a předá žádost druhé straně do dvou pracovních dnů. Odpovědnosti za bezpečnost přidělených systémů a dodavatelů nese každá společnost ve svém rozsahu; převzetí úkolu se zaznamená.',
                 'Údaje se uchovávají jen po dobu potřebnou pro popsané účely a příslušné zákonné nároky. Po skončení spolupráce se upraví přístupy a oddělí údaje, které se musejí uchovat. Oprávnění k marketingovým e-mailům se ověřuje samostatně; předání kontaktu mezi firmami samo nepřenáší souhlas ani zákaznickou výjimku.',
             ] },
         ],
     },
     en: {
         title: 'Joint processing of project data',
-        publication: { date: '2026-11-03', isDraft: true, notice: 'Draft outline of a joint-controller arrangement. Both companies must adopt the full arrangement and verify operational safeguards before the relevant processing starts. This draft itself authorises neither a transfer nor marketing messages.' },
+        publication: { date: '2026-11-03', isDraft: false, notice: 'Information about responsibilities in project cooperation. A relevant Article 26 joint-controller arrangement or Article 28 processing agreement must be effective before that processing starts. This public notice does not replace those agreements or a legal basis for marketing.' },
         perex: 'How AI Web and Neonmedia may cooperate on project enquiries, business communications and customer records. Tools may change while the purposes and required safeguards remain defined.',
         sections: [
             { heading: 'Companies and purposes', paragraphs: [
-                `The proposed joint controllers for jointly determined campaigns and sales records are ${getOperatorIdentification('en')} and ${NEONMEDIA_IDENTIFICATION.en}. Each company’s accounting, personnel and unrelated projects have separate purposes.`,
+                `Where campaign and sales-record purposes and means are determined jointly, the joint controllers are ${getOperatorIdentification('en')} and ${NEONMEDIA_IDENTIFICATION.en}. Each company’s accounting, personnel and unrelated projects have separate purposes.`,
                 'Data include business contact details, company and role, enquiry source and subject, relevant correspondence, agency attribution, licence status and necessary settlement records. Customer workflow content and special-category personal data are not automatically included. Depending on the purpose, the basis may be pre-contractual steps or a contract with the individual, assessed legitimate interests for company contacts, legal obligations or required consent.',
             ] },
             { heading: 'Access by both companies and changing responsibilities', paragraphs: [
@@ -47,7 +47,7 @@ export const JOINT_PRIVACY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 'Processing a contact in a business AI service and uploading an entire CRM into a personal account have different contractual and security requirements. A general mention of AI does not authorise both.',
             ] },
             { heading: 'Individual rights and responsibilities', paragraphs: [
-                'The proposed common contact is privacy@ptbk.io; individuals may exercise rights against either company. AI Web coordinates notices and request records. Neonmedia provides information when collecting contacts and forwards requests within two working days. Each company remains responsible for the systems and suppliers it engages; task transfers are recorded.',
+                'The common contact is privacy@ptbk.io; individuals may exercise rights against either company. AI Web coordinates notices and request records. Neonmedia provides information when collecting contacts and forwards requests within two working days. Each company remains responsible for the systems and suppliers it engages; task transfers are recorded.',
                 'Retention follows the necessary purposes and applicable legal claims. On termination, access is adjusted and legally retained records are separated. Permission to send marketing emails is assessed independently: sharing a contact does not itself transfer consent or another company’s customer exemption.',
             ] },
         ],

@@ -2,15 +2,15 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import type { LegalDocument } from '@/lib/legal/legalDocument';
 import { getOperatorIdentification, LEGAL_CONTACT_EMAIL, NEONMEDIA_IDENTIFICATION } from '@/lib/legal/legalOperator';
 
-/** Proposed B2B subscription contract, separate from the existing workshop and community terms. */
+/** Current B2B product terms; workshop and community terms have their own scope. */
 export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Podmínky produktu Promptbook',
         publication: {
-            date: '2026-11-03', isDraft: true,
-            notice: 'Pracovní návrh, dosud neúčinný. Zveřejnění není nabídkou k uzavření smlouvy ani změnou již sjednaných práv. Použije se až po výslovném přijetí konkrétní verze v objednávce. Ceny a otevřené varianty se tímto textem neaktivují.',
+            date: '2026-11-03', isDraft: false,
+            notice: "Znění ze dne 3. listopadu 2026 pro objednávky, které na tyto podmínky odkazují. Konkrétní objednávka určuje rozsah plnění. Nové verze zveřejňujeme s datem; změny běžících smluv oznamujeme postupem uvedeným níže a zachováváme již vzniklá práva.",
         },
-        perex: 'Návrh pravidel pro firemní předplatné, produktovou podporu a vztah mezi klientem, jeho agenturou a dodavatelem Promptbooku. Podmínky workshopů a členství v komunitě zůstávají samostatné.',
+        perex: 'Pravidla pro firemní předplatné, produktovou podporu a vztah mezi klientem, jeho agenturou a dodavatelem Promptbooku. Podmínky workshopů a členství v komunitě zůstávají samostatné.',
         sections: [
             {
                 heading: 'Dodavatel, zákazník a uzavření smlouvy',
@@ -24,7 +24,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 bullets: [
                     'Placené oprávnění k užívání komerční ovládací aplikace Promptbook, sjednané spojovací služby relay a objednané produktové služby. Samostatný engine běží v prostředí zákazníka a jeho práva určuje licence konkrétní verze. Předplatné aplikace se automaticky nevydává za povinnou platbu za každé samostatné použití enginu.',
                     'Jedno klientské prostředí je konkrétní samostatný projekt zákazníka s vymezenou agendou a oprávněními, nikoli jeden fyzický počítač nebo jeden agent. Oddělená oddělení jedné firmy mohou mít různé samostatné licence. Pouhé přejmenování či technická migrace nové prostředí nevytváří.',
-                    'Vlastní zdrojový kód a práva ke konkrétní verzi se řídí její přiloženou licencí. Předplatné samo nepřepisuje licence cizích komponent ani již udělená oprávnění. Pracovní návrh licenčních oprávnění je na stránce Licence enginu.',
+                    'Vlastní zdrojový kód a práva ke konkrétní verzi se řídí její přiloženou licencí. Předplatné samo nepřepisuje licence cizích komponent ani již udělená oprávnění. Licenční oprávnění popisuje dokument na stránce Licence enginu.',
                     'AI modely, tokeny, hosting klientského enginu, databáze, úložiště, externí nástroje, instalace, integrace, individuální školení, konzultace a zakázková práce se hradí zvlášť. Obecná dokumentace a zveřejněná výuková videa nejsou samostatným placeným školením.',
                 ],
             },
@@ -32,8 +32,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 heading: 'Tarify, úhrada a ukončení obnovování',
                 paragraphs: [
                     'Start je jednorázový třicetidenní produkční pilot, dostupný jednou pro koncového zákazníka, bez automatického obnovení a bez produktového SLA. Business se standardně obnovuje měsíčně; zákazník může další obnovení zrušit nejpozději před začátkem dalšího období. Již zaplacené období tím nekončí.',
-                    'Cenu, měnu, DPH a splatnost vždy určuje potvrzená objednávka. Roční předplatné a sleva za předplacení vzniknou jen jejich výslovným sjednáním; tento draft nezavádí nový roční tarif. Předplacené plnění se poprvé aktivuje až přijetím sjednané úhrady, není-li výslovně sjednáno jinak. Úspěšné stržení platby a převod platební brány na účet AI Webu jsou dvě odlišné události.',
-                    'Při neúspěšné obnově již běžícího předplatného zákazníka vyzveme k nápravě a určíme přiměřenou dodatečnou lhůtu; běžný návrh je 30 dní od splatnosti. Poté lze pozastavit placené služby. Ukončení předplatného samo neodebírá práva, která zákazník podle konkrétní licence smí vykonávat i bez něj.',
+                    'Cenu, měnu, DPH a splatnost vždy určuje potvrzená objednávka. Roční předplatné a sleva za předplacení vzniknou jen jejich výslovným sjednáním; roční tarif musí být uveden v potvrzené objednávce. Předplacené plnění se poprvé aktivuje až přijetím sjednané úhrady, není-li výslovně sjednáno jinak. Úspěšné stržení platby a převod platební brány na účet AI Webu jsou dvě odlišné události.',
+                    'Při neúspěšné obnově již běžícího předplatného zákazníka vyzveme k nápravě a určíme přiměřenou dodatečnou lhůtu; standardní lhůta je 30 dní od splatnosti. Poté lze pozastavit placené služby. Ukončení předplatného samo neodebírá práva, která zákazník podle konkrétní licence smí vykonávat i bez něj.',
                 ],
             },
             {
@@ -49,8 +49,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     'První věcnou reakci na řádně doručené hlášení problému platformy poskytneme do 16 pracovních hodin, pondělí až pátek 9:00–17:00 v časové zóně Europe/Prague mimo české svátky. Reakcí je první posouzení, žádost o nezbytné podklady nebo návrh dalšího postupu; automatická doručenka nestačí.',
                     'Objednávka určí jeden pověřený technický kontakt a kanál hlášení. Zákazník poskytne popis, relevantní verzi a dostupné podklady; čekání na nezbytnou součinnost se nezapočítává do doby následného řešení. První reakce není garancí opravy, dostupnosti ani konkrétního obchodního výsledku. Nejde o nepřetržitou pohotovost nebo servis cizích systémů.',
-                    "Navržená politika podpory se vztahuje na stabilní vydání řady 0.118 a novějších. Řada znamená dvojici major.minor. Každou takovou nově vydanou řadu podporujeme nejméně 90 kalendářních dní od vydání první stabilní verze této řady na npm nebo GitHubu; přehled a zdrojové datum zveřejňujeme na ptbk.io/cs/releases; v jejím rámci se podpora vztahuje vždy jen na nejnovější stabilní patch. Nový patch tuto devadesátidenní lhůtu celé řady nespouští znovu. Podpora zahrnuje posouzení hlášení a podle potřeby vydávání opravných patchů, nikoli garantovaný termín opravy nebo novou funkci.",
-                    "Po dobu poskytování této podpory musí být k dispozici nejméně jedna podporovaná stabilní řada a její nejnovější patch. Prerelease vydání včetně číselných přípon, alpha, beta a RC jsou z této politiky vyloučena. Uvedení řady 0.118 neprohlašuje její historická prerelease vydání za stabilní ani zpětně nezakládá SLA. Před přijetím tohoto návrhu musí být skutečně dostupná alespoň jedna stabilní podporovaná řada; seznam a minimum podpory se zveřejní před objednávkou na ptbk.io/cs/releases. Původní externí datum vydání není zdejším datem zveřejnění a změna zdroje již slíbenou podporu nezkrátí. Označení LTS je pouze informativní a samo nepřidává smluvní dobu podpory. Prerelease nejsou určena pro komerční provoz. Nevzniká individuální větev ani neomezená podpora historie.",
+                    "Politika podpory se vztahuje na stabilní vydání řady 0.118 a novějších. Řada znamená dvojici major.minor. Každou takovou nově vydanou řadu podporujeme nejméně 90 kalendářních dní od vydání první stabilní verze této řady na npm nebo GitHubu; přehled a zdrojové datum zveřejňujeme na ptbk.io/cs/releases; v jejím rámci se podpora vztahuje vždy jen na nejnovější stabilní patch. Nový patch tuto devadesátidenní lhůtu celé řady nespouští znovu. Podpora zahrnuje posouzení hlášení a podle potřeby vydávání opravných patchů, nikoli garantovaný termín opravy nebo novou funkci.",
+                    "Po dobu poskytování této podpory musí být k dispozici nejméně jedna podporovaná stabilní řada a její nejnovější patch. Prerelease vydání včetně číselných přípon, alpha, beta a RC jsou z této politiky vyloučena. Uvedení řady 0.118 neprohlašuje její historická prerelease vydání za stabilní ani zpětně nezakládá SLA. Před sjednáním této podpory musí být skutečně dostupná alespoň jedna stabilní podporovaná řada; seznam a minimum podpory se zveřejní před objednávkou na ptbk.io/cs/releases. Původní externí datum vydání není zdejším datem zveřejnění a změna zdroje již slíbenou podporu nezkrátí. Označení LTS je pouze informativní a samo nepřidává smluvní dobu podpory. Prerelease nejsou určena pro komerční provoz. Nevzniká individuální větev ani neomezená podpora historie.",
                 ],
             },
             {
@@ -81,13 +81,13 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     'AI Web může opakované plnění ukončit s 60denním oznámením. Neodstraněné podstatné porušení po výzvě, naléhavá bezpečnost nebo protiprávní jednání umožní odpovídající omezení či ukončení dříve. Pokud AI Web neposkytne část již předplacené služby, vrátí poměrnou cenu neposkytnutého plnění; již vzniklé platební povinnosti se vypořádají zvlášť.',
                     'Zákazník předem souhlasí s postoupením smlouvy spolu s produktem nebo závodem na nabyvatele, který převezme sjednané povinnosti; AI Web mu převod oznámí. Změna vlastníka společnosti sama není zánikem smlouvy. Ukončení hostované služby a odkup provizních práv partnera jsou samostatné otázky.',
-                    'Zánik aplikace nebo relay sám fyzicky nevypíná lokální engine. Pokračování může vyžadovat vlastní modely, klíče, zálohy, nástroje, alternativní ovládání a zásahy vývojáře. Rozsah práv dále provozovat a upravovat konkrétní verzi musí být výslovně obsažen v přijaté licenci; tento draft nepředstírá, že chybějící oprávnění již existuje.',
+                    'Zánik aplikace nebo relay sám fyzicky nevypíná lokální engine. Pokračování může vyžadovat vlastní modely, klíče, zálohy, nástroje, alternativní ovládání a zásahy vývojáře. Rozsah práv dále provozovat a upravovat konkrétní verzi musí být výslovně obsažen v přijaté licenci; oprávnění nad rámec konkrétní licence vyžaduje výslovnou dohodu.',
                 ],
             },
             {
                 heading: 'Odpovědnost a rozhodné právo',
                 paragraphs: [
-                    'AI Web odpovídá za své sjednané plnění, nikoli za správnost každého výstupu AI, výpadek zákazníkova zařízení či cizího modelu nebo úspěch podnikání. Pro běžnou nedbalost v podnikatelském vztahu návrh omezuje souhrnnou náhradu na cenu dotčené služby zaplacenou za předchozích 12 měsíců a vylučuje ušlý zisk. Omezení se neuplatní, kde je zákon zakazuje, zejména u úmyslu, hrubé nedbalosti a újmy na přirozených právech člověka.',
+                    'AI Web odpovídá za své sjednané plnění, nikoli za správnost každého výstupu AI, výpadek zákazníkova zařízení či cizího modelu nebo úspěch podnikání. Pro běžnou nedbalost v podnikatelském vztahu se souhrnná náhrada omezuje na cenu dotčené služby zaplacenou za předchozích 12 měsíců a vylučuje ušlý zisk. Omezení se neuplatní, kde je zákon zakazuje, zejména u úmyslu, hrubé nedbalosti a újmy na přirozených právech člověka.',
                     `Použije se české právo a příslušné české soudy. Před soudním sporem se strany pokusí vyjasnit konkrétní nárok přes ${LEGAL_CONTACT_EMAIL}. Znění přijaté při objednávce musí být uchovatelné; pozdější překlad nemění dříve sjednaná práva.`,
                 ],
             },
@@ -96,10 +96,10 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
     en: {
         title: 'Promptbook product terms',
         publication: {
-            date: '2026-11-03', isDraft: true,
-            notice: 'Discussion draft, not yet effective. Publication is neither an offer nor a change to existing rights. It applies only when a specific version is expressly accepted in an order. This text does not activate prices or unresolved alternatives.',
+            date: '2026-11-03', isDraft: false,
+            notice: "Version dated 3 November 2026 for orders incorporating these terms. The order defines the service scope. New versions carry a publication date; changes to existing agreements follow the notice procedure below and preserve accrued rights.",
         },
-        perex: 'Proposed rules for business subscriptions, product support and the respective roles of the customer, its agency and Promptbook. Existing workshop and community terms remain separate.',
+        perex: 'Rules for business subscriptions, product support and the respective roles of the customer, its agency and Promptbook. Existing workshop and community terms remain separate.',
         sections: [
             {
                 heading: 'Supplier, customer and agreement',
@@ -113,7 +113,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 bullets: [
                     'Paid permission to use the commercial Promptbook control application, agreed relay connectivity and ordered product services. The standalone engine runs in the customer’s environment under its version-specific licence. Application subscription is not automatically presented as compulsory payment for every independent engine use.',
                     'One client environment means a defined separate customer project with its own workflow and permissions, not a physical server or one agent. Separate departments may have separate licences. Renaming or a technical migration does not by itself create a new environment.',
-                    'Rights to a particular source version follow its accompanying licence. A subscription does not rewrite third-party licences or rights already granted. The proposed commercial grant is described on the Engine licence page.',
+                    'Rights to a particular source version follow its accompanying licence. A subscription does not rewrite third-party licences or rights already granted. The commercial grant is described on the Engine licence page.',
                     'Models, tokens, engine hosting, databases, storage, external tools, installation, integration, individual training, consulting and custom work are charged separately. General documentation and published instructional videos are not separate paid training.',
                 ],
             },
@@ -121,8 +121,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 heading: 'Plans, payment and renewal',
                 paragraphs: [
                     'Start is a single 30-day production pilot, available once per end customer, without automatic renewal or product SLA. Business normally renews monthly; cancellation before the next period stops the next renewal and does not shorten a paid period.',
-                    'The confirmed order specifies price, currency, VAT and due date. Annual billing or a prepayment discount requires express agreement; this draft does not launch an annual plan. Prepaid services are first activated only after the agreed payment is received, unless expressly agreed otherwise. A successful customer charge and a payment-processor payout to AI Web are distinct events.',
-                    'Following a failed renewal of an existing subscription, we request payment and allow an appropriate cure period; the proposed ordinary period is 30 days from the due date. Paid services may then be suspended. Subscription termination does not remove rights which the applicable licence allows the customer to exercise independently.',
+                    'The confirmed order specifies price, currency, VAT and due date. Annual billing or a prepayment discount requires express agreement; an annual plan must be specified in the confirmed order. Prepaid services are first activated only after the agreed payment is received, unless expressly agreed otherwise. A successful customer charge and a payment-processor payout to AI Web are distinct events.',
+                    'Following a failed renewal of an existing subscription, we request payment and allow an appropriate cure period; the ordinary period is 30 days from the due date. Paid services may then be suspended. Subscription termination does not remove rights which the applicable licence allows the customer to exercise independently.',
                 ],
             },
             {
@@ -138,8 +138,8 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     'We provide a first substantive response to a properly received platform issue within 16 working hours, Monday–Friday 09:00–17:00 Europe/Prague excluding Czech public holidays. A response is an initial assessment, request for necessary information or proposed next step; an automated receipt is insufficient.',
                     'The order identifies one authorised technical contact and reporting channel. The customer provides a description, relevant version and available evidence; time awaiting necessary cooperation is excluded from subsequent resolution time. The first response is not a guaranteed fix, availability commitment or business outcome. There is no continuous on-call service or support for third-party systems.',
-                    "The proposed support policy covers stable releases in line 0.118 and later. A line means the major.minor pair. Each newly released line receives at least 90 calendar days of support from its first stable release on npm or GitHub, recorded with its source date in our catalogue at ptbk.io/en/releases; within that line only its latest stable patch is supported. A new patch does not restart the line’s 90-day period. Support includes assessing reports and issuing corrective patches as needed, without a guaranteed repair deadline or new features.",
-                    "At least one supported stable line and its latest patch must remain available throughout the provision of this support. Prereleases, including numeric suffixes, alpha, beta and RC, are excluded. Naming line 0.118 does not reclassify historical prereleases as stable or create retrospective SLA. Before this proposal is accepted at least one stable supported line must actually be available; the list and retirement dates are disclosed before ordering. LTS is an informational label and does not itself add a contractual support period. Prereleases are not intended for commercial production. No individual branch or unlimited historic maintenance is included.",
+                    "The support policy covers stable releases in line 0.118 and later. A line means the major.minor pair. Each newly released line receives at least 90 calendar days of support from its first stable release on npm or GitHub, recorded with its source date in our catalogue at ptbk.io/en/releases; within that line only its latest stable patch is supported. A new patch does not restart the line’s 90-day period. Support includes assessing reports and issuing corrective patches as needed, without a guaranteed repair deadline or new features.",
+                    "At least one supported stable line and its latest patch must remain available throughout the provision of this support. Prereleases, including numeric suffixes, alpha, beta and RC, are excluded. Naming line 0.118 does not reclassify historical prereleases as stable or create retrospective SLA. Before this support is agreed at least one stable supported line must actually be available; the list and retirement dates are disclosed before ordering. LTS is an informational label and does not itself add a contractual support period. Prereleases are not intended for commercial production. No individual branch or unlimited historic maintenance is included.",
                 ],
             },
             {
@@ -170,13 +170,13 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     'AI Web may terminate recurring services on 60 days’ notice. An uncured material breach following notice, urgent security issue or unlawful conduct permits proportionate earlier restriction or termination. AI Web refunds the proportional price of prepaid services it does not supply; accrued payment duties are settled separately.',
                     'The customer gives advance consent to assignment together with the product or business to an acquirer assuming the agreed obligations; AI Web gives notice of assignment. A shareholder change does not itself terminate the agreement. Hosted-service retirement and purchase of partner commission rights are separate matters.',
-                    'Loss of the application or relay does not itself physically stop the local engine. Continued operation may require the customer’s own models, keys, backups, tools, alternative controls and developer work. Continued rights to run or modify a version must be expressly granted by the accepted licence; this draft does not claim that missing permissions already exist.',
+                    'Loss of the application or relay does not itself physically stop the local engine. Continued operation may require the customer’s own models, keys, backups, tools, alternative controls and developer work. Continued rights to run or modify a version must be expressly granted by the accepted licence; any rights beyond that licence require an express agreement.',
                 ],
             },
             {
                 heading: 'Liability and governing law',
                 paragraphs: [
-                    'AI Web is responsible for its agreed services, not every AI output, customer-device or third-party model outage, or commercial success. For ordinary negligence in a business relationship, the proposed aggregate damages cap is the price paid for the affected service in the preceding 12 months, excluding lost profit. Mandatory exceptions remain, including intent, gross negligence and injury to natural personal rights.',
+                    'AI Web is responsible for its agreed services, not every AI output, customer-device or third-party model outage, or commercial success. For ordinary negligence in a business relationship, the aggregate damages cap is the price paid for the affected service in the preceding 12 months, excluding lost profit. Mandatory exceptions remain, including intent, gross negligence and injury to natural personal rights.',
                     `Czech law and the competent Czech courts apply. The parties first try to clarify a specific claim through ${LEGAL_CONTACT_EMAIL}. The accepted order and terms must be retainable; a later translation does not change previously agreed rights.`,
                 ],
             },

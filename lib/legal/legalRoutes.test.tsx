@@ -20,8 +20,9 @@ describe('canonical legal navigation', () => {
         expect(getLegacyLegalRedirect('/en/legal/partner-terms')).toBeNull();
         expect(getLegalKindBySlug('unknown', 'en')).toBeUndefined();
     });
-    it('keeps drafts non-indexed', () => {
-        expect(LEGAL_PAGE_METADATA.partnerTerms.cs.robots).toMatchObject({ index: false });
-        expect(LEGAL_PAGE_METADATA.jointPrivacy.en.robots).toMatchObject({ index: false });
+    it('publishes current legal documents in both languages', () => {
+        for (const kind of LEGAL_DOCUMENT_KINDS) for (const language of ['cs', 'en'] as const) {
+            expect(LEGAL_PAGE_METADATA[kind][language].robots).toBeUndefined();
+        }
     });
 });

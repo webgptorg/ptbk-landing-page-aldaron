@@ -1,29 +1,28 @@
-# Smluvní a licenční stránky — 3. listopadu 2026
+# Právní dokumenty a aktuální znění
 
-Vlastník výslovně požádal o zveřejnění návrhů na hlavním webu a push do `main`. Toto zadání nahrazuje dřívější omezení marketingových úkolů, které zakazovalo měnit právní texty. Nejde o přijetí návrhů smluv s třetí osobou.
+## Autorita a zveřejnění
 
-- `/cs/podminky-produktu` a `/en/podminky-produktu`: samostatný neúčinný návrh B2B produktu. Dosavadní smlouvy workshopů a komunity se nepřepisují.
-- `/cs/partnerske-podminky` a `/en/partnerske-podminky`: neúčinný návrh programu agentur, nikoli zveřejnění individuálních obchodních podmínek koordinátora.
-- `/cs/licence` a `/en/licence`: dosavadní verzované licenční oznámení a neúčinný návrh budoucích oprávnění. Placeným produktem programu je komerční aplikace. Návrh sám neuděluje nová trvalá ani neodvolatelná práva k enginu a neodebírá dřívější granty.
-- Obě existující varianty ochrany osobních údajů i jejich marketingové aliasy používají jeden aktualizovaný obsah. Jmenuje Neonmedia, účely, rozsah, právní základy a odděluje kontaktní evidenci od pracovního obsahu enginu. Text nenahrazuje potřebné smlouvy správců/zpracovatelů.
+Zadání vlastníka z 3. listopadu 2026 nahrazuje dosavadní režim veřejných pracovních verzí. Web zveřejňuje aktuální dokumenty bez označení návrhu: obchodní podmínky, produktové a partnerské podmínky, licenci enginu, ochranu osobních údajů a informaci o společném zpracování. Každý dokument má datum; obchodní vztah vzniká až přijetím konkrétní smlouvy nebo potvrzením objednávky. Zveřejnění samo nemění starší smlouvy ani nepodepisuje ujednání podle čl. 26/28 GDPR.
 
-Patička odkazuje na návrhy s jasným označením; uživatel schválil jejich veřejné zpřístupnění. Návrhy mají `noindex` a nejsou v sitemap, nejsou však neveřejné ani chráněné před přístupem. Žádné interní rozpočty, individuální podíly koordinátora nebo vyjednávací otázky se na těchto stránkách nezveřejňují.
+## Cesty a navigace
 
-## Obsah a hranice návrhu
+Kanonické adresy jsou `/cs/legal/*` a `/en/legal/*`, anglické slugy jsou přeložené. Přesměrování starších adres zachovává query. Aktuální texty jsou indexovatelné a zahrnuté v sitemap. Stránky se renderují na serveru; celý obsah smluv se nepřibaluje do klientského JavaScriptu marketingových stránek.
 
-Pracovní sazby podle odpovědí z 3. listopadu jsou 17 % při měsíční a 20 % při roční platbě komerční aplikace. Základem je uhrazená způsobilá softwarová část bez DPH po slevách a přípustných opravách, bez poplatku brány. Vlastník potvrdil, že nová sazba nahrazuje dřívější efektivní 24% bonus. Jde o neúčinný návrh; starší přijaté dohody se samotnou právní stránkou nemění; měsíční modelové kalkulace nyní používají 17 %. Roční tarif se neaktivuje.
+Patička má samostatný sloupec Právní dokumenty se všemi dokumenty. Vydání a podpora patří mezi produktové zdroje. Spodní řádek obsahuje copyright a sociální odkazy; identifikace společnosti a kontakty mají vlastní čitelný řádek.
 
-Atribuce identifikuje právnickou osobu, skutečné klientské prostředí a potvrzený obchod. Nejde o trvalou rezervaci celého IČO. Technická migrace nárok neruší; pozdní platba odloží výplatu a skutečné ukončení vyžaduje nové posouzení. Samostatně se řeší předání péče, doba nároku a případný odkup. Neodsouhlasený výkupní násobek ani cenový koridor nesmějí být vydávány za sjednané podmínky.
+## Partnerská pravidla
 
-Vlastník nově výslovně vyloučil všechna prerelease vydání. Návrh politiky proto podporuje stabilní řady major.minor od 0.118, každou alespoň 90 dní od prvního stabilního vydání a vždy jen její nejnovější stabilní patch. Nový patch neobnovuje celou lhůtu. Nejméně jedna stabilní podporovaná řada musí existovat po dobu podpory. Historická `0.118.0-0` z 11. října 2026 a aktuální `0.119.0-47` jsou prerelease, nejsou přeznačeny jako stabilní. Před přijetím SLA je nutné skutečně vydat nebo doložit stabilní podporovanou řadu. Reborn cleanup probíhal již u 0.115; řada 0.118 je navržená obchodní hranice, nikoli tvrzení o prvním commitu celé větve.
+Potvrzená sazba je jednotných 20 % skutečně zaplacené způsobilé softwarové ceny bez DPH po slevách a přípustných vratkách, u všech současných i budoucích plánů a fakturačních režimů. Poplatek platební brány základ nesnižuje. Roční sleva snižuje částku, nikoli sazbu; neexistuje dorovnání na 17/24 %. Splatnost je do 30 dní od přijetí prostředků s předností dřívější kogentní lhůty, bez dvanáctin roční provize. Měsíční kalkulačka i PDF používají 20 %.
 
-Návrh mění oznámení ceny při obnově na 30 dní bez pevného procentního koridoru; odděluje změnu ceny od změny sazby partnera. Pracovní slevová pravomoc je do 30 % na první objednané období bez automatického souběhu s jinými slevami. Pravidla zůstávají neúčinná do přijetí konkrétní verze.
+Délku nároku stanoví individuální partnerská smlouva před potvrzením klienta. Výsledek rešerše s doporučením časového limitu ještě není rozhodnutím vlastníka; veřejný web proto nezavádí automaticky 12, 24 ani 36 měsíců. Nové nepotvrzené obchody a skutečně nové produkty lze do budoucna vymezit nově; potvrzeným obchodům zůstává jejich sjednaná sazba a doba. Změny běžících vztahů zachovávají informační povinnosti, možnost odmítnutí a příslušné kogentní ochrany.
 
-U skutečného obchodního zastoupení nelze interním měsíčním rozvrhem roční platby ani čekáním na bankovní payout obejít § 2504 odst. 2 a § 2505. Opravy provizí respektují § 2507 a § 2519. Návrh výpovědi 60 dní zachovává zákonná měsíční minima i konec kalendářního měsíce. Samostatná smlouva s koordinátorem, její rozpočet, výpočet výsledku a otázky zůstávají mimo veřejný repozitář.
+## Podpora a licence
 
-Zásady uvádějí podmíněné předání dat skutečně zvolenému AI poskytovateli a rozlišují naše funkce, zpracování podle pokynů zákazníka a přímý zákaznický účet. Zmínka OpenAI nebo Anthropic nedokládá použití v každém nasazení. Konkrétní smluvní subjekt, retence, region a předání mimo EHP se ověřují pro danou cestu. Úprava zásad neuzavírá za strany smlouvu podle čl. 26 nebo 28 GDPR.
+Podpora stabilních řad od 0.118 trvá alespoň 90 dní od prvního skutečného stabilního vydání na npm/GitHubu a zahrnuje poslední stabilní patch. Nový patch lhůtu neobnovuje. Podpora vyžaduje alespoň jednu skutečně vydanou stabilní řadu; web nové vydání enginu nevytváří. Prerelease jsou volitelně viditelné a nevytvářejí stabilní podporu; LTS je informační označení. Starší platně nabyté licence a již slíbené vyšší minimum se nezkracují.
 
-Texty jsou serverově vykreslené v `NewLegalPage`, sdílejí `lib/legal` a data publikace. Celý právní obsah se nepřibaluje do klientského JavaScriptu hlavních marketingových stránek. Jazykové varianty, canonical, social cards, stav návrhu a datum mají být stejné ve všech cestách.
+## Soukromé dokumenty a osobní údaje
+
+Smlouvy s Neonmedia, individuální rozpočty, projektové podíly a odkupy zůstávají v nativních Google dokumentech mimo veřejný repozitář. Veřejná informace o zpracování musí odpovídat skutečným rolím a nepředstírá podpis dvoustranné smlouvy. Nové formuláře evidují konkrétní účel a samostatný newsletterový souhlas, historické údaje se nedoplňují. Potvrzovací newsletterové e-maily se neimplementují. Viz `docs/contact-submission-evidence.md`.
 
 ## Veřejné podklady
 
@@ -44,22 +43,3 @@ Ověřeno 2. 11. 2026. Níže jsou příklady konkrétních programů; žádný 
 | Kogentní práva | [Občanský zákoník, státní publikace účinná k 1. 1. 2026](https://spu.gov.cz/frontend/webroot/uploads/files/2026/02/dokument_89_2012_sb25958._zakon_obcansky_zakonik25958.pdf) | Změny dlouhodobých podmínek, postoupení, případné zastoupení a limity odpovědnosti nelze libovolně obejít. |
 
 Identifikace AI Webu vychází z [Obchodního věstníku, zápis zveřejněný 8. 10. 2026](https://ov.gov.cz/zapis/25360448); údaje Neonmedia z [jejích vlastních zásad](https://www.neonmedia.cz/ochrana-osobnich-udaju). Zdroj jejich údajů neznamená přijetí všech jejich právních závěrů.
-
-## Owner revision of 3 November 2026
-
-All legal documents have canonical language-prefixed URLs under `/cs/legal` and `/en/legal`; English document slugs are translated. Old public URLs redirect with queries preserved. The hub, document navigation and all shared footers link to the canonical documents and to `/cs|en/releases`. Releases are a product resource rather than a legal document. Discussion drafts remain non-effective and noindex; the new joint-processing outline does not claim a signed agreement or completed safeguards.
-
-Referral partners may simply recommend customers; customers purchase directly from AI Web and separately order an agency’s services. The 17% monthly / 20% annual proposal replaces the old effective 24% bonus. The monthly calculator and its exports use 17%. Mandatory rules follow the actual relationship, not its label.
-
-The catalogue mirrors every public npm/GitHub release with a version base at least 0.118.0, preserving publication dates separately from the first listing here. A six-hourly append-preserving sync commits source updates; failures do not erase history. The initial 23 versions are all prereleases. The proposed line support minimum is 90 days from the first actual stable release on npm/GitHub, latest stable patch only; a new patch does not reset the line’s clock. Existing support promises cannot be shortened by source edits. This policy remains a proposal pending the final agreement.
-
-The bilateral Neonmedia contract, its budget, buyout valuations, liability discussions and negotiating brief remain outside the repository.
-
-
-## Další kolo z 3. listopadu 2026
-
-Řady se zobrazují po major.minor, s posledním stabilním patchem a prvním skutečným stabilním vydáním. Kandidáti prerelease jsou za samostatným rozbalením, nejsou pro komerční provoz a nemají stabilní podporu. LTS je pouze informační označení. Devadesátidenní minimum běží od vydání první stabilní verze a patch je neobnovuje; již přijatá vyšší minima zůstávají. Bez skutečně vydané stabilní řady nelze deklarovat splnění této podmínky. Vydání enginu se touto změnou nevytváří.
-
-Nový požadavek na jednodušší jednotnou provizi je předmětem dalšího rozhodnutí; dosavadní výpočet 17/20 se tímto commitem nepřepíná. Individuální podíly a odkup Neonmedia zůstávají mimo veřejný repozitář.
-
-Nové kontaktní formuláře napříč ptbk.io, pavolhejny.cz, pavolhejny.com a ai-ta-krajta.cz používají verzovanou informační povinnost a samostatné konkrétní souhlasy pouze pro newsletter. Evidence je serverová a neměnná při úpravě kontaktu. Registrace, PDF a poptávky nejsou souhlasem s reklamou; historické řádky se nedoplňují. Viz docs/contact-submission-evidence.md.

@@ -5,31 +5,22 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
-- The owner’s 3 November 2026 instruction consolidates documents at `/cs/legal/*` and `/en/legal/*`,
-  with translated English slugs, canonical metadata, a shared hub, cross-links and legacy redirects preserving queries.
-  New contractual proposals remain non-effective, noindex and outside sitemap. The public joint-processing outline
-  is also a proposal, not evidence of a signed Article 26 agreement. Both companies may select assessed tools under
-  the same safeguards; a public notice is not blanket permission to upload personal data anywhere.
-  `/cs/releases` and `/en/releases` publish the committed npm/GitHub catalogue from 0.118 onwards; older history links
-  to npm. Original publication and first listing here are distinct; automatic sync preserves existing records,
-  first-listing dates and support extensions. Prereleases never acquire stable support. The proposed 90-day line
-  minimum follows the first actual stable release on npm/GitHub and covers the latest stable patch; at least the latest stable line
-  remains available. The UI groups major.minor lines, shows only the latest stable patch and hides grey prerelease candidates in a native disclosure. LTS is an optional informational marker, not extra contractual support. This draft policy is not activated by publication. Six-hourly sync fails without deleting history.
-  Referral agencies need not continuously sell or supply care; customers contract directly with AI Web. Monthly
-  calculator assumptions are 17%, with a separately agreed annual rate of 20%; accepted older rights remain separate.
-
-- The owner's 2 November 2026 instruction authorizes legal proposal pages and their footer links on `main`.
-  The 3 November revision proposes 17% monthly / 20% annual paid-application commission, separately agreed bonuses,
-  30-day renewal-price notices, bounded discount authority and stable-only support from line 0.118. These remain
-  non-effective proposals; no annual tariff or previously accepted commission is activated or amended. Agency
-  accrual/payment and notice clauses preserve mandatory Czech protections. AI-provider notices distinguish actual
-  processing routes. Keep the coordinator's bilateral draft and negotiating questions out of this public repository.
-  `/cs|en/podminky-produktu`, `/cs|en/partnerske-podminky` and `/cs|en/licence` distinguish non-effective
-  discussion drafts from the existing version-specific licence and accepted contracts. Drafts are publicly readable
-  but noindex and excluded from sitemap; no bilateral coordinator economics are published. Legal text renders on
-  the server in `businesses/new/NewLegalPage.tsx` from the shared bilingual `lib/legal` registry. Privacy notices name
-  Neonmedia and the limited project-data purposes without claiming a notice replaces controller/processor contracts.
-  See `specs/new-contractual-pages.md`. Earlier marketing-task bans on licence edits do not override this instruction.
+- The owner's latest 3 November 2026 instruction publishes current legal texts at `/cs/legal/*` and
+  `/en/legal/*`, with dated versions, canonical metadata, indexable sitemap entries and legacy redirects.
+  Public documents, metadata, link labels and release-support policy have no discussion-draft status.
+  A current public version does not itself conclude an order, sign the bilateral controller arrangement,
+  withdraw older rights or rewrite an accepted agreement. Changes follow the agreed notice mechanism.
+  Keep bilateral Neonmedia economics, buyouts and negotiating questions outside this public repository.
+  Referral commission is a uniform 20% of actually paid eligible software prices excluding VAT, for all
+  current/future plans and billing schedules. Pay within 30 days of receipt, subject to earlier mandatory law;
+  annual commission is not paid in twelve portions. The accepted partner sheet defines duration: no
+  unapproved 12/24/36-month default is activated. New, unconfirmed referrals may be closed prospectively
+  on 30 days' notice while confirmed deals retain their agreed rights. Calculators and exports use 20%.
+  The main footer puts all legal documents in one dedicated column; releases belong with product resources.
+  Release lines group major.minor with the latest stable patch and hidden prerelease candidates. Support
+  runs at least 90 days from the first actual stable publication, not restarted by patches; existing higher
+  promises remain. LTS is informational. Never turn prereleases into stable versions or claim a stable
+  release exists when the catalogue has none. Six-hourly sync preserves history and support extensions.
 
 - `/book` is the primary-domain common-knowledge catalogue with English source Books. Readable topics live at
   `/book/<slug>`; latest `/book/<slug>.book` and immutable `/book/<slug>/<version>.book` return identical

@@ -31,3 +31,8 @@ Tvůrce nebo návštěvník, který chce pouze doporučovat, má vlastní kontak
 ## Vztah a kontakty
 
 CTA píše do stejného kontaktního systému jako zbytek webu a zaznamená téma partnerství. Jiří řeší obchod, Pavol technologii; oba zůstávají rovnocenně prezentovaní na hlavní a příběhové stránce. Jiřího konkrétní adresa pro smluvní SLA se nemění, ale není jedinou tváří webu.
+
+
+## Aktualizace 3. listopadu 2026
+
+Platí jednotných 20 % pro všechny současné i budoucí softwarové plány bez rozlišování měsíční/roční sazby. Výplata do 30 dní od inkasa, s předností dřívější povinné zákonné lhůty. Přesná doba nároku je v přijatém partnerském listu; žádný nový časový limit se tímto zveřejněním nezavádí. Veřejné dokumenty jsou aktuální verzované podmínky. Viz [právní stránky](new-contractual-pages.md).

@@ -1,0 +1,15 @@
+.grid.grid { grid-template-columns: 1.1fr .8fr 1fr 1.25fr; align-items: start; gap: 36px; }
+.grid nav > strong { margin-bottom: 6px; font-size: 13px; line-height: 1.5; }
+.documents { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
+.documents a { display: inline-block; line-height: 1.6; padding-block: 2px; }
+.company { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 22px; margin-top: 38px; padding-top: 22px; border-top: 1px solid #e0e6ee; font-size: 11px; line-height: 1.7; color: #657183; }
+.company strong { color: #1b2739; font-weight: 500; }
+.company a:hover, .legal a:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 900px) { .grid.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 36px; } }
+@media (max-width: 520px) {
+ .grid.grid { gap: 28px 20px; }
+ .grid > :first-child, .legal { grid-column: 1 / -1; }
+ .documents { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; }
+ .company { margin-top: 28px; gap: 7px 18px; }
+ .company > strong { flex-basis: 100%; }
+}

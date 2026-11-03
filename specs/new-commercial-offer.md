@@ -63,3 +63,8 @@ Více instancí a nestandardní požadavky vedou k individuální nabídce, niko
 Hlavní, partnerská a cenová stránka používají klasické porovnatelné karty dvou plánů Start a Business. Na českých stránkách se nabídka prezentuje přímo jako Start 400 Kč na 30 dní a Business 2 200 Kč měsíčně za prostředí, bez DPH. Bez poznámky „přepočet při 22 Kč/USD“ a bez výplňkových vysvětlivek o převodu. Anglická verze používá původních 19 / 100 USD. Partnerský příklad je 2 200 → 440 Kč, respektive 100 → 20 USD. Ceny, obsah nabídky, interní převodní konstanta, výpočet, editovatelný modelový kurz, zaokrouhlení a uložené parametry zůstávají beze změny. Kalkulačka a PDF zachovávají podstatné výpočetní předpoklady. Konečné platební podmínky stanoví objednávka.
 
 Večerní cenové rozhodnutí 25. října 2026: česká veřejná nabídka Start je zaokrouhlena na **400 Kč**; anglická zůstává **19 USD**. Business zůstává 2 200 Kč / 100 USD. Jde o samostatnou českou nabídkovou cenu, nikoli změnu interního kurzu nebo původního editovatelného USD modelu kalkulačky.
+
+
+## Aktualizace 3. listopadu 2026
+
+Platí jednotných 20 % pro všechny současné i budoucí softwarové plány bez rozlišování měsíční/roční sazby. Výplata do 30 dní od inkasa, s předností dřívější povinné zákonné lhůty. Přesná doba nároku je v přijatém partnerském listu; žádný nový časový limit se tímto zveřejněním nezavádí. Veřejné dokumenty jsou aktuální verzované podmínky. Viz [právní stránky](new-contractual-pages.md).

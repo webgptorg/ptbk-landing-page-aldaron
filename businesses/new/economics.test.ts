@@ -19,25 +19,25 @@ describe('commercial offer v1.0', () => {
         expect(pilot.input.instancesPerClient).toBe(1);
         expect(pilot.horizonCost).toBe(pilot.economicCost + DEFAULT_INPUT.setupFeeCzk);
         expect(pilot.partner.recurringRevenue).toBe(0);
-        expect(pilot.partner.licenceShare).toBeCloseTo(710.6);
+        expect(pilot.partner.licenceShare).toBeCloseTo(836);
     });
     it('does not extrapolate pilot payback past its life', () => {
         expect(calculate({ plan: 'start', setupFeeCzk: 1e8 }).paybackMonths).toBeNull();
         expect(calculate({ plan: 'start', setupFeeCzk: 0 }).paybackMonths).toBe(0);
     });
-    it('uses the 17 percent monthly rate and never expires it arbitrarily after 12 months', () => {
+    it('uses the uniform 20 percent rate and never expires it arbitrarily after 12 months', () => {
         const r = calculate({ horizonMonths: 24, exchangeRate: 1, clients: 1, serviceFeeCzk: 0, setupFeeCzk: 0 });
-        expect(r.partner.licenceShare).toBe(17);
-        expect(r.partner.horizonRevenue).toBe(408);
-        expect(COMMERCIAL_TERMS.partnerSharePercent).toBe(17);
+        expect(r.partner.licenceShare).toBe(20);
+        expect(r.partner.horizonRevenue).toBe(480);
+        expect(COMMERCIAL_TERMS.partnerSharePercent).toBe(20);
     });
-    it('gives 3.23 USD from one paid Start', () => {
-        expect(calculate({ plan: 'start', exchangeRate: 1, clients: 1 }).partner.licenceShare).toBeCloseTo(3.23);
+    it('gives 3.8 USD from one paid Start', () => {
+        expect(calculate({ plan: 'start', exchangeRate: 1, clients: 1 }).partner.licenceShare).toBeCloseTo(3.8);
     });
     it('excludes unpaid licences and deducts refunds from the paid amount', () => {
         const r = calculate({ clients: 1, exchangeRate: 1, paidLicencePercent: 50, refundPercent: 20 });
         expect(r.partner.netPaidLicences).toBe(40);
-        expect(r.partner.licenceShare).toBeCloseTo(6.8);
+        expect(r.partner.licenceShare).toBeCloseTo(8);
     });
     it.each([{ paidLicencePercent: 0 }, { refundPercent: 100 }])('no share without net paid licence: %o', (change) => {
         expect(calculate(change).partner.licenceShare).toBe(0);
@@ -83,9 +83,9 @@ describe('whole-client economics', () => {
     it('counts setup only once and never as monthly revenue', () => {
         const r = calculate();
         expect(r.horizonBenefit).toBeCloseTo(r.netBenefit * 12 - DEFAULT_INPUT.setupFeeCzk);
-        expect(r.partner.recurringRevenue).toBe(28740);
-        expect(r.partner.horizonRevenue).toBe(494880);
-        expect(r.partner.horizonContribution).toBe(234880);
+        expect(r.partner.recurringRevenue).toBe(29400);
+        expect(r.partner.horizonRevenue).toBe(502800);
+        expect(r.partner.horizonContribution).toBe(242800);
     });
     it('moves third-party costs to the partner without double billing the client', () => {
         const direct = calculate();

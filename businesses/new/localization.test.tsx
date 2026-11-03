@@ -63,7 +63,7 @@ describe('bilingual launch site', () => {
         expect(text(<NewLegalPage kind="privacyPolicy" language="en"/>)).toContain('Privacy');
         for (const kind of ['productTerms', 'partnerTerms', 'engineLicense'] as const) {
             const rendered=text(<NewLegalPage kind={kind} language="en"/>);
-            expect(rendered).toContain('Draft for discussion');
+            expect(rendered).toContain('Version dated');
             expect(rendered).toContain('2026');
             expect(rendered).not.toContain('Návrh k projednání');
         }

@@ -23,10 +23,10 @@ const LEGAL_LINK_TEXTS: Readonly<Record<LegalDocumentKind, Readonly<Record<Suppo
         cs: 'Obchodní podmínky',
         en: 'Terms and Conditions',
     },
-    productTerms: { cs: 'Podmínky produktu · návrh', en: 'Product terms · draft' },
-    partnerTerms: { cs: 'Partnerské podmínky · návrh', en: 'Partner terms · draft' },
+    productTerms: { cs: 'Podmínky produktu', en: 'Product terms' },
+    partnerTerms: { cs: 'Partnerské podmínky', en: 'Partner terms' },
     engineLicense: { cs: 'Licence enginu', en: 'Engine licence' },
-    jointPrivacy: { cs: 'Společné zpracování · návrh', en: 'Joint processing · draft' },
+    jointPrivacy: { cs: 'Společné zpracování', en: 'Joint processing' },
 };
 
 /**
@@ -54,7 +54,12 @@ export function getLegalLink(kind: LegalDocumentKind, language: SupportedHomepag
 export function getLegalLinks(language: SupportedHomepageLanguage): readonly LegalLink[] {
     return [
         { href: getLegalHubPath(language), text: language === 'cs' ? 'Právní dokumenty' : 'Legal documents' },
-        ...LEGAL_DOCUMENT_KINDS.map((kind) => getLegalLink(kind, language)),
+        ...getLegalDocumentLinks(language),
         { href: getReleasesPath(language), text: language === 'cs' ? 'Vydání a podpora' : 'Releases and support' },
     ];
+}
+
+/** Document links for a dedicated footer section; product releases belong with resources. */
+export function getLegalDocumentLinks(language: SupportedHomepageLanguage): readonly LegalLink[] {
+    return LEGAL_DOCUMENT_KINDS.map(kind => getLegalLink(kind, language));
 }
