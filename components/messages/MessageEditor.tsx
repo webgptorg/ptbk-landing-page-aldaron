@@ -137,7 +137,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                 {transcriptionNotice && <p role="status" className="text-sm text-green-800">{transcriptionNotice}</p>}
             </section>
             <label className="block text-sm font-medium">Celý kontext
-                <Textarea autoFocus value={values.context} onChange={(e) => update('context', e.target.value)} disabled={busy}
+                <Textarea value={values.context} onChange={(e) => update('context', e.target.value)} disabled={busy}
                     rows={17} maxLength={MESSAGE_CONTEXT_MAX_LENGTH} className="mt-2 font-mono text-sm" placeholder="Vložte konverzaci, podklady nebo celé myšlenky…" required />
             </label>
             <p className="text-xs text-slate-500">{new Intl.NumberFormat('cs-CZ').format(values.context.length)} znaků</p>
