@@ -74,7 +74,12 @@ export async function remoteRecordingManifest(partId: string) {
     for (let from = 0; ; from += 500) {
         const { data, error } = await db.from('message_recording_chunks').select('sequence,object_key,byte_length,sha256').eq('part_id', partId).order('sequence').range(from, from + 499);
         if (error) throw unavailable();
-        for (const chunk of data ?? []) chunks.push({ sequence: chunk.sequence, byteLength: chunk.byte_length, sha256: chunk.sha256, url: await signStoredObject(chunk.object_key) });
+        // Bounded parallel signing keeps a five-minute file well inside the function deadline.
+        for (let offset = 0; offset < (data?.length ?? 0); offset += 20) {
+            chunks.push(...await Promise.all((data ?? []).slice(offset, offset + 20).map(async chunk => ({
+                sequence: chunk.sequence, byteLength: chunk.byte_length, sha256: chunk.sha256, url: await signStoredObject(chunk.object_key),
+            }))));
+        }
         if (!data || data.length < 500) break;
     }
     return { chunks, expectedChunks: part.expected_chunks as number | null };
