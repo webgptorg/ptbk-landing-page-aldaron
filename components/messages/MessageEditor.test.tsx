@@ -5,6 +5,7 @@ import '@testing-library/jest-dom/vitest';
 const mocks = vi.hoisted(() => ({ request: vi.fn(), transcribe: vi.fn() }));
 vi.mock('@/lib/admin/requestAdminJson', () => ({ requestAdminJson: mocks.request }));
 vi.mock('@/lib/messages/messageTranscriptionClient', () => ({ transcribeMessageFile: mocks.transcribe }));
+vi.mock('./MessageMeetingRecorder', () => ({ MessageMeetingRecorder: () => null }));
 import { MessageEditor } from './MessageEditor';
 import { TEST_MESSAGE } from '@/lib/messages/messageTestFixtures';
 const agent = { id: TEST_MESSAGE.agentId, name: 'Pavol Hejný', isEnabled: true };

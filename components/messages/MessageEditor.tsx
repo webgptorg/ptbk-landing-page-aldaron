@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,7 @@ import { transcribeMessageFile } from '@/lib/messages/messageTranscriptionClient
 import { createMessagePrefix, createMessageShareText, getMessageUrl, MESSAGE_CONTEXT_MAX_LENGTH, MESSAGE_DOMAINS, MESSAGE_VALUES_SCHEMA,
     PAVOL_MESSAGE_AGENT_ID, type ManagedMessage, type MessageValues } from '@/lib/messages/messageModel';
 import type { ManagedAgent } from '@/lib/agents/agentModel';
+import { MessageMeetingRecorder } from './MessageMeetingRecorder';
 import { ArrowLeft, ArrowRight, Copy, ExternalLink, LoaderCircle, Sparkles, Volume2 } from 'lucide-react';
 
 type AgentChoice = Pick<ManagedAgent, 'id' | 'name' | 'isEnabled'>;
@@ -33,6 +34,9 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const [transcriptionNotice, setTranscriptionNotice] = useState('');
     const [failedAudioFile, setFailedAudioFile] = useState<File | null>(null);
     const [pendingTranscript, setPendingTranscript] = useState('');
+    const [recordingBusy, setRecordingBusy] = useState(false);
+    const recordingBusyRef = useRef(false);
+    const valuesRef = useRef(values); valuesRef.current = values;
     useAdminDraftProtection(pendingTranscript);
     const operationRef = useRef(false);
     const { copyStatus, copyText } = useCopyTextToClipboard();
@@ -54,7 +58,17 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
         operationRef.current = true; setOperation(name); setError(''); onBusy(true);
         try { await action(); }
         catch (e) { setError(e instanceof Error ? e.message : 'Požadavek se nepodařilo dokončit.'); }
-        finally { operationRef.current = false; setOperation(''); onBusy(false); }
+        finally { operationRef.current = false; setOperation(''); onBusy(recordingBusyRef.current); }
+    };
+    const captureBusy = useCallback((value: boolean) => {
+        recordingBusyRef.current = value; setRecordingBusy(value); onBusy(value || operationRef.current);
+    }, [onBusy]);
+    const acceptRecordedTranscript = (transcript: string) => {
+        // Cached results can be re-applied after a reload without duplicating existing text.
+        if (valuesRef.current.context.includes(transcript)) return;
+        const context = appendMessageTranscript(valuesRef.current.context, transcript);
+        valuesRef.current = { ...valuesRef.current, context };
+        update('context', context);
     };
     const generate = () => run('Generuji texty…', async () => {
         if (!values.context.trim()) throw new Error('Nejprve vložte celý kontext.');
@@ -87,13 +101,17 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     });
     const publicUrl = saved ? getMessageUrl({ domain: values.domain, shortcode: `${values.prefix}-${saved.shortcode.split('-').at(-1)}` }) : '';
     const shareText = saved ? createMessageShareText(values.markdown, publicUrl) : '';
-    const busy = Boolean(operation);
+    const busy = Boolean(operation) || recordingBusy;
 
     return <form ref={autosave.formRef} className="space-y-5" onSubmit={(event) => { event.preventDefault(); if (!saved && step === 2) void run('Vytvářím zprávu…', async () => { await save(); }); }}>
         <nav aria-label="Kroky zprávy" className="flex gap-2 border-b border-slate-200 pb-4">
             <Button type="button" variant={step === 1 ? 'default' : 'outline'} disabled={busy} onClick={() => setStep(1)}>1. Celý kontext</Button>
             <Button type="button" variant={step === 2 ? 'default' : 'outline'} disabled={busy || !values.context.trim()} onClick={() => setStep(2)}>2. Zpráva</Button>
         </nav>
+        <div hidden={step !== 1}>
+            <MessageMeetingRecorder scope={saved?.id ?? 'new'} disabled={Boolean(operation) || Boolean(pendingTranscript)}
+                transcriptionConfigured={transcriptionConfigured} onBusy={captureBusy} onTranscript={acceptRecordedTranscript} />
+        </div>
         {step === 1 ? <>
             <section aria-label="Kontext z audia" className="space-y-3 rounded-xl border border-dashed border-slate-300 p-4"
                 onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = busy || !transcriptionConfigured || pendingTranscript ? 'none' : 'copy'; }}

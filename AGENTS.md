@@ -41,8 +41,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   never through Vercel's media body limits. Scribe v2 verbatim text and numbered diarized speakers append to existing
   context under a filename heading. Missing/incompatible diarization preserves the original text. Transcription is
   explicit, protected as pending admin work and never retried automatically. Retain completed text if it exceeds the
-  context limit. Source audio/token are not stored or reused for summary narration; subsequent summary/speech controls
+  context limit. External-file audio/token are not stored or reused for summary narration; subsequent summary/speech controls
   retain their existing behavior. Transcription uses the existing server-only ElevenLabs key independently of storage.
+  The context editor primarily offers a microphone meeting recorder. Two-second delivered chunks commit atomically
+  to a separate IndexedDB database before bounded, checksum-verified, idempotent private CDN backups. Five-minute
+  containers and interrupted/resumed parts share a meeting UUID; continuation always creates a new file. Raw bytes
+  and paid transcripts survive refresh, transcription and message deletion; nothing deletes them automatically.
+  Web Locks prevent simultaneous capture on one origin. Stop awaits final data and committed writes; device loss,
+  storage failure or a stalled recorder stop capture and preserve the committed prefix and an emergency tail download.
+  Wake Lock is best effort: the UI explains unlocked/foreground use and never promises mobile background capture.
+  Private recording APIs require messages permission and same-origin checks; raw media is never public message audio.
+  Original files and cached transcripts remain explicitly downloadable, and ordered transcription reuses the file
+  workflow without automatically retrying billed requests. See `docs/message-meeting-recorder.md` for limits and checks.
   The sender's copy/export adds the current URL at the start or after a greeting; the public text remains clean.
   Shortener lists message entries with a Messages edit link; its mutation API cannot edit/delete them. Private
   `messages` rows and their codes are hidden from anonymous database enumeration; a known URL alone grants access.
