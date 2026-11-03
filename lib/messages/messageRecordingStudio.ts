@@ -5,6 +5,7 @@ import type { StudioRecording } from '@/lib/recording-studio/recordingStudioType
 import type { MessageRecordingChunk, MessageRecordingPart } from './messageRecordingTypes';
 
 let isClaimedInThisDocument = false;
+export const LEGACY_MESSAGE_CAPTURE_LOCK = 'ptbk-message-meeting-capture';
 const occupiedMessage = 'Recording Studio používá jiná záložka nebo otevřený rekordér. Dokončete v ní práci a zavřete ji; nahrávky ani nastavení se nemění.';
 
 /** The same lock and fenced writes as Recording Studio; never changes its source preferences. */
@@ -19,13 +20,17 @@ export async function acquireMessageStudio(): Promise<() => Promise<void>> {
         prepare: () => RECORDING_STUDIO_AUTHORITY.read(),
         run: async (lock, previous) => {
             if (!lock) throw new Error(occupiedMessage);
-            const authority = await RECORDING_STUDIO_AUTHORITY.claim(crypto.randomUUID(), previous.generation);
-            if (!authority) throw new Error('Studio mezitím převzala jiná záložka. Zkuste nahrávání znovu.');
-            let release!: () => void;
-            const released = new Promise<void>(resolve => { release = resolve; });
-            acquired(async () => { release(); await operation; });
-            try { await released; }
-            finally { RECORDING_STUDIO_AUTHORITY.surrender(authority); }
+            // Older open tabs use this lock instead of the studio lock. Hold both until final data is committed.
+            await navigator.locks.request(LEGACY_MESSAGE_CAPTURE_LOCK, { ifAvailable: true }, async legacyLock => {
+                if (!legacyLock) throw new Error('V jiné záložce běží původní rekordér. Nejprve v ní dokončete nahrávání a obnovte ji. Původní audio zůstává zachované.');
+                const authority = await RECORDING_STUDIO_AUTHORITY.claim(crypto.randomUUID(), previous.generation);
+                if (!authority) throw new Error('Studio mezitím převzala jiná záložka. Zkuste nahrávání znovu.');
+                let release!: () => void;
+                const released = new Promise<void>(resolve => { release = resolve; });
+                acquired(async () => { release(); await operation; });
+                try { await released; }
+                finally { RECORDING_STUDIO_AUTHORITY.surrender(authority); }
+            });
         },
     });
     void operation.finally(() => { isClaimedInThisDocument = false; }).catch(rejected);

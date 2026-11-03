@@ -1,9 +1,16 @@
-import { appendMessageStudioChunk, createMessageStudioRecording, finishMessageStudioRecording } from './messageRecordingStudio';
+import { appendMessageStudioChunk, createMessageStudioRecording, finishMessageStudioRecording, LEGACY_MESSAGE_CAPTURE_LOCK } from './messageRecordingStudio';
 import { listRecordingParts, loadRecordingChunks, patchRecordingPart } from './messageRecordingStorage';
 import { readStudioRecording, saveStudioRecording } from '@/lib/recording-studio/recordingStudioStorage';
 
 /** Run only while holding Recording Studio's ownership. Never removes the earlier local bytes or paid text. */
-export async function preserveMessageRecordingsInStudio(): Promise<void> {
+export async function preserveMessageRecordingsInStudio(isLegacyLockHeld = false): Promise<void> {
+    if (!isLegacyLockHeld) {
+        await navigator.locks.request(LEGACY_MESSAGE_CAPTURE_LOCK, { ifAvailable: true }, async lock => {
+            if (!lock) throw new Error('V jiné záložce běží původní rekordér. Jeho zálohu převedeme až po dokončení nahrávání.');
+            await preserveMessageRecordingsInStudio(true);
+        });
+        return;
+    }
     for (const part of await listRecordingParts()) {
         if (part.studioRecordingId) {
             if (part.status === 'recording') {

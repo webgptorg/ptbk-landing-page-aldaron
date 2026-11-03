@@ -60,7 +60,7 @@ export class MessageMeetingCapture {
         if (generation !== this.generation) { await release(); throw new Error('Spouštění nahrávání bylo přerušeno.'); }
         this.releaseLock = release;
         try {
-            await preserveMessageRecordingsInStudio();
+            await preserveMessageRecordingsInStudio(true);
             this.failed = false; this.storageFailed = false; this.paused = false; this.microphoneMuted = false;
             this.accumulatedMilliseconds = 0; this.persistence = Promise.resolve();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });

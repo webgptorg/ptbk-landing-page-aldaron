@@ -17,7 +17,7 @@ describe('existing message audio becomes a normal Recording Studio source', () =
         for (let sequence = 0; sequence < bytes.length; sequence++) await saveRecordingChunk({ partId: part.id, sequence, bytes: new Blob([bytes[sequence]]), synced: false });
         const authority = await claimTestRecordingStudioAuthority();
         try {
-            await preserveMessageRecordingsInStudio(); await preserveMessageRecordingsInStudio();
+            await preserveMessageRecordingsInStudio(true); await preserveMessageRecordingsInStudio(true);
             const recording = (await readStudioRecording(part.id))!;
             expect(recording.status).toBe('interrupted'); expect(recording.tracks).toHaveLength(1);
             expect(recording.tracks[0].chunkCount).toBe(3);
@@ -26,7 +26,7 @@ describe('existing message audio becomes a normal Recording Studio source', () =
             const migrated = (await loadRecordingPart(part.id))!;
             expect(migrated.transcript).toBe('Paid transcript'); expect(migrated.studioRecordingId).toBe(part.id);
             expect(await (await localRecordingFile(migrated))!.text()).toBe('HEADER|original|END');
-            await deleteStudioRecording(part.id); await preserveMessageRecordingsInStudio();
+            await deleteStudioRecording(part.id); await preserveMessageRecordingsInStudio(true);
             expect(await readStudioRecording(part.id)).toBeUndefined();
         } finally { RECORDING_STUDIO_AUTHORITY.surrender(authority); }
     });

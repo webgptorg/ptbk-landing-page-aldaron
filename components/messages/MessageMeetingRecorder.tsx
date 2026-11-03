@@ -102,7 +102,7 @@ export function MessageMeetingRecorder({ scope, agentName = 'Pavol Hejný', disa
         // Migrate the former recorder's local backups without touching source configuration or removing originals.
         void perform(async () => {
             const release = await acquireMessageStudio();
-            try { await preserveMessageRecordingsInStudio(); }
+            try { await preserveMessageRecordingsInStudio(true); }
             finally { await release(); }
         });
     };

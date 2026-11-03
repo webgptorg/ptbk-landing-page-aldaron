@@ -5,6 +5,7 @@ import { listRecordingParts, loadRecordingPart, localRecordingFile } from './mes
 import { RECORDING_PART_MS } from './messageRecordingTypes';
 import { readStudioRecording, listStudioRecordings, readRecordingTrack } from '@/lib/recording-studio/recordingStudioStorage';
 import * as storage from './messageRecordingStorage';
+import { LEGACY_MESSAGE_CAPTURE_LOCK } from './messageRecordingStudio';
 class Track extends EventTarget { stop = vi.fn(); }
 class Recorder {
     static instances: Recorder[] = [];
@@ -20,21 +21,32 @@ class Recorder {
     stop() { this.state = 'inactive'; clearInterval(this.timer); queueMicrotask(() => { this.ondataavailable?.({ data: new Blob(['FINAL']) }); this.onstop?.(); }); }
 }
 let track: Track, held: boolean;
+const heldLocks = new Set<string>();
 const captures: MessageMeetingCapture[] = [];
 const createCapture = (events: ConstructorParameters<typeof MessageMeetingCapture>[0]) => { const capture = new MessageMeetingCapture(events); captures.push(capture); return capture; };
 beforeEach(() => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date', 'performance'] });
-    track = new Track(); held = false; Recorder.instances = [];
+    track = new Track(); held = false; heldLocks.clear(); Recorder.instances = [];
     const document = Object.assign(new EventTarget(), { visibilityState: 'visible' });
     vi.stubGlobal('document', document); vi.stubGlobal('MediaRecorder', Recorder);
     vi.stubGlobal('navigator', { mediaDevices: { getUserMedia: vi.fn(async () => ({ getTracks: () => [track], getAudioTracks: () => [track] })) },
-        locks: { request: async (_name: string, _options: unknown, run: (lock: unknown) => Promise<void>) => {
-            if (held) return run(null); held = true; try { await run({}); } finally { held = false; }
+        locks: { request: async (name: string, _options: unknown, run: (lock: unknown) => Promise<void>) => {
+            if (heldLocks.has(name)) return run(null); heldLocks.add(name); held = true;
+            try { await run({}); } finally { heldLocks.delete(name); held = heldLocks.size > 0; }
         } },
     });
 });
 afterEach(async () => { for (const capture of captures.splice(0)) await capture.stop(true).catch(() => undefined); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 describe('meeting capture recovery boundaries', () => {
+    it('does not migrate or race an older recorder still running in another tab', async () => {
+        heldLocks.add(LEGACY_MESSAGE_CAPTURE_LOCK);
+        const recorder = createCapture({ changed: vi.fn(), failed: vi.fn() });
+        await expect(recorder.start('new', 'Old tab still capturing')).rejects.toThrow('původní rekordér');
+        expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+        heldLocks.delete(LEGACY_MESSAGE_CAPTURE_LOCK);
+        await recorder.start('new', 'After old tab finished'); await recorder.stop();
+        expect((await loadRecordingPart(recorder.currentPart!.id))!.status).toBe('complete');
+    });
     it('releases microphone and studio ownership when the encoder refuses to start', async () => {
         const recorder = createCapture({ changed: vi.fn(), failed: vi.fn() });
         const start = vi.spyOn(Recorder.prototype, 'start').mockImplementationOnce(() => { throw new Error('Encoder unavailable'); });
