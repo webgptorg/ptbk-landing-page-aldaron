@@ -22,7 +22,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     cs: {
         title: 'Ochrana osobních údajů',
         publication: { date: '2026-11-03', isDraft: false },
-        perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
+        perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo weby pavolhejny.cz, pavolhejny.com a ai-ta-krajta.cz či využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
         sections: [
             {
                 heading: 'Kdo vaše údaje zpracovává',
@@ -42,6 +42,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'Zpracováváme údaje, které nám dáte, údaje o návštěvě webu a nezbytné pracovní kontaktní údaje předané v rámci poptávky či partnerského obchodu. U kontaktu získaného jinak než přímo od vás sdělíme také dostupnou informaci o jeho zdroji.',
                 ],
                 bullets: [
+                    'U nových formulářů ukládáme odděleně účel požadavku, zdroj, čas přijetí, jazyk a verzi informačního textu. U odběru novinek také přesné znění a výslovnou volbu souhlasu pro konkrétní téma a odesílatele AI Web s.r.o. Registrace, poptávka ani stažení PDF samy nezakládají souhlas s newsletterem nebo samostatným marketingem Neonmedia. Záznam o odeslání neověřuje vlastnictví e-mailové schránky. Historickým kontaktům souhlas zpětně nedoplňujeme.',
                     'Údaje z formulářů: jméno a příjmení, e-mailová adresa, telefonní číslo, název firmy, fakturační údaje a text zprávy, kterou nám napíšete.',
                     'Údaje o registraci na akci: zvolený termín, počet účastníků, formát a případný slevový kód.',
                     'Technické údaje o návštěvě: IP adresa, typ a jazyk prohlížeče, typ zařízení, navštívené stránky, čas návštěvy a stránka, ze které jste přišli.',
@@ -165,7 +166,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     en: {
         title: 'Privacy Policy',
         publication: { date: '2026-11-03', isDraft: false },
-        perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or use the Promptbook services, why we do it, and which rights you have.`,
+        perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or pavolhejny.cz, pavolhejny.com and ai-ta-krajta.cz or use the Promptbook services, why we do it, and which rights you have.`,
         sections: [
             {
                 heading: 'Who processes your data',
@@ -185,6 +186,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'We process information you provide, website-visit information and necessary business contacts supplied for an enquiry or partner deal. Where information was not obtained directly from you, we also provide available information about its source.',
                 ],
                 bullets: [
+                    'For new forms we record the purpose, source, receipt time, language and notice version. Newsletter requests also record the exact wording and explicit consent choice for the named topic and sender AI Web s.r.o. Enquiries, registration and PDF requests do not subscribe you to a newsletter or Neonmedia marketing. A submission does not verify email ownership. We do not retrospectively infer consent for historical contacts.',
                     'Data from forms: name, e-mail address, phone number, company name, billing details, and the message you write to us.',
                     'Data about an event registration: the chosen date, the number of participants, the format, and any discount code.',
                     'Technical data about the visit: IP address, browser type and language, device type, visited pages, time of the visit, and the page you came from.',

@@ -1,3 +1,4 @@
+import { createContactNoticeFields } from '@/lib/contacts/contactSubmissionPolicy';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -31,6 +32,7 @@ function createRegistrationRequest(overrides: Readonly<Record<string, unknown>> 
     return new NextRequest('http://localhost/api/community/membership/registration', {
         method: 'POST',
         body: JSON.stringify({
+            ...createContactNoticeFields(),
             planId: 'premium',
             billingPeriod: 'yearly',
             fullname: 'Pavol Hejný',

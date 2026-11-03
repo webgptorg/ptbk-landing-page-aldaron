@@ -46,7 +46,7 @@ export function LeadCaptureProvider({ children }: { children: ReactNode }) {
         submitting.current = true; setBusy(true); setError('');
         try {
             if (!saved) {
-                await subscribeToWaitlist({ email: email.trim(), fullname: fullname.trim(),
+                await subscribeToWaitlist({ email: email.trim(), fullname: fullname.trim(), language: locale,
                     placeName: request.kind === 'pdf' ? 'new-calculator-pdf' : 'new-website-contact',
                     note: [request.topic, request.note || '', note.trim(), request.kind === 'pdf'
                         ? 'Zájemce požádal o PDF kalkulaci. Nejde o přihlášení k newsletteru.'

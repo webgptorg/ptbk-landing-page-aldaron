@@ -1,3 +1,5 @@
+import { createContactNoticeFields } from '@/lib/contacts/contactSubmissionPolicy';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { sendJson } from '@/lib/api/requestJson';
 import type { ContactSubmission } from '@/lib/contacts/Contact';
 
@@ -7,6 +9,8 @@ import type { ContactSubmission } from '@/lib/contacts/Contact';
 const WAITLIST_API_PATH = '/api/waitlist';
 
 type SubscribeToWaitlistOptions = {
+    language?: SupportedHomepageLanguage;
+    marketingConsent?: boolean;
     fullname?: string;
     email: string;
     placeName: string;
@@ -51,5 +55,6 @@ export async function subscribeToWaitlist(options: SubscribeToWaitlistOptions): 
         ...readSubmissionPlace(),
     };
 
-    await sendJson(WAITLIST_API_PATH, 'POST', contactSubmission);
+    const language = options.language ?? (typeof document !== 'undefined' && document.documentElement.lang.startsWith('en') ? 'en' : 'cs');
+    await sendJson(WAITLIST_API_PATH, 'POST', { ...contactSubmission, ...createContactNoticeFields(language, options.marketingConsent === true) });
 }

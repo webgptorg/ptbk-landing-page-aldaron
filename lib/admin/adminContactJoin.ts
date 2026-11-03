@@ -229,6 +229,7 @@ function createMergedContact(group: AdminContactGroup): Contact {
 
     return {
         id: primaryContact.id,
+        submissionEvidence: primaryContact.submissionEvidence,
         createdAt: getFirstFilledContactTextValue(group.contacts, 'createdAt'),
         fullname: getFirstFilledContactTextValue(group.contacts, 'fullname'),
         email: getFirstFilledContactTextValue(group.contacts, 'email'),
@@ -307,6 +308,7 @@ export function formatAdminContactRecords(contactGroup: AdminContactGroup | null
                 `Email: ${contact.email ?? ''}`,
                 `Phone: ${contact.phone ?? ''}`,
                 `User note: ${contact.userNote ?? ''}`,
+                `Submission evidence (source-specific, not a current mailing permission): ${contact.submissionEvidence ? JSON.stringify(contact.submissionEvidence) : 'Not recorded; do not infer consent.'}`,
                 `Is contacted: ${contact.isContacted === true ? 'yes' : contact.isContacted === false ? 'no' : ''}`,
                 `Is waitlisted: ${contact.isWaitlisted === true ? 'yes' : contact.isWaitlisted === false ? 'no' : ''}`,
                 `Our note: ${contact.ourNote ?? ''}`,

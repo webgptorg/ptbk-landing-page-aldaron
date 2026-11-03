@@ -1,3 +1,4 @@
+import { createContactNoticeFields } from '@/lib/contacts/contactSubmissionPolicy';
 import { APP_NAME } from '@/config';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -58,6 +59,7 @@ function createWaitlistRequest(
  * A filled in form which is expected to be accepted, so that every test can change just the one thing it is about
  */
 const VALID_CONTACT_SUBMISSION = {
+    ...createContactNoticeFields('cs', true),
     fullname: 'Jana Nováková',
     email: 'jana@example.com',
     phone: '+420123456789',
@@ -80,7 +82,9 @@ describe('gathering a contact from a public form', () => {
 
         expect(response.status).toBe(200);
         expect(database.from).toHaveBeenCalledWith('Contact');
-        expect(getWrittenContact(database)).toMatchObject(VALID_CONTACT_SUBMISSION);
+        const { noticeVersion, noticeLanguage, marketingConsent, ...textFields } = VALID_CONTACT_SUBMISSION;
+        expect(getWrittenContact(database)).toMatchObject(textFields);
+        expect(getWrittenContact(database).submissionEvidence).toMatchObject({ version: noticeVersion, language: noticeLanguage, marketingConsent, emailVerified: false });
     });
 
     it('stores a field which was left empty as no value at all', async () => {
@@ -204,4 +208,19 @@ describe('gathering a contact from a public form', () => {
         expect(response.status).toBe(500);
         expect(answer.error).not.toContain('relation');
     });
+    it('rejects newsletter submissions with no choice and accepts enquiries without marketing', async () => {
+        const database = createContactInsertDatabase();
+        createSupabaseServiceRoleClientMock.mockReturnValue({ from: database.from });
+        expect((await POST(createWaitlistRequest({ ...VALID_CONTACT_SUBMISSION, marketingConsent: false }))).status).toBe(400);
+        expect(database.insert).not.toHaveBeenCalled();
+        expect((await POST(createWaitlistRequest({ ...VALID_CONTACT_SUBMISSION, placeName: 'new-website-contact', marketingConsent: false, submissionEvidence: { emailVerified: true } }))).status).toBe(200);
+        expect(getWrittenContact(database).submissionEvidence).toMatchObject({ marketingConsent: false, emailVerified: false, consentText: null });
+    });
+    it('does not accept an outdated open form as evidence of current consent', async () => {
+        const database = createContactInsertDatabase();
+        createSupabaseServiceRoleClientMock.mockReturnValue({ from: database.from });
+        expect((await POST(createWaitlistRequest({ ...VALID_CONTACT_SUBMISSION, noticeVersion: undefined }))).status).toBe(400);
+        expect(database.insert).not.toHaveBeenCalled();
+    });
+
 });

@@ -86,6 +86,7 @@ describe('Footer newsletter subscription', () => {
             expect(subscribeToWaitlistMock).toHaveBeenCalledWith({
                 email: 'reader@example.com',
                 placeName: 'newsletter-footer',
+                language: 'en', marketingConsent: true,
             });
         });
 

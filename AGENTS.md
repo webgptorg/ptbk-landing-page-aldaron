@@ -13,8 +13,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `/cs/releases` and `/en/releases` publish the committed npm/GitHub catalogue from 0.118 onwards; older history links
   to npm. Original publication and first listing here are distinct; automatic sync preserves existing records,
   first-listing dates and support extensions. Prereleases never acquire stable support. The proposed 90-day line
-  minimum follows the first stable listing here and covers the latest stable patch; at least the latest stable line
-  remains available. This draft policy is not activated by publication. Six-hourly sync fails without deleting history.
+  minimum follows the first actual stable release on npm/GitHub and covers the latest stable patch; at least the latest stable line
+  remains available. The UI groups major.minor lines, shows only the latest stable patch and hides grey prerelease candidates in a native disclosure. LTS is an optional informational marker, not extra contractual support. This draft policy is not activated by publication. Six-hourly sync fails without deleting history.
   Referral agencies need not continuously sell or supply care; customers contract directly with AI Web. Monthly
   calculator assumptions are 17%, with a separately agreed annual rate of 20%; accepted older rights remain separate.
 
@@ -779,6 +779,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   room: expose only anonymous totals, approved messages, and shared projects;
   show member first names only. If the room cannot be read, show less content,
   not an error. Landing-page reactions are estimates based on recent room data.
+
+### Contact forms revision of 3 November 2026
+
+All four public domains share the versioned source/purpose registry in `lib/contacts/contactSubmissionPolicy.ts`.
+New waitlist and both paid-registration submissions must send the current notice version/language. Newsletter sources
+require their actual explicit consent; service enquiries, registrations and calculator PDF requests never imply it.
+The server writes canonical text, purpose, language, receipt time and the actual choice atomically in Contact's
+`submissionEvidence`. Existing rows remain null. A database trigger and admin input allowlists preserve this record;
+source histories keep their own evidence when contacts are grouped. The recorded choice does not prove mailbox
+ownership or override a subsequent withdrawal. No email confirmation or campaign sending is implemented here.
+Use the shared notice on every new public contact form and register its source before accepting submissions.
+Never fabricate consent for historical contacts or add Neonmedia's unrelated marketing to the grant.
 
 ### Administration and data rules
 

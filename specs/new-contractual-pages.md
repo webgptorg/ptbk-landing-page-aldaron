@@ -51,6 +51,15 @@ All legal documents have canonical language-prefixed URLs under `/cs/legal` and 
 
 Referral partners may simply recommend customers; customers purchase directly from AI Web and separately order an agency’s services. The 17% monthly / 20% annual proposal replaces the old effective 24% bonus. The monthly calculator and its exports use 17%. Mandatory rules follow the actual relationship, not its label.
 
-The catalogue mirrors every public npm/GitHub release with a version base at least 0.118.0, preserving publication dates separately from the first listing here. A six-hourly append-preserving sync commits source updates; failures do not erase history. The initial 23 versions are all prereleases. The proposed line support minimum is 90 days from the first stable listing here, latest stable patch only; a new patch does not reset the line’s clock. Existing support promises cannot be shortened by source edits. This policy remains a proposal pending the final agreement.
+The catalogue mirrors every public npm/GitHub release with a version base at least 0.118.0, preserving publication dates separately from the first listing here. A six-hourly append-preserving sync commits source updates; failures do not erase history. The initial 23 versions are all prereleases. The proposed line support minimum is 90 days from the first actual stable release on npm/GitHub, latest stable patch only; a new patch does not reset the line’s clock. Existing support promises cannot be shortened by source edits. This policy remains a proposal pending the final agreement.
 
 The bilateral Neonmedia contract, its budget, buyout valuations, liability discussions and negotiating brief remain outside the repository.
+
+
+## Další kolo z 3. listopadu 2026
+
+Řady se zobrazují po major.minor, s posledním stabilním patchem a prvním skutečným stabilním vydáním. Kandidáti prerelease jsou za samostatným rozbalením, nejsou pro komerční provoz a nemají stabilní podporu. LTS je pouze informační označení. Devadesátidenní minimum běží od vydání první stabilní verze a patch je neobnovuje; již přijatá vyšší minima zůstávají. Bez skutečně vydané stabilní řady nelze deklarovat splnění této podmínky. Vydání enginu se touto změnou nevytváří.
+
+Nový požadavek na jednodušší jednotnou provizi je předmětem dalšího rozhodnutí; dosavadní výpočet 17/20 se tímto commitem nepřepíná. Individuální podíly a odkup Neonmedia zůstávají mimo veřejný repozitář.
+
+Nové kontaktní formuláře napříč ptbk.io, pavolhejny.cz, pavolhejny.com a ai-ta-krajta.cz používají verzovanou informační povinnost a samostatné konkrétní souhlasy pouze pro newsletter. Evidence je serverová a neměnná při úpravě kontaktu. Registrace, PDF a poptávky nejsou souhlasem s reklamou; historické řádky se nedoplňují. Viz docs/contact-submission-evidence.md.

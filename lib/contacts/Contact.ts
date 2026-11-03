@@ -1,9 +1,11 @@
+import type { ContactSubmissionEvidence } from './contactSubmissionPolicy';
 /**
  * One contact (lead) as stored in the `Contact` table
  *
  * Note: The shape mirrors the database table, the admin dashboard only reads it, never changes its structure
  */
 export type Contact = {
+    readonly submissionEvidence?: ContactSubmissionEvidence | null;
     readonly id: number;
     readonly createdAt: string | null;
     readonly fullname: string | null;
@@ -26,7 +28,7 @@ export type Contact = {
  *
  * Note: `id` is only a technical identifier, it is never shown as a column
  */
-export type ContactColumnKey = Exclude<keyof Contact, 'id'>;
+export type ContactColumnKey = Exclude<keyof Contact, 'id' | 'submissionEvidence'>;
 
 /**
  * Key of a contact field which holds a text rather than a yes or no answer

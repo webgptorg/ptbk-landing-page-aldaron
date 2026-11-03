@@ -1,3 +1,4 @@
+import { createContactNoticeFields } from '@/lib/contacts/contactSubmissionPolicy';
 import type {
     AiSupervizeMiniWorkshopAvailability,
     AiSupervizeMiniWorkshopPrice,
@@ -39,7 +40,7 @@ export async function submitAiSupervizeMiniWorkshopRegistration(
     const response = await fetch(AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_API_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationRequest),
+        body: JSON.stringify({ ...registrationRequest, ...createContactNoticeFields() }),
     });
     const responseBody = (await response.json().catch(() => ({}))) as AiSupervizeMiniWorkshopRegistrationErrorResponse &
         Partial<AiSupervizeMiniWorkshopRegistrationResponse>;

@@ -1,5 +1,7 @@
 'use client';
 
+import { getNewsletterConsentText } from '@/lib/contacts/contactSubmissionPolicy';
+
 import { PRO_FIRMY_PATH } from '@/businesses/pro-firmy/config';
 import { WHITEPAPER_PATHS } from '@/businesses/whitepaper/whitepaperConfig';
 import { createPublicUrl } from '@/lib/domains/publicDomainRouting';
@@ -207,7 +209,7 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
         setIsSuccessful(false);
 
         try {
-            await subscribeToWaitlist({ email, placeName: NEWSLETTER_FOOTER_PLACE_NAME });
+            await subscribeToWaitlist({ email, placeName: NEWSLETTER_FOOTER_PLACE_NAME, language, marketingConsent: isConsentGiven });
 
             setIsSuccessful(true);
             setEmail('');
@@ -285,7 +287,7 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
                                     className="mt-0.5"
                                 />
                                 <label htmlFor="consent" className="text-sm text-gray-400 leading-relaxed">
-                                    {consentLabel}
+                                    {getNewsletterConsentText('promptbook-newsletter', language)}
                                 </label>
                             </div>
 
@@ -301,6 +303,7 @@ export function Footer({ language = 'en', ...overrides }: FooterProps) {
                             </Button>
 
                             <PersonalDataConsentNote
+                                isNewsletter
                                 language={language}
                                 className="text-gray-500"
                                 linkClassName="text-gray-400 hover:text-white"

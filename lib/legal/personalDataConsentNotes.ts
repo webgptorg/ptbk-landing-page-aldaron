@@ -31,21 +31,21 @@ const PERSONAL_DATA_CONSENT_NOTES: Readonly<
 > = {
     cs: {
         formal: {
-            prefix: 'Jak zpracováváme osobní údaje a s kým je sdílíme, popisují naše ',
+            prefix: 'Správcem údajů je AI Web s.r.o. Účely, příjemce, dobu uchování a Vaše práva popisují naše ',
             privacyPolicyLinkText: 'zásady ochrany osobních údajů',
         },
         informal: {
-            prefix: 'Jak zpracováváme osobní údaje a s kým je sdílíme, popisují naše ',
+            prefix: 'Správcem údajů je AI Web s.r.o. Účely, příjemce, dobu uchování a Vaše práva popisují naše ',
             privacyPolicyLinkText: 'zásady ochrany osobních údajů',
         },
     },
     en: {
         formal: {
-            prefix: 'How we process and share personal data is explained in our ',
+            prefix: 'AI Web s.r.o. is the controller. Purposes, recipients, retention and your rights are explained in our ',
             privacyPolicyLinkText: 'privacy policy',
         },
         informal: {
-            prefix: 'How we process and share personal data is explained in our ',
+            prefix: 'AI Web s.r.o. is the controller. Purposes, recipients, retention and your rights are explained in our ',
             privacyPolicyLinkText: 'privacy policy',
         },
     },

@@ -109,7 +109,7 @@ export function ContactsTable(props: ContactsTableProps) {
                                 <TableCell className="p-2 align-top">
                                     <AdminContactDetails
                                         contactGroup={contact.contactGroup}
-                                        isContactRecordsIncluded={contact.contactGroup.contacts.length > 1}
+                                        isContactRecordsIncluded={true}
                                         isWorkshopParticipationsIncluded
                                         isWorkshopFeedbackIncluded
                                     />

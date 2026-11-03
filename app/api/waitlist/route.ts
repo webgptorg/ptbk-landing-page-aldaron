@@ -1,3 +1,4 @@
+import { readContactSubmissionEvidence } from '@/lib/contacts/contactSubmissionPolicy';
 // app/api/waitlist/route.ts
 import { APP_NAME } from '@/config';
 import { readClientIpAddress } from '@/lib/api/readClientIpAddress';
@@ -43,6 +44,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 });
     }
 
+    const submissionEvidence = readContactSubmissionEvidence(body, contactTextFields.placeName ?? '');
+    if (!submissionEvidence) {
+        return NextResponse.json({ error: 'The form has changed. Reload the page and confirm your choice. / Formulář se změnil. Obnovte stránku a potvrďte svou volbu.' }, { status: 400 });
+    }
+
     const contactsTable = getContactsTableOrNull();
     if (contactsTable === null) {
         return createContactsUnreachableResponse();
@@ -50,6 +56,7 @@ export async function POST(request: NextRequest) {
 
     const { errorMessage } = await insertContact(contactsTable, {
         ...contactTextFields,
+        submissionEvidence,
         appName: APP_NAME,
         userAgent: request.headers.get('user-agent'),
         ipAddress: readClientIpAddress(request),

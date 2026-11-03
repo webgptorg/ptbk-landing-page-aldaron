@@ -1,3 +1,4 @@
+import { readContactSubmissionEvidence } from '@/lib/contacts/contactSubmissionPolicy';
 import {
     AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_PLACE_NAME,
     getAiSupervizeMiniDiscountPlaceId,
@@ -139,6 +140,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: INVALID_REGISTRATION_ERROR_MESSAGE }, { status: 400 });
     }
 
+    const submissionEvidence = readContactSubmissionEvidence(body!, 'AiSupervizeMiniWorkshopRegistration');
+    if (!submissionEvidence) return NextResponse.json({ error: 'Formulář se změnil. Obnovte stránku a odešlete jej znovu.' }, { status: 400 });
+
     const contactsTable = getContactsTableOrNull();
 
     if (contactsTable === null) {
@@ -218,6 +222,7 @@ export async function POST(request: NextRequest) {
         fullname: registrationRequest.fullname,
         email: registrationRequest.email,
         userNote: contactNote,
+        submissionEvidence,
         isWaitlisted,
         placeName: AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_PLACE_NAME,
         appName: APP_NAME,

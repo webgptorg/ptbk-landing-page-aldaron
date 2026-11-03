@@ -1,5 +1,7 @@
 'use client';
 
+import { getServicePurposeText } from '@/lib/contacts/contactSubmissionPolicy';
+
 import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getLegalPagePath } from '@/lib/legal/legalPagePaths';
@@ -24,12 +26,14 @@ export function PersonalDataConsentNote({
     className,
     linkClassName,
     children,
+    isNewsletter = false,
 }: {
     language: SupportedHomepageLanguage;
     addressForm?: AddressForm;
     className?: string;
     linkClassName?: string;
     children?: ReactNode;
+    isNewsletter?: boolean;
 }) {
     const { prefix, privacyPolicyLinkText } = getPersonalDataConsentNote(language, addressForm);
     const privacyPolicyUrl = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
@@ -43,7 +47,7 @@ export function PersonalDataConsentNote({
             >
                 {privacyPolicyLinkText}
             </Link>
-            .{children ? <> {children}</> : null}
+            .{!isNewsletter && <> {getServicePurposeText(language)}</>}{children ? <> {children}</> : null}
         </p>
     );
 }

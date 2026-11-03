@@ -1,3 +1,4 @@
+import { createContactNoticeFields } from '@/lib/contacts/contactSubmissionPolicy';
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -84,6 +85,7 @@ function createRegistrationRequest(overrides: Readonly<Record<string, unknown>> 
     return new NextRequest('http://localhost/api/ai-supervize-mini/registration', {
         method: 'POST',
         body: JSON.stringify({
+            ...createContactNoticeFields(),
             eventSlug: ONSITE_EVENT_SLUG,
             participantCount: 2,
             fullname: 'Jana Nováková',

@@ -32,6 +32,8 @@ function renderEmailSubscriptionForm() {
 
 function submitForm() {
     const form = screen.getByRole('form', { name: 'AI ta Krajta do e-mailu' });
+    const checkbox = within(form).getByRole('checkbox');
+    if (!(checkbox as HTMLInputElement).checked) fireEvent.click(checkbox);
     fireEvent.submit(form);
 }
 
@@ -61,6 +63,7 @@ describe('AI ta Krajta email subscription form', () => {
         expect(within(FOOTER).getByRole('form', { name: 'Zůstaň v obraze' })).toBeVisible();
 
         fireEvent.change(FOOTER_EMAIL_FIELD, { target: { value: 'footer-listener@example.com' } });
+        fireEvent.click(within(FOOTER).getByRole('checkbox'));
         fireEvent.submit(within(FOOTER).getByRole('form', { name: 'Zůstaň v obraze' }));
 
         expect(await within(FOOTER).findByRole('status')).toHaveTextContent('žádost o e-mailové novinky jsme uložili');
@@ -68,6 +71,7 @@ describe('AI ta Krajta email subscription form', () => {
         expect(EMAIL_SUBSCRIPTION_MOCKS.subscribeToWaitlist).toHaveBeenCalledWith({
             email: 'footer-listener@example.com',
             placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
+            language: 'cs', marketingConsent: true,
             note: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
         });
     });
@@ -79,9 +83,9 @@ describe('AI ta Krajta email subscription form', () => {
         expect(screen.getAllByRole('textbox')).toHaveLength(1);
         expect(screen.getByRole('textbox', { name: 'E-mail' })).toBeRequired();
         expect(screen.getByRole('button', { name: 'Odebírat e-mailem' })).toBeVisible();
-        expect(screen.getByRole('link', { name: 'zásad ochrany osobních údajů' })).toHaveAttribute(
+        expect(screen.getByRole('link', { name: 'zásady ochrany osobních údajů' })).toHaveAttribute(
             'href',
-            'https://ptbk.io/cs/ochrana-osobnich-udaju',
+            'https://ptbk.io/cs/legal/ochrana-osobnich-udaju',
         );
     });
 
@@ -103,6 +107,7 @@ describe('AI ta Krajta email subscription form', () => {
         expect(EMAIL_SUBSCRIPTION_MOCKS.subscribeToWaitlist).toHaveBeenCalledWith({
             email: 'listener@example.com',
             placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
+            language: 'cs', marketingConsent: true,
             note: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
         });
         expect(screen.queryByText('listener@example.com')).not.toBeInTheDocument();

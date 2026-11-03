@@ -1,3 +1,4 @@
+import { readContactSubmissionEvidence } from '@/lib/contacts/contactSubmissionPolicy';
 import {
     COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
     COMMUNITY_MEMBERSHIP_REGISTRATION_PLACE_NAME,
@@ -88,6 +89,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: INVALID_REGISTRATION_ERROR_MESSAGE }, { status: 400 });
     }
 
+    const submissionEvidence = readContactSubmissionEvidence(body!, 'CommunityMembershipRegistration');
+    if (!submissionEvidence) return NextResponse.json({ error: 'Formulář se změnil. Obnovte stránku a odešlete jej znovu.' }, { status: 400 });
+
     const contactsTable = getContactsTableOrNull();
     if (contactsTable === null) {
         return createContactsUnreachableResponse();
@@ -122,6 +126,7 @@ export async function POST(request: NextRequest) {
         fullname: registrationRequest.fullname,
         email: registrationRequest.email,
         userNote: contactNote,
+        submissionEvidence,
         isWaitlisted: false,
         placeName: COMMUNITY_MEMBERSHIP_REGISTRATION_PLACE_NAME,
         appName: APP_NAME,

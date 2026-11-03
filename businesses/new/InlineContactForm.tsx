@@ -38,6 +38,7 @@ export function InlineContactForm({ partnership = false }: { partnership?: boole
                 email: email.trim(),
                 fullname: fullname.trim(),
                 placeName: 'new-website-contact',
+                language: locale,
                 note: [
                     partnership ? 'Partnerství — kontaktní formulář' : 'Promptbook — kontaktní formulář',
                     message.trim(),

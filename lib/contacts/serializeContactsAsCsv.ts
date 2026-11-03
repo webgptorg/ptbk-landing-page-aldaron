@@ -17,10 +17,10 @@ import { serializeRowsAsCsv } from '@/lib/exports/serializeRowsAsCsv';
 export function serializeContactsAsCsv(contacts: readonly Contact[]): string {
     return serializeRowsAsCsv(
         contacts,
-        CONTACT_COLUMN_DEFINITIONS.map((column) => ({
+        [...CONTACT_COLUMN_DEFINITIONS.map((column) => ({
             header: column.key,
             getValue: (contact: Contact) => formatContactValueForExport(contact, column.key),
-        })),
+        })), { header: 'submissionEvidence', getValue: (contact: Contact) => contact.submissionEvidence ? JSON.stringify(contact.submissionEvidence) : '' }],
     );
 }
 

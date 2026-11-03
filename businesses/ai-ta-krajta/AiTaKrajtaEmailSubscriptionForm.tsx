@@ -1,5 +1,7 @@
 'use client';
 
+import { getNewsletterConsentText } from '@/lib/contacts/contactSubmissionPolicy';
+
 import {
     AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
     AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
@@ -36,6 +38,7 @@ export function AiTaKrajtaEmailSubscriptionSection() {
  */
 export function AiTaKrajtaEmailSubscriptionForm({ isFooter = false }: { readonly isFooter?: boolean }) {
     const [email, setEmail] = useState('');
+    const [isConsentGiven, setIsConsentGiven] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -67,6 +70,8 @@ export function AiTaKrajtaEmailSubscriptionForm({ isFooter = false }: { readonly
             return;
         }
 
+        if (!isConsentGiven) { setErrorMessage('Potvrď souhlas s e-mailovými novinkami.'); return; }
+
         isSubmissionInFlightRef.current = true;
         setIsSubmitting(true);
         setErrorMessage(null);
@@ -74,6 +79,8 @@ export function AiTaKrajtaEmailSubscriptionForm({ isFooter = false }: { readonly
         try {
             await subscribeToWaitlist({
                 email: normalizedEmail,
+                marketingConsent: isConsentGiven,
+                language: 'cs',
                 placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
                 note: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
             });
@@ -156,13 +163,18 @@ export function AiTaKrajtaEmailSubscriptionForm({ isFooter = false }: { readonly
                 </p>
             )}
 
+            <label className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-white/70">
+                <input type="checkbox" checked={isConsentGiven} onChange={event => setIsConsentGiven(event.target.checked)} disabled={isSubmitting} className="mt-0.5" />
+                <span>{getNewsletterConsentText('podcast-newsletter', 'cs')}</span>
+            </label>
             <PersonalDataConsentNote
+                isNewsletter
                 language="cs"
                 addressForm="informal"
                 className="mt-3 text-white/40"
                 linkClassName="text-white/70"
             >
-                Odesláním zároveň žádáš o e-mailové novinky AI ta Krajta.
+                Souhlas se týká pouze novinek AI ta Krajta.
             </PersonalDataConsentNote>
         </form>
     );
