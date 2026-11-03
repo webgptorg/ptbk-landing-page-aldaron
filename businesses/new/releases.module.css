@@ -12,3 +12,8 @@
 .sources { display: flex; gap: 24px; margin-bottom: 0; font-size: 14px; }
 .sources a { color: #075b83; text-decoration: underline; text-underline-offset: 3px; }
 .release summary { cursor: pointer; line-height: 1.6; }
+.candidates { max-width: 920px; margin: 0 auto 56px; }
+.candidates > summary { cursor: pointer; padding: 16px; color: #526275; }
+.candidates .list { margin: 12px 0 0; }
+.candidate { background: #f5f6f8; color: #526275; }
+.badge[data-state='ended'] { color: #7f1d1d; background: #fee2e2; }

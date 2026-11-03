@@ -11,11 +11,13 @@ export type ProductRelease = {
     notes?: string;
     /** A published minimum may only be extended. Prereleases never acquire support. */
     supportUntil?: string;
+    /** Informational editorial designation; never creates an extra contractual guarantee. */
+    lts?: boolean;
 };
 export const PRODUCT_RELEASES: readonly ProductRelease[] = catalog.releases;
 export const RELEASE_CATALOG_UPDATED_AT = catalog.checkedAt;
 
-/** Minimum window follows the first listing of a stable major.minor line, not npm publication. */
+/** The first actual stable release starts a line's clock. Patches never restart it. */
 export function getReleaseSupport(release: ProductRelease, releases: readonly ProductRelease[], now = new Date()) {
     const version = parseReleaseVersion(release.version)!;
     if (release.prerelease || version.prerelease) return { status: 'prerelease' as const, until: null };
@@ -24,8 +26,8 @@ export function getReleaseSupport(release: ProductRelease, releases: readonly Pr
         const parsed = parseReleaseVersion(item.version)!;
         return parsed.major === version.major && parsed.minor === version.minor;
     }).sort((a, b) => compareReleaseVersions(b.version, a.version));
-    const firstListing = Math.min(...line.map(item => Date.parse(item.listedAt)));
-    const minimum = firstListing + 90 * 86_400_000;
+    const firstStableRelease = Math.min(...line.map(item => Date.parse(item.publishedAt)));
+    const minimum = firstStableRelease + 90 * 86_400_000;
     const promised = Math.max(minimum, ...line.map(item => item.supportUntil ? Date.parse(item.supportUntil) : 0));
     const newestLine = stable.slice().sort((a, b) => compareReleaseVersions(b.version, a.version))[0];
     const latest = line[0].version === release.version;
@@ -34,4 +36,30 @@ export function getReleaseSupport(release: ProductRelease, releases: readonly Pr
         status: !latest ? 'superseded' as const : now.getTime() < promised || latestStable ? 'supported' as const : 'ended' as const,
         until: new Date(promised).toISOString(),
     };
+}
+
+/** One row per major.minor line, with stable releases and candidates kept separate. */
+export function groupReleaseLines(releases: readonly ProductRelease[]) {
+    const lines = new Map<string, ProductRelease[]>();
+    for (const release of releases) {
+        const version = parseReleaseVersion(release.version);
+        if (!version) continue;
+        const key = `${version.major}.${version.minor}`;
+        const entries = lines.get(key) ?? [];
+        entries.push(release);
+        lines.set(key, entries);
+    }
+    return Array.from(lines.entries()).map(([line, entries]) => {
+        const sorted = entries.slice().sort((a, b) => compareReleaseVersions(b.version, a.version));
+        const stable = sorted.filter(item => !item.prerelease && !parseReleaseVersion(item.version)?.prerelease);
+        return {
+            line,
+            latestStable: stable[0] ?? null,
+            latestPrerelease: sorted.find(item => item.prerelease || parseReleaseVersion(item.version)?.prerelease) ?? null,
+            firstStableAt: stable.length ? stable.reduce((date, item) => item.publishedAt < date ? item.publishedAt : date, stable[0].publishedAt) : null,
+            firstListedAt: entries.reduce((date, item) => item.listedAt < date ? item.listedAt : date, entries[0].listedAt),
+            stablePatchCount: stable.length,
+            lts: stable.some(item => item.lts === true),
+        };
+    }).sort((a, b) => compareReleaseVersions(`${b.line}.0`, `${a.line}.0`));
 }

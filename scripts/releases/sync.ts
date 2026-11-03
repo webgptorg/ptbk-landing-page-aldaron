@@ -38,6 +38,7 @@ async function main() {
             ...(gh || old?.githubUrl ? { githubUrl: gh?.html_url ?? old.githubUrl } : {}),
             ...(old?.notes || gh?.body ? { notes: old?.notes ?? gh.body.slice(0, 4000) } : {}),
             ...(old?.supportUntil ? { supportUntil: old.supportUntil } : {}),
+            ...(old?.lts !== undefined ? { lts: old.lts } : {}),
         });
     }
     const releases = Array.from(records.values()).sort((a: any, b: any) => compareReleaseVersions(b.version, a.version));
