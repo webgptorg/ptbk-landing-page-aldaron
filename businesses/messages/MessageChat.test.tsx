@@ -18,6 +18,7 @@ describe('floating message conversation', () => {
     beforeEach(() => {
         vi.stubGlobal('fetch', fetchMock);
         fetchMock.mockReset();
+        localStorage.clear();
         Element.prototype.scrollTo = vi.fn();
     });
     afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -123,5 +124,47 @@ describe('floating message conversation', () => {
         const second = sent(2);
         expect(second.conversationId).toBe(first.conversationId); expect(second.requestId).not.toBe(first.requestId);
         expect(second.messages).toHaveLength(3);
+    });
+    it('restores the transcript, draft and conversation ID after remount, and starts a separate new chat', async () => {
+        fetchMock.mockImplementation(() => Promise.resolve(Response.json({ reply: 'Saved answer' })));
+        const view = render(<MessageChat messageId="saved" introduction="Hello" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Saved question' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByText('Saved answer');
+        const original = sent(0).conversationId;
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Unfinished draft' } });
+        view.unmount();
+        render(<MessageChat messageId="saved" introduction="Hello" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        expect(screen.getByRole('log')).toHaveTextContent('Saved answer');
+        expect(screen.getByRole('textbox')).toHaveValue('Unfinished draft');
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await waitFor(() => expect(sent(1).conversationId).toBe(original));
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Nový chat' })).toBeEnabled());
+        fireEvent.click(screen.getByRole('button', { name: 'Nový chat' }));
+        expect(screen.getByRole('log')).toHaveTextContent('Hello');
+        expect(screen.getByRole('log')).not.toHaveTextContent('Saved answer');
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'New question' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await waitFor(() => expect(sent(2).conversationId).not.toBe(original));
+    });
+    it('does not restore another message and keeps retry IDs across a refresh after a network failure', async () => {
+        fetchMock.mockRejectedValueOnce(new TypeError('Connection lost'));
+        fetchMock.mockResolvedValueOnce(Response.json({ reply: 'Recovered' }));
+        const view = render(<MessageChat messageId="first" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Retry me' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByRole('alert');
+        view.rerender(<MessageChat messageId="second" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        expect(screen.getByRole('textbox')).toHaveValue('');
+        view.rerender(<MessageChat messageId="first" />);
+        fireEvent.click(screen.getByRole('button', { name: 'Otevřít chat s Pavolem' }));
+        expect(screen.getByRole('textbox')).toHaveValue('Retry me');
+        fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
+        await screen.findByText('Recovered');
+        expect(sent(1)).toEqual(sent(0));
     });
 });

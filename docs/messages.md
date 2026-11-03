@@ -94,6 +94,12 @@ regenerated. Updating only the full context does not invalidate otherwise matchi
 
 ## Migration and checks
 
+The public chat remembers one conversation per message (and per homepage language) in browser localStorage,
+including drafts, conversation/request identifiers and the complete visible transcript. Only the recent bounded
+window is sent to the model. `Nový chat` replaces that local conversation without removing any administration
+record. Interrupted network retries retain their original request ID even after refresh. Disabled/full browser
+storage leaves chat usable and reports that persistence failed. No server-side history retrieval is added.
+
 The original recording, message and reviewed word map are imported once with:
 
 ```sh

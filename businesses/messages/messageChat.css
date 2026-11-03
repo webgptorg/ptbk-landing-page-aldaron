@@ -1,5 +1,9 @@
 .message-chat-history { display: flex; flex: 1 1 auto; flex-direction: column; gap: 1rem; min-height: 0; max-height: 360px; overflow-y: auto; overscroll-behavior: contain; padding: 1rem; }
 .message-chat-history:empty { display: none; }
+.message-chat-tools { display: flex; flex-shrink: 0; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .4rem; padding: .4rem .75rem; border-bottom: 1px solid var(--article-line); }
+.message-chat-tools > button { display: inline-flex; align-items: center; gap: .3rem; padding: .35rem; color: var(--article-muted); font-size: .75rem; border-radius: 6px; }
+.message-chat-tools > button:hover { background: var(--article-soft); }
+.message-chat-tools > button:disabled { opacity: .4; }
 .message-chat-turn { font-size: .86rem; line-height: 1.7; overflow-wrap: anywhere; }
 /* The same sanitized Markdown renderer as other chat surfaces, scoped to this compact dialog. */
 .message-chat-markdown {
