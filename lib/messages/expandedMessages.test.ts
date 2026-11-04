@@ -10,8 +10,21 @@ import { TEST_MESSAGE } from './messageTestFixtures';
 import { parseMessageChatTurns } from './messageTypes';
 import { getInternalPathname, getPublicDomainRouteByHostname } from '@/lib/domains/publicDomainRouting';
 import { renderArticleDocument } from '@/businesses/articles/articleDocument';
+import { prepareMessageSpeech } from './messageSpeech';
 
 describe('expanded message authoring and sharing', () => {
+    it('keeps measured highlighting attached to original words after silent URLs, including repeated labels', () => {
+        const markdown = 'Před https://example.com/raw a [dokument](https://example.com/doc).\n\n<https://example.com/auto>\n\nDokument znovu: [dokument][ref].\n\n[ref]: https://example.com/reference';
+        const prepared = prepareMessageSpeech(markdown);
+        expect(prepared.script).not.toContain('https');
+        expect(prepared.script).toContain('dokument');
+        const characters = Array.from(prepared.script);
+        const timing = mapMessageAudioAlignment(markdown, { characters, character_start_times_seconds: characters.map((_, i) => i / 10), character_end_times_seconds: characters.map((_, i) => (i + 1) / 10) })!;
+        const visualWords = renderArticleDocument(markdown, '', '').words;
+        expect(timing.words.map((word) => word.wordId)).toEqual(prepared.words.map((word) => word.id));
+        for (const word of timing.words) expect(visualWords.find((visual) => visual.id === word.wordId)?.text).toBe(word.text);
+        expect(timing.words.some((word) => word.text.includes('https'))).toBe(false);
+    });
     it('retires the old route and rejects forged chat roles and oversized histories', () => {
         const site = getPublicDomainRouteByHostname('pavolhejny.cz')!;
         expect(getInternalPathname(site, '/messages/old-capability')).toBeUndefined();

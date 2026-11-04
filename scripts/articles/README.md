@@ -75,6 +75,22 @@ must be made in the exact script before the one-time generation and verified by 
 
 ## One-time generation
 
+New narration uses `lib/text/speechText.mjs` to remove raw HTTP(S)/www addresses and autolinks, retain only named
+Markdown link labels, and remove Markdown formatting while retaining paragraph breaks, punctuation and numeric
+values. Requests enable provider text normalization for dates, numbers and currencies. Source article Markdown and
+existing recordings are never changed by this preparation. `--check` writes nothing. Only a fresh explicit
+`--generate` records the cleaned exact input back into `audio/script.txt`, before any paid request. Existing chunk
+directories with a different script require manual review; existing narration is never regenerated.
+
+Follow the [ElevenLabs narration guidance](https://elevenlabs.io/docs/overview/capabilities/text-to-speech/best-practices):
+use complete sentences and natural punctuation, keep paragraphs at topic boundaries, and review ambiguous numbers,
+dates, units and abbreviations in the recording's language. Expand an ambiguous expression in the editorial script
+when its exact pronunciation matters. Preserve values and meaning; do not add free-form delivery instructions that
+would themselves be spoken. Do not insert model-specific expressive or SSML tags without checking model support.
+The [API normalization setting](https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps)
+helps pronunciation but is not a substitute for listening review. These rules apply to future explicit generation,
+never a bulk rebuild of older audio.
+
 Requires Node.js with `fetch`, repository dependencies, `ffmpeg`, `ffprobe`, a connected API key,
 and explicit editorial intention to incur ElevenLabs usage. This is a separate command:
 

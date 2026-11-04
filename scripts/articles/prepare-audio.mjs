@@ -11,6 +11,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { resolveArticleDirectory } from './generate-manifest.mjs';
 import { splitScript, validateAlignment, alignmentToWords, wordsToVtt } from './audio-timing.mjs';
+import { prepareSpeechText } from '../../lib/text/speechText.mjs';
 
 const apiOrigin = 'https://api.elevenlabs.io';
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
@@ -108,8 +109,12 @@ export async function main(args = process.argv.slice(2)) {
     const key = process.env.ELEVENLABS_API_KEY;
     if (!key) throw new Error('ELEVENLABS_API_KEY is not available. Supply it through a secure environment or secret manager; never paste it into chat, a command argument or a tracked file.');
     const directory = await resolveArticleDirectory(options.articleId);
-    const script = await readFile(path.join(directory, 'audio', 'script.txt'), 'utf8');
+    const sourceScript = await readFile(path.join(directory, 'audio', 'script.txt'), 'utf8');
+    const script = prepareSpeechText(sourceScript);
     if (!script.trim()) throw new Error('The adapted audio/script.txt is empty.');
+    if (script !== sourceScript.trim() && await exists(path.join(directory, 'audio', 'generation'))) {
+        throw new Error('The existing generation uses an earlier script. Preserve its exact input and review it manually; no recording was regenerated.');
+    }
     const [voice, modelResult] = await Promise.all([findVoice(key, options.voiceName, options.voiceId), apiJson('/v1/models', key)]);
     if (!Array.isArray(modelResult.data)) throw new Error('Unexpected ElevenLabs model-list response.');
     const model = modelResult.data.find((entry) => entry.model_id === options.modelId);
@@ -125,10 +130,12 @@ export async function main(args = process.argv.slice(2)) {
         catch { throw new Error(`${command} is required for one-file MP3 assembly and duration verification. No speech was generated.`); }
     }
     if (await exists(path.join(directory, 'audio', 'narration.mp3'))) throw new Error('narration.mp3 already exists. This tool never automatically regenerates a finished recording.');
+    // Only an explicit first generation records the cleaned exact input; checks and completed recordings never rewrite it.
+    if (script !== sourceScript) await writeFile(path.join(directory, 'audio', 'script.txt'), script);
     const provenance = { provider: 'ElevenLabs', voiceId: voice.voice_id, voiceName: voice.name, modelId: model.model_id, language: options.language, outputFormat: 'mp3_44100_128', storedVoiceSettings: voice.settings ?? null, source: 'https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps' };
     for (let i = 0; i < chunks.length; i++) {
         const chunkDirectory = path.join(directory, 'audio', 'generation', `chunk-${String(i + 1).padStart(4, '0')}`);
-        const request = { text: chunks[i], model_id: model.model_id, ...(i ? { previous_text: chunks[i - 1].slice(-1000) } : {}), ...(i + 1 < chunks.length ? { next_text: chunks[i + 1].slice(0, 1000) } : {}) };
+        const request = { text: chunks[i], model_id: model.model_id, apply_text_normalization: 'on', ...(i ? { previous_text: chunks[i - 1].slice(-1000) } : {}), ...(i + 1 < chunks.length ? { next_text: chunks[i + 1].slice(0, 1000) } : {}) };
         const record = { ...provenance, request };
         const recordString = `${JSON.stringify(record, null, 2)}\n`;
         const requestFile = path.join(chunkDirectory, 'request.json');

@@ -1,19 +1,19 @@
 import 'server-only';
 import { randomUUID } from 'node:crypto';
 import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
-import { renderArticleDocument } from '@/businesses/articles/articleDocument';
 import type { ArticleWordTimings } from '@/businesses/articles/articleTiming';
 import { getAgentDatabase } from '@/lib/agents/agentDatabase';
 import { putStoredObject, removeStoredObject } from '@/lib/storage/objectStorage';
 import { loadManagedMessage, messageTextHash } from './messageDatabase';
 import type { ManagedMessage, MessageAudio } from './messageModel';
 import { claimMessageAudioLease } from './messageAudioLease';
+import { prepareMessageSpeech } from './messageSpeech';
 
 export type CharacterAlignment = { characters: string[]; character_start_times_seconds: number[]; character_end_times_seconds: number[] };
 /** Only provider-measured character intervals can attach to exact written words; missing alignment stays absent. */
 export function mapMessageAudioAlignment(markdown: string, alignment: CharacterAlignment | undefined): ArticleWordTimings | undefined {
-    const document = renderArticleDocument(markdown, '', '');
-    const script = document.words.map((word) => word.text).join(' ');
+    const document = prepareMessageSpeech(markdown);
+    const { script } = document;
     if (!alignment || alignment.characters.join('') !== script || alignment.characters.length !== alignment.character_start_times_seconds.length
         || alignment.characters.length !== alignment.character_end_times_seconds.length) return undefined;
     const offsets: number[] = [];
@@ -25,11 +25,11 @@ export function mapMessageAudioAlignment(markdown: string, alignment: CharacterA
     const words = [];
     for (const word of document.words) {
         const start = alignment.character_start_times_seconds[offsets[offset]];
-        const end = alignment.character_end_times_seconds[offsets[offset + word.text.length - 1]];
+        const end = alignment.character_end_times_seconds[offsets[offset + word.spokenText.length - 1]];
         if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start < previousStart || end <= start) return undefined;
         while (sentenceIndex + 1 < sentences.length && sentences[sentenceIndex + 1].index <= offset) sentenceIndex++;
         words.push({ text: word.text, wordId: word.id, sentenceId: `s${sentenceIndex}`, start, end });
-        previousStart = start; offset += word.text.length + 1;
+        previousStart = start; offset += word.spokenText.length + 1;
     }
     return words.length ? { version: 1, words } : undefined;
 }
@@ -51,7 +51,7 @@ export async function generateMessageAudio(id: string, requestSignal: AbortSigna
     if (!key || !process.env.OBJECT_STORAGE_BUCKET) throw Object.assign(new Error('Pro generování nastavte ELEVENLABS_API_KEY a souborové úložiště.'), { status: 503 });
     const existing = await loadManagedMessage(id);
     if (!existing) throw Object.assign(new Error('Zpráva nebyla nalezena.'), { status: 404 });
-    const script = renderArticleDocument(existing.markdown, '', '').words.map((word) => word.text).join(' ');
+    const { script } = prepareMessageSpeech(existing.markdown);
     if (!script || script.length > 10_000) throw Object.assign(new Error('Pro namluvení musí mít zpráva nejvýše 10 000 znaků čitelného textu.'), { status: 400 });
     const client = getAgentDatabase();
     const token = randomUUID();
@@ -64,7 +64,7 @@ export async function generateMessageAudio(id: string, requestSignal: AbortSigna
         // This endpoint is invoked only by the explicit admin button. Never retry a potentially billed call automatically.
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice.id)}/with-timestamps?output_format=mp3_44100_128`, {
             method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json' }, signal,
-            body: JSON.stringify({ text: script, model_id: process.env.ELEVENLABS_MODEL_ID?.trim() || 'eleven_multilingual_v2' }),
+            body: JSON.stringify({ text: script, model_id: process.env.ELEVENLABS_MODEL_ID?.trim() || 'eleven_multilingual_v2', apply_text_normalization: 'on' }),
         });
         if (!response.ok) throw new Error(`ElevenLabs odmítlo generování (HTTP ${response.status}). Ověřte přístup k hlasu a kredity.`);
         const result = await response.json() as { audio_base64?: string; alignment?: CharacterAlignment };
