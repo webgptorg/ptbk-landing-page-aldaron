@@ -43,9 +43,11 @@ export function AiTaKrajtaPersonCard({
                 aria-pressed={isSelected}
                 className="group/portrait text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-[#ff6b6b]"
             >
-                <AiTaKrajtaPersonAvatar person={person} size="large" />
+                <AiTaKrajtaPersonAvatar person={person} size="large"
+                    className={person.teamStatus === 'former' ? 'grayscale opacity-70' : undefined} />
 
                 <h3 className="mt-4 text-lg font-semibold text-white">{person.name}</h3>
+                {person.teamStatus === 'former' && <p className="mt-1 text-xs text-white/55">Dřívější člen týmu</p>}
                 <p className="mt-2 text-sm leading-relaxed text-white/60">{person.headline}</p>
             </button>
 

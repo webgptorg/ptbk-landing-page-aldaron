@@ -32,7 +32,7 @@ import { AiTaKrajtaPeopleSection } from './AiTaKrajtaPeopleSection';
 const ORDERED_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'first-person',
-        isTeamMember: true,
+        teamStatus: 'active',
         name: 'První člověk',
         headline: 'Často mluví v dílech.',
         url: null,

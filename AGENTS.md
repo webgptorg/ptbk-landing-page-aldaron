@@ -315,8 +315,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The shared avatar puts every portrait over a stable, subtly varied neutral gradient.
   Card and episode buttons highlight it on hover and keyboard focus, with a small
   zoom only when reduced motion is not requested. A future person without a photo
-  keeps initials on that same background. Team contributors are shown separately from invited guests;
-  guests live in a collapsible list. The order within each group is drawn anew for every visit, weighted by how many episodes of the archive name each
+  keeps initials on that same background. The visible team is Pavol, Petr, Jiří and Katka. A native Zobrazit více
+  disclosure shows Šimon and Jacek first, then former contributors (including Prokop and Patrik) with grayscale
+  portraits and an explicit former-member label. Guests remain in their own collapsible list. Editorial `teamStatus`
+  in the roster owns these groups. The order within each group is drawn anew for every visit, weighted by how many episodes of the archive name each
   person after their roster factor is applied (one by default), so somebody heard
   often comes up high far more often than someone in one díl without the list ever becoming a ranking. The draw is local state and
   is made in the browser; the page itself is built in the order the draw leans

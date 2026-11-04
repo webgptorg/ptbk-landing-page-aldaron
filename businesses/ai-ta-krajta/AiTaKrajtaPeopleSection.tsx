@@ -17,11 +17,13 @@ export function AiTaKrajtaPeopleSection() {
 
     const orderedPeople = useAiTaKrajtaOrderedPeople(episodeCountByPersonId);
 
-    const team = orderedPeople.filter((person) => person.isTeamMember);
-    const guests = orderedPeople.filter((person) => !person.isTeamMember);
+    const team = orderedPeople.filter((person) => person.teamStatus === 'active');
+    const extendedTeam = orderedPeople.filter((person) => person.teamStatus === 'extended');
+    const formerTeam = orderedPeople.filter((person) => person.teamStatus === 'former');
+    const guests = orderedPeople.filter((person) => person.teamStatus === undefined);
 
     const renderPeople = (people: typeof orderedPeople, label: string) => (
-        <ul aria-label={label} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul aria-label={label} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {people.map((person) => (
                 <li key={person.id}>
                     <AiTaKrajtaPersonCard
@@ -57,6 +59,16 @@ export function AiTaKrajtaPeopleSection() {
 
                 <h3 className="mt-10 text-xl font-semibold text-white">Tým podcastu</h3>
                 {renderPeople(team, 'Tým podcastu')}
+
+                <details className="mt-6">
+                    <summary className="cursor-pointer text-sm font-medium text-white/75 hover:text-white">
+                        Zobrazit více členů týmu
+                    </summary>
+                    <h3 className="mt-8 text-xl font-semibold text-white">Širší tým</h3>
+                    {renderPeople(extendedTeam, 'Širší tým')}
+                    <h3 className="mt-8 text-xl font-semibold text-white/70">Dříve s námi</h3>
+                    {renderPeople(formerTeam, 'Dříve s námi')}
+                </details>
 
                 <details className="mt-10 border-t border-white/10 pt-6">
                     <summary className="cursor-pointer text-xl font-semibold text-white">

@@ -14,8 +14,8 @@ export type AiTaKrajtaPerson = {
 
     readonly name: string;
 
-    /** Regular podcast contributors are shown separately from invited guests. */
-    readonly isTeamMember?: boolean;
+    /** Editorial team membership; an omitted value identifies an invited guest. */
+    readonly teamStatus?: 'active' | 'extended' | 'former';
 
     /**
      * Multiplier of this person's credited episode appearances when the roster is drawn
@@ -71,7 +71,7 @@ export type AiTaKrajtaPerson = {
 export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'pavol-hejny',
-        isTeamMember: true,
+        teamStatus: 'active',
         name: 'Pavol Hejný',
         factor: 0.8,
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
@@ -85,7 +85,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'jiri-jahn',
-        isTeamMember: true,
+        teamStatus: 'active',
         name: 'Jiří Jahn',
         headline: 'Řeší, co z AI firma reálně použije. Tahá debatu k praktickým otázkám.',
         url: 'https://www.ptbk.io/jirka',
@@ -95,7 +95,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'petr-glaser',
-        isTeamMember: true,
+        teamStatus: 'active',
         name: 'Petr Glaser',
         headline: 'Vývojář, píše bleeding.dev. Testuje nové modely dřív, než se o nich začne psát.',
         url: 'https://bleeding.dev/',
@@ -107,7 +107,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'patrik-braborec',
-        isTeamMember: true,
+        teamStatus: 'former',
         name: 'Patrik Braborec',
         headline: 'Součást klasické sestavy podcastu. Drží díly pohromadě a hlídá, aby debata nesklouzla do hype.',
         url: null,
@@ -117,7 +117,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'jacek-soubusta',
-        isTeamMember: true,
+        teamStatus: 'extended',
         name: 'Jacek Soubusta',
         headline: 'Data a nástroje kolem AI. Umí veřejně přiznat, že vlastní MCP server spláchl do záchodu.',
         url: null,
@@ -127,7 +127,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'simon-podhajsky',
-        isTeamMember: true,
+        teamStatus: 'extended',
         name: 'Šimon Podhajský',
         headline: 'Přednášel na AI Engineer o read-only AI a kognitivních výparech. Nejskeptičtější hlas u stolu.',
         url: null,
@@ -137,7 +137,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'roman-baranovic',
-        isTeamMember: true,
+        teamStatus: 'former',
         name: 'Roman Baranovič',
         headline: 'Expert na digitální transformaci školství. Vrací se do dílů o AI ve školách.',
         url: 'https://narnia.sk/employees/roman-baranovic-2/',
@@ -147,7 +147,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'katka-fajmanova',
-        isTeamMember: true,
+        teamStatus: 'active',
         name: 'Katka Fajmanová',
         factor: 1.7,
         headline: 'Architektura a interpretabilita modelů. Díl o tom, co se děje uvnitř sítě.',
@@ -158,6 +158,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'prokop-simek',
+        teamStatus: 'former',
         name: 'Prokop Simek',
         headline: 'Šéf DX Heroes, prvního sponzora podcastu. V IT je 13 let napříč vývojem, marketingem a byznysem.',
         url: 'https://prokopsimek.cz/en',
