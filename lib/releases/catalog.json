@@ -1,6 +1,15 @@
 {
-  "checkedAt": "2026-11-04T06:37:47.791Z",
+  "checkedAt": "2026-11-04T19:52:42.291Z",
   "releases": [
+    {
+      "version": "0.119.0-62",
+      "publishedAt": "2026-11-04T19:49:59.040Z",
+      "listedAt": "2026-11-04T19:52:42.291Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-62",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-62",
+      "notes": "Promptbook 0.119.0-62 and its matching Book language extension."
+    },
     {
       "version": "0.119.0-56",
       "publishedAt": "2026-11-04T06:17:13.929Z",
