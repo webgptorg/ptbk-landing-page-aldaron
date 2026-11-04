@@ -7,6 +7,7 @@ import {
 import { AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
 import { mergePodcastEpisodes } from '@/lib/podcast/mergePodcastEpisodes';
 import { extractYoutubeVideoId } from '@/lib/youtube/youtubeEmbed';
+import { readPodcastTranscript } from '@/lib/podcast/readPodcastTranscript';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -187,7 +188,7 @@ describe('AI_TA_KRAJTA_INTERNAL_EPISODES', () => {
 
     it('keeps a complete searchable transcript for every episode', () => {
         const incompletelyTranscribedEpisodes = AI_TA_KRAJTA_INTERNAL_EPISODES.filter(
-            (episode) => episode.transcript.trim().length < 1_000,
+            (episode) => readPodcastTranscript(episode).trim().length < 1_000,
         );
 
         expect(incompletelyTranscribedEpisodes).toEqual([]);
@@ -217,9 +218,10 @@ describe('createAiTaKrajtaInternalEpisodes', () => {
 
     it('does not pass complete transcripts into the fallback archive', () => {
         const serializedEpisodes = JSON.stringify(createAiTaKrajtaInternalEpisodes());
-        const firstTranscriptExcerpt = AI_TA_KRAJTA_INTERNAL_EPISODES[0]!.transcript.slice(0, 80);
+        const firstTranscriptExcerpt = readPodcastTranscript(AI_TA_KRAJTA_INTERNAL_EPISODES[0]!).slice(0, 80);
 
         expect(serializedEpisodes).not.toContain('"transcript"');
+        expect(serializedEpisodes).not.toContain('"transcriptFile"');
         expect(serializedEpisodes).not.toContain(firstTranscriptExcerpt);
     });
 });

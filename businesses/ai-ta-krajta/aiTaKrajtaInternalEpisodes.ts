@@ -45,7 +45,10 @@ export type AiTaKrajtaInternalEpisode = {
      * Note: `createAiTaKrajtaInternalEpisodes` deliberately does not pass this into a podcast episode, which keeps
      *       the transcript out of the object a page serializes to a browser.
      */
-    readonly transcript: string;
+    readonly transcript?: string;
+
+    /** A separately committed, speaker-labelled transcript. Unmigrated episodes retain their inline text. */
+    readonly transcriptFile?: string;
 };
 
 /**

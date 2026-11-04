@@ -7,6 +7,7 @@ import {
     isAiTaKrajtaTextMatchingSearchWords,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaTextSearch';
 import { createPodcastEpisodeSlug } from '@/lib/podcast/podcastEpisodeIdentity';
+import { readPodcastTranscript } from '@/lib/podcast/readPodcastTranscript';
 
 /**
  * Finds the safe identifiers of episodes whose complete server-side transcript contains every searched word
@@ -25,7 +26,7 @@ export function findAiTaKrajtaEpisodeSlugsMatchingTranscriptInEpisodes(
     }
 
     return episodes
-        .filter((episode) => isAiTaKrajtaTextMatchingSearchWords(episode.transcript, searchWords))
+        .filter((episode) => isAiTaKrajtaTextMatchingSearchWords(readPodcastTranscript(episode), searchWords))
         .map((episode) => createPodcastEpisodeSlug(episode.number, episode.title));
 }
 

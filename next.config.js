@@ -37,6 +37,7 @@ const nextConfig = {
     serverExternalPackages: ['pg', '@promptbook/node', '@promptbook/core'],
     outputFileTracingIncludes: {
         '/*': ['./migrations/**/*.sql'],
+        '/api/ai-ta-krajta/episodes/search': ['./podcasts/transcripts/**/*.vtt'],
         '/book/**': ['./knowledge/**/*.book'],
         '/cs/pavol': ['./articles/**/*'],
         '/en/pavol': ['./articles/**/*'],

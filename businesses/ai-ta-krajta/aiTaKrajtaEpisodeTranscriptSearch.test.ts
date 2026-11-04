@@ -2,7 +2,10 @@ import {
     findAiTaKrajtaEpisodeSlugsMatchingTranscriptInEpisodes,
 } from '@/businesses/ai-ta-krajta/aiTaKrajtaEpisodeTranscriptSearch';
 import type { AiTaKrajtaInternalEpisode } from '@/businesses/ai-ta-krajta/aiTaKrajtaInternalEpisodes';
-import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('node:fs', () => ({ readFileSync: vi.fn() }));
 
 function createInternalEpisode(values: Partial<AiTaKrajtaInternalEpisode>): AiTaKrajtaInternalEpisode {
     return {
@@ -18,6 +21,17 @@ function createInternalEpisode(values: Partial<AiTaKrajtaInternalEpisode>): AiTa
 }
 
 describe('findAiTaKrajtaEpisodeSlugsMatchingTranscriptInEpisodes', () => {
+    it('searches migrated and legacy episodes together without searching voice annotations', () => {
+        vi.mocked(readFileSync).mockReturnValue('WEBVTT\n\n00:00:01.000 --> 00:00:05.000\n<v pavol-hejny>Lokální modely v podcastech.</v>\n');
+        const episodes = [
+            createInternalEpisode({ number: 6, transcript: 'Podcastech se věnujeme lokální modely.' }),
+            createInternalEpisode({ number: 7, transcript: undefined, transcriptFile: 'podcasts/transcripts/mixed-search.vtt' }),
+            createInternalEpisode({ number: 8, transcript: undefined }),
+        ];
+        expect(findAiTaKrajtaEpisodeSlugsMatchingTranscriptInEpisodes(episodes, 'lokalni modely')).toEqual(['6', '7']);
+        expect(findAiTaKrajtaEpisodeSlugsMatchingTranscriptInEpisodes(episodes, 'pavol-hejny')).toEqual([]);
+    });
+
     it('finds every word in a complete transcript without regard to Czech diacritics', () => {
         const episodeSlugs = findAiTaKrajtaEpisodeSlugsMatchingTranscriptInEpisodes(
             [
