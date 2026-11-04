@@ -40,7 +40,7 @@ const PUBLIC_PAGE_PATHS = [
     '/cs/obchodni-podminky',
     '/en/terms-and-conditions',
     '/contact',
-    '/branding',
+    '/en/branding',
     '/data-deletion',
     '/old',
 ] as const;
@@ -69,6 +69,8 @@ const MOVED_PERMANENTLY_STATUS_CODE = 301;
 const TEMPORARY_REDIRECT_STATUS_CODE = 307;
 
 const PUBLIC_REDIRECTS: readonly PublicRedirect[] = [
+    { path: '/branding', statusCode: PERMANENT_REDIRECT_STATUS_CODE, destinationPaths: ['/en/branding'] },
+    { path: '/cs/branding', statusCode: PERMANENT_REDIRECT_STATUS_CODE, destinationPaths: ['/en/branding'] },
     { path: '/', statusCode: TEMPORARY_REDIRECT_STATUS_CODE, destinationPaths: ['/cs', '/en'] },
     { path: '/pro-firmy', statusCode: MOVED_PERMANENTLY_STATUS_CODE, destinationPaths: [PRO_FIRMY_PATH] },
     { path: '/pavol', statusCode: TEMPORARY_REDIRECT_STATUS_CODE, destinationPaths: ['/cs/pavol', '/en/pavol'] },

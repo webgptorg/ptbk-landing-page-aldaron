@@ -103,6 +103,14 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // The public brand kit is English-only. Branded domains have already resolved their own /branding page above.
+    const brandingAlias = /^\/(?:cs\/)?branding(\/opengraph-image)?\/?$/.exec(request.nextUrl.pathname);
+    if (brandingAlias) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = `/en/branding${brandingAlias[1] ?? ''}`;
+        return NextResponse.redirect(redirectUrl, 308);
+    }
+
     if (request.nextUrl.pathname === '/pavol') {
         const language = getPreferredHomepageLanguage(request.headers.get('accept-language'));
         const redirectUrl = request.nextUrl.clone();

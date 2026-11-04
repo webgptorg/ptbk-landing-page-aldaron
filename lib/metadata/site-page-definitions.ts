@@ -9,7 +9,7 @@ import type { Metadata } from 'next';
  * Public supporting pages have their own cards; internal tools retain the brand fallback.
  */
 export const BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
-    path: '/branding',
+    path: '/en/branding',
     language: 'en',
     title: 'Promptbook brand kit',
     socialTitle: 'The Promptbook brand kit',

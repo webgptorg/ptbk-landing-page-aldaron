@@ -4,6 +4,8 @@ The launch website is published at `/cs` and `/en`. `/` and unprefixed marketing
 
 The specification entry is [`../../specs/_main.md`](../../specs/_main.md). The latest owner feedback is dated 24 October 2026 and applies equally to the product and partnership pages.
 
+The resources footer in both languages links to the English-only brand kit at `/en/branding` (Czech label: `Logo a značka (EN)`). `/branding` and `/cs/branding` redirect permanently to it, preserving query parameters.
+
 ## Shared presentation
 
 - The header and footer pair the original mark with `promptbook`: black `prompt`, logo-blue `book` (`#000080`), no trailing dot.

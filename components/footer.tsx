@@ -63,7 +63,7 @@ const footerDefaultsByLanguage: Record<FooterLanguage, FooterContent> = {
             { href: 'https://ptbk.io/manifest', text: 'Manifest' },
             { href: 'https://github.com/webgptorg/promptbook', text: 'Documentation' },
             { href: 'https://promptbook.studio/miniapps/new', text: 'Playground' },
-            { href: '/branding', text: 'Branding' },
+            { href: '/en/branding', text: 'Brand kit' },
         ],
         companyHeader: 'Company',
         companyLinks: [
@@ -107,7 +107,7 @@ const footerDefaultsByLanguage: Record<FooterLanguage, FooterContent> = {
             { href: 'https://ptbk.io/', text: 'Promptbook' },
             { href: 'https://github.com/webgptorg/promptbook', text: 'Dokumentace' },
             { href: 'https://promptbook.studio/miniapps/new', text: 'Playground' },
-            { href: '/branding', text: 'Branding' },
+            { href: '/en/branding', text: 'Logo a značka (EN)' },
         ],
         companyHeader: 'Společnost',
         companyLinks: [

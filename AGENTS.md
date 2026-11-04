@@ -609,8 +609,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   access. All cookies still depend on `ADMIN_PASSWORD`; legacy environment-admin cookies retain their meaning.
   Account/password creation is explicit, profile/access edits use the shared autosave/dialog conventions, and private
   account projections never return password hashes or session versions. `/admin` is the post-login dashboard.
+- `/en/branding` is the English-only Promptbook brand kit. Both language versions of the main footer link there;
+  the Czech label explicitly says EN. `/branding` and `/cs/branding`, including their sharing-image paths,
+  permanently redirect there with queries preserved. The podcast domain retains its independent `/branding` page.
 - Other public/legal routes include `/contact`, `/data-deletion`, `/privacy`,
-  `/terms`, `/dekujeme`, `/branding`, and the routes under `/k`, `/old`, and
+  `/terms`, `/dekujeme`, and the routes under `/k`, `/old`, and
   `/test`.
 
 ### Shared community and workshop behavior
