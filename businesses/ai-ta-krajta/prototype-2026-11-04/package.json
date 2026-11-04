@@ -1,0 +1,5 @@
+{
+  "name": "ai-ta-krajta-throwaway-prototypes",
+  "private": true,
+  "scripts": { "prototype": "python3 -m http.server 4009 --directory dist" }
+}
