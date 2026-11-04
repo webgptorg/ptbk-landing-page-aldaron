@@ -143,7 +143,7 @@ test.describe('isolated public domains', () => {
             await page.goto(localDomainUrl(hostname, '/?person=pavol-hejny#dily'), { waitUntil: 'networkidle' });
             const navigation = page.getByRole('navigation', { name: 'Hlavní navigace' });
             await expect(navigation.getByRole('link')).toHaveCount(2);
-            await expect(navigation.getByRole('link', { name: 'Díly', exact: true })).toHaveAttribute('href', '/');
+            await expect(navigation.getByRole('link', { name: 'Díly', exact: true })).toHaveAttribute('href', '/episodes');
             await expect(navigation.getByRole('link', { name: 'Spolupráce', exact: true })).toHaveAttribute('href', '/media-kit');
             await expect(page.locator('section#odber')).toHaveCount(0);
             await expect(page.locator('footer form')).toHaveCount(0);
