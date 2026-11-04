@@ -14,6 +14,9 @@ export type AiTaKrajtaPerson = {
 
     readonly name: string;
 
+    /** Regular podcast contributors are shown separately from invited guests. */
+    readonly isTeamMember?: boolean;
+
     /**
      * Multiplier of this person's credited episode appearances when the roster is drawn
      *
@@ -68,6 +71,7 @@ export type AiTaKrajtaPerson = {
 export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'pavol-hejny',
+        isTeamMember: true,
         name: 'Pavol Hejný',
         factor: 0.8,
         headline: 'AI konzultant a vývojář. Staví AI agenty a v dílech je rozebírá z praxe.',
@@ -81,6 +85,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'jiri-jahn',
+        isTeamMember: true,
         name: 'Jiří Jahn',
         headline: 'Řeší, co z AI firma reálně použije. Tahá debatu k praktickým otázkám.',
         url: 'https://www.ptbk.io/jirka',
@@ -90,6 +95,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'petr-glaser',
+        isTeamMember: true,
         name: 'Petr Glaser',
         headline: 'Vývojář, píše bleeding.dev. Testuje nové modely dřív, než se o nich začne psát.',
         url: 'https://bleeding.dev/',
@@ -101,6 +107,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'patrik-braborec',
+        isTeamMember: true,
         name: 'Patrik Braborec',
         headline: 'Součást klasické sestavy podcastu. Drží díly pohromadě a hlídá, aby debata nesklouzla do hype.',
         url: null,
@@ -110,6 +117,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'jacek-soubusta',
+        isTeamMember: true,
         name: 'Jacek Soubusta',
         headline: 'Data a nástroje kolem AI. Umí veřejně přiznat, že vlastní MCP server spláchl do záchodu.',
         url: null,
@@ -119,6 +127,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'simon-podhajsky',
+        isTeamMember: true,
         name: 'Šimon Podhajský',
         headline: 'Přednášel na AI Engineer o read-only AI a kognitivních výparech. Nejskeptičtější hlas u stolu.',
         url: null,
@@ -128,6 +137,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'roman-baranovic',
+        isTeamMember: true,
         name: 'Roman Baranovič',
         headline: 'Expert na digitální transformaci školství. Vrací se do dílů o AI ve školách.',
         url: 'https://narnia.sk/employees/roman-baranovic-2/',
@@ -137,6 +147,7 @@ export const AI_TA_KRAJTA_PEOPLE: readonly AiTaKrajtaPerson[] = [
     },
     {
         id: 'katka-fajmanova',
+        isTeamMember: true,
         name: 'Katka Fajmanová',
         factor: 1.7,
         headline: 'Architektura a interpretabilita modelů. Díl o tom, co se děje uvnitř sítě.',

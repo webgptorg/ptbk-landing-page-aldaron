@@ -32,6 +32,7 @@ import { AiTaKrajtaPeopleSection } from './AiTaKrajtaPeopleSection';
 const ORDERED_PEOPLE: readonly AiTaKrajtaPerson[] = [
     {
         id: 'first-person',
+        isTeamMember: true,
         name: 'První člověk',
         headline: 'Často mluví v dílech.',
         url: null,
@@ -60,18 +61,15 @@ afterEach(() => {
 });
 
 describe('AI ta Krajta people section', () => {
-    it('renders the drawn roster as one list in its received order', () => {
+    it('separates the team from invited guests without losing either person', () => {
         render(<AiTaKrajtaPeopleSection />);
 
-        const peopleList = screen.getByRole('list');
+        const team = screen.getByRole('list', { name: 'Tým podcastu' });
+        const guests = screen.getByRole('list', { name: 'Hosté podcastu', hidden: true });
 
-        expect(screen.getAllByRole('list')).toHaveLength(1);
-        expect(
-            within(peopleList)
-                .getAllByRole('listitem')
-                .map((item) => item.textContent),
-        ).toEqual(ORDERED_PEOPLE.map((person) => person.name));
-        expect(screen.queryByText('U mikrofonu')).toBeNull();
-        expect(screen.queryByText('Byli u nás')).toBeNull();
+        expect(within(team).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['První člověk']);
+        expect(within(guests).getAllByRole('listitem', { hidden: true }).map((item) => item.textContent)).toEqual(['Druhý člověk']);
+        expect(within(team).queryByText('Druhý člověk')).toBeNull();
+        expect(screen.getByText('Hosté podcastu (1)')).toBeDefined();
     });
 });
