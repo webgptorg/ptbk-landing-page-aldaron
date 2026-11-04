@@ -28,13 +28,13 @@ GET a PDF jsou úplně specifikované v [kontaktu a exportu](new-contact-and-pdf
 
 ## Pevná nabídka
 
-Start **399 Kč**, Business **1 999 Kč za prostředí a měsíc**, oba průběžně; anglické ceny zůstávají **19 / 100 USD měsíčně**. Podíl je **20 % po 24 měsíců**. Tyto hodnoty nejsou vstupy a URL je nesmí přepsat. Přesné právní podmínky určuje [obchodní nabídka](new-commercial-offer.md). V kalkulačce neexistuje třetí bezplatný ani libovolně nacenitelný tarif.
+Start **399 Kč**, Business **1 999 Kč za projekt a měsíc**, oba průběžně; anglické ceny zůstávají **19 / 100 USD měsíčně**. Podíl je **20 % po 24 měsíců**. Tyto hodnoty nejsou vstupy a URL je nesmí přepsat. Přesné právní podmínky určuje [obchodní nabídka](new-commercial-offer.md). V kalkulačce neexistuje třetí bezplatný ani libovolně nacenitelný tarif.
 
 Ostatní hodnoty jsou editovatelné ilustrativní odhady, ne průzkum mezd, skutečné tarify providerů nebo zaručená úspora. Částky jsou v Kč bez DPH. USD převádí editovatelný modelový kurz, nikoli aktuální kurzová služba.
 
-## Období a prostředí
+## Období a projekty
 
-Start i Business: měsíční období a zvolený horizont. Počet samostatných prostředí jednoho klienta násobí **jen licenci**. Veškerá práce, AI, hosting a jiné náklady se zadávají za **celého klienta**, ne automaticky za každou instanci.
+Start i Business: měsíční období a zvolený horizont. Počet samostatných projektů jednoho klienta násobí **jen základní předplatné**. Kapacitní příplatky nejsou součástí modelu; toto omezení se uvádí viditelně v rychlé i pokročilé kalkulačce, textovém exportu a PDF. Provize se obchodně vztahuje i na všechny placené softwarové příplatky v původním 24měsíčním okně, ale model počítá jen zadané základní licence. Veškerá práce, AI, hosting a jiné náklady se zadávají za **celého klienta**, ne automaticky za každou instanci.
 
 Start používá stejnou práci s horizontem a počtem licencovaných prostředí jako Business. Není jednorázový pilot a vytváří MRR. Přepnutí plánu nesmaže zadané předpoklady. Kalkulačka nepřiznává oprávnění ani neimplementuje licenční omezení.
 
@@ -67,7 +67,7 @@ Společné enumy: režim firma/partner; scénář výše; plán Business/Start; 
 
 Hodinový náklad představuje celkový náklad zaměstnavatele nebo sazbu externího dodavatele, ne automaticky hrubou mzdu. Při samostatné správě lze servis dát na 0 a vlastní práci uvést do dohledu. Režie portfolia se neúčtuje znovu za každého klienta.
 
-AI předplatné **nahrazuje tokenový účet**, nepřičítá se. Příplatky a podporovaný automatizovaný provoz musí uživatel ověřit u poskytovatele. Příplatky lze zadat do ostatních nástrojů. Lokální režim má nulový externí tokenový účet, ale stále uvedené náklady hardwaru a provozu. Co je v hostingu, nezapočítávat znovu zvlášť.
+AI předplatné **nahrazuje tokenový účet**, nepřičítá se. Příplatky a podporovaný automatizovaný provoz musí uživatel ověřit u poskytovatele. Příplatky externího AI poskytovatele lze zadat do ostatních nástrojů; kapacitní příplatky Promptbooku se takto nezadávají, protože by se nesprávně vyloučily z provizního základu. Lokální režim má nulový externí tokenový účet, ale stále uvedené náklady hardwaru a provozu. Co je v hostingu, nezapočítávat znovu zvlášť.
 
 ## Výpočet klienta
 

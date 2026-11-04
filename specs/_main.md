@@ -8,7 +8,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 
 ## Rozcestník specifikace
 
-- [Smluvní a licenční návrhy](new-contractual-pages.md): výslovně schválené zveřejnění návrhů z 2. listopadu, stav účinnosti, partnerství, licence a informační povinnost při sdílení údajů.
+- [Smluvní a licenční podmínky](new-contractual-pages.md): aktuální veřejná znění, přijetí objednávky, partnerství, licence a informační povinnost při sdílení údajů.
 - [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
 - [Bezpečnost a autonomie](new-security-and-autonomy.md): zero trust, lokální a vzdálené ovládání, pevná pravidla, učení a aktualizace enginu.
 - [Vlastní instalace](new-open-source-page.md): prompty pro instalaci pomocí AI na počítač nebo VPS, npm, shell, Windows EXE, VPS/cloud a pomoc s nasazením.
@@ -42,6 +42,6 @@ Sekce „Příklady použití“ bez dalšího podnadpisu ukazuje společnou tec
 
 Český web je na `/cs`, plná anglická verze pod `/en` se stejnými suffixy cest. Kořen `/` vybere jazyk podle `Accept-Language`. Přepínač zachovává protějšek stránky, query výpočtu a fragment. Překlady zahrnují ukázky, formuláře, kalkulačku, právní texty a PDF; serverový výstup má správný jazyk už před hydratací. Metadata uvádějí canonical a jazykové alternativy, veřejné stránky jsou indexovatelné a uvedené v sitemap.
 
-České částky se zobrazují v Kč, anglické v USD. Ceny zůstávají 400 / 2 200 Kč a 19 / 100 USD. Česká nabídka uvádí přímo české ceny, bez poznámky o přepočtu. Interní převod pro zobrazení zůstává zachovaný. Kalkulačka zachovává původní jednotky uložených parametrů a převádí zobrazení i vstupy podle jazyka, včetně tokenových sazeb. Její zadaný kurz je odhad, ne živý kurz. Podíl zůstává pevný 20 %.
+Aktuální znění v5 z 3. listopadu 2026 má dva plány za projekt enginu: 399 / 1 999 Kč měsíčně, v angličtině 19 / 100 USD. Schválené příplatky Businessu 99 / 99 / 49 Kč se i anglicky uvádějí v Kč. Kapacitu a provizi popisuje [obchodní nabídka](new-commercial-offer.md). Česká nabídka uvádí přímo české ceny, bez poznámky o přepočtu. Interní převod pro zobrazení zůstává zachovaný. Kalkulačka zachovává původní jednotky uložených parametrů a převádí zobrazení i vstupy podle jazyka, včetně tokenových sazeb. Její zadaný kurz je odhad, ne živý kurz. Podíl zůstává pevný 20 %.
 
 Barevnost vychází z původního modrého loga Promptbooku (`#000080`) a černé. V hlavičce i patičce je původní symbol vedle slova `promptbook`, bez tečky: `prompt` černě a `book` modře. Hero nadpisy nemají závěrečné tečky. Světlé plochy, prostorové scény a přístupnost pohybu zůstávají zachované.

@@ -16,7 +16,7 @@ const pages: Record<string, [string, string]> = {
     '': [NEW_PAGE_DEFINITIONS.en.title, NEW_PAGE_DEFINITIONS.en.description],
     partnership: [PARTNERSHIP_PAGE_DEFINITIONS.en.title, PARTNERSHIP_PAGE_DEFINITIONS.en.description],
     agendy: ['Choose your workflow', 'Explore email, accounting documents, social content, video and website maintenance workflows.'],
-    cenik: ['Pricing and support', 'Start: $19 and Business: $100 monthly per client environment. Ongoing subscriptions, full terms and product support.'],
+    cenik: ['Pricing and support', 'Start: $19 and Business: $100 monthly per engine project. Included capacity, approved add-ons and product support.'],
     kalkulacka: ['Cost and benefit calculator', 'Calculate the complete economics of your workflow or partner service. Edit assumptions, share a link and download a PDF.'],
     srovnani: ['Compare AI approaches', 'Compare Promptbook with coding agents, workflow platforms and personal assistants in one table and individual guides.'],
     'o-nas': ['Our story and founders', 'Jiří Jahn and Pavol Hejný, equal cofounders of Promptbook. From website chatbots to ongoing business workflows.'],

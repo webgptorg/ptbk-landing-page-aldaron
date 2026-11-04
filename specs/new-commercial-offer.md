@@ -1,66 +1,63 @@
 # Obchodní nabídka, licence a servisní SLA
 
-Autorita: navazující rozhodnutí vlastníka z 3. listopadu 2026; aktuální nabídka sama neuzavírá konkrétní smlouvu. Stejné částky a podmínky platí v obou stránkách, metadatech, kalkulačce a exportu.
+Autorita: konečné schválení vlastníka z 3. listopadu 2026, znění **2026-11-03-v5**. Web publikuje aktuální nabídku. Přijaté objednávky mají vlastní sjednaný mechanismus změn; nové zveřejnění je zpětně nepřepisuje.
 
-## Nabídka má přesně dva plány
+## Dva plány za projekt enginu
 
-Aktuální rozhodnutí vlastníka z 3. listopadu 2026 nahrazuje dřívější pilot a cenové údaje. Web publikuje aktuální nabídku, ne návrh. Před spuštěním lze ceník a rozlišení dále iterovat; přijaté objednávky mají vlastní sjednaná pravidla změn.
-
-| Vlastnost | Start | Business |
+| Parametr | Start | Business |
 | --- | --- | --- |
-| Cena bez DPH | 399 Kč měsíčně za klientské prostředí | 1 999 Kč měsíčně za klientské prostředí |
-| Anglická nabídka | 19 USD měsíčně | 100 USD měsíčně |
-| Účel | Průběžný provoz ve vlastní režii | Průběžný provoz s produktovou podporou |
-| Licence | Jedno klientské prostředí, více agentů | Jedno klientské prostředí, více agentů |
-| Produktová podpora | Není zahrnuta | Posouzení hlášených problémů platformy |
-| SLA | Žádné produktové SLA | První věcná reakce do 16 pracovních hodin |
+| Cena měsíčně bez DPH | 399 Kč | 1 999 Kč |
+| Anglická základní nabídka | 19 USD | 100 USD |
+| Aktivovaní odborní agenti | 3 | 10 v ceně |
+| Ovládající uživatelé | 1 | 5 v ceně |
+| Připojené instance harnessů | 1 | Bez licenčního limitu počtu |
+| Oddělené webové profily | 1 | 5 v ceně |
+| Core a systémové role | Mimo limit odborníků | Mimo limit odborníků |
+| Pravidelné spouštění a nepřetržitý provoz | Ano | Ano |
+| Podpora výrobce | Bez garantované reakce | První věcné posouzení do 16 pracovních hodin |
+| Další kapacita | Přechodem na Business | Předem povolenými příplatky |
 
-Oba plány mohou běžet trvale a standardně se obnovují měsíčně, bez ročního závazku. Obnovení lze zrušit pro další fakturační období. Start nemá jednorázový nárok, třicetidenní limit ani povinný přechod na Business. Další rozlišení plánů je otevřené rozhodnutí; nevymýšlet nové funkční či početní limity. Horizont kalkulačky není smluvní závazek.
+Oba plány jsou dlouhodobě použitelná měsíční předplatná bez ročního závazku. Start nemá povinný konec po 30 dnech. Obnovení lze zrušit před dalším obdobím. Oba může spravovat klient sám nebo agentura.
 
-## Co znamená instance
+Jednotkou je samostatný **projekt enginu** s vlastními agenty, pravidly a oprávněními. Agenda je příklad použití, ne smluvní hranice. Firma může kombinovat více projektů obou plánů. Server, firma, jednotlivý úkol ani přihlášení nejsou jednotkou licence. Migrace ani přejmenování nový projekt nevytvářejí. Interní parametr kalkulačky `instancesPerClient` zůstává kompatibilní a nově je popsaný jako počet projektů.
 
-Samostatné prostředí jednoho koncového klienta, nikoli fyzický server, jeden agent nebo jeden spuštěný úkol. Instance může obsahovat více agentů. Každé další samostatné produkční prostředí vyžaduje samostatnou licenci. Společný server pro více klientů neznamená jednu sdílenou licenci. Neuvádět starý limit deseti agentů ani nekonečné klientské prostředí za jednu licenci.
+## Počítání kapacity
 
-Web nenastavuje limity výkonu ani neimplementuje vymáhání licence. Předmět a rozsah oprávnění stanoví objednávka a licenční podmínky konkrétního nasazení.
+- Odborník je aktivovaná pracovní role i při čekání. Archivované definice a šablony nečerpají kapacitu. Výměna role nevytváří další celý měsíční poplatek. Core komunikace, směrování, učení a oprav je mimo limit; rozhoduje skutečná funkce, ne název.
+- Ovládající uživatel je konkrétní oprávněný člověk zadávající nebo měnící práci. Více zařízení je jeden člověk. Technik agentury se počítá stejně jako klientův člověk; pouhý příjemce výstupu ani kontakt s podporou místo nečerpá.
+- Instance harnessu je aktivní připojená konfigurace a přihlašovací kontext. Úlohy a relace nad stejnou konfigurací nejsou další instance. Vlastní pravidla a úhrady poskytovatelů platí samostatně.
+- Webový profil odděluje přihlašovací identitu. Jeden profil může používat mnoho webů, záložek a integrací bez jejich samostatného započtení.
 
-## Co se platí mimo licenci
+## Příplatky Businessu
 
-Hosting, databáze, úložiště, AI modely a externí služby. Platí je klient, případně agentura nebo provozní partner podle dohody. Samostatně se platí návrh řešení, instalace, integrace, školení a průběžná práce agentury. Web proto zobrazuje úplnou ekonomiku, ne pouze cenu licence.
+| Další kapacita nad základ | Kč měsíčně bez DPH |
+| --- | ---: |
+| Odborný agent | 99 |
+| Ovládající uživatel | 99 |
+| Oddělený webový profil | 49 |
 
-Promptbook neprodává spravovaný hosting nebo kompletní koncovou službu. Předplatné nezahrnuje správu serveru, instalaci aktualizací, zakázkový vývoj ani neomezené konzultace. Aktualizace pocházejí ze standardně zveřejňovaných vydání; předplatné neobjednává samostatnou distribuci nebo individuální plán oprav.
+Účtuje se kapacita nad základ **poměrně podle doby aktivace** v období, nikoli vytížení nebo zprávy. Polovina období znamená polovinu sazby. Placené rozšíření potřebuje předchozí výslovný souhlas klienta a dohodnutý měsíční rozpočet. Výchozí je bez automatického přečerpání: upozornění před limitem, nepovolená kapacita se neaktivuje a cena se sama nemění. Rozpracované úlohy se neruší. Podklad vyúčtování je kontrolovatelný záznam kapacity a doby.
 
-## Partnerství a tok plateb
+Za celý měsíc: 15 odborníků a 7 lidí = 1 999 + 5 × 99 + 2 × 99 = **2 692 Kč**, provize **538,40 Kč** v původním 24měsíčním okně. Anglický web ponechá základ $19/$100, ale nové příplatky uvádí v přesně schválených Kč; měnu fakturace určí objednávka. Nevytvářet vlastní dolarové sazby.
 
-Klient → Promptbook: licence. Klient → agentura: její vlastní práce a servis. Klient, agentura nebo provozní partner → vybraní poskytovatelé: AI a infrastruktura dle dohody. Promptbook → agentura: partnerský podíl.
+Upgrade zachová projekt a data, vyžaduje potvrzení placené změny. Downgrade nastane v dalším období až po splnění kapacit Startu. Upgrade ani příplatky neobnovují provizní okno. Nezavádět licenční kvóty úloh, tokenů, souběhu, normostran znalostí nebo kontextu.
 
-Agentura neplatí partnerský paušál ani předem nenakupuje balík klientských licencí. To neznamená bezplatné vlastní produkční používání: v takovém případě je agentura sama koncovým klientem podle licence. Podmínky podílu z vlastní licence ani vícestupňové provize nejsou touto specifikací uděleny.
+## Oddělené platby a podpora
 
-Podíl je **20 % ze skutečně uhrazených licenčních plateb přivedeného klienta, bez DPH a po odečtení vratek**. Zahrnuje Start i Business. Nezahrnuje hosting, spotřebu modelů, práci agentury nebo jiná plnění. Vyplácí se z ceny licence, nepřičítá se klientovi znovu.
+Klient platí licenci Promptbooku, samostatně agentuře za návrh, instalaci, integrace, školení a péči. AI účty, tokeny, hosting, databáze, úložiště a externí služby platí klient nebo partner podle dohody. Podpora výrobce je odlišná od práce agentury. Licence neposkytuje spravovaný hosting, správu serveru ani individuální distribuční větev.
 
-Pro nové dohody je schváleno 24 kalendářních měsíců od první placené aktivace konkrétní licence. Změna plánu ani přerušení plateb lhůtu neobnovují. Započítává se jen zaplacená služba v tomto okně, u přesahující roční platby poměrná část. Provize se platí do 30 dnů od inkasa; roční provize se nerozkládá po měsících. Starší odlišně přijaté dohody zůstávají zachovány. Vlastní péče partnera má samostatnou objednávku a může pokračovat i po konci provize. Nepřidávat cookie okna, pravidla last-click, výplatní minima, certifikační stupně nebo další partnerské sazby.
+Business poskytuje první věcné posouzení hlášení platformy, žádost o nezbytné podklady nebo návrh dalšího postupu do **16 pracovních hodin**, pondělí–pátek **9:00–17:00 Europe/Prague mimo české svátky**. Automatická doručenka nestačí. Jeden technický kontakt klienta nebo agentury, **jiri@ptbk.io**. Nejde o garanci termínu opravy, dostupnosti nebo nepřetržitou pohotovost. Podporovanou verzi určí objednávka; pravidla vydání se touto změnou nemění.
 
-Při úhradě bez vratek: Start 19 USD → 3,80 USD partnerovi; Business 100 USD → 20 USD partnerovi. Nad rámec toho agentura fakturuje vlastní práci podle své nabídky.
+## Partnerská provize
 
-## Servisní SLA Business
+Jednotných **20 % skutečně zaplacené softwarové ceny včetně všech placených softwarových příplatků Promptbooku**, bez DPH po slevách a přípustných vratkách; poplatek brány základ nesnižuje. Stejně pro všechny současné i budoucí plány a fakturační režimy. AI, infrastruktura a vlastní práce jsou mimo základ.
 
-Běžné dotazy a péči o řešení zajišťuje agentura. Za každou instanci má Promptbook jeden pověřený technický kontakt, typicky z agentury. Hlášení problému platformy se posílá na **jiri@ptbk.io**.
+Prvních **24 kalendářních měsíců od první placené aktivace konkrétní licence**, bez restartu při změně plánu, rozšíření nebo přerušení. Přesahující roční platba má poměrný základ. Splatnost do 30 dní od inkasa, s předností dřívější kogentní lhůty; roční provize se nevyplácí po dvanáctinách. Starší přijaté odlišné dohody zůstávají zachovány. Agentura nemá partnerský paušál ani povinné balíky licencí. Vlastní služby může poskytovat i po skončení provize.
 
-První věcná reakce do **16 pracovních hodin**: první posouzení, požadavek na potřebné podklady nebo návrh dalšího postupu. Automatická doručenka není reakcí.
+## Web a hranice implementace
 
-Pracovní čas: **pondělí–pátek, 9:00–17:00, Europe/Prague, mimo české státní a ostatní svátky**. Nejde o 16 uplynulých hodin, 24/7 službu ani slib dvou kalendářních dnů. Podporovanou verzi a konfiguraci určí objednávka.
+Hlavní stránka, partnerství a ceník sdílejí dvě srovnatelné karty a přehled příplatků. Kontakt „Potřebujete větší rozsah? Domluvme se.“ není třetí tarif. Kalkulačka, textový export a PDF počítají základ vybraného plánu a viditelně vylučují kapacitní příplatky. CZ licence jsou pevně v Kč, EN základ v USD; uložené jednotky, kurz pro externí náklady a query zůstávají kompatibilní.
 
-SLA negarantuje termín odstranění závady ani dostupnost serveru, aplikace nebo externích služeb. Bez nepřetržité pohotovosti, telefonní linky a servisu cizích systémů. Provoz agentů na pozadí v noci se nikdy nesmí zaměňovat s dostupností lidské podpory.
+Tato změna publikuje nabídku a podmínky; neimplementuje měření kapacity, vymáhání licence v enginu ani Stripe. Před provozním účtováním rozšíření musí existovat souhlas, záznam aktivace, ochrana proti dvojímu účtování a kontrolovatelné vyúčtování respektující rozpočet.
 
-## Veřejný kód a individuální rozsah
-
-Samostatný vývoj a neprodukční testování jsou bez licenčního poplatku za podmínek veřejné licence, bez produktové podpory a SLA. **Není to třetí cenový plán**, hostovaný SaaS free tier ani časově omezené hostované demo.
-
-Pro produkční provoz včetně vlastního hostingu se nabízí Start nebo Business. Placená licence je potřebná v rozsahu, v němž produkční použití nepovoluje veřejná licence konkrétní verze. Již udělená práva a licence jednotlivých součástí nejsou dotčeny. Přesný rozsah oprávnění určí licenční podmínky a objednávka. Odkazovat na upstream `LICENSE.md`, neměnit jej ani tvrdit neomezené open-source produkční oprávnění.
-
-Více instancí a nestandardní požadavky vedou k individuální nabídce, nikoli ke třetí kartě s vymyšlenou cenou nebo vyšším SLA. Nepřetržitou podporu nenabízíme. Kontaktem je Jiří Jahn, jiri@ptbk.io.
-
-## Jazykové zobrazení a kalkulačka — 3. listopadu 2026
-
-Ceník, karty, kalkulačka i PDF používají společné `commercialTerms.ts`. České licence se počítají pevně v Kč: Start 399, Business 1 999 za prostředí/měsíc. Anglické licence zůstávají 19 / 100 USD a do interních Kč se převedou zadaným kurzem. Kurz pro tokeny a další modelové USD náklady i uložené jednotky se nemění. České nabídky nezobrazují kurzový disclaimer. Příklady: 399 → 79,80 Kč partnerovi; 1 999 → 399,80 Kč, při plné úhradě bez vratek.
-
-Platí jednotných 20 % pro všechny současné i budoucí softwarové plány bez rozlišování měsíční/roční sazby. Výplata do 30 dní od inkasa, s předností dřívější povinné zákonné lhůty. Nový schválený limit je 24 měsíců; samotná nová publikace nemění starší dohody. Veřejné dokumenty mají aktuální znění 2026-11-03-v4. Viz [právní stránky](new-contractual-pages.md).
+Samostatný vývoj a neprodukční testování se řídí veřejnou licencí konkrétní verze, nejsou třetím plánem. Nová publikace nemění BUSL ani dříve nabytá práva. Přesný grant stanoví licence a objednávka. Neveřejné podíly, rozpočty a odkupy Neonmedia zůstávají mimo tento repozitář.

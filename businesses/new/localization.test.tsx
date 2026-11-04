@@ -49,6 +49,21 @@ describe('bilingual launch site', () => {
         expect(storedFieldValue('inputPriceUsd',66,'cs',22)).toBe(3);
         expect(displayFieldValue('volume',300,'en',22)).toBe(300);
     });
+    it.each(['cs', 'en'] as const)('publishes the same two capacity plans on all pricing surfaces in %s', locale => {
+        for (const page of [<NewLandingPage key="home"/>, <NewLandingPage key="partner" partnership/>, <PricingPage key="pricing"/>]) {
+            const element = document.createElement('div');
+            element.innerHTML = html(page, locale);
+            expect(element.querySelectorAll('[data-plan]')).toHaveLength(2);
+            const start = element.querySelector('[data-plan="start"]')!.textContent!;
+            const business = element.querySelector('[data-plan="business"]')!.textContent!;
+            expect(start).toContain(locale === 'cs' ? '3 aktivovaní odborní agenti' : '3 active specialist agents');
+            expect(start).toContain(locale === 'cs' ? '1 ovládající uživatel' : '1 controlling user');
+            expect(business).toContain(locale === 'cs' ? '10 aktivovaných odborných agentů' : '10 active specialist agents');
+            expect(business).toContain(locale === 'cs' ? '5 ovládajících uživatelů' : '5 controlling users');
+            const rates = Array.from(element.querySelectorAll('section[aria-labelledby="business-addons-title"] td')).map(cell => cell.textContent);
+            expect(rates).toEqual(locale === 'cs' ? ['99 Kč', '99 Kč', '49 Kč'] : ['99 CZK', '99 CZK', '49 CZK']);
+        }
+    });
     it.each([
         ['home',<NewLandingPage key="home"/>],['partners',<NewLandingPage key="partners" partnership/>],['open-source',<OpenSourcePage key="open-source"/>],['pricing',<PricingPage key="pricing"/>],['story',<StoryPage key="story"/>],['security',<SecurityPage key="security"/>],['FAQ',<FaqPage key="faq"/>],['comparisons',<ComparisonsPage key="comparisons"/>],['calculator',<EconomicsCalculator key="calculator" advanced/>],
         ...Object.keys(SCENARIOS).map(id=>[id,<AgendaPage key={id} scenarioId={id as ScenarioId}/>]),

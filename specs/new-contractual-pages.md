@@ -14,7 +14,7 @@ Patička má samostatný sloupec Právní dokumenty se všemi dokumenty. Vydán�
 
 Potvrzená sazba je jednotných 20 % skutečně zaplacené způsobilé softwarové ceny bez DPH po slevách a přípustných vratkách, u všech současných i budoucích plánů a fakturačních režimů. Poplatek platební brány základ nesnižuje. Roční sleva snižuje částku, nikoli sazbu; neexistuje dorovnání na 17/24 %. Splatnost je do 30 dní od přijetí prostředků s předností dřívější kogentní lhůty, bez dvanáctin roční provize. Měsíční kalkulačka i PDF používají 20 %.
 
-Délku nároku stanoví individuální partnerská smlouva před potvrzením klienta. Výsledek rešerše s doporučením časového limitu ještě není rozhodnutím vlastníka; veřejný web proto nezavádí automaticky 12, 24 ani 36 měsíců. Nové nepotvrzené obchody a skutečně nové produkty lze do budoucna vymezit nově; potvrzeným obchodům zůstává jejich sjednaná sazba a doba. Změny běžících vztahů zachovávají informační povinnosti, možnost odmítnutí a příslušné kogentní ochrany.
+Konečné schválení vlastníka z 3. listopadu stanoví pro nové dohody prvních 24 kalendářních měsíců od první placené aktivace konkrétní licence bez restartu při změně tarifu, rozšíření nebo přerušení. Základ zahrnuje všechny placené softwarové příplatky Promptbooku. Produktové a partnerské podmínky mají znění 2026-11-03-v5 a schválené kapacity podle obchodní specifikace. Nové nepotvrzené obchody a skutečně nové produkty lze do budoucna vymezit nově; potvrzeným obchodům zůstává jejich sjednaná sazba a doba. Změny běžících vztahů zachovávají informační povinnosti, možnost odmítnutí a příslušné kogentní ochrany.
 
 ## Podpora a licence
 

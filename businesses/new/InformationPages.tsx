@@ -23,13 +23,22 @@ return <header className={s.pageIntro}><Link className={s.breadcrumb} href={path
 
 export function PricingPage() {
     const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t("Licence pro vaši firemní agendu.")}>{t("Vyberte si průběžný provoz ve vlastní režii nebo s produktovou podporou. Oba plány měsíčně, bez ročního závazku.")}</PageIntro><PricingCards full/><div className={s.prose}>
-    <h2>{t("Jak se plány účtují")}</h2><p>{t("Start i Business jsou průběžná měsíční předplatná za klientské prostředí, bez omezení na jeden měsíc a bez ročního závazku. Další obnovení lze zrušit před začátkem dalšího fakturačního období. Start je určen pro vlastní správu; Business zahrnuje produktovou podporu a první věcnou reakci do 16 pracovních hodin.")}</p>
-    <h3>{t("Co je klientské prostředí?")}</h3><p>{t(COMMERCIAL_TERMS.instance)}</p>
+return <><PageIntro title={t("Licence pro vaši firemní agendu.")}>{t("Vyberte velikost týmu a kapacitu projektu. Oba plány měsíčně, bez ročního závazku, ve vlastní správě nebo s agenturou.")}</PageIntro><PricingCards full/><div className={s.prose}>
+    <h2>{t("Jak se plány účtují")}</h2><p>{t("Start i Business jsou průběžná měsíční předplatná za projekt enginu. Oba podporují pravidelné spouštění i nepřetržitý provoz a lze je používat dlouhodobě. Další obnovení lze zrušit před začátkem dalšího fakturačního období. Start má podporu výrobce bez garantované reakce; Business první věcné posouzení do 16 pracovních hodin.")}</p>
+    <h3>{t("Co je jeden projekt?")}</h3><p>{t(COMMERCIAL_TERMS.instance)}</p>
+    <h2>{t("Jak počítáme kapacitu")}</h2>
+    <h3>{t("Odborní agenti a core role")}</h3><p>{t(COMMERCIAL_TERMS.specialists)}</p>
+    <h3>{t("Ovládající uživatelé")}</h3><p>{t(COMMERCIAL_TERMS.users)}</p>
+    <h3>{t("Připojené harnessy")}</h3><p>{t(COMMERCIAL_TERMS.harnesses)}</p>
+    <h3>{t("Oddělené webové profily")}</h3><p>{t(COMMERCIAL_TERMS.browserProfiles)}</p>
+    <h2>{t("Rozšíření, rozpočet a změna plánu")}</h2><p>{t(COMMERCIAL_TERMS.expansion)}</p>
+    <p>{locale === 'en' ? 'CZK example for a full month: Business with 15 specialists and 7 controlling users costs CZK 1,999 + 5 × CZK 99 + 2 × CZK 99 = CZK 2,692 excluding VAT. The 20% agency share within the original 24-month window is CZK 538.40.' : 'Příklad za celý měsíc: Business s 15 odborníky a 7 ovládajícími uživateli stojí 1 999 + 5 × 99 + 2 × 99 = 2 692 Kč bez DPH. Partnerská provize 20 % v původním 24měsíčním okně je 538,40 Kč.'}</p>
+    <p>{t(COMMERCIAL_TERMS.planChanges)}</p>
+    <p>{t("Licenční kvóty neurčujeme pro počet úloh, souběžné běhy, tokeny, normostrany znalostí ani velikost kontextu. Skutečný výkon, cena AI a limity poskytovatelů se řídí zvoleným prostředím a jejich vlastními podmínkami.")}</p>
     <h2>{t("Celkové náklady, ne jen licence")}</h2><p>{t(COMMERCIAL_TERMS.exclusions)}</p><p>{t("AI a infrastrukturu hradí klient, případně partner podle dohody. Promptbook neprodává spravovaný hosting. Cena nezahrnuje správu serveru, instalaci aktualizací, zakázkový vývoj ani neomezené konzultace.")}</p><p>{t("Aktualizace vycházejí ve standardních vydáních. Předplatné není objednávkou samostatné distribuce ani individuálního plánu oprav.")}</p><p>{t("Automatické aktualizace enginu řídí nastavení projektu. Lidská správa serveru a servisní práce partnera jsou samostatné služby.")} <Link href={path('bezpecnost#aktualizace')}>{t("Jak fungují automatické aktualizace →")}</Link></p><Link href={path('kalkulacka')}>{t("Spočítat kompletní náklady a přínosy →")}</Link>
-    <h2>{t("Podpora Business")}</h2><p>{t(COMMERCIAL_TERMS.support)}</p><p>{t(COMMERCIAL_TERMS.supportWindow)}</p><p>{t("Běžnou péči zajišťuje partner. Za klientské prostředí s námi komunikuje jeden pověřený technický kontakt. Hlášení problémů platformy přijímáme na ")}{t(COMMERCIAL_TERMS.contact)}{t(".")}</p><p>{t(COMMERCIAL_TERMS.supportLimits)}</p>
+    <h2>{t("Podpora Business")}</h2><p>{t(COMMERCIAL_TERMS.support)}</p><p>{t(COMMERCIAL_TERMS.supportWindow)}</p><p>{t("Oba plány můžete spravovat sami nebo s agenturou. Licence Promptbooku, práce agentury a podpora výrobce jsou samostatné části. Za projekt s námi komunikuje jeden pověřený technický kontakt klienta nebo agentury. Hlášení problémů platformy přijímáme na ")}{t(COMMERCIAL_TERMS.contact)}{t(".")}</p><p>{t(COMMERCIAL_TERMS.supportLimits)}</p>
     <h2>{t("Veřejný kód a vlastní nasazení")}</h2><p>{t(COMMERCIAL_TERMS.publicLicence)}</p><p>{t(COMMERCIAL_TERMS.productionLicence)}</p><p><Link href={path('licence')}>{locale === 'en' ? 'Engine licence and commercial terms →' : 'Licence enginu a komerční podmínky →'}</Link></p>
-    <h2>{t("Více prostředí nebo jiný rozsah?")}</h2><p>{t("Připravíme individuální nabídku. Nepřetržitou lidskou podporu nenabízíme. Přesná oprávnění a podmínky stanoví objednávka, licenční smlouva a případně partnerská dohoda.")}</p><div className={s.actions}><LeadButton topic={t("Individuální rozsah a více klientských prostředí")}>{t("Probrat požadavky")}</LeadButton></div>
+    <h2>{t("Potřebujete větší rozsah? Domluvme se.")}</h2><p>{t("Připravíme individuální nabídku. Nepřetržitou lidskou podporu nenabízíme. Přesná oprávnění a podmínky stanoví objednávka, licenční smlouva a případně partnerská dohoda.")}</p><div className={s.actions}><LeadButton topic={t("Individuální rozsah a více projektů")}>{t("Probrat požadavky")}</LeadButton></div>
 </div></>;}
 
 export function StoryPage(){
@@ -98,7 +107,13 @@ const FAQ = [
     ['Jak fungují automatické aktualizace?', 'Ve výchozím nastavení engine ve volné chvíli instaluje stabilní opravné a menší verze v rámci stejné hlavní verze. Automatiku můžete vypnout nebo připnout verzi. Předběžná vydání se sama nezapínají; pokud už na jednom jste, postupujete po něm ke stabilní verzi a pak zůstáváte na stabilních vydáních. Ruční pauza i zastavení zůstávají platné.'],
     ['Jak začnu na vlastním serveru?', 'V aplikaci získáte příkaz pro svůj VPS. Po připojení pokračujete nastavením první agendy a přihlášením k vybraným AI nástrojům. Přihlašovací kroky dokončujete Vy v chráněném rozhraní nebo terminálu; hesla ani přihlašovací kódy neposíláte do běžného chatu. S nasazením může pomoci partner.'],
     ['Je engine zdarma?', 'Veřejný kód má vlastní licenční podmínky. Samostatný vývoj a neprodukční testování jsou bez licenčního poplatku podle licence dané verze. Produkční použití se řídí právy konkrétní verze a případnou komerční licencí Start či Business.'],
-    ['Co znamená jedno klientské prostředí?', COMMERCIAL_TERMS.instance],
+    ['Co znamená jeden projekt?', COMMERCIAL_TERMS.instance],
+    ['Jak se počítají odborní agenti?', COMMERCIAL_TERMS.specialists],
+    ['Kdo je ovládající uživatel?', COMMERCIAL_TERMS.users],
+    ['Co je instance harnessu?', COMMERCIAL_TERMS.harnesses],
+    ['Co je oddělený webový profil?', COMMERCIAL_TERMS.browserProfiles],
+    ['Jak se účtují rozšíření Businessu?', COMMERCIAL_TERMS.expansion],
+    ['Mohu zůstat na Startu nebo změnit plán?', COMMERCIAL_TERMS.planChanges],
     ['Znamená 24/7 provoz i podporu v noci?', 'Ne. Business má první věcnou reakci do 16 pracovních hodin v definovaném pracovním okně, nikoli nepřetržitou pohotovost, garanci opravy nebo dostupnosti. Podrobnosti jsou v ceníku.'],
     ['Kdo nám řešení nasadí?', 'Partner, který s vámi vybere agendu a postará se o nastavení i běžnou péči podle dohody. Promptbook poskytuje technologii a licenční produktovou podporu. Samostatné technické nasazení je také možné.'],
     ['Musím odejít od svých současných nástrojů?', 'Ne nutně. Podívejte se na srovnání jednotlivých přístupů. Některé nástroje, například coding harnessy, mohou být součástí vašeho řešení s Promptbookem.'],

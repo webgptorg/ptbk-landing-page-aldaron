@@ -1,7 +1,7 @@
 import type { NumericKey } from './calculatorState';
 
 export const FIELD_LABELS: Record<NumericKey, string> = {
-    exchangeRate: 'Kurz USD → Kč', instancesPerClient: 'Prostředí na jednoho klienta',
+    exchangeRate: 'Kurz USD → Kč', instancesPerClient: 'Projektů na jednoho klienta',
     volume: 'Počet položek za měsíc', unitsPerItem: 'Jednotek na položku',
     manualMinutes: 'Ruční práce na celou položku (min)', hourlyCost: 'Náklad na člověka (Kč/h)',
     retainedWorkPercent: 'Lidská práce, která zůstane (%)', oversightHours: 'Další dohled (h/měs.)',
@@ -22,7 +22,7 @@ export const FIELD_GROUPS: { title: string; description: string; keys: NumericKe
     { title: 'Práce a lidská kontrola', description: 'Ruční čas je za celou položku, ne za každou dílčí jednotku. Kontroly a dohled zůstávají v nákladech.', keys: ['unitsPerItem', 'manualMinutes', 'hourlyCost', 'retainedWorkPercent', 'oversightHours'] },
     { title: 'AI a externí služby', description: 'Tokeny pokrývají celý postup včetně kontextu a nástrojů. Sazby jsou upravitelné modelové odhady, nikoli živý ceník poskytovatele.', keys: ['inputTokens', 'outputTokens', 'inputPriceUsd', 'outputPriceUsd', 'aiSubscriptionCzk', 'externalPerUnitCzk', 'retryReservePercent', 'exchangeRate'] },
     { title: 'Server a ostatní provoz', description: 'Částky za celého klienta. Co je již v ceně serveru, nepřičítejte podruhé. Lokální model také potřebuje hardware a elektřinu.', keys: ['hostingCzk', 'databaseCzk', 'backupCzk', 'toolsCzk', 'energyCzk', 'hardwareCzk'] },
-    { title: 'Nasazení, servis a licence', description: 'Nasazení je jednorázové. Další prostředí násobí jen licenci; objem práce a ostatní náklady zadáváte za celého klienta.', keys: ['setupFeeCzk', 'serviceFeeCzk', 'instancesPerClient', 'horizonMonths'] },
+    { title: 'Nasazení, servis a licence', description: 'Nasazení je jednorázové. Další projekty násobí jen základní předplatné; objem práce a ostatní náklady zadáváte za celého klienta. Kapacitní příplatky nejsou v kalkulaci zahrnuté.', keys: ['setupFeeCzk', 'serviceFeeCzk', 'instancesPerClient', 'horizonMonths'] },
     { title: 'Náklady a úhrady partnera', description: 'Kalkulace používá jednotných 20 % ze skutečně uhrazených licencí bez DPH po vratkách, stejně při měsíční i roční platbě. Hosting, AI ani vlastní služby do základu nepatří.', keys: ['partnerHours', 'partnerHourlyCost', 'partnerSetupHours', 'acquisitionPerClientCzk', 'partnerOverheadCzk', 'paidLicencePercent', 'refundPercent'], partnerOnly: true },
 ];
 export function numericFieldBounds(key: NumericKey): { min: number; max: number; step: number | 'any' } {

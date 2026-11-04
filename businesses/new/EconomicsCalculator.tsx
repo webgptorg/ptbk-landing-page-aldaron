@@ -153,6 +153,7 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                 </div>
             </div>
             <div className={s.calculatorBottom}><div><button type="button" className={s.secondaryButton} onClick={requestPdf}><Download size={17} />{t("Stáhnout PDF výpočet")}</button>{advanced ? <button type="button" className={`${s.resetButton} ${controls.inlineAction}`} onClick={copyLink}><Link2 size={15} aria-hidden="true"/><span>{t("Sdílet kalkulaci")}</span></button> : <Link className={s.textLink} href={calculatorPath(state, locale)}>{t("Pokročilá kalkulačka ")}<ArrowRight size={17} /></Link>}<button type="button" className={`${s.resetButton} ${controls.inlineAction}`} onClick={() => update(defaultCalculatorState(state.mode))}><RotateCcw size={15} aria-hidden="true"/><span>{t("Obnovit příklad")}</span></button></div><p>{t("Upravitelné odhady, částky bez DPH. Změna vstupů nic neobjednává.")}</p>
+                <p>{t(COMMERCIAL_TERMS.calculationScope)} <Link href={path('cenik')}>{t("Celý ceník a podmínky")}</Link></p>
                 {showLink && <label className={`${s.field} ${s.fullField}`}>{t("Odkaz se všemi parametry")}<input className={s.copyField} readOnly value={calculationShareUrl(state, locale)} onFocus={(event) => event.target.select()} /></label>}<span className={s.shareStatus} role="status">{t(shareStatus)}</span>
             </div>
         </div>

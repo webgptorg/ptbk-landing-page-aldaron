@@ -20,7 +20,7 @@ Formulář nezakládá účet, objednávku ani partnerskou smlouvu; používá [
 
 ## Podíl a platby
 
-Přesné podmínky podle [obchodní nabídky](new-commercial-offer.md): 20 % ze skutečně uhrazených licencí bez DPH po vratkách. Start i Business, měsíční vyúčtování po dobu placeného užívání a trvání partnerské dohody. Žádný automatický 12měsíční konec, bezpodmínečné doživotní oprávnění nebo jiné procento podle slideru. Přiřazení klienta, splatnost a ukončení nároku určí dohoda.
+Přesné podmínky podle [obchodní nabídky](new-commercial-offer.md): 20 % ze skutečně uhrazeného softwaru včetně všech placených softwarových příplatků Promptbooku bez DPH po slevách a přípustných vratkách, v prvních 24 kalendářních měsících od první placené aktivace konkrétní licence. Upgrade ani rozšíření lhůtu neobnovují. Starší přijaté dohody se nemění zpětně. Přiřazení klienta a další podmínky určí přijatá dohoda.
 
 Žádný partnerský paušál a žádné povinné nákupy balíků licencí. Vlastní produkční používání partnera není z tohoto důvodu bezplatné. Klient platí licenci přímo Promptbooku. Provoz a AI platí klient nebo partner podle dohody; model kalkulačky obě cesty rozlišuje. Implementaci a servis určuje partner sám.
 
@@ -35,4 +35,6 @@ CTA píše do stejného kontaktního systému jako zbytek webu a zaznamená tém
 
 ## Aktualizace 3. listopadu 2026
 
-Platí jednotných 20 % pro všechny současné i budoucí softwarové plány bez rozlišování měsíční/roční sazby. Výplata do 30 dní od inkasa, s předností dřívější povinné zákonné lhůty. Přesná doba nároku je v přijatém partnerském listu; žádný nový časový limit se tímto zveřejněním nezavádí. Veřejné dokumenty jsou aktuální verzované podmínky. Viz [právní stránky](new-contractual-pages.md).
+Platí jednotných 20 % pro všechny současné i budoucí softwarové plány bez rozlišování měsíční/roční sazby. Výplata do 30 dní od inkasa, s předností dřívější povinné zákonné lhůty. Pro nové dohody je schváleno 24 měsíců od první placené aktivace konkrétní licence, bez restartu při rozšíření či změně plánu; odlišné starší přijaté dohody zůstávají zachované. Veřejné dokumenty jsou aktuální verzované podmínky. Viz [právní stránky](new-contractual-pages.md).
+
+V5 sjednocuje dvě karty Start/Business a přehled příplatků podle [obchodní nabídky](new-commercial-offer.md). Oba plány mohou mít vlastní správu nebo agenturu. Licence, práce agentury a podpora výrobce zůstávají odlišná plnění.

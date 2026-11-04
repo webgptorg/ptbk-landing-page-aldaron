@@ -8,7 +8,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
         title: 'Partnerské podmínky Promptbook',
         publication: {
             date: '2026-11-03', isDraft: false,
-            notice: "Znění 2026-11-03-v4 ze dne 3. listopadu 2026. Podmínky se stávají součástí konkrétní partnerské smlouvy jejím přijetím; samotné odeslání poptávky partnerství nezakládá. Partnerský list určuje partnera, rozsah a dobu nároku. Nové znění nepřepisuje dříve přijaté dohody.",
+            notice: "Znění 2026-11-03-v5 ze dne 3. listopadu 2026. Podmínky se stávají součástí konkrétní partnerské smlouvy jejím přijetím; samotné odeslání poptávky partnerství nezakládá. Partnerský list určuje partnera, rozsah a dobu nároku. Nové znění nepřepisuje dříve přijaté dohody.",
         },
         perex: 'Pravidla pro agentury a integrátory, kteří doporučují konkrétní klientská prostředí a mohou poskytovat vlastní samostatně objednané služby. Odměna za software je oddělená od vlastní práce partnera a od samostatné dohody s koordinátorem programu.',
         sections: [
@@ -24,7 +24,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Jak se přiřazuje obchod',
                 paragraphs: [
-                    'Partner před uzavřením obchodu registruje v dohodnuté evidenci zákaznickou právnickou osobu, vymezené klientské prostředí či agendu, odpovědný kontakt a doložený původ obchodu. AI Web přiřazení potvrdí. Samotný kontakt ve firemním adresáři, cookie nebo shodné IČO nárok nezakládá.',
+                    'Partner před uzavřením obchodu registruje v dohodnuté evidenci zákaznickou právnickou osobu, konkrétní projekt enginu, odpovědný kontakt a doložený původ obchodu. AI Web přiřazení potvrdí. Samotný kontakt ve firemním adresáři, cookie nebo shodné IČO nárok nezakládá.',
                     'Přiřazení se váže na konkrétní licenci a její ekonomicky navazující předplatné, nikoli automaticky na celou skupinu firem či všechny útvary zákazníka. Tři oddělené projekty jedné velké firmy mohou mít tři partnery, pokud mají skutečně oddělené licence a doložený rozsah. Umělé dělení nebo přeznačení jediné licence nesmí vytvářet dvojí provizi.',
                     'Při souběhu doporučení se vychází z potvrzeného obchodu a doloženého přínosu. Sporný obchod se vyřeší podle záznamů před výplatou sporné části; nesporné provize zůstávají splatné. Technická změna ID, migrace projektu nebo změna tarifu sama přiřazení neruší.',
                 ],
@@ -34,7 +34,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     "Provize činí jednotných 20 % ze skutečně zaplacené způsobilé softwarové ceny bez DPH, po slevách a přípustných vratkách. Stejná sazba platí pro všechny současné i budoucí plány a měsíční, roční i jinou fakturaci; názvy tarifů sazbu nemění. Běžné poplatky platební brány základ provize nesnižují. Pouhá autorizace ani neuhrazená faktura nejsou přijatou platbou; povinná zákonná pravidla vzniku provize zůstávají zachována.",
                     "Bezplatné užití samostatného enginu nevytváří provizi. Vrácení platby nebo chargeback opraví provizi jen v prokázaném rozsahu, v němž podle smlouvy a zákona nárok nevznikl nebo zanikl; nesplnění z důvodu na straně AI Webu není automatickým důvodem odebrat provizi obchodního zástupce.",
-                    "Podíl se vztahuje na způsobilou softwarovou složku všech plánů. Nevztahuje se na AI tokeny a kredity, infrastrukturu, daně ani na implementaci, konzultace, kurzy, školení a jinou práci. Příjmy z vlastní práce náleží jejímu poskytovateli. Za vlastní nákup partnera a víceúrovňové doporučování nevzniká automaticky provize.",
+                    "Podíl se vztahuje na způsobilou softwarovou složku všech plánů včetně všech placených softwarových příplatků Promptbooku, zejména za další odborné agenty, ovládající uživatele a oddělené webové profily. Zahrnují se po slevách a přípustných vratkách bez DPH v původním 24měsíčním okně konkrétní licence; upgrade ani přidání kapacity toto okno neobnovují. Nevztahuje se na AI tokeny a kredity, infrastrukturu, daně ani na implementaci, konzultace, kurzy, školení a jinou práci. Příjmy z vlastní práce náleží jejímu poskytovateli. Za vlastní nákup partnera a víceúrovňové doporučování nevzniká automaticky provize.",
                     'Případný budoucí tokenový tarif zatím není nabízen; jeho licenční složka podléhá dohodnuté provizi, spotřební tokenová složka má samostatná předem sjednaná pravidla. Přeznačení stejné licence nesmí obcházet vzniklé nároky.',
                 ],
             },
@@ -109,7 +109,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
         title: 'Promptbook partner terms',
         publication: {
             date: '2026-11-03', isDraft: false,
-            notice: "Version dated 3 November 2026 (2026-11-03-v4). These terms form part of a partner agreement when accepted; an enquiry alone does not create a partnership. The partner sheet identifies the partner, scope and commission period. A new version does not rewrite previously accepted agreements.",
+            notice: "Version dated 3 November 2026 (2026-11-03-v5). These terms form part of a partner agreement when accepted; an enquiry alone does not create a partnership. The partner sheet identifies the partner, scope and commission period. A new version does not rewrite previously accepted agreements.",
         },
         perex: 'Rules for agencies and integrators referring specific client environments and optionally providing separately ordered services. Software commission is separate from the partner’s own work and the programme coordinator’s bilateral agreement.',
         sections: [
@@ -125,7 +125,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             {
                 heading: 'Deal attribution',
                 paragraphs: [
-                    'Before closing, the partner records the customer legal entity, defined client environment or workflow, responsible contact and evidenced origin of the deal. AI Web confirms attribution. An address-book entry, cookie or matching company number alone does not create commission.',
+                    'Before closing, the partner records the customer legal entity, specific engine project, responsible contact and evidenced origin of the deal. AI Web confirms attribution. An address-book entry, cookie or matching company number alone does not create commission.',
                     'Attribution follows the specific licence and its economically continuous subscription, not automatically the whole corporate group or every department. Three separate licensed projects at one company may have three partners with evidenced scope. Artificially splitting or relabelling one licence must not create duplicate commission.',
                     'Competing claims are resolved from the confirmed deal and evidenced contribution before paying the disputed portion; undisputed commission remains payable. Technical ID changes, project migration or plan changes do not by themselves cancel attribution.',
                 ],
@@ -135,7 +135,7 @@ export const PARTNER_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
                 paragraphs: [
                     "Commission is a uniform 20% of the actually paid eligible software price, excluding VAT, after discounts and permitted refunds. The same rate applies to all current and future plans and monthly, annual or other billing; plan names do not change it. Ordinary payment-processing fees do not reduce the base. Authorisation alone or an unpaid invoice is not received payment; mandatory statutory commission-accrual rules remain applicable.",
                     "Free use of the standalone engine earns no commission. A refund or chargeback adjusts commission only to the evidenced extent the entitlement did not arise or ceased under the contract and law; non-performance caused by AI Web does not automatically remove a commercial agent’s commission.",
-                    "The share covers the eligible software component of all plans. It excludes AI tokens and credits, infrastructure, taxes, implementation, consulting, courses, training and other work. Service income belongs to its provider. Own purchases and multi-level referrals earn no automatic commission.",
+                    "The share covers the eligible software component of all plans, including all paid Promptbook software add-ons, in particular additional specialist agents, controlling users and separate browser profiles. They are included after discounts and permitted refunds, excluding VAT, within the original 24-month window for the licence; upgrades and capacity additions do not restart it. It excludes AI tokens and credits, infrastructure, taxes, implementation, consulting, courses, training and other work. Service income belongs to its provider. Own purchases and multi-level referrals earn no automatic commission.",
                     'A possible future token plan is not currently offered: its licence component remains subject to agreed commission, while token consumption requires separately agreed rules disclosed in advance. Relabelling the same licence must not circumvent accrued rights.',
                 ],
             },

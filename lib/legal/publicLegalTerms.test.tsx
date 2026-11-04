@@ -21,4 +21,15 @@ describe('published legal versions', () => {
         expect(html).toContain('již potvrzených obchodů');
         expect(html).toContain('povinné informační povinnosti');
     });
+    it.each(['cs', 'en'] as const)('keeps paid capacity subject to approval and inside the original commission window in %s', language => {
+        const product = renderToStaticMarkup(<NewLegalPage kind="productTerms" language={language}/>);
+        const partner = renderToStaticMarkup(<NewLegalPage kind="partnerTerms" language={language}/>);
+        expect(product).toContain('2026-11-03-v5');
+        expect(partner).toContain('2026-11-03-v5');
+        expect(product).toContain(language === 'cs' ? 'předem výslovně povolit' : 'explicit prior approval');
+        expect(product).toContain(language === 'cs' ? 'poměrně podle doby' : 'proportionally to the time');
+        expect(product).toContain(language === 'cs' ? 'bez automatického přečerpání' : 'no automatic overage');
+        expect(partner).toContain(language === 'cs' ? 'všech placených softwarových příplatků' : 'all paid Promptbook software add-ons');
+        expect(partner).toContain(language === 'cs' ? 'upgrade ani přidání kapacity toto okno neobnovují' : 'upgrades and capacity additions do not restart it');
+    });
 });

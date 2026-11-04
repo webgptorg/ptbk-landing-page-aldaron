@@ -5,6 +5,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
 
 ### Public routes
 
+- The final approved 3 November v5 offer is per engine project: Start 399 Kč / $19 monthly with
+  3 specialists, 1 controlling human, 1 harness instance and 1 browser profile; Business 1 999 Kč / $100
+  with 10 specialists, 5 humans, 5 profiles and no licence count limit on harness instances. Core roles
+  do not use specialist capacity. Extra Business capacity costs 99/99/49 Kč by activated time, with
+  explicit prior approval and budget, never automatic overage. Commission includes all paid software
+  add-ons within the original 24 months. Public copy, legal terms and calculator scope follow
+  `specs/new-commercial-offer.md`; this website does not implement engine metering or billing.
+
 - The owner's latest 3 November 2026 instruction publishes current legal texts at `/cs/legal/*` and
   `/en/legal/*`, with dated versions, canonical metadata, indexable sitemap entries and legacy redirects.
   Public documents, metadata, link labels and release-support policy have no discussion-draft status.

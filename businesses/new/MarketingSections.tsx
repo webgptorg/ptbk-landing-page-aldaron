@@ -20,34 +20,43 @@ export function SecuritySection() {
 export function PricingCards({ full = false }: { full?: boolean }) {
     const { t, locale, path } = useSiteLocale();
     const en = locale === 'en';
+    const start = COMMERCIAL_TERMS.startCapacity;
+    const business = COMMERCIAL_TERMS.businessCapacity;
+    const addons = COMMERCIAL_TERMS.businessAddonsCzk;
     const plans = [
         {
             id: 'start' as const,
             name: 'Start',
-            purpose: en ? 'Ongoing operations with self-service setup' : 'Průběžný provoz ve vlastní režii',
-            period: en ? 'per month · per client environment' : 'měsíčně · za klientské prostředí',
+            purpose: en ? 'A small team for ongoing work' : 'Menší tým pro průběžnou práci',
+            period: en ? 'per month · per engine project' : 'měsíčně · za projekt enginu',
             features: [
-                en ? 'One client environment' : 'Jedno klientské prostředí',
-                en ? 'Multiple agents in one environment' : 'Více agentů v jednom prostředí',
-                en ? 'No annual commitment' : 'Bez ročního závazku',
+                en ? `${start.specialists} active specialist agents` : `${start.specialists} aktivovaní odborní agenti`,
+                en ? `${start.users} controlling user` : `${start.users} ovládající uživatel`,
+                en ? `${start.harnesses} attached harness instance` : `${start.harnesses} připojená instance harnessu`,
+                en ? `${start.browserProfiles} separate browser profile` : `${start.browserProfiles} oddělený webový profil`,
+                en ? 'Core and system roles do not use specialist places' : 'Core a systémové role mimo limit odborníků',
+                en ? 'Scheduling and continuous operation' : 'Pravidelné spouštění i nepřetržitý provoz',
             ],
-            support: en ? 'Product support and SLA not included' : 'Bez produktové podpory a SLA',
-            note: en ? 'Cancel for the next billing period' : 'Ukončení pro další fakturační období',
+            support: en ? 'Manufacturer support without a guaranteed response time' : 'Podpora výrobce bez garantované reakce',
+            note: en ? 'No annual commitment. More capacity by upgrading to Business.' : 'Bez ročního závazku. Další kapacita přechodem na Business.',
             action: t('Začít se Startem'),
             topic: `Start · ${licencePrice('start', locale)} / ${t('měsíc')}`,
         },
         {
             id: 'business' as const,
             name: 'Business',
-            purpose: en ? 'Ongoing operations with product support' : 'Průběžný provoz s produktovou podporou',
-            period: en ? 'per month · per client environment' : 'měsíčně · za klientské prostředí',
+            purpose: en ? 'A larger team with approved capacity add-ons' : 'Větší tým s povolenými kapacitními příplatky',
+            period: en ? 'per month · per engine project' : 'měsíčně · za projekt enginu',
             features: [
-                en ? 'One client environment' : 'Jedno klientské prostředí',
-                en ? 'Multiple agents in one environment' : 'Více agentů v jednom prostředí',
-                en ? 'No annual commitment' : 'Bez ročního závazku',
+                en ? `${business.specialists} active specialist agents included` : `${business.specialists} aktivovaných odborných agentů v ceně`,
+                en ? `${business.users} controlling users included` : `${business.users} ovládajících uživatelů v ceně`,
+                en ? 'Harness instances without a licence count limit' : 'Instance harnessů bez licenčního limitu počtu',
+                en ? `${business.browserProfiles} separate browser profiles included` : `${business.browserProfiles} oddělených webových profilů v ceně`,
+                en ? 'Core and system roles do not use specialist places' : 'Core a systémové role mimo limit odborníků',
+                en ? 'Scheduling and continuous operation' : 'Pravidelné spouštění i nepřetržitý provoz',
             ],
             support: en ? `First substantive response within ${COMMERCIAL_TERMS.responseWorkingHours} working hours` : `První věcná reakce do ${COMMERCIAL_TERMS.responseWorkingHours} pracovních hodin`,
-            note: en ? 'Cancel for the next billing period' : 'Ukončení pro další fakturační období',
+            note: en ? 'No annual commitment. Extra capacity requires your prior approval.' : 'Bez ročního závazku. Rozšíření jen s Vaším předchozím souhlasem.',
             action: t('Probrat Business'),
             topic: t('Business — firemní provoz Promptbooku'),
         },
@@ -75,6 +84,21 @@ export function PricingCards({ full = false }: { full?: boolean }) {
                 <p className={pricing.planNote}>{plan.note}</p>
             </article>)}
         </div>
+        <section className={pricing.addons} aria-labelledby="business-addons-title">
+            <h3 id="business-addons-title">{en ? 'Business capacity add-ons' : 'Kapacitní příplatky Businessu'}</h3>
+            <div className={pricing.tableScroll}>
+                <table>
+                    <thead><tr><th scope="col">{en ? 'Capacity above the included allocation' : 'Kapacita nad zahrnutý základ'}</th><th scope="col">{en ? 'Monthly rate, excluding VAT' : 'Měsíční sazba bez DPH'}</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">{en ? 'Additional specialist agent' : 'Další odborný agent'}</th><td>{addons.specialist} {en ? 'CZK' : 'Kč'}</td></tr>
+                        <tr><th scope="row">{en ? 'Additional controlling user' : 'Další ovládající uživatel'}</th><td>{addons.user} {en ? 'CZK' : 'Kč'}</td></tr>
+                        <tr><th scope="row">{en ? 'Additional separate browser profile' : 'Další oddělený webový profil'}</th><td>{addons.browserProfile} {en ? 'CZK' : 'Kč'}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>{en ? 'Charged proportionally for the time extra capacity is active, with your prior approval and an agreed monthly budget. No automatic overage. The order confirms the billing currency; these approved add-on rates are in CZK.' : 'Poměrně podle doby aktivace další kapacity, s Vaším předchozím souhlasem a dohodnutým měsíčním rozpočtem. Bez automatického přečerpání.'}</p>
+            <LeadButton secondary topic={en ? 'Larger project capacity' : 'Větší kapacita projektu'}>{en ? 'Need more capacity? Let’s talk.' : 'Potřebujete větší rozsah? Domluvme se.'}</LeadButton>
+        </section>
         <div className={pricing.terms}>
             <p>{en ? 'Excluding VAT. AI, infrastructure and partner services are charged separately.' : 'Bez DPH. AI, infrastruktura a práce partnera se hradí zvlášť.'}</p>
             {!full && <Link href={path('cenik')}>{en ? 'Full pricing and terms' : 'Celý ceník a podmínky'}<ArrowRight size={15} aria-hidden="true"/></Link>}
