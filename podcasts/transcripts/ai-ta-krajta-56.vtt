@@ -1,0 +1,1002 @@
+WEBVTT
+
+1
+00:00:00.200 --> 00:00:12.600
+<v pavol-hejny>[úvodní znělka] Vítám vás všechny u padesátého šestého dílu Ajta Krajta. Dneska v netradiční sestavě s Katkou, Šimonem, Jirkou</v>
+
+2
+00:00:12.680 --> 00:00:24.960
+<v pavol-hejny>a mnou. A ještě než začneme, tak bych rád poděkoval Promptbooku a Promptbook Supervizi a workshopům za to, že nás podporujou. Podívejte se dolů do komentáře, pokud sami ve firmě</v>
+
+3
+00:00:25.000 --> 00:00:33.560
+<v pavol-hejny>zavádíte AI nebo bojujete s web codingem, tak vám s tím velmi rádi pomůžeme. A teď bych začal novinkami. Kdo z vás tenhle týden něco má?</v>
+
+4
+00:00:33.920 --> 00:00:46.360
+<v ai-ta-krajta-56-speaker_1>Kdo z nás tenhle týden má něco jiného než Fable-5? Respektive tohle odpoledne, posledních dvacet čtyři hodin. Nevím, kdy přesně bylo to oznámení. Já ho dostal vprostřed večeře.</v>
+
+5
+00:00:47.360 --> 00:00:59.760
+<v ai-ta-krajta-56-speaker_1>Pro ty z vás, kteří nejsou přikovaní ke svým počítačům a mobilům, Fable-5 je nový model od Anthropicu, který je podle všeho první model, který je dostupný, eh, z řady,</v>
+
+6
+00:01:00.460 --> 00:01:13.200
+<v ai-ta-krajta-56-speaker_1>eh, mytického Mythosu, akorát okrouhaný o schopnosti, které by umožňovaly dál posouvat vývoj AI modelů, popřípadě kyberbezpečnostní útoky a další</v>
+
+7
+00:01:13.700 --> 00:01:22.620
+<v ai-ta-krajta-56-speaker_1>věci, ve kterých dotaz na tento model Fable přesměruje na Opus 4-8. Kačka už se mi směje.</v>
+
+8
+00:01:22.620 --> 00:01:31.140
+<v ai-ta-krajta-56-speaker_2>[smích] No můžu začít bejt skeptik, jo? Přišla ta chvíle. Ne, ještě počkám.</v>
+
+9
+00:01:31.480 --> 00:01:39.020
+<v ai-ta-krajta-56-speaker_1>Tak jo, ale Jir-Jirka a Pavol říkali, že už ho dnes zkoušeli celý den. Jaké jste nabrali zkušenosti, pánové?</v>
+
+10
+00:01:39.660 --> 00:01:51.800
+<v ai-ta-krajta-56-speaker_3>Je to tak. Ty, hm, dojmy jsou rozporuplný, eh, poněkud. Jakože vlastně není to testovaný proti žádnýmu oficiálnímu benchmarku z naší strany. Je to spíš subjektivní dojem.</v>
+
+11
+00:01:52.600 --> 00:02:04.920
+<v ai-ta-krajta-56-speaker_3>A vlastně mně přijde, že jako vidím ty výsledky spíše, eh, papírově deklarovaný, než že bych je, je viděl prakticky. V podstatě zlepšení mezi čtyři osmičkou a Fablem, hm,</v>
+
+12
+00:02:05.100 --> 00:02:11.560
+<v ai-ta-krajta-56-speaker_3>jsem jako asi moc nezavnímal nějaký razantní zlepšení. A schválně, kdo mi to vyvrátí teďka?</v>
+
+13
+00:02:11.780 --> 00:02:12.100
+<v ai-ta-krajta-56-speaker_1>Ne, já si myslím, že to lze úplně vyvrátit.</v>
+
+14
+00:02:12.100 --> 00:02:24.100
+<v ai-ta-krajta-56-speaker_2>No já ti to teda tak potvrdím, jo. Jakože taky jsem to zkoušela a nic moc. Jako obecně jako, teď budu ten skeptik teda, jakože v poslední době, tak poslední měsíc s kolegou</v>
+
+15
+00:02:24.140 --> 00:02:36.200
+<v ai-ta-krajta-56-speaker_2>už si vždycky sázíme, když už se to stalo dvakrát, prostě Claude najednou začne bejt nějakej horší, tak si řekneme: „Aha, vyjde novej model.“ A dva dny na to tady máme novej model. No</v>
+
+16
+00:02:36.280 --> 00:02:44.180
+<v ai-ta-krajta-56-speaker_2>takže jestli pak ten Fable nebude zrovna tak skvělej, jako byl ten Opus někdy před dvěma měsícema, jo? Konec skeptického okna.</v>
+
+17
+00:02:44.340 --> 00:02:56.920
+<v ai-ta-krajta-56-speaker_1>Zajímalo by mě, jestli třeba LM Arena, což je, eh, benchmarkovací prostor, ve kterém proti sobě soutěží na slepo modely a jestli eviduje, proti</v>
+
+18
+00:02:56.980 --> 00:03:09.060
+<v ai-ta-krajta-56-speaker_1>které verzi a v kterém čase ten model byl použitý. To je možná otázka na Petra Gostěva, kterého bysme měli touto otázkou oblažit. Ale omlouvám se, skočil jsem Jirkovi</v>
+
+19
+00:03:09.100 --> 00:03:09.840
+<v ai-ta-krajta-56-speaker_1>a Pavlovi do řeči.</v>
+
+20
+00:03:10.300 --> 00:03:22.580
+<v pavol-hejny>Já jsem chtěl být ten, co bude skeptický, ale vlastně jako nebudu, eh, protože mně přijde, že strašně záleží, jako co jsme čekali. Já jsem myslel, že Anthropicu se povedlo nastavit úplně jako bombastický očekávání.</v>
+
+21
+00:03:23.120 --> 00:03:35.320
+<v pavol-hejny>Už před měsícem říkal, že dojde na Claude Mythos a, a Claude Mythos je úplně totálně jiný a nový model. A teď tady je Fable, který je z té rodiny Mythos, jak říkají.</v>
+
+22
+00:03:36.440 --> 00:03:48.600
+<v pavol-hejny>A tím pádem to očekávání bylo, že to musí být úplně jako kvalitativně něco jiného. Možná jako rozdíl mezi GPT trojkou a čtyřkou. A ono to jako kvalitativně něco jiného buď není, anebo</v>
+
+23
+00:03:48.680 --> 00:03:49.460
+<v pavol-hejny>to nevidíme.</v>
+
+24
+00:03:49.720 --> 00:03:57.840
+<v ai-ta-krajta-56-speaker_1>Což je podle mě spíš to, že, že to je kvalitativně lepší na úkolech, které už nejsou ty standardní vývojářské.</v>
+
+25
+00:03:58.240 --> 00:04:10.620
+<v pavol-hejny>A nevidíme znamená, že reálně ono to vyšlo od, jako před osmnácti hodinami, co se teďka bavíme. A takže jsme to zkoušeli na limitovaným množství věcí a úkolů a je úplně možný, že jsme ho podcekovali,</v>
+
+26
+00:04:10.880 --> 00:04:23.000
+<v pavol-hejny>že jsme šli vlastně pod nějakou jeho kognitivní úroveň. Ale zároveň tam mám velmi velký ale. My jsme potřebovali velmi rychle udělat nějakej web codingovej prototyp aplikace, kterej Jirka udělal a ten prototyp je vlastně</v>
+
+27
+00:04:23.060 --> 00:04:35.560
+<v pavol-hejny>fakt dobrej. A nevím, jestli lepší, než by byl z jako jiných nástrojů a určitě horší, než by byl udělanej třeba z Makaly nebo z nějakejch jako nástrojů, který v sobě už přímo maj nějaký</v>
+
+28
+00:04:35.580 --> 00:04:48.040
+<v pavol-hejny>jako víc designový přemýšlení. Ale to je jedno. Ale jedna z takových věcí je ta, že v rámci toho kódu bylo poměrně hodně takových věcí, které mě samotného</v>
+
+29
+00:04:48.280 --> 00:05:00.420
+<v pavol-hejny>zarážej, že ty modely i dneska vypouštěj. Například, eh, v rámci toho kódu tam byla nějaká integrace chatbota a bylo to tam udělané tak, že API klíč leakuje na frontend a</v>
+
+30
+00:05:00.500 --> 00:05:12.680
+<v pavol-hejny>všechny věci se posílaj z frontendu. A teďka to je něco, co já jako tuším, že tohleto by být nemělo a že by tam měl být nějaký server a tak jsem to prostě nějakými jako dalšíma dvěma iteracema Codexu,</v>
+
+31
+00:05:13.560 --> 00:05:26.020
+<v pavol-hejny>eh, jako dou-doupravil. Ale myslím si, že tohleto je takový jako symptom toho, že se blížíme do doby, kdy bude spoustu softwaru, který se prostě udělal</v>
+
+32
+00:05:26.900 --> 00:05:39.200
+<v pavol-hejny>a jsou v něm chyby, o kterých se prostě neví. A tady v tom konkrétním případě jsem jako tušil, kde je ta chyba a kde je ten problém a že to jako nemůžu vypustit v tom, v tom stavu, jak jsme to měli. Jenomže na druhou stranu</v>
+
+33
+00:05:39.280 --> 00:05:51.680
+<v pavol-hejny>já třeba teďka dělám nějakej bashovej script, kterej něco instaluje a dělám ho kompletně pomocí AI. A tam mně přesně hlodá hlavou jako ta opačná strana, že já jako moc nevím, jak se píšou bashový skripty. Nevím, jaký jsou tam tyhlety jako quirks</v>
+
+34
+00:05:52.520 --> 00:06:00.540
+<v pavol-hejny>a jako potenciální jako věci, na který si dát pozor, protože nejsem prostě profesionál na jako linuxový systémy a Bash. A teďka-</v>
+
+35
+00:06:01.088 --> 00:06:13.288
+<v ai-ta-krajta-56-speaker_1>Já nevím, jestli to bezpečnost nebo co to vlastně je ta věc, o které jako mluvím, ale myslím si, že čekáme na to, než nastanou první nějaký fakt velký průšvihy, který vznikly tímhle. Já</v>
+
+36
+00:06:13.328 --> 00:06:25.428
+<v ai-ta-krajta-56-speaker_1>myslím, že první velký průšvihy už jsme viděli ve spoustě leaků, Lovable a Supabase databází a tak. Prostě to posílání API klíčů z frontendu je klasická střela</v>
+
+37
+00:06:25.488 --> 00:06:37.588
+<v ai-ta-krajta-56-speaker_1>do nohy. Možná méně klasická střela do nohy než psát bash script, jo, ale pořád velmi klasická. A důvod, proč to nebyla velká katastrofa je, že málokdy se to týkalo webů,</v>
+
+38
+00:06:37.648 --> 00:06:49.988
+<v ai-ta-krajta-56-speaker_1>které by někdo velmi hodně aktivně používal. Ale myslím, že začínám vidět v, v nástrojích třeba vím, že tohleto se mi jednou taky stalo, když jsem si wipecodoval nějakou aplikaci</v>
+
+39
+00:06:50.028 --> 00:07:02.168
+<v ai-ta-krajta-56-speaker_1>s chatem, kde jsem zkoušel fungovat jenom v TypeScriptu, což je pro mě neobvyklé, tak jsem si neuvědomil, že mi tam leakuje ten klíč na první dobrou před security review, ale i ten deployment preview na</v>
+
+40
+00:07:02.228 --> 00:07:14.428
+<v ai-ta-krajta-56-speaker_1>Netlify mi tohleto zarazil. Takže myslím, že se dostáváme do fáze, kde taky spousta těch střel do nohy bude blokovaná nástroji, které všichni používají. Tím se ale dostáváme</v>
+
+41
+00:07:14.448 --> 00:07:26.548
+<v ai-ta-krajta-56-speaker_1>docela daleko od toho, jestli Fable by neměl být dostatečně dobře vytrénovaný na dostatečně dobře kvalitních datech, aby tohleto už nedělal sám od sebe. A jestli to je známka nekvality modelu, známka nekvality</v>
+
+42
+00:07:26.588 --> 00:07:36.388
+<v ai-ta-krajta-56-speaker_1>dat, známka nedobře zakořeněných best practices nebo známka toho, že by se tohle mělo vstřebat do toho harnesu, který se spolu vyvíjí s tím Fablem. Co myslíte?</v>
+
+43
+00:07:36.868 --> 00:07:48.888
+<v ai-ta-krajta-56-speaker_3>Mě to hlavně překvapuje z toho důvodu, že je to odvozený teda podle té oficiální dokumentace z Mythosu přece. A tak bych čekal, že to bude trošku</v>
+
+44
+00:07:48.928 --> 00:08:01.968
+<v ai-ta-krajta-56-speaker_3>bezpečnější. Ale ok, tak možná, že ty, ty funkce, který jak jsi říkal na začátku Šimone, jsou ořezaný, že AI se nemůže upravovat, tak, tak se to dotklo i nějakých security-</v>
+
+45
+00:08:01.968 --> 00:08:14.308
+<v ai-ta-krajta-56-speaker_1>To si nemyslím a myslím, že ty si to taky nemyslíš. A-ale důvod, proč Mythos byl prohlašovaný za takový pokrok, nebylo to, že by sám nedělal bezpečnostní chyby, ale že dokáže rychle využívat ty bezpečnostní</v>
+
+46
+00:08:14.348 --> 00:08:26.448
+<v ai-ta-krajta-56-speaker_1>chyby a vytvářet úplně nové bezpečnostní chyby v systémech, které je ještě nechytly. A to nevím, jestli někdo z nás je dostatečně sec DevOps na to, aby otestoval,</v>
+
+47
+00:08:26.468 --> 00:08:28.868
+<v ai-ta-krajta-56-speaker_1>jestli nás to odkáže zpátky na opus čtyři osm.</v>
+
+48
+00:08:29.208 --> 00:08:31.168
+<v ai-ta-krajta-56-speaker_2>Asi bysme si měli někoho pozvat, co?</v>
+
+49
+00:08:31.248 --> 00:08:43.388
+<v ai-ta-krajta-56-speaker_1>[smích] Ano, podíváme se na to. Myslím, že jsme probrali v minulých dílech to, jak Mythos není významný tím, že by umožňoval to, co předtím nebylo vůbec možné,</v>
+
+50
+00:08:43.448 --> 00:08:55.628
+<v ai-ta-krajta-56-speaker_1>ale že to dokáže bez jako významnější harness. Že jako IL prokázal docela elegantně, že spoustu těch problémů v kódu lze najít i méně pokročilými, menšími, levnějšími</v>
+
+51
+00:08:55.668 --> 00:09:07.728
+<v ai-ta-krajta-56-speaker_1>modely, pokud se proskenují celé. Ale že to, že to Mythos dokáže udělat na několikátou dobrou bez toho, aby se nějak významně promptoval, prostě se řekne najdi chybu. Že</v>
+
+52
+00:09:07.788 --> 00:09:20.068
+<v ai-ta-krajta-56-speaker_1>to je potenciálně ten game changer, který dává moderní hackerské vulnerability research věci a exploitaci do rukou běžným občanům. Nebo tak jsem aspoň chápal ty claimy já.</v>
+
+53
+00:09:20.208 --> 00:09:21.808
+<v ai-ta-krajta-56-speaker_1>Chcete mi na tohle nalít studenou vodu?</v>
+
+54
+00:09:22.068 --> 00:09:34.168
+<v ai-ta-krajta-56-speaker_2>Já jsem to chápala stejně teda no. Ale jak ses ptal jakoby, um, jak jsi tu otázku položil, jestli lepší model, horší model. Jako ve výsledku stejně sebelepší to bude model, ta zodpovědnost bude na tom</v>
+
+55
+00:09:34.248 --> 00:09:46.548
+<v ai-ta-krajta-56-speaker_2>člověku, že jo. Takže jestli to není jako paradoxně, jako paradoxně spoléhat se na lepší model, že to prostě udělá bezpečnější. Nevím no, aby</v>
+
+56
+00:09:46.588 --> 00:09:49.208
+<v ai-ta-krajta-56-speaker_2>to nakonec nebylo ku neprospěchu věci.</v>
+
+57
+00:09:49.468 --> 00:10:01.828
+<v ai-ta-krajta-56-speaker_1>To je vlastně moje další novinka. V pondělí jsem byl na AI Thinkers v Londýně, kde byl CEO společnosti Harvey AI, což je právní AI agent. A</v>
+
+58
+00:10:02.128 --> 00:10:14.448
+<v ai-ta-krajta-56-speaker_1>ten právě mluvil o tom, že jedna z dalších rychle vyvíjejících se oblastí zákona může být třeba o-oblast zodpovědnosti AI agentů a kdo za ni bude zodpovědný a tak. Že to, to, že v současné</v>
+
+59
+00:10:14.488 --> 00:10:26.628
+<v ai-ta-krajta-56-speaker_1>době AI agenti zároveň fungují v rámci našich bezpečnostních systémů, takže většinou assumují identitu jejich vlastníka a jako ten vlastník se verifikují a</v>
+
+60
+00:10:26.688 --> 00:10:38.968
+<v ai-ta-krajta-56-speaker_1>autentizují systémům, že stejně jako se odkláníme od tohohle systému, tak se právně můžeme začít odklánět od toho, že vlastník agenta je plně zodpovědný za všechny</v>
+
+61
+00:10:38.988 --> 00:10:51.128
+<v ai-ta-krajta-56-speaker_1>bezpečnostní díry. Ale bůh ví, bůh ví, jak to vlastně právně zavedeme nakonce. Taky teda mluvil o tom, že firmy, které používají jejich bota Harveye, že občas, když ho</v>
+
+62
+00:10:51.188 --> 00:11:03.568
+<v ai-ta-krajta-56-speaker_1>používají dvě firmy ve vzájemném vyjednávání, tak potom vytvoří kontrakt, který žádný člověk nedokáže obsáhnout sám od sebe a musí začít od znova, aby věděli, co vlastně podepisují.</v>
+
+63
+00:11:04.008 --> 00:11:16.008
+<v ai-ta-krajta-56-speaker_1>Což mi přišlo docela zábavné. A samozřejmě mluvil o tom, že existence Mythosu a podobných modelů, ať už je ta frontier úroveň, jak chceme daleko, neznamená nutně existenční hrozbu pro někoho, kdo si</v>
+
+64
+00:11:16.028 --> 00:11:28.248
+<v ai-ta-krajta-56-speaker_1>nedokáže dovolit ty tokeny. Ale že prostě úkolem firem může být nastavit dostatečně dobrý syntetický prostředí a trénovací prostředí, aby si vytrénovaly, nafintinovaly vlastní levnější model, který dokáže mít výkon na úrovni</v>
+
+65
+00:11:28.308 --> 00:11:40.508
+<v ai-ta-krajta-56-speaker_1>Mythosu a aspoň v té doméně, jenom v té doméně, na které jim záleží. A mluvil právě o tom, že díky posledním modelům je konečně možné si vytvořit takovouhle syntetickou arénu</v>
+
+66
+00:11:41.148 --> 00:11:53.728
+<v ai-ta-krajta-56-speaker_1>pro trénink těch modelů a pro vyhodnocování těch modelů, evaluaci mnohem lépe, než to bývalo možné předtím. Že jejich hlavní překážka bylo to, že jejich syntetické právní</v>
+
+67
+00:11:53.788 --> 00:12:05.828
+<v ai-ta-krajta-56-speaker_1>prostředí nebylo tak náročné, tak, tak jako vyšperkované jako realita. A že Opus 4.7 tohleto sfouknul docela hezky. A to je poslední věta, kterou si</v>
+
+68
+00:12:05.988 --> 00:12:18.268
+<v ai-ta-krajta-56-speaker_1>dám. Myslím si, že jako v tomhletom se docela hezky ukazuje path dependency toho, jak ty modely vlastně používáme. Jenom málo lidí si vytváří syntetickou arénu pro svoje aplikace</v>
+
+69
+00:12:18.788 --> 00:12:31.728
+<v ai-ta-krajta-56-speaker_1>a v těch vyhodnocuje a zlepšuje ty aplikace dál. Takže máme relativně málo informací o tom, co se děje, když si takovouhle arénu vytvoříte a jak se ty arény liší model od modelu. A</v>
+
+70
+00:12:31.948 --> 00:12:44.208
+<v ai-ta-krajta-56-speaker_1>většina lidí právě přijde k tomu modelu podobně jako Jirka s Pavlem, že prostě potřebují něco udělat, takže to udělají tím standardním způsobem, který znají z předchozích modelů a možná experimentují</v>
+
+71
+00:12:44.248 --> 00:12:56.248
+<v ai-ta-krajta-56-speaker_1>trošku s tím, co se dá delegovat tomu modelu teď, co nedelegovali předtím možná ne. A obecně prostě ta míra hranatosti té hranice možností a míra toho,</v>
+
+72
+00:12:56.308 --> 00:13:00.928
+<v ai-ta-krajta-56-speaker_1>do které my nemůžeme dohlédnout všechny možnosti použití toho modelu, je velká.</v>
+
+73
+00:13:01.728 --> 00:13:13.888
+<v pavol-hejny>Mně stále přijde, že se trošku vracím zpátky, že minimálně nevidím, v čem by byl teďka ten jako nový model Fable vlastně jako jiný</v>
+
+74
+00:13:13.948 --> 00:13:26.388
+<v pavol-hejny>a teď jako rozhodně lepší v tom slova smyslu, že je to nějaká jako další generace. Ale kdyby to nazvali Claude Opus 4.9, tak mě to vůbec nepřekvapí a vůbec bych si toho nevšiml.</v>
+
+75
+00:13:26.428 --> 00:13:38.428
+<v pavol-hejny>Zatímco když to nazvou Fable, tak, tak to bude nejspíš jako hlavním tématem tady tý IT Critty. A teď si říkám, jestli jenom my sami nevidíme, co je tam to</v>
+
+76
+00:13:38.488 --> 00:13:51.628
+<v pavol-hejny>zásadní jiného. Anebo jestli je to tak, že je to nějaká jako velmi chytrá marketingová PR věc, jak úplně obyčejný, jako obyčejný update desetinkový, eh,</v>
+
+77
+00:13:51.668 --> 00:13:54.808
+<v pavol-hejny>zabalit do takhle bombastickýho hábu. Co si o tom myslíte?</v>
+
+78
+00:13:55.088 --> 00:14:07.708
+<v ai-ta-krajta-56-speaker_1>Já jako jsem trošku skeptický k tomu, že je to jenom marketing. Myslím, že prostě zkoušeli ten model trénovat trošku jinak a z toho jim vyšla nová řada modelů. A asi je ode mě příliš naivní si myslet, že marketing</v>
+
+79
+00:14:08.548 --> 00:14:19.648
+<v ai-ta-krajta-56-speaker_1>do toho neměl až tak tolik co říct, že to spíš možná byla diskuse mezi tím, jestli tomu říkat Mythos Lite nebo nějak jinak, než jestli po-pokračovat v tom, jak se tomu říká doteď. Ale kdo ví.</v>
+
+80
+00:14:20.028 --> 00:14:32.148
+<v ai-ta-krajta-56-speaker_3>To se nevylučuje, že jako, eh, jestli něco nevidíme a, eh, nebo zároveň v tom hraje roli marketing. Ono přece jenom to pojmenování toho modelu Fable a Mythos jako vlastně to je takový jakože</v>
+
+81
+00:14:32.188 --> 00:14:44.268
+<v ai-ta-krajta-56-speaker_3>Fable je vlastně Mythos Lite přeloženo do nějaký sémantický jako vrstvy. Myslím si, že, eh, to, že, to, že nedokážeme v tuhle chvíli říct, v čem je Fable lepší, je právě důsledkem toho, co říkal Šimon před chvilkou, že</v>
+
+82
+00:14:44.308 --> 00:14:56.348
+<v ai-ta-krajta-56-speaker_3>k tomu přistupujeme velmi, eh, nesystematicky a jako subjektivně a vlastně to nemáme. Kdybychom, kdybychom ve svý vlastní doméně používali-- takhle my, my je tam používáme,</v>
+
+83
+00:14:56.468 --> 00:15:08.728
+<v ai-ta-krajta-56-speaker_3>ale kdybychom to otestovali a měli otestovaný na nějakým konkrétním benchmarku, tak bychom pravděpodobně zjistili dříve či později buď my nebo někdo jinej, eh, v čem to je přesně lepší. A já myslím, já souhlasím</v>
+
+84
+00:15:08.768 --> 00:15:12.068
+<v ai-ta-krajta-56-speaker_3>se Šimonem, že někde to lepší je, jenom to prostě nevidíme.</v>
+
+85
+00:15:12.868 --> 00:15:25.168
+<v ai-ta-krajta-56-speaker_1>Já třeba jsem viděl docela jednoduchý zlepšení, když jsem teďka z různých důvodů se probíral spoustou právních dokumentů. Tak jsem si je zároveň potom v tramvaji sám přečetl a našel jsem tam jednu věc, která mě znepokojovala,</v>
+
+86
+00:15:25.208 --> 00:15:37.288
+<v ai-ta-krajta-56-speaker_1>kterou se Opus nezabýval, a když jsem to potom předhodil Fable, tak tam našel to, čeho jsem se bál, aniž bych ho promptoval, aby to tam našel, samozřejmě. A to</v>
+
+87
+00:15:37.328 --> 00:15:44.668
+<v ai-ta-krajta-56-speaker_1>prostě taky není úplně dobrý test, že prostě vezmu konverzaci s Opusem a předhodím jí Fable a řeknu mu:</v>
+
+88
+00:15:46.188 --> 00:15:58.428
+<v ai-ta-krajta-56-speaker_1>„Najdi díry.“ Ale není to nic. Myslím si, že právě jako to zvládání dlouhých dokumentů a vyhodnocování dlouhého kontextu rozumněji a důkladněji je jedna z věcí, o které mluví Ethan</v>
+
+89
+00:15:58.488 --> 00:16:10.908
+<v ai-ta-krajta-56-speaker_1>Mollick jako ni-o něčem, co ten Fable v jeho testování zvládá lépe. Takže potenciálně tam padla ta konvergence anekdot nebo, a jak říkáme, anek-data jsou složená</v>
+
+90
+00:16:10.948 --> 00:16:11.888
+<v ai-ta-krajta-56-speaker_1>z různých anekdot.</v>
+
+91
+00:16:12.368 --> 00:16:24.428
+<v pavol-hejny>Mně přijde, že jedna taková zajímavá věc je vůbec to využití, že to, že existuje nějakej benchmark znamená, že to testujeme oproti nějakýmu konkrétnímu využití nebo schopnosti, kterou tam anticipujeme</v>
+
+92
+00:16:24.468 --> 00:16:36.688
+<v pavol-hejny>nebo měříme. Ale například hodně jako zajímavý tehdy, když vyšel ChatGPT bylo, že on ChatGPT nebyl nějakej jako zásadně lepší model, než byla ta GPT trojka, která</v>
+
+93
+00:16:36.728 --> 00:16:49.188
+<v pavol-hejny>tehdy byla, ale přišli s jako dost netradičním způsobem, jak vlastně statistický model, který předtím byl k tomu, aby predikoval text, tak ho najednou zabalili do jako softwaru,</v>
+
+94
+00:16:49.268 --> 00:17:01.408
+<v pavol-hejny>který si s tebou povídá. To mně přijde, že se trošku stalo i s těma, i s těma coding analysis, že najednou jako z chatu udělali agenta, který může dělat akce a programovat. A teďka, jestli díky</v>
+
+95
+00:17:01.448 --> 00:17:09.108
+<v pavol-hejny>Fable přijdou nějaký takovýhle nový form faktory, řekněme, který by předtím prostě udělat nešly s těma starými modely.</v>
+
+96
+00:17:09.148 --> 00:17:21.568
+<v ai-ta-krajta-56-speaker_1>Tak to, o čem se asi nejvíc mluví jako no-nový form factor je to, že hodíme agenta místo toho, abychom mu dali prompt, tak mu dáme kontext a věci k dosažení. To je něco, co trošku testuje ten Humanity's</v>
+
+97
+00:17:21.608 --> 00:17:33.828
+<v ai-ta-krajta-56-speaker_1>Last Exam, který teďka sdílím na obrazovce, ve kterém Fable dosáhnul zase o něco lepšího výsledku než předtím Opus 4.8 nebo GPT pět, 5.5. Ale pořád je to na padesáti devíti</v>
+
+98
+00:17:33.888 --> 00:17:46.068
+<v ai-ta-krajta-56-speaker_1>lomeno šedesáti čtyřech procentech. Eh, což znamená, že jsme ještě nesaturovali tyhlety jako problémy na úrovni doktorandů a akademiků, který jsou fakt složitý pro normální</v>
+
+99
+00:17:46.108 --> 00:17:58.728
+<v ai-ta-krajta-56-speaker_1>lidi. Mě asi nejvíc zajímá, eh, ten benchmark, který se jmenuje GDP Eval, ta knowledge work, kde je The Fable jen o něco lepší. Ale samozřejmě, jak jsme si ukázali někdy</v>
+
+100
+00:17:58.768 --> 00:18:11.084
+<v ai-ta-krajta-56-speaker_1>předminule, všechny tyhlety benchmarky jsou obehratelné a tohleto je ještě číslo, které jenom vydal Anthropic, nepotvrdil ho. Nikdo ostat-nikdo jiný, takže uvidíme, kolik</v>
+
+101
+00:18:11.144 --> 00:18:16.104
+<v ai-ta-krajta-56-speaker_1>půjde tahle, tenhle výsledek na, řekněme, ne-Anthropicí verzi Fable.</v>
+
+102
+00:18:16.524 --> 00:18:21.164
+<v ai-ta-krajta-56-speaker_2>A co říkáte na to, že oni ten model vypustěj jenom na pár dní? Je to tak, že jo?</v>
+
+103
+00:18:21.804 --> 00:18:26.084
+<v ai-ta-krajta-56-speaker_1>Ano, vypouštějí ho jen do dvaadvacátého, jestli si to správně pamatuju.</v>
+<v ai-ta-krajta-56-speaker_2>No.</v>
+
+104
+00:18:26.144 --> 00:18:38.404
+<v pavol-hejny>Já si myslím, že Anthropic je absolutně geniální v marketingu a v tom jako dělání PR, protože kdyby to udělali normálním způsobem a vydali by Claude Opus 4.9 nebo Claude</v>
+
+105
+00:18:38.464 --> 00:18:50.524
+<v pavol-hejny>Opus 5, to je asi jedno, a, eh, řekli by, nevím, že tam jsou větší rate limity nebo whatever co, tak by to byla klasická zpráva, o který jako bychom se</v>
+
+106
+00:18:50.564 --> 00:19:02.604
+<v pavol-hejny>bavili i tady možná jako prvních pět minut. Ale Anthropic jako poslední půl rok dokázal sebrat úplně veškerou pozornost. Já sám jsem chtěl už jako nadhodit to, že se</v>
+
+107
+00:19:02.624 --> 00:19:14.684
+<v pavol-hejny>tady blíží třeba GPT-5.6 a že jsem jako hodně zvědavej na ní a, eh, že jsou tady, že jsou tady jako zajímavý čínský modely, že jsou tady jako zajímavý různý věci. Ale</v>
+
+108
+00:19:14.724 --> 00:19:27.084
+<v pavol-hejny>podle mě Anthropic se naučil jako dělat to, aby tu debatu totálně ovládl. A myslím si, že to, že je to omezený na pár dní, to je úplně jako klasickej tah, jak do toho přinýst nějakou scarcity. Zároveň</v>
+
+109
+00:19:27.124 --> 00:19:39.764
+<v pavol-hejny>jako vypadat dobře a zároveň jako navodit atmosféru, že je to v něčem speciální, že Fable není jako nějakej normální model, ale že je to prostě ten první veřejně dostupnej model z tý rodiny Mythos</v>
+
+110
+00:19:39.904 --> 00:19:42.864
+<v pavol-hejny>a dělají to strašně dobře.</v>
+
+111
+00:19:42.904 --> 00:19:55.364
+<v ai-ta-krajta-56-speaker_1>Nemyslím si, že jsou úplně první v tomhle. Myslím si, že GPT-4.5 byl v tomhletom podobně, že byl dostupný jenom na některých subscriptions. Potom O1 Pro taky. Do jisté míry to bylo</v>
+
+112
+00:19:56.044 --> 00:20:08.164
+<v ai-ta-krajta-56-speaker_1>oprávněné, že, a z podobných důvodů podle mě, ne, ne marketingových, ale protože GPT-4.5 žralo hrozně moc computu a jelo pomalu na to, jak moc to žralo computu. A tipnul bych si,</v>
+
+113
+00:20:08.244 --> 00:20:20.344
+<v ai-ta-krajta-56-speaker_1>že podobně na tom bude i Fable. Ale samozřejmě je to, je to ode mě spíš to, že mám trošku jiný prior ohledně toho, jak moc velký marketingový hráč Anthropic skutečně je</v>
+
+114
+00:20:20.384 --> 00:20:24.624
+<v ai-ta-krajta-56-speaker_1>versus jak moc dělají, co můžou s tím computem, co mají.</v>
+
+115
+00:20:24.944 --> 00:20:37.124
+<v pavol-hejny>Mimochodem, když jsi tady zmínil GPT-4.5, mně tohle to fakt hodně připomíná. Nebo mám tam jako takovou analogii s GPT, mezi jako přechodem z GPT-3 na GPT-4. Ono když už tady přicházela GPT-4,</v>
+
+116
+00:20:37.564 --> 00:20:49.604
+<v pavol-hejny>tak tím, že byl ChatGPT, tak na tom industry byla už fokusovaná ohromná pozornost a GPT-4 byla opravdu, jako u GPT-4 by se dalo opravdu tehdy říct, že to byla ta</v>
+
+117
+00:20:49.644 --> 00:21:01.844
+<v pavol-hejny>jako zcela nová game changing rodina modelů. A podle mě oni to tehdy taky pochopili a dělali vlastně podobný věci, že třeba s Microsoft, kterej tehdy měl totálně OpenAI pod palcem, tak přesně dělal různý</v>
+
+118
+00:21:01.864 --> 00:21:13.884
+<v pavol-hejny>jako finty, že člověk na to, aby se k GPT-4 dostal přes Azure, tak musel dělat, jako musel projít třeba jako nějakým oficiálním kurzem jako bezpečnosti. Dělaly se nad tím opravdu jako</v>
+
+119
+00:21:13.944 --> 00:21:26.164
+<v pavol-hejny>zajímavý takovýdle jako rošády. Ale jako co si myslím, že proč se to děje teďka? Myslím, že teď se to děje proto, že Anthropic směřuje k IPO a myslím si, že si jako připravujou půdu</v>
+
+120
+00:21:26.204 --> 00:21:28.884
+<v pavol-hejny>pro to, aby to udělali co nejlíp.</v>
+
+121
+00:21:29.424 --> 00:21:30.364
+<v ai-ta-krajta-56-speaker_1>Dává taky smysl.</v>
+
+122
+00:21:32.224 --> 00:21:44.644
+<v ai-ta-krajta-56-speaker_3>Já bych se ještě pozastavil nad tím, co jsi Šimone říkal, že nakolik je Anthropic marketingovej specialista versus jak efektivně umí používat ten compute, kterej má dostupnej. Tak</v>
+
+123
+00:21:45.384 --> 00:21:57.584
+<v ai-ta-krajta-56-speaker_3>chápu to správně, že v tomhle smyslu myslíš, že ten poměr se blíží jako spíš jedničce, když v tom čitateli je ta efektivita a v tom jmenovateli je ten marketing,</v>
+
+124
+00:21:57.644 --> 00:21:58.124
+<v ai-ta-krajta-56-speaker_3>jo? Jako že-</v>
+
+125
+00:21:58.224 --> 00:21:59.384
+<v pavol-hejny>Ne, myslím, že je to půl na půl.</v>
+
+126
+00:21:59.884 --> 00:22:00.784
+<v ai-ta-krajta-56-speaker_3>Ok, ok.</v>
+
+127
+00:22:01.824 --> 00:22:13.824
+<v ai-ta-krajta-56-speaker_1>Ale myslím si, že jako jsou to oba tlaky, které nějak diktují ten směr. A kdyby tam nebyl ten tlak z hlediska computu, tak se marketingová úplně jinak. Obecně teďka podle mě nejsme moc</v>
+
+128
+00:22:13.904 --> 00:22:25.283
+<v ai-ta-krajta-56-speaker_1>ve fázi, kde by bylo pro ty společnosti marketingově, ekonomicky udržitelné držet zkrátka modely, o kterých jsou přesvědčený, že jsou lepší než modely konkurence.</v>
+
+129
+00:22:25.644 --> 00:22:37.684
+<v pavol-hejny>Musí balancovat trošku na hraně, že oni na jednu stranu musí vypouštět tyhlety jako úžasný nový modely, aby kolem nich byl buzz a na druhou stranu, eh, je to jako strašně náročný. Oni jako jednak finančně</v>
+
+130
+00:22:37.724 --> 00:22:49.724
+<v pavol-hejny>krvácají a jednak pravděpodobně jejich datový centra jedou na sto procent. A v tom se blbě balancuje, protože ono je hrozně super, když ten jejich nejnovější model využije někdo, kdo s tím udělá nějakou cool věc. Ale potom</v>
+
+131
+00:22:49.764 --> 00:22:56.484
+<v pavol-hejny>na druhou stranu, když jako to dalších milion lidí vyzkouší na nějaký úplný blbůstky, tak s tím se strašně blbě operuje.</v>
+
+132
+00:22:57.664 --> 00:23:09.804
+<v ai-ta-krajta-56-speaker_1>Jasně, ale je tam určitá logika v tom, že pokud dokáže ta společnost vytvořit model, který v nějakém dobrém harnesu dokáže mít dobrou spolehlivost na ekonomicky relevantní</v>
+
+133
+00:23:09.844 --> 00:23:21.844
+<v ai-ta-krajta-56-speaker_1>tasky, tak potom přestože to využívá všechny datová centra, která mají k dispozici, si za to můžou napařit víc prostě proto, že dokážou prokázat to ROI. To číslo na</v>
+
+134
+00:23:21.904 --> 00:23:34.024
+<v ai-ta-krajta-56-speaker_1>tom, že méně tasků selže, na tom, že méně špatných rozhodnutí je dosáhnuto a tak. Takže to mi dává aspoň naivně, myslím, že nikdo z nás není ekonomický analytik, ale dává</v>
+
+135
+00:23:34.064 --> 00:23:37.884
+<v ai-ta-krajta-56-speaker_1>mi to smysl jako další roubek v té logice.</v>
+
+136
+00:23:38.204 --> 00:23:50.484
+<v pavol-hejny>Já bych se možná jako tady tím přesunul k tomu, že my opravdu jsme začali řešit novinky, ale vlastně zatím máme jenom jednu. A já už jsem tu druhou nastínil. Eh, teďka v nejbližší době</v>
+
+137
+00:23:50.544 --> 00:23:59.084
+<v pavol-hejny>budou mít IPO tři AI firmy, a to Anthropic, OpenAI a xAI v rámci SpaceX. Co si o tom myslíte?</v>
+
+138
+00:23:59.304 --> 00:24:11.544
+<v ai-ta-krajta-56-speaker_1>Nevím, jestli, eh, jsem zvědavý, jak moc peněz se do toho naleje, když to bude moct být veřejně tradované. Jestli mě bude bavit ten věčný rollercoaster toho, jak se ty ceny budou lišit veřejně.</v>
+
+139
+00:24:12.196 --> 00:24:23.276
+<v ai-ta-krajta-56-speaker_1>Místo toho, abysme to viděli jenom v ozvěně toho, jestli nerealizovali Series G nebo já nevím co. Vnímáš tam nějaký jako dopad, který myslíš, že bude přímo na nás jako koncové uživatele?</v>
+
+140
+00:24:23.916 --> 00:24:36.376
+<v ai-ta-krajta-56-speaker_3>Já bych řekl, že to je známka toho, že se tohleto odvětví začíná nějak konsolidovat ve smyslu, jako že, že se z něho stává prostě takový klasickej zajetej business malů. A</v>
+
+141
+00:24:36.416 --> 00:24:48.736
+<v ai-ta-krajta-56-speaker_3>hlavně je tam s tím spojený očekávání toho, že jako akcionář seš vlastně podílníkem na zisku nebo na budoucím zisku. Tak asi někdo minimálně předpokládá, že ty společnosti</v>
+
+142
+00:24:48.776 --> 00:25:00.736
+<v ai-ta-krajta-56-speaker_3>dřív či později ziskový budou. Jako bude velmi zajímavý sledovat ten počáteční vývoj těch cen. Mimochodem, kdy se to má stát? To možná je ještě takový ne úplně dobře stanovený.</v>
+
+143
+00:25:01.616 --> 00:25:07.756
+<v pavol-hejny>Myslím si, že to ještě není definitivně stanovený, ale, ale Anthropic bude nejspíš první z těhletěch tří.</v>
+
+144
+00:25:08.056 --> 00:25:11.036
+<v ai-ta-krajta-56-speaker_1>No, koupíte si akcie, pánové? A Kačko?</v>
+
+145
+00:25:11.376 --> 00:25:19.116
+<v ai-ta-krajta-56-speaker_3>Já bych řekl, že určitě dřív nebo později si je koupím, protože je budu mít v nějakým mixu, v nějakým ETF, který kupuju. [smích]</v>
+
+146
+00:25:19.136 --> 00:25:31.636
+<v ai-ta-krajta-56-speaker_1>Tam vlastně byla teďka nějaká aféra s tím, že do ETF by se teoreticky měly nové akcie vrážit až po roce a půl a SpaceX a xAI se do toho mixu chtějí dostat dřív. Takže</v>
+
+147
+00:25:31.716 --> 00:25:37.196
+<v ai-ta-krajta-56-speaker_1>ano, možná dříve, než čekáme, budeme vlastnit tyto akcie také skrz naše indexové fondy.</v>
+
+148
+00:25:37.676 --> 00:25:49.836
+<v pavol-hejny>Popravdě řečeno, spíš v tuhle tu chvíli chci být na tý straně člověka, kterej jako ty, ty peníze investorů jako pálí těma tokenama než ten, kterej tam ty peníze dává. Jako</v>
+
+149
+00:25:49.896 --> 00:26:02.036
+<v pavol-hejny>určitě dřív či později přijde doba, kdy jedna jako z věcí, kterou člověk vlastní, budou, budou akcie takovýhle firem. Ale myslím si, že jako v průběhu IPO to není ta správná chvíle. Ale</v>
+
+150
+00:26:02.076 --> 00:26:07.016
+<v pavol-hejny>zase nejsme investiční podcast a tady to není investiční rada a,</v>
+
+151
+00:26:09.516 --> 00:26:12.136
+<v pavol-hejny>a já o investování vím prd. A-</v>
+
+152
+00:26:12.616 --> 00:26:17.136
+<v ai-ta-krajta-56-speaker_1>A pokud chcete někoho necertifikovaného na investování, zeptejte se Fejbla.</v>
+
+153
+00:26:17.856 --> 00:26:30.296
+<v pavol-hejny>Ano, ano, ano, ano, ten vám poradí líp. Já jako spíš, spíš z tý druhý strany to vidím, že mně přijde, že se ten trh přesně jako hrozně konsoliduje, nějakým způsobem profesionalizuje a strašně vyrostl, že</v>
+
+154
+00:26:30.416 --> 00:26:42.416
+<v pavol-hejny>jako reálně OpenAI byl vesměs startup, ale OpenAI byla neziskov-, malinká, v principu malá neziskovka nebo na americký poměry malá neziskovka před pár</v>
+
+155
+00:26:42.476 --> 00:26:51.716
+<v pavol-hejny>lety. Anthropic byl nějakej odštěpenej tým z týhletý neziskovky. To, co měl Apple před pár lety, takhle evolvovanej Anthropic je OpenAI. A to je jako šílený.</v>
+
+156
+00:26:51.896 --> 00:26:57.316
+<v ai-ta-krajta-56-speaker_1>A překvapuje tě to? Myslíš si, že je to další oblíbené slovo bublina?</v>
+
+157
+00:26:58.616 --> 00:27:10.636
+<v pavol-hejny>Těžko říct, jestli bublina. Překvapuje mě to už jenom proto, že přece jenom ten, teď tímhletím jakoby vůbec nechci podceňovat to, co Anthropic nebo OpenAI dělá, ale přece jenom opravdu jsou to firmy, který</v>
+
+158
+00:27:10.676 --> 00:27:23.236
+<v pavol-hejny>jako přišly s nějakým jako velmi inovativním způsobem, jak trénovat AI modely, ale zároveň mají tady poměrně relevantní konkurenci v Číně a nemají tu jako velkou infrastrukturu</v>
+
+159
+00:27:23.296 --> 00:27:35.376
+<v pavol-hejny>okolo sebe, že přece jenom to není Microsoft nebo Apple nebo Google, který maj jako desítky až stovky projektů, mnoho různejch revenue streamů, eh, jsou zaintegrovaný</v>
+
+160
+00:27:35.416 --> 00:27:45.556
+<v pavol-hejny>do všech těch jako věcí, mají kontrakty v governmentu a podobně. Tam ještě OpenAI ani Anthropic není, ale stejně ty jejich valuace odpovídají tomu, jako kdyby byli.</v>
+
+161
+00:27:45.996 --> 00:27:58.216
+<v ai-ta-krajta-56-speaker_3>Je tam ještě jeden moment, kterej jsem si teďka narychlo ověřoval. Pokud mi Google sumarizace nekecá, tak například Google, kterej vstoupil na burzu v roce 2004. Mě totiž</v>
+
+162
+00:27:58.256 --> 00:28:10.556
+<v ai-ta-krajta-56-speaker_3>zajímalo, jestli byl v té době už v zisku anebo jestli ještě pořád byl i tehdy ztrátovej. A nebyl. Byl už v zisku. Tak je možný, že tohle je jeden významnej faktor, kterým</v>
+
+163
+00:28:10.616 --> 00:28:22.176
+<v ai-ta-krajta-56-speaker_3>se tyhlety IPOs liší od té vlny před deseti, dvaceti lety už. A chtěl bych vidět možná to srovnání s dalšíma společnostma, který v podobný době se dostávaly na burzu.</v>
+
+164
+00:28:22.316 --> 00:28:28.336
+<v ai-ta-krajta-56-speaker_1>Takže napříště si musíme pozvat někoho na SecDevOps a někoho přes IPOs. Máme domácí úkol.</v>
+
+165
+00:28:29.595 --> 00:28:33.975
+<v ai-ta-krajta-56-speaker_3>Jo, myslím, že to bude Fejbl vědět, koho si pozveme.</v>
+
+166
+00:28:34.316 --> 00:28:46.496
+<v ai-ta-krajta-56-speaker_1>To se mi úplně nelíbí, protože nedokážeme verifikovat, jestli nám říká věci, co dávají smysl nebo respektive bude to znít přesvědčivě, ale kdo ví. A to má trošku nulovou přidanou hodnotu</v>
+
+167
+00:28:46.516 --> 00:28:49.176
+<v ai-ta-krajta-56-speaker_1>pro naše posluchače. Ale o tom zase příště.</v>
+
+168
+00:28:49.436 --> 00:28:59.856
+<v ai-ta-krajta-56-speaker_3>Mohli jsme možná probrat ještě jednu novinku a to je papežská encyklika týkající se AI. Nevím, jestli do toho chceme zabředávat, ale prosím, kdo se k tomu vyjádří.</v>
+
+169
+00:29:01.016 --> 00:29:13.816
+<v ai-ta-krajta-56-speaker_1>Já si ji chci fakt přečíst všech dvě stě stran, než se k ní začnu vyjadřovat. Samozřejmě jsem vstřebal z Twitteru spoustu kritik a naopak o spoustu, spoustu podpory. Dává</v>
+
+170
+00:29:13.856 --> 00:29:26.096
+<v ai-ta-krajta-56-speaker_1>mi smysl, že to katolická církev vydala jako otázka toho, jak žít lidský život v kontextu AI je dost tlačivá. Otázka toho, jak vést víru ve světě s AI je taky tlačivá</v>
+
+171
+00:29:26.136 --> 00:29:38.216
+<v ai-ta-krajta-56-speaker_1>v momentě, kdy na App Storu je Chat Bible nebo jak se to jmenuje jednou z hlavních aplikací. A otázka toho, jestli AI jsou morálně relevantní, jestli mají vědomí,</v>
+
+172
+00:29:38.336 --> 00:29:50.516
+<v ai-ta-krajta-56-speaker_1>jestli mají víru samotná, je relevantní taky. V tomhletom, jestli jsem pochopil tu encykliku správně, se jako katolická církev dost jasně staví na stranu unikátnosti lidství a</v>
+
+173
+00:29:50.596 --> 00:29:59.596
+<v ai-ta-krajta-56-speaker_1>toho, že bez ohledu na to, jak vysoké je verzové číslo Cloudu, tak nemá vědomí a nemá morální relevance. Ale jak říkám, musím si to ještě přečíst.</v>
+
+174
+00:29:59.816 --> 00:30:00.056
+<v ai-ta-krajta-56-speaker_3>Jo.</v>
+
+175
+00:30:00.116 --> 00:30:06.796
+<v ai-ta-krajta-56-speaker_2>Já si to taky chci přečíst, no. No a Šimone, přečteš si to celý nebo si to necháš sumarizovat od AI?</v>
+
+176
+00:30:07.436 --> 00:30:19.436
+<v ai-ta-krajta-56-speaker_1>Chci si to přečíst celý a potom vyzkoušet na s-sumarizaci to, čemu rozumím a to, čemu nerozumím. Ale obecně si myslím, že je pořád nějaká hodnota v tom číst</v>
+
+177
+00:30:19.476 --> 00:30:20.616
+<v ai-ta-krajta-56-speaker_1>primární dokumenty.</v>
+
+178
+00:30:21.540 --> 00:30:28.360
+<v pavol-hejny>Když v tom o tom člověk potom chce aspoň někde třeba mluvit a nejenom tomu porozumět v zásadě tak, jak tomu budou rozumět ostatní.</v>
+
+179
+00:30:29.340 --> 00:30:41.460
+<v ai-ta-krajta-56-speaker_2>Já si to taky myslím. No ale pravda je, že je to čím dál těžší. Jako snažím se třeba články číst celý, ale jak jich vychází tolik, tak jako už si je taky občas nechám sumarizovat no. A to jsem byla jako dost proti,</v>
+
+180
+00:30:42.400 --> 00:30:44.220
+<v ai-ta-krajta-56-speaker_2>ale nestíhám to no. Co vy?</v>
+
+181
+00:30:44.820 --> 00:30:56.920
+<v ai-ta-krajta-56-speaker_3>Mě hlavně fascinuje to, že, hm, já, já velmi rád si čtu věci, který jsou psaný třeba v jazycích, který úplně nevládnu aktivně. A tak mě baví</v>
+
+182
+00:30:56.980 --> 00:31:09.100
+<v ai-ta-krajta-56-speaker_3>to, že si můžu s AIkem ty věci nechat překládat, když třeba nejsou přeložený buďto do angličtiny nebo do něčeho zvladatelnýho. To mně přijde fajn. Typicky je to třeba němčina, kterou jako umím</v>
+
+183
+00:31:09.140 --> 00:31:12.800
+<v ai-ta-krajta-56-speaker_3>tak nějak pasivně, ale občas jsou tam nějaký slovíčka, který prostě neznám.</v>
+
+184
+00:31:14.380 --> 00:31:26.820
+<v pavol-hejny>Mně na těch sumarizacích přijde jediná taková jako nebezpečná věc, kvůli který si myslím, že s-se na to dá pozor a to to, že pokud tu sumarizaci dělá někdo jeden centrální typu</v>
+
+185
+00:31:27.380 --> 00:31:39.460
+<v pavol-hejny>Google sumarizuje věci z něčeho, z Wikipedie třeba, nebo nějaká agentura agreguje zprávy a agreguje to pro velkou část trhu, tak pak v tý sumarizaci</v>
+
+186
+00:31:39.520 --> 00:31:51.700
+<v pavol-hejny>může jako dojít k poměrně zásadnímu biasu. Ale pokud si tu sumarizaci každý udělá sám nějak podle sebe, protože nakonec když něco čteme, tak si stejně tu sumarizaci nějak interně v hlavě děláme. Tak pokud</v>
+
+187
+00:31:51.740 --> 00:32:04.000
+<v pavol-hejny>bychom jako na stejnej jako originální zdroj si každý udělal nějakou svoji unikátní sumarizaci, ať už tu lidskou nebo to, že nám to někdo převypráví, někdo jiný si to od někoho poslechne,</v>
+
+188
+00:32:05.120 --> 00:32:17.480
+<v pavol-hejny>někdo třetí si to nechá hodit do jako svýho specifickýho chatu GPT, někdo jiný to udělá fejlem, tak naopak to se zdá, že je v pohodě. Jako ve chvíli, když tam není nějaký systematický bias, ale když to sumarizace</v>
+
+189
+00:32:17.520 --> 00:32:18.580
+<v pavol-hejny>z mnoha různých stran.</v>
+
+190
+00:32:18.980 --> 00:32:23.900
+<v ai-ta-krajta-56-speaker_1>Myslíš, že ten bias vyruší tím, že tam bude spoustu různých zdrojů chyby?</v>
+
+191
+00:32:25.680 --> 00:32:37.820
+<v pavol-hejny>Hele, to je podle mě strašně dobrá otázka a myslím si, že různý metody sumarizace budou mít nějakej různej velmi specifickej bias, kterej budou dělat. Stejně tak jako třeba s-různý</v>
+
+192
+00:32:37.840 --> 00:32:49.920
+<v pavol-hejny>jazyky mají jako různou jako míru toho, jaký informace zaznamenaj a jaký nezaznamenaj. Ono v tomhletom jsou třeba jako GPT, Claude a ty jiný modely trošku jiný, ale zároveň ten bias maj jako</v>
+
+193
+00:32:49.960 --> 00:33:00.380
+<v pavol-hejny>velmi podobným směrem, že řekněme není to, že by oba sumarizovaly jako do toho samýho, ale oba sumarizujou jako do jako plus mínus deset procent stejný oblasti, jo. Mně připadá.</v>
+
+194
+00:33:00.760 --> 00:33:07.840
+<v ai-ta-krajta-56-speaker_1>Dokážeš todleto ukázat na nějakým příkladům, prosím tě? Nebo to je těžký? Je možný, že je to moc těžký.</v>
+
+195
+00:33:08.680 --> 00:33:21.320
+<v pavol-hejny>Hele, to je podle mě těžký, ale zkusím uvést nějakej jakoby, n-nemám teďka příklad z AIka. Zamyslím se nad tím do příště. A vlastně možná ještě taková subotázka pro diváky. Zajímá</v>
+
+196
+00:33:21.380 --> 00:33:33.480
+<v pavol-hejny>vás pro nějakej příští díl, že bychom se, eh, bavili o papežský encyklice nebo, nebo je to jako mimo našeho podcastu? Případně si jako k tomu někoho pozvali, protože mně by přišlo hrozně</v>
+
+197
+00:33:33.500 --> 00:33:45.960
+<v pavol-hejny>zajímavý si někoho pozvat k tady tomu. A ta druhá věc, že jestli vás primárně zajímá AI nebo jestli vás zajímaj i takový ty jako různý náběhy do IT, který tady občas máme, který se AI</v>
+
+198
+00:33:46.000 --> 00:33:58.360
+<v pavol-hejny>netýkají, ale prostě jako sem tam se ta analogie vyskytne. Tak teďka jednu z takových analogií dám. Mně připadá, že jeden z druhů sumarizace jako určitě informace je obrázková komprese a,</v>
+
+199
+00:33:59.260 --> 00:34:11.600
+<v pavol-hejny>eh, v tomhletom například JPEG a PNG má vlastně jako úplně jiný způsob, jak ty věci vlastně sumarizuje. A ještě úplně totálně jiný je SVGéčko nebo vektorový obrázky. A připadá</v>
+
+200
+00:34:11.680 --> 00:34:24.440
+<v pavol-hejny>mi, že jazykové modely, kdybych udělal jako analogii, tak j-jazykové modely jsou v podstatě jako kdybych měl, eh, jinak nastavený parametry JPEG komprese. Zatímco</v>
+
+201
+00:34:24.500 --> 00:34:36.640
+<v pavol-hejny>já bych hrozně rád, aby tady existoval nějaký způsob, jak věci sumarizovat jako úplně jiným způsobem. Ale připadá mi, že tohleto v tuhle chvíli jazykové modely neumí. Že jazykový model tu věc, že jako vypouští</v>
+
+202
+00:34:36.680 --> 00:34:47.780
+<v pavol-hejny>velmi stejný informace, ať už je to jako Claude nebo GPT. A čím se to skoro dá víc ovlivnit, je tou jako, tím kontextem okolo toho celýho. To je ta věc, která to ovlivní skoro víc než ten samotnej model.</v>
+
+203
+00:34:48.080 --> 00:34:57.220
+<v ai-ta-krajta-56-speaker_1>Myslím si, že tohle je zajímavé téma na něčí disertaci. Takže jestli máme posluchače na začátku svého doktorského studia, tak doufám, že tohle jim přijde jako zajímavý nápad.</v>
+
+204
+00:34:57.580 --> 00:35:09.640
+<v pavol-hejny>No i-já bych ještě jako řekl, že poměrně jako zásadní faktor tady toho celýho není ani to učení toho modelu jako takovýho, ale vůbec ta tokenizace na začátku. Protože když se člověk podívá na to, jakým jako systémem jako</v>
+
+205
+00:35:09.800 --> 00:35:21.860
+<v pavol-hejny>vzniká ta tokenizace, tak tam třeba typicky se jako hodně prioritizuje angličtina. Eh, hodně se prioritizují nějaký věci, nějaký jako oblasti. A ono ve chvíli, když se ta tokenizace od toho začátku</v>
+
+206
+00:35:21.860 --> 00:35:33.880
+<v pavol-hejny>udělá jinak, tak i ten model má vlastně jako trošku jiný to jako, to vpečení, přemýšlení, řekněme. A připadá mi, že tahleta věc se dá trošku třeba rozbít tak, že tu věc člověk sumarizuje přes jiný jazyk.</v>
+
+207
+00:35:34.480 --> 00:35:46.680
+<v pavol-hejny>Nebo že dělá tu sumarizaci přes Caesarovu šifru, kdy vlastně jako trošku rozbije ten jako inherentní vliv tý tokenizace na tom modelu. Ale zase, jak říkáš, to by bylo na nějakou, na nějakou práci. A vůbec nevím,</v>
+
+208
+00:35:46.740 --> 00:35:54.800
+<v pavol-hejny>jestli do takovýhle debat máme v Aj Taj Krajta zacházet. A strašně mě to zajímá, i když jo, i když ne, tak napište do komentáře.</v>
+
+209
+00:35:55.320 --> 00:36:00.520
+<v ai-ta-krajta-56-speaker_2>Sumarizace přes Caesarovu šifru. No to je, to je výborný. [smích] To zkusím.</v>
+
+210
+00:36:03.380 --> 00:36:15.540
+<v pavol-hejny>Je to strašně dobrá metoda. Úplně jako s-stupidní, ale vlastně dobrá. Ty ve chvíli, když se ptáš modelu přes Caesarovu šifru, tak ten model má najednou</v>
+
+211
+00:36:16.140 --> 00:36:28.240
+<v pavol-hejny>n-ne že jinou osobnost, ale jako kdybys udělala přesně to, že mu jako trošku mu zhoršíš jako kvalitu jeho výstupu a jeho inteligence, ale odpečeš mu spoustu takovejch jeho jako inherentních vlastností, který on</v>
+
+212
+00:36:28.280 --> 00:36:31.564
+<v pavol-hejny>má. A už jsme na něj jako úplně běžně zvyklí.</v>
+
+213
+00:36:31.944 --> 00:36:36.344
+<v ai-ta-krajta-56-speaker_3>Taková ta čuská metoda, uměla pro jazykové modely.</v>
+
+214
+00:36:36.884 --> 00:36:49.064
+<v pavol-hejny>Když se bavíme o tomhletom, tak já se ještě vrátím zpátky asi půl hodiny, co jsi ty Šimone říkal, že když dva AI agenti mezi sebou vyjednávají nějakou smlouvu, tak se dostaneš do bodu, kdy</v>
+
+215
+00:36:49.084 --> 00:37:01.843
+<v pavol-hejny>v té smlouvě jsou věci, které nejsou pro člověka pochopitelné. A takovýchhle experimentů už bylo jako vícero. Že se nechali mezi sebou povídat jazykové modely nebo AIka a oni si vlastně vytvořili nějaký svůj vlastní lingvisticky</v>
+
+216
+00:37:01.944 --> 00:37:14.764
+<v pavol-hejny>řečeno jazyk, IT slovy řečeno komprese. A ono to nějak fungovalo, akorát člověk už do toho neviděl. Tak, eh, mě by třeba zajímalo, že co si o tom myslíte z hlediska nějaký bezpečnosti a transparentnosti.</v>
+
+217
+00:37:14.964 --> 00:37:26.964
+<v ai-ta-krajta-56-speaker_1>V tomhle případě podle mě šlo spíš o nabobtnání než o komprimovaný jazyk. Ale myslím si, že význam otázky je ten samý, že jak tu kompresi, tak tu nabobtnanou</v>
+
+218
+00:37:27.024 --> 00:37:35.364
+<v ai-ta-krajta-56-speaker_1>logiku je schopno pojmout jenom nelidské vědomí. A co my s tím? Chápu tě správně?</v>
+
+219
+00:37:35.504 --> 00:37:36.264
+<v pavol-hejny>Absolutně.</v>
+
+220
+00:37:37.944 --> 00:37:50.224
+<v ai-ta-krajta-56-speaker_1>Já s-mám problém s tím, abych nezabíhal příliš mnoho do filosofie a filosofie vědy v tomhletom. Mám pocit, že máme spoustu systémů, které existují na světě,</v>
+
+221
+00:37:51.064 --> 00:38:03.344
+<v ai-ta-krajta-56-speaker_1>které nejsou pojmutelné bez jako nějaké míry abstrakce. A cílem naší vědy, méně cílem našeho inženýrství, je dostat se do takové úrovně, kde ty abstrakce stačí, jsou pochopitelné a zároveň dostatečně redukovatelné</v>
+
+222
+00:38:03.384 --> 00:38:15.944
+<v ai-ta-krajta-56-speaker_1>na to, abychom s nimi dokázali operovat. Inženýrství s tímhletím má menší problém, protože tomu nevadí, když publikuje black box, který prostě funguje a nemáme dobré abstrakce pro to, abychom pochopili jak. Viz</v>
+
+223
+00:38:16.004 --> 00:38:16.784
+<v ai-ta-krajta-56-speaker_1>jazykové modely.</v>
+
+224
+00:38:17.444 --> 00:38:19.984
+<v ai-ta-krajta-56-speaker_3>Je samotný jazykový model abstrakcí?</v>
+
+225
+00:38:20.344 --> 00:38:21.284
+<v ai-ta-krajta-56-speaker_1>Nepochopitelnou.</v>
+
+226
+00:38:21.764 --> 00:38:34.064
+<v ai-ta-krajta-56-speaker_3>No, to je velmi těžká otázka. Hm, jako jsou různý přístupy k tomu. Eh, některý, některý historicky, eh, některý</v>
+
+227
+00:38:34.104 --> 00:38:46.284
+<v ai-ta-krajta-56-speaker_3>lidi vnímali abstrakci jako něco velmi-- že existuje takovej článek, nevím, jestli slavnej, ale eh, nějaký německej filosof, myslím, že to byl Hegel nebo</v>
+
+228
+00:38:46.324 --> 00:38:58.704
+<v ai-ta-krajta-56-speaker_3>někdo takovej, tak má článek, kterej se jmenuje, eh, Kdo myslí abstraktně. A tam, eh, ukazuje, že, nebo snaží se ukázat, že lidi,</v>
+
+229
+00:38:58.764 --> 00:39:11.124
+<v ai-ta-krajta-56-speaker_3>kteří často bývají po-považováni za, za ty, že myslí nejvíc abstraktně, tak ve skutečnosti myslí nejvíc konkrétně a obráceně. Je to velmi vtipnej článek, tak si ho kdyžtak můžete přečíst.</v>
+
+230
+00:39:11.304 --> 00:39:23.544
+<v ai-ta-krajta-56-speaker_1>Stejně tak jako v neurovědě byl někdy cirka 2020 vydaný článek o tom, že možná prostě mozky jsou natolik neabstrahovatelný black box, že je lze pochopit</v>
+
+231
+00:39:23.584 --> 00:39:35.684
+<v ai-ta-krajta-56-speaker_1>jen deep learning modelem, který potom nebude interpretovatelný. A to tedy je méně o tom, jestli je to abstraktní nebo konkrétní a více o tom, že možná abstrakce nemusí fungovat</v>
+
+232
+00:39:36.404 --> 00:39:45.424
+<v ai-ta-krajta-56-speaker_1>pro dostatečně velkou komplexitu. To se nám bude hledat skvěle tyhlety věci do citací pod dílem. Už se těším.</v>
+
+233
+00:39:46.944 --> 00:39:59.064
+<v pavol-hejny>Můžeme použít Fable. Já si myslím, že bych tu tady možná jako dal poslední slovo, protože jsme se opravdu posunuli od velmi konkrétního releasu tenhletý den až po jako strašně zajímavou</v>
+
+234
+00:39:59.104 --> 00:40:11.244
+<v pavol-hejny>filozofickou debatu. A fakt by hodně mě zajímalo, jakým způsobem to vnímají diváci. A pokud diváci chtějí, tak, tak bych se strašně rád pobavil o</v>
+
+235
+00:40:11.284 --> 00:40:22.324
+<v pavol-hejny>papežské encyklice někdy příště. Tam si naopak vůbec nemyslím, že je potřeba to mít v nějakým jako díle, který bude hned hned, protože tahleta věc je, má jako větší relevanci, než jeden release nějakýho modelu.</v>
+
+236
+00:40:22.504 --> 00:40:28.724
+<v ai-ta-krajta-56-speaker_1>Ano, budu se těšit napříště, až se popere efekt TS a papežská encyklika o naši pozornost.</v>
+
+237
+00:40:29.364 --> 00:40:35.004
+<v pavol-hejny>Efekt TS. Jo, ale já jsem si říkal, že bude jeden díl, kde nezazní efekt TS.</v>
+
+238
+00:40:35.264 --> 00:40:36.344
+<v ai-ta-krajta-56-speaker_1>Ne tenhle.</v>
+
+239
+00:40:36.404 --> 00:40:36.504
+<v pavol-hejny>Jo.</v>
+
+240
+00:40:37.064 --> 00:40:39.804
+<v ai-ta-krajta-56-speaker_1>Vím, že Petr tu není a musím to za něj suplovat.</v>
+
+241
+00:40:40.804 --> 00:40:46.324
+<v pavol-hejny>I ne, ale jako efekt TS je strašně dobrá kniha. To jako zase Petrovi musím dát, dát za pravdu.</v>
+
+242
+00:40:46.344 --> 00:40:46.584
+<v ai-ta-krajta-56-speaker_1>To nezpochybňuju.</v>
+
+243
+00:40:46.664 --> 00:40:51.063
+<v pavol-hejny>Ale dneska to bylo míň tech scriptový a víc mytický a filozofický.</v>
+
+244
+00:40:51.123 --> 00:40:59.304
+<v ai-ta-krajta-56-speaker_1>Tak snad nám to posluchači odpustí. S tím bych se asi rozloučil. Děkujeme vám všem, že posloucháte. A nějaké myšlenky na závěr?</v>
+
+245
+00:40:59.984 --> 00:41:02.144
+<v pavol-hejny>Využívejte drop tokeny, dokud jsou do toho.</v>
+
+246
+00:41:04.464 --> 00:41:08.604
+<v ai-ta-krajta-56-speaker_3>Já nic nemám. Řekl bych to záleží prostě. Akorát se to sem vůbec nehodí.</v>
+
+247
+00:41:09.344 --> 00:41:10.224
+<v ai-ta-krajta-56-speaker_2>Já taky nic nemám.</v>
+
+248
+00:41:11.924 --> 00:41:17.604
+<v ai-ta-krajta-56-speaker_3>Tak popřejeme vše-všechno dobré posluchačům a budeme se těšit na další díl. Ahoj.</v>
+
+249
+00:41:17.644 --> 00:41:18.544
+<v ai-ta-krajta-56-speaker_1>Mějte se krásně.</v>
+
+250
+00:41:18.544 --> 00:41:22.744
+<v ai-ta-krajta-56-speaker_4>[hudba]</v>

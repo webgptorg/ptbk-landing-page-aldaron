@@ -1,0 +1,965 @@
+WEBVTT
+
+1
+00:00:04.100 --> 00:00:13.320
+<v ai-ta-krajta-62-speaker_0>Ahoj všichni, vítám vás u šedesátého druhého dílu podcastu Ajta Krajta. Dneska s Jirkou a s Pavlem. Takže-</v>
+
+2
+00:00:14.240 --> 00:00:14.440
+<v ai-ta-krajta-62-speaker_1>Ahoj.</v>
+
+3
+00:00:15.080 --> 00:00:20.400
+<v ai-ta-krajta-62-speaker_0>Ahoj, asi můžeme začít rovnou tradičně tím, jestli máte někdo nějaké novinky.</v>
+
+4
+00:00:20.760 --> 00:00:32.780
+<v pavol-hejny>Já mám takovou drobnou novinku. Teďka druhý den platí to, že se musí označovat AI obsah a je to novinka v rámci AI Actu. Tak jsem vlastně hodně zvědavý na to,</v>
+
+5
+00:00:33.020 --> 00:00:36.480
+<v pavol-hejny>jak to různý, eh, firmy a média pojmou.</v>
+
+6
+00:00:36.680 --> 00:00:47.660
+<v ai-ta-krajta-62-speaker_0>Když už jsi u toho, tak mi to vlastně připomnělo, že se na LinkedInu objevilo to tlačítko na označení „Seems like AI slop.“ To s tím tak maličko souvisí. Co na to říkáte?</v>
+
+7
+00:00:47.900 --> 00:01:00.300
+<v pavol-hejny>No co se týká toho označování, mně přijde vlastně jako hodně zajímavý to, v týhletý debatě by tady měl být nejspíš i Šimon, možná v nějaký příští na tohle téma, že se předpokládá, že ten obsah buď je nebo není AIkovej,</v>
+
+8
+00:01:00.540 --> 00:01:12.880
+<v pavol-hejny>ale spoustu nebo drtivá většina věcí, co se dneska produkuje, tak jsou někde mezi. Já si právě vůbec nejsem jistý, že kde má být ta hranice, že co znamená, že ta daná věc</v>
+
+9
+00:01:13.040 --> 00:01:25.260
+<v pavol-hejny>není nebo je udělaná AIkem. Eh, obyčejná fotka z mobilu je taky už dneska poměrně hodně algoritmicky vylepšená. Zatímco pokud já vygeneruju třeba nějaký obrázek</v>
+
+10
+00:01:25.280 --> 00:01:37.500
+<v pavol-hejny>nebo nějakej text a pak ho upravím, tak znamená to, že je to AIkem vygenerovaný nebo ne? Myslím si, že budou jako zajímavý ty edge casy a bude podle mě zajímavý nějaký jako právní spory, který, který na základě</v>
+
+11
+00:01:37.520 --> 00:01:38.440
+<v pavol-hejny>tady toho vzniknou.</v>
+
+12
+00:01:38.580 --> 00:01:47.960
+<v ai-ta-krajta-62-speaker_0>A ten AI Act jako vysloveně teda nařizuje, že se to musí všechno označovat a někdo to tím pádem bude muset ale taky kontrolovat, jestli je to správně označený.</v>
+
+13
+00:01:48.200 --> 00:02:00.460
+<v pavol-hejny>No tam z-zaj-zajímavý na tom je to, že je to opravdu, že ta distinkce opravdu ta, že je nebo není AI obsah. Je to braný jako jedna nula. Ale já si myslím, že problematický není jenom jako říct, zda</v>
+
+14
+00:02:00.500 --> 00:02:10.340
+<v pavol-hejny>něco AI obsah je nebo není. Podle mě problematický je vůbec jako popsat tu míru do jak, jak jako velký míry daná věc je AIková nebo ne.</v>
+
+15
+00:02:10.440 --> 00:02:10.600
+<v ai-ta-krajta-62-speaker_0>Hm.</v>
+
+16
+00:02:11.100 --> 00:02:23.380
+<v pavol-hejny>A zároveň já jsem teďka slyšel takovou hrozně jako zajímavou, takovej zajímavej názor. Spoustu lidí jako nemá ráda AI generovanej kód a říká, že my se vzdáváme kontroly a že je to slop a jako podobný</v>
+
+17
+00:02:23.420 --> 00:02:35.500
+<v pavol-hejny>věci. Jenomže ono, když bych si vzal kód předtím, než se, než se kód psal AIkem, tak i jako pokud cokoliv napíšu, nevím, například v Céčku, tak to, co mně reálně</v>
+
+18
+00:02:35.540 --> 00:02:47.760
+<v pavol-hejny>běží na tom procesoru, tak to není Céčko, ale nějakej vygenerovanej assembler. Tím pádem nula procent mýho kódu je reálně nevygenerovanýho. A teďka jako teda ja-jaká je ta distinkce?</v>
+
+19
+00:02:47.800 --> 00:02:59.940
+<v pavol-hejny>Jako vygenerovaný čím? Musí to jako projít přes-- jako pokud stačí, že to prošlo přes nějakej algoritmus, tak v principu veškerej obsah je, je generovanej. Nebo to musí být neuronová síť,</v>
+
+20
+00:03:00.100 --> 00:03:08.760
+<v pavol-hejny>nebo to musí být jazykovej model? Nebo jako kde je ta hranice? A to mně vůbec není jasný a mně přijde, že tohleto se tady vůbec nedefinuje.</v>
+
+21
+00:03:09.020 --> 00:03:21.360
+<v ai-ta-krajta-62-speaker_0>A já nevím, jak to vnímáte u vás, ale jakože u nás v práci už si hodně jakože máme prostě repa, kde na to člověk nečáhal prostě na ten kód a jsou celý vygenerovaný a je toho čím dál víc, no. Jako</v>
+
+22
+00:03:21.400 --> 00:03:33.380
+<v ai-ta-krajta-62-speaker_0>nenazvala bych to, že nám to třeba vadí nebo nevadí, ale spíš, že se přizpůsobujeme, protože ono už to teď možná ani často jinak nejde, no, když člověk chce stíhat to tempo. Ale to teda nevím, to je, to je můj názor.</v>
+
+23
+00:03:33.700 --> 00:03:45.840
+<v ai-ta-krajta-62-speaker_1>No, ona je podle mě otázka, že, hm, jako jaký jsou důvody k zavedení tohohle aktu, že čím nás chtějí, eh, tímhletím chrá-- před čím nás chtějí chránit. Software je do</v>
+
+24
+00:03:45.880 --> 00:03:58.000
+<v ai-ta-krajta-62-speaker_1>nějaký míry, pokud je použitej na velmi citlivých strategických místech, tak je to určitě bezpečnostní záležitost. Ale na druhou stranu, proč by mělo někoho zajímat, že si ve svym projektu</v>
+
+25
+00:03:58.820 --> 00:04:11.740
+<v ai-ta-krajta-62-speaker_1>generuješ kód pomocí AIka? Přijde mně, že tam je obrovská škála. Prostě myslím, že, že ne všichni budou stejně posuzovaní. Eh, je to takový jako, podobně jako v GDPR třeba. Pamatuju si na doby, kdy byli</v>
+
+26
+00:04:11.740 --> 00:04:23.960
+<v ai-ta-krajta-62-speaker_1>lidi poměrně hodně vyděšení z tohodle toho nařízení a mám pocit, že ne vždycky se postupovalo úplně racionálním způsobem. Jako že vlastně se snažila chránit úplně zbytečně moc před něčím, co reálně vůbec nehrozilo.</v>
+
+27
+00:04:24.060 --> 00:04:26.900
+<v ai-ta-krajta-62-speaker_1>Já bych to asi, nevím, potřeboval bych si to nastudovat.</v>
+
+28
+00:04:27.100 --> 00:04:39.660
+<v pavol-hejny>Když zmiňuješ GDPR, já se jako fakt bojím, že to dopadne tak, jak teďka v podstatě na úplně libovolnej web přijdu, tak úplně každej web mně říká, že má cookies. V podstatě ne-neexistuje</v>
+
+29
+00:04:39.680 --> 00:04:51.700
+<v pavol-hejny>web dneska, bez toho, aby to tam nebylo. My třeba jsme měli takovej web, kde to tam nebylo, protože jsme reálně cookies na jednom projektu nepoužívali, ale stejně to po nás jako chtěli, protože prostě to tam jako musí bejt. Už se</v>
+
+30
+00:04:51.740 --> 00:05:03.880
+<v pavol-hejny>to bere, už se to bere, že takováhle věc tam musí bejt. A já se jako fakt bojím, že tady budeme za pět let všude mít navíc jako AI slop, ne v podobě toho AI slopu, ale v podobě</v>
+
+31
+00:05:03.920 --> 00:05:14.880
+<v pavol-hejny>těch nálepek, že AI generated. A teďka jako všude po tom, jako po tom webu a po těch věcech bude nálepka „AI generated“ a bude to absolutně jako bezvýznamový.</v>
+
+32
+00:05:15.620 --> 00:05:17.800
+<v ai-ta-krajta-62-speaker_1>Myslím, že to je reálný riziko tohleto.</v>
+
+33
+00:05:18.240 --> 00:05:20.180
+<v ai-ta-krajta-62-speaker_0>To je, to je dobrý point, no, to jako-</v>
+
+34
+00:05:20.460 --> 00:05:32.520
+<v pavol-hejny>Zároveň jako já asi rozumím tomu, na co to re-, na co to reaguje. Jako že třeba když se člověk kouká na televizi nebo na nějaký video, tak tam asi opravdu dává smysl, jako z nějakýho teatrickýho hlediska,</v>
+
+35
+00:05:33.040 --> 00:05:45.240
+<v pavol-hejny>aby bylo jasný, kterej z těch záběrů je. A teď ani možná jako ta distinkce AI, non-AI je možná jako hrozně hrubá. Že dávala by smysl nějaká distinkce, tohleto je reálně záběr z tý doby,</v>
+
+36
+00:05:45.440 --> 00:05:57.920
+<v pavol-hejny>z toho místa. Tohleto je jenom nějakej ilustrační záběr, což ty televize často označují. A tohleto je jako AIkem vygenerovaná vizualizace. Ale mně přijde, že i bez toho, aby to Evropská</v>
+
+37
+00:05:57.960 --> 00:06:03.940
+<v pavol-hejny>unie nařizovala, tak, tak tohleto se reálně už dělo. Nebo minimálně u těch seriózních médií se tohleto vždycky dělo.</v>
+
+38
+00:06:04.060 --> 00:06:16.100
+<v ai-ta-krajta-62-speaker_0>No ono u těch textů, já nevím, jestli to máte taky tak, ale já když prostě čtu nějakej článek vygenerovanej AI, tak jak už jsme toho četli hodně, že jo, tak tam jsou takový ty obraty, co si říkáte prostě „Aha, no tak</v>
+
+39
+00:06:16.420 --> 00:06:27.550
+<v ai-ta-krajta-62-speaker_0>to je úplně jasný, že tohle je vygenerovaný.“ A já už pak ani nemám často chuť to dočíst, i když jako vlastně v tom článku třeba jsou dobrý informace, ale no, to ani nepotřebuje tu nálepku potom.</v>
+
+40
+00:06:27.810 --> 00:06:36.030
+<v pavol-hejny>Možná pojďme na nějakou, na nějakou další novinku a k tady tomu se případně vraťme. Kdo z vás má něco, něco tenhle týden dalšího novýho?</v>
+
+41
+00:06:36.210 --> 00:06:48.230
+<v ai-ta-krajta-62-speaker_0>Tak já možná můžu mluvit o tom jazykovým modelu, kterej se někomu povedlo narvat na ESP32. To mě prostě úplně dostalo, že jsem to musela zkusit taky. Takže teď tady zrovna teď</v>
+
+42
+00:06:48.270 --> 00:07:00.330
+<v ai-ta-krajta-62-speaker_0>to tady mám. Mně se to povedlo zprovoznit asi před půl hodinou, jo. Takže já ukážu. Mám tady model v krabičce od sirek doslova. Kdo viděl moji prezentaci na AI Monday, kde jsem mluvila o modelu</v>
+
+43
+00:07:00.370 --> 00:07:12.410
+<v ai-ta-krajta-62-speaker_0>v krabičce od sirek, tak tady si ho tam můžu doslova nacpat. Já to takhle otevřu. Támhle je to prostě-- ten člověk použil nějakej trik, co používá Google, kterej se jmenuje Fair Layer</v>
+
+44
+00:07:12.470 --> 00:07:24.830
+<v ai-ta-krajta-62-speaker_0>Embeddings, aby se mi to vešlo do tý paměti. Já nevím, jestli to je vidět, ale ten model prostě běží vysloveně v tom ESP32. Je to hrozně cool, takže potom přidám nějaký odkaz na repo do komentářů.</v>
+
+45
+00:07:25.250 --> 00:07:37.610
+<v ai-ta-krajta-62-speaker_0>A buď mu tam běží nějakej model, kterej jenom jakože dokončuje dětský příběhy, anebo teď tam přidal model, kterej se jmenuje Barista a můžete se ho ptát na otázky o kafi. Takže</v>
+
+46
+00:07:37.630 --> 00:07:48.750
+<v ai-ta-krajta-62-speaker_0>vlastně to směřuje tam, že byste si mohli povídat s automatem na kafe o kafi a běželo by to prostě tady v tomhle. To je úplně, úplně hustý. Tak dejte vědět do komentářů.</v>
+
+47
+00:07:48.770 --> 00:07:51.770
+<v pavol-hejny>Jak má user interface? J-jak, jak tomu píšu?</v>
+
+48
+00:07:52.010 --> 00:07:54.870
+<v ai-ta-krajta-62-speaker_0>Jo dobře, píšu tomu teď z terminálu. No ale tak jako.</v>
+
+49
+00:07:56.650 --> 00:08:05.670
+<v pavol-hejny>Že to reálně tvoří nějakej server, na kterej se já SSHáčku a můžu si s tím psát tímhletím způsobem. Že je to vlastně takový server v krabičce od sirek.</v>
+
+50
+00:08:06.270 --> 00:08:13.170
+<v ai-ta-krajta-62-speaker_0>No. [smích] Já tomu taky říkám př-přeskavel. A jo, jako ano, je to, je to prostě úplně super.</v>
+
+51
+00:08:13.990 --> 00:08:24.050
+<v pavol-hejny>A když říkáš Barista, tak je to tak, že je to jakoby fine tunovanej model tak, aby znal všechny věci o kávě? Nebo je tam i nějakej RAG a indexová databáze a něco-</v>
+
+52
+00:08:24.090 --> 00:08:36.230
+<v ai-ta-krajta-62-speaker_0>Ne, to ne. Je to fakt jenom model. On je malinkej totiž. On tady tenhlecten, o-- kterej vypráví ty pohádky, ten má dvacet devět milionů parametrů a většina z toho je ten slovník a ten Barista bude podobně malej. A jako R-RAG to</v>
+
+53
+00:08:36.270 --> 00:08:48.290
+<v ai-ta-krajta-62-speaker_0>tam jako není. Fakt je to jenom ten model. Prostě celý to teď, vlastně ty experimenty s tím teď začínaj. Já taky chci zkusit nějakej model natrénovat na food courtly. No, uvidíme, jestli se to povede. Tak</v>
+
+54
+00:08:48.310 --> 00:09:00.650
+<v ai-ta-krajta-62-speaker_0>v dalším díle. Takže je to fakt, je to, je to na začátku, ale já si myslím, že to má potenciál. No, tak uvidíme. Tady můžu i ukázat, jak to píše něco. Tady si teď napíšu začátek pohádky do terminálu.</v>
+
+55
+00:09:00.970 --> 00:09:08.010
+<v ai-ta-krajta-62-speaker_0>Jo. No a ono to možná nebude vidět. Ale trošku jo. [smích] Dám tam pak odkaz.</v>
+
+56
+00:09:14.330 --> 00:09:26.510
+<v pavol-hejny>Mně přijde jako zajímavá věc, že, eh, vši-- jako že ten opravdu velkej hype ohledně AIka, ten nastal chatem GPT, kterej byl nad GPT, mně říkali tři a půlkou, ale reálně GPT</v>
+
+57
+00:09:26.570 --> 00:09:38.710
+<v pavol-hejny>trojkou. Mě samotnýho začaly jazykový modely fascinovat v době GPT dvojky, protože ono to jako bylo divný v tu, v tu chvíli, že vlastně stále ten generovanej text byl tak-- měl takovej jako hodně, hodně AI vibe. Ale</v>
+
+58
+00:09:38.770 --> 00:09:48.510
+<v pavol-hejny>byl to první model, kterej uměl psát smysluplný lidskej text, kterej byl delší než, než několik vět. Předpokládám, že zhruba na týhletý úrovni je ten model, kterej běží v tý krabičce.</v>
+
+59
+00:09:48.710 --> 00:09:51.070
+<v ai-ta-krajta-62-speaker_0>Ano, je prostě hodně malinkej. Jo.</v>
+
+60
+00:09:51.210 --> 00:09:53.610
+<v pavol-hejny>Jaký to má kontextový okno velký nebo-</v>
+
+61
+00:09:54.170 --> 00:10:03.890
+<v ai-ta-krajta-62-speaker_0>Jéžiš- To nevím, to nevím. To jsem se nedívala, ale to bude malinkatý, jo, to bude nějakejch jako-- ne, teď šílím, ale fakt to bude úplně, úplně malinký.</v>
+
+62
+00:10:04.090 --> 00:10:16.210
+<v pavol-hejny>Že právě přemýšlím, že jako jak, jak velkej, jak rozsáhlý příběh tam dokážu napsat a zároveň po jak, po jaký době by se tahleta věc začala cyklit nebo ten příběh začal bejt divnej. Že by bylo zajímavý</v>
+
+63
+00:10:16.390 --> 00:10:28.650
+<v pavol-hejny>v tý době nebo v době těchletěch modelů bylo zajímavý to, že to, kdy člověk začíná poznat, že to opravdu je AIko nebo že to opravdu jako něco divnýho, tak bylo zhruba po odstavci textu. Tak by mě jako</v>
+
+64
+00:10:28.670 --> 00:10:35.410
+<v pavol-hejny>hodně zajímal nějakej-- dokážeš to z toho vytáhnout textově a dát to třeba do komentáře tady dolů pod, tady dolů pod video?</v>
+
+65
+00:10:35.430 --> 00:10:47.010
+<v ai-ta-krajta-62-speaker_0>Jo, přidám to pak. Ono jako ale ten model není opravdu vůbec nějakej skvělej, ale už jsem si to našla, že to má jenom dvěstě padesát šest tokenů kontextový okno, je to fakt malinký, no. Ale jako vlastně to zajímavost je, že to fakt narval na</v>
+
+66
+00:10:47.050 --> 00:10:48.390
+<v ai-ta-krajta-62-speaker_0>něco takhle malýho, no.</v>
+
+67
+00:10:48.630 --> 00:11:00.910
+<v pavol-hejny>To jako je, je to fascinující. Já si jako umím představit praktický využití takovýhle věci. Jakoby tak nebudou se na tom spouštět programovací agenti, ale jako dává to smysl ně-- jako může to dávat smysl na nějakou klasifikaci</v>
+
+68
+00:11:01.330 --> 00:11:07.170
+<v pavol-hejny>například nebo na něco, co jako opravdu běží on device a potřebuje to spotřebovat poměrně málo energie.</v>
+
+69
+00:11:07.410 --> 00:11:19.070
+<v ai-ta-krajta-62-speaker_0>No, já právě teď zrovna přemýšlím, co bych s tím tak mohla udělat, když už jsem to tady teda zprovoznila, no. Takže nějakou klasifikaci, to je pravda. Ale má to strašnejch hvězdiček na GitHubu, no ty jo, asi už pět tisíc nebo možná už víc, jako.</v>
+
+70
+00:11:19.290 --> 00:11:22.530
+<v ai-ta-krajta-62-speaker_0>Nevím. Uvidíme, co s tím bude dál. Máte nějakou další novinku někdo?</v>
+
+71
+00:11:22.750 --> 00:11:34.930
+<v pavol-hejny>Já žádnou speciální novinku nemám ten, pro tuhle epizodu. Koukal jsem trošku na Kimi 4.3 a její podrobnější benchmarkování. Ještě nemám úplně všechny možný výsledky. Možná bych to nechal až do, do další</v>
+
+72
+00:11:34.990 --> 00:11:47.090
+<v pavol-hejny>epizody. Každopádně to, o čem se tady bavíme, je podle mě s-stále více se potvrzuje, že jedna velká část technologií půjde směrem, který umožní udržet, jako skladovat ty malý jazykový modely</v>
+
+73
+00:11:47.130 --> 00:11:59.850
+<v pavol-hejny>na nějakým zařízení, je reálně používat. Myslím, že je to, je to taková jako trošku sázka na to, že proč, proč třeba někteří lidi říkají, že Apple není odepsanej, protože je jedním z způsobů, jak tyhlety malý jazykový modely systematicky</v>
+
+74
+00:11:59.890 --> 00:12:11.970
+<v pavol-hejny>provozovat lokálně. Protože na čem to poběží? Asi, asi na nějakých, na nějakým hardwaru, kterej bude mít dostatečně velkou paměť a propustnost. Já bych tam ještě jako možná rozlišoval, protože to, co ukazovala Katka, tak to</v>
+
+75
+00:12:11.990 --> 00:12:24.490
+<v pavol-hejny>jsou opravdu jako úplně, to je opravdu úplně super malej model. Ono bude existovat pravděpodobně něco jako mezi, něco mezi tím opravdu jako vel-velkým, velkým modelem typu Opus Pet nebo Fable a</v>
+
+76
+00:12:24.970 --> 00:12:37.006
+<v pavol-hejny>těmahle těma malinkejma modelama, kdy- Třeba si jako na nějakým jako i Airu dokážu spustit už jako modely, který oni nejsou dobrý jako v porovnání s tím, co máme, pokud jako jdeme přes cloud nebo</v>
+
+77
+00:12:37.026 --> 00:12:49.046
+<v pavol-hejny>pokud máme nějakej, nějakej jako šílenej cluster grafik. Ale jsou dobrý v tom, že do-už dokážou dělat function calling a tool calling, eh, už se na nich dá provozovat nějakej RAG, už se přes</v>
+
+78
+00:12:49.066 --> 00:13:00.906
+<v pavol-hejny>ně dají dělat nějaký třeba jednoduchý textový sumarizace. Už se přes ně dají dělat nějaký třeba anonymizace před tím, než se to posílá do velkejch modelů. Tyhlety středně velký modely, případně malý modely pak můžou fungovat v tandemu s těma</v>
+
+79
+00:13:00.946 --> 00:13:13.626
+<v pavol-hejny>velkejma, protože mně přijde, že ty architektury dneska jsou často postavený tím způsobem, že vlastně všechno jde jenom do cloudu. Tam se to prostě pustí na těch jako, v těch jako šílenejch datacentrech</v>
+
+80
+00:13:13.866 --> 00:13:25.946
+<v pavol-hejny>s těma jako šílenejma dotacema jako od, jako od Američanů nebo Číňanů. Tady to je jednak neudržitelný a jednak si myslím, že na spoustu věcí bude stačit jako nějaká jako</v>
+
+81
+00:13:25.986 --> 00:13:29.266
+<v pavol-hejny>mezicesta nebo nějaká optimalizace procesu.</v>
+
+82
+00:13:30.206 --> 00:13:42.686
+<v ai-ta-krajta-62-speaker_0>Já teď zrovna zkouším vlastně celou jako naši aplikaci, kterou vyvíjím, tak zkouším, na kterým by to zvládlo jet v lokálním modelu. A jsem až překvapená, jak jsou ty lokální modely dobrý. A samozřejmě</v>
+
+83
+00:13:42.726 --> 00:13:54.506
+<v ai-ta-krajta-62-speaker_0>ono záleží na tom use casu. To je vlastně ta hlavní věc, jakej je ten use case a podle toho pak si člověk vybírá ten model. Pro nás teda speciálně když chceme, aby ta aplikace mluvila česky, tak to je vlastně ten největší blok, že potřebujem,</v>
+
+84
+00:13:54.566 --> 00:14:06.746
+<v ai-ta-krajta-62-speaker_0>aby to mělo dobrou češtinu. A kdybych se spokojila jenom s anglickým modelem na nějakou klasifikaci, jsi říkal, tak to by samozřejmě pak bylo mnohem jednodušší, no. Ale, ale u těch českejch jako jo, už je spousta jako dobrejch českejch modelů,</v>
+
+85
+00:14:07.286 --> 00:14:18.726
+<v ai-ta-krajta-62-speaker_0>která jako s multim-no multimodálních taky, ale multilinguage jsem teď chtěla říct, který jako už tu češtinu zvládnou dost obojně, no. A běží on device třeba ta, já to teď řeknu blbě, protože já o tom jenom čtu a s nikým o tom nemluvím, ale</v>
+
+86
+00:14:18.746 --> 00:14:31.006
+<v ai-ta-krajta-62-speaker_0>Gemma E4B, ta, ta má taky nějakou-- ta zrovna přesně má tu speciální architekturu, co použili pro vytrénování tady tohohle modelu. Ten multi, ježíšmarja. No, to je prostě parallel embedding. A že ona dokáže</v>
+
+87
+00:14:31.046 --> 00:14:43.206
+<v ai-ta-krajta-62-speaker_0>běžet i na mobilu a chová se prostě jako mnohem, jako vlastně mnohem lepší model, ale zabere prostě paměť jako, jako horší model. Tak, tak bych to řekla. Pak tam možná dám odkaz, jakej</v>
+
+88
+00:14:43.226 --> 00:14:55.006
+<v ai-ta-krajta-62-speaker_0>model to je. Ten mi přijde taky fakt, fakt jako dobrej, že zvládne i nějaký ty tool cally, který třeba zrovna my potřebujeme. No ale, ale záleží na tom use casu, no. Člověk musí mít svoje vlastní evaly na svůj vlastní use case, aby to poznal.</v>
+
+89
+00:14:55.366 --> 00:14:59.826
+<v pavol-hejny>Jinak pro Android existuje taková parádní appka, která se jmenuje Edge Gallery. Je to od Googlu.</v>
+
+90
+00:15:00.246 --> 00:15:00.386
+<v ai-ta-krajta-62-speaker_0>Mhm.</v>
+
+91
+00:15:00.506 --> 00:15:12.666
+<v pavol-hejny>Člověk si tam může stáhnout přímo lokální modely, ale o-oni jsou takhle. Ono já bych přesně řekl, že tohleto je přesně jako mezi. To je jako me-mezi těma obrovskejma modelama a mezi tim, jako ma-malým ESPíčkem</v>
+
+92
+00:15:12.726 --> 00:15:24.826
+<v pavol-hejny>v krabičce od Siri. Jedna z architektur, já jsem jí teda nepoužíval kvůli optimalizaci, já jsem jí používal kvůli, kvůli tomu, že jsem jako vytěžoval to nejlepší z real time modelu a to nejlepší z pomalýho</v>
+
+93
+00:15:24.866 --> 00:15:36.886
+<v pavol-hejny>thinking modelu, že člověk může dát do tandemu dva modely s tím, že jeden umí dobře česky, umí dobře formulovat věci, umí si s tebou dobře povídat a ten druhej je dobrej v tom</v>
+
+94
+00:15:37.086 --> 00:15:49.286
+<v pavol-hejny>ty věci dělat na pozadí. Vlastně ty si povídáš s tím jako dobrým modelem v češtině, klidně nějakým jako optimalizovaným na tvým lokálním zařízení, který je třeba zfine tunovanej pro jako specificky nějakej danej jazyk.</v>
+
+95
+00:15:49.446 --> 00:16:01.566
+<v pavol-hejny>Tenhle ten model vlastně má všechny věci, který jsou trochu těžší nebo který jsou potenciálně delegovatelný nebo jsou nějaká otázka někde ven, tak se ptá ven do nějakýho jako velmi</v>
+
+96
+00:16:01.606 --> 00:16:14.326
+<v pavol-hejny>silnýho thinking modelu, který je úplně jedno, jak bude dobrej v češtině, jak bude dobrej konverzačně. Důležitý je to, aby mu předal všechny ty věci, aby je ten, ten lokální model, ten povídací, dokázal přeformulovat</v>
+
+97
+00:16:14.466 --> 00:16:15.766
+<v pavol-hejny>do přirozených vět.</v>
+
+98
+00:16:15.966 --> 00:16:28.006
+<v ai-ta-krajta-62-speaker_0>Jo, to zní jako zajímavě. Ono když člověk vyvíjí nějakou tu jako chatovací appu, tak že jo, to člověk asi hodně přemýšlí nad tím, jakou to má latenci, aby se to stíhalo. No už když tady přemýšlím, jak bych to jako, jak bych to udělala, aby</v>
+
+99
+00:16:28.046 --> 00:16:40.066
+<v ai-ta-krajta-62-speaker_0>to nemělo takovej zásah, no. Mně to těší. A pak vlastně čím, že jo, co je vlastně ta výhoda potom těch lokálních modelů oproti těm, co vlastně ti běží jako někde u tý třetí strany? Jak-- protože</v>
+
+100
+00:16:40.086 --> 00:16:47.105
+<v ai-ta-krajta-62-speaker_0>když to přece jenom jako ty, ty jednodušší modely zas tak drahý nejsou a tu latenci docela dobrou jako maj, jako-</v>
+
+101
+00:16:47.146 --> 00:16:59.366
+<v pavol-hejny>Já, já bych paradoxně řekl, že rychlost to není. A to kvůli tomu, že-- nebo takhle, jako trošku pomíjím takový ty fakt super malý modely. To, co jsi ukazovala, o tom jako moc nic nevím a tam nevím. Ale pokud beru modely</v>
+
+102
+00:16:59.406 --> 00:17:11.566
+<v pavol-hejny>na úrovni, nevím, třeba z toho Kimieho nebo nějakýho DeepSeeka, tak vezmu DeepSeeka toho nejnovějšího, abych byl, abych byl přesnej. Tak ono se dá rozběhnout lokálně, ale, eh, typicky</v>
+
+103
+00:17:11.686 --> 00:17:23.826
+<v pavol-hejny>se mně ho nepo-- typicky se mně ho nepovede rozběhnout úplně optimálně na nějakým jako normálně drahým hardwaru s nějakou jako normální tokenovou rychlostí tak, aby to bylo, jako že buď mě to bude stát strašně</v>
+
+104
+00:17:23.866 --> 00:17:36.366
+<v pavol-hejny>moc peněz, nebo to bude mít prostě pět tokenů za vteřinu nebo jako nějakej divnej kompromis mezi tim. Anebo si to koupím od Číňanů, případně od nějakýho prostě providera tady. Budu to mít v principu</v>
+
+105
+00:17:36.726 --> 00:17:48.906
+<v pavol-hejny>notovaný, rychlejší a levnější. Jedinej možná případ je, kdybych to používal v nějakým prostředí, kde je pomalej internet jako by default. Jako výhodu to má jinou. Výhodu to má tu, že nikam neposílám data a že mně to nikdo nemůže</v>
+
+106
+00:17:48.946 --> 00:17:50.866
+<v pavol-hejny>vypnout. To si myslím, že je-</v>
+
+107
+00:17:51.526 --> 00:17:51.806
+<v ai-ta-krajta-62-speaker_0>Mhm, mhm</v>
+
+108
+00:17:51.806 --> 00:17:53.206
+<v pavol-hejny>...zatím podceňované.</v>
+
+109
+00:17:53.246 --> 00:17:53.526
+<v ai-ta-krajta-62-speaker_0>Ano.</v>
+
+110
+00:17:53.726 --> 00:18:06.046
+<v ai-ta-krajta-62-speaker_1>To je podle mě důležitá věc, se kterou se setkáváme ostatně i v Prombooku, že m-má-máme spoustu klientů, který tohleto přesně požadujou. Myslím, že stále větší bude podíl</v>
+
+111
+00:18:06.866 --> 00:18:13.846
+<v ai-ta-krajta-62-speaker_1>firem, který možná i z důvodu AI Aktu nebo čehokoliv budou potřebovat, aby ty modely prostě byly lokální.</v>
+
+112
+00:18:14.046 --> 00:18:26.126
+<v ai-ta-krajta-62-speaker_0>Jako můj pocit z toho teď aktuálně z těch lokálních modelů, jako pro to, pro ten náš use case, co teda potřebuju já, že už je to fakt hodně na dobrý cestě, aby to</v>
+
+113
+00:18:26.166 --> 00:18:38.342
+<v ai-ta-krajta-62-speaker_0>bylo výhodnější, ale pořád pro nás je ještě výhodnější volat tu třetí stranu. Ale že fakt, fakt už jsou hodně dobrý. Až mě to překvapilo, no. Nevím, jestli třeba za půl roku už na to přejdem, že to fakt jako,</v>
+
+114
+00:18:38.762 --> 00:18:48.302
+<v ai-ta-krajta-62-speaker_0>jako můj sen je, že to fakt jako bude vysloveně v tom mobilu prostě multimodální model, kterej prostě bude přímo jako on device. No tak uvidíme, ale zlepšuje se to rychle, no.</v>
+
+115
+00:18:48.602 --> 00:19:00.882
+<v pavol-hejny>Stále problém je, že u těch třetích stran my v tuhle tu chvíli nemáme tu jejich reálnou cenu. My jako vidíme třeba z nějaké jako token price nebo, nebo jako máme nějakou třeba subscription na to kódování. Ta subscription to ani náhodou není,</v>
+
+116
+00:19:01.462 --> 00:19:13.762
+<v pavol-hejny>není to, co to reálně stojí. A to token price to taky není to, co to stojí. Teďka je problém, že ono určitě tam jako dochází k spoustě optimalizací, že ono to jako za nějakou dobu bude levnější, takže jako ta cena dneska nás nemusí</v>
+
+117
+00:19:13.802 --> 00:19:26.542
+<v pavol-hejny>zajímat, ale na druhou stranu, kdy přijde tlak těch investorů a oni budou muset začít vydělat. Ale jako mi-minimálně pokud to člověk chce teďka utilitárně prostě co nejvíc vytěžit, tak v tuhle tu chvíli prostě pokud jede jako, eh,</v>
+
+118
+00:19:26.642 --> 00:19:33.842
+<v pavol-hejny>agenty dvacet čtyři sedm, tak jako velmi dobře čerpá ty všechny VC money z Ameriky, případně ty vládní jako čínský peníze.</v>
+
+119
+00:19:34.082 --> 00:19:46.142
+<v ai-ta-krajta-62-speaker_0>No, já už to taky dělám, že si nechávám přes noc běžet agenty. Ještě nedávno jsem se tomu vyhejbala. Chtěla jsem si kontrolovat každej krok, ale prostě no, je to tak. A teda teď jsem si uvědomila, ne, teď trošku</v>
+
+120
+00:19:46.162 --> 00:19:56.942
+<v ai-ta-krajta-62-speaker_0>asi měním téma, jo, ale vzpomněla jsem si na ten Fable, ale vy jste o něm možná mluvili v minulým díle, tak nevím, ale jenom jako rychle chci říct, že jsem jako tvrdila, že až tak dobrej není, ale to je proto, že jsem pro něj právě neměla ten</v>
+
+121
+00:19:57.042 --> 00:20:09.082
+<v ai-ta-krajta-62-speaker_0>use case. Jako já jsem ho používala na ty svoje úlohy, prostě co řeším v práci, ale zjistila jsem, že jsou prostě úlohy, kamarád mi ukázal: „Ty hele, já jsem mu napsal prostě prompt jednu větu a vyrobil mi hru.“ Říkám:</v>
+
+122
+00:20:09.182 --> 00:20:19.942
+<v ai-ta-krajta-62-speaker_0>„Aha, no jo.“ Takže jsem se začala podívat na každou blbost, co mě napadne a jo, uznávám, že je to fakt dobrej model. No ale Opus světka teda taky no, ale to je možná teď jako mimo téma. Možná jste to rozebírali minule.</v>
+
+123
+00:20:20.082 --> 00:20:32.862
+<v pavol-hejny>Částečně jsme to rozebírali a vlastně nám potvrzuješ to, co, to co jsme jako hypotézu, ke k-ke který jsme dospěli, že vlastně je potřeba mít ten správnej use case a že možná, že na takový běžný, řekněme,</v>
+
+124
+00:20:33.302 --> 00:20:45.421
+<v pavol-hejny>otázka, jestli je to běžný, ale když používáš modely na programování třeba a máš, seš zvyklá na nějaký workflow, že máš třeba už nějaký atomický úkoly, který jenom svěřuješ těm, těm modelům a ony ho dělají, tak možná ten rozdíl prostě</v>
+
+125
+00:20:45.442 --> 00:20:57.482
+<v pavol-hejny>nepoznáš. Ale v okamžiku, kdy máš nechat navrhnout nějakou architekturu nebo dělat nějaký jako rozhodnutí, tak v tu chvíli se ta síla trošku projeví. No aspoň já mám ten pocit. Přijde,</v>
+
+126
+00:20:57.522 --> 00:21:09.742
+<v pavol-hejny>že tam působí hodně takový efekt, že jako když jsme s vibe codingem začínali tak jako rok a půl dozadu, tak to bylo tak, že tehdy, jak to běželo na tý GPT čtyřce, tak, eh, tak jako spoustu věcí</v>
+
+127
+00:21:09.782 --> 00:21:22.002
+<v pavol-hejny>bylo úplně fascinujících, že jde. Že jako já agentovi zadám, nech to vyrobit nějakou jako s-novou stránku v, na mým webu a ono jí to prostě udělalo. Nebo tady přišli jako Labable a Makali, který uměli jako vyšlehnout</v>
+
+128
+00:21:22.042 --> 00:21:34.282
+<v pavol-hejny>jako z jednoho promptu celej web. A bylo to pro nás úplně fascinující. Čím víc jsme šli do hloubky, tím víc jsme naráželi na to, že to jako vlastně spoustu věcí neumí. U spousty věcí se to sekne, často to produkuje nekvalitní</v>
+
+129
+00:21:34.362 --> 00:21:46.622
+<v pavol-hejny>kód a tak. Každej novej model tohleto zlepšoval a zlepšoval. Připadá mi, že u toho Fable jsme se dostali do stavu, kdy u běžnýho projektu už vlastně nevytěžíme o moc víc, než jsme vytěžili z, jako</v>
+
+130
+00:21:46.642 --> 00:21:58.962
+<v pavol-hejny>třeba z Opusu čtyři sedmičky. Že vlastně už to není tak jako obrovsky fascinující efekt, ale ono je to možná jenom tim, že třeba s Promptbookem je moc málo jako složitej a moc málo ambiciózní projekt. To je jako absolutně</v>
+
+131
+00:21:59.022 --> 00:21:59.362
+<v pavol-hejny>možný.</v>
+
+132
+00:21:59.542 --> 00:22:12.102
+<v ai-ta-krajta-62-speaker_0>No jednak je to o tý složitosti a druhak vlastně mi přijde, že jako že tyhlecty modely typu Fable, že umí prostě, když tomu dáš fakt jako úplně jednoduchý zadání a ono si to prostě všechno domyslí. Tim, jak prostě, tim,</v>
+
+133
+00:22:12.122 --> 00:22:20.702
+<v ai-ta-krajta-62-speaker_0>jak prostě si zorkestruje ty agenty, aby se spolu nějak domluvily, že jo a prostě to nějak něco použitelnýho vystřelí hned. No, to nevím, jak to udělali.</v>
+
+134
+00:22:20.882 --> 00:22:33.102
+<v pavol-hejny>Já tu mám ještě jedno takový téma, který s tím, co říkáš, dost hodně souvisí a to to, že mě vlastně fascinuje, nakolik ten, ten základní Claude Code nebo Codex vlastně není</v>
+
+135
+00:22:33.122 --> 00:22:45.382
+<v pavol-hejny>dobrej programátor. A já to zkusím rozvést. Ono to jako zní hrozně divně, když říkám, že není dobrej programátor. On je strašně dobrej programátor v tom, že on umí implementovat feature. Jakoukoliv věc, co mu dáš, že má udělat,</v>
+
+136
+00:22:45.462 --> 00:22:57.502
+<v pavol-hejny>ať už jako celou appku nebo nějakou komplexní změnu v appce, tak jí už dneska udělá bezvadně. V podstatě v drtivý většině jako situací, když dobře zadáš, co chceš udělat, tak ti to</v>
+
+137
+00:22:57.602 --> 00:23:09.682
+<v pavol-hejny>jako udělá tu věc dobře. Ale když se pak člověk dívá na ten kód a opravdu si dělá jako review toho kódu, tak ten kód často je, n-nechci říkat nekvalitní, on není jako</v>
+
+138
+00:23:09.722 --> 00:23:21.742
+<v pavol-hejny>u-úplně vysloveně nekvalitní, ale jako je tam spoustu věcí, který jsou, který se daj velmi lehce napravit a často stačí velmi málo k tomu, aby se mu jeho programátorský skill zvedl úplně</v>
+
+139
+00:23:21.762 --> 00:23:34.102
+<v pavol-hejny>neuvěřitelně bez toho, aby mu dropla ta kvalita v tý, v tý exekutivě, v tý exekuci. A vlastně mě hodně zajímá, jestli se o tom jako něco myslíte, jestli máte podobnou zkušenost anebo, nebo se mnou nesouhlasíte.</v>
+
+140
+00:23:34.642 --> 00:23:47.082
+<v ai-ta-krajta-62-speaker_0>No já mám pocit, že jakmile prostě v tom kódu máš jenom maličko nějakej náznak něčeho, co není jako úplně dobře, tak on potom se toho drží a ten pattern prostě rozšiřuje a opakuje,</v>
+
+141
+00:23:47.142 --> 00:23:57.282
+<v ai-ta-krajta-62-speaker_0>že jo. To je první věc. A druhá věc je, že po sobě, jako to je možná můj problém, jako to mám já jako udělaný, ale prostě že po sobě strašně neuklízí, jo.</v>
+
+142
+00:23:58.922 --> 00:24:05.062
+<v ai-ta-krajta-62-speaker_0>A strašně tam nechává zbytečný části kódu, který už by tam jako bejt nemusely. Ale možná, že to mám já špatný, no.</v>
+
+143
+00:24:05.322 --> 00:24:17.482
+<v pavol-hejny>Mně přijde, že takovej jako úplně asi nejběžnější nešvar toho je, že se opakuje, že vlastně nedělá, nedělá žádný společný abstrakce, ale že často stejná funkcionalita je na dvaceti různých jako</v>
+
+144
+00:24:17.502 --> 00:24:29.502
+<v pavol-hejny>místech copy paste. A vtipný na tom je, že ono to jako, že pokud člověk nekouká na ten kód a nepotřebuje tu appku mít jako moc velkou, tak tahleta věc většinou nevadí. Tahleta věc začne vadit až jako, až</v>
+
+145
+00:24:29.522 --> 00:24:36.862
+<v pavol-hejny>většinou ve chvíli, kdy už to člověk nepřikládá na zodpovědnost tomu, kdo to, tomu modelu nebo tomu runu, kterej to implementoval.</v>
+
+146
+00:24:37.062 --> 00:24:38.362
+<v ai-ta-krajta-62-speaker_0>No a to je třeba kdy?</v>
+
+147
+00:24:39.654 --> 00:24:51.854
+<v pavol-hejny>My máme na, na našem agentím serveru takovou jako komponentu, která ukazuje, jak si má člověk nakonfigurovat DNSka na to, aby mu ten server fungoval, aby vlastně jako všichni agenti měli třeba přístup ke svým e-mailům</v>
+
+148
+00:24:52.054 --> 00:25:04.394
+<v pavol-hejny>a, a aby byly jako jejich projekty správně nakonfigurovaný a tak. Teďka tahle ta komponenta se používá na-- nebo tady ten pattern se používá napříč různým systémem, že je tam nějaká jedna centrální stránka, na který jsou vidět všechny</v>
+
+149
+00:25:04.434 --> 00:25:16.834
+<v pavol-hejny>DNSka, jakoby úplně všechny DNSka, který se mají nakonfigurovat pro to, jako pro to, aby ten server fungoval. A pak tam jsou různý podstránky, například stránka e-mailovýho serveru, která zobrazuje jenom</v>
+
+150
+00:25:16.994 --> 00:25:29.014
+<v pavol-hejny>DNSka relevantní k e-mailu. Stránka projektů, který zobrazuje jenom DNSka relevantní k nějak, jako k projektům, který si ti agenti vytvořili. On udělal to, že udělal stejně vypadající komponentu a zkopíroval ji na</v>
+
+151
+00:25:29.094 --> 00:25:41.734
+<v pavol-hejny>všechny místa. Že vlastně jakoby úplně stejná komponenta, stejně, stejně vypadající, stejně fungující byla na všech místech. Já jsem tam přidával Cloudflare wizard, aby to uměl prostě na jako jeden klik automaticky</v>
+
+152
+00:25:41.754 --> 00:25:53.854
+<v pavol-hejny>nastavit na Cloudflare. A ono to přidal jenom na jedno z těch míst a na těch ostatních to nebylo. Pak zase, pak on dělal nějaký UIkový úpravy a zase je udělal na jiným místě. A teďka jsem tam měl jedno místo, na kterým byl</v>
+
+153
+00:25:53.914 --> 00:26:06.054
+<v pavol-hejny>ten wizard a ta dobrá funkcionalita a druhý místo, který vypadalo dobře a mělo dobrý UXko. A tyhlety místa vlastně, tam nebyl merge con-- to nebyl merge conflict, to bylo vysloveně zduplikovaný kód na dvou místech, kterých se každej vyvinul</v>
+
+154
+00:26:06.114 --> 00:26:12.954
+<v pavol-hejny>svým vlastním směrem. A kdyby to už od začátku udělal nějakou jako společnou komponentou, nějakou abstrakcí, tak by tenhle problém vůbec nenastal.</v>
+
+155
+00:26:13.174 --> 00:26:25.294
+<v ai-ta-krajta-62-speaker_0>Mhm, to se mi taky stalo, něco jako v jiným kontextu, ale jo, taky no, to prostě, to dělá, no. A třeba ano, máš pravdu, no. Člověk na to přijde až v momentě, kdy jako je s tím problém. Hm, je</v>
+
+156
+00:26:25.334 --> 00:26:26.114
+<v ai-ta-krajta-62-speaker_0>to tak, no.</v>
+
+157
+00:26:26.134 --> 00:26:34.114
+<v pavol-hejny>Mě, Katko, zaujalo, ty máš několik podobných projektů, jako je teďka to, cos ukazovala, tu krabičku. Nechtěla bys o tom něco povědět?</v>
+
+158
+00:26:34.494 --> 00:26:46.594
+<v ai-ta-krajta-62-speaker_0>Jo, tak jako můžu o tom Brainscopu, ale to jsem si měla možná něco připravit. Já vlastně, o co mi jde obecně jako na mým GitHubu, je interpretabilita vlastně</v>
+
+159
+00:26:46.614 --> 00:26:59.034
+<v ai-ta-krajta-62-speaker_0>jazykovejch modelů, respektive možnost pro všechny lidi, co vyvíjejí aplikace, aby se mohli, když teda samozřejmě potřebujete k tomu lokální model, abyste se mohli podívat, co se v tom modelu přesně děje. Vlastně</v>
+
+160
+00:26:59.414 --> 00:27:11.674
+<v ai-ta-krajta-62-speaker_0>využít to třeba pro nějaký porozumění tomu, jak se ta aplikace chová a, em, třeba nějak ten model ovlivnit a vylepšit chování tý aplikace, no. Ale jako zároveň taky hnedka</v>
+
+161
+00:27:11.714 --> 00:27:23.734
+<v ai-ta-krajta-62-speaker_0>chci říct jako disclaimer, že tohle všechno vlastně předběhuju aktuálního výzkumu, že nevím, jestli to reálně někdo už jako používá, vlastně, vlastně asi ani ne. No v nějakém smyslu jo, že třeba Anthropic</v>
+
+162
+00:27:23.854 --> 00:27:36.414
+<v ai-ta-krajta-62-speaker_0>a Google, a to si nejsem jistá, to jsem úplně z toho jejich paperu nepochopila, ale jestli to opravdu dělaj nebo jenom chtějí, ale kontrolujou si na úrovni, nikoliv, ne-nemaj tam jakože textovej klasifikátor, ale</v>
+
+163
+00:27:36.474 --> 00:27:48.714
+<v ai-ta-krajta-62-speaker_0>kontrolujou si na úrovni aktivací nějaký vlastně tímhle bezpečnostní monitoring vlastně trafiku, co jim tam chodí, jo. Že prostě na úrovni aktivací toho modelu se dívají, jestli se tam neděje zrovna</v>
+
+164
+00:27:48.754 --> 00:28:00.914
+<v ai-ta-krajta-62-speaker_0>něco nebezpečnýho, jo, že sledujou to, jako tam, to, to asi tak hodím nějakej odkaz teda, no. A já jako se snažím teda udělat jakoby open source appku. Vlastně už jako ona funguje, jo, jenom vlastně ještě</v>
+
+165
+00:28:01.314 --> 00:28:13.674
+<v ai-ta-krajta-62-speaker_0>je to furt ve stádiu, že to vylepšuju a vylepšuju. Že můžete si vlastně vzít svoji aplikaci, napojit jí na lokální model a sledovat, co se v tom, eh, modelu děje. No a můžete si tam prostě natrénovat nějaký lineární</v>
+
+166
+00:28:13.794 --> 00:28:25.874
+<v ai-ta-krajta-62-speaker_0>proud, kterým prostě můžete sledovat, v jaký vrstvě se ten model danej rozhodl. Už si byl jistej, že použije tady tenhle tool a ne tamten tool. No a, nebo, nebo právě jako o co</v>
+
+167
+00:28:25.914 --> 00:28:38.354
+<v ai-ta-krajta-62-speaker_0>se taky snažím je vysloveně ten model ovlivnit, aby se nějak choval. Já o tom pak budu mít, o těhle svých pokusech na naší aplikaci budu mít talk na vlastně jedné AI konferenci v Ostravě. Jmenuje se to myslím, že Festival</v>
+
+168
+00:28:38.414 --> 00:28:50.414
+<v ai-ta-krajta-62-speaker_0>AI, tak se to asi jmenuje. Tak, tak přihodím kdyžtak pozvánku, no. Ale může se dát i link na to zrovna jako-- a můžete si to zkusit každej, kdo se koukáte na svojí reálný aplikaci. Jsou tam nějaký různý příklady a</v>
+
+169
+00:28:50.474 --> 00:28:51.174
+<v ai-ta-krajta-62-speaker_0>návody, no.</v>
+
+170
+00:28:51.394 --> 00:29:03.454
+<v pavol-hejny>Určitě to dáme do popisku. Podle mě tohle všechno je, je strašně zajímavý a zvlášť v souvislosti s lokálníma modelama. Mně, mně vlastně přijde ještě fascinující to, jak jsme nakousli někde uprostřed tohohle,</v>
+
+171
+00:29:03.494 --> 00:29:15.634
+<v pavol-hejny>em, dílu. Velká část nějaký práce bude spočívat v tom, že rozdělit nějakou velkou úlohu na sadu menších podúloh, který svěříš každou jinýmu malýmu modelu, vlastně tak,</v>
+
+172
+00:29:15.694 --> 00:29:26.734
+<v pavol-hejny>aby ten výsledek byl zpracovávaný optimálně. Nemyslím tím, že teďka zrovna tvůj nástroj by se na to měl používat, ale přijde mně to jako nějaká příbuzný téma, který by se možná dalo nějak pak zkombinovat dohromady.</v>
+
+173
+00:29:26.854 --> 00:29:39.334
+<v ai-ta-krajta-62-speaker_0>Mohli byste si připravit nějakej díl na ty lokální modely, nebo možná už jsme i měli, ale ono mně přijde, že vždycky strašně závisí na tom konkrétním use casu, no, jakoby každý potřebuje něco jinýho, no. Něco jinýho potřebujou chatovací</v>
+
+174
+00:29:39.374 --> 00:29:47.134
+<v ai-ta-krajta-62-speaker_0>appky, něco jinýho potřebujete, když máte ty coding agenty. Takže, no, jakmile konkrétní use case, tak si připravím nějaký demo třeba, no.</v>
+
+175
+00:29:47.314 --> 00:29:52.694
+<v pavol-hejny>Určitě pozveme všechny na konferenci, která bude v Ostravě. Hm, máš už datum?</v>
+
+176
+00:29:52.934 --> 00:29:54.134
+<v ai-ta-krajta-62-speaker_0>15.9.</v>
+
+177
+00:29:55.314 --> 00:30:07.494
+<v pavol-hejny>Tak tímto zveme všechny na konferenci 15.9. do Ostravy. Co bychom ještě dál mohli probrat dneska? Co mně vlastně přijdou jako dvě zajímavý témata, a to jednak jako lokální modely jako takový. Druhý zajímavý</v>
+
+178
+00:30:07.534 --> 00:30:18.454
+<v pavol-hejny>téma mně přijde to, to, čemu se ty věnuješ a, jako Katko, a myslím si, že by bylo zajímavý na to třeba udělat i celej díl, je to nahlížení a interpretabilita modelů. To je jako, to je jako hodně zajímavý téma.</v>
+
+179
+00:30:18.494 --> 00:30:18.734
+<v ai-ta-krajta-62-speaker_0>Mhm.</v>
+
+180
+00:30:18.774 --> 00:30:30.214
+<v pavol-hejny>A pak mně třetí jsou nějaký jako orchestrační patterny. To, jakým jako způsobem jsou ty jednotlivý modely, ať už lokální nebo cloudový, ale jako různě velký cloudový, vlastně mezi sebou provázaný nějakým-</v>
+
+181
+00:30:30.274 --> 00:30:31.734
+<v ai-ta-krajta-62-speaker_0>Ono to spolu vlastně dost souvisí, no.</v>
+
+182
+00:30:31.874 --> 00:30:35.954
+<v pavol-hejny>Ono spolu souvisí, protože často dává smysl, jako jedno bez druhýho nedává smysl.</v>
+
+183
+00:30:36.274 --> 00:30:49.122
+<v ai-ta-krajta-62-speaker_0>Nějak, nějak to promyslíme, no. Možná že i jako by bylo dobrý, kdyby-- já jsem chtěla říct divákům, aby nám vlastně dali tipy, jakej vlastně use case. Ale to je, to je těžký se, já nevím vlastně, jak se mám zeptat, takže- [smích]</v>
+
+184
+00:30:49.182 --> 00:31:01.382
+<v ai-ta-krajta-62-speaker_0>Takže protože když si tu svojí orchestraci má podle toho, co potřebuje, že jo. Nebo já si to tak představuju, že. Každopádně ale obecně, co jsem zjistila, když ty lokální modely teď testuju, je, že my když máme vlastně, když to posíláme</v>
+
+185
+00:31:01.402 --> 00:31:13.562
+<v ai-ta-krajta-62-speaker_0>někam do tý Athény cizí, tak neřešíme tolik to context window, že jo, protože ho mají velký. Ale u těch lokálních modelů jsem došla k závěru, že kdybych na ně fakt jako chtěla přejít, pak si teda víc sakra</v>
+
+186
+00:31:13.602 --> 00:31:25.762
+<v ai-ta-krajta-62-speaker_0>dám pozor, abych si fakt jako ten kontext předávala jako co, co nejmíň, co nejmíň toho kontextu je potřeba, no. Protože ty menší modely prostě u nich je to lepší. Ale záleží hrozně na tom use case, no.</v>
+
+187
+00:31:25.882 --> 00:31:38.122
+<v pavol-hejny>Mně přijde takovej jako obecně zajíma-zajímavý pattern, co se děje, že se přechází od toho, že mám tady nějakej model a nějaký procesy okolo toho modelu a ty velmi pevně svážu. Například mám tady</v>
+
+188
+00:31:38.202 --> 00:31:50.582
+<v pavol-hejny>model, mám tady vektorovou databázi, mám tady dotaz uživatele. Předtím, než to posílám modelu, tak dělám nějakej embedding a vector search, cosine distance. Vybírám nějaký jako chunkers z databáze,</v>
+
+189
+00:31:50.742 --> 00:32:03.202
+<v pavol-hejny>ty posílám do nějakýho jednoho velkýho promptu modelu, to vracím zpátky, něco validuju, dělám tamto, hentamto. Je to velmi jasně daná pipelina, co vlastně se děje při jako každym runu versus takovej ten jako opravdu silnej</v>
+
+190
+00:32:03.242 --> 00:32:15.382
+<v pavol-hejny>agentní přístup. Jako vůbec neříkám, co se má dít před čím a jakým způsobem, ale dávám modelu veškerej kontext a říkám mu: „Tohleto je tvůj úkol. Tady máš všechny možný metody,</v>
+
+191
+00:32:15.562 --> 00:32:27.702
+<v pavol-hejny>tooly, věci, co můžeš udělat k tomu, abys ho splnil. Dělej si, co chceš. Dělej si indexace, kdy chceš. Pouštěj si batch, kdy chceš. Je to na tobě.“ My jsme za poslední měsíce jako hodně přešli jako od toho, od</v>
+
+192
+00:32:27.862 --> 00:32:39.942
+<v pavol-hejny>takovýho toho jako rigidního po tenhleten jako velmi agentní, ale zároveň u těch lokálních modelů, tam ten agentní přístup jako zdaleka tolik nefunguje, protože ty modely jsou na tohleto jako mnohem slabší už jenom proto, že mají mnohem menší</v>
+
+193
+00:32:39.982 --> 00:32:40.702
+<v pavol-hejny>context window.</v>
+
+194
+00:32:40.822 --> 00:32:52.922
+<v ai-ta-krajta-62-speaker_0>Já se jako furt zdráhám tomu agent-- jakože tomu, čemu říkáš jako agentnímu, jako úplně přejít. Ale zase je pravda, že ono furt, furt vlastně ten agent tam pak může jako sám rozhodnout, že teď to</v>
+
+195
+00:32:52.962 --> 00:33:00.002
+<v ai-ta-krajta-62-speaker_0>dá tomu lokálnímu modelu, že jo. Asi možná, že to bude ten další krok, jo, že prostě no, že to bude takhle.</v>
+
+196
+00:33:00.142 --> 00:33:12.062
+<v pavol-hejny>To je pak jako další věc. To se, to se týká těch nějakejch orchestrčních patternů, že vlastně jsou takový dv-- jich je jako víc než dva, ale jsou takový jako dva, který jdou jako proti sobě. Tedy jeden je takovej, že máš velkýho silnýho agenta,</v>
+
+197
+00:33:12.122 --> 00:33:24.462
+<v pavol-hejny>do kterýho tam jede primárně a ten velkej silnej agent se může rozhodnout, že se spawne nějaký subagenty, který budou běžet třeba na slabším modelu nebo nižším thinkingu nebo klidně lokálním modelu, ale vlastně že se to deleguje ze shora</v>
+
+198
+00:33:24.522 --> 00:33:36.622
+<v pavol-hejny>dolů. Pak je druhej pattern a to nějaká jako eskalační, jako eskalační stupnice, kdy já všechno posílám nejdřív do velmi malýho modelu, klidně jako lokálního, a ten tu, ten můj problém buď vyřeší,</v>
+
+199
+00:33:36.742 --> 00:33:38.302
+<v pavol-hejny>anebo se zeptá silnějšího modelu.</v>
+
+200
+00:33:38.582 --> 00:33:38.782
+<v ai-ta-krajta-62-speaker_0>Hm.</v>
+
+201
+00:33:38.902 --> 00:33:51.082
+<v pavol-hejny>A to třeba s-- to jako první představil Apple, když ještě chtěl integrovat ChatGPT. Jako přijde mně, že mnohem víc se používá ten první, že ten první to reálně v těch coding agentech funguje teďka. Ten druhej je zatím spíš</v>
+
+202
+00:33:51.102 --> 00:34:01.422
+<v pavol-hejny>jako na úrovni nějakejch experimentů, když to vlastně by mě nějak jako hodně zajímalo, třeba od diváků, že jestli jako něk-někdo tenhleten eskalační používá v nějaký produkční aplikaci a funguje mu to dobře.</v>
+
+203
+00:34:01.642 --> 00:34:02.842
+<v ai-ta-krajta-62-speaker_0>Dejte nám kdyžtak vědět.</v>
+
+204
+00:34:03.302 --> 00:34:15.582
+<v pavol-hejny>Pak bych řekl, že ještě jako třetí, kterej je jako takovej komplementarně to tandemovej, že mám nějaký dva modely, který nebo dva přístupy, který jsou každý dobrý na něco jinýho. Například real time a deep thinking. A</v>
+
+205
+00:34:15.682 --> 00:34:27.802
+<v pavol-hejny>ty jsou vlastně v tandemu s-- jako spolu mezi sebou. Jeden dělá například komunikaci s uživatelem a ten druhej dělá ten jako research a tu práci za tím. Taky trochu eskalace, řekněme, ale, ale taková</v>
+
+206
+00:34:27.822 --> 00:34:33.502
+<v pavol-hejny>jako slabší eskalace. A to mně třeba přijde, že funguje. To my třeba používáme a funguje to velmi dobře.</v>
+
+207
+00:34:33.582 --> 00:34:45.642
+<v ai-ta-krajta-62-speaker_0>Tak to je otázka, jako když, když ti stačí jako většinou jenom komunikovat s uživatelem a neposílat často něco na ten lepší model, tak to asi jako může bejt dobrý, no. Teda teď nevím, jestli,</v>
+
+208
+00:34:45.662 --> 00:34:47.342
+<v ai-ta-krajta-62-speaker_0>jestli jsem pochopila, jak to myslíš, to jako.</v>
+
+209
+00:34:47.462 --> 00:34:59.722
+<v pavol-hejny>Já myslím, že u těch eskalací je jeden z hlavních problémů to, že, hm, je potřeba zjistit, že se něco stalo špatně. Ně-- nebo jako mít nějaký kritéria toho, jak poznat, že ten výstup je dobrej, dostatečně dobrej anebo</v>
+
+210
+00:34:59.762 --> 00:35:11.782
+<v pavol-hejny>ne. A přijde mi, že tam je jako nějaký trošku ne-- jako cost toho, že když něco uděláš párkrát blbě, tak když dostaneš zpětnou vazbu a eskaluješ to někam výš a tam se to opraví, tak je to v pohodě. Ale, eh, jsou případy, kdy to</v>
+
+211
+00:35:11.822 --> 00:35:23.822
+<v pavol-hejny>není úplně vhodný, protože ty můžeš ztratit klienta třeba díky tomu, že něco párkrát prostě podělá. To mně přijde, jako že je možná důvod, proč se občas spoléháme na ty silnější</v>
+
+212
+00:35:23.862 --> 00:35:24.182
+<v pavol-hejny>modely-</v>
+
+213
+00:35:24.502 --> 00:35:24.702
+<v ai-ta-krajta-62-speaker_0>Jo, jo</v>
+
+214
+00:35:24.722 --> 00:35:26.242
+<v pavol-hejny>...i když bychom třeba nemuseli. No.</v>
+
+215
+00:35:26.442 --> 00:35:36.182
+<v ai-ta-krajta-62-speaker_0>To je pravda. No já pu-furt nemám v tyhlecty lokální modely takovou důvěru, abych opravdu řekla: „Tak teď na ně přecházíme, no, uvidíme.“ Ale víš, že se fakt rychle zlepšujou, no.</v>
+
+216
+00:35:36.462 --> 00:35:48.702
+<v pavol-hejny>S tím jako hodně souvisí takovej experiment, kterej jsem dělal teďka poslední dva týdny. Jak OpenAI vydalo ty tři modely, Lunu, Teru a Sol, tak samozřejmě jako na nějaký problémy jsem spustil Sol, protože</v>
+
+217
+00:35:48.722 --> 00:36:00.782
+<v pavol-hejny>prostě jako tak je to konkurent Fejlu. Ale na absolutně drtivou většinu běžných věcí, co děláme, nám stačila pět-pětka. To znamená, jsem na to pouštěl prostě klasickou pět-šestku Teru. Ale teď jsem udělal experiment, že jsem</v>
+
+218
+00:36:00.802 --> 00:36:13.242
+<v pavol-hejny>na jako zase novou sadu problémů, eh, spustil Lunu. Říkal jsem si: „Hm, tak jako čekám, že to bude mít mnohem větší failure rate, ale jako spotřebuju toho míň.“ A co jsem zjistil, že z jako</v>
+
+219
+00:36:13.502 --> 00:36:25.822
+<v pavol-hejny>deset-- asi deseti věcí, který implementuje Tera, tak devět je dobře. Z dvaceti, který naimplementovala Luna, myslím si, že sedmnáct bylo dobře, že, že to bylo jako vel-velmi jako podobnej poměr,</v>
+
+220
+00:36:25.882 --> 00:36:37.882
+<v pavol-hejny>že to bylo jenom velmi jako, že jenom o velmi malinko nespolehlivosti to bylo menší. Kvalita toho kódu byla velmi podobná, ta rychlost byla podstatně lepší, spotřeba byla prostě pětinová. Tak si říkám, že vlastně používat</v>
+
+221
+00:36:37.962 --> 00:36:41.742
+<v pavol-hejny>Teru je jenom ten psycholog-- jako minimálně u nás už jenom ten psychologický efekt.</v>
+
+222
+00:36:42.162 --> 00:36:54.222
+<v ai-ta-krajta-62-speaker_0>Mě k tomu jako napadá, jestli ale není rozdíl, že jo, jestli to použiješ na nějakej existující stack, kterej už je prostě dobře napsanej, anebo jestli na tom něco stavíš od začátku, no, že. Ale tak to je to, co jsi říkal, že prostě</v>
+
+223
+00:36:54.262 --> 00:36:57.042
+<v ai-ta-krajta-62-speaker_0>tam vymyslí nějaký architektury, nějakej lepší model a</v>
+
+224
+00:36:57.634 --> 00:37:09.734
+<v pavol-hejny>Já jsem včera byl na takový akci, která se jmenuje Vy coding hackathon, kde se prostě sedí a dělají se tam věci. Jenomže já jsem jako hrozně línej člověk a mně se prostě ani nechtělo psát ty prompty. Já už jsem tam jako jenom seděl a pil kávu.</v>
+
+225
+00:37:09.794 --> 00:37:21.654
+<v pavol-hejny>Udělal jsem takovej experiment, že jsem si vyrobil dva agenty, který jako každé, jeden byl takovej jako generickej, že vlastně jako v podstatě to nebylo nic navíc oproti jako klasickýmu kodexu. A ten druhej byl developer, kterej měl nějakej</v>
+
+226
+00:37:21.654 --> 00:37:33.834
+<v pavol-hejny>jako velmi jasnej styl toho, jak pracuje. Všechno dělal v Babylon JS, to je taková 3D knihovna, jako ještě nějaký další constraints. A vlastně jenom jsem ho nechal, nechal udělat nějakých jako pár matematických vizualizací,</v>
+
+227
+00:37:33.854 --> 00:37:46.054
+<v pavol-hejny>jako například vizualiza-vizualizaci tesseraktu čtyřdek rychle nebo vizualizace cyklických grup. Co mně přišlo vlastně jako zajímavý, že a všichni to dělali paralelně v podstatě, já jsem jenom dal nějaký jako nápady, který ty agenti</v>
+
+228
+00:37:46.074 --> 00:37:58.294
+<v pavol-hejny>udělali. A ten agent, kterej byl jako mnou velmi dobře nastavenej, tak měl nějakej jako svůj styl. Ty věci byly od něj udělaný líp podstatně. Míň to jako driftovalo k nějakým jako polofunkčním</v>
+
+229
+00:37:58.354 --> 00:38:10.514
+<v pavol-hejny>zvláštním řešením. Mělo to nějakej jakoby v uvozovkách podpis. Mně přijde, že tohleto možná jako hodně souvisí s tím, proč služby typu jako Macaulay nebo Loveblue nebo Base, teď nevím, čtyři</v>
+
+230
+00:38:10.534 --> 00:38:22.554
+<v pavol-hejny>sta čtyři myslím je to číslo, tak maj vlastně svoje místo, protože já bych si tu samou věc mohl prostě spustit v generickém kodexu. Jenomže já vím, že když to udělám v Macaulay, tak ten web bude vypadat fakt</v>
+
+231
+00:38:22.594 --> 00:38:34.734
+<v pavol-hejny>dobře a bude uživatelsky dobrej. Když to udělám v Loveblue, tak to bude mít takovej jako AI vibe, kterej dneska ty stránky maj. Když to udělám v Base, tak to bude mít takovej dashboardovej vibe, že možná jako už nebudeme dělat aplikace a</v>
+
+232
+00:38:34.774 --> 00:38:38.374
+<v pavol-hejny>nebudeme dělat frameworky, ale budeme dělat tyhlety jako style programátorský.</v>
+
+233
+00:38:38.474 --> 00:38:40.454
+<v ai-ta-krajta-62-speaker_0>Hm, na to, na to něco bude.</v>
+
+234
+00:38:40.674 --> 00:38:52.914
+<v pavol-hejny>Tak vypadá to, že jsme dneska vyčerpali všechny témata možný i nemožný. Určitě se to stalo mnohem víc, než, než co jsme tady probrali a půjdeme to natáhnout do další epizody. Mimochodem diváci si velmi často píšou</v>
+
+235
+00:38:53.034 --> 00:39:05.234
+<v pavol-hejny>o praktický zkušenosti naše, možná i nějaký ukázky, tak něco z toho jsme tady předvedli dneska a určitě se budem dál zlepšovat v tom. Tak prosím napište do komentářů, co byste rádi viděli. Kdybyste chtěli</v>
+
+236
+00:39:05.294 --> 00:39:17.354
+<v pavol-hejny>pomoct ve firmě s AIkem, tak, eh, my děkujeme za sponsoring AI supervizi a zároveň budeme teď dvacátýho dělat workshop, tak, eh, kterej bude zdarma. Tak</v>
+
+237
+00:39:17.494 --> 00:39:21.494
+<v pavol-hejny>se, tak se pojďte připojit. Dáme link do komentáře.</v>
+
+238
+00:39:21.734 --> 00:39:25.134
+<v ai-ta-krajta-62-speaker_0>No tak to se připojím, to jsem neviděla. Jsem zvědavá.</v>
+
+239
+00:39:25.314 --> 00:39:28.354
+<v pavol-hejny>Tak jo. Tak děkujem za pozornost a uvidíme se příště. Díky.</v>
+
+240
+00:39:28.634 --> 00:39:28.954
+<v ai-ta-krajta-62-speaker_0>Ahoj.</v>
+
+241
+00:39:29.614 --> 00:39:29.934
+<v pavol-hejny>Čau.</v>

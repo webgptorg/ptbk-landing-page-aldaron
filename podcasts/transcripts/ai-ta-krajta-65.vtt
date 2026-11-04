@@ -1,0 +1,893 @@
+WEBVTT
+
+1
+00:00:04.180 --> 00:00:16.320
+<v ai-ta-krajta-65-speaker_0>Tak ahoj. Dneska tady máme takovej skromnej díl. Potkali jsme se tady jenom s Kačkou. Je to šedesátej pátej díl IT Cryty. Nevznikla by bez podpory Promfuchu, za kterým stojí</v>
+
+2
+00:00:16.360 --> 00:00:25.040
+<v ai-ta-krajta-65-speaker_0>právě Pavol a Jirka, který tady s náma dneska nejsou, ale určitě se na ně, eh, podívejte. A teďkon se pustíme do novinek. Máš něco, Kačko?</v>
+
+3
+00:00:26.160 --> 00:00:38.260
+<v ai-ta-krajta-65-speaker_1>Jo, tak já můžu začít jenom rychlou novinkou, a to jsem včera si jenom stihla rychle přečíst na Linkáči, že vyšel tady ten novej, eh, Qwen model Qwen 3.8 Flash Next. Tady to mám napsaný,</v>
+
+4
+00:00:38.340 --> 00:00:40.360
+<v ai-ta-krajta-65-speaker_1>ale moc jsem toho o něm zatím zjistit nestihla.</v>
+
+5
+00:00:40.760 --> 00:00:52.840
+<v ai-ta-krajta-65-speaker_0>Já se na něj už koukal. Za mě je zajímavý, že oni tvrděj, že je to něco z rodiny Qwen 4, přestože číslování má stále Qwen 3.8. Co oni tam zavedli je, že to není jenom klasickej model, kterej</v>
+
+6
+00:00:52.900 --> 00:01:05.340
+<v ai-ta-krajta-65-speaker_0>má celkový parametry a aktivní parametry, ale že tam mají něco, čemu říkají engram layers. Zkusím to tam někde najít. On je vlastně speciální tím, že má padesát jedna miliard engram layers. Tady to mají. Celkem</v>
+
+7
+00:01:05.379 --> 00:01:17.840
+<v ai-ta-krajta-65-speaker_0>má teda sto dvacet pět miliard parametrů, aktivních šest, ale ještě k tomu má padesát jedna miliard engram embeddingů a čtyři miliardy multi-token prediction. Takže</v>
+
+8
+00:01:17.880 --> 00:01:30.100
+<v ai-ta-krajta-65-speaker_0>ten model vlastně jako zapíká strašně moc věcí dohromady. Přestože je to jenom stopětadvacetimiliardovej model, tak se nevejde na jeden spark v čtyřbitový kvantizaci. Aspoň</v>
+
+9
+00:01:30.140 --> 00:01:42.400
+<v ai-ta-krajta-65-speaker_0>teda zatím. Uvidíme, jestli tam budou nějaký posuny. Tak jsem zvědavej, chystám se to vyzkoušet. Teďkon jsem narazil i na nějakou službu, která by ho měla mít zdarma tady ten Qwen. Takže za mě</v>
+
+10
+00:01:43.020 --> 00:01:49.380
+<v ai-ta-krajta-65-speaker_0>se to posouvá hezky a pokud ty benchmarky jsou pravda, tak tady máme jako Opus 4 šestku, která běží doma.</v>
+
+11
+00:01:49.660 --> 00:02:02.140
+<v ai-ta-krajta-65-speaker_1>Cool, teda skoro mi přijde, že to začíná bejt takovej trend, že jsou vlastně takovýhle větší modely, který se chovaj jako menší na těch, aby se vešly na ty menší devicy, že jo, že ta Gemma E4B taky je</v>
+
+12
+00:02:02.180 --> 00:02:07.340
+<v ai-ta-krajta-65-speaker_1>něčím podobná. Ta zase na to jde trošku jinak. A no, skoro mi přijde, že to je trend.</v>
+
+13
+00:02:07.860 --> 00:02:19.920
+<v ai-ta-krajta-65-speaker_0>Jo, jako takhle, tady ten model je jako větší díky těm padesáti jedna miliardám engramů, ale podle všeho by to mělo pomoct právě s tím, že on si vlastně jakoby pasivně do sebe zacachovává takový</v>
+
+14
+00:02:19.980 --> 00:02:32.180
+<v ai-ta-krajta-65-speaker_0>ty fáze jako dev function a podobný záležitosti. Takže pak nemusí řešit jenom tokeny, ale má to rozsekaný hezky po nějakejch, řekněme, frázích. By to tak mělo bejt. Tak se nám připojil Pavol</v>
+
+15
+00:02:32.640 --> 00:02:44.840
+<v ai-ta-krajta-65-speaker_0>a já budu pokračovat s mojí novinkou, protože ten Qwen není jediná záležitost. Určitě jste mnozí zaznamenali, že v posledním týdnu bylo k dispozici něco, co se nazývalo Ox</v>
+
+16
+00:02:44.900 --> 00:02:57.560
+<v ai-ta-krajta-65-speaker_0>Alpha, což, eh, bylo hodně šílený, protože spousta lidí nevěděla, co je to za, vlastně za model. Protože provideri řekli, že máme k dispozici</v>
+
+17
+00:02:57.680 --> 00:03:09.900
+<v ai-ta-krajta-65-speaker_0>sto bilionů tokenů denně zdarma. Dali to na Open Router, dali to na Open Code, dali to do Cluenu, úplně všude možně a nevědělo se, co to je. Navíc ten model fungoval velice</v>
+
+18
+00:03:09.940 --> 00:03:21.960
+<v ai-ta-krajta-65-speaker_0>dobře. Podle některých benchmarků byl jako na úrovni Opus 4 šestky. Záleželo na tom, co se s tím, eh, dělalo. Na Open Routeru se protočilo hezkejch pár bilionů</v>
+
+19
+00:03:22.020 --> 00:03:34.380
+<v ai-ta-krajta-65-speaker_0>tokenů. Takže když to převádíme mezi anglickou, českou soustavou, tak, eh, uvidíte, že to bylo trillions v angličtině. Včera bylo odhalený, co je to za model. Je to GLM 5.3 Flash,</v>
+
+20
+00:03:34.780 --> 00:03:46.820
+<v ai-ta-krajta-65-speaker_0>což je hustý, že je to zase flash model, kterej by měl jet na dvou sparkcích nebo něčem podobným. Ale to za mě není to nejepičtější. To, že je to první multimodální model</v>
+
+21
+00:03:46.860 --> 00:03:59.100
+<v ai-ta-krajta-65-speaker_0>od GLM, kterej prý už má i followera, měl by vyjít GLM 5.3 Omni. Ale mnohem zajímavější je, že proč oni dávali tolik tokenů zadarmo, je, že se rozhodli testovat Huawei čipy.</v>
+
+22
+00:04:00.700 --> 00:04:12.880
+<v ai-ta-krajta-65-speaker_0>Celá ta inference těch sto bilionů tokenů za den měla šlapat na Huawei. Žádná Nvidia, žádný zápaďácký grafiky, všechno Ascend GPUs od Huaweie.</v>
+
+23
+00:04:14.160 --> 00:04:14.480
+<v ai-ta-krajta-65-speaker_1>Cool.</v>
+
+24
+00:04:16.100 --> 00:04:28.560
+<v ai-ta-krajta-65-speaker_0>A pokud to je skutečně pravda, tak je to šílený. Všichni říkali: „To musí bejt Cursor, novej fine tunovanej model od Cursoru, kterej bude stavět nad nějakým čínským modelem, protože</v>
+
+25
+00:04:28.600 --> 00:04:35.680
+<v ai-ta-krajta-65-speaker_0>kdo jinej má kapacity na to servírovat tolik tokenů jen tak?“ A nakonec to všechny překvapilo. Zkoušeli jste ten Ox Alpha?</v>
+
+26
+00:04:36.200 --> 00:04:41.780
+<v ai-ta-krajta-65-speaker_1>Ne, já jsem teď nestíhala asi tak tejden moc sledovat novinky, takže ne. A co ty na to říkáš teda?</v>
+
+27
+00:04:42.000 --> 00:04:54.300
+<v ai-ta-krajta-65-speaker_0>Mě ten Ox Alpha strašně bavil. Je to prostě stepped up od toho, co bylo s GLM v některejch ohledech, v některejch samozřejmě ne. Je to furt flash model, ale bylo to jako spolehlivý. Bylo to</v>
+
+28
+00:04:54.400 --> 00:05:06.520
+<v ai-ta-krajta-65-speaker_0>rychlý a napříč různejma providerama se to chovalo víceméně konzistentně. Já jsem dělal i benchmarky. Záleželo, jak to kdo wrapoval. Nose Research, což jsou autoři, kteří jsou za Hermisem. Ti byli jedni z těch stabilnějších</v>
+
+29
+00:05:06.580 --> 00:05:18.780
+<v ai-ta-krajta-65-speaker_0>a samozřejmě Open Code Go byl super. Na Open Router mně to dávalo čtyři sta dvacet devítku strašně často, protože jsem to prostě zkoušel používat se subagentama. Co je ale hustý, tak jsou statistiky, který teďkom vydal</v>
+
+30
+00:05:19.180 --> 00:05:32.120
+<v ai-ta-krajta-65-speaker_0>Open Router. Ten tvrdí, že jenom přes Open Router se za těch šest dnů protočilo dvacet tři celá dva bilionů tokenů na ten Ox Alpha, takže</v>
+
+31
+00:05:32.200 --> 00:05:44.280
+<v ai-ta-krajta-65-speaker_0>přeskočil DeepSeek Flash, přeskočil Mimo od Xiaomi. To je jenom kapacita na Open Routeru. Samozřejmě část se protočila na Open Code Go a na dalších. Člověk, kterýho sleduju, tak ten říká,</v>
+
+32
+00:05:44.380 --> 00:05:54.260
+<v ai-ta-krajta-65-speaker_0>že on to jako škáloval do absurdních rozměrů. Byl zodpovědnej za každej jeden z šesti set čtyřiceti čtyř tokenů, který byly protočený.</v>
+
+33
+00:05:54.540 --> 00:05:58.280
+<v pavol-hejny>Myslíš i v coding, jako i v úplně celkově nebo jenom v codingu?</v>
+
+34
+00:05:58.480 --> 00:06:10.876
+<v ai-ta-krajta-65-speaker_0>Prostě on to používá na coding, škáluje tím všechny možný věci. To je člověk, kterej si platí z vlastní kapsy třináct tisíc dolarů měsíčně za subscription. Prej protočil třicet</v>
+
+35
+00:06:10.936 --> 00:06:13.776
+<v ai-ta-krajta-65-speaker_0>šest miliard tokenů za těch pět dnů.</v>
+
+36
+00:06:13.976 --> 00:06:16.616
+<v ai-ta-krajta-65-speaker_1>To je dost nepředstavitelný. [smích]</v>
+
+37
+00:06:16.676 --> 00:06:28.756
+<v ai-ta-krajta-65-speaker_0>Jako vždycky to jde vytočit do šílenejch rozměrů. Já jsem si s tím hrál taky, protočil jsem tam nějakou tu jako miliardu. Super bylo, že jak byl zdarma a zároveň to byl čínskej model, tak neodmítal takový ty</v>
+
+38
+00:06:28.776 --> 00:06:38.156
+<v ai-ta-krajta-65-speaker_0>věci jako dekompilace, reverse engineering. Takže jsem si s tím hrál na tyhle věci. Byla to, byla to velká zábava. Ten model mě bavil. Určitě budu pokračovat v jeho používání.</v>
+
+39
+00:06:38.496 --> 00:06:40.896
+<v ai-ta-krajta-65-speaker_1>No tak to taky musím zkusit teda, jestli to ještě jde.</v>
+
+40
+00:06:41.136 --> 00:06:53.136
+<v ai-ta-krajta-65-speaker_0>Právě to včera vypadlo z těch free use dealů. Ale když si zaplatíš OpenCode Go, tak oni mají teďkom akci, že za pět dolarů máš jako přístup právě ke Kimi, k</v>
+
+41
+00:06:53.176 --> 00:07:02.156
+<v ai-ta-krajta-65-speaker_0>DeepSeeku a i k tomu GLM 5.3 Flash. Je to za mě super, super subscription, ve kterým si můžeš vyzkoušet spoustu Open Weights modelů.</v>
+
+42
+00:07:03.556 --> 00:07:03.796
+<v ai-ta-krajta-65-speaker_1>Mhm.</v>
+
+43
+00:07:03.996 --> 00:07:16.316
+<v ai-ta-krajta-65-speaker_0>Mají to spolehlivý, mají to rychlý. Teďkom dokonce měli něco, čemu říkali Operation Cheap Seek, protože potom, co DeepSeek bude zvedat ceny za API, tak oni se rozhodli najít způsob, jak provozovat</v>
+
+44
+00:07:16.356 --> 00:07:26.756
+<v ai-ta-krajta-65-speaker_0>profitabilně DeepSeek i za původní ceny. A říkali, že se jim to povedlo. Tak jsem zvědavej, jestli se jim to povede dlouhodobě. Ale jako wow.</v>
+
+45
+00:07:27.036 --> 00:07:37.336
+<v pavol-hejny>A kdyby ses to provozoval zcela na nějaký jako vlastní infrastruktuře nebo na nějakým vlastním cloudu, tak kolik by ten GLM 5.3 Flash byl reálně nákladovej?</v>
+
+46
+00:07:37.716 --> 00:07:49.776
+<v ai-ta-krajta-65-speaker_0>Hele, toho, co jsem koukal, tak k tomu potřebuješ dva Sparky nebo jedno nový Mac Studio. Speaking of, máme tady další novinku. Apple včera vařil, vyšlo nový, vyšly nový zařízení od Applu. Nejzajímavější</v>
+
+47
+00:07:49.776 --> 00:08:02.336
+<v ai-ta-krajta-65-speaker_0>je tam za mě zdaleka Mac Studio, který oproti předchozím rumors tak se bude prodávat i v pětsetdvanáctigigový verzi Mac Studio M5 Ultra. Propustnost</v>
+
+48
+00:08:02.456 --> 00:08:15.116
+<v ai-ta-krajta-65-speaker_0>bude jedna celá dva tera za sekundu těch pamětí. Ta nejvyšší verze teda půjde do prodeje myslím až v říjnu. Teďkom už jsou ale vyprodaný ty dvěstěpadesátšestigigový, který</v>
+
+49
+00:08:15.156 --> 00:08:27.376
+<v ai-ta-krajta-65-speaker_0>mají překvapivě dobrou cenu. Pohybujou se kolem deseti tisíc dolarů, což je za mě jako velice hezká cena. Vlastně se to vyrovná dvoum Sparkům a mám to v jednom počítači. Nemusím tam řešit nějaký propojování</v>
+
+50
+00:08:27.416 --> 00:08:27.676
+<v ai-ta-krajta-65-speaker_0>a tak.</v>
+
+51
+00:08:28.216 --> 00:08:32.216
+<v ai-ta-krajta-65-speaker_1>No, člověk chvíli nedává pozor a dějí se takový věci. To je hrůza.</v>
+
+52
+00:08:33.476 --> 00:08:45.636
+<v ai-ta-krajta-65-speaker_0>No byl to divokej týden, ne že ne. Jako Frontier Labs mlčí, ale Open Weights jedou v tuhle chvíli. Tak jsem zvědavej, s čím nás odzbrojí, protože teďkom jsou zas nějaký jako šeptandy,</v>
+
+53
+00:08:45.696 --> 00:08:57.736
+<v ai-ta-krajta-65-speaker_0>že takhle. Včera, předevčírem Tibo, kterej je zodpovědnej za resety v Codexu, tak sdílel, že dobrý produkty vyžadují alespoň třicet čtyři dnů k tomu, aby dozrály. Takže se začíná mluvit o tom, že by</v>
+
+54
+00:08:57.776 --> 00:09:09.956
+<v ai-ta-krajta-65-speaker_0>měla vyjít GPT šestka nebo GPT pět sedmička, která má codename Astra. Prej už mají dokončenej i trénink modelu, kterej bude OP jedna po Astře a teďkom právě dělají</v>
+
+55
+00:09:10.156 --> 00:09:13.816
+<v ai-ta-krajta-65-speaker_0>fine tuning a všechny možný věci, aby tam, aby tam byly jako guard rails a tak dále.</v>
+
+56
+00:09:15.276 --> 00:09:27.296
+<v pavol-hejny>Když mluvíme o tom OpenAI Codexu, tak ty k těm resetům máš nějak jakoby víc, víc deep info, protože mě to zároveň těší a zároveň mě vždycky hrozně irituje, protože je to takový</v>
+
+57
+00:09:27.336 --> 00:09:28.316
+<v pavol-hejny>neprediktibilní.</v>
+
+58
+00:09:28.836 --> 00:09:41.196
+<v ai-ta-krajta-65-speaker_0>Je to s těma resetama těžký, protože oni na jednu stranu zavedli ty bankovaný resety, že si to můžeš resetovat, kdy chceš, ale ty mají limitaci měsíc. Takže už mi některý</v>
+
+59
+00:09:41.236 --> 00:09:53.716
+<v ai-ta-krajta-65-speaker_0>resety propadly, protože jsem zrovna byl na prázdninách a tak, že jsem to nevyužil. Pak mají klasický resety. Nejlepší je asi sledovat Tiba na X. Nicméně on</v>
+
+60
+00:09:53.756 --> 00:10:06.056
+<v ai-ta-krajta-65-speaker_0>občas napíše: „Jo, zejtra večer bude reset.“ A pak ten reset udělá o šest hodin dřív. Takže lidi, kteří si dali třeba joby na to, aby vysáli maximálně ty limity, tak</v>
+
+61
+00:10:06.076 --> 00:10:09.076
+<v ai-ta-krajta-65-speaker_0>jim to běží, dostanou novej reset a vyse-vysajou ten novej reset.</v>
+
+62
+00:10:09.396 --> 00:10:21.516
+<v pavol-hejny>Mně, mně jakoby čím dál tím víc přijde, že je to jako strašný kasino tyhlety subscriptions. A vlastně já jako přemýšlím, co je ten důvod. Já si jako myslím, že jeden z nich bude ten,</v>
+
+63
+00:10:21.595 --> 00:10:34.216
+<v pavol-hejny>že oni jako vědí, že to pak ty lidi sledujou a že to opravdu, že ten dashboard jako hypnotizujou očima. Ale vlastně zároveň mě to hrozně štve tohleto, protože nevím, jak se toho, jak to jako rozumně automatizovat.</v>
+
+64
+00:10:34.296 --> 00:10:46.356
+<v pavol-hejny>Obzvlášť tím, že je to jako neprediktibilní. Ale teďka jsi mně dal nějakej tip a zkusím dát nějakýmu miniagentíkovi za úkol sledovat tady ten, tady ten x-kovej účet, aby se podle toho řídil,</v>
+
+65
+00:10:46.676 --> 00:10:49.056
+<v pavol-hejny>zda se mně povede tratit víc nebo míň.</v>
+
+66
+00:10:49.316 --> 00:11:01.356
+<v ai-ta-krajta-65-speaker_1>A možná, když už jsme teda u toho, jak se snažíme co nejvíc využít ty subscriptiony a bejt co nejvíc efektivní, tak bych navázala tématem, který jsem chtěla dneska probrat. Vlastně je to taková moje</v>
+
+67
+00:11:01.496 --> 00:11:14.056
+<v ai-ta-krajta-65-speaker_1>krátká prezentace, kterou jsem měla někdy předevčírem na firemním meetingu, protože, a je to vlastně téma, který už jsem tady rozebírala několikrát. Prostě s kolegama jsme teď všichni děsně efektivní</v>
+
+68
+00:11:14.096 --> 00:11:26.396
+<v ai-ta-krajta-65-speaker_1>každej zvlášť, ale snažíme se nějak spolupracovat a přijít na to, jak to udělat, aby vlastně to ve výsledku nevedlo k větší neefektivitě. Když vlastně kolega si něco dělá v Appinu,</v>
+
+69
+00:11:26.476 --> 00:11:38.956
+<v ai-ta-krajta-65-speaker_1>něco prostě na frontendu, já zase si tam orchestruju ty agenty a musíme se nějak sladit. Kdysi jsem tady vyprávěla o tom, jak mi začal posílat prostě markdown fajly od Clauda, co si tam mám u sebe v tom repu spravit.</v>
+
+70
+00:11:39.316 --> 00:11:51.396
+<v ai-ta-krajta-65-speaker_1>Já jsem mu pak řekla: „Tak to můžeš stáhnut rovnou, že jo, když už jako jsi na to ty tokeny vypálil.“ Já tu teda nasdílím rychlou obrazovku a vlastně prezentaci jsem pojmenovala</v>
+
+71
+00:11:51.476 --> 00:12:03.636
+<v ai-ta-krajta-65-speaker_1>Kozel zahradníkem aneb hlavolam, kterej teď řešej všechny týmy. A tohle je reálná hra, co existuje, co máme tady na chalupě. A o co v tý hře jde, jo, že</v>
+
+72
+00:12:03.696 --> 00:12:15.728
+<v ai-ta-krajta-65-speaker_1>tam jsou takový jakoby posuvný políčka, podle kterejch, který se maj posouvat a sestavovat různý konfigurace. A je tam vlastně vždycky i řešení ke každý tý úloze. Ale to, co</v>
+
+73
+00:12:15.768 --> 00:12:27.868
+<v ai-ta-krajta-65-speaker_1>teď ty týmy chtějí najít, vlastně není to řešení, ale ta konfigurace, do jaký se chtějí dostat. A já teda tady přestanu mlžit s divnými pojmy a popíšu to rovnou na tom obrázku. Tady ten kozel,</v>
+
+74
+00:12:27.948 --> 00:12:40.388
+<v ai-ta-krajta-65-speaker_1>jo, to je vývojář a je na tý svojí zahrádce. A dejme tomu, že to je Franta, frontend vývojář. Všimněte si, že vlastně ze všech těch zelených políček, což jsou hlávky zelí, má</v>
+
+75
+00:12:40.408 --> 00:12:52.888
+<v ai-ta-krajta-65-speaker_1>vlastně to v tý svojí ohrádce jenom ty dvě. A to je ten jeho frontend. A ty ostatní hlávky zelí, to je třeba ta Appina, to jsou DevOpsi, to je prostě všechno ostatní. No ale tím,</v>
+
+76
+00:12:52.948 --> 00:13:05.568
+<v ai-ta-krajta-65-speaker_1>že Franta teď má vlastně ty svoje agenty a může si kódit, tak vlastně mu to umožní dostat se i do každýho toho dalšího repa a vlastně něco tam udělat. A teď Franta, že jo, zkušený vývojář to je, ale</v>
+
+77
+00:13:05.608 --> 00:13:17.808
+<v ai-ta-krajta-65-speaker_1>přeci jenom ve všech těch ostatních částech tý codebase je to tak trochu kozel zahradníkem, protože vlastně neví, jaký tam platěj prostě ty pravidla, co si tam každej v tom svym repu určuje. No a takovejhle</v>
+
+78
+00:13:17.848 --> 00:13:30.148
+<v ai-ta-krajta-65-speaker_1>vývojářů je tam teď spousta, že jo? Všichni vlastně teď můžou těmi agenty řešit tu feature napříč celou tou codebase. Teď já nevím, jestli jako můžou, nemůžou. To asi jako záleží na tom daným</v>
+
+79
+00:13:30.468 --> 00:13:42.488
+<v ai-ta-krajta-65-speaker_1>týmu, jak si to rozvrhne, no. A pak to prostě vypadá nějak takhle. Ta úloha je, že vlastně potřebujou se spolu nějak sladit a domluvit, jak to dělat, aby si do toho sice mohli lejt, do toho svýho zelí</v>
+
+80
+00:13:42.528 --> 00:13:44.608
+<v ai-ta-krajta-65-speaker_1>vzájemně, ale aby se domluvili.</v>
+
+81
+00:13:44.848 --> 00:13:56.988
+<v ai-ta-krajta-65-speaker_0>Kačka se nám odpojila. Každopádně mně se to, mně se to, co nám tady ukazovala, líbilo strašně moc, eh, protože to úplně geniálně ilustruje přesně ten problém, že si každej může</v>
+
+82
+00:13:57.028 --> 00:14:09.108
+<v ai-ta-krajta-65-speaker_0>lízt do svýho, ale zároveň lízt i do cizího. Je to o nějaký transformaci. Já teďko něco podobnýho právě řeším s klientama, že je potřeba se podívat do nejenom toho pojďme zefektivnit vývoj, ale</v>
+
+83
+00:14:09.128 --> 00:14:21.508
+<v ai-ta-krajta-65-speaker_0>pojďme zefektivnit celý SDLC. A najednou se začínají objevovat takový, eh, krásný termíny, který tady byly už dlouho, ale pro spoustu lidí byly sprostý slovo jako shift left, jako</v>
+
+84
+00:14:21.548 --> 00:14:33.868
+<v ai-ta-krajta-65-speaker_0>třeba TDD, který hodně prosazuje Karel Smutnej ze Scrum Dojo. Eh, kdysi dávno tak byl i event, že jo, s Prokopem z Deichs Heroes, tak se dělalo AI Coding Dojo. Takže začínají</v>
+
+85
+00:14:33.888 --> 00:14:45.908
+<v ai-ta-krajta-65-speaker_0>se zase vracet na výsluní termíny, který tady byly už, eh, dávno v minulosti. Nebyl na ně prostor. A teďko mi přijde, že to začíná mít čím dál tím větší sílu, protože koho z vás,</v>
+
+86
+00:14:46.428 --> 00:14:52.728
+<v ai-ta-krajta-65-speaker_0>pokud jste to někdy zkoušeli, bavilo dělat TDD? Nikoho. Neznám nikoho, koho bavilo TDD.</v>
+
+87
+00:14:53.308 --> 00:15:02.648
+<v pavol-hejny>Já s tím absolutně souhlasím a připadá mně, že pro ty agenty opravdu vzniknou nějaký jako metodiky. A možná Kačko, pokračuj a znovu to vysdílej.</v>
+
+88
+00:15:03.548 --> 00:15:15.728
+<v ai-ta-krajta-65-speaker_1>Eh, jo, já už jsem vlastně pak v tý prezentaci, to už byl konec prezentace. Já jsem pak chtěla říct, že nevím, jestli ten názor vlastně na to, že má každej nebo že může každej s-vlastně šahat všude, je kontroverzní nebo není. A</v>
+
+89
+00:15:15.788 --> 00:15:27.908
+<v ai-ta-krajta-65-speaker_1>že nevím vlastně, jak by s tím kdo souhlasil a že my teda se snažíme, my chceme jako, protože že jo, pak, pak je ten tým strašně efektivní, když si každej vezme tu jednu feature a implementuje ji skrz na skrz. Nemusí se prostě čekat na to,</v>
+
+90
+00:15:27.988 --> 00:15:40.008
+<v ai-ta-krajta-65-speaker_1>že hele, tady prostě potřebuju v tý Appině tohle. Jo jasně, za chvilku ti to dodám, ale mezitím ještě musím udělat těch deset věcí, co tady mám, že jo, v issues. A jde to hrozně rychle, ale zároveň to může</v>
+
+91
+00:15:40.108 --> 00:15:52.568
+<v ai-ta-krajta-65-speaker_1>vést k tomu, že se celá ta codebase rozbije, když se to dělá špatně, no. Takže my teď jako dáváme si nějaký pravidla, že si vždycky, eh, vlastně informujeme se o stavu té v uvozovkách zahrádky, v</v>
+
+92
+00:15:52.608 --> 00:16:04.848
+<v ai-ta-krajta-65-speaker_1>jaké, jaké jsme jako tu třeba tu Appinu, v jakým jsme jí teď jako, do jakého stavu já jsem tu Appinu uvedla a co jsem tam udělala, říkám kolegovi. A ani si to teda zatím jako neschvalujem, jo? Vždycky si řeknem, co budem dělat a pak</v>
+
+93
+00:16:04.888 --> 00:16:05.988
+<v ai-ta-krajta-65-speaker_1>si to oznámíme, no.</v>
+
+94
+00:16:06.888 --> 00:16:15.368
+<v ai-ta-krajta-65-speaker_0>Mně přijde, že klíčová věc, kterou tady je potřeba dodržet, je brutálně zainvestovat do různejch code quality enforcementů.</v>
+
+95
+00:16:15.928 --> 00:16:16.128
+<v ai-ta-krajta-65-speaker_1>Hm.</v>
+
+96
+00:16:16.548 --> 00:16:28.827
+<v ai-ta-krajta-65-speaker_0>A to je přesně to, co dělám na svejch projektech. To, co řeším s klientama. Řešili jsme to x-krát tady v minulosti. Můj oblíbenej stack. Udělejte feedback loop rychlou. Pokud váš</v>
+
+97
+00:16:28.988 --> 00:16:41.248
+<v ai-ta-krajta-65-speaker_0>agent bude čekat hodinu na review, tak ten agent jako, oni se snažej s tím pracovat, ale nejlepší, s čím přišli je, že ten agent prostě poluje. Takže vy si pálíte tokeny na tom, že</v>
+
+98
+00:16:41.288 --> 00:16:53.948
+<v ai-ta-krajta-65-speaker_0>ten agent říká: „Hm, už tam je review? Ne, není. Tak já ještě počkám.“ A je to vlastně strašně špatně. Přitom se to dá udělat mnohem jako líp, mnohem víc deterministický a</v>
+
+99
+00:16:54.048 --> 00:17:06.348
+<v ai-ta-krajta-65-speaker_0>prostě z toho udělám nějaký workflow. To je jedna věc. A druhá věc je, že to udělám rychlý. Takže jsem přešel z ESLintu na Oxlint. Přešel jsem z Prettieru na Ox format a takhle postupně</v>
+
+100
+00:17:06.448 --> 00:17:18.788
+<v ai-ta-krajta-65-speaker_0>tvořím další a další věci v tom mým toolingu a zároveň závisí jako na stavu codebase. Pokud mám codebase, které je relativně greenfield nebo tam můžu dělat nějaký masivnější změny, tak</v>
+
+101
+00:17:18.828 --> 00:17:30.888
+<v ai-ta-krajta-65-speaker_0>si dovolím aktivovat pravidla, který pozvednou úroveň tý codebase. Ale může bejt codebase už v takovým stavu, že mi to vyhodí prostě deset tisíc errorů. Jo, byl jsem</v>
+
+102
+00:17:30.908 --> 00:17:43.128
+<v ai-ta-krajta-65-speaker_0>na projektu, kde jsme zapli PHP Stan jedničku, nejnižší úroveň kontroly, co v PHPčku je, a vyhodilo to šestnáct tisíc errorů. Jo, bavil jsem se s týpkem, ten říkal: „Jo, my jsme si to zapli taky</v>
+
+103
+00:17:43.468 --> 00:17:55.788
+<v ai-ta-krajta-65-speaker_0>a crashlo nám to PHP Stan.“ Prostě byl out of memory. Takže jsou projekty ve fakt špatným stavu. A pak je potřeba s tím pracovat trošku jinak, protože to, že mi</v>
+
+104
+00:17:56.088 --> 00:18:08.368
+<v ai-ta-krajta-65-speaker_0>deset tisíckrát chybí středník na konci řádku v JavaScriptu vlastně není problém. Jsou tam mnohem důležitější věci, takže je to o nějaký prioritizaci. To je další věc, eh,</v>
+
+105
+00:18:08.428 --> 00:18:20.456
+<v ai-ta-krajta-65-speaker_0>na kterou dělám tooling, protože jsem se rozhodl poskládat ty nástroje pro kopače zlata, kteří jako těžej hromadu věcí z AI. Takže- Řeším</v>
+
+106
+00:18:20.536 --> 00:18:33.376
+<v ai-ta-krajta-65-speaker_0>tool, kterej bude prioritizovat to, co má smysl fixovat, to, co je skutečně důležitý. Můžou to bejt security věci, můžou to bejt performance věci, může to bejt už aplikace linteru, protože</v>
+
+107
+00:18:33.416 --> 00:18:45.836
+<v ai-ta-krajta-65-speaker_0>už ta kódbéjs je v dobrým stavu. Jde o to dát jasnou prioritu a umět to komunikovat i s člověkem i s tím agentem, protože oni potřebujou to jako komunikovat jinak. Zároveň jeden z možnejch výstupů,</v>
+
+108
+00:18:45.916 --> 00:18:58.016
+<v ai-ta-krajta-65-speaker_0>kterej hodlám testovat, tak je, že to pomůže CTO a technickejm lidem komunikovat směrem k byznysu, proč to má smysl fixnout. Protože na spoustě projektech jsem</v>
+
+109
+00:18:58.056 --> 00:19:10.496
+<v ai-ta-krajta-65-speaker_0>potkal to, že hmm, na to není budget, to je refactoring, proč bysme to dělali? A pak se management ptá: „A proč tahle featura letos trvá měsíc, když minulej rok</v>
+
+110
+00:19:10.516 --> 00:19:22.536
+<v ai-ta-krajta-65-speaker_0>jste to na jiným projektu měli za týden?“ No protože jsi nám dovolil tam naházet hromadu sraček a nedovolils nám to uklidit, protože jsi dal deadline včera bylo pozdě. Tohleto podle mě, co říkáš, je úplně totálně</v>
+
+111
+00:19:22.576 --> 00:19:34.656
+<v ai-ta-krajta-65-speaker_0>kruciální. A já bych možná ještě jako předřadil před ten bod mít ty testy rychlý, tak mít je zcela automatizovat. Protože ve chvíli, když ten agent tu věc má zcela-- ten feedback loop má zcela</v>
+
+112
+00:19:34.676 --> 00:19:47.336
+<v ai-ta-krajta-65-speaker_0>automatizovanej a je tam co nejmíň lidskýho zásahu, ideálně žádnej, vždycky zásahy až po nějaký jako další práci agenta, pak podle mě to, že to trvá dlouho, je trochu menší issue, než že to musí člověk vybesedovat.</v>
+
+113
+00:19:47.496 --> 00:19:59.676
+<v ai-ta-krajta-65-speaker_0>Druhá věc, co bych k tomu možná doplnil, je ta, že quality check nebo automatizovaný test v tý pipelině, tak to může být opravdu všechno možný i nemožný. To může být linting, type check, nějaký quality</v>
+
+114
+00:19:59.756 --> 00:20:12.676
+<v ai-ta-krajta-65-speaker_0>check, různý checky závislostí. Napadá mě všechno m-- integrační testy, unit testy. Jako napadá mě opravdu všechno možný a nemožný, co se dá do tady tý kategorie dát.</v>
+
+115
+00:20:13.096 --> 00:20:25.196
+<v ai-ta-krajta-65-speaker_0>A obecně moje taková heuristika je, že vždycky se to má dělat od toho nejjednoduššího po ten, po ten nejtěžší, aby to selhalo co nejdřív a ten agent to mohl zase zpátky začít fixovat. A zároveň by to v tý</v>
+
+116
+00:20:25.236 --> 00:20:37.456
+<v ai-ta-krajta-65-speaker_0>pipelině mělo být udělaný nějak automatizovaně. Ne, ne tak, aby se ten agent rozhodl, zda se ten test spustí nebo ne, ale aby vždycky před tím, než to posílá, tak aby se to muselo prostě, jako aby to muselo</v>
+
+117
+00:20:37.516 --> 00:20:50.176
+<v ai-ta-krajta-65-speaker_0>projít testama. A my jak máme našeho kodéra, já ho tady dám, tady dám do odkazu, tak, tak ten dělá vlastně ještě navíc takovej sendvič. On vždycky když něco začne implementovat, tak on má šnůru věcí, co má naimplementovat</v>
+
+118
+00:20:50.236 --> 00:21:02.336
+<v ai-ta-krajta-65-speaker_0>a on si ze začátku spustí testy. Pokud to neprojde, tak si rovnou vyrobí první PRD na to, aby to opravil, ať už je to jako jakákoliv malá věc. Pokud ty testy projdou, tak implementuje</v>
+
+119
+00:21:02.356 --> 00:21:14.376
+<v ai-ta-krajta-65-speaker_0>první PRD. Pak znovu pouští testy, commituje to, co, to co udělal v PRD, commituje další PR-- eh, implementuje další P, další PRD, commituje, co udělal v tom,</v>
+
+120
+00:21:14.676 --> 00:21:27.056
+<v ai-ta-krajta-65-speaker_0>v tom PRD, zcommituje, spouští-- vždycky vlastně cyklí to, že dělá implementaci, testy, implementaci, testy, implementaci, testy a vždycky ty testy jsou zase sandvičovaný z obou stran, aby měl agent jistotu, že začal</v>
+
+121
+00:21:27.176 --> 00:21:39.176
+<v ai-ta-krajta-65-speaker_0>a skončil s funkčním stavem, ať už v těch testech je cokoliv a v těch checkech cokoliv. A možná jako otázka na vás, jak to nazývat? Protože já vždycky říkám testy, akorát oni to nejsou jenom</v>
+
+122
+00:21:39.216 --> 00:21:41.936
+<v ai-ta-krajta-65-speaker_0>testy, ono jsou to i jako různý druhy quality checků.</v>
+
+123
+00:21:42.296 --> 00:21:42.436
+<v ai-ta-krajta-65-speaker_1>Jo.</v>
+
+124
+00:21:42.616 --> 00:21:44.036
+<v ai-ta-krajta-65-speaker_0>A neznám by byl lepší název.</v>
+
+125
+00:21:44.696 --> 00:21:50.916
+<v ai-ta-krajta-65-speaker_1>Různý asi pravidla specifický pro to daný repo myslíš jo? Nebo, nebo quality checky taky, no tak to je otázka.</v>
+
+126
+00:21:51.616 --> 00:22:03.736
+<v ai-ta-krajta-65-speaker_0>Ale je dobrá otázka, protože kd-kdysi ta situace byla jednoduchá. Kdysi byly integrační testy, unit testy, linting, možná type check. Ale, jo, jako, ale teďka mně přijde, že vlastně tady to všechno by mělo</v>
+
+127
+00:22:03.756 --> 00:22:11.856
+<v ai-ta-krajta-65-speaker_0>mít nějakej jeden velkej souhrnej název, protože tohleto všechno by se mělo udělat předtím, než agent udělá commit.</v>
+
+128
+00:22:12.076 --> 00:22:24.196
+<v ai-ta-krajta-65-speaker_1>Jako já nemám název, ale mám příklad ještě asi, že třeba já když vlezu kolegovi do toho frontendu, tak ze začátku se nám prostě stávalo, tam máme nějaký widgety, že jo. Každej ten widget musí mít nějaký</v>
+
+129
+00:22:24.236 --> 00:22:36.056
+<v ai-ta-krajta-65-speaker_1>svoje vlastnosti, jo. Ale to ví jenom ten kolega, že jo. Ten to vždycky jako si zkontroluje a zařídí. A já o tom nevím a můj agent taky ne. On to vlastně ani neměl nikde napsaný, protože to měl v hlavě. Takže já jsem odtud vždycky udělala něco</v>
+
+130
+00:22:36.096 --> 00:22:48.276
+<v ai-ta-krajta-65-speaker_1>prostě, co pak vypadalo ošklivě na tom frontendu. Já jsem to ani nevěděla, že to vypadá ošklivě, protože to jako on ví. Takže takhle mi asi dvakrát nadával, když teda jsme si to tam někam jako napsali jako pravidlo, no. Takže</v>
+
+131
+00:22:48.396 --> 00:22:51.796
+<v ai-ta-krajta-65-speaker_1>to asi jako bude součást těch nějakejch quality checků, no.</v>
+
+132
+00:22:52.696 --> 00:22:55.756
+<v ai-ta-krajta-65-speaker_0>Já přemýšlím, jestli by to nemělo být nějaká součást end-to-end testu.</v>
+
+133
+00:22:56.016 --> 00:23:00.656
+<v ai-ta-krajta-65-speaker_1>Jo, to jako asi jo. Jako to jsme zjistili, že máme málo testů, když jsme s tím začali, no.</v>
+
+134
+00:23:01.316 --> 00:23:13.616
+<v ai-ta-krajta-65-speaker_0>Mimochodem jako, eh, pro tip, jako obzvlášť u TypeScriptovejch a JavaScriptovejch repozitářů sám agent umí strašně dobře jako inicializovat ty Playwrightový end-to-end testy. Prostě udělejte</v>
+
+135
+00:23:13.656 --> 00:23:26.236
+<v ai-ta-krajta-65-speaker_0>mu PRD a řekněte mu, že chcete do projektu přidat jako dobrý pokrytí end-to-end testama napsaných Playwrightu a ať to přidá do všech pipeline. A už na to jsou. Sice spotřebujete polovinu</v>
+
+136
+00:23:26.256 --> 00:23:32.596
+<v ai-ta-krajta-65-speaker_0>svýho, svýho limitu, ale to jako nevadí. Pro jakýkoliv další příští úkol se vám to bude dělat líp.</v>
+
+137
+00:23:33.036 --> 00:23:34.636
+<v ai-ta-krajta-65-speaker_1>Tím možná jako si-- jo promiň.</v>
+
+138
+00:23:35.116 --> 00:23:41.936
+<v ai-ta-krajta-65-speaker_0>A já pak mám ještě jeden perk, kterej my teďka zkoušíme a vlastně mě fascinuje, že to funguje. Ale možná ty říkej a pak řeknu já.</v>
+
+139
+00:23:42.456 --> 00:23:54.736
+<v ai-ta-krajta-65-speaker_1>No mě napadlo, že úplně jsi tím nahrál na téma, který jsme tady předtím jenom tak rychle probrali tady s, eh, s Petrem, což je, že vlastně ten Cloud v Chromu nebo jakýkoliv agent prostě v prohlížeči, tak je</v>
+
+140
+00:23:54.776 --> 00:24:06.876
+<v ai-ta-krajta-65-speaker_1>hrozně super na různý testování. A já třeba jsem jako říkala, že teď to používám strašně moc, konkret-konkrétně toho Cloud in Chrome. Prostě ať mi všechno prokliká a otestuje, abych to nemusela dělat já, ale zároveň jako se děsím</v>
+
+141
+00:24:06.976 --> 00:24:12.376
+<v ai-ta-krajta-65-speaker_1>toho, aby to bylo dost bezpečný, protože není, že jo. A tak jsem se ptala, jak to udělat nějak bezpečně, no.</v>
+
+142
+00:24:13.016 --> 00:24:25.096
+<v ai-ta-krajta-65-speaker_0>Ty mi úplně čteš myšlenky, protože já jsem vlastně chtěl říct podobnou věc, že my jsme si jako-- my máme klasický end-to-end testy, prostě úplně jako nuda napsaná v Type Scriptu a v Playwrightu, jako která říká: „Klikni na</v>
+
+143
+00:24:25.136 --> 00:24:37.296
+<v ai-ta-krajta-65-speaker_0>tlačítko, který má napsáno tohle, pak očekávej na stránce tohle, pak udělej tohle, pak pohyb myší sem.“ Ale my jsme udělali takovou věc, že jsme z těch PRDs, který píšeme, vyrobili markdownovej dokument, kterej</v>
+
+144
+00:24:37.316 --> 00:24:49.504
+<v ai-ta-krajta-65-speaker_0>popisuje to chování tý stránky lidským jazykem. Prostě- Na stránce se má uživatel možnost přihlásit jménem admin a heslem test. Tím se proklikne do adminskýho panelu. Tam by měl vidět graf</v>
+
+145
+00:24:49.584 --> 00:25:01.744
+<v ai-ta-krajta-65-speaker_0>interakcí. Ten by si měl umět přiblížit a něco prostě takhle popsaná, jako lidsky to. Tady jeden dokument by normálně měli klasický lidský testovací klikači. A já jsem tohleto dal agentovi,</v>
+
+146
+00:25:01.884 --> 00:25:13.904
+<v ai-ta-krajta-65-speaker_0>ale přidal jsem to do tý pipeline. Takže vlastně jako součástí tý testovací pipeline je to, že se spustí jako jinej, jiná instance Codexu nebo Cloud Coda, která má za úkol ne, ne udělat něco v tom</v>
+
+147
+00:25:13.964 --> 00:25:26.464
+<v ai-ta-krajta-65-speaker_0>projektu, ale jenom vytvořit soubor, kterej udělá nějakej report z tady toho testu a na konci tady toho souboru je OK nebo fail a tím, tím se to automaticky očekuje. Z mýho asi měsíčního testování tady toho přístupu</v>
+
+148
+00:25:26.504 --> 00:25:39.164
+<v ai-ta-krajta-65-speaker_0>mně přijde, že to funguje strašně dobře, že je to jako strašně dobrá další vrstva nad těmi jako klasickými end-to-end testy. Jo, jako je toho strašně moc, s čím se dá pracovat. Dokonce</v>
+
+149
+00:25:39.224 --> 00:25:51.684
+<v ai-ta-krajta-65-speaker_0>tak, eh, zase se vracíme k tomu, už to tady bylo. Máme tady historicky věci typu Gherkin, kterej specifikuje nějakou, řekněme jako gramatiku pro to, jak, eh, psát</v>
+
+150
+00:25:51.824 --> 00:26:04.344
+<v ai-ta-krajta-65-speaker_0>scénáře. Takže je tam taková ta klasika given, when, then. A tímhle způsobem já jsem schopnej to popsat tak, že tomu rozumí byznysák, že tomu rozumí agent a pak to prostě umím spouštět. Dokonce</v>
+
+151
+00:26:04.384 --> 00:26:16.424
+<v ai-ta-krajta-65-speaker_0>už jako zase existují nějaký nástroje a máme v pipelině na testování, takže nevím, jak jsou, jak jsou stabilní, kterým prostě předložím takhle Gherkinový scénáře a oni mi takhle procházejí tu appku automaticky.</v>
+
+152
+00:26:16.584 --> 00:26:28.724
+<v ai-ta-krajta-65-speaker_0>A teď jako začínáme docházet k tomu, že ano, je to super, protože já ty Gherkin scénáře pak dávám rovnou jako třeba do toho Playwrightího, je to nějakej wrapper nad Playwrightem, kterej to kombinuje s AIkem.</v>
+
+153
+00:26:29.124 --> 00:26:41.324
+<v ai-ta-krajta-65-speaker_0>Potom to mám ale na úrovni codebase. A teď jak spolupracovat s netechnickejma lidma? Budu je učit, co je to terminál a co je to GitHub? Nebo zkusím vymyslet nějakou jinou abstrakci? Mimochodem ta pohádka, to už</v>
+
+154
+00:26:41.344 --> 00:26:53.404
+<v ai-ta-krajta-65-speaker_0>tady bylo. To je, to je jako velmi obhraný v IT světě. To si myslím, že vůbec není nový. To nepřišlo s AIkem. A mimochodem Basic a COBOL, to jsou úplně jako, jsou jazyky, o který, který podle mě jako</v>
+
+155
+00:26:53.424 --> 00:27:05.844
+<v ai-ta-krajta-65-speaker_0>většina lidí ani nebude vědět, že existujou. Tak vlastně ta jejich původní idea byla, že by se programy měly psát v přirozený angličtině, že by se to nemělo psát v nějakých složitých systémových instrukcích, ale že by měly existovat</v>
+
+156
+00:27:05.904 --> 00:27:18.164
+<v ai-ta-krajta-65-speaker_0>nějaký instrukce, který zněj jako přirozená angličtina. A myslím si, že když dneska někdo ukáže COBOL, Basic a možná i to SQL, co má vlastně jako velmi podobnou story, si myslím, že nikdo neřekne,</v>
+
+157
+00:27:18.204 --> 00:27:30.224
+<v ai-ta-krajta-65-speaker_0>že tohleto není pro odborníky, ale, ale pro běžný lidi. J-j-já si dokonce myslím, že bude existovat odborník, jako že pokud se nějakej takovejhle agentskej způsob testování ujme, což si myslím, že se skoro</v>
+
+158
+00:27:30.244 --> 00:27:42.604
+<v ai-ta-krajta-65-speaker_0>jistě ujme, tak ty dokumenty, ty scénáře, to taky budou psát lidi, co tomu rozumí. To taky bude nějaká odbornost, která bude umět správně popsat chování. Akorát prostě ty lidi nebudou muset</v>
+
+159
+00:27:43.064 --> 00:27:55.264
+<v ai-ta-krajta-65-speaker_0>umět psát x path selectory, jako budou muset mít tu odbornost, jak otestovat aplikace. Já si jako nemyslím, že to musí bejt nutně jako člověk na tohle specializovanej.</v>
+
+160
+00:27:55.624 --> 00:28:07.764
+<v ai-ta-krajta-65-speaker_0>Ostatně existuje, že jo, říká se tomu trio, že je tam tester, produkťák a vývojář. Ty jo, jak se to jmenuje? Má to nějaký, nějakej</v>
+
+161
+00:28:07.804 --> 00:28:20.544
+<v ai-ta-krajta-65-speaker_0>název. Product trio, že jo. A to je víceméně, to jsou víceméně ti lidi, kteří by měli být schopní napsat tady ten popisek, kteří to popíšou a kteří si vzájemně mezi sebou zvalidujou, že je to OK po stránce</v>
+
+162
+00:28:20.924 --> 00:28:32.984
+<v ai-ta-krajta-65-speaker_0>produktu, OK po stránce vývoje, OK po stránce UXu. A to je něco, kde se zase přesouvá a transformuje celý to SDLC. Už to není, a ono to jako dlouhou</v>
+
+163
+00:28:33.024 --> 00:28:45.224
+<v ai-ta-krajta-65-speaker_0>dobu nemělo být o tom, že si přehazujem balíčky, jako že teďkon právě jsem byl na pokecu s Karlem Knuttrym a on říká: „No, tak tam, než se dostane ticket k vývojáři v některých bankách léta</v>
+
+164
+00:28:45.284 --> 00:28:57.604
+<v ai-ta-krajta-65-speaker_0>Páně 2015, tak dostane vytištěnou business analýzu, kde jsou normálně pSQL dotazy napsaný na papíře, takže ten člověk to jenom</v>
+
+165
+00:28:57.764 --> 00:29:09.924
+<v ai-ta-krajta-65-speaker_0>přepisuje. A analytik, eh, když dostal dotaz: „Hele, a proč to jako rovnou nenaprogramuješ?“ „To ne, já nejsem programátor, to musejí dělat ti vývojáři.“ A ano, oni to musejí dělat</v>
+
+166
+00:29:09.944 --> 00:29:21.964
+<v ai-ta-krajta-65-speaker_0>vývojáři, protože z Wordu fakt nezkontroluju, jestli se ten kód zkompiluje. Jde to blbě, jo, ale když se to jako posune od toho, že nebudeme si takhle házet balíčky jako na, tady máš analýzu,</v>
+
+167
+00:29:22.064 --> 00:29:34.124
+<v ai-ta-krajta-65-speaker_0>na, tady máš specifikaci, na, tady máš kód k otestování, tak je to mnohem lepší, jo? Místo toho, když tester dostane kód k testování a jediný instrukce</v>
+
+168
+00:29:34.184 --> 00:29:46.264
+<v ai-ta-krajta-65-speaker_0>jsou tady máš ticket, počkej si, než se ti vytočí prostředí, tak to prostě nemůže fungovat. A nebo když to je ještě jako horší příklad, kdy ten vývojář řekne tomu testerovi, co má</v>
+
+169
+00:29:46.304 --> 00:29:58.644
+<v ai-ta-krajta-65-speaker_0>testovat. No samozřejmě, že ten vývojář mu neřekne, tady to nějak blbne. Většinou, většinou jako jsem ve firmách potkával, kdy mu dá jako instrukce k tý happy path anebo k těm pár jako unhappy path,</v>
+
+170
+00:29:58.764 --> 00:30:11.164
+<v ai-ta-krajta-65-speaker_0>ale rozhodně tam pak není ta invence. A to je důvod, proč jsou ty role i rozdělený, že jo. Protože tester má jinej mindset než vývojář a je potřeba s tím pracovat. Ve spoustě firmách je to o masivní transformaci celýho procesu.</v>
+
+171
+00:30:12.004 --> 00:30:24.964
+<v ai-ta-krajta-65-speaker_0>A i když my nakrásně zrychlíme vývoj desetinásobně, tak to neznamená, že zrychlíme celej proces desetinásobně. Jo, nám se to jako hezky mluví. Myslím si, že my všichni vlastně jsme v týmech, který jsou</v>
+
+172
+00:30:25.064 --> 00:30:37.984
+<v ai-ta-krajta-65-speaker_0>docela AI capable. Ale pak tady máme projekty, kde je stakeholder třetí strana, která jim, lidem řekne: „No tady máte jenom read only access na Figmu a udělejte</v>
+
+173
+00:30:38.024 --> 00:30:50.052
+<v ai-ta-krajta-65-speaker_0>to nějak podle toho, ale nemusí to bejt jedna ku jedný, protože jsme to prostě tam naklikali rychle.“ A podobný věci, jo. Takže my máme obrovskou výhodu. Uvidíme, jak se to jako promítne.</v>
+
+174
+00:30:50.112 --> 00:31:02.112
+<v ai-ta-krajta-65-speaker_0>Někde se to mění do toho, že se vytvářej nějaký jako mini týmy, který mají třeba tři lidi, kdy všichni jako úzce spolupracujou. Jinde se s tím pracuje tak, že se dělá obrovskej, eh,</v>
+
+175
+00:31:02.332 --> 00:31:14.392
+<v ai-ta-krajta-65-speaker_0>backlog, kdy všichni to odbavujou tu jednu věc. To je zase, to je zase další záležitost, kterou mi řekl, eh, Karel. Existuje něco, co se nazývá LeSS. Slyšeli jste někdy o LeSS?</v>
+
+176
+00:31:14.672 --> 00:31:19.092
+<v ai-ta-krajta-65-speaker_0>A nemyslím tý CSSkový, eh, preprocesingový knihovně.</v>
+
+177
+00:31:19.852 --> 00:31:19.952
+<v ai-ta-krajta-65-speaker_1>Ne.</v>
+
+178
+00:31:21.092 --> 00:31:33.412
+<v ai-ta-krajta-65-speaker_0>Je to Large Scale Scrum. A princip toho je, že všichni mají jeden obrovskej backlog a odbavujou to tak, aby dosáhli toho cílenýho výsledku. Není to tak, že ty řešíš tady daňovej modul,</v>
+
+179
+00:31:33.512 --> 00:31:45.512
+<v ai-ta-krajta-65-speaker_0>ty řešíš tady design systém, ty řešíš tohle, ale všichni budujou jeden produkt. Všichni odbavujou to, aby to šlapalo. Ta myšlenka za tím je geniální, ale vidět to aplikovaný v</v>
+
+180
+00:31:45.612 --> 00:31:49.972
+<v ai-ta-krajta-65-speaker_0>praxi, ještě jsem takovou firmu nepotkal. Ale Karel tvrdí, že nějaký takový existujou.</v>
+
+181
+00:31:50.172 --> 00:32:02.472
+<v ai-ta-krajta-65-speaker_1>Tak ono taky možná ne všichni jako i chtějí bejt tak strašně efektivní. Pro někoho možná, pro některý firmy bude možná jako výhodnější s tím až tak jako nespěchat, s tou snahou bejt efektivní,</v>
+
+182
+00:32:02.552 --> 00:32:07.412
+<v ai-ta-krajta-65-speaker_1>no. Nevím. Jako že ne všude, ne všude to je výhoda totiž asi si myslím.</v>
+
+183
+00:32:07.752 --> 00:32:19.852
+<v ai-ta-krajta-65-speaker_0>Eh, já si jako uvědomuju, že jsem na tý absolutní hranici. Mně jde o to trošku i nabourat ten mindset, proto, proto vlastně o tom mluvím tímhle způsobem. Mám teda jako štěstí na klienty, kde</v>
+
+184
+00:32:21.152 --> 00:32:33.892
+<v ai-ta-krajta-65-speaker_0>nemusím bojovat s takhle šílenou byrokracií často. Nebo je tam aspoň nějaká vůle optimalizovat jiný části, jo. Všude se na něco narazí. Ne, že ne. Ať už je to prostě mateřská společnost nám přikázala,</v>
+
+185
+00:32:33.972 --> 00:32:46.332
+<v ai-ta-krajta-65-speaker_0>že i po zvednutí cen musíme používat GitHub Copilot. Nebo je to stakeholder tady trvá tři týdny, než nám pošle reakci na úpravu požadavku. Jo? Ale</v>
+
+186
+00:32:46.372 --> 00:32:58.772
+<v ai-ta-krajta-65-speaker_0>to neznamená, že se nedá transformovat jiná část toho vývoje. Jedna z věcí, kterou já mám jako extrémně oblíbenou, kvitujou to i, a mám to právě od lidí z ByteDance, kteří stojí za Respekem</v>
+
+187
+00:32:58.792 --> 00:33:10.812
+<v ai-ta-krajta-65-speaker_0>a tak. Tak oni říkali: „Hele, jedna z největších věcí, kterou pro mě AI změnilo, je, jak moc můžu zkoumat konkurenční implementace. Dělají na compilerech, kompilátorech a podobnejch věcech.</v>
+
+188
+00:33:11.252 --> 00:33:23.292
+<v ai-ta-krajta-65-speaker_0>V minulosti to bylo tak: hele, podívám se na to, jak to dělaj v Céčku a podívám se na to, jak to dělaj v C++. A budu mít nějakou dobrou výchozí pozici, protože tohle jsou dostatečně vyspělý ekosystémy na to, aby měli</v>
+
+189
+00:33:23.332 --> 00:33:35.612
+<v ai-ta-krajta-65-speaker_0>asi zvládnutý compilery. Dneska je to tak, že s AI prozkoumaj třicet různejch implementací Zig, Rust, Céčko, Odin a x milion dalších. Začnou destilovat</v>
+
+190
+00:33:35.912 --> 00:33:48.132
+<v ai-ta-krajta-65-speaker_0>ty myšlenky do tý svojí vlastní, eh, potřeby. A to je něco, co se strašně moc podceňuje. Jak moc můžu prozkoumat, jak to dělá konkurence, ať už algoritmicky nebo</v>
+
+191
+00:33:48.732 --> 00:34:01.412
+<v ai-ta-krajta-65-speaker_0>po stránce UX, UI. Takže to zase má dopad na celý SDLC. Můžu se podívat na to, jak se testujou appky jinde, že se dělaj někde už jenom vizuální testy, protože člověk</v>
+
+192
+00:34:01.452 --> 00:34:14.432
+<v ai-ta-krajta-65-speaker_0>vlastně taky funguje na bázi vizuálních testů a svojí nějaký vlastní paměti. My rozhodně neříkáme jako „klikni na tlačítko střídou, tečka něco a tak“. Takže ten posun je extrémně</v>
+
+193
+00:34:14.452 --> 00:34:27.092
+<v ai-ta-krajta-65-speaker_0>širokej a je to jenom o tom si najít místečko, kde to může fungovat. To mě přivedlo na video, který tady nasdílím. Dáme ho pak do materiálů.</v>
+
+194
+00:34:27.592 --> 00:34:39.672
+<v ai-ta-krajta-65-speaker_0>A to je zase můj oblíbenej Theo Brown, kterej jako získává spoustu hejtů od různejch lidí. Ale on mluví o jedný důležitý věci, a to je to, že my máme nějakou škálu. Ta</v>
+
+195
+00:34:39.712 --> 00:34:51.912
+<v ai-ta-krajta-65-speaker_0>škála je prostě slop stránka, kdy si to navibuju v Makali nebo v něčem takovým. A pak je to software, kterej běží v kardiostimulátorech a podobnejch věcech. A spousta lidí</v>
+
+196
+00:34:51.932 --> 00:35:04.452
+<v ai-ta-krajta-65-speaker_0>přeceňuje, jak moc je důležitej ten jejich kód. Spousta lidí si říká „ano, to je strašně důležitej ten kód, nemůžou tam bejt chyby a tak dále“. Ale realita je taková, že většina projektů nestojí lidský životy, když se něco podělá. Ale to</v>
+
+197
+00:35:04.472 --> 00:35:16.652
+<v ai-ta-krajta-65-speaker_0>je jenom část toho příběhu. Druhá část je, že i když jsem na tom extrémně náročným kódu, kde to může stát lidi životy a napíšu dvě stě řádků za den, tak to neznamená, že já nemůžu</v>
+
+198
+00:35:16.672 --> 00:35:28.752
+<v ai-ta-krajta-65-speaker_0>použít AI k tomu, abych podpořil tu moji snahu. Že budu najednou generovat dva tisíce supportních řádků. Budu si dělat nějakej fuzzy testing, budu dělat chaos testing, zkusím si odstřelit nějaký</v>
+
+199
+00:35:28.792 --> 00:35:40.792
+<v ai-ta-krajta-65-speaker_0>části service. A to jsou věci, který se nikdy nemusej dostat do tý produkční části, ale můžu si tím extrémně vylepšit celou codebase, protože ji, eh, posílím. Jeden z takovejch jako tipů,</v>
+
+200
+00:35:40.912 --> 00:35:53.092
+<v ai-ta-krajta-65-speaker_0>kterej nestojí dva tisíce řádků, ale já to říkám všude, je, pokud máte testy, zapněte fully parallel mód Playwrightu a zapněte paralelizaci na n minus jedna vláken, který</v>
+
+201
+00:35:53.112 --> 00:36:05.272
+<v ai-ta-krajta-65-speaker_0>na počítači máte. Takže třeba na mým Macu to pojede na devíti vláknech, na, když máte Threadripper, tak to pojede klidně šedesát tři testů paralelně a tak. A v tu chvíli poznáte, jak moc jsou vaše testy stabilní a jak moc</v>
+
+202
+00:36:05.292 --> 00:36:06.292
+<v ai-ta-krajta-65-speaker_0>jsou na sobě závislý.</v>
+
+203
+00:36:07.912 --> 00:36:14.132
+<v ai-ta-krajta-65-speaker_0>A taky zjistíte, jak moc se dá zrychlit CI/CD, když tam dáte jako silnější stroj s větším množstvím paralelizace a tak.</v>
+
+204
+00:36:14.412 --> 00:36:26.692
+<v ai-ta-krajta-65-speaker_1>To je, to je hrozně zajímavá myšlenka, že vlastně se dá dělat strašně moc různejch, řekněme experimentů, který by člověk prostě dřív nedělal, protože na to neměl čas, protože musel psát jako to jen kód svůj. Ale teď prostě</v>
+
+205
+00:36:26.732 --> 00:36:30.292
+<v ai-ta-krajta-65-speaker_1>si může vymejšlet všechno možný a jenom přijít na to, co zkoušet, no.</v>
+
+206
+00:36:30.672 --> 00:36:42.952
+<v ai-ta-krajta-65-speaker_0>Zkoušet se dá úplně všechno. Jo, jako prozkoumáš konkurenci, prozkoumáš prostě, uděláš, uděláš si blbej deep research na to, jak zlepšit kvalitu kódu. Jo, máš tam, máš tam jako milion</v>
+
+207
+00:36:42.992 --> 00:36:55.332
+<v ai-ta-krajta-65-speaker_0>věcí. Anthropic měl článek právě zaměřenej na fuzzy testing to myslím bylo, nebo property based testing, kdy principem právě je, že nemám definovaný hodnoty, se kterýma ten kód testuju, ale</v>
+
+208
+00:36:55.532 --> 00:37:07.604
+<v ai-ta-krajta-65-speaker_0>jedu na nějakým jako tom intervalu. Takže vím, že prostě tahle funkce bere jedna až sto a druhej parametr je jedno písmeno z abecedy. Blbost jo, ale plácnu to. A místo toho, abych si</v>
+
+209
+00:37:07.644 --> 00:37:19.684
+<v ai-ta-krajta-65-speaker_0>vydefinoval, ok, tak otestuju pětku a áčko, tak prostě ten fuzzy testing nebo property based testing mi tam bude dávat random inputy v tý validní kombinaci. A budu hledat, jestli tam nejsou nějaký issues,</v>
+
+210
+00:37:19.744 --> 00:37:31.784
+<v ai-ta-krajta-65-speaker_0>jestli třeba nějaká kombinace není problematická nebo jestli to mám naspecifikovaný správně, jo? Moje, můj oblíbenej test, eh, kterým jako odhaluju mindset testera, je: máš input na číslo.</v>
+
+211
+00:37:31.984 --> 00:37:34.144
+<v ai-ta-krajta-65-speaker_0>Co tam zkusíš zadat, abys to rozbil jako první?</v>
+
+212
+00:37:34.664 --> 00:37:36.564
+<v ai-ta-krajta-65-speaker_1>Já bych tam zkusila nezadat nic teda.</v>
+
+213
+00:37:36.904 --> 00:37:49.184
+<v ai-ta-krajta-65-speaker_0>Ok, to neřeš. Ber to jako, ber to jako HTML input prostě na frontendu. Neřeš jako co je na backendu. Zadáváš to tam jako tester. Ok, ok. Hele, to se mi, to jsem jako, to je většinou ošetřený,</v>
+
+214
+00:37:49.284 --> 00:38:01.584
+<v ai-ta-krajta-65-speaker_0>ale co je strašně často rozbitý, zejména pokud to jsou jakoby ty manažovaný inputy, tak je, když udělám exponenciální zápis čísla. Já napíšu, že si chci koupit jedna E5 produktů. A viděl</v>
+
+215
+00:38:01.644 --> 00:38:07.124
+<v ai-ta-krajta-65-speaker_0>jsem apky, kde tady tenhle zápis crashnul celej frontend.</v>
+
+216
+00:38:07.144 --> 00:38:08.864
+<v ai-ta-krajta-65-speaker_1>[smích]</v>
+
+217
+00:38:09.204 --> 00:38:21.484
+<v ai-ta-krajta-65-speaker_0>Prostě mi to crashnulo celej prohlížeč. Ne tab, ale celej ten frontend vy-vystoupal do takový úrovně, že mi systém zabil prohlížeč. Takže to je jako taková myšlenka</v>
+
+218
+00:38:21.544 --> 00:38:33.564
+<v ai-ta-krajta-65-speaker_0>na závěr. Zkuste přemýšlet nad tím, jakejma všema způsobama můžete vylepšit kvalitu vašich aplikací. A nemusí to bejt vždycky ty ordinérní, který jste navnímali za svou</v>
+
+219
+00:38:33.604 --> 00:38:39.324
+<v ai-ta-krajta-65-speaker_0>kariéru. Je toho spousta, co je neobjevenýho. Teď je ten nejlepší čas objevovat všechno možný.</v>
+
+220
+00:38:39.604 --> 00:38:42.764
+<v ai-ta-krajta-65-speaker_1>To je hezkej závěr. [smích]</v>
+
+221
+00:38:42.804 --> 00:38:43.004
+<v ai-ta-krajta-65-speaker_0>Ahoj.</v>
+
+222
+00:38:43.404 --> 00:38:43.784
+<v ai-ta-krajta-65-speaker_1>Ahoj.</v>
+
+223
+00:38:43.784 --> 00:38:45.904
+<v ai-ta-krajta-65-speaker_3>[hudba]</v>

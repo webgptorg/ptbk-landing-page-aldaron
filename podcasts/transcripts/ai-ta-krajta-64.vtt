@@ -1,0 +1,857 @@
+WEBVTT
+
+1
+00:00:04.320 --> 00:00:16.520
+<v ai-ta-krajta-64-speaker_0>Ahoj, vítáme vás u šedesátýho čtvrtýho dílu IT Cryty. Máme naše kulatiny. Vydrželi jsme dýl než většina podcastů, co kdy začala vznikat. A to by nebylo možný bez podpory</v>
+
+2
+00:00:16.660 --> 00:00:23.720
+<v ai-ta-krajta-64-speaker_0>Probooku, díky kterýmu máme skvělýho střihače a kteří pořádají událost, kterou si kdyžtak přibližte kluci.</v>
+
+3
+00:00:24.060 --> 00:00:36.240
+<v pavol-hejny>Měli jsme teďka online webinář na AI vibe coding a to, jaký, jaký tam jsou všechny problémy. Mělo to dost ústěch a tak děláme round dva a dáváme odkaz do komentáře. A já bych rovnou</v>
+
+4
+00:00:36.280 --> 00:00:39.060
+<v pavol-hejny>začal novinkami. Eh, má někdo z vás novinky?</v>
+
+5
+00:00:39.320 --> 00:00:45.880
+<v ai-ta-krajta-64-speaker_0>Já jsem měl novinky, který jsem posílal v době, kdy byly novinky. Nevím, jestli jste je někdo zmiňovali. Eh, předsedy v Googlu jste řešili?</v>
+
+6
+00:00:46.060 --> 00:00:51.200
+<v pavol-hejny>Částečně jsme je řešili v minulým díle s Romanem Barabišem, ale klidně přidej svoji trošku do mlýna.</v>
+
+7
+00:00:51.340 --> 00:01:03.700
+<v ai-ta-krajta-64-speaker_0>No, vypadá to, že v Googlu se to hodně otřásá. Odešly jim tam čtyři velký AI mozky s tím, že jeden člověk byl v Googlu jako jeden z top zaměstnanců,</v>
+
+8
+00:01:03.760 --> 00:01:15.920
+<v ai-ta-krajta-64-speaker_0>co tam doteď byli. Byl tam pětadvacet let a byl prakticky u všeho, u vyhledávání, u AI a u všeho možnýho. Ti se teďka rozhodli si založit vlastní startup, kterej se jmenuje</v>
+
+9
+00:01:15.960 --> 00:01:28.300
+<v ai-ta-krajta-64-speaker_0>Discovery Loop a tam mě zaujalo to, samotná ta existence toho startupu. Jde premisou toho ne, že budou dělat AI asistovanej výzkum, ale že budou mít AI powered výzkum a postaví na tom jako</v>
+
+10
+00:01:28.340 --> 00:01:36.420
+<v ai-ta-krajta-64-speaker_0>existenci tý firmy a budou prostě dofoodovat ty modely, aby jim ta firma, eh, rostla, fungovala líp a tak dále. Tak jsem zvědavej, kam to dopracujou.</v>
+
+11
+00:01:36.540 --> 00:01:46.040
+<v pavol-hejny>Jo, má tohle být nějak jako semi autonomní vývoj nebo re-research? Nebo jak, jak je to myšlený vlastně? Budou do toho lidi zasahovat?</v>
+
+12
+00:01:46.120 --> 00:01:58.240
+<v ai-ta-krajta-64-speaker_0>Z toho, co víme, má to bejt fakt jako autonomní záležitost. Oni už mají i stránky, tak já je teďka nasdílím. Jmenuje se to Discover Loop a je to fakt automatic, automatic discovery to accelerate science and</v>
+
+13
+00:01:58.280 --> 00:01:59.360
+<v ai-ta-krajta-64-speaker_0>engineering for the world.</v>
+
+14
+00:02:01.280 --> 00:02:13.320
+<v ai-ta-krajta-64-speaker_0>Oni vyloženě chtějí fakt jako jít po tom vyzkoumávat nový věci, automatizovat je a tak. Otázka je, nakolik tam jako, kde bude hrát roli ten člověk. Tam to podle mě nějakou dobu ještě nezjistíme. Na druhou</v>
+
+15
+00:02:13.360 --> 00:02:18.980
+<v ai-ta-krajta-64-speaker_0>stranu s těma jménama, co tam šli, tak to se rajsuje samo. Prostě člověk řekne: „Á, čtyři ex Google lidi.“</v>
+
+16
+00:02:19.340 --> 00:02:31.560
+<v pavol-hejny>Jak já to vnímám, tak jde vlastně o to nechat, eh, AI generovat nějaký nápady. Něco, co by člověka třeba nenapadlo tak rychle úplně, ne? Druhá důležitá věc bude podle mě ta, potom to nějak zvalidovat, nějak</v>
+
+17
+00:02:31.600 --> 00:02:33.220
+<v pavol-hejny>to jako, jako střet s realitou.</v>
+
+18
+00:02:33.600 --> 00:02:45.660
+<v ai-ta-krajta-64-speaker_0>Oni tady píšou, že jako propose, run and learn from evaluations a bude to parallel execution of thousands of experiments. Tak uvidíme, jak to dopadne. Myslím si, že jako v researchi je to stále docela underutilized.</v>
+
+19
+00:02:45.920 --> 00:02:58.080
+<v pavol-hejny>Shodou, shodou okolností jsme minulej týden řešili to, že já nevím, třeba Anthropic dělá pokroky, mírný pokroky v matematice třeba a tak. Ale jo, tohle je určitě důležitej směr. Myslím,</v>
+
+20
+00:02:58.180 --> 00:03:00.220
+<v pavol-hejny>že není náhoda, že ty lidi pochází z Google.</v>
+
+21
+00:03:02.860 --> 00:03:05.800
+<v ai-ta-krajta-64-speaker_0>No, já jsem zvědavej, jak to bude dál s Googlem, protože-</v>
+
+22
+00:03:05.840 --> 00:03:18.000
+<v pavol-hejny>No já možná, možná přidám svoji novinku, že, hm, OpenAI teďka oficiálně, ono to s tím trochu souvisí, eh, jako ostatně vždycky. Oficiálně zveřejnili nebo, hm, přiklonili se prostě k tomu, co už</v>
+
+23
+00:03:18.040 --> 00:03:30.120
+<v pavol-hejny>dlouho je ve vzduchu. To, že zpomalí AI vývoj. Nevíme přesně, co to bude znamenat, jak moc to myslí vážně. Řekl bych, že to je takový jako nějaká stylizace do něčeho, že na jednu stranu se tím zbavuješ tlaku</v>
+
+24
+00:03:30.520 --> 00:03:40.480
+<v pavol-hejny>neustále vydávat nějaký novinky a na druhou stranu můžeš v klidu někde pod střechou vyvíjet nějaký super ničivý modely, který všechno rozbijou. Nevím, co si o tom myslíte.</v>
+
+25
+00:03:40.760 --> 00:03:52.940
+<v ai-ta-krajta-64-speaker_0>Já jsem k tomuhle takovej jako skeptickej, co za tím vlastně jako sledujou. Na jednu stranu, jak říkáš, prostě to, že to jako pozastavěj na papíře nemusí znamenat, že to pozastavěj i v reálu. Druhak</v>
+
+26
+00:03:52.980 --> 00:04:05.400
+<v ai-ta-krajta-64-speaker_0>si myslím, že to je trošku politická snaha pomali ty ostatní, že řeknou: „My jsme to udělali, tak vy přece můžete taky.“ Tím, co teďko předvedl jako novej Qwen tři osmička, tak to je jako neskutečný. Ten model</v>
+
+27
+00:04:05.460 --> 00:04:10.700
+<v ai-ta-krajta-64-speaker_0>je brutální. Škoda, že tady není Kačka. Ta si myslím, že by z toho byla nadšená. Už jste ho zkoušeli?</v>
+
+28
+00:04:10.860 --> 00:04:18.500
+<v pavol-hejny>Zkoušeli a je to úplně brutální. Mně připadá, že ty číněně začínají být stejně dob-- nebo už jsou stejně dobrý a už je to prostě na tu tovku.</v>
+
+29
+00:04:18.640 --> 00:04:19.360
+<v ai-ta-krajta-64-speaker_0>Je to tak no.</v>
+
+30
+00:04:19.579 --> 00:04:32.020
+<v pavol-hejny>Já se přiznám, že jsem ještě tenhle ten model nezkoušel na programování, žádný otázky, ale zajímalo by mě docela, jak třeba do-dokázali byste nějak srovnat třeba GPT pět, šestku, třeba řekněme Sol v</v>
+
+31
+00:04:32.060 --> 00:04:36.040
+<v pavol-hejny>nějakým medium režimu nebo high režimu s tímhletím zvířetem?</v>
+
+32
+00:04:36.140 --> 00:04:48.320
+<v ai-ta-krajta-64-speaker_0>Ne, z toho, co jsem testoval já, tak samozřejmě klasickej problém menších modelů. Nekomunikovat s tím v jiným jazyce než v angličtině nebo v čínštině, pokud někdo umíte. Chvíli, kdy člověk dodržuje</v>
+
+33
+00:04:48.360 --> 00:05:00.420
+<v ai-ta-krajta-64-speaker_0>jakoby ty to, že se posune trošku dozadu s tím, jak s tím komunikuje, že tomu nedává, eh, moc volnosti pro výklad, tak ten model je neskutečně silnej. Chlape docela hezky. Jedinej problém je, že tím,</v>
+
+34
+00:05:00.460 --> 00:05:12.900
+<v ai-ta-krajta-64-speaker_0>že je to dense model, tak na Macu je jako šíleně, šíleně pomalej. Naproti tomu, když, eh, vydali ten A3B, třicet pět B A3B, tý tři šest a tři sedm generaci, tak</v>
+
+35
+00:05:13.220 --> 00:05:21.380
+<v ai-ta-krajta-64-speaker_0>ten mi přišel jako zajímavější na Macbooku. Kdežto ty dense modely prostě potřebujou pořádnej výkon těch grafik. Takže na Macu to není úplně použitelný.</v>
+
+36
+00:05:22.080 --> 00:05:34.100
+<v pavol-hejny>Mně tam přijde jako jedna věc a to ta, že ono nutně to, že ten model se dá stáhnout nemusí, nemusí znamenat, že si ho rovnou stáhnu a provozuju lokálně. Ono to vůbec znamená tu option, ale to, že to</v>
+
+37
+00:05:34.140 --> 00:05:46.720
+<v pavol-hejny>můžu udělat. Protože pokud mi vypnou Sol nebo Fable, tak s tím nic neudělám. Jenomže model, který už je takhle vypuštěnej, tak si ho vždycky můžu někde lokálně spustit,</v>
+
+38
+00:05:47.100 --> 00:05:54.960
+<v pavol-hejny>i když si ho zrovna teďka lokálně nespouštím. A ono ještě je něco mezi, jako já ho můžu spustit na svém vlastním cloudu, i když to je taky poměrně drahý.</v>
+
+39
+00:05:55.100 --> 00:06:07.220
+<v ai-ta-krajta-64-speaker_0>Jo, jako já teďkon přemýšlím, že si právě koupím dva Sparky právě kvůli provozování některejch modelů a kvůli věcem, který s cloudovejma vůbec neudělám nebo ne s cloudovejma, který si nenasazuju sám</v>
+
+40
+00:06:07.240 --> 00:06:19.300
+<v ai-ta-krajta-64-speaker_0>někam. Třeba nějaký security scanny, tak teďkon OpenAI tak specifikovalo, že mají klasickej model a pak máte Daybreak Blue a Daybreak Red a k tomu červenýmu se prakticky nedá dostat jako jednotlivec, pokud nemáte</v>
+
+41
+00:06:19.320 --> 00:06:31.992
+<v ai-ta-krajta-64-speaker_0>nějakej track of record. Takže tam jsem se nedostal. Ale Daybreak Blue mám schválenej. Tam vám stačí normálně projít klasickým KYC- Občankou a tak, jsem schopnej s tím jako dělat něco. Ale že bych vyloženě jako zkusil pentestovat</v>
+
+42
+00:06:32.032 --> 00:06:33.392
+<v ai-ta-krajta-64-speaker_0>naši infra, to neprojde.</v>
+
+43
+00:06:33.572 --> 00:06:45.672
+<v pavol-hejny>Bych řekl, že obecně další jako zajímavý okruh témat, a to AI modely a security a to, co povolujou a nepovolujou. Protože mně přijde, že s-že začíná být strašně těžký rozlišit, zda daná věc je legit a</v>
+
+44
+00:06:45.692 --> 00:06:58.272
+<v pavol-hejny>jenom jako opravuje chyby v mým vlastním softwaru, anebo zda provádím nějaký útok. A já s-- my sami s tím začínáme mít poměrně problémy, protože model, kterej je dobrej v security, tak je dobrej v hackování</v>
+
+45
+00:06:58.372 --> 00:06:59.071
+<v pavol-hejny>a vice versa.</v>
+
+46
+00:06:59.192 --> 00:07:12.192
+<v ai-ta-krajta-64-speaker_0>Já jako teďka, teďka zrovna jsem viděl, že Stefan z Outsiders, tak měli přednášku o tom, že hacknuli různý modely a donutili je dělat jako nepřístojnosti. Co bylo zajímavý, že Gemini tím, že je jako hodně prosociální,</v>
+
+47
+00:07:12.552 --> 00:07:24.812
+<v ai-ta-krajta-64-speaker_0>tak tam když člověk jako specifikoval, že je holka ze Severní Koreje a potřebuje jako utýct a k tomu musí sestavit bombu, tak najednou Gemini: „Ale prosím beze všeho.“ Takže je jako zajímavý, jak i to vlastně nastavení</v>
+
+48
+00:07:24.852 --> 00:07:27.512
+<v ai-ta-krajta-64-speaker_0>toho modelu promítá do toho, jak ho hacknete.</v>
+
+49
+00:07:27.732 --> 00:07:39.732
+<v pavol-hejny>Mně přijde jako úplně fascinující, jak tyhlety pohádky okolo vlastně jako konzistentně fungujou a konzistentně fungujou už od prostě GPT tři a půlky a stále je to stejně platný, že vlastně jako či-čistě tím, co, co</v>
+
+50
+00:07:39.772 --> 00:07:51.952
+<v pavol-hejny>mu nakecám, mu dokážu zvýšit ochotu nebo schopnosti toho, co on udělá. A mi-mimochodem já mám jako, jako jednoduš-jednodušší jako tu, eh, ono když mám nějakej repozitář, tak</v>
+
+51
+00:07:52.112 --> 00:08:04.332
+<v pavol-hejny>já mu buď můžu říct nehackne, anebo mu můžu říct neho fixne. Jenomže ono velmi často je to v podstatě ekvivalent. My jsme teďka taky potřebovali ověřit nějakou naši appku, protože my teďka, jak jsme dělali</v>
+
+52
+00:08:04.392 --> 00:08:16.552
+<v pavol-hejny>ten první webinář, tak nám to celý spravoval agent. Jsme udělali takovej experiment, že e-maily posílal agent, webovku tvořil agent. Byl to jako jeden agent, kterej to, který si to všechno manažoval a jakoby přece jenom člověk má</v>
+
+53
+00:08:16.632 --> 00:08:29.332
+<v pavol-hejny>jako důvěřovat, ale prověřovat. Tak jsem si to chtěl nechat prověřit, zda ta, zda tam nejsou nějaký chyby, protože minimálně nějaký tam nasekal. Když jsem mu to řekl tak, že to má hacknout, tak, tak jako ab-absolutně</v>
+
+54
+00:08:29.472 --> 00:08:41.512
+<v pavol-hejny>žád-- ani ty čínský modely mně řekly, že ne, ale jakmile jsem mu řekl, že se na to má podívat, abychom to mohli opravit a že nám má udělat pull request, aby to opravil, tak to v pohodě udělal. Ale ono je to vlastně</v>
+
+55
+00:08:41.532 --> 00:08:45.332
+<v pavol-hejny>ekvivalentní práce. Jedno a druhý je to samý, akorát jinej pohled do za samou věc.</v>
+
+56
+00:08:45.412 --> 00:08:57.592
+<v ai-ta-krajta-64-speaker_0>Často jo, ale jsou věci, který jako neuděláš bez toho, abys ho donutil jako hackovat. Pokud chceš dělat vyloženě nějakej jako black box testing tvojí infra, tak tam potřebuješ ten agent jako toho agenta donutit,</v>
+
+57
+00:08:57.652 --> 00:09:09.772
+<v ai-ta-krajta-64-speaker_0>se pustil do toho útoku. A to je jeden z důvodů, proč chcu právě si nakoupit ten Spark. Vlastně to teďkon řeším i s klientama. Na některý věci to prostě dává smysl, i když je to třeba pomalejší na tu propustnost, tak pokud to pustím</v>
+
+58
+00:09:09.812 --> 00:09:21.832
+<v ai-ta-krajta-64-speaker_0>jako nějakej overnight scanner, kterej mi bude dělat nějaký automatizace, kde mi nevadí, že to jede deset tokenů za sekundu. Anebo budu mít nějakej jako long running testing mojí</v>
+
+59
+00:09:21.872 --> 00:09:34.012
+<v ai-ta-krajta-64-speaker_0>infrastruktury po stránce bezpečnosti a jenom potřebuju, aby to manažovalo ty existující nástroje na hackování. Tam se to jako vyplatí a nevadí mi, že to, že to pojede pomalu a nemusím hnedka investovat do grafiky za dvě</v>
+
+60
+00:09:34.092 --> 00:09:35.072
+<v ai-ta-krajta-64-speaker_0>stě třicet tisíc.</v>
+
+61
+00:09:35.292 --> 00:09:47.912
+<v pavol-hejny>Jo no, no často stačí, aby to vůbec jelo, protože jako u spousty úkolů je ti jedno, jak rychle to, nebo úplně jedno ne, ale u spousty úkolů nezáleží na tom, že to jede dlouho, ale že se to udělá dobře a že to nemusíš supervizovat</v>
+
+62
+00:09:48.012 --> 00:09:48.892
+<v pavol-hejny>a babysittovat.</v>
+
+63
+00:09:49.212 --> 00:10:01.472
+<v ai-ta-krajta-64-speaker_0>Je to tak. Teďkom, teďkom právě co skládám je, eh, propojit dvakrát Spark. Ale další experiment, kterej uvidím, jestli k tomu přesvědčím, eh, klienty je, že jsou i metody, jak</v>
+
+64
+00:10:01.532 --> 00:10:13.532
+<v ai-ta-krajta-64-speaker_0>zřetězit osm Sparků do sebe. Potřebujete k tomu teda sice jako brutální router, kterej sám o sobě stojí tolik, co jeden ze Sparků. Pak jste schopni mít osm krát sto dvacet osm giga ramek a</v>
+
+65
+00:10:13.572 --> 00:10:23.292
+<v ai-ta-krajta-64-speaker_0>V ramek vlastně. A tam už se dá provozovat třeba Kimi K dva a půl. Tu trojku tam nerozjedete, ta je jako obrovská, ale dva a půlka rozhodně.</v>
+
+66
+00:10:23.492 --> 00:10:28.972
+<v pavol-hejny>No máš Petře nějaký tipy, jak donutit agenty, aby začali hackovat pro tebe?</v>
+
+67
+00:10:29.092 --> 00:10:41.152
+<v ai-ta-krajta-64-speaker_0>Hele, právě si je provozovat lokálně a vzít obliterated verzi. Jo, koho to zajímá, tak si najděte na Hugging Face, teďkom se tomu říká obliterated a tam jsou odstraněný veškerý zábrany a</v>
+
+68
+00:10:41.172 --> 00:10:53.632
+<v ai-ta-krajta-64-speaker_0>je to dělaný trošku jinak. V minulosti se totiž tady tyhle modely dělaly tím, že jste udělali fine tuning, kde jste ten model jako přesvědčili, že je v pořádku dělat, já nevím, hacky, návody na bomby a tak. Ale</v>
+
+69
+00:10:53.692 --> 00:11:03.152
+<v ai-ta-krajta-64-speaker_0>teďkom oni přišli s nějakým výzkumem a zkusím ho kdyžtak pak nalinkovat do komentářů, kterej vlastně odstraňuje ty bezpečnostní vrstvy místo toho, aby je přeučoval.</v>
+
+70
+00:11:03.312 --> 00:11:09.412
+<v pavol-hejny>Ok, to může mít rozhodně zajímavý. Nevím, jestli Pavel už řekl svoji novinku. Pavle, máš něco?</v>
+
+71
+00:11:09.852 --> 00:11:22.032
+<v ai-ta-krajta-64-speaker_0>Nemám přímo asi novinku. Jako že hodně teďka sleduju to, co se děje v OpenAI s Astrou a vlastně nejspíš s GPT pět šest a vůbec jako všechny věci,</v>
+
+72
+00:11:22.112 --> 00:11:34.292
+<v ai-ta-krajta-64-speaker_0>co se kolem toho melou. Ale nemám tam asi nic, co bych do toho já sám mohl přihodit. To zase není, není novinka globální, ale spíš taková naše, že jsme použili agenta a dali jsme mu jako mnohem větší autonomii než kdykoliv předtím.</v>
+
+73
+00:11:34.492 --> 00:11:46.832
+<v ai-ta-krajta-64-speaker_0>Vzniklo z toho několik takovejch hrozně zajímavejch překvapení. Ještě evaluujeme vlastně, jestli to byl dobrej nápad nebo ne, ale minimálně za tenhle tejden jsem odeslal víc personalizovanejch e-mailů</v>
+
+74
+00:11:46.892 --> 00:11:59.052
+<v ai-ta-krajta-64-speaker_0>než podle mě za můj jako minulej zbejvající život. Ne zbejvající, za můj předchozí život. [smích] Zbejvající doufám ne, protože dělá, protože jsme dělali workshop a ještě budeme dělat workshop. A původně jsme chtěli</v>
+
+75
+00:11:59.072 --> 00:12:11.132
+<v ai-ta-krajta-64-speaker_0>udělat prostě klasickou e-mailovou pipelinu, takovou tu, takovou tu klasickou nudu, že jakoby přistane ve formuláři nějaký e-mail, po, hnedka se odesílá jeden e-mail, po pár hodinách se odesílá další, pak další. A je to úplně jako</v>
+
+76
+00:12:11.512 --> 00:12:16.552
+<v ai-ta-krajta-64-speaker_0>hloupě nastavený časově jako template. Ale místo toho jsme udělali to, že jsme si vyrobili agenta</v>
+
+77
+00:12:16.972 --> 00:12:29.412
+<v pavol-hejny>Kterej má napojení, napojení na Gmailový API, takže umí ovládat vlastně Gmail. Nemáme tam toli, máme tam asi tisíc lidí, takže, takže se to ještě dalo dělat tímhle způsobem. Když jich tam budeme mít víc, tak, tak</v>
+
+78
+00:12:29.612 --> 00:12:41.612
+<v pavol-hejny>to bude muset být přes něco jinýho než Gmail. A ten měl prostě za úkol s těma lidma komunikovat. Nebyl omezenej tím, kdy co musí a jak poslat, ale jako měl za úkol, má, měl za úkol ty lidi</v>
+
+79
+00:12:41.652 --> 00:12:53.672
+<v pavol-hejny>tam dostat. Některým lidem psal víc e-mailů, některým míň e-mailů, u některejch hodně ujel teda, což mně přišlo vtipný. Co mě úplně nejvíc zarazilo, bylo to, půl z těch e-mailů, co jsem odeslal nebo co můj agent odeslal, tak já sám bych</v>
+
+80
+00:12:53.692 --> 00:13:05.892
+<v pavol-hejny>je v životě jako takhle neformuloval nebo nebyl bych takhle invazivní a drzej, protože on si třeba z ty lidi trošku překlepl, zjistil, že danej člověk třeba pracuje s Power BI a tak ten email jako hodně personalizoval tak, aby to jako</v>
+
+81
+00:13:06.352 --> 00:13:18.932
+<v pavol-hejny>mířilo na toho konkrétního člověka. A co mě překvapilo, že jako i přesto, že to byl hromadný e-mail, tak fakt hodně lidí odpovědělo. Jako, jako kdyby to nebyl hromadný e-mail, protože ono to tak vůbec nepůsobilo.</v>
+
+82
+00:13:19.012 --> 00:13:31.432
+<v pavol-hejny>Další věc, kterou ten agent dělal, bylo, že si automaticky vytvářel web k tomu, k tomu webináři. Ty, ty všechny věci tak, aby byly připravený k tomu, aby to běželo dobře a měl jako úplnou volnost. Mohl,</v>
+
+83
+00:13:31.692 --> 00:13:43.752
+<v pavol-hejny>mohl jako libovolně dávat do toho jako repozitáře, co chtěl, mohl dělat databázový migrace. Já jsem to samozřejmě potom na konci ověřil, že je to všechno dobrý, že tam nejsou žádný kiksy,</v>
+
+84
+00:13:43.812 --> 00:13:55.932
+<v pavol-hejny>že tam není nějaká bezpečnostní zranitelnost a tak. Ale překvapilo mě, nakolik to fungovalo dobře. Vlastně jako kdybych měl opravdu externího zaměstnance, kterej mně pomohl s workshopem a já jsem v principu jenom viděl, jak nám</v>
+
+85
+00:13:55.952 --> 00:13:58.212
+<v pavol-hejny>odpovídají lidi a přihlašujou se nám tam lidi.</v>
+
+86
+00:13:58.772 --> 00:14:10.832
+<v ai-ta-krajta-64-speaker_0>To mě zajímá, jestli, jak jste to jako skládali, jestli jste tam třeba měli fakt jako nějakej i feedback loop na to, jak je to formulovaný. Protože na mě vyskočila samozřejmě ta stránka k tomu workshopu. První, co na mě vyskočilo, bylo, kde</v>
+
+87
+00:14:10.912 --> 00:14:23.192
+<v ai-ta-krajta-64-speaker_0>se agenti lámou. A já úplně: „Panebože, to je tak moc AI fráze.“ A to mě jako, to mě jako zabolelo u srdíčka a říkal jsem si, že zrovna tohle jako bych čekal, že, že se jako podchytí.</v>
+
+88
+00:14:23.752 --> 00:14:31.532
+<v ai-ta-krajta-64-speaker_0>Já mám právě jako i kily, který dělaj jako antiagentní, eh, češtinu, angličtinu a formulování a tak.</v>
+
+89
+00:14:32.512 --> 00:14:44.372
+<v pavol-hejny>Ono totiž, ono to ce-ce-celej ten proces byl vlastně jako rozdělenej v principu na dvě části. Na tu část tý jako landing page a reklamy. To dělalo vlastně Neon Media, naše, naše reklamní agentura. A teda udělali to dobře, protože se tam jako</v>
+
+90
+00:14:44.412 --> 00:14:56.812
+<v pavol-hejny>měli jsme strašně dobrou cenu za člověka, za pro-- ale je pravda, že to vypadá hodně AI. To si myslím, že je jenom o tom, že, že jako, že jinýho našeho agenta na to pošlu, nech tyhlety jako AI</v>
+
+91
+00:14:56.872 --> 00:15:09.472
+<v pavol-hejny>traces jako z toho vymaže, že jako my na to máme nějaký prostě jako mechanismy, jak tyhlety AIkový traces smazat, aby to prostě člověka netrigrovalo. Ale já si myslim, nebo aspoň jako z mý zkušenosti, tohle to víc triggeruje</v>
+
+92
+00:15:09.872 --> 00:15:12.052
+<v pavol-hejny>nás než jako běžnou populaci.</v>
+
+93
+00:15:12.212 --> 00:15:12.892
+<v ai-ta-krajta-64-speaker_0>Asi jo no.</v>
+
+94
+00:15:13.032 --> 00:15:23.892
+<v pavol-hejny>Budem já třeba osobně, eh, já úplně jako nesnáším, jako já osobně jsem úplně rudej, když na mě vyběhne, jak je takovej ten týpek. Myslím, že ne Pavel Nedvěd, Honza Nedvěd se jmenuje.</v>
+
+95
+00:15:23.932 --> 00:15:31.032
+<v ai-ta-krajta-64-speaker_0>Jo. A tak to je, to je jako figurka na český marketingový scéně, která je jako speciální.</v>
+
+96
+00:15:31.272 --> 00:15:43.672
+<v pavol-hejny>Jo, ale zjevně, jako zjevně mu to funguje lomeno takhle. On je extrém, on je úplně totální bizarní extrém. Já jsem, nebo aspoň doposud jsem byl na tom úplně opačným extrému. Já jsem vždycky před každým e-mailem,</v>
+
+97
+00:15:43.712 --> 00:15:55.732
+<v pavol-hejny>před každou komunikací, co jsem posílal, jsem si řekl: „To je blbý, přece takhle bych to neformuloval. A mám tomu člověku tykat nebo vykat? Není blbý říkat Dobrý den, Petře?“ A mně přijde, že jako člověk musí být někde mezi</v>
+
+98
+00:15:55.792 --> 00:16:08.092
+<v pavol-hejny>tím. A jedna z věcí, v čem mně ten agent pomohl, je, jsem ty e-maily neodesílal já. Prostě se to stalo. A teď já si říkám: „Ty vole, to já jsem fakt odeslal?“ Jako že tohleto jsme opravdu vypustili. Tady je takováhle věc a</v>
+
+99
+00:16:08.212 --> 00:16:14.292
+<v pavol-hejny>já mám problém s tím, že já kdybych nad tím přemýšlel moc, tak takovouhle věc jako neudělám, to se mně prostě nepovede.</v>
+
+100
+00:16:14.352 --> 00:16:17.812
+<v ai-ta-krajta-64-speaker_0>Jo, jako rozhodně ten agent jako pomůže, pomůže zbořit některý bariéry.</v>
+
+101
+00:16:17.992 --> 00:16:30.332
+<v pavol-hejny>A hlavně ti pomůže si uvědomit, že některý věci jsou opravdu jenom v tvojí hlavě, že čes-často spousta lidí to vnímá úplně, ale úplně jinak než ty. Kudem, čím přesně, dokázal bys to nějak líp formulovat, čím přesně tě triggeruje ten styl Honzy</v>
+
+102
+00:16:30.372 --> 00:16:38.852
+<v pavol-hejny>Nedvěda? Že jako mně přijde, že on ačkoliv je jako vlastně lidskej hodně, tak v nějakým smyslu je takovej jako právě tímhletím AI.</v>
+
+103
+00:16:39.452 --> 00:16:51.672
+<v ai-ta-krajta-64-speaker_0>Hele, mě v principu jako netriggruje on, protože mám adblock. Lidi, co ho nemají, on je přesně ten případ, jako že otevřu dveře, Nedvěd, otevřu ledničku, Nedvěd, bojím se jít na záchod</v>
+
+104
+00:16:51.752 --> 00:17:04.392
+<v ai-ta-krajta-64-speaker_0>prostě. Jo a on, on jako se úplně nebav, nebojí mluvit o tom, jak moc pálí prostě peněz na reklamu, a že se jim to stejně vyplatí. Já si jako na tohle bych potřeboval nějakej jako názor fakt reálnejch markeťáků.</v>
+
+105
+00:17:04.452 --> 00:17:16.752
+<v ai-ta-krajta-64-speaker_0>Na druhou stranu dlouhodobě mu to funguje. Kdyby sypal takový prachy a nevynášelo mu to, tak je to prostě debil. Takže myslím si, že je to prostě speciální figurka na český scéně, která má svůj styl. Stejně</v>
+
+106
+00:17:16.772 --> 00:17:22.112
+<v ai-ta-krajta-64-speaker_0>jako v minulosti byl, že jo, Info Marketing toho Davida, teď si nevzpomenu na jméno.</v>
+
+107
+00:17:22.152 --> 00:17:22.632
+<v pavol-hejny>Kirsche?</v>
+
+108
+00:17:22.972 --> 00:17:23.052
+<v ai-ta-krajta-64-speaker_0>Jo.</v>
+
+109
+00:17:23.652 --> 00:17:24.832
+<v pavol-hejny>Že jo. [smích]</v>
+
+110
+00:17:24.852 --> 00:17:29.992
+<v ai-ta-krajta-64-speaker_0>To byl podobnej styl. Taky to prostě přinesený z Ameriky, agresivní styl a tak no.</v>
+
+111
+00:17:30.112 --> 00:17:42.632
+<v pavol-hejny>No já mám takovou hypotézu, že možná často nezáleží ani tak na kvalitě těch, těch zpráv, který posíláš nebo který vysíláš, ale možná na té konzistenci a na tom, na té frekvenci. Jako že to mně přijde jeden z velkých</v>
+
+112
+00:17:43.192 --> 00:17:55.292
+<v pavol-hejny>významných faktorů u toho úspěchu. A to se právě, myslím, Nedvědovi daří. No ok, nevím, co k tomu máte další. Já tuhle debatu trošku ohnu, ohnu k programování, ale paradoxně zůstanu u tématu. Já často</v>
+
+113
+00:17:55.332 --> 00:18:07.584
+<v pavol-hejny>vidím takovej jeden jako zajímavej efekt ve firmách, kdy vlastně Je firma, ta má produkt, ta firma funguje velmi dobře, produkt funguje velmi dobře, ale adopce AI je v podstatě nula. A to proto,</v>
+
+114
+00:18:07.704 --> 00:18:19.784
+<v pavol-hejny>že ty seniorní programátoři, kteří tam jsou, tak vlastně mají ten pocit nebo jakoby n-naráží na tu bariéru, že na to, aby AIko dobře fungovalo, tak je mu potřeba nechat určitou volnost. Je potřeba</v>
+
+115
+00:18:20.044 --> 00:18:32.084
+<v pavol-hejny>udělat jako pravidla okolo, je, je potřeba jako vystavět tu, tu pipelinu, která to celý kontroluje, ale zároveň je tomu AIku potřeba nechat, aby běželo, aby fungovalo. Jenomže často ti</v>
+
+116
+00:18:32.124 --> 00:18:44.444
+<v pavol-hejny>lidi, kteří strávili roky pipláním nad tím jako dokonalým produktem, tak vlastně mají pocit, že hm, ale teďka tam jdou nějaký, teďka tam prostě jde jako tisíc novejch řádek kódu a my jsme si všechny neprohlídli.</v>
+
+117
+00:18:44.544 --> 00:18:56.784
+<v pavol-hejny>Tady to by mohlo být trošku jinak. Tady ta funkce je napsaná jako špatnou notací, tady to je pojmenovaný trochu mimo náš manuál a vlastně nedokážou úplně jako vzdát tu kontrolu a tím pádem to AIko jim reálně jenom přidá,</v>
+
+118
+00:18:56.904 --> 00:19:09.304
+<v pavol-hejny>přidělává práci. Myslím si, že jedna jako z nejtěžších nebo největších bariér adopce AIka ve firmě, která už funguje, n-není to jako stopadesát</v>
+
+119
+00:19:09.344 --> 00:19:16.164
+<v pavol-hejny>triků, jak správně promptovat, ale je nějakým způsobem rozumně vybalancovat to vznání tý kontroly.</v>
+
+120
+00:19:16.444 --> 00:19:28.564
+<v ai-ta-krajta-64-speaker_0>Jo. Ne, ono to platí všude, nejenom jako marketing, vývoj, vlastně všude, všude je tam nějakej ten překryv a mně přijde, že u sebe třeba víc jako pozoruju tu volnost v tom jako kódu, že tam sice</v>
+
+121
+00:19:28.584 --> 00:19:40.744
+<v ai-ta-krajta-64-speaker_0>jako jsem pověnoval se hodně tomu, abych měl nějaký quality checky a tak, ale je to díky tomu, že tam mám expertizu. Kdežto v marketingu, v sales a tak expertizu nemám, takže se mi jako na jednu stranu</v>
+
+122
+00:19:40.784 --> 00:19:53.284
+<v ai-ta-krajta-64-speaker_0>snáz vzdává kontroly, protože nemám co kontrolovat, na druhou stranu tam mnohem víc vidím to, co nefunguje u ostatních, kteří to jako automatizujou a nechcu spadnout do týhle škatulky. Takže je to takový jako oboustranný</v>
+
+123
+00:19:53.304 --> 00:20:02.684
+<v ai-ta-krajta-64-speaker_0>za mě. Možná to je jenom můj problém, že jako tam, kde nemám expertizu, tak nechcu bejt tolik náchylnej k tomu, co AI jako vymyslí za slovo.</v>
+
+124
+00:20:02.964 --> 00:20:15.404
+<v pavol-hejny>To je mimochodem hro-hrozně jako zajímavý, že jako existuje Dunning-Kruger efekt a teďka problém je v tom, že člověk sám vůbec neví, jako kde na tý škále je. N-nejvýhoda, že AI jako tohle strašně posiluje, že najednou</v>
+
+125
+00:20:15.464 --> 00:20:27.624
+<v pavol-hejny>u věcí, kde člověk reálně tu expertizu má, tak jako mu to AIko připadá v spoustě věcech blbý a třeba ho potřebuje strašně moc kontrolovat, nedá mu tak, nedá mu jako zdaleka takovou volnost. Tím pádem</v>
+
+126
+00:20:27.644 --> 00:20:39.684
+<v pavol-hejny>ty lidi, kteří v tom mají menší expertizu, tak toho udělaj vlastně paradoxně mnohem víc, protože tomu AIku nechaj, nechaj volnost a třeba ta věc bude udělaná trošku hůř. Čistě rychlostí tý exekuce to prostě</v>
+
+127
+00:20:39.704 --> 00:20:52.224
+<v pavol-hejny>předeženou. Na druhou stranu, jako u každý věci asi existují nějaký oblasti, kde je potřeba vědět, kde hrozí průšvihy. Třeba si mně přijde, že taková jako úplně, úplná klasika je teďka,</v>
+
+128
+00:20:52.444 --> 00:21:04.504
+<v pavol-hejny>eh, Supabase a nezabezpečený ťabulky. A to my jsme tím taky vinný, což je jako hrozný, protože já vím, o co se jedná, akorát jako z-znám lidi, co mají reálně apky, který jako mají poměrně hodně uživatelů</v>
+
+129
+00:21:04.784 --> 00:21:16.984
+<v pavol-hejny>a vůbec netuší, o co se jedná. Mají tam tady ten bug a ani jako neví, že to je problém. N-n-n-než jakoby si uvědomujou, že ok, je to nějaký a-acceptable risk nebo že něco, ale prostě ani netuší, co to je databáze, ale</v>
+
+130
+00:21:17.024 --> 00:21:18.964
+<v pavol-hejny>maj apku. [smích]</v>
+
+131
+00:21:19.084 --> 00:21:21.624
+<v ai-ta-krajta-64-speaker_0>Chceš vydat seznam těchhletěch aplikací, Honzo?</v>
+
+132
+00:21:22.464 --> 00:21:34.404
+<v pavol-hejny>Já jsem nikdy nebyl, já nejsem dobrej hacker nebo já jako ne-ne-nemám úplně duši hackera. Jako mě nikdy nelákalo věci prolamovat. Mě vždycky bavilo ty věc, ty jako nový věci vyrábět. Takže kdybych byl víc hacker, tak si udělám nějakýho agenta,</v>
+
+133
+00:21:34.564 --> 00:21:43.204
+<v pavol-hejny>kterej jednak obejde ty ochrany Open AI, Antropiku, případně pod nějakým čínským modelem a bude, bude automaticky hackovat. Ale mě to vůbec neláká tohleto dělat.</v>
+
+134
+00:21:43.424 --> 00:21:55.464
+<v ai-ta-krajta-64-speaker_2>Já, já mám ještě jednu poznámku k tomu, cos říkal, že lze dohnat nedostatek expertizy, eh, rychlostí exekuce nebo nějak, nějakým způsobem to kompenzovat. Mně přijde, že co často vidím je, že když ty necháš</v>
+
+135
+00:21:55.504 --> 00:22:07.704
+<v ai-ta-krajta-64-speaker_2>tomu AIku volnost, ono něco udělá, nějak se to prostě zexekuuje, v nějaký kvalitě se to vyrobí, ale jsou tam třeba nějaký nedostatky, který seniorní vývojář prostě opraví. Ty pokud nevíš, co se děje přesně, tak příště, když to budeš dělat podobnou</v>
+
+136
+00:22:07.724 --> 00:22:19.824
+<v ai-ta-krajta-64-speaker_2>věc, tak ty, ty stejný chyby tam prostě nasekáš znovu. Pokud si nevytvoříš nějakej loop, kterej to AIko dokáže nějakým způsobem internalizovat ten obsah těch připomínek, který měl ten, ten seniorní vývojář a příště už</v>
+
+137
+00:22:19.843 --> 00:22:27.844
+<v ai-ta-krajta-64-speaker_2>tu chybu neudělá. Prostě jde mi o to, to je důležitej mechanismus, jak se člověk zlepšuje a učí, učí se no-novým věcem. Jenomže asi to bude mít nějakej strop, ta rychlost tý exekuce.</v>
+
+138
+00:22:28.184 --> 00:22:40.444
+<v ai-ta-krajta-64-speaker_0>To jsme tady řešili už v nějakým díle, že třeba pozoruju hodně u Antropiku, kdy oni jako chrlej různý varianty a pak nás jako přesvědčujou, že to je správně. Já třeba jako nechápu smysl tagu, jako že</v>
+
+139
+00:22:40.824 --> 00:22:52.984
+<v ai-ta-krajta-64-speaker_0>ve Slacku toho jejich bota prostě. W-what the fuck? A přitom oni jako nás přesvědčujou. Ostatně Karpa, ty jsi jednu chvíli, nevím, jestli to stále platí, zavřel profil, protože lidi ho začali hejtit, že se nechal</v>
+
+140
+00:22:53.024 --> 00:23:05.044
+<v ai-ta-krajta-64-speaker_0>nahajrovat, aby šiloval za nahovno produkty Antropiku. A mně prostě jako přijde, že je tam určitej strop, kdy můžeš jako zkoušet ty limity lidí. Stejně</v>
+
+141
+00:23:05.064 --> 00:23:17.164
+<v ai-ta-krajta-64-speaker_0>jako v emailingu, když jsme ho tady řešili, tak taky jako můžeš jet super agresivně nebo můžeš bejt trošku jemnější a otázka je, jak ti to přetřese ten list, kolik lidí tě nahlásí jako spam, kolik lidí</v>
+
+142
+00:23:17.204 --> 00:23:29.264
+<v ai-ta-krajta-64-speaker_0>se odhlásí a tak dále. Takže je to, je to prostě nějakej threshold, kterej je ještě navíc k tomu kulturně závislej. Já když jsem řešil před, eh, rokem a půl nějakou e-mailovou kampaň, tak jsem si prošel, jak se to</v>
+
+143
+00:23:29.284 --> 00:23:40.924
+<v ai-ta-krajta-64-speaker_0>dělá jako v Americe a tak. A tam jako na jednu kampaň, která trvá třeba měsíc, pošleš osm e-mailů, deset. A v Česku jsou lidi na straně jako po třech až pěti.</v>
+
+144
+00:23:41.184 --> 00:23:53.304
+<v pavol-hejny>No, to je těžkej problém, jak to celý optimalizovat tyhlety trade offy. Myslím, že není, eh, jako, obtížně se to měří, obtížně se to vyhodnocuje a dělá se na tím nějaká statistika. Je to prostě takový trošku umění. Já</v>
+
+145
+00:23:53.344 --> 00:24:05.644
+<v pavol-hejny>myslím, že do nějaký míry člověk obzvlášť jako v takhle rychle měnícím světě ty hrany člověk jako musí trochu testovat. Jedna z věcí, co my třeba jako velmi systematicky děláme, je to, že snažíme na AIko delegovat asi trochu</v>
+
+146
+00:24:05.684 --> 00:24:17.784
+<v pavol-hejny>víc zodpovědnosti a trochu víc autonomie, než je v danou dobu běžný. Samozřejmě narážíme, jako sa-samozřejmě máme spoustu faktů. Spíš si říkáme, že je dobrý mít nějaký</v>
+
+147
+00:24:17.804 --> 00:24:29.976
+<v pavol-hejny>jako mechani-- jako jednak tu zkušenost, protože- Teďka, teďka se hraje to, jako kdo, kdo se na tom poli etablujem. A zároveň je dobrý mít nějaký jako mechanismy, jak neudělat mega průšvih, jak udělat</v>
+
+148
+00:24:29.976 --> 00:24:41.996
+<v pavol-hejny>jenom mikroprůšvih. Tím se vlastně vracíme trošku na začátek, jak Petr mluvil o autonomním, o tom novým startupu, kterej se oddělil od, od Google. Pokud je to tak, že ten human in the loop je schopnej si vzít ponaučení a udělat to</v>
+
+149
+00:24:42.036 --> 00:24:54.116
+<v pavol-hejny>příště líp nebo testuje hranice a něco novýho se tím dozví, tak si myslím, že to je úplně v pohodě. A přesně takhle se prostě dělají nový věci, který třeba lidi nenapadnou, dokud to nezkusíš, dokud těch startupů nemáš prostě desítky. To se,</v>
+
+150
+00:24:54.356 --> 00:25:06.396
+<v pavol-hejny>to mě třeba baví strašně moc. Je to ten rozdíl mezi nějakým, řekněme, thinking modelem, kterej podle mě tuhletu schopnost stále ještě nemá. Jako hele nějaké jako reflexe hlubší nebo nějakýho odstupu a podívání se na</v>
+
+151
+00:25:06.496 --> 00:25:16.616
+<v pavol-hejny>ty věci a zhodnocení. Takže jako, no nevím, jestli to říkám nějak srozumitelně, ale prostě tohle je takovej pocit, kterej myslím, že kdyby se objevil nějaký skutečný AGI, tak by tohleto muselo umět.</v>
+
+152
+00:25:16.776 --> 00:25:28.836
+<v ai-ta-krajta-64-speaker_0>Ono je to, ono je to strašně těžký, jako třeba, že jo Google už má, už má přes rok ten výzkum, kdy jsou schopní měnit ty váhy toho modelu a dávat nějak, mu nějak memory a tak dále. Ale reálně jsem to jako</v>
+
+153
+00:25:28.856 --> 00:25:40.976
+<v ai-ta-krajta-64-speaker_0>v praxi neviděl. Jednu dobu to vypadalo, že oni začali razit, že ten model bude personalizovanej i podle vaší historie prohlížeči a tak. Tak jsem si říkal: „Jo, to zní jako něco, že už aplikujou ten svůj výzkum,</v>
+
+154
+00:25:41.136 --> 00:25:53.156
+<v ai-ta-krajta-64-speaker_0>ale reálně jako Gemini je sto let za opicema. Praktický využití je jako tady tu funkcionalitu jsem ani neviděl, že by se vůbec zapla. Je možný, že je to samozřejmě kvůli Evropský unii, která řekla: „No tak to teda</v>
+
+155
+00:25:53.196 --> 00:26:04.716
+<v ai-ta-krajta-64-speaker_0>ne, jako nebudete tady personalizovat podle veškerý historie, co u vás jako mají.“ Ne, že by se to nedělo, jenom to nesmí dělat v LA lemkách, protože ty jsou teďkon pod drobnohledem AI Actu a podobnejch věcí. Nevím, no jako souhlasím s tím,</v>
+
+156
+00:26:04.776 --> 00:26:16.876
+<v ai-ta-krajta-64-speaker_0>že aby to skutečně mohlo dojít k nějakýmu AGI, tak to musí mít schopnost se učit a jako aktivně učit. Nejenom jako že udělá marax s nějakejma markdown fajlama nebo něco podobnýho. Protože to</v>
+
+157
+00:26:16.896 --> 00:26:29.155
+<v ai-ta-krajta-64-speaker_0>je jasná ukázka toho, že když mám malej model, on prostě nebude mít tu dostatečnou world knowledge a nebude umět ty abstrakce. Takže Qwen je sice jako skvělej, když se vrátím k tomu tématu, ale aby uměl</v>
+
+158
+00:26:29.176 --> 00:26:41.176
+<v ai-ta-krajta-64-speaker_0>jako dobře generalizovat mezi programovacíma jazykama, tak to už je u něj jako horší. Stejně jako generalizace mezi, eh, normálníma jazykama. Přitom už máme z minulosti vypozorovaný, že Google Translate, tak</v>
+
+159
+00:26:41.216 --> 00:26:53.256
+<v ai-ta-krajta-64-speaker_0>si vytvořil, že jo, svou jako mezivrstvu pro překlady mezi, mezi jazykama. A to už je jako x let zpátky. Z určitejch důvodů, a ty důvody jsou jako nepochopitelně, eh, nebo pochopitelně validní, tak, eh, nechtějí tohle</v>
+
+160
+00:26:53.276 --> 00:27:05.296
+<v ai-ta-krajta-64-speaker_0>vypustit, že jo. Microsoft měl ten svůj model, kterej se aktivně učil z toho, co, eh, lidi napsali a během chvilky z toho byl racek, kterej požadoval vyhlazení Židů. Je to prostě o tom, že dostanou se k tomu</v>
+
+161
+00:27:05.336 --> 00:27:06.916
+<v ai-ta-krajta-64-speaker_0>lidi, kteří budou testovat ty hranice.</v>
+
+162
+00:27:07.196 --> 00:27:19.616
+<v pavol-hejny>Mně přijde, že existuje ještě jedna taková, já, já to, jsem to teda už zmiňoval jako mnoho, mnohokrát, ale připadá mně, že je to jako opět relevantní. Taková ta metrika, jak dlouho dokáže agent běžet bez zásahu</v>
+
+163
+00:27:19.656 --> 00:27:32.096
+<v pavol-hejny>člověka. Já si myslím, že tady to není zase jedna nebo nula. My jsme, my se jako, my postupně celej čas prodlužujeme. Že jako vlastně my jsme třeba teďka s Jirkou udělali experiment,</v>
+
+164
+00:27:32.156 --> 00:27:44.316
+<v pavol-hejny>že jsme nechali agenta běžet v podstatě zcela bez zásahu týden, aby spravoval nějakou agendu a on samozřejmě někam trošku oddriftoval, kam bychom nechtěli. Podle mě úplně ultimate goal je jako</v>
+
+165
+00:27:44.376 --> 00:27:56.416
+<v pavol-hejny>mít, nebo je těžko říct, co je ultimate goal, ale jakože je jedna z, jedna jako strašně cool věcí by bylo mít agenta, kterej opravdu jede zcela bezzásahově a může jako běžet jako</v>
+
+166
+00:27:56.456 --> 00:28:08.596
+<v pavol-hejny>deset let po smrti člověka klidně. Což teďka podle mě reálně ještě není možný. Pro nás ten nejdelší horizont, co nám nějakej agent smysluplně běžel, podle mě důležitý je to slovo smysluplně, protože</v>
+
+167
+00:28:09.036 --> 00:28:20.416
+<v pavol-hejny>jakoby to, aby něco běželo týden, to je v pohodě udělat, ale aby, aby to opravdu udělalo jako nějakou práci, kde bychom si řekli: „Jo, to by mělo smysl tohleto nechat jako spuštěný, tak bylo teďka ten týden.</v>
+
+168
+00:28:20.736 --> 00:28:32.736
+<v ai-ta-krajta-64-speaker_0>Záleží, no, jakože u engineeringu je to podle mě jako jednodušší, protože seš schopnej udělat jako plán a striktní feedback loop, že to klidně bude i přes týden, ale musí to bejt fakt jako už komplexní záležitost. U</v>
+
+169
+00:28:32.776 --> 00:28:43.056
+<v ai-ta-krajta-64-speaker_0>jinejch věcí, tak ten týden je jako docela jako hranice, která si myslím, že na většinu projektů bude smysluplná, že, že nezačne moc driftovat.</v>
+
+170
+00:28:43.356 --> 00:28:55.416
+<v pavol-hejny>Já mám ještě jednu takovou vtipnou věc, to už je z před dvou týdnů, kdy já jsem jako schválně dal našemu jako agentovi, protože mně, mně jako vždycky, vždycky na těch vibe codingových platformách vadí to. Ony umí strašně dobře</v>
+
+171
+00:28:55.456 --> 00:29:07.716
+<v pavol-hejny>udělat ten projekt do toho zadání, protože je to nějakej repozitář, možná někde vypublikovanej. Jenomže typicky projekt nekončí tím, že je publikovanej. Typicky o projektu je potřeba dát vědět lidem, je potřeba</v>
+
+172
+00:29:07.756 --> 00:29:20.056
+<v pavol-hejny>nasbírat nějakej feedback, je potřeba, eh, odpovídat na support, je potřeba udělat strašně moc těch věcí jako potom. A já jsem jako schválně chtěl zkusit udělat takový, jsem jako využil Makaly jako</v>
+
+173
+00:29:20.096 --> 00:29:32.496
+<v pavol-hejny>pro vyrobení toho projektu nebo můj agent využil Makaly, ale, eh, pak ještě jako měl pár dní, co ten projekt měl propagovat, měl ho někam jako postovat</v>
+
+174
+00:29:32.536 --> 00:29:44.636
+<v pavol-hejny>a tak. Docela vtipný, co si vymyslel, že má udělat za projekt, aby zaujal co nejvíc lidí. Tak, eh, ty můžete hádat, jako co za projekt vymyslel agent tak, aby zaujal co nejvíc lidí. [smích]</v>
+
+175
+00:29:44.716 --> 00:29:47.876
+<v ai-ta-krajta-64-speaker_0>Eh, souvisí to s nějakým, nějakým sexuálním obsahem?</v>
+
+176
+00:29:48.416 --> 00:29:49.556
+<v pavol-hejny>Ne, ale si blíž. [smích]</v>
+
+177
+00:29:49.576 --> 00:29:55.236
+<v ai-ta-krajta-64-speaker_0>Hubnutí, nějakej fitness, něco takovýho. Nebo vydělání peněz. Buď hubnutí, nebo peníze.</v>
+
+178
+00:29:56.536 --> 00:30:09.616
+<v pavol-hejny>Ne, eh, vyrobil, eh, mapu vražd v Český republice a příběhů k nim. [smích] A já jsem říkal: „Co to, koho by tohleto mohlo sakra zajímat?“</v>
+
+179
+00:30:09.636 --> 00:30:21.736
+<v pavol-hejny>A on to jako na-napostoval do jako různých, jako mým jménem do různých lokálních skupin, takový jako Praha, eh, Praha-Klánovice, Praha-Dolní Počernice a vždycky jako že tady se stalo tohle tam. A já, mě</v>
+
+180
+00:30:21.776 --> 00:30:25.596
+<v pavol-hejny>překvapilo. Tolik lidí se zajímá o to, kde se staly nějaký vraždy, že-</v>
+
+181
+00:30:25.996 --> 00:30:31.168
+<v ai-ta-krajta-64-speaker_0>Protože nemají nic jinýho na práci Vždyť nadávají na politiku u piva nebo řešej vraždy na TN.cz.</v>
+
+182
+00:30:32.608 --> 00:30:42.988
+<v pavol-hejny>Po-popravdě ale i-já jsem se na to taky koukal a říkám: „Ty jo, opravdu tady byl zakopanej ten poklad, kvůli kterýmu se vraždilo?“ V-v Klanovickém lese tehdy, jak to bylo.</v>
+
+183
+00:30:44.268 --> 00:30:44.388
+<v ai-ta-krajta-64-speaker_0>Jako-</v>
+
+184
+00:30:44.868 --> 00:30:46.748
+<v pavol-hejny>Samotný mě to zaujalo. [smích]</v>
+
+185
+00:30:46.768 --> 00:30:58.888
+<v ai-ta-krajta-64-speaker_0>Mě jako nezajímají třeba vraždy jako obecně, ale já zas jako ujíždím na tématu jako mafie a podsvětí a tak dále. Takže bych tam asi jako taky zabloudil, ale spíš jako za jiným</v>
+
+186
+00:30:58.928 --> 00:31:03.808
+<v ai-ta-krajta-64-speaker_0>účelem. A pokud tam budeš mít zmapovaný, až jako vyschne Orlík, tak tam půjdu určitě.</v>
+
+187
+00:31:06.068 --> 00:31:18.848
+<v pavol-hejny>To je dobrý, no. Mně právě připadá, že jako, jako že, eh, já mám úplně strašně jako takovej, že chtěl bych někdy mít spuštěnou Dark Factory, která prostě jako jede,</v>
+
+188
+00:31:19.128 --> 00:31:31.168
+<v pavol-hejny>vytváří věci, který ty lidi zajímaj, jsou zajímavý a jako atraktivní, užitečný. Já nejsem ten, co musí jako řešit tu obslužnou práci okolo toho. Já jsem jenom ten, co, co</v>
+
+189
+00:31:31.228 --> 00:31:43.788
+<v pavol-hejny>třeba určuje ten morální kodex toho celýho nebo ty úplně základní jako boundaries toho celýho, ale ne, ne ty jako detaily typu, že tak jako jaká konkrétně appka se udělá, na jaký doméně poběží a jakým způsobem,</v>
+
+190
+00:31:44.068 --> 00:31:50.448
+<v pavol-hejny>eh, na ní poběží reklamní kampaň. To mě třeba jako vůbec nezajímá. To nech, to nech si vyřeší ta Dark Factory sama.</v>
+
+191
+00:31:50.648 --> 00:31:59.248
+<v ai-ta-krajta-64-speaker_0>Jako určitě by to byl zajímavý experiment to fakt jako dotáhnout do next levelu. Mů-můžem na to někdy sednout a zkusit to jako rozjet fakt naplno.</v>
+
+192
+00:31:59.488 --> 00:32:02.268
+<v pavol-hejny>Myslíš Dark Factory anebo stránku o vraždách?</v>
+
+193
+00:32:03.828 --> 00:32:16.348
+<v ai-ta-krajta-64-speaker_0>Ale Dark Factory, která bude fakt jako precizně connectit všechny možný data a vytahovat prostě věci z Google Analytics a nějakejch jako SEO programů a všeho možnýho, tak</v>
+
+194
+00:32:16.468 --> 00:32:28.948
+<v ai-ta-krajta-64-speaker_0>to by mi přišlo jako fakt zajímavej experiment, protože nevím, nakolik tys to Pavle napojil na nějaký jako reálný data sources, z čeho to vycházelo. Ale myslím si, že když by to vyloženě bylo Dark Factory, která bude mapovat</v>
+
+195
+00:32:29.028 --> 00:32:41.428
+<v ai-ta-krajta-64-speaker_0>aktuální trendy na sociálních sítích, ve vyhledávání a tak a bude promptně reagovat na to, aby tam lidi jako chodili, že to je něco, co je zrovna trendy, tomu rychle udělá web, naplní to datama,</v>
+
+196
+00:32:41.668 --> 00:32:51.168
+<v ai-ta-krajta-64-speaker_0>ty ověří a všechno, tak by to mohl bejt jako hodně zajímavej experiment i z hlediska toho, kamaž seš schopnej dostat stránku, která vlastně má nulovou historii.</v>
+
+197
+00:32:51.408 --> 00:32:59.808
+<v pavol-hejny>Hm, když se bavíme o Dark Factories, v některých dílech jsme tady řešili autonomní agenty pro výrobu softwaru. Tak jaký jsou, z-změnily se vaše odhady od minula?</v>
+
+198
+00:33:00.048 --> 00:33:12.328
+<v ai-ta-krajta-64-speaker_0>Teďka mám rozkliklou sérii článků právě od, eh, lidí v Americe a chystám se ji přečíst, takže až ji přečtu, tak o ní kdyžtak budu mluvit v nějakým z dalších dílů. Ale právě se tam jako</v>
+
+199
+00:33:12.488 --> 00:33:24.928
+<v ai-ta-krajta-64-speaker_0>mluvilo o tom, že Dark Factories jsou často spíš sen než něco, co se dá zrealizovat, protože je to přesně o tom, co jsme si jako už xkrát říkali. Když mám úspěšnost devadesát devět procent,</v>
+
+200
+00:33:25.188 --> 00:33:37.448
+<v ai-ta-krajta-64-speaker_0>tak je to hezký, ale pokud složím šedesát kroků, kde mám úspěšnost devadesát devět procent, tak ten výsledek už je jako mnohem horší. Takže podle mě tam jako jsou ještě některý věci, který jako chyběj k</v>
+
+201
+00:33:37.488 --> 00:33:49.488
+<v ai-ta-krajta-64-speaker_0>tomu, aby to mohlo skutečně projít. A proto teďkom jako tooling, kterej dělám pro Dark Factory softwarový, tak není o tom, že udělám dobrou sadu nějakejch promptů všeho, ale že buduju</v>
+
+202
+00:33:49.548 --> 00:34:01.708
+<v ai-ta-krajta-64-speaker_0>tu feedback loop, buduju prioritizační tool, kterej fakt jako projde všechny možný chyby, který mám a jsou to lintovací chyby, security chyby, nějaký SEO věci typu chybí nám</v>
+
+203
+00:34:01.728 --> 00:34:13.948
+<v ai-ta-krajta-64-speaker_0>nějaký descriptiony a podobný věci nebo nemáme canonical části HTML a podobný. A dá mi to prioritizaci toho, protože ono je strašně jednoduchý říct: „Tady máš padesát tisíc chyb ve tvým kódu.“ Už není jednoduchý</v>
+
+204
+00:34:14.048 --> 00:34:21.568
+<v ai-ta-krajta-64-speaker_0>říct: „Tohle je actually důležitý.“ Takže tohle je teďkom jako můj fokus. Druhej fokus je samozřejmě nějaká optimalizace usage.</v>
+
+205
+00:34:21.768 --> 00:34:33.788
+<v pavol-hejny>Jo, to je další, eh, velmi důležitý téma, s kterým se i my setkáváme velmi často, že nejenom že není těžký vyrobit agenta, kterej autonomně týden běží, ale vůbec není těžký prostě spálit na něm</v>
+
+206
+00:34:34.108 --> 00:34:40.528
+<v pavol-hejny>prakticky neomezený množství tokenů a veškerý benefit, který ti to přinese, je téměř nulovej. Tak tomuhletomu se snažíme samozřejmě vyhnout.</v>
+
+207
+00:34:40.628 --> 00:34:52.828
+<v ai-ta-krajta-64-speaker_0>Proto jsem říkal jako sm-smysluplný využití a ještě navíc je potřeba mít jako na paměti to, že jako teďka je ta cena jako strašně dotovaná. Že jakoby to, co se dneska může zdát jako smysluplný využití, vlastně nemusí</v>
+
+208
+00:34:52.848 --> 00:35:05.148
+<v ai-ta-krajta-64-speaker_0>být smysluplný využití. Ale pálit token narmo, nadarmo, to je jednoduchý. To je jako skoro lepší těžit Bitcoin. Jako udělat něco, jako u-- pustit agenta na smysluplnou práci tak, aby ta práce vyžadovala</v>
+
+209
+00:35:05.228 --> 00:35:08.548
+<v ai-ta-krajta-64-speaker_0>co nejmíň lidský intervence. To bych řekl jako velkej úkol.</v>
+
+210
+00:35:08.788 --> 00:35:13.708
+<v pavol-hejny>Jo, toho mi zní jako docela dobrej závěr dnešního dílu, pokud nemáme něco dalšího.</v>
+
+211
+00:35:13.888 --> 00:35:23.288
+<v ai-ta-krajta-64-speaker_0>Já už nic nemám. Musím říct, že teďkon ten rozjezd za mě byl trošku pomalejší. Příště přijdu připravenější i s novinkama a tak, ale jsem rád, že jsem zase v krajině zpátky.</v>
+
+212
+00:35:23.408 --> 00:35:28.528
+<v pavol-hejny>Jo, to my taky. Super. Tak jo, tak budeme rádi za komentáře. Budeme se těšit na další díl.</v>
+
+213
+00:35:28.768 --> 00:35:29.068
+<v ai-ta-krajta-64-speaker_0>Ahoj.</v>
+
+214
+00:35:29.808 --> 00:35:34.788
+<v pavol-hejny>Ahoj. Díky, čau. [hudba]</v>

@@ -38,7 +38,10 @@ if (recording.krajtaNumber !== undefined) {
     if (!episode) throw new Error('The referenced Krajta episode no longer exists.');
     episode.transcriptFile = vttFile;
     delete episode.transcript;
-    await writeFile(episodeFilename, JSON.stringify(episodes, null, 4) + '\n');
+    // Keep the archive's existing one-line host arrays so untouched inline rows remain unchanged on disk.
+    const episodeJson = JSON.stringify(episodes, null, 4).replace(/^        "hosts": \[([\s\S]*?)^        \],/gm,
+        (_match, contents) => `        "hosts": [${JSON.parse(`[${contents}]`).map(name => JSON.stringify(name)).join(', ')}],`);
+    await writeFile(episodeFilename, episodeJson + '\n');
 }
 await writeFile(indexFilename, JSON.stringify(index, null, 2) + '\n');
 console.log(JSON.stringify({ recordingId, vttFile, cues: converted.cues.length, speakerIds: converted.speakers }));

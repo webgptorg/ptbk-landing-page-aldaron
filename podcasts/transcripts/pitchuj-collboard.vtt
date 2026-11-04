@@ -1,0 +1,929 @@
+WEBVTT
+
+1
+00:00:00.820 --> 00:00:12.820
+<v pitchuj-collboard-speaker_0>[intro hudba] Ahoj, ahoj, vítáme</v>
+
+2
+00:00:12.860 --> 00:00:20.500
+<v pitchuj-collboard-speaker_0>vás u dalšího dílu podcastu Pitchuj startup a opět jsem u mikrofonu já, Terka. Vedle mě sedí Lenča.</v>
+
+3
+00:00:20.620 --> 00:00:21.400
+<v pitchuj-collboard-speaker_1>Ahoj všem.</v>
+
+4
+00:00:21.560 --> 00:00:30.480
+<v pitchuj-collboard-speaker_0>A dnes jsme si pozvali hosta Pavola Hejného ze startupu Colboard, respektive cofoundera Colboardu. Ahoj.</v>
+
+5
+00:00:30.720 --> 00:00:31.760
+<v pavol-hejny>Díky moc za pozvání.</v>
+
+6
+00:00:31.760 --> 00:00:44.180
+<v pitchuj-collboard-speaker_0>[smích] My děkujeme, že jsi přišel. A na začátek jako každý, abys neměl, eh, výjimku, tak tě poprosím, jestli můžeš vypitchovat svůj startup, váš projekt za třicet sekund.</v>
+
+7
+00:00:45.440 --> 00:00:51.380
+<v pavol-hejny>Jo, to bude jednoduchý. Eh, já to řeknu v jedný větě. Děláme v-velmi jednoduchou virtuální tabuli pro vzdělávání.</v>
+
+8
+00:00:51.960 --> 00:00:53.660
+<v pitchuj-collboard-speaker_0>Tak to bylo hodně rychlý. [smích]</v>
+
+9
+00:00:53.700 --> 00:00:56.200
+<v pitchuj-collboard-speaker_1>To je podle mě náš rekord. [smích]</v>
+
+10
+00:00:56.240 --> 00:01:08.300
+<v pitchuj-collboard-speaker_0>To, to je náš rekord, to je pravda. [smích] Pavole, řekni nám vlastně tvůj cel-celý příběh, jak Colboard vznikl, jak jsi na to přišel, proč jsi na to přišel [smích] a tak dále.</v>
+
+11
+00:01:09.340 --> 00:01:21.940
+<v pavol-hejny>Ono to do velmi velké míry souvisí s tou celou pandemií a s tím blázincem, který tady teďka je. Eh, já jsem čistě náhodou, když, když tohleto celé začalo, byl před rokem nebo před rokem a něco v Plzni. A,</v>
+
+12
+00:01:22.540 --> 00:01:34.820
+<v pavol-hejny>eh, a když jsem, eh, když jsem se vrátil do Prahy, tak, tak se začaly, tak se zavíraly všechny školy, obchody, eh, přestaly jezdit vlaky. Bylo to opravdu, opravdu úplně jako šílené. A já jsem v té době,</v>
+
+13
+00:01:35.160 --> 00:01:47.180
+<v pavol-hejny>eh, už dělal na startupu nebo už několik let dělal na startupu, který, eh, dělá elektronické učebnice. A my jsme měli celý ten stack a všechny ty procesy a</v>
+
+14
+00:01:47.240 --> 00:01:59.620
+<v pavol-hejny>technologie a prostě úplně všechno postavený pro klasickou výuku ve školách. A, eh, chtěli jsme nějakým způsobem rychle pomoct, eh, nebo se nějak buď jednak se přizpůsobit</v>
+
+15
+00:01:59.660 --> 00:02:11.880
+<v pavol-hejny>a jednak celý situaci pomoct a udělat něco pro ty učitele hnedka. A udělali jsme si nějakou analýzu, co je a co není. A zjistili jsme, že dělat nějakou další padesátou platformu</v>
+
+16
+00:02:11.940 --> 00:02:24.100
+<v pavol-hejny>na, eh, na volání nebo videohovory nedává smysl. Ono jako žádná z nich asi nebyla v té době jako úplně super nejlepší pro školství, ale, ale bylo jich tolik, že prostě dělat další bylo</v>
+
+17
+00:02:24.160 --> 00:02:36.260
+<v pavol-hejny>úplný nesmysl. Ale co jsme zjistili, že existuje tady pár virtuálních tabulí, ale ty tabule nejsou, eh, nejsou úplně dobré nebo ne-není to úplně něco, co by se dalo, dalo velmi jednoduše v tom</v>
+
+18
+00:02:36.320 --> 00:02:48.560
+<v pavol-hejny>školství použít, nebo co by mohla, co by mohla učitelka s žáky nebo učitelé s žáky použít, eh, použít natolik jako nějak bez nějakých jako kla-- technických klacků,</v>
+
+19
+00:02:48.720 --> 00:02:50.120
+<v pavol-hejny>co jsou jim házený pod nohy.</v>
+
+20
+00:02:51.660 --> 00:03:03.900
+<v pavol-hejny>A tak jsme si, tak jsme si udělali takový něco jako hackathon za týden a udělali jsme virtuální tabule, kdy ta idea byla úplně jako jednoduchá. Máme tady nějakou virtuální</v>
+
+21
+00:03:03.940 --> 00:03:16.220
+<v pavol-hejny>plochu, kterou si člověk otevře, může do ní kreslit, všichni na ní vidí to samé, eh, co mají ten daný odkaz. Nic, nic víc speciálního, nic míň. A ono nám to fungovalo poměrně rychle.</v>
+
+22
+00:03:16.320 --> 00:03:28.420
+<v pavol-hejny>Eh, poměrně rychle jsme to dostali k učitelům, ale vlastně pak jsme zjistili, že to asi má jako mnohem větší potenciál než jenom jako projekt na, eh, na chvilku a na to, abychom si</v>
+
+23
+00:03:28.480 --> 00:03:31.840
+<v pavol-hejny>udělali nějaký takovýhle jako interní hackathon a rychle pomohli.</v>
+
+24
+00:03:33.540 --> 00:03:46.180
+<v pavol-hejny>A za ten rok, eh, jsme to, jsme to hlavně technicky vylepšovali, protože, eh, protože my ten potenciál jednak vidíme v tý jednoduchosti, v tom, že, v tom, že do té samotné</v>
+
+25
+00:03:46.240 --> 00:03:58.500
+<v pavol-hejny>tabule není potřeba dělat žádné složité nastavování, registrace, žádné prostě složité věci. Člověk si ji může otevřít a prostě ji používat. To je taková, takový nějaký jeden benefit a ten druhý, on zdánlivě jde proti tomu, ale</v>
+
+26
+00:03:58.560 --> 00:04:09.360
+<v pavol-hejny>ne úplně. A to je velmi velká modularita. Em, teď nevím, jestli to mám vzít spíš z toho technickýho pohledu víc nebo z toho byznysovýho pohledu. To je možná-</v>
+
+27
+00:04:10.020 --> 00:04:17.519
+<v pitchuj-collboard-speaker_0>No, vem to z toho technickýho pohledu a klidně potom můžeme probrat i ten byznysový pohled. [smích]</v>
+
+28
+00:04:17.600 --> 00:04:29.600
+<v pavol-hejny>Ono typicky, když se nějaký software vyvíjí, to, já, já to vidím hodně, já to vidím hodně a v podstatě ve všech projektech. Já programuju asi od jedenácti, teď mi je dvacet sedm a v podstatě na skoro každým projektu, co jsem</v>
+
+29
+00:04:29.620 --> 00:04:41.940
+<v pavol-hejny>dělal, tak se stala taková věc, že buď už ten projekt byl rozjetý a víceméně jakákoliv věc, která se do toho projektu měla doplnit nebo doprogramovat, tak byla docela složitá, protože člověk nevěděl, jestli náhodou nerozbije něco,</v>
+
+30
+00:04:41.980 --> 00:04:54.040
+<v pavol-hejny>už co tam existuje nebo do čeho všeho se musí ještě zapasovat. A často i velmi jednoduché věci. Například teď nedávno jsem dělal na ještě jiném projektu formuláře pro sčítání ptáků na krmítkách.</v>
+
+31
+00:04:54.080 --> 00:05:06.640
+<v pavol-hejny>Zní to hrozně jednoduše, ale vlastně je tam tak strašně moc věcí, do kterých, do jakých reálií se to ještě musí zapasovat, že i vlastně velmi jednoduchá věc je strašně složitá. A, em,</v>
+
+32
+00:05:07.460 --> 00:05:19.820
+<v pavol-hejny>a my jsme se tady tomu do jisté míry chtěli vyhnout a, em, a postavit, postavit nad tou tabulí nějakou architekturu, aby tam ty funkce šly přidávat, eh, aby tam ty funkce šly přidávat</v>
+
+33
+00:05:19.860 --> 00:05:31.940
+<v pavol-hejny>bez toho, aby tam vznikal technologický dluh. A o-na tom teďka docela dlouhou dobu pracujeme a vlastně děláme, děláme nějaké, eh, ně-nějaké jakoby rozhraní mezi</v>
+
+34
+00:05:32.000 --> 00:05:44.500
+<v pavol-hejny>tou, tou samotnou základní tabulí a mezi těmi funkcemi, který na ní jsou, abychom, aby to nebyla tabule s deseti, patnácti, třiceti funkcemi a teď každá další bude složitější a složitější dělat, ale</v>
+
+35
+00:05:44.500 --> 00:05:56.720
+<v pavol-hejny>aby to byla nějaká univerzální platforma na sdílení čehokoliv. S tím, že ty jednotlivé funkce a prvky a nástroje a pohledy a tak jsou jenom jakési aplikace, které jsou na té tabuli. Podobně jako v chytrých</v>
+
+36
+00:05:56.780 --> 00:06:09.044
+<v pavol-hejny>mobilech. Člověk má chytrý mobil, může tam mít sto tisíc aplikací. A teďka to, že nějaký vývojář A dělá aplikaci, neovlivňuje vývojáře B a neovlivňuje vývojáře C. A tady to se teďka nějak pořádně snažíme</v>
+
+37
+00:06:09.084 --> 00:06:21.084
+<v pavol-hejny>rozjet. A, a mimo jiné jedna z věcí je, že právě se Sitportem organizujeme Hackathon za měsíc, eh, kde, kde bychom právě rádi pro jako nezávislé lidi vypustili dělání tady těch modulů. My už je</v>
+
+38
+00:06:21.104 --> 00:06:30.704
+<v pavol-hejny>děláme poměrně dobře v týmu, už jsme dělali na pár hackathonech a teď bychom to právě rádi dostali na nějaký další level, kdy, kdy by ty moduly udělal, udělal někdo, kdo je od nás nezávislý.</v>
+
+39
+00:06:31.364 --> 00:06:41.264
+<v pitchuj-collboard-speaker_0>Na Hackathon se moc těšíme. Já si myslím, že bude mít velký úspěch, protože vy už jste organizovali jeden webinář a tam se přihlásilo snad sto lidí nebo, nebo kolik tam bylo?</v>
+
+40
+00:06:41.264 --> 00:06:48.124
+<v pitchuj-collboard-speaker_1>Vlastně z toho byly dva webináře právě kvůli velkému zájmu ze stran učitelů, ředitelů a podobně.</v>
+
+41
+00:06:49.744 --> 00:07:01.964
+<v pavol-hejny>To, to já vlastně sám jakoby děkuju za to, že takhle můžu super se Sitportem spolupracovat. Ono my jsme někdy na začátku roku vymysleli, že uděláme, že uděláme webinář, protože přece jenom ten Callboard</v>
+
+42
+00:07:02.024 --> 00:07:14.304
+<v pavol-hejny>je jednoduchý, ale jsou tam i pokročilé funkce. A teďka, eh, teďka my tím, že jsme hlavně programátoři a tím, že prostě čas-časově omezení, tak tam na tom nema-nemáme žádný super sofistikovaný návod</v>
+
+43
+00:07:14.344 --> 00:07:26.664
+<v pavol-hejny>nebo tak. A teď jsou učitelé, kteří si na to přišli, ale spoustu učitelů by rádi využilo pokročilé funkce, ale nevědí o nich. A tak jsme, tak jsme udělali webinář vlastně na pokročilé používání Callboardu. A, a</v>
+
+44
+00:07:26.724 --> 00:07:38.984
+<v pavol-hejny>tím, že my tam už uživatele máme a jsme to mezi nima zpropagovali a, eh, tak, tak se to asi docela chytilo. Nebo respektive docela dost učitelů se přihlásilo. Já bych řekl, že to souvisí s tím, že pokud jsou programátoři,</v>
+
+45
+00:07:39.024 --> 00:07:47.984
+<v pavol-hejny>tak programátoři si často na ty věci rádi přijdou sami. Zatímco, eh, zatímco pro ty učitele je mnohem lepší forma mít tam, eh, mít, aby jim to někdo ukázal.</v>
+
+46
+00:07:48.484 --> 00:08:00.724
+<v pitchuj-collboard-speaker_0>Určitě. Hlavně to měli dost složitý, myslím v době pandemie, že se museli učit všechny ty online vychytávky. Takže Callboard je prostě tak jednoduchá věc, že mi to přijde úplně geniální</v>
+
+47
+00:08:00.784 --> 00:08:01.084
+<v pitchuj-collboard-speaker_0>pro ně.</v>
+
+48
+00:08:02.584 --> 00:08:14.604
+<v pavol-hejny>Tam bych k tomu řekl, že tam, tam na tom celým, na celé téhleté situaci ono, ono vláda z nějakýho nebo prostě nějakým způsobem se uzavřely školy a teďka po celé Evropě se uzavřely školy, ale těch softwarů, které se v</v>
+
+49
+00:08:14.644 --> 00:08:26.864
+<v pavol-hejny>těch školách daly využít, vlastně není úplně moc. Eh, ono je to tak, že všechno, co se v těch školách používá, jsou spíš takové ohnuté věci použitelné víc pro byznys</v>
+
+50
+00:08:27.524 --> 00:08:39.884
+<v pavol-hejny>a, eh, například Zoom, který se velmi často používá, tak to se typicky používalo v byznyse. Eh, Google Classroom nebo Microsoft Teams, to jsou platformy, které jsou určené primárně pro byznys a náhodou je</v>
+
+51
+00:08:40.344 --> 00:08:49.004
+<v pavol-hejny>ohly i pro školy. Ale, ale ze všech těch funkcí úplně čiší, že to je primárně, eh, primárně věc pro B2B a,</v>
+
+52
+00:08:50.744 --> 00:09:03.904
+<v pavol-hejny>a takhle, takhle je to v podstatě se všemi nástroji. A teďka i tím, že tam přibylo najednou hrozně moc lidí a nejenom ze škol, tak ty nástroje ne úplně stoprocentně fungovaly. Byly, bylo tam spoustu technických problémů a, eh,</v>
+
+53
+00:09:03.944 --> 00:09:12.464
+<v pavol-hejny>a byla to, byla to taková doba, kdy se experimentovalo se vším možným a, a vlastně to byl takovej jako velkej booster těch technologií bych řekl.</v>
+
+54
+00:09:13.324 --> 00:09:13.804
+<v pitchuj-collboard-speaker_0>Určitě.</v>
+
+55
+00:09:14.524 --> 00:09:24.204
+<v pitchuj-collboard-speaker_1>A mě to přivádí na otázku, co já musím mít teda za software nebo prostě co mít, abych mohla jako běžný uživatel použít Callboard?</v>
+
+56
+00:09:24.664 --> 00:09:36.844
+<v pavol-hejny>Jo, to je dobrá otázka. My jsme se právě snažili, aby, aby člověk nemusel mít prakticky nic. Eh, respektive když říkám prakticky nic, tak, tak něco člověk mít musí tím, že je to software, ale,</v>
+
+57
+00:09:37.584 --> 00:09:49.624
+<v pavol-hejny>ale prakticky nic znamená to, že už dneska v podstatě má každej nějakej chytrej mobil, eh, nějakej počítač, prostě něco, nějaký zařízení. A naše jakoby filozofie nebo to naše,</v>
+
+58
+00:09:49.904 --> 00:10:02.084
+<v pavol-hejny>eh, to náš směr, kterým chceme jít, je, že nechceme to omezovat na žádnou jako platformu, žádnej způsob, žádný zařízení. A asi nejlepší je to pa-potom vyvíjet</v>
+
+59
+00:10:02.104 --> 00:10:14.224
+<v pavol-hejny>na webu a tím pádem je to prostě webová aplikace, kterou se snažíme, aby se dala spustit všude možně a na všech možných druzích ovládání a zařízení a platformách a tak.</v>
+
+60
+00:10:15.404 --> 00:10:27.543
+<v pitchuj-collboard-speaker_1>A vaše primární cílovka tak jsou právě učitelé nebo ty školy jako takový. Eh, máte v plánu to nějak rozšiřovat dál? Protože my, jak jsme si s tím vyzkoušeli třeba pracovat právě na těch různých</v>
+
+61
+00:10:27.584 --> 00:10:34.004
+<v pitchuj-collboard-speaker_1>webinářích, tak v tom vidíme potenciál třeba i pro nás, pro naše použití. Tak jak vy to vidíte i do budoucna?</v>
+
+62
+00:10:34.784 --> 00:10:46.984
+<v pavol-hejny>Jo, to je, to je právě teďka, teďka taková skvělá otázka, že jakým způsobem to dál posunout. Já o tom teď, teď je přesně ta doba, kdy o tom fakt hodně přemýšlíme a fakt to hodně, hodně plánujeme. My jsme už takovouhle</v>
+
+63
+00:10:47.004 --> 00:10:59.244
+<v pavol-hejny>dobu měli tak půl roku dozadu, kdy to vypadalo, že koronavirus zmizí a, a už, už takovouhle věc školy nebudou potřebovat. Eh, teďka, teďka samozřejmě nám tam taky jako zásadně ubyli uživatelé</v>
+
+64
+00:10:59.304 --> 00:11:11.924
+<v pavol-hejny>tím, že, tím, že prostě se školy postupně otvíraj, ale, ale řekl bych, že je čas na to, to, to nějak posunout ne do, ne do té čistě online výuky, ale do té takzvaně</v>
+
+65
+00:11:12.084 --> 00:11:24.344
+<v pavol-hejny>hybridní výuky. To, dneska, dneska se o tom různě mluví jako třeba rotační výuka nebo střídavá výuka nebo smíšená výuka, kombinovaná výuka. Obecně bych to zařadil do balíku toho, že se, že je to něco mezi</v>
+
+66
+00:11:24.424 --> 00:11:37.044
+<v pavol-hejny>tím, že dě-že, že to čistě online a něco mezi tou klasickou prostě výukou ve škole. A asi, asi primárně stále zůstáváme ve vzdělávání</v>
+
+67
+00:11:37.644 --> 00:11:49.684
+<v pavol-hejny>s tím, že to nebrání nikomu, kdo to chce použít mimo vzdělávání, aby to nemohl použít. Ale asi ten náš, ten náš jako primární fokus a cíl a to, kam budeme dávat nejvíc pozornosti</v>
+
+68
+00:11:49.804 --> 00:12:01.804
+<v pavol-hejny>a, a jak to celý budeme optimalizovat, bude asi to vzdělávání i dlouhodobě. Možná se ukáže, že je to neudržitelný. Těžko, těžko říct, ale doufám, že spíš ano, protože tam dokážeme udělat nejví-- podle</v>
+
+69
+00:12:01.884 --> 00:12:14.940
+<v pavol-hejny>mě za mě tam dokážu i největší udělat impact na nějakou, na společnost a obecně na, eh Na, na, na tu budoucnost, na to jak, jak to tady vypadá. A, eh, ale</v>
+
+70
+00:12:15.020 --> 00:12:27.120
+<v pavol-hejny>s tím, že jak jsem říkal, že se do toho budou dávat dělat externí moduly a, eh, a různé jako přídavné funkce, tak, eh, vůbec nic nebrání tomu, aby někdo, kdo by nebo nějaká-- člověk</v>
+
+71
+00:12:27.160 --> 00:12:38.660
+<v pavol-hejny>nebo skupina lidí nebo firma, která by chtěla tady tu věc využít u sebe, potřebovala by tam nějaký speciální funkce nebo speciální využití, aby to mohla na té naší platformě udělat klidně i s nějakou naší spoluprací.</v>
+
+72
+00:12:40.840 --> 00:12:50.140
+<v pavol-hejny>A, eh, a možná i něco takového sami, sami jako vyzkoušíme, vypustíme, ale asi to spíš bude z naší strany opravdu v takové té kategorii experimentu.</v>
+
+73
+00:12:51.860 --> 00:13:03.940
+<v pitchuj-collboard-speaker_1>Mě s tímhletím, jak jsi se bavil o tom, že vlastně třeba ubývá těch uživatelů tím, že začala rotační výuka a obdobně. Tak já naopak, eh, si to spíš představuju, kdy pamatuju si, když</v>
+
+74
+00:13:04.120 --> 00:13:16.240
+<v pitchuj-collboard-speaker_1>jsme měli první smart tabuli na gymnáziu a teďkon se na to dalo psát a obdobně, ale vlastně se tam stejně promítaly věci z počítače rovnou. A já si myslím</v>
+
+75
+00:13:16.300 --> 00:13:28.340
+<v pitchuj-collboard-speaker_1>nebo věřím, jako že ti učitelé, kteří si přičichli k tomu Colloboardu v té online výuce, že i při té rotační právě využijou tuhletu, tenhleten nástroj a právě klidně to dají na</v>
+
+76
+00:13:28.380 --> 00:13:40.860
+<v pitchuj-collboard-speaker_1>tu smart tabuli a využijou toho propojení a těch vašich modulů, který tam máte. Takže já naopak jako věřím, že se k tomu vrátí a i když to bude celý prostě offline</v>
+
+77
+00:13:40.920 --> 00:13:43.100
+<v pitchuj-collboard-speaker_1>výuka, která tu už rok nebyla.</v>
+
+78
+00:13:44.540 --> 00:13:57.620
+<v pavol-hejny>J-j-já si myslím, že to je strašně dobrá připomínka v tom, že to kombinuje takové dvě různé věci. A ta první je ta, že to mě samotného z těch webinářů překvapilo. To jsem zjistil až jako v plné síle na těch webinářích, co teďka byly, eh,</v>
+
+79
+00:13:57.960 --> 00:14:10.040
+<v pavol-hejny>že nakolik ta zkušenost těch učitelů a teď nemyslím jenom s Colloboardem, myslím jako obecně s tou výukou, že nakolik, eh, že nakolik se z toho vzalo i pozitivních věcí, že i přesto, že pro ty učitele</v>
+
+80
+00:14:10.080 --> 00:14:22.420
+<v pavol-hejny>to muselo být jako nesmírně těžký období a je nesmírně těžký období. Je to něco, co, eh, co pravděpodobně ani nechtěli dělat. Jako že člověk nejde dělat učitele proto, aby celý den seděl, seděl před počítačem.</v>
+
+81
+00:14:23.040 --> 00:14:35.200
+<v pavol-hejny>Ale překvapilo mě, že kolik tam bylo učitelů, kteří vlastně říkali, že jo, sice to bylo těžký, ale naučil, naučil jsem se tohle, tohle, tamto a teďka nebo vůbec, vůbec jsem nevěděl, že to jde dělat,</v>
+
+82
+00:14:35.260 --> 00:14:47.380
+<v pavol-hejny>že to jde dělat takhle anebo prostě a, a že se z toho vzalo fakt spoustu, spoustu pozitivních věcí, což mě strašně příjemně překvapilo. A zase nevím, nakolik je to ten selection bias, že nakolik se na takovýhle webináře nepřihlásí</v>
+
+83
+00:14:47.420 --> 00:14:59.580
+<v pavol-hejny>učitelé primárně spíš, kteří se chtějí angažovat. Ale, ale já s-s, já si to spíš nepřipouštím. Já si spíš říkám, že to bude reprezentativní vzorek. A, a ta druhá, ta,</v>
+
+84
+00:14:59.620 --> 00:15:12.060
+<v pavol-hejny>ta druhá, druhá téma, která z toho vyplývá, je, že, eh, přesně jak jsi říkala, s těma interaktivníma tabulema. Ono dneska už na spoustě školách interaktivní tabule jsou a</v>
+
+85
+00:15:12.520 --> 00:15:25.240
+<v pavol-hejny>často se úplně, často se používají takovým způsobem, že, že, že vlastně ta interaktivita z nich trošku vypadává, že je to v podstatě takovej jako projektor, eh, projektor a občas se na tu tabuli něco nakreslí</v>
+
+86
+00:15:25.280 --> 00:15:37.420
+<v pavol-hejny>s tím, že asi pokud by se projektorem promítalo na klasický whiteboard a byly by tam klasický fixy, tak by to bylo asi pro ty lidi pohodlnější a efektivnější. A, eh,</v>
+
+87
+00:15:38.140 --> 00:15:47.880
+<v pavol-hejny>já, já hodně vidím, že tyhlety, tyhlety tabule mají str-- že už ten hardware je strašně vymakanej, že ten hardware funguje, je přesnej, je dobrej, ale ten software, kterej tam je takovej,</v>
+
+88
+00:15:51.520 --> 00:16:03.740
+<v pavol-hejny>je tak, je takovej, že prostě, že aby tam byl, aby tam něco bylo. A to je taky jedna z možných cest. Eh, jako to už víceméně děláme. To už jsme dělali v tom HiDu. Přinýst jako,</v>
+
+89
+00:16:03.800 --> 00:16:15.580
+<v pavol-hejny>přinýst na interaktivní tabuli nějaký software, který dává na ty interaktivní tabule smysl. Aby, aby to kombi, aby to nebylo jenom obyčejné kreslení, protože pokud je to jenom obyčejné kreslení, to si člověk může udělat i fixou nad projektorem</v>
+
+90
+00:16:16.200 --> 00:16:28.320
+<v pavol-hejny>nebo vytištěnýma papírama. Ale aby to kombinovalo právě nějaký jako interaktivní prvky spolu s tím, že se s tím dá interagovat spolu s tím, že učitel do toho může zasahovat přes počítač spolu s tím, že, že ti, ty děti tam</v>
+
+91
+00:16:28.340 --> 00:16:33.020
+<v pavol-hejny>můžou přijít a něco dělat, eh, něco dělat jako s tou interaktivitou.</v>
+
+92
+00:16:34.200 --> 00:16:46.600
+<v pitchuj-collboard-speaker_1>To je super. Takže Colloboard bude mít určitě využití i právě ve chvíli, kdy teda se všichni v-vrátí do škol, tak je to taky něco, na čem pracujete, aby to mělo využití i když, i offline</v>
+
+93
+00:16:46.620 --> 00:16:47.440
+<v pitchuj-collboard-speaker_1>vlastně potom.</v>
+
+94
+00:16:49.980 --> 00:16:59.540
+<v pavol-hejny>Eh, ano, ano, ano. Respektive já si nemys-- to je zase dobrá otázka, jestli se, jestli ta výuka bude, jestli se ta výuka vrátí zpět do těch kolejí, jak byla před tím rokem.</v>
+
+95
+00:16:59.840 --> 00:17:00.740
+<v pitchuj-collboard-speaker_1>To je otázka, no.</v>
+
+96
+00:17:01.060 --> 00:17:13.500
+<v pavol-hejny>Jestli to bude prostě přesně to. No, jakože nak-nakolik tahle ta celá zkušenost tu výuku ovlivní dlouhodobě. Jako i já za mě doufám, že, že ovlivní, protože</v>
+
+97
+00:17:14.840 --> 00:17:18.080
+<v pavol-hejny>myslím, že bychom si z toho měli vzít co nejvíc pozitivních věcí.</v>
+
+98
+00:17:18.500 --> 00:17:30.620
+<v pitchuj-collboard-speaker_1>Určitě došlo k nějakýmu velkýmu zefektivnění, který vidíme nejen u firem jako takových, to fungování a tak dál, ale myslím si, že i to zefektivnění nastává během té</v>
+
+99
+00:17:30.660 --> 00:17:40.620
+<v pitchuj-collboard-speaker_1>výuky. Samozřejmě rodiče, eh, jsou trošku jiného názoru, ale chápeme, že jsou zase v trošku výlučné situaci oproti, oproti nám.</v>
+
+100
+00:17:42.160 --> 00:17:42.540
+<v pitchuj-collboard-speaker_1>Určitě.</v>
+
+101
+00:17:44.160 --> 00:17:56.500
+<v pavol-hejny>Jo, eh, já, já tam vlastně mám to, že já opravdu, opravdu učitele, kteří se, kteří se toho dokázali chopit jako příležitosti, fakt obdivuju, že jako je to opravdu něco, co mě, něco, co pro mě, pro mě bylo normální.</v>
+
+102
+00:17:56.540 --> 00:18:08.540
+<v pavol-hejny>Já jsem vždycky pracoval remote a vždycky jsem tyhlety technologie používal. Ale, ale je to jako, je to vlastně zajímavé, že spoustu lidí to donutilo je používat, ale spoustu lidí to vzalo jako skvělou příležitost. A taky</v>
+
+103
+00:18:08.580 --> 00:18:20.660
+<v pavol-hejny>bych řekl, že tam to není jenom o tom naučit se používat technologie, ale tak změnit vůbec přístup k tomu, jak, eh, jak s, jak se na ty věci dívám. Například, eh- Například na</v>
+
+104
+00:18:20.700 --> 00:18:32.860
+<v pavol-hejny>začátku jsem hodně viděl, že prostě, že se vzalo to, co se dělalo ve škole, prostě že je učitel a teďka dvacet pět žáků sedí. A to se taky, to taky vidím čistě z pozorování, to tak jako trochu</v>
+
+105
+00:18:32.920 --> 00:18:45.180
+<v pavol-hejny>mění, že, že přece jenom, eh, můžou se tam víc používat nahraný materiály. Nemusí to být tak, že všichni sedí. Může to být tak, že se víc využívá ten zvuk. A, eh, a teď, teď dodržuje například se nau-- já nejvíc</v>
+
+106
+00:18:45.220 --> 00:18:57.300
+<v pavol-hejny>věcí, co jsem se jako v životě naučil, jsem se nenaučil tak, že jsem seděl na zadku a někde jsem, někde jsem si zapisoval poznámky jako ve škole, ale prostě tím, že jsem šel a přitom jsem něco poslouchal, jak naživo, tak ne naživo. A řekl</v>
+
+107
+00:18:57.340 --> 00:19:09.460
+<v pavol-hejny>bych, že tyhlety paradigmy toho, jako jak se díváme k tomu, jak se učit nebo jak se na něco soustředit nebo jak přednášet, že ono se to bude měnit a mění. Eh, a tady to spíš</v>
+
+108
+00:19:09.500 --> 00:19:15.740
+<v pavol-hejny>jako spoustu lidí donutilo, aby, aby vůbec vidělo, že se to, že se na to dá dívat i úplně jinak.</v>
+
+109
+00:19:17.080 --> 00:19:17.560
+<v pitchuj-collboard-speaker_0>Určitě.</v>
+
+110
+00:19:19.480 --> 00:19:31.660
+<v pitchuj-collboard-speaker_0>Já jsem, eh, trošku sítě proklepla, než jsme měli tady ten podcast a zjistila jsem, že seš fakt hodně akční i na sociálních sítích a vlastně, eh, že Callboard není jediný projekt, který</v>
+
+111
+00:19:31.700 --> 00:19:37.460
+<v pitchuj-collboard-speaker_0>děláš, že toho děláš spoustu. Jak to prosím tě stíháš? [smích]</v>
+
+112
+00:19:37.520 --> 00:19:49.520
+<v pitchuj-collboard-speaker_1>Což ještě ráda k tomu chci jako doplnit k tomu, jak to Pavol stíhá, když ještě přijel za námi z Prahy prostě do Plzně. Obětoval ten svůj čas ve vlaku. Bude to mít při</v>
+
+113
+00:19:49.580 --> 00:19:51.520
+<v pitchuj-collboard-speaker_1>cestě zpátky a, a pořád.</v>
+
+114
+00:19:52.720 --> 00:19:53.100
+<v pitchuj-collboard-speaker_0>Tak.</v>
+
+115
+00:19:54.220 --> 00:20:06.500
+<v pavol-hejny>Já jsem si hodně vyzkoušel to, že když se pracuje, tak, eh, že to často není, jako obzvlášť u toho programování, že to často není o tom, kolik člověk, eh, prosedí času u klávesnice a monitoru, ale</v>
+
+116
+00:20:06.540 --> 00:20:19.000
+<v pavol-hejny>je to spíš o tom, jestli pracuje efektivně a možná chytře. Je těžko říct, jestli je to to správné slovo, ale jde o to, že, hm, že taková asi bych řekl klasická</v>
+
+117
+00:20:19.040 --> 00:20:31.520
+<v pavol-hejny>představa spoustu prací, včetně programátorské práce, je ta, že je to o tom přijít a nabušit co nejrychlejc do tý klávesnice prostě těch tisíce a tisíce řádků kódu. Ale to</v>
+
+118
+00:20:31.580 --> 00:20:43.740
+<v pavol-hejny>tak spíš není. Ono je to víc o tom, že člověk musí mít promyšlený to, jakým způsobem ten systém má fungovat, jakým způsobem se skládá a tak. A to samotné napsání, to už je, to už je taková ta špička ledovce, to už se,</v>
+
+119
+00:20:43.800 --> 00:20:55.980
+<v pavol-hejny>to se vždycky nějak dá udělat. A, eh, tím pádem já se hodně snažím cokoliv, co dělám, tak mít předem hodně dobře promyšlené, aby to nebylo, aby to nebylo o tom, že,</v>
+
+120
+00:20:56.600 --> 00:21:08.600
+<v pavol-hejny>eh, že se teďka donutím sedět šestnáct hodin u počítače a jako něčím se mořit, ale spíš se to snažím hodně promyslet předtím, než to jdu implementovat. Když už to implementuju, tak už je to jednoduchý, protože už to všechno</v>
+
+121
+00:21:08.640 --> 00:21:21.180
+<v pavol-hejny>vlastně vím. Jenom to dávám na ten, ne na papír, ale na, na tu obrazovku. A, hm, a zároveň, zároveň s tím já hodně pracuju venku, což, eh,</v>
+
+122
+00:21:21.360 --> 00:21:33.600
+<v pavol-hejny>já jednak jako i si beru notebook venku a prostě i programuju přímo venku, ale zároveň si ty věci hodně přemýšlím venku a myslím, že je to mno-- jako násobně efektivnější, než když bych to měl opravdu časovaný tím způsobem,</v>
+
+123
+00:21:33.660 --> 00:21:48.460
+<v pavol-hejny>že si teďka dám budíka na, eh, na osmou, jedu do práce na devátou, tam prostě sedím osm hodin přesně, eh, odtamtud odjedu a pak si zakážu přemýšlet o práci a jdu spát. Eh,</v>
+
+124
+00:21:48.500 --> 00:22:00.580
+<v pavol-hejny>j-j-já jsem i takhle pracoval, ale, ale udělal jsem toho, jakože řekl bych, že jsem toho udělal třeba s dvacet krát míň, jako že ta efektivita i hodiny práce byla třeba s dvacetinásobně míň efektivní. A takhle</v>
+
+125
+00:22:00.640 --> 00:22:12.720
+<v pavol-hejny>asi nemůžou fungovat všechny profese, ale zrovna programátor takhle docela dobře fungovat může. A já pak nějaký věci deleguju. To je, to je další jako kategorie věcí, co dělám. Že já často věci, co</v>
+
+126
+00:22:12.780 --> 00:22:24.800
+<v pavol-hejny>píšu, tak nepíšu úplně sám, ale, ale jenom dávám tu ideu toho, co chci napsat a prostě, prostě mám nějaký systém, jakým způsobem to delegovat nebo automatizovat. A pak hodně věcí, fakt hodně věcí automatizuju.</v>
+
+127
+00:22:25.140 --> 00:22:37.799
+<v pavol-hejny>Že to, že jsem hodně aktivní na sociálních sítích, neznamená, že mám jako, že, že vlastně neustále refreshuju sociální sítě, ale spíš, eh, prostě sociální sítě jsou dneska takové trochu nutné zlo, že jako, eh,</v>
+
+128
+00:22:37.840 --> 00:22:49.980
+<v pavol-hejny>bohužel mně přijde, že člověk často, pokud dělá nějakou práci, tak musí i o tý práci dost mluvit, aby, aby ty lidi vnímali, že tu práci dělá. A, a tak jsem si udělal systém</v>
+
+129
+00:22:50.020 --> 00:22:59.880
+<v pavol-hejny>na to, aby, aby když něco dělám, abych o tom i jako, abych o tom i psal. Ale dělám to spíš způsobem, že, že pokud něco píšu nebo píšu nějakou věc, tak si jí třeba jako segme,</v>
+
+130
+00:23:01.480 --> 00:23:13.980
+<v pavol-hejny>jeden den si dám na to, abych jako sepsal všechny věci, co budu psát v následujícím měsíci například. A pak už mám systém, který mi to automaticky na ty sítě dává, postuje, eh, a to. A pak zase jako v dávkách to nějak zpracovávám.</v>
+
+131
+00:23:14.080 --> 00:23:24.280
+<v pavol-hejny>To samé takhle to dělám s maily a s dalšími věcmi. Takže já nad tím vlastně nestr-- já strávím drtivou většinu času spíš nad vymýšlením tý architektury toho systému. Eh.</v>
+
+132
+00:23:25.180 --> 00:23:37.400
+<v pitchuj-collboard-speaker_0>To jsem chtěla říct, [smích] že zase musíš mít výbornej time management a musíš si to umět naplánovat dopředu. To třeba mně dělá problém, že si jako si to rozmyslet v tom, eh, v to, v tý chvíli</v>
+
+133
+00:23:37.440 --> 00:23:49.520
+<v pitchuj-collboard-speaker_0>nebo v tom dnu, co všechno vlastně budu sdílet následující měsíc, ať už je to Instagram, LinkedIn nebo, eh, nebo něco, něco jinýho, to je jedno. Ale že teda máš super promyšlený nebo</v>
+
+134
+00:23:49.560 --> 00:23:52.640
+<v pitchuj-collboard-speaker_0>musíš to mít super promyšlený. [smích]</v>
+
+135
+00:23:52.680 --> 00:24:04.760
+<v pitchuj-collboard-speaker_1>Ty jsi nám tady řekl různé tvoje takové nástroje, eh, co se týče efektivity času a toho, jak pracuješ a podobně. Eh, vyjmenuj nám nebo řekni nám nějaký teda ty</v>
+
+136
+00:24:05.900 --> 00:24:14.140
+<v pitchuj-collboard-speaker_1>must nástroje, funkce a tak dál. Prostě to, co by člověk měl dělat, čeho by se měl třeba účastnit a podobně.</v>
+
+137
+00:24:15.200 --> 00:24:25.900
+<v pavol-hejny>Jo, tak, eh, co se týká, co se týká technologií, tak jako určitě Callboard. Já, já se jako všechno píšu do Callboardu, ale, ale jako řek-, řekl bych, že zrovna tohleto je asi lepší jiná nástěnka, která se jmenuje Trello.</v>
+
+138
+00:24:27.604 --> 00:24:39.604
+<v pavol-hejny>A teďka ze všech těchhle těch, nebo z hodně z těchhle těch nástrojů ty věci jdou automatizovat. To já dělám přes Integromat, což je taková, taková věc, která za člověka automaticky dělá úkoly, který jsou rutinní. A,</v>
+
+139
+00:24:40.504 --> 00:24:52.684
+<v pavol-hejny>a potom, potom, co se týká těch postupů, tak je ještě jedna taková zajímavá věc, a to, a to i, i c-i vlastně jak jsem se vůbec k Skidportu dostal, a to přes Hackathony, což je v podstatě</v>
+
+140
+00:24:52.924 --> 00:25:05.104
+<v pavol-hejny>takový víkendový nebo prostě několikadenní maraton, kdy se, kdy se velmi intenzivně pracuje. A to bych řekl, že je, že je tak jako velmi efektivní, ale na jako</v>
+
+141
+00:25:05.124 --> 00:25:17.384
+<v pavol-hejny>zase určitý druh činnosti. Je to velmi efektivní na to přijít na nějaké jako úplně nové postupy nebo přijít na úplně nové projekty. Není to podle mě úplně efektivní na, na to, pokud mám set dvaceti pěti</v>
+
+142
+00:25:17.464 --> 00:25:29.564
+<v pavol-hejny>úkolů do stávajícího projektu a potřebuju udělat kvalitně, není to úplně na kvalitní práci. Je to spíš na to, že mám, že mám nějaký nápad a chtěl bych si ověřit například, že ho dokážu implementovat nebo</v>
+
+143
+00:25:29.604 --> 00:25:41.224
+<v pavol-hejny>nějakou technologii a chtěl bych si zjistit v ní pracovat. A pak je podle mě velmi efektivní přesně udělat jako velmi krátký a velmi intenzivní soustředění na to, na to pár dní.</v>
+
+144
+00:25:42.064 --> 00:25:54.144
+<v pitchuj-collboard-speaker_1>Mě s tímhle tím ještě napadá, používáš papírovej diář nebo svůj mobil, kalendář? A hlavně co všechno si tam píšeš? Protože je několik těch teorií toho, že by se tam měly</v>
+
+145
+00:25:54.184 --> 00:26:03.644
+<v pitchuj-collboard-speaker_1>psát ty nejdůležitější věci. Někdo si tam naopak píše úplně všechno. Někdo tam píše i třeba to, co delegoval na někoho jiného. Jakej ty máš systém?</v>
+
+146
+00:26:04.184 --> 00:26:16.164
+<v pavol-hejny>Ehm, já mám, takhle, co se týká papíru, já papír taky používám. Mám takový ty klasický prostě klasický kartičky a těch mám v počítači celou haldu. Ale- [smích]</v>
+
+147
+00:26:16.184 --> 00:26:17.784
+<v pitchuj-collboard-speaker_1>To já taky. [smích] Všichni.</v>
+
+148
+00:26:18.264 --> 00:26:31.484
+<v pavol-hejny>Všichni, no. A vlastně já s-já si říkám, že toho vlastně není zas tolik, ale ono je toho vlastně docela dost. Já jsem teďka nedávno vyhazoval papír a byly toho dvě kila za</v>
+
+149
+00:26:31.504 --> 00:26:43.584
+<v pavol-hejny>poslední asi půl rok, takže je toho dost. [smích] A j-j-já na to mám spíš mám, já na to spíš mám takový systém, že to ani není o tom, že pokud něco urgentně potřebuju udělat, tak, tak to mám napsaný v nějaký elektronický formě, abych</v>
+
+150
+00:26:43.604 --> 00:26:55.604
+<v pavol-hejny>na to jako nemohl zapomenout. Tady ty kartičky jsou spíš od toho, že prostě nápady, který mám, tak si takhle zapisuju a teďka jednou za týden nebo dva si udělám nějaký takový třízení, že vezmu všechny kartičky. Spoustu z nich jsem</v>
+
+151
+00:26:55.664 --> 00:27:07.804
+<v pavol-hejny>mezitím udělal nebo si promyslel nebo je to prostě takové to něco, co visí ve vzduchu. Ty, které ne, tak ty si napíšu jako buď do Trello nebo Collaboardu na, jako pokud to má být víc jako návrh nějaké</v>
+
+152
+00:27:07.844 --> 00:27:20.284
+<v pavol-hejny>věci, návrh nějakého systému, tak se na to hodně právě používám C-Collaboard. Pokud je to, pokud jsou to spíš takové jako úkoly typu udělat tamto, hentamto, koupit tamto, hentamto, tak, tak na to mám, na to mám,</v>
+
+153
+00:27:20.764 --> 00:27:32.924
+<v pavol-hejny>na to mám právě Trello. S tím, že, s tím, že ještě tam mám jako různá klíčová slova, která mně to prostě třídí, abych, abych pak třeba si ty věci dokázal dělat hromadně. Že jako například mám</v>
+
+154
+00:27:32.964 --> 00:27:45.044
+<v pavol-hejny>nějakou postranní knihovnu, nějakej postranní projekt, kterej spravuje něco, a místo toho, abych ho stále otvíral, něco v něm upravil, nasadi nebo jakoby zveřejnil ten kód a tak. Tak</v>
+
+155
+00:27:45.084 --> 00:27:56.144
+<v pavol-hejny>místo toho to dělám tak, že si zapisuju ty věci, co se toho maj týkat, a pak to jednou za měsíc sfouknu. Udělám si jeden den, kdy prostě jedu jak, jak fretka, jedu po druhý věci a to tam doimplementovávám.</v>
+
+156
+00:27:58.164 --> 00:28:10.204
+<v pitchuj-collboard-speaker_1>Ale je to výborný nápad vlastně s tím mít tam ty lístečky a pak si to protřídit, protože já ve chvíli, kdy to mám na lístečku, tak jsem taková, že do druhýho dne při nejlepším to mít hotový. Pak to všechno</v>
+
+157
+00:28:10.244 --> 00:28:13.744
+<v pitchuj-collboard-speaker_1>nestíhám a, a sunu to vlastně před sebou. [smích]</v>
+
+158
+00:28:13.764 --> 00:28:16.224
+<v pavol-hejny>To mluvíš o mně nebo? [smích]</v>
+
+159
+00:28:16.264 --> 00:28:20.504
+<v pitchuj-collboard-speaker_1>To jsem se nakazila. [smích]</v>
+
+160
+00:28:20.564 --> 00:28:20.784
+<v pavol-hejny>No.</v>
+
+161
+00:28:21.084 --> 00:28:24.384
+<v pitchuj-collboard-speaker_1>Takže díky moc za tyhlety rady. A</v>
+
+162
+00:28:26.544 --> 00:28:38.584
+<v pitchuj-collboard-speaker_1>mě ještě zajímá, já jsem ve spojitosti s Collaboardem našla i, jmenuje se to Hedu, jestli to říkám vlastně</v>
+
+163
+00:28:38.624 --> 00:28:48.124
+<v pitchuj-collboard-speaker_1>správně. Jestli nám můžeš tady přiblížit, o co se jedná. Rozdíly mezi tím, co vlastně je Collaboard a tak dál.</v>
+
+164
+00:28:48.504 --> 00:28:48.664
+<v pavol-hejny>Ehm,</v>
+
+165
+00:28:50.224 --> 00:29:02.284
+<v pavol-hejny>to je právě ten projekt, o kterém jsem mluvil úplně na začátku, ze kterého jsme vzešli. Hedu je platforma pro učitele, která poskytuje vlastně obsah, obsah učebnic. A ono to celé vzniklo tím způsobem,</v>
+
+166
+00:29:02.364 --> 00:29:14.444
+<v pavol-hejny>že můj dědeček napsal učebnice matematiky a kolem něj se vytvořila jako celá organizace, která ty učebnice vydává, která, které píše, která dělá, dělá ty obslužné</v>
+
+167
+00:29:14.484 --> 00:29:26.484
+<v pavol-hejny>věci kolem toho. A, a nějakou dobu po tom, co to vzniklo, tak, tak, tak tam byla myšlenka, udělejme to v elektronický formě. Ale to byla doba, ona to doba je vlastně stále, kdy,</v>
+
+168
+00:29:26.524 --> 00:29:38.964
+<v pavol-hejny>kdy v podstatě nebyli žádní programátoři a já jsem se do toho připojil spíš takovou náhodou, že tam byl nějaký mail, který se posílal a teďka mně nějak přistálo, že oni by potřebovali dělat elektronický</v>
+
+169
+00:29:39.004 --> 00:29:51.364
+<v pavol-hejny>učebnice a já jsem na to nějak odpověděl. Nějak jsem se s nima sešel a, a založili jsme startup. A ten jsme udělali a je to mnohem míň, je to mnohem míň na technologický bázi. Je to opravdu spíš na způsob,</v>
+
+170
+00:29:51.444 --> 00:30:03.524
+<v pavol-hejny>že, že děláme obsahovou platformu, kde je prostě spoustu učebnic, které se prodávají školám, které se licencují učitelům a, a které si ten učitel může buď nějak zařazovat do pracovních listů, nebo, nebo právě</v>
+
+171
+00:30:03.564 --> 00:30:15.604
+<v pavol-hejny>zobrazovat na těch interaktivních tabulích. Ale je tam mnohem víc takového toho klasického, klasické tvorby systému na způsob, že, že je tam spoustu různých oken, spoustu různých, spoustu</v>
+
+172
+00:30:15.644 --> 00:30:27.704
+<v pavol-hejny>různých klikání modálů a tak. Je to takové, taková mnohem jako klasičtější webová aplikace, než je právě Collaboard, který je víc technologický. A Collaboard právě vznikl, on s--</v>
+
+173
+00:30:28.104 --> 00:30:30.544
+<v pavol-hejny>já to dělám s Jonášem, který je z interního týmu</v>
+
+174
+00:30:32.064 --> 00:30:44.324
+<v pavol-hejny>právě, právě Hedu a, a hodně nám v tom právě pomáhal Honza Šedo, který se mnou právě Hedu založil. Takže oni tyhle ty dvě věci jsou právně a organizačně hodně propojený, i když, i</v>
+
+175
+00:30:44.344 --> 00:30:56.356
+<v pavol-hejny>když je chceme postupně vydělit, protože kaž-každý z těchhle těch dvou projektů má různé vize a různé, různé cíle a potenciálně směřuje jako úplně jiným směrem. Ale, ale</v>
+
+176
+00:30:56.396 --> 00:31:00.416
+<v pavol-hejny>vzešlo to vlastně z toho samého. Colboard byl, byl jenom interním projektem Heydu.</v>
+
+177
+00:31:01.236 --> 00:31:08.856
+<v pitchuj-collboard-speaker_1>A dá se to nějak provázat dohromady tyhlety dvě samostatný vlastně jako skupiny nebo tyhlety dva projekty?</v>
+
+178
+00:31:09.956 --> 00:31:21.956
+<v pavol-hejny>Dá a je to provázané. Je to tak, že je to tak, že Heydu v sobě má obsah s učebnicema a teďka ty učebnice se skládají z nějakých konkrétních, konkrétních úloh a učitel si ty úlohy může například</v>
+
+179
+00:31:21.976 --> 00:31:33.976
+<v pavol-hejny>vytisknout do PDFka, ale stejně tak si je může vlastně dát do Colboardu a otevřít je v Colboardu. A jedna asi z, jedna z věcí, ke které směřujeme, je, že my v tom Heydu máme nějaký právě,</v>
+
+180
+00:31:34.756 --> 00:31:46.916
+<v pavol-hejny>nějakou komponentu na zobrazování těch úloh v rámci interaktivních tabulí, která je taková, že to jde, ale, ale není úplně ideální. A my právě tady tu komponentu chceme nahradit Heydu, že vla--</v>
+
+181
+00:31:47.356 --> 00:32:00.176
+<v pavol-hejny>my tady tu komponentu chceme nahradit Colboardem, že Colboard bude, že Colboard v tady tom případě nebude samostatná aplikace sama o sobě, ale bude někde pouze figurovat, figurovat někde vložená. Možná</v>
+
+182
+00:32:00.216 --> 00:32:10.516
+<v pavol-hejny>něco na podobnej způsob, jak když jste tady měli, měli podcast o BestTalku. Takže BestTalk může být takhle vložený do nějakých jako jiných platforem a nemusí figurovat sám o sobě.</v>
+
+183
+00:32:11.816 --> 00:32:24.156
+<v pitchuj-collboard-speaker_1>Ale ještě u toho Colboardu mě zajímá, je to celé free nebo jsou tam placené moduly? Nebo jak vy to vlastně jako třeba máte nastavené. Protože vlastně jsem i četla, že tím, že už je více těch metod</v>
+
+184
+00:32:24.216 --> 00:32:36.116
+<v pitchuj-collboard-speaker_1>právě třeba Hejného metoda a tak dál, tak vy se na to zaměřujete a dáváte tam tuhletu možnost využívat vlastně i takto specifickou jako výuku nebo věci pro výuku.</v>
+
+185
+00:32:38.076 --> 00:32:50.296
+<v pavol-hejny>Co se týká pla-, co se týká placení, tak samotný Colboard je zatím zdarma. A to je právě jedna z těch jako velkých věcí, že př, že, že jakým způsobem to nejlépe monetizovat, že jak, jakým, jakým</v>
+
+186
+00:32:50.396 --> 00:33:02.476
+<v pavol-hejny>směrem jít tak, aby, abychom, abychom to nějak smysluplně dokázali uživit. Co se týká toho, tak to není, není, že by z toho, že by z toho nic nebylo. Ono je to přece jenom tak, že, že Heydu</v>
+
+187
+00:33:02.516 --> 00:33:13.896
+<v pavol-hejny>má placený obsah a teďka Colboard do nějaké míry technologicky vlastně podporuje Heydu, tím pádem, tím pádem tady ten, tady ten nějaký vztah je a hodně učitelů je tam právě z Heydu, takže,</v>
+
+188
+00:33:15.816 --> 00:33:28.276
+<v pavol-hejny>takže, ale ti samotní, ti samotní uživatelé, kteří tam jen tak přijdou, tak ti tenhleten vztah nevidí. Pro ně je to prostě zdarma a bez, bez všeho. A my tam ještě kromě Heydu máme, máme</v>
+
+189
+00:33:28.336 --> 00:33:30.796
+<v pavol-hejny>prvky z Montessori výuky. Ale,</v>
+
+190
+00:33:32.816 --> 00:33:44.956
+<v pavol-hejny>ale ono, ono to bylo do jedn, na jednu stranu proto, že tam byla poptávka, na druhou stranu tam šlo taky o to ukázat, že, že se tam takhle ty palety prvků dají přidávat a že bychom tam mohli doplnit další a další a další. A,</v>
+
+191
+00:33:46.596 --> 00:33:52.056
+<v pavol-hejny>a šlo tak jako z půl, z půlky o ten samotný obsah a z půlky tak o tu technologickou demonstraci.</v>
+
+192
+00:33:53.736 --> 00:34:06.056
+<v pitchuj-collboard-speaker_1>Tady je právě skvělý i ta podpora tohodle, řekněme trošku jiného stylu vyučování. Já vlastně o tom čtu stále víc a víc a narážím na to víc a víc a vidím i, že školy na to postupně</v>
+
+193
+00:34:06.116 --> 00:34:18.396
+<v pitchuj-collboard-speaker_1>přechází. Některý už jsou třeba i přímo na to specializovaný nebo mají takto specificky udělanou třeba třídu a podobně. Takže i tohle, ta možnost využít i tyhlety jiný prvky si myslím,</v>
+
+194
+00:34:18.476 --> 00:34:30.856
+<v pitchuj-collboard-speaker_1>že je ta dobrá cesta právě pro ten Colboard jako takovej, i když se ty děti vrátí zpátky do škol nebo zůstane rotační výuka. Takže za mě fakt skvěle jako podchycený tyhlety</v>
+
+195
+00:34:30.896 --> 00:34:39.736
+<v pitchuj-collboard-speaker_1>věci. Jak to vidíš třeba s expanzí do zahraničí? Myslíš, že to má potenciál i v zahraničí Colboard? Přemýšlel jsi o tom?</v>
+
+196
+00:34:40.436 --> 00:34:52.456
+<v pavol-hejny>Určitě, tam, tam to podle mě hodně souvisí s obsahem a tím, že, tím, že Hejného metoda je i v, je na Slovensku, tak, a Heydu je na Slovensku, tak, tak samotný Colboard je na Slovensku,</v>
+
+197
+00:34:53.876 --> 00:35:06.396
+<v pavol-hejny>protože, protože přes to tam přirozeně, přirozeně ti učitelé přišli. Zároveň, zároveň máme na Slovensku další učitele, kteří nějak s tím obsahem nesouvisí, ale jsou tam. Určitě</v>
+
+198
+00:35:06.576 --> 00:35:18.676
+<v pavol-hejny>to budeme, teď to máme přeložený ještě do angličtiny s tím, že ale lidí, kteří to v angličtině používají, moc není. Nebo z toho celkového počtu je to, je to spíš rarita a zároveň si myslím, že to je víc o tom, že to jsou</v>
+
+199
+00:35:18.716 --> 00:35:30.816
+<v pavol-hejny>učitelé, kteří jsou v Čechách, jen mají, jen mají systém, jen mají systém anglicky a jsou za nějakou VPNkou, kde se tváří, že jsou, že jsou, že jsou jinde. A určitě, určitě to budeme chtít</v>
+
+200
+00:35:30.876 --> 00:35:33.856
+<v pavol-hejny>expandovat. Je podle mě zase otázkou, nakolik,</v>
+
+201
+00:35:35.596 --> 00:35:47.656
+<v pavol-hejny>nakolik, nakolik jít víc tou expanzí po jednotlivých obsazech a odvětvích tady v rámci Čech a Slovenska versus nakolik vzít ty samé věci, ty samé prvky a prostě je přeložit a nějak to expandovat</v>
+
+202
+00:35:47.656 --> 00:36:00.096
+<v pavol-hejny>do zahraničí. Tady tu otázku úplně promyšlenou nemáme a hodně to souvisí právě s tím, že my zatím stále ještě hodně jedeme v tom módu, že teďka prostě, teďka je prostě krize a podporujeme</v>
+
+203
+00:36:00.136 --> 00:36:01.596
+<v pavol-hejny>to české školství. Ale,</v>
+
+204
+00:36:03.636 --> 00:36:07.936
+<v pavol-hejny>ale jak říkám, to, to se mění, ale nemám na to teďka jednoznačnou odpověď.</v>
+
+205
+00:36:08.816 --> 00:36:20.936
+<v pitchuj-collboard-speaker_1>Super. No a klasicky, já nevím, jestli Leni máš ještě teda nějakou otázku, co se týká Colboardu? Vůbec. Já nad vším přemýšlím a mám šíleně moc myšlenek a těším se, až si půjdu něco</v>
+
+206
+00:36:21.396 --> 00:36:33.536
+<v pitchuj-collboard-speaker_1>zapsat na lístečky na stůl a udělám si v tom systém. [smích] Jako poslední otázka, kterou dáváme skoro každému. Jaký je tvůj největší fuckup? Co se vám událo, co</v>
+
+207
+00:36:33.576 --> 00:36:36.256
+<v pitchuj-collboard-speaker_1>bys řekl, že, že byl fuckup?</v>
+
+208
+00:36:37.356 --> 00:36:49.436
+<v pavol-hejny>Jo, tak my jsme měli do, my jsme měli pár fuckupů s tím, že, s tím, že jak tam přišlo hodně lidí, tak, tak ten server prostě nestíhal. A teďka, a nám,</v>
+
+209
+00:36:49.536 --> 00:37:02.016
+<v pavol-hejny>nám se to stalo, jako nám se to vlastně stalo v takových dvou větších sériích před rokem a teďka, kdy, kdy my jsme už mysleli, že to je dobrý, že, že tam je, že, že toto jsme to, co to způsobovalo,</v>
+
+210
+00:37:02.056 --> 00:37:14.680
+<v pavol-hejny>je opravený, ale jako zase ten další den to, to byl problém a pak zase další den, další den to byl problém. A měli jsme problém s tím, že jsme Prostě neuměli vychytit to, když tam těch</v>
+
+211
+00:37:14.700 --> 00:37:27.120
+<v pavol-hejny>jako, když tam dejme tomu v těch osm nebo devět prostě se nahrnulo strašně moc lidí a, a teď se to najednou celý zaseklo a jako nic tam nic do toho nepomáhalo a nevěděli jsme, co s tím. Což</v>
+
+212
+00:37:27.180 --> 00:37:39.220
+<v pavol-hejny>se teďka zlepšilo jako teďka, teďka se to zlepšilo jednak tím, že jsme tam hodně věcí zlepšili a jednak se to zlepšilo hodně tím, že, že tam těch lidí je teďka prostě nějaký, nějaký menší procento z těch, co tam byli, co tam byli</v>
+
+213
+00:37:39.260 --> 00:37:47.900
+<v pavol-hejny>předtím. Ale to je určitě věc, na kterou se musíme mnohem líp zaměřit, pokud bychom to chtěli nějak jako výrazně masivně expandovat.</v>
+
+214
+00:37:49.400 --> 00:37:57.940
+<v pitchuj-collboard-speaker_1>A mě přeci jen napadla jedna otázka poslední [smích], a to je, když k něčemu takovému dojde, jak u vás vypadá krizové řízení?</v>
+
+215
+00:37:59.500 --> 00:38:11.980
+<v pavol-hejny>Co se týká krizového řízení, my jako nic, nic takového zatím nemáme zprocesovaného, protože jednak jako doufáme, že to nebude muset být rutinní věc, jako že to stále bude prostě krizová, krizová záležitost</v>
+
+216
+00:38:12.780 --> 00:38:24.940
+<v pavol-hejny>a zároveň, ehm, zároveň, no prostě se to snažím co nejrychleji opravit. A s tím, že, s tím, že my jsme se dostali do té fáze, kdy na začátku, ten první, ta první</v>
+
+217
+00:38:24.980 --> 00:38:37.000
+<v pavol-hejny>série problémů, která byla, ta byla hrozně problematická na opravení a vždycky, vždycky trvalo hrozně dlouho, než se muselo něco překonfigurovat a tak. My jsme se teďka dostali do té fáze, kdy vlastně</v>
+
+218
+00:38:37.040 --> 00:38:49.540
+<v pavol-hejny>v uvozovkách jenom stačí restartovat server a je to v pohodě. Což je, eh, což je předstupeň k tomu, aby tady ty problémy se řešily automaticky. Teď to rozekáme na více serverů a ve</v>
+
+219
+00:38:49.560 --> 00:39:01.680
+<v pavol-hejny>chvíli, když nějaký z nich bude mít problém, tak se automaticky restartuje. No a potom samozřejmě můžeme hledat, jako jestli by se ještě nedalo vyřešit to, aby ty servery neměly problém. Ale ono tady ten druh aplikace</v>
+
+220
+00:39:01.760 --> 00:39:14.140
+<v pavol-hejny>má občas problém v tom, že právě jak je k němu připojených hodně lidí zároveň, tak se to chová trochu jinak než běžné webovky, které ty lidi odbaví tak, že je odbaví, eh, a pak se jimi nezabývají. Že</v>
+
+221
+00:39:14.200 --> 00:39:19.100
+<v pavol-hejny>ono to má prostě svoje specifika a já přece jenom nejsem úplně nejlepší serverař, takže,</v>
+
+222
+00:39:20.780 --> 00:39:22.480
+<v pavol-hejny>takže se jako hodně učíme za pochodu.</v>
+
+223
+00:39:25.000 --> 00:39:37.260
+<v pitchuj-collboard-speaker_0>Pavle, já ti moc děkuju nebo my ti moc děkujeme za Sitport, že jsi sem dorazil. Bylo to úplně super zajímavý povídání a myslím si, že Callboard má velký potenciál a držím vám</v>
+
+224
+00:39:37.320 --> 00:39:47.760
+<v pitchuj-collboard-speaker_0>palce v budoucnu i s expanzí do zahraničí třeba. A aby vám prostě vše vycházelo tak, jak ty chceš, jak chcete celej tým.</v>
+
+225
+00:39:48.540 --> 00:39:51.060
+<v pavol-hejny>Já děkuju. Děkuju za sebe, za Callboard, za pozvání.</v>
+
+226
+00:39:52.040 --> 00:39:58.640
+<v pitchuj-collboard-speaker_1>No, my se budeme těšit, co s čím s Callboardem ještě přijdete a co za novinky nás tam čeká.</v>
+
+227
+00:39:59.180 --> 00:40:01.500
+<v pavol-hejny>Já se těším na ten Hackathon, co organizujete.</v>
+
+228
+00:40:01.540 --> 00:40:08.140
+<v pitchuj-collboard-speaker_0>Na ten se taky těšíme. To je pravda. Kolikátýho je, abysme to teda taky ještě řekli. Dvacátého osmého?</v>
+
+229
+00:40:08.200 --> 00:40:08.840
+<v pitchuj-collboard-speaker_1>Května.</v>
+
+230
+00:40:08.880 --> 00:40:20.980
+<v pitchuj-collboard-speaker_0>Dvacátého osmého května. Takže všichni na Sitport tečka cz [smích] a tam se můžete registrovat na Hackathon s Callboardem. Tak a teďka už</v>
+
+231
+00:40:21.000 --> 00:40:24.680
+<v pitchuj-collboard-speaker_0>je teda opravdu konec [smích] a my se s váma loučíme.</v>
+
+232
+00:40:26.400 --> 00:40:30.360
+<v pitchuj-collboard-speaker_1>Tak a těšíme se zase u dalšího dílu Pitch Your Startup.</v>

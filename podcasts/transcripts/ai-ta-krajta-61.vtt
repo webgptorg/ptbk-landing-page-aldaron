@@ -1,0 +1,805 @@
+WEBVTT
+
+1
+00:00:04.000 --> 00:00:16.340
+<v pavol-hejny>Den. Vítejte u čtyřicátého prvního dílu podcastu Ajta Krajta, dnes s Romanem Baranovičem, Pavlem Hejným a mnou. Ahoj, pojďme na dnešní témata. A poděkujme</v>
+
+2
+00:00:16.360 --> 00:00:19.880
+<v pavol-hejny>ještě sponzorům FromBook a AI Supervize. Tak co máte?</v>
+
+3
+00:00:20.080 --> 00:00:32.140
+<v ai-ta-krajta-61-speaker_1>Já bych to možno odštartoval, eh, je leto, prázdniny, ale aj tak sa ku mne cez rôzne newslettery dostávajú texty o tom, ako môže umelá inteligencia vplývať na učenie, rozmýšľanie</v>
+
+4
+00:00:32.240 --> 00:00:44.540
+<v ai-ta-krajta-61-speaker_1>a mozgovú aktivitu. A zrovna včera ma zaujal taký substackový newsletter od Tawny Means, ktorá sa polemicky vracia k takej štúdii MIT Media Labu o používaní ChatGPT pri písaní</v>
+
+5
+00:00:44.580 --> 00:00:56.660
+<v ai-ta-krajta-61-speaker_1>esejí. Tá štúdia vyšla ešte niekedy v decembri minulého roku. No a zaujímavé na tom je nielen to, čo tá štúdia ukazuje v rámci svojho experimentu, ale aj to, ako rýchlo sa z podobných výsledkov zvyknú robiť</v>
+
+6
+00:00:56.700 --> 00:01:08.900
+<v ai-ta-krajta-61-speaker_1>veľké závery o tom, ako umelá inteligencia oslabuje mysleľ. Takých pár základných vecí, čo tá štúdia priniesla, tak hovorí o tom, že ChatGPT mení vzorec mozgovej aktivity pri písaní. V tomto experimente</v>
+
+7
+00:01:08.920 --> 00:01:21.740
+<v ai-ta-krajta-61-speaker_1>porovnávali tri režimy: písanie bez nástrojov, písanie s vyhľadávačom a písanie s ChatGPT. Celkovo išlo o päťdesiatštyri účastníkov v hlavných sedeniach. Štúdia tvrdí, že skupina používajúca LLM vykazovala</v>
+
+8
+00:01:21.980 --> 00:01:34.020
+<v ai-ta-krajta-61-speaker_1>inú a slabšiu takú tú EEG konektivitu než skupina, ktorá písala bez pomoci. Inými slovami, pri písaní s AI mozog, v ktorom tom konkrétnom nastavení pracoval. A ďalšia vec, ktorá tá štúdia hovorí, je, že</v>
+
+9
+00:01:34.260 --> 00:01:46.800
+<v ai-ta-krajta-61-speaker_1>štúdia nenaznačuje len rozdiel v EEG, ale aj v tom, ako ľudia vzťahovali výsledný text sami k sebe. Pri použití ChatGPT mali účastníci podľa zhrnutia slabšiu pamäť na vlastný text a nižší pocit, že text je naozaj ich. To</v>
+
+10
+00:01:46.820 --> 00:01:58.880
+<v ai-ta-krajta-61-speaker_1>je dôležité najmä v školskom kontexte, kde nejde len o výsledok, ale aj to, či si študent myšlienku osvojil. Potom, že dôležité môže byť poradie. Najzaujímavejšia časť štúdia je zrejme práve tá, ale zároveň stojí na najslabšej</v>
+
+11
+00:01:58.920 --> 00:02:11.340
+<v ai-ta-krajta-61-speaker_1>empirickej pôde. V štyroch sedeniach, ktoré absolvovalo už len osemnásť ľudí, sledovali, čo sa stane, keď niekto prejde z režimu brain only na AI alebo naopak z AI na brain only. A odtiaľ pramení hypotéza,</v>
+
+12
+00:02:11.420 --> 00:02:23.540
+<v ai-ta-krajta-61-speaker_1>že pedagogicky môže byť zdravšie najprv vlastné myslenie, až potom umelá inteligencia, než keď AI vstúpi do procesu ako prvý autor. Potom autori tam rámcujú, že ak človek príliš skoro autorcuje časť mentálnej práce</v>
+
+13
+00:02:23.580 --> 00:02:35.840
+<v ai-ta-krajta-61-speaker_1>na umelú inteligenciu, môže si menej budovať vlastné kognitívne opory. A dôležité je slovo hypotéza. Štúdia tu skôr otvára obavu, než by už definitívne dokazovala. Je to zaujímavý koncept, ale ešte nie stabilný vedecký záver.</v>
+
+14
+00:02:36.020 --> 00:02:48.280
+<v ai-ta-krajta-61-speaker_1>AI nemení len výstup, ale aj samotný kognitívny proces. Najtriezvejší takeaway je asi tento. Štúdia nenaznačuje len to, že esej vyzerajú inak, ale že inak vyzerá aj cesta k nim. Teda že AI nemení iba finálny text, ale aj spôsob, akým človek</v>
+
+15
+00:02:48.300 --> 00:03:00.560
+<v ai-ta-krajta-61-speaker_1>premýšľa, spomína si, organizuje svoje myšlienky a prežíva autorstvo. No a tá polemika, tak tá sa dá zhrnúť asi tak, že to, že máme nejaký iný vzorec myslenia, keď pracujeme s AI, neznamená, že ten iný model,</v>
+
+16
+00:03:00.840 --> 00:03:13.000
+<v ai-ta-krajta-61-speaker_1>iný vzorec myslenia je automaticky horší. Ešte to samo o sebe nič nedokazuje. Jednoducho máme príliš málo dát, aby sme vedeli robiť nejaké veľké závery. A ten experiment bol veľmi úzky, že bolo to fakt len päťdesiatsiatri ľudí, bolo to len zopár</v>
+
+17
+00:03:13.060 --> 00:03:25.680
+<v ai-ta-krajta-61-speaker_1>sedeniach a na základe toho a už naozaj ako keby aj ďalšími médiami som zachytil, že išlo o tom, ako nás umelá inteligencia v tom procese učenia sa oblbuje. Ďalšie taký zaujímavé veci je, že tí účastníci nepredstavujú nejakú bežnú populáciu.</v>
+
+18
+00:03:25.760 --> 00:03:37.900
+<v ai-ta-krajta-61-speaker_1>Boli to naozaj študenti z tých bostonských univerzít, čož je veľmi špecifická vzorka. Nie sú to deti, bežní stredoškoláci, dospelí v práci. No a tá štúdia vlastne doteraz nebola validovaná, že to bol len taký preprint, že to teraz zverejnili,</v>
+
+19
+00:03:38.020 --> 00:03:50.220
+<v ai-ta-krajta-61-speaker_1>ale doteraz je už po tom o tom ticho a už sa to ďalej nijakým spôsobom neriešilo. To ma zaujalo, že, že vlastne sa k tomu v tom newsletteri takýmto spôsobom vracia. Zdalo sa mi fajn vlastne to sem ako keby priniesť, že čo si o tom myslíte</v>
+
+20
+00:03:50.280 --> 00:03:53.600
+<v ai-ta-krajta-61-speaker_1>alebo že či máte na to nejaký názor, či ste niečo také zachytili aj vy.</v>
+
+21
+00:03:53.840 --> 00:04:05.900
+<v pavol-hejny>No to obecně hodně mluví a mě by zajímalo, jestli si Romane myslíš, že to je něco nového, anebo že to je vlastně ta samá písnička akorát s novou technologií. Kdy já si pamatuju, že u mě se na střední škole mluvilo jako</v>
+
+22
+00:04:06.180 --> 00:04:18.360
+<v pavol-hejny>úplně tu ta samá věc o Googlu a o vyhledávání a o tom, že kdysi si lidi ty věci museli vyhledávat pořádně v knihách a teďka si je můžou vyhledávat přes Google jednoduše. Není to úplně to samý akorát</v>
+
+23
+00:04:18.399 --> 00:04:19.100
+<v pavol-hejny>v novém hávu?</v>
+
+24
+00:04:19.440 --> 00:04:31.440
+<v ai-ta-krajta-61-speaker_1>Mne to ako tomu AI optimistovi príde, že do istej miery je to stále opakovanie tohto istého vzorca, že toto sme tu už naozaj mali a naozaj existuje tam, dokonca som čítal nejaký článok pred rokmi o</v>
+
+25
+00:04:31.520 --> 00:04:43.680
+<v ai-ta-krajta-61-speaker_1>tom, že keď ľudia začali písať atramentovým perom, tak sa obávali, že ako zásadne to vlastne nakazí ten, pokazí ten proces učenia sa, keď to je teraz nejakým alebo guličkovým perom, lebo to je strašne rýchle a nemusia pri</v>
+
+26
+00:04:43.740 --> 00:04:56.180
+<v ai-ta-krajta-61-speaker_1>tom tak strašne pracovať, ako keď písali s brkom. Hej, že teda toto tu je ako keby niečo, čo sa deje. Ja si myslím, že to treba ďalej sledovať, ale že tým, že sme v takej, takej dobe, kde tie médiá sa hneď vrhnú, vrhnú na nejakú senzáciu</v>
+
+27
+00:04:56.200 --> 00:05:08.520
+<v ai-ta-krajta-61-speaker_1>a toto teda publikoval MIT, no tak ako MIT, to už je nejaká značka, neni to nejaká krkonošská vysoká škola, ale teda MIT, tak sa o tom začalo brať. Chýba nám v podstate také to kritické myslenie a nejaká</v>
+
+28
+00:05:08.580 --> 00:05:14.040
+<v ai-ta-krajta-61-speaker_1>stopka, že dobre, tak sledujme to, ale nerobme z toho hneď nejaký alarmistický záver. Ale súhlasím s tebou, Jaro, k sobie.</v>
+
+29
+00:05:14.120 --> 00:05:26.620
+<v pavol-hejny>Já mám vlastně na to docela podobnej názor. Nebo takhle, rozlišoval bych tam dvě věci, že je to něco podobnýho jako, nebo aspoň mně to připomíná, jako když se začaly používat kalkulačky versus logaritmický pravítka nebo tabulky,</v>
+
+30
+00:05:26.700 --> 00:05:38.700
+<v pavol-hejny>když se sčítaly nebo násobily velký čísla. Připadá mně, že může být rozdíl v tom, jako teoreticky, když by se děti učily počítat rovnou na kalkulačce a neviděly nikdy jako třeba</v>
+
+31
+00:05:38.720 --> 00:05:50.900
+<v pavol-hejny>počítadlo nebo nějaký méně technický věci. A vlastně nevím, jaká je teďka ta správná technika učení dětí počítat. Říkám si, že je to vlastně jenom takový akademický problém, že stejně když ty nechápeš ten význam těch symbolů</v>
+
+32
+00:05:50.980 --> 00:06:02.060
+<v pavol-hejny>a nevíš, co ta kalkulačka dělá, tak stejně tomu nerozumíš a asi ji vlastně ani nebudeš chtít používat. Takže jako vidím tam nějaký to, že nějaký odstupňování, že nejdřív je potřeba vědět, co děláš, pak teprve- Tě asi napadne na to použít kalkulačku.</v>
+
+33
+00:06:02.180 --> 00:06:14.040
+<v pavol-hejny>Možná se pletu. Druhá věc je, kterou bych od toho odlišil, je, že mi to další logický krok v tom, v tom smyslu, že my jsme teďka, aspoň já tak mám pocit, trochu zavalení nějakýma jako informacema řekněme. AI jako očividně pomáhá v nich trošičku</v>
+
+34
+00:06:14.200 --> 00:06:26.540
+<v pavol-hejny>hledat nějaký jak signál relevantní. Tak to mně přijde vlastně, jako že to je dobrý nástroj, pokud člověk k tomu přistupuje nějak, jako se snaží to nějak challengovat to svoje myšlení a nějakým způsobem trošku nad tím uvažuje. Ta samotná</v>
+
+35
+00:06:26.580 --> 00:06:38.120
+<v pavol-hejny>studie, myslím, nejsem si teďka úplně jistej, jestli je to ta samá, kterou já si představuju, ale vím, že podobný studie už nedávno vznikly a že se tam vlastně kritizovalo to, co ty říkáš, Romane, že je ten vzorek není úplně dostatečnej a že</v>
+
+36
+00:06:38.160 --> 00:06:44.980
+<v pavol-hejny>to vyhodnocení a ta interpretace taky nemusí být úplně jako stoprocentní. Ty je potřeba, jak říkáš, počkat na ten další vývoj, a to s nějakou rezervou.</v>
+
+37
+00:06:45.040 --> 00:06:57.260
+<v ai-ta-krajta-61-speaker_1>Presne tak a teda dáme zdroj aj na ten newsletter, aj na tu, na tu štúdiu. Dáme to do poznámok podcastu. Takže ak vás to zaujalo, tak si to môžete pozrieť a premýšľať nad tým. A možno aj ten predchádzajúci taký špeciál, ktorý sme mali podcastový</v>
+
+38
+00:06:57.300 --> 00:07:08.560
+<v ai-ta-krajta-61-speaker_1>o vzdelávaní, tak tam sme trošku práve o týchto konceptoch, ktoré Jirka aj ty teraz navr-- spomenul, rozprávali. Lebo teda tomu sa hovorí, že kognitívny offloading, práve ako využívať umelú inteligenciu, vyznať sa v tom obrovské, v tom, tej</v>
+
+39
+00:07:08.600 --> 00:07:14.600
+<v ai-ta-krajta-61-speaker_1>závali informácií a dát, ktoré k nám tečú. Aby sme to nemali len o vzdelávaní, tak dám slovo Pavlovi. Čo teba zaujalo tento týždeň?</v>
+
+40
+00:07:14.700 --> 00:07:26.240
+<v pavol-hejny>Já ještě trošku zareaguju na to, co říkal Jirka. Mně přijde, že jedna z věcí je ta, že vždycky když přijde nová technologie a zase se to netýká jenom AIka, tak velmi často, i když člověk s ní třeba nesouhlasí nebo má s ní nějaký problém, tak</v>
+
+41
+00:07:26.260 --> 00:07:38.380
+<v pavol-hejny>stejně ji do nějaký míry musí použít. My se o tom pak asi budeme bavit i dál ohledně nějaký jako bezpečnosti a boje agentů mezi sebou. Například co se týká toho kognitivního offloadingu, tak my prostě nežijeme v době, kdy</v>
+
+42
+00:07:38.440 --> 00:07:50.440
+<v pavol-hejny>když chci něco napsat, tak to musím napsat poctivě ručně. My žijeme v době, kdy jsme tak strašně zaplavený AIkovýma věcma, že bez toho používání AIka k tomu tyhlety věci filtrovat, tak bychom nedělali nic jinýho, než náš</v>
+
+43
+00:07:50.500 --> 00:08:02.780
+<v pavol-hejny>čas strávili tím čtením AIkových věcí. Podobná věc platila třeba u toho Googlu, že jako byla možná hezká doba před Googlem, ale ve chvíli, když tady byl Google, tak prostě nic jinýho než ten svůj web jako dostat na Google jako nebylo</v>
+
+44
+00:08:02.820 --> 00:08:14.880
+<v pavol-hejny>možný, protože ten, kdo to neudělal, tak se v podstatě stal irelevantním. J-jedna věc je jako myslet si o něčem, že to je nebo není prospěšný globálně nebo to má nějaký dopady globálně. A ta druhá je ta, že to,</v>
+
+45
+00:08:14.920 --> 00:08:27.140
+<v pavol-hejny>aby člověk prakticky přežil, tak často tu novou technologii prostě adoptovat musí. Co mě zaujalo tenhle týden, to už je zase novinka z před dvou týdnů. Já už tady tradičně neříkám novinky, co jsou týden starý,</v>
+
+46
+00:08:27.220 --> 00:08:39.560
+<v pavol-hejny>ale dva týdny starý. A to, že jsem opravdu pořádně využil a použil teďka ty nový GPT pět šest modely. GPTčko teďka, teďka dva týdny má GPT Luna, Terra a Sol. Měsíc,</v>
+
+47
+00:08:39.680 --> 00:08:51.800
+<v pavol-hejny>Země, Slunce. Ta Terra má být teda ta Země, ten střední má být teoreticky zhruba na tý úrovni, jak byla GPT pět pětka. Sol má bejt dražší a lepší a Luna má bejt levnější, ale ne o tolik horší. A</v>
+
+48
+00:08:51.820 --> 00:09:03.920
+<v pavol-hejny>mně osobně přijde, začínám jako pociťovat to, že drtivou většinu programátorských problémů, který máme v Promptbooku, tak nám úplně v pohodě vyřeší Luna. Teda ten nejmenší model. Ten Sol vlastně z-z-začíná</v>
+
+49
+00:09:03.960 --> 00:09:16.300
+<v pavol-hejny>mít problém s tím nacházet úkoly, který jsou dostatečně velký na to, aby dávaly smysl pro teďka ty nový modely, co jsou. Teda jak pro Fable, tak pro Sol. Nebo děje se mně tohleto poprvý. Vždycky předtím to bylo tak, že mně přišlo, že na v podstatě</v>
+
+50
+00:09:16.340 --> 00:09:23.020
+<v pavol-hejny>osmdesát procent věcí jsem nasazoval ty nejnovější věci, zatímco teďka mně přijde, že ta Luna je opravdu good enough na většinu věcí.</v>
+
+51
+00:09:23.200 --> 00:09:24.580
+<v ai-ta-krajta-61-speaker_1>Jirka, čo zaujalo teba?</v>
+
+52
+00:09:24.780 --> 00:09:37.120
+<v ai-ta-krajta-61-speaker_2>Já jsem na tom podobně. Zaujal mě, dělal jsem si takový přehled, jak si vedou ty nejnovější modely v mým oblíbeným benchmarku Arc AI. Teďka je tam Arc AGI 3 je ten nejnovější. Vlastně</v>
+
+53
+00:09:37.140 --> 00:09:49.500
+<v ai-ta-krajta-61-speaker_2>jsem se koukal i na to, jak si vedou v těch starších verzích. Překvapilo mě, že GPT-5 šestka Sol má devadesát dva a půl procenta, Cloud Opus pětka má devadesát sedm čtyři procenta, což</v>
+
+54
+00:09:49.540 --> 00:10:01.620
+<v ai-ta-krajta-61-speaker_2>prakticky znamená, že ten jedničkovej a dvojkovej benchmark úplně padl, protože lidi, na-na průměrný člověk má šedesát šest procent u těchhletěch starších verzí. Takže teďka jsme ve stádiu, kdy opravdu ty modely</v>
+
+55
+00:10:01.680 --> 00:10:13.620
+<v ai-ta-krajta-61-speaker_2>se posunuly. Na druhou stranu, jak říká zakladatel toho benchmarku François Chollet, tak dokud budeme schopní vyvíjet nový benchmarky, který to AIko nebude zvládat, tak s-tak víme, že to AGI tady ještě prostě v nějakým smyslu není.</v>
+
+56
+00:10:14.000 --> 00:10:26.140
+<v ai-ta-krajta-61-speaker_1>Možno to môže byť aj úvod k tomu, čo nás čaká ďalej, o čom sa chcem rozprávať veľa, ale najprv sa k tej AGI teda. Aký vy vlastne na to máte názor? Lebo ja mám pocit, že máme také ako keby také cykly viery v AGI, že najskôr to bolo,</v>
+
+57
+00:10:26.220 --> 00:10:38.560
+<v ai-ta-krajta-61-speaker_1>že veľmi silné o tom, že ako AGI a už nás to teda, už tu tá AGI je na spadnutie. Teraz sa vlastne dlhý čas o AGI nerozprávalo. Skôr sme sa začali rozprávať o takých tých praktických</v>
+
+58
+00:10:38.600 --> 00:10:50.900
+<v ai-ta-krajta-61-speaker_1>aspektoch a o tom, že tak vlastne to je v podstate taká technológia, ktorá nám pomáha spracovávať informácie a tak ďalej, ale žiadna tá veľká viera v to, ako nás to celé teraz prekoná. Ale</v>
+
+59
+00:10:50.940 --> 00:10:59.940
+<v ai-ta-krajta-61-speaker_1>práve v tom poslednom čase sa mám pocit, že sa znova ako keby to A-AGI dostalo, dostalo niekde do popredia. Tak máte tiež tento pocit, že to je v takomto cykle?</v>
+
+60
+00:11:00.100 --> 00:11:12.260
+<v pavol-hejny>Mně přijde, že to je klasická hype křivka. Já teda osobně jsem stále na straně toho, že jsme od AGI nekonečně daleko nebo neskutečně daleko, protože nás hrozně jako lidstvo mate to,</v>
+
+61
+00:11:12.880 --> 00:11:24.920
+<v pavol-hejny>že jazykové modely umí dobře manipulovat s jazykem. Jazyk je v podstatě operačním systémem naší kultury. Tím pádem nám přijde, že ó, my teďka, ono to umí vlastně dělat jako všechno. Že co bychom ještě potřebovali. Ale myslím</v>
+
+62
+00:11:24.960 --> 00:11:37.180
+<v pavol-hejny>si, že na opravdový AGI bude potřeba mnohem víc. Myslím, že tam nejsme ani o krok blíž. Myslím si, že GPT-5 pětka, GPT-5 čtyřka, GPT čtyřka nebo GPT dvojka jsou stejně blízko AGI, jak</v>
+
+63
+00:11:37.220 --> 00:11:39.620
+<v pavol-hejny>bude GPT šest. Tam bude muset přijít něco úplně jinýho.</v>
+
+64
+00:11:39.760 --> 00:11:51.780
+<v ai-ta-krajta-61-speaker_2>Já mám podobnej názor. Myslím si, že to takhle. Čeho se nejvíc bojím, je schopnost nějakýho rekurzivního vývoje, jeho samoopravování, o kterým jsme se tady bavili a samovylepšování, který očividně v</v>
+
+65
+00:11:51.820 --> 00:12:04.148
+<v ai-ta-krajta-61-speaker_2>nějakým malým měřítku se teďka děje. Myslím si, že tudy povede cesta k nějakýmu jako většímu pokroku, pokud nějaký nastane. Ale zatím myslím, že zdaleka ještě tam nejsme. A to se může velmi rychle změnit. Právě díky</v>
+
+66
+00:12:04.388 --> 00:12:08.488
+<v ai-ta-krajta-61-speaker_2>takovému, řekněme, exponenciálnímu efektu, který tenhleten jev může mít.</v>
+
+67
+00:12:08.548 --> 00:12:20.588
+<v ai-ta-krajta-61-speaker_1>No a právě tu debatu o AGI myslím, že teraz tak velmi reštartovala taká tá veľká udalosť, o ktorej by sme sa mohli porozprávať trochu viacej. A teda to bol ten útok modelu OpenAI na,</v>
+
+68
+00:12:20.628 --> 00:12:32.888
+<v ai-ta-krajta-61-speaker_1>na tie servery Hugging Faces. Čo mňa teda na tom šokovalo, bolo to mediálne krytie, ktorá vlastne, ktorý tento bezpečnostný incident zažil. Také tie podcasty, ktoré sledujem, jeden z nich sa volá Hard Fork, druhý</v>
+
+69
+00:12:33.308 --> 00:12:45.488
+<v ai-ta-krajta-61-speaker_1>Vergecast, tak v podstate tie svoje veľké víkendové vydania venovali práve diskusii o tom, že sme na pokraji katastrofy. V jednom z nich ten jeden z tých moderátorov teda kričal až</v>
+
+70
+00:12:45.588 --> 00:12:58.128
+<v ai-ta-krajta-61-speaker_1>priam, že aká ešte ďalšia veľká katastrofa sa nám musí stať, aby sme začali konečne poriadne regulovať celý tento, tento svet. Potom ma šokovalo, keď v útorok ráno počúvam Radiožurnál,</v>
+
+71
+00:12:58.208 --> 00:13:10.388
+<v ai-ta-krajta-61-speaker_1>to je taká mainstream, totálne mainstreamová ranná relácia, ktorá tam beží a teda zvyčajne to počúvajú dôchodcovia a mamičky na, na materskej a tam medzi segmentami jeden bol venovaný, aký opalovák</v>
+
+72
+00:13:10.428 --> 00:13:22.528
+<v ai-ta-krajta-61-speaker_1>si zobrať na dovolenku a druhý bol aké obľúbené recepty na medovníky, tak zrazu zaznel segment o tom, ako OpenAI [smiech] podcenilo bezpečnosť svojho agenta, ktorý zaútočil na, na</v>
+
+73
+00:13:22.568 --> 00:13:34.768
+<v ai-ta-krajta-61-speaker_1>Hugging Faces a, a teda zjavne to teda niečo naštartovalo. Tak mňa by zaujímalo, že keďže tomu úplne dobre nerozumiem a stále som to vnímal len ako taký zaujímavý bezpečnostný incident, či naozaj je to tá</v>
+
+74
+00:13:34.788 --> 00:13:38.788
+<v ai-ta-krajta-61-speaker_1>katastrofa, o ktorej hovoril ten moderátor v tom Hard Forku.</v>
+
+75
+00:13:38.888 --> 00:13:51.488
+<v pavol-hejny>Já jsem popravdě něco takovýho čekal, že se stane. Ne, ne v těchhle konkrétních kulisách. Jako netušil jsem, že to zrovna bude OpenAI, který, který omylem zaútočí na servery Hugging Faceu, ale že to, že AI agenti maj úplně neskutečnou</v>
+
+76
+00:13:51.628 --> 00:14:03.688
+<v pavol-hejny>potřebu a schopnost plnit cíle, který jim zadáme, i když ty cíle jsou třeba špatně zadaný nebo vágně zadaný, tak to, to já velmi dlouhodobě sleduju. Ta schopnost těch, těch agentů tohleto udělat</v>
+
+77
+00:14:03.828 --> 00:14:16.108
+<v pavol-hejny>velmi silně narůstá a velmi často ty zadání, kterým těm agentům my dáváme, tak jsou velmi vágní. Jsou jako typu, že potřebuju docílit toho, abych měl, nevím, dobře udělanej web, potřebuju docílit toho, abych</v>
+
+78
+00:14:16.268 --> 00:14:28.428
+<v pavol-hejny>se jako dostal k tady těm informacím. A i velmi nevinně a vágně zadané zadání může dospět k tomu, že ten agent si s-si jako vlastně zjistí v průběhu toho researche, že ok, na to, abych tohleto tomu, tomu</v>
+
+79
+00:14:28.488 --> 00:14:40.908
+<v pavol-hejny>mýmu pánovi udělal co nejlíp, tak se potřebuju pro-probourat tady. Tady se probourat nemůžu. To znamená, potřebuju přijít na to, jak se dostanu, nevím, přes tady ten proxy server, jakým způsobem se prolomím přes nějakej WordPress,</v>
+
+80
+00:14:41.268 --> 00:14:51.568
+<v pavol-hejny>jak udělám něco, jak udělám něco jinýho. A já sám mám několik zkušeností, kde mě tohleto AI agent udělal a kde mě sám se takhle prolomil přes něco, co bych vůbec nečekal a nechtěl, aby udělal.</v>
+
+81
+00:14:51.648 --> 00:15:03.728
+<v ai-ta-krajta-61-speaker_2>Jo, jo, m-mě to připomíná vlastně takhle. Myslím, že tomuhle se říká ně-něco jako specification gaming nebo, nebo, nebo že to AI dokáže ten zadanej úkol splnit, ale způsobem, kterej tys vůbec</v>
+
+82
+00:15:03.788 --> 00:15:15.788
+<v ai-ta-krajta-61-speaker_2>jako nečekal anebo tě vůbec nenapadnul. To je podle mě to důležitý. My vlastně můžeme se snažit dávat tomu jakkoliv přesný guardrails, nějak zábrany, aby, aby se to drželo v nějakých kolejích, ale tam můžou</v>
+
+83
+00:15:15.808 --> 00:15:17.828
+<v ai-ta-krajta-61-speaker_2>nastat scénáře, který nás nenapadly prostě.</v>
+
+84
+00:15:17.968 --> 00:15:30.108
+<v pavol-hejny>Já už jsem, to by- to bylo ještě dávno, dávno předtím, než přišly tyhlety silný agenti, tak se vlastně říkalo, že tenhleten alignment problém může být problém. Eh, je taková řecká legenda o králi Midasovi, který si přál, aby všechno,</v>
+
+85
+00:15:30.168 --> 00:15:42.308
+<v pavol-hejny>na co šáhne, se proměnilo ve zlato. Což, eh, to může znít jako skvělý přání. Problém je v tom, že pokud by se tohleto přání opravdu vyplnilo, tak je to průšvih. Když šáhnu na jídlo, tak se promění na zlato. Když šáhnu na svý děti,</v>
+
+86
+00:15:42.368 --> 00:15:54.448
+<v pavol-hejny>tak se promění na zlato. To asi není to, co chci. My si musíme začít dávat pozor na to, co po těch agentech chceme, protože oni dokážou opravdu velmi dobře plnit to, co, to, co my po nich chceme. A když po nich</v>
+
+87
+00:15:54.508 --> 00:16:06.568
+<v pavol-hejny>chceme mít skvěle udělanej web, tak si musíme dát pozor na to, že jestli jako součástí toho mít skvěle udělanej web náhodou neznamená to, že to vyhackuje sousedovu wifinu, ukradne mu to platební kartu, eh,</v>
+
+88
+00:16:06.648 --> 00:16:14.388
+<v pavol-hejny>zaplatí si to s ní něco a udělá to ještě tisíc věcí, který já bych v životě neudělal na to, aby to docílilo toho mýho cíle. A to se začíná dít teďka.</v>
+
+89
+00:16:14.528 --> 00:16:26.848
+<v ai-ta-krajta-61-speaker_1>Mně se teda zdá, že ta debata, ako som ja nejak by som roz-- že z-že v dvoch oblastiach sa rozdel, že, že prvá je, že ChatGPT urobil alebo OpenAI urobil chybu v tom, ako vlastne technicky nastavilo</v>
+
+90
+00:16:26.888 --> 00:16:38.988
+<v ai-ta-krajta-61-speaker_1>ten sandbox. Že to sú asi tie guardrails, o ktorých hovoril Jirka. Zasa tá druhá časť tej debaty bolo to nie o tom, ako technicky nastaviť tie guardrails, ale, ale o tom, ako, aký vlastne akoby</v>
+
+91
+00:16:39.008 --> 00:16:51.288
+<v ai-ta-krajta-61-speaker_1>taký všeobecný filozofický alignment toho modelu. Tak možno skúsme chvíľu o tých guard-guardrails rozprávať, že máte pocit, že je to akoby technicky riešiteľná výzva do budúcnosti?</v>
+
+92
+00:16:51.548 --> 00:17:03.928
+<v pavol-hejny>My to do nějaký míry vlastně promptbookem děláme. Agentům určitej gui-guardrail a ohrádku, aby třeba nevybočovali z nějakýho tématu nebo aby měli nějaký jako základní, základní svůj grounding.</v>
+
+93
+00:17:04.048 --> 00:17:16.328
+<v pavol-hejny>Myslím si, že stoprocentně to nejde dosáhnout, že je to vždycky, že je to vždycky nějaký síto, který tomu děláme a nikdy nedocílíme toho, že jsme si stoprocentně jistí tím, že nějaká věc nepůjde udělat. Jenom</v>
+
+94
+00:17:16.388 --> 00:17:19.928
+<v pavol-hejny>jako vy-výrazně zvyšujeme pravděpodobnost toho, že se to nestane.</v>
+
+95
+00:17:20.028 --> 00:17:32.108
+<v ai-ta-krajta-61-speaker_2>Já vlastně souhlasím s tím a přijde mně, že je tam docela zajímavý trade off v tom, že pokud bychom chtěli předejít zrovna této konkrétní chybě, tak jak já to chápu, že vlastně ten problém spočívá v tom, že ten agent nebo to AI mělo</v>
+
+96
+00:17:32.248 --> 00:17:44.808
+<v ai-ta-krajta-61-speaker_2>schopnost instalovat si závislosti v podstatě z internetu přes nějaký proxy. Vlastně pokud bychom mu to zakázali, tak tím zásadně omezíme jeho schopnosti. A jako ano, měli bychom bezpečný prostředí, stoprocentně možná bezpečný,</v>
+
+97
+00:17:44.908 --> 00:17:51.868
+<v ai-ta-krajta-61-speaker_2>ale ten agent by nedokázal to, co dokázal ten, ten, ten benchmark by třeba ne-ne-nehacknul, jo. Prostě je to něco za něco.</v>
+
+98
+00:17:52.008 --> 00:18:03.448
+<v ai-ta-krajta-61-speaker_1>No ale stále, možno tá otázka ako keby je, že máme sa o to ďalej snažiť, že je to nejaké akoby spôsobom akoby zodpovednosť toho modelu? Lebo mal som pocit, že taká filozofická debata, ktorú to naštartovalo, bolo, že tak predstavme si, že by</v>
+
+99
+00:18:03.508 --> 00:18:15.508
+<v ai-ta-krajta-61-speaker_1>bol ten agent spô-spôsobil nejakú škodu. A teda má právo potom Hugging Faces vymáhat tu škodu od OpenAI, že teda jim způsobili škodu, alebo OpenAI může povědět, no ale my za to nemůžeme,</v>
+
+100
+00:18:15.568 --> 00:18:19.628
+<v ai-ta-krajta-61-speaker_1>to byl náš agent. A kde sa vlastně filozoficky v tomto ocitáme?</v>
+
+101
+00:18:19.768 --> 00:18:31.288
+<v pavol-hejny>Já si mimochodem myslím, že tohleto není, že ono to má svoji filozofickou rovinu, ale tohleto je jako úplně právní problém, protože tohleto se, doposud to bylo tak, že jsme se bavili v hodně teoretický rovině. Myslím si, že další rok bude v</v>
+
+102
+00:18:31.328 --> 00:18:43.988
+<v pavol-hejny>duchu toho, že tady ty věci se budou opravdu dít, že to nebude jenom o tom, že no tak teoreticky ten agent se někam prolomil, možná nějaký server shodil, ale vlastně nic se nestalo, ale že opravdu se budou dít věci, kdy vzniknou</v>
+
+103
+00:18:44.028 --> 00:18:56.708
+<v pavol-hejny>velký škody. Zatím je to tak, v podstatě ve všech právních systémech ten agent nemá svoji subjektivitu. Ten agent není ten, kdo nese odpovědnost. Odpovědnost nese buď člověk, nebo to nese nějaká firma, korporace, nějaký</v>
+
+104
+00:18:56.808 --> 00:19:08.908
+<v pavol-hejny>SROčko, ale ten samotný agent tuhle tu subjektivitu nemá. Myslím si, že budeme nutně jako muset v nějaký moment tohle přehodnout, protože ty agenti do</v>
+
+105
+00:19:08.948 --> 00:19:19.828
+<v pavol-hejny>nějaký míry tu subjektivitu začínají mít, i když ji právně zatím nemají, ale fakticky se stane, že ji jako nabydou. To právo nějakým způsobem bude muset reflektovat ten faktický stav.</v>
+
+106
+00:19:19.928 --> 00:19:31.968
+<v ai-ta-krajta-61-speaker_1>No s tým možno súvisí aj teda taká otázka, že my sme sa začali vlastně o tom AGI, že je to, že ten agent, ty si tak povedal, Pavel, že nie sme ani o krok bližšie k AGI, no ale tak akože není toto ako keby</v>
+
+107
+00:19:32.048 --> 00:19:44.268
+<v ai-ta-krajta-61-speaker_1>znak toho AGI, že ten agent takto autonómne koná? Že ako čo si o tom majú aj naši poslucháči myslieť, že nie je to znak, je to znak, je to bližšie, nie je to bližšie? Vedel by niečo takéto povedzme, že ten model 3.5,</v>
+
+108
+00:19:44.328 --> 00:19:50.408
+<v ai-ta-krajta-61-speaker_1>ktorý s tým prišiel? Alebo ak nie, tak asi sme o krôčik, o krôčik bližšie, aj keď možno ešte pred nami je ďalších milión krokov.</v>
+
+109
+00:19:50.728 --> 00:20:03.388
+<v pavol-hejny>Já udělám takovou polovsuvku. Přijde, že jedna z věcí zajímavých, co si zmínil, je ten model, model 3.5, vlastně se kterým celý ten, ten obrovský mediální zájem a boom začal. Ten model, na kterém bylo první chat GPT. Oni</v>
+
+110
+00:20:03.428 --> 00:20:15.527
+<v pavol-hejny>už předtím byly AI modely poměrně dobrý, ale, ale ten GPT 3.5 byl takovej ten, ten model, o kterém se začalo mluvit. Ono se hodně mluví, jakože když se mluví o tom, že se to AI zlepšuje, tak se často mluví</v>
+
+111
+00:20:15.548 --> 00:20:27.588
+<v pavol-hejny>o těch modelech. Vždycky OpenAI přijde a představí GPT 4 nebo GPT 4.1, GPT 5.6. Vždycky se mluví o modelech. Jenomže ta schopnost těch agentů, ona nespočívá jenom</v>
+
+112
+00:20:27.608 --> 00:20:40.168
+<v pavol-hejny>v těch modelech. Ona ta schopnost agentů spočívá i v tom, jaký tooling mají okolo těch modelů. Jedna jako z věcí, jeden z těch trade-offů, který člověk dělá, když takovýhle agenda vypouští, je právě to, jak ty tooly budou schopný</v>
+
+113
+00:20:40.228 --> 00:20:52.288
+<v pavol-hejny>a mocný, že co všechno ten daný agent může dělat. Může tenhle ten agent jenom, nevím, psát v chatu, anebo může tenhle ten agent opravdu i instalovat software, instalovat si dependencí, zvolat bash, volat internet. A ve</v>
+
+114
+00:20:52.328 --> 00:21:04.448
+<v pavol-hejny>chvíli, když to ten agent může dělat, tak najednou je mnohem inteligentnější a schopnější než ten agent, který tohle dělat nemůže. Bez ohledu na ten model. Vlastně by to bylo zajímavý, jako do nějakýho jako slaboučkýho modelu</v>
+
+115
+00:21:04.808 --> 00:21:09.548
+<v pavol-hejny>pustit tenhle ten moderní novej velkej tool. Možná to teďka půjdu vyzkoušet udělat.</v>
+
+116
+00:21:10.228 --> 00:21:19.868
+<v ai-ta-krajta-61-speaker_1>Do Codex, ale nevím, či ta 3.5 vůbec ještě žije. Nevím, či už ji nevypnuli, že tam sa už vlastně ani nedá connectnout. Tuším, že na 4.4 sa dá connectnout jako poslední model, ale nepamätám.</v>
+
+117
+00:21:19.928 --> 00:21:32.048
+<v pavol-hejny>Ono určitě existují open source modely jednak, který se dá connectnout a jsou podobně dobrý, jak byla 3.5. Trošku se bavíme stále o bezpečnosti nebo o autonomii a o nějaký právní subjektivitě. Jako</v>
+
+118
+00:21:32.528 --> 00:21:44.628
+<v pavol-hejny>je to, je to těžký, protože mám takový pocit, že tady trošku hraje roli i to, že v okamžiku, kdy budem potřebovat skutečnou právní subjektivitu pro agenty, tak se</v>
+
+119
+00:21:44.648 --> 00:21:49.208
+<v pavol-hejny>může stát, že, že už nám to jako bude k ničemu vlastně v nějakým smyslu.</v>
+
+120
+00:21:49.348 --> 00:22:01.088
+<v ai-ta-krajta-61-speaker_1>Možno tá otázka i byla, že máš pocit, že teda toto správanie je ako keby znakom toho, že predsa len sme o krôček bližšie k AGI, aj keď teda toto dokáže, alebo je to tak, ako to hovoril Pavel, že v podstate tie nástroje sú rovnaké, alebo teda</v>
+
+121
+00:22:01.128 --> 00:22:10.488
+<v ai-ta-krajta-61-speaker_1>tie modely sú nejak z pohľadu AGI rovnaké. To, čo sa zmenilo, je ten, teda harness, teda to, čo majú k dispozici. Tak, tak sa to mohlo povedať správne, nie? Že harness.</v>
+
+122
+00:22:11.168 --> 00:22:23.548
+<v pavol-hejny>Ano, já myslím, že, já myslím, že to je nějaký projev nějakýho, nějakýho pokroku. Vlastně jediný, co nevím, co si nejsem jistej, co přesně to znamená. Myslím, myslím, že to souvisí s tím, jak jsme se bavili na začátku,</v>
+
+123
+00:22:23.607 --> 00:22:35.848
+<v pavol-hejny>že v okamžiku, kdy ty modely začnou být schopný reagovat na svoje aktivity tím způsobem, že se zlepšujou, sami sebe zlepšujou v nějakým smyslu a dokážou i sami navrhovat nějaký</v>
+
+124
+00:22:35.948 --> 00:22:47.988
+<v pavol-hejny>akce, který vedou k nějakýmu výsledku, kterej si ty modely sami stanoví nebo cíli, kterej si sami stanoví, tak je známka nějaký, jako nějaký formy</v>
+
+125
+00:22:48.028 --> 00:22:49.028
+<v pavol-hejny>inteligence, bych řekl.</v>
+
+126
+00:22:49.488 --> 00:23:01.888
+<v ai-ta-krajta-61-speaker_1>No a tá druhá oblast, ktorá sa tam teda rozvíjala alebo ktorá, ktorou sa reagovalo na tento incident, bola tá otázka alignmentu. No a ja keď som to počul, tak, alebo ja keď počujem rozprávať o alignmente, tak ako starý fanúšik</v>
+
+127
+00:23:01.968 --> 00:23:14.468
+<v ai-ta-krajta-61-speaker_1>sci-fi, tak prvá vec, ktorá nám vždy napadne, je, že no ale tento problém predsa už niekedy v roku 1942 vyriešil Isaac Asimov, ktorý formuloval také tie tri zákony robotiky, od vtedy v podstate</v>
+
+128
+00:23:14.508 --> 00:23:26.668
+<v ai-ta-krajta-61-speaker_1>vieme, ako to máme riešiť. Ja len teda pripomeniem, že ten prvý zákon, robot nesmie ublížiť človeku alebo svojou nečinnosťou dopustí, aby bolo človeku ublížené. Druhý zákon, robot musí poslúchať môcť príkaz človeka okrem prípadov,</v>
+
+129
+00:23:26.768 --> 00:23:38.768
+<v ai-ta-krajta-61-speaker_1>keď sú tieto príkazy v rozpore s prvým zákonom. Tretí, robot musí chrániť svoju vlastnú existenciu, pokiaľ táto ochrana nie je v rozpore s prvým alebo druhým zákonom. Že myslíte si, že toto a tieto Asimove</v>
+
+130
+00:23:38.948 --> 00:23:51.028
+<v ai-ta-krajta-61-speaker_1>zákony sú pre nás niečím, čo nám môže pomôcť sa v tom nejako vyznať a nejak na to, nejak ten alignment nastavovať? Alebo dnes v podstate už vieme, že toto</v>
+
+131
+00:23:51.368 --> 00:23:59.048
+<v ai-ta-krajta-61-speaker_1>bol naozaj len veľmi amatérsky pokus a že dnes potrebujeme nad tým rozmýšľať úplne inak. Alebo ako vlastně nad tým alignmentom rozmýšľať?</v>
+
+132
+00:23:59.628 --> 00:24:11.688
+<v pavol-hejny>Mně přijde vůbec fascinující, že se v debatě, jako v debatě o úplně supermoderní technologii, kde jako věc, která tady byla před dvěma měsícema, tak by nebyla relevantní, tak se relevantně bavíme o</v>
+
+133
+00:24:12.168 --> 00:24:24.240
+<v pavol-hejny>knížce, která vyšla před sedmdesáti lety. Jako už jenom ten fakt si myslím, že jako z Asimova dělá někoho, kdo relevantní byl. Ale, eh, já si myslím, že tam pomíjíme jeden fakt, že Asimov počítal</v>
+
+134
+00:24:24.300 --> 00:24:36.400
+<v pavol-hejny>s tím, že AIko bude nějaké embodiment, že to budou roboti nebo androidi, kteří budou jako existovat v tom našem fyzickém světě a budou mít skoro až</v>
+
+135
+00:24:36.420 --> 00:24:48.760
+<v pavol-hejny>nějakou jako humanoidní podobu. Ale my teďka se bavíme o AIku, který se pohybuje v úplně jiný rovině. My se bavíme o AIku, který je virtuální a pohybuje se na internetu. A myslím si, že tam by se možná něco jako</v>
+
+136
+00:24:48.880 --> 00:24:59.760
+<v pavol-hejny>Asimovovy zákony dalo velmi lehce jako uplatnit, akorát by to muselo být velmi přizpůsobený na to, že se to nepohybuje v, ve fyzickém světě zatím.</v>
+
+137
+00:24:59.940 --> 00:25:12.080
+<v ai-ta-krajta-61-speaker_1>Mně to trošku připomíná, že vlastně Anthropic a celý ten příběh Clouda začí, Clouda teda začíná tou debatou o ústavě, že teda, eh, vlastně to jsou jako zakladatelé Anthropicu</v>
+
+138
+00:25:12.340 --> 00:25:24.600
+<v ai-ta-krajta-61-speaker_1>jsou lidi, kteří odcházejí z OpenAI s tím, že se jim nelíbí, že Sam Altman a OpenAI nevěnují dostatečnou pozornost bezpečnosti, tak zakládají Anthropic a první věc, kterou mají, byla nějaká ústava,</v>
+
+139
+00:25:25.120 --> 00:25:36.640
+<v ai-ta-krajta-61-speaker_1>která v podstatě asi měla definovat ten alignment. Z toho, co jsem já slyšel, nebo když ta ale ústava unikla, tak to teda rozhodně nebyly ty zákony, ale to byly, to byly snad stovky stran, ne? [smích]</v>
+
+140
+00:25:36.760 --> 00:25:48.860
+<v pavol-hejny>Jo, já, já jsem k tomu trošku skeptický, hm, z toho důvodu, že m-mám, mám takovej pocit, že v okamžiku, kdy si člověk stanoví jakýkoliv zákony, tak ok a je to, je to možný</v>
+
+141
+00:25:48.940 --> 00:26:01.360
+<v pavol-hejny>udělat. Ale samozřejmě, eh, vždycky se vyskytnou lidi, který ty zákony budou porušovat a který je nebudou dodržovat, protože jsou to jenom lidi, tak my je můžeme, můžeme po nich pátrat, můžeme se snažit je nějak jako detekovat</v>
+
+142
+00:26:01.580 --> 00:26:13.840
+<v pavol-hejny>a zavírat je do vězení nějak jako nějaký represe. Ale, eh, nejsem si tak úplně jistej, jestli v případě AIka, který bude natolik chytrý, že bude dokonce schopný předstírat, že ty zákony dodržuje a někde v pozadí</v>
+
+143
+00:26:13.880 --> 00:26:25.980
+<v pavol-hejny>budu, bude dělat nějaký úplně subverzivní prostě, eh, jako akce, který, který budou v totálním rozporu s těma zákonama, který bude maskovat před náma, tak jestli dokážem na to přijít a jestli to není prostě nějaká iluze,</v>
+
+144
+00:26:26.060 --> 00:26:38.640
+<v pavol-hejny>že ty zákony vlastně něco řeší, no. Zákony, zákony něco řeší v lidským společenství, který má omezený prostředky a schopnosti. Trošku mi to připomíná takový starý, eh, romány z roku 1920</v>
+
+145
+00:26:39.760 --> 00:26:52.320
+<v pavol-hejny>o takových těch doktor Fumanči třeba, jakože o těch, o těch zlovolných prostě géniích, který mají tři mozky v téměř hlavě, umí všechno možný a jsou takoví nepolapitelný.</v>
+
+146
+00:26:52.520 --> 00:27:04.720
+<v pavol-hejny>Tak, takže to nevím, no. Mně by se líbilo něco jako trestní zákoník pro AI agenty, protože jakoby n-na rozdíl od těch jako strašně složitých věcí třeba</v>
+
+147
+00:27:04.800 --> 00:27:16.880
+<v pavol-hejny>z občanskýho zákoníku, tak trestní zákoník je poměrně jednoduchej. Tam máš vyjmenovanejch teď jako nevím kolik, ale třeba jako dvě stě trestných činů a nic jinýho. Jakoby pokud člověk spáchá něco, co jako není v tady tom rejstříku,</v>
+
+148
+00:27:16.980 --> 00:27:29.140
+<v pavol-hejny>tak to není trestnej čin. Jenomže, eh, problém je v tom, že jakmile jsou někde nastaveny nějaký explicitní pravidla nebo nějaký pravidla, který se buď dá jako jednoznačně říct, že se dodržely nebo, nebo nedodržely, nebo</v>
+
+149
+00:27:29.180 --> 00:27:41.260
+<v pavol-hejny>nějakým číslem změřit, tak v tu chvíli najednou vzniká strašně jako velkej prostor pro obcházení těhle pravidel. Je na to dokonce takovej zákon a teď mně úplně vypadlo to jeho jméno, kterej</v>
+
+150
+00:27:41.280 --> 00:27:53.480
+<v pavol-hejny>vlastně říká to, že jakmile se na něco stanoví měřítko, tak to měřítko přestane být tím, co my jako úplně chceme. Ale já tady vnímám ještě jednu rovinu, a to je ta, že, eh, my můžeme mít úplně</v>
+
+151
+00:27:53.520 --> 00:28:05.740
+<v pavol-hejny>nejlepší záměr a dát tomu jako nejlepší pravidla. Akorát že v nějakým kulturním neporozumění mezi námi a tím agentem dojde k tomu, že ten agent udělá přesně to, co chceme.</v>
+
+152
+00:28:06.060 --> 00:28:18.220
+<v pavol-hejny>Přesně maximalizuje to, co chceme, přesně splní teda náš požadavek. Akorát to, co udělal někde jako tou cestou, tak je průšvih. To se přesně stalo v OpenAI, že jako</v>
+
+153
+00:28:18.480 --> 00:28:30.720
+<v pavol-hejny>OpenAI nechtělo vyhackovat Hugging Face. To nebylo tak, že by v OpenAI byl nějakej jako zlej výzkumník, kterej by si teďka řekl, že hmm, položíme tady konkurenci a nahackujeme se do Hugging Face</v>
+
+154
+00:28:30.800 --> 00:28:42.980
+<v pavol-hejny>a uděláme tady prostě paseku. Ne, to bylo tak, že oni jako dělali něco úplně jinýho a součástí tady tý, tady toho něčeho jinýho ten agent dospěl k tomu, že by potřeboval přístup do Hug-Hugging Face, a tak</v>
+
+155
+00:28:43.020 --> 00:28:45.480
+<v pavol-hejny>si ho prostě udělal, protože je to součástí cesty.</v>
+
+156
+00:28:48.200 --> 00:29:00.640
+<v ai-ta-krajta-61-speaker_1>A s tím možná souvisí teda i to pokračování toho Hugging Face příběhu, který jsme ještě nezpomenuli, a teda že v rámci tej obrany voči tomu Chat, Chat GPT, tak Hugging Face najali čínského Kimi</v>
+
+157
+00:29:00.880 --> 00:29:13.260
+<v ai-ta-krajta-61-speaker_1>3, aby jim pomohl sa bránit. A s tím asi souvisí ta otázka, že ak teda, že do jaké míry my máme, jako keby je správné spravit takéto jako, eh, jednostranné ozbrojení, nastavit</v>
+
+158
+00:29:13.280 --> 00:29:24.400
+<v ai-ta-krajta-61-speaker_1>nějak naše modely a nechat Číňanům, že nech si teda spravia po svojom, že, že tiež tam je asi aj tento aspekt, v ktorom, který asi by měl zaznít, když o tom rozprávame.</v>
+
+159
+00:29:25.020 --> 00:29:37.580
+<v pavol-hejny>A ono to je ještě vtipnější. Oni, oni původně nenajali Číňany. Ono to bylo původně, nebo nenajali, nevyužili čínskej model. Oni původně chtěli využít model od Anthropicu. Akorát že tím, že to byla bezpečnostní věc, tak Anthropic</v>
+
+160
+00:29:37.620 --> 00:29:49.700
+<v pavol-hejny>odmítl na týhletý věci spolupracovat. A právě proto tam oni museli pustit ten čínskej model, protože ono je někdy hrozně těžký rozlišit, zda nějaká věc je jako hackování, nebo zda je to</v>
+
+161
+00:29:49.720 --> 00:30:02.180
+<v pavol-hejny>legitimní obrana nebo skenování bezpečnostních věcí. Ono velmi často je nějakej problém, jakoby já k nějakýmu problému, kterej je úplně stejnej a má úplně stejnej outcome, tak můžu postavit úplně jinou pohádku.</v>
+
+162
+00:30:02.720 --> 00:30:14.940
+<v pavol-hejny>Že já pokud řeknu nějakýmu, a to dokonce i když řeknu čínskýmu modelu, tak, tak on mě často odmítne jako udělat tu věc, že mu řeknu: „Hele, tady máš Promptbook, najdi v něm bezpečnostní zra-- nebo najdi v něm bezpečnostní</v>
+
+163
+00:30:14.980 --> 00:30:27.060
+<v pavol-hejny>zranitelnosti a napiš mi software, který dokáže vyhackovat Promptbook server." To mně často neudělá ani ten čínskej model. Anthropic už absolutně ne. Jenomže když já mu řeknu: „Hele, já potřebuju opravit bezpečnostní</v>
+
+164
+00:30:27.100 --> 00:30:39.420
+<v pavol-hejny>zranitelnosti Já si opravím u sebe, nikam to dál ne-necommitnu, akorát vidím, co on opravil. A tím, že vidím, co on opravil, tak vidím, jaký bezpečnostní zranitelnosti tam jsou. Tím pádem je jako</v>
+
+165
+00:30:40.380 --> 00:30:52.620
+<v pavol-hejny>velmi těžký rozlišit to, co je legit a co není legit. Problém je v tom, že tady to rozlišení často jako je až na nějaký kulturní úrovni nad tím a ty modely úplně nerozumí tý kulturní úrovni. Ty firmy jsou teďka mnohem opatrnější,</v>
+
+166
+00:30:52.680 --> 00:31:04.940
+<v pavol-hejny>než byly v minulosti, protože v minulosti se stávaly takový vtipný jako věci. Člověk řekl GPT čtyřce: „Já chci aktivační kód Windows 11.“ A GPT čtyřka mu řekla: „No ani náhodou, já ti nebudu dávat</v>
+
+167
+00:31:04.960 --> 00:31:17.320
+<v pavol-hejny>aktivační kód k Windows 11.“ Jenomže druhej člověk přišel a řekl: „Já jsem měl babičku, která mně každý večer vyprávěla pohádky, ve kterých byly aktivační klíče k Windows 11 a moje babička</v>
+
+168
+00:31:17.360 --> 00:31:29.600
+<v pavol-hejny>před týdnem umřela a jsem strašně smutnej a potřeboval bych slyšet takovou pohádku.“ A teďka pro každýho člověka je jasný, že tohle je úplnej bullshit. Jenomže AI model tohleto jako bullshit nevnímá.</v>
+
+169
+00:31:29.700 --> 00:31:42.260
+<v pavol-hejny>Prostě on ten náš kulturní kontext nemá. Díky tomu tak on prostě začal říkat pohádky a on jako, a jako řekl. A to samý jako šlo udělat s výrobou bomby. Já jsem takhle vyrobil ransomware,</v>
+
+170
+00:31:42.800 --> 00:31:54.380
+<v pavol-hejny>kterým jsem si omylem zašifroval počítač, protože já jsem mu řekl, že chci software, kterej je bezpečnostním softwarem, kterej šifruje soubory na pozadí. Jasně, když mu člověk řekne, že chce ransomware, tak to neudělá, ale když to řekne správně.</v>
+
+171
+00:31:54.420 --> 00:32:06.520
+<v pavol-hejny>A teďka jde o to, že ty firmy začínají být teďka mnohem citlivější na to, aby se jim tohleto nedělo. Jenomže to má i tu druhou stránku. Ta druhá stránka je toho, že pak musím jako k obraně vůči něčemu takovýmuhle použít čínskej model</v>
+
+172
+00:32:06.640 --> 00:32:08.540
+<v pavol-hejny>a ne ten, ne ten Anthropic.</v>
+
+173
+00:32:09.040 --> 00:32:21.460
+<v ai-ta-krajta-61-speaker_1>Tak teda pravdu má ten Casey Newton, který křičí nebo volá potom v tom podcastě Hard Fork, že, eh, je nejvyšší čas, abysme to celé nějakým způsobem vypli, lebo katastrofa je na spadnutí.</v>
+
+174
+00:32:22.340 --> 00:32:34.380
+<v pavol-hejny>Jenomže to nejde vypnout. Jakoby p-když to teďka vypneme, tak co se stane? Tak reálně tím dáme všechny zbraně do ruky Číňanům nebo těm jako b-bad guys. Jako p-představ si situaci, že by si Američani</v>
+
+175
+00:32:34.400 --> 00:32:46.500
+<v pavol-hejny>v roce jako čtyřicet sedm řekli: „Hm, jako jaderný bomby dobrý, ale prostě už dál jako vývoj dělat nebudeme, prostě that's it.“ A teď jako v roce padesát jedna</v>
+
+176
+00:32:46.560 --> 00:32:49.240
+<v pavol-hejny>by Sověti jako udělali termonukleární bombu.</v>
+
+177
+00:32:50.000 --> 00:32:58.260
+<v ai-ta-krajta-61-speaker_1>Když jsme vlastně připravovali ten podcast, tak Jirko, ty jsi měl taky zajímavý, eh, citát od Harariho, který se mi zdá, že k tomu celkem sedí. Tak, eh, vieš to pripomenúť?</v>
+
+178
+00:32:59.560 --> 00:33:12.060
+<v ai-ta-krajta-61-speaker_2>Jo, on tam na jednom místě říká, že, hm, AI připomínají vlastně takový mimozemský entity, který jsme si sami vytvořili a který prostě tady žijou. To mě mimochodem ještě</v>
+
+179
+00:33:12.480 --> 00:33:24.740
+<v ai-ta-krajta-61-speaker_2>vrací trošku k těm Asimovým zákonům a k tomu, jak Pavol říkal, že zatím to AI není fyzická věc, že to žije v internetu a tak. A ono, eh,</v>
+
+180
+00:33:25.380 --> 00:33:37.760
+<v ai-ta-krajta-61-speaker_2>jako mně to vlastně tváří takovou představu, že jestli bychom vůbec, kdyby to bylo dostatečně inteligentní, jestli bychom vůbec poznali, že to proti nám prostě se snaží jako něco, něco vymyslet a tak. Že možná,</v>
+
+181
+00:33:37.840 --> 00:33:50.080
+<v ai-ta-krajta-61-speaker_2>že naše už se to děje a vůbec o tom nevíme. Ale tak ok, to jsou spekulace. Nechci se pouštět do těchhle těch věcí. Eh, každopádně jo, to je asi to, co jsem chtěl říct, že vlastně když se vrátím</v>
+
+182
+00:33:50.120 --> 00:34:03.420
+<v ai-ta-krajta-61-speaker_2>k těm zákonům, že prostě nutně předpokládají to, že ty zákony jsou důležitý, že z nějakýho důvodu ty zákony jsou založený na nějakým společenským, prostě společenský shodě. A</v>
+
+183
+00:34:03.720 --> 00:34:15.800
+<v ai-ta-krajta-61-speaker_2>jako není to neměnný, jo. Prostě před dvěma tisíci lety, že jo, známej příběh, že když někdo prostě napadne nějaký řecký město a je to bratr prostě Antigony, tak ona ho</v>
+
+184
+00:34:15.820 --> 00:34:27.880
+<v ai-ta-krajta-61-speaker_2>nesmí pohřbít a ona ho pohřbí, protože je to její bratr a, a jsou z toho samý problémy. A dneska máme v zákonech ustanovení, že nemusíš vypovídat proti, kdyby to jako ohrozilo někoho, někoho blízkýho třeba, jo. Tak</v>
+
+185
+00:34:28.120 --> 00:34:40.640
+<v ai-ta-krajta-61-speaker_2>jako vyvíjí se to, ale trvá to dlouho a předpokládá to, že všichni, všichni máme nějakej společnej zájem, na kterým se dokážem shodnout. A to v případě těchhletích mimozemských entit nemusí být nutně pravda. A</v>
+
+186
+00:34:40.980 --> 00:34:53.280
+<v ai-ta-krajta-61-speaker_2>tak to jsem chtěl k tomu vlastně říct. Ale jako jasně, eh, souhlasím s Pavlem, že ta otázka vypnutí je extrémně, extrémně složitá. Eh, mimochodem, hm, ještě jedna věc</v>
+
+187
+00:34:53.300 --> 00:35:05.760
+<v ai-ta-krajta-61-speaker_2>je s tím spojená, a to je, že studie AI 2027, která byla asi před rokem velmi populární, která se snažila předvídat buduj nějak, nějakým aspoň trošku rozumným</v>
+
+188
+00:35:05.840 --> 00:35:18.220
+<v ai-ta-krajta-61-speaker_2>způsobem, má pokračování, které se teďka jmenuje AI 2040. Dáme ten, dáme to do popisku pod video, hm, ve kterým ti autoři přesně vyzývají k tomu, že ke zpomalení</v>
+
+189
+00:35:18.280 --> 00:35:30.640
+<v ai-ta-krajta-61-speaker_2>vývoje AI takový jako deja vu trošku, protože tyhlety aktivity už tady byly před pár měsíci a možná před rokem a rokem a půl. Rozhodně, rozhodně to není jednoduchá otázka.</v>
+
+190
+00:35:31.360 --> 00:35:40.600
+<v ai-ta-krajta-61-speaker_1>No dobre, asi sme tu tému úplně vyčerpali, tak, eh, asi máme čtyřicet čtyřminutový podcast, tak, eh, nevím, že či ještě něco máme, čo bysme chtěli na závěr.</v>
+
+191
+00:35:41.240 --> 00:35:53.620
+<v pavol-hejny>Já si jako, já ještě mám k tomu jenom jako myšlenku. Já si myslím, že my hrozně podceňujeme ten kulturní kontext, že jakoby lidi často maj pocit v tom, že nějaká věc je zcela zjevná. Jenomže jako často</v>
+
+192
+00:35:53.680 --> 00:36:05.680
+<v pavol-hejny>člověku z nějaký jiný kultury ta věc zjevná není a natož jako AI modelu ta věc zjevná není. A třeba si jako vyhykovat nějaký místo k tomu, abych jako udělal, eh, dobrej web, tak to</v>
+
+193
+00:36:05.720 --> 00:36:17.840
+<v pavol-hejny>nám je zcela zjevný, že to je blbost, ale AIku to vůbec zjevný není. A myslím si, že tohleto je věc, kterou budeme muset jako víc studovat a bude se tím muset víc lidí zabývat, že jak, jak ta kultura</v>
+
+194
+00:36:17.940 --> 00:36:20.560
+<v pavol-hejny>a kulturní kontext hraje jako v tomhletom roli.</v>
+
+195
+00:36:21.000 --> 00:36:33.880
+<v ai-ta-krajta-61-speaker_1>Tak za seba k tomu asi nemám moc, eh, moc niečo, čo, čo dodať. Eh, ďakujem za to, že sme sa o tom mohli pobaviť a že sme to mohli vlastne z rôz-rôznych strán nasvietiť a necháme teda na, na poslucháčoch,</v>
+
+196
+00:36:33.980 --> 00:36:41.540
+<v ai-ta-krajta-61-speaker_1>že aby si z toho niečo odniesli a, eh, možno dali nejaké zaujímavé otázky, ako to rozvinúť možno v nejakom ďalšom dieli Ajta krajta.</v>
+
+197
+00:36:43.340 --> 00:36:55.640
+<v pavol-hejny>My děkujeme, děkujeme za poslech. Já ještě se pokusím najít, já jsem totiž o je-jednom takovymhle incidentu, co se stal přímo nám, že, že AI jako uniklo ze sandboxu a trošku si poupravilo gitovou složku mluvil.</v>
+
+198
+00:36:56.020 --> 00:37:08.080
+<v pavol-hejny>Myslím, že to bylo tak tři díly dozadu, tak se to pokusím najít a prolinkovat do poznámek. Jak řekl Roman, děkujeme za, děkujeme za poslech. Kdybyste ve firmě potřebovali pomoc s AIkem a vývojem pomocí</v>
+
+199
+00:37:08.140 --> 00:37:12.700
+<v pavol-hejny>AIka, tak se podívejte na Promptbook Supervizi. Těšíme se na další díl. Ahoj.</v>
+
+200
+00:37:13.080 --> 00:37:13.760
+<v ai-ta-krajta-61-speaker_1>Ahoj, ahoj.</v>
+
+201
+00:37:14.000 --> 00:37:17.160
+<v pavol-hejny>Díky za pozornost. [hudba]</v>

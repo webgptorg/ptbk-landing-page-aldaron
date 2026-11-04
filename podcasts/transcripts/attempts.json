@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "attempts": [
+    {
+      "id": "data-talk-157",
+      "status": "provider_completed_result_unavailable",
+      "show": "Data Talk",
+      "title": "Podcastový průřez feat. AI ta Krajta",
+      "publishedAt": "2025-10-16T07:00:00+02:00",
+      "appearanceId": "pavol-podcast:datatalk-18008082",
+      "durationInSeconds": 7526,
+      "sourceGuid": "Buzzsprout-18008082",
+      "mediaUrl": "https://www.buzzsprout.com/2034779/episodes/18008082-data-talk-special-podcastovy-prurez-feat-ai-ta-krajta.mp3",
+      "sourceUrl": "https://www.datatalk.cz/podcast/epizoda-157",
+      "speakerMapping": {},
+      "sourceAudioDurationInSeconds": 7526.410667,
+      "sourceAudioSha256": "a51f87c50279c9a36bb9eaace3b74b11746e209966a42e9ab7c62728a108493a",
+      "providerRequestTraceId": "4bc8da468ad8415d013c2ea4637f93df",
+      "providerRequestAt": "2026-11-04T12:11:10Z",
+      "providerHttpStatus": 200,
+      "providerLatencyInSeconds": 286.35,
+      "clientHttpStatus": 503,
+      "note": "Provider Request Log confirms successful processing, but the client connection was terminated before response headers. No result JSON or transcription ID was received. Not retried to avoid duplicate billing. Replaced in the ten-complete-recording pilot by ai-ta-krajta-56."
+    }
+  ]
+}

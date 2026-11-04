@@ -4,7 +4,7 @@
   "recordings": [
     {
       "id": "ai-ta-krajta-65",
-      "status": "pending",
+      "status": "transcribed",
       "show": "AI ta Krajta",
       "title": "AI ta Krajta #65 | AI zrychlí vývoj 10x. Celý proces ale ne | Qwen 3.8 Flash a testování Huawei čipů",
       "publishedAt": "2026-08-28T14:00:38.000Z",
@@ -13,11 +13,86 @@
       "sourceGuid": "4bcfd9f6-d95c-4bed-b77e-15bd2490c918",
       "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/124928403/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-7-30%2F430809394-44100-2-7663a51bf480d.mp3",
       "sourceUrl": "https://www.youtube.com/watch?v=zbVvChkQQHs",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_2": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2328.42449,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_2",
+        "cosineSimilarity": 0.71379,
+        "nextSpeakerCosineSimilarity": 0.21933,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 57,
+            "centroidCosine": 0.21933,
+            "medianCosine": 0.14467
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 15,
+            "centroidCosine": 0.13019,
+            "medianCosine": 0.11431
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 5,
+            "centroidCosine": 0.71379,
+            "medianCosine": 0.65596
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 447.186,
+            "end": 456.186,
+            "cosineSimilarity": 0.65183
+          },
+          {
+            "start": 555.4259999999999,
+            "end": 564.4259999999999,
+            "cosineSimilarity": 0.65596
+          },
+          {
+            "start": 609.5459999999999,
+            "end": 614.686,
+            "cosineSimilarity": 0.65924
+          },
+          {
+            "start": 615.946,
+            "end": 624.946,
+            "cosineSimilarity": 0.73777
+          },
+          {
+            "start": 893.458,
+            "end": 902.458,
+            "cosineSimilarity": 0.61897
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:07:44.952123+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-65.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-65.scribe.json.gz",
+      "sha256": "9996b4b010bdfdb309627776326379ecc3a7103232228519b3468fba93fbbfa6",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:07:45.062Z",
+      "cueCount": 223,
+      "actualLastCueEnd": 2325.904,
+      "speakerIds": [
+        "ai-ta-krajta-65-speaker_0",
+        "ai-ta-krajta-65-speaker_1",
+        "pavol-hejny",
+        "ai-ta-krajta-65-speaker_3"
+      ],
+      "sourceAudioSha256": "89aaba90c5227ee1222772f2609dc3d6822e2fc8218a3a1c5b1909f840629b40"
     },
     {
       "id": "ai-ta-krajta-64",
-      "status": "pending",
+      "status": "transcribed",
       "show": "AI ta Krajta",
       "title": "AI ta Krajta #64 | Čtyři AI lídři opouštějí Google. Co chystá Discovery Loop?",
       "publishedAt": "2026-08-27T08:25:22.000Z",
@@ -26,11 +101,120 @@
       "sourceGuid": "da6a3b3f-fbbd-483b-9b08-2d8c62504d8a",
       "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/124778062/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-7-26%2F430600605-44100-2-09e99debd805e.mp3",
       "sourceUrl": "https://www.youtube.com/watch?v=9kMN7t4kLNs",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_1": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2134.883265,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_1",
+        "cosineSimilarity": 0.62512,
+        "nextSpeakerCosineSimilarity": 0.21618,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 33,
+            "centroidCosine": 0.15812,
+            "medianCosine": 0.14142
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 36,
+            "centroidCosine": 0.62512,
+            "medianCosine": 0.6054
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 1,
+            "centroidCosine": 0.21618,
+            "medianCosine": 0.21618
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 24.209999999999997,
+            "end": 33.209999999999994,
+            "cosineSimilarity": 0.60669
+          },
+          {
+            "start": 139.49,
+            "end": 148.49,
+            "cosineSimilarity": 0.31164
+          },
+          {
+            "start": 251.01000000000002,
+            "end": 258.35,
+            "cosineSimilarity": 0.64493
+          },
+          {
+            "start": 393.722,
+            "end": 402.722,
+            "cosineSimilarity": 0.59723
+          },
+          {
+            "start": 623.6419999999999,
+            "end": 628.822,
+            "cosineSimilarity": 0.23849
+          },
+          {
+            "start": 872.6619999999999,
+            "end": 881.6619999999999,
+            "cosineSimilarity": 0.65297
+          },
+          {
+            "start": 978.1419999999999,
+            "end": 987.1419999999999,
+            "cosineSimilarity": 0.20916
+          },
+          {
+            "start": 1203.114,
+            "end": 1212.114,
+            "cosineSimilarity": 0.67156
+          },
+          {
+            "start": 1627.346,
+            "end": 1636.346,
+            "cosineSimilarity": 0.63007
+          },
+          {
+            "start": 1805.366,
+            "end": 1814.366,
+            "cosineSimilarity": 0.60411
+          },
+          {
+            "start": 1878.518,
+            "end": 1887.518,
+            "cosineSimilarity": 0.68479
+          },
+          {
+            "start": 2123.558,
+            "end": 2128.3779999999997,
+            "cosineSimilarity": 0.27322
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:07:45.148285+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-64.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-64.scribe.json.gz",
+      "sha256": "3ff94dfd0643fa6715f981110dbed771535576c73cf4385af2d30a7cc4cc53b9",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:07:45.262Z",
+      "cueCount": 214,
+      "actualLastCueEnd": 2134.788,
+      "speakerIds": [
+        "ai-ta-krajta-64-speaker_0",
+        "pavol-hejny",
+        "ai-ta-krajta-64-speaker_2"
+      ],
+      "sourceAudioSha256": "361ae01f840b7ed5ff05ab9a6093a145502ffe63a850566d1c9429006fde4e6d"
     },
     {
       "id": "ai-ta-krajta-63",
-      "status": "pending",
+      "status": "transcribed",
       "show": "AI ta Krajta",
       "title": "AI ta Krajta #63 | Google přesouvá šéfa AI. Co to znamená pro Gemini?",
       "publishedAt": "2026-08-25T08:00:00.000Z",
@@ -39,11 +223,120 @@
       "sourceGuid": "bc19cc2f-3cc6-4933-a3ff-2b3a3b9568dd",
       "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/124655532/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-7-24%2F430430920-44100-2-35e121c0b8b13.mp3",
       "sourceUrl": "https://www.youtube.com/watch?v=7drdqrvimS0",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_2": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 3186.546939,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_2",
+        "cosineSimilarity": 0.65498,
+        "nextSpeakerCosineSimilarity": 0.32051,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 38,
+            "centroidCosine": 0.32051,
+            "medianCosine": 0.25756
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 42,
+            "centroidCosine": 0.04921,
+            "medianCosine": 0.04559
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 74,
+            "centroidCosine": 0.65498,
+            "medianCosine": 0.63599
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 361.902,
+            "end": 370.902,
+            "cosineSimilarity": 0.57666
+          },
+          {
+            "start": 595.9019999999999,
+            "end": 604.9019999999999,
+            "cosineSimilarity": 0.69522
+          },
+          {
+            "start": 1504.8300000000002,
+            "end": 1513.8300000000002,
+            "cosineSimilarity": 0.5995
+          },
+          {
+            "start": 1649.3500000000001,
+            "end": 1658.3500000000001,
+            "cosineSimilarity": 0.62992
+          },
+          {
+            "start": 2002.6580000000001,
+            "end": 2011.6580000000001,
+            "cosineSimilarity": 0.64913
+          },
+          {
+            "start": 2084.7980000000002,
+            "end": 2093.7980000000002,
+            "cosineSimilarity": 0.20975
+          },
+          {
+            "start": 2173.358,
+            "end": 2182.358,
+            "cosineSimilarity": 0.64756
+          },
+          {
+            "start": 2343.808,
+            "end": 2352.808,
+            "cosineSimilarity": 0.64205
+          },
+          {
+            "start": 2593.9120000000003,
+            "end": 2599.172,
+            "cosineSimilarity": 0.61189
+          },
+          {
+            "start": 2716.112,
+            "end": 2721.712,
+            "cosineSimilarity": 0.23942
+          },
+          {
+            "start": 3010.696,
+            "end": 3019.696,
+            "cosineSimilarity": 0.69004
+          },
+          {
+            "start": 3172.196,
+            "end": 3179.656,
+            "cosineSimilarity": 0.69016
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:08:58.039985+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-63.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-63.scribe.json.gz",
+      "sha256": "d2274b7a113c6b0d0230c40123d83ac488476a65b15fe8fb006cd62cc4006d0a",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:08:58.182Z",
+      "cueCount": 286,
+      "actualLastCueEnd": 3184.066,
+      "speakerIds": [
+        "ai-ta-krajta-63-speaker_0",
+        "ai-ta-krajta-63-speaker_1",
+        "pavol-hejny"
+      ],
+      "sourceAudioSha256": "dd09fe40bae43eedfec852889c1b646f85e5f39d2f85705c56344be195536077"
     },
     {
       "id": "ai-ta-krajta-62",
-      "status": "pending",
+      "status": "transcribed",
       "show": "AI ta Krajta",
       "title": "AI ta Krajta #62 | AI modely na ESP32, AI Act a praktický vibecoding",
       "publishedAt": "2026-08-09T18:00:00.000Z",
@@ -52,11 +345,120 @@
       "sourceGuid": "5f32094a-5fb3-438d-9efb-cd1e4a4bf3e9",
       "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/123984799/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-7-9%2F429516218-44100-2-cac6f0a31590a.mp3",
       "sourceUrl": "https://www.youtube.com/watch?v=J3gLNpOPr6o",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_2": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2374.50449,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_2",
+        "cosineSimilarity": 0.6448,
+        "nextSpeakerCosineSimilarity": 0.25827,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 37,
+            "centroidCosine": 0.12787,
+            "medianCosine": 0.10286
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 4,
+            "centroidCosine": 0.25827,
+            "medianCosine": 0.24416
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 47,
+            "centroidCosine": 0.6448,
+            "medianCosine": 0.64292
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 20.91,
+            "end": 29.91,
+            "cosineSimilarity": 0.62019
+          },
+          {
+            "start": 117.59,
+            "end": 126.59,
+            "cosineSimilarity": 0.69222
+          },
+          {
+            "start": 267.25,
+            "end": 276.25,
+            "cosineSimilarity": 0.68147
+          },
+          {
+            "start": 336.01,
+            "end": 345.01,
+            "cosineSimilarity": 0.74195
+          },
+          {
+            "start": 494.14,
+            "end": 503.14,
+            "cosineSimilarity": 0.69431
+          },
+          {
+            "start": 682.9,
+            "end": 691.9,
+            "cosineSimilarity": 0.20697
+          },
+          {
+            "start": 959.816,
+            "end": 968.816,
+            "cosineSimilarity": 0.72915
+          },
+          {
+            "start": 1341.0320000000002,
+            "end": 1350.0320000000002,
+            "cosineSimilarity": 0.66566
+          },
+          {
+            "start": 1586.284,
+            "end": 1593.964,
+            "cosineSimilarity": 0.25147
+          },
+          {
+            "start": 1818.924,
+            "end": 1827.924,
+            "cosineSimilarity": 0.60456
+          },
+          {
+            "start": 2043.452,
+            "end": 2048.9719999999998,
+            "cosineSimilarity": 0.56406
+          },
+          {
+            "start": 2320.824,
+            "end": 2329.824,
+            "cosineSimilarity": 0.18383
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:11:16.611043+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-62.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-62.scribe.json.gz",
+      "sha256": "3b7d1dcc6986c39e67d8ce148f8158ba3a991f1c93f6107c0734a877e61dde37",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:11:16.734Z",
+      "cueCount": 241,
+      "actualLastCueEnd": 2369.934,
+      "speakerIds": [
+        "ai-ta-krajta-62-speaker_0",
+        "ai-ta-krajta-62-speaker_1",
+        "pavol-hejny"
+      ],
+      "sourceAudioSha256": "267bc1af4f55b30a86371eb430dd85831658a99daa9c4f82fb4bb376c9bea7f7"
     },
     {
       "id": "ai-ta-krajta-61",
-      "status": "pending",
+      "status": "transcribed",
       "show": "AI ta Krajta",
       "title": "AI ta Krajta #61 | AI Agent zdivočel a napadl konkurenci! Průlom k AGI, nebo konec světa?",
       "publishedAt": "2026-08-04T08:30:01.000Z",
@@ -65,11 +467,120 @@
       "sourceGuid": "4a1ced96-47ec-487f-867a-af72a2281bb6",
       "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/123743849/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-7-4%2F429184387-44100-2-3c09b2ee19384.m4a",
       "sourceUrl": "https://www.youtube.com/watch?v=XkjNwXu9b4w",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_0": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2238.332993,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_0",
+        "cosineSimilarity": 0.66815,
+        "nextSpeakerCosineSimilarity": 0.24205,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 34,
+            "centroidCosine": 0.66815,
+            "medianCosine": 0.63733
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 21,
+            "centroidCosine": 0.08825,
+            "medianCosine": 0.09484
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 12,
+            "centroidCosine": 0.24205,
+            "medianCosine": 0.21722
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 4.15,
+            "end": 12.37,
+            "cosineSimilarity": 0.2549
+          },
+          {
+            "start": 314.27,
+            "end": 323.27,
+            "cosineSimilarity": 0.2248
+          },
+          {
+            "start": 660.25,
+            "end": 665.57,
+            "cosineSimilarity": 0.68399
+          },
+          {
+            "start": 918.1179999999999,
+            "end": 927.1179999999999,
+            "cosineSimilarity": 0.67421
+          },
+          {
+            "start": 1099.9180000000001,
+            "end": 1108.9180000000001,
+            "cosineSimilarity": 0.71166
+          },
+          {
+            "start": 1280.0780000000002,
+            "end": 1289.0780000000002,
+            "cosineSimilarity": 0.64422
+          },
+          {
+            "start": 1439.778,
+            "end": 1448.778,
+            "cosineSimilarity": 0.70631
+          },
+          {
+            "start": 1565.15,
+            "end": 1574.15,
+            "cosineSimilarity": 0.22441
+          },
+          {
+            "start": 1765.17,
+            "end": 1774.17,
+            "cosineSimilarity": 0.61635
+          },
+          {
+            "start": 1840.5300000000002,
+            "end": 1849.5300000000002,
+            "cosineSimilarity": 0.57411
+          },
+          {
+            "start": 2141.39,
+            "end": 2150.39,
+            "cosineSimilarity": 0.69056
+          },
+          {
+            "start": 2203.4900000000002,
+            "end": 2212.4900000000002,
+            "cosineSimilarity": 0.63045
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:11:16.822463+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-61.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-61.scribe.json.gz",
+      "sha256": "d68ab7d66db102f32cf7a4d81cf053ef95400f8935d6ad7cf7bacc08a90a0305",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:11:16.961Z",
+      "cueCount": 201,
+      "actualLastCueEnd": 2237.16,
+      "speakerIds": [
+        "pavol-hejny",
+        "ai-ta-krajta-61-speaker_1",
+        "ai-ta-krajta-61-speaker_2"
+      ],
+      "sourceAudioSha256": "797044b65b17ab954655e802ae2b4110910bd4412d565801889541d452361d1c"
     },
     {
       "id": "ai-ta-krajta-57",
-      "status": "pending",
+      "status": "transcribed",
       "show": "AI ta Krajta",
       "title": "AI ta Krajta #57 | Anthropic Fable 5, Google OKF a proč vývoj softwaru míří k dark factory",
       "publishedAt": "2026-06-27T08:25:32.000Z",
@@ -78,24 +589,245 @@
       "sourceGuid": "ca648507-da46-48cb-be31-86e55b8258fb",
       "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/121868854/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-5-23%2F426662556-44100-2-966dd3ba3890b.mp3",
       "sourceUrl": "https://www.youtube.com/watch?v=nC4hb2KoCno",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_2": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2528.026122,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_2",
+        "cosineSimilarity": 0.64568,
+        "nextSpeakerCosineSimilarity": 0.27745,
+        "comparisons": [
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 62,
+            "centroidCosine": 0.27745,
+            "medianCosine": 0.25388
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 77,
+            "centroidCosine": 0.64568,
+            "medianCosine": 0.57758
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 21.369999999999997,
+            "end": 30.369999999999997,
+            "cosineSimilarity": 0.58659
+          },
+          {
+            "start": 141.13,
+            "end": 150.13,
+            "cosineSimilarity": 0.64032
+          },
+          {
+            "start": 524.018,
+            "end": 533.018,
+            "cosineSimilarity": 0.61628
+          },
+          {
+            "start": 695.8779999999999,
+            "end": 704.8779999999999,
+            "cosineSimilarity": 0.66101
+          },
+          {
+            "start": 846.934,
+            "end": 855.934,
+            "cosineSimilarity": 0.64222
+          },
+          {
+            "start": 1074.6940000000002,
+            "end": 1083.6940000000002,
+            "cosineSimilarity": 0.51454
+          },
+          {
+            "start": 1302.1380000000001,
+            "end": 1311.1380000000001,
+            "cosineSimilarity": 0.60188
+          },
+          {
+            "start": 1606.922,
+            "end": 1615.922,
+            "cosineSimilarity": 0.54857
+          },
+          {
+            "start": 1850.182,
+            "end": 1854.562,
+            "cosineSimilarity": 0.50539
+          },
+          {
+            "start": 1964.102,
+            "end": 1970.962,
+            "cosineSimilarity": 0.56857
+          },
+          {
+            "start": 2305.55,
+            "end": 2310.47,
+            "cosineSimilarity": 0.56307
+          },
+          {
+            "start": 2509.53,
+            "end": 2517.75,
+            "cosineSimilarity": 0.5612
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:11:17.097999+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-57.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-57.scribe.json.gz",
+      "sha256": "fe43c856e6f09e5c8907535e0f2e8f4e78c22c8cb1656523ba414881274b6793",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:11:58.255Z",
+      "cueCount": 228,
+      "actualLastCueEnd": 2527.9,
+      "speakerIds": [
+        "ai-ta-krajta-57-speaker_0",
+        "ai-ta-krajta-57-speaker_1",
+        "pavol-hejny",
+        "ai-ta-krajta-57-speaker_3"
+      ],
+      "sourceAudioSha256": "db8c01da665bfa349bd73e27bdc0715b29c84675d22225b17d0d3a2d9204afb7"
     },
     {
-      "id": "data-talk-157",
-      "status": "pending",
-      "show": "Data Talk",
-      "title": "Podcastový průřez feat. AI ta Krajta",
-      "publishedAt": "2025-10-16T07:00:00+02:00",
-      "appearanceId": "pavol-podcast:datatalk-18008082",
-      "durationInSeconds": 7526,
-      "sourceGuid": "Buzzsprout-18008082",
-      "mediaUrl": "https://www.buzzsprout.com/2034779/episodes/18008082-data-talk-special-podcastovy-prurez-feat-ai-ta-krajta.mp3",
-      "sourceUrl": "https://www.datatalk.cz/podcast/epizoda-157",
-      "speakerMapping": {}
+      "id": "ai-ta-krajta-56",
+      "status": "transcribed",
+      "show": "AI ta Krajta",
+      "title": "AI ta Krajta #56 | Anthropic Fable 5, bezpečnost vibe codingu a ztrátová komprese reality",
+      "publishedAt": "2026-06-20T13:11:59.000Z",
+      "krajtaNumber": 56,
+      "durationInSeconds": 2482,
+      "sourceGuid": "f74fc774-1e24-4eea-b3b2-00f8b9cd4670",
+      "mediaUrl": "https://anchor.fm/s/104a797ac/podcast/play/121707861/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-5-19%2F426449616-44100-2-0701a2e9c21f7.mp3",
+      "sourceUrl": "https://www.youtube.com/watch?v=BQqEjLX2k5o",
+      "speakerMapping": {
+        "speaker_0": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2482.886531,
+      "sourceAudioSha256": "7665545da9024c362ccd434158fb6b606d8908b88b73437fe9db0b19e05bf986",
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_0",
+        "cosineSimilarity": 0.73549,
+        "nextSpeakerCosineSimilarity": 0.21654,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 51,
+            "centroidCosine": 0.73549,
+            "medianCosine": 0.65912
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 68,
+            "centroidCosine": 0.1309,
+            "medianCosine": 0.11583
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 5,
+            "centroidCosine": 0.14917,
+            "medianCosine": 0.14078
+          },
+          {
+            "speakerId": "speaker_3",
+            "availableCleanSegments": 19,
+            "centroidCosine": 0.21654,
+            "medianCosine": 0.18954
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 8.69,
+            "end": 17.689999999999998,
+            "cosineSimilarity": 0.72839
+          },
+          {
+            "start": 238.39000000000001,
+            "end": 243.67,
+            "cosineSimilarity": 0.63841
+          },
+          {
+            "start": 327.04999999999995,
+            "end": 336.04999999999995,
+            "cosineSimilarity": 0.69114
+          },
+          {
+            "start": 813.678,
+            "end": 822.678,
+            "cosineSimilarity": 0.79094
+          },
+          {
+            "start": 1225.094,
+            "end": 1234.094,
+            "cosineSimilarity": 0.62722
+          },
+          {
+            "start": 1354.154,
+            "end": 1363.154,
+            "cosineSimilarity": 0.61068
+          },
+          {
+            "start": 1547.226,
+            "end": 1556.226,
+            "cosineSimilarity": 0.67593
+          },
+          {
+            "start": 1654.026,
+            "end": 1663.026,
+            "cosineSimilarity": 0.70402
+          },
+          {
+            "start": 1930.67,
+            "end": 1938.4299999999998,
+            "cosineSimilarity": 0.62263
+          },
+          {
+            "start": 2053.31,
+            "end": 2062.31,
+            "cosineSimilarity": 0.66441
+          },
+          {
+            "start": 2197.034,
+            "end": 2202.014,
+            "cosineSimilarity": 0.65384
+          },
+          {
+            "start": 2446.8140000000003,
+            "end": 2450.913,
+            "cosineSimilarity": 0.57408
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:26:32.829041+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/ai-ta-krajta-56.vtt",
+      "rawFile": "podcasts/transcripts/raw/ai-ta-krajta-56.scribe.json.gz",
+      "sha256": "c79aeb64176985a0f58d7128f62c2bf3b284bbdf1169def6cbfe6953d95dcf26",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:28:17.759Z",
+      "cueCount": 250,
+      "actualLastCueEnd": 2482.744,
+      "speakerIds": [
+        "pavol-hejny",
+        "ai-ta-krajta-56-speaker_1",
+        "ai-ta-krajta-56-speaker_2",
+        "ai-ta-krajta-56-speaker_3",
+        "ai-ta-krajta-56-speaker_4"
+      ]
     },
     {
       "id": "zatisi-2024-01-03",
-      "status": "pending",
+      "status": "transcribed",
       "show": "Zátiší · Rádio 1",
       "title": "Pavol Hejný & Tomáš Studeník",
       "publishedAt": "2024-01-04T14:37:35Z",
@@ -104,11 +836,129 @@
       "sourceGuid": "https://api.spreaker.com/episode/58197915",
       "mediaUrl": "https://api.spreaker.com/download/episode/58197915/z_ti_2024_01_03_a_voj_pavol_hejn_tom_studen_k.mp3",
       "sourceUrl": "https://www.spreaker.com/episode/zatisi-3-1-2024-pavol-hejny-tomas-studenik--58197915",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_3": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 3165.70125,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_3",
+        "cosineSimilarity": 0.63311,
+        "nextSpeakerCosineSimilarity": 0.13244,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 2,
+            "centroidCosine": 0.07051,
+            "medianCosine": 0.05279
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 73,
+            "centroidCosine": -0.02729,
+            "medianCosine": -0.02794
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 52,
+            "centroidCosine": 0.13244,
+            "medianCosine": 0.12008
+          },
+          {
+            "speakerId": "speaker_3",
+            "availableCleanSegments": 40,
+            "centroidCosine": 0.63311,
+            "medianCosine": 0.59515
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 409.114,
+            "end": 418.114,
+            "cosineSimilarity": 0.53171
+          },
+          {
+            "start": 884.866,
+            "end": 893.866,
+            "cosineSimilarity": 0.59444
+          },
+          {
+            "start": 1085.066,
+            "end": 1094.066,
+            "cosineSimilarity": 0.65508
+          },
+          {
+            "start": 1234.534,
+            "end": 1243.534,
+            "cosineSimilarity": 0.55179
+          },
+          {
+            "start": 1320.1940000000002,
+            "end": 1325.774,
+            "cosineSimilarity": 0.62717
+          },
+          {
+            "start": 1479.414,
+            "end": 1488.414,
+            "cosineSimilarity": 0.6046
+          },
+          {
+            "start": 1736.066,
+            "end": 1745.066,
+            "cosineSimilarity": 0.59586
+          },
+          {
+            "start": 1954.5020000000002,
+            "end": 1961.202,
+            "cosineSimilarity": 0.59877
+          },
+          {
+            "start": 2101.862,
+            "end": 2107.642,
+            "cosineSimilarity": 0.62402
+          },
+          {
+            "start": 2150.1020000000003,
+            "end": 2154.982,
+            "cosineSimilarity": 0.58105
+          },
+          {
+            "start": 2535.382,
+            "end": 2542.142,
+            "cosineSimilarity": 0.53481
+          },
+          {
+            "start": 3020.286,
+            "end": 3027.346,
+            "cosineSimilarity": 0.57139
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:12:37.870448+00:00"
+      },
+      "transcriptFile": "podcasts/transcripts/zatisi-2024-01-03.vtt",
+      "rawFile": "podcasts/transcripts/raw/zatisi-2024-01-03.scribe.json.gz",
+      "sha256": "da4e5fe58b9711d4ea950edea94756dfdc11a9f067e1d202ec8b3ed915b63a80",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:12:38.014Z",
+      "cueCount": 328,
+      "actualLastCueEnd": 3162.556,
+      "speakerIds": [
+        "zatisi-2024-01-03-speaker_0",
+        "zatisi-2024-01-03-speaker_1",
+        "zatisi-2024-01-03-speaker_2",
+        "pavol-hejny"
+      ],
+      "sourceAudioSha256": "f026b5221ad79926315c7282f2aa1f02b2bd5aad6bda8f80244de19ff0d849ee",
+      "containerDurationEstimateInSeconds": 3160.96625,
+      "sourceAudioDurationMethod": "Decoded mono 16kHz PCM sample count (50,651,220 samples); the MP3 container duration estimate is inaccurate."
     },
     {
       "id": "pitchuj-collboard",
-      "status": "pending",
+      "status": "transcribed",
       "show": "Pitchuj · SIT Port",
       "title": "Collboard a Pavol Hejný",
       "publishedAt": "2021-05-06T20:00:00+02:00",
@@ -117,11 +967,121 @@
       "sourceGuid": "Buzzsprout-8469691",
       "mediaUrl": "https://www.buzzsprout.com/1466371/episodes/8469691-pitchuj-startup-collboard-a-pavol-hejny.mp3",
       "sourceUrl": "https://www.buzzsprout.com/1466371/episodes/8469691-pitchuj-startup-collboard-a-pavol-hejny",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_2": "pavol-hejny"
+      },
+      "sourceAudioDurationInSeconds": 2433.160089,
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_2",
+        "cosineSimilarity": 0.50667,
+        "nextSpeakerCosineSimilarity": 0.17532,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 14,
+            "centroidCosine": 0.05246,
+            "medianCosine": 0.0505
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 21,
+            "centroidCosine": 0.17532,
+            "medianCosine": 0.15713
+          },
+          {
+            "speakerId": "speaker_2",
+            "availableCleanSegments": 109,
+            "centroidCosine": 0.50667,
+            "medianCosine": 0.48411
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 45.589999999999996,
+            "end": 51.230000000000004,
+            "cosineSimilarity": 0.36752
+          },
+          {
+            "start": 193.95000000000002,
+            "end": 198.32999999999998,
+            "cosineSimilarity": 0.35996
+          },
+          {
+            "start": 451.714,
+            "end": 460.714,
+            "cosineSimilarity": 0.47388
+          },
+          {
+            "start": 674.174,
+            "end": 683.174,
+            "cosineSimilarity": 0.48867
+          },
+          {
+            "start": 922.87,
+            "end": 931.87,
+            "cosineSimilarity": 0.55063
+          },
+          {
+            "start": 1217.3500000000001,
+            "end": 1226.3500000000001,
+            "cosineSimilarity": 0.48329
+          },
+          {
+            "start": 1455.3500000000001,
+            "end": 1464.3500000000001,
+            "cosineSimilarity": 0.48493
+          },
+          {
+            "start": 1625.854,
+            "end": 1634.854,
+            "cosineSimilarity": 0.46361
+          },
+          {
+            "start": 1835.614,
+            "end": 1844.614,
+            "cosineSimilarity": 0.52355
+          },
+          {
+            "start": 2005.4460000000001,
+            "end": 2010.646,
+            "cosineSimilarity": 0.47356
+          },
+          {
+            "start": 2202.606,
+            "end": 2207.6859999999997,
+            "cosineSimilarity": 0.5152
+          },
+          {
+            "start": 2351.09,
+            "end": 2358.95,
+            "cosineSimilarity": 0.49629
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:15:37.877464+00:00",
+        "additionalEvidence": "The hosts introduce their guest as Pavol Hejny from Collboard, then the matched speaker thanks them and pitches the virtual whiteboard in the first person."
+      },
+      "transcriptFile": "podcasts/transcripts/pitchuj-collboard.vtt",
+      "rawFile": "podcasts/transcripts/raw/pitchuj-collboard.scribe.json.gz",
+      "sha256": "45247a307d0e27567b5b410a6995a7f0e3c873cde89557dc15e43bb7ba54e225",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:15:37.989Z",
+      "cueCount": 232,
+      "actualLastCueEnd": 2430.36,
+      "speakerIds": [
+        "pitchuj-collboard-speaker_0",
+        "pitchuj-collboard-speaker_1",
+        "pavol-hejny"
+      ],
+      "sourceAudioSha256": "1dc37f038c3a076732ef4c7bf8fde31ef099e5f3090bb24b4d93813a38cd0a8e"
     },
     {
       "id": "youngschoolers-5",
-      "status": "pending",
+      "status": "transcribed",
       "show": "Youngschooler’s",
       "title": "Zjistil jsem, že studenti architektury nechtějí budovat PC hry",
       "publishedAt": "2020-07-02T01:00:00Z",
@@ -130,7 +1090,111 @@
       "sourceGuid": "tag:audioboom.com,2020-06-30:/posts/7619749",
       "mediaUrl": "https://audioboom.com/posts/7619749.mp3?modified=1593522838&sid=5027144&source=rss",
       "sourceUrl": "https://audioboom.com/posts/7619749",
-      "speakerMapping": {}
+      "speakerMapping": {
+        "speaker_1": "pavol-hejny"
+      },
+      "speakerReview": {
+        "method": "Original Pavol voice sample compared with clean speaker turns using WeSpeaker ResNet34. Similarity scores are not probabilities.",
+        "referenceVoiceId": "I2zA26JYXwtZmPCZflQY",
+        "referenceSampleId": "qDONXKzd46K8V1jFciGf",
+        "referenceSampleSha256": "91e3a708f34af84c70e62fc32ef22546b4412fa1c081c36db48f69a19563d71c",
+        "modelSha256": "9fea6516d7ad6bf0a76c7689f5a49b65d330fad6dde96c91bb4435ffbfe056a1",
+        "matchedSpeaker": "speaker_1",
+        "cosineSimilarity": 0.63295,
+        "nextSpeakerCosineSimilarity": 0.15837,
+        "comparisons": [
+          {
+            "speakerId": "speaker_0",
+            "availableCleanSegments": 15,
+            "centroidCosine": 0.15837,
+            "medianCosine": 0.14975
+          },
+          {
+            "speakerId": "speaker_1",
+            "availableCleanSegments": 53,
+            "centroidCosine": 0.63295,
+            "medianCosine": 0.60918
+          }
+        ],
+        "checkedSegments": [
+          {
+            "start": 32.49,
+            "end": 36.51,
+            "cosineSimilarity": 0.46552
+          },
+          {
+            "start": 116.21000000000001,
+            "end": 125.21000000000001,
+            "cosineSimilarity": 0.42364
+          },
+          {
+            "start": 226.59,
+            "end": 235.59,
+            "cosineSimilarity": 0.48428
+          },
+          {
+            "start": 347.19,
+            "end": 356.19,
+            "cosineSimilarity": 0.55837
+          },
+          {
+            "start": 456.89,
+            "end": 461.41,
+            "cosineSimilarity": 0.60027
+          },
+          {
+            "start": 516.67,
+            "end": 521.5500000000001,
+            "cosineSimilarity": 0.5792
+          },
+          {
+            "start": 621.35,
+            "end": 627.629,
+            "cosineSimilarity": 0.63089
+          },
+          {
+            "start": 725.53,
+            "end": 734.53,
+            "cosineSimilarity": 0.64992
+          },
+          {
+            "start": 810.762,
+            "end": 819.762,
+            "cosineSimilarity": 0.6254
+          },
+          {
+            "start": 920.0219999999999,
+            "end": 929.0219999999999,
+            "cosineSimilarity": 0.70459
+          },
+          {
+            "start": 1016.602,
+            "end": 1025.6019999999999,
+            "cosineSimilarity": 0.6181
+          },
+          {
+            "start": 1107.422,
+            "end": 1111.502,
+            "cosineSimilarity": 0.62318
+          }
+        ],
+        "reviewedAt": "2026-11-04T12:07:44.928601+00:00",
+        "additionalEvidence": "The guest is introduced as Pavol Hejny immediately before the matched speaker answers and describes his own early programming work."
+      },
+      "sourceAudioDurationInSeconds": 1148,
+      "transcriptFile": "podcasts/transcripts/youngschoolers-5.vtt",
+      "rawFile": "podcasts/transcripts/raw/youngschoolers-5.scribe.json.gz",
+      "sha256": "d409920d42da3413953096819687d2e9949ccafcc6e73f502683d968286d91fa",
+      "model": "scribe_v2",
+      "importedAt": "2026-11-04T12:03:37.055Z",
+      "cueCount": 147,
+      "actualLastCueEnd": 1147.912,
+      "speakerIds": [
+        "youngschoolers-5-speaker_0",
+        "pavol-hejny",
+        "youngschoolers-5-speaker_2"
+      ],
+      "sourceAudioSha256": "27bbcd333df013e238f9c218e6e0a344fca1c86dd9f7e226a73b630a5f984fbb"
     }
   ]
 }

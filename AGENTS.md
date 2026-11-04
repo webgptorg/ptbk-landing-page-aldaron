@@ -299,6 +299,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   VTT text through `readPodcastTranscript`; source text and file paths never enter browser props. Keep the search API,
   player and page controls unchanged. Raw Scribe output is retained with each completed import; no paid processing runs
   during builds or on a schedule. See `podcasts/README.md` for explicit commands and speaker-attribution checks.
+  The completed pilot uses acoustic comparisons with Pavol's original single-speaker sample for its stable
+  `pavol-hejny` identity. Review evidence stays in the index; private reference audio and embeddings are not published.
   Each episode lists every credited person by name, and every person any source
   credits has a card in `aiTaKrajtaPeople.ts`, which a test keeps in step, so a
   credited person never misses their portrait and the filter cannot lose them.

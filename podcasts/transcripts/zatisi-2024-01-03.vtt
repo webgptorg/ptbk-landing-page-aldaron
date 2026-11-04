@@ -1,0 +1,1313 @@
+WEBVTT
+
+1
+00:00:00.040 --> 00:00:00.740
+<v zatisi-2024-01-03-speaker_0>Paní Tlučhořová</v>
+
+2
+00:00:00.820 --> 00:00:01.000
+<v zatisi-2024-01-03-speaker_1>No.</v>
+
+3
+00:00:01.380 --> 00:00:09.980
+<v zatisi-2024-01-03-speaker_2>Někdy mají dneska lidi pocit, že politici jsou syčáci, který prostě jenom hrabou pod sebe. A nejhorší ze všeho jsou trbaslíci.</v>
+
+4
+00:00:10.260 --> 00:00:14.980
+<v zatisi-2024-01-03-speaker_0>Buďme o poznání méně neurvalí.</v>
+
+5
+00:00:15.280 --> 00:00:17.080
+<v zatisi-2024-01-03-speaker_2>Na to už je příliš pozdě a, eh.</v>
+
+6
+00:00:18.680 --> 00:00:26.540
+<v zatisi-2024-01-03-speaker_0>No tak pana, pana Lábu jsem viděl párkrát jenom teda. Já takhle nic proti němu nemám, viďte? On takovej je to bláznivej herec. No, v tý televizi ten tak vždycky jako je rudej. [smích]</v>
+
+7
+00:00:26.560 --> 00:00:39.280
+<v zatisi-2024-01-03-speaker_2>Šťastny ať jsou všechny bytosti. Om. Hezký večer, posloucháte Radio 1, začíná diskuzní pořad Zátěží, od jehož mikrofonu vás dnes zdraví Aleš Vojíř. Rok</v>
+
+8
+00:00:39.400 --> 00:00:51.920
+<v zatisi-2024-01-03-speaker_2>2023 byl rokem, kdy umělá inteligence naplno ukázala své schopnosti široké veřejnosti, a to zejména díky chatbotu ChatGPT od OpenAI. A co nás čeká v tom letošním roce? Kam se bude umělá inteligence</v>
+
+9
+00:00:52.380 --> 00:01:04.500
+<v zatisi-2024-01-03-speaker_2>dál vyvíjet? Jak ji efektivně využívat v každodenním životě, kdy na ni naopak raději nespoléhat a v čem bychom měli být ostražití? O praktickém využití umělé inteligence se v Zátěží na Radiu</v>
+
+10
+00:01:04.640 --> 00:01:12.920
+<v zatisi-2024-01-03-speaker_2>1 budeme bavit s Pavolem Hejným a Tomášem Studeníkem z konzultačního týmu AI Nodes nebo Nauts. Dobrý večer, pánové.</v>
+
+11
+00:01:13.700 --> 00:01:14.320
+<v zatisi-2024-01-03-speaker_1>Dobrý večer.</v>
+
+12
+00:01:14.640 --> 00:01:27.000
+<v zatisi-2024-01-03-speaker_2>Dobrý večer. Pár slov o mých dnešních hostech. Pavel Hejný je developer, technologický nadšenec, zakladatel, eh, různých startupů a je třeba autorem, to mě zaujalo, první české mobilní aplikace pro sledování</v>
+
+13
+00:01:27.020 --> 00:01:28.240
+<v zatisi-2024-01-03-speaker_2>ptáků. Říkám to správně, Pavole?</v>
+
+14
+00:01:28.400 --> 00:01:29.720
+<v zatisi-2024-01-03-speaker_1>Ano, ano. [smích]</v>
+
+15
+00:01:29.780 --> 00:01:35.380
+<v zatisi-2024-01-03-speaker_2>A Tomáš Studeník je inovátor, zakladatel startupů, autor knih. Poslední se jmenuje Umění neúspěchu.</v>
+
+16
+00:01:35.600 --> 00:01:35.840
+<v zatisi-2024-01-03-speaker_1>Mhm.</v>
+
+17
+00:01:37.020 --> 00:01:49.200
+<v zatisi-2024-01-03-speaker_2>A je taky iniciátor a manažer projektu TheatRE. Může robot napsat divadelní hru? A tady možná pozorní posluchači Ráda 1 už se chytají, protože před rokem a čtvrt jsme, eh, s Tomášem a</v>
+
+18
+00:01:49.260 --> 00:02:01.460
+<v zatisi-2024-01-03-speaker_2>s Rudolfem Russou tehdy, Rosou tehdy byli v Zátěží a bavili jsme se právě o tom, jak pánové dokázali přesvědčit v uvozovkách robota nebo stroj napsat hru O lidech. Hra</v>
+
+19
+00:02:01.540 --> 00:02:13.780
+<v zatisi-2024-01-03-speaker_2>se hrála ve Švandově divadle, vysílala se online, kdy ji viděly desítky tisíc lidí. Psali o ní i západní média. Z mého pohledu hra samotná byla v mnoha ohledech taková podivná, možná dadaistická, ale vlastně</v>
+
+20
+00:02:13.800 --> 00:02:26.280
+<v zatisi-2024-01-03-speaker_2>byla úspěšná a první, kdy nepsali lidé o robotech, ale roboti nebo umělá inteligence o lidech. Zajímavý je, že jen pár dní, možná týden, možná dva týdny po našem povídání na Radiu 1 představila OpenAI</v>
+
+21
+00:02:26.540 --> 00:02:38.680
+<v zatisi-2024-01-03-speaker_2>svého zmíněného kecálka ChatGPT, který znamenal z pohledu běžných uživatelů zásadní přelom v tom, jak asi vnímáme schopnosti generativní umělé inteligence. A teď už po tom dlouhém úvodu míří otázka nejdřív</v>
+
+22
+00:02:38.720 --> 00:02:47.200
+<v zatisi-2024-01-03-speaker_2>na vás, Tomáši. Kdybyste tu divadelní hru O lidech nechali napsat aktuální GPT 3,5 nebo 4.0, byla by diametrálně odlišná?</v>
+
+23
+00:02:48.180 --> 00:02:56.240
+<v zatisi-2024-01-03-speaker_1>No byla by úplně jiná. Byla by nudná, nezajímavá jako většina obsahu, který</v>
+
+24
+00:02:57.920 --> 00:03:04.260
+<v zatisi-2024-01-03-speaker_1>je generován denodenně na internetu a ať už lidmi nebo umělou inteligencí.</v>
+
+25
+00:03:04.600 --> 00:03:07.320
+<v zatisi-2024-01-03-speaker_2>Takže byla by, když nudná, tak horší, se dá říct?</v>
+
+26
+00:03:07.440 --> 00:03:09.680
+<v zatisi-2024-01-03-speaker_1>Já si myslím, že by byla naprosto nezajímavá.</v>
+
+27
+00:03:09.980 --> 00:03:12.160
+<v zatisi-2024-01-03-speaker_2>No vidíte, já jsem čekal přesně opačnou odpověď.</v>
+
+28
+00:03:12.220 --> 00:03:24.680
+<v zatisi-2024-01-03-speaker_1>[smích] Na tom právě bylo zajímavý, že to bylo v předvečer toho boomu, kdy umělá inteligence začala psát a tvořit jako</v>
+
+29
+00:03:25.100 --> 00:03:37.400
+<v zatisi-2024-01-03-speaker_1>zprůměrovaný člověk. Čili nic zajímavého, nemastně, neslaně, všedně, šedě. A ta verze Chat nebo ten model GPT 2, na kterým-</v>
+
+30
+00:03:37.560 --> 00:03:37.700
+<v zatisi-2024-01-03-speaker_2>Mhm.</v>
+
+31
+00:03:38.160 --> 00:03:50.160
+<v zatisi-2024-01-03-speaker_1>Na kterým tenkrát to stálo, tak právě na tom bylo zajímavý, že měl ten dadaistický charakter a pletl si věci, opakoval, cyklil se, dával k sobě zdánlivě</v>
+
+32
+00:03:50.200 --> 00:03:58.180
+<v zatisi-2024-01-03-speaker_1>nespojitelné a nesmyslné. A to myslím bylo něco, co, co je, co je asi pryč už.</v>
+
+33
+00:03:58.600 --> 00:04:03.940
+<v zatisi-2024-01-03-speaker_2>Tak to je vlastně pro umělce, kteří nás poslouchají, kteří poslouchají Zátěží na Radiu 1, dobrá zpráva.</v>
+
+34
+00:04:03.960 --> 00:04:16.260
+<v zatisi-2024-01-03-speaker_1>[smích] Já si myslím, že stejně jako když si vzpomenu na film Karlíka továrna na čokoládu, kde ten dědeček, eh,</v>
+
+35
+00:04:16.459 --> 00:04:28.500
+<v zatisi-2024-01-03-speaker_1>nebyl vyhozen od té, od té linky, ale začal opravovat roboty, které, které montovaly víčka, tak si myslím, že to je podobné i s, i s umělci. Já si myslím, že naopak jsou otevřeny další</v>
+
+36
+00:04:28.540 --> 00:04:38.020
+<v zatisi-2024-01-03-speaker_1>možnosti, jak spolutvořit a využít tento nový nástroj, eh, k něčemu zajímavějšímu možná a něčemu novému.</v>
+
+37
+00:04:38.360 --> 00:04:50.780
+<v zatisi-2024-01-03-speaker_2>Ještě poslední věc k té hře. Když jsme se před tím rokem a čtvrt bavili s vámi, Tomáši a s Rudou Rosou, tak jsme se bavili o tom, že většinou vždycky ten děj skončí u násilí a sexu, protože</v>
+
+38
+00:04:50.840 --> 00:04:55.820
+<v zatisi-2024-01-03-speaker_2>ten model byl nakrmený věcmi z internetu, který je plný násilí a sexu. Tak teď už by to tak nebylo?</v>
+
+39
+00:04:57.740 --> 00:05:09.980
+<v zatisi-2024-01-03-speaker_1>Teď už se to úspěšně ladí, že to, co na tom bylo takové syrové a ještě neutesané, neučesané, my asi si budeme povídat o těch všech pokřivaních, o biasu, eh,</v>
+
+40
+00:05:10.420 --> 00:05:23.040
+<v zatisi-2024-01-03-speaker_1>tak to ještě v těch modelech bylo. A my jsme tenkrát tím projektem právě myslím docela úspěšně poukázali na to, na čem ten tehdejší model stál a co je v základu právě umělé inteligence.</v>
+
+41
+00:05:23.400 --> 00:05:34.540
+<v zatisi-2024-01-03-speaker_1>To znamená, co tam nacpem, to taky, to taky dostanem naservírované. To se nemění, ale samozřejmě se to čím dál tím více reguluje, optimalizuje, průměruje.</v>
+
+42
+00:05:35.660 --> 00:05:44.040
+<v zatisi-2024-01-03-speaker_2>Nepřemýšleli jste, když jsem se vám ozval, zdali byste nepřišli, ozval jsem se vám, Tomáši, tak jestli vy nebo Pavol, jestli jste přemýšleli, že byste za sebe poslali nějakého robota?</v>
+
+43
+00:05:45.740 --> 00:05:46.040
+<v zatisi-2024-01-03-speaker_1>Tak</v>
+
+44
+00:05:47.740 --> 00:06:00.380
+<v zatisi-2024-01-03-speaker_1>já asi bych za sebe robota neposílal. Jestli bych poslal, tak možná kdybych ve stejnou chvíli musel absolvovat více rozhovorů, což určitě po dnešku se poptávka</v>
+
+45
+00:06:00.440 --> 00:06:13.184
+<v zatisi-2024-01-03-speaker_1>navýší a myslím si, že to zcela vážně se stane, že se budeme zmnožovat, budeme za sebe posílat avatary. A digitální, eh, dvojčata na různé akce. A samozřejmě</v>
+
+46
+00:06:13.424 --> 00:06:25.904
+<v zatisi-2024-01-03-speaker_1>budeme si potom hlídat, kde vystoupíme, kde se zjevíme sami za sebe. Možná, že se nezjevíme nikde a budeme spíš trávit čas s rodinou a naši digitální avataři budou běhat za byznysem nebo zábavou a společně</v>
+
+47
+00:06:26.584 --> 00:06:33.084
+<v zatisi-2024-01-03-speaker_1>s dalšími digitálními avatary si budou dávat nějaký jedničko nulový nápoj.</v>
+
+48
+00:06:33.744 --> 00:06:45.784
+<v zatisi-2024-01-03-speaker_2>Už takové avatary máte? My před vysíláním, Pavle, tak vy jste, eh, vlastně mi ukazoval svého audio avatara. Tak máte i avatara, který je nabitý vašimi znalostmi a dokázal by za vás aspoň</v>
+
+49
+00:06:45.824 --> 00:06:47.744
+<v zatisi-2024-01-03-speaker_2>nějaký základní věci zeskočit?</v>
+
+50
+00:06:48.964 --> 00:07:01.124
+<v pavol-hejny>Ten nápad přišel právě od Tomáše, kdy mně řekl: „Pavle, udělej jednu aplikaci, kterou vyvíjím, udělej ji tak, aby lidi mohli, aby se lidi bavili jakoby s tebou, ale,</v>
+
+51
+00:07:01.684 --> 00:07:13.904
+<v pavol-hejny>eh, a ty jsi jim odpovídal jako přirozený člověk.“ A tak jsem si naklonoval svůj hlas, zatím teda ne, ne sebe obrazově, ale hlasově ano. A cokoliv co napíšu, ať už to napíšu já nebo přes Chat GPT,</v>
+
+52
+00:07:14.064 --> 00:07:18.924
+<v pavol-hejny>tak to umím, umím zadat a za třicet sekund to mám vygenerované.</v>
+
+53
+00:07:20.144 --> 00:07:32.564
+<v zatisi-2024-01-03-speaker_2>Tak to byste možná během písničky mohli vyzkoušet jednu větu, kterou byste řekl vy a pustili bysme i vašeho klona a nechali bychom chvilku posluchače hádat, jestli to první, co půjde po písničce do vysílání, budete vy živý</v>
+
+54
+00:07:32.624 --> 00:07:35.904
+<v zatisi-2024-01-03-speaker_2>nebo ten váš klon audio. Zkusíme to?</v>
+
+55
+00:07:36.264 --> 00:07:37.224
+<v pavol-hejny>Určitě to zkusme.</v>
+
+56
+00:07:38.204 --> 00:07:50.384
+<v zatisi-2024-01-03-speaker_2>Já se přiznám, že jsem si nemohl odpustit tu věc, kterou už si přede mnou neodpustili tisíce, možná desetitisíce, možná statisíce novinářů. A samozřejmě jsem použil Chat GPT. Ale je to jenom, je to jenom jedna věc.</v>
+
+57
+00:07:50.964 --> 00:08:03.304
+<v zatisi-2024-01-03-speaker_2>Já jsem se vás chtěl zeptat na váš název, co AI Nautes znamená, ale zeptal jsem se právě Chatu GPT před, eh, vysíláním. Zeptal jsem se: „Do diskuzního pořadu v rádiu mi přijdou hovořit dva hosté z konzultačního týmu</v>
+
+58
+00:08:03.524 --> 00:08:15.564
+<v zatisi-2024-01-03-speaker_2>AI Nautes. Myslíš si, že jeho název vymysleli oni, pomlčka, lidé, nebo že si ho nechali vygenerovat umělou inteligencí? A co tento název podle tebe znamená?“ Já mu teda ty „ká“, samozřejmě vadí. „Dokážeš ten název vysvětlit?“</v>
+
+59
+00:08:15.584 --> 00:08:28.104
+<v zatisi-2024-01-03-speaker_2>A Chat GPT mi odpověděl: „Název AI Nautes vypadá jako kombinace slov AI, umělá inteligence, a naut, používané v názvech jako astronaut, kosmonaut a tak dále. Výraz naut pochází z řeckého slova nautés,</v>
+
+60
+00:08:28.504 --> 00:08:40.604
+<v zatisi-2024-01-03-speaker_2>což znamená námořník. V tomto kontextu by AI Nautes mohlo znamenat námořníci AI nebo námořníci AI nebo průzkumníci umělé inteligence, což naznačuje, že členové tohoto týmu jsou průzkumníci</v>
+
+61
+00:08:40.624 --> 00:08:44.484
+<v zatisi-2024-01-03-speaker_2>nebo dobrodruzi v umělé, v oblasti umělé inteligence.“ Podařilo se mu to?</v>
+
+62
+00:08:45.024 --> 00:08:46.784
+<v pavol-hejny>No to je až děsivé, jak je to přesné.</v>
+
+63
+00:08:47.324 --> 00:08:52.144
+<v zatisi-2024-01-03-speaker_2>Nezměnil jsem ani jediné slovo, jo. Jako kdyby tam měl nějaký chyby, tak je přečtu, ale prostě oni tam ani nebyly. Takže je to přesný.</v>
+
+64
+00:08:52.544 --> 00:08:54.564
+<v pavol-hejny>Já bych skoro nepoznal, že to nepsal Tomáš.</v>
+
+65
+00:08:54.564 --> 00:08:59.144
+<v zatisi-2024-01-03-speaker_2>[smích] Tomáši, tak to je velká-- jestli tady něco neplouhá.</v>
+
+66
+00:09:00.024 --> 00:09:07.904
+<v zatisi-2024-01-03-speaker_1>Ne, to bys poznal, protože kdybych to psal, tak bych tam dal ve, eh, v řečtině ten původní název. Tam asi nebyl. Nebo byl tam, dal jsem tam řecky.</v>
+
+67
+00:09:08.004 --> 00:09:09.324
+<v zatisi-2024-01-03-speaker_2>Úvozovka, nautes, úvozovka.</v>
+
+68
+00:09:09.384 --> 00:09:22.004
+<v zatisi-2024-01-03-speaker_1>A potom ještě je tam jedna nepřesnost, kteří určitě klasičtí, klasicky vzdělaní posluchači si všimli, že ai nautés je skutečně námořník, čili singulár. Ale my jsme tým</v>
+
+69
+00:09:22.964 --> 00:09:31.744
+<v zatisi-2024-01-03-speaker_1>a ten tým zase by byl ai nautai v řečtině. Což je ještě zajímavější v tom, že AI je na začátku i na konci.</v>
+
+70
+00:09:31.804 --> 00:09:33.404
+<v zatisi-2024-01-03-speaker_2>No to je moc pěkný. Takže to použijeme.</v>
+
+71
+00:09:33.864 --> 00:09:46.044
+<v zatisi-2024-01-03-speaker_1>No tak AI Nautes nakonec z toho vypadlo takový, že jde lépe přes pisky, ale AI Nautai je samozřejmě něco, co, hm, je z mého pohledu lépe vystihuje ten náš tým, protože pracujeme</v>
+
+72
+00:09:46.084 --> 00:09:58.184
+<v zatisi-2024-01-03-speaker_1>právě jako tým na, posádka lodi, která na těch vlnách rozbouřených, nových, nečekaných umělé inteligence každý něco umí, někdo pádluje, ně-někdo má ruce v kormidlo,</v>
+
+73
+00:09:58.344 --> 00:10:02.884
+<v zatisi-2024-01-03-speaker_1>někdo padá přes palubu a někdo naviguje. Takže takhle fungujeme.</v>
+
+74
+00:10:03.524 --> 00:10:15.584
+<v zatisi-2024-01-03-speaker_2>Možná posluchači, jestli ně-někteří z vás máte přístup k Chatu GPT, což vlastně můžete mít všichni, k té neplacené verzi. Zkuste ten prompt, to zadání, které jsem četl, tam přidat ještě:</v>
+
+75
+00:10:15.904 --> 00:10:27.244
+<v zatisi-2024-01-03-speaker_2>„Odpověz mi jako Tomáš Studeník. Buď víc, víc básni, mluv víc vznešeně.“ Zajímalo by mě, jestli by se třeba dostal i k podobným, by se dostal k podobným slovům, který jsi říkal ty.</v>
+
+76
+00:10:27.524 --> 00:10:30.644
+<v zatisi-2024-01-03-speaker_1>No musí mít propojení minimálně asi na Bing to APíčko, myslím si, že jinak to-</v>
+
+77
+00:10:30.664 --> 00:10:34.884
+<v zatisi-2024-01-03-speaker_2>Takže pokud máte čtyřku, pokud si platíte dvacet dolarů měsíčně, tak můžete.</v>
+
+78
+00:10:34.904 --> 00:10:35.264
+<v zatisi-2024-01-03-speaker_1>Tak jo.</v>
+
+79
+00:10:35.624 --> 00:10:37.264
+<v pavol-hejny>A nebo pomocí Bing chatu.</v>
+
+80
+00:10:37.964 --> 00:10:49.964
+<v zatisi-2024-01-03-speaker_2>Nebo pomocí Bing chatu, jasně. Poslední s Chatem GPT z mé strany. Odpovídal dál: „Pokud jde o to, kdo vymyslel název, je to obtížné určit bez dalších informací. Mohli</v>
+
+81
+00:10:50.004 --> 00:11:02.224
+<v zatisi-2024-01-03-speaker_2>ho vytvořit lidé, kteří chtěli použít nápaditý a výstižný název pro jejich tým. Nicméně vzhledem k tomu, že umělá inteligence je stále více schopna kreativního a generativního myšlení, není nemožné, že by název</v>
+
+82
+00:11:02.264 --> 00:11:14.344
+<v zatisi-2024-01-03-speaker_2>mohl být navržen AI.“ To mě fascinuje, jak dokázal i ty zápory dát správně v češtině. „To by záleželo na schopnostech a parametrech AI, AI, která by byla použita.“ Já jsem teda se</v>
+
+83
+00:11:14.364 --> 00:11:26.804
+<v zatisi-2024-01-03-speaker_2>zeptal: „A ty bys to dokázal?“ Chat GPT: „Ano, dokázal bych.“ A tak dál a tak dál a tak dál. Zrovna o víkendu, když jsme s dcerami řešili, jak pojmenovat jednoho draka z pohádek o dracích,</v>
+
+84
+00:11:27.484 --> 00:11:39.464
+<v zatisi-2024-01-03-speaker_2>který ještě do češtiny asi nebyl přeložen, ale byly přeloženy z předchozích dílů jeho předchůdci, tak mě překvapil taky, že dokázal, myslím, že jsme chtěli, že to byl Thunder a my jsme chtěli, aby to byla holka a jeden z těch návrhů byl Hroměnka,</v>
+
+85
+00:11:39.544 --> 00:11:41.724
+<v zatisi-2024-01-03-speaker_2>což mi nepřišlo vůbec blbý, teda se přiznám.</v>
+
+86
+00:11:42.804 --> 00:11:45.944
+<v zatisi-2024-01-03-speaker_1>Myslím, že to je super. Já bych to nevymyslel takhle dobře.</v>
+
+87
+00:11:46.504 --> 00:11:58.744
+<v zatisi-2024-01-03-speaker_2>A on hodil čtyři názvy. No jako tři, tři byly takový dva nic moc, jeden slušnej a Hroměnka velmi mile překvapilo. Ale konec, konec už o přípravě Aleše Vojíře s pomocí AI na dnešní rozhovor se Tomášem Studeníkem a Pavlem Hejním</v>
+
+88
+00:11:58.824 --> 00:11:59.644
+<v zatisi-2024-01-03-speaker_2>z AI Nautes.</v>
+
+89
+00:12:00.504 --> 00:12:06.664
+<v zatisi-2024-01-03-speaker_1>Kéž by se všichni takto připravovali, eh, na, na svá povolání jako Aleš Vojíř.</v>
+
+90
+00:12:06.664 --> 00:12:19.276
+<v zatisi-2024-01-03-speaker_2>Teďko na vás budu, teďko na vás budu hodnější. [smích] Ne, vůbec Pavle, kdybyste měli zvolit nejvýstižnější slova, která by popsala ten posun, ke kterému za poslední rok došlo. On už to Tomáš částečně naznačil, že možná</v>
+
+91
+00:12:19.396 --> 00:12:31.876
+<v zatisi-2024-01-03-speaker_2>ten chat je nudnější a akurátnější. Ale kdybyste měli zvolit nějaká dvě tři slova, k jakému posunu došlo ve vývoji umělé inteligence hlavně z pohledu veřejnosti za poslední rok, tak která byste použili?</v>
+
+92
+00:12:33.356 --> 00:12:45.596
+<v pavol-hejny>Možná právě ta široká veřejnost, protože mnoho z těch věcí už bylo a existovalo předtím. Ale v roce dva tisíce dvacet tři se tady ty, tady ty všechny úžasné a nové technologie jak na poli textu,</v>
+
+93
+00:12:45.636 --> 00:12:49.316
+<v pavol-hejny>tak na poli obrázků nebo audia dostaly do širokýho povědomí.</v>
+
+94
+00:12:50.796 --> 00:12:54.876
+<v zatisi-2024-01-03-speaker_2>Říkal Pavol. Dodá něco Tomáš? Kouká upřeně.</v>
+
+95
+00:12:55.556 --> 00:13:02.696
+<v zatisi-2024-01-03-speaker_1>Ne, já jsem tě poslouchal. To je vždycky vzácná chvíle, když opravdu někoho posloucháte, že zapomenete na všechno kolem. Což-</v>
+
+96
+00:13:02.736 --> 00:13:09.336
+<v zatisi-2024-01-03-speaker_2>Nějaká dvě tři výstižná slova, která by dokázala charakterizovat ten posun umělé inteligence za poslední rok.</v>
+
+97
+00:13:09.976 --> 00:13:22.096
+<v zatisi-2024-01-03-speaker_1>No, musím se shodnout s Pavolem, že to je jakási ta buzzovitost, ať použiju strašný paskvil z angličtiny. Čili ten buzz, ten, to,</v>
+
+98
+00:13:22.136 --> 00:13:34.496
+<v zatisi-2024-01-03-speaker_1>jak se o tom mluví, že je to na každém kroku a najednou takový ten další české slovo hype s tím, že umělá inteligence vyřeší všechno, na co ta lidská inteligence nestačí, tak najednou,</v>
+
+99
+00:13:35.216 --> 00:13:47.376
+<v zatisi-2024-01-03-speaker_1>eh, ze všech stran slyším: „No vždyť tam přece AI to vyřeší.“ Že všechny problémy, který si lidstvo nebylo schopno poradit, tak najednou máme umělou inteligenci, která mu-- je</v>
+
+100
+00:13:47.416 --> 00:13:55.916
+<v zatisi-2024-01-03-speaker_1>naprosto všemocná, všezchopná a minimálně cítím tady tu bezmeznou,</v>
+
+101
+00:13:57.496 --> 00:14:09.896
+<v zatisi-2024-01-03-speaker_1>ale mělkou důvěru v to, že nějakým zázračným způsobem nás z těch, jak bych to řekl hezky, z těch příkopů a nesnází dostane.</v>
+
+102
+00:14:09.956 --> 00:14:11.316
+<v zatisi-2024-01-03-speaker_1>Zase je tam znát ta,</v>
+
+103
+00:14:13.656 --> 00:14:15.476
+<v zatisi-2024-01-03-speaker_1>ta, ehm,</v>
+
+104
+00:14:17.216 --> 00:14:29.616
+<v zatisi-2024-01-03-speaker_1>ten rys, eh, moderní doby moderních technologií, že outsourcujeme spoustu věcí, který jsme dělali dřív sami do mobilů, do zařízení, gadgetů a</v>
+
+105
+00:14:29.696 --> 00:14:41.836
+<v zatisi-2024-01-03-speaker_1>umělé inteligence s tím, že spoléháme na to, že za nás, eh, budou, budou věci řešit a budou za nás především řešit to nepříjemné.</v>
+
+106
+00:14:43.736 --> 00:14:44.636
+<v zatisi-2024-01-03-speaker_2>Pavol chtěl ještě dodat.</v>
+
+107
+00:14:44.716 --> 00:14:56.816
+<v pavol-hejny>Že tam se děje takový velmi zajímavý efekt, že vlastně ta technologie je úžasná a na některé věci naprosto, naprosto revoluční, ale naopak pro jako jiný typ úkolů nedává vůbec žádný smysl.</v>
+
+108
+00:14:57.456 --> 00:15:09.516
+<v pavol-hejny>A tím, že to bylo zabalené do toho, do té formy, toho rádce, toho univerzálního velmi moudrého rádce, který umí napsat cokoliv, tak se ho, nebo jo, tak, tak ho takhle antroporomof,</v>
+
+109
+00:15:09.716 --> 00:15:20.776
+<v pavol-hejny>antropomorfizuju, tak se ho lidi ptají na, na věci, které vůbec nedává smysl se ho ptát. A to je podle mě něco, co skrývá určitá nebezpečí.</v>
+
+110
+00:15:21.556 --> 00:15:33.616
+<v zatisi-2024-01-03-speaker_2>A o příležitostech, možnostech i nebezpečích se v Zátěží na Radiu Jedna budeme bavit po písničce. Bavíme se s Tomášem Studeníkem a Pavolem Hejným a vyzkoušíme si i to, jestli poznáte, jestli po písničce začne mluvit Pavol</v>
+
+111
+00:15:33.696 --> 00:15:35.516
+<v zatisi-2024-01-03-speaker_2>Hejný, člověk nebo jeho klon.</v>
+
+112
+00:15:35.516 --> 00:15:48.316
+<v pavol-hejny>[zvuk větru] Vážení posluchači, posloucháte Zátěží v Radiu Jedna. Vážení</v>
+
+113
+00:15:48.356 --> 00:15:51.116
+<v pavol-hejny>posluchači, posloucháte Zátěží v Radiu Jedna.</v>
+
+114
+00:15:52.016 --> 00:16:04.096
+<v zatisi-2024-01-03-speaker_2>Tak co myslíte? Byl první, první naklonovaný Pavol Hejný z AI Nautes, se kterým a s Tomášem Studeníkem se bavíme o umělé inteligenci. Nebo to druhé byl reálný, eh, Pavol?</v>
+
+115
+00:16:05.896 --> 00:16:18.416
+<v zatisi-2024-01-03-speaker_2>Tak já vám to prozradím. Prozradím vám to. První byl naklonovaný. Ono samozřejmě bylo to trošku slyšet, jak to bylo z toho, z toho telefonu. Kdybysme pustili tady nějakou wavku nebo nějakou mp3 toho hlasu, tak by to bylo fakt téměř, eh, nerozpoznání.</v>
+
+116
+00:16:19.576 --> 00:16:22.936
+<v zatisi-2024-01-03-speaker_2>Jak to je těžké něco takového udělat? Dokázal bych to udělat já jako naprostý laik?</v>
+
+117
+00:16:23.416 --> 00:16:35.576
+<v pavol-hejny>Určitě ano. A je to až nebezpečně jednoduché. Dokonce ne, že byste to vy dokázal udělat, ale jako kdokoliv by to vám dokázal udělat a dát vám do úst jakákoliv slova, co by chtěl. A já</v>
+
+118
+00:16:35.616 --> 00:16:47.816
+<v pavol-hejny>samozřejmě sám sobě jsem si dal povolení k tomu tohle udělat. Ale, ale je to dobrá etická otázka, že jak, jak dlouhodobě budeme žít ve světě, kde kdokoliv může, může vyrobit nahrávku</v>
+
+119
+00:16:47.876 --> 00:16:52.556
+<v pavol-hejny>kohokoliv, kdo má na internetu minutu svého hlasu.</v>
+
+120
+00:16:54.236 --> 00:17:06.556
+<v zatisi-2024-01-03-speaker_2>Tak to já asi budu hodně klonovaný. Nevíte náhodou, komu se líbil můj hlas? [smích] Ne, ale čistě prakticky, kdybych teď se k tomu chtěl, se tomu začít věnovat, tak existuje nějakej online nástroj, kde</v>
+
+121
+00:17:06.596 --> 00:17:13.076
+<v zatisi-2024-01-03-speaker_2>úplně v pohodě si nahraju dvě, pět minut svýho hlasu a hned mi z toho vyleze můj audio avatar.</v>
+
+122
+00:17:13.316 --> 00:17:25.676
+<v pavol-hejny>Ano, těch nástrojů existuje hned několik a existují různý kombinace hlasu, hlasu a videa a jsou na různé úrovni. Existují takové, kde, kde není klonování hlasu, ale kde ten hlas je obecně</v>
+
+123
+00:17:25.716 --> 00:17:37.936
+<v pavol-hejny>velmi dobrý, ale nějaký univerzální. A pak existují nástroje, kde si člověk naklonuje svůj vlastní hlas, případně si ho může ještě doupravit, aby zněl, eh, víc, víc hluboce, aby byl rychlejší. Anebo</v>
+
+124
+00:17:37.956 --> 00:17:41.296
+<v pavol-hejny>pak může udělat to, že svým vlastním hlasem mluví, ale mluví v čínštině.</v>
+
+125
+00:17:42.036 --> 00:17:52.516
+<v zatisi-2024-01-03-speaker_2>To jsem se chtěl zeptat. Byl jsem na nějaké konferenci na podzim, kde jsem musel mluvit anglicky, což pro mě vždycky znamená vystoupení z mýho komfortu do relativně velkýho diskomfortu. Na druhou stranu je to dobrý, když člověk tady ty hranice</v>
+
+126
+00:17:52.536 --> 00:18:04.616
+<v zatisi-2024-01-03-speaker_2>překonává. Ale říkal jsem si: „No, to přeci už není tak daleko, abych já mluvil česky a ono to za mě mluvilo anglicky nebo případně čínsky s nějakým zpožděním třeba, já nevím, vteřině, dvou vteřiny, dvou vteřině?“</v>
+
+127
+00:18:04.916 --> 00:18:17.456
+<v pavol-hejny>Dokonce teďka existuje taková věc, že člověk se připojí na stream a ono mu to zachytává jeho mikrofon a do toho výstupu mu to posílá jeho hlas, ale upravený tak, aby nezněl s přízvukem.</v>
+
+128
+00:18:18.684 --> 00:18:29.404
+<v pavol-hejny>A je to až strašidelně dobré, že člověk by si ani neřekl, že to neř-nemluví ten člověk. Člověk by si spíš řekl, že „Hm, on se naučil anglicky.“</v>
+
+129
+00:18:29.404 --> 00:18:33.444
+<v zatisi-2024-01-03-speaker_2>[smích] Myslím si, že nemálo českým politikům by se to hodilo.</v>
+
+130
+00:18:34.463 --> 00:18:43.244
+<v pavol-hejny>Ale člověk potřebuje mít aspoň jako trochu úroveň, eh, protože ono to upravuje spíš přízvuk zatím než, než úplně slovní zásobu a tak.</v>
+
+131
+00:18:43.324 --> 00:18:55.344
+<v zatisi-2024-01-03-speaker_2>Takže musím šprtat gramatiku a slovní zásobu. Pánové, před písničkou jsme si slíbili, že si řekneme ty pozitivní využití, na co má smysl třeba ChatGPT využívat</v>
+
+132
+00:18:55.464 --> 00:19:04.544
+<v zatisi-2024-01-03-speaker_2>a kdy si na něj dát velký pozor. Tak kdybysme zůstali ještě chvilku pozi-tom pozitivním. A na co je fakt skvělý nebo na co ho používáte vy ve své denní rutině?</v>
+
+133
+00:19:04.944 --> 00:19:17.244
+<v zatisi-2024-01-03-speaker_1>Já zrovna, zrovna jsem si vybavil, em, situaci, kdy jsme s manželkou, eh, vymýšleli nebo zadali do ChatGPT, aby nám udělalo</v>
+
+134
+00:19:17.304 --> 00:19:29.964
+<v zatisi-2024-01-03-speaker_1>vánoční přání nebo PFko, nějaký text, protože to jsou věci speciálně takové ty vzkazy, přání, různé zdravice,</v>
+
+135
+00:19:30.044 --> 00:19:42.964
+<v zatisi-2024-01-03-speaker_1>projevy, články. Pro studenty to může být něco, co jim napíše, strukturuje jejich práce. Je to opravdu něco, co, s čím se člověk trápí. A</v>
+
+136
+00:19:42.984 --> 00:19:55.244
+<v zatisi-2024-01-03-speaker_1>tam ta umělá inteligence naplňuje příslib toho robota. Čili tady tu, i když je to intelektuální robota, tak jsme všichni z toho vyčerpaní. A při generování ať už textu nebo obrázků, kdy</v>
+
+137
+00:19:55.324 --> 00:20:07.964
+<v zatisi-2024-01-03-speaker_1>dřív buď jsem musel být talentovaný grafik či umělec a nakreslit to nebo mít hodně peněz a zaplatit si fotobanku a ještě s tím mít další práci v x grafických programech. Tak dneska</v>
+
+138
+00:20:08.624 --> 00:20:20.904
+<v zatisi-2024-01-03-speaker_1>něco, co by ani nešlo vyfotit, nešlo nakreslit v různých stylech vám řada programů vygeneruje, pokud, pokud dobře zformulujete zadání.</v>
+
+139
+00:20:21.404 --> 00:20:31.284
+<v zatisi-2024-01-03-speaker_1>A to je něco, co usnadňuje práci v každodenním životě, em, člověku doma i, i v práci.</v>
+
+140
+00:20:32.324 --> 00:20:33.624
+<v zatisi-2024-01-03-speaker_2>Říká Tomáš Studený. Pavol?</v>
+
+141
+00:20:34.384 --> 00:20:46.684
+<v pavol-hejny>Já mám takovou věc, že já maluju a občas mi dochází nápady, co, co malovat. A běžně jsem to dělal z fotek nebo prostě z inspirativních míst. A když přišla Midjourney, co je jako jeden z těch modelů,</v>
+
+142
+00:20:46.744 --> 00:20:59.064
+<v pavol-hejny>který generují obrázky, tak jsem, tak jsem hledal inspiraci právě tam. Ale já jsem velmi líný člověk. A tak jsem si řekl: „No, eh, měl bych to nějak zautomatizovat.“ A napsal jsem si</v>
+
+143
+00:20:59.244 --> 00:21:11.424
+<v pavol-hejny>skript, který mi generoval různé obrázky, různé variace obrázků, například krychle ve, ve stylu různých umělců nebo, eh, budovy ve stylu různých umělců nebo všechna možná zvířata v</v>
+
+144
+00:21:11.484 --> 00:21:23.764
+<v pavol-hejny>kombinaci s různými uměleckými styly. A z toho jsem si vybíral: „Hm, tohleto by mohlo být hezký na opravdový faktický obraz nebo tohleto by mohlo být hezký právě na to P-- zmíněné PFko, které, které Tomáš říkal, nebo tohleto by mohlo být hezké</v>
+
+145
+00:21:23.824 --> 00:21:35.824
+<v pavol-hejny>na potisk na nějakou tapetu. A mám teďka ohromnou galerii fotek a, nebo fotek, vygenerovaných obrázků, které jsou vlastně napůl vytvořené mnou a tím mým</v>
+
+146
+00:21:35.984 --> 00:21:42.664
+<v pavol-hejny>programem a nápadem, ale zároveň jsou vygenerované pomocí, pomocí toho difúzního modelu Midjourney.</v>
+
+147
+00:21:44.084 --> 00:21:46.824
+<v zatisi-2024-01-03-speaker_2>Práva na to nemáte vy-vymýšlený na ty obrázky.</v>
+
+148
+00:21:47.244 --> 00:22:00.544
+<v pavol-hejny>To je velmi dobrá otázka. To je věc, která se bude muset ještě vyřešit nebo vysoudit, protože já si osobně myslím, že ty práva na to mám, protože jsem do toho vložil signifikantní množství mé energie. Ale,</v>
+
+149
+00:22:01.164 --> 00:22:12.404
+<v pavol-hejny>ale určitě přijdou soudní spory, kdy budou umělci žalovat tyhl-ty firmy, které trénovaly své modely na jejich datech. A, a nevím, jak se to vyvyví--</v>
+
+150
+00:22:12.464 --> 00:22:25.084
+<v zatisi-2024-01-03-speaker_1>Teďka nejnověji třeba New York Times. To sleduju, jak, jak se to bude vyvíjet, ale tam je až zarážející, jak vypadá, že, že, že zjevně, em,</v>
+
+151
+00:22:25.984 --> 00:22:38.363
+<v zatisi-2024-01-03-speaker_1>je to spíš kopie toho, co, co bylo nakrmeno do modelu než, než nějaká víceméně náhodná nebo pozměněná variace.</v>
+
+152
+00:22:38.423 --> 00:22:50.464
+<v zatisi-2024-01-03-speaker_1>Takže opravdu, jak říká Pavol, dneska je to tak, že u většiny tady těch nástrojů, když je budete používat uživatelsky, je dobré si prostudovat podmínky užití, zejména pokud plánujete s tím vydělávat peníze a živit se</v>
+
+153
+00:22:50.524 --> 00:23:03.404
+<v zatisi-2024-01-03-speaker_1>tím a někdo, aby vám za to platil, za ty výstupy, kde použijete nástroje umělé inteligence. Obecně zatím, em, práva duševního vlastnictví může mít jenom člověk, eh,</v>
+
+154
+00:23:04.244 --> 00:23:16.304
+<v zatisi-2024-01-03-speaker_1>v naší, eh, na naší planetě. Historicky byly zajímavé případy, kdy první případ, kdy se tohle ještě před nástupem AI řešilo, bylo, jestli gorila, teda</v>
+
+155
+00:23:16.444 --> 00:23:29.144
+<v zatisi-2024-01-03-speaker_1>myslím, že to byla gorila, může mít autorská práva, protože sebrala foťák fotografovi, něco vyfotila, ten to potom vystavil v galerii a byla z toho velká debata. A</v>
+
+156
+00:23:29.204 --> 00:23:41.604
+<v zatisi-2024-01-03-speaker_1>něco podobného nás čeká i, i tady se s plechovkama, se servery. Jestli teda můžou mít autorský práva. Zatím, zatím ten postoj většinovej je, že ne. Ale</v>
+
+157
+00:23:41.644 --> 00:23:54.164
+<v zatisi-2024-01-03-speaker_1>vy jakmile, eh, to použijete například za účelem výdělku nebo obohacení, tak dneska se ozývají ti autoři těch původních</v>
+
+158
+00:23:54.224 --> 00:24:06.964
+<v zatisi-2024-01-03-speaker_1>dat, která byla nakrmena do plechovek. A, em, vy minimálně když to používáte, tak často je požadavek aspoň abyste zmínili, že to bylo vytvořeno prostřednictvím</v>
+
+159
+00:24:07.004 --> 00:24:09.904
+<v zatisi-2024-01-03-speaker_1>nástrojů umělé inteligence. Říkám to dobře, Pavole, abych-</v>
+
+160
+00:24:10.084 --> 00:24:22.224
+<v pavol-hejny>No jasně, tam je pak jako ještě jedna dobrá otázka, že on ten model totiž funguje tak, že jim projdou miliony obrázků nebo miliony, miliardy, prostě opravdu velké množství obrázků. A ty obrázky jsou nějakým způsobem</v>
+
+161
+00:24:22.284 --> 00:24:34.524
+<v pavol-hejny>označené. A vlastně on se snaží, je to taková jakoby trojčlenka, on se snaží pro to nové zadání, pro které ještě neexistuje obrázek, co nejlépe naimitovat obrázek tak, aby zapadal do té, do té sady, která, kterou</v>
+
+162
+00:24:34.564 --> 00:24:46.816
+<v pavol-hejny>ten model byl nakrmený. A teď když se stane taková věc, že například nějak, že tam jsou obrazy nějakého známého umělce a já řeknu, že bych chtěl namalovat Že bych chtěl namalovat sám portrét sám sebe,</v>
+
+163
+00:24:47.276 --> 00:24:59.336
+<v pavol-hejny>ale jako pomocí tady toho známého umělce. Možná není dobrý příklad, protože on mě nebude znát, že bych chtěl namalovat auto od tady toho známého umělce. Tak, eh, on mně vytvoří obraz jakoby od tady toho umělce. A teď je dobrá otázka, jestli</v>
+
+164
+00:24:59.376 --> 00:25:11.676
+<v pavol-hejny>jsem autorem já, který udělal ten prompt nebo který mu dal to zadání, jestli je autorem ten autor toho modelu, co vytvořil ten model, který to vytváří, anebo jestli je autorem ten umělec. Anebo jestli je tam nějaký, nějaký</v>
+
+165
+00:25:11.736 --> 00:25:15.736
+<v pavol-hejny>poměr. A to je otázka, která není vyřešená v tuhle chvíli.</v>
+
+166
+00:25:18.696 --> 00:25:31.176
+<v zatisi-2024-01-03-speaker_2>Nevím, jestli jste, určitě jste viděli, ale nevím, jestli jste byli na akci, která, kterou pořádala Asociace AI a to bylo taky na podzim. Promítání nebo dokonce soutěž, řekněme filmů, krátkých videí</v>
+
+167
+00:25:31.296 --> 00:25:43.636
+<v zatisi-2024-01-03-speaker_2>vytvořených právě s pomocí nástrojů umělé inteligence. Je pravda, že, eh, některé z nich, eh, soutěžní i nesoutěžní, eh, mě překvapily tím, že z mého pohledu</v>
+
+168
+00:25:43.676 --> 00:25:55.736
+<v zatisi-2024-01-03-speaker_2>byly za, jakože vlastně mě vyděsily. Vyděsilo mě to, co jsem viděl, jako ty obrazy, že z mýho pohledu to bylo jako za hranicí lidský imaginace. Aspoň teda tý, kterou mám já, kterou si dokážu představit, že</v>
+
+169
+00:25:55.796 --> 00:26:07.816
+<v zatisi-2024-01-03-speaker_2>to byly věci, jsem říkal na to, i kdyby ten člověk byl tvůrce, režisér byl na nejhorších houbičkách, tak by tady ty věci nevymyslel. Ale bylo to hrozně zajímavý pro mě jako člověka, že jsem vlastně viděl něco, co</v>
+
+170
+00:26:07.836 --> 00:26:14.256
+<v zatisi-2024-01-03-speaker_2>bych asi neviděl, kdyby ta umělá inteligence nebyla. Tak to bylo umění, nebo to nebylo umění? Asi, já vlastně nevím.</v>
+
+171
+00:26:16.636 --> 00:26:28.936
+<v pavol-hejny>Podle mě to umění určitě je. Tam v rámci těch generativních modelů pro obrázky existuje takový zajímavý koncept, že člověk může jít, eh, že člověk může vygenerovat obraz nějakého konceptu a jít</v>
+
+172
+00:26:29.016 --> 00:26:41.296
+<v pavol-hejny>až do extrému s tím, že například může říct, že chce vygenerovat obrázek, který je děsivý, ale ješt- a ještě víc děsivý a ještě víc děsivý. A ono to opravdu, opravdu zajde až na nějakou hranici jako</v>
+
+173
+00:26:41.516 --> 00:26:43.376
+<v pavol-hejny>psychedelického bizáru, řekněme.</v>
+
+174
+00:26:43.376 --> 00:26:45.356
+<v zatisi-2024-01-03-speaker_2>[smích]</v>
+
+175
+00:26:45.436 --> 00:26:58.176
+<v pavol-hejny>Ale to samé jde dělat s obyčejnýma věcma, že chci, eh, obraz brýlí a chci obraz, který je ještě víc o brýlích a ještě víc o brýlích. A, eh, a opravdu je zajímavé si s tím hrát. Zatím</v>
+
+176
+00:26:58.636 --> 00:26:59.196
+<v pavol-hejny>dokud to-</v>
+
+177
+00:26:59.476 --> 00:27:11.736
+<v zatisi-2024-01-03-speaker_1>Já, Pavle, trochu nesouhlasím třeba s tou děsivostí, protože, eh, z mýho pohledu nejděsivější je očekávání to samotné. To znamená to,</v>
+
+178
+00:27:12.556 --> 00:27:25.376
+<v zatisi-2024-01-03-speaker_1>to, že tam nic není, ale něco tušíme a myslíme si, že by tam mohlo být a není to zobrazeno. Já když, když vlastně se dívám na ty obrázky, které často padají z různých, eh,</v>
+
+179
+00:27:25.396 --> 00:27:37.636
+<v zatisi-2024-01-03-speaker_1>těch nástrojů, tak jsou, ukazují věci, které by člověk jakoby nenakombinoval, ty komponenty nedal dohromady. Ta monstra, ty, ty scény a kostýmy a propriety, které</v>
+
+180
+00:27:37.676 --> 00:27:50.036
+<v zatisi-2024-01-03-speaker_1>se objevují, jsou skutečně, nedají se, že jo, často, dneska jsem zrovna dělal baristu, jak v kosmu nalévá kosmonautům kafe, myslím. Tak to je prostě blbost a to</v>
+
+181
+00:27:50.176 --> 00:28:02.356
+<v zatisi-2024-01-03-speaker_1>by člověka asi nenapadlo nebo by nevěděl, jak to nakreslit. Ale, eh, mě napadá jeden umělec Petr Válek, velmi zajímavej českej umělec, kterej využívá trochu myslím starší modely, které</v>
+
+182
+00:28:02.376 --> 00:28:14.736
+<v zatisi-2024-01-03-speaker_1>ještě mají rysy dada a vytváří skutečně hororové obrazy, eh, které doporučuju se, si vyhledat a podívat. Vytváří obrazy různých rodin, eh,</v>
+
+183
+00:28:14.876 --> 00:28:27.096
+<v zatisi-2024-01-03-speaker_1>dětí a situací, eh, z rodinného života, které jsou skutečně hrozivé. Ale myslím si, že, že co tu hrozivost</v>
+
+184
+00:28:27.156 --> 00:28:39.336
+<v zatisi-2024-01-03-speaker_1>pak vytváří, je to, eh, že to je rodina, kde my jako lidé máme nějaký ten obraz té jistoty, té lásky, těch jako krásných malých dětí. A skutečně umělá</v>
+
+185
+00:28:39.376 --> 00:28:51.416
+<v zatisi-2024-01-03-speaker_1>inteligence se nebojí šáhnout do těchto stereotypů tak brutálně, jak by to člověk snad nedokázal. Tam uznávám teda, že, eh, má navrch.</v>
+
+186
+00:28:52.116 --> 00:28:55.056
+<v zatisi-2024-01-03-speaker_2>Pavel poslouchal, vypadal, že by možná reagoval, možná ne.</v>
+
+187
+00:28:55.916 --> 00:29:08.036
+<v pavol-hejny>Mě zaujalo ty koncepty, které se kombinují. Já, my na zítra připravujeme nějakou prezentaci s Tomášem a já tady mám, eh, kávu, hrneček kávy ve, ve vesmíru. Létající.</v>
+
+188
+00:29:08.536 --> 00:29:20.536
+<v pavol-hejny>To je něco, co by, co by se reálně ani nevyfotilo a pravděpodobně by to nikdo ani namaloval. A je zajímavé se s tím hrát. Je zajímavé vůbec zkoumat, zkoumat ty možnosti toho, co vlastně lze</v>
+
+189
+00:29:20.576 --> 00:29:31.176
+<v pavol-hejny>udělat. A, a teď, teď nedávno jsem například viděl, že člověk si můž, že člověk může zadat libovolnou kombinaci zvířat a ono mu to udělá, ono mu to udělá kombinaci.</v>
+
+190
+00:29:31.796 --> 00:29:33.376
+<v zatisi-2024-01-03-speaker_2>To by se hrozně líbilo Víteři. [smích]</v>
+
+191
+00:29:33.416 --> 00:29:37.376
+<v pavol-hejny>No, tak to už je, to už existuje. Nevím, jak se to jmenuje.</v>
+
+192
+00:29:38.176 --> 00:29:50.396
+<v zatisi-2024-01-03-speaker_2>Na začátku jsem slíbil, že se pokusíme být maximálně praktičtí. Tak teďko kdybyste se podívali, eh, když vlastně se líbilo, jak Tomáš zmiňoval robot robota, tak už jste nějakou robotu ze sebe sejmuli a</v>
+
+193
+00:29:50.496 --> 00:29:59.976
+<v zatisi-2024-01-03-speaker_2>něco za vás dělají nástroje opravdu automaticky? Něco, co vám třeba ještě před půl rokem, rokem, dvěma lety ubíralo minuty, hodiny času týdně?</v>
+
+194
+00:30:01.316 --> 00:30:13.736
+<v pavol-hejny>Já naprosto nesnáším, eh, vymýšlení toho, jak mám naformulovat text. Když něco píšu, mám nějaký oficiální e-mail, tak já nevím, mám tohle slovo dát před tamto slovo a často mi to zabíralo osmdesát procent</v>
+
+195
+00:30:13.816 --> 00:30:25.856
+<v pavol-hejny>času toho napsání e-mailu. A já jsem si udělal takovou open source knihovnu, eh, která, která umožňuje napsat jakýsi recept toho, jak transformovat jeden text do druhého textu. A mám tam udělaný</v>
+
+196
+00:30:25.896 --> 00:30:37.956
+<v pavol-hejny>návod k tomu, jak surový text, který zadám někde hlasem úplně kdekoliv, tak jak mi ho dokáže přefiltrovat, předtřídit, eh, vylepšit, eh, doplnit čárky, doplnit interpunkce</v>
+
+197
+00:30:38.596 --> 00:30:41.636
+<v pavol-hejny>a vytvořit z něj profesionálně znějící text.</v>
+
+198
+00:30:43.596 --> 00:30:44.076
+<v zatisi-2024-01-03-speaker_2>Tomáši?</v>
+
+199
+00:30:45.072 --> 00:30:57.972
+<v zatisi-2024-01-03-speaker_1>No já to využívám, uh, docela podobně, zejména když, uh, uh, stavíme webovou strá-strá-stránku například pro nějakou akci, jako je Hackathon, uh, kdy potřebujem</v>
+
+200
+00:30:58.352 --> 00:31:12.052
+<v zatisi-2024-01-03-speaker_1>dovymyslet a rozepsat třeba výzvy, problémy, které se budou řešit tak a vymyslet ještě chytlavý název, který zarezonuje u cílové skupiny, což jsou mladí studenti inteligentní.</v>
+
+201
+00:31:12.592 --> 00:31:24.752
+<v zatisi-2024-01-03-speaker_1>A někdy člověk už prostě nemá energii neustále přicházet s úžasně chytlavými a takzvaný klikatelnými názvy. A tady musím říct, že, že umělá inteligence s tím vůbec nemá problém.</v>
+
+202
+00:31:24.792 --> 00:31:37.652
+<v zatisi-2024-01-03-speaker_1>A když se mi něco nelíbí, tak jí řeknu: „Přepiš to, udělej to znova.“ Vůbec se na mě nezlobí, já jí můžu furt komandovat, říkat: „Tohle ne, ty tam dej tohle, vrať se zpátky.“ A je až zajímavý, jak už Pavel zmiňoval tu antropomorfizaci,</v>
+
+203
+00:31:37.972 --> 00:31:50.792
+<v zatisi-2024-01-03-speaker_1>že až člověku blbý vůči tomu plechovému modelu se chovat, uh, uh, jako lehce neurvale. Takže já, já i píšu třeba prosím, „přepiš prosím.“ A je to něco, co myslím už,</v>
+
+204
+00:31:51.252 --> 00:32:03.772
+<v zatisi-2024-01-03-speaker_1>uh, Boston Dynamics, když měli nějaké ty roboty a viděl jsem první videa těch, těch psů nebo, uh, těch humanoidů, a když je testovali a záměrně do nich bouchali a kopali, tak mi z toho nas-naskakovala</v>
+
+205
+00:32:03.812 --> 00:32:07.812
+<v zatisi-2024-01-03-speaker_1>husí kůže a bylo mi z toho špatně. Tak si myslím, že je zajímavý, jak</v>
+
+206
+00:32:09.372 --> 00:32:18.152
+<v zatisi-2024-01-03-speaker_1>se dokážeme chovat, uh, vlastně k plechovkám, um, relativně hezky a oni, oni vůbec nemají problém s námi.</v>
+
+207
+00:32:18.892 --> 00:32:31.092
+<v zatisi-2024-01-03-speaker_2>Na co si máme dát pozor, uh, když využíváme třeba nejrozšířenější ChatGPT, co jsou právě ty hezky česky zase použiju slovo biasy nebo ty nebezpečný věci tam schované, o kterých možná</v>
+
+208
+00:32:31.132 --> 00:32:33.232
+<v zatisi-2024-01-03-speaker_2>ani netušíme, ale to tak funguje.</v>
+
+209
+00:32:34.352 --> 00:32:47.312
+<v pavol-hejny>Tam je si dobré uvědomit, že co je vlastně pod tím, co je podstata té technologie. A podstata té technologie je to, že ono to umí psát takzvaně pravděpodobný text. Uh, určitě</v>
+
+210
+00:32:47.392 --> 00:32:59.672
+<v pavol-hejny>mno-možní z vás máte na mobilu klávesnici, a když napíšete nějaké slovo, tak ono vám to říká tři slova, která by mohla následovat a vy můžete stále ťukat na to prostřední a ono to něco napíše. Řekněme jakýchkoliv pět slov</v>
+
+211
+00:32:59.792 --> 00:33:12.032
+<v pavol-hejny>je, vypadá dobře, ale celkově se ten text velmi sype. A tyhle ty modely, ony jsou vlastně jako něco na podobný způsob, akorát to umí mnohem lépe takzvaně držet kontext, že to umí mnohem déle</v>
+
+212
+00:33:12.152 --> 00:33:24.272
+<v pavol-hejny>držet podstatu a smysl daného textu. Uh, ale, ale mnoho věcí to vůbec nemá. Mnoho věcí to, to neumí. Například to nemá emoce, nedává vůbec smysl</v>
+
+213
+00:33:24.332 --> 00:33:36.612
+<v pavol-hejny>s tím interagovat jako s něčím, co má emoce. Nebo, uh, nebo například, uh, to nemá přístup k mnoha informacím, co si my myslíme, že má. Například nedává vůbec žádný smysl zkopírovat text</v>
+
+214
+00:33:36.712 --> 00:33:49.312
+<v pavol-hejny>a dát ho do chatu GPT a zeptat se ho, zda to napsal on. On to jako neví. On není, není člověk, který by si pamatoval, jaké texty napsal. On je to opravdu model, který předpovídá, uh, předpovídá pravděpodobnost</v>
+
+215
+00:33:49.372 --> 00:33:55.992
+<v pavol-hejny>dalšího, dalšího slova. A pokaždé, když ten chat spustíme, tak se startuje nanovo, jakoby vyresetuje se mu ta paměť.</v>
+
+216
+00:33:58.192 --> 00:33:59.692
+<v pavol-hejny>A, a tohleto je si dobré uvědomit.</v>
+
+217
+00:34:01.072 --> 00:34:13.072
+<v zatisi-2024-01-03-speaker_2>To, co říkáte, je zajímavé i v kontextu, když začali studenti využívat ChatGPT, aby psali, aby si nechávali psát za sebe seminárky, tak samozřejmě vznikly nástroje, které měly odhalovat, zda náhodou ty seminárky,</v>
+
+218
+00:34:13.732 --> 00:34:25.892
+<v zatisi-2024-01-03-speaker_2>uh, nenapsal, nenapsaly právě nějaké nástroje umělé inteligence místo studentů. A pokud si dobře pamatuju, tak se v poslední době od tady těch nástrojů, které hlídají, jestli napsala umělá inteligence, odstupuje, protože oni měli vlastně</v>
+
+219
+00:34:26.432 --> 00:34:37.672
+<v zatisi-2024-01-03-speaker_2>velkou chybovost, respektive měli moc jako, nevím, falešných pozitiv, se tomu, pozitivních názorů se tomu říká, že prostě i texty, který nebyly napsaný umělou inteligencí, vyhodnocovali, jako že byly napsaný umělou inteligencí.</v>
+
+220
+00:34:38.472 --> 00:34:50.612
+<v pavol-hejny>Ono prakticky jakýkoliv test bude mít, uh, bude mít, že buď bude moc citlivý, nebo bude málo citlivý. Ale zároveň, uh, tady to je velmi zajímavá matematická otázka, jak vlastně poznat, že nějaký text</v>
+
+221
+00:34:50.652 --> 00:35:03.032
+<v pavol-hejny>byl vygenerovaný nějakým modelem. Ale velmi obecně by se dalo říct, že to není moc možné. Nebo jako je mož-- je možné, že oni nějakým způsobem začnou tajně označovat ty texty. Ale, ale</v>
+
+222
+00:35:03.092 --> 00:35:15.172
+<v pavol-hejny>obecně není možné, není možné to nějak jako univerzálně detekovat. Uh, a, a myslím si, že si to velmi dobré uvědomit i v tom, že pokud, um,</v>
+
+223
+00:35:15.212 --> 00:35:26.992
+<v pavol-hejny>někdo dostane nějaký email nebo text a má na tom, jako na té druhé, na té druhé straně vlastně zhodnotit, zda ten text, co byl, tak byl udělanej takzvaně poctivě tou jako tou klasik-- tím kla-klasickou cestou.</v>
+
+224
+00:35:27.032 --> 00:35:28.232
+<v zatisi-2024-01-03-speaker_1>I když to může být blbost naprosto.</v>
+
+225
+00:35:28.252 --> 00:35:40.272
+<v pavol-hejny>Když to může být blbost, anebo zda byl jakoby vygenerovanej nějak jako falešně. Tak často lidi mají, mají takový, takový pocit, že to nemá duši nebo ten text něco, že něco tomu chybí. Já jsem to věděl,</v>
+
+226
+00:35:40.872 --> 00:35:52.892
+<v pavol-hejny>ale, uh, ve skutečnosti, uh, spíš nedokážou. Oni ty mode-- ty modely dokážou, dokáží, dokáží ten text imitovat velmi, velmi dokonale.</v>
+
+227
+00:35:52.992 --> 00:35:55.132
+<v pavol-hejny>A vlastně to bude čím dál tím těžší a těžší.</v>
+
+228
+00:35:55.752 --> 00:36:04.812
+<v zatisi-2024-01-03-speaker_2>Říká Pavel Hejný. S ním a s Tomášem Studeníkem z AI News se bavíme o umělé inteligenci. Po ještě jedné písničce se budeme dalších čtvrt hodiny, dalších patnáct minut bavit.</v>
+
+229
+00:36:06.732 --> 00:36:18.792
+<v zatisi-2024-01-03-speaker_2>Posloucháte Zátiší na Rádiu jedna. S Tomášem Studeníkem a Pavolem Hejným se bavíme o umělé inteligenci. A možná pánové, chvilku vydržme v těch možná hrozbách, který, který nám od</v>
+
+230
+00:36:19.032 --> 00:36:20.992
+<v zatisi-2024-01-03-speaker_2>AI hrozí, uh,</v>
+
+231
+00:36:22.992 --> 00:36:35.352
+<v zatisi-2024-01-03-speaker_2>čím víc bude využívaná v praktických, uh, v našich praktických činnostech. A teďkon konkrétně přemýšlím, když voláte, a to snad vás ještě neohrozí, jo, ale už mě to irituje, že když zavoláte do banky,</v>
+
+232
+00:36:35.452 --> 00:36:47.832
+<v zatisi-2024-01-03-speaker_2>tak nejdřív, uh, na základě toho, co tam, na základě toho, uh, co řeknete tomu umělému hlasu, tak vás to nějak ro-rozřídí a rozhoduje, jestli vám to odpoví samo nebo vám to dá, vás to, uh,</v>
+
+233
+00:36:47.872 --> 00:36:59.992
+<v zatisi-2024-01-03-speaker_2>přepojí na živého operátora. Ostatně na, na Data festivalu na VŠE na podzim říkala paní, která má na starosti, lingvistka, která má na starosti jen-jeden z těchto modelů pro jednu velkou banku, tak říkala: „Víte,</v>
+
+234
+00:37:00.072 --> 00:37:12.432
+<v zatisi-2024-01-03-speaker_2>co je jeden z nejčastějších dotazů na Na ten, na ten, eh, na ten chatbot: „Řekni mi“ – já nevím, jak si říkat, jak se jmenuje ten chatbot – „řekni mi, co mám říct tý v uvozovkách plechový</v>
+
+235
+00:37:12.492 --> 00:37:24.492
+<v zatisi-2024-01-03-speaker_2>hubě na infolince, aby mě co nejrychleji přepojila, přepojila na, na člověka?“ No tak, tak z mýho pohledu je to vlastně trochu otravný, jo, protože jasně, oni se to nějak snaží. Chápu, že to ušetří ty peníze na konci.</v>
+
+236
+00:37:24.532 --> 00:37:36.872
+<v zatisi-2024-01-03-speaker_2>Teďkon se můžem bavit, jestli to ušetří mně poplatky, nebo to už, nebo to spíš povede k vyšším, k vyšším, eh, ziskům těch bank. Ale ok, jo, chtějí tam, chtějí to nějak protřídit. Tak z mýho pohledu,</v>
+
+237
+00:37:37.132 --> 00:37:45.672
+<v zatisi-2024-01-03-speaker_2>teď jsem se hrozně zakecal, z mýho pohledu laika, uživatele, zákazníka je to někdy otravný a říkám si: „Ty jo, to není úplně dobrej krok.“ Tak</v>
+
+238
+00:37:47.692 --> 00:37:48.952
+<v zatisi-2024-01-03-speaker_2>je to dobrý nasazení?</v>
+
+239
+00:37:49.892 --> 00:37:50.312
+<v pavol-hejny>To bych řekl-</v>
+
+240
+00:37:50.352 --> 00:37:56.452
+<v zatisi-2024-01-03-speaker_2>Nebude nás to štvát čím dál víc? Nebude to, že se probujeme k tomu živýmu člověkovi až po hodině?</v>
+
+241
+00:37:57.112 --> 00:38:09.392
+<v pavol-hejny>Já si myslím, že tohleto vlastně není jako nic tak zásadně nového. Ono ta digitalizace, digitalizace dostupuje do všech možných sfér a například takhle datové schránky mnoho lidí opravdu velmi iritují, že by radši dostávali fyzické</v>
+
+242
+00:38:09.412 --> 00:38:21.472
+<v pavol-hejny>dopisy. A tady to je jenom nějaký ekvivalent, jenom, jenom dotažený jako dál. Ale, ale myslím, že to celé míří k té otázce, že nakolik, nakolik vůbec ten generovaný obsah, nakolik ho</v>
+
+243
+00:38:21.552 --> 00:38:34.012
+<v pavol-hejny>označovat a jak, jak to vlastně celé lidi vnímají. Protože, eh, je klidně možné, že se dostaneme do doby, kdy lidi ani nebudou vědět, že, že komunikují s robotem nebo s chatbotem. A teď je otázka,</v>
+
+244
+00:38:34.052 --> 00:38:46.332
+<v pavol-hejny>že říct jim to a, a vlastně, eh, a t-ti lidi, ti lidi najednou z toho budou mít dojem, že „Aha, já teďka se nebavím s pravým člověkem, je to nějaké jako falešné, mám z toho jako horší pocit?“ Nebo,</v>
+
+245
+00:38:46.652 --> 00:38:57.792
+<v pavol-hejny>nebo jim to neříct, nechat těm lidem dobrý pocit, ale, ale vlastně jako nepřiznat to, že tam za tím je něco takového. A to je jako etická a právní otázka, která se bude muset vyřešit.</v>
+
+246
+00:39:00.612 --> 00:39:12.752
+<v zatisi-2024-01-03-speaker_1>No já si myslím, že, hm, začneme ty roboty mít rá-rá-rádi, jakmile budou řešit to, proč tam voláme. To</v>
+
+247
+00:39:12.792 --> 00:39:25.412
+<v zatisi-2024-01-03-speaker_1>znamená, jakmile úspěšně nám pomůžou, eh, vyřešit náš problém, budou mít neustále příjemný hlas, budou, i když na ně budeme hrubí, tak nezavolají nadřízeného,</v>
+
+248
+00:39:25.552 --> 00:39:37.852
+<v zatisi-2024-01-03-speaker_1>nebudou, nebudou unavení, takže bude to mít výhody. Budou, jejich hlas bude přizpůsoben našim hla-- našemu hlasu, bude se lépe poslouchat, eh, než třeba člověk</v>
+
+249
+00:39:37.912 --> 00:39:50.192
+<v zatisi-2024-01-03-speaker_1>fyzicky může nasimulovat nářečí, rychlost hlasu a tak dále. Takže ta interakce, já bych čekal, že bude pro člověka vlastně nakonec příjemnější. Ale to jediný kritérium,</v>
+
+250
+00:39:50.772 --> 00:40:03.712
+<v zatisi-2024-01-03-speaker_1>který je platný ve všech byznysových věcech a věcech, které se týkají, eh, všech těch linek podpory a zákaznických</v>
+
+251
+00:40:03.772 --> 00:40:15.772
+<v zatisi-2024-01-03-speaker_1>center, že chceme vyřešit nějaký problém, proto tam voláme a jakmile nám ten problém úspěšně vyřeší robot, tak si myslím, že budeme naopak třeba možná chtít přepojit na robota,</v>
+
+252
+00:40:16.172 --> 00:40:29.172
+<v zatisi-2024-01-03-speaker_1>než, než to řešit s člověkem. To se týká, myslím si, zákaznické péče. Tam opravdu masivní rozvoj nás čeká během jednoho, dvou roků, eh,</v>
+
+253
+00:40:29.532 --> 00:40:31.252
+<v zatisi-2024-01-03-speaker_1>dojde k velké transformaci.</v>
+
+254
+00:40:31.412 --> 00:40:43.652
+<v zatisi-2024-01-03-speaker_2>Chtěl jsem se zeptat, kdy Tomáš Studený odpověděl a předešel svou odpovědí mou otázku. Ještě mě u toho Tomáše napadlo, jak jsi říkal, že budete třeba chtít jako zákazník naštvaný chtít přepojit na šéfa. Tak vlastně</v>
+
+255
+00:40:43.672 --> 00:40:49.572
+<v zatisi-2024-01-03-speaker_2>proč ne, že jo? Tak robot přepojí na jiný hlas, který bude mít jinou míru asertivity. [smích]</v>
+
+256
+00:40:49.592 --> 00:41:01.772
+<v zatisi-2024-01-03-speaker_1>To jak říkal Pavol, bude tam muset být nějaká eskalační procedura, kde vždycky na konci bude člověk. Ale když se podíváte na statistiky, proč lidi volají třeba na call centrum do banky, tak až překvapivě hodně lidí</v>
+
+257
+00:41:01.812 --> 00:41:14.292
+<v zatisi-2024-01-03-speaker_1>volá s dotazy například „Kolik mám na účtu?“ A toto by ten, všichni si můžeme pohodlně zjistit v internetovém bankovnictví, v aplikaci, v nějakým jakoby jednoduchým stromu.</v>
+
+258
+00:41:15.032 --> 00:41:27.192
+<v zatisi-2024-01-03-speaker_1>Ale z nějakého důvodu spousta lidí chce i tudle věc slyšet, aby někdo, člověk teda mi tohle přečetl někde, ale myslím si, že, eh, todle časem</v>
+
+259
+00:41:27.252 --> 00:41:39.612
+<v zatisi-2024-01-03-speaker_1>se bude snižovat. Ale opravdu, když dneska se díváte na statistiky, tak takovýchto dotazů je tam poměrně hodně, že jenom lidi byli zvyklí na to, že to nevěděli, nechtějí si to pamatovat a někdo jim to vždycky v bance, v</v>
+
+260
+00:41:39.652 --> 00:41:40.912
+<v zatisi-2024-01-03-speaker_1>bance, v bance řekl.</v>
+
+261
+00:41:41.812 --> 00:41:54.912
+<v pavol-hejny>Tam je si možná dobré uvědomit, že často když je nějaká služba, tak osmdesát procent dotazů na ní jsou jako velmi obvykle opakující se a jenom nějaká jako malá ča-- menší část jsou</v>
+
+262
+00:41:54.972 --> 00:42:07.252
+<v pavol-hejny>opravdu expertní dotazy a často, často je to o těch prioritách a zdrojích, že často je lepší, aby na těch jako dvacet procent expertních věcí byli vyhrazení ti experti a na těch osmdesát,</v>
+
+263
+00:42:07.392 --> 00:42:08.732
+<v pavol-hejny>ty se dají zautomatizovat.</v>
+
+264
+00:42:10.272 --> 00:42:22.292
+<v pavol-hejny>A myslím si, že tohleto bude platit v mnoha, mnoha službách napříč celým průmyslem, od, od psaní textů, generování webů až jako po infolinky.</v>
+
+265
+00:42:23.172 --> 00:42:26.632
+<v zatisi-2024-01-03-speaker_2>Bavíme se o komerční sféře. Kdybychom se podívali do veřejného sektoru,</v>
+
+266
+00:42:28.172 --> 00:42:40.252
+<v zatisi-2024-01-03-speaker_2>tak myslíte si, že v nějaké dohledné době nějaké algoritmy nebo umělá inteligence bude pomáhat rozhodovat třeba věci i ve veřejné správě? A mířím k tomu i třeba nějaký</v>
+
+267
+00:42:40.692 --> 00:42:52.892
+<v zatisi-2024-01-03-speaker_2>scoring toho, jestli vy na úřadu práce jste neporušil nějaká pravidla, abyste mohl dostat podporu v nezaměstnanosti kupříkladu. Třeba toho já už bych se trochu bál,</v>
+
+268
+00:42:52.972 --> 00:42:59.092
+<v zatisi-2024-01-03-speaker_2>no, pokud by– ale možná se bojím, protože jsem laik, který neví, nevidí dovnitř.</v>
+
+269
+00:43:00.132 --> 00:43:12.475
+<v pavol-hejny>Já bych osobně řekl, že tohle je velmi nebezpečná věc, kterou bychom si Jako společnost to jednak měli uvědomit a, a myslím si, že bychom měli požadovat, nech zásadní věci v životě o</v>
+
+270
+00:43:12.536 --> 00:43:23.256
+<v pavol-hejny>nás nerozhoduje nějaký model, který je zavřený za černou skříňkou. Myslím si, že to je něco, co, co jako bude velká otázka od budoucna.</v>
+
+271
+00:43:25.176 --> 00:43:37.176
+<v zatisi-2024-01-03-speaker_1>Já jenom doplním, že vlastně tam tímto směrem míří tolik diskutovaná regulace Evropské unie, že opravdu o člověku by neměl, neměla rozhodovat plechovka, když</v>
+
+272
+00:43:37.216 --> 00:43:49.496
+<v zatisi-2024-01-03-speaker_1>to zjednoduším. V těch zásadních věcích, jestli někde dostanu místo, jestli se mi dostane nějakého ošetření například v nemocnici, jestli mám nárok na, eh, na, na daný lék. Takže</v>
+
+273
+00:43:49.536 --> 00:44:02.256
+<v zatisi-2024-01-03-speaker_1>ty zásadní věci, možná i ty méně, méně zásadní, buď musí být naprosto zřejmé, jak k tomu rozhodnutí ta umělá inteligence došla. Musí být takzvaná explainable, vysvětlitelná,</v>
+
+274
+00:44:02.416 --> 00:44:14.416
+<v zatisi-2024-01-03-speaker_1>což dneska, eh, není v řadě, v řadě aplikací z principu toho, jak funguje. To, že si nepamatuje, co, co řekla předtím. Nedá se teda najít nějaká niť, cesta, která vede od</v>
+
+275
+00:44:14.476 --> 00:44:20.356
+<v zatisi-2024-01-03-speaker_1>těch vstupů k tomu výstupu. A Evropská unie, myslím, že to</v>
+
+276
+00:44:21.896 --> 00:44:33.996
+<v zatisi-2024-01-03-speaker_1>je vlastně, eh, v určitém směru hraje za, za nás, za člověka, za práva o tom, aby o s-- o našem životě jsme rozhodovali sami nebo se rozhodovalo</v>
+
+277
+00:44:34.036 --> 00:44:46.056
+<v zatisi-2024-01-03-speaker_1>nějakým, eh, transparentním, demokratickým, jasným způsobem. Eh, a tam, tam dneska ta, ty černé skříňky těch serverů,</v>
+
+278
+00:44:46.736 --> 00:44:58.776
+<v zatisi-2024-01-03-speaker_1>eh, ještě, ještě nejsou. Takže si myslím, že to je, je to něco, co, co nás čeká, aby, aby o našem životě, eh, jsme rozhodovali sami nebo</v>
+
+279
+00:44:58.816 --> 00:45:07.916
+<v zatisi-2024-01-03-speaker_1>se rozhodovalo na základě naprosto transparentních pravidel a bylo vždycky vysvětlitelné, na základě čeho k nějakému rozhodnutí došlo nebo nedošlo.</v>
+
+280
+00:45:08.996 --> 00:45:21.476
+<v zatisi-2024-01-03-speaker_2>Ta regulace, regulace je hrozně zajímavá věc, protože z toho, co říkáte, samozřejmě vlastně smysl má. Ale nebojíte se, že na druhou stranu nám utečou země, které</v>
+
+281
+00:45:21.636 --> 00:45:33.896
+<v zatisi-2024-01-03-speaker_2>nejsou ke svým občanům tak úplně, eh, že nemají své občany až tolik v lásce? A teď nemyslím jenom Čínu, ale můžeme se bavit taky třeba ve Spojených státech. Prostě když nebudeme</v>
+
+282
+00:45:33.916 --> 00:45:46.116
+<v zatisi-2024-01-03-speaker_2>regulovat, když se podíváte na to, tak když Google spouštěl Bard, tak právě kvůli nějakým, eh, možným regulacím na evropským kontinentu nebo v Evropské unii, tak to přišlo se zpožděním velmi výrazným.</v>
+
+283
+00:45:46.836 --> 00:45:59.076
+<v zatisi-2024-01-03-speaker_2>Tak nebojíte se, že-- já to naprosto chápu a souhlasím s tím. Ale nemůže nám hrozit, že nám uteče svět, že právě ty země, které nebudou vůbec jako řešit svý lidi, ať je to třeba Čína, tak že oni v tý umělé inteligenci skočí</v>
+
+284
+00:45:59.136 --> 00:46:02.956
+<v zatisi-2024-01-03-speaker_2>o další krok nebo skok, revoluční, revoluční krok dál?</v>
+
+285
+00:46:04.136 --> 00:46:16.356
+<v pavol-hejny>Já bych to možná rozdělil na dvě různé kategorie. My se vlastně bavíme o něčem, čemu se říká generativní AI, která spočívá v tom, že s poměrně málo informací já dělám, eh, nějaký bohatý obsah, že z jednoho</v>
+
+286
+00:46:16.416 --> 00:46:28.776
+<v pavol-hejny>zadání na obrázek vygeneruju celý obrázek, z jednoho zadání vygeneruju celý web nebo tak. A často to má své problémy, tady ty technologie a mají svoje etické otázky, ale ten,</v>
+
+287
+00:46:28.836 --> 00:46:41.096
+<v pavol-hejny>ten opravdový problém, který zmiňujete, tak se týká spíš té jako druhé umělé inteligence, té, té, která dokáže z mnoho obsahů, třeba z video, z video streamu nebo, nebo z, z</v>
+
+288
+00:46:41.176 --> 00:46:53.556
+<v pavol-hejny>mnoho různých informací, ze všech transakcí na bankovním účtě vyrobit to jedno číslo, to, to jedno sociální skóre nebo tu jednu informaci, že tady je, eh, tady je Pavol Hejný a, a má zlý úmysly.</v>
+
+289
+00:46:53.616 --> 00:47:05.696
+<v pavol-hejny>Nebo že tady je něco. A teď myslím si, že problematičtější je ten druhý typ umělé inteligence než ten generativní. Ale každá má opravdu velmi jiné, velmi jiné etické a</v>
+
+290
+00:47:05.736 --> 00:47:06.896
+<v pavol-hejny>legislativní problémy.</v>
+
+291
+00:47:08.976 --> 00:47:11.216
+<v zatisi-2024-01-03-speaker_2>Tomáš kýve hlavou, nechce nic dodat?</v>
+
+292
+00:47:12.576 --> 00:47:16.056
+<v zatisi-2024-01-03-speaker_1>Já strašně rád dodávám, zejména po večeři, jo, já dodávám furt-</v>
+
+293
+00:47:16.056 --> 00:47:17.236
+<v zatisi-2024-01-03-speaker_2>To jste i tak. [smích]</v>
+
+294
+00:47:17.276 --> 00:47:29.496
+<v zatisi-2024-01-03-speaker_1>Já jsem jet, ale už, už zase začínám myslet na to, jak pak dorazím domů a dodám si nějakou čokoládku, která, kterou mi přivezla žena drahá, kterou tímto zdravím, protože</v>
+
+295
+00:47:29.516 --> 00:47:41.916
+<v zatisi-2024-01-03-speaker_1>jsem řekl, že udělám tady tu trapnou věc, jak pozdravím domů a děti možná poslouchají. Sešly se všichni u rozhlasového přijímače a poslouchají tatínka, jak mudruje v rozhlase. Ne, je, je opravdu,</v>
+
+296
+00:47:43.196 --> 00:47:55.656
+<v zatisi-2024-01-03-speaker_1>umělá inteligence má různé škatulky. Myslím Pavol celkem dobře to rozdělil na to, že z mnohého dělá jediné anebo z jediného dělá mnohé. A</v>
+
+297
+00:47:55.716 --> 00:48:07.796
+<v zatisi-2024-01-03-speaker_1>ty největší problémy jsou právě ty na základě, eh, dat, eh, rozsáhlých souborů dat různých, o který, která nejsou opravená oproti těm</v>
+
+298
+00:48:08.436 --> 00:48:20.796
+<v zatisi-2024-01-03-speaker_1>různým pokřivením, takzvaně biasům, biasům, jak se říká. Eh, potom se to přenese do těch výstupů. A to jsou všechny ty kauzy, kdy diskriminovala podle</v>
+
+299
+00:48:21.696 --> 00:48:33.796
+<v zatisi-2024-01-03-speaker_1>barvy pleti, podle toho místa, kde člověk se narodil, podle, eh, na jakou školu chodil a tak dále. A myslím si, že ty etické aspekty</v>
+
+300
+00:48:34.296 --> 00:48:46.836
+<v zatisi-2024-01-03-speaker_1>jsou skutečně to nejdůležitější. A jestli nějaké země nám utečou, myslím tím teďka třeba Evropu nebo, eh, evropskou civilizaci tím, že nemají</v>
+
+301
+00:48:48.296 --> 00:49:00.356
+<v zatisi-2024-01-03-speaker_1>respekt k osobním datům a k ochraně osobních dat, eh, tak si myslím, že sice možná něco ztratíme, někde náskok, ale na druhou stranu ochrana soukromí je tak základní</v>
+
+302
+00:49:00.396 --> 00:49:12.496
+<v zatisi-2024-01-03-speaker_1>hodnota, že má z mého pohledu preferenci Před nějakým technologickým náskokem, který ale povede také k tomu, že, eh, se z nás nasimuluje můj avatar, že se,</v>
+
+303
+00:49:12.596 --> 00:49:24.616
+<v zatisi-2024-01-03-speaker_1>eh, zdeepfakuje, někdo se za mě může vydávat, někdo mi může ukradnout, eh, můj hlas, můj obraz, nasimulovat. A vždycky si musíme vybrat, co je, co je</v>
+
+304
+00:49:24.656 --> 00:49:25.676
+<v zatisi-2024-01-03-speaker_1>pro nás důležitější.</v>
+
+305
+00:49:26.996 --> 00:49:39.276
+<v zatisi-2024-01-03-speaker_2>Říkal Tomáš Studeník. Bavili jsme se v Zátiší na Rádu jedna i s Pavlem Hejným. Jelikož pánové, máme poslední dvě minuty. Když jsme se před rokem a čtvrt bavili s Tom-s Tomášem Studeníkem a tedy</v>
+
+306
+00:49:39.316 --> 00:49:52.596
+<v zatisi-2024-01-03-speaker_2>s Rudolfem Rossou, eh, tak čtrnáct dnů poté přišlo k velké změně, k revoluční změně alespoň z pohledu obecného publika. Vyšel Chat GPT, OpenAI zveřejnila. Myslíte</v>
+
+307
+00:49:52.636 --> 00:50:05.516
+<v zatisi-2024-01-03-speaker_2>si, že něco podobného nastane do čtrnácti dnů teď? A když se budem bavit třeba za rok, za rok a půl, tak že si pustíme před vysíláním naše dnešní povídání a řekneme si: „Ty jo, no tohle bysme tehdy věděli.“</v>
+
+308
+00:50:05.596 --> 00:50:18.016
+<v pavol-hejny>Čistě pravděpodobnostně si spíš myslím, že ne. Ale, ale ten rozvoj podle mě bude naprosto, naprosto markantní v následujícím roce. A hlavně si myslím, že těch věcí, které se budou dát pomocí generativní</v>
+
+309
+00:50:18.036 --> 00:50:27.496
+<v pavol-hejny>inteligence dělat, tak, tak se, tak se ty možnosti neskutečně zlepší a neskutečně se zvětší možnost jako bohatosti toho obsahu, který se dá generovat.</v>
+
+310
+00:50:29.356 --> 00:50:42.156
+<v zatisi-2024-01-03-speaker_1>Já osobně čekám pomalu, eh, no pomalu, spíš rychle nástup těch robotů v tom Čapkově smyslu, který konečně například mi umyjou nádobí nebo uvaří</v>
+
+311
+00:50:42.196 --> 00:50:48.836
+<v zatisi-2024-01-03-speaker_1>nebo uklidí. Eh, protože abstraktní modely generují pomalu sonety a,</v>
+
+312
+00:50:50.676 --> 00:51:03.036
+<v zatisi-2024-01-03-speaker_1>a, a básně a krásné obrazy. Ale to, aby robot mi doma pořádně uklidil, umyl nádobí, pořád není. A myslím si, že nás čeká éra, kdy ta síla umělé inteligence těch</v>
+
+313
+00:51:03.076 --> 00:51:15.076
+<v zatisi-2024-01-03-speaker_1>modelů, které buď rozeznávají něco, nebo něco generují, vymýšlejí recepty, se spojí i s tím hardwarem, s těmi roboty, na kterých mimochodem pracuje kdekdo, včetně Elona Muska, eh,</v>
+
+314
+00:51:15.196 --> 00:51:27.736
+<v zatisi-2024-01-03-speaker_1>a pomůže nám nejenom na té intelektuální rovině, ale také na té fyziologické, eh, anebo té, eh, subsistenční. Takže zkráceně</v>
+
+315
+00:51:28.216 --> 00:51:38.876
+<v zatisi-2024-01-03-speaker_1>konečně budeme mít doma, eh, Saturnina, [smích] který, který nám pomůže uvařit, uklidit a ještě nám řekne nějakej dobrej vtip večer.</v>
+
+316
+00:51:39.276 --> 00:51:51.856
+<v zatisi-2024-01-03-speaker_2>Tak já mám zatím doma jenom Alexu. Ta mi pustí rádio, který chci. Možná mi na něco odpoví, ale neuvaří za mě ani neumyje nádobí. Pánové, děkuju moc. Hosty v dnešním Zátiší byl Tomáš a Pavol.</v>
+
+317
+00:51:52.696 --> 00:52:04.136
+<v zatisi-2024-01-03-speaker_2>Tomáš Studeník a Pavol Hejný. Omlouvám se, to je vždycky na konci, [smích] mě vypadne aspoň, aspoň jedno, jedno slovo nebo jedno jméno. Děkuju moc, že jste přišli a uvidíme, třeba za rok a čtvrt si vás zase pozvu právě proto, abychom ukázali,</v>
+
+318
+00:52:04.196 --> 00:52:08.056
+<v zatisi-2024-01-03-speaker_2>co se stalo za ten rok a půl, kdy jsme se naposledy bavili. Hezký večer.</v>
+
+319
+00:52:08.676 --> 00:52:12.796
+<v zatisi-2024-01-03-speaker_1>Hezký večer a my už za sebe pošleme nějaké digitální simulace.</v>
+
+320
+00:52:12.836 --> 00:52:14.136
+<v pavol-hejny>Já už za sebe pošlu avatara.</v>
+
+321
+00:52:14.276 --> 00:52:14.756
+<v zatisi-2024-01-03-speaker_1>Přesně.</v>
+
+322
+00:52:14.796 --> 00:52:14.996
+<v pavol-hejny>No.</v>
+
+323
+00:52:15.496 --> 00:52:17.536
+<v zatisi-2024-01-03-speaker_2>Já tak to jsem ani nebudu muset přijít. To udělám z domova.</v>
+
+324
+00:52:17.596 --> 00:52:17.756
+<v pavol-hejny>No.</v>
+
+325
+00:52:18.516 --> 00:52:27.836
+<v zatisi-2024-01-03-speaker_2>A z Ráda jedna, tentokrát ještě fyzicky ze studia Ráda jedna se letos, letos dne se loučí i Aleš ujir. Přeju hezký večer, mějte se. Paní Tlučhořová. No.</v>
+
+326
+00:52:27.896 --> 00:52:32.856
+<v zatisi-2024-01-03-speaker_1>Buďme o poznání méně neurvalí.</v>
+
+327
+00:52:32.896 --> 00:52:38.296
+<v zatisi-2024-01-03-speaker_2>Na to už je příliš pozdě a, eh- A nejhorší ze všeho jsou trpaslíci.</v>
+
+328
+00:52:38.456 --> 00:52:42.556
+<v zatisi-2024-01-03-speaker_1>Šťastni ať jsou všechny bytosti. Om.</v>

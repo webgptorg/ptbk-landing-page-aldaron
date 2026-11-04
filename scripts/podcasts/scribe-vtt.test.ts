@@ -37,4 +37,18 @@ describe('archival Scribe conversion', () => {
         expect(() => scribeToVtt({ text: 'Starý text.' }, 'old')).toThrow('word-timed');
         expect(() => scribeToVtt({ words: [{ text: 'Slovo', speaker_id: 'speaker_0' }] }, 'old')).toThrow('no usable timing');
     });
+
+    it('keeps a point-timed interjection under its own voice using surrounding real cue bounds', () => {
+        const result = scribeToVtt({ words: [
+            { text: 'Rozumím.', type: 'word', start: 1, end: 3, speaker_id: 'speaker_0' },
+            { text: 'Jo.', type: 'word', start: 2.8, end: 2.8, speaker_id: 'speaker_1' },
+            { text: 'Pokračuj.', type: 'word', start: 3.1, end: 4, speaker_id: 'speaker_0' },
+        ] }, 'dialogue', { speaker_1: 'pavol-hejny' });
+        expect(result.cues[0]).toMatchObject({ start: 1, end: 3, text: 'Rozumím. Jo.' });
+        expect(result.vtt).toContain('<v dialogue-speaker_0>Rozumím.</v>\n<v pavol-hejny>Jo.</v>');
+        expect(result.cues).toHaveLength(2);
+        expect(() => scribeToVtt({ words: [
+            { text: 'Jo.', type: 'word', start: 2.8, end: 2.8, speaker_id: 'speaker_1' },
+        ] }, 'isolated')).toThrow('no real positive time interval');
+    });
 });
