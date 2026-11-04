@@ -1,11 +1,4 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
-import { createE2eTestEmail } from '@/lib/e2e/testData';
-import {
-    AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
-    AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
-} from '@/businesses/ai-ta-krajta/config';
-import { submitAndExpectApiSuccess } from './support/submissions';
-
 const LOCAL_SERVER_URL = new URL(process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4009');
 
 const BRANDED_HOSTS = [
@@ -138,61 +131,32 @@ test.describe('isolated public domains', () => {
         });
 
         await page.goto(localDomainUrl('ai-ta-krajta.cz', '/'), { waitUntil: 'domcontentloaded' });
-        await page.getByRole('button', { name: 'Poslouchat', exact: true }).click();
+        await page.getByRole('button', { name: 'Poslouchat poslední díl', exact: true }).click();
         await expect(page.getByRole('button', { name: 'Zavřít přehrávač' })).toBeVisible();
         expect(blockedAssetUrls).toEqual([]);
     });
 
-    test('subscribes from the podcast section and footer on mobile without interrupting playback or page state', async ({ page }) => {
-        await page.addInitScript(() => {
-            Object.defineProperty(HTMLMediaElement.prototype, 'play', {
-                configurable: true,
-                value: () => Promise.resolve(),
-            });
-        });
+    test('keeps mobile podcast navigation compact without a newsletter or product terms', async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });
 
         for (const hostname of ['ai-ta-krajta.cz', 'www.ai-ta-krajta.cz']) {
-            const email = createE2eTestEmail(`ai-ta-krajta-email-${hostname.startsWith('www.') ? 'www' : 'apex'}`);
             await page.goto(localDomainUrl(hostname, '/?person=pavol-hejny#dily'), { waitUntil: 'networkidle' });
-
-            const IS_FOOTER_SUBSCRIPTION = hostname.startsWith('www.');
-            const SUBSCRIPTION_AREA = IS_FOOTER_SUBSCRIPTION ? page.locator('footer') : page.locator('section#odber');
-            await expect(page.locator('footer').getByRole('form', { name: 'Zůstaň v obraze' })).toBeVisible();
-            await expect(SUBSCRIPTION_AREA.getByRole('link', { name: 'zásad ochrany osobních údajů' })).toHaveAttribute(
-                'href',
-                'https://ptbk.io/cs/ochrana-osobnich-udaju',
+            const navigation = page.getByRole('navigation', { name: 'Hlavní navigace' });
+            await expect(navigation.getByRole('link')).toHaveCount(2);
+            await expect(navigation.getByRole('link', { name: 'Díly', exact: true })).toHaveAttribute('href', '/');
+            await expect(navigation.getByRole('link', { name: 'Spolupráce', exact: true })).toHaveAttribute('href', '/media-kit');
+            await expect(page.locator('section#odber')).toHaveCount(0);
+            await expect(page.locator('footer form')).toHaveCount(0);
+            await expect(page.locator('footer').getByRole('link', { name: 'Ochrana osobních údajů' })).toHaveAttribute(
+                'href', 'https://ptbk.io/cs/legal/ochrana-osobnich-udaju',
             );
+            await expect(page.locator('footer').getByRole('link', { name: 'Obchodní podmínky' })).toHaveCount(0);
+            expect(new URL(page.url()).searchParams.get('person')).toBe('pavol-hejny');
+            expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-            await page.getByRole('button', { name: /^Pustit díl / }).click();
-            await expect(page).toHaveURL(/episode=/);
-            await expect(page.getByRole('button', { name: 'Pozastavit', exact: true })).toBeVisible();
-
-            const emailField = SUBSCRIPTION_AREA.getByRole('textbox', { name: 'E-mail' });
-            await emailField.fill(` ${email} `);
-            const waitlistRequestPromise = page.waitForRequest(
-                (request) => request.method() === 'POST' && new URL(request.url()).pathname === '/api/waitlist',
-            );
-            await submitAndExpectApiSuccess(page, '/api/waitlist', () => emailField.press('Enter'));
-
-            const submittedContact = await waitlistRequestPromise.then((request) => request.postDataJSON());
-            expect(submittedContact).toMatchObject({
-                fullname: '',
-                email,
-                phone: '',
-                userNote: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
-                placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
-            });
-            expect(submittedContact.url).toContain(hostname);
-
-            const submittedUrl = new URL(page.url());
-            expect(submittedUrl.pathname).toBe('/');
-            expect(submittedUrl.searchParams.get('person')).toBe('pavol-hejny');
-            expect(submittedUrl.searchParams.get('episode')).not.toBeNull();
-            expect(submittedUrl.search).not.toContain(email);
-            await expect(page.getByRole('status')).toContainText('žádost o e-mailové novinky jsme uložili');
-            await expect(page.getByRole('button', { name: 'Pozastavit', exact: true })).toBeVisible();
-            await expect(page.locator('body')).not.toContainText(email);
+            await navigation.getByRole('link', { name: 'Spolupráce', exact: true }).click();
+            await expect(page.getByRole('heading', { level: 1 })).toHaveText('Host, téma nebo partnerství.');
+            await expect(page.getByRole('navigation', { name: 'Hlavní navigace' }).getByRole('link')).toHaveCount(2);
         }
     });
 

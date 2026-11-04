@@ -11,8 +11,8 @@ const SHARING_PREVIEW_PAGES = [
     { hostname: 'ptbk.io', path: '/en/privacy-policy', title: /Privacy Policy/ },
     { hostname: 'ptbk.io', path: '/cs/komunita/projects', title: /Co tvoří/ },
     { hostname: 'ptbk.io', path: '/cs/online-workshop/participant', title: /Živý online workshop/ },
-    { hostname: 'ai-ta-krajta.cz', path: '/media-kit', title: /Media kit/ },
-    { hostname: 'ai-ta-krajta.cz', path: '/branding', title: /Brand kit/ },
+    { hostname: 'ai-ta-krajta.cz', path: '/media-kit', title: /Spolupráce/ },
+    { hostname: 'ai-ta-krajta.cz', path: '/branding', title: /Logo a podklady/ },
     { hostname: 'pavolhejny.cz', path: '/', title: /Pavol Hejný/ },
     { hostname: 'pavolhejny.com', path: '/', title: /Pavol Hejný/ },
 ] as const;

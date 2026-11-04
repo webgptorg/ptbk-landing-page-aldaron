@@ -40,13 +40,13 @@ export type AiTaKrajtaSubpage = {
 
 export const AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE: AiTaKrajtaSubpage = {
     path: AI_TA_KRAJTA_MEDIA_KIT_PATH,
-    title: 'Media kit',
+    title: 'Spolupráce',
     description: 'Nabídka spolupráce, redakční pravidla a kontakt na redakci.',
 };
 
 export const AI_TA_KRAJTA_BRANDING_SUBPAGE: AiTaKrajtaSubpage = {
     path: AI_TA_KRAJTA_BRANDING_PATH,
-    title: 'Brand kit',
+    title: 'Logo a podklady',
     description: 'Logo ke stažení, barvy pořadu, psaní názvu a pravidla použití.',
 };
 

@@ -143,12 +143,12 @@ for (const path of PUBLIC_PAGE_PATHS) {
 test('AI ta Krajta collaboration section deep-links to its media kit', async ({ page }) => {
     await page.goto(AI_TA_KRAJTA_PATH, { waitUntil: 'domcontentloaded' });
 
-    const mediaKitLink = page.getByRole('link', { name: 'Otevřít media kit' });
+    const mediaKitLink = page.getByRole('link', { name: 'Zjistit víc', exact: true });
     await expect(mediaKitLink).toHaveAttribute('href', AI_TA_KRAJTA_MEDIA_KIT_PATH);
     await mediaKitLink.click();
 
     await expect(page).toHaveURL(AI_TA_KRAJTA_MEDIA_KIT_PATH);
-    await expect(page.getByRole('heading', { name: /Oslovte české a slovenské publikum/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Host, téma nebo partnerství.' })).toBeVisible();
 });
 
 test('AI ta Krajta owns its metadata, icon and installable manifest and credits Promptbook coder', async ({ page }) => {

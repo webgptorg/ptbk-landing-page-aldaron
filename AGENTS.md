@@ -315,8 +315,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The shared avatar puts every portrait over a stable, subtly varied neutral gradient.
   Card and episode buttons highlight it on hover and keyboard focus, with a small
   zoom only when reduced motion is not requested. A future person without a photo
-  keeps initials on that same background. The one people list is drawn anew
-  for every visit, weighted by how many episodes of the archive name each
+  keeps initials on that same background. Team contributors are shown separately from invited guests;
+  guests live in a collapsible list. The order within each group is drawn anew for every visit, weighted by how many episodes of the archive name each
   person after their roster factor is applied (one by default), so somebody heard
   often comes up high far more often than someone in one díl without the list ever becoming a ranking. The draw is local state and
   is made in the browser; the page itself is built in the order the draw leans
@@ -346,8 +346,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `ptbk.io` to `/media-kit` and `/branding` on `ai-ta-krajta.cz`. They are the two pages beside
   the podcast, named once in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page
-  differently than the page names itself. Both share the homepage navigation,
-  section heading and footer as each other. The brand kit hands out the logo the
+  differently than the page names itself. Both share the homepage navigation and footer.
+  The collaboration page is labelled Spolupráce and keeps the existing `/media-kit` URL and inquiry deep links.
+  Its concise guest/topic guidance, approved partner offers and editorial rules precede one contact form;
+  dated audience figures and brand downloads sit in an optional media-kit detail. The homepage's Zjistit víc
+  opens that explanation, while Napsat nám opens the contact form. The brand-kit heading uses the canonical
+  `AI_TA_KRAJTA_NAME` spelling. The brand kit hands out the logo the
   site already serves at `/ai-ta-krajta/logo.svg`, `.png` and the cover artwork,
   publishes no colour outside `AI_TA_KRAJTA_COLORS`, and says how the name is
   written; it asks for nothing and sends visitors to the media-kit form.
