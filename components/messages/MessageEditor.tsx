@@ -49,6 +49,12 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             method: saved ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed.data),
         });
         setSaved(result.message);
+        // Adopt server-prepared links only while this field still contains the submitted draft.
+        if (valuesRef.current.markdown === parsed.data.markdown) {
+            const normalized = { ...valuesRef.current, markdown: result.message.markdown };
+            valuesRef.current = normalized;
+            setValues(normalized);
+        }
         if (!saved) autosave.acceptDraftValue();
         onSaved(result.message);
         return true;
@@ -198,7 +204,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             {saved ? <>
                 <section className="space-y-3 rounded-xl border border-slate-200 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-medium">Zpráva k odeslání</h3>
-                        <Button type="button" disabled={busy} variant="outline" onClick={() => void run('Ukládám před kopírováním…', async () => { if (await autosave.saveNow()) await copyText(shareText); })}><Copy className="mr-2 h-4 w-4" />{copyStatus === 'copied' ? 'Zkopírováno' : 'Kopírovat zprávu s odkazem'}</Button>
+                        <Button type="button" disabled={busy} variant="outline" onClick={() => void run('Ukládám před kopírováním…', async () => { if (await autosave.saveNow()) await copyText(createMessageShareText(valuesRef.current.markdown, publicUrl)); })}><Copy className="mr-2 h-4 w-4" />{copyStatus === 'copied' ? 'Zkopírováno' : 'Kopírovat zprávu s odkazem'}</Button>
                     </div>
                     <Textarea aria-label="Zpráva k odeslání včetně odkazu" value={shareText} readOnly rows={6} className="bg-slate-50" />
                     {copyStatus === 'failed' && <p role="alert" className="text-sm text-red-700">Kopírování se nepodařilo. Označte a zkopírujte text z pole.</p>}

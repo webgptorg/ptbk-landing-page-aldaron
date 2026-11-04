@@ -5,6 +5,7 @@ import { getAgentDatabase } from '@/lib/agents/agentDatabase';
 import { generateShortcode } from '@/lib/shortener/generateShortcode';
 import { normalizeHostname } from '@/lib/domains/publicDomainRouting';
 import { loadAllSupabaseRows } from '@/lib/supabase/loadAllSupabaseRows';
+import { prepareMessageLinks } from './messageLinks';
 import type { ManagedMessage, MessageAudio, MessageValues, MessageListItem } from './messageModel';
 
 export const MESSAGE_RESPONSE_HEADERS = {
@@ -56,9 +57,10 @@ export const loadMessageByShortcode = cache(async (shortcode: string, hostname: 
 });
 export async function saveManagedMessage(id: string | null, values: MessageValues): Promise<ManagedMessage> {
     const client = getAgentDatabase();
+    const markdown = await prepareMessageLinks(client, values.markdown);
     for (let attempt = 0; attempt < 5; attempt++) {
         const { data, error } = await client.rpc('save_expanded_message', {
-            target_id: id, target_title: values.title, target_markdown: values.markdown, target_context: values.context,
+            target_id: id, target_title: values.title, target_markdown: markdown, target_context: values.context,
             target_introduction: values.introduction, target_prefix: values.prefix, target_domain: values.domain,
             target_agent_id: values.agentId, target_code_suffix: generateShortcode(),
         });

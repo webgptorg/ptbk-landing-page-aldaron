@@ -78,7 +78,15 @@ use cases, and audiences. Keep these rules current when behavior changes.
   No old `/messages/<capability>` route or compatibility redirect is retained. Pages stay outside sitemaps and feeds,
   noindex/no-store with no third-party analytics or cookie panel. Dynamic social cards use the actual subject,
   expansion arrows and Pavol's portrait. Metadata/image requests do not record a tracked navigation.
-  Audio is optional and generated only by its authenticated button, never autosave or build. Supabase Storage's
+  Saving a message prepares its Markdown links through the workshop material parser, safe title fetch/fallback and
+  ad hoc shortener. Raw URLs become titled Markdown; authored labels remain. Existing registered short URLs stay
+  unchanged; code and images remain untouched. Only save paths prepare links, never public reads or a bulk backfill.
+  Destination links are ordinary `admin-shortener` ad hoc redirects; `sourceApp=messages` remains reserved for the
+  unlisted message page. Server-normalized Markdown returns to the editor without replacing newer typing.
+  Audio is optional and generated only by its authenticated button, never autosave or build. New narration omits
+  raw HTTP(S)/www URLs and reads only Markdown link labels, with original visual IDs retained for measured alignment.
+  Existing recordings, scripts and timing are never regenerated or invalidated just by deploying these rules.
+  Supabase Storage's
   private shared `OBJECT_STORAGE_BUCKET` holds immutable MP3s, with short signed CDN reads and native byte ranges.
   A text hash hides stale audio and timing after text edits. Exact provider character alignment maps to renderer
   words; absent or incompatible alignment disables tracking. Explicit migration reuses the original recording and

@@ -482,7 +482,7 @@ export async function loadWorkshopMaterialTrackedDestination(
     return { destinationUrl: destinationUrls[0] ?? null, errorMessage: null };
 }
 
-function getWorkshopShortcodeLinkDestinationsRequiringTitle(bodyMarkdown: string): readonly string[] {
+export function getWorkshopShortcodeLinkDestinationsRequiringTitle(bodyMarkdown: string): readonly string[] {
     return Array.from(
         new Set(
             collectWorkshopMaterialLinkRanges(bodyMarkdown)
@@ -509,7 +509,7 @@ function getStoredWorkshopShortcodeLinkTitle(value: string | null | undefined): 
     return title === '' ? null : title;
 }
 
-async function resolveWorkshopShortcodeLinkTitle(destinationUrl: string): Promise<string> {
+export async function resolveWorkshopShortcodeLinkTitle(destinationUrl: string): Promise<string> {
     const trackableUrl = getTrackableWorkshopMaterialUrl(destinationUrl);
     if (trackableUrl === null) {
         return destinationUrl;

@@ -11,6 +11,31 @@ import { TEST_MESSAGE } from '@/lib/messages/messageTestFixtures';
 const agent = { id: TEST_MESSAGE.agentId, name: 'Pavol Hejný', isEnabled: true };
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 describe('two-step message editor', () => {
+    it('adopts prepared server links without replacing text typed while the save was pending', async () => {
+        let complete!: (value: unknown) => void;
+        const raw = 'Viz https://example.com/doc';
+        const prepared = 'Viz [Dokument](https://ptbk.io/AbCd1234)';
+        mocks.request.mockReturnValueOnce(new Promise((resolve) => { complete = resolve; }));
+        mocks.request.mockResolvedValue({ message: { ...TEST_MESSAGE, markdown: 'Novější text.' } });
+        render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured={false} transcriptionConfigured={false} onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.change(screen.getByLabelText('Krátká zpráva'), { target: { value: raw } });
+        await waitFor(() => expect(mocks.request).toHaveBeenCalledOnce(), { timeout: 2000 });
+        fireEvent.change(screen.getByLabelText('Krátká zpráva'), { target: { value: 'Novější text.' } });
+        complete({ message: { ...TEST_MESSAGE, markdown: prepared } });
+        await waitFor(() => expect(mocks.request).toHaveBeenCalledTimes(2));
+        expect(screen.getByLabelText('Krátká zpráva')).toHaveValue('Novější text.');
+        const options = mocks.request.mock.calls[1][1] as { body: string };
+        const body = JSON.parse(options.body) as { markdown: string };
+        expect(body.markdown).toBe('Novější text.');
+    });
+    it('shows server-prepared links in both the editable draft and share text', async () => {
+        const prepared = 'Viz [Dokument](https://ptbk.io/AbCd1234)';
+        mocks.request.mockResolvedValue({ message: { ...TEST_MESSAGE, markdown: prepared } });
+        render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured={false} transcriptionConfigured={false} onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.change(screen.getByLabelText('Krátká zpráva'), { target: { value: 'Viz https://example.com/doc' } });
+        await waitFor(() => expect(screen.getByLabelText('Krátká zpráva')).toHaveValue(prepared), { timeout: 2000 });
+        expect((screen.getByLabelText('Zpráva k odeslání včetně odkazu') as HTMLTextAreaElement).value).toContain(prepared);
+    });
     it('generates three texts only on request, keeps the draft editable and requires explicit creation', async () => {
         mocks.request.mockResolvedValueOnce({ title: 'První použití', markdown: 'Ahoj týme,\n\nDokončíme registraci.', introduction: 'Můžeme probrat první použití.' });
         const saved = vi.fn();

@@ -153,3 +153,20 @@ References: [Supabase S3 compatibility](https://supabase.com/docs/guides/storage
 [ElevenLabs timestamp synthesis](https://elevenlabs.io/docs/api-reference/text-to-speech/convert-with-timestamps).
 Audio context uses [single-use tokens](https://elevenlabs.io/docs/api-reference/tokens/create) and
 [batch transcription](https://elevenlabs.io/docs/api-reference/speech-to-text/convert).
+
+## Link preparation and new narration
+
+Every explicit creation or autosave prepares the short message Markdown with the existing workshop-material
+destination parser, safe page-title scraper/fallback, Markdown escaping and ad hoc shortener. Raw HTTP(S) URLs
+become `[page title](short URL)`; authored link labels remain. Registered short links on any enabled public-domain
+alias are left byte-for-byte unchanged. Duplicate destinations share a replacement. Failed saves retain the draft,
+and retries can reuse already-created ad hoc links. A failed metadata fetch uses the destination hostname.
+Context and chat introduction remain source text. Public reads, git-backed article Markdown and historical messages
+are not rewritten. Destination links retain ordinary redirect provenance (`admin-shortener`, ad hoc, message note);
+the `messages` source app is reserved for the message page itself.
+
+New audio omits bare HTTP(S)/www addresses and autolinks, including URL-only labels. Named inline/reference links
+read their label. The speech script retains renderer word IDs across silent URLs, so character timing attaches
+only to actually spoken words. Missing or incompatible provider alignment still disables tracking. New requests
+explicitly enable ElevenLabs text normalization for numbers, dates and currencies. Neither deployment nor saving
+automatically calls ElevenLabs; stored audio and timing remain unchanged until the existing explicit controls act.
