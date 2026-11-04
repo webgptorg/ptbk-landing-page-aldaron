@@ -324,7 +324,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   browser hydrates into the list it was sent.
   Collaboration submissions use `/admin/contacts`. The 4 November simplification removes the podcast's
   newsletter signup from the homepage and footer; historical contact sources and records remain intact.
-  Homepage, collaboration and brand-kit headers share compact navigation to the two main internal pages,
+  The homepage previews five episodes; Zobrazit více opens the full `/episodes` archive with the current filters
+  and shared player preserved. `/episodes` has its own canonical metadata, sharing card and podcast-only sitemap entry.
+  Homepage, archive, collaboration and brand-kit headers share compact navigation to the two main internal pages,
   Díly and Spolupráce. Listening platforms stay outside the header. The podcast footer links only the
   canonical privacy notice, not Promptbook's product/legal catalogue. The podcast tab icon uses
   the page's own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are

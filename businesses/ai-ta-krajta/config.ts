@@ -6,6 +6,9 @@ import { AI_TA_KRAJTA_INTERNAL_PATH } from '@/lib/domains/publicDomainRouting';
  */
 export const AI_TA_KRAJTA_PATH = AI_TA_KRAJTA_INTERNAL_PATH;
 
+/** Complete episode archive, separate from the five-episode homepage preview. */
+export const AI_TA_KRAJTA_EPISODES_PATH = AI_TA_KRAJTA_PATH + '/episodes';
+
 /**
  * Public page which explains the podcast and every way of working with it
  */
@@ -298,14 +301,14 @@ export type AiTaKrajtaNavigationItem = {
  * The two main pages; listening platforms belong with the episodes, downloads in the footer.
  */
 export const AI_TA_KRAJTA_NAVIGATION_ITEMS: readonly AiTaKrajtaNavigationItem[] = [
-    { label: 'Díly', href: AI_TA_KRAJTA_PATH },
+    { label: 'Díly', href: AI_TA_KRAJTA_EPISODES_PATH },
     { label: 'Spolupráce', href: AI_TA_KRAJTA_MEDIA_KIT_PATH },
 ];
 
 /**
  * How many episodes the archive shows before a visitor asks for the rest
  */
-export const AI_TA_KRAJTA_INITIAL_EPISODE_COUNT = 12;
+export const AI_TA_KRAJTA_INITIAL_EPISODE_COUNT = 5;
 
 /**
  * Public endpoint which looks through the server-only episode transcripts

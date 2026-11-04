@@ -9,6 +9,7 @@ import { AiTaKrajtaHero } from '@/businesses/ai-ta-krajta/AiTaKrajtaHero';
 import { AiTaKrajtaPageStateProvider } from '@/businesses/ai-ta-krajta/AiTaKrajtaPageState';
 import { AiTaKrajtaPeopleSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaPeopleSection';
 import { PromptbookCoderBadge } from '@/components/promptbook-coder/PromptbookCoderBadge';
+import { AI_TA_KRAJTA_EPISODES_PATH, AI_TA_KRAJTA_PATH } from './config';
 
 const CODER_BADGE_OBSTACLE_SELECTOR = '[data-ai-ta-krajta-mini-player], .cookie-consent__panel';
 const CODER_BADGE_PLAYMATE_SELECTOR = '[data-ai-ta-krajta-terrarium]';
@@ -21,17 +22,20 @@ const CODER_BADGE_PLAYMATE_SELECTOR = '[data-ai-ta-krajta-terrarium]';
  *
  * @param archive episodes of the show as they were read from its feed on the server
  */
-export function AiTaKrajtaPage({ archive }: { readonly archive: AiTaKrajtaArchive }) {
+export function AiTaKrajtaPage({ archive, isEpisodeArchive = false }: {
+    readonly archive: AiTaKrajtaArchive;
+    readonly isEpisodeArchive?: boolean;
+}) {
     return (
         <AiTaKrajtaPageStateProvider archive={archive}>
             <div className="min-h-screen bg-[#232a25] pb-24 font-sans antialiased">
-                <AiTaKrajtaHeader />
+                <AiTaKrajtaHeader activePath={isEpisodeArchive ? AI_TA_KRAJTA_EPISODES_PATH : AI_TA_KRAJTA_PATH} />
 
                 <main>
-                    <AiTaKrajtaHero />
-                    <AiTaKrajtaEpisodeList />
-                    <AiTaKrajtaPeopleSection />
-                    <AiTaKrajtaCollaborationSection />
+                    {!isEpisodeArchive && <AiTaKrajtaHero />}
+                    <AiTaKrajtaEpisodeList isArchive={isEpisodeArchive} />
+                    {!isEpisodeArchive && <AiTaKrajtaPeopleSection />}
+                    {!isEpisodeArchive && <AiTaKrajtaCollaborationSection />}
                 </main>
 
                 <AiTaKrajtaFooter />

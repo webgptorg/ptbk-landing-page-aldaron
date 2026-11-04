@@ -1,11 +1,14 @@
 'use client';
 
 import { AiTaKrajtaEpisodeCard } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisodeCard';
+import { AiTaKrajtaLink } from '@/businesses/ai-ta-krajta/AiTaKrajtaLink';
+import { serializeAiTaKrajtaViewState } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
 import { isPlayableAiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
 import { useAiTaKrajtaPageState } from '@/businesses/ai-ta-krajta/AiTaKrajtaPageState';
 import { getAiTaKrajtaPersonById } from '@/businesses/ai-ta-krajta/aiTaKrajtaPeople';
 import {
     AI_TA_KRAJTA_INITIAL_EPISODE_COUNT,
+    AI_TA_KRAJTA_EPISODES_PATH,
     MAXIMAL_AI_TA_KRAJTA_EPISODE_SEARCH_QUERY_LENGTH,
     AI_TA_KRAJTA_PLATFORMS,
     AI_TA_KRAJTA_SECTION_IDS,
@@ -49,7 +52,7 @@ function AiTaKrajtaEmptyArchive({ hasEpisodes }: { readonly hasEpisodes: boolean
 /**
  * The whole archive of the show with its filter, its search and the button which plays a díl right here
  */
-export function AiTaKrajtaEpisodeList() {
+export function AiTaKrajtaEpisodeList({ isArchive = false }: { readonly isArchive?: boolean }) {
     const {
         archive,
         filteredEpisodes,
@@ -60,22 +63,27 @@ export function AiTaKrajtaEpisodeList() {
         playEpisode,
         setIsPlaying,
         setSearchQuery,
-        showWholeArchive,
         togglePersonFilter,
     } = useAiTaKrajtaPageState();
 
     const selectedPerson = getAiTaKrajtaPersonById(viewState.personId);
-    const shownEpisodes = viewState.isWholeArchiveShown
+    const shownEpisodes = isArchive
         ? filteredEpisodes
         : filteredEpisodes.slice(0, AI_TA_KRAJTA_INITIAL_EPISODE_COUNT);
     const hiddenEpisodeCount = filteredEpisodes.length - shownEpisodes.length;
+    const archiveSearchParams = serializeAiTaKrajtaViewState(
+        { ...viewState, isWholeArchiveShown: false },
+        new URLSearchParams(),
+    ).toString();
+    const archivePath = AI_TA_KRAJTA_EPISODES_PATH + (archiveSearchParams ? `?${archiveSearchParams}` : '');
+    const Heading = isArchive ? 'h1' : 'h2';
 
     return (
         <section id={AI_TA_KRAJTA_SECTION_IDS.EPISODES} className="scroll-mt-28 md:scroll-mt-20 border-t border-white/10 py-16 sm:py-20">
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
                 <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Díly</h2>
+                        <Heading className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Díly</Heading>
                         <p className="mt-3 max-w-xl text-white/60">
                             Pusťte si díl rovnou tady. Přehrávač zůstane dole, i když sjedete dál.
                         </p>
@@ -128,7 +136,7 @@ export function AiTaKrajtaEpisodeList() {
                     {shownEpisodes.length === 0 ? (
                         <AiTaKrajtaEmptyArchive hasEpisodes={archive.episodes.length > 0} />
                     ) : (
-                        <ul className="grid gap-4">
+                        <ul aria-label="Díly podcastu" className="grid gap-4">
                             {shownEpisodes.map((episode) => {
                                 const isLoaded = playingEpisode?.slug === episode.slug;
 
@@ -158,13 +166,12 @@ export function AiTaKrajtaEpisodeList() {
 
                 {hiddenEpisodeCount > 0 && (
                     <div className="mt-8 text-center">
-                        <button
-                            type="button"
-                            onClick={showWholeArchive}
+                        <AiTaKrajtaLink
+                            href={archivePath}
                             className="inline-flex h-11 items-center rounded-full border border-white/20 px-6 text-sm font-medium text-white transition-colors hover:border-white/50"
                         >
-                            Zobrazit ještě {formatCzechCountedNoun(hiddenEpisodeCount, ['díl', 'díly', 'dílů'])}
-                        </button>
+                            Zobrazit více
+                        </AiTaKrajtaLink>
                     </div>
                 )}
             </div>

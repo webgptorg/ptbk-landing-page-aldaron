@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
  * Note: The page does not use the header of the site on purpose. This one is dark, it navigates the show rather than
  *       the product, and its main button plays a recording instead of opening a form.
  */
-export function AiTaKrajtaHeader() {
+export function AiTaKrajtaHeader({ activePath }: { readonly activePath?: string }) {
     const { newestPlayableEpisode, playingEpisode, viewState, playEpisode, setIsPlaying } = useAiTaKrajtaPageState();
     const [isHydrated, setIsHydrated] = useState(false);
 
@@ -37,7 +37,7 @@ export function AiTaKrajtaHeader() {
 
     return (
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#1a201c]/90 backdrop-blur-md">
-            <AiTaKrajtaNavigation>
+            <AiTaKrajtaNavigation activePath={activePath}>
                 <button
                     type="button"
                     onClick={handleListenClick}

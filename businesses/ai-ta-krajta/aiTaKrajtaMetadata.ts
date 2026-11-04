@@ -7,6 +7,7 @@ import {
     AI_TA_KRAJTA_BRANDING_SUBPAGE,
     AI_TA_KRAJTA_COLORS,
     AI_TA_KRAJTA_COVER_IMAGE_PATH,
+    AI_TA_KRAJTA_EPISODES_PATH,
     AI_TA_KRAJTA_MANIFEST_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_PATH,
     AI_TA_KRAJTA_MEDIA_KIT_SUBPAGE,
@@ -72,6 +73,15 @@ export const AI_TA_KRAJTA_PAGE_DEFINITION: PageMetadataDefinition = {
     isSocialPreviewImageGenerated: true,
     sitemapPriority: 0.7,
     sitemapChangeFrequency: 'weekly',
+};
+
+/** Search and sharing metadata for the complete podcast archive. */
+export const AI_TA_KRAJTA_EPISODES_PAGE_DEFINITION: PageMetadataDefinition = {
+    ...AI_TA_KRAJTA_PAGE_DEFINITION,
+    path: AI_TA_KRAJTA_EPISODES_PATH,
+    title: `${AI_TA_KRAJTA_BRAND_NAME} | Všechny díly`,
+    socialTitle: 'Všechny díly AI ta Krajta',
+    description: 'Všechny díly podcastu AI ta Krajta. Hledejte témata, filtrujte podle lidí a poslouchejte přímo na webu.',
 };
 
 /**
@@ -189,6 +199,11 @@ export const AI_TA_KRAJTA_METADATA: Metadata = {
 export const AI_TA_KRAJTA_MEDIA_KIT_METADATA: Metadata = {
     ...AI_TA_KRAJTA_METADATA,
     ...createPageMetadata(AI_TA_KRAJTA_MEDIA_KIT_PAGE_DEFINITION),
+};
+
+export const AI_TA_KRAJTA_EPISODES_METADATA: Metadata = {
+    ...AI_TA_KRAJTA_METADATA,
+    ...createPageMetadata(AI_TA_KRAJTA_EPISODES_PAGE_DEFINITION),
 };
 
 /**

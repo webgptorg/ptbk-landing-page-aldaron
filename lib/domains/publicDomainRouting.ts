@@ -70,9 +70,11 @@ export type PublicDomainRoute = {
 
 const AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes'] = [
     { path: '', isIndexed: true },
+    { path: '/episodes', isIndexed: true },
     { path: '/media-kit', isIndexed: true },
     { path: '/branding', isIndexed: true },
     { path: '/opengraph-image' },
+    { path: '/episodes/opengraph-image' },
     { path: '/media-kit/opengraph-image' },
     { path: '/branding/opengraph-image' },
     { path: '/manifest.webmanifest' },
