@@ -322,15 +322,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   is made in the browser; the page itself is built in the order the draw leans
   towards, from the most often named person to the least often named one, so the
   browser hydrates into the list it was sent.
-  Collaboration submissions use `/admin/contacts`. The homepage also offers an
-  email-only request for AI ta Krajta episode and show updates through
-  `/api/waitlist`, with its own contact source and purpose note. The source
-  filter and exports retain that source alongside any collaboration history for
-  the same email; this collects requests without sending campaigns. The
-  subscription section follows the episodes and is linked from the header menu;
-  the same email form also appears in the shared podcast footer on the podcast,
-  media-kit and branding pages. Privacy
-  links point to the canonical Promptbook legal page. The podcast tab icon uses
+  Collaboration submissions use `/admin/contacts`. The 4 November simplification removes the podcast's
+  newsletter signup from the homepage and footer; historical contact sources and records remain intact.
+  Homepage, collaboration and brand-kit headers share compact navigation to the two main internal pages,
+  Díly and Spolupráce. Listening platforms stay outside the header. The podcast footer links only the
+  canonical privacy notice, not Promptbook's product/legal catalogue. The podcast tab icon uses
   the page's own snake drawing in `/ai-ta-krajta/logo.svg` and `.png`; SVG corners are
   rounded and transparent, while the raster fills its square. That drawing is
   traced off the cover artwork of the show and recorded once in
@@ -350,7 +346,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `ptbk.io` to `/media-kit` and `/branding` on `ai-ta-krajta.cz`. They are the two pages beside
   the podcast, named once in `AI_TA_KRAJTA_SUBPAGES`, which the footer
   lists and which they point at each other through, so no link can name a page
-  differently than the page names itself. Both wear the same compact header,
+  differently than the page names itself. Both share the homepage navigation,
   section heading and footer as each other. The brand kit hands out the logo the
   site already serves at `/ai-ta-krajta/logo.svg`, `.png` and the cover artwork,
   publishes no colour outside `AI_TA_KRAJTA_COLORS`, and says how the name is

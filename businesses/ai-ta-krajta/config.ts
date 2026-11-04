@@ -295,13 +295,11 @@ export type AiTaKrajtaNavigationItem = {
 };
 
 /**
- * Navigation of the header, which walks the page from the episodes down to the collaboration
+ * The two main pages; listening platforms belong with the episodes, downloads in the footer.
  */
 export const AI_TA_KRAJTA_NAVIGATION_ITEMS: readonly AiTaKrajtaNavigationItem[] = [
-    { label: 'Díly', href: `#${AI_TA_KRAJTA_SECTION_IDS.EPISODES}` },
-    { label: 'Odebírat', href: `#${AI_TA_KRAJTA_SECTION_IDS.EMAIL_SUBSCRIPTION}` },
-    { label: 'Kdo v tom jede', href: `#${AI_TA_KRAJTA_SECTION_IDS.PEOPLE}` },
-    { label: 'Spolupráce', href: `#${AI_TA_KRAJTA_SECTION_IDS.COLLABORATION}` },
+    { label: 'Díly', href: AI_TA_KRAJTA_PATH },
+    { label: 'Spolupráce', href: AI_TA_KRAJTA_MEDIA_KIT_PATH },
 ];
 
 /**

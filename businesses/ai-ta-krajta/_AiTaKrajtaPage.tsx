@@ -2,7 +2,6 @@
 
 import type { AiTaKrajtaArchive } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
 import { AiTaKrajtaCollaborationSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaCollaborationSection';
-import { AiTaKrajtaEmailSubscriptionSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaEmailSubscriptionForm';
 import { AiTaKrajtaEpisodeList } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisodeList';
 import { AiTaKrajtaFooter } from '@/businesses/ai-ta-krajta/AiTaKrajtaFooter';
 import { AiTaKrajtaHeader } from '@/businesses/ai-ta-krajta/AiTaKrajtaHeader';
@@ -31,7 +30,6 @@ export function AiTaKrajtaPage({ archive }: { readonly archive: AiTaKrajtaArchiv
                 <main>
                     <AiTaKrajtaHero />
                     <AiTaKrajtaEpisodeList />
-                    <AiTaKrajtaEmailSubscriptionSection />
                     <AiTaKrajtaPeopleSection />
                     <AiTaKrajtaCollaborationSection />
                 </main>

@@ -15,7 +15,7 @@ vi.mock('@/lib/subscription/subscribeToWaitlist', () => ({
     subscribeToWaitlist: EMAIL_SUBSCRIPTION_MOCKS.subscribeToWaitlist,
 }));
 
-import { AiTaKrajtaEmailSubscriptionForm, AiTaKrajtaEmailSubscriptionSection } from './AiTaKrajtaEmailSubscriptionForm';
+import { AiTaKrajtaEmailSubscriptionForm } from './AiTaKrajtaEmailSubscriptionForm';
 import { AiTaKrajtaFooter } from './AiTaKrajtaFooter';
 import {
     AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
@@ -46,34 +46,20 @@ afterEach(() => {
 });
 
 describe('AI ta Krajta email subscription form', () => {
-    it('lets the footer subscribe independently of the episode-page form', async () => {
+    it('keeps the podcast footer free of newsletter signup and product terms', () => {
         render(
             <PublicSiteNavigationProvider hostname="www.ai-ta-krajta.cz">
-                <AiTaKrajtaEmailSubscriptionSection />
                 <AiTaKrajtaFooter />
             </PublicSiteNavigationProvider>,
         );
 
-        const SECTION = screen.getByRole('region', { name: 'AI ta Krajta do e-mailu' });
-        const FOOTER = screen.getByRole('contentinfo');
-        const SECTION_EMAIL_FIELD = within(SECTION).getByRole('textbox', { name: 'E-mail' });
-        const FOOTER_EMAIL_FIELD = within(FOOTER).getByRole('textbox', { name: 'E-mail' });
-
-        expect(SECTION_EMAIL_FIELD.id).not.toBe(FOOTER_EMAIL_FIELD.id);
-        expect(within(FOOTER).getByRole('form', { name: 'Zůstaň v obraze' })).toBeVisible();
-
-        fireEvent.change(FOOTER_EMAIL_FIELD, { target: { value: 'footer-listener@example.com' } });
-        fireEvent.click(within(FOOTER).getByRole('checkbox'));
-        fireEvent.submit(within(FOOTER).getByRole('form', { name: 'Zůstaň v obraze' }));
-
-        expect(await within(FOOTER).findByRole('status')).toHaveTextContent('žádost o e-mailové novinky jsme uložili');
-        expect(SECTION_EMAIL_FIELD).toHaveValue('');
-        expect(EMAIL_SUBSCRIPTION_MOCKS.subscribeToWaitlist).toHaveBeenCalledWith({
-            email: 'footer-listener@example.com',
-            placeName: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_PLACE_NAME,
-            language: 'cs', marketingConsent: true,
-            note: AI_TA_KRAJTA_EMAIL_SUBSCRIPTION_CONTACT_NOTE,
-        });
+        const footer = screen.getByRole('contentinfo');
+        expect(within(footer).queryByRole('form')).toBeNull();
+        expect(within(footer).getByRole('link', { name: 'Ochrana osobních údajů' })).toHaveAttribute(
+            'href', 'https://ptbk.io/cs/legal/ochrana-osobnich-udaju',
+        );
+        expect(within(footer).queryByRole('link', { name: 'Obchodní podmínky' })).toBeNull();
+        expect(EMAIL_SUBSCRIPTION_MOCKS.subscribeToWaitlist).not.toHaveBeenCalled();
     });
 
     it('asks only for an email and links to the canonical privacy page', () => {

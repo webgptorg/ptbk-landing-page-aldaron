@@ -1,7 +1,6 @@
 'use client';
 
 import { AiTaKrajtaMark } from '@/businesses/ai-ta-krajta/AiTaKrajtaMark';
-import { AiTaKrajtaEmailSubscriptionForm } from '@/businesses/ai-ta-krajta/AiTaKrajtaEmailSubscriptionForm';
 import {
     AI_TA_KRAJTA_NAME,
     AI_TA_KRAJTA_PATH,
@@ -10,10 +9,13 @@ import {
     AI_TA_KRAJTA_SUBPAGES,
     AI_TA_KRAJTA_TAGLINE_BY_LANGUAGE,
 } from '@/businesses/ai-ta-krajta/config';
-import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
+import { getLegalLink } from '@/lib/legal/legalLinks';
+import { createPublicUrl } from '@/lib/domains/publicDomainRouting';
 import { PromptbookCoderCredit } from '@/components/promptbook-coder/PromptbookCoderBadge';
 import { ORGANIZATION_LEGAL_NAME } from '@/lib/metadata/site-config';
 import { AiTaKrajtaLink as Link } from './AiTaKrajtaLink';
+
+const PRIVACY_LINK = getLegalLink('privacyPolicy', 'cs');
 
 const FOOTER_LINK_CLASS_NAME = 'text-sm text-white/50 transition-colors hover:text-white';
 
@@ -28,13 +30,13 @@ const CURRENT_YEAR = new Date().getFullYear();
 /**
  * Footer shared by the podcast and its supporting pages
  *
- * Note: It uses the podcast's own email subscription form and shares only the legal links with the product footer.
+ * Only the privacy notice applies here; product terms and newsletter signup are not podcast navigation.
  */
 export function AiTaKrajtaFooter() {
     return (
         <footer className="border-t border-white/10 bg-[#141a16]">
             <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
-                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.75fr)_minmax(0,0.7fr)_minmax(0,1.15fr)]">
+                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
                     <div className="max-w-sm">
                         <Link
                             href={AI_TA_KRAJTA_PATH}
@@ -93,9 +95,6 @@ export function AiTaKrajtaFooter() {
                         </ul>
                     </nav>
 
-                    <div className="min-w-0">
-                        <AiTaKrajtaEmailSubscriptionForm isFooter />
-                    </div>
                 </div>
 
                 <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/40 sm:flex-row sm:items-center sm:justify-between">
@@ -103,11 +102,9 @@ export function AiTaKrajtaFooter() {
                         © {CURRENT_YEAR} {AI_TA_KRAJTA_NAME}. Vydává {ORGANIZATION_LEGAL_NAME}. Všechna práva
                         vyhrazena.
                     </p>
-                    <LegalFooterLinks
-                        language="cs"
-                        className="gap-x-5"
-                        linkClassName="text-white/45 hover:text-white"
-                    />
+                    <a href={createPublicUrl(PRIVACY_LINK.href)} className="text-white/45 hover:text-white">
+                        {PRIVACY_LINK.text}
+                    </a>
                 </div>
             </div>
         </footer>
