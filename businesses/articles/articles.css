@@ -1,3 +1,5 @@
+/* Hidden overflow on body creates a non-scrolling ancestor that traps position: sticky. */
+html:has(.article-site), body:has(.article-site) { overflow-x: clip; }
 .article-site {
     --article-paper: #f8fafc;
     --article-ink: #182b42;
@@ -64,10 +66,11 @@
 .article-reading-layout { display: grid; grid-template-columns: 250px minmax(0, 750px); justify-content: center; gap: clamp(2rem, 5.2vw, 5rem); padding-top: 3rem; border-top: 1px solid var(--article-line); }
 .article-contents { align-self: start; position: sticky; top: 2rem; scroll-margin-top: 2rem; }
 .article-contents details > summary { font-size: .67rem; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; color: var(--article-muted); cursor: pointer; }
-.article-contents nav { display: grid; gap: .05rem; margin-top: 1.2rem; max-height: calc(100vh - 7rem); overflow-y: auto; scrollbar-width: thin; padding-right: .6rem; }
-.article-contents a { display: flex; align-items: baseline; gap: .65rem; padding: .55rem 0; color: var(--article-muted); font-size: .7rem; line-height: 1.55; }
+.article-contents nav { display: grid; gap: .05rem; margin-top: 1.2rem; max-height: max(0px, calc(100dvh - 7rem - var(--article-player-clearance, 0px))); overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-gutter: stable; scroll-behavior: auto; padding: .3rem .6rem .3rem 0; }
+.article-contents a { display: flex; align-items: baseline; gap: .65rem; padding: .55rem .5rem; border-left: 2px solid transparent; color: var(--article-muted); font-size: .7rem; line-height: 1.55; }
 .article-contents a > span { flex-shrink: 0; color: var(--article-accent); font-size: .58rem; font-variant-numeric: tabular-nums; }
 .article-contents a:hover { color: var(--article-accent); }
+.article-contents a[aria-current='location'] { color: var(--article-ink); border-left-color: var(--article-accent); background: var(--article-soft); font-weight: 600; }
 .article-reading-column { min-width: 0; max-width: 100%; }
 .article-prose { font-size: clamp(1.05rem, 1.3vw, 1.15rem); line-height: 1.95; font-weight: 400; overflow-wrap: break-word; }
 .article-prose p { margin-block: 1.4rem; }
@@ -172,7 +175,7 @@
 @media (max-width: 800px) {
     .article-reading-layout { display: block; max-width: 750px; padding-top: 0; }
     .article-contents { position: static; padding-block: 1.5rem; margin-bottom: 2.5rem; border-bottom: 1px solid var(--article-line); }
-    .article-contents nav { max-height: 230px; margin-top: .75rem; grid-template-columns: 1fr 1fr; column-gap: 1.3rem; }
+    .article-contents nav { max-height: min(230px, calc(100dvh - 7rem - var(--article-player-clearance, 0px))); margin-top: .75rem; grid-template-columns: 1fr 1fr; column-gap: 1.3rem; }
     .article-contents a { font-size: .69rem; padding-block: .5rem; }
     .article-hero { max-width: 750px; }
     .article-index-card { grid-template-columns: 1fr 1fr; gap: 1.6rem; }
@@ -196,7 +199,7 @@
     .article-hero-actions { gap: .65rem; margin-top: 1.5rem; }
     .article-hero-actions .article-text-link { font-size: .7rem; }
     .article-button { padding-inline: 1rem; font-size: .72rem; min-height: 44px; }
-    .article-contents nav { grid-template-columns: 1fr; max-height: 220px; }
+    .article-contents nav { grid-template-columns: 1fr; max-height: min(220px, calc(100dvh - 7rem - var(--article-player-clearance, 0px))); }
     .article-contents { margin-bottom: 2rem; }
     .article-prose { font-size: 1.03rem; line-height: 1.95; }
     .article-prose h2 { margin-top: 3.2rem; padding-top: 1.5rem; font-size: 1.65rem; }
