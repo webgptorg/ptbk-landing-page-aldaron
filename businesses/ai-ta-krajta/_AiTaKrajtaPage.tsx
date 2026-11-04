@@ -10,6 +10,8 @@ import { AiTaKrajtaPageStateProvider } from '@/businesses/ai-ta-krajta/AiTaKrajt
 import { AiTaKrajtaPeopleSection } from '@/businesses/ai-ta-krajta/AiTaKrajtaPeopleSection';
 import { PromptbookCoderBadge } from '@/components/promptbook-coder/PromptbookCoderBadge';
 import { AI_TA_KRAJTA_EPISODES_PATH, AI_TA_KRAJTA_PATH } from './config';
+import { useSearchParams } from 'next/navigation';
+import { AiTaKrajtaPrototypePage } from './prototypes/AiTaKrajtaPrototypePage';
 
 const CODER_BADGE_OBSTACLE_SELECTOR = '[data-ai-ta-krajta-mini-player], .cookie-consent__panel';
 const CODER_BADGE_PLAYMATE_SELECTOR = '[data-ai-ta-krajta-terrarium]';
@@ -22,10 +24,16 @@ const CODER_BADGE_PLAYMATE_SELECTOR = '[data-ai-ta-krajta-terrarium]';
  *
  * @param archive episodes of the show as they were read from its feed on the server
  */
-export function AiTaKrajtaPage({ archive, isEpisodeArchive = false }: {
+export function AiTaKrajtaPage({ archive, isEpisodeArchive = false, isPrototypeEnabled = false }: {
     readonly archive: AiTaKrajtaArchive;
     readonly isEpisodeArchive?: boolean;
+    readonly isPrototypeEnabled?: boolean;
 }) {
+    const params = useSearchParams();
+    const variant = params.get('variant');
+    if (isPrototypeEnabled && (variant === 'A' || variant === 'B' || variant === 'C')) {
+        return <AiTaKrajtaPrototypePage archive={archive} variant={variant} />;
+    }
     return (
         <AiTaKrajtaPageStateProvider archive={archive}>
             <div className="min-h-screen bg-[#232a25] pb-24 font-sans antialiased">

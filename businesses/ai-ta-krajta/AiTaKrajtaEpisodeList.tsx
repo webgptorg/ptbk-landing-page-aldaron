@@ -52,7 +52,7 @@ function AiTaKrajtaEmptyArchive({ hasEpisodes }: { readonly hasEpisodes: boolean
 /**
  * The whole archive of the show with its filter, its search and the button which plays a díl right here
  */
-export function AiTaKrajtaEpisodeList({ isArchive = false }: { readonly isArchive?: boolean }) {
+export function AiTaKrajtaEpisodeList({ isArchive = false, isEmbedded = false }: { readonly isArchive?: boolean; readonly isEmbedded?: boolean }) {
     const {
         archive,
         filteredEpisodes,
@@ -80,7 +80,7 @@ export function AiTaKrajtaEpisodeList({ isArchive = false }: { readonly isArchiv
 
     return (
         <section id={AI_TA_KRAJTA_SECTION_IDS.EPISODES} className="scroll-mt-28 md:scroll-mt-20 border-t border-white/10 py-16 sm:py-20">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className={isEmbedded ? '' : 'mx-auto max-w-6xl px-4 sm:px-6'}>
                 <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                     <div>
                         <Heading className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Díly</Heading>

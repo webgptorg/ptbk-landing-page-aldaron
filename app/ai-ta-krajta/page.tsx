@@ -31,7 +31,7 @@ export default async function AiTaKrajtaRoute() {
             {/* Note: The page reads its shareable state from the query parameters, which Next.js only hands over
                       inside a suspense boundary. */}
             <Suspense>
-                <AiTaKrajtaPage archive={archive} />
+                <AiTaKrajtaPage archive={archive} isPrototypeEnabled={process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV !== 'production'} />
             </Suspense>
         </>
     );

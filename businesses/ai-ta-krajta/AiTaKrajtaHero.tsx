@@ -5,6 +5,7 @@ import { AiTaKrajtaSnakeTerrarium } from '@/businesses/ai-ta-krajta/AiTaKrajtaSn
 import { formatAiTaKrajtaEstimate } from '@/businesses/ai-ta-krajta/aiTaKrajtaFormatting';
 import { AI_TA_KRAJTA_PLATFORMS, AI_TA_KRAJTA_SECTION_IDS } from '@/businesses/ai-ta-krajta/config';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
+import { AiTaKrajtaLink } from './AiTaKrajtaLink';
 import { ArrowUpRight, Play } from 'lucide-react';
 
 /**
@@ -22,7 +23,7 @@ function AiTaKrajtaFact({ label, value }: { readonly label: string; readonly val
 /**
  * The opening of the page, which says what the show is, where it comes out and lets the logo be played with
  */
-export function AiTaKrajtaHero() {
+export function AiTaKrajtaHero({ partnerActionHref }: { readonly partnerActionHref?: string }) {
     const { archive, newestPlayableEpisode, playEpisode } = useAiTaKrajtaPageState();
     const { estimatedSubscriberCount, estimatedListeningHours } = archive.statistics;
 
@@ -67,12 +68,13 @@ export function AiTaKrajtaHero() {
                                 : `Pustit díl ${newestPlayableEpisode.slug}`}
                         </button>
 
-                        <a
+                        {partnerActionHref ? <AiTaKrajtaLink href={partnerActionHref}
+                            className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 text-base font-medium text-white transition-colors hover:border-white/50">Partnerství pro firmy</AiTaKrajtaLink> : <a
                             href={`#${AI_TA_KRAJTA_SECTION_IDS.EPISODES}`}
                             className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 text-base font-medium text-white transition-colors hover:border-white/50"
                         >
                             Projít archiv
-                        </a>
+                        </a>}
                     </div>
 
                     <div className="mt-10">
