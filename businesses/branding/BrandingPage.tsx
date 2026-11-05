@@ -9,6 +9,7 @@ export function BrandingPage({ language }: { language: Language }) {
     const cs = language === 'cs';
     const text = (cz: string, en: string) => cs ? cz : en;
     const messages = brand.messages[language];
+    const [lockupWidth, lockupHeight] = brand.logo.lockupSize;
     const sections = [
         ['logo', text('Logo', 'Logo')], ['rules', text('Použití', 'Usage')],
         ['colors', text('Barvy', 'Colors')], ['type', text('Písmo', 'Type')],
@@ -26,7 +27,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <div className={s.logos}>
                 {(['light', 'dark'] as const).map(theme => <div className={s.logoCard} key={theme}>
                     <div className={`${s.logoPreview} ${theme === 'dark' ? s.dark : ''}`}>
-                        <Image src={brand.assets[theme === 'light' ? 'lockupLight' : 'lockupDark']} width={760} height={144} alt={text(`Promptbook — ${theme === 'light' ? 'světlé' : 'tmavé'} pozadí`, `Promptbook on ${theme} background`)} priority />
+                        <Image src={brand.assets[theme === 'light' ? 'lockupLight' : 'lockupDark']} width={lockupWidth} height={lockupHeight} alt={text(`Promptbook — ${theme === 'light' ? 'světlé' : 'tmavé'} pozadí`, `Promptbook on ${theme} background`)} priority />
                     </div>
                     <div className={s.assetCaption}><h3>{theme === 'light' ? text('Na světlé pozadí', 'On light backgrounds') : text('Na tmavé pozadí', 'On dark backgrounds')}</h3><Downloads base={`/brand/promptbook-lockup-${theme}`} pngLabel="PNG · 1440 px"/></div>
                 </div>)}
@@ -48,7 +49,7 @@ export function BrandingPage({ language }: { language: Language }) {
                     <figcaption><strong>{text('Nechte logu prostor', 'Leave clear space')}</strong><p>{text('Ze všech stran alespoň ¼ výšky symbolu. U celého loga měřte podle symbolu.', 'Leave at least ¼ of the symbol height on every side. For the full logo, measure using its symbol.')}</p></figcaption>
                 </figure>
                 <figure className={s.rule}>
-                    <div className={s.minimum}><Image src={brand.assets.symbolBlue} width={32} height={32} alt={text('Symbol ve velikosti 32 pixelů', 'Symbol at 32 pixels')}/><Image src={brand.assets.lockupLight} width={160} height={30} alt={text('Celé logo široké 160 pixelů', 'Full logo at 160 pixels wide')}/></div>
+                    <div className={s.minimum}><Image src={brand.assets.symbolBlue} width={32} height={32} alt={text('Symbol ve velikosti 32 pixelů', 'Symbol at 32 pixels')}/><Image src={brand.assets.lockupLight} width={160} height={Math.round(160 * lockupHeight / lockupWidth)} alt={text('Celé logo široké 160 pixelů', 'Full logo at 160 pixels wide')}/></div>
                     <figcaption><strong>{text('Minimální velikost na obrazovce', 'Minimum digital size')}</strong><p>{text('Symbol 32 px, celé logo 160 px na šířku. V tisku ověřte čitelnost na skutečném výstupu.', 'Symbol: 32 px wide. Full logo: 160 px wide. Check print legibility at the actual output size.')}</p></figcaption>
                 </figure>
                 <figure className={s.rule}>
@@ -91,7 +92,7 @@ export function BrandingPage({ language }: { language: Language }) {
         <section id="examples" className={s.section} aria-labelledby="examples-heading">
             <h2 id="examples-heading">{text('Šablony', 'Templates')}</h2>
             <div className={s.templates}>{(['slide', 'social'] as const).map(kind => <figure key={kind}><Image src={`/brand/promptbook-${kind}-${language}.png`} width={kind === 'slide' ? 1600 : 1200} height={kind === 'slide' ? 900 : 630} alt={text(kind === 'slide' ? 'Šablona prezentačního slidu' : 'Šablona příspěvku na sociální sítě',kind === 'slide' ? 'Presentation slide template' : 'Social post template')}/><figcaption><h3>{kind === 'slide' ? text('Prezentace · 16 : 9', 'Presentation · 16 : 9') : text('Sociální sítě · 1200 × 630', 'Social · 1200 × 630')}</h3><Downloads base={`/brand/promptbook-${kind}-${language}`} pngLabel="PNG"/></figcaption></figure>)}</div>
-            <div className={s.partnerExample}><div><p>{text('AI agenti pro naše klienty', 'AI agents for our clients')}</p><Image src={brand.assets.lockupLight} width={230} height={44} alt="Promptbook"/></div><div><h3>{text('Partnerský web', 'Partner website')}</h3><p>{text('Použijte celé logo s odkazem na ptbk.io. Vlastní značku nechte oddělenou.', 'Use the complete logo linked to ptbk.io. Keep your own brand separate.')}</p><Downloads base="/brand/promptbook-lockup-light" pngLabel="PNG"/></div></div>
+            <div className={s.partnerExample}><div><p>{text('AI agenti pro naše klienty', 'AI agents for our clients')}</p><Image src={brand.assets.lockupLight} width={230} height={Math.round(230 * lockupHeight / lockupWidth)} alt="Promptbook"/></div><div><h3>{text('Partnerský web', 'Partner website')}</h3><p>{text('Použijte celé logo s odkazem na ptbk.io. Vlastní značku nechte oddělenou.', 'Use the complete logo linked to ptbk.io. Keep your own brand separate.')}</p><Downloads base="/brand/promptbook-lockup-light" pngLabel="PNG"/></div></div>
             <p className={s.note}>{text('SVG šablony lze upravit; používají Outfit a Inter. PNG mají písma vykreslená.', 'SVG templates are editable and use Outfit and Inter. PNGs have the fonts rendered in.')}</p>
             <div className={s.partnerExample}><div className={s.robotPreview}><Image src="/brand/promptbook-robot.svg" width={112} height={112} alt={text('Robot z hlavní stránky Promptbooku', 'Robot from the Promptbook homepage')}/></div><div><h3>{text('Robot z hlavní stránky', 'Homepage robot')}</h3><p>{text('Doplňková ilustrace. Logo nenahrazuje.', 'A supporting illustration. It does not replace the logo.')}</p><Downloads base="/brand/promptbook-robot" pngLabel="PNG · 1024 px"/></div></div>
 

@@ -31,7 +31,8 @@ The construction hexagon is a guide, not an extra visible outline in the logo.
 
 The lockup uses actual Inter Bold outlines from the locally licensed font; it has
 no external font or bitmap dependency. Light: blue symbol, near-black `prompt`,
-blue `book`. Dark: all white. Clear space is ¼ of the symbol height on every side.
+blue `book`. Dark: all white. The cube's vertical edge matches the wordmark's
+cap height. Clear space is ¼ of the symbol height on every side.
 Digital minimums are 32 px for the symbol and 160 px for the complete lockup;
 the page shows both at their actual desktop sizes. Print remains an actual-size
 legibility check rather than an invented universal millimetre threshold.

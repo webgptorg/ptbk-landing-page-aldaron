@@ -18,6 +18,7 @@
     "viewBox": [0, 0, 128, 128],
     "center": [64, 64],
     "radius": 60,
+    "lockupSize": [760, 164],
     "clearSpaceRatio": 0.25,
     "minimumSymbolWidthPx": 32,
     "minimumLockupWidthPx": 160

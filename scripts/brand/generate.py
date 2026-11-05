@@ -47,9 +47,14 @@ def outlines(text, x, y, color):
     return ''.join(result), x
 
 def lockup(dark=False):
-    first, end = outlines('prompt', 152, 99, COLORS['white'] if dark else COLORS['ink'])
-    second, end = outlines('book', end, 99, COLORS['white'] if dark else COLORS['blue'])
-    return f'<g transform="translate(12 8)">{mark(COLORS["white"] if dark else COLORS["blue"])}</g>{first}{second}'
+    first, end = outlines('prompt', 168, 109, COLORS['white'] if dark else COLORS['ink'])
+    second, _ = outlines('book', end, 109, COLORS['white'] if dark else COLORS['blue'])
+    # Match the vertical edge of the cube to the height of the lettering.
+    symbol_scale = font['OS/2'].sCapHeight * scale / BRAND['logo']['radius']
+    center_y = BRAND['logo']['lockupSize'][1] / 2
+    symbol_y = center_y - BRAND['logo']['center'][1] * symbol_scale
+    transform = f'translate(10 {number(symbol_y)}) scale({number(symbol_scale)})'
+    return f'<g transform="{transform}">{mark(COLORS["white"] if dark else COLORS["blue"])}</g>{first}{second}'
 
 def svg(width, height, content, title):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img"><title>{escape(title)}</title>{content}</svg>\n'
@@ -57,7 +62,7 @@ def svg(width, height, content, title):
 for name, color in [('blue',COLORS['blue']),('white',COLORS['white'])]:
     (OUT / f'promptbook-symbol-{name}.svg').write_text(svg(128,128,mark(color),f'Promptbook {name} symbol'))
 for theme in ['light','dark']:
-    (OUT / f'promptbook-lockup-{theme}.svg').write_text(svg(760,144,lockup(theme=='dark'),'Promptbook'))
+    (OUT / f'promptbook-lockup-{theme}.svg').write_text(svg(*BRAND['logo']['lockupSize'],lockup(theme=='dark'),'Promptbook'))
 
 # Editable templates use actual brand outlines; text remains editable in SVG.
 for locale, message in BRAND['messages'].items():
@@ -81,6 +86,7 @@ six equal sides, 120° interior angles. Never stretch, rotate, recolor or add ef
 Blue {COLORS['blue']} on light surfaces; white on dark. Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
 complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Bold.
+In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
 Logo SVGs contain vector paths, with no embedded bitmap or font dependency.
 Editable slide/social templates require Outfit and Inter; their PNG exports do not.
 

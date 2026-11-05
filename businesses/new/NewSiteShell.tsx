@@ -52,8 +52,9 @@ function LocalizedShell({ children }: { children: ReactNode }) {
 /** The website and downloadable kit use the identical outlined vector lockup. */
 function BrandLogo({ priority = false }: { priority?: boolean }) {
     const { path, t } = useSiteLocale();
+    const [width, height] = PROMPTBOOK_BRAND.logo.lockupSize;
     return <Link className={s.logo} href={path()} aria-label={t('Promptbook — úvod')}>
-        <Image src={PROMPTBOOK_BRAND.assets.lockupLight} width={174} height={33} alt="promptbook" priority={priority}/>
+        <Image src={PROMPTBOOK_BRAND.assets.lockupLight} width={width} height={height} alt="promptbook" priority={priority}/>
     </Link>;
 }
 
