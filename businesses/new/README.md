@@ -8,7 +8,7 @@ The resources footer links to the matching `/cs/branding` or `/en/branding` bran
 
 ## Shared presentation
 
-- The header and footer pair the original mark with `promptbook`: black `prompt`, ink-blue `book` (`#17386C`), no trailing dot.
+- The header and footer pair the original mark with `promptbook`: black Inter Light `prompt`, ink-blue Inter Bold `book` (`#17386C`), no trailing dot.
 - The hero leads directly into one compact carousel with podcast, CRM outreach and overnight repair scenes. Playback starts when the scene becomes readable; on mobile each panel reveals on reaching it. The page keeps moving normally. No pinned story tracks or forced tab progression.
 - A separate app/engine scene shows independent device choices and continuing engine work when the app sleeps. The former files, Git history and model-choice feature trio is removed.
 - Start and Business use conventional plan cards. Czech prices are 399 Kč / 1 999 Kč per client environment/month; English prices remain $19 / $100 monthly. Public pricing contains no exchange-rate disclaimer.

@@ -32,11 +32,12 @@ def mark(color):
     }
     return ''.join(f'<path fill="{color}" transform="matrix({" ".join(map(number, matrices[face]))})" d="{ART[face]}"/>' for face in matrices)
 
-font = TTFont(ROOT / 'public/fonts/workshop/Inter-Bold.ttf')
-glyphs, cmap = font.getGlyphSet(), font.getBestCmap()
-scale = 100 / font['head'].unitsPerEm
+light_font = TTFont(ROOT / 'scripts/brand/fonts/Inter-Light.ttf')
+bold_font = TTFont(ROOT / 'public/fonts/workshop/Inter-Bold.ttf')
 
-def outlines(text, x, y, color):
+def outlines(text, x, y, color, font):
+    glyphs, cmap = font.getGlyphSet(), font.getBestCmap()
+    scale = 100 / font['head'].unitsPerEm
     result = []
     for character in text:
         glyph = glyphs[cmap[ord(character)]]
@@ -47,10 +48,10 @@ def outlines(text, x, y, color):
     return ''.join(result), x
 
 def lockup(dark=False):
-    first, end = outlines('prompt', 168, 109, COLORS['white'] if dark else COLORS['ink'])
-    second, _ = outlines('book', end, 109, COLORS['white'] if dark else COLORS['blue'])
+    first, end = outlines('prompt', 168, 109, COLORS['white'] if dark else COLORS['ink'], light_font)
+    second, _ = outlines('book', end, 109, COLORS['white'] if dark else COLORS['blue'], bold_font)
     # Match the vertical edge of the cube to the height of the lettering.
-    symbol_scale = font['OS/2'].sCapHeight * scale / BRAND['logo']['radius']
+    symbol_scale = 100 * bold_font['OS/2'].sCapHeight / bold_font['head'].unitsPerEm / BRAND['logo']['radius']
     center_y = BRAND['logo']['lockupSize'][1] / 2
     symbol_y = center_y - BRAND['logo']['center'][1] * symbol_scale
     transform = f'translate(10 {number(symbol_y)}) scale({number(symbol_scale)})'
@@ -85,7 +86,7 @@ Use the supplied SVG/PNG assets. The PB mark projects onto a regular hexagon:
 six equal sides, 120° interior angles. Never stretch, rotate, recolor or add effects.
 Blue {COLORS['blue']} on light surfaces; white on dark. Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
-complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Bold.
+complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Light (prompt) and Inter Bold (book).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
 Logo SVGs contain vector paths, with no embedded bitmap or font dependency.
 Editable slide/social templates require Outfit and Inter; their PNG exports do not.

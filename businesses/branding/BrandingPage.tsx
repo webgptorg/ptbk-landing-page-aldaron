@@ -78,7 +78,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <h2 id="type-heading">{text('Písmo', 'Typography')}</h2>
             <div className={s.typeGrid}>
                 <div><a className={s.fontName} href="https://fonts.google.com/specimen/Outfit">Outfit ↗</a><p>{text('Nadpisy · 500–600', 'Headings · 500–600')}</p><p className={s.headingSample}>{messages.headline}</p></div>
-                <div><a className={s.fontName} href="https://fonts.google.com/specimen/Inter">Inter ↗</a><p>{text('Text 400 · zvýraznění 600–700', 'Body 400 · emphasis 600–700')}</p><p className={s.bodySample}>{messages.short}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p></div>
+                <div><a className={s.fontName} href="https://fonts.google.com/specimen/Inter">Inter ↗</a><p>{text('Text 400 · zvýraznění 600–700', 'Body 400 · emphasis 600–700')}</p><p className={s.bodySample}>{messages.short}</p><p>{text('Logotyp · prompt v řezu Light, book v řezu Bold', 'Wordmark · prompt in Light, book in Bold')}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p></div>
             </div>
         </section>
 

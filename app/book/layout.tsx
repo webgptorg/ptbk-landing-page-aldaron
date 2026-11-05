@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import s from './knowledge.module.css';
 
-/** Compact shared reading shell using the existing Promptbook mark and wordmark. */
+/** Compact reading shell using the shared Promptbook lockup. */
 export default function KnowledgeLayout({ children }: { children: ReactNode }) {
     return (
         <div className={s.site} lang="en" style={PROMPTBOOK_BRAND_STYLE}>
@@ -13,10 +13,12 @@ export default function KnowledgeLayout({ children }: { children: ReactNode }) {
             </a>
             <header className={s.header}>
                 <Link href="/en" className={s.brand} aria-label="Promptbook home">
-                    <Image src={PROMPTBOOK_BRAND.assets.symbolBlue} width={34} height={34} alt="" />
-                    <span>
-                        prompt<span className={s.brandBlue}>book</span>
-                    </span>
+                    <Image
+                        src={PROMPTBOOK_BRAND.assets.lockupLight}
+                        width={PROMPTBOOK_BRAND.logo.lockupSize[0]}
+                        height={PROMPTBOOK_BRAND.logo.lockupSize[1]}
+                        alt=""
+                    />
                 </Link>
                 <nav aria-label="Knowledge navigation">
                     <Link href="/book">Common knowledge</Link>

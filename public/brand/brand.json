@@ -15,7 +15,7 @@
   "fonts": {
     "heading": "Outfit",
     "body": "Inter",
-    "wordmark": "Inter Bold"
+    "wordmark": "Inter Light (prompt), Inter Bold (book)"
   },
   "logo": {
     "geometry": "regular point-up hexagon; isometric PB mark",

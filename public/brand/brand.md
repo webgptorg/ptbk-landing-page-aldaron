@@ -7,7 +7,7 @@ Use the supplied SVG/PNG assets. The PB mark projects onto a regular hexagon:
 six equal sides, 120° interior angles. Never stretch, rotate, recolor or add effects.
 Blue #17386C on light surfaces; white on dark. Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
-complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Bold.
+complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Light (prompt) and Inter Bold (book).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
 Logo SVGs contain vector paths, with no embedded bitmap or font dependency.
 Editable slide/social templates require Outfit and Inter; their PNG exports do not.
