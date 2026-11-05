@@ -20,7 +20,7 @@ import { CITIES_CS_PAGE_DEFINITION } from '@/businesses/pro-mesta/citiesCsMetada
 import { LEGAL_PAGE_DEFINITION_LIST } from '@/lib/legal/legalPageMetadata';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import {
-    BRANDING_PAGE_DEFINITION,
+    BRANDING_PAGE_DEFINITIONS,
     CONTACT_PAGE_DEFINITION,
     DATA_DELETION_PAGE_DEFINITION,
 } from '@/lib/metadata/site-page-definitions';
@@ -53,7 +53,7 @@ const PAGE_METADATA_DEFINITIONS: readonly PageMetadataDefinition[] = [
     PAVOL_PAGE_DEFINITIONS.cs,
     PAVOL_PAGE_DEFINITIONS.en,
     CONTACT_PAGE_DEFINITION,
-    BRANDING_PAGE_DEFINITION,
+    ...Object.values(BRANDING_PAGE_DEFINITIONS),
     ...LEGAL_PAGE_DEFINITION_LIST,
     DATA_DELETION_PAGE_DEFINITION,
 ];

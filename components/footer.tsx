@@ -107,7 +107,7 @@ const footerDefaultsByLanguage: Record<FooterLanguage, FooterContent> = {
             { href: 'https://ptbk.io/', text: 'Promptbook' },
             { href: 'https://github.com/webgptorg/promptbook', text: 'Dokumentace' },
             { href: 'https://promptbook.studio/miniapps/new', text: 'Playground' },
-            { href: '/en/branding', text: 'Logo a značka (EN)' },
+            { href: '/cs/branding', text: 'Logo a značka' },
         ],
         companyHeader: 'Společnost',
         companyLinks: [

@@ -15,13 +15,14 @@ import { LeadButton, LeadCaptureProvider } from './LeadCapture';
 import { NEW_SITE_NAVIGATION, sitePath } from './siteConfig';
 import { TechnologyIncubation } from './TechnologyIncubation';
 import { ENGINE_REPOSITORY } from './commercialTerms';
+import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import s from './site.module.css';
 import f from './footer.module.css';
 
 function LocalizedShell({ children }: { children: ReactNode }) {
     const { t, locale, path } = useSiteLocale();
 
-    return <LeadCaptureProvider><div className={s.site} lang={locale}>
+    return <LeadCaptureProvider><div className={s.site} lang={locale} style={PROMPTBOOK_BRAND_STYLE}>
         <a href="#obsah" className={s.skip}>{t("Přejít na obsah")}</a>
         <header className={s.header}><div className={s.headerInner}>
             <BrandLogo priority/>
@@ -33,7 +34,7 @@ function LocalizedShell({ children }: { children: ReactNode }) {
         <footer className={s.footer}><div className={`${s.footerGrid} ${f.grid}`}>
             <div><BrandLogo/><p>{t("Vaše AI.")}<br />{t("Opravdu Vaše.")}</p></div>
             <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('cenik')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={`/${locale}/releases`}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
-            <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('srovnani')}>{t("Srovnání")}</Link><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href="/en/branding" hrefLang="en">{locale === 'cs' ? 'Logo a značka (EN)' : 'Brand kit'}</Link></nav>
+            <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('srovnani')}>{t("Srovnání")}</Link><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href={path('branding')} hrefLang={locale}>{locale === 'cs' ? 'Logo a značka' : 'Brand kit'}</Link></nav>
             <nav className={f.legal} aria-label={locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}>
                 <strong><Link href={`/${locale}/legal`}>{locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}</Link></strong>
                 <ul className={f.documents}>{getLegalDocumentLinks(locale).map(link => <li key={link.href}><Link href={link.href}>{link.text}</Link></li>)}</ul>
@@ -48,12 +49,11 @@ function LocalizedShell({ children }: { children: ReactNode }) {
     </div></LeadCaptureProvider>;
 }
 
-/** Keep the original mark and exact wordmark colors together in both navigation and footer. */
+/** The website and downloadable kit use the identical outlined vector lockup. */
 function BrandLogo({ priority = false }: { priority?: boolean }) {
     const { path, t } = useSiteLocale();
     return <Link className={s.logo} href={path()} aria-label={t('Promptbook — úvod')}>
-        <Image src="/logo/promptbook-logo-blue-transparent-128.png" width={33} height={33} alt="" priority={priority}/>
-        <span className={s.wordmark}><span>prompt</span><span className={s.logoBook}>book</span></span>
+        <Image src={PROMPTBOOK_BRAND.assets.lockupLight} width={174} height={33} alt="promptbook" priority={priority}/>
     </Link>;
 }
 

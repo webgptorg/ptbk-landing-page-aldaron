@@ -10,14 +10,19 @@ function createRequest(url: string, headers: HeadersInit = {}): NextRequest {
 }
 
 describe('domain middleware', () => {
-    it('keeps the English brand kit canonical regardless of browser language and preserves alias queries', async () => {
-        for (const alias of ['/branding', '/cs/branding', '/branding/opengraph-image', '/cs/branding/opengraph-image']) {
-            const response = await middleware(createRequest(`https://ptbk.io${alias}?from=footer`, { 'accept-language': 'cs' }));
-            expect(response.status).toBe(308);
-            expect(response.headers.get('location')).toBe(`https://ptbk.io/en/branding${alias.endsWith('/opengraph-image') ? '/opengraph-image' : ''}?from=footer`);
+    it('serves both explicit brand-kit languages and selects a private unprefixed alias', async () => {
+        for (const language of ['cs', 'en']) {
+            for (const suffix of ['', '/opengraph-image']) {
+                const response = await middleware(createRequest(`https://ptbk.io/branding${suffix}?from=footer`, { 'accept-language': language }));
+                expect(response.status).toBe(307);
+                expect(response.headers.get('location')).toBe(`https://ptbk.io/${language}/branding${suffix}?from=footer`);
+                expect(response.headers.get('Vary')).toBe('Accept-Language');
+                expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+                const canonical = await middleware(createRequest(`https://ptbk.io/${language}/branding${suffix}`, { 'accept-language': language === 'cs' ? 'en' : 'cs' }));
+                expect(canonical.headers.get('location')).toBeNull();
+                expect(canonical.headers.get('x-middleware-request-x-promptbook-page-language')).toBe(language);
+            }
         }
-        const canonical = await middleware(createRequest('https://ptbk.io/en/branding', { 'accept-language': 'cs' }));
-        expect(canonical.headers.get('location')).toBeNull();
     });
 
     it('overwrites spoofed internal scope headers and covers shortcodes beginning with api', async () => {

@@ -39,8 +39,8 @@ export function MinimalFooter({ language = 'cs' }: { readonly language?: Support
                         <Link href={createPublicUrl(`/${language}/articles`)} className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
                             {language === 'cs' ? 'Články a podcast' : 'Articles & podcast'}
                         </Link>
-                        <Link href="/branding" className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
-                            Branding
+                        <Link href={`/${language}/branding`} className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
+                            {language === 'cs' ? 'Logo a značka' : 'Brand kit'}
                         </Link>
                         <Link href="/book" className={MINIMAL_FOOTER_LINK_CLASS_NAME}>
                             Common knowledge

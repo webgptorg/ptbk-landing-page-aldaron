@@ -11,15 +11,28 @@ import type { Metadata } from 'next';
 export const BRANDING_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/en/branding',
     language: 'en',
+    languageAlternates: { cs: '/cs/branding', en: '/en/branding' },
     title: 'Promptbook brand kit',
     socialTitle: 'The Promptbook brand kit',
     isSocialPreviewImageGenerated: true,
-    description: 'Promptbook logos, colors, typefaces, and approved messages for partners, press, and product teams.',
+    description: 'Download Promptbook logos as SVG or PNG. Colors, typography, usage rules, product descriptions and templates.',
     socialPreviewImageAlt: 'Promptbook brand kit',
     keywords: ['Promptbook branding', 'logo', 'brand assets', 'press kit'],
     sitemapPriority: 0.4,
     sitemapChangeFrequency: 'yearly',
 };
+
+export const BRANDING_PAGE_DEFINITIONS = {
+    en: BRANDING_PAGE_DEFINITION,
+    cs: {
+        ...BRANDING_PAGE_DEFINITION,
+        path: '/cs/branding', language: 'cs',
+        title: 'Promptbook — Logo a značka', socialTitle: 'Logo a značka Promptbook',
+        description: 'Loga Promptbooku ke stažení v SVG a PNG. Barvy, písma, pravidla použití, popisy produktu a šablony.',
+        socialPreviewImageAlt: 'Logo a značka Promptbook',
+        keywords: ['Promptbook', 'logo', 'značka', 'brand kit'],
+    },
+} satisfies Record<'cs' | 'en', PageMetadataDefinition>;
 
 export const CONTACT_PAGE_DEFINITION: PageMetadataDefinition = {
     path: '/contact',

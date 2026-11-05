@@ -37,7 +37,7 @@ async function loadBrandAssets(brandKind: SocialPreviewBrandKind) {
         };
     }
 
-    const logo = await readFile(join(process.cwd(), 'public/logo/promptbook-logo-white-transparent-1024.png'));
+    const logo = await readFile(join(process.cwd(), 'public/brand/promptbook-symbol-white-1024.png'));
     return { logo: createImageDataUrl(logo, 'image/png') };
 }
 

@@ -57,6 +57,7 @@ const nextConfig = {
             './public/fonts/workshop/Inter-Regular.ttf',
             './public/fonts/workshop/Outfit-Bold.ttf',
             './public/logo/promptbook-logo-white-transparent-1024.png',
+            './public/brand/promptbook-symbol-white-1024.png',
             './public/logo/pavol-hejny-ph.svg',
             './public/people/pavol-hejny-transparent-square.png',
         ],

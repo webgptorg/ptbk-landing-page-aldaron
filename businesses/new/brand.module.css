@@ -1,4 +1,4 @@
-.brandPage{--brand:#000080;--ink:#111318;--muted:#687383;--ice:#eef4fb;isolation:isolate}
+.brandPage{--brand:var(--ptbk-blue,#000080);--ink:var(--ptbk-ink,#111318);--muted:var(--ptbk-muted,#687383);--ice:var(--ptbk-surface,#eef4fb);isolation:isolate}
 .hero{position:relative;text-align:center;padding:48px 0 58px;margin:auto;max-width:1100px}
 .hero::before{content:'';position:absolute;z-index:-1;inset:20px -8% -40px;background:radial-gradient(ellipse at 50% 38%,#edf4ff 0,transparent 66%);pointer-events:none}
 .hero h1{font-size:clamp(42px,6.3vw,80px);font-weight:500;letter-spacing:-.055em;line-height:1.1;max-width:1100px;margin:auto;text-wrap:balance}

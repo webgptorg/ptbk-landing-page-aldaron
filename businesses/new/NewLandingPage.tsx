@@ -15,6 +15,7 @@ import { BrandTestimonials } from './BrandTestimonials';
 import { PricingCards } from './MarketingSections';
 import { InlineContactForm } from './InlineContactForm';
 import b from './brand.module.css';
+import { PROMPTBOOK_BRAND, PROMPTBOOK_INTRO } from '@/lib/promptbook-brand';
 
 /** One product story, adapted to people running agendas and partners delivering them. */
 export function NewLandingPage({ partnership = false, showTestimonials = true }: { partnership?: boolean; showTestimonials?: boolean }) {
@@ -22,10 +23,10 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
     const en = locale === 'en';
     const intro = partnership
         ? (en ? ['Bring clients AI that takes care of ongoing work.', 'You know their business.', 'We provide the engine, app and product support.', 'You earn from your services and a share of their licence.'] : ['Dodávejte klientům AI, která se průběžně stará o jejich práci.', 'Vy znáte jejich podnikání.', 'My dodáváme engine, aplikaci a produktovou podporu.', 'Vyděláváte na svých službách i podílu z licence.'])
-        : (en ? ['Hand over a responsibility.', 'Set the rules.', 'Start your agents.', 'They work independently.', 'They ask only when they need you.', 'You can check in at any time.'] : ['Předáte agendu.', 'Nastavíte pravidla.', 'Spustíte agenty.', 'Pracují sami.', 'Ozvou se, jen když Vás potřebují.', 'Vy máte kdykoliv přehled.']);
+        : PROMPTBOOK_INTRO[locale];
     return <div className={b.brandPage}>
         <section className={b.hero} aria-labelledby="brand-heading" data-testid="brand-hero">
-            <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <HeroHeadline key={locale} firstLine={en ? 'You used to give AI tasks' : 'Dřív jste AI úkolovali'}/>}</h1>
+            <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <HeroHeadline key={locale} firstLine={PROMPTBOOK_BRAND.messages[locale].headline.split('. ')[0]}/>}</h1>
             <StagedIntro sentences={intro}/>
             <BrandActions partner={partnership}/>
             <Link className={b.partnerLink} href={path(partnership ? '' : 'partnership')}>

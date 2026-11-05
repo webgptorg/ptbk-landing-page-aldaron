@@ -609,9 +609,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   access. All cookies still depend on `ADMIN_PASSWORD`; legacy environment-admin cookies retain their meaning.
   Account/password creation is explicit, profile/access edits use the shared autosave/dialog conventions, and private
   account projections never return password hashes or session versions. `/admin` is the post-login dashboard.
-- `/en/branding` is the English-only Promptbook brand kit. Both language versions of the main footer link there;
-  the Czech label explicitly says EN. `/branding` and `/cs/branding`, including their sharing-image paths,
-  permanently redirect there with queries preserved. The podcast domain retains its independent `/branding` page.
+- `/cs/branding` and `/en/branding` share the concise Promptbook brand kit in `businesses/branding`.
+  Both use the launch shell, matching language switch/footer, canonical alternates and sharing images.
+  Unprefixed `/branding` selects the browser language with a private 307. `lib/promptbook-brand/brand.json`
+  owns product colors, messages, geometry and asset paths; `scripts/brand/generate.py` produces SVG/PNG,
+  templates and public Markdown/JSON/CSS rules. The PB mark uses an exact regular-hexagon projection;
+  the complete lockup has outlined lettering and is shared by the launch header, footer and kit.
+  Every asset stays individually downloadable; ZIP is optional. No BookEditor/MockedChat demo belongs here.
+  These product-only changes must never restyle AI ta Krajta or Pavol's personal sites or replace shared legacy assets.
 - Other public/legal routes include `/contact`, `/data-deletion`, `/privacy`,
   `/terms`, `/dekujeme`, and the routes under `/k`, `/old`, and
   `/test`.
