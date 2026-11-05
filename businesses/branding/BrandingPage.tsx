@@ -78,13 +78,14 @@ export function BrandingPage({ language }: { language: Language }) {
             <h2 id="type-heading">{text('Písmo', 'Typography')}</h2>
             <div className={s.typeGrid}>
                 <div><a className={s.fontName} href="https://fonts.google.com/specimen/Outfit">Outfit ↗</a><p>{text('Nadpisy · 500–600', 'Headings · 500–600')}</p><p className={s.headingSample}>{messages.headline}</p></div>
-                <div><a className={s.fontName} href="https://fonts.google.com/specimen/Inter">Inter ↗</a><p>{text('Text 400 · zvýraznění 600–700', 'Body 400 · emphasis 600–700')}</p><p className={s.bodySample}>{messages.short}</p><p>{text('Logotyp · prompt v řezu Light, book v řezu Bold', 'Wordmark · prompt in Light, book in Bold')}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p></div>
+                <div><a className={s.fontName} href="https://fonts.google.com/specimen/Inter">Inter ↗</a><p>{text('Text 400 · zvýraznění 600–700', 'Body 400 · emphasis 600–700')}</p><p className={s.bodySample}>{messages.short}</p><p>{text('Celý logotyp je v řezu Inter Bold (700).', 'The entire wordmark is set in Inter Bold (700).')}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p></div>
             </div>
         </section>
 
         <section id="copy" className={s.section} aria-labelledby="copy-heading">
             <h2 id="copy-heading">{text('Texty ke zkopírování', 'Copy to use')}</h2>
-            <p className={s.naming}>{text('V textu Promptbook. V logu promptbook bez tečky. Zkratka a CLI příkaz: ptbk.', 'Write Promptbook in text. The visual wordmark is promptbook, without a dot. Abbreviation and CLI command: ptbk.')}</p>
+            <p className={s.naming}>{text('V textu Promptbook. V logu promptbook bez tečky.', 'Write Promptbook in text. The visual wordmark is promptbook, without a dot.')}</p>
+            <p className={s.naming}>{text('Oficiální zkratka je', 'The official abbreviation is')} <code>{brand.abbreviation}</code>{text(' a píše se malými písmeny. Stejně se zapisuje příkaz CLI.', ' and is written in lowercase. Use the same spelling for the CLI command.')}</p>
             {([['headline',text('Hlavní sdělení', 'Main message')],['short',text('Jedna věta', 'One sentence')],['paragraph',text('Krátký popis', 'Short description')]] as const).map(([key,label]) => <div className={s.copyRow} key={key}><h3>{label}</h3><p>{messages[key]}</p><CopyText text={messages[key]} language={language}/></div>)}
             <div className={s.voice}><strong>{text('Pište konkrétně', 'Be specific')}</strong><p>{text('„Agenti připraví návrh odpovědi podle historie v CRM.“ Místo „Revoluční AI transformuje Vaše podnikání.“', '“Agents draft a reply using your CRM history.” Instead of “Revolutionary AI transforms your business.”')}</p></div>
         </section>

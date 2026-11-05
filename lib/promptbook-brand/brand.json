@@ -12,7 +12,7 @@
     "surface": "#EEF4FB",
     "white": "#FFFFFF"
   },
-  "fonts": { "heading": "Outfit", "body": "Inter", "wordmark": "Inter Light (prompt), Inter Bold (book)" },
+  "fonts": { "heading": "Outfit", "body": "Inter", "wordmark": "Inter Bold" },
   "logo": {
     "geometry": "regular point-up hexagon; isometric PB mark",
     "viewBox": [0, 0, 128, 128],

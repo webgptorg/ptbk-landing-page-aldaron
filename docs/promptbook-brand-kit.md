@@ -19,6 +19,11 @@ own artwork, components, routes, fonts, tokens and copy. Original `/logo/*` asse
 remain unchanged because other existing surfaces use them. The new `/brand/*`
 files have their own paths and explicit static-file allowlist entries.
 
+## Brand name
+
+Use Promptbook in text and `promptbook` in the logo. The official abbreviation
+is `ptbk` in lowercase. The CLI command uses the same spelling.
+
 ## Logo construction
 
 `artwork.json` retains the three authored PB curves from
@@ -29,8 +34,8 @@ the six vertices are `(64,4)`, `(64+30√3,34)`, `(64+30√3,94)`, `(64,124)`,
 `(64−30√3,94)`, `(64−30√3,34)`. The envelope has six 60-unit sides and 120° angles.
 The construction hexagon is a guide, not an extra visible outline in the logo.
 
-The lockup outlines Inter Light (300) for `prompt` and Inter Bold (700) for `book`.
-It has no external font or bitmap dependency. Light: blue symbol, near-black `prompt`,
+The lockup uses actual Inter Bold outlines from the locally licensed font; it has
+no external font or bitmap dependency. Light: blue symbol, near-black `prompt`,
 blue `book`. Dark: all white. The cube's vertical edge matches the wordmark's
 cap height. Clear space is ¼ of the symbol height on every side.
 Digital minimums are 32 px for the symbol and 160 px for the complete lockup;
@@ -49,10 +54,7 @@ This explicit editorial command generates the committed SVGs, transparent PNGs,
 localized 16:9 and social templates, Markdown rules, JSON tokens, CSS variables and
 an optional ZIP with stable entry dates. Raster templates use local Outfit/Inter
 through Fontconfig; they require no font-network request. Template SVG text stays
-editable and requires those fonts. Font licences are in `public/fonts/workshop`.
-The generator uses an Inter Light subset containing the characters in `prompt`.
-It comes from the same Inter 4.001 source (git-66647c0bb) as the local PDF fonts,
-instantiated at weight 300 and optical size 14.
+editable and requires those fonts. Font licences are already in `public/fonts/workshop`.
 Generation never runs during a website build or calls an AI provider.
 
 Every published file is linked individually. Keep all generated `/brand/*` paths
