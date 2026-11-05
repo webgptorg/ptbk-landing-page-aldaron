@@ -1,0 +1,56 @@
+{
+  "name": "Promptbook",
+  "wordmark": "promptbook",
+  "abbreviation": "ptbk",
+  "updatedAt": "2026-11-05",
+  "contact": "pavol@ptbk.io",
+  "colors": {
+    "blue": "#000080",
+    "ink": "#111318",
+    "text": "#1B2739",
+    "muted": "#687383",
+    "surface": "#EEF4FB",
+    "white": "#FFFFFF"
+  },
+  "fonts": {
+    "heading": "Outfit",
+    "body": "Inter",
+    "wordmark": "Inter Bold"
+  },
+  "logo": {
+    "geometry": "regular point-up hexagon; isometric PB mark",
+    "viewBox": [
+      0,
+      0,
+      128,
+      128
+    ],
+    "center": [
+      64,
+      64
+    ],
+    "radius": 60,
+    "clearSpaceRatio": 0.25,
+    "minimumSymbolWidthPx": 32,
+    "minimumLockupWidthPx": 160
+  },
+  "messages": {
+    "cs": {
+      "headline": "Dřív jste AI úkolovali. Teď pracuje pro Vás.",
+      "short": "Promptbook předává dlouhodobé agendy AI agentům, kteří pracují na Vašem počítači nebo serveru podle Vašich pravidel.",
+      "paragraph": "Předáte agendu. Nastavíte pravidla. Spustíte agenty. Pracují sami. Ozvou se, jen když Vás potřebují. Vy máte kdykoliv přehled. Engine běží na Vašem počítači nebo serveru, s Vašimi soubory a modely, které si zvolíte."
+    },
+    "en": {
+      "headline": "You used to give AI tasks. Now it works for you.",
+      "short": "Promptbook hands ongoing work to AI agents that run on your computer or server and follow your rules.",
+      "paragraph": "Hand over a responsibility. Set the rules. Start your agents. They work independently. They ask only when they need you. You can check in at any time. The engine runs on your computer or server, with your files and your choice of models."
+    }
+  },
+  "assets": {
+    "lockupLight": "/brand/promptbook-lockup-light.svg",
+    "lockupDark": "/brand/promptbook-lockup-dark.svg",
+    "symbolBlue": "/brand/promptbook-symbol-blue.svg",
+    "symbolWhite": "/brand/promptbook-symbol-white.svg"
+  },
+  "scope": "Promptbook only. AI ta Krajta and Pavol Hejny personal sites have independent brands."
+}
