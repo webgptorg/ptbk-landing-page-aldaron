@@ -13,7 +13,7 @@
 .header{background:#ffffffed;border-color:#e8ecf1;backdrop-filter:blur(18px)}
 .headerInner{min-height:70px;padding:10px 32px}
 .logo{font-family:var(--font-outfit),sans-serif;font-size:23px;font-weight:500;letter-spacing:-.04em;gap:9px}
-.logo img{width:29px;height:29px}
+.logo img{width:174px;height:33px}
 .desktopNav{font-size:12px;font-weight:400}.desktopNav a{min-height:44px;display:inline-flex;align-items:center;color:#586577}.desktopNav a:hover{color:var(--brand)}
 .site .button,.site .secondaryButton,.leadDialog .button{min-height:48px;font-size:14px;font-weight:500;padding:12px 23px;transition:background .2s,box-shadow .2s}
 .site .button,.leadDialog .button{background:#1c2b46;box-shadow:none}
