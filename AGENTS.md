@@ -614,7 +614,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Unprefixed `/branding` selects the browser language with a private 307. `lib/promptbook-brand/brand.json`
   owns product colors, messages, geometry and asset paths; `scripts/brand/generate.py` produces SVG/PNG,
   templates and public Markdown/JSON/CSS rules. The PB mark uses an exact regular-hexagon projection;
-  the complete lockup has outlined lettering and is shared by the launch header, footer and kit.
+  the complete lockup has outlined Inter Medium / Bold lettering and is shared by the launch header, footer and kit.
+  The kit shows full and lowercase Medium-only ptbk lockups on white, ink blue and black.
+  Its localized PDF downloads print the same pages via `scripts/brand/export-guide.cjs`.
   Every asset stays individually downloadable; ZIP is optional. No BookEditor/MockedChat demo belongs here.
   These product-only changes must never restyle AI ta Krajta or Pavol's personal sites or replace shared legacy assets.
 - Other public/legal routes include `/contact`, `/data-deletion`, `/privacy`,

@@ -10,10 +10,12 @@ process.env.FONTCONFIG_FILE = fontConfig;
 const sharp = require('sharp');
 async function main() {
     for (const filename of fs.readdirSync(directory).filter(name => name.endsWith('.svg'))) {
-        const widths = filename.includes('symbol') ? [128, 256, 1024] : filename.includes('robot') ? [1024] : filename.includes('lockup') ? [1440] : [filename.includes('social') ? 1200 : 1600];
+        const widths = filename.includes('symbol') ? [128, 256, 1024] : filename.includes('robot') ? [1024] : filename.includes('lockup') ? [1440] : filename.includes('abbreviation') ? [796] : [filename.includes('social') ? 1200 : 1600];
         for (const width of widths) {
             const suffix = filename.includes('symbol') ? `-${width}` : '';
-            await sharp(path.join(directory, filename)).resize({ width }).png().toFile(path.join(directory, filename.replace('.svg', `${suffix}.png`)));
+            const image = sharp(path.join(directory, filename)).resize({ width });
+            if (filename.endsWith('-black.svg')) image.flatten({ background: '#000000' });
+            await image.png().toFile(path.join(directory, filename.replace('.svg', `${suffix}.png`)));
         }
     }
 }

@@ -8,7 +8,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 
 ## Rozcestník specifikace
 
-- [Logo a značka](../docs/promptbook-brand-kit.md): český i anglický brand kit, pravidelný hexagon, individuální SVG/PNG, společné produktové podklady a šablony. Ostatní značky v repozitáři se nemění.
+- [Logo a značka](../docs/promptbook-brand-kit.md): český i anglický brand kit s PDF, plný i zkrácený logotyp na třech podkladech, individuální SVG/PNG a společné šablony. Ostatní značky v repozitáři se nemění.
 - [Smluvní a licenční podmínky](new-contractual-pages.md): aktuální veřejná znění, přijetí objednávky, partnerství, licence a informační povinnost při sdílení údajů.
 - [Obsah a informační architektura](new-product-page.md): jednoduchý úvod, ukázky, data, publikum a rozdělení podstránek.
 - [Bezpečnost a autonomie](new-security-and-autonomy.md): zero trust, lokální a vzdálené ovládání, pevná pravidla, učení a aktualizace enginu.

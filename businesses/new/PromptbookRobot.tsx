@@ -2,35 +2,63 @@ import { useId } from 'react';
 import brand from '../../lib/promptbook-brand/brand.json';
 import s from './hero-headline.module.css';
 
-/** A folded blue cube with the original logo triangle along its back-left top edge. */
+const goldenRatio = (1 + Math.sqrt(5)) / 2;
+const headEdge = 36;
+const bodyEdge = headEdge / goldenRatio;
+const footEdge = bodyEdge / 2;
+const bodyTop = footEdge + bodyEdge;
+const headTop = bodyTop + headEdge;
+
+/** Use the same unit scale for the three projected axes. */
+function project(x: number, y: number, z: number) {
+    return `${(56 + Math.sqrt(3) / 2 * (x - y)).toFixed(3)},${(99 + (x + y) / 2 - z).toFixed(3)}`;
+}
+
+/** A cube's three visible faces share vertices and use the same edge length. */
+function Cube({ x, y, z, edge, leftFill, rightFill, stroke = '#7f94bd' }: {
+    x: number; y: number; z: number; edge: number; leftFill: string; rightFill: string; stroke?: string;
+}) {
+    const top = z + edge;
+    const back = project(x, y, top);
+    const left = project(x, y + edge, top);
+    const front = project(x + edge, y + edge, top);
+    const right = project(x + edge, y, top);
+    const leftBottom = project(x, y + edge, z);
+    const frontBottom = project(x + edge, y + edge, z);
+    const rightBottom = project(x + edge, y, z);
+
+    return <g stroke={stroke} strokeWidth="1" strokeLinejoin="round">
+        <polygon points={`${left} ${front} ${frontBottom} ${leftBottom}`} fill={leftFill}/>
+        <polygon points={`${front} ${right} ${rightBottom} ${frontBottom}`} fill={rightFill}/>
+        <polygon points={`${back} ${left} ${front} ${right}`} fill="#eef3ff"/>
+    </g>;
+}
+
+/** A stack of isometric cubes with two diagonally placed feet and an articulated pen. */
 export function PromptbookRobot() {
-    const id = useId().replace(/:/g, '');
+    const id = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+    const paper = `url(#${id}-paper)`;
+    const headOrigin = -headEdge / 2;
+    const bodyOrigin = -bodyEdge / 2;
     return <svg viewBox="0 0 112 112" fill="none" aria-hidden="true" focusable="false" data-promptbook-robot>
         <defs>
             <linearGradient id={`${id}-paper`} x1="30" y1="34" x2="72" y2="102" gradientUnits="userSpaceOnUse"><stop stopColor="white"/><stop offset="1" stopColor="#e3eafa"/></linearGradient>
             <linearGradient id={`${id}-blue`} x1="71" y1="19" x2="89" y2="58" gradientUnits="userSpaceOnUse"><stop stopColor="#42628F"/><stop offset="1" stopColor={brand.colors.blue}/></linearGradient>
         </defs>
-        <ellipse cx="58" cy="105" rx="26" ry="3" fill="#163a80" opacity=".08"/>
-        <g stroke="#7f94bd" strokeWidth="1" strokeLinejoin="round">
-            <path d="M39 89 37 100 50 103 54 91Z M63 91 64 101 77 98 74 86Z" fill="#dce5f8"/>
-            <path d="M37 100 50 103 51 100 M64 101 77 98 76.25 95" stroke={brand.colors.blue}/>
-            <path d="M79 72 86 76 85 87 80 91 76 86Z" fill={brand.colors.blue}/>
-            <path d="M36 67 58 60 80 69 77 89 57 99 35 88Z" fill={`url(#${id}-paper)`} stroke="none"/>
-            <path d="M57 73 80 69 77 89 57 99Z" fill="#d4dff6" stroke="none"/>
-            <path d="M36 67 58 60 80 69 77 89 57 99 35 88Z M36 67 57 73 80 69 M57 73V99"/>
-        </g>
+        <ellipse cx="56" cy="104" rx="26" ry="3" fill={brand.colors.blue} opacity=".08"/>
+        <Cube x={bodyOrigin} y={0} z={0} edge={footEdge} leftFill="#e5ecfb" rightFill="#c4d3ee"/>
+        <Cube x={0} y={bodyOrigin} z={0} edge={footEdge} leftFill="#e5ecfb" rightFill="#c4d3ee"/>
+        <Cube x={bodyOrigin} y={bodyOrigin} z={footEdge} edge={bodyEdge} leftFill={paper} rightFill="#d4dff6"/>
+        <path d="M73 77 81 78 81 88 76 91 72 86Z" fill={brand.colors.blue} stroke="#7f94bd" strokeLinejoin="round"/>
         <g className={s.robotHead}>
-            <path d="M26 24 56.5 10 87 24V60L56.5 74 26 60Z" fill={`url(#${id}-paper)`}/>
-            <path d="M26 24 56.5 10 87 24 56.5 38Z" fill="#eef3ff"/>
-            <path d="M26 24 56.5 10V24Z" fill={brand.colors.blue} opacity=".85"/>
-            <path d="M56.5 38 87 24V60L56.5 74Z" fill={`url(#${id}-blue)`}/>
-            <path d="M26 24 56.5 10 87 24V60L56.5 74 26 60Z M26 24 56.5 38 87 24 M56.5 38V74" stroke="#153078" strokeWidth="1.15" strokeLinejoin="round"/>
-            <path d="m32 33 20 8v19l-20-8Z" fill={brand.colors.blue} stroke={brand.colors.blue}/>
-            <g fill="#fff" stroke="none"><path d="M36 41q0-2 1.6-1.4l.4.2q1.6.6 1.6 2.6v3q0 2-1.6 1.4l-.4-.2q-1.6-.6-1.6-2.6Z"/><path d="M45 44.5q0-2 1.6-1.4l.4.2q1.6.6 1.6 2.6v3q0 2-1.6 1.4l-.4-.2q-1.6-.6-1.6-2.6Z"/></g>
-            <path d="m38 51 8 3" stroke="#a8c8ff" strokeLinecap="round"/>
+            <Cube x={headOrigin} y={headOrigin} z={bodyTop} edge={headEdge} leftFill={paper} rightFill={`url(#${id}-blue)`} stroke="#153078"/>
+            <polygon points={`${project(headOrigin, -headOrigin, headTop)} ${project(headOrigin, headOrigin, headTop)} ${project(0, 0, headTop)}`} fill={brand.colors.blue} opacity=".85"/>
+            <path d="m31 44 20 11v19l-20-11Z" fill={brand.colors.blue} stroke={brand.colors.blue}/>
+            <g fill="#fff"><path d="M35 52q0-2 1.6-1.2l.4.2q1.6.8 1.6 2.8v3q0 2-1.6 1.2l-.4-.2q-1.6-.8-1.6-2.8Z"/><path d="M44 57q0-2 1.6-1.2l.4.2q1.6.8 1.6 2.8v3q0 2-1.6 1.2l-.4-.2q-1.6-.8-1.6-2.8Z"/></g>
+            <path d="m37 62 8 4.5" stroke="#a8c8ff" strokeLinecap="round"/>
         </g>
         <g className={s.robotArm} stroke="#15276a" strokeWidth="1.2" strokeLinejoin="round">
-            <path d="m36 72-10 3-8-9-4 4 9 14 13-2Z" fill={`url(#${id}-paper)`}/>
+            <path d="m40 79-14 1-8-14-4 4 9 17 17-1Z" fill={paper}/>
             <path d="M7 48 11 46 19 67 18 74 14 69Z" fill={brand.colors.blue}/>
             <path d="M7 48 6 42 11 46Z" fill="#8fa8d8"/>
             <path d="m15 63 4 2 2 7-5 2-3-6Z" fill="#d8e4fa"/>

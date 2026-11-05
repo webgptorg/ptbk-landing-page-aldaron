@@ -10,35 +10,54 @@ export function BrandingPage({ language }: { language: Language }) {
     const text = (cz: string, en: string) => cs ? cz : en;
     const messages = brand.messages[language];
     const [lockupWidth, lockupHeight] = brand.logo.lockupSize;
+    const backgrounds = [
+        ['Light', text('Bílý podklad', 'White background'), ''],
+        ['Dark', text('Inkoustově modrý podklad', 'Ink blue background'), s.dark],
+        ['Black', text('Černý podklad', 'Black background'), s.black],
+    ] as const;
+    const lockups = [
+        ['lockup', brand.wordmark, brand.logo.lockupSize, 1440],
+        ['abbreviation', brand.abbreviation, brand.logo.abbreviationLockupSize, 796],
+    ] as const;
     const sections = [
         ['logo', text('Logo', 'Logo')], ['rules', text('Použití', 'Usage')],
         ['colors', text('Barvy', 'Colors')], ['type', text('Písmo', 'Type')],
         ['copy', text('Texty', 'Copy')], ['examples', text('Šablony', 'Templates')],
     ];
-    return <article className={s.page} style={PROMPTBOOK_BRAND_STYLE}>
+    return <article data-promptbook-brand-kit className={s.page} style={PROMPTBOOK_BRAND_STYLE}>
         <header className={s.intro}>
             <h1>{text('Logo a značka', 'Brand kit')}</h1>
             <p>{text('Podklady pro web, prezentace a média.', 'Assets for websites, presentations and press.')}</p>
+            <a className={s.pdfDownload} href={`/brand/promptbook-brand-guide-${language}.pdf`} download>{text('Stáhnout celý manuál jako PDF', 'Download the full guide as a PDF')}</a>
             <nav aria-label={text('Obsah brand kitu', 'Brand kit contents')} className={s.navigation}>{sections.map(([id, title]) => <a href={`#${id}`} key={id}>{title}</a>)}</nav>
         </header>
 
         <section id="logo" className={s.section} aria-labelledby="logo-heading">
             <h2 id="logo-heading">Logo</h2>
-            <div className={s.logos}>
-                {(['light', 'dark'] as const).map(theme => <div className={s.logoCard} key={theme}>
-                    <div className={`${s.logoPreview} ${theme === 'dark' ? s.dark : ''}`}>
-                        <Image src={brand.assets[theme === 'light' ? 'lockupLight' : 'lockupDark']} width={lockupWidth} height={lockupHeight} alt={text(`Promptbook — ${theme === 'light' ? 'světlé' : 'tmavé'} pozadí`, `Promptbook on ${theme} background`)} priority />
-                    </div>
-                    <div className={s.assetCaption}><h3>{theme === 'light' ? text('Na světlé pozadí', 'On light backgrounds') : text('Na tmavé pozadí', 'On dark backgrounds')}</h3><Downloads base={`/brand/promptbook-lockup-${theme}`} pngLabel="PNG · 1440 px"/></div>
-                </div>)}
-            </div>
+            {lockups.map(([kind, name, [width, height], pngWidth]) => <div className={s.lockupGroup} key={kind}>
+                <h3>{name}</h3>
+                <div className={s.logos}>
+                    {backgrounds.map(([theme, label, background]) => {
+                        const svg = brand.assets[`${kind}${theme}`];
+                        return <figure className={s.logoCard} key={theme}>
+                            <div className={`${s.logoPreview} ${background} ${kind === 'abbreviation' ? s.abbreviation : ''}`}>
+                                <Image src={svg} width={width} height={height} alt={`${name} · ${label}`} priority/>
+                            </div>
+                            <figcaption className={s.assetCaption}>
+                                <strong>{label}</strong>
+                                <Downloads base={svg.slice(0, -4)} pngLabel={`PNG · ${pngWidth} px`}/>
+                            </figcaption>
+                        </figure>;
+                    })}
+                </div>
+            </div>)}
             <div className={s.symbols}>
                 {(['blue', 'white'] as const).map(color => <div className={s.symbolRow} key={color}>
                     <div className={`${s.symbolPreview} ${color === 'white' ? s.dark : ''}`}><Image src={brand.assets[color === 'blue' ? 'symbolBlue' : 'symbolWhite']} width={72} height={72} alt={text('Samostatný symbol', 'Standalone symbol')} /></div>
                     <div><h3>{color === 'blue' ? text('Modrý symbol', 'Blue symbol') : text('Bílý symbol', 'White symbol')}</h3><div className={s.downloads}><a download href={`/brand/promptbook-symbol-${color}.svg`}>SVG</a>{[128,256,1024].map(size => <a download key={size} href={`/brand/promptbook-symbol-${color}-${size}.png`}>PNG · {size}</a>)}</div></div>
                 </div>)}
             </div>
-            <p className={s.note}>{text('Všechna loga mají průhledné pozadí. SVG obsahují vektorové křivky včetně názvu.', 'All logos have transparent backgrounds. SVGs contain vector paths, including the wordmark.')} <a href="/brand/promptbook-brand-kit.zip" download>{text('Vše také v ZIP', 'Also available as a ZIP')}</a></p>
+            <p className={s.note}>{text('Světlá a modrá varianta mají průhledné pozadí. Černá varianta má černý podklad přímo v souboru. SVG obsahují vektorové křivky včetně názvu.', 'Artwork for white and blue backgrounds is transparent. The black version includes its black background in the file. SVGs contain vector paths, including the wordmark.')} <a href="/brand/promptbook-brand-kit.zip" download>{text('Vše také v ZIP', 'Also available as a ZIP')}</a></p>
         </section>
 
         <section id="rules" className={s.section} aria-labelledby="rules-heading">
@@ -66,7 +85,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <h2 id="colors-heading">{text('Barvy', 'Colors')}</h2>
             <div className={s.colors}>{[
                 ['blue', text('Značka a odkazy', 'Brand and links')], ['ink', text('Název a nadpisy', 'Wordmark and headings')],
-                ['text', text('Běžný text', 'Body text')], ['surface', text('Jemné pozadí', 'Soft background')], ['white', text('Základní pozadí', 'Base background')],
+                ['text', text('Běžný text', 'Body text')], ['surface', text('Jemné pozadí', 'Soft background')], ['white', text('Základní pozadí', 'Base background')], ['black', text('Černý podklad loga', 'Black logo background')],
             ].map(([key,label]) => {
                 const hex = brand.colors[key as keyof typeof brand.colors];
                 return <div className={s.color} key={key}><div className={s.swatch} style={{ background: hex }}/><strong>{label}</strong><code>{hex}</code><CopyText text={hex} language={language}/></div>;
@@ -78,7 +97,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <h2 id="type-heading">{text('Písmo', 'Typography')}</h2>
             <div className={s.typeGrid}>
                 <div><a className={s.fontName} href="https://fonts.google.com/specimen/Outfit">Outfit ↗</a><p>{text('Nadpisy · 500–600', 'Headings · 500–600')}</p><p className={s.headingSample}>{messages.headline}</p></div>
-                <div><a className={s.fontName} href="https://fonts.google.com/specimen/Inter">Inter ↗</a><p>{text('Text 400 · zvýraznění 600–700', 'Body 400 · emphasis 600–700')}</p><p className={s.bodySample}>{messages.short}</p><p>{text('Celý logotyp je v řezu Inter Bold (700).', 'The entire wordmark is set in Inter Bold (700).')}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p></div>
+                <div><a className={s.fontName} href="https://fonts.google.com/specimen/Inter">Inter ↗</a><p>{text('Text 400 · zvýraznění 600–700', 'Body 400 · emphasis 600–700')}</p><p className={s.bodySample}>{messages.short}</p><p>{text('V logotypu je „prompt“ v Inter Medium (500) a „book“ v Inter Bold (700) ve stejné velikosti. Zkratka „ptbk“ je celá v Inter Medium (500).', 'The full wordmark uses Inter Medium (500) for “prompt” and Inter Bold (700) for “book” at the same size. The entire “ptbk” abbreviation uses Inter Medium (500).')}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p></div>
             </div>
         </section>
 
@@ -95,7 +114,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <div className={s.templates}>{(['slide', 'social'] as const).map(kind => <figure key={kind}><Image src={`/brand/promptbook-${kind}-${language}.png`} width={kind === 'slide' ? 1600 : 1200} height={kind === 'slide' ? 900 : 630} alt={text(kind === 'slide' ? 'Šablona prezentačního slidu' : 'Šablona příspěvku na sociální sítě',kind === 'slide' ? 'Presentation slide template' : 'Social post template')}/><figcaption><h3>{kind === 'slide' ? text('Prezentace · 16 : 9', 'Presentation · 16 : 9') : text('Sociální sítě · 1200 × 630', 'Social · 1200 × 630')}</h3><Downloads base={`/brand/promptbook-${kind}-${language}`} pngLabel="PNG"/></figcaption></figure>)}</div>
             <div className={s.partnerExample}><div><p>{text('AI agenti pro naše klienty', 'AI agents for our clients')}</p><Image src={brand.assets.lockupLight} width={230} height={Math.round(230 * lockupHeight / lockupWidth)} alt="Promptbook"/></div><div><h3>{text('Partnerský web', 'Partner website')}</h3><p>{text('Použijte celé logo s odkazem na ptbk.io. Vlastní značku nechte oddělenou.', 'Use the complete logo linked to ptbk.io. Keep your own brand separate.')}</p><Downloads base="/brand/promptbook-lockup-light" pngLabel="PNG"/></div></div>
             <p className={s.note}>{text('SVG šablony lze upravit; používají Outfit a Inter. PNG mají písma vykreslená.', 'SVG templates are editable and use Outfit and Inter. PNGs have the fonts rendered in.')}</p>
-            <div className={s.partnerExample}><div className={s.robotPreview}><Image src="/brand/promptbook-robot.svg" width={112} height={112} alt={text('Robot z hlavní stránky Promptbooku', 'Robot from the Promptbook homepage')}/></div><div><h3>{text('Robot z hlavní stránky', 'Homepage robot')}</h3><p>{text('Doplňková ilustrace. Logo nenahrazuje.', 'A supporting illustration. It does not replace the logo.')}</p><Downloads base="/brand/promptbook-robot" pngLabel="PNG · 1024 px"/></div></div>
+            <div className={s.partnerExample}><div className={s.robotPreview}><Image src="/brand/promptbook-robot.svg" width={112} height={112} alt={text('Robot z hlavní stránky Promptbooku', 'Robot from the Promptbook homepage')}/></div><div><h3>{text('Robot z hlavní stránky', 'Homepage robot')}</h3><p>{text('Doplňková ilustrace. Hrany hlavy a těla jsou v poměru zlatého řezu. Dvě diagonálně umístěné nohy mají polovinu hrany těla.', 'A supporting illustration. The head and body edges follow the golden ratio. The two diagonal feet have half the body edge length.')}</p><Downloads base="/brand/promptbook-robot" pngLabel="PNG · 1024 px"/></div></div>
 
         </section>
 

@@ -10,15 +10,17 @@
     "text": "#1B2739",
     "muted": "#687383",
     "surface": "#EEF4FB",
-    "white": "#FFFFFF"
+    "white": "#FFFFFF",
+    "black": "#000000"
   },
-  "fonts": { "heading": "Outfit", "body": "Inter", "wordmark": "Inter Bold" },
+  "fonts": { "heading": "Outfit", "body": "Inter", "wordmark": "Inter Medium (500) / Inter Bold (700)", "abbreviation": "Inter Medium (500)" },
   "logo": {
     "geometry": "regular point-up hexagon; isometric PB mark",
     "viewBox": [0, 0, 128, 128],
     "center": [64, 64],
     "radius": 60,
     "lockupSize": [760, 164],
+    "abbreviationLockupSize": [420, 164],
     "clearSpaceRatio": 0.25,
     "minimumSymbolWidthPx": 32,
     "minimumLockupWidthPx": 160
@@ -38,6 +40,10 @@
   "assets": {
     "lockupLight": "/brand/promptbook-lockup-light.svg",
     "lockupDark": "/brand/promptbook-lockup-dark.svg",
+    "lockupBlack": "/brand/promptbook-lockup-black.svg",
+    "abbreviationLight": "/brand/promptbook-abbreviation-light.svg",
+    "abbreviationDark": "/brand/promptbook-abbreviation-dark.svg",
+    "abbreviationBlack": "/brand/promptbook-abbreviation-black.svg",
     "symbolBlue": "/brand/promptbook-symbol-blue.svg",
     "symbolWhite": "/brand/promptbook-symbol-white.svg"
   },

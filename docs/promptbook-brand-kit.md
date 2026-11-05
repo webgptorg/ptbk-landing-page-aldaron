@@ -34,9 +34,12 @@ the six vertices are `(64,4)`, `(64+30√3,34)`, `(64+30√3,94)`, `(64,124)`,
 `(64−30√3,94)`, `(64−30√3,34)`. The envelope has six 60-unit sides and 120° angles.
 The construction hexagon is a guide, not an extra visible outline in the logo.
 
-The lockup uses actual Inter Bold outlines from the locally licensed font; it has
-no external font or bitmap dependency. Light: blue symbol, near-black `prompt`,
-blue `book`. Dark: all white. The cube's vertical edge matches the wordmark's
+The full lockup uses equal-size Inter Medium (500) for `prompt` and Inter Bold
+(700) for `book`. The lowercase `ptbk` lockup uses Inter Medium (500) throughout.
+Both have outlined lettering. The light artwork uses an ink-blue symbol and
+near-black lettering, with ink-blue `book` in the full version. The all-white
+artwork has a transparent export for ink-blue surfaces and a solid black export.
+The cube's vertical edge matches the wordmark's
 cap height. Clear space is ¼ of the symbol height on every side.
 Digital minimums are 32 px for the symbol and 160 px for the complete lockup;
 the page shows both at their actual desktop sizes. Print remains an actual-size
@@ -57,6 +60,14 @@ through Fontconfig; they require no font-network request. Template SVG text stay
 editable and requires those fonts. Font licences are already in `public/fonts/workshop`.
 Generation never runs during a website build or calls an AI provider.
 
+The full Czech and English PDFs print the actual localized pages. With the site
+running locally and Playwright Chromium installed, regenerate the PDFs and ZIP:
+
+```sh
+node scripts/brand/export-guide.cjs http://localhost:4009
+python scripts/brand/generate.py
+```
+
 Every published file is linked individually. Keep all generated `/brand/*` paths
 in `lib/domains/sharedPublicAssetPaths.ts` when adding/removing a file. The ZIP is
 only a convenience; downloads never require it.
@@ -66,7 +77,8 @@ only a convenience; downloads never require it.
 Downloads lead, followed by illustrated spacing, minimum sizes, regular geometry,
 bad-use examples, color roles with real clipboard feedback, practical font samples,
 approved short/paragraph text and slide/social/partner examples. The robot is a static
-export of the actual homepage component. No current verified engine UI screenshot
+export of the actual homepage component. Its isometric head and body use a
+golden-ratio edge length, with two half-body-edge cubes placed diagonally below. No current verified engine UI screenshot
 was available in the repository; it is not replaced with a fabricated mockup. BookEditor and
 MockedChat demonstrations are removed only from this page, not from the product.
 The source files remain untouched. Do not manufacture an engine screenshot from

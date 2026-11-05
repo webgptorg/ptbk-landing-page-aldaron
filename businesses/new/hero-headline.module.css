@@ -12,8 +12,8 @@
 .check{position:absolute;right:-.26em;bottom:-.13em;width:.2em;height:.2em;stroke:var(--ptbk-blue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .robot{position:absolute;top:0;left:50%;width:88px;height:88px;transform:translateX(-50%);line-height:0}
 .robot>svg{width:100%;height:100%;overflow:visible}
-.robotHead{transform-origin:56px 68px;transform-box:view-box}
-.robotArm{transform-origin:34px 76px;transform-box:view-box}
+.robotHead{transform-origin:56px 66px;transform-box:view-box}
+.robotArm{transform-origin:40px 81px;transform-box:view-box}
 /* The pale guide keeps the complete promise readable from the first paint. */
 .headline[data-animated=true] .initialLetter{color:#a1afcc;animation:ink-in 0s linear calc(.1s + var(--letter)*.026s) both}
 .headline[data-stage=writing] .robotArm{animation:robot-write .3s ease-in-out infinite alternate}

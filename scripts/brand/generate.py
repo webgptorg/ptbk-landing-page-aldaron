@@ -32,11 +32,12 @@ def mark(color):
     }
     return ''.join(f'<path fill="{color}" transform="matrix({" ".join(map(number, matrices[face]))})" d="{ART[face]}"/>' for face in matrices)
 
-font = TTFont(ROOT / 'public/fonts/workshop/Inter-Bold.ttf')
-glyphs, cmap = font.getGlyphSet(), font.getBestCmap()
-scale = 100 / font['head'].unitsPerEm
+bold = TTFont(ROOT / 'public/fonts/workshop/Inter-Bold.ttf')
+medium = TTFont(ROOT / 'scripts/brand/fonts/Inter-Medium.ttf')
 
-def outlines(text, x, y, color):
+def outlines(text, x, y, color, font):
+    glyphs, cmap = font.getGlyphSet(), font.getBestCmap()
+    scale = 100 / font['head'].unitsPerEm
     result = []
     for character in text:
         glyph = glyphs[cmap[ord(character)]]
@@ -46,23 +47,36 @@ def outlines(text, x, y, color):
         x += glyph.width*scale - 4
     return ''.join(result), x
 
-def lockup(dark=False):
-    first, end = outlines('prompt', 168, 109, COLORS['white'] if dark else COLORS['ink'])
-    second, _ = outlines('book', end, 109, COLORS['white'] if dark else COLORS['blue'])
+def lockup(theme='light', abbreviated=False):
+    dark = theme != 'light'
+    first_color = COLORS['white'] if dark else COLORS['ink']
+    accent_color = COLORS['white'] if dark else COLORS['blue']
+    if abbreviated:
+        lettering, _ = outlines(BRAND['abbreviation'], 168, 109, first_color, medium)
+    else:
+        first, end = outlines('prompt', 168, 109, first_color, medium)
+        second, _ = outlines('book', end, 109, accent_color, bold)
+        lettering = first + second
     # Match the vertical edge of the cube to the height of the lettering.
-    symbol_scale = font['OS/2'].sCapHeight * scale / BRAND['logo']['radius']
+    symbol_scale = (100 * bold['OS/2'].sCapHeight / bold['head'].unitsPerEm) / BRAND['logo']['radius']
     center_y = BRAND['logo']['lockupSize'][1] / 2
     symbol_y = center_y - BRAND['logo']['center'][1] * symbol_scale
     transform = f'translate(10 {number(symbol_y)}) scale({number(symbol_scale)})'
-    return f'<g transform="{transform}">{mark(COLORS["white"] if dark else COLORS["blue"])}</g>{first}{second}'
+    background = f'<rect width="100%" height="100%" fill="{COLORS["black"]}"/>' if theme == 'black' else ''
+    return f'{background}<g transform="{transform}">{mark(accent_color)}</g>{lettering}'
 
 def svg(width, height, content, title):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img"><title>{escape(title)}</title>{content}</svg>\n'
 
 for name, color in [('blue',COLORS['blue']),('white',COLORS['white'])]:
     (OUT / f'promptbook-symbol-{name}.svg').write_text(svg(128,128,mark(color),f'Promptbook {name} symbol'))
-for theme in ['light','dark']:
-    (OUT / f'promptbook-lockup-{theme}.svg').write_text(svg(*BRAND['logo']['lockupSize'],lockup(theme=='dark'),'Promptbook'))
+for theme in ('light', 'dark', 'black'):
+    (OUT / f'promptbook-lockup-{theme}.svg').write_text(
+        svg(*BRAND['logo']['lockupSize'], lockup(theme), BRAND['name'])
+    )
+    (OUT / f'promptbook-abbreviation-{theme}.svg').write_text(
+        svg(*BRAND['logo']['abbreviationLockupSize'], lockup(theme, abbreviated=True), BRAND['abbreviation'])
+    )
 
 # Editable templates use actual brand outlines; text remains editable in SVG.
 for locale, message in BRAND['messages'].items():
@@ -84,9 +98,13 @@ Name: {BRAND['name']}. Visual wordmark: {BRAND['wordmark']} (no trailing dot).
 Official abbreviation: {BRAND['abbreviation']} (lowercase). CLI command: {BRAND['abbreviation']}.
 Use the supplied SVG/PNG assets. The PB mark projects onto a regular hexagon:
 six equal sides, 120° interior angles. Never stretch, rotate, recolor or add effects.
-Blue {COLORS['blue']} on light surfaces; white on dark. Keep at least 1/4 of
+Light artwork is transparent for white surfaces. Use the transparent white artwork on
+ink blue {COLORS['blue']} or the all-white lockup with its solid black {COLORS['black']} background.
+Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
-complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Bold.
+complete lockup 160 px. Headings: Outfit. Body: Inter.
+Full wordmark: Inter Medium (500) for prompt, Inter Bold (700) for book, at equal sizes.
+The abbreviated ptbk wordmark is entirely Inter Medium (500).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
 Logo SVGs contain vector paths, with no embedded bitmap or font dependency.
 Editable slide/social templates require Outfit and Inter; their PNG exports do not.
