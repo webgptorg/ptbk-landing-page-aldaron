@@ -1,4 +1,4 @@
-.headline{position:relative;display:block;padding-top:104px;color:#000080;line-height:1.12}
+.headline{position:relative;display:block;padding-top:104px;color:var(--ptbk-blue);line-height:1.12}
 .firstLine{display:block;color:#1b2739}
 /* Each complete phrase occupies the same grid cell. Its spaces remain natural,
    while the longest phrase reserves the outer geometry before animation starts. */
@@ -9,7 +9,7 @@
 .forYou{position:relative;white-space:nowrap}
 .you{position:relative}
 .underline{position:absolute;left:-.02em;bottom:-.09em;width:104%;height:.11em;overflow:visible;stroke:#7896d3;stroke-width:1.7;stroke-linecap:round}
-.check{position:absolute;right:-.26em;bottom:-.13em;width:.2em;height:.2em;stroke:#000080;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.check{position:absolute;right:-.26em;bottom:-.13em;width:.2em;height:.2em;stroke:var(--ptbk-blue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .robot{position:absolute;top:0;left:50%;width:88px;height:88px;transform:translateX(-50%);line-height:0}
 .robot>svg{width:100%;height:100%;overflow:visible}
 .robotHead{transform-origin:56px 68px;transform-box:view-box}
@@ -24,7 +24,7 @@
 .phrase[data-swapping=true] .activity{animation:word-replace .38s cubic-bezier(.16,1,.3,1) both}
 .headline[data-running=false] *,.headline[data-running=false] *::after{animation-play-state:paused!important}
 .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@keyframes ink-in{to{color:#000080}}
+@keyframes ink-in{to{color:var(--ptbk-blue)}}
 @keyframes draw-line{to{stroke-dashoffset:0}}
 @keyframes robot-write{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
 @keyframes robot-nod{0%,100%{transform:none}45%{transform:translateY(1.5px) rotate(3deg)}}

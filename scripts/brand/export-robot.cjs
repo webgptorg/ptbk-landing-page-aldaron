@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '../..');
 const source = fs.readFileSync(path.join(root, 'businesses/new/PromptbookRobot.tsx'), 'utf8')
     .replace(/import s from '[^']+\.css';/, 'const s: Record<string, string> = {};');
 const code = ts.transpileModule(source, {
-    compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
 }).outputText;
 const compiled = { exports: {} };
 new Function('require', 'module', 'exports', code)(require, compiled, compiled.exports);

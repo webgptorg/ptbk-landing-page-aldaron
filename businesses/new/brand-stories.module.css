@@ -1,11 +1,11 @@
 /* A single, non-sticky stage. Only its camera responds to normal page scroll. */
-.stories{--story-ink:#151923;--story-blue:#000080;--scene-orbit:0deg;--scene-tilt:0deg;--scene-lift:0px;color:var(--story-ink);padding:12px 0 22px;position:relative;min-width:0}
+.stories{--story-ink:#151923;--story-blue:var(--ptbk-blue);--scene-orbit:0deg;--scene-tilt:0deg;--scene-lift:0px;color:var(--story-ink);padding:12px 0 22px;position:relative;min-width:0}
 .carouselBar{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:930px;margin:0 auto 18px}
 .storyChoices{display:flex;gap:6px;padding:5px;background:#f0f2f8;border:1px solid #e6e9f2;border-radius:16px}
 .storyChoices button{display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#717b91;border-radius:11px;min-height:44px;padding:9px 23px;font-size:13px!important;transition:background .2s,color .2s,box-shadow .2s}
-.storyChoices button[aria-selected=true]{color:#000080;background:#fff;box-shadow:0 2px 8px #24336b0c;font-weight:600}
+.storyChoices button[aria-selected=true]{color:var(--ptbk-blue);background:#fff;box-shadow:0 2px 8px #24336b0c;font-weight:600}
 .carouselArrows{display:flex;gap:6px}.carouselArrows button{display:grid;place-items:center;width:44px;height:44px;background:#fff;border:1px solid #e2e7f0;border-radius:50%;color:#435375;transition:background .2s}.carouselArrows button:hover{background:#edf1fa}
-.stories button:focus-visible,.story:focus-visible{outline:2px solid #000080;outline-offset:4px}
+.stories button:focus-visible,.story:focus-visible{outline:2px solid var(--ptbk-blue);outline-offset:4px}
 .story{position:relative;padding:25px 34px 20px;border:1px solid #e7eaf2;border-radius:30px;background:radial-gradient(ellipse at 50% 80%,#e1e8fcaa,transparent 66%),linear-gradient(120deg,#fafbff,#f3f6fd 65%,#f9fafc);isolation:isolate;scroll-margin-top:100px;overflow:clip}
 .sceneTitle{font-size:clamp(18px,2vw,24px)!important;font-weight:500!important;letter-spacing:-.025em!important;text-align:center;color:#334364;margin:0 0 2px!important;line-height:1.4!important}
 .scene{position:relative;height:470px;width:min(100%,760px);margin:0 auto;perspective:1500px}
@@ -15,7 +15,7 @@
 .timeline button{border:0;position:relative;background:none;display:flex;flex:1;flex-direction:column;align-items:center;gap:9px;min-height:48px;padding:8px 4px;color:#8a94a7;font-size:11px!important}
 .timeline button:not(:last-child):after{content:'';height:1px;background:#d8deeb;position:absolute;width:calc(100% - 22px);left:calc(50% + 11px);top:12px;z-index:-1}
 .timelineDot{width:9px;height:9px;border-radius:50%;background:#d7ddea;box-shadow:0 0 0 4px #f3f5fb}
-.timelineDot[data-complete=true]{background:#7185bc}.timeline button[aria-pressed=true]{color:#293f86;font-weight:600}.timeline button[aria-pressed=true] .timelineDot{background:#000080;box-shadow:0 0 0 4px #dfe5f7}
+.timelineDot[data-complete=true]{background:#7185bc}.timeline button[aria-pressed=true]{color:#293f86;font-weight:600}.timeline button[aria-pressed=true] .timelineDot{background:var(--ptbk-blue);box-shadow:0 0 0 4px #dfe5f7}
 .sceneFooter{display:flex;justify-content:space-between;gap:15px;align-items:center;color:#8791a2;font-size:10px;line-height:1.6;padding:13px 6px 0}.sceneFooter>span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:.08em}
 .stage{position:relative;width:100%;height:100%;perspective:1200px;transform-style:flat}
 .surface{position:absolute;background:#fff;border:1px solid #fff;border-radius:14px;overflow:hidden;box-shadow:1px 3px 0 #d9e2ee,0 20px 44px -22px #48688d4d;transition:transform .65s cubic-bezier(.22,.7,.24,1),opacity .45s,filter .5s}

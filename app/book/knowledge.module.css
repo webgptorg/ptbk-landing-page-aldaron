@@ -1,7 +1,7 @@
 .site {
     --ink: #141a31;
     --muted: #596176;
-    --blue: #000080;
+    --blue: var(--ptbk-blue);
     --line: #dce1ed;
     min-height: 100vh;
     background: #f9faff;

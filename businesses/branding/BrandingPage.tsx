@@ -71,7 +71,7 @@ export function BrandingPage({ language }: { language: Language }) {
                 const hex = brand.colors[key as keyof typeof brand.colors];
                 return <div className={s.color} key={key}><div className={s.swatch} style={{ background: hex }}/><strong>{label}</strong><code>{hex}</code><CopyText text={hex} language={language}/></div>;
             })}</div>
-            <div className={s.contrast}><span>{text('Modrá na bílé', 'Blue on white')} · 16 : 1</span><span>{text('Bílá na modré', 'White on blue')} · 16 : 1</span></div>
+            <div className={s.contrast}><span>{text('Modrá na bílé', 'Blue on white')} · {cs ? '11,5' : '11.5'} : 1</span><span>{text('Bílá na modré', 'White on blue')} · {cs ? '11,5' : '11.5'} : 1</span></div>
         </section>
 
         <section id="type" className={s.section} aria-labelledby="type-heading">

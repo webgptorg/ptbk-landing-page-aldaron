@@ -1,18 +1,19 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import s from './knowledge.module.css';
 
 /** Compact shared reading shell using the existing Promptbook mark and wordmark. */
 export default function KnowledgeLayout({ children }: { children: ReactNode }) {
     return (
-        <div className={s.site} lang="en">
+        <div className={s.site} lang="en" style={PROMPTBOOK_BRAND_STYLE}>
             <a href="#knowledge-main" className={s.skip}>
                 Skip to content
             </a>
             <header className={s.header}>
                 <Link href="/en" className={s.brand} aria-label="Promptbook home">
-                    <Image src="/logo/promptbook-logo-blue-transparent-128.png" width={34} height={34} alt="" />
+                    <Image src={PROMPTBOOK_BRAND.assets.symbolBlue} width={34} height={34} alt="" />
                     <span>
                         prompt<span className={s.brandBlue}>book</span>
                     </span>

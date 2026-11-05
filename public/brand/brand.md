@@ -5,7 +5,7 @@ Updated: 2026-11-05. Contact: pavol@ptbk.io.
 Name: Promptbook. Visual wordmark: promptbook (no trailing dot). CLI: ptbk.
 Use the supplied SVG/PNG assets. The PB mark projects onto a regular hexagon:
 six equal sides, 120° interior angles. Never stretch, rotate, recolor or add effects.
-Blue #000080 on light surfaces; white on dark. Keep at least 1/4 of
+Blue #17386C on light surfaces; white on dark. Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
 complete lockup 160 px. Headings: Outfit. Body: Inter. Wordmark: outlined Inter Bold.
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
