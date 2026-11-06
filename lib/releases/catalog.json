@@ -1,6 +1,24 @@
 {
-  "checkedAt": "2026-11-05T20:04:10.399Z",
+  "checkedAt": "2026-11-06T06:57:54.593Z",
   "releases": [
+    {
+      "version": "0.119.0-72",
+      "publishedAt": "2026-11-06T02:21:32.026Z",
+      "listedAt": "2026-11-06T06:57:54.593Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-72",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-72",
+      "notes": "Promptbook 0.119.0-72 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-72` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-72-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-72 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `be1ccd820bf9ef0317f9b0d1c6b4fc51f53c0dfe8b7424c6df886be9318a6b68`.\n"
+    },
+    {
+      "version": "0.119.0-71",
+      "publishedAt": "2026-11-05T22:59:13.380Z",
+      "listedAt": "2026-11-06T06:57:54.593Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-71",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-71",
+      "notes": "Promptbook 0.119.0-71 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-71` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-71-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-71 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `dcabcaafd19748829ee5e518f551116d4a5c80a4098af0210620f217719e7ed6`.\n"
+    },
     {
       "version": "0.119.0-70",
       "publishedAt": "2026-11-05T18:24:48.822Z",
