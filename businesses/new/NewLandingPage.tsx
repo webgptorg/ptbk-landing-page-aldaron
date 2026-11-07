@@ -43,7 +43,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
         {partnership && <PartnerQuestions/>}
         {showTestimonials && <BrandTestimonials/>}
         <section className={b.founders} id="kontakt" aria-labelledby="contact-heading">
-            <div className={b.foundersIntro}><h2 id="contact-heading">{en ? 'Contact' : 'Kontakt'}</h2></div>
+            <div className={b.foundersIntro}><h2 id="contact-heading">{en ? 'Meet the founders' : 'Kdo stojí za Promptbookem'}</h2></div>
             <Founders compact/>
             <div className={b.storyLink}><Link href={path('o-nas')}>{en ? 'Our story' : 'Náš příběh'}<ArrowRight size={16}/></Link></div>
         </section>

@@ -74,7 +74,7 @@
 
 .contacts {
     display: grid;
-    gap: 10px;
+    gap: 2px;
     margin: 24px 0 12px;
     font-style: normal;
     font-size: 13px;
@@ -87,7 +87,7 @@
     align-items: center;
     gap: 8px;
     width: fit-content;
-    min-height: 28px;
+    min-height: 26px;
     white-space: nowrap;
 }
 
@@ -164,7 +164,7 @@
     .founder h3 { font-size: 27px; }
     .founder .role { font-size: 11px; }
     .founder .description { font-size: 12px; }
-    .contacts { font-size: 12px; gap: 6px; margin-top: 19px; }
+    .contacts { font-size: 12px; margin-top: 19px; }
     .contacts svg { width: 13px; }
     .founder .action { font-size: 11px; gap: 4px; }
     .founder .action svg { width: 14px; }
@@ -181,4 +181,4 @@
  .founder:not(.reverse) .contacts{justify-items:end;margin-top:12px}
  .founder:not(.reverse) .action{justify-content:flex-end;text-align:right}
 }
-@media(max-width:500px){.founder:not(.reverse) .content{padding-left:12px}.founder:not(.reverse) .contacts{gap:6px}.founder:not(.reverse) .contacts a{min-height:32px}}
+@media(max-width:500px){.founder:not(.reverse) .content{padding-left:12px}}
