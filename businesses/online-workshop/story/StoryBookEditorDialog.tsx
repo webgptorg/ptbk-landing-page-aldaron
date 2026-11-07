@@ -5,10 +5,15 @@ import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import type { BookEditorProps } from '@promptbook/components';
+import { version as monacoVersion } from 'monaco-editor/package.json';
 import dynamic from 'next/dynamic';
 import { useRef, useState } from 'react';
 
-const BookEditor = dynamic(() => import('@promptbook/components').then((module) => module.BookEditor), {
+const BookEditor = dynamic(async () => {
+    const [{ loader }, { BookEditor }] = await Promise.all([import('@monaco-editor/react'), import('@promptbook/components')]);
+    loader.config({ paths: { vs: `/vendor/monaco/${monacoVersion}/vs` } });
+    return BookEditor;
+}, {
     ssr: false,
     loading: () => <p role="status" className="p-4 text-sm text-slate-500">Načítám editor…</p>,
 });
