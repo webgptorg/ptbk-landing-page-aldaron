@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { readBrowserLocalStorageItem, removeBrowserLocalStorageItem, writeBrowserLocalStorageItem } from '@/lib/browser/browserStorage';
-import { createAudioProgress, limitAudioHistory, readAudioHistory, readRememberedAudioTrack, AUDIO_PLAYER_STORAGE_KEY, AUDIO_HISTORY_STORAGE_KEY, AUDIO_TRACKING_STORAGE_KEY, type AudioHistory, type AudioTrack } from '@/lib/audio-player/audioPlayerState';
+import { createAudioProgress, isTextAudioTrack, limitAudioHistory, readAudioHistory, readRememberedAudioTrack, AUDIO_PLAYER_STORAGE_KEY, AUDIO_HISTORY_STORAGE_KEY, AUDIO_TRACKING_STORAGE_KEY, type AudioHistory, type AudioTrack } from '@/lib/audio-player/audioPlayerState';
 import { getPodcastEpisodeResumePositionInSeconds, type PodcastEpisodePlaybackProgress } from '@/lib/podcast/podcastPlaybackProgress';
 import { loadPodcastPlaybackProgress, savePodcastPlaybackProgress } from '@/lib/podcast/podcastPlaybackProgressStorage';
 import { AI_TA_KRAJTA_PLAYBACK_PROGRESS_STORAGE_KEY } from '@/businesses/ai-ta-krajta/config';
@@ -126,6 +126,8 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         if (trackRef.current?.id === nextTrack.id) { setIsPlaying(autoplay); return; }
         remember();
         const audio = audioRef.current;
+        const previousTrack = trackRef.current;
+        if (previousTrack?.kind === 'story') URL.revokeObjectURL(previousTrack.src);
         playingIntentRef.current = false;
         audio?.pause();
         const progress = historyRef.current[nextTrack.id] ?? null;
@@ -137,7 +139,8 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         setDuration(nextTrack.durationInSeconds ?? 0);
         setError(null);
         setTrack(nextTrack);
-        writeBrowserLocalStorageItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify(nextTrack));
+        if (nextTrack.kind === 'story') removeBrowserLocalStorageItem(AUDIO_PLAYER_STORAGE_KEY);
+        else writeBrowserLocalStorageItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify(nextTrack));
         playingIntentRef.current = autoplay;
         updateIsPlaying(autoplay);
     }, [remember, setIsPlaying]);
@@ -146,6 +149,7 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
         remember();
         playingIntentRef.current = false;
         audioRef.current?.pause();
+        if (trackRef.current?.kind === 'story') URL.revokeObjectURL(trackRef.current.src);
         trackRef.current = null;
         pendingPositionRef.current = null;
         setTrack(null);
@@ -162,11 +166,11 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
     // Refresh this capability without restarting, seeking or changing playback intent.
     const setTrackTrackingAvailable = useCallback((id: string, available: boolean) => {
         const current = trackRef.current;
-        if (!current || current.id !== id || current.kind !== 'article' || current.trackingAvailable === available) return;
+        if (!current || current.id !== id || !isTextAudioTrack(current.kind) || current.trackingAvailable === available) return;
         const updated = { ...current, trackingAvailable: available };
         trackRef.current = updated;
         setTrack(updated);
-        writeBrowserLocalStorageItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify(updated));
+        if (updated.kind !== 'story') writeBrowserLocalStorageItem(AUDIO_PLAYER_STORAGE_KEY, JSON.stringify(updated));
     }, []);
 
     useEffect(() => {
@@ -182,7 +186,7 @@ export function AudioPlayerProvider({ children }: { readonly children: ReactNode
     // timeupdate can be 250 ms apart. Follow the real media clock each frame for short aligned words.
     useEffect(() => {
         if (!isPlaying) return;
-        const interval = track?.kind === 'article' && track.trackingAvailable && trackingEnabled ? 16 : 40;
+        const interval = isTextAudioTrack(track?.kind) && track?.trackingAvailable && trackingEnabled ? 16 : 40;
         let frame = 0;
         let previous = 0;
         const update = (timestamp: number) => {

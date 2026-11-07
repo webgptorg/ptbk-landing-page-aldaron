@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { isTextAudioTrack } from '@/lib/audio-player/audioPlayerState';
 import { useAudioPlayer } from '@/components/audio-player/AudioPlayerProvider';
 import { findArticleWordAtTime, getArticleTimedSentences, getArticleWordSeekTimes, parseArticleWordTimings, type ArticleWordTimings } from './articleTiming';
 
@@ -44,14 +45,16 @@ function getTrackingWords(container: HTMLElement, timings: ArticleWordTimings): 
 }
 
 /** The article itself stays server rendered. This boundary only decorates a real, reviewed alignment. */
-export function ArticleTracking({ articleId, wordsUrl, children }: {
+export function ArticleTracking({ articleId, wordsUrl, wordTimings, children }: {
     readonly articleId: string;
     readonly wordsUrl?: string;
+    readonly wordTimings?: ArticleWordTimings;
     readonly children: ReactNode;
 }) {
     const { track, currentTime, isPlaying, trackingEnabled, seekTo, setTrackTrackingAvailable } = useAudioPlayer();
     const root = useRef<HTMLDivElement>(null);
-    const [timings, setTimings] = useState<ArticleWordTimings | null>(null);
+    const [loadedTimings, setTimings] = useState<ArticleWordTimings | null>(null);
+    const timings = wordTimings ?? loadedTimings;
     const dom = useRef<TrackingDom | null>(null);
     const highlightedWords = useRef<HTMLElement[]>([]);
     const activeWord = useRef<HTMLElement | null>(null);
@@ -59,7 +62,7 @@ export function ArticleTracking({ articleId, wordsUrl, children }: {
     const manualScrollActive = useRef(false);
     const userIntentUntil = useRef(0);
     const lastScrollAt = useRef(-Infinity);
-    const active = track?.id === articleId && track.kind === 'article' && trackingEnabled;
+    const active = track?.id === articleId && isTextAudioTrack(track.kind) && trackingEnabled;
     const sentences = useMemo(() => getArticleTimedSentences(timings?.words ?? []), [timings]);
 
     useEffect(() => {

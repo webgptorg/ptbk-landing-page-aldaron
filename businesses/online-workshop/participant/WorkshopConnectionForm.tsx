@@ -34,6 +34,8 @@ type WorkshopConnectionFormProps = {
      *       and the e-mail they have just typed.
      */
     readonly connectionTermPicker?: ReactNode;
+    /** Show the shared identity form inside an event which is already readable. */
+    readonly isEmbedded?: boolean;
 };
 
 export type WorkshopConnectionDetails = {
@@ -64,6 +66,7 @@ export function WorkshopConnectionForm({
     errorMessage,
     onConnect,
     connectionTermPicker,
+    isEmbedded = false,
 }: WorkshopConnectionFormProps) {
     const [fullname, setFullname] = useState(initialFullname);
     const [email, setEmail] = useState(initialEmail);
@@ -91,13 +94,14 @@ export function WorkshopConnectionForm({
         }
     };
 
+    const Container = isEmbedded ? 'div' : 'main';
     return (
-        <main className="relative flex min-h-[calc(100svh-4.5rem)] items-center justify-center overflow-hidden bg-room-background px-4 py-8 text-room-heading sm:px-5 sm:py-12">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(48,168,189,0.22),transparent_34%),radial-gradient(circle_at_80%_80%,rgba(122,255,235,0.12),transparent_30%)]" />
-            <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgb(var(--room-border)/.6)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--room-border)/.6)_1px,transparent_1px)] [background-size:48px_48px]" />
+        <Container className={isEmbedded ? undefined : "relative flex min-h-[calc(100svh-4.5rem)] items-center justify-center overflow-hidden bg-room-background px-4 py-8 text-room-heading sm:px-5 sm:py-12"}>
+            {!isEmbedded && <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(48,168,189,0.22),transparent_34%),radial-gradient(circle_at_80%_80%,rgba(122,255,235,0.12),transparent_30%)]" />}
+            {!isEmbedded && <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgb(var(--room-border)/.6)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--room-border)/.6)_1px,transparent_1px)] [background-size:48px_48px]" />}
 
-            <div className="relative grid w-full max-w-4xl overflow-hidden rounded-3xl border border-room-border/10 bg-room-inset/70 shadow-2xl backdrop-blur-xl md:grid-cols-[0.9fr_1.1fr]">
-                <section className="border-b border-room-border/10 bg-room-accent/5 p-6 sm:p-8 md:border-b-0 md:border-r md:p-10">
+            <div className={isEmbedded ? undefined : "relative grid w-full max-w-4xl overflow-hidden rounded-3xl border border-room-border/10 bg-room-inset/70 shadow-2xl backdrop-blur-xl md:grid-cols-[0.9fr_1.1fr]"}>
+                {!isEmbedded && <section className="border-b border-room-border/10 bg-room-accent/5 p-6 sm:p-8 md:border-b-0 md:border-r md:p-10">
                     <span className="inline-flex items-center gap-2 rounded-full border border-room-accent/20 bg-room-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-room-accent">
                         <Radio className="h-3.5 w-3.5" /> {roomLabel}
                     </span>
@@ -122,9 +126,9 @@ export function WorkshopConnectionForm({
                             <dd className="mt-1 font-semibold text-room-heading">{connectionDetails.durationLabel}</dd>
                         </div>
                     </dl>
-                </section>
+                </section>}
 
-                <form onSubmit={handleSubmit} className="p-6 sm:p-8 md:p-10">
+                <form onSubmit={handleSubmit} className={isEmbedded ? "p-5 sm:p-6" : "p-6 sm:p-8 md:p-10"}>
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-room-accent/10 text-room-accent">
                         <LockKeyhole className="h-5 w-5" />
                     </div>
@@ -207,12 +211,12 @@ export function WorkshopConnectionForm({
                  *       footer of the card rather than as a third panel of it, so the workshop being entered and the
                  *       form entering it are what the room is read as.
                  */}
-                {connectionTermPicker !== undefined && (
+                {!isEmbedded && connectionTermPicker !== undefined && (
                     <section className="border-t border-room-border/10 bg-room-overlay/[0.02] px-6 py-5 sm:px-8 md:col-span-2 md:px-10 md:py-6">
                         {connectionTermPicker}
                     </section>
                 )}
             </div>
-        </main>
+        </Container>
     );
 }

@@ -14,13 +14,17 @@ export type AudioTrack = {
     readonly author: string;
     readonly href: string;
     readonly language: 'cs' | 'en';
-    readonly kind: 'article' | 'podcast';
+    readonly kind: 'article' | 'podcast' | 'story';
     readonly artwork?: string;
     readonly durationInSeconds?: number | null;
     readonly trackingAvailable?: boolean;
     readonly appearance?: 'promptbook' | 'personal';
     readonly podcastEpisode?: PlayableAiTaKrajtaEpisode;
 };
+
+export function isTextAudioTrack(kind: AudioTrack['kind'] | undefined): boolean {
+    return kind === 'article' || kind === 'story';
+}
 
 export type AudioHistory = Readonly<Record<string, PodcastEpisodePlaybackProgress>>;
 export const AUDIO_PLAYER_STORAGE_KEY = 'promptbook.audio-player.v1';

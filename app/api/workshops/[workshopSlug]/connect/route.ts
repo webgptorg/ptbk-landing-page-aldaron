@@ -6,6 +6,7 @@ import {
     getWorkshopDatabaseOrNull,
     loadWorkshopPublicState,
 } from '@/lib/workshops/workshopDatabase';
+import { STORY_EVENT_TYPE } from '@/lib/workshops/storyRoomPaths';
 import { workshopConnectionSchema } from '@/lib/workshops/workshopSchemas';
 import { createWorkshopParticipant, setWorkshopSessionCookie } from '@/lib/workshops/workshopSession';
 import { NextRequest, NextResponse } from 'next/server';
@@ -56,13 +57,11 @@ export async function POST(request: NextRequest, context: WorkshopConnectRouteCo
 
     // Loading the first room snapshot here avoids a second workshop lookup and
     // participant authentication request when many attendees join at once.
-    const { state, errorMessage } = await loadWorkshopPublicState(
-        supabase,
-        workshopRow,
-        connection.participant,
-        'recent',
-    );
-    if (state === null) {
+    // The story miniapp loads its own view with this same session cookie.
+    const { state, errorMessage } = workshopRow.event_type === STORY_EVENT_TYPE
+        ? { state: null, errorMessage: null }
+        : await loadWorkshopPublicState(supabase, workshopRow, connection.participant, 'recent');
+    if (state === null && workshopRow.event_type !== STORY_EVENT_TYPE) {
         // The session cookie is still returned. The client can retry the state
         // endpoint without creating a duplicate participant row.
         console.error('Failed to load the initial workshop state:', errorMessage);

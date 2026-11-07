@@ -1,4 +1,4 @@
-import type { AudioTrack } from './audioPlayerState';
+import { isTextAudioTrack, type AudioTrack } from './audioPlayerState';
 
 /** Keep same-site links inside the persistent player owner, including a site's www alias. */
 export function getAudioSourceNavigation(track: Pick<AudioTrack, 'href' | 'kind'>, currentUrl: string) {
@@ -12,7 +12,7 @@ export function getAudioSourceNavigation(track: Pick<AudioTrack, 'href' | 'kind'
         return {
             href: external ? source.href : `${source.pathname}${source.search}${source.hash}`,
             external,
-            isCurrentArticle: track.kind === 'article' && !external && pathname(source) === pathname(current),
+            isCurrentArticle: isTextAudioTrack(track.kind) && !external && pathname(source) === pathname(current),
         };
     } catch {
         return null;
