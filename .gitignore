@@ -56,3 +56,6 @@ next-env.d.ts
 
 
 .diskroom
+
+# Same-origin assets copied from the pinned Monaco package during build.
+/public/vendor/monaco/

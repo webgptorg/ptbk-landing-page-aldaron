@@ -59,6 +59,11 @@ const APPROVED = 'approved-browser-session';
 const SECOND_APPROVED = 'second-approved-browser-session';
 const PENDING = 'pending-browser-session';
 const BANNED = 'banned-browser-session';
+const PAVOL = 'Pavol Hejný 2026';
+const ALICE_VOICE = 'AlenkaVoice123456789';
+const DRAGON_VOICE = 'DrakPenaVoice1234567';
+const CUSTOM_VOICE = 'UpravenyHlas12345678';
+const PREVIEW_VOICE = 'PreviewVoice12345678';
 const SLUG = 'already-in-calendar';
 const URL = `https://www.ptbk.io/api/workshops/${SLUG}/story`;
 const context = { params: Promise.resolve({ workshopSlug: SLUG }) };
@@ -154,7 +159,8 @@ it('migrates only the existing library occurrence, and makes no legacy invite a 
     const guest = await read();
     expect(guest.story?.title).toBe('Kniha, která si pamatovala zítřek');
     expect(guest.characters.length).toBeGreaterThan(10);
-    expect(guest.characters.every(({ book }) => book === undefined)).toBe(true);
+    expect(guest.characters.every(({ book, bookRevision }) => book === undefined && bookRevision === undefined)).toBe(true);
+    expect(guest.characters.find(({ name }) => name === 'Pavol Hejný')?.voice).toBe(PAVOL);
     const command = { action: 'character', id: randomUUID(), book: 'Drak Pěna\nPERSONA Vyfukuje bubliny.' } as const;
     expect((await post(undefined, command)).status).toBe(401);
     expect((await post(PENDING, command)).status).toBe(403);
@@ -170,6 +176,11 @@ it('shares generated characters and lets other approved participants edit the lo
         if (url.endsWith('/images/generations')) {
             return Response.json({ data: [{ b64_json: readFileSync('public/story-portraits/alenka.webp', 'base64') }] });
         }
+        if (url.includes('/v2/voices?')) return Response.json({ voices: [] });
+        if (url.endsWith('/text-to-voice/design')) {
+            return Response.json({ previews: [{ generated_voice_id: PREVIEW_VOICE, language: 'cs' }] });
+        }
+        if (url.endsWith('/text-to-voice')) return Response.json({ voice_id: DRAGON_VOICE });
         return Response.json({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({
             name: 'Drak Pěna', persona: 'Vyfukuje bubliny.', knowledge: 'V bublině našel klíč.', rule: 'Chraň kamarády.',
         }) }] }] });
@@ -187,9 +198,16 @@ it('shares generated characters and lets other approved participants edit the lo
     expect(fixture.background).toHaveLength(1);
     expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toContain(`META IMAGE https://ptbk.io/api/workshops/${SLUG}/story?portrait=${characterId}`);
 
+    const beforeEdit = (await read(APPROVED)).characters.find(({ id }) => id === characterId)!;
+    expect(beforeEdit.bookRevision).toMatch(/^[a-f0-9]{64}$/);
     const book = `Drak Stín\nPERSONA Vyfukuje zlaté bubliny.\nMETA COLOR #346968\nMETA IMAGE /api/workshops/${SLUG}/story?portrait=${characterId}`;
     expect((await post(SECOND_APPROVED, { action: 'character', id: characterId, book: `${book}\nMETA IMAGE https://other.example/portrait.png` })).status).toBe(400);
-    expect((await post(SECOND_APPROVED, { action: 'character', id: characterId, book })).status).toBe(200);
+    const edit = { action: 'character', id: characterId, book, baseRevision: beforeEdit.bookRevision } as const;
+    const saved = await post(SECOND_APPROVED, edit);
+    expect(saved.status).toBe(200);
+    expect(await saved.json()).toMatchObject({ bookRevision: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    expect((await post(SECOND_APPROVED, edit)).status).toBe(200);
+    expect((await post(APPROVED, { ...edit, book: book.replace('Stín', 'Oheň') })).status).toBe(409);
     expect((await post(APPROVED, { action: 'cast', storyId: story.id, characterId, include: true })).status).toBe(200);
     expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toBe(book);
     expect((await read()).story?.cast).toContain(characterId);
@@ -198,9 +216,11 @@ it('shares generated characters and lets other approved participants edit the lo
     expect(fixture.background).toHaveLength(1);
     await fixture.background.shift()!();
     expect(provider.mock.calls.filter(([url]) => url.endsWith('/images/generations'))).toHaveLength(1);
+    expect(provider.mock.calls.filter(([url]) => url.endsWith('/text-to-voice/design'))).toHaveLength(1);
     expect((await read()).characters.find(({ id }) => id === characterId)).toMatchObject({
-        name: 'Drak Stín', color: '#346968', image: `/api/workshops/${SLUG}/story?portrait=${characterId}`,
+        name: 'Drak Stín', color: '#346968', image: `/api/workshops/${SLUG}/story?portrait=${characterId}`, voice: DRAGON_VOICE,
     });
+    expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toContain(`META VOICE ${DRAGON_VOICE}`);
     expect((await GET(new NextRequest(`${URL}?portrait=${characterId}`, { headers: headers() }), context)).headers.get('location'))
         .toMatch(/^https:\/\/storage\.invalid\/workshops\/story\/.+\.webp$/);
     expect((await GET(new NextRequest(`${URL}?portrait=${randomUUID()}`, { headers: headers() }), context)).status).toBe(404);
@@ -245,10 +265,27 @@ it('appends one vetted line, including when two people click at once or a reques
     expect(provider.mock.calls.map(([url]) => url)).toEqual(['https://api.openai.com/v1/responses', 'https://api.openai.com/v1/moderations']);
 });
 
-it('reuses measured ElevenLabs clips when an extra line is added', async () => {
+it('assigns and reuses character voices, with timing for dialogue alone and a cache per voice', async () => {
     fixture.upload.mockClear();
-    const story = (await read()).story!;
-    const provider = vi.fn(async (_url: string, init: RequestInit) => {
+    const state = await read(APPROVED);
+    const story = state.story!;
+    const speech = story.lines[0]!;
+    let started!: () => void;
+    let finishDesign!: () => void;
+    const designStarted = new Promise<void>((resolve) => { started = resolve; });
+    const designCanFinish = new Promise<void>((resolve) => { finishDesign = resolve; });
+    const provider = vi.fn(async (url: string, init: RequestInit) => {
+        if (url.endsWith('/moderations')) return Response.json({ results: [{ flagged: false }] });
+        if (url.includes('/v2/voices?')) return Response.json({ voices: [] });
+        if (url.endsWith('/text-to-voice/design')) {
+            const { voice_description, text } = JSON.parse(init.body as string) as { voice_description: string; text: string };
+            expect(voice_description).toContain('Alenka');
+            expect(text.length).toBeGreaterThanOrEqual(100);
+            started();
+            await designCanFinish;
+            return Response.json({ previews: [{ generated_voice_id: PREVIEW_VOICE, language: 'cs' }] });
+        }
+        if (url.endsWith('/text-to-voice')) return Response.json({ voice_id: ALICE_VOICE });
         const { text } = JSON.parse(init.body as string) as { text: string };
         const characters = Array.from(text);
         return Response.json({
@@ -260,18 +297,44 @@ it('reuses measured ElevenLabs clips when an extra line is added', async () => {
         });
     });
     vi.stubGlobal('fetch', provider);
-    const clip = (segmentId: string) => post(undefined, { action: 'audio', storyId: story.id, segmentId });
+    const clip = (segmentId: string, waitOnly = false) => post(undefined, { action: 'audio', storyId: story.id, segmentId, waitOnly });
     const first = await clip('title');
     expect(first.status).toBe(200);
-    expect(await first.json()).toMatchObject({ url: expect.stringContaining('storage.invalid'), timings: { words: expect.any(Array) } });
+    expect(await first.json()).toMatchObject({ url: expect.stringContaining('storage.invalid'), voice: PAVOL, timings: { words: expect.any(Array) } });
     expect((await clip('premise')).status).toBe(200);
-    expect((await clip(story.lines[0]!.id)).status).toBe(200);
+
+    const requested = clip(speech.id);
+    await Promise.race([designStarted, requested.then(() => { throw new Error('Voice design did not start.'); })]);
+    try {
+        expect((await clip(speech.id, true)).status).toBe(409);
+        expect((await read()).characters.find(({ id }) => id === speech.characterId)?.voiceStatus).toBe('pending');
+    } finally {
+        finishDesign();
+    }
+    const spoken = await requested;
+    expect(spoken.status).toBe(200);
+    expect(await spoken.json()).toMatchObject({
+        voice: ALICE_VOICE,
+        timings: { words: expect.arrayContaining([{ wordId: 'w0', text: 'Podívejte,', start: 0, end: 1, sentenceId: 's0' }]) },
+    });
     expect((await clip('title')).status).toBe(200);
     expect((await clip('premise')).status).toBe(200);
-    expect(provider).toHaveBeenCalledTimes(3);
+    expect((await clip(speech.id)).status).toBe(200);
+    expect(provider.mock.calls.filter(([url]) => url.includes('/with-timestamps')).map(([url, init]) => [
+        url.split('/').at(-2), (JSON.parse(init.body as string) as { text: string }).text,
+    ])).toEqual([
+        ['test-narrator', story.title], ['test-narrator', story.premise], [ALICE_VOICE, speech.text],
+    ]);
     expect(fixture.upload).toHaveBeenCalledTimes(3);
-    expect(provider.mock.calls.every(([url]) => url.includes('/test-narrator/with-timestamps'))).toBe(true);
     expect((await clip(randomUUID())).status).toBe(404);
+
+    const alice = (await read(APPROVED)).characters.find(({ id }) => id === speech.characterId)!;
+    expect(alice.book).toContain(`META VOICE ${ALICE_VOICE}`);
+    const edit = { action: 'character', id: alice.id, baseRevision: alice.bookRevision } as const;
+    expect((await post(APPROVED, { ...edit, book: alice.book!.replace(ALICE_VOICE, 'https://example.org') })).status).toBe(400);
+    expect((await post(APPROVED, { ...edit, book: alice.book!.replace(ALICE_VOICE, CUSTOM_VOICE) })).status).toBe(200);
+    expect(await (await clip(speech.id)).json()).toMatchObject({ voice: CUSTOM_VOICE });
+    expect(fixture.upload).toHaveBeenCalledTimes(4);
 });
 
 it('chooses the next speaker from the current cast and keeps their earlier lines after they leave', async () => {

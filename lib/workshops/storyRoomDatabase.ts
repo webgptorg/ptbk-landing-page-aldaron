@@ -1,5 +1,5 @@
 import 'server-only';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { SITE_URL } from '@/lib/metadata/site-config';
 import { createAdHocShortcodeLink } from '@/lib/shortener/shortcodeLinkAdHoc';
 import { createPublicShortcodeLinkUrl } from '@/lib/shortener/shortcodeLink';
@@ -8,10 +8,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ManagedAgent } from '@/lib/agents/agentModel';
 import { runDatabaseTransaction, type DatabaseTransaction } from '@/lib/database/runDatabaseTransaction';
 import {
-    STORY_ROOM_MAX_LINES, type StoryCharacter, type StoryLine, type StoryRoomState,
+    STORY_ROOM_MAX_LINES, type StoryAudioSegmentId, type StoryCharacter, type StoryLine, type StoryRoomState,
     type StoryRoomEdit, type StoryRoomParticipant, type StorySummary, type StoryTurn, type WorkshopStory,
 } from './storyRoomTypes';
-import { getStoryBookAppearance, getStoryCharacterColor, withStoryBookAppearance } from './storyRoomBook';
+import { getStoryBookAppearance, getStoryBookVoice, getStoryCharacterColor, getStoryVoiceFromObjectKey, withStoryBookAppearance, withStoryBookVoice } from './storyRoomBook';
 import { getManagedStoryBook, getTemplateStoryBook, STORY_TEMPLATE_BY_ID, STORY_TEMPLATES } from './storyRoomCast';
 import { STORY_EVENT_TYPE, STORY_ROOM_PATH } from './storyRoomPaths';
 
@@ -43,6 +43,7 @@ type StoryRow = {
     id: string; title: string; premise: string; character_ids: string[]; lines: StoryLine[]; is_busy: boolean;
 };
 type CharacterRow = { id: string; name: string; book_source: string };
+type StoryVoiceRow = { cache_key: string; object_key: string | null; is_pending: boolean };
 type StoryPortraitRow = { portrait_object_key: string | null; portrait_pending: boolean };
 
 const STORY_END = "COALESCE(w.ends_at, w.starts_at + interval '1 hour')";
@@ -97,6 +98,21 @@ function bookName(book: string): string {
     return book.split(/\r?\n/, 1)[0]!.trim();
 }
 
+function getStoryBookRevision(source: string) {
+    return createHash('sha256').update(source).digest('hex');
+}
+
+function checkStoryBookRevision(command: Extract<StoryRoomEdit, { action: 'character' }>, current: string) {
+    if (command.book !== current && command.baseRevision && command.baseRevision !== getStoryBookRevision(current)) {
+        throw new StoryRoomError(409, 'Někdo mezitím upravil stejnou postavu. Zkopíruj si svoje změny a otevři editor znovu.');
+    }
+}
+
+function getStoryVoiceKey(room: RoomRow, id: string) {
+    const scope = STORY_TEMPLATE_BY_ID.has(id) ? 'prepared' : room.agent_ids.includes(id) ? 'managed' : room.workshop_id;
+    return `voice:${scope}:${id}`;
+}
+
 async function getCharacters(tx: DatabaseTransaction, room: RoomRow, canEdit: boolean): Promise<StoryCharacter[]> {
     const { rows: managed } = await tx.query<Pick<CharacterRow, 'id' | 'name'>>(
         `SELECT id, name FROM public.workshop_agents WHERE id = ANY($1::uuid[]) AND is_enabled
@@ -110,32 +126,43 @@ async function getCharacters(tx: DatabaseTransaction, room: RoomRow, canEdit: bo
         [room.workshop_id],
     );
     const prepared = STORY_TEMPLATES.map((template) => {
-        const book = getTemplateStoryBook(template, room.book_overrides[template.id]);
-        return {
-            id: template.id, name: bookName(book), avatar: template.avatar, ...getStoryBookAppearance(book),
-            ...(canEdit ? { book } : {}),
-        };
+        const source = room.book_overrides[template.id];
+        const book = getTemplateStoryBook(template, source);
+        return { id: template.id, name: bookName(book), avatar: template.avatar, source: source ?? '', book };
     });
-    return [
+    const characters = [
         ...prepared,
         ...managed.filter(({ id }) => !STORY_TEMPLATE_BY_ID.has(id)).map(({ id, name }) => {
-            const book = getManagedStoryBook(id, name, room.book_overrides[id]);
-            return {
-                id, name: bookName(book), avatar: 'sparkles' as const, ...getStoryBookAppearance(book),
-                ...(canEdit ? { book } : {}),
-            };
+            const source = room.book_overrides[id];
+            const book = getManagedStoryBook(id, name, source);
+            return { id, name: bookName(book), avatar: 'sparkles' as const, source: source ?? '', book };
         }),
-        ...custom.map(({ id, name, book_source, portrait_object_key, portrait_pending }): StoryCharacter => {
+        ...custom.map(({ id, name, book_source, portrait_object_key, portrait_pending }) => {
             const book = withStoryBookAppearance(book_source, getStoryCharacterColor(id));
-            const { color, image } = getStoryBookAppearance(book);
+            const { image } = getStoryBookAppearance(book);
             const imageReady = image && (portrait_object_key || !image.endsWith(`?portrait=${id}`));
             return {
-                id, name, color, ...(canEdit ? { book } : {}),
-                ...(imageReady ? { image } : {}),
-                ...(!imageReady && !portrait_object_key ? { portraitStatus: portrait_pending ? 'pending' : 'unavailable' } : {}),
+                id, name, source: book_source, book,
+                ...(!imageReady ? { image: undefined } : {}),
+                ...(!imageReady && !portrait_object_key ? { portraitStatus: portrait_pending ? 'pending' as const : 'unavailable' as const } : {}),
             };
         }),
     ];
+    const { rows: voices } = await tx.query<StoryVoiceRow>(
+        `SELECT cache_key, object_key, COALESCE(lease_until > now(), false) AS is_pending
+         FROM public.workshop_story_audio WHERE cache_key = ANY($1::text[])`,
+        [characters.map(({ id }) => getStoryVoiceKey(room, id))],
+    );
+    const byKey = new Map(voices.map((voice) => [voice.cache_key, voice]));
+    return characters.map(({ id, source, book, ...character }): StoryCharacter => {
+        const generated = byKey.get(getStoryVoiceKey(room, id));
+        const voice = getStoryBookVoice(book) ?? getStoryVoiceFromObjectKey(generated?.object_key);
+        return {
+            id, ...getStoryBookAppearance(book), ...character, voice,
+            ...(canEdit ? { book: withStoryBookVoice(book, voice), bookRevision: getStoryBookRevision(source) } : {}),
+            ...(!voice && generated?.is_pending ? { voiceStatus: 'pending' } : {}),
+        };
+    });
 }
 
 async function getCharacter(tx: DatabaseTransaction, room: RoomRow, id: string): Promise<ManagedAgent> {
@@ -182,6 +209,7 @@ export async function readStoryRoom(
             canWrite,
             participant: participant ? { fullname: participant.fullname, isInteractionBanned: participant.isInteractionBanned } : null,
             canGenerate: Boolean(process.env.OPENAI_API_KEY?.trim()) && room.generation_attempts < MAX_GENERATION_ATTEMPTS,
+            canGenerateVoice: Boolean(process.env.ELEVENLABS_API_KEY?.trim()),
         };
     });
 }
@@ -320,11 +348,61 @@ export async function getStoryRoomShareUrl(access: StoryAccess, slug: string, su
     });
 }
 
-export async function readStoryForNarration(access: StoryAccess, storyId: string) {
+export type StoryVoiceSubject = {
+    readonly key: string;
+    readonly workshopId: string;
+    readonly name: string;
+    readonly book: string;
+    readonly reference?: string;
+};
+
+async function getStoryVoiceSubject(tx: DatabaseTransaction, room: RoomRow, id?: string, name?: string): Promise<StoryVoiceSubject | undefined> {
+    const template = id ? STORY_TEMPLATE_BY_ID.get(id) : STORY_TEMPLATES.find((entry) => entry.name === name);
+    if (template) {
+        return {
+            key: getStoryVoiceKey(room, template.id), workshopId: room.workshop_id, name: template.name, book: getTemplateStoryBook(template),
+            reference: getStoryBookVoice(room.book_overrides[template.id] ?? ''),
+        };
+    }
+    const { rows: [managed] } = await tx.query<Pick<CharacterRow, 'id' | 'name'>>(
+        `SELECT id, name FROM public.workshop_agents WHERE id = ANY($1::uuid[]) AND is_enabled
+         AND CASE WHEN $2::uuid IS NULL THEN name = $3 ELSE id = $2 END LIMIT 1`,
+        [room.agent_ids, id ?? null, name ?? null],
+    );
+    if (managed) {
+        const book = getManagedStoryBook(managed.id, managed.name);
+        return {
+            key: getStoryVoiceKey(room, managed.id), workshopId: room.workshop_id, name: managed.name, book,
+            reference: getStoryBookVoice(getManagedStoryBook(managed.id, managed.name, room.book_overrides[managed.id])),
+        };
+    }
+    const { rows: [custom] } = await tx.query<CharacterRow>(
+        `SELECT id, name, book_source FROM public.workshop_story_characters WHERE workshop_id = $1 AND pending_id IS NULL
+         AND CASE WHEN $2::uuid IS NULL THEN name = $3 ELSE id = $2 END ORDER BY created_at, id LIMIT 1`,
+        [room.workshop_id, id ?? null, name ?? null],
+    );
+    return custom && {
+        key: getStoryVoiceKey(room, custom.id), workshopId: room.workshop_id, name: custom.name, book: custom.book_source,
+        reference: getStoryBookVoice(custom.book_source),
+    };
+}
+
+export async function readStoryVoiceSubject(access: StoryAccess, characterId: string) {
+    return runDatabaseTransaction('reading workshop character for voice design', async (tx) => {
+        const room = await getRoom(tx, access, true);
+        return getStoryVoiceSubject(tx, room, characterId);
+    });
+}
+
+export async function readStoryForNarration(access: StoryAccess, storyId: string, segmentId: StoryAudioSegmentId) {
     return runDatabaseTransaction('reading workshop story for narration', async (tx) => {
         const room = await getRoom(tx, access);
         const { title, premise, lines } = await getStory(tx, room.workshop_id, storyId);
-        return { title, premise, lines };
+        const line = lines.find(({ id, kind }) => id === segmentId && kind === 'speech');
+        return {
+            title, premise, lines,
+            subject: line ? await getStoryVoiceSubject(tx, room, line.characterId, line.characterName) : undefined,
+        };
     });
 }
 
@@ -339,7 +417,7 @@ async function checkCapacity(
 
 export async function saveStoryRoomCommand(
     access: StoryAccess, command: StoryRoomEdit,
-): Promise<string | null> {
+): Promise<{ storyId: string | null; bookRevision?: string }> {
     return runDatabaseTransaction('updating workshop story room', async (tx) => {
         const room = await getRoom(tx, access, true);
         const roomId = room.workshop_id;
@@ -354,32 +432,35 @@ export async function saveStoryRoomCommand(
                     [command.id, roomId, command.title, command.premise, STORY_TEMPLATES.slice(0, 3).map(({ id }) => id)],
                 );
             }
-            return command.id;
+            return { storyId: command.id };
         }
         if (command.action === 'character') {
             if (STORY_TEMPLATE_BY_ID.has(command.id) || room.agent_ids.includes(command.id)) {
                 // Story edits belong to this occurrence. Managed Books in the agent registry are never overwritten.
                 await getCharacter(tx, room, command.id);
+                checkStoryBookRevision(command, room.book_overrides[command.id] ?? '');
                 await tx.query(
                     `UPDATE public.workshop_story_rooms
                      SET book_overrides = jsonb_set(book_overrides, ARRAY[$2]::text[], to_jsonb($3::text))
                      WHERE workshop_id = $1`,
                     [roomId, command.id, command.book],
                 );
-                return null;
+                return { storyId: null, bookRevision: getStoryBookRevision(command.book) };
             }
+            const current = await getCharacter(tx, room, command.id);
+            checkStoryBookRevision(command, current.bookSource);
             const { rows } = await tx.query(
                 `UPDATE public.workshop_story_characters SET name = $3, book_source = $4
                  WHERE id = $1 AND workshop_id = $2 AND pending_id IS NULL RETURNING id`,
                 [command.id, roomId, bookName(command.book), command.book],
             );
             if (!rows.length) throw new StoryRoomError(404, 'Tato postava v dílně není.');
-            return null;
+            return { storyId: null, bookRevision: getStoryBookRevision(command.book) };
         }
         const story = await getStory(tx, roomId, command.storyId);
         if (story.is_busy) throw new StoryRoomError(409, 'Postava právě hraje. Chvilku počkej.');
         const hasCharacter = story.character_ids.includes(command.characterId);
-        if (hasCharacter === command.include) return story.id;
+        if (hasCharacter === command.include) return { storyId: story.id };
         if (command.include) {
             await getCharacter(tx, room, command.characterId);
             if (story.character_ids.length >= MAX_CAST) throw new StoryRoomError(409, 'Na scénu se vejde nejvýš 12 postav.');
@@ -388,7 +469,7 @@ export async function saveStoryRoomCommand(
             ? [...story.character_ids, command.characterId]
             : story.character_ids.filter((id) => id !== command.characterId);
         await tx.query('UPDATE public.workshop_stories SET character_ids = $2 WHERE id = $1', [story.id, cast]);
-        return story.id;
+        return { storyId: story.id };
     });
 }
 

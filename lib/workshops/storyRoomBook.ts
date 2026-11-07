@@ -7,7 +7,11 @@ export const STORY_CHARACTER_COLORS = [
     '#596747', '#90624F', '#344D68', '#526E73', '#6D5579', '#17386C',
 ] as const;
 
-export const STORY_BOOK_META = /^META[ \t]+(COLOR|IMAGE)(?:[ \t]+(.*))?$/i;
+export const STORY_NARRATOR_VOICE = 'Pavol Hejný 2026';
+export const STORY_VOICE_OBJECT_PREFIX = 'elevenlabs:voice:';
+const ELEVENLABS_VOICE_ID = /^[a-z0-9]{20}$/i;
+
+export const STORY_BOOK_META = /^META[ \t]+(COLOR|IMAGE|VOICE)(?:[ \t]+(.*))?$/i;
 
 export function getStoryCharacterColor(id: string) {
     return STORY_CHARACTER_COLORS[Number.parseInt(id.slice(0, 8), 16) % STORY_CHARACTER_COLORS.length]!;
@@ -42,9 +46,32 @@ export function getStoryBookAppearance(book: string) {
         const value = match?.[2]?.trim();
         if (!match || !value) continue;
         if (match[1]!.toUpperCase() === 'COLOR') color = getStoryBookColor(value);
-        else image = getStoryBookImage(value);
+        if (match[1]!.toUpperCase() === 'IMAGE') image = getStoryBookImage(value);
     }
     return { color, image };
+}
+
+export function getStoryVoiceId(value: unknown): string | undefined {
+    return typeof value === 'string' && ELEVENLABS_VOICE_ID.test(value) ? value : undefined;
+}
+
+export function getStoryVoiceFromObjectKey(key: string | null | undefined) {
+    if (key?.startsWith(STORY_VOICE_OBJECT_PREFIX)) return getStoryVoiceId(key.slice(STORY_VOICE_OBJECT_PREFIX.length));
+}
+
+export function getStoryVoiceReference(value: string): string | undefined {
+    return value === STORY_NARRATOR_VOICE ? value : getStoryVoiceId(value);
+}
+
+export function getStoryBookVoice(book: string) {
+    for (const line of book.split(/\r?\n/).slice(1)) {
+        const match = STORY_BOOK_META.exec(line.trim());
+        if (match?.[1]?.toUpperCase() === 'VOICE') return getStoryVoiceReference(match[2]?.trim() ?? '');
+    }
+}
+
+export function withStoryBookVoice(book: string, voice: string | undefined) {
+    return voice && !getStoryBookVoice(book) ? `${book}\nMETA VOICE ${voice}` : book;
 }
 
 export function getStoryBookText(book: string) {

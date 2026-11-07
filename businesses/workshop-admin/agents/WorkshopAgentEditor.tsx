@@ -5,24 +5,12 @@ import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { useAdminAutosave } from '@/hooks/useAdminAutosave';
 import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 
+import { BookEditor, preloadBookEditor } from '@/components/book-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DEFAULT_WORKSHOP_AGENT_VALUES, WORKSHOP_AGENT_WRITE_SCHEMA, type WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
 import type { BookEditorProps } from '@promptbook/components';
-import dynamic from 'next/dynamic';
 import { useRef, useState, type FormEvent } from 'react';
-
-let bookEditorModulePromise: Promise<typeof import('@promptbook/components')> | null = null;
-
-function loadBookEditorModule() {
-    bookEditorModulePromise ??= import('@promptbook/components');
-    return bookEditorModulePromise;
-}
-
-const BOOK_EDITOR = dynamic(() => loadBookEditorModule().then((components) => components.BookEditor), {
-    ssr: false,
-    loading: () => <p className="p-4 text-sm text-slate-500">Načítám editor Book…</p>,
-});
 
 /**
  * Starts fetching the sizeable rich editor while the Agents section itself is opening.
@@ -31,7 +19,7 @@ const BOOK_EDITOR = dynamic(() => loadBookEditorModule().then((components) => co
  * not have to wait for its bundle only after choosing to create an agent.
  */
 export function preloadWorkshopAgentBookEditor(): void {
-    void loadBookEditorModule().catch(() => undefined);
+    preloadBookEditor();
 }
 
 type WorkshopAgentEditorProps = {
@@ -85,7 +73,7 @@ export function WorkshopAgentEditor({ initialValues, isListeningOffered, isSavin
             </label>
             <div role="group" aria-label="Zdrojový Book agenta">
                 {/* Incomplete drafts stay local for new agents; existing agents validate through autosave. */}
-                <BOOK_EDITOR value={values.bookSource as BookEditorProps['value']} onChange={(bookSource) => setValues((current) => ({ ...current, bookSource }))}
+                <BookEditor value={values.bookSource as BookEditorProps['value']} onChange={(bookSource) => setValues((current) => ({ ...current, bookSource }))}
                     height="420px" isReadonly={initialValues === null && isSaving} isUploadButtonShown={false} isCameraButtonShown={false} />
             </div>
             {!globalOnly && <fieldset disabled={initialValues === null && isSaving} className="space-y-4 rounded-xl border border-slate-200 p-4">

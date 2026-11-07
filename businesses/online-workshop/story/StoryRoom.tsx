@@ -4,21 +4,24 @@ import type { ArticleWordTimings } from '@/businesses/articles/articleTiming';
 import { ArticleTracking } from '@/businesses/articles/ArticleTracking';
 import { WorkshopConnectionForm } from '@/businesses/online-workshop/participant/WorkshopConnectionForm';
 import { connectToWorkshop, disconnectFromWorkshop } from '@/businesses/online-workshop/participant/workshopParticipantApi';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { useAudioPlayerControls } from '@/components/audio-player/AudioPlayerProvider';
 import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
+import { getStoryNarrationSegments, getStoryNarrationTrackId, getStoryNarrationVoice } from '@/lib/workshops/storyRoomNarration';
 import { createStoryRoomApiPath, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
-import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
+import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryLine, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
 import { STORY_ROOM_MAX_LINES } from '@/lib/workshops/storyRoomTypes';
 import { createWorkshopSelectionPath, type WorkshopParticipantIdentity } from '@/lib/workshops/workshopParticipantLink';
 import {
-    Anchor, ArrowRight, Bird, BookOpen, Cat, Cookie, Download, Headphones, House, ImagePlus, Minus,
+    Anchor, Bird, BookOpen, Cat, Cookie, Download, Headphones, House, ImagePlus, Minus,
     PawPrint, Pencil, Plus, QrCode, Rabbit, Search, ShoppingBasket, Sparkles, TreeDeciduous, Wind,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { StoryBookEditorDialog } from './StoryBookEditorDialog';
 import { prepareStoryNarration, type StoryNarrationClipCache } from './storyNarrationPlayer';
 import s from './storyRoom.module.css';
 
@@ -31,8 +34,7 @@ type StoryEvent = {
 };
 type Editor =
     | { type: 'story'; id: string; title: string; premise: string }
-    | { type: 'description'; id: string; description: string }
-    | { type: 'book'; id: string; book: string; name: string };
+    | { type: 'description'; id: string; description: string };
 type Narration = { readonly storyId: string; readonly trackId: string; readonly timings?: ArticleWordTimings };
 type StoryRequest = StoryRoomCommand | { readonly action: 'share' };
 
@@ -61,8 +63,8 @@ function CharacterBadge({ character }: { readonly character: StoryCharacter }) {
     );
 }
 
-function StoryWords({ id, text, startAt = 0 }: { readonly id: string; readonly text: string; readonly startAt?: number }) {
-    let word = startAt;
+function StoryWords({ id, text }: { readonly id: string; readonly text: string }) {
+    let word = 0;
     return text.split(/(\s+)/).map((part, index) => /\S/.test(part)
         ? <span key={index} data-article-word={`${id}:w${word++}`}>{part}</span>
         : part);
@@ -93,7 +95,9 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [isJoinOpen, setIsJoinOpen] = useState(false);
     const [editor, setEditor] = useState<Editor | null>(null);
+    const [bookEditor, setBookEditor] = useState<StoryCharacter & { book: string }>();
     const [pending, setPending] = useState('');
+    const [pendingTurn, setPendingTurn] = useState<StoryTurn | null>(null);
     const [shareOpen, setShareOpen] = useState(false);
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [shareError, setShareError] = useState('');
@@ -104,6 +108,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const pendingRequest = useRef(false);
     const uncertainTurn = useRef<StoryTurn | null>(null);
     const shareRequest = useRef<Promise<string> | null>(null);
+    const requestedVoicesFor = useRef<string | null>(null);
     const audioRequest = useRef<AbortController | null>(null);
     const transcript = useRef<HTMLOListElement>(null);
     const clips = useRef<StoryNarrationClipCache>(new Map());
@@ -113,6 +118,16 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const canWrite = state?.canWrite === true;
 
     useEffect(() => { setSelectedId(initialStoryId); }, [initialStoryId]);
+
+    const canGenerateVoice = state?.canGenerateVoice === true;
+    useEffect(() => {
+        if (!canWrite || !canGenerateVoice || requestedVoicesFor.current === apiPath) return;
+        requestedVoicesFor.current = apiPath;
+        void fetch(apiPath, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'prepare-voices', storyId }),
+        }).catch(() => undefined);
+    }, [apiPath, canGenerateVoice, canWrite, storyId]);
 
     function selectStory(id: string) {
         setSelectedId(id);
@@ -168,9 +183,15 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(command),
         });
-        const data = await response.json() as { storyId?: string; characterId?: string; url?: string; error?: string };
+        const data = await response.json() as { storyId?: string; characterId?: string; bookRevision?: string; line?: StoryLine; url?: string; error?: string };
         if (command.action === 'turn' && response.status !== 409 && response.status < 500) uncertainTurn.current = null;
-        if (!response.ok) throw new Error(data.error ?? 'Požadavek se nepodařilo dokončit.');
+        if (!response.ok) {
+            const message = data.error ?? 'Požadavek se nepodařilo dokončit.';
+            if (command.action === 'character' && [400, 403, 409, 422].includes(response.status)) {
+                throw new AdminSaveValidationError(message);
+            }
+            throw new Error(message);
+        }
         return data;
     }
 
@@ -181,6 +202,14 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         setNotice('');
         try {
             const data = await requestRoom(command);
+            const line = data.line;
+            if (command.action === 'turn' && line?.id === command.requestId) {
+                setState((current) => {
+                    const updated = current?.story;
+                    if (!current || !updated || updated.id !== command.storyId || updated.lines.some(({ id }) => id === line.id)) return current;
+                    return { ...current, story: { ...updated, isBusy: false, lines: [...updated.lines, line] } };
+                });
+            }
             if (data.storyId) selectStory(data.storyId);
             return true;
         } catch (error) {
@@ -194,13 +223,14 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     }
 
     function play(currentStory: WorkshopStory, character?: StoryCharacter) {
-        if (pendingRequest.current) return;
+        if (!canWrite || pendingRequest.current) return;
         const previous = uncertainTurn.current;
         const command: StoryTurn = previous?.storyId === currentStory.id && previous.characterId === character?.id
             ? previous
             : { action: 'turn', storyId: currentStory.id, characterId: character?.id, requestId: window.crypto.randomUUID() };
         uncertainTurn.current = command;
-        void mutate(command, character ? `${character.name} je na tahu…` : 'Příběh pokračuje…');
+        setPendingTurn(command);
+        void mutate(command, 'Připravuji další tah…').finally(() => setPendingTurn(null));
     }
 
     function changeCast(storyId: string, characterId: string, include: boolean) {
@@ -212,14 +242,18 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         if (!editor) return;
         const command: StoryRoomCommand = editor.type === 'story'
             ? { action: 'create', id: editor.id, title: editor.title, premise: editor.premise }
-            : editor.type === 'description'
-                ? { action: 'generate-character', id: editor.id, description: editor.description }
-                : { action: 'character', id: editor.id, book: editor.book };
-        if (await mutate(command, editor.type === 'description' ? 'Vymýšlím postavu…' : 'Ukládám…')) {
-            setEditor(null);
-            if (editor.type === 'description') setNotice('Novou postavu najdeš v seznamu. Můžeš ji přidat na scénu.');
-            if (editor.type === 'book') setNotice('Book postavy je uložený.');
-        }
+            : { action: 'generate-character', id: editor.id, description: editor.description };
+        if (await mutate(command, editor.type === 'description' ? 'Vymýšlím postavu…' : 'Ukládám…')) setEditor(null);
+    }
+
+    async function saveBook(id: string, book: string, baseRevision: string | undefined) {
+        const { bookRevision } = await requestRoom({ action: 'character', id, book, baseRevision });
+        setState((current) => current && ({
+            ...current,
+            characters: current.characters.map((character) => character.id === id ? { ...character, book, bookRevision } : character),
+        }));
+        setRevision((current) => current + 1);
+        return bookRevision;
     }
 
     async function connect(values: WorkshopParticipantIdentity) {
@@ -289,7 +323,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
 
     async function readAloud(currentStory: WorkshopStory) {
         if (audioRequest.current) return;
-        const trackId = `story:${currentStory.id}:${currentStory.lines.at(-1)?.id ?? 'start'}`;
+        const trackId = currentTrackId;
         if (player.track?.id === trackId) {
             player.setIsPlaying(!player.isPlaying);
             return;
@@ -299,13 +333,14 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         setIsPreparingAudio(true);
         setNotice('');
         try {
-            const audio = await prepareStoryNarration(apiPath, currentStory, request.signal, clips.current);
+            const audio = await prepareStoryNarration(apiPath, currentStory, characters, request.signal, clips.current);
             request.signal.throwIfAborted();
-            setNarration({ timings: audio.timings, storyId: currentStory.id, trackId });
+            setNarration({ timings: audio.timings, storyId: currentStory.id, trackId: audio.trackId });
+            if (audio.trackId !== trackId) setRevision((current) => current + 1);
             const href = createWorkshopSelectionPath(STORY_ROOM_PATH, event.slug, new URLSearchParams({ story: currentStory.id }));
             player.playTrack({
-                id: trackId, src: URL.createObjectURL(audio.blob), href, kind: 'story', language: 'cs',
-                title: currentStory.title, author: 'Pavol Hejný', appearance: 'promptbook',
+                id: audio.trackId, src: URL.createObjectURL(audio.blob), href, kind: 'story', language: 'cs',
+                title: currentStory.title, author: event.title, appearance: 'promptbook',
                 durationInSeconds: audio.duration, trackingAvailable: Boolean(audio.timings),
             });
         } catch (error) {
@@ -320,13 +355,22 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const cast = (story?.cast ?? []).flatMap((id) => characters.find((character) => character.id === id) ?? []);
     const canChangeCast = canWrite && !pending && !story?.isBusy;
     const canTakeTurn = canChangeCast && state?.canGenerate && story && story.lines.length < STORY_ROOM_MAX_LINES;
+    const localTurn = story && pendingTurn?.storyId === story.id && !story.lines.some(({ id }) => id === pendingTurn.requestId)
+        ? pendingTurn : null;
+    const isWritingTurn = Boolean(localTurn || story?.isBusy);
+    const writingCharacter = localTurn?.characterId
+        ? characters.find(({ id }) => id === localTurn.characterId)
+        : cast.length === 1 ? cast[0] : undefined;
     const currentNarration = narration?.storyId === storyId ? narration : null;
     const isPlayingStory = player.track?.id === currentNarration?.trackId && player.isPlaying;
-    const isCurrentRecording = currentNarration?.trackId === `story:${storyId}:${story?.lines.at(-1)?.id ?? 'start'}`;
+    const currentTrackId = story && getStoryNarrationTrackId(
+        story, getStoryNarrationSegments(story).map((segment) => getStoryNarrationVoice(segment, characters)),
+    );
+    const isCurrentRecording = Boolean(currentNarration && currentNarration.trackId === currentTrackId);
 
     useEffect(() => {
         if (transcript.current && !isPlayingStory) transcript.current.scrollTop = transcript.current.scrollHeight;
-    }, [storyId, story?.lines.length, isPlayingStory]);
+    }, [storyId, story?.lines.length, isPlayingStory, isWritingTurn]);
 
     return (
         <div className={s.room} style={PROMPTBOOK_BRAND_STYLE}>
@@ -407,7 +451,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                         <div className={s.paperActions}>
                                             <button type="button" className={s.secondary} onClick={() => void readAloud(story)} disabled={isPreparingAudio}>
                                                 <Headphones size={17} aria-hidden="true" />
-                                                {isPreparingAudio ? 'Připravuji hlas…' : isCurrentRecording && isPlayingStory ? 'Pozastavit čtení' : currentNarration && !isCurrentRecording ? 'Přečíst novou verzi' : 'Přečíst příběh'}
+                                                {isPreparingAudio ? 'Připravuji předčítání…' : isCurrentRecording && isPlayingStory ? 'Pozastavit čtení' : currentNarration && !isCurrentRecording ? 'Přečíst novou verzi' : 'Přečíst příběh'}
                                             </button>
                                             <button type="button" className={s.secondary} onClick={() => void exportPdf(story)} disabled={isExporting}>
                                                 <Download size={17} aria-hidden="true" /> {isExporting ? 'Připravuji PDF…' : 'Stáhnout PDF'}
@@ -424,31 +468,44 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                         <li key={line.id} style={characterStyle(actor?.color)} className={isSpeech ? s.speechLine : s.actionLine}>
                                                             <CharacterBadge character={actor ?? { id: line.id, name: line.characterName }} />
                                                             <div className={s.message}>
-                                                                <small className={s.actorLabel}>{isSpeech
-                                                                    ? <StoryWords id={line.id} text={`${line.characterName}:`} />
-                                                                    : `${line.characterName} · akce`}</small>
-                                                                <p className={s.bubble}><StoryWords id={line.id} text={line.text}
-                                                                    startAt={isSpeech ? line.characterName.split(/\s+/).length : 0} /></p>
+                                                                <small className={s.actorLabel}>{isSpeech ? line.characterName : `${line.characterName} · akce`}</small>
+                                                                <p className={s.bubble}><StoryWords id={line.id} text={line.text} /></p>
                                                             </div>
                                                         </li>
                                                     );
                                                 })}
+                                                {isWritingTurn && (
+                                                    <li className={s.pendingLine} style={characterStyle(writingCharacter?.color)}>
+                                                        {writingCharacter
+                                                            ? <CharacterBadge character={writingCharacter} />
+                                                            : <span className={s.avatar} aria-hidden="true">?</span>}
+                                                        <div className={s.message}>
+                                                            <small className={s.actorLabel}>{writingCharacter?.name ?? 'Další tah'}</small>
+                                                            <p className={s.bubble}>
+                                                                {writingCharacter ? 'Píše…' : 'Jedna z postav píše…'}
+                                                                <span className={s.typingDots} aria-hidden="true"><i /><i /><i /></span>
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                )}
                                             </ol>
-                                            {story.lines.length === 0 && <p className={s.quiet}>Zatím nikdo nepromluvil. První věta je na scéně!</p>}
+                                            {story.lines.length === 0 && !isWritingTurn && <p className={s.quiet}>Zatím nikdo nepromluvil. První věta je na scéně!</p>}
                                         </ArticleTracking>
                                         <section className={s.stage} aria-labelledby="story-stage-title">
-                                            <div className={s.stageHeader}>
-                                                <div>
-                                                    <h3 id="story-stage-title">Kdo bude na tahu?</h3>
-                                                    <p className={s.quiet}>{canWrite ? 'Klikni na portrét a postava dostane slovo.' : 'Postavy na scéně.'}</p>
-                                                </div>
-                                                {canWrite && <button type="button" className={s.primary} disabled={!canTakeTurn || cast.length === 0}
-                                                    onClick={() => play(story)}>
-                                                    Pokračovat v příběhu <ArrowRight size={16} aria-hidden="true" />
-                                                </button>}
-                                            </div>
+                                            <h3 id="story-stage-title">Kdo bude na tahu?</h3>
+                                            <p className={s.quiet}>{canWrite ? 'Klikni na portrét a postava dostane slovo.' : 'Postavy na scéně.'}</p>
                                             {cast.length === 0 ? <p className={s.quiet}>Přidej na scénu postavu ze seznamu.</p> : (
                                                 <ul className={s.cast}>
+                                                    {canWrite && (
+                                                        <li className={s.castCharacter}>
+                                                            <button type="button" className={s.turn} disabled={!canTakeTurn}
+                                                                aria-label="Pokračovat v příběhu" title="Pokračovat v příběhu"
+                                                                onClick={() => play(story)}>
+                                                                <span className={`${s.avatar} ${s.autoAvatar}`} aria-hidden="true">?</span>
+                                                                <span className={s.turnName}>Automaticky</span>
+                                                            </button>
+                                                        </li>
+                                                    )}
                                                     {cast.map((character) => (
                                                         <li key={character.id} className={s.castCharacter} style={characterStyle(character.color)}>
                                                             <button type="button" className={s.turn} disabled={!canTakeTurn}
@@ -466,8 +523,8 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                     ))}
                                                 </ul>
                                             )}
-                                            {(pending || notice || story.isBusy) && (
-                                                <p className={s.stageStatus} role="status">{pending || notice || 'Postava právě hraje svůj tah…'}</p>
+                                            {(notice || (pending && !localTurn)) && (
+                                                <p className={s.stageStatus} role="status">{notice || pending}</p>
                                             )}
                                             {canWrite && !state.canGenerate && <p className={s.quiet}>AI tahy teď nejsou dostupné.</p>}
                                         </section>
@@ -489,6 +546,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                     <CharacterBadge character={character} />
                                                     <span className={s.characterName}>{character.name}
                                                         {character.portraitStatus === 'pending' && <small className={s.portraitStatus}>Portrét se kreslí…</small>}
+                                                        {character.voiceStatus === 'pending' && <small className={s.portraitStatus}>Hlas se připravuje…</small>}
                                                     </span>
                                                     {canWrite && character.portraitStatus === 'unavailable' && <button type="button" className={s.iconButton}
                                                         title="Vytvořit portrét" aria-label={`Vytvořit portrét · ${character.name}`}
@@ -501,9 +559,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                         disabled={!canChangeCast} onClick={() => changeCast(story.id, character.id, !onStage)}>{onStage ? '−' : '+'}</button>}
                                                     {canWrite && character.book !== undefined && <button type="button" className={s.iconButton} title="Upravit Book"
                                                         aria-label={`Upravit Book · ${character.name}`}
-                                                        disabled={Boolean(pending)} onClick={() => setEditor({
-                                                            type: 'book', id: character.id, name: character.name, book: character.book!,
-                                                        })}><Pencil size={15} aria-hidden="true" /></button>}
+                                                        disabled={Boolean(pending)} onClick={() => setBookEditor({ ...character, book: character.book! })}><Pencil size={15} aria-hidden="true" /></button>}
                                                 </li>
                                             );
                                         })}
@@ -534,30 +590,30 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                 </DialogContent>
             </Dialog>
 
+            {bookEditor && (
+                <StoryBookEditorDialog key={bookEditor.id} name={bookEditor.name} book={bookEditor.book} bookRevision={bookEditor.bookRevision}
+                    onSave={(book, revision) => saveBook(bookEditor.id, book, revision)} onClose={() => setBookEditor(undefined)} />
+            )}
+
             <Dialog open={Boolean(editor) && canWrite} onOpenChange={(open) => { if (!open && !pendingRequest.current) setEditor(null); }}>
                 {editor && (
                     <DialogContent closeLabel="Zavřít" className={s.dialog} style={PROMPTBOOK_BRAND_STYLE}>
-                        <DialogTitle>{editor.type === 'story' ? 'Nový příběh' : editor.type === 'description' ? 'Vymysli postavu' : `Book · ${editor.name}`}</DialogTitle>
+                        <DialogTitle>{editor.type === 'story' ? 'Nový příběh' : 'Vymysli postavu'}</DialogTitle>
                         <DialogDescription>{editor.type === 'story'
                             ? 'Napiš, kde se první scéna odehrává a co se v ní právě stalo.'
-                            : editor.type === 'description'
-                                ? 'Stačí napsat, kdo to je a co by mohl v příběhu dělat. Dílna z popisu připraví jeho Book.'
-                                : 'Book určuje povahu i vzhled postavy. META COLOR je barva a META IMAGE odkaz na portrét z dílny. Úprava platí v této dílně.'}</DialogDescription>
+                            : 'Stačí napsat, kdo to je a co by mohl v příběhu dělat. Dílna z popisu připraví jeho Book.'}</DialogDescription>
                         <form onSubmit={(submit) => void submitEditor(submit)} className={s.editor}>
                             {editor.type === 'story' ? (
                                 <>
                                     <label>Název<input value={editor.title} minLength={2} maxLength={80} required onChange={(change) => setEditor({ ...editor, title: change.target.value })} /></label>
                                     <label>Začátek příběhu<textarea value={editor.premise} minLength={5} maxLength={550} required rows={4} onChange={(change) => setEditor({ ...editor, premise: change.target.value })} /></label>
                                 </>
-                            ) : editor.type === 'description' ? (
+                            ) : (
                                 <label>Popis postavy<textarea value={editor.description} minLength={5} maxLength={900} required rows={5}
                                     placeholder="Třeba malý drak, který se bojí tmy a nosí s sebou lucernu." onChange={(change) => setEditor({ ...editor, description: change.target.value })} /></label>
-                            ) : (
-                                <label>Book postavy<textarea className={s.book} value={editor.book} minLength={15} maxLength={8_000} required rows={8}
-                                    spellCheck={false} onChange={(change) => setEditor({ ...editor, book: change.target.value })} /></label>
                             )}
                             <button type="submit" className={s.primary} disabled={Boolean(pending)}>
-                                {pending || (editor.type === 'description' ? 'Vytvořit postavu' : editor.type === 'book' ? 'Uložit Book' : 'Otevřít příběh')}
+                                {pending || (editor.type === 'description' ? 'Vytvořit postavu' : 'Otevřít příběh')}
                             </button>
                             {notice && <p className={s.error} role="status">{notice}</p>}
                         </form>

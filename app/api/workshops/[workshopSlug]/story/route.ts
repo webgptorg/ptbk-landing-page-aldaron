@@ -12,6 +12,7 @@ import {
 import { checkStoryText, generateStoryCharacterBook, generateStoryLine, validateCustomStoryBook } from '@/lib/workshops/storyRoomGeneration';
 import { STORY_EVENT_TYPE } from '@/lib/workshops/storyRoomPaths';
 import { canGenerateStoryPortrait, generateStoryPortrait } from '@/lib/workshops/storyRoomPortrait';
+import { prepareStoryVoices } from '@/lib/workshops/storyRoomVoice';
 import { STORY_AUDIO_SEGMENT, STORY_ID, STORY_ROOM_COMMAND } from '@/lib/workshops/storyRoomTypes';
 import { findWorkshopBySlug, getWorkshopDatabaseOrNull } from '@/lib/workshops/workshopDatabase';
 import { authenticateWorkshopParticipant } from '@/lib/workshops/workshopSession';
@@ -59,6 +60,7 @@ function errorResponse(error: unknown) {
 const REQUEST_SCHEMA = z.union([
     STORY_ROOM_COMMAND,
     z.object({ action: z.literal('share') }).strict(),
+    z.object({ action: z.literal('prepare-voices'), storyId: STORY_ID.optional() }).strict(),
     z.object({ action: z.literal('audio'), storyId: STORY_ID, segmentId: STORY_AUDIO_SEGMENT, waitOnly: z.boolean().optional() }).strict(),
 ]);
 
@@ -107,15 +109,32 @@ export async function POST(request: NextRequest, context: StoryRouteContext) {
         const parsed = await readCommand(request);
         if (!parsed.success) return json({ error: 'Zkontroluj, že je text vyplněný a není příliš dlouhý.' }, 400);
         const command = parsed.data;
-        const { access, supabase, workshopSlug } = await getAccess(request, context);
+        const { access, participant, supabase, workshopSlug } = await getAccess(request, context);
         if (command.action === 'share') return json({ url: await getStoryRoomShareUrl(access, workshopSlug, supabase) });
         if (command.action === 'audio') {
             return json(await getStoryAudioClip(access, command.storyId, command.segmentId, request.signal, command.waitOnly));
         }
         if (!access.participantId) return json({ error: 'Nejdřív se připoj do dílny a počkej na schválení.' }, 401);
+        if (command.action === 'prepare-voices') {
+            await requireStoryRoomWriteAccess(access);
+            if (!process.env.ELEVENLABS_API_KEY?.trim() || !allowPublicChatRequest(`story-voices:${access.workshopId}`, 1)) {
+                return json({});
+            }
+            const room = await readStoryRoom(access, command.storyId ?? null, participant);
+            const missing = new Set(room.characters.filter(({ voice, voiceStatus }) => !voice && !voiceStatus).map(({ id }) => id));
+            const priority = [
+                ...(room.story?.lines.flatMap(({ characterId, kind }) => kind === 'speech' && characterId ? [characterId] : []) ?? []),
+                ...(room.story?.cast ?? []),
+            ];
+            const ids = Array.from(new Set([...priority, ...Array.from(missing)])).filter((id) => missing.has(id)).slice(0, 12);
+            if (ids.length) after(() => prepareStoryVoices(access, ids));
+            return json({});
+        }
         if (command.action === 'character' || command.action === 'generate-character' || command.action === 'portrait' || command.action === 'create') {
             await requireStoryRoomWriteAccess(access);
-            if (!allowPublicChatRequest(`story-edit:${access.workshopId}:${access.participantId}`)) {
+            const isBookSave = command.action === 'character';
+            const editKey = isBookSave ? 'story-book' : 'story-edit';
+            if (!allowPublicChatRequest(`${editKey}:${access.workshopId}:${access.participantId}`, isBookSave ? 60 : undefined)) {
                 return json({ error: 'Chvilku počkej a pak zkus uložit změnu znovu.' }, 429);
             }
             if (command.action === 'portrait') {
@@ -138,7 +157,13 @@ export async function POST(request: NextRequest, context: StoryRouteContext) {
                         if (error instanceof StoryRoomError) throw error;
                         return json({ error: 'Postavu se nepodařilo vymyslet. Zkus to prosím znovu.' }, 502);
                     }
-                    if (portraitUrl) after(() => generateStoryPortrait(access, command.id, lease, book));
+                    const designVoice = Boolean(process.env.ELEVENLABS_API_KEY?.trim());
+                    if (portraitUrl || designVoice) after(async () => {
+                        await Promise.allSettled([
+                            portraitUrl ? generateStoryPortrait(access, command.id, lease, book) : undefined,
+                            designVoice ? prepareStoryVoices(access, [command.id]) : undefined,
+                        ]);
+                    });
                 }
                 return json({ characterId: command.id });
             }
@@ -151,7 +176,7 @@ ${command.premise}`, request.signal);
             }
         }
         if (command.action !== 'turn') {
-            return json({ storyId: await saveStoryRoomCommand(access, command) });
+            return json(await saveStoryRoomCommand(access, command));
         }
         if (!process.env.OPENAI_API_KEY?.trim()) return json({ error: 'AI je teď nedostupná.' }, 503);
         const claim = await claimStoryTurn(access, command);
@@ -159,6 +184,7 @@ ${command.premise}`, request.signal);
             try {
                 const line = await generateStoryLine(claim, command.requestId, request.signal);
                 await finishStoryTurn(access, command, claim.leaseId, line);
+                return json({ storyId: command.storyId, line });
             } catch (error) {
                 try { await finishStoryTurn(access, command, claim.leaseId, null); }
                 catch { console.warn('Workshop story turn lease could not be released.'); }

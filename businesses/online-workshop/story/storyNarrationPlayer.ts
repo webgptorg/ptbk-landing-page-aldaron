@@ -1,15 +1,16 @@
 import { parseArticleWordTimings, type ArticleWordTimings } from '@/businesses/articles/articleTiming';
-import { getStoryNarrationSegments } from '@/lib/workshops/storyRoomNarration';
-import type { WorkshopStory } from '@/lib/workshops/storyRoomTypes';
+import { getStoryNarrationSegments, getStoryNarrationTrackId, getStoryNarrationVoice } from '@/lib/workshops/storyRoomNarration';
+import type { StoryCharacter, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
 
-type NarrationClip = { samples: Int16Array<ArrayBuffer>; timings: ArticleWordTimings | null };
+type NarrationClip = { samples: Int16Array<ArrayBuffer>; timings: ArticleWordTimings | null; voice?: string };
 const SAMPLE_RATE = 24_000;
 const PAUSE_SAMPLES = Math.round(SAMPLE_RATE * 0.18);
 
 async function loadClip(
     apiPath: string, storyId: string, segmentId: string, signal: AbortSignal, context: OfflineAudioContext,
 ): Promise<NarrationClip> {
-    for (let attempt = 0; attempt < 30; attempt++) {
+    for (let attempt = 0; attempt < 85; attempt++) {
+        signal.throwIfAborted();
         const response = await fetch(apiPath, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
             body: JSON.stringify({ action: 'audio', storyId, segmentId, waitOnly: attempt > 0 }),
@@ -18,7 +19,7 @@ async function loadClip(
             await new Promise((resolve) => window.setTimeout(resolve, 1_300));
             continue;
         }
-        const data = await response.json() as { url?: string | null; timings?: unknown; error?: string };
+        const data = await response.json() as { url?: string | null; timings?: unknown; voice?: string; error?: string };
         if (!response.ok) throw new Error(data.error ?? 'Předčítání se nepodařilo připravit.');
         if (!data.url) return { samples: new Int16Array(), timings: null };
         const media = await fetch(data.url, { signal });
@@ -30,7 +31,7 @@ async function loadClip(
         for (let i = 0; i < channel.length; i++) {
             samples[i] = Math.round(Math.max(-1, Math.min(1, channel[i]!)) * 32767);
         }
-        return { samples, timings: parseArticleWordTimings(data.timings) };
+        return { samples, timings: parseArticleWordTimings(data.timings), voice: data.voice };
     }
     throw new Error('Předčítání se připravuje déle než obvykle. Zkus to znovu.');
 }
@@ -55,19 +56,22 @@ function makeWaveHeader(sampleCount: number): ArrayBuffer {
 
 /** The player keeps a single seekable track. Immutable clips can be reused on either side of the network. */
 export async function prepareStoryNarration(
-    apiPath: string, story: WorkshopStory, signal: AbortSignal, clipCache: Map<string, NarrationClip>,
+    apiPath: string, story: WorkshopStory, characters: readonly StoryCharacter[], signal: AbortSignal, clipCache: StoryNarrationClipCache,
 ) {
     const segments = getStoryNarrationSegments(story);
     const context = new OfflineAudioContext(1, 1, SAMPLE_RATE);
     const clips: NarrationClip[] = [];
     for (let index = 0; index < segments.length; index += 3) {
         signal.throwIfAborted();
-        const batch = await Promise.all(segments.slice(index, index + 3).map(async ({ id, text }) => {
-            const cacheKey = `${story.id}:${id}:${text}`;
-            const cached = clipCache.get(cacheKey);
+        const batch = await Promise.all(segments.slice(index, index + 3).map(async (segment) => {
+            const { id, text } = segment;
+            const voice = getStoryNarrationVoice(segment, characters);
+            const key = (reference?: string) => JSON.stringify([story.id, id, text, reference]);
+            const cached = clipCache.get(key(voice));
             if (cached) return cached;
-            const clip = await loadClip(apiPath, story.id, id, signal, context);
-            clipCache.set(cacheKey, clip);
+            const loaded = await loadClip(apiPath, story.id, id, signal, context);
+            const clip = { ...loaded, voice: loaded.voice ?? voice };
+            clipCache.set(key(clip.voice), clip);
             return clip;
         }));
         clips.push(...batch);
@@ -98,6 +102,7 @@ export async function prepareStoryNarration(
     }
     if (!samplesWritten) throw new Error('V příběhu zatím není co číst.');
     return {
+        trackId: getStoryNarrationTrackId(story, clips.map(({ voice }) => voice)),
         blob: new Blob([makeWaveHeader(samplesWritten), ...parts], { type: 'audio/wav' }),
         duration: samplesWritten / SAMPLE_RATE,
         timings: words.length ? { version: 1 as const, words } : undefined,

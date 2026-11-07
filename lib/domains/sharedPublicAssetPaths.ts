@@ -1,7 +1,7 @@
 /**
  * Files in `public/` which branded sites may load from this deployment.
  * Keep this list in step with `public/`; the routing test checks that no asset is missed.
- * Copied article downloads use the separate bounded /article-assets/ allowlist.
+ * Copied article downloads and Monaco runtime files use separate bounded allowlists.
  */
 export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/CNAME',
@@ -162,6 +162,18 @@ export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/recording-studio/vad/ort-wasm-simd-threaded.wasm',
     '/recording-studio/vad/silero_vad_legacy.onnx',
     '/sponsors/CI-Technology-Incubation.png',
+    '/story-portraits/alenka.webp',
+    '/story-portraits/baba-jaga.webp',
+    '/story-portraits/dorotka.webp',
+    '/story-portraits/kacatko.webp',
+    '/story-portraits/karkulka.webp',
+    '/story-portraits/kocour.webp',
+    '/story-portraits/marenka.webp',
+    '/story-portraits/maugli.webp',
+    '/story-portraits/nemo.webp',
+    '/story-portraits/pinocchio.webp',
+    '/story-portraits/sherlock.webp',
+    '/story-portraits/vypravec.webp',
     '/studio-media-worker.js',
     '/studio-range-reader.d.mts',
     '/studio-range-reader.mjs',

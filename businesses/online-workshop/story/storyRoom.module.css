@@ -135,6 +135,19 @@
     line-height: 1.58;
 }
 .actionLine .bubble { background: transparent; border-style: dashed; font-style: italic; }
+.pendingLine .bubble { display: flex; align-items: center; gap: .6rem; color: var(--ptbk-muted); }
+.typingDots { display: inline-flex; gap: .2rem; }
+.typingDots i {
+    width: .25rem;
+    height: .25rem;
+    border-radius: 50%;
+    background: currentColor;
+    animation: typing 1.2s ease-in-out infinite;
+}
+.typingDots i:nth-child(2) { animation-delay: .15s; }
+.typingDots i:nth-child(3) { animation-delay: .3s; }
+@keyframes typing { 0%, 60%, 100% { opacity: .35; } 30% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .typingDots i { animation: none; } }
 .sidebar h2, .stage h3 { font-size: 1.36rem; line-height: 1.15; }
 .sidebar h2 { margin-bottom: .65rem; }
 .stage {
@@ -144,8 +157,6 @@
     border-radius: 0 0 1.25rem 1.25rem;
     background: color-mix(in srgb, var(--ptbk-surface) 52%, white);
 }
-.stageHeader { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .55rem 1rem; }
-.stageHeader .quiet { margin: .2rem 0 0; }
 .quiet { margin: .35rem 0 .7rem; color: var(--ptbk-muted); line-height: 1.5; font-size: .88rem; }
 .cast { display: flex; flex-wrap: wrap; gap: .35rem .55rem; margin: .75rem 0 0; }
 .castCharacter { position: relative; display: flex; width: 4.55rem; }
@@ -198,6 +209,7 @@
     font-weight: 750;
     font-size: .85rem;
 }
+.autoAvatar { border-style: dashed; background: var(--ptbk-white); color: var(--ptbk-blue); font-size: 1.35rem; }
 .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .avatar[data-portrait-pending='true']::after {
     position: absolute;
@@ -243,7 +255,6 @@
 .editor label { display: grid; gap: .35rem; font-size: .9rem; font-weight: 700; }
 .editor :is(input,textarea) { font-weight: 400; }
 .editor textarea { resize: vertical; }
-.editor .book { font: .85rem/1.45 ui-monospace, monospace; }
 .paper :global([data-tracking='true']) :global([data-article-word]) { cursor: pointer; scroll-margin-block: 5rem; }
 .paper :global([data-active-sentence='true']) { background: #cfdef5; color: var(--ptbk-ink); }
 .paper :global([data-active-word='true']) { background: #a6c3ee; color: var(--ptbk-ink); }

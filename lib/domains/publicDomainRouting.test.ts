@@ -111,6 +111,8 @@ describe('public domain routing', () => {
         expect(isSharedDeploymentAssetPath('/people/ai-ta-krajta/pavol-hejny.png')).toBe(true);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/narration.mp3')).toBe(true);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/words.json')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/vendor/monaco/0.54.0/vs/loader.js')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/vendor/monaco/0.54.0/vs/../credentials.json')).toBe(false);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/script.txt')).toBe(false);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/metadata.json')).toBe(false);
         expect(isSharedDeploymentAssetPath('/cs')).toBe(false);
@@ -125,8 +127,10 @@ describe('public domain routing', () => {
 
     it('keeps the shared asset allowlist in step with the public directory', () => {
         const publicFiles = listPublicAssetPaths(join(process.cwd(), 'public'));
-        // Article downloads have a bounded namespace because their copied files vary with publication.
-        expect([...SHARED_PUBLIC_ASSET_PATHS].sort()).toEqual(publicFiles.filter((file) => !file.startsWith('/article-assets/')).sort());
-        expect(publicFiles.every(isSharedDeploymentAssetPath)).toBe(true);
+        // Generated public assets have bounded namespaces and are verified separately.
+        expect([...SHARED_PUBLIC_ASSET_PATHS].sort()).toEqual(publicFiles.filter((file) =>
+            !file.startsWith('/article-assets/') && !file.startsWith('/vendor/monaco/'),
+        ).sort());
+        expect(publicFiles.filter((file) => !isSharedDeploymentAssetPath(file))).toEqual([]);
     });
 });

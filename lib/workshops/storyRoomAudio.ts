@@ -8,7 +8,9 @@ import { runDatabaseTransaction } from '@/lib/database/runDatabaseTransaction';
 import { putStoredObject, removeStoredObject, signStoredObject } from '@/lib/storage/objectStorage';
 import { removeSpeechUrls } from '@/lib/text/speechText.mjs';
 import { readStoryForNarration, StoryRoomError, type StoryAccess } from './storyRoomDatabase';
+import { STORY_NARRATOR_VOICE } from './storyRoomBook';
 import { getStoryNarrationSegments } from './storyRoomNarration';
+import { ensureStoryVoice } from './storyRoomVoice';
 import type { StoryAudioSegmentId } from './storyRoomTypes';
 
 type CachedClip = { object_key: string | null; timings: ArticleWordTimings | null; is_pending: boolean };
@@ -16,7 +18,8 @@ type CachedClip = { object_key: string | null; timings: ArticleWordTimings | nul
 export async function getStoryAudioClip(
     access: StoryAccess, storyId: string, segmentId: StoryAudioSegmentId, signal: AbortSignal, waitOnly = false,
 ) {
-    const segments = getStoryNarrationSegments(await readStoryForNarration(access, storyId));
+    const story = await readStoryForNarration(access, storyId, segmentId);
+    const segments = getStoryNarrationSegments(story);
     const index = segments.findIndex(({ id }) => id === segmentId);
     const segment = segments[index];
     if (!segment) throw new StoryRoomError(404, 'Tahle část příběhu není k dispozici.');
@@ -26,11 +29,19 @@ export async function getStoryAudioClip(
     });
     const script = words.map(({ spokenText }) => spokenText).join(' ');
     if (!script) return { url: null, timings: null };
-    // The preceding line stays the same as new turns arrive. It helps the voice carry the story across clips.
-    const previousText = index > 0 ? removeSpeechUrls(segments[index - 1]!.text).trim() : undefined;
+    const voice = story.subject ? await ensureStoryVoice(story.subject, signal, waitOnly) : STORY_NARRATOR_VOICE;
+    const narrator = voice === STORY_NARRATOR_VOICE;
+    const previous = segments[index - 1];
+    const sharesSpeaker = previous?.speaker?.id === segment.speaker?.id && previous?.speaker?.name === segment.speaker?.name;
+    const previousText = previous && sharesSpeaker ? removeSpeechUrls(previous.text).trim() : undefined;
+    const narratorId = narrator ? process.env.ELEVENLABS_VOICE_ID?.trim() : undefined;
+    const narratorName = narrator ? process.env.ELEVENLABS_VOICE_NAME?.trim() : undefined;
+    // The introduction and adjacent stage directions keep the same script, voice and alignment as earlier recordings.
+    const identity = narrator && !segment.speaker && !previous?.speaker
+        ? [1, narratorId, narratorName]
+        : [2, voice, narratorId, narratorName];
     const cacheKey = createHash('sha256').update(JSON.stringify([
-        1, process.env.ELEVENLABS_VOICE_ID?.trim(), process.env.ELEVENLABS_VOICE_NAME?.trim(),
-        getElevenLabsNarrationModel(), previousText, words,
+        ...identity, getElevenLabsNarrationModel(), previousText, words,
     ])).digest('hex');
     const leaseId = randomUUID();
     const key = process.env.ELEVENLABS_API_KEY?.trim();
@@ -70,15 +81,15 @@ export async function getStoryAudioClip(
         if (winner?.is_pending) throw new StoryRoomError(409, 'Tahle část se právě načítá.');
         throw new StoryRoomError(503, 'Předčítání zkus znovu za několik minut.');
     });
-    if (clip?.object_key) return { url: await signStoredObject(clip.object_key), timings: clip.timings };
+    if (clip?.object_key) return { url: await signStoredObject(clip.object_key), timings: clip.timings, voice };
 
     const objectKey = `workshops/story/${access.workshopId}/${cacheKey}-${leaseId}.mp3`;
     let uploaded = false;
     let published = false;
     try {
         const providerSignal = AbortSignal.any([signal, AbortSignal.timeout(24_000)]);
-        const voice = await resolveElevenLabsNarrator(key!, providerSignal);
-        const { bytes, alignment } = await synthesizeElevenLabsNarration(key!, voice.id, script, providerSignal, previousText);
+        const voiceId = narrator ? (await resolveElevenLabsNarrator(key!, providerSignal)).id : voice;
+        const { bytes, alignment } = await synthesizeElevenLabsNarration(key!, voiceId, script, providerSignal, previousText);
         if (!bytes.length || bytes.length > 1_500_000) throw new StoryRoomError(502, 'Nahrávku se nepodařilo načíst.');
         const timings = mapSpeechAlignment({ script, words }, alignment) ?? null;
         await putStoredObject(objectKey, bytes, 'audio/mpeg');
@@ -92,11 +103,11 @@ export async function getStoryAudioClip(
             return rows.length > 0;
         });
         if (!published) throw new StoryRoomError(409, 'Tahle část se právě načítá.');
-        return { url: await signStoredObject(objectKey), timings };
+        return { url: await signStoredObject(objectKey), timings, voice };
     } catch (error) {
         if (error instanceof StoryRoomError) throw error;
         console.warn('Story narration failed.', error instanceof Error ? error.message : 'unknown');
-        throw new StoryRoomError(502, 'Pavolův hlas se teď nepodařilo načíst. Zkus to znovu.');
+        throw new StoryRoomError(502, 'Některý z hlasů se teď nepodařilo načíst. Zkus to znovu.');
     } finally {
         if (!published) {
             if (uploaded) await removeStoredObject(objectKey).catch(() => undefined);

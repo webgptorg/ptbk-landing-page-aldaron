@@ -1,5 +1,5 @@
 import 'server-only';
-import { getPreparedStoryPortraitUrl, getStoryCharacterColor, withStoryBookAppearance } from './storyRoomBook';
+import { getPreparedStoryPortraitUrl, getStoryCharacterColor, STORY_NARRATOR_VOICE, withStoryBookAppearance, withStoryBookVoice } from './storyRoomBook';
 
 /** The four original literary roles keep their IDs, including in existing transcripts and casts. */
 export const STORY_TEMPLATES = [
@@ -52,8 +52,9 @@ export function getTemplateStoryBook(character: (typeof STORY_TEMPLATES)[number]
 /** Editing a role made from a managed agent starts with a safe fictional local draft. */
 export function getManagedStoryBook(id: string, name: string, override?: string) {
     const isPavol = name === 'Pavol Hejný';
-    return withStoryBookAppearance(
+    const book = withStoryBookAppearance(
         override ?? `${name}\nPERSONA Zvídavý vypravěč v pohádce, který pomáhá dětem oživovat příběhy.\nRULE Mluv o tom, co se děje v příběhu.`,
         isPavol ? '#17386C' : getStoryCharacterColor(id), isPavol ? getPreparedStoryPortraitUrl('vypravec') : undefined,
     );
+    return withStoryBookVoice(book, isPavol ? STORY_NARRATOR_VOICE : undefined);
 }

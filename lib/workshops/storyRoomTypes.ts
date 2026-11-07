@@ -15,10 +15,13 @@ export type StoryCharacter = {
     readonly id: string;
     readonly name: string;
     readonly book?: string;
+    readonly bookRevision?: string;
     readonly avatar?: StoryCharacterAvatar;
     readonly color?: string;
     readonly image?: string;
     readonly portraitStatus?: 'pending' | 'unavailable';
+    readonly voice?: string;
+    readonly voiceStatus?: 'pending';
 };
 
 export type StoryLine = {
@@ -46,6 +49,7 @@ export type StoryRoomState = {
     readonly canWrite: boolean;
     readonly participant: { readonly fullname: string; readonly isInteractionBanned: boolean } | null;
     readonly canGenerate: boolean;
+    readonly canGenerateVoice?: boolean;
 };
 
 export const STORY_ROOM_COMMAND = z.discriminatedUnion('action', [
@@ -61,6 +65,7 @@ export const STORY_ROOM_COMMAND = z.discriminatedUnion('action', [
     z.object({
         action: z.literal('character'), id: STORY_ID,
         book: z.string().trim().min(15).max(8_000),
+        baseRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(),
     }).strict(),
     z.object({ action: z.literal('portrait'), id: STORY_ID }).strict(),
     z.object({

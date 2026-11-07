@@ -41,5 +41,8 @@ export function useAdminAutosave({ value, onSave, isEnabled = true }: AdminAutos
     const acceptDraftValue = useCallback((savedValue?: unknown) => {
         draftProtection.acceptDraftValue(savedValue === undefined ? undefined : JSON.stringify(savedValue) ?? 'undefined');
     }, [draftProtection.acceptDraftValue]);
-    return { ...state, formRef, acceptSavedValue, acceptDraftValue, saveNow: () => queue.flush(true) };
+    return {
+        ...state, formRef, acceptSavedValue, acceptDraftValue,
+        flush: () => queue.flush(), saveNow: () => queue.flush(true), discard: () => queue.discard(),
+    };
 }
