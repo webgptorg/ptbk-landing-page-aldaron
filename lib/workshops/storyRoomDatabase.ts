@@ -118,7 +118,7 @@ async function getCharacters(tx: DatabaseTransaction, room: RoomRow, canEdit: bo
         ...managed.filter(({ id }) => !STORY_TEMPLATE_BY_ID.has(id)).map(({ id, name }) => {
             const override = room.book_overrides[id];
             return {
-                id, name: override ? bookName(override) : name, avatar: '✦',
+                id, name: override ? bookName(override) : name, avatar: 'sparkles' as const,
                 ...(canEdit ? { book: override ?? getManagedStoryBook(name) } : {}),
             };
         }),

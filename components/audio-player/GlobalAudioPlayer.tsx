@@ -7,6 +7,7 @@ import { ArrowRight, ArrowUpRight, Pause, Play, RotateCcw, RotateCw, X } from 'l
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type CSSProperties } from 'react';
+import { PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import { getAudioSourceNavigation } from '@/lib/audio-player/audioSourceNavigation';
 import './audioPlayer.css';
 
@@ -29,7 +30,7 @@ export function GlobalAudioPlayer() {
         target: '_blank', rel: 'noopener noreferrer',
         'aria-label': `${sourceLabel} (${en ? 'opens in a new tab' : 'otevře se v nové kartě'})`,
     } : {};
-    return <aside className="article-global-player" data-appearance={track.appearance ?? 'personal'} data-fixed-bottom-control data-article-player aria-label={track.kind === 'podcast' ? en ? 'Podcast audio player' : 'Přehrávač podcastu' : track.kind === 'story' ? 'Přehrávač příběhu' : en ? 'Article audio player' : 'Přehrávač článku'}>
+    return <aside className="article-global-player" data-appearance={track.appearance ?? 'personal'} data-audio-kind={track.kind} style={track.kind === 'story' ? PROMPTBOOK_BRAND_STYLE : undefined} data-fixed-bottom-control data-article-player aria-label={track.kind === 'podcast' ? en ? 'Podcast audio player' : 'Přehrávač podcastu' : track.kind === 'story' ? 'Přehrávač příběhu' : en ? 'Article audio player' : 'Přehrávač článku'}>
         <div className="article-global-player__inner">
             <button type="button" className="article-global-player__play" onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? en ? 'Pause' : 'Pozastavit' : en ? 'Play' : 'Přehrát'}>
                 {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}

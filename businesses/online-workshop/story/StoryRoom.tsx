@@ -13,7 +13,10 @@ import { createStoryRoomApiPath, STORY_ROOM_PATH } from '@/lib/workshops/storyRo
 import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
 import { STORY_ROOM_MAX_LINES } from '@/lib/workshops/storyRoomTypes';
 import { createWorkshopSelectionPath, type WorkshopParticipantIdentity } from '@/lib/workshops/workshopParticipantLink';
-import { BookOpen, Download, Headphones, MessageCircle, Pencil, Plus, QrCode, Sparkles } from 'lucide-react';
+import {
+    Anchor, Bird, BookOpen, Cat, Cookie, Download, Headphones, House, MessageCircle, PawPrint, Pencil, Plus,
+    QrCode, Rabbit, Search, ShoppingBasket, Sparkles, TreeDeciduous, Wind,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
@@ -45,9 +48,15 @@ function characterStyle(index: number): CSSProperties {
     return { '--character-color': color, '--character-background': background } as CSSProperties;
 }
 
+const CHARACTER_ICONS = {
+    rabbit: Rabbit, search: Search, tree: TreeDeciduous, cat: Cat, basket: ShoppingBasket, wind: Wind,
+    paw: PawPrint, cookie: Cookie, anchor: Anchor, bird: Bird, house: House, sparkles: Sparkles,
+};
+
 function CharacterBadge({ character }: { readonly character: StoryCharacter }) {
     const initials = character.name.split(/\s+/).slice(0, 2).map((part) => Array.from(part)[0]).join('').toLocaleUpperCase('cs');
-    return <span className={s.avatar} aria-hidden="true">{character.avatar ?? (initials || '✦')}</span>;
+    const Icon = character.avatar ? CHARACTER_ICONS[character.avatar] : undefined;
+    return <span className={s.avatar} aria-hidden="true">{Icon ? <Icon size={17} /> : initials || <Sparkles size={17} />}</span>;
 }
 
 function StoryWords({ id, text }: { readonly id: string; readonly text: string }) {

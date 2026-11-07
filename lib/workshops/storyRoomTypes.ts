@@ -7,11 +7,15 @@ export const STORY_ROOM_MAX_LINES = 80;
 
 export const STORY_ID = z.string().uuid();
 export const STORY_AUDIO_SEGMENT = z.union([z.literal('title'), z.literal('premise'), STORY_ID]);
+export type StoryCharacterAvatar =
+    | 'rabbit' | 'search' | 'tree' | 'cat' | 'basket' | 'wind'
+    | 'paw' | 'cookie' | 'anchor' | 'bird' | 'house' | 'sparkles';
+
 export type StoryCharacter = {
     readonly id: string;
     readonly name: string;
     readonly book?: string;
-    readonly avatar?: string;
+    readonly avatar?: StoryCharacterAvatar;
 };
 
 export type StoryLine = {

@@ -72,5 +72,19 @@ body:has([data-article-player]) { padding-bottom:100px; }
     .article-global-player[data-appearance] .article-global-player__tracking { background:transparent;color:inherit; }
 }
 
+.article-global-player[data-audio-kind=story] {
+    --player-surface: var(--ptbk-white);
+    --player-accent: var(--ptbk-blue);
+    --player-line: color-mix(in srgb, var(--ptbk-blue) 16%, white);
+    --player-track: var(--ptbk-surface);
+    color: var(--ptbk-blue);
+}
+.article-global-player[data-audio-kind=story] .article-global-player__play,
+.article-global-player[data-audio-kind=story] .article-global-player__tracking[aria-pressed=true] {
+    background: var(--ptbk-blue);
+}
+.article-global-player[data-audio-kind=story] input { accent-color: var(--ptbk-blue); }
+.article-global-player[data-audio-kind=story] :is(button, input, a):focus-visible { outline-color: var(--ptbk-blue); }
+
 /* Only the newly persistent player needs extra clearance on supporting pages; the show's existing pb-24 stays exact. */
 body:has([data-ai-ta-krajta-mini-player]) .ai-ta-krajta-supporting-page { padding-bottom:calc(6rem + env(safe-area-inset-bottom)); }
