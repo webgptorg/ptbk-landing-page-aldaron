@@ -425,7 +425,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                             <CharacterBadge character={actor ?? { id: line.id, name: line.characterName }} />
                                                             <div className={s.message}>
                                                                 <small className={s.actorLabel}>{isSpeech
-                                                                    ? <StoryWords id={line.id} text={line.characterName} />
+                                                                    ? <StoryWords id={line.id} text={`${line.characterName}:`} />
                                                                     : `${line.characterName} · akce`}</small>
                                                                 <p className={s.bubble}><StoryWords id={line.id} text={line.text}
                                                                     startAt={isSpeech ? line.characterName.split(/\s+/).length : 0} /></p>
