@@ -39,6 +39,7 @@ beforeAll(async () => {
         INSERT INTO public.workshops (slug, room_kind, event_type, title, starts_at, external_url)
         VALUES ('already-in-calendar', 'workshop', 'external', 'Příběhová dílna', now(), '${LIBRARY_EVENT}?from=calendar');
     `);
+    await fixture.database.exec(readFileSync('migrations/2026-09-1400-workshop-soft-delete.sql', 'utf8'));
     await fixture.database.exec(readFileSync('migrations/2026-11-0700-workshop-story-room.sql', 'utf8'));
     await fixture.database.query(
         "UPDATE public.workshop_story_rooms SET invite_hash = $1, write_until = now() + interval '1 hour', read_until = now() + interval '1 day'",

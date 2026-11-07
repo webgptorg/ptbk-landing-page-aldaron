@@ -77,7 +77,7 @@ WITH existing_workshop AS (
         '2026-11-07 15:30:00+01', '2026-11-07 16:30:00+01', 'onsite', 'Městská knihovna v Praze', 0,
         'https://www.mlp.cz/cz/akce/pribeh-ktery-se-sam-odehrava-pise-promptboo/12791'
     WHERE NOT EXISTS (SELECT 1 FROM existing_workshop)
-    ON CONFLICT (slug) DO NOTHING
+    ON CONFLICT (slug) WHERE is_deleted = false DO NOTHING
     RETURNING id
 )
 INSERT INTO public.workshop_story_rooms (workshop_id, invite_hash, agent_ids, write_until, read_until)
