@@ -121,8 +121,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
   cast. Room Books are editable by approved participants. Edits to prepared roles belong to the term, while managed
   agent Books remain private. Free-text descriptions generate moderated Books. Turns from a portrait or the story's
-  contextual cast selection append at most one moderated sentence under the same lease. Both cast controls share one
-  stage membership action. Character Books own the accent (`META COLOR`) and approved workshop portrait (`META IMAGE`).
+  contextual cast selection append at most one moderated sentence under the same lease. The automatic turn is the first portrait-sized control on the stage. A temporary chat bubble shows the
+  selected character, or an unknown speaker during contextual selection. Only approved, saved lines become
+  permanent. Both cast controls share one stage membership action. Character Books own the accent (`META COLOR`) and approved workshop portrait (`META IMAGE`).
   Newly generated Books are playable while a request-scoped portrait job draws and stores their images. A failed job
   leaves the Book available and can be retried by an approved participant. The event owns a shortener link for sharing,
   QR and the PDF follow-up.

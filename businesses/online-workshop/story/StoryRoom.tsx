@@ -9,11 +9,11 @@ import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import { createStoryRoomApiPath, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
-import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
+import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryLine, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
 import { STORY_ROOM_MAX_LINES } from '@/lib/workshops/storyRoomTypes';
 import { createWorkshopSelectionPath, type WorkshopParticipantIdentity } from '@/lib/workshops/workshopParticipantLink';
 import {
-    Anchor, ArrowRight, Bird, BookOpen, Cat, Cookie, Download, Headphones, House, ImagePlus, Minus,
+    Anchor, Bird, BookOpen, Cat, Cookie, Download, Headphones, House, ImagePlus, Minus,
     PawPrint, Pencil, Plus, QrCode, Rabbit, Search, ShoppingBasket, Sparkles, TreeDeciduous, Wind,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -94,6 +94,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const [isJoinOpen, setIsJoinOpen] = useState(false);
     const [editor, setEditor] = useState<Editor | null>(null);
     const [pending, setPending] = useState('');
+    const [pendingTurn, setPendingTurn] = useState<StoryTurn | null>(null);
     const [shareOpen, setShareOpen] = useState(false);
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [shareError, setShareError] = useState('');
@@ -168,7 +169,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(command),
         });
-        const data = await response.json() as { storyId?: string; characterId?: string; url?: string; error?: string };
+        const data = await response.json() as { storyId?: string; characterId?: string; line?: StoryLine; url?: string; error?: string };
         if (command.action === 'turn' && response.status !== 409 && response.status < 500) uncertainTurn.current = null;
         if (!response.ok) throw new Error(data.error ?? 'Požadavek se nepodařilo dokončit.');
         return data;
@@ -181,6 +182,14 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         setNotice('');
         try {
             const data = await requestRoom(command);
+            const line = data.line;
+            if (command.action === 'turn' && line?.id === command.requestId) {
+                setState((current) => {
+                    const updated = current?.story;
+                    if (!current || !updated || updated.id !== command.storyId || updated.lines.some(({ id }) => id === line.id)) return current;
+                    return { ...current, story: { ...updated, isBusy: false, lines: [...updated.lines, line] } };
+                });
+            }
             if (data.storyId) selectStory(data.storyId);
             return true;
         } catch (error) {
@@ -194,13 +203,14 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     }
 
     function play(currentStory: WorkshopStory, character?: StoryCharacter) {
-        if (pendingRequest.current) return;
+        if (!canWrite || pendingRequest.current) return;
         const previous = uncertainTurn.current;
         const command: StoryTurn = previous?.storyId === currentStory.id && previous.characterId === character?.id
             ? previous
             : { action: 'turn', storyId: currentStory.id, characterId: character?.id, requestId: window.crypto.randomUUID() };
         uncertainTurn.current = command;
-        void mutate(command, character ? `${character.name} je na tahu…` : 'Příběh pokračuje…');
+        setPendingTurn(command);
+        void mutate(command, 'Připravuji další tah…').finally(() => setPendingTurn(null));
     }
 
     function changeCast(storyId: string, characterId: string, include: boolean) {
@@ -320,13 +330,19 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const cast = (story?.cast ?? []).flatMap((id) => characters.find((character) => character.id === id) ?? []);
     const canChangeCast = canWrite && !pending && !story?.isBusy;
     const canTakeTurn = canChangeCast && state?.canGenerate && story && story.lines.length < STORY_ROOM_MAX_LINES;
+    const localTurn = story && pendingTurn?.storyId === story.id && !story.lines.some(({ id }) => id === pendingTurn.requestId)
+        ? pendingTurn : null;
+    const isWritingTurn = Boolean(localTurn || story?.isBusy);
+    const writingCharacter = localTurn?.characterId
+        ? characters.find(({ id }) => id === localTurn.characterId)
+        : cast.length === 1 ? cast[0] : undefined;
     const currentNarration = narration?.storyId === storyId ? narration : null;
     const isPlayingStory = player.track?.id === currentNarration?.trackId && player.isPlaying;
     const isCurrentRecording = currentNarration?.trackId === `story:${storyId}:${story?.lines.at(-1)?.id ?? 'start'}`;
 
     useEffect(() => {
         if (transcript.current && !isPlayingStory) transcript.current.scrollTop = transcript.current.scrollHeight;
-    }, [storyId, story?.lines.length, isPlayingStory]);
+    }, [storyId, story?.lines.length, isPlayingStory, isWritingTurn]);
 
     return (
         <div className={s.room} style={PROMPTBOOK_BRAND_STYLE}>
@@ -433,22 +449,38 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                         </li>
                                                     );
                                                 })}
+                                                {isWritingTurn && (
+                                                    <li className={s.pendingLine} style={characterStyle(writingCharacter?.color)}>
+                                                        {writingCharacter
+                                                            ? <CharacterBadge character={writingCharacter} />
+                                                            : <span className={s.avatar} aria-hidden="true">?</span>}
+                                                        <div className={s.message}>
+                                                            <small className={s.actorLabel}>{writingCharacter?.name ?? 'Další tah'}</small>
+                                                            <p className={s.bubble}>
+                                                                {writingCharacter ? 'Píše…' : 'Jedna z postav píše…'}
+                                                                <span className={s.typingDots} aria-hidden="true"><i /><i /><i /></span>
+                                                            </p>
+                                                        </div>
+                                                    </li>
+                                                )}
                                             </ol>
-                                            {story.lines.length === 0 && <p className={s.quiet}>Zatím nikdo nepromluvil. První věta je na scéně!</p>}
+                                            {story.lines.length === 0 && !isWritingTurn && <p className={s.quiet}>Zatím nikdo nepromluvil. První věta je na scéně!</p>}
                                         </ArticleTracking>
                                         <section className={s.stage} aria-labelledby="story-stage-title">
-                                            <div className={s.stageHeader}>
-                                                <div>
-                                                    <h3 id="story-stage-title">Kdo bude na tahu?</h3>
-                                                    <p className={s.quiet}>{canWrite ? 'Klikni na portrét a postava dostane slovo.' : 'Postavy na scéně.'}</p>
-                                                </div>
-                                                {canWrite && <button type="button" className={s.primary} disabled={!canTakeTurn || cast.length === 0}
-                                                    onClick={() => play(story)}>
-                                                    Pokračovat v příběhu <ArrowRight size={16} aria-hidden="true" />
-                                                </button>}
-                                            </div>
+                                            <h3 id="story-stage-title">Kdo bude na tahu?</h3>
+                                            <p className={s.quiet}>{canWrite ? 'Klikni na portrét a postava dostane slovo.' : 'Postavy na scéně.'}</p>
                                             {cast.length === 0 ? <p className={s.quiet}>Přidej na scénu postavu ze seznamu.</p> : (
                                                 <ul className={s.cast}>
+                                                    {canWrite && (
+                                                        <li className={s.castCharacter}>
+                                                            <button type="button" className={s.turn} disabled={!canTakeTurn}
+                                                                aria-label="Pokračovat v příběhu" title="Pokračovat v příběhu"
+                                                                onClick={() => play(story)}>
+                                                                <span className={`${s.avatar} ${s.autoAvatar}`} aria-hidden="true">?</span>
+                                                                <span className={s.turnName}>Automaticky</span>
+                                                            </button>
+                                                        </li>
+                                                    )}
                                                     {cast.map((character) => (
                                                         <li key={character.id} className={s.castCharacter} style={characterStyle(character.color)}>
                                                             <button type="button" className={s.turn} disabled={!canTakeTurn}
@@ -466,8 +498,8 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                     ))}
                                                 </ul>
                                             )}
-                                            {(pending || notice || story.isBusy) && (
-                                                <p className={s.stageStatus} role="status">{pending || notice || 'Postava právě hraje svůj tah…'}</p>
+                                            {(notice || (pending && !localTurn)) && (
+                                                <p className={s.stageStatus} role="status">{notice || pending}</p>
                                             )}
                                             {canWrite && !state.canGenerate && <p className={s.quiet}>AI tahy teď nejsou dostupné.</p>}
                                         </section>

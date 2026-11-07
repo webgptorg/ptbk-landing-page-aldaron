@@ -159,6 +159,7 @@ ${command.premise}`, request.signal);
             try {
                 const line = await generateStoryLine(claim, command.requestId, request.signal);
                 await finishStoryTurn(access, command, claim.leaseId, line);
+                return json({ storyId: command.storyId, line });
             } catch (error) {
                 try { await finishStoryTurn(access, command, claim.leaseId, null); }
                 catch { console.warn('Workshop story turn lease could not be released.'); }
