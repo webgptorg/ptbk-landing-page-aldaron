@@ -1,13 +1,10 @@
 'use client';
 
 import defaultBook from '@/businesses/_generic/default.book';
+import { BookEditor } from '@/components/book-editor';
 import type { string_book } from '@promptbook/types';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-
-const BookEditor = dynamic(() => import('@promptbook/components').then((module) => module.BookEditor), {
-    ssr: false,
-});
 
 const PromptbookAgentIntegration = dynamic(
     () => import('@promptbook/components').then((module) => module.PromptbookAgentIntegration),

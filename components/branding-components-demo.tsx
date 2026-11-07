@@ -1,9 +1,9 @@
 'use client';
 
 import defaultBook from '@/businesses/_generic/default.book';
+import { BookEditor } from '@/components/book-editor';
 import dynamic from 'next/dynamic';
 
-const BookEditor = dynamic(() => import('@promptbook/components').then((m) => m.BookEditor), { ssr: false });
 const MockedChat = dynamic(() => import('@promptbook/components').then((m) => m.MockedChat), { ssr: false });
 
 const SAMPLE_MESSAGES = [

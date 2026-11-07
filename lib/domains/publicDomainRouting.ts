@@ -271,6 +271,7 @@ export function isSharedDeploymentAssetPath(pathname: string): boolean {
 
     // Committed article downloads are copied unchanged into public/ before compilation. Only these bounded namespaces
     // are shared; ordinary foreign pages and arbitrary file-looking paths still receive a branded 404.
+    if (/^\/vendor\/monaco\/\d+\.\d+\.\d+\/(?:LICENSE|ThirdPartyNotices\.txt|vs\/(?:[a-z0-9_][a-z0-9_.-]*\/)*[a-z0-9_][a-z0-9_.-]*\.(?:js|css|ttf))$/i.test(pathname)) return true;
     if (/^\/article-assets\/[a-z0-9][a-z0-9-]*\/(?:content\.md|article\.pdf|images\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|avif)|audio\/(?:narration\.mp3|subtitles\.vtt|words\.json))$/.test(pathname)) return true;
     if (/^\/article-podcasts\/(?:promptbook|pavol-hejny)\.png$/.test(pathname)) return true;
     return SHARED_PUBLIC_ASSET_PATH_SET.has(pathname);
