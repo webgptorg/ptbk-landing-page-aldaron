@@ -26,7 +26,7 @@ Patička přebírá oficiální údaje ze stávajícího repozitáře: **AI Web 
 
 Produktová reference Slezské univerzity a pět původních referencí o osobní spolupráci s Pavolem Hejným tvoří jednu společnou mřížku stejných karet. Jedna karta obsahuje jednu citaci s jejím autorem. Žádné oddělovací nadpisy pro univerzitu a osobní zkušenosti. Všechny citace, jména, role a fotografie se zachovávají; díky nezměněnému znění a atribuci se osobní zkušenost nevydává za používání Promptbooku. Samostatná produktová datová kopie neimportuje osobní konfiguraci a nepřebírá automaticky budoucí změny. Všechny reference jsou dostupné, bez karuselu skrývajícího obsah. Praha 13 nesmí figurovat v žádném veřejném textu, metadatech ani logu.
 
-Společná patička zachovává původní obrázek `public/sponsors/CI-Technology-Incubation.png` a přesné původní české/anglické znění podpory CzechInvest Technologická inkubace. Není nahrazeno novým logem nebo přepsaným příslibem podpory.
+Společná patička zobrazuje [oficiální českou a anglickou variantu loga Technologické inkubace](https://technologickainkubace.org/o-technologicke-inkubaci/ke-stazeni/slozka/122370/) pro světlý podklad. Poděkování za podporu je v kompaktní řadě s firemními údaji. LinkedIn a Discord patří k logu Promptbooku a firemní jméno je v této patičce jednou.
 
 ## Přístupnost a pohyb
 

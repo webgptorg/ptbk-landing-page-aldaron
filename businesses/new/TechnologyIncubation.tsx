@@ -1,21 +1,22 @@
 'use client';
 
 import Image from 'next/image';
-import technologyIncubationSponsor from '@/public/sponsors/CI-Technology-Incubation.png';
+import czechLogo from '@/public/sponsors/technology-incubation-cs.png';
+import englishLogo from '@/public/sponsors/technology-incubation-en.png';
 import { useSiteLocale } from './LocaleProvider';
 import s from './technology-incubation.module.css';
 
-/** Preserves the existing funding acknowledgement and original sponsor artwork. */
+/** Uses CzechInvest’s project logos for light backgrounds. */
 export function TechnologyIncubation() {
     const { locale } = useSiteLocale();
 
     return (
         <div className={s.sponsorship}>
             <Image
-                src={technologyIncubationSponsor}
+                src={locale === 'cs' ? czechLogo : englishLogo}
                 alt={locale === 'cs' ? 'CzechInvest — Technologická inkubace' : 'CzechInvest — Technology Incubation'}
                 className={s.logo}
-                sizes="200px"
+                sizes="186px"
             />
             <p className={s.acknowledgement}>
                 {locale === 'cs'

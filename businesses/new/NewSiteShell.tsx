@@ -12,7 +12,7 @@ import { ORGANIZATION_DATA_BOX_ID, ORGANIZATION_LEGAL_NAME, ORGANIZATION_REGISTR
 import { LEGAL_CONTACT_EMAIL, PRIVACY_CONTACT_EMAIL } from '@/lib/legal/legalOperator';
 import { getLegalDocumentLinks } from '@/lib/legal/legalLinks';
 import { LeadButton, LeadCaptureProvider } from './LeadCapture';
-import { NEW_SITE_NAVIGATION, sitePath } from './siteConfig';
+import { NEW_SITE_NAVIGATION } from './siteConfig';
 import { TechnologyIncubation } from './TechnologyIncubation';
 import { ENGINE_REPOSITORY } from './commercialTerms';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
@@ -32,7 +32,13 @@ function LocalizedShell({ children }: { children: ReactNode }) {
         </div></header>
         <main id="obsah" className={s.container}>{t(children)}</main>
         <footer className={s.footer}><div className={`${s.footerGrid} ${f.grid}`}>
-            <div><BrandLogo/><p>{t("Vaše AI.")}<br />{t("Opravdu Vaše.")}</p></div>
+            <div>
+                <BrandLogo/>
+                <div className={f.socials}>
+                    <a href="https://linkedin.com/company/promptbook">LinkedIn</a>
+                    <a href="https://discord.gg/x3QWNaa89N">Discord</a>
+                </div>
+            </div>
             <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('pricing')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={`/${locale}/releases`}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
             <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('srovnani')}>{t("Srovnání")}</Link><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href={path('branding')} hrefLang={locale}>{locale === 'cs' ? 'Logo a značka' : 'Brand kit'}</Link></nav>
             <nav className={f.legal} aria-label={locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}>
@@ -40,12 +46,18 @@ function LocalizedShell({ children }: { children: ReactNode }) {
                 <ul className={f.documents}>{getLegalDocumentLinks(locale).map(link => <li key={link.href}><Link href={link.href}>{link.text}</Link></li>)}</ul>
             </nav>
         </div>
-        <div className={f.company}>
-            <strong>{ORGANIZATION_LEGAL_NAME}</strong><span>{t("IČO: ")}{ORGANIZATION_REGISTRATION_NUMBER}</span><span>{t("Datová schránka: ")}{ORGANIZATION_DATA_BOX_ID}</span>
-            <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a><a href={`mailto:${PRIVACY_CONTACT_EMAIL}`}>{PRIVACY_CONTACT_EMAIL}</a>
-            <a href="https://or.justice.cz/ias/ui/rejstrik-firma.vysledky?subjektId=1223693&amp;typ=UPLNY">{t("Obchodní rejstřík ↗")}</a>
+        <div className={f.details}>
+            <div className={f.company}>
+                <strong>{ORGANIZATION_LEGAL_NAME}</strong>
+                <span>{t('IČO: ')}{ORGANIZATION_REGISTRATION_NUMBER}</span>
+                <span>{t('Datová schránka: ')}{ORGANIZATION_DATA_BOX_ID}</span>
+                <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
+                <a href={`mailto:${PRIVACY_CONTACT_EMAIL}`}>{PRIVACY_CONTACT_EMAIL}</a>
+                <a href="https://or.justice.cz/ias/ui/rejstrik-firma.vysledky?subjektId=1223693&amp;typ=UPLNY">{t('Obchodní rejstřík ↗')}</a>
+            </div>
+            <TechnologyIncubation/>
         </div>
-        <div className={s.footerBottom}><span>© {new Date().getFullYear()} {ORGANIZATION_LEGAL_NAME}</span><div><a href="https://linkedin.com/company/promptbook">LinkedIn</a><a href="https://discord.gg/x3QWNaa89N">Discord</a></div></div><TechnologyIncubation/></footer>
+        </footer>
     </div></LeadCaptureProvider>;
 }
 
