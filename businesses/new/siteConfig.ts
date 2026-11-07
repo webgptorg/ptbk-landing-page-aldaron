@@ -2,7 +2,7 @@
 export const NEW_SITE_BASE = '/cs';
 export const sitePath = (path = '') => `${NEW_SITE_BASE}${path ? `/${path.replace(/^\/+/, '')}` : ''}`;
 export const NEW_SITE_SECTIONS = [
-    'agendy', 'partnership', 'cenik', 'srovnani', 'o-nas', 'kalkulacka',
+    'agendy', 'partnership', 'pricing', 'srovnani', 'o-nas', 'kalkulacka',
     'bezpecnost', 'faq', 'soukromi', 'podminky', 'open-source',
     'podminky-produktu', 'partnerske-podminky', 'licence', 'legal', 'releases', 'branding',
 ] as const;
@@ -18,6 +18,6 @@ export function isNewSitePublicPath(pathname: string): boolean {
     return false;
 }
 export const NEW_SITE_NAVIGATION = [
-    ['Agendy', 'agendy'], ['Pro partnery', 'partnership'], ['Ceník', 'cenik'],
+    ['Agendy', 'agendy'], ['Pro partnery', 'partnership'], ['Ceník', 'pricing'],
     ['Srovnání', 'srovnani'], ['Náš příběh', 'o-nas'],
 ] as const;

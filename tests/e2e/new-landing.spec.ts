@@ -27,6 +27,10 @@ test('localized pages retain public metadata and legacy calculation queries', as
     const destination = new URL(legacy.headers().location, legacy.url());
     expect(destination.pathname).toBe('/kalkulacka');
     expect(destination.search).toBe('?volume=47&mode=partner');
+    const oldPricing = await request.get('/en/cenik?source=partner', {maxRedirects:0});
+    expect(oldPricing.status()).toBe(308);
+    expect(new URL(oldPricing.headers().location, oldPricing.url()).pathname).toBe('/en/pricing');
+    expect(new URL(oldPricing.headers().location, oldPricing.url()).search).toBe('?source=partner');
     for (const [path,language] of [['/cs','cs'],['/en','en']]) {
         const response = await visit(page, path);
         expect(response?.status()).toBe(200);
@@ -173,7 +177,7 @@ test('product interest preserves failed drafts and saves one nonbinding CRM enqu
 });
 
 test('Czech marketing pages and language switching retain the page, calculation and anchor', async ({page}) => {
-    for (const path of ['/cs/cenik','/cs/partnership','/cs/agendy/email','/cs/srovnani/chatgpt']) {
+    for (const path of ['/cs/pricing','/cs/partnership','/cs/agendy/email','/cs/srovnani/chatgpt']) {
         const response = await visit(page,path);
         expect(response?.status()).toBe(200);
         await expect(page.locator('main h1')).toHaveCount(1);
@@ -276,10 +280,10 @@ test('founder CTA uses the contact system and restores focus after success',asyn
 });
 
 test('all information and comparison routes stay within the new website',async({page})=>{
-    const paths=['partnership','cenik','agendy','agendy/email','bezpecnost','faq','o-nas','soukromi','podminky','srovnani',...['claude-code','codex','n8n','make','openclaw','paperclip'].map(slug=>`srovnani/${slug}`)];
+    const paths=['partnership','pricing','agendy','agendy/email','bezpecnost','faq','o-nas','soukromi','podminky','srovnani',...['claude-code','codex','n8n','make','openclaw','paperclip'].map(slug=>`srovnani/${slug}`)];
     for(const path of paths){const response=await visit(page, `/cs/${path}`);expect(response?.status(),path).toBe(200);await expect(page.locator('main h1')).toHaveCount(1);
         const links=await page.getByRole('navigation',{name:'Hlavní navigace'}).locator('a').evaluateAll(links=>links.map(a=>a.getAttribute('href')));expect(links.every(href=>href?.startsWith('/'))).toBe(true);}
-    await visit(page, '/cs/cenik');await expect(page.getByText('První věcná reakce do 16 pracovních hodin',{exact:true})).toBeVisible();
+    await visit(page, '/cs/pricing');await expect(page.getByText('První věcná reakce do 16 pracovních hodin',{exact:true})).toBeVisible();
     expect((await visit(page, '/cs/srovnani/not-a-vendor'))?.status()).toBe(404);
 });
 

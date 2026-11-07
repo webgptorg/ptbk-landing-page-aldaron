@@ -24,13 +24,13 @@ function text(node: ReactNode) { const element = document.createElement('div'); 
 const remainingCzech = (value: string) => ['Jiří Jahn', 'Pavol Hejný', 'Jiří', 'Tomáš Studeník', 'Jan Šedo', 'Tereza Texlová', 'VŠEM', 'Šimon Podhajský', 'Šimon', 'Lucie Benešová', 'ŠP'].reduce((text, name) => text.replaceAll(name, ''), value).match(/[^.!?\n]*[čďěňřšťůž][^.!?\n]*/gi) ?? [];
 describe('bilingual launch site', () => {
     it('keeps language paths and complete calculation state across language changes', () => {
-        expect(localeFromPath('/en/cenik')).toBe('en');
+        expect(localeFromPath('/en/pricing')).toBe('en');
         expect(localeFromPath('/engine')).toBe('cs');
         expect(localizedPath('/en/agendy/social','cs')).toBe('/cs/agendy/social');
         expect(localizedPath('/new/en/agendy/social','cs')).toBe('/cs/agendy/social');
         expect(localizedPath('/','en')).toBe('/en');
         expect(localizedPath('/cs/agendy/email?volume=47#detail','en')).toBe('/en/agendy/email?volume=47#detail');
-        expect(localizedPath('/cs/cenik','cs')).toBe('/cs/cenik');
+        expect(localizedPath('/cs/pricing','en')).toBe('/en/pricing');
         expect(localizedPath('/en','cs')).toBe('/cs');
         expect(localizedPath('/new/en/kalkulacka?volume=47#vysledek','cs')).toBe('/cs/kalkulacka?volume=47#vysledek');
         const state=defaultCalculatorState('partner'); state.input.hostingCzk=654; state.input.exchangeRate=24;
@@ -49,11 +49,12 @@ describe('bilingual launch site', () => {
         expect(storedFieldValue('inputPriceUsd',66,'cs',22)).toBe(3);
         expect(displayFieldValue('volume',300,'en',22)).toBe(300);
     });
-    it.each(['cs', 'en'] as const)('publishes the same two capacity plans on all pricing surfaces in %s', locale => {
-        for (const page of [<NewLandingPage key="home"/>, <NewLandingPage key="partner" partnership/>, <PricingPage key="pricing"/>]) {
+    it.each(['cs', 'en'] as const)('shares Start and Business while keeping pricing details off the landing pages in %s', locale => {
+        for (const [page, full] of [[<NewLandingPage/>, false], [<NewLandingPage partnership/>, false], [<PricingPage/>, true]] as const) {
             const element = document.createElement('div');
             element.innerHTML = html(page, locale);
-            expect(element.querySelectorAll('[data-plan]')).toHaveLength(2);
+            const plans = Array.from(element.querySelectorAll('[data-plan]'), card => card.getAttribute('data-plan'));
+            expect(plans).toEqual(full ? ['free', 'start', 'business', 'enterprise'] : ['start', 'business']);
             const start = element.querySelector('[data-plan="start"]')!.textContent!;
             const business = element.querySelector('[data-plan="business"]')!.textContent!;
             expect(start).toContain(locale === 'cs' ? '3 aktivovaní odborní agenti' : '3 active specialist agents');
@@ -61,7 +62,13 @@ describe('bilingual launch site', () => {
             expect(business).toContain(locale === 'cs' ? '10 aktivovaných odborných agentů' : '10 active specialist agents');
             expect(business).toContain(locale === 'cs' ? '5 ovládajících uživatelů' : '5 controlling users');
             const rates = Array.from(element.querySelectorAll('section[aria-labelledby="business-addons-title"] td')).map(cell => cell.textContent);
-            expect(rates).toEqual(locale === 'cs' ? ['99 Kč', '99 Kč', '49 Kč'] : ['99 CZK', '99 CZK', '49 CZK']);
+            expect(rates).toEqual(full ? (locale === 'cs' ? ['99 Kč', '99 Kč', '49 Kč'] : ['99 CZK', '99 CZK', '49 CZK']) : []);
+            if (full) {
+                expect(element.querySelector(`[data-plan="free"] a[href="/${locale}/open-source"]`)).not.toBeNull();
+                expect(element.querySelector(`#partners a[href="/${locale}/partnership"]`)).not.toBeNull();
+            } else {
+                expect(element.querySelector(`#cenik a[href="/${locale}/pricing"]`)).not.toBeNull();
+            }
         }
     });
     it.each([

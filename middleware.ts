@@ -147,19 +147,25 @@ export async function middleware(request: NextRequest) {
         return response;
     }
 
-    if (isNewSitePublicPath(request.nextUrl.pathname)) {
+    const { pathname } = request.nextUrl;
+    const legacyPricing = /^\/(?:cs\/|en\/)?cenik\/?$/.test(pathname);
+    if (legacyPricing || isNewSitePublicPath(pathname)) {
+        const explicitLanguage = /^\/(cs|en)(?:\/|$)/.exec(pathname)?.[1];
         // Explicit locale URLs are stable. Entry pages without a locale follow the browser language;
         // keep the response private because shared caching must not send another visitor to our choice.
-        if (!/^\/(?:cs|en)(?:\/|$)/.test(request.nextUrl.pathname) && !request.nextUrl.pathname.endsWith('/opengraph-image')) {
+        if (legacyPricing || (!explicitLanguage && !pathname.endsWith('/opengraph-image'))) {
             const redirectUrl = request.nextUrl.clone();
-            const language = getPreferredHomepageLanguage(request.headers.get('accept-language'));
-            redirectUrl.pathname = `/${language}${request.nextUrl.pathname === '/' ? '' : request.nextUrl.pathname}`;
-            const response = NextResponse.redirect(redirectUrl, 307);
-            response.headers.set('Vary', 'Accept-Language');
-            response.headers.set('Cache-Control', 'private, no-store');
+            const language = explicitLanguage ?? getPreferredHomepageLanguage(request.headers.get('accept-language'));
+            const suffix = legacyPricing ? '/pricing' : pathname;
+            redirectUrl.pathname = `/${language}${suffix === '/' ? '' : suffix}`;
+            const response = NextResponse.redirect(redirectUrl, explicitLanguage ? 308 : 307);
+            if (!explicitLanguage) {
+                response.headers.set('Vary', 'Accept-Language');
+                response.headers.set('Cache-Control', 'private, no-store');
+            }
             return response;
         }
-        requestHeaders.set('x-promptbook-page-language', /^\/en(?:\/|$)/.test(request.nextUrl.pathname) ? 'en' : 'cs');
+        requestHeaders.set('x-promptbook-page-language', explicitLanguage ?? 'cs');
         return NextResponse.next({ request: { headers: requestHeaders } });
     }
 

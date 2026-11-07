@@ -19,7 +19,7 @@ export const COMMERCIAL_TERMS = {
     supportLimits: 'SLA negarantuje odstranění závady v určitém čase ani dostupnost serveru, aplikace nebo externích služeb. Nezahrnuje nepřetržitou pohotovost, telefonní linku ani servis cizích systémů. Podporovanou verzi a konfiguraci určí objednávka.',
     share: '20 % ze skutečně zaplacené softwarové ceny u všech plánů, včetně všech placených softwarových příplatků Promptbooku, po dobu prvních 24 kalendářních měsíců od první placené aktivace konkrétní doporučené licence. Stejně při měsíční i roční platbě, bez DPH, po slevách a přípustných vratkách; poplatky platební brány podíl agentury nesnižují. Hosting, tokeny, externí AI účty a vlastní práce jsou samostatné.',
     shareTerm: 'Provize je splatná do 30 dní od přijetí příslušné platby, u měsíčního i ročního předplatného stejně; dřívější povinná zákonná lhůta má přednost. Změna plánu ani přerušení plateb 24měsíční lhůtu neobnovují. Starší přijaté dohody zůstávají zachovány.',
-    publicLicence: 'Samostatný vývoj a neprodukční testování jsou bez licenčního poplatku za podmínek veřejné licence, bez produktové podpory a SLA. Nejde o třetí cenový plán.',
+    publicLicence: 'Samostatný vývoj a neprodukční testování jsou bez licenčního poplatku za podmínek veřejné licence, bez produktové podpory a SLA.',
     productionLicence: 'Pro produkční provoz, včetně vlastního hostingu, nabízíme Start nebo Business. Placená licence je potřebná v rozsahu, v němž produkční použití nepovoluje veřejná licence konkrétní verze; již udělená práva a licence jednotlivých součástí tím nejsou dotčeny. Přesný rozsah oprávnění určí licenční podmínky a objednávka.',
 } as const;
 export const ENGINE_REPOSITORY = 'https://github.com/webgptorg/promptbook';

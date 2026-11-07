@@ -8,7 +8,7 @@ import { CalculatorUrlSync } from '@/businesses/new/CalculatorUrlSync';
 import { COMPARISONS } from '@/businesses/new/comparisons';
 import { SCENARIOS, type ScenarioId } from '@/businesses/new/economics';
 import { newPageMetadata, OPEN_SOURCE_PAGE_COPY, NEW_PAGE_DEFINITIONS, PARTNERSHIP_PAGE_DEFINITIONS, NEW_EN_METADATA, PARTNERSHIP_EN_METADATA } from '@/businesses/new/newMetadata';
-import { translate } from '@/businesses/new/localization';
+import { licencePrice, translate } from '@/businesses/new/localization';
 import { NewLegalPage } from '@/businesses/new/NewLegalPage';
 import { LEGAL_PAGE_METADATA } from '@/lib/legal/legalPageMetadata';
 import s from '@/businesses/new/site.module.css';
@@ -16,7 +16,7 @@ const pages: Record<string, [string, string]> = {
     '': [NEW_PAGE_DEFINITIONS.en.title, NEW_PAGE_DEFINITIONS.en.description],
     partnership: [PARTNERSHIP_PAGE_DEFINITIONS.en.title, PARTNERSHIP_PAGE_DEFINITIONS.en.description],
     agendy: ['Choose your workflow', 'Explore email, accounting documents, social content, video and website maintenance workflows.'],
-    cenik: ['Pricing and support', 'Start: $19 and Business: $100 monthly per engine project. Included capacity, approved add-ons and product support.'],
+    pricing: ['Pricing and support', `Free for self-installation, Start at ${licencePrice('start', 'en')} and Business at ${licencePrice('business', 'en')} monthly per engine project, custom Enterprise and partner terms.`],
     kalkulacka: ['Cost and benefit calculator', 'Calculate the complete economics of your workflow or partner service. Edit assumptions, share a link and download a PDF.'],
     srovnani: ['Compare AI approaches', 'Compare Promptbook with coding agents, workflow platforms and personal assistants in one table and individual guides.'],
     'o-nas': ['Our story and founders', 'Jiří Jahn and Pavol Hejný, equal cofounders of Promptbook. From website chatbots to ongoing business workflows.'],
@@ -60,7 +60,7 @@ export default async function Page({ params, searchParams }: Props) {
         case 'partnership': return <NewLandingPage partnership/>;
         case 'open-source': return <OpenSourcePage/>;
         case 'agendy': return <AgendasPage/>;
-        case 'cenik': return <PricingPage/>;
+        case 'pricing': return <PricingPage/>;
         case 'srovnani': return <ComparisonsPage/>;
         case 'o-nas': return <StoryPage/>;
         case 'bezpecnost': return <SecurityPage/>;

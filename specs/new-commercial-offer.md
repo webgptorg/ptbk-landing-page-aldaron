@@ -56,8 +56,8 @@ Prvních **24 kalendářních měsíců od první placené aktivace konkrétní 
 
 ## Web a hranice implementace
 
-Hlavní stránka, partnerství a ceník sdílejí dvě srovnatelné karty a přehled příplatků. Kontakt „Potřebujete větší rozsah? Domluvme se.“ není třetí tarif. Kalkulačka, textový export a PDF počítají základ vybraného plánu a viditelně vylučují kapacitní příplatky. CZ licence jsou pevně v Kč, EN základ v USD; uložené jednotky, kurz pro externí náklady a query zůstávají kompatibilní.
+Hlavní a partnerská stránka ukazují karty Start a Business a odkazují na společný ceník `/cs/pricing` a `/en/pricing`. Ten navíc uvádí Free pro vlastní instalaci podle veřejné licence dané verze, individuálně sjednávaný Enterprise, kapacitní příplatky a partnerský podíl. Kalkulačka, textový export a PDF počítají základ vybraného předplatného Start nebo Business. Kapacitní příplatky jsou samostatná položka. CZ licence jsou pevně v Kč a EN základ v USD. Uložené jednotky, kurz pro externí náklady a query zůstávají kompatibilní.
 
 Tato změna publikuje nabídku a podmínky; neimplementuje měření kapacity, vymáhání licence v enginu ani Stripe. Před provozním účtováním rozšíření musí existovat souhlas, záznam aktivace, ochrana proti dvojímu účtování a kontrolovatelné vyúčtování respektující rozpočet.
 
-Samostatný vývoj a neprodukční testování se řídí veřejnou licencí konkrétní verze, nejsou třetím plánem. Nová publikace nemění BUSL ani dříve nabytá práva. Přesný grant stanoví licence a objednávka. Neveřejné podíly, rozpočty a odkupy Neonmedia zůstávají mimo tento repozitář.
+Samostatný vývoj a neprodukční testování v nabídce Free se řídí veřejnou licencí konkrétní verze. Přesný grant stanoví licence a objednávka. Neveřejné podíly, rozpočty a odkupy Neonmedia zůstávají mimo tento repozitář.

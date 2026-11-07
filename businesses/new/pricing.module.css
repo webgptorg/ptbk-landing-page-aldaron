@@ -3,6 +3,8 @@
     margin-inline: auto;
 }
 
+.pricing.full { max-width: none; }
+
 .plans {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -30,7 +32,7 @@
     min-height: 94px;
 }
 
-.planHeading h3 {
+.planHeading :is(h2, h3) {
     margin: 0 0 12px;
     color: #151e2d;
     font-size: 29px;
@@ -81,6 +83,17 @@
 .plan .action svg {
     flex-shrink: 0;
 }
+
+.plan .linkAction {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #dbe3ed;
+    color: #172c58;
+    text-align: center;
+}
+
+.plan .linkAction:hover { background: #f4f7fb; }
 
 .features {
     display: grid;
@@ -155,15 +168,21 @@
     text-underline-offset: 4px;
 }
 
-.addons {
-    margin-top: 28px;
+.details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.detail {
     padding: clamp(22px, 3vw, 32px);
     border: 1px solid #d8e0ec;
     border-radius: 20px;
     background: #fff;
 }
 
-.addons h3 {
+.detail h2 {
     margin: 0 0 18px;
     color: #172c58;
     font-size: 20px;
@@ -173,7 +192,7 @@
     overflow-x: auto;
 }
 
-.addons table {
+.detail table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
@@ -182,32 +201,46 @@
     color: #35435c;
 }
 
-.addons th,
-.addons td {
+.detail th,
+.detail td {
     padding: 12px 0;
     border-bottom: 1px solid #e4e9f1;
     vertical-align: top;
 }
 
-.addons th {
+.detail th {
     padding-right: 20px;
     font-weight: 500;
 }
 
-.addons td,
-.addons thead th:last-child {
+.detail td,
+.detail thead th:last-child {
     text-align: right;
 }
 
-.addons td {
+.detail td {
     white-space: nowrap;
 }
 
-.addons p {
-    margin: 18px 0;
+.detail p {
+    margin: 14px 0 0;
     color: #637086;
     font-size: 13px;
     line-height: 1.7;
+}
+
+.detail a { margin-top: 12px; }
+
+@media (min-width: 1080px) {
+    .full .plans { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    .full .plan { padding: 24px 21px; }
+    .full .amount { font-size: clamp(39px, 3.4vw, 48px); }
+    .full .plan .action { padding-inline: 12px; }
+    .full .planHeading { min-height: 100px; }
+}
+
+@media (max-width: 760px) {
+    .details { grid-template-columns: 1fr; gap: 18px; }
 }
 
 @media (max-width: 640px) {

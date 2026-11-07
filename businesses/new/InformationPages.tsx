@@ -23,7 +23,7 @@ return <header className={s.pageIntro}><Link className={s.breadcrumb} href={path
 
 export function PricingPage() {
     const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t("Licence pro vaši firemní agendu.")}>{t("Vyberte velikost týmu a kapacitu projektu. Oba plány měsíčně, bez ročního závazku, ve vlastní správě nebo s agenturou.")}</PageIntro><PricingCards full/><div className={s.prose}>
+return <><PageIntro title={t('Ceník')}>{locale === 'en' ? 'Compare self-installation, subscriptions per engine project and a custom offer for your team.' : 'Porovnejte vlastní instalaci, předplatné za projekt enginu a nabídku na míru pro Váš tým.'}</PageIntro><PricingCards full/><div className={s.prose}>
     <h2>{t("Jak se plány účtují")}</h2><p>{t("Start i Business jsou průběžná měsíční předplatná za projekt enginu. Oba podporují pravidelné spouštění i nepřetržitý provoz a lze je používat dlouhodobě. Další obnovení lze zrušit před začátkem dalšího fakturačního období. Start má podporu výrobce bez garantované reakce; Business první věcné posouzení do 16 pracovních hodin.")}</p>
     <h3>{t("Co je jeden projekt?")}</h3><p>{t(COMMERCIAL_TERMS.instance)}</p>
     <h2>{t("Jak počítáme kapacitu")}</h2>
@@ -38,7 +38,6 @@ return <><PageIntro title={t("Licence pro vaši firemní agendu.")}>{t("Vyberte 
     <h2>{t("Celkové náklady, ne jen licence")}</h2><p>{t(COMMERCIAL_TERMS.exclusions)}</p><p>{t("AI a infrastrukturu hradí klient, případně partner podle dohody. Promptbook neprodává spravovaný hosting. Cena nezahrnuje správu serveru, instalaci aktualizací, zakázkový vývoj ani neomezené konzultace.")}</p><p>{t("Aktualizace vycházejí ve standardních vydáních. Předplatné není objednávkou samostatné distribuce ani individuálního plánu oprav.")}</p><p>{t("Automatické aktualizace enginu řídí nastavení projektu. Lidská správa serveru a servisní práce partnera jsou samostatné služby.")} <Link href={path('bezpecnost#aktualizace')}>{t("Jak fungují automatické aktualizace →")}</Link></p><Link href={path('kalkulacka')}>{t("Spočítat kompletní náklady a přínosy →")}</Link>
     <h2>{t("Podpora Business")}</h2><p>{t(COMMERCIAL_TERMS.support)}</p><p>{t(COMMERCIAL_TERMS.supportWindow)}</p><p>{t("Oba plány můžete spravovat sami nebo s agenturou. Licence Promptbooku, práce agentury a podpora výrobce jsou samostatné části. Za projekt s námi komunikuje jeden pověřený technický kontakt klienta nebo agentury. Hlášení problémů platformy přijímáme na ")}{t(COMMERCIAL_TERMS.contact)}{t(".")}</p><p>{t(COMMERCIAL_TERMS.supportLimits)}</p>
     <h2>{t("Veřejný kód a vlastní nasazení")}</h2><p>{t(COMMERCIAL_TERMS.publicLicence)}</p><p>{t(COMMERCIAL_TERMS.productionLicence)}</p><p><Link href={path('licence')}>{locale === 'en' ? 'Engine licence and commercial terms →' : 'Licence enginu a komerční podmínky →'}</Link></p>
-    <h2>{t("Potřebujete větší rozsah? Domluvme se.")}</h2><p>{t("Připravíme individuální nabídku. Nepřetržitou lidskou podporu nenabízíme. Přesná oprávnění a podmínky stanoví objednávka, licenční smlouva a případně partnerská dohoda.")}</p><div className={s.actions}><LeadButton topic={t("Individuální rozsah a více projektů")}>{t("Probrat požadavky")}</LeadButton></div>
 </div></>;}
 
 export function StoryPage(){
@@ -120,7 +119,7 @@ const FAQ = [
 ] as const;
 export function FaqPage(){
     const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t("Otázky před první agendou.")}/><div className={s.faq}>{FAQ.map(([question,answer]) => <details key={question}><summary>{t(question)}</summary><p>{t(answer)}</p></details>)}</div><section className={s.section}><div className={s.actions}><Link className={s.secondaryButton} href={path('cenik')}>{t("Ceník a SLA")}</Link><Link className={s.secondaryButton} href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link></div></section><ClosingCta/></>;}
+return <><PageIntro title={t("Otázky před první agendou.")}/><div className={s.faq}>{FAQ.map(([question,answer]) => <details key={question}><summary>{t(question)}</summary><p>{t(answer)}</p></details>)}</div><section className={s.section}><div className={s.actions}><Link className={s.secondaryButton} href={path('pricing')}>{t("Ceník a SLA")}</Link><Link className={s.secondaryButton} href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link></div></section><ClosingCta/></>;}
 
 export function AgendasPage(){
     const { t, locale, path } = useSiteLocale();
