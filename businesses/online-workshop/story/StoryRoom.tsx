@@ -27,6 +27,7 @@ function getRoomHeaders(access: Access) {
 }
 
 export function StoryRoom() {
+    const [isReady, setIsReady] = useState(false);
     const [access, setAccess] = useState<Access | null>(null);
     const [codeInput, setCodeInput] = useState('');
     const [state, setState] = useState<StoryRoomState | null>(null);
@@ -64,6 +65,7 @@ export function StoryRoom() {
     }, []);
 
     useEffect(() => {
+        setIsReady(true);
         let code = window.location.hash.slice(1);
         if (!code) {
             try { code = window.sessionStorage.getItem(INVITE_STORAGE_KEY) ?? ''; } catch { /* Manual entry remains available. */ }
@@ -238,7 +240,7 @@ export function StoryRoom() {
             </section>
             {readError && <p className={styles.notice} role="alert">{readError}</p>}
             {notice && <p className={styles.notice} role="status">{notice}</p>}
-            {!access && <form className={styles.entry} onSubmit={(event) => {
+            {!access && <form className={styles.entry} aria-busy={!isReady} onSubmit={(event) => {
                 event.preventDefault();
                 join(codeInput);
             }}>
@@ -246,8 +248,8 @@ export function StoryRoom() {
                 <label htmlFor="room-code">Kód z pozvánky</label>
                 <div className={styles.row}>
                     <input id="room-code" autoComplete="off" autoCapitalize="characters" value={codeInput}
-                        onChange={(event) => setCodeInput(event.target.value)} maxLength={25} placeholder="XXXXX XXXXX XXXXX" />
-                    <button className={styles.primary} type="submit">Vstoupit</button>
+                        onChange={(event) => setCodeInput(event.target.value)} disabled={!isReady} maxLength={25} placeholder="XXXXX XXXXX XXXXX" />
+                    <button className={styles.primary} type="submit" disabled={!isReady}>Vstoupit</button>
                 </div>
             </form>}
             {access && !state && !readError && <p className={styles.notice} role="status"><LoaderCircle size={16} className={styles.spin} /> Otevírám dílnu…</p>}
