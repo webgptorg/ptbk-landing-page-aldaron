@@ -10,6 +10,11 @@ const fixture = vi.hoisted(() => ({
     database: undefined as PGlite | undefined,
     upload: vi.fn(),
     shortLink: vi.fn(),
+    background: [] as Array<() => Promise<void>>,
+}));
+vi.mock('next/server', async (importOriginal) => ({
+    ...await importOriginal<typeof import('next/server')>(),
+    after: (job: () => Promise<void>) => { fixture.background.push(job); },
 }));
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/database/migrateDatabase', () => ({ migrateDatabaseOnStartup: async () => undefined }));
@@ -91,7 +96,10 @@ beforeAll(async () => {
         VALUES ('a3307473-e95b-4e34-9e84-1c15daecf238', 'Pavol Hejný', 'Pavol Hejný
 PERSONA Soukromá výchozí role.');
     `);
-    for (const filename of ['2026-09-1400-workshop-soft-delete', '2026-11-0700-workshop-story-room', '2026-11-0701-workshop-story-event']) {
+    for (const filename of [
+        '2026-09-1400-workshop-soft-delete', '2026-11-0700-workshop-story-room', '2026-11-0701-workshop-story-event',
+        '2026-11-0702-workshop-story-portraits',
+    ]) {
         await fixture.database.exec(readFileSync(`migrations/${filename}.sql`, 'utf8'));
     }
     for (const [token, trusted, banned] of [
@@ -159,6 +167,9 @@ it('migrates only the existing library occurrence, and makes no legacy invite a 
 it('shares generated characters and lets other approved participants edit the local Books', async () => {
     const provider = vi.fn(async (url: string) => {
         if (url.endsWith('/moderations')) return Response.json({ results: [{ flagged: false }] });
+        if (url.endsWith('/images/generations')) {
+            return Response.json({ data: [{ b64_json: readFileSync('public/story-portraits/alenka.webp', 'base64') }] });
+        }
         return Response.json({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({
             name: 'Drak Pěna', persona: 'Vyfukuje bubliny.', knowledge: 'V bublině našel klíč.', rule: 'Chraň kamarády.',
         }) }] }] });
@@ -171,13 +182,28 @@ it('shares generated characters and lets other approved participants edit the lo
     expect((await post(APPROVED, generated)).status).toBe(200);
     expect((await post(APPROVED, generated)).status).toBe(200);
     expect(provider.mock.calls.filter(([url]) => url.endsWith('/responses'))).toHaveLength(1);
-    expect((await read()).characters.find(({ id }) => id === characterId)).toEqual({ id: characterId, name: 'Drak Pěna' });
+    expect((await read()).characters.find(({ id }) => id === characterId)).toMatchObject({ id: characterId, name: 'Drak Pěna', portraitStatus: 'pending' });
+    expect((await read()).characters.find(({ id }) => id === characterId)?.image).toBeUndefined();
+    expect(fixture.background).toHaveLength(1);
+    expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toContain(`META IMAGE https://ptbk.io/api/workshops/${SLUG}/story?portrait=${characterId}`);
 
-    const book = 'Drak Stín\nPERSONA Vyfukuje zlaté bubliny.';
+    const book = `Drak Stín\nPERSONA Vyfukuje zlaté bubliny.\nMETA COLOR #346968\nMETA IMAGE /api/workshops/${SLUG}/story?portrait=${characterId}`;
+    expect((await post(SECOND_APPROVED, { action: 'character', id: characterId, book: `${book}\nMETA IMAGE https://other.example/portrait.png` })).status).toBe(400);
     expect((await post(SECOND_APPROVED, { action: 'character', id: characterId, book })).status).toBe(200);
     expect((await post(APPROVED, { action: 'cast', storyId: story.id, characterId, include: true })).status).toBe(200);
     expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toBe(book);
     expect((await read()).story?.cast).toContain(characterId);
+    expect((await post(PENDING, { action: 'portrait', id: characterId })).status).toBe(403);
+    expect((await post(APPROVED, { action: 'portrait', id: characterId })).status).toBe(200);
+    expect(fixture.background).toHaveLength(1);
+    await fixture.background.shift()!();
+    expect(provider.mock.calls.filter(([url]) => url.endsWith('/images/generations'))).toHaveLength(1);
+    expect((await read()).characters.find(({ id }) => id === characterId)).toMatchObject({
+        name: 'Drak Stín', color: '#346968', image: `/api/workshops/${SLUG}/story?portrait=${characterId}`,
+    });
+    expect((await GET(new NextRequest(`${URL}?portrait=${characterId}`, { headers: headers() }), context)).headers.get('location'))
+        .toMatch(/^https:\/\/storage\.invalid\/workshops\/story\/.+\.webp$/);
+    expect((await GET(new NextRequest(`${URL}?portrait=${randomUUID()}`, { headers: headers() }), context)).status).toBe(404);
 
     const pavol = (await read(APPROVED)).characters.find(({ name }) => name === 'Pavol Hejný')!;
     expect(pavol.book).not.toContain('Soukromá výchozí role.');
@@ -220,6 +246,7 @@ it('appends one vetted line, including when two people click at once or a reques
 });
 
 it('reuses measured ElevenLabs clips when an extra line is added', async () => {
+    fixture.upload.mockClear();
     const story = (await read()).story!;
     const provider = vi.fn(async (_url: string, init: RequestInit) => {
         const { text } = JSON.parse(init.body as string) as { text: string };
@@ -245,6 +272,35 @@ it('reuses measured ElevenLabs clips when an extra line is added', async () => {
     expect(fixture.upload).toHaveBeenCalledTimes(3);
     expect(provider.mock.calls.every(([url]) => url.includes('/test-narrator/with-timestamps'))).toBe(true);
     expect((await clip(randomUUID())).status).toBe(404);
+});
+
+it('chooses the next speaker from the current cast and keeps their earlier lines after they leave', async () => {
+    const story = (await read()).story!;
+    const alice = story.cast[0]!;
+    const sherlock = story.cast[1]!;
+    const provider = vi.fn(async (url: string, options: RequestInit) => {
+        if (url.endsWith('/moderations')) return Response.json({ results: [{ flagged: false }] });
+        const body = JSON.parse(options.body as string) as {
+            text: { format: { schema: { properties: { characterId: { enum: string[] } } } } };
+            input: { content: { text: string }[] }[];
+        };
+        expect(body.text.format.schema.properties.characterId.enum).toEqual(story.cast.filter((id) => id !== alice));
+        expect(body.input[0].content[0].text).toContain('Podívejte, inkoust se hýbe!');
+        return Response.json({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({
+            characterId: sherlock, kind: 'speech', text: 'Zkusím tu stopu prozkoumat lupou.',
+        }) }] }] });
+    });
+    vi.stubGlobal('fetch', provider);
+    expect((await post(APPROVED, { action: 'cast', storyId: story.id, characterId: alice, include: false })).status).toBe(200);
+    const automatic: StoryTurn = { action: 'turn', storyId: story.id, requestId: randomUUID() };
+    expect((await post(PENDING, automatic)).status).toBe(403);
+    expect((await post(APPROVED, automatic)).status).toBe(200);
+    expect((await post(APPROVED, automatic)).status).toBe(200);
+    const updated = (await read()).story!;
+    expect(updated.cast).not.toContain(alice);
+    expect(updated.lines[0]?.characterId).toBe(alice);
+    expect(updated.lines.at(-1)).toMatchObject({ id: automatic.requestId, characterId: sherlock, characterName: 'Sherlock Holmes' });
+    expect(provider.mock.calls.filter(([url]) => url.endsWith('/responses'))).toHaveLength(1);
 });
 
 it('serves the same workshop shortener URL for the dialog and PDF', async () => {

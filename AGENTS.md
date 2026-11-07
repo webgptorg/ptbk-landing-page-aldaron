@@ -120,8 +120,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/cs/pribeh` is the miniapp for the `story` event type. The existing workshop term, name/e-mail session,
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
   cast. Room Books are editable by approved participants. Edits to prepared roles belong to the term, while managed
-  agent Books remain private. Free-text descriptions generate moderated Books, and explicit character turns append
-  at most one moderated sentence under a lease. The event owns a shortener link for sharing, QR and the PDF follow-up.
+  agent Books remain private. Free-text descriptions generate moderated Books. Turns from a portrait or the story's
+  contextual cast selection append at most one moderated sentence under the same lease. Both cast controls share one
+  stage membership action. Character Books own the accent (`META COLOR`) and approved workshop portrait (`META IMAGE`).
+  Newly generated Books are playable while a request-scoped portrait job draws and stores their images. A failed job
+  leaves the Book available and can be retried by an approved participant. The event owns a shortener link for sharing,
+  QR and the PDF follow-up.
   Reading reuses the site audio player, Pavol's configured ElevenLabs voice and the private object store. Immutable
   narration clips and measured alignment are reused when a new line is added. The room is excluded from analytics.
   Other event miniapps can use the event type registry and the same workshop entry/moderation endpoints.

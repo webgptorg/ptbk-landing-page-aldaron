@@ -16,6 +16,9 @@ export type StoryCharacter = {
     readonly name: string;
     readonly book?: string;
     readonly avatar?: StoryCharacterAvatar;
+    readonly color?: string;
+    readonly image?: string;
+    readonly portraitStatus?: 'pending' | 'unavailable';
 };
 
 export type StoryLine = {
@@ -59,13 +62,15 @@ export const STORY_ROOM_COMMAND = z.discriminatedUnion('action', [
         action: z.literal('character'), id: STORY_ID,
         book: z.string().trim().min(15).max(8_000),
     }).strict(),
+    z.object({ action: z.literal('portrait'), id: STORY_ID }).strict(),
     z.object({
         action: z.literal('cast'), storyId: STORY_ID, characterId: STORY_ID, include: z.boolean(),
     }).strict(),
     z.object({
-        action: z.literal('turn'), storyId: STORY_ID, characterId: STORY_ID, requestId: STORY_ID,
+        action: z.literal('turn'), storyId: STORY_ID, characterId: STORY_ID.optional(), requestId: STORY_ID,
     }).strict(),
 ]);
 
 export type StoryRoomCommand = z.infer<typeof STORY_ROOM_COMMAND>;
 export type StoryTurn = Extract<StoryRoomCommand, { action: 'turn' }>;
+export type StoryRoomEdit = Extract<StoryRoomCommand, { action: 'create' | 'character' | 'cast' }>;

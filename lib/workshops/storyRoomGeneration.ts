@@ -1,8 +1,8 @@
 import 'server-only';
 import { z } from 'zod';
 import { runManagedAgent } from '@/lib/agents/agentRuntime';
+import { getStoryBookColor, getStoryBookImage, getStoryBookText, STORY_BOOK_META } from './storyRoomBook';
 import { StoryRoomError, type ClaimedStoryTurn } from './storyRoomDatabase';
-import type { StoryLine } from './storyRoomTypes';
 
 const STORY_INSTRUCTIONS = `Jsi herec v česky psané improvizované pohádce pro děti a rodiče.
 Napiš právě jednu krátkou českou větu jako zvolená postava. Vyber buď to, co nahlas řekne (speech), nebo jednu pozorovatelnou akci (action).
@@ -22,11 +22,26 @@ const PRIVATE_DETAILS = new RegExp(String.raw`(?:https?://|www\.|[\p{L}\d._%+-]+
 
 export function validateCustomStoryBook(book: string) {
     const [name, ...lines] = book.split(/\r?\n/);
-    const text = lines.join('\n');
     const allowedCommitments = /^(?:PERSONA|KNOWLEDGE|RULE|GOAL)\s+\S/i;
-    if (!name || name.trim().length > 60 || !/^PERSONA\s+\S/im.test(text)
-        || lines.some((line) => /^[A-Z][A-Z_]{1,30}(?:\s|$)/.test(line.trim()) && !allowedCommitments.test(line.trim()))) {
-        throw new StoryRoomError(400, 'Na první řádek napiš jméno postavy. Přidej PERSONA a podle chuti KNOWLEDGE, GOAL nebo RULE.');
+    const malformed = () => new StoryRoomError(400, 'Na první řádek napiš jméno postavy. Přidej PERSONA a podle chuti KNOWLEDGE, GOAL, RULE, META COLOR nebo META IMAGE.');
+    if (!name || name.trim().length > 60 || !/^PERSONA\s+\S/im.test(lines.join('\n'))) throw malformed();
+    const seen = new Set<string>();
+    for (const line of lines.map((line) => line.trim())) {
+        const meta = STORY_BOOK_META.exec(line);
+        if (!meta) {
+            if (/^[A-Z][A-Z_]{1,30}(?:\s|$)/.test(line) && !allowedCommitments.test(line)) throw malformed();
+            continue;
+        }
+        const key = meta[1]!.toUpperCase();
+        if (seen.has(key)) throw new StoryRoomError(400, `META ${key} může být v Booku jen jednou.`);
+        seen.add(key);
+        const value = meta[2]?.trim() ?? '';
+        if (key === 'COLOR' && !getStoryBookColor(value)) {
+            throw new StoryRoomError(400, 'Do META COLOR zadej barvu v hexadecimálním tvaru, třeba #31527E.');
+        }
+        if (key === 'IMAGE' && !getStoryBookImage(value)) {
+            throw new StoryRoomError(400, 'Do META IMAGE vlož odkaz na portrét z dílny.');
+        }
     }
 }
 
@@ -52,22 +67,39 @@ export async function checkStoryText(text: string, signal: AbortSignal) {
     if (flagged !== false) throw new StoryRoomError(503, 'Text teď nejde ověřit. Zkus to prosím znovu.');
 }
 
-export async function generateStoryLine(claim: ClaimedStoryTurn, requestId: string, signal: AbortSignal): Promise<StoryLine> {
-    const output = await runManagedAgent(claim.agent, 'Zahraj další tah vybrané postavy.', JSON.stringify({
-        character: claim.agent.name, title: claim.story.title, opening: claim.story.premise,
-        previousTurns: claim.story.lines.slice(-24).map(({ characterName, kind, text }) => ({ characterName, kind, text })),
-    }), signal, [], {
+export async function generateStoryLine(claim: ClaimedStoryTurn, requestId: string, signal: AbortSignal) {
+    const scene = {
+        title: claim.story.title, opening: claim.story.premise,
+        previousTurns: claim.story.lines.slice(-24).map(({ characterId, characterName, kind, text }) => ({ characterId, characterName, kind, text })),
+    };
+    const automatic = claim.agents.length > 1;
+    const director = {
+        id: 'story-turn-director', name: 'Režie pohádky', isEnabled: true,
+        bookSource: 'Režie pohádky\nPERSONA Rozvíjíš rozehranou pohádku s obsazením na scéně.',
+    };
+    const output = await runManagedAgent(automatic ? director : claim.agents[0]!,
+        automatic ? 'Vyber postavu na scéně a zahraj její další tah.' : 'Zahraj další tah vybrané postavy.',
+        JSON.stringify(automatic ? { ...scene, cast: claim.agents.map(({ id, name, bookSource }) => ({
+            id, name, book: getStoryBookText(bookSource).slice(0, 2_800),
+        })) } : { ...scene, character: claim.agents[0]!.name }), signal, [], {
         model: 'gpt-4.1-mini',
-        maxOutputTokens: 240,
+        maxOutputTokens: 320,
         timeoutMilliseconds: 23_000,
-        systemInstruction: STORY_INSTRUCTIONS,
-        jsonSchema: LINE_SCHEMA,
+        systemInstruction: automatic ? `${STORY_INSTRUCTIONS}
+Vyber postavu výhradně z obsazení. Podle oslovení, otevřené akce a povah odhadni, čí tah přirozeně posune scénu. Když dává smysl více postav, dej přednost někomu jinému než poslednímu mluvčímu. Vrať její identifikátor jako characterId.` : STORY_INSTRUCTIONS,
+        jsonSchema: automatic ? {
+            ...LINE_SCHEMA, required: [...LINE_SCHEMA.required, 'characterId'],
+            properties: { ...LINE_SCHEMA.properties, characterId: { type: 'string', enum: claim.agents.map(({ id }) => id) } },
+        } : LINE_SCHEMA,
     });
-    const line = STORY_LINE.parse(JSON.parse(output));
+    const parsed: unknown = JSON.parse(output);
+    const line = (automatic ? STORY_LINE.extend({ characterId: z.string() }) : STORY_LINE).parse(parsed);
+    const actor = 'characterId' in line ? claim.agents.find(({ id }) => id === line.characterId) : claim.agents[0];
+    if (!actor) throw new StoryRoomError(502, 'Nepodařilo se vybrat postavu na scéně. Zkus to znovu.');
     const text = SENTENCES.segment(line.text.replace(/\s+/g, ' '))[Symbol.iterator]().next().value?.segment.trim();
     if (!text || text.length > 240) throw new StoryRoomError(502, 'Postava zkusila příliš dlouhý tah. Zkus kliknout znovu.');
     await checkStoryText(text, signal);
-    return { id: requestId, characterId: claim.agent.id, characterName: claim.agent.name, kind: line.kind, text };
+    return { id: requestId, characterId: actor.id, characterName: actor.name, kind: line.kind, text };
 }
 
 const CHARACTER_FIELDS = ['name', 'persona', 'knowledge', 'rule'] as const;

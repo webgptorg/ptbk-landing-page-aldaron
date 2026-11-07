@@ -9,8 +9,9 @@ import type { ManagedAgent } from '@/lib/agents/agentModel';
 import { runDatabaseTransaction, type DatabaseTransaction } from '@/lib/database/runDatabaseTransaction';
 import {
     STORY_ROOM_MAX_LINES, type StoryCharacter, type StoryLine, type StoryRoomState,
-    type StoryRoomCommand, type StoryRoomParticipant, type StorySummary, type StoryTurn, type WorkshopStory,
+    type StoryRoomEdit, type StoryRoomParticipant, type StorySummary, type StoryTurn, type WorkshopStory,
 } from './storyRoomTypes';
+import { getStoryBookAppearance, getStoryCharacterColor, withStoryBookAppearance } from './storyRoomBook';
 import { getManagedStoryBook, getTemplateStoryBook, STORY_TEMPLATE_BY_ID, STORY_TEMPLATES } from './storyRoomCast';
 import { STORY_EVENT_TYPE, STORY_ROOM_PATH } from './storyRoomPaths';
 
@@ -42,6 +43,7 @@ type StoryRow = {
     id: string; title: string; premise: string; character_ids: string[]; lines: StoryLine[]; is_busy: boolean;
 };
 type CharacterRow = { id: string; name: string; book_source: string };
+type StoryPortraitRow = { portrait_object_key: string | null; portrait_pending: boolean };
 
 const STORY_END = "COALESCE(w.ends_at, w.starts_at + interval '1 hour')";
 
@@ -101,28 +103,38 @@ async function getCharacters(tx: DatabaseTransaction, room: RoomRow, canEdit: bo
          ORDER BY array_position($1::uuid[], id)`,
         [room.agent_ids],
     );
-    const { rows: custom } = await tx.query<CharacterRow>(
-        `SELECT id, name, book_source FROM public.workshop_story_characters
+    const { rows: custom } = await tx.query<CharacterRow & StoryPortraitRow>(
+        `SELECT id, name, book_source, portrait_object_key, COALESCE(portrait_lease_until > now(), false) AS portrait_pending
+         FROM public.workshop_story_characters
          WHERE workshop_id = $1 AND pending_id IS NULL ORDER BY created_at, id`,
         [room.workshop_id],
     );
     const prepared = STORY_TEMPLATES.map((template) => {
-        const override = room.book_overrides[template.id];
+        const book = getTemplateStoryBook(template, room.book_overrides[template.id]);
         return {
-            id: template.id, name: override ? bookName(override) : template.name, avatar: template.avatar,
-            ...(canEdit ? { book: override ?? getTemplateStoryBook(template) } : {}),
+            id: template.id, name: bookName(book), avatar: template.avatar, ...getStoryBookAppearance(book),
+            ...(canEdit ? { book } : {}),
         };
     });
     return [
         ...prepared,
         ...managed.filter(({ id }) => !STORY_TEMPLATE_BY_ID.has(id)).map(({ id, name }) => {
-            const override = room.book_overrides[id];
+            const book = getManagedStoryBook(id, name, room.book_overrides[id]);
             return {
-                id, name: override ? bookName(override) : name, avatar: 'sparkles' as const,
-                ...(canEdit ? { book: override ?? getManagedStoryBook(name) } : {}),
+                id, name: bookName(book), avatar: 'sparkles' as const, ...getStoryBookAppearance(book),
+                ...(canEdit ? { book } : {}),
             };
         }),
-        ...custom.map(({ id, name, book_source }) => ({ id, name, ...(canEdit ? { book: book_source } : {}) })),
+        ...custom.map(({ id, name, book_source, portrait_object_key, portrait_pending }): StoryCharacter => {
+            const book = withStoryBookAppearance(book_source, getStoryCharacterColor(id));
+            const { color, image } = getStoryBookAppearance(book);
+            const imageReady = image && (portrait_object_key || !image.endsWith(`?portrait=${id}`));
+            return {
+                id, name, color, ...(canEdit ? { book } : {}),
+                ...(imageReady ? { image } : {}),
+                ...(!imageReady && !portrait_object_key ? { portraitStatus: portrait_pending ? 'pending' : 'unavailable' } : {}),
+            };
+        }),
     ];
 }
 
@@ -130,7 +142,8 @@ async function getCharacter(tx: DatabaseTransaction, room: RoomRow, id: string):
     const override = room.book_overrides[id];
     const template = STORY_TEMPLATE_BY_ID.get(id);
     if (template) {
-        return { id, name: override ? bookName(override) : template.name, bookSource: override ?? getTemplateStoryBook(template), isEnabled: true };
+        const book = getTemplateStoryBook(template, override);
+        return { id, name: bookName(book), bookSource: book, isEnabled: true };
     }
     const { rows: [row] } = await tx.query<CharacterRow>(
         `SELECT id, name, book_source FROM public.workshop_agents
@@ -204,7 +217,9 @@ export async function reserveStoryCharacterGeneration(access: StoryAccess, chara
     });
 }
 
-export async function finishStoryCharacterGeneration(access: StoryAccess, characterId: string, leaseId: string, book: string | null) {
+export async function finishStoryCharacterGeneration(
+    access: StoryAccess, characterId: string, leaseId: string, book: string | null, portraitUrl?: string,
+) {
     await runDatabaseTransaction('finishing story character generation', async (tx) => {
         if (book === null) {
             await tx.query(
@@ -214,12 +229,65 @@ export async function finishStoryCharacterGeneration(access: StoryAccess, charac
             return;
         }
         await getRoom(tx, access, true);
+        const source = withStoryBookAppearance(book, getStoryCharacterColor(characterId), portraitUrl);
         const { rows } = await tx.query(
-            `UPDATE public.workshop_story_characters SET name = $4, book_source = $5, pending_id = NULL, pending_until = NULL
+            `UPDATE public.workshop_story_characters SET name = $4, book_source = $5, pending_id = NULL, pending_until = NULL,
+                 portrait_lease_id = CASE WHEN $6::boolean THEN $3::uuid END,
+                 portrait_lease_until = CASE WHEN $6::boolean THEN now() + interval '3 minutes' END
              WHERE workshop_id = $1 AND id = $2 AND pending_id = $3 AND pending_until > now() RETURNING id`,
-            [access.workshopId, characterId, leaseId, bookName(book), book],
+            [access.workshopId, characterId, leaseId, bookName(book), source, Boolean(portraitUrl)],
         );
         if (!rows.length) throw new StoryRoomError(409, 'Čas na vytvoření postavy vypršel. Zkus to znovu.');
+    });
+}
+
+export async function reserveStoryPortrait(access: StoryAccess, characterId: string, portraitUrl: string) {
+    return runDatabaseTransaction('reserving workshop story portrait', async (tx) => {
+        const room = await getRoom(tx, access, true);
+        const { rows: [character] } = await tx.query<CharacterRow & StoryPortraitRow>(
+            `SELECT id, name, book_source, portrait_object_key, COALESCE(portrait_lease_until > now(), false) AS portrait_pending
+             FROM public.workshop_story_characters WHERE id = $1 AND workshop_id = $2 AND pending_id IS NULL`,
+            [characterId, access.workshopId],
+        );
+        if (!character) throw new StoryRoomError(404, 'Tato postava v dílně není.');
+        const { image } = getStoryBookAppearance(character.book_source);
+        if (character.portrait_pending || character.portrait_object_key || (image && !image.endsWith(`?portrait=${characterId}`))) return null;
+        await countGenerationAttempt(tx, room);
+        const lease = randomUUID();
+        await tx.query(
+            `UPDATE public.workshop_story_characters
+             SET book_source = $4, portrait_lease_id = $3, portrait_lease_until = now() + interval '3 minutes'
+             WHERE id = $1 AND workshop_id = $2`,
+            [characterId, access.workshopId, lease, withStoryBookAppearance(character.book_source, getStoryCharacterColor(characterId), portraitUrl)],
+        );
+        return { lease, book: character.book_source };
+    });
+}
+
+export async function finishStoryPortrait(access: StoryAccess, characterId: string, lease: string, objectKey: string | null) {
+    return runDatabaseTransaction('publishing workshop story portrait', async (tx) => {
+        if (objectKey) await getRoom(tx, access, true);
+        const { rows } = await tx.query(
+            `UPDATE public.workshop_story_characters
+             SET portrait_object_key = $4, portrait_lease_id = NULL, portrait_lease_until = NULL
+             WHERE id = $1 AND workshop_id = $2 AND portrait_lease_id = $3
+               AND ($4::text IS NULL OR portrait_lease_until > now()) RETURNING id`,
+            [characterId, access.workshopId, lease, objectKey],
+        );
+        return Boolean(rows.length);
+    });
+}
+
+export async function readStoryPortraitObject(access: StoryAccess, characterId: string) {
+    return runDatabaseTransaction('reading workshop story portrait', async (tx) => {
+        await getRoom(tx, access);
+        const { rows: [character] } = await tx.query<{ portrait_object_key: string }>(
+            `SELECT portrait_object_key FROM public.workshop_story_characters
+             WHERE id = $1 AND workshop_id = $2 AND pending_id IS NULL AND portrait_object_key IS NOT NULL`,
+            [characterId, access.workshopId],
+        );
+        if (!character) throw new StoryRoomError(404, 'Portrét ještě není k dispozici.');
+        return character.portrait_object_key;
     });
 }
 
@@ -270,7 +338,7 @@ async function checkCapacity(
 }
 
 export async function saveStoryRoomCommand(
-    access: StoryAccess, command: Exclude<StoryRoomCommand, StoryTurn | { action: 'generate-character' }>,
+    access: StoryAccess, command: StoryRoomEdit,
 ): Promise<string | null> {
     return runDatabaseTransaction('updating workshop story room', async (tx) => {
         const room = await getRoom(tx, access, true);
@@ -325,7 +393,7 @@ export async function saveStoryRoomCommand(
 }
 
 export type ClaimedStoryTurn = {
-    readonly agent: ManagedAgent;
+    readonly agents: readonly ManagedAgent[];
     readonly story: Pick<WorkshopStory, 'title' | 'premise' | 'lines'>;
     readonly leaseId: string;
 };
@@ -337,29 +405,38 @@ export async function claimStoryTurn(access: StoryAccess, command: StoryTurn): P
         const story = await getStory(tx, room.workshop_id, command.storyId);
         if (story.lines.some(({ id }) => id === command.requestId)) return null;
         if (story.is_busy) throw new StoryRoomError(409, 'Na scéně už někdo hraje. Chvilku počkej.');
-        if (!story.character_ids.includes(command.characterId)) throw new StoryRoomError(409, 'Nejdřív přidej postavu na scénu.');
+        if (command.characterId && !story.character_ids.includes(command.characterId)) {
+            throw new StoryRoomError(409, 'Nejdřív přidej postavu na scénu.');
+        }
         if (story.lines.length >= STORY_ROOM_MAX_LINES) throw new StoryRoomError(409, 'Příběh je plný. Můžeš si ho stáhnout a začít další.');
         const { rows: [running] } = await tx.query<{ count: number }>(
             'SELECT count(*)::int AS count FROM public.workshop_stories WHERE workshop_id = $1 AND pending_until > now()',
             [room.workshop_id],
         );
         if (running!.count >= MAX_PARALLEL_GENERATIONS) throw new StoryRoomError(429, 'Hraje hodně příběhů naráz. Zkus to za chvilku.');
-        const agent = await getCharacter(tx, room, command.characterId);
+        const candidates = command.characterId ? [await getCharacter(tx, room, command.characterId)] : await Promise.all(
+            story.character_ids.map((id) => getCharacter(tx, room, id).catch((error: unknown) => {
+                if (error instanceof StoryRoomError && error.status === 404) return null;
+                throw error;
+            })),
+        );
+        const agents = candidates.filter((agent) => agent !== null);
+        if (!agents.length) throw new StoryRoomError(409, 'Nejdřív přidej postavu na scénu.');
         const leaseId = randomUUID();
         await tx.query(
             "UPDATE public.workshop_stories SET pending_id = $2, pending_until = now() + interval '45 seconds' WHERE id = $1",
             [story.id, leaseId],
         );
         await countGenerationAttempt(tx, room);
-        return { agent, story, leaseId };
+        return { agents, story, leaseId };
     });
 }
 
-export async function finishStoryTurn(access: StoryAccess, command: StoryTurn, leaseId: string, line: StoryLine | null) {
+export async function finishStoryTurn(access: StoryAccess, command: StoryTurn, leaseId: string, line: (StoryLine & { characterId: string }) | null) {
     return runDatabaseTransaction('finishing workshop story turn', async (tx) => {
         if (line) {
             const room = await getRoom(tx, access, true);
-            await getCharacter(tx, room, command.characterId);
+            await getCharacter(tx, room, line.characterId);
             const { rows } = await tx.query(
                 `UPDATE public.workshop_stories
                  SET lines = lines || $3::jsonb, pending_id = NULL, pending_until = NULL

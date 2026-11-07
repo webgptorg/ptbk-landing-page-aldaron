@@ -2,22 +2,25 @@ import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull
 import { migrateDatabaseOnStartup } from '@/lib/database/migrateDatabase';
 import { getPublicRequestHostname, isPrimarySiteHostname } from '@/lib/domains/publicDomainRouting';
 import { allowPublicChatRequest } from '@/lib/messages/publicChatRateLimit';
+import { signStoredObject } from '@/lib/storage/objectStorage';
 import { getStoryAudioClip } from '@/lib/workshops/storyRoomAudio';
+import { createStoryPortraitUrl, getStoryBookText } from '@/lib/workshops/storyRoomBook';
 import {
-    claimStoryTurn, finishStoryCharacterGeneration, finishStoryTurn, getStoryRoomShareUrl, readStoryRoom, requireStoryRoomWriteAccess,
-    reserveStoryCharacterGeneration, saveStoryRoomCommand, StoryRoomError,
+    claimStoryTurn, finishStoryCharacterGeneration, finishStoryTurn, getStoryRoomShareUrl, readStoryPortraitObject, readStoryRoom,
+    requireStoryRoomWriteAccess, reserveStoryCharacterGeneration, reserveStoryPortrait, saveStoryRoomCommand, StoryRoomError,
 } from '@/lib/workshops/storyRoomDatabase';
 import { checkStoryText, generateStoryCharacterBook, generateStoryLine, validateCustomStoryBook } from '@/lib/workshops/storyRoomGeneration';
 import { STORY_EVENT_TYPE } from '@/lib/workshops/storyRoomPaths';
+import { canGenerateStoryPortrait, generateStoryPortrait } from '@/lib/workshops/storyRoomPortrait';
 import { STORY_AUDIO_SEGMENT, STORY_ID, STORY_ROOM_COMMAND } from '@/lib/workshops/storyRoomTypes';
 import { findWorkshopBySlug, getWorkshopDatabaseOrNull } from '@/lib/workshops/workshopDatabase';
 import { authenticateWorkshopParticipant } from '@/lib/workshops/workshopSession';
-import { NextRequest } from 'next/server';
+import { after, type NextRequest } from 'next/server';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 45;
+export const maxDuration = 180;
 
 const MAX_BODY_BYTES = 34_000;
 
@@ -80,8 +83,17 @@ async function readCommand(request: Request) {
 
 export async function GET(request: NextRequest, context: StoryRouteContext) {
     try {
-        const storyId = STORY_ID.safeParse(request.nextUrl.searchParams.get('story'));
+        const { searchParams } = request.nextUrl;
         const { access, participant } = await getAccess(request, context);
+        if (searchParams.has('portrait')) {
+            const portraitId = STORY_ID.safeParse(searchParams.get('portrait'));
+            if (!portraitId.success) return json({ error: 'Tento portrét v dílně není.' }, 404);
+            const url = await signStoredObject(await readStoryPortraitObject(access, portraitId.data));
+            return new Response(null, { status: 307, headers: {
+                Location: url, 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow',
+            } });
+        }
+        const storyId = STORY_ID.safeParse(searchParams.get('story'));
         return json(await readStoryRoom(access, storyId.success ? storyId.data : null, participant));
     } catch (error) {
         return errorResponse(error);
@@ -101,29 +113,38 @@ export async function POST(request: NextRequest, context: StoryRouteContext) {
             return json(await getStoryAudioClip(access, command.storyId, command.segmentId, request.signal, command.waitOnly));
         }
         if (!access.participantId) return json({ error: 'Nejdřív se připoj do dílny a počkej na schválení.' }, 401);
-        if (command.action === 'character' || command.action === 'generate-character' || command.action === 'create') {
+        if (command.action === 'character' || command.action === 'generate-character' || command.action === 'portrait' || command.action === 'create') {
             await requireStoryRoomWriteAccess(access);
             if (!allowPublicChatRequest(`story-edit:${access.workshopId}:${access.participantId}`)) {
                 return json({ error: 'Chvilku počkej a pak zkus uložit změnu znovu.' }, 429);
+            }
+            if (command.action === 'portrait') {
+                if (!canGenerateStoryPortrait()) return json({ error: 'Kreslení portrétů teď není dostupné.' }, 503);
+                const reservation = await reserveStoryPortrait(access, command.id, createStoryPortraitUrl(workshopSlug, command.id));
+                if (reservation) after(() => generateStoryPortrait(access, command.id, reservation.lease, reservation.book));
+                return json({ characterId: command.id });
             }
             if (command.action === 'generate-character') {
                 await checkStoryText(command.description, request.signal);
                 const lease = await reserveStoryCharacterGeneration(access, command.id);
                 if (lease) {
+                    const portraitUrl = canGenerateStoryPortrait() ? createStoryPortraitUrl(workshopSlug, command.id) : undefined;
+                    let book: string;
                     try {
-                        const book = await generateStoryCharacterBook(command.description, request.signal);
-                        await finishStoryCharacterGeneration(access, command.id, lease, book);
+                        book = await generateStoryCharacterBook(command.description, request.signal);
+                        await finishStoryCharacterGeneration(access, command.id, lease, book, portraitUrl);
                     } catch (error) {
                         await finishStoryCharacterGeneration(access, command.id, lease, null).catch(() => undefined);
                         if (error instanceof StoryRoomError) throw error;
                         return json({ error: 'Postavu se nepodařilo vymyslet. Zkus to prosím znovu.' }, 502);
                     }
+                    if (portraitUrl) after(() => generateStoryPortrait(access, command.id, lease, book));
                 }
                 return json({ characterId: command.id });
             }
             if (command.action === 'character') {
                 validateCustomStoryBook(command.book);
-                await checkStoryText(command.book, request.signal);
+                await checkStoryText(getStoryBookText(command.book), request.signal);
             } else {
                 await checkStoryText(`${command.title}
 ${command.premise}`, request.signal);
@@ -143,7 +164,7 @@ ${command.premise}`, request.signal);
                 catch { console.warn('Workshop story turn lease could not be released.'); }
                 if (error instanceof StoryRoomError) throw error;
                 console.warn('Workshop story generation did not finish.', error instanceof Error ? error.name : 'unknown');
-                return json({ error: 'Postavě se tah nepovedl. Klikni na ni znovu.' }, 502);
+                return json({ error: 'Další tah se nepovedl. Zkus to znovu.' }, 502);
             }
         }
         return json({ storyId: command.storyId });
