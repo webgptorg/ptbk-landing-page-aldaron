@@ -9,6 +9,7 @@ import { useAudioPlayerControls } from '@/components/audio-player/AudioPlayerPro
 import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
+import { getStoryNarrationSegments, getStoryNarrationTrackId, getStoryNarrationVoice } from '@/lib/workshops/storyRoomNarration';
 import { createStoryRoomApiPath, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
 import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryLine, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
 import { STORY_ROOM_MAX_LINES } from '@/lib/workshops/storyRoomTypes';
@@ -62,8 +63,8 @@ function CharacterBadge({ character }: { readonly character: StoryCharacter }) {
     );
 }
 
-function StoryWords({ id, text, startAt = 0 }: { readonly id: string; readonly text: string; readonly startAt?: number }) {
-    let word = startAt;
+function StoryWords({ id, text }: { readonly id: string; readonly text: string }) {
+    let word = 0;
     return text.split(/(\s+)/).map((part, index) => /\S/.test(part)
         ? <span key={index} data-article-word={`${id}:w${word++}`}>{part}</span>
         : part);
@@ -107,6 +108,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const pendingRequest = useRef(false);
     const uncertainTurn = useRef<StoryTurn | null>(null);
     const shareRequest = useRef<Promise<string> | null>(null);
+    const requestedVoicesFor = useRef<string | null>(null);
     const audioRequest = useRef<AbortController | null>(null);
     const transcript = useRef<HTMLOListElement>(null);
     const clips = useRef<StoryNarrationClipCache>(new Map());
@@ -116,6 +118,16 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const canWrite = state?.canWrite === true;
 
     useEffect(() => { setSelectedId(initialStoryId); }, [initialStoryId]);
+
+    const canGenerateVoice = state?.canGenerateVoice === true;
+    useEffect(() => {
+        if (!canWrite || !canGenerateVoice || requestedVoicesFor.current === apiPath) return;
+        requestedVoicesFor.current = apiPath;
+        void fetch(apiPath, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'prepare-voices', storyId }),
+        }).catch(() => undefined);
+    }, [apiPath, canGenerateVoice, canWrite, storyId]);
 
     function selectStory(id: string) {
         setSelectedId(id);
@@ -311,7 +323,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
 
     async function readAloud(currentStory: WorkshopStory) {
         if (audioRequest.current) return;
-        const trackId = `story:${currentStory.id}:${currentStory.lines.at(-1)?.id ?? 'start'}`;
+        const trackId = currentTrackId;
         if (player.track?.id === trackId) {
             player.setIsPlaying(!player.isPlaying);
             return;
@@ -321,13 +333,14 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         setIsPreparingAudio(true);
         setNotice('');
         try {
-            const audio = await prepareStoryNarration(apiPath, currentStory, request.signal, clips.current);
+            const audio = await prepareStoryNarration(apiPath, currentStory, characters, request.signal, clips.current);
             request.signal.throwIfAborted();
-            setNarration({ timings: audio.timings, storyId: currentStory.id, trackId });
+            setNarration({ timings: audio.timings, storyId: currentStory.id, trackId: audio.trackId });
+            if (audio.trackId !== trackId) setRevision((current) => current + 1);
             const href = createWorkshopSelectionPath(STORY_ROOM_PATH, event.slug, new URLSearchParams({ story: currentStory.id }));
             player.playTrack({
-                id: trackId, src: URL.createObjectURL(audio.blob), href, kind: 'story', language: 'cs',
-                title: currentStory.title, author: 'Pavol Hejný', appearance: 'promptbook',
+                id: audio.trackId, src: URL.createObjectURL(audio.blob), href, kind: 'story', language: 'cs',
+                title: currentStory.title, author: event.title, appearance: 'promptbook',
                 durationInSeconds: audio.duration, trackingAvailable: Boolean(audio.timings),
             });
         } catch (error) {
@@ -350,7 +363,10 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         : cast.length === 1 ? cast[0] : undefined;
     const currentNarration = narration?.storyId === storyId ? narration : null;
     const isPlayingStory = player.track?.id === currentNarration?.trackId && player.isPlaying;
-    const isCurrentRecording = currentNarration?.trackId === `story:${storyId}:${story?.lines.at(-1)?.id ?? 'start'}`;
+    const currentTrackId = story && getStoryNarrationTrackId(
+        story, getStoryNarrationSegments(story).map((segment) => getStoryNarrationVoice(segment, characters)),
+    );
+    const isCurrentRecording = Boolean(currentNarration && currentNarration.trackId === currentTrackId);
 
     useEffect(() => {
         if (transcript.current && !isPlayingStory) transcript.current.scrollTop = transcript.current.scrollHeight;
@@ -435,7 +451,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                         <div className={s.paperActions}>
                                             <button type="button" className={s.secondary} onClick={() => void readAloud(story)} disabled={isPreparingAudio}>
                                                 <Headphones size={17} aria-hidden="true" />
-                                                {isPreparingAudio ? 'Připravuji hlas…' : isCurrentRecording && isPlayingStory ? 'Pozastavit čtení' : currentNarration && !isCurrentRecording ? 'Přečíst novou verzi' : 'Přečíst příběh'}
+                                                {isPreparingAudio ? 'Připravuji předčítání…' : isCurrentRecording && isPlayingStory ? 'Pozastavit čtení' : currentNarration && !isCurrentRecording ? 'Přečíst novou verzi' : 'Přečíst příběh'}
                                             </button>
                                             <button type="button" className={s.secondary} onClick={() => void exportPdf(story)} disabled={isExporting}>
                                                 <Download size={17} aria-hidden="true" /> {isExporting ? 'Připravuji PDF…' : 'Stáhnout PDF'}
@@ -452,11 +468,8 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                         <li key={line.id} style={characterStyle(actor?.color)} className={isSpeech ? s.speechLine : s.actionLine}>
                                                             <CharacterBadge character={actor ?? { id: line.id, name: line.characterName }} />
                                                             <div className={s.message}>
-                                                                <small className={s.actorLabel}>{isSpeech
-                                                                    ? <StoryWords id={line.id} text={`${line.characterName}:`} />
-                                                                    : `${line.characterName} · akce`}</small>
-                                                                <p className={s.bubble}><StoryWords id={line.id} text={line.text}
-                                                                    startAt={isSpeech ? line.characterName.split(/\s+/).length : 0} /></p>
+                                                                <small className={s.actorLabel}>{isSpeech ? line.characterName : `${line.characterName} · akce`}</small>
+                                                                <p className={s.bubble}><StoryWords id={line.id} text={line.text} /></p>
                                                             </div>
                                                         </li>
                                                     );
@@ -533,6 +546,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                     <CharacterBadge character={character} />
                                                     <span className={s.characterName}>{character.name}
                                                         {character.portraitStatus === 'pending' && <small className={s.portraitStatus}>Portrét se kreslí…</small>}
+                                                        {character.voiceStatus === 'pending' && <small className={s.portraitStatus}>Hlas se připravuje…</small>}
                                                     </span>
                                                     {canWrite && character.portraitStatus === 'unavailable' && <button type="button" className={s.iconButton}
                                                         title="Vytvořit portrét" aria-label={`Vytvořit portrét · ${character.name}`}

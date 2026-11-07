@@ -120,16 +120,25 @@ use cases, and audiences. Keep these rules current when behavior changes.
 - `/cs/pribeh` is the miniapp for the `story` event type. The existing workshop term, name/e-mail session,
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
   cast. Approved participants edit room Books in the shared highlighted BookEditor with debounced, ordered autosave.
-  Closing flushes the latest draft; a stale revision or an invalid Book keeps the draft available. Edits to prepared
-  roles belong to the term, while managed agent Books remain private. Free-text descriptions generate moderated Books. Turns from a portrait or the story's
-  contextual cast selection append at most one moderated sentence under the same lease. The automatic turn is the first portrait-sized control on the stage. A temporary chat bubble shows the
-  selected character, or an unknown speaker during contextual selection. Only approved, saved lines become
-  permanent. Both cast controls share one stage membership action. Character Books own the accent (`META COLOR`) and approved workshop portrait (`META IMAGE`).
+  Closing flushes the latest draft; a stale revision or an invalid Book keeps the draft available. Build and development
+  serve the pinned Monaco runtime from the same origin. Edits to prepared roles belong to the term, while managed agent
+  Books remain private. Free-text descriptions generate moderated Books. Turns from a portrait or contextual cast
+  selection append at most one moderated sentence under the same lease. The automatic turn is the first portrait-sized
+  control on the stage. A temporary chat bubble shows the selected character, or an unknown speaker during contextual
+  selection. Only approved, saved lines become permanent. Both cast controls share one stage membership action. Character
+  Books own the accent (`META COLOR`) and approved workshop portrait (`META IMAGE`).
   Newly generated Books are playable while a request-scoped portrait job draws and stores their images. A failed job
   leaves the Book available and can be retried by an approved participant. The event owns a shortener link for sharing,
   QR and the PDF follow-up.
-  Reading reuses the site audio player, Pavol's configured ElevenLabs voice and the private object store. Immutable
-  narration clips and measured alignment are reused when a new line is added. The room is excluded from analytics.
+  Story Books can set a local `META VOICE` with an ElevenLabs voice ID. The default narrator and Pavol role
+  use the configured Pavol Hejný 2026 voice. New fictional characters get an original Czech Voice Design voice
+  in the background. Approved room entry warms existing roles, and playback can prepare a missing voice when needed.
+  The private story audio cache reserves each voice under a separate provider-resource key and prevents
+  concurrent designs for the same role, including across workshops.
+  Reuse the existing server-only ElevenLabs key with Voice Design, voice lookup and speech permissions.
+  Speech uses the actor's voice and omits speaker labels from narration. The shared player assembles the private
+  immutable clips into one seekable track and offsets their measured word timings. A voice change invalidates the
+  affected clip. The room is excluded from analytics.
   Other event miniapps can use the event type registry and the same workshop entry/moderation endpoints.
 
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,

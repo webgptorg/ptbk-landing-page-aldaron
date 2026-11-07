@@ -1,7 +1,7 @@
 import 'server-only';
 import { z } from 'zod';
 import { runManagedAgent } from '@/lib/agents/agentRuntime';
-import { getStoryBookColor, getStoryBookImage, getStoryBookText, STORY_BOOK_META } from './storyRoomBook';
+import { getStoryBookColor, getStoryBookImage, getStoryBookText, getStoryVoiceReference, STORY_BOOK_META } from './storyRoomBook';
 import { StoryRoomError, type ClaimedStoryTurn } from './storyRoomDatabase';
 
 const STORY_INSTRUCTIONS = `Jsi herec v česky psané improvizované pohádce pro děti a rodiče.
@@ -23,7 +23,7 @@ const PRIVATE_DETAILS = new RegExp(String.raw`(?:https?://|www\.|[\p{L}\d._%+-]+
 export function validateCustomStoryBook(book: string) {
     const [name, ...lines] = book.split(/\r?\n/);
     const allowedCommitments = /^(?:PERSONA|KNOWLEDGE|RULE|GOAL)\s+\S/i;
-    const malformed = () => new StoryRoomError(400, 'Na první řádek napiš jméno postavy. Přidej PERSONA a podle chuti KNOWLEDGE, GOAL, RULE, META COLOR nebo META IMAGE.');
+    const malformed = () => new StoryRoomError(400, 'Na první řádek napiš jméno postavy. Přidej PERSONA a podle chuti KNOWLEDGE, GOAL, RULE, META COLOR, META IMAGE nebo META VOICE.');
     if (!name || name.trim().length > 60 || !/^PERSONA\s+\S/im.test(lines.join('\n'))) throw malformed();
     const seen = new Set<string>();
     for (const line of lines.map((line) => line.trim())) {
@@ -41,6 +41,9 @@ export function validateCustomStoryBook(book: string) {
         }
         if (key === 'IMAGE' && !getStoryBookImage(value)) {
             throw new StoryRoomError(400, 'Do META IMAGE vlož odkaz na portrét z dílny.');
+        }
+        if (key === 'VOICE' && !getStoryVoiceReference(value)) {
+            throw new StoryRoomError(400, 'Do META VOICE zadej ID hlasu z ElevenLabs.');
         }
     }
 }
@@ -77,7 +80,8 @@ export async function generateStoryLine(claim: ClaimedStoryTurn, requestId: stri
         id: 'story-turn-director', name: 'Režie pohádky', isEnabled: true,
         bookSource: 'Režie pohádky\nPERSONA Rozvíjíš rozehranou pohádku s obsazením na scéně.',
     };
-    const output = await runManagedAgent(automatic ? director : claim.agents[0]!,
+    const actorBook = claim.agents[0]!;
+    const output = await runManagedAgent(automatic ? director : { ...actorBook, bookSource: getStoryBookText(actorBook.bookSource) },
         automatic ? 'Vyber postavu na scéně a zahraj její další tah.' : 'Zahraj další tah vybrané postavy.',
         JSON.stringify(automatic ? { ...scene, cast: claim.agents.map(({ id, name, bookSource }) => ({
             id, name, book: getStoryBookText(bookSource).slice(0, 2_800),

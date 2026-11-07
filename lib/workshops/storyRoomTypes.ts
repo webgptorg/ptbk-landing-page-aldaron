@@ -20,6 +20,8 @@ export type StoryCharacter = {
     readonly color?: string;
     readonly image?: string;
     readonly portraitStatus?: 'pending' | 'unavailable';
+    readonly voice?: string;
+    readonly voiceStatus?: 'pending';
 };
 
 export type StoryLine = {
@@ -47,6 +49,7 @@ export type StoryRoomState = {
     readonly canWrite: boolean;
     readonly participant: { readonly fullname: string; readonly isInteractionBanned: boolean } | null;
     readonly canGenerate: boolean;
+    readonly canGenerateVoice?: boolean;
 };
 
 export const STORY_ROOM_COMMAND = z.discriminatedUnion('action', [
