@@ -10,11 +10,11 @@ Oba režimy používají stejný model. **Pro mou firmu** porovnává ruční pr
 
 Na `/[locale]` výchozí firemní režim; na `/[locale]/partnership` partnerský. Výchozí scénář sociální sítě (včetně jejich pracovních odhadů), první také v seznamu, plán Business, horizont 12 měsíců. Karta jasně vystupuje ze stránky: velké kulaté rohy, stín, jeden společný tmavě modrý povrch pro nadpis, vstupy, výsledek a akce. Výsledek odděluje jemná linka, nemá další zaoblenou kartu ani vlastní stín. Působí jako interaktivní finanční kalkulačka, ne jako další textová sekce.
 
-Viditelné vstupy jsou pouze scénář a nejdůležitější čísla. Firma: objem práce a náklad na člověka za hodinu. Partner: počet aktivních klientů a servis za klienta. Objem/počet klientů lze upravit číslem i posuvníkem. Partnerský podíl je viditelně **pevně 20 %**, bez výběru.
+Viditelný vstup je scénář a u firmy objem práce nebo u partnera počet aktivních klientů. Objem i počet klientů lze upravit číslem nebo posuvníkem. Náklad na člověka, cenu servisu a další předpoklady lze upravit v pokročilé kalkulačce. Podíl zůstává pevně 20 %.
 
 Přínos musí být zřejmý při rychlém skenování: **„Za 12 měsíců můžete ušetřit v hodnotě práce 100 854 Kč“** nebo **„Za 12 měsíců vám může zbýt po nákladech … Kč“**. Částka není vytržená z věty a zvoleného období. Při záporném výsledku se věta změní na převýšení nákladů a výsledek se nezakrývá.
 
-Doplňkové metriky: u firmy uvolněné hodiny a provoz bez interní práce; u partnera tržby a náklady obsluhy za období. Stručná poznámka vysvětluje odhad a rozdíl mezi kapacitou/hotovostí nebo tržbami/ziskem. Není zde plný formulář tokenů, vratek, režie, akvizice a implementace.
+Rychlá kalkulačka ukazuje hlavní odhad a krátkou poznámku o zvoleném předplatném a kapacitních příplatcích. Uvolněné hodiny, provoz, tržby i náklady obsluhy jsou v pokročilé kalkulačce.
 
 **Pokročilá kalkulačka** otevře `/[locale]/kalkulacka` se všemi rozpracovanými hodnotami v GET, ne prázdný nový příklad. **Stáhnout PDF výpočet** otevře kontaktní e-mailovou bránu. **Obnovit příklad** vrátí výchozí odhady a scénář, zachová režim. Ikona a text jsou uvnitř jednoho tlačítka na jednom řádku, bez zalomení či odděleného klikacího prvku i na mobilu.
 

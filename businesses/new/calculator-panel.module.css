@@ -24,7 +24,18 @@
 .panel details p{color:var(--panel-muted)}
 .panel :global([class*="fixedShare"]){background:#ffffff0c}
 .panel :global([class*="calcMetrics"]){border-color:var(--panel-line)}
+.panel .quickGrid{padding-block:18px;align-items:center}
+.panel .quickVolume{margin-top:16px}
+.quickVolume input[type=range]{margin-top:8px}
+.quickGrid .result>div{margin:10px 0 0}
+.quickGrid .result strong{margin:6px 0 0}
+.panel .quickBottom{gap:8px 20px;padding-bottom:20px}
+.panel .quickBottom>div{gap:2px 14px}
+.panel .quickBottom button{padding-inline:0;font-size:12px}
+.quickBottom p{max-width:none}
 @media(max-width:760px){
  .panel .results{border-inline-start:0;border-block-start:1px solid var(--panel-line);padding-inline-start:0;padding-block-start:26px}
+ .quickGrid .results{padding-block-start:14px}
+ .quickBottom>div>a{flex-basis:100%;min-height:36px}
 }
 @media(forced-colors:active){.panel{background:Canvas;color:CanvasText;border:1px solid CanvasText!important}.panel h2,.panel h3,.panel label,.panel p,.panel small,.panel .result strong{color:CanvasText}.panel .results{border-color:CanvasText}}

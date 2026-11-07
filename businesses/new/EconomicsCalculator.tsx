@@ -61,6 +61,7 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
     const setInput = (change: Partial<EconomicsInput>) => update({ ...state, input: { ...input, ...change } });
     const field = (key: NumericKey, label = FIELD_LABELS[key]) => <NumberField key={key} name={key} label={localizedFieldLabel(key, label, locale)} value={displayFieldValue(key, input[key], locale, input.exchangeRate)} onChange={(value) => setInput({ [key]: storedFieldValue(key, value, locale, input.exchangeRate) })} />;
     const company = state.mode === 'company';
+    const planName = input.plan === 'start' ? 'Start' : 'Business';
     const period = `${result.input.horizonMonths} ${t('měsíců')}`;
     const amount = company ? result.horizonBenefit : partner.horizonContribution;
     const costRows: Array<[string, number]> = [
@@ -101,15 +102,15 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
             <div className={s.calculatorTop}><h2>{t(advanced ? 'Vaše kalkulace' : 'Vyplatí se Vám Promptbook?')}</h2><div className={s.modeTabs} role="tablist" aria-label={t("Režim kalkulačky")}>
                 {(['company','partner'] as const).map(mode => <button type="button" role="tab" key={mode} id={`${id}-${mode}`} aria-controls={`${id}-panel`} aria-selected={state.mode === mode} tabIndex={state.mode === mode ? 0 : -1} onClick={() => update({ ...state, mode })} onKeyDown={tabKey}>{t(mode === 'company' ? 'Pro mou firmu' : 'Nasazuji klientům')}</button>)}
             </div></div>
-            <div className={s.calculatorGrid} role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${state.mode}`}>
-                <div className={s.calculatorControls}><p>{t(company ? 'Vyberte práci, kterou chcete předat agentům.' : 'Spočítejte si službu, kterou nabídnete klientům.')}</p>
+            <div className={`${s.calculatorGrid} ${advanced ? '' : panel.quickGrid}`} role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${state.mode}`}>
+                <div className={s.calculatorControls}>
+                    {advanced && <p>{t(company ? 'Vyberte práci, kterou chcete předat agentům.' : 'Spočítejte si službu, kterou nabídnete klientům.')}</p>}
                     <div className={s.fields}><label className={`${s.field} ${s.fullField}`} htmlFor={`${id}-scenario`}>{t("Co chcete automatizovat?")}<select id={`${id}-scenario`} value={state.scenario} onChange={(event) => update(changeScenario(state, event.target.value as ScenarioId))}>{(['social', 'email', 'documents', 'video', 'coding'] as const).map(key => [key, SCENARIOS[key]] as const).map(([key,value]) => <option value={key} key={key}>{t(value.title)}</option>)}</select></label>
-                    {t(company ? field('hourlyCost') : field('serviceFeeCzk'))}
+                    {advanced && (company ? field('hourlyCost') : field('serviceFeeCzk'))}
                     {advanced && <label className={s.field} htmlFor={`${id}-plan`}>{t("Licenční plán")}<select id={`${id}-plan`} value={input.plan} onChange={(event) => setInput({ plan: event.target.value as EconomicsInput['plan'] })}><option value="business">Business · {licencePrice('business', locale)} / {t('měsíc')}</option><option value="start">Start · {licencePrice('start', locale)} / {t('měsíc')}</option></select></label>}
                     </div>
-                    <div className={s.sliderField}><div><label htmlFor={`${id}-quick`}>{t(company ? scenario.volumeLabel : FIELD_LABELS.clients)}</label><input id={`${id}-quick`} type="number" min={0} max={company ? 1e9 : 5000} step={1} value={input[quickKey]} onChange={(event) => { const n = event.target.valueAsNumber; if (Number.isFinite(n)) setInput({ [quickKey]: Math.max(0, Math.min(company ? 1e9 : 5000, Math.floor(n))) }); }} /></div><input type="range" aria-label={t(`${company ? scenario.volumeLabel : 'Počet klientů'} — posuvník`)} min={0} max={quickMax} step={1} value={input[quickKey]} onChange={(event) => setInput({ [quickKey]: Number(event.target.value) })} /></div>
-                    {!company && <div className={s.fixedShare}><strong>{t(COMMERCIAL_TERMS.partnerSharePercent)}{t(" %")}</strong><span>{t("pevný partnerský podíl")}<br />{t("z uhrazených licencí po vratkách")}</span></div>}
-                    {!advanced && <p className={s.advancedNote}>{t(input.plan === 'start' ? 'Výpočet pro Start.' : 'Výpočet pro Business.')}{t(" Ostatní náklady a čas na obsluhu jsou předvyplněné odhady. ")}<Link className={s.textLink} href={calculatorPath(state, locale)}>{t("Upravit všechny předpoklady ")}<ArrowRight size={15} /></Link></p>}
+                    <div className={`${s.sliderField} ${advanced ? '' : panel.quickVolume}`}><div><label htmlFor={`${id}-quick`}>{t(company ? scenario.volumeLabel : FIELD_LABELS.clients)}</label><input id={`${id}-quick`} type="number" min={0} max={company ? 1e9 : 5000} step={1} value={input[quickKey]} onChange={(event) => { const n = event.target.valueAsNumber; if (Number.isFinite(n)) setInput({ [quickKey]: Math.max(0, Math.min(company ? 1e9 : 5000, Math.floor(n))) }); }} /></div><input type="range" aria-label={t(`${company ? scenario.volumeLabel : 'Počet klientů'} — posuvník`)} min={0} max={quickMax} step={1} value={input[quickKey]} onChange={(event) => setInput({ [quickKey]: Number(event.target.value) })} /></div>
+                    {advanced && !company && <div className={s.fixedShare}><strong>{t(COMMERCIAL_TERMS.partnerSharePercent)}{t(" %")}</strong><span>{t("pevný partnerský podíl")}<br />{t("z uhrazených licencí po vratkách")}</span></div>}
                     {advanced && <>
                         {!company && <details className={s.advancedDetails}><summary>{t("Objem práce jednoho klienta")}</summary><div className={s.fields}>{field('volume',scenario.volumeLabel)}</div></details>}
                         {FIELD_GROUPS.filter(group => !group.partnerOnly || !company).map(group => <details className={s.advancedDetails} key={group.title}><summary>{t(group.title)}</summary><p>{t(group.description)}</p>
@@ -129,11 +130,11 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                     <p>{t("Za ")}{t(period)}</p><div className={s.resultSentence}>
                         {t(amount < 0 ? 'náklady převýší přínos o' : company ? 'můžete ušetřit v hodnotě práce' : 'vám může zbýt po nákladech')}
                         <strong data-testid={company ? 'net-benefit' : 'partner-benefit'}>{formatMoney(Math.abs(amount))}</strong>
-                        {t(amount < 0 ? 'Při těchto předpokladech to nevychází.' : company ? 'Prostor pro to, co je důležité.' : 'Z nasazení, servisu a podílu z licencí.')}
-                    </div><div className={s.calcMetrics}>
+                        {advanced && t(amount < 0 ? 'Při těchto předpokladech to nevychází.' : company ? 'Prostor pro to, co je důležité.' : 'Z nasazení, servisu a podílu z licencí.')}
+                    </div>{advanced && <><div className={s.calcMetrics}>
                         <div><small>{t(company ? 'Uvolněná kapacita / období' : 'Opakované tržby / měsíc')}</small><strong data-testid={company ? 'saved-hours' : 'partner-revenue'}>{t(company ? `${decimal(result.savedHours)} h` : formatMoney(partner.recurringRevenue))}</strong></div>
                         <div><small>{t(company ? 'Provoz bez lidské práce / období' : 'Obsluha a režie / období')}</small><strong>{formatMoney(company ? result.operatingCost : partner.deliveryCost)}</strong></div>
-                    </div><p className={s.small}>{t(company ? 'Odhad zahrnuje provoz, lidskou kontrolu i jednorázové nasazení. Hodnota uvolněného času není automaticky hotovostní úspora mezd.' : 'Odhad po zadaných nákladech, před daní z příjmů. Stálý počet klientů od první aktivace, provize nejvýše 24 měsíců; nejde o zaručený výdělek.')}</p>
+                    </div><p className={s.small}>{t(company ? 'Odhad zahrnuje provoz, lidskou kontrolu i jednorázové nasazení. Hodnota uvolněného času není automaticky hotovostní úspora mezd.' : 'Odhad po zadaných nákladech, před daní z příjmů. Stálý počet klientů od první aktivace, provize nejvýše 24 měsíců; nejde o zaručený výdělek.')}</p></>}
                 </div>
                 {advanced && <div className={s.breakdown}>
                     {!company && <><h3>{t("Vaše partnerská ekonomika")}</h3><MoneyRows exchangeRate={input.exchangeRate} rows={[
@@ -152,9 +153,19 @@ function Calculator({ initialMode = 'company', advanced = false }: { initialMode
                 </div>}
                 </div>
             </div>
-            <div className={s.calculatorBottom}><div><button type="button" className={s.secondaryButton} onClick={requestPdf}><Download size={17} />{t("Stáhnout PDF výpočet")}</button>{advanced ? <button type="button" className={`${s.resetButton} ${controls.inlineAction}`} onClick={copyLink}><Link2 size={15} aria-hidden="true"/><span>{t("Sdílet kalkulaci")}</span></button> : <Link className={s.textLink} href={calculatorPath(state, locale)}>{t("Pokročilá kalkulačka ")}<ArrowRight size={17} /></Link>}<button type="button" className={`${s.resetButton} ${controls.inlineAction}`} onClick={() => update(defaultCalculatorState(state.mode))}><RotateCcw size={15} aria-hidden="true"/><span>{t("Obnovit příklad")}</span></button></div><p>{t("Upravitelné odhady, částky bez DPH. Změna vstupů nic neobjednává.")}</p>
-                <p>{t(COMMERCIAL_TERMS.calculationScope)} <Link href={path('pricing')}>{t("Celý ceník a podmínky")}</Link></p>
-                {showLink && <label className={`${s.field} ${s.fullField}`}>{t("Odkaz se všemi parametry")}<input className={s.copyField} readOnly value={calculationShareUrl(state, locale)} onFocus={(event) => event.target.select()} /></label>}<span className={s.shareStatus} role="status">{t(shareStatus)}</span>
+            <div className={`${s.calculatorBottom} ${advanced ? '' : panel.quickBottom}`}>
+                <div>
+                    {!advanced && <Link className={s.textLink} href={calculatorPath(state, locale)}>{t('Pokročilá kalkulačka ')}<ArrowRight size={17} aria-hidden="true"/></Link>}
+                    <button type="button" className={advanced ? s.secondaryButton : `${s.resetButton} ${controls.inlineAction}`} onClick={requestPdf}><Download size={17} aria-hidden="true"/><span>{t('Stáhnout PDF výpočet')}</span></button>
+                    {advanced && <button type="button" className={`${s.resetButton} ${controls.inlineAction}`} onClick={copyLink}><Link2 size={15} aria-hidden="true"/><span>{t('Sdílet kalkulaci')}</span></button>}
+                    <button type="button" className={`${s.resetButton} ${controls.inlineAction}`} onClick={() => update(defaultCalculatorState(state.mode))}><RotateCcw size={15} aria-hidden="true"/><span>{t('Obnovit příklad')}</span></button>
+                </div>
+                {advanced ? <>
+                    <p>{t('Upravitelné odhady, částky bez DPH. Změna vstupů nic neobjednává.')}</p>
+                    <p>{t(COMMERCIAL_TERMS.calculationScope)} <Link href={path('pricing')}>{t('Celý ceník a podmínky')}</Link></p>
+                    {showLink && <label className={`${s.field} ${s.fullField}`}>{t('Odkaz se všemi parametry')}<input className={s.copyField} readOnly value={calculationShareUrl(state, locale)} onFocus={(event) => event.target.select()} /></label>}
+                    <span className={s.shareStatus} role="status">{t(shareStatus)}</span>
+                </> : <p>{locale === 'en' ? `Estimate excluding VAT, with the base ${planName} subscription. Capacity add-ons are separate.` : `Odhad bez DPH se základním předplatným ${planName}. Kapacitní příplatky jsou samostatná položka.`}</p>}
             </div>
         </div>
     </section>;
