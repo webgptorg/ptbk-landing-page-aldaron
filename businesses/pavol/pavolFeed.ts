@@ -1,7 +1,7 @@
 import type { Article, ArticleLanguage } from '@/lib/articles/types';
 import { getArticlePodcastDefinition } from '@/lib/articles/podcast';
 import { getArticleUrl } from '@/lib/articles/urls';
-import { AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
+import { AI_TA_KRAJTA_COVER_IMAGE_PATH, AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
 import { topicFromSourceTitle } from './pavolPodcastCopy';
 import type { PavolPodcast } from './pavolPodcasts';
 
@@ -24,18 +24,31 @@ function getPodcastFeedTitle(podcast: PavolPodcast): string {
     return topic ? `${prefix}: ${topic.replace(/\u2014/g, '-')}` : prefix;
 }
 
+function getPodcastFeedImageUrl(podcast: PavolPodcast, websiteUrl: string): string | undefined {
+    if (podcast.source !== AI_TA_KRAJTA_NAME) return undefined;
+
+    const { episodeArtworkUrl } = podcast;
+    if (episodeArtworkUrl && publicUrl(episodeArtworkUrl)) {
+        const artwork = new URL(episodeArtworkUrl);
+        // The merged archive can also carry a rectangular YouTube thumbnail.
+        if (!artwork.hostname.endsWith('.ytimg.com')) return artwork.href;
+    }
+
+    return new URL(AI_TA_KRAJTA_COVER_IMAGE_PATH, websiteUrl).href;
+}
+
 /** One existing subscription address per language; source GUIDs and recordings remain unchanged. */
 export function createPavolFeed(articles: readonly Article[], podcasts: readonly PavolPodcast[], language: ArticleLanguage): string {
     const definition = getArticlePodcastDefinition(language, 'personal');
     const items = [
         ...articles.filter(article => article.authorId === 'pavol-hejny' && article.language === language).map(article => ({
             id: article.id, title: article.title, href: getArticleUrl(article, 'personal'), description: article.perex,
-            publishedAt: article.publishedAt, language: article.language, author: article.author.name,
+            publishedAt: article.publishedAt, language: article.language, author: article.author.name, imageUrl: undefined,
             audioUrl: article.audio?.url, byteLength: article.audio?.byteLength, duration: article.audio?.duration, subtitlesUrl: article.audio?.subtitlesUrl,
         })),
         ...podcasts.map(podcast => ({
             id: podcast.id, title: getPodcastFeedTitle(podcast), href: podcast.href, description: podcast.description,
-            publishedAt: podcast.publishedAt, language: podcast.language, author: podcast.source,
+            publishedAt: podcast.publishedAt, language: podcast.language, author: podcast.source, imageUrl: getPodcastFeedImageUrl(podcast, definition.websiteUrl),
             audioUrl: podcast.audioUrl, byteLength: podcast.audioByteLength, duration: podcast.durationInSeconds, subtitlesUrl: undefined,
         })),
     ].filter(item => publicUrl(item.href)).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
@@ -49,6 +62,7 @@ export function createPavolFeed(articles: readonly Article[], podcasts: readonly
 <itunes:author>Pavol Hejný</itunes:author><itunes:explicit>false</itunes:explicit><itunes:type>episodic</itunes:type><itunes:category text="Technology" /><itunes:image href="${xml(definition.imageUrl)}" />
 ${unique.map(item => `<item><title>${xml(item.title)}</title><link>${xml(item.href)}</link><guid isPermaLink="false">${xml(item.id)}</guid><pubDate>${xml(new Date(item.publishedAt).toUTCString())}</pubDate><description>${xml(`${item.description}${item.language !== language ? ` (${item.language === 'cs' ? 'Audio in Czech' : 'Audio in English'})` : ''}`)}</description><dc:language>${item.language}</dc:language><itunes:author>${xml(item.author)}</itunes:author>${
         publicUrl(item.audioUrl) ? `<enclosure url="${xml(item.audioUrl!)}" length="${item.byteLength ?? 0}" type="audio/mpeg" />` : ''}${
-        item.duration && item.duration > 0 ? `<itunes:duration>${Math.round(item.duration)}</itunes:duration>` : ''}${publicUrl(item.subtitlesUrl) ? `<podcast:transcript url="${xml(item.subtitlesUrl!)}" type="text/vtt" language="${item.language}" rel="captions" />` : ''}</item>`).join('\n')}
+        item.duration && item.duration > 0 ? `<itunes:duration>${Math.round(item.duration)}</itunes:duration>` : ''}${
+        item.imageUrl ? `<itunes:image href="${xml(item.imageUrl)}" />` : ''}${publicUrl(item.subtitlesUrl) ? `<podcast:transcript url="${xml(item.subtitlesUrl!)}" type="text/vtt" language="${item.language}" rel="captions" />` : ''}</item>`).join('\n')}
 </channel></rss>\n`;
 }

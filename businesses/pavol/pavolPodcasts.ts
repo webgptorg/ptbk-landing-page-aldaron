@@ -23,6 +23,7 @@ export type PavolPodcast = {
     readonly audioByteLength?: number;
     readonly durationInSeconds: number | null;
     readonly imageSrc?: string;
+    readonly episodeArtworkUrl?: string;
 };
 
 export type PavolPodcastAppearance = Omit<PavolPodcast, 'description'> & {
@@ -49,6 +50,7 @@ export function getPavolAiTaKrajtaPodcasts(episodes: readonly AiTaKrajtaEpisode[
         audioByteLength: episode.audioByteLength,
         durationInSeconds: episode.durationInSeconds,
         imageSrc: AI_TA_KRAJTA_COVER_IMAGE_PATH,
+        episodeArtworkUrl: episode.imageUrl ?? undefined,
     })).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
 }
 
