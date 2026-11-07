@@ -7,6 +7,7 @@ import type { StoryRoomCommand, StoryRoomState, StoryTurn } from '@/lib/workshop
 
 const fixture = vi.hoisted(() => ({ database: undefined as PGlite | undefined }));
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/database/migrateDatabase', () => ({ migrateDatabaseOnStartup: async () => undefined }));
 vi.mock('@/lib/database/runDatabaseTransaction', () => ({
     runDatabaseTransaction: (_label: string, run: (tx: DatabaseTransaction) => Promise<unknown>) =>
         fixture.database!.transaction((tx) => run({ query: (sql, values) => tx.query(sql, values ? [...values] : undefined) })),

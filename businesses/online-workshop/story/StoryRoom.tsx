@@ -219,6 +219,7 @@ export function StoryRoom() {
 
     const isBusy = Boolean(pending) || Boolean(story?.isBusy);
     const canPlay = state?.canWrite && state.canGenerate && !isBusy && lineCount < STORY_ROOM_MAX_LINES;
+    const turnCount = `${lineCount} ${lineCount === 1 ? 'tah' : lineCount <= 4 ? 'tahy' : 'tahů'}`;
     const cast = story?.cast.flatMap((id) => state?.characters.find((character) => character.id === id) ?? []) ?? [];
 
     return (
@@ -293,7 +294,7 @@ export function StoryRoom() {
                                 <p className={styles.activity} role="status">
                                     {isBusy && <LoaderCircle className={styles.spin} size={16} aria-hidden="true" />}
                                     {pending || (story.isBusy ? 'Postava právě hraje…' : lineCount >= STORY_ROOM_MAX_LINES ? 'Příběh je plný.' :
-                                        story.lines.length ? `${story.lines.length} tahů` : 'Vyber postavu a rozehraj první tah.')}
+                                        lineCount ? turnCount : 'Vyber postavu a rozehraj první tah.')}
                                 </p>
                             </div>
                             <footer className={styles.exports}>

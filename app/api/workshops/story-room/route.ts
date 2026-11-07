@@ -1,3 +1,4 @@
+import { migrateDatabaseOnStartup } from '@/lib/database/migrateDatabase';
 import { getPublicRequestHostname, isPrimarySiteHostname } from '@/lib/domains/publicDomainRouting';
 import { allowPublicChatRequest } from '@/lib/messages/publicChatRateLimit';
 import {
@@ -33,7 +34,8 @@ function getAccess(request: Request) {
 
 function errorResponse(error: unknown) {
     if (error instanceof StoryRoomError) return json({ error: error.message }, error.status);
-    console.error('Workshop story operation failed.', error instanceof Error ? error.name : 'unknown');
+    const code = error instanceof Error && 'code' in error && typeof error.code === 'string' ? error.code : undefined;
+    console.error('Workshop story operation failed.', { name: error instanceof Error ? error.name : 'unknown', code });
     return json({ error: 'Dílna teď neodpovídá. Zkus to za chvilku.' }, 503);
 }
 
@@ -60,7 +62,9 @@ export async function GET(request: Request) {
     try {
         const url = new URL(request.url);
         const storyId = STORY_ID.safeParse(url.searchParams.get('story'));
-        return json(await readStoryRoom(getAccess(request), storyId.success ? storyId.data : null));
+        const access = getAccess(request);
+        await migrateDatabaseOnStartup();
+        return json(await readStoryRoom(access, storyId.success ? storyId.data : null));
     } catch (error) {
         return errorResponse(error);
     }
@@ -74,6 +78,7 @@ export async function POST(request: Request) {
         const parsed = await readCommand(request);
         if (!parsed.success) return json({ error: 'Zkontroluj, že je text vyplněný a není příliš dlouhý.' }, 400);
         const command = parsed.data;
+        await migrateDatabaseOnStartup();
         if (command.action === 'character' || command.action === 'create') {
             if (!allowPublicChatRequest(`story-edit:${access.inviteHash}:${access.ownerHash}`)) {
                 return json({ error: 'Chvilku počkej a pak zkus uložit změnu znovu.' }, 429);
