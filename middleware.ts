@@ -16,6 +16,7 @@ import { getPreferredHomepageLanguage } from './lib/homepage-language';
 import { isNewSitePublicPath } from './businesses/new/siteConfig';
 import { getPublicShortcodeLinkOnHostname } from './lib/shortener/shortcodeLinkMiddleware';
 import { SHORTCODE_LINK_HOST_HEADER } from './lib/shortener/shortcodeLinkDomains';
+import { STORY_ROOM_PATH } from './lib/workshops/storyRoomPaths';
 
 /**
  * Builds a redirect to an independently branded site's public URL while retaining the browser's query parameters.
@@ -33,6 +34,7 @@ export async function middleware(request: NextRequest) {
     // Never accept a client-supplied scope header. Preserve the original host across Next's internal rewrites.
     requestHeaders.set(SHORTCODE_LINK_HOST_HEADER, requestHostname);
     requestHeaders.set('x-promptbook-private-message', '0');
+    requestHeaders.set('x-promptbook-private-story', '0');
     const publicDomainRoute = getPublicDomainRouteByHostname(requestHostname);
 
     // A custom domain keeps its concise public path in the address bar while Next renders the existing nested route.
@@ -101,6 +103,12 @@ export async function middleware(request: NextRequest) {
         if (legacyDomainRoute) {
             return createPublicDomainRedirectResponse(request, legacyDomainRoute);
         }
+    }
+
+    if (request.nextUrl.pathname === STORY_ROOM_PATH || request.nextUrl.pathname === `${STORY_ROOM_PATH}/`) {
+        requestHeaders.set('x-promptbook-page-language', 'cs');
+        requestHeaders.set('x-promptbook-private-story', '1');
+        return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
     // Unprefixed kit follows the main website's language selection. Branded domains resolve above.

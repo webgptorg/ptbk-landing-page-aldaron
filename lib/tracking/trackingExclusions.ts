@@ -1,6 +1,9 @@
 import { ONLINE_WORKSHOP_PARTICIPANT_PATH } from '@/businesses/online-workshop/config';
+import { STORY_ROOM_API_PATH, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
 
-const ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES = ['/admin', '/messages', '/cs/pavol/messages', '/api/messages'] as const;
+const TRACKING_EXCLUDED_PATH_PREFIXES = [
+    '/admin', '/messages', '/cs/pavol/messages', '/api/messages', STORY_ROOM_PATH, STORY_ROOM_API_PATH,
+] as const;
 const SENSITIVE_TRACKING_QUERY_PARAMETERS = ['email', 'fullname', 'token'] as const;
 
 function isWorkshopParticipantPath(pathname: string): boolean {
@@ -18,7 +21,7 @@ function isPathExcluded(pathname: string, excludedPathPrefixes: readonly string[
  * data. Neither page may receive normal page tracking or session recording.
  */
 export function isThirdPartyTrackingAllowed(pathname: string): boolean {
-    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES) && !isWorkshopParticipantPath(pathname);
+    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES) && !isWorkshopParticipantPath(pathname);
 }
 
 /**
@@ -27,7 +30,7 @@ export function isThirdPartyTrackingAllowed(pathname: string): boolean {
  * temporarily contain a prefilled e-mail address or full name.
  */
 export function isGoogleAnalyticsAllowed(pathname: string): boolean {
-    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, ADMIN_TRACKING_EXCLUDED_PATH_PREFIXES);
+    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES);
 }
 
 export function isGoogleAnalyticsPageViewAllowed(pathname: string): boolean {
@@ -47,6 +50,7 @@ export function removeSensitiveTrackingParameters(url: string): string {
         // A capability is in the path, not a query parameter. Never disclose it to third-party collectors.
         if (/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(parsedUrl.pathname)) parsedUrl.pathname = '/[unlisted]';
         parsedUrl.pathname = parsedUrl.pathname.replace(/(\/(?:cs\/pavol\/|api\/)?messages)\/[^/]+/g, '$1/[private]');
+        if (isPathExcluded(parsedUrl.pathname, [STORY_ROOM_PATH])) parsedUrl.hash = '';
         SENSITIVE_TRACKING_QUERY_PARAMETERS.forEach((parameterName) => parsedUrl.searchParams.delete(parameterName));
         return parsedUrl.toString();
     } catch {

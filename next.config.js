@@ -65,7 +65,7 @@ const nextConfig = {
     devIndicators: false,
     async headers() {
         return [
-            ...['/messages/:path*', '/cs/pavol/messages/:path*', '/api/messages/:path*'].map((source) => ({
+            ...['/messages/:path*', '/cs/pavol/messages/:path*', '/api/messages/:path*', '/cs/pribeh'].map((source) => ({
                 source,
                 headers: [
                     { key: 'Cache-Control', value: 'private, no-store, max-age=0' },

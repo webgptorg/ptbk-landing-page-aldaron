@@ -117,6 +117,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents
   cannot be deleted out from under messages/history; they can be disabled or reassigned. Separate `messages` and
   `agents` delegated permissions guard their pages and APIs.
+- `/cs/pribeh` is a Czech family story workshop attached to a live-workshop occurrence. A single invite grants
+  room access without registration. Each story has its own cast and shared transcript. A browser may edit its own
+  fictional Books. Prepared characters are shared workshop agents and their private Books remain server-only.
+  Turns are explicit, capped and leased per story before calling the existing server-side Book runtime. Its one
+  Czech sentence is reviewed before appending. Expired or repeated requests cannot add duplicate lines. The room
+  has a bounded writing window and a later reading deadline. Invite and editor credentials are stored hashed;
+  access is unlisted and excluded from analytics. PDF export and browser speech are available from the transcript.
 
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,
   committed PDF, and separately prepared audio assets. Promptbook lists all authors by language at `/cs/articles` and
