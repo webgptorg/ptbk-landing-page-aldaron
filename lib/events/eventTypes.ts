@@ -5,11 +5,12 @@ import {
     ONLINE_WORKSHOP_REGISTRATION_PLACE_NAME,
 } from '@/businesses/online-workshop/config';
 import { AI_SUPERVIZE_MINI_PATH } from '@/lib/discounts/discountPlaces';
+import { STORY_EVENT_TYPE, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
 
 /**
  * Every kind of event which can be administered, ordered as an administration offers them
  */
-export const EVENT_TYPE_VALUES = ['online-workshop', 'ai-supervize-mini', 'external'] as const;
+export const EVENT_TYPE_VALUES = ['online-workshop', 'ai-supervize-mini', STORY_EVENT_TYPE, 'external'] as const;
 
 export type EventType = (typeof EVENT_TYPE_VALUES)[number];
 
@@ -74,6 +75,14 @@ const EVENT_TYPE_DEFINITIONS: Readonly<Record<EventType, EventTypeDefinition>> =
         landingPagePath: AI_SUPERVIZE_MINI_PATH,
         registrationPlaceName: AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_PLACE_NAME,
         participantPath: null,
+    },
+
+    [STORY_EVENT_TYPE]: {
+        id: STORY_EVENT_TYPE,
+        label: 'Příběhová dílna',
+        landingPagePath: STORY_ROOM_PATH,
+        registrationPlaceName: null,
+        participantPath: STORY_ROOM_PATH,
     },
 
     // Note: A conference or a workshop which a lecturer of the community speaks at is held by its own organizer. This
