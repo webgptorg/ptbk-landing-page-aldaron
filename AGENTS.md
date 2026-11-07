@@ -119,8 +119,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `agents` delegated permissions guard their pages and APIs.
 - `/cs/pribeh` is the miniapp for the `story` event type. The existing workshop term, name/e-mail session,
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
-  cast. Room Books are editable by approved participants. Edits to prepared roles belong to the term, while managed
-  agent Books remain private. Free-text descriptions generate moderated Books. Turns from a portrait or the story's
+  cast. Approved participants edit room Books in the shared highlighted BookEditor with debounced, ordered autosave.
+  Closing flushes the latest draft; a stale revision or an invalid Book keeps the draft available. Edits to prepared
+  roles belong to the term, while managed agent Books remain private. Free-text descriptions generate moderated Books. Turns from a portrait or the story's
   contextual cast selection append at most one moderated sentence under the same lease. The automatic turn is the first portrait-sized control on the stage. A temporary chat bubble shows the
   selected character, or an unknown speaker during contextual selection. Only approved, saved lines become
   permanent. Both cast controls share one stage membership action. Character Books own the accent (`META COLOR`) and approved workshop portrait (`META IMAGE`).

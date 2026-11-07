@@ -115,7 +115,9 @@ export async function POST(request: NextRequest, context: StoryRouteContext) {
         if (!access.participantId) return json({ error: 'Nejdřív se připoj do dílny a počkej na schválení.' }, 401);
         if (command.action === 'character' || command.action === 'generate-character' || command.action === 'portrait' || command.action === 'create') {
             await requireStoryRoomWriteAccess(access);
-            if (!allowPublicChatRequest(`story-edit:${access.workshopId}:${access.participantId}`)) {
+            const isBookSave = command.action === 'character';
+            const editKey = isBookSave ? 'story-book' : 'story-edit';
+            if (!allowPublicChatRequest(`${editKey}:${access.workshopId}:${access.participantId}`, isBookSave ? 60 : undefined)) {
                 return json({ error: 'Chvilku počkej a pak zkus uložit změnu znovu.' }, 429);
             }
             if (command.action === 'portrait') {
@@ -151,7 +153,7 @@ ${command.premise}`, request.signal);
             }
         }
         if (command.action !== 'turn') {
-            return json({ storyId: await saveStoryRoomCommand(access, command) });
+            return json(await saveStoryRoomCommand(access, command));
         }
         if (!process.env.OPENAI_API_KEY?.trim()) return json({ error: 'AI je teď nedostupná.' }, 503);
         const claim = await claimStoryTurn(access, command);

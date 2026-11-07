@@ -187,9 +187,16 @@ it('shares generated characters and lets other approved participants edit the lo
     expect(fixture.background).toHaveLength(1);
     expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toContain(`META IMAGE https://ptbk.io/api/workshops/${SLUG}/story?portrait=${characterId}`);
 
+    const beforeEdit = (await read(APPROVED)).characters.find(({ id }) => id === characterId)!;
+    expect(beforeEdit.bookRevision).toMatch(/^[a-f0-9]{64}$/);
     const book = `Drak Stín\nPERSONA Vyfukuje zlaté bubliny.\nMETA COLOR #346968\nMETA IMAGE /api/workshops/${SLUG}/story?portrait=${characterId}`;
     expect((await post(SECOND_APPROVED, { action: 'character', id: characterId, book: `${book}\nMETA IMAGE https://other.example/portrait.png` })).status).toBe(400);
-    expect((await post(SECOND_APPROVED, { action: 'character', id: characterId, book })).status).toBe(200);
+    const edit = { action: 'character', id: characterId, book, baseRevision: beforeEdit.bookRevision } as const;
+    const saved = await post(SECOND_APPROVED, edit);
+    expect(saved.status).toBe(200);
+    expect(await saved.json()).toMatchObject({ bookRevision: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    expect((await post(SECOND_APPROVED, edit)).status).toBe(200);
+    expect((await post(APPROVED, { ...edit, book: book.replace('Stín', 'Oheň') })).status).toBe(409);
     expect((await post(APPROVED, { action: 'cast', storyId: story.id, characterId, include: true })).status).toBe(200);
     expect((await read(APPROVED)).characters.find(({ id }) => id === characterId)?.book).toBe(book);
     expect((await read()).story?.cast).toContain(characterId);

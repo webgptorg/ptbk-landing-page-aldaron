@@ -4,6 +4,7 @@ import type { ArticleWordTimings } from '@/businesses/articles/articleTiming';
 import { ArticleTracking } from '@/businesses/articles/ArticleTracking';
 import { WorkshopConnectionForm } from '@/businesses/online-workshop/participant/WorkshopConnectionForm';
 import { connectToWorkshop, disconnectFromWorkshop } from '@/businesses/online-workshop/participant/workshopParticipantApi';
+import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { useAudioPlayerControls } from '@/components/audio-player/AudioPlayerProvider';
 import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -19,6 +20,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { StoryBookEditorDialog } from './StoryBookEditorDialog';
 import { prepareStoryNarration, type StoryNarrationClipCache } from './storyNarrationPlayer';
 import s from './storyRoom.module.css';
 
@@ -31,8 +33,7 @@ type StoryEvent = {
 };
 type Editor =
     | { type: 'story'; id: string; title: string; premise: string }
-    | { type: 'description'; id: string; description: string }
-    | { type: 'book'; id: string; book: string; name: string };
+    | { type: 'description'; id: string; description: string };
 type Narration = { readonly storyId: string; readonly trackId: string; readonly timings?: ArticleWordTimings };
 type StoryRequest = StoryRoomCommand | { readonly action: 'share' };
 
@@ -93,6 +94,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [isJoinOpen, setIsJoinOpen] = useState(false);
     const [editor, setEditor] = useState<Editor | null>(null);
+    const [bookEditor, setBookEditor] = useState<StoryCharacter & { book: string }>();
     const [pending, setPending] = useState('');
     const [pendingTurn, setPendingTurn] = useState<StoryTurn | null>(null);
     const [shareOpen, setShareOpen] = useState(false);
@@ -169,9 +171,15 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(command),
         });
-        const data = await response.json() as { storyId?: string; characterId?: string; line?: StoryLine; url?: string; error?: string };
+        const data = await response.json() as { storyId?: string; characterId?: string; bookRevision?: string; line?: StoryLine; url?: string; error?: string };
         if (command.action === 'turn' && response.status !== 409 && response.status < 500) uncertainTurn.current = null;
-        if (!response.ok) throw new Error(data.error ?? 'Požadavek se nepodařilo dokončit.');
+        if (!response.ok) {
+            const message = data.error ?? 'Požadavek se nepodařilo dokončit.';
+            if (command.action === 'character' && [400, 403, 409, 422].includes(response.status)) {
+                throw new AdminSaveValidationError(message);
+            }
+            throw new Error(message);
+        }
         return data;
     }
 
@@ -222,14 +230,18 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         if (!editor) return;
         const command: StoryRoomCommand = editor.type === 'story'
             ? { action: 'create', id: editor.id, title: editor.title, premise: editor.premise }
-            : editor.type === 'description'
-                ? { action: 'generate-character', id: editor.id, description: editor.description }
-                : { action: 'character', id: editor.id, book: editor.book };
-        if (await mutate(command, editor.type === 'description' ? 'Vymýšlím postavu…' : 'Ukládám…')) {
-            setEditor(null);
-            if (editor.type === 'description') setNotice('Novou postavu najdeš v seznamu. Můžeš ji přidat na scénu.');
-            if (editor.type === 'book') setNotice('Book postavy je uložený.');
-        }
+            : { action: 'generate-character', id: editor.id, description: editor.description };
+        if (await mutate(command, editor.type === 'description' ? 'Vymýšlím postavu…' : 'Ukládám…')) setEditor(null);
+    }
+
+    async function saveBook(id: string, book: string, baseRevision: string | undefined) {
+        const { bookRevision } = await requestRoom({ action: 'character', id, book, baseRevision });
+        setState((current) => current && ({
+            ...current,
+            characters: current.characters.map((character) => character.id === id ? { ...character, book, bookRevision } : character),
+        }));
+        setRevision((current) => current + 1);
+        return bookRevision;
     }
 
     async function connect(values: WorkshopParticipantIdentity) {
@@ -533,9 +545,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                         disabled={!canChangeCast} onClick={() => changeCast(story.id, character.id, !onStage)}>{onStage ? '−' : '+'}</button>}
                                                     {canWrite && character.book !== undefined && <button type="button" className={s.iconButton} title="Upravit Book"
                                                         aria-label={`Upravit Book · ${character.name}`}
-                                                        disabled={Boolean(pending)} onClick={() => setEditor({
-                                                            type: 'book', id: character.id, name: character.name, book: character.book!,
-                                                        })}><Pencil size={15} aria-hidden="true" /></button>}
+                                                        disabled={Boolean(pending)} onClick={() => setBookEditor({ ...character, book: character.book! })}><Pencil size={15} aria-hidden="true" /></button>}
                                                 </li>
                                             );
                                         })}
@@ -566,30 +576,30 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                 </DialogContent>
             </Dialog>
 
+            {bookEditor && (
+                <StoryBookEditorDialog key={bookEditor.id} name={bookEditor.name} book={bookEditor.book} bookRevision={bookEditor.bookRevision}
+                    onSave={(book, revision) => saveBook(bookEditor.id, book, revision)} onClose={() => setBookEditor(undefined)} />
+            )}
+
             <Dialog open={Boolean(editor) && canWrite} onOpenChange={(open) => { if (!open && !pendingRequest.current) setEditor(null); }}>
                 {editor && (
                     <DialogContent closeLabel="Zavřít" className={s.dialog} style={PROMPTBOOK_BRAND_STYLE}>
-                        <DialogTitle>{editor.type === 'story' ? 'Nový příběh' : editor.type === 'description' ? 'Vymysli postavu' : `Book · ${editor.name}`}</DialogTitle>
+                        <DialogTitle>{editor.type === 'story' ? 'Nový příběh' : 'Vymysli postavu'}</DialogTitle>
                         <DialogDescription>{editor.type === 'story'
                             ? 'Napiš, kde se první scéna odehrává a co se v ní právě stalo.'
-                            : editor.type === 'description'
-                                ? 'Stačí napsat, kdo to je a co by mohl v příběhu dělat. Dílna z popisu připraví jeho Book.'
-                                : 'Book určuje povahu i vzhled postavy. META COLOR je barva a META IMAGE odkaz na portrét z dílny. Úprava platí v této dílně.'}</DialogDescription>
+                            : 'Stačí napsat, kdo to je a co by mohl v příběhu dělat. Dílna z popisu připraví jeho Book.'}</DialogDescription>
                         <form onSubmit={(submit) => void submitEditor(submit)} className={s.editor}>
                             {editor.type === 'story' ? (
                                 <>
                                     <label>Název<input value={editor.title} minLength={2} maxLength={80} required onChange={(change) => setEditor({ ...editor, title: change.target.value })} /></label>
                                     <label>Začátek příběhu<textarea value={editor.premise} minLength={5} maxLength={550} required rows={4} onChange={(change) => setEditor({ ...editor, premise: change.target.value })} /></label>
                                 </>
-                            ) : editor.type === 'description' ? (
+                            ) : (
                                 <label>Popis postavy<textarea value={editor.description} minLength={5} maxLength={900} required rows={5}
                                     placeholder="Třeba malý drak, který se bojí tmy a nosí s sebou lucernu." onChange={(change) => setEditor({ ...editor, description: change.target.value })} /></label>
-                            ) : (
-                                <label>Book postavy<textarea className={s.book} value={editor.book} minLength={15} maxLength={8_000} required rows={8}
-                                    spellCheck={false} onChange={(change) => setEditor({ ...editor, book: change.target.value })} /></label>
                             )}
                             <button type="submit" className={s.primary} disabled={Boolean(pending)}>
-                                {pending || (editor.type === 'description' ? 'Vytvořit postavu' : editor.type === 'book' ? 'Uložit Book' : 'Otevřít příběh')}
+                                {pending || (editor.type === 'description' ? 'Vytvořit postavu' : 'Otevřít příběh')}
                             </button>
                             {notice && <p className={s.error} role="status">{notice}</p>}
                         </form>

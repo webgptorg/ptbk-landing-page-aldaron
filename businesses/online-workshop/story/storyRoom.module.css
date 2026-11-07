@@ -255,7 +255,6 @@
 .editor label { display: grid; gap: .35rem; font-size: .9rem; font-weight: 700; }
 .editor :is(input,textarea) { font-weight: 400; }
 .editor textarea { resize: vertical; }
-.editor .book { font: .85rem/1.45 ui-monospace, monospace; }
 .paper :global([data-tracking='true']) :global([data-article-word]) { cursor: pointer; scroll-margin-block: 5rem; }
 .paper :global([data-active-sentence='true']) { background: #cfdef5; color: var(--ptbk-ink); }
 .paper :global([data-active-word='true']) { background: #a6c3ee; color: var(--ptbk-ink); }
