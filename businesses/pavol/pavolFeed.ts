@@ -1,10 +1,28 @@
 import type { Article, ArticleLanguage } from '@/lib/articles/types';
 import { getArticlePodcastDefinition } from '@/lib/articles/podcast';
 import { getArticleUrl } from '@/lib/articles/urls';
+import { AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
+import { topicFromSourceTitle } from './pavolPodcastCopy';
 import type { PavolPodcast } from './pavolPodcasts';
 
 const xml = (value: string | number) => String(value).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 const publicUrl = (value: string | null | undefined) => { try { return Boolean(value && ['https:', 'http:'].includes(new URL(value).protocol)); } catch { return false; } };
+
+const KRAJTA_EPISODE_NUMBER = /(?:^|\|)\s*AI\s*ta\s*krajta\s*#?\s*(\d+(?:-\d+)?)/i;
+const KRAJTA_TITLE_PREFIX = /^AI\s*ta\s*krajta(?:\s*#?\s*\d+(?:-\d+)?)?(?:\s*:\s*|\s*$)/i;
+
+function getPodcastFeedTitle(podcast: PavolPodcast): string {
+    if (podcast.source !== AI_TA_KRAJTA_NAME) return podcast.title;
+
+    // The source title retains multipart labels even when the stable episode slug only has the main number.
+    const publishedNumber = podcast.originalTitle?.match(KRAJTA_EPISODE_NUMBER)?.[1];
+    const label = publishedNumber ? `#${publishedNumber}` : podcast.episodeLabel;
+    const prefix = label ? `${podcast.source} ${label}` : podcast.source;
+    const topic = podcast.title.replace(KRAJTA_TITLE_PREFIX, '')
+        || topicFromSourceTitle(podcast.originalTitle ?? '').replace(KRAJTA_TITLE_PREFIX, '');
+
+    return topic ? `${prefix}: ${topic.replace(/\u2014/g, '-')}` : prefix;
+}
 
 /** One existing subscription address per language; source GUIDs and recordings remain unchanged. */
 export function createPavolFeed(articles: readonly Article[], podcasts: readonly PavolPodcast[], language: ArticleLanguage): string {
@@ -16,7 +34,7 @@ export function createPavolFeed(articles: readonly Article[], podcasts: readonly
             audioUrl: article.audio?.url, byteLength: article.audio?.byteLength, duration: article.audio?.duration, subtitlesUrl: article.audio?.subtitlesUrl,
         })),
         ...podcasts.map(podcast => ({
-            id: podcast.id, title: podcast.title, href: podcast.href, description: podcast.description,
+            id: podcast.id, title: getPodcastFeedTitle(podcast), href: podcast.href, description: podcast.description,
             publishedAt: podcast.publishedAt, language: podcast.language, author: podcast.source,
             audioUrl: podcast.audioUrl, byteLength: podcast.audioByteLength, duration: podcast.durationInSeconds, subtitlesUrl: undefined,
         })),

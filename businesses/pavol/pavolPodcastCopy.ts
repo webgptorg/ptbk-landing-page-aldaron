@@ -638,7 +638,7 @@ const byVideo = new Map(EPISODE_COPY.filter((copy) => copy.videoId).map((copy) =
 const byNumber = new Map(EPISODE_COPY.filter((copy) => copy.number !== null).map((copy) => [copy.number!, copy]));
 
 /** Remove only the publisher's repeated show label, retaining the actual subject and any part label. */
-function topicFromSourceTitle(title: string): string {
+export function topicFromSourceTitle(title: string): string {
     const parts = title.split('|').map((part) => part.trim());
     if (parts.length > 1 && /^AI\s*ta\s*krajta/i.test(parts[0])) return parts.slice(1).join(' | ');
     if (parts.length > 1 && /AI\s*ta\s*krajta/i.test(parts[parts.length - 1])) return parts.slice(0, -1).join(' | ');

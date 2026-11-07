@@ -1,8 +1,9 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect } from 'vitest';
+import { parsePodcastRssFeed } from '@/lib/podcast/parsePodcastRssFeed';
 import { createPavolFeed } from './pavolFeed';
 import { getArticles } from '@/lib/articles/load';
-import type { PavolPodcast } from './pavolPodcasts';
+import { getPavolAiTaKrajtaPodcasts, type PavolPodcast } from './pavolPodcasts';
 
 const appearance: PavolPodcast = {
     id: 'source:stable-id', source: 'A & B', title: 'A < B', description: 'English summary',
@@ -11,6 +12,28 @@ const appearance: PavolPodcast = {
 };
 
 describe('combined personal RSS', () => {
+    it.each([
+        ['cs', 'Od AI nápadu k reálným penězům: A jak škálovat byznys'],
+        ['en', 'From an AI idea to revenue: scaling a business'],
+    ] as const)('labels Krajta parts and specials in the %s feed and retains the topic for new episodes', (language, multipartTopic) => {
+        const feed = parsePodcastRssFeed(`<rss><channel><title>AI ta Krajta</title>
+            <item><title>Od AI nápadu k reálným penězům: A jak škálovat byznys | AItaKrajta #71-2</title><enclosure url="https://example.org/71-2.mp3" /></item>
+            <item><title>AI ta Krajta #999 | Nový díl &amp; AI</title><enclosure url="https://example.org/999.mp3" /></item>
+            <item><title>Rozhovor bez čísla | AItaKrajta speciál</title><enclosure url="https://example.org/special.mp3" /></item>
+            </channel></rss>`, { showTitle: 'AI ta Krajta' });
+        const podcasts = getPavolAiTaKrajtaPodcasts(feed.episodes.map(episode => ({ ...episode, personIds: ['pavol-hejny'] })), language);
+        const doc = new DOMParser().parseFromString(createPavolFeed([], [...podcasts, appearance], language), 'application/xml');
+        const titles = Object.fromEntries(Array.from(doc.querySelectorAll('item')).map(item => [
+            item.querySelector('guid')?.textContent, item.querySelector('title')?.textContent,
+        ]));
+        expect(titles).toEqual({
+            'ai-ta-krajta:71': `AI ta Krajta #71-2: ${multipartTopic}`,
+            'ai-ta-krajta:999': 'AI ta Krajta #999: Nový díl & AI',
+            'ai-ta-krajta:rozhovor-bez-cisla-aitakrajta-special': 'AI ta Krajta: Rozhovor bez čísla',
+            [appearance.id]: appearance.title,
+        });
+    });
+
     it('preserves existing article identity and canonical audio and includes source appearances once', () => {
         const articles = getArticles('cs', 'personal');
         const xml = createPavolFeed(articles, [appearance, appearance], 'cs');
