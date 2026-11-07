@@ -11,6 +11,7 @@
 .site{--brand:var(--ptbk-blue);--blue:#476fae;--line:#e3e8ef;--soft-blue:#6c83a5}
 .site .softHeading{color:var(--soft-blue)}
 .header{background:#ffffffed;border-color:#e8ecf1;backdrop-filter:blur(18px)}
+.site:has([data-landing-hero]) .header{border-bottom:0}
 .headerInner{min-height:70px;padding:10px 32px}
 .logo{font-family:var(--font-outfit),sans-serif;font-size:23px;font-weight:500;letter-spacing:-.04em;gap:9px}
 .logo img{width:174px;height:auto}

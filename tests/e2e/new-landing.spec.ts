@@ -46,7 +46,7 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
         const hero = page.getByTestId('brand-hero');
         await expect(hero.getByRole('button')).toHaveCount(1);
         await expect(hero.getByRole('button',{name:cta,exact:true})).toBeVisible();
-        await expect(hero.getByRole('link',{name:'nebo si nainstalujte engine u sebe'})).toHaveAttribute('href','/cs/open-source');
+        await expect(hero.getByRole('link',{name:'Nainstalujte engine u sebe'})).toHaveAttribute('href','/cs/open-source');
         const carousel = page.getByTestId('brand-carousel');
         const choices = carousel.getByRole('tab');
         const article = carousel.locator('article[data-story]');

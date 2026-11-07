@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
 import s from './brand.module.css';
 
-/** One primary enquiry action, with a quieter route to independent installation. */
+/** The main enquiry action sets the width for both secondary links. */
 export function BrandActions({ partner = false }: { partner?: boolean }) {
     const { locale, path } = useSiteLocale();
     const en = locale === 'en';
@@ -15,8 +16,13 @@ export function BrandActions({ partner = false }: { partner?: boolean }) {
             : (partner ? 'Partnerství — nasazování Promptbooku klientům' : 'Předání práce AI')}>
             {en ? (partner ? 'Bring Promptbook to my clients' : 'Free up my time') : (partner ? 'Chci nasazovat klientům' : 'Chci uvolnit ruce')}
         </LeadButton>
-        <Link className={s.installLink} href={path('open-source')}>
-            <span>{en ? 'or install the engine yourself' : 'nebo si nainstalujte engine u sebe'}</span><span aria-hidden="true">↗</span>
-        </Link>
+        <div className={s.secondaryActions}>
+            <Link href={path('open-source')}>
+                <span>{en ? 'Install the engine yourself' : 'Nainstalujte engine u sebe'}</span><ArrowRight size={14} aria-hidden="true"/>
+            </Link>
+            <Link href={path(partner ? '' : 'partnership')}>
+                <span>{partner ? (en ? 'Explore Promptbook' : 'Prohlédnout Promptbook') : (en ? 'For partners · 20% software share' : 'Pro partnery · 20 % podíl ze softwaru')}</span><ArrowRight size={14} aria-hidden="true"/>
+            </Link>
+        </div>
     </div>;
 }
