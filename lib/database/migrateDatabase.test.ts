@@ -85,6 +85,9 @@ describe('applyDatabaseMigrations', () => {
         expect(executedInitializationSql).not.toMatch(/^\s*BEGIN\s*;/i);
         expect(executedInitializationSql).not.toMatch(/COMMIT\s*;\s*$/i);
         expect(executedSql.filter((sql) => sql === 'BEGIN;')).toHaveLength(1);
+        const lockIndex = executedSql.findIndex((sql) => sql.includes('pg_advisory_xact_lock'));
+        expect(executedSql.findIndex((sql) => sql.includes('pg_terminate_backend'))).toBeLessThan(lockIndex);
+        expect(executedSql[lockIndex - 1]).toContain('SET LOCAL idle_in_transaction_session_timeout');
     });
 
     it('does not run an already recorded migration again', async () => {

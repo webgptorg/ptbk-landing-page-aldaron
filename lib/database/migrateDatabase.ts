@@ -15,6 +15,34 @@ const DATABASE_MIGRATIONS_ADVISORY_LOCK_KEY = '734119762104';
 const BEGIN_SQL = 'BEGIN;';
 const COMMIT_SQL = 'COMMIT;';
 const ROLLBACK_SQL = 'ROLLBACK;';
+const IDLE_MIGRATION_TIMEOUT_SQL = "SET LOCAL idle_in_transaction_session_timeout = '45s';";
+
+// Recover only abandoned connections using this runner's advisory lock. An interrupted serverless startup
+// can leave its transaction open on the pooler after the JavaScript process stops running.
+const END_ABANDONED_MIGRATIONS_SQL = `
+WITH migration_connections AS MATERIALIZED (
+    SELECT activity.pid, activity.state, activity.state_change, activity.query_start, activity.wait_event_type, locks.granted
+    FROM pg_stat_activity AS activity
+    JOIN pg_locks AS locks ON locks.pid = activity.pid
+    WHERE activity.datname = current_database()
+      AND activity.usename = current_user
+      AND activity.pid <> pg_backend_pid()
+      AND locks.locktype = 'advisory'
+      AND locks.objsubid = 1
+      AND ((locks.classid::bigint << 32) | locks.objid::bigint) = $1::bigint
+), abandoned_holders AS (
+    SELECT pid FROM migration_connections
+    WHERE granted AND state IN ('idle in transaction', 'idle in transaction (aborted)')
+      AND state_change < clock_timestamp() - interval '2 minutes'
+), abandoned AS (
+    SELECT pid, true AS granted FROM abandoned_holders
+    UNION ALL
+    SELECT pid, false FROM migration_connections
+    WHERE NOT granted AND wait_event_type = 'Lock'
+      AND query_start < clock_timestamp() - interval '2 minutes'
+      AND EXISTS (SELECT 1 FROM abandoned_holders)
+)
+SELECT pg_terminate_backend(pid) AS terminated FROM abandoned ORDER BY granted ASC;`;
 
 const READ_MIGRATION_TABLE_EXISTS_SQL = `
 SELECT to_regclass('public."Migration"') IS NOT NULL AS migration_table_exists;`;
@@ -233,9 +261,14 @@ export async function applyDatabaseMigrations(
     let transactionStarted = false;
 
     try {
+        const recovery = await client.query(END_ABANDONED_MIGRATIONS_SQL, [DATABASE_MIGRATIONS_ADVISORY_LOCK_KEY]);
+        const recovered = recovery.rows.filter(({ terminated }) => terminated === true).length;
+        if (recovered > 0) logger.warn(`Closed ${recovered} abandoned database migration connections.`);
+
         await client.query(BEGIN_SQL);
         transactionStarted = true;
 
+        await client.query(IDLE_MIGRATION_TIMEOUT_SQL);
         await client.query('SELECT pg_advisory_xact_lock($1::bigint);', [DATABASE_MIGRATIONS_ADVISORY_LOCK_KEY]);
 
         if (!(await migrationTableExists(client))) {
