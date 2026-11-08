@@ -29,7 +29,16 @@ export async function getStoryAudioClip(
     });
     const script = words.map(({ spokenText }) => spokenText).join(' ');
     if (!script) return { url: null, timings: null };
-    const voice = story.subject ? await ensureStoryVoice(story.subject, signal, waitOnly) : STORY_NARRATOR_VOICE;
+    let voice = STORY_NARRATOR_VOICE;
+    if (story.subject) {
+        try {
+            voice = await ensureStoryVoice(story.subject, signal, waitOnly);
+        } catch (error) {
+            signal.throwIfAborted();
+            // A pending design can still succeed. A failed design or its cooldown should not block the dialogue.
+            if (!(error instanceof StoryRoomError) || (error.status !== 502 && error.status !== 503)) throw error;
+        }
+    }
     const narrator = voice === STORY_NARRATOR_VOICE;
     const previous = segments[index - 1];
     const sharesSpeaker = previous?.speaker?.id === segment.speaker?.id && previous?.speaker?.name === segment.speaker?.name;

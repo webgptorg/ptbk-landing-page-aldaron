@@ -9,6 +9,7 @@ import { useAudioPlayerControls } from '@/components/audio-player/AudioPlayerPro
 import { PromptbookQrCode } from '@/components/promptbook-qr-code';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
+import { STORY_NARRATOR_VOICE } from '@/lib/workshops/storyRoomBook';
 import { getStoryNarrationSegments, getStoryNarrationTrackId, getStoryNarrationVoice } from '@/lib/workshops/storyRoomNarration';
 import { createStoryRoomApiPath, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
 import type { StoryCharacter, StoryRoomCommand, StoryRoomState, StoryLine, StoryTurn, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
@@ -104,6 +105,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const [isCopied, setIsCopied] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [isPreparingAudio, setIsPreparingAudio] = useState(false);
+    const [audioError, setAudioError] = useState('');
     const [narration, setNarration] = useState<Narration | null>(null);
     const pendingRequest = useRef(false);
     const uncertainTurn = useRef<StoryTurn | null>(null);
@@ -177,6 +179,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         audioRequest.current?.abort();
         clips.current.clear();
     }, [storyId]);
+    useEffect(() => { setAudioError(''); }, [storyId]);
 
     async function requestRoom(command: StoryRequest) {
         const response = await fetch(apiPath, {
@@ -331,7 +334,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
         const request = new AbortController();
         audioRequest.current = request;
         setIsPreparingAudio(true);
-        setNotice('');
+        setAudioError('');
         try {
             const audio = await prepareStoryNarration(apiPath, currentStory, characters, request.signal, clips.current);
             request.signal.throwIfAborted();
@@ -344,7 +347,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                 durationInSeconds: audio.duration, trackingAvailable: Boolean(audio.timings),
             });
         } catch (error) {
-            if (!request.signal.aborted) setNotice(showError(error, 'Předčítání se nepodařilo připravit.'));
+            if (!request.signal.aborted) setAudioError(showError(error, 'Předčítání se nepodařilo připravit.'));
         } finally {
             audioRequest.current = null;
             setIsPreparingAudio(false);
@@ -364,7 +367,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const currentNarration = narration?.storyId === storyId ? narration : null;
     const isPlayingStory = player.track?.id === currentNarration?.trackId && player.isPlaying;
     const currentTrackId = story && getStoryNarrationTrackId(
-        story, getStoryNarrationSegments(story).map((segment) => getStoryNarrationVoice(segment, characters)),
+        story, getStoryNarrationSegments(story).map((segment) => getStoryNarrationVoice(segment, characters) ?? STORY_NARRATOR_VOICE),
     );
     const isCurrentRecording = Boolean(currentNarration && currentNarration.trackId === currentTrackId);
 
@@ -457,6 +460,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                 <Download size={17} aria-hidden="true" /> {isExporting ? 'Připravuji PDF…' : 'Stáhnout PDF'}
                                             </button>
                                         </div>
+                                        {audioError && <p className={s.error} role="status">{audioError}</p>}
                                         <ArticleTracking articleId={currentNarration?.trackId ?? `story:${story.id}`} wordTimings={currentNarration?.timings}>
                                             <h2><StoryWords id="title" text={story.title} /></h2>
                                             <p className={s.premise}><StoryWords id="premise" text={story.premise} /></p>

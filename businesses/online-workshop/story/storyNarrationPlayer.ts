@@ -1,4 +1,5 @@
 import { parseArticleWordTimings, type ArticleWordTimings } from '@/businesses/articles/articleTiming';
+import { STORY_NARRATOR_VOICE } from '@/lib/workshops/storyRoomBook';
 import { getStoryNarrationSegments, getStoryNarrationTrackId, getStoryNarrationVoice } from '@/lib/workshops/storyRoomNarration';
 import type { StoryCharacter, WorkshopStory } from '@/lib/workshops/storyRoomTypes';
 
@@ -13,7 +14,8 @@ async function loadClip(
         signal.throwIfAborted();
         const response = await fetch(apiPath, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
-            body: JSON.stringify({ action: 'audio', storyId, segmentId, waitOnly: attempt > 0 }),
+            // A 409 may be waiting on the voice design. Once ready, this line may still need to be generated.
+            body: JSON.stringify({ action: 'audio', storyId, segmentId }),
         });
         if (response.status === 409) {
             await new Promise((resolve) => window.setTimeout(resolve, 1_300));
@@ -70,7 +72,7 @@ export async function prepareStoryNarration(
             const cached = clipCache.get(key(voice));
             if (cached) return cached;
             const loaded = await loadClip(apiPath, story.id, id, signal, context);
-            const clip = { ...loaded, voice: loaded.voice ?? voice };
+            const clip = { ...loaded, voice: loaded.voice ?? voice ?? STORY_NARRATOR_VOICE };
             clipCache.set(key(clip.voice), clip);
             return clip;
         }));

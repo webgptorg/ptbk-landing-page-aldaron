@@ -366,6 +366,38 @@ it('chooses the next speaker from the current cast and keeps their earlier lines
     expect(provider.mock.calls.filter(([url]) => url.endsWith('/responses'))).toHaveLength(1);
 });
 
+it('reads dialogue with the narrator when Voice Design is denied and switches to a saved voice when available', async () => {
+    const story = (await read()).story!;
+    const speech = story.lines.at(-1)!;
+    expect(speech.characterName).toBe('Sherlock Holmes');
+    let savedVoice: string | undefined;
+    const provider = vi.fn(async (url: string) => {
+        if (url.includes('/v2/voices?')) {
+            const name = new globalThis.URL(url).searchParams.get('search');
+            return Response.json({ voices: savedVoice ? [{ name, voice_id: savedVoice }] : [] });
+        }
+        if (url.endsWith('/text-to-voice/design')) return Response.json({}, { status: 403 });
+        return Response.json({ audio_base64: Buffer.from('mp3').toString('base64') });
+    });
+    vi.stubGlobal('fetch', provider);
+    const clip = () => post(undefined, { action: 'audio', storyId: story.id, segmentId: speech.id });
+    const first = await clip();
+    expect(first.status).toBe(200);
+    const fallback = await first.json() as { url: string };
+    expect(fallback).toMatchObject({ voice: PAVOL, url: expect.stringContaining('storage.invalid') });
+    expect(await (await clip()).json()).toEqual(fallback);
+    expect((await read()).characters.find(({ id }) => id === speech.characterId)?.voice).toBeUndefined();
+    expect(provider.mock.calls.filter(([url]) => url.endsWith('/text-to-voice/design'))).toHaveLength(1);
+
+    savedVoice = 'SherlockVoice1234567';
+    await fixture.database!.query("UPDATE public.workshop_story_audio SET last_attempt_at = now() - interval '4 minutes' WHERE object_key IS NULL");
+    const recovered = await (await clip()).json() as { url: string };
+    expect(recovered).toMatchObject({ voice: savedVoice, url: expect.stringContaining('storage.invalid') });
+    expect(recovered.url).not.toBe(fallback.url);
+    expect(provider.mock.calls.filter(([url]) => url.includes('/with-timestamps')).map(([url]) => url.split('/').at(-2)))
+        .toEqual(['test-narrator', savedVoice]);
+});
+
 it('serves the same workshop shortener URL for the dialog and PDF', async () => {
     const shortUrl = 'https://ptbk.io/PtBkTest';
     const first = await post(undefined, { action: 'share' });

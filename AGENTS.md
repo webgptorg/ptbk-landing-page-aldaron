@@ -136,7 +136,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The private story audio cache reserves each voice under a separate provider-resource key and prevents
   concurrent designs for the same role, including across workshops.
   Reuse the existing server-only ElevenLabs key with Voice Design, voice lookup and speech permissions.
-  Speech uses the actor's voice and omits speaker labels from narration. The shared player assembles the private
+  Speech uses the actor's voice and omits speaker labels from narration. When Voice Design fails or is cooling
+  down, the narrator reads the affected line. The fallback is cached separately from the actor's own recording.
+  A pending design can finish first, after which each requested line can render independently. The shared player assembles the private
   immutable clips into one seekable track and offsets their measured word timings. A voice change invalidates the
   affected clip. The room is excluded from analytics.
   Other event miniapps can use the event type registry and the same workshop entry/moderation endpoints.
