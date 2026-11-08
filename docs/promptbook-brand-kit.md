@@ -39,8 +39,9 @@ The full lockup uses equal-size Inter Medium (500) for `prompt` and Inter Bold
 Both have outlined lettering. The light artwork uses an ink-blue symbol and
 near-black lettering, with ink-blue `book` in the full version. The all-white
 artwork has a transparent export for ink-blue surfaces and a solid black export.
-The cube's vertical edge matches the wordmark's
-cap height. Clear space is ¼ of the symbol height on every side.
+The cube's vertical edge matches the wordmark's cap height. In the full lockup,
+the gap from the symbol to the first letter is about 40 units in the 760-unit
+viewBox. Clear space is ¼ of the symbol height on every side.
 Digital minimums are 32 px for the symbol and 160 px for the complete lockup;
 the page shows both at their actual desktop sizes. Print remains an actual-size
 legibility check rather than an invented universal millimetre threshold.

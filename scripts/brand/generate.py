@@ -54,7 +54,7 @@ def lockup(theme='light', abbreviated=False):
     if abbreviated:
         lettering, _ = outlines(BRAND['abbreviation'], 168, 109, first_color, medium)
     else:
-        first, end = outlines('prompt', 168, 109, first_color, medium)
+        first, end = outlines('prompt', 184, 109, first_color, medium)
         second, _ = outlines('book', end, 109, accent_color, bold)
         lettering = first + second
     # Match the vertical edge of the cube to the height of the lettering.
