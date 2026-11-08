@@ -28,6 +28,39 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('hero working headline', () => {
+    it('turns only the head toward the pointer and returns to rest on touch cancellation', () => {
+        const { container } = render(<section data-landing-hero><HeroHeadline/></section>);
+        const hero = container.querySelector('[data-landing-hero]')!;
+        const face = hero.querySelector('[data-promptbook-robot-head] g')!;
+        const foot = hero.querySelector('[data-promptbook-robot] > g > polygon')!;
+        const getPose = () => face.getAttribute('transform');
+        const rest = getPose();
+        const footPoints = foot.getAttribute('points');
+
+        function pointer(type: string, pointerType: 'mouse' | 'touch', clientX: number) {
+            act(() => {
+                hero.dispatchEvent(Object.assign(new Event(type, { bubbles: true }), {
+                    pointerType, pointerId: 1, isPrimary: true, clientX, clientY: 100,
+                }));
+                vi.advanceTimersByTime(800);
+            });
+        }
+
+        pointer('pointermove', 'mouse', 160);
+        expect(getPose()).not.toBe(rest);
+        expect(foot.getAttribute('points')).toBe(footPoints);
+        pointer('pointerleave', 'mouse', 160);
+        expect(getPose()).toBe(rest);
+
+        pointer('pointerdown', 'touch', -160);
+        const left = getPose();
+        expect(left).not.toBe(rest);
+        pointer('pointermove', 'touch', 160);
+        expect(getPose()).not.toBe(left);
+        pointer('pointercancel', 'touch', 160);
+        expect(getPose()).toBe(rest);
+    });
+
     it('starts with the complete accessible promise and changes activities only after the introduction', () => {
         const { container } = render(<h1><HeroHeadline firstLine="Dřív jste AI úkolovali"/></h1>);
         const heading = screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' });

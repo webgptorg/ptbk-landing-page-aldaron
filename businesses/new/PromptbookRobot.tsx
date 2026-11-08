@@ -1,7 +1,9 @@
+import { memo } from 'react';
+import { PromptbookRobotHead } from './PromptbookRobotHead';
 import s from './hero-headline.module.css';
 
 /** The working pose of the Robot Studio mascot (4cab138) at its default angle. */
-export function PromptbookRobot() {
+export const PromptbookRobot = memo(function PromptbookRobot() {
     return <svg viewBox="0 0 112 112" fill="none" aria-hidden="true" focusable="false" data-promptbook-robot>
         <ellipse cx="56" cy="103" rx="24" ry="2.5" fill="#17386C" opacity=".08"/>
         <g stroke="#17386C" strokeWidth=".55" strokeLinejoin="round">
@@ -36,22 +38,7 @@ export function PromptbookRobot() {
             <polygon points="32.19,86.21 32.19,77.02 32.68,81.13 32.68,90.33" fill="#AFC8EE"/>
             <polygon points="60.23,89.24 32.68,90.33 32.68,81.13 39.8,80.85 39.8,84.22 60.23,83.41" fill="#426BA4"/>
             <polygon points="32.19,77.02 39.32,76.74 39.8,80.85 32.68,81.13" fill="#DFEBFF"/>
-            <g className={s.robotHead}>
-                <polygon points="56,83.24 89.01,64.18 89.01,26.06 56,45.12" fill="#17386C"/>
-                <polygon points="22.99,64.18 56,83.24 56,45.12 22.99,26.06" fill="#FFFFFF"/>
-                <g transform="matrix(33.01 19.06 0 38.12 22.99 26.06)" fill="#FFFFFF" stroke="none">
-                    <rect x=".16" y=".23" width=".68" height=".54" rx=".095" fill="#111318"/>
-                    <rect x=".353" y=".385" width=".0422" height=".0842"/>
-                    <rect x=".605" y=".385" width=".0422" height=".0842"/>
-                    <rect x=".353" y=".553" width=".0422" height=".0422"/>
-                    <rect x=".395" y=".595" width=".0422" height=".0422"/>
-                    <rect x=".437" y=".637" width=".1262" height=".0422"/>
-                    <rect x=".563" y=".595" width=".0422" height=".0422"/>
-                    <rect x=".605" y=".553" width=".0422" height=".0422"/>
-                </g>
-                <polygon points="22.99,26.06 56,45.12 89.01,26.06 56,7" fill="#EEF3FF"/>
-                <path d="M56,7L22.99,26.06L56,26.06Z" fill="#17386C" stroke="none"/>
-            </g>
+            <PromptbookRobotHead/>
         </g>
     </svg>;
-}
+});

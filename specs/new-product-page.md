@@ -15,6 +15,8 @@ Nejnovější večerní zadání z 25. října 2026 platí shodně pro českou a
 7. **Kontakt**, oba rovnocenní zakladatelé se zrcadlovými portréty a ověřenými kontakty. Na mobilu jsou Jiřího jméno i role zarovnané doprava stejně jako kontakty; kontaktní blok zůstává dole vpravo. Siluety stále vystupují z karet a lícují s jejich spodním okrajem. Odkaz na příběh je až pod kartami.
 8. Viditelný formulář **Napište nám** doplňuje existující modál; společná patička zachovává logo a Technologickou inkubaci i odkaz na bezpečnost.
 
+Na české i anglické hlavní stránce robůtek v úvodní sekci plynule natáčí hlavu ke kurzoru nebo k prvnímu dotyku. Po odchodu kurzoru nebo ukončení dotyku se vrací do výchozí polohy. Posouvání stránky a gesta zůstávají v režii prohlížeče. Při omezeném pohybu má robůtek statickou pracovní pózu.
+
 ## Tři pracovní příběhy
 
 Pořadí tabů: **Péče o kontakty**, **Správa podcastů**, **Údržba webu**; výchozí je péče o kontakty. Anglické protějšky: Contact follow-up, Podcast management, Website maintenance. Taby mají jednotné zarovnání a jednorádkové názvy; na úzké obrazovce mohou mít vlastní vodorovné posouvání, celá stránka nepřetéká. Podcast používá mikrofon. Ovládání respektuje šipky a Home/End. Tlačítko play/pause není přítomné.
