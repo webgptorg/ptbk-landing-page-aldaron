@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PRODUCT_RELEASES, RELEASE_CATALOG_UPDATED_AT, getReleaseSupport, groupReleaseLines, type ProductRelease } from '@/lib/releases/catalog';
+import { PRODUCT_RELEASES, RELEASE_CATALOG_UPDATED_AT, getInstallationReleases, getReleaseSupport, groupReleaseLines, type ProductRelease } from '@/lib/releases/catalog';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { LegalNavigation } from './LegalNavigation';
 import s from './site.module.css';
@@ -8,6 +8,7 @@ import r from './releases.module.css';
 export function ReleasesPage({ language }: { language: SupportedHomepageLanguage }) {
     const cs = language === 'cs';
     const format = (date: string) => new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { dateStyle: 'long', timeZone: 'Europe/Prague' }).format(new Date(date));
+    const { stable, preview } = getInstallationReleases();
     const lines = groupReleaseLines(PRODUCT_RELEASES);
     const stableLines = lines.filter(line => line.latestStable);
     const candidates = lines.filter(line => line.latestPrerelease);
@@ -15,6 +16,11 @@ export function ReleasesPage({ language }: { language: SupportedHomepageLanguage
     return <>
         <header className={s.pageIntro}><Link className={s.breadcrumb} href={`/${language}`}>← Promptbook</Link><h1>{cs ? 'Vydání a podpora' : 'Releases and support'}</h1><p>{cs ? 'Řady Promptbooku od 0.115. Každá řada major.minor ukazuje svůj nejnovější stabilní patch.' : 'Promptbook lines from 0.115 onwards. Each major.minor line shows its latest stable patch.'}</p></header>
         <article className={s.prose}>
+            {(stable || preview) && <p>
+                {stable && <span>{cs ? 'Doporučená stabilní verze' : 'Recommended stable release'} <strong>{stable.version}</strong>{' · '}</span>}
+                {preview && <span>{cs ? 'Verze k vyzkoušení' : 'Preview release'} <strong>{preview.version}</strong>{' · '}</span>}
+                <Link href={`/${language}/open-source`}>{cs ? 'Instalace' : 'Installation'} ↗</Link>
+            </p>}
             <h2>{cs ? 'Jak číst přehled' : 'Reading the catalogue'}</h2>
             <p>{cs ? 'Původní vydání je datum zveřejnění na npm nebo GitHubu. Zveřejněno zde označuje první zařazení řady do tohoto přehledu. Jednotlivé patche se nesčítají do samostatných řádků; úplná historie zůstává ve zdrojích.' : 'Original release means publication on npm or GitHub. Listed here records the line’s first entry in this catalogue. Patches are grouped rather than shown as separate rows; the complete history remains available at the sources.'}</p>
             <p>{cs ? 'Politika smluvní podpory: nejméně 90 dní od vydání první stabilní verze řady major.minor, vždy pro její nejnovější stabilní patch. Nový patch lhůtu neprodlužuje. Vždy musí zůstat alespoň jedna podporovaná stabilní řada. Již přijaté závazky podpory se nezkracují. Konkrétní rozsah podpory určuje přijatá smlouva.' : 'Contractual support policy: at least 90 days from the first stable release of a major.minor line, covering its latest stable patch. A patch does not restart the period. At least one supported stable line must remain available. Existing accepted support commitments are not shortened. The accepted agreement defines the specific support scope.'}</p>

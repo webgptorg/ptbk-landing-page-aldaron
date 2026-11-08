@@ -1,6 +1,8 @@
 import catalog from './catalog.json';
 import { compareReleaseVersions, parseReleaseVersion } from './version';
 
+export type ReleaseDownload = { url: string; checksumUrl: string };
+
 export type ProductRelease = {
     version: string;
     publishedAt: string;
@@ -9,6 +11,8 @@ export type ProductRelease = {
     npmUrl?: string;
     githubUrl?: string;
     notes?: string;
+    downloads?: { windows?: ReleaseDownload };
+    installable?: boolean;
     /** A published minimum may only be extended. Prereleases never acquire support. */
     supportUntil?: string;
     /** Informational editorial designation; never creates an extra contractual guarantee. */
@@ -62,4 +66,14 @@ export function groupReleaseLines(releases: readonly ProductRelease[]) {
             lts: stable.some(item => item.lts === true),
         };
     }).sort((a, b) => compareReleaseVersions(`${b.line}.0`, `${a.line}.0`));
+}
+
+/** Use the newest fully published release in each channel. */
+export function getInstallationReleases(releases: readonly ProductRelease[] = PRODUCT_RELEASES) {
+    const ready = releases.filter(release => release.installable)
+        .sort((a, b) => compareReleaseVersions(b.version, a.version));
+    return {
+        stable: ready.find(release => getReleaseSupport(release, releases).status === 'supported'),
+        preview: ready.find(release => getReleaseSupport(release, releases).status === 'prerelease'),
+    };
 }

@@ -4,11 +4,11 @@ set -Eeuo pipefail
 umask 077
 
 if [[ "${1:-}" == --help ]]; then
-    printf 'Usage: curl -fsSL https://www.ptbk.io/install.sh | bash\nUbuntu 24.04 x86-64 with systemd; root or sudo; an interactive SSH terminal.\nInstalls prerequisites and Promptbook, then opens ptbk init as promptbook.\n'
+    printf 'Usage: curl -fsSL https://www.ptbk.io/install.sh | bash -s -- [--version VERSION]\nUbuntu 24.04 x86-64 with systemd; root or sudo; an interactive SSH terminal.\nInstalls prerequisites and Promptbook, then opens ptbk init as promptbook.\n'
     exit 0
 fi
-if (( $# != 0 )); then
-    printf 'This entry point takes no arguments.\n' >&2
+if (( $# != 0 )) && ! { [[ $# == 2 && "$1" == --version && "$2" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; }; then
+    printf 'Pass --version with an exact published version.\n' >&2
     exit 1
 fi
 
@@ -54,7 +54,7 @@ else
 fi
 test -s "$installer_directory/install.sh"
 bash -n "$installer_directory/install.sh"
-"${privilege_command[@]}" bash "$installer_directory/install.sh" </dev/tty
+"${privilege_command[@]}" bash "$installer_directory/install.sh" "$@" </dev/tty
 
 # A piped download must not become the wizard's stdin. Authentication is never logged here.
 # Repeated setup opens the existing project's ordinary entry point without reinitializing it.

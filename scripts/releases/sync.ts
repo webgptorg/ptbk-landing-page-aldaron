@@ -1,21 +1,24 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { isCurrentGeneration, compareReleaseVersions, parseReleaseVersion } from '../../lib/releases/version';
 
+type GitHubAsset = { name: string; browser_download_url: string; state: string; size: number };
+
 async function main() {
     const file = new URL('../../lib/releases/catalog.json', import.meta.url);
     const previous = JSON.parse(await readFile(file, 'utf8')) as { checkedAt: string; releases: import('../../lib/releases/catalog').ProductRelease[] };
     const now = new Date().toISOString();
-    const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'Promptbook-release-catalog' };
-    async function get(url: string): Promise<any> {
+    const githubHeaders = { Accept: 'application/vnd.github+json', 'User-Agent': 'Promptbook-release-catalog' };
+    async function get(url: string, headers?: HeadersInit): Promise<any> {
         const response = await fetch(url, { headers, signal: AbortSignal.timeout(30_000) });
         if (!response.ok) throw new Error(`${new URL(url).hostname}: HTTP ${response.status}`);
         return response.json() as Promise<any>;
     }
     // Fetch both sources completely before any write; a failed source never empties history.
+    if (process.env.GH_TOKEN) Object.assign(githubHeaders, { Authorization: `Bearer ${process.env.GH_TOKEN}` });
     const npm = await get('https://registry.npmjs.org/ptbk');
     const github: any[] = [];
     for (let page = 1; ; page++) {
-        const releases = await get(`https://api.github.com/repos/webgptorg/promptbook/releases?per_page=100&page=${page}`);
+        const releases = await get(`https://api.github.com/repos/webgptorg/promptbook/releases?per_page=100&page=${page}`, githubHeaders);
         if (!Array.isArray(releases)) throw new Error('Unexpected GitHub release response');
         github.push(...releases.filter((item: any) => !item.draft));
         if (releases.length < 100) break;
@@ -29,13 +32,21 @@ async function main() {
         const npmDate = npm.versions[version] && npm.time[version];
         const publishedAt = npmDate || gh?.published_at;
         if (!publishedAt || !Number.isFinite(Date.parse(publishedAt))) throw new Error(`No publication date for ${version}`);
-        const old: any = records.get(version);
+        const old = records.get(version);
+        const windowsName = `Promptbook-Setup-${version}-windows-x64.exe`;
+        const assets = (gh?.assets ?? []) as GitHubAsset[];
+        const uploaded = (name: string) => assets.find(asset => asset.name === name && asset.state === 'uploaded' && asset.size > 0)?.browser_download_url;
+        const windowsUrl = uploaded(windowsName);
+        const checksumUrl = uploaded(`${windowsName}.sha256`);
+        const windows = windowsUrl && checksumUrl ? { url: windowsUrl, checksumUrl } : undefined;
         // Existing publication, first-listing and support promises are immutable in automatic sync.
         records.set(version, {
             version, publishedAt: old?.publishedAt ?? publishedAt, listedAt: old?.listedAt ?? now,
             prerelease: old?.prerelease ?? (!!parseReleaseVersion(version)?.prerelease || !!gh?.prerelease),
             ...(npm.versions[version] || old?.npmUrl ? { npmUrl: `https://www.npmjs.com/package/ptbk/v/${version}` } : {}),
             ...(gh || old?.githubUrl ? { githubUrl: gh?.html_url ?? old.githubUrl } : {}),
+            ...(windows ? { downloads: { windows } } : {}),
+            ...(windows && npm.versions[version]?.dist?.tarball ? { installable: true } : {}),
             ...(old?.notes || gh?.body ? { notes: old?.notes ?? gh.body.slice(0, 4000) } : {}),
             ...(old?.supportUntil ? { supportUntil: old.supportUntil } : {}),
             ...(old?.lts !== undefined ? { lts: old.lts } : {}),

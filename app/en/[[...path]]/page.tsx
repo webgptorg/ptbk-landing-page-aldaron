@@ -1,3 +1,4 @@
+import { getInstallationReleases } from '@/lib/releases/catalog';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { NewLandingPage } from '@/businesses/new/NewLandingPage';
@@ -58,7 +59,7 @@ export default async function Page({ params, searchParams }: Props) {
     switch (key) {
         case '': return <NewLandingPage showTestimonials={query.testimonials === '1'}/>;
         case 'partnership': return <NewLandingPage partnership/>;
-        case 'open-source': return <OpenSourcePage/>;
+        case 'open-source': return <OpenSourcePage {...getInstallationReleases()} />;
         case 'agendy': return <AgendasPage/>;
         case 'pricing': return <PricingPage/>;
         case 'srovnani': return <ComparisonsPage/>;

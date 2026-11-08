@@ -6,6 +6,7 @@ import { ArrowRight, Check, Copy, Github, Terminal } from 'lucide-react';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
+import type { ProductRelease } from '@/lib/releases/catalog';
 import s from './open-source.module.css';
 
 /** Direct installation choices; AI-assisted setup stays first. */
@@ -18,7 +19,6 @@ const REPOSITORY = 'https://github.com/webgptorg/promptbook';
 const SERVER_GUIDE = `${REPOSITORY}/blob/reborn/2026-10/deploy/README.md`;
 const INSTALLER_URL = 'https://www.ptbk.io/install.sh';
 const SHELL_COMMAND = `curl -fsSL ${INSTALLER_URL} | bash`;
-const NPM_COMMAND = 'npm install --global ptbk\nptbk init';
 const AZURE_DEPLOY = `https://portal.azure.com/#create/Microsoft.Template/uri/${encodeURIComponent('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json')}`;
 const METHODS: readonly InstallMethod[] = ['ai', 'npm', 'shell', 'windows', 'server'];
 
@@ -129,9 +129,14 @@ function CommandBlock({ commands, title, labels, prompt = false }: { commands: s
 }
 
 /** Shared Czech/English installation page. */
-export function OpenSourcePage() {
+export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; preview?: ProductRelease } = {}) {
     const { locale, path } = useSiteLocale();
     const copy = COPY[locale];
+    const [usePreview, setUsePreview] = useState(false);
+    const release = usePreview ? preview : stable ?? preview;
+    const npmCommand = `npm install --global ptbk${release ? `@${release.version}` : ''}`;
+    const shellCommand = release ? `${SHELL_COMMAND} -s -- --version ${release.version}` : SHELL_COMMAND;
+    const windows = release?.downloads?.windows;
     const [method, setMethod] = useState<InstallMethod>('ai');
     const [target, setTarget] = useState<InstallTarget>('local');
     const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -155,6 +160,16 @@ export function OpenSourcePage() {
             <Link className={s.back} href={path()}>{copy.back}</Link>
             <h1>{copy.title}</h1>
             <p>{copy.intro}</p>
+            {release && <p>
+                <strong>{release.prerelease
+                    ? (locale === 'cs' ? 'Verze k vyzkoušení' : 'Preview release')
+                    : (locale === 'cs' ? 'Doporučená stabilní verze' : 'Recommended stable release')} {release.version}</strong>
+                {' · '}<Link href={path('releases')}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link>
+            </p>}
+            {stable && preview && <label>
+                <input type="checkbox" checked={usePreview} onChange={event => setUsePreview(event.target.checked)} />
+                {' '}{locale === 'cs' ? 'Vyzkoušet verzi' : 'Try preview'} {preview.version}
+            </label>}
         </header>
         <section className={s.installer} aria-label={copy.methods}>
             <div className={s.tabs} role="tablist" aria-label={copy.methods}>
@@ -178,9 +193,13 @@ export function OpenSourcePage() {
                             <span>{value === 'local' ? copy.aiLocal : copy.aiServer}</span>
                         </label>)}
                     </fieldset>
-                    <CommandBlock key={target} title={copy.aiPromptTitle} labels={copy} prompt commands={target === 'local' ? copy.aiLocalPrompt : copy.aiServerPrompt} />
+                    <CommandBlock key={target} title={copy.aiPromptTitle} labels={copy} prompt commands={[
+                        target === 'local' ? copy.aiLocalPrompt : copy.aiServerPrompt,
+                        release && (locale === 'cs' ? 'Použij přesně tento instalační příkaz' : 'Use this exact installation command'),
+                        release && (target === 'local' ? npmCommand : shellCommand),
+                    ].filter(Boolean).join('\n\n')} />
                 </> : item === 'shell' ? <>
-                    <CommandBlock title="Bash / SSH" labels={copy} commands={SHELL_COMMAND} />
+                    <CommandBlock title="Bash / SSH" labels={copy} commands={shellCommand} />
                     <a className={s.textLink} href="https://github.com/webgptorg/ptbk-landing-page-aldaron/blob/main/public/install.sh">{copy.shellSource}<ArrowRight size={14} aria-hidden="true" /></a>
                     <details className={s.login}>
                         <summary>{copy.shellLogin}</summary>
@@ -190,10 +209,11 @@ export function OpenSourcePage() {
                         <a href="https://code.claude.com/docs/en/authentication">{copy.claudeLogin}</a>
                         <CommandBlock title="Claude Code" labels={copy} commands="claude auth login" />
                     </details>
-                </> : item === 'npm' ? <CommandBlock title={copy.terminal} labels={copy} commands={NPM_COMMAND} />
+                </> : item === 'npm' ? <CommandBlock title={copy.terminal} labels={copy} commands={`${npmCommand}\nptbk init`} />
                     : item === 'windows' ? <div className={s.download}>
-                        <a href={`${REPOSITORY}/releases`} className={s.primaryLink}>{copy.download}<ArrowRight size={17} aria-hidden="true" /></a>
-                        <code>Promptbook-Setup-&lt;version&gt;-windows-x64.exe</code>
+                        <a href={windows?.url ?? `${REPOSITORY}/releases`} className={s.primaryLink}>{copy.download}{windows && ` · ${release?.version}`}<ArrowRight size={17} aria-hidden="true" /></a>
+                        {windows && <a href={windows.checksumUrl}>SHA-256</a>}
+                        {!windows && <code>Promptbook-Setup-&lt;version&gt;-windows-x64.exe</code>}
                     </div> : <>
                         <div className={s.providers}>
                             <a href={`${SERVER_GUIDE}#digitalocean`}><strong>DigitalOcean</strong><span>{copy.digitalOceanHint}</span><ArrowRight size={17} aria-hidden="true" /></a>
@@ -201,6 +221,7 @@ export function OpenSourcePage() {
                             <a href={`${SERVER_GUIDE}#aws`}><strong>AWS</strong><span>{copy.awsHint}</span><ArrowRight size={17} aria-hidden="true" /></a>
                         </div>
                         <p className={s.note}>{copy.serverCost} <a href={SERVER_GUIDE}>{copy.serverGuide}</a></p>
+                        {release && <CommandBlock title="Bash / SSH" labels={copy} commands={shellCommand} />}
                     </>}
             </div>)}
         </section>

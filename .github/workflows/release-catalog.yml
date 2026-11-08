@@ -19,6 +19,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node --import tsx scripts/releases/sync.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Publish appended release records
         run: |
           if git diff --quiet -- lib/releases/catalog.json; then exit 0; fi

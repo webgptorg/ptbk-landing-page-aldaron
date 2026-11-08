@@ -1,6 +1,38 @@
 {
-  "checkedAt": "2026-11-06T06:57:54.593Z",
+  "checkedAt": "2026-11-08T13:33:24.053Z",
   "releases": [
+    {
+      "version": "0.119.0-75",
+      "publishedAt": "2026-11-07T22:53:45.117Z",
+      "listedAt": "2026-11-08T13:33:24.053Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-75",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-75",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-Setup-0.119.0-75-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-Setup-0.119.0-75-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-75 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-75` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-75-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-75 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `22d1acf4bd15b509a124774aaa3b399630e053adf670211aaab3aebd6605d2e5`.\n"
+    },
+    {
+      "version": "0.119.0-74",
+      "publishedAt": "2026-11-07T18:17:59.229Z",
+      "listedAt": "2026-11-08T13:33:24.053Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-74",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-74",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-Setup-0.119.0-74-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-Setup-0.119.0-74-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-74 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-74` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-74-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-74 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `bb76b2089b07d4efdfa84e9538238e9ab20ea5508ef5d6dd0e16f2c099004eee`.\n\nAll platform downloads for this release:\n\n| Platform | File | Checksum |\n| --- | --- | --- |\n| Windows x64 installer | [Download](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-Setup-0.119.0-74-windows-x64.exe) | [SHA-256](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-Setup-0.119.0-74-windows-x64.exe.sha256) |\n| macOS Apple Silicon (unsigned prerelease) | [Download](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-arm64-unsigned.dmg) | [SHA-256](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-arm64-unsigned.dmg.sha256) |\n| macOS Intel (unsigned prerelease) | [Download](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-x64-unsigned.dmg) | [SHA-256](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-x64-unsigned.dmg.sha256) |\n| Android ARM64 preview | [Download](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-android-arm64-preview.apk) | [SHA-256](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-android-arm64-preview.apk.sha256) |\n| VS Code extension | [Download](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/book-extension-ptbk-0.119.0-74.vsix) | [SHA-256](https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/book-extension-ptbk-0.119.0-74.vsix.sha256) |\n\nSource archives: [ZIP](https://github.com/webgptorg/promptbook/archive/refs/tags/v0.119.0-74.zip) · [tar.gz](https://github.com/webgptorg/promptbook/archive/refs/tags/v0.119.0-74.tar.gz).\n\nThe five downloads were independently verified against their SHA-256 files. [All 17 publication and validation jobs passed](https://github.com/webgptorg/promptbook/actions/runs/42398562007).\n\n"
+    },
     {
       "version": "0.119.0-72",
       "publishedAt": "2026-11-06T02:21:32.026Z",
@@ -8,6 +40,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-72",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-72",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-Setup-0.119.0-72-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-Setup-0.119.0-72-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-72 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-72` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-72-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-72 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `be1ccd820bf9ef0317f9b0d1c6b4fc51f53c0dfe8b7424c6df886be9318a6b68`.\n"
     },
     {
@@ -17,6 +56,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-71",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-71",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-Setup-0.119.0-71-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-Setup-0.119.0-71-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-71 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-71` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-71-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-71 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `dcabcaafd19748829ee5e518f551116d4a5c80a4098af0210620f217719e7ed6`.\n"
     },
     {
@@ -26,6 +72,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-70",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-70",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-Setup-0.119.0-70-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-Setup-0.119.0-70-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-70 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-70` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-70-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-70 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `002bc7383fa0fcc44626d1769c8b145a5902d918bb993cfbf4baf3409e0ceaa6`.\n"
     },
     {
@@ -35,6 +88,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-67",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-67",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-Setup-0.119.0-67-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-Setup-0.119.0-67-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-67 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-67` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-67-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-67 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `02b1e364116ffce5f310655f309308b8db492e8fad2ef28eec7809386bf92179`.\n"
     },
     {
@@ -44,6 +104,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-66",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-66",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-66/Promptbook-Setup-0.119.0-66-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-66/Promptbook-Setup-0.119.0-66-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-66 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-66` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-66-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-66 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `1860a80c0c3055caca4f415c09d289123038c636656a7cfeb6afcaafc6e0930c`.\n"
     },
     {
@@ -53,6 +120,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-62",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-62",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-62/Promptbook-Setup-0.119.0-62-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-62/Promptbook-Setup-0.119.0-62-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-62 and its matching Book language extension."
     },
     {
@@ -62,6 +136,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-56",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-56",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-56/Promptbook-Setup-0.119.0-56-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-56/Promptbook-Setup-0.119.0-56-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-56 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-56` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-56-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-56 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `bf700697f53702da65cdeb88cb6d632e495009c17cca380d9a4e9aa563f0a53f`.\n"
     },
     {
@@ -71,6 +152,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-54",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-54",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-54/Promptbook-Setup-0.119.0-54-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-54/Promptbook-Setup-0.119.0-54-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-54 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-54` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-54-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-54 globally, offers the local desktop client (selected by default), Codex and Claude Code, and creates an empty first-project folder. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `0a26f9829fc6de32fb56830ce8a014cd472fb2675a2d0049b4bb2a8ac58fbff5`.\n"
     },
     {
@@ -80,6 +168,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-47",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-47",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-47/Promptbook-Setup-0.119.0-47-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-47/Promptbook-Setup-0.119.0-47-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-47 and its matching Book language extension."
     },
     {
@@ -89,6 +184,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-45",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-45",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-45/Promptbook-Setup-0.119.0-45-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-45/Promptbook-Setup-0.119.0-45-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-45.\n\n- **npm:** `npm install -g ptbk@0.119.0-45` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-45-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-45 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `71f6e5c17ccf05dbd9cfd709e63be9a6ffea17f40fda1a14068d04c7d3269f45`."
     },
     {
@@ -98,6 +200,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-44",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-44",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-44/Promptbook-Setup-0.119.0-44-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-44/Promptbook-Setup-0.119.0-44-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-44.\n\n- **npm:** `npm install -g ptbk@0.119.0-44` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-44-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-44 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `e2e4c15ad0224bb4791c10407c7eb773752d607d4dedab52116f6f5bd882f597`."
     },
     {
@@ -107,6 +216,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-43",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-43",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-43/Promptbook-Setup-0.119.0-43-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-43/Promptbook-Setup-0.119.0-43-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-43.\n\n- **npm:** `npm install -g ptbk@0.119.0-43` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-43-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-43 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `833a55c04f31b3b87a8ad98ce4fed223b69772b00140b96bb6a107a75b14fbcc`."
     },
     {
@@ -116,6 +232,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-42",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-42",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-42/Promptbook-Setup-0.119.0-42-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-42/Promptbook-Setup-0.119.0-42-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-42.\n\n- **npm:** `npm install -g ptbk@0.119.0-42` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-42-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-42 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `07b837d07a95ecb7fd1dd7f1951addb2cdeb56d35efd6b8658125dc622b3bdef`."
     },
     {
@@ -125,6 +248,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-41",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-41",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-41/Promptbook-Setup-0.119.0-41-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-41/Promptbook-Setup-0.119.0-41-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-41.\n\n- **npm:** `npm install -g ptbk@0.119.0-41` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-41-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-41 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `ae71aeec4f23b256cc7ec60e1a64ecbab77214461d6ab60806d279279d33c2a7`."
     },
     {
@@ -134,6 +264,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-40",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-40",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-40/Promptbook-Setup-0.119.0-40-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-40/Promptbook-Setup-0.119.0-40-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-40.\n\n- **npm:** `npm install -g ptbk@0.119.0-40` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-40-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-40 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `561022c8f3c03c7673b2928088100a64cb6459ac65b510455fc53836dbd1c15c`."
     },
     {
@@ -143,6 +280,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-39",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-39",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-39/Promptbook-Setup-0.119.0-39-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-39/Promptbook-Setup-0.119.0-39-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-39.\n\n- **npm:** `npm install -g ptbk@0.119.0-39` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-39-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-39 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `7cc6c6863f93fba06bdfd0748fa0654595e4e323efe0496ee040da3860ee904c`."
     },
     {
@@ -152,6 +296,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-38",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-38",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-38/Promptbook-Setup-0.119.0-38-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-38/Promptbook-Setup-0.119.0-38-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-38.\n\n- **npm:** `npm install -g ptbk@0.119.0-38` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-38-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-38 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `bf1fe8526ff3eb8155fcee33d6913bfcd64b76c376bb1bcb32c56f4f8525c2ce`."
     },
     {
@@ -161,6 +312,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-37",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-37",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-37/Promptbook-Setup-0.119.0-37-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-37/Promptbook-Setup-0.119.0-37-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-37.\n\n- **npm:** `npm install -g ptbk@0.119.0-37` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-37-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-37 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `76222cc5ae7336307b2e199cb220e2ce94f6e259613d61316e0dd50cda4c4eb6`."
     },
     {
@@ -177,6 +335,13 @@
       "prerelease": true,
       "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-26",
       "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-26",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-26/Promptbook-Setup-0.119.0-26-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-26/Promptbook-Setup-0.119.0-26-windows-x64.exe.sha256"
+        }
+      },
+      "installable": true,
       "notes": "Promptbook 0.119.0-26.\n\n- **npm:** `npm install -g ptbk@0.119.0-26` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-26-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-26 globally and creates an empty first-project folder. It then opens a terminal running `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `3ba56aacf37db6c7484d43843f3da18954b1fa560313a293486f05773b4124d6`."
     },
     {

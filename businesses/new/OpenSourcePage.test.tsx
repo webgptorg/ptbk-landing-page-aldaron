@@ -10,13 +10,31 @@ import { newPageMetadata, OPEN_SOURCE_PAGE_COPY } from './newMetadata';
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
 
 /** Keeps the installation path inside its real locale and contact providers. */
-function page(locale: 'cs' | 'en' = 'en') {
-    return <SiteLocaleProvider locale={locale}><LeadCaptureProvider><OpenSourcePage /></LeadCaptureProvider></SiteLocaleProvider>;
+function page(locale: 'cs' | 'en' = 'en', releases?: Parameters<typeof OpenSourcePage>[0]) {
+    return <SiteLocaleProvider locale={locale}><LeadCaptureProvider><OpenSourcePage {...releases} /></LeadCaptureProvider></SiteLocaleProvider>;
 }
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('self-hosted installation entry point', () => {
+    it('uses the same preview version for the AI prompt, npm, shell and Windows download', () => {
+        const version = '0.119.0-75';
+        const url = `https://github.com/webgptorg/promptbook/releases/download/v${version}/Promptbook-Setup-${version}-windows-x64.exe`;
+        render(page('en', { preview: {
+            version, prerelease: true, publishedAt: '2026-11-08', listedAt: '2026-11-08',
+            downloads: { windows: { url, checksumUrl: `${url}.sha256` } },
+        } }));
+        expect(screen.getByText(`Preview release ${version}`)).toBeTruthy();
+        expect(screen.getByRole('tabpanel').textContent).toContain(`npm install --global ptbk@${version}`);
+        fireEvent.click(screen.getByRole('tab', { name: 'npm' }));
+        expect(screen.getByRole('tabpanel').textContent).toContain(`npm install --global ptbk@${version}`);
+        fireEvent.click(screen.getByRole('tab', { name: 'Shell' }));
+        expect(screen.getByRole('tabpanel').textContent).toContain(`bash -s -- --version ${version}`);
+        fireEvent.click(screen.getByRole('tab', { name: 'Windows EXE' }));
+        expect(screen.getByRole('link', { name: /Choose a Windows EXE/ }).getAttribute('href')).toBe(url);
+        expect(screen.getByRole('link', { name: 'SHA-256' }).getAttribute('href')).toBe(`${url}.sha256`);
+    });
+
     it('starts with the AI prompt and moves through all five methods from the keyboard', () => {
         render(page());
         const ai = screen.getByRole('tab', { name: 'Claude Code / Codex / AI' });
