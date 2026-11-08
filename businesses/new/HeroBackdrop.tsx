@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import s from './brand.module.css';
 
+type PointerLight = { element: HTMLSpanElement; x: number; y: number };
+
+/** A decorative light for each pointer, leaving hit testing and gestures to the page. */
 export function HeroBackdrop() {
     const backdrop = useRef<HTMLDivElement>(null);
 
@@ -12,57 +15,94 @@ export function HeroBackdrop() {
         if (!layer || !hero) return;
 
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const spots = new Map<number, HTMLSpanElement>();
+        const lights = new Map<number, PointerLight>();
+        let frame = 0;
 
-        function clearSpot({ pointerId }: PointerEvent) {
-            spots.get(pointerId)?.remove();
-            spots.delete(pointerId);
-        }
-
-        function clearAll() {
-            spots.forEach(spot => spot.remove());
-            spots.clear();
-        }
-
-        const track = (event: PointerEvent) => {
-            if (motion.matches) return;
-
-            let spot = spots.get(event.pointerId);
-            if (!spot) {
-                if (event.pointerType !== 'mouse' && event.type !== 'pointerdown') return;
-                spot = document.createElement('span');
-                spot.className = s.grainSpot;
-                layer.append(spot);
-                spots.set(event.pointerId, spot);
-            }
+        const paint = () => {
+            frame = 0;
+            if (!lights.size) return;
 
             const { left, top } = layer.getBoundingClientRect();
-            spot.style.transform = `translate3d(${event.clientX - left}px, ${event.clientY - top}px, 0)`;
+            lights.forEach(({ element, x, y }) => {
+                element.style.transform = `translate3d(${x - left}px, ${y - top}px, 0) translate(-50%, -50%)`;
+                if (!element.parentElement) {
+                    layer.append(element);
+                    element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' });
+                }
+            });
         };
 
-        function release(event: PointerEvent) {
-            if (event.pointerType !== 'mouse') clearSpot(event);
+        const track = ({ pointerId, pointerType, type, clientX, clientY }: PointerEvent) => {
+            if (motion.matches) return;
+
+            let light = lights.get(pointerId);
+            if (!light) {
+                if (pointerType !== 'mouse' && type !== 'pointerdown') return;
+                const element = document.createElement('span');
+                element.className = s.heroLight;
+                light = { element, x: clientX, y: clientY };
+                lights.set(pointerId, light);
+            } else {
+                light.x = clientX;
+                light.y = clientY;
+            }
+            if (!frame) frame = window.requestAnimationFrame(paint);
+        };
+
+        function fade({ pointerId }: PointerEvent) {
+            const light = lights.get(pointerId);
+            if (!light) return;
+            lights.delete(pointerId);
+
+            const { element } = light;
+            if (!element.parentElement) return;
+            const { opacity } = window.getComputedStyle(element);
+            const animation = element.animate([{ opacity }, { opacity: 0 }], {
+                duration: 320,
+                easing: 'ease-out',
+                fill: 'forwards',
+            });
+            animation.onfinish = () => element.remove();
         }
 
+        function release(event: PointerEvent) {
+            if (event.pointerType !== 'mouse') fade(event);
+        }
+
+        const clear = () => {
+            window.cancelAnimationFrame(frame);
+            frame = 0;
+            lights.clear();
+            layer.replaceChildren();
+        };
+
+        function updateMotion() {
+            if (motion.matches) clear();
+        }
+
+        hero.addEventListener('pointerenter', track, { passive: true });
         hero.addEventListener('pointermove', track, { passive: true });
         hero.addEventListener('pointerdown', track, { passive: true });
-        hero.addEventListener('pointerup', release);
-        hero.addEventListener('pointercancel', clearSpot);
-        hero.addEventListener('pointerleave', clearSpot);
-        window.addEventListener('blur', clearAll);
-        motion.addEventListener('change', clearAll);
+        hero.addEventListener('pointerleave', fade);
+        window.addEventListener('pointerup', release);
+        window.addEventListener('pointercancel', fade);
+        window.addEventListener('blur', clear);
+        document.addEventListener('visibilitychange', clear);
+        motion.addEventListener('change', updateMotion);
 
         return () => {
+            hero.removeEventListener('pointerenter', track);
             hero.removeEventListener('pointermove', track);
             hero.removeEventListener('pointerdown', track);
-            hero.removeEventListener('pointerup', release);
-            hero.removeEventListener('pointercancel', clearSpot);
-            hero.removeEventListener('pointerleave', clearSpot);
-            window.removeEventListener('blur', clearAll);
-            motion.removeEventListener('change', clearAll);
-            clearAll();
+            hero.removeEventListener('pointerleave', fade);
+            window.removeEventListener('pointerup', release);
+            window.removeEventListener('pointercancel', fade);
+            window.removeEventListener('blur', clear);
+            document.removeEventListener('visibilitychange', clear);
+            motion.removeEventListener('change', updateMotion);
+            clear();
         };
     }, []);
 
-    return <div ref={backdrop} className={s.heroBackdrop} aria-hidden="true"/>;
+    return <div ref={backdrop} className={s.heroBackdrop} aria-hidden="true" data-testid="hero-backdrop"/>;
 }

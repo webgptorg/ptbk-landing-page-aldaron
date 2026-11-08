@@ -1,7 +1,6 @@
 .brandPage{--brand:var(--ptbk-blue);--ink:var(--ptbk-ink,#111318);--muted:var(--ptbk-muted,#687383);--ice:var(--ptbk-surface,#eef4fb);isolation:isolate}
 .hero{position:relative;text-align:center;padding:48px 0 58px;margin:auto;max-width:1100px}
 .heroBackdrop {
-    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='grain' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath d='M0 0h160v160H0z' filter='url(%23grain)'/%3E%3C/svg%3E");
     position: absolute;
     z-index: -1;
     inset: 0 auto -36px 50%;
@@ -9,26 +8,22 @@
     transform: translateX(-50%);
     overflow: hidden;
     pointer-events: none;
-    background: radial-gradient(ellipse at 50% 40%, #edf4ff, transparent 70%);
-    mask-image: linear-gradient(transparent, #000 46px, #000);
+    background:
+        radial-gradient(ellipse 47% 61% at 28% 28%, #cedff955, transparent),
+        radial-gradient(ellipse 44% 65% at 75% 50%, #d9e1fa50, transparent),
+        radial-gradient(ellipse at 50% 40%, #edf4ff, transparent 70%);
+    mask-image: linear-gradient(transparent, #000 46px, #000 82%, transparent);
 }
-.heroBackdrop::before, .grainSpot {
+.heroLight {
     position: absolute;
-    background-image: var(--grain);
+    top: 0;
+    left: 0;
+    width: clamp(260px, 44vw, 620px);
+    aspect-ratio: 1.45;
+    background: radial-gradient(ellipse closest-side, #a6c8f557, #c7def649 38%, #e3eff820 68%, transparent);
 }
-.heroBackdrop::before {
-    content: '';
-    inset: 0;
-    opacity: .10;
-    mask-image: radial-gradient(ellipse at 50% 40%, #000, transparent 72%);
-}
-.grainSpot {
-    top: -90px;
-    left: -90px;
-    width: 180px;
-    height: 180px;
-    opacity: .18;
-    mask-image: radial-gradient(#000, transparent 68%);
+@media (prefers-reduced-motion: reduce) {
+    .heroLight { display: none; }
 }
 .hero h1{font-size:clamp(42px,6.3vw,80px);font-weight:500;letter-spacing:-.055em;line-height:1.1;max-width:1100px;margin:auto;text-wrap:balance}
 .hero h1>.heroReveal{display:block;color:var(--brand)}

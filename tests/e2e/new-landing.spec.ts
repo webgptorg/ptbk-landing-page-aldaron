@@ -97,6 +97,36 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
     for(const forbidden of ['Napíšete knihu','MangoWeb','Současný web','AI zaměstnanci pro vás','Instance je samostatné'])expect(text).not.toContain(forbidden);
 });
 
+test.describe('touch on the hero backdrop', () => {
+    test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+    test('shows separate lights for two touches and clears them when motion is reduced', async ({ page, context }) => {
+        await visit(page, '/cs');
+        const lights = page.getByTestId('hero-backdrop').locator('span');
+        const touch = await context.newCDPSession(page);
+        const left = { x: 85, y: 260, id: 1 };
+        const right = { x: 300, y: 305, id: 2 };
+
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [left] });
+        await expect(lights).toHaveCount(1);
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [left, right] });
+        await expect(lights).toHaveCount(2);
+        const centers = await lights.evaluateAll(nodes => nodes.map(node => {
+            const { x, y, width, height } = node.getBoundingClientRect();
+            return { x: Math.round(x + width / 2), y: Math.round(y + height / 2) };
+        }));
+        expect(centers).toEqual([{ x: left.x, y: left.y }, { x: right.x, y: right.y }]);
+
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+        await expect(lights).toHaveCount(0);
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [left] });
+        await expect(lights).toHaveCount(1);
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await expect(lights).toHaveCount(0);
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    });
+});
+
 test('app location and engine location are independent and the engine continues with the app closed',async({page})=>{
     await page.emulateMedia({reducedMotion:'reduce'});
     await visit(page,'/cs/bezpecnost');
