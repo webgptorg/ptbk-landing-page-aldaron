@@ -10,7 +10,7 @@ export function PromptbookRobotHead() {
 
     useEffect(() => {
         const svg = head.current?.ownerSVGElement;
-        const hero = svg?.closest('[data-landing-hero]');
+        const hero = svg?.closest<HTMLElement>('[data-landing-hero]');
         if (!svg || !hero) return;
 
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
