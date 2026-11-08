@@ -1,7 +1,8 @@
 import type { Article, ArticleLanguage } from '@/lib/articles/types';
 import { getArticlePodcastDefinition } from '@/lib/articles/podcast';
 import { getArticleUrl } from '@/lib/articles/urls';
-import { AI_TA_KRAJTA_COVER_IMAGE_PATH, AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
+import { AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
+import { PAVOL_KRAJTA_SHOW_ARTWORK_URL } from './pavolPodcastArtwork';
 import { topicFromSourceTitle } from './pavolPodcastCopy';
 import type { PavolPodcast } from './pavolPodcasts';
 
@@ -27,14 +28,9 @@ function getPodcastFeedTitle(podcast: PavolPodcast): string {
 function getPodcastFeedImageUrl(podcast: PavolPodcast, websiteUrl: string): string | undefined {
     if (podcast.source !== AI_TA_KRAJTA_NAME) return undefined;
 
-    const { episodeArtworkUrl } = podcast;
-    if (episodeArtworkUrl && publicUrl(episodeArtworkUrl)) {
-        const artwork = new URL(episodeArtworkUrl);
-        // The merged archive can also carry a rectangular YouTube thumbnail.
-        if (!artwork.hostname.endsWith('.ytimg.com')) return artwork.href;
-    }
-
-    return new URL(AI_TA_KRAJTA_COVER_IMAGE_PATH, websiteUrl).href;
+    return podcast.artworkVideoId
+        ? new URL(`/api/pavol/podcast-artwork/v1/${podcast.artworkVideoId}.jpg`, websiteUrl).href
+        : PAVOL_KRAJTA_SHOW_ARTWORK_URL;
 }
 
 /** One existing subscription address per language; source GUIDs and recordings remain unchanged. */

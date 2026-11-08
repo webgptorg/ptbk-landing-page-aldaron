@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { parsePodcastRssFeed } from '@/lib/podcast/parsePodcastRssFeed';
 import { createPavolFeed } from './pavolFeed';
 import { getArticles } from '@/lib/articles/load';
+import { PAVOL_KRAJTA_SHOW_ARTWORK_URL } from './pavolPodcastArtwork';
 import { getPavolAiTaKrajtaPodcasts, type PavolPodcast } from './pavolPodcasts';
 
 const appearance: PavolPodcast = {
@@ -16,13 +17,16 @@ describe('combined personal RSS', () => {
         ['cs', 'Od AI nápadu k reálným penězům: A jak škálovat byznys'],
         ['en', 'From an AI idea to revenue: scaling a business'],
     ] as const)('labels Krajta parts and specials and publishes their artwork in the %s feed', (language, multipartTopic) => {
-        const episodeCover = 'https://example.org/71-2.jpg?width=3000&variant=large';
         const feed = parsePodcastRssFeed(`<rss><channel><title>AI ta Krajta</title>
-            <item><title>Od AI nápadu k reálným penězům: A jak škálovat byznys | AItaKrajta #71-2</title><enclosure url="https://example.org/71-2.mp3" /><itunes:image href="${episodeCover.replace('&', '&amp;')}" /></item>
+            <item><title>Od AI nápadu k reálným penězům: A jak škálovat byznys | AItaKrajta #71-2</title><enclosure url="https://example.org/71-2.mp3" /><itunes:image href="https://example.org/71-2.jpg" /></item>
             <item><title>AI ta Krajta #999 | Nový díl &amp; AI</title><enclosure url="https://example.org/999.mp3" /></item>
-            <item><title>Rozhovor bez čísla | AItaKrajta speciál</title><enclosure url="https://example.org/special.mp3" /><itunes:image href="https://i3.ytimg.com/vi/example/hqdefault.jpg" /></item>
+            <item><title>Rozhovor bez čísla | AItaKrajta speciál</title><enclosure url="https://example.org/special.mp3" /></item>
             </channel></rss>`, { showTitle: 'AI ta Krajta' });
-        const podcasts = getPavolAiTaKrajtaPodcasts(feed.episodes.map(episode => ({ ...episode, personIds: ['pavol-hejny'] })), language);
+        const podcasts = getPavolAiTaKrajtaPodcasts(feed.episodes.map(episode => ({
+            ...episode,
+            personIds: ['pavol-hejny'],
+            videoUrl: episode.number === 999 ? 'https://www.youtube.com/watch?v=Yxy12aB3c4D' : null,
+        })), language);
         const doc = new DOMParser().parseFromString(createPavolFeed([], [...podcasts, appearance], language), 'application/xml');
         const titles = Object.fromEntries(Array.from(doc.querySelectorAll('item')).map(item => [
             item.querySelector('guid')?.textContent, item.querySelector('title')?.textContent,
@@ -38,13 +42,15 @@ describe('combined personal RSS', () => {
         const artwork = Object.fromEntries(Array.from(doc.querySelectorAll('item')).map(item => [
             item.querySelector('guid')?.textContent, item.getElementsByTagNameNS(itunes, 'image')[0]?.getAttribute('href'),
         ]));
-        const showCover = `https://pavolhejny.${language === 'cs' ? 'cz' : 'com'}/pavol/media/ai-ta-krajta.jpg`;
+        const artworkBaseUrl = `https://pavolhejny.${language === 'cs' ? 'cz' : 'com'}/api/pavol/podcast-artwork/v1/`;
         expect(artwork).toEqual({
-            'ai-ta-krajta:71': episodeCover,
-            'ai-ta-krajta:999': showCover,
-            'ai-ta-krajta:rozhovor-bez-cisla-aitakrajta-special': showCover,
+            'ai-ta-krajta:71': `${artworkBaseUrl}V1DKmqhDaHk.jpg`,
+            'ai-ta-krajta:999': `${artworkBaseUrl}Yxy12aB3c4D.jpg`,
+            'ai-ta-krajta:rozhovor-bez-cisla-aitakrajta-special': PAVOL_KRAJTA_SHOW_ARTWORK_URL,
             [appearance.id]: undefined,
         });
+        const part = Array.from(doc.querySelectorAll('item')).find(item => item.querySelector('guid')?.textContent === 'ai-ta-krajta:71');
+        expect(part?.querySelector('enclosure')?.getAttribute('url')).toBe('https://example.org/71-2.mp3');
         expect(doc.querySelector('channel')?.getElementsByTagNameNS(itunes, 'image')[0]?.getAttribute('href')).toBe('https://ptbk.io/article-podcasts/pavol-hejny-v2.png');
     });
 

@@ -1,4 +1,4 @@
-import { getPavolEpisodeCopy, getPavolAppearanceCopy } from './pavolPodcastCopy';
+import { getPavolEpisodeArtworkVideoId, getPavolEpisodeCopy, getPavolAppearanceCopy } from './pavolPodcastCopy';
 import type { AiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
 import { AI_TA_KRAJTA_COVER_IMAGE_PATH, AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
 import { createAiTaKrajtaEpisodePath } from '@/businesses/ai-ta-krajta/aiTaKrajtaViewState';
@@ -23,7 +23,7 @@ export type PavolPodcast = {
     readonly audioByteLength?: number;
     readonly durationInSeconds: number | null;
     readonly imageSrc?: string;
-    readonly episodeArtworkUrl?: string;
+    readonly artworkVideoId?: string;
 };
 
 export type PavolPodcastAppearance = Omit<PavolPodcast, 'description'> & {
@@ -50,7 +50,7 @@ export function getPavolAiTaKrajtaPodcasts(episodes: readonly AiTaKrajtaEpisode[
         audioByteLength: episode.audioByteLength,
         durationInSeconds: episode.durationInSeconds,
         imageSrc: AI_TA_KRAJTA_COVER_IMAGE_PATH,
-        episodeArtworkUrl: episode.imageUrl ?? undefined,
+        artworkVideoId: getPavolEpisodeArtworkVideoId(episode),
     })).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
 }
 

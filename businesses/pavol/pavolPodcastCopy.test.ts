@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPavolEpisodeCopy } from './pavolPodcastCopy';
+import { getPavolEpisodeArtworkVideoId, getPavolEpisodeCopy } from './pavolPodcastCopy';
 import { AI_TA_KRAJTA_INTERNAL_EPISODES, createAiTaKrajtaInternalEpisodes } from '@/businesses/ai-ta-krajta/aiTaKrajtaInternalEpisodes';
 import { mergePodcastEpisodes } from '@/lib/podcast/mergePodcastEpisodes';
 import { getPavolAiTaKrajtaPodcasts } from './pavolPodcasts';
@@ -13,6 +13,12 @@ describe('reviewed English episode metadata', () => {
         getPavolAiTaKrajtaPodcasts(episodes, 'cs');
         getPavolAiTaKrajtaPodcasts(episodes, 'en');
         expect(episodes).toEqual(before);
+    });
+    it('does not use one YouTube part as the artwork for the full episode', () => {
+        expect(getPavolEpisodeArtworkVideoId({
+            title: 'Jev není AGI: Největší inovace možná není nový model | AItaKrajta #68 (plný díl)',
+            videoUrl: 'https://www.youtube.com/watch?v=4e3BUNuyQmQ',
+        })).toBeUndefined();
     });
     it('covers every internally credited appearance without changing recording language or participation', () => {
         const selected = getPavolAiTaKrajtaPodcasts(episodes, 'en');

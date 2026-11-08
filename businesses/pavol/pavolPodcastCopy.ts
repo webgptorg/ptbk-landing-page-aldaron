@@ -1,5 +1,6 @@
 import type { AiTaKrajtaEpisode } from '@/businesses/ai-ta-krajta/AiTaKrajtaEpisode';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { extractYoutubeVideoId } from '@/lib/youtube/youtubeEmbed';
 
 export type PavolPodcastCopy = {
     readonly title: string;
@@ -562,7 +563,7 @@ const EPISODE_COPY: readonly EpisodeCopy[] = [
     {
         "number": 70,
         "sourceTitle": "Nová éra VZP - skok do hackathonů a digitalizace | AItaKrajta Speciální #70 díl",
-        "videoId": null,
+        "videoId": "B3LhaYhWmn4",
         "csTitle": "Nová éra VZP - skok do hackathonů a digitalizace",
         "enTitle": "VZP, healthcare hackathons, and digital transformation",
         "enDescription": "Ivan Duškov joins a conversation about Rakathon, healthcare challenges, screening, and using AI in practice."
@@ -594,7 +595,7 @@ const EPISODE_COPY: readonly EpisodeCopy[] = [
     {
         "number": 67,
         "sourceTitle": "AI ta Krajta #67 | 10 000 agentů řeší matematiku? Astra, DeepSeek a coding agents",
-        "videoId": null,
+        "videoId": "95qXM3YO9Cc",
         "csTitle": "10 000 agentů řeší matematiku? Astra, DeepSeek a coding agents",
         "enTitle": "Ten thousand agents doing maths? Astra, DeepSeek, and coding workflows",
         "enDescription": "Coding harnesses, model routing, human time, and a discussion of claims about large agent teams solving mathematical problems."
@@ -602,7 +603,7 @@ const EPISODE_COPY: readonly EpisodeCopy[] = [
     {
         "number": 66,
         "sourceTitle": "AI ta Krajta #66 | Nový Fable, AI benchmarky, subscription limity a vlastní hardware",
-        "videoId": null,
+        "videoId": "vIk9kX62In8",
         "csTitle": "Nový Fable, AI benchmarky, subscription limity a vlastní hardware",
         "enTitle": "Fable, benchmarks, subscription limits, and your own hardware",
         "enDescription": "Model performance and the trade-offs between API access, subscriptions, rented infrastructure, and local hardware."
@@ -645,12 +646,10 @@ export function topicFromSourceTitle(title: string): string {
     return title;
 }
 
-function videoIdFromUrl(value: string | null): string | undefined {
-    if (!value) return undefined;
-    try {
-        const url = new URL(value);
-        return url.hostname === 'youtu.be' ? url.pathname.slice(1) : url.searchParams.get('v') ?? undefined;
-    } catch { return undefined; }
+/** An exact match can also record that the complete audio episode has no corresponding full-length video. */
+export function getPavolEpisodeArtworkVideoId(episode: Pick<AiTaKrajtaEpisode, 'title' | 'videoUrl'>): string | undefined {
+    const reviewed = byTitle.get(episode.title.normalize('NFC').trim());
+    return (reviewed ? reviewed.videoId : extractYoutubeVideoId(episode.videoUrl)) ?? undefined;
 }
 
 /** Exact publisher/video identity wins over a number, so split episodes and specials retain their own subjects. */
@@ -658,7 +657,7 @@ export function getPavolEpisodeCopy(
     episode: Pick<AiTaKrajtaEpisode, 'id' | 'slug' | 'number' | 'title' | 'shortTitle' | 'summary' | 'videoUrl'>,
     language: SupportedHomepageLanguage,
 ): PavolPodcastCopy {
-    const videoId = videoIdFromUrl(episode.videoUrl);
+    const videoId = extractYoutubeVideoId(episode.videoUrl);
     const copy = byTitle.get(episode.title.normalize('NFC').trim())
         ?? (videoId ? byVideo.get(videoId) : undefined)
         ?? (episode.number !== null ? byNumber.get(episode.number) : undefined);

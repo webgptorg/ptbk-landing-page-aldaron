@@ -276,7 +276,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Personal articles/podcast.xml subscriptions now combine matching-language articles with Pavol's filtered appearances,
   refresh hourly, preserve article GUIDs and canonical source audio, and identify original recording languages.
   Their AI ta Krajta items prefix the topic with the show name and the published number, including split parts. Unnumbered specials use the show name alone.
-  These items publish the source episode artwork with the show cover as fallback, including when the archive has only a video thumbnail.
+  These items use the matching YouTube episode thumbnail in a 1400-pixel square JPEG that preserves the whole frame.
+  Missing videos or thumbnails use the publisher's full-bleed square show cover. The artwork route is scoped to the personal domains.
   They are linked from both archives and the footer through a subscription dialog with copy, explicit XML and supported Subscribe on Android actions. The footer label is Podcast. Personal feeds use the versioned portrait-led podcast cover; feed URLs and GUIDs stay stable. Promptbook article-only feeds stay independent.
   Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu with reduced-motion-aware icon and panel transitions.
   The introduction, projects, testimonials, and media remain readable without animated reveals; older media
