@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import s from './hero-headline.module.css';
 
-const REST = { yaw: 0, pitch: 0 };
+const CENTER = { x: 0, y: 0 };
+const REST = { head: CENTER, eyes: CENTER };
 const clamp = (value: number) => Math.max(-1, Math.min(1, value));
+
+function easeToward(current: typeof CENTER, target: typeof CENTER, elapsed: number, timeConstant: number) {
+    const dx = target.x - current.x;
+    const dy = target.y - current.y;
+    if (Math.abs(dx) < .002 && Math.abs(dy) < .002) return target;
+
+    const smoothing = 1 - Math.exp(-elapsed / timeConstant);
+    return { x: current.x + dx * smoothing, y: current.y + dy * smoothing };
+}
 
 export function PromptbookRobotHead() {
     const head = useRef<SVGGElement>(null);
@@ -14,29 +24,25 @@ export function PromptbookRobotHead() {
         if (!svg || !hero) return;
 
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        let target = REST;
+        let target = CENTER;
         let current = REST;
         let activePointer: number | undefined;
+        let activeTouch: number | undefined;
         let frame: number | undefined;
         let previousTime = 0;
 
         function animate(now: number) {
             const elapsed = Math.max(0, Math.min(now - previousTime, 50));
-            const smoothing = 1 - Math.exp(-elapsed / 80);
             previousTime = now;
-            const yaw = target.yaw - current.yaw;
-            const pitch = target.pitch - current.pitch;
-            if (Math.abs(yaw) < .001 && Math.abs(pitch) < .001) {
-                current = target;
-                frame = undefined;
-            } else {
-                current = { yaw: current.yaw + yaw * smoothing, pitch: current.pitch + pitch * smoothing };
-                frame = window.requestAnimationFrame(animate);
-            }
+            current = {
+                head: easeToward(current.head, target, elapsed, 105),
+                eyes: easeToward(current.eyes, target, elapsed, 36),
+            };
+            frame = current.head === target && current.eyes === target ? undefined : window.requestAnimationFrame(animate);
             setLook(current);
         }
 
-        function lookAt(next: typeof REST) {
+        function lookAt(next: typeof CENTER) {
             target = next;
             if (frame === undefined) {
                 previousTime = performance.now();
@@ -44,39 +50,69 @@ export function PromptbookRobotHead() {
             }
         }
 
-        const track = (event: PointerEvent) => {
-            if (motion.matches || !event.isPrimary) return;
-            if (event.pointerType !== 'mouse' && event.type !== 'pointerdown' && activePointer !== event.pointerId) return;
-            activePointer = event.pointerId;
-
+        const trackPosition = (clientX: number, clientY: number) => {
             const bounds = svg.getBoundingClientRect();
             // The center of the head in the neutral 112 × 112 view box.
-            const x = event.clientX - (bounds.left + bounds.width / 2);
-            const y = event.clientY - (bounds.top + bounds.height * 45.12 / 112);
-            lookAt({ yaw: .45 * clamp(x / 180), pitch: -.20 * clamp(y / 180) });
+            const x = clientX - (bounds.left + bounds.width / 2);
+            const y = clientY - (bounds.top + bounds.height * 45.12 / 112);
+            lookAt({ x: clamp(x / 180), y: clamp(y / 180) });
         };
+
+        function trackPointer(event: PointerEvent) {
+            if (motion.matches || !event.isPrimary || event.pointerType === 'touch' || activeTouch !== undefined) return;
+            if (event.pointerType !== 'mouse' && event.type !== 'pointerdown' && activePointer !== event.pointerId) return;
+            activePointer = event.pointerId;
+            trackPosition(event.clientX, event.clientY);
+        }
 
         function release(event: PointerEvent) {
             if (event.pointerId !== activePointer) return;
             activePointer = undefined;
-            lookAt(REST);
+            lookAt(CENTER);
         }
 
         function lift(event: PointerEvent) {
             if (event.pointerType !== 'mouse') release(event);
         }
 
+        // Native scrolling cancels touch pointer events, but passive touch events keep following the finger.
+        function startTouch(event: TouchEvent) {
+            if (motion.matches || activeTouch !== undefined || event.touches.length !== 1) return;
+            const touch = event.changedTouches[0];
+            activePointer = undefined;
+            activeTouch = touch.identifier;
+            trackPosition(touch.clientX, touch.clientY);
+        }
+
+        function moveTouch(event: TouchEvent) {
+            if (activeTouch === undefined) return;
+            const touch = Array.from(event.changedTouches).find(({ identifier }) => identifier === activeTouch);
+            if (touch) trackPosition(touch.clientX, touch.clientY);
+        }
+
+        function endTouch(event: TouchEvent) {
+            if (activeTouch === undefined || Array.from(event.touches).some(({ identifier }) => identifier === activeTouch)) return;
+            activeTouch = undefined;
+            lookAt(CENTER);
+        }
+
         function reset() {
             if (frame !== undefined) window.cancelAnimationFrame(frame);
             frame = undefined;
             activePointer = undefined;
-            current = target = REST;
+            activeTouch = undefined;
+            target = CENTER;
+            current = REST;
             setLook(REST);
         }
 
-        hero.addEventListener('pointerdown', track, { passive: true });
-        hero.addEventListener('pointermove', track, { passive: true });
+        hero.addEventListener('pointerdown', trackPointer, { passive: true });
+        hero.addEventListener('pointermove', trackPointer, { passive: true });
         hero.addEventListener('pointerleave', release);
+        hero.addEventListener('touchstart', startTouch, { passive: true });
+        window.addEventListener('touchmove', moveTouch, { passive: true });
+        window.addEventListener('touchend', endTouch, { passive: true });
+        window.addEventListener('touchcancel', endTouch, { passive: true });
         window.addEventListener('pointerup', lift);
         window.addEventListener('pointercancel', release);
         window.addEventListener('blur', reset);
@@ -84,9 +120,13 @@ export function PromptbookRobotHead() {
         motion.addEventListener('change', reset);
         return () => {
             if (frame !== undefined) window.cancelAnimationFrame(frame);
-            hero.removeEventListener('pointerdown', track);
-            hero.removeEventListener('pointermove', track);
+            hero.removeEventListener('pointerdown', trackPointer);
+            hero.removeEventListener('pointermove', trackPointer);
             hero.removeEventListener('pointerleave', release);
+            hero.removeEventListener('touchstart', startTouch);
+            window.removeEventListener('touchmove', moveTouch);
+            window.removeEventListener('touchend', endTouch);
+            window.removeEventListener('touchcancel', endTouch);
             window.removeEventListener('pointerup', lift);
             window.removeEventListener('pointercancel', release);
             window.removeEventListener('blur', reset);
@@ -95,10 +135,12 @@ export function PromptbookRobotHead() {
         };
     }, []);
 
-    const cosYaw = Math.cos(look.yaw);
-    const sinYaw = Math.sin(look.yaw);
-    const cosPitch = Math.cos(look.pitch);
-    const sinPitch = Math.sin(look.pitch);
+    const yaw = .55 * look.head.x;
+    const pitch = -.26 * look.head.y;
+    const cosYaw = Math.cos(yaw);
+    const sinYaw = Math.sin(yaw);
+    const cosPitch = Math.cos(pitch);
+    const sinPitch = Math.sin(pitch);
     // Rotate the cube around its neck and project into the mascot's isometric view.
     function project(x: number, y: number, z: number) {
         const side = (x * (cosYaw + sinYaw) + z * (sinYaw - cosYaw)) / Math.SQRT2;
@@ -127,8 +169,10 @@ export function PromptbookRobotHead() {
         <polygon points={[frontBottomLeft, frontBottomRight, frontTopRight, frontTopLeft].join(' ')} fill="#FFFFFF"/>
         <g transform={faceTransform} fill="#FFFFFF" stroke="none">
             <rect x=".16" y=".23" width=".68" height=".54" rx=".095" fill="#111318"/>
-            <rect x=".353" y=".385" width=".0422" height=".0842"/>
-            <rect x=".605" y=".385" width=".0422" height=".0842"/>
+            <g data-promptbook-robot-eyes transform={`translate(${.085 * look.eyes.x} ${.05 * look.eyes.y})`}>
+                <rect x=".353" y=".385" width=".0422" height=".0842"/>
+                <rect x=".605" y=".385" width=".0422" height=".0842"/>
+            </g>
             <rect x=".353" y=".553" width=".0422" height=".0422"/>
             <rect x=".395" y=".595" width=".0422" height=".0422"/>
             <rect x=".437" y=".637" width=".1262" height=".0422"/>

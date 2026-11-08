@@ -97,8 +97,38 @@ test('home and partnership share a compact keyboard carousel and ungrouped testi
     for(const forbidden of ['Napíšete knihu','MangoWeb','Současný web','AI zaměstnanci pro vás','Instance je samostatné'])expect(text).not.toContain(forbidden);
 });
 
-test.describe('touch on the hero backdrop', () => {
+test.describe('touch in the hero', () => {
     test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+    test('the robot keeps following the finger during native scrolling', async ({ page, context }) => {
+        await visit(page, '/cs');
+        const face = page.locator('[data-promptbook-robot-head] > g');
+        const eyes = face.locator('[data-promptbook-robot-eyes]');
+        const restingHead = await face.getAttribute('transform');
+        const restingEyes = await eyes.getAttribute('transform');
+        const faceWidth = () => face.evaluate((node: SVGGElement) => node.transform.baseVal.getItem(0).matrix.a);
+        const eyesOffset = () => eyes.evaluate((node: SVGGElement) => node.transform.baseVal.getItem(0).matrix.e);
+        const touch = await context.newCDPSession(page);
+        const drag = (type: 'touchStart' | 'touchMove', x: number, y: number) =>
+            touch.send('Input.dispatchTouchEvent', { type, touchPoints: [{ x, y, id: 1 }] });
+
+        await drag('touchStart', 80, 370);
+        await expect.poll(eyesOffset).toBeLessThan(-.02);
+        await expect(face).not.toHaveAttribute('transform', restingHead!);
+
+        for (let y = 350; y >= 250; y -= 20) await drag('touchMove', 80, y);
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(35);
+        await expect.poll(eyesOffset).toBeLessThan(-.02);
+        const leftFacingWidth = await faceWidth();
+
+        await drag('touchMove', 300, 240);
+        await expect.poll(eyesOffset).toBeGreaterThan(.02);
+        await expect.poll(faceWidth).toBeGreaterThan(leftFacingWidth + 8);
+
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+        await expect(eyes).toHaveAttribute('transform', restingEyes!);
+        await expect(face).toHaveAttribute('transform', restingHead!);
+    });
 
     test('shows separate lights for two touches and clears them when motion is reduced', async ({ page, context }) => {
         await visit(page, '/cs');

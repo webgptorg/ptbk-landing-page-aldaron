@@ -28,13 +28,15 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('hero working headline', () => {
-    it('turns only the head toward the pointer and returns to rest on touch cancellation', () => {
+    it('moves the eyes and head toward the pointer and returns to rest on touch cancellation', () => {
         const { container } = render(<section data-landing-hero><HeroHeadline/></section>);
         const hero = container.querySelector('[data-landing-hero]')!;
         const face = hero.querySelector('[data-promptbook-robot-head] g')!;
+        const eyes = face.querySelector('[data-promptbook-robot-eyes]')!;
         const foot = hero.querySelector('[data-promptbook-robot] > g > polygon')!;
         const getPose = () => face.getAttribute('transform');
         const rest = getPose();
+        const restingEyes = eyes.getAttribute('transform');
         const footPoints = foot.getAttribute('points');
 
         function pointer(type: string, pointerType: 'mouse' | 'touch', clientX: number) {
@@ -46,19 +48,35 @@ describe('hero working headline', () => {
             });
         }
 
+        function touch(type: string, clientX: number) {
+            const contact = { identifier: 1, clientX, clientY: 100 };
+            act(() => {
+                hero.dispatchEvent(new TouchEvent(type, {
+                    bubbles: true,
+                    touches: type === 'touchcancel' ? [] : [contact as Touch],
+                    changedTouches: [contact as Touch],
+                }));
+                vi.advanceTimersByTime(800);
+            });
+        }
+
         pointer('pointermove', 'mouse', 160);
         expect(getPose()).not.toBe(rest);
+        expect(eyes.getAttribute('transform')).not.toBe(restingEyes);
         expect(foot.getAttribute('points')).toBe(footPoints);
         pointer('pointerleave', 'mouse', 160);
         expect(getPose()).toBe(rest);
 
-        pointer('pointerdown', 'touch', -160);
+        touch('touchstart', -160);
         const left = getPose();
         expect(left).not.toBe(rest);
-        pointer('pointermove', 'touch', 160);
+        pointer('pointercancel', 'touch', -160);
+        expect(getPose()).toBe(left);
+        touch('touchmove', 160);
         expect(getPose()).not.toBe(left);
-        pointer('pointercancel', 'touch', 160);
+        touch('touchcancel', 160);
         expect(getPose()).toBe(rest);
+        expect(eyes.getAttribute('transform')).toBe(restingEyes);
     });
 
     it('starts with the complete accessible promise and changes activities only after the introduction', () => {
