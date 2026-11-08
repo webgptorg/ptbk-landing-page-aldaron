@@ -1,5 +1,6 @@
 import 'server-only';
 import { createHash, randomUUID } from 'node:crypto';
+import { readElevenLabsErrorCode } from '@/lib/audio-player/elevenLabsNarration';
 import { runDatabaseTransaction } from '@/lib/database/runDatabaseTransaction';
 import { getStoryBookText, getStoryVoiceFromObjectKey, getStoryVoiceId, STORY_VOICE_OBJECT_PREFIX } from './storyRoomBook';
 import { readStoryVoiceSubject, StoryRoomError, type StoryAccess, type StoryVoiceSubject } from './storyRoomDatabase';
@@ -7,6 +8,11 @@ import { readStoryVoiceSubject, StoryRoomError, type StoryAccess, type StoryVoic
 const API_ORIGIN = 'https://api.elevenlabs.io';
 const VOICE_SAMPLE = 'Za regálem tiše zašustil papír. Poslouchej, kniha má pro nás zprávu. Pojď blíž a podíváme se, jak to celé začalo.';
 const VOICE_TIMEOUT = 65_000;
+
+async function voiceError(response: Response, operation: string) {
+    const code = await readElevenLabsErrorCode(response);
+    return new Error(`ElevenLabs ${operation} HTTP ${response.status}${code ? ` (${code})` : ''}`);
+}
 
 type VoiceCacheRow = { workshop_id: string; object_key: string | null; is_pending: boolean; is_cooling_down: boolean };
 
@@ -43,7 +49,7 @@ async function generateVoice(subject: StoryVoiceSubject, key: string, signal: Ab
     const voiceName = `Promptbook Story ${createHash('sha256').update(subject.key).digest('hex').slice(0, 20)}`;
     // Recover an already saved provider voice if an earlier job lost its response or cache row.
     const lookup = await fetch(`${API_ORIGIN}/v2/voices?search=${encodeURIComponent(voiceName)}&page_size=100`, { headers, signal });
-    if (!lookup.ok) throw new Error(`ElevenLabs voice lookup HTTP ${lookup.status}`);
+    if (!lookup.ok) throw await voiceError(lookup, 'voice lookup');
     const found = await lookup.json() as { voices?: { name: string; voice_id: string }[] };
     const existing = found.voices?.find(({ name }) => name === voiceName);
     if (existing) {
@@ -64,7 +70,7 @@ async function generateVoice(subject: StoryVoiceSubject, key: string, signal: Ab
             text: VOICE_SAMPLE, stream_previews: true,
         }),
     });
-    if (!preview.ok) throw new Error(`ElevenLabs Voice Design HTTP ${preview.status}`);
+    if (!preview.ok) throw await voiceError(preview, 'Voice Design');
     const data = await preview.json() as { previews?: { generated_voice_id: string; language?: string }[] };
     const selected = data.previews?.find(({ language }) => language === 'cs') ?? data.previews?.[0];
     const previewId = getStoryVoiceId(selected?.generated_voice_id);
@@ -75,7 +81,7 @@ async function generateVoice(subject: StoryVoiceSubject, key: string, signal: Ab
             voice_name: voiceName, voice_description: voiceDescription, generated_voice_id: previewId,
         }),
     });
-    if (!created.ok) throw new Error(`ElevenLabs voice save HTTP ${created.status}`);
+    if (!created.ok) throw await voiceError(created, 'voice save');
     const result = await created.json() as { voice_id?: string };
     const id = getStoryVoiceId(result.voice_id);
     if (!id) throw new Error('ElevenLabs returned no saved voice ID.');

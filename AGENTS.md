@@ -140,8 +140,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   down, the narrator reads the affected line. The fallback is cached separately from the actor's own recording.
   A pending design can finish first, after which each requested line can render independently. The shared player assembles the private
   immutable clips into one seekable track and offsets their measured word timings. A voice change invalidates the
-  affected clip. The story can also be read using a Czech voice installed on the reader's device. This explicit
-  browser action only selects local voices, without requesting cloud audio. The room is excluded from analytics.
+  affected clip. The room is excluded from analytics.
   Other event miniapps can use the event type registry and the same workshop entry/moderation endpoints.
 
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,

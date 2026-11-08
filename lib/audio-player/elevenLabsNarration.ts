@@ -1,6 +1,17 @@
 import 'server-only';
 import type { ArticleWordTimings } from '@/businesses/articles/articleTiming';
 
+export async function readElevenLabsErrorCode(response: Response): Promise<string | undefined> {
+    const body = await response.json().catch(() => undefined) as { detail?: { code?: unknown; status?: unknown } } | undefined;
+    const code = body?.detail?.code ?? body?.detail?.status;
+    return typeof code === 'string' && /^[a-z][a-z0-9_]{0,63}$/.test(code) ? code : undefined;
+}
+
+async function narrationError(response: Response, message: string) {
+    const code = await readElevenLabsErrorCode(response);
+    return Object.assign(new Error(message), { providerStatus: response.status, providerCode: code });
+}
+
 export type CharacterAlignment = { characters: string[]; character_start_times_seconds: number[]; character_end_times_seconds: number[] };
 /** Attach measured intervals only when ElevenLabs returned the exact text submitted. */
 export function mapSpeechAlignment(
@@ -33,7 +44,7 @@ export async function resolveElevenLabsNarrator(key: string, signal: AbortSignal
     const id = process.env.ELEVENLABS_VOICE_ID?.trim();
     if (id) return { id, name };
     const response = await fetch(`https://api.elevenlabs.io/v2/voices?search=${encodeURIComponent(name)}&page_size=100`, { headers: { 'xi-api-key': key }, signal });
-    if (!response.ok) throw new Error('Hlas se nepodařilo ověřit v ElevenLabs.');
+    if (!response.ok) throw await narrationError(response, 'Hlas se nepodařilo ověřit v ElevenLabs.');
     const data = await response.json() as { voices?: { voice_id: string; name: string }[] };
     const matches = data.voices?.filter((voice) => voice.name === name) ?? [];
     if (matches.length !== 1) throw new Error('Nastavte ELEVENLABS_VOICE_ID pro hlas Pavol Hejný 2026.');
@@ -58,7 +69,7 @@ export async function synthesizeElevenLabsNarration(
             ...(previousText ? { previous_text: previousText } : {}),
         }),
     });
-    if (!response.ok) throw new Error(`ElevenLabs odmítlo generování (HTTP ${response.status}). Ověřte přístup k hlasu a kredity.`);
+    if (!response.ok) throw await narrationError(response, `ElevenLabs odmítlo generování (HTTP ${response.status}). Ověřte přístup k hlasu a kredity.`);
     const result = await response.json() as { audio_base64?: string; alignment?: CharacterAlignment };
     if (!result.audio_base64) throw new Error('ElevenLabs nevrátilo nahrávku. Před dalším pokusem zkontrolujte historii generování.');
     return { bytes: Buffer.from(result.audio_base64, 'base64'), alignment: result.alignment };

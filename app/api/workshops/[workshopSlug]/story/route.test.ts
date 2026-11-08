@@ -376,12 +376,19 @@ it('reads dialogue with the narrator when Voice Design is denied and switches to
             const name = new globalThis.URL(url).searchParams.get('search');
             return Response.json({ voices: savedVoice ? [{ name, voice_id: savedVoice }] : [] });
         }
-        if (url.endsWith('/text-to-voice/design')) return Response.json({}, { status: 403 });
+        if (url.endsWith('/text-to-voice/design')) {
+            return Response.json({ detail: { code: 'feature_not_available', message: 'Provider response details' } }, { status: 403 });
+        }
         return Response.json({ audio_base64: Buffer.from('mp3').toString('base64') });
     });
     vi.stubGlobal('fetch', provider);
     const clip = () => post(undefined, { action: 'audio', storyId: story.id, segmentId: speech.id });
-    const first = await clip();
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const first = await clip().finally(() => {
+        const calls = [...warning.mock.calls];
+        warning.mockRestore();
+        expect(calls).toEqual([['Workshop voice design failed.', 'ElevenLabs Voice Design HTTP 403 (feature_not_available)']]);
+    });
     expect(first.status).toBe(200);
     const fallback = await first.json() as { url: string };
     expect(fallback).toMatchObject({ voice: PAVOL, url: expect.stringContaining('storage.invalid') });

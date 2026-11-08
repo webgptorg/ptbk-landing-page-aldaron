@@ -115,7 +115,11 @@ export async function getStoryAudioClip(
         return { url: await signStoredObject(objectKey), timings, voice };
     } catch (error) {
         if (error instanceof StoryRoomError) throw error;
-        console.warn('Story narration failed.', error instanceof Error ? error.message : 'unknown');
+        if (error instanceof Error && 'providerStatus' in error && 'providerCode' in error) {
+            console.warn('Story narration failed.', error.message, { providerStatus: error.providerStatus, providerCode: error.providerCode });
+        } else {
+            console.warn('Story narration failed.', error instanceof Error ? error.message : 'unknown');
+        }
         throw new StoryRoomError(502, 'Některý z hlasů se teď nepodařilo načíst. Zkus to znovu.');
     } finally {
         if (!published) {
