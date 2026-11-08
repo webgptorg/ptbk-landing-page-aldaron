@@ -130,9 +130,10 @@ test.describe('touch in the hero', () => {
         await expect(face).toHaveAttribute('transform', restingHead!);
     });
 
-    test('shows separate lights for two touches and clears them when motion is reduced', async ({ page, context }) => {
+    test('shows separate lights for two touches and honors display preferences', async ({ page, context }) => {
         await visit(page, '/cs');
-        const lights = page.getByTestId('hero-backdrop').locator('span');
+        const backdrop = page.getByTestId('hero-backdrop');
+        const lights = backdrop.locator('span');
         const touch = await context.newCDPSession(page);
         const left = { x: 85, y: 260, id: 1 };
         const right = { x: 300, y: 305, id: 2 };
@@ -154,6 +155,13 @@ test.describe('touch in the hero', () => {
         await page.emulateMedia({ reducedMotion: 'reduce' });
         await expect(lights).toHaveCount(0);
         await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await page.mouse.move(160, 260);
+        await expect(lights).toHaveCount(1);
+        await page.emulateMedia({ forcedColors: 'active' });
+        await expect(backdrop).toBeHidden();
+        await expect(lights).toHaveCount(0);
     });
 });
 

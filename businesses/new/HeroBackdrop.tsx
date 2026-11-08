@@ -14,7 +14,7 @@ export function HeroBackdrop() {
         const hero = layer?.parentElement;
         if (!layer || !hero) return;
 
-        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const staticBackdrop = window.matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
         const lights = new Map<number, PointerLight>();
         let frame = 0;
 
@@ -33,7 +33,7 @@ export function HeroBackdrop() {
         };
 
         const track = ({ pointerId, pointerType, type, clientX, clientY }: PointerEvent) => {
-            if (motion.matches) return;
+            if (staticBackdrop.matches) return;
 
             let light = lights.get(pointerId);
             if (!light) {
@@ -76,8 +76,8 @@ export function HeroBackdrop() {
             layer.replaceChildren();
         };
 
-        function updateMotion() {
-            if (motion.matches) clear();
+        function updateBackdrop() {
+            if (staticBackdrop.matches) clear();
         }
 
         hero.addEventListener('pointerenter', track, { passive: true });
@@ -88,7 +88,7 @@ export function HeroBackdrop() {
         window.addEventListener('pointercancel', fade);
         window.addEventListener('blur', clear);
         document.addEventListener('visibilitychange', clear);
-        motion.addEventListener('change', updateMotion);
+        staticBackdrop.addEventListener('change', updateBackdrop);
 
         return () => {
             hero.removeEventListener('pointerenter', track);
@@ -99,7 +99,7 @@ export function HeroBackdrop() {
             window.removeEventListener('pointercancel', fade);
             window.removeEventListener('blur', clear);
             document.removeEventListener('visibilitychange', clear);
-            motion.removeEventListener('change', updateMotion);
+            staticBackdrop.removeEventListener('change', updateBackdrop);
             clear();
         };
     }, []);

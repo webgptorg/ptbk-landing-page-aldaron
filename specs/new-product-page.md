@@ -4,7 +4,7 @@
 
 Nejnovější večerní zadání z 25. října 2026 platí shodně pro českou a anglickou hlavní i partnerskou stránku. Zachovává světlý blueprint, jednoduchost a prémiový, plynulý dojem. Původní pětizáložkové demo zůstává pouze na přehledu agend a detailech.
 
-Od 8. listopadu úvodní pozadí navazuje na navigaci hladkým světle modrým přechodem. Pod kurzorem a každým aktivním dotykem se objeví měkký odlesk, který po odchodu nebo uvolnění plynule zhasne. Posouvání i přiblížení fungují nativně. Při omezení pohybu je pozadí statické.
+Od 8. listopadu úvodní pozadí navazuje na navigaci hladkým světle modrým přechodem. Měkký odlesk plynule sleduje kurzor i každý aktivní dotyk a po odchodu nebo uvolnění dozní. Posouvání i přiblížení fungují nativně. Při omezení pohybu je gradient statický, ve vynucených barvách se použije systémové pozadí.
 
 ### Pořadí bloků
 
