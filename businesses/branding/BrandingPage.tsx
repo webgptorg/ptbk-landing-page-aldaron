@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { PROMPTBOOK_BRAND as brand, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import { CopyText } from './CopyText';
+import { RobotBrandSection } from './RobotBrandSection';
 import s from './branding.module.css';
 
 type Language = 'cs' | 'en';
@@ -23,6 +24,7 @@ export function BrandingPage({ language }: { language: Language }) {
         ['logo', text('Logo', 'Logo')], ['rules', text('Použití', 'Usage')],
         ['colors', text('Barvy', 'Colors')], ['type', text('Písmo', 'Type')],
         ['copy', text('Texty', 'Copy')], ['examples', text('Šablony', 'Templates')],
+        ['robot', text('Robot', 'Robot')],
     ];
     return <article data-promptbook-brand-kit className={s.page} style={PROMPTBOOK_BRAND_STYLE}>
         <header className={s.intro}>
@@ -114,13 +116,14 @@ export function BrandingPage({ language }: { language: Language }) {
             <div className={s.templates}>{(['slide', 'social'] as const).map(kind => <figure key={kind}><Image src={`/brand/promptbook-${kind}-${language}.png`} width={kind === 'slide' ? 1600 : 1200} height={kind === 'slide' ? 900 : 630} alt={text(kind === 'slide' ? 'Šablona prezentačního slidu' : 'Šablona příspěvku na sociální sítě',kind === 'slide' ? 'Presentation slide template' : 'Social post template')}/><figcaption><h3>{kind === 'slide' ? text('Prezentace · 16 : 9', 'Presentation · 16 : 9') : text('Sociální sítě · 1200 × 630', 'Social · 1200 × 630')}</h3><Downloads base={`/brand/promptbook-${kind}-${language}`} pngLabel="PNG"/></figcaption></figure>)}</div>
             <div className={s.partnerExample}><div><p>{text('AI agenti pro naše klienty', 'AI agents for our clients')}</p><Image src={brand.assets.lockupLight} width={230} height={Math.round(230 * lockupHeight / lockupWidth)} alt="Promptbook"/></div><div><h3>{text('Partnerský web', 'Partner website')}</h3><p>{text('Použijte celé logo s odkazem na ptbk.io. Vlastní značku nechte oddělenou.', 'Use the complete logo linked to ptbk.io. Keep your own brand separate.')}</p><Downloads base="/brand/promptbook-lockup-light" pngLabel="PNG"/></div></div>
             <p className={s.note}>{text('SVG šablony lze upravit; používají Outfit a Inter. PNG mají písma vykreslená.', 'SVG templates are editable and use Outfit and Inter. PNGs have the fonts rendered in.')}</p>
-            <div className={s.partnerExample}><div className={s.robotPreview}><Image src="/brand/promptbook-robot.svg" width={112} height={112} alt={text('Robot z hlavní stránky Promptbooku', 'Robot from the Promptbook homepage')}/></div><div><h3>{text('Robot z hlavní stránky', 'Homepage robot')}</h3><p>{text('Doplňková ilustrace. Hrany hlavy a těla jsou v poměru zlatého řezu. Dvě diagonálně umístěné nohy mají polovinu hrany těla.', 'A supporting illustration. The head and body edges follow the golden ratio. The two diagonal feet have half the body edge length.')}</p><Downloads base="/brand/promptbook-robot" pngLabel="PNG · 1024 px"/></div></div>
 
         </section>
 
+        <RobotBrandSection language={language}/>
+
         <footer className={s.resources}>
             <div><strong>{text('Pro lidi i AI agenty', 'For people and AI agents')}</strong><div className={s.downloads}><a download href="/brand/brand.md">Markdown</a><a download href="/brand/brand.json">JSON</a><a download href="/brand/brand.css">CSS</a></div></div>
-            <p>{text('Aktualizováno', 'Updated')} <time dateTime={brand.updatedAt}>{cs ? '5. 11. 2026' : '5 November 2026'}</time><br/><a href={`mailto:${brand.contact}`}>{brand.contact}</a></p>
+            <p>{text('Aktualizováno', 'Updated')} <time dateTime={brand.updatedAt}>{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { dateStyle: cs ? 'medium' : 'long', timeZone: 'UTC' }).format(new Date(brand.updatedAt))}</time><br/><a href={`mailto:${brand.contact}`}>{brand.contact}</a></p>
         </footer>
     </article>;
 }

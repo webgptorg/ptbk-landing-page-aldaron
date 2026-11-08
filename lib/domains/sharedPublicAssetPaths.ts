@@ -23,6 +23,7 @@ export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/brand/promptbook-lockup-dark.svg',
     '/brand/promptbook-lockup-light.png',
     '/brand/promptbook-lockup-light.svg',
+    '/brand/promptbook-robot.glb',
     '/brand/promptbook-robot.svg',
     '/brand/promptbook-robot.png',
     '/brand/promptbook-slide-cs.png',

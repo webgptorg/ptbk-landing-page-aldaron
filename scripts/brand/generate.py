@@ -121,6 +121,18 @@ Editable slide/social templates require Outfit and Inter; their PNG exports do n
 
 {BRAND['messages']['en']['paragraph']}
 
+## Robot
+
+The mascot is a supporting illustration for agent examples. Use the Promptbook logo
+to identify the brand. The manual illustrates working, thinking, assembling, finished
+and resting poses. The working pose is available as SVG, PNG and an editable
+[GLB](https://www.ptbk.io/brand/promptbook-robot.glb).
+
+The torso edge is 61.8% of the head edge. Each foot is 44% of the torso edge.
+Place the feet diagonally with a gap. Keep continuous L-shaped arms, with clearance
+below the chin and the pen through the left grip as seen from the front. Retain
+the ink-blue triangle, light shell and pixel expression on the dark display.
+
 ## Scope and sources
 
 Applies only to Promptbook, not AI ta Krajta or Pavol Hejny personal sites.

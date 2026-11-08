@@ -643,6 +643,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The kit shows full and lowercase Medium-only ptbk lockups on white, ink blue and black.
   Its localized PDF downloads print the same pages via `scripts/brand/export-guide.cjs`.
   Every asset stays individually downloadable; ZIP is optional. No BookEditor/MockedChat demo belongs here.
+  The robot section projects five poses from the approved Robot Studio geometry and offers the editable
+  working-pose GLB. Keep its on-page instructions, static illustrations and printed guide in sync.
   These product-only changes must never restyle AI ta Krajta or Pavol's personal sites or replace shared legacy assets.
 - Other public/legal routes include `/contact`, `/data-deletion`, `/privacy`,
   `/terms`, `/dekujeme`, and the routes under `/k`, `/old`, and

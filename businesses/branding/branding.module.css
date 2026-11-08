@@ -2,7 +2,35 @@
 @media(max-width:760px){.intro{padding-top:38px}.section{padding:32px 0}.logos,.symbols,.typeGrid,.templates,.partnerExample{grid-template-columns:1fr}.ruleGrid{grid-template-columns:1fr;gap:28px}.rule{display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center}.rule>div{margin:0;height:155px}.minimum{gap:12px;padding:10px}.minimum img:last-child{max-width:none;height:auto}.clearSpace>div{padding:20px}.clearSpace img{width:80px;height:80px}.colors{grid-template-columns:repeat(2,minmax(0,1fr))}.colors>.color:first-child{grid-column:1/-1}.swatch{height:66px}.donts{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.copyRow{grid-template-columns:1fr;gap:12px}.resources{align-items:start;flex-direction:column}.resources>p{text-align:left}.logoPreview{min-height:155px;padding:32px 22px}.symbolRow .downloads{gap:12px}.templates img{aspect-ratio:auto}.partnerExample{gap:18px}.rule p{font-size:13px!important}}
 @media(max-width:420px){.rule{grid-template-columns:1fr}.rule>div{height:165px}.rule figcaption{margin-top:0}.minimum img:last-child{max-width:none}.navigation{gap:9px 20px}.symbolRow{gap:14px}.symbolPreview{width:84px;height:90px}}
 
-.partnerExample .robotPreview{display:flex;justify-content:center;background:var(--ptbk-surface)}.partnerExample .robotPreview img{width:112px;height:112px;margin:0}
+/* The interactive view and the illustrated poses share the same geometry. */
+.robotIntro{max-width:68ch;margin-bottom:22px!important}
+.robotLayout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start;gap:28px}
+.robotViewer{min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:white}
+.robotStage{display:grid;place-items:center;min-height:260px;background:var(--ptbk-surface);touch-action:pan-y;cursor:grab;user-select:none}
+.robotStage:active{cursor:grabbing}
+.robotStage svg{display:block;width:min(100%,300px);pointer-events:none}
+.robotControls{display:flex;align-items:end;flex-wrap:wrap;gap:12px;padding:12px 14px 4px}
+.robotControls label{display:grid;gap:4px;font-size:12px;font-weight:600}
+.robotControls select,.robotViews button{color:var(--ptbk-blue);background:white;border:1px solid #c9d2df;border-radius:7px;padding:6px 9px;min-height:40px;font:inherit;font-size:13px}
+.robotViews{display:flex;flex-wrap:wrap;gap:5px}
+.robotViews button[aria-pressed=true]{color:white;background:var(--ptbk-blue);border-color:var(--ptbk-blue)}
+.robotViewer .robotHint{padding:8px 14px 14px;font-size:12px;line-height:1.5}
+.robotInstructions{font-size:14px;line-height:1.55}
+.robotInstructions p{margin-bottom:16px!important}
+.robotInstructions ul{list-style:disc;margin:8px 0 0;padding-left:20px}
+.robotInstructions li+li{margin-top:7px}
+.robotPoseHeading{margin:28px 0 12px}
+.robotPoses{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.robotPose{margin:0;min-width:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:white}
+.robotPose svg{display:block;width:100%;background:var(--ptbk-surface)}
+.robotPose figcaption{padding:11px 12px 14px;font-size:14px}
+.robotPose figcaption p{font-size:12px;line-height:1.5;margin-top:4px!important}
+@media(max-width:760px){
+    .robotLayout{grid-template-columns:1fr;gap:20px}
+    .robotPoses{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .robotStage svg{width:min(100%,270px)}
+}
+
 
 
 
@@ -28,7 +56,7 @@
     .intro>p{font-size:16px}
     .navigation,.pdfDownload,.copyControl{display:none}
     .section{padding:20px 0}
-    .section:is([id="rules"], [id="type"], [id="examples"]){break-before:page}
+    .section:is([id="rules"], [id="type"], [id="examples"], [id="robot"]){break-before:page}
     .page .section h2{font-size:25px;margin-bottom:16px;break-after:avoid}
     .lockupGroup,.logoCard,.rule,.color,.copyRow,.templates figure,.partnerExample,.resources{break-inside:avoid}
     .logos,.ruleGrid,.colors{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -49,5 +77,12 @@
     .naming{margin-bottom:12px!important}
     .copyRow{grid-template-columns:120px 1fr;gap:12px;padding:12px 0}
     .voice{margin-top:14px;break-inside:avoid}
+    .robotViewer{display:none}
+    .robotLayout{display:block}
+    .robotPoses{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .robotPose{break-inside:avoid}
+    .robotPose figcaption{padding:6px;font-size:12px}
+    .robotPose figcaption p{font-size:10px}
+    .robotIntro,.robotInstructions,.robotPoses{break-inside:avoid}
     .resources{flex-direction:row}
 }

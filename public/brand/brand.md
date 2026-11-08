@@ -1,6 +1,6 @@
 # Promptbook brand kit
 
-Updated: 2026-11-05. Contact: pavol@ptbk.io.
+Updated: 2026-11-08. Contact: pavol@ptbk.io.
 
 Name: Promptbook. Visual wordmark: promptbook (no trailing dot).
 Official abbreviation: ptbk (lowercase). CLI command: ptbk.
@@ -28,6 +28,18 @@ Předáte agendu. Nastavíte pravidla. Spustíte agenty. Pracují sami. Ozvou se
 Promptbook hands ongoing work to AI agents that run on your computer or server and follow your rules.
 
 Hand over a responsibility. Set the rules. Start your agents. They work independently. They ask only when they need you. You can check in at any time. The engine runs on your computer or server, with your files and your choice of models.
+
+## Robot
+
+The mascot is a supporting illustration for agent examples. Use the Promptbook logo
+to identify the brand. The manual illustrates working, thinking, assembling, finished
+and resting poses. The working pose is available as SVG, PNG and an editable
+[GLB](https://www.ptbk.io/brand/promptbook-robot.glb).
+
+The torso edge is 61.8% of the head edge. Each foot is 44% of the torso edge.
+Place the feet diagonally with a gap. Keep continuous L-shaped arms, with clearance
+below the chin and the pen through the left grip as seen from the front. Retain
+the ink-blue triangle, light shell and pixel expression on the dark display.
 
 ## Scope and sources
 

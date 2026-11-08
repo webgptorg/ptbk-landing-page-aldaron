@@ -77,9 +77,22 @@ only a convenience; downloads never require it.
 
 Downloads lead, followed by illustrated spacing, minimum sizes, regular geometry,
 bad-use examples, color roles with real clipboard feedback, practical font samples,
-approved short/paragraph text and slide/social/partner examples. The robot is a static
-export of the actual homepage component. Its isometric head and body use a
-golden-ratio edge length, with two half-body-edge cubes placed diagonally below. No current verified engine UI screenshot
+approved short/paragraph text and slide/social/partner examples. The robot section
+includes a rotatable view, five illustrated poses and instructions for making
+new poses. The standalone SVG and PNG are exported from the homepage component.
+The GLB contains the working pose with separate named meshes for the head, torso,
+feet, arms and pen. Import it in Blender with File → Import → glTF 2.0.
+
+The viewer and GLB use the Robot Studio mascot from revision
+`4cab1389a4e3835dbc711da69634689fbc50e860`. To regenerate the pose geometry and
+GLB from a checkout of the approved source, run:
+
+```sh
+node scripts/brand/export-robot-model.mjs /path/to/robot-studio/dist
+```
+
+The torso edge is 61.8% of the head edge. Each foot is 44% of the torso edge.
+The feet sit diagonally with a gap between them. No current verified engine UI screenshot
 was available in the repository; it is not replaced with a fabricated mockup. BookEditor and
 MockedChat demonstrations are removed only from this page, not from the product.
 The source files remain untouched. Do not manufacture an engine screenshot from
