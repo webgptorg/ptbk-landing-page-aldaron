@@ -25,6 +25,7 @@ import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 
 import { StoryBookEditorDialog } from './StoryBookEditorDialog';
 import { prepareStoryNarration, type StoryNarrationClipCache } from './storyNarrationPlayer';
 import s from './storyRoom.module.css';
+import { useDeviceStoryNarration } from './useDeviceStoryNarration';
 
 type StoryEvent = {
     readonly slug: string;
@@ -117,9 +118,13 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
     const player = useAudioPlayerControls();
     const story = state?.story && (!selectedId || state.story.id === selectedId) ? state.story : null;
     const storyId = story?.id;
+    const { status: deviceStatus, error: deviceError, toggle: toggleDeviceNarration, stop: stopDeviceNarration } = useDeviceStoryNarration(storyId);
     const canWrite = state?.canWrite === true;
 
     useEffect(() => { setSelectedId(initialStoryId); }, [initialStoryId]);
+    useEffect(() => {
+        if (player.isPlaying) stopDeviceNarration();
+    }, [player.isPlaying, stopDeviceNarration]);
 
     const canGenerateVoice = state?.canGenerateVoice === true;
     useEffect(() => {
@@ -326,6 +331,7 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
 
     async function readAloud(currentStory: WorkshopStory) {
         if (audioRequest.current) return;
+        stopDeviceNarration();
         const trackId = currentTrackId;
         if (player.track?.id === trackId) {
             player.setIsPlaying(!player.isPlaying);
@@ -456,11 +462,20 @@ export function StoryRoom({ event, initialIdentity, initialStoryId }: {
                                                 <Headphones size={17} aria-hidden="true" />
                                                 {isPreparingAudio ? 'Připravuji předčítání…' : isCurrentRecording && isPlayingStory ? 'Pozastavit čtení' : currentNarration && !isCurrentRecording ? 'Přečíst novou verzi' : 'Přečíst příběh'}
                                             </button>
+                                            <button type="button" className={s.secondary} onClick={() => toggleDeviceNarration(story, () => {
+                                                audioRequest.current?.abort();
+                                                player.setIsPlaying(false);
+                                            })}>
+                                                {deviceStatus === 'playing' ? 'Pozastavit hlas zařízení' : deviceStatus === 'paused'
+                                                    ? 'Pokračovat hlasem zařízení' : 'Přečíst hlasem zařízení'}
+                                            </button>
                                             <button type="button" className={s.secondary} onClick={() => void exportPdf(story)} disabled={isExporting}>
                                                 <Download size={17} aria-hidden="true" /> {isExporting ? 'Připravuji PDF…' : 'Stáhnout PDF'}
                                             </button>
                                         </div>
-                                        {audioError && <p className={s.error} role="status">{audioError}</p>}
+                                        {(deviceError || (audioError && deviceStatus === 'idle')) && (
+                                            <p className={s.error} role="status">{deviceError || audioError}</p>
+                                        )}
                                         <ArticleTracking articleId={currentNarration?.trackId ?? `story:${story.id}`} wordTimings={currentNarration?.timings}>
                                             <h2><StoryWords id="title" text={story.title} /></h2>
                                             <p className={s.premise}><StoryWords id="premise" text={story.premise} /></p>
