@@ -12,6 +12,7 @@ import {
     normalizeDiscountCode,
     type DiscountCode,
 } from './discountCode';
+import { PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID, PROMPTBOOK_START_DISCOUNT_PLACE_ID } from './discountPlaces';
 import { describe, expect, it } from 'vitest';
 
 const CURRENT_DATE = new Date('2026-08-20T12:00:00.000Z');
@@ -61,6 +62,17 @@ describe('shared discount-code rules', () => {
         expect(isDiscountCodeValidForAllPlaces(selectedPlacesDiscountCode)).toBe(false);
         expect(isDiscountCodeValidInPlace(selectedPlacesDiscountCode, 'ai-supervize-mini-online')).toBe(true);
         expect(isDiscountCodeValidInPlace(selectedPlacesDiscountCode, 'ai-supervize-mini-onsite')).toBe(false);
+    });
+
+    it('requires the chosen Promptbook plan to be explicitly included', () => {
+        expect(isDiscountCodeUsableInPlace(createDiscountCode(), PROMPTBOOK_START_DISCOUNT_PLACE_ID, CURRENT_DATE))
+            .toBe(false);
+
+        const startDiscount = createDiscountCode({ placeIds: [PROMPTBOOK_START_DISCOUNT_PLACE_ID] });
+        expect(isDiscountCodeUsableInPlace(startDiscount, PROMPTBOOK_START_DISCOUNT_PLACE_ID, CURRENT_DATE))
+            .toBe(true);
+        expect(isDiscountCodeUsableInPlace(startDiscount, PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID, CURRENT_DATE))
+            .toBe(false);
     });
 
     it('exposes the remaining uses and makes exhaustion part of usability', () => {

@@ -3,6 +3,8 @@ import {
     COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
     COMMUNITY_MEMBERSHIP_PATH,
     DISCOUNT_PLACES,
+    PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID,
+    PROMPTBOOK_START_DISCOUNT_PLACE_ID,
     createDiscountCodePrefillPath,
     createDiscountCodeUrl,
     getDiscountCodePlaces,
@@ -19,9 +21,22 @@ describe('discount-place links', () => {
         );
     });
 
-    it('expands all places and preserves only known selected places', () => {
-        expect(getDiscountCodePlaces([])).toEqual(DISCOUNT_PLACES);
+    it('expands all places without opting into either Promptbook plan', () => {
+        expect(getDiscountCodePlaces([]).map(({ id }) => id)).toEqual([
+            'ai-supervize-mini-onsite',
+            'ai-supervize-mini-online',
+            COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
+        ]);
         expect(getDiscountCodePlaces(['ai-supervize-mini-online', 'unknown-place'])).toEqual([DISCOUNT_PLACES[1]]);
+    });
+
+    it('prefills a code on the selected Promptbook plan', () => {
+        const [start, business] = getDiscountCodePlaces([
+            PROMPTBOOK_START_DISCOUNT_PLACE_ID,
+            PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID,
+        ]);
+        expect(createDiscountCodeUrl(start!, 'UVOD')).toBe('/cs/pricing/objednat/start?code=UVOD#registrace');
+        expect(createDiscountCodeUrl(business!, 'UVOD')).toBe('/cs/pricing/objednat/business?code=UVOD#registrace');
     });
 
     it('offers a registration-prefilled link for community membership', () => {

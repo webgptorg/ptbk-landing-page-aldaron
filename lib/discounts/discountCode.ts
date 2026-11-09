@@ -1,4 +1,5 @@
 import { MAXIMAL_DISCOUNT_CODE_LENGTH, MAXIMAL_DISCOUNT_PERCENT } from '@/lib/discounts/discountCodeConstants';
+import { isPromptbookDiscountPlaceId } from '@/lib/discounts/discountPlaces';
 
 /**
  * How long a discount survives after it has opened a subscription. `null` deliberately means the
@@ -29,8 +30,11 @@ export type DiscountCodeValues = SubscriptionDiscountDuration & {
     readonly endsAt: string;
     readonly isEnabled: boolean;
 
-    /** Empty means every current and future discount place. */
+    /** Empty includes all places that do not require explicit selection. */
     readonly placeIds: readonly string[];
+
+    /** Shows an exact code as an offer on the selected Promptbook checkout pages. */
+    readonly isPromoted?: boolean;
 
     /** Null means unlimited use. */
     readonly maximumUseCount: number | null;
@@ -86,7 +90,10 @@ export function isDiscountCodeValidInPlace(
     discountCode: Pick<DiscountCodeValues, 'placeIds'>,
     discountPlaceId: string,
 ): boolean {
-    return isDiscountCodeValidForAllPlaces(discountCode) || discountCode.placeIds.includes(discountPlaceId);
+    return (
+        discountCode.placeIds.includes(discountPlaceId) ||
+        (isDiscountCodeValidForAllPlaces(discountCode) && !isPromptbookDiscountPlaceId(discountPlaceId))
+    );
 }
 
 export function getRemainingDiscountCodeUseCount(

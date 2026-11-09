@@ -20,6 +20,22 @@ export const COMMUNITY_MEMBERSHIP_PATH = `${COMMUNITY_PATH}/clenstvi`;
 export const AI_SUPERVIZE_MINI_ONSITE_DISCOUNT_PLACE_ID = 'ai-supervize-mini-onsite';
 export const AI_SUPERVIZE_MINI_ONLINE_DISCOUNT_PLACE_ID = 'ai-supervize-mini-online';
 export const COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID = 'community-membership';
+export const PROMPTBOOK_START_DISCOUNT_PLACE_ID = 'promptbook-start';
+export const PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID = 'promptbook-business';
+export const PROMPTBOOK_DISCOUNT_PLACE_IDS = [
+    PROMPTBOOK_START_DISCOUNT_PLACE_ID,
+    PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID,
+] as const;
+
+type PromptbookDiscountPlaceId = (typeof PROMPTBOOK_DISCOUNT_PLACE_IDS)[number];
+
+export function getPromptbookDiscountPlaceId(planId: 'start' | 'business'): PromptbookDiscountPlaceId {
+    return planId === 'start' ? PROMPTBOOK_START_DISCOUNT_PLACE_ID : PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID;
+}
+
+export function isPromptbookDiscountPlaceId(discountPlaceId: string): discountPlaceId is PromptbookDiscountPlaceId {
+    return PROMPTBOOK_DISCOUNT_PLACE_IDS.some((placeId) => placeId === discountPlaceId);
+}
 
 export const DISCOUNT_PLACES: readonly DiscountPlace[] = [
     {
@@ -43,6 +59,20 @@ export const DISCOUNT_PLACES: readonly DiscountPlace[] = [
         pagePath: COMMUNITY_MEMBERSHIP_PATH,
         registrationSectionId: REGISTRATION_SECTION_ID,
     },
+    {
+        id: PROMPTBOOK_START_DISCOUNT_PLACE_ID,
+        label: 'Promptbook Start',
+        description: 'Měsíční předplatné Start',
+        pagePath: '/cs/pricing/objednat/start',
+        registrationSectionId: REGISTRATION_SECTION_ID,
+    },
+    {
+        id: PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID,
+        label: 'Promptbook Business',
+        description: 'Měsíční předplatné Business',
+        pagePath: '/cs/pricing/objednat/business',
+        registrationSectionId: REGISTRATION_SECTION_ID,
+    },
 ];
 
 export function getDiscountPlaceById(discountPlaceId: string): DiscountPlace | null {
@@ -62,11 +92,11 @@ export function isKnownDiscountPlaceId(discountPlaceId: string): boolean {
 }
 
 /**
- * An empty place list means every place, including places added later.
+ * Promptbook plans require explicit opt-in. Other places retain the existing all-places scope.
  */
 export function getDiscountCodePlaces(placeIds: readonly string[]): readonly DiscountPlace[] {
     return placeIds.length === 0
-        ? DISCOUNT_PLACES
+        ? DISCOUNT_PLACES.filter(({ id }) => !isPromptbookDiscountPlaceId(id))
         : placeIds
               .map(getDiscountPlaceById)
               .filter((discountPlace): discountPlace is DiscountPlace => discountPlace !== null);

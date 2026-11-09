@@ -6,7 +6,7 @@ import {
     MAXIMAL_DISCOUNT_PERCENT,
     MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT,
 } from '@/lib/discounts/discountCodeConstants';
-import { isKnownDiscountPlaceId } from '@/lib/discounts/discountPlaces';
+import { isKnownDiscountPlaceId, isPromptbookDiscountPlaceId } from '@/lib/discounts/discountPlaces';
 import { z } from 'zod';
 
 const discountCodeSchema = z
@@ -58,6 +58,7 @@ export const discountCodeValuesSchema = z
         startsAt: z.string().datetime({ offset: true }),
         endsAt: z.string().datetime({ offset: true }),
         isEnabled: z.boolean(),
+        isPromoted: z.boolean().default(false),
         placeIds: discountPlaceIdsSchema,
         maximumUseCount: maximumUseCountSchema,
         subscriptionDiscountDurationMonths: subscriptionDiscountDurationMonthsSchema,
@@ -65,4 +66,10 @@ export const discountCodeValuesSchema = z
     .refine((discountCode) => Date.parse(discountCode.endsAt) >= Date.parse(discountCode.startsAt), {
         message: 'Konec platnosti musí být po začátku platnosti.',
         path: ['endsAt'],
+    })
+    .refine((discountCode) => !discountCode.isPromoted || (
+        !discountCode.code.includes('*') && discountCode.placeIds.some(isPromptbookDiscountPlaceId)
+    ), {
+        message: 'Zveřejnit lze přesný kód s výslovně vybraným tarifem Promptbooku.',
+        path: ['isPromoted'],
     });

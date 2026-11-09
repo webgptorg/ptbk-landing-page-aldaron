@@ -26,6 +26,7 @@ import {
     createDiscountCodeUrl,
     getDiscountCodePlaces,
     getDiscountPlaceLabel,
+    isPromptbookDiscountPlaceId,
 } from '@/lib/discounts/discountPlaces';
 import { Loader2, Pencil, TicketPercent, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -66,11 +67,12 @@ function getDiscountCodeUseSummary(discountCode: DiscountCode): string {
 }
 
 function getSubscriptionDiscountSummary(discountCode: DiscountCode): string {
-    const isValidForCommunityMembership =
-        isDiscountCodeValidForAllPlaces(discountCode) ||
-        discountCode.placeIds.includes(COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID);
+    const isValidForSubscription = isDiscountCodeValidForAllPlaces(discountCode) ||
+        discountCode.placeIds.some(
+            (placeId) => placeId === COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID || isPromptbookDiscountPlaceId(placeId),
+        );
 
-    if (!isValidForCommunityMembership) {
+    if (!isValidForSubscription) {
         return '—';
     }
 
@@ -275,10 +277,15 @@ export function DiscountCodeAdmin() {
                                                 >
                                                     {discountCodeStatus.label}
                                                 </span>
+                                                {discountCode.isPromoted && (
+                                                    <span className="mt-1 block text-xs text-slate-600">
+                                                        Veřejná nabídka
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
                                                 {isDiscountCodeValidForAllPlaces(discountCode) ? (
-                                                    'Všechna místa'
+                                                    'Všechna místa kromě tarifů Promptbooku'
                                                 ) : (
                                                     <ul className="space-y-0.5">
                                                         {discountCode.placeIds.map((discountPlaceId) => (

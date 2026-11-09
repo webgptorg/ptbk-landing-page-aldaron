@@ -9,7 +9,7 @@ vi.mock('@/lib/supabase', () => ({
     createSupabaseServiceRoleClient: createSupabaseServiceRoleClientMock,
 }));
 
-import { loadActiveDiscount } from './discountCodeDatabase';
+import { loadActiveDiscount, loadPromotedDiscountsByPlace } from './discountCodeDatabase';
 
 const WILDCARD_DISCOUNT_CODE_ROW = {
     id: '00000000-0000-0000-0000-000000000001',
@@ -56,5 +56,52 @@ describe('submitted discount-code loading', () => {
             },
             errorMessage: null,
         });
+    });
+
+    it('selects an available promoted code for each Promptbook plan without exposing the database row', async () => {
+        const query = {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            lte: vi.fn().mockReturnThis(),
+            gte: vi.fn().mockReturnThis(),
+            overlaps: vi.fn().mockReturnThis(),
+            order: vi.fn().mockReturnThis(),
+            then: (onFulfilled: (value: unknown) => unknown) => Promise.resolve(onFulfilled({
+                data: [
+                    {
+                        ...WILDCARD_DISCOUNT_CODE_ROW,
+                        code: 'EXHAUSTED',
+                        is_promoted: true,
+                        place_ids: ['promptbook-start'],
+                        maximum_use_count: 1,
+                        use_count: 1,
+                    },
+                    {
+                        ...WILDCARD_DISCOUNT_CODE_ROW,
+                        code: 'UVOD',
+                        percent: 30,
+                        is_promoted: true,
+                        place_ids: ['promptbook-start'],
+                        subscription_discount_duration_months: 3,
+                    },
+                ],
+                error: null,
+            })),
+        };
+        createSupabaseServiceRoleClientMock.mockReturnValue({ from: vi.fn().mockReturnValue(query) });
+
+        expect(await loadPromotedDiscountsByPlace(new Date('2026-08-20T12:00:00.000Z'))).toEqual({
+            activeDiscountByPlaceId: {
+                'promptbook-start': {
+                    code: 'UVOD',
+                    percent: 30,
+                    remainingUseCount: null,
+                    subscriptionDiscountDurationMonths: 3,
+                },
+                'promptbook-business': null,
+            },
+            errorMessage: null,
+        });
+        expect(query.eq).toHaveBeenCalledWith('is_promoted', true);
     });
 });

@@ -13,6 +13,7 @@ import {
     DISCOUNT_CODE_TABLE_NAME,
     RESOLVE_DISCOUNT_CODE_FUNCTION_NAME,
 } from '@/lib/discounts/discountCodeConstants';
+import { isPromptbookDiscountPlaceId, PROMPTBOOK_DISCOUNT_PLACE_IDS } from '@/lib/discounts/discountPlaces';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
@@ -28,6 +29,7 @@ export type DiscountCodeRow = {
     readonly starts_at: string;
     readonly ends_at: string;
     readonly is_enabled: boolean;
+    readonly is_promoted?: boolean;
     readonly place_ids: readonly string[] | null;
     readonly maximum_use_count: number | null;
     readonly subscription_discount_duration_months: number | null;
@@ -102,6 +104,7 @@ export function mapDiscountCodeRow(discountCodeRow: DiscountCodeRow): DiscountCo
         startsAt: discountCodeRow.starts_at,
         endsAt: discountCodeRow.ends_at,
         isEnabled: discountCodeRow.is_enabled,
+        isPromoted: discountCodeRow.is_promoted ?? false,
         placeIds: discountCodeRow.place_ids ?? [],
         maximumUseCount: discountCodeRow.maximum_use_count,
         subscriptionDiscountDurationMonths: discountCodeRow.subscription_discount_duration_months,
@@ -120,6 +123,7 @@ export function createDiscountCodeDatabaseValues(
         starts_at: discountCode.startsAt,
         ends_at: discountCode.endsAt,
         is_enabled: discountCode.isEnabled,
+        is_promoted: discountCode.isPromoted ?? false,
         place_ids: discountCode.placeIds,
         maximum_use_count: discountCode.maximumUseCount,
         subscription_discount_duration_months: discountCode.subscriptionDiscountDurationMonths,
@@ -222,6 +226,41 @@ export async function loadActiveDiscountsByPlace(
     };
 }
 
+/** Picks the latest active public offer for each plan and leaves private codes on the server. */
+export async function loadPromotedDiscountsByPlace(
+    currentDate: Date = new Date(),
+): Promise<ActiveDiscountsByPlaceLoadResult> {
+    const supabase = getDiscountCodeDatabaseOrNull();
+    if (supabase === null) {
+        return { activeDiscountByPlaceId: {}, errorMessage: DISCOUNT_CODE_DATABASE_UNAVAILABLE_ERROR_MESSAGE };
+    }
+
+    const timestamp = currentDate.toISOString();
+    const { data, error } = await supabase
+        .from(DISCOUNT_CODE_TABLE_NAME)
+        .select('*')
+        .eq('is_promoted', true)
+        .eq('is_enabled', true)
+        .lte('starts_at', timestamp)
+        .gte('ends_at', timestamp)
+        .overlaps('place_ids', [...PROMPTBOOK_DISCOUNT_PLACE_IDS])
+        .order('starts_at', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id');
+    if (error !== null) {
+        return { activeDiscountByPlaceId: {}, errorMessage: error.message };
+    }
+
+    const discountCodes = ((data ?? []) as DiscountCodeRow[]).map(mapDiscountCodeRow);
+    return {
+        activeDiscountByPlaceId: Object.fromEntries(PROMPTBOOK_DISCOUNT_PLACE_IDS.map((placeId) => {
+            const discountCode = discountCodes.find((code) => isDiscountCodeUsableInPlace(code, placeId, currentDate));
+            return [placeId, discountCode ? createActiveDiscount(discountCode) : null];
+        })),
+        errorMessage: null,
+    };
+}
+
 function readDiscountCodeConsumptionStatus(status: string): DiscountCodeConsumptionStatus {
     return status === 'applied' || status === 'exhausted' ? status : 'unusable';
 }
@@ -281,4 +320,52 @@ export async function consumeDiscountCode(
     return consumptionRow === undefined
         ? { status: 'unusable', activeDiscount: null, errorMessage: null }
         : createDiscountCodeConsumptionResult(consumptionRow);
+}
+
+/** Reserves one use for a stable Promptbook order and returns the terms frozen for that order. */
+export async function reservePromptbookDiscountCode(
+    discountCodeValue: string,
+    discountPlaceId: string,
+    reservationId: string,
+): Promise<DiscountCodeConsumptionResult> {
+    const normalizedDiscountCode = normalizeDiscountCode(discountCodeValue);
+    if (!isDiscountCodeNormalized(normalizedDiscountCode) || !isPromptbookDiscountPlaceId(discountPlaceId)) {
+        return { status: 'unusable', activeDiscount: null, errorMessage: null };
+    }
+
+    const supabase = getDiscountCodeDatabaseOrNull();
+    if (supabase === null) {
+        return { status: 'unusable', activeDiscount: null, errorMessage: DISCOUNT_CODE_DATABASE_UNAVAILABLE_ERROR_MESSAGE };
+    }
+
+    const { data, error } = await supabase.rpc('reserve_promptbook_discount_code', {
+        submitted_code: normalizedDiscountCode,
+        place_id: discountPlaceId,
+        reservation_id: reservationId,
+    });
+    if (error !== null) {
+        return { status: 'unusable', activeDiscount: null, errorMessage: error.message };
+    }
+
+    const reservationRow = ((data ?? []) as DiscountCodeConsumptionRow[])[0];
+    return reservationRow === undefined
+        ? { status: 'unusable', activeDiscount: null, errorMessage: null }
+        : createDiscountCodeConsumptionResult(reservationRow);
+}
+
+/** Commits a paid reservation or frees it when Stripe confirms that the checkout expired. */
+export async function settlePromptbookDiscountReservation(
+    reservationId: string,
+    isRedeemed: boolean,
+): Promise<{ readonly errorMessage: string | null }> {
+    const supabase = getDiscountCodeDatabaseOrNull();
+    if (supabase === null) {
+        return { errorMessage: DISCOUNT_CODE_DATABASE_UNAVAILABLE_ERROR_MESSAGE };
+    }
+
+    const { error } = await supabase.rpc('settle_promptbook_discount_reservation', {
+        reservation_id: reservationId,
+        is_redeemed: isRedeemed,
+    });
+    return { errorMessage: error?.message ?? null };
 }

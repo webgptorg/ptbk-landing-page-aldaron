@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
 import {
     isDiscountCodeValidForAllPlaces,
+    normalizeDiscountCode,
     type DiscountCode,
     type DiscountCodeValues,
 } from '@/lib/discounts/discountCode';
@@ -18,7 +19,12 @@ import {
     MAXIMAL_DISCOUNT_PERCENT,
     MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT,
 } from '@/lib/discounts/discountCodeConstants';
-import { COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID, DISCOUNT_PLACES } from '@/lib/discounts/discountPlaces';
+import {
+    COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
+    DISCOUNT_PLACES,
+    getDiscountCodePlaces,
+    isPromptbookDiscountPlaceId,
+} from '@/lib/discounts/discountPlaces';
 import { X } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 
@@ -43,6 +49,7 @@ function createNewDiscountCodeValues(): DiscountCodeValues {
         startsAt: startsAt.toISOString(),
         endsAt: endsAt.toISOString(),
         isEnabled: true,
+        isPromoted: false,
         placeIds: [],
         maximumUseCount: null,
         subscriptionDiscountDurationMonths: null,
@@ -60,6 +67,7 @@ function createDiscountCodeValues(discountCode: DiscountCode | null): DiscountCo
         startsAt: discountCode.startsAt,
         endsAt: discountCode.endsAt,
         isEnabled: discountCode.isEnabled,
+        isPromoted: discountCode.isPromoted ?? false,
         placeIds: discountCode.placeIds,
         maximumUseCount: discountCode.maximumUseCount,
         subscriptionDiscountDurationMonths: discountCode.subscriptionDiscountDurationMonths,
@@ -96,8 +104,9 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
     const isEditing = discountCode !== null;
     const isUseCountLimited = values.maximumUseCount !== null;
     const isSubscriptionDiscountDurationLimited = values.subscriptionDiscountDurationMonths !== null;
-    const isCommunityMembershipSelected =
-        isValidForAllPlaces || values.placeIds.includes(COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID);
+    const isPromptbookSelected = !isValidForAllPlaces && values.placeIds.some(isPromptbookDiscountPlaceId);
+    const isSubscriptionSelected =
+        isValidForAllPlaces || values.placeIds.includes(COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID) || isPromptbookSelected;
 
     const updateValue = <TField extends keyof DiscountCodeValues>(field: TField, value: DiscountCodeValues[TField]) => {
         setValues((currentValues) => ({ ...currentValues, [field]: value }));
@@ -120,6 +129,9 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
         if (!isValidForAllPlaces && values.placeIds.length === 0) {
             return rejectInvalidDraft('Vyberte alespoň jedno místo, kde kód platí, nebo zvolte všechna místa.');
         }
+        if (isPromptbookSelected && values.isPromoted && normalizeDiscountCode(values.code).includes('*')) {
+            return rejectInvalidDraft('Veřejná nabídka vyžaduje kód bez hvězdičky.');
+        }
         if (
             values.subscriptionDiscountDurationMonths !== null &&
             (!Number.isInteger(values.subscriptionDiscountDurationMonths) ||
@@ -136,6 +148,7 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
             ...values,
             startsAt,
             endsAt,
+            isPromoted: isPromptbookSelected && values.isPromoted === true,
             placeIds: isValidForAllPlaces ? [] : values.placeIds,
         });
 
@@ -254,14 +267,15 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                         onChange={(event) => {
                             const nextIsValidForAllPlaces = event.target.checked;
                             setIsValidForAllPlaces(nextIsValidForAllPlaces);
+                            if (nextIsValidForAllPlaces) {
+                                updateValue('isPromoted', false);
+                            }
 
-                            // Moving from the implicit "all places" representation to selected
-                            // places should start with every currently known place selected. This
-                            // keeps an accidental empty selection from being serialized as "all".
+                            // Start with the same places when moving to an explicit selection.
                             if (!nextIsValidForAllPlaces && values.placeIds.length === 0) {
                                 updateValue(
                                     'placeIds',
-                                    DISCOUNT_PLACES.map((discountPlace) => discountPlace.id),
+                                    getDiscountCodePlaces([]).map((discountPlace) => discountPlace.id),
                                 );
                             }
                         }}
@@ -269,7 +283,7 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     />
                     <span>
                         <strong className="block text-slate-950">Všechna místa</strong>
-                        Kód platí všude, kde se slevové kódy zadávají, i v místech přidaných později.
+                        Pro tarify Promptbook Start a Business je vždy potřeba výslovný výběr.
                     </span>
                 </label>
 
@@ -280,16 +294,19 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                                 <input
                                     type="checkbox"
                                     checked={values.placeIds.includes(discountPlace.id)}
-                                    onChange={(event) =>
-                                        updateValue(
-                                            'placeIds',
-                                            toggleDiscountPlaceId(
-                                                values.placeIds,
-                                                discountPlace.id,
-                                                event.target.checked,
-                                            ),
-                                        )
-                                    }
+                                    onChange={(event) => {
+                                        const placeIds = toggleDiscountPlaceId(
+                                            values.placeIds,
+                                            discountPlace.id,
+                                            event.target.checked,
+                                        );
+                                        setValues((currentValues) => ({
+                                            ...currentValues,
+                                            placeIds,
+                                            isPromoted: placeIds.some(isPromptbookDiscountPlaceId)
+                                                && currentValues.isPromoted === true,
+                                        }));
+                                    }}
                                     className="mt-0.5 h-4 w-4 rounded"
                                 />
                                 <span>
@@ -302,12 +319,27 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                 )}
             </fieldset>
 
-            {isCommunityMembershipSelected && (
+            {isPromptbookSelected && (
+                <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+                    <input
+                        type="checkbox"
+                        checked={values.isPromoted === true}
+                        onChange={(event) => updateValue('isPromoted', event.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded"
+                    />
+                    <span>
+                        <strong className="block text-slate-950">Zobrazit jako veřejnou nabídku</strong>
+                        Nabídka se zobrazí na objednávce vybraných tarifů Promptbooku po dobu platnosti kódu.
+                    </span>
+                </label>
+            )}
+
+            {isSubscriptionSelected && (
                 <fieldset className="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
                     <legend className="px-1 text-sm font-semibold text-slate-950">Sleva v předplatném</legend>
                     <p className="mb-4 leading-5 text-slate-600">
-                        Toto nastavení se použije pouze pro placené členství komunity. Platnost kódu určuje, dokdy lze
-                        slevu získat; zde určujete, jak dlouho pak sleva zůstane v již založeném předplatném.
+                        Platnost kódu určuje, dokdy lze slevu získat. Zde určujete, jak dlouho pak sleva platí
+                        v již založeném předplatném.
                     </p>
 
                     <label className="flex items-start gap-3">

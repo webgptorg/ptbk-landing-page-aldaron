@@ -58,6 +58,14 @@ describe('discount-code write schema', () => {
         expect(ignoredDuration).toBeNull();
     });
 
+    it('only publishes exact codes explicitly available on a Promptbook plan', () => {
+        const promotion = { ...VALID_DISCOUNT_CODE, isPromoted: true, placeIds: ['promptbook-start'] };
+        expect(discountCodeValuesSchema.parse(promotion).isPromoted).toBe(true);
+        expect(discountCodeValuesSchema.safeParse({ ...promotion, placeIds: [] }).success).toBe(false);
+        expect(discountCodeValuesSchema.safeParse({ ...promotion, code: 'WELCOME*' }).success).toBe(false);
+        expect(discountCodeValuesSchema.parse(VALID_DISCOUNT_CODE).isPromoted).toBe(false);
+    });
+
     it('rejects unknown places and an invalid maximum use count', () => {
         expect(discountCodeValuesSchema.safeParse({ ...VALID_DISCOUNT_CODE, placeIds: ['not-a-place'] }).success).toBe(
             false,
