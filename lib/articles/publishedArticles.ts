@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { cache } from 'react';
+import { getArticleOpeningParagraph } from '@/businesses/articles/articleDocument';
 import { canReadCommunityMemberArticle } from '@/lib/community-membership/communityMembershipArticleAccess';
 import { getArticleAuthor } from './authors';
 import { getAllArticles } from './load';
@@ -74,43 +75,89 @@ export async function getPublishedArticles(language: ArticleLanguage, publicatio
     })].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
 }
 
-export const getPublishedCommunityArticle = cache(async (community: 'vyvojari' | 'promptbook', language: ArticleLanguage, slug: string) => {
+type CommunityArticleDetail =
+    | { readonly kind: 'article'; readonly article: Article; readonly visibility: ManagedArticlePlacement['visibility'] }
+    | { readonly kind: 'teaser'; readonly title: string; readonly perex: string; readonly openingMarkdown: string };
+
+function offersFreeArticleTeaser(community: 'vyvojari' | 'promptbook', placement: ManagedArticlePlacement): boolean {
+    return community === 'promptbook' && placement.visibility === 'members';
+}
+
+export const getCommunityArticleDetail = cache(async (
+    community: 'vyvojari' | 'promptbook',
+    language: ArticleLanguage,
+    slug: string,
+): Promise<CommunityArticleDetail | null> => {
     const legacyArticles = getAllArticles();
     const legacy = legacyArticles.find((article) => article.slug === slug && article.language === language);
     if (legacy) {
         const placements = await getLegacyArticlePlacements();
         return placements[legacy.id]?.communities.includes(community)
-            ? { article: applyLegacyArticlePlacements(legacy, placements, legacyArticles), visibility: 'public' as const }
+            ? { kind: 'article', article: applyLegacyArticlePlacements(legacy, placements, legacyArticles), visibility: 'public' }
             : null;
     }
     const row = await readPublishedManagedArticle(language, slug, community);
     if (!row) return null;
     const placement = getArticlePlacement(row, community);
-    if (!placement || !await canReadManagedArticlePlacement(placement)) return null;
+    if (!placement) return null;
+    if (!await canReadManagedArticlePlacement(placement)) {
+        return offersFreeArticleTeaser(community, placement) ? {
+            kind: 'teaser',
+            title: row.title,
+            perex: row.perex,
+            openingMarkdown: getArticleOpeningParagraph(row.markdown, row.title, row.perex),
+        } : null;
+    }
     const article = toPublishedArticle(row, placement);
-    return article ? { article, visibility: placement.visibility } : null;
+    return article ? { kind: 'article', article, visibility: placement.visibility } : null;
 });
 
-export async function getPublishedCommunityArticles(community: 'vyvojari' | 'promptbook', publicOnly = false): Promise<readonly Article[]> {
+export async function getPublishedCommunityArticle(community: 'vyvojari' | 'promptbook', language: ArticleLanguage, slug: string) {
+    const detail = await getCommunityArticleDetail(community, language, slug);
+    return detail?.kind === 'article' ? { article: detail.article, visibility: detail.visibility } : null;
+}
+
+type CommunityArticleCard = Pick<Article, 'id' | 'title' | 'perex' | 'language' | 'slug' | 'publishedAt'> & {
+    readonly authorName: string;
+    readonly hasAudio: boolean;
+};
+
+export async function getCommunityArticleCards(
+    community: 'vyvojari' | 'promptbook',
+    waitingRoom = false,
+): Promise<readonly CommunityArticleCard[]> {
     const [rows, legacyPlacements] = await Promise.all([
-        readPublishedManagedArticles(undefined, community, publicOnly), getLegacyArticlePlacements(),
+        readPublishedManagedArticles(undefined, community, waitingRoom && community !== 'promptbook'),
+        getLegacyArticlePlacements(),
     ]);
     const legacyArticles = getAllArticles();
     const legacy = legacyArticles.filter((article) => legacyPlacements[article.id]?.communities.includes(community))
-        .map((article) => applyLegacyArticlePlacements(article, legacyPlacements, legacyArticles));
-    const accessByVisibility = new Map<ManagedArticlePlacement['visibility'], Promise<boolean>>();
-    const articles = await Promise.all(rows.map(async (row) => {
-        const placement = getArticlePlacement(row, community);
-        if (!placement || (publicOnly && placement.visibility !== 'public')) return null;
-        let access = accessByVisibility.get(placement.visibility);
-        if (!access) {
-            access = canReadManagedArticlePlacement(placement);
-            accessByVisibility.set(placement.visibility, access);
-        }
-        return await access ? toPublishedArticle(row, placement) : null;
-    }));
+        .map(({ id, title, perex, language, slug, publishedAt, author, audio }) => ({
+            id, title, perex, language, slug, publishedAt, authorName: author.name, hasAudio: Boolean(audio),
+        }));
     const reservedSlugs = new Set(legacyArticles.map((article) => `${article.language}/${article.slug}`));
-    return [...legacy, ...articles.filter((article): article is Article => article !== null && !reservedSlugs.has(`${article.language}/${article.slug}`))]
+    const accessByVisibility = new Map<ManagedArticlePlacement['visibility'], Promise<boolean>>();
+    const articles = await Promise.all(rows.map(async (row): Promise<CommunityArticleCard | null> => {
+        const placement = getArticlePlacement(row, community);
+        const author = getArticleAuthor(row.author_id);
+        if (!placement || !author || !row.published_at || reservedSlugs.has(`${row.language}/${row.slug}`)) return null;
+
+        if (placement.visibility !== 'public' && !offersFreeArticleTeaser(community, placement)) {
+            if (waitingRoom) return null;
+            let access = accessByVisibility.get(placement.visibility);
+            if (!access) {
+                access = canReadManagedArticlePlacement(placement);
+                accessByVisibility.set(placement.visibility, access);
+            }
+            if (!await access) return null;
+        }
+
+        return {
+            id: row.id, title: row.title, perex: row.perex, language: row.language, slug: row.slug,
+            publishedAt: row.published_at, authorName: author.name, hasAudio: Boolean(getCurrentManagedArticleAsset(row, 'audio')),
+        };
+    }));
+    return [...legacy, ...articles.filter((article): article is CommunityArticleCard => article !== null)]
         .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
 }
 

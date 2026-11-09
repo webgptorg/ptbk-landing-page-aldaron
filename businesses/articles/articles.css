@@ -68,6 +68,16 @@
 .article-contents a { display: flex; align-items: baseline; gap: .65rem; padding: .55rem 0; color: var(--article-muted); font-size: .7rem; line-height: 1.55; }
 .article-contents a > span { flex-shrink: 0; color: var(--article-accent); font-size: .58rem; font-variant-numeric: tabular-nums; }
 .article-contents a:hover { color: var(--article-accent); }
+.article-teaser-body { max-width: 750px; }
+.article-unlock-form { margin-top: 2rem; border: 1px solid var(--article-line); border-radius: 1rem; background: var(--article-soft); padding: clamp(1rem, 4vw, 1.75rem); }
+.article-unlock-form h2 { margin: 0 0 .35rem; font-family: var(--font-outfit), sans-serif; font-size: 1.55rem; font-weight: 550; }
+.article-unlock-form > p { margin: .45rem 0 1rem; color: var(--article-muted); }
+.article-unlock-form [role="alert"] { color: #9f2525; }
+.article-unlock-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.article-unlock-fields label { display: grid; gap: .3rem; font-size: .88rem; font-weight: 550; }
+.article-unlock-fields input { width: 100%; border: 1px solid var(--article-line); border-radius: .5rem; background: var(--article-paper); padding: .55rem .65rem; }
+.article-unlock-form button:disabled { opacity: .7; }
+.article-unlock-form > .article-unlock-privacy { margin: .75rem 0 0; }
 .article-reading-column { min-width: 0; max-width: 100%; }
 .article-prose { font-size: clamp(1.05rem, 1.3vw, 1.15rem); line-height: 1.95; font-weight: 400; overflow-wrap: break-word; }
 .article-prose p { margin-block: 1.4rem; }

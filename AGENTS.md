@@ -152,7 +152,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   and Pavol blogs can publish any registered author's articles. Community publication is independent and can use a
   community room session or a verified paid entitlement. Access is selected per destination; a public placement
   makes the shared text and media public and requires a public canonical. Drafts and restricted placements stay
-  out of public indexing and feeds.
+  out of public indexing and feeds. Free member articles in the Promptbook community expose their title, perex and
+  opening paragraph before entry. The inline name and email form opens that room and refreshes the current article.
+  The remaining text and downloads still require its own session.
   The four `articles/podcast.xml` routes still have deterministic initial prerenders and refresh hourly for admin
   publications. Only reviewed, existing audio becomes an episode. Managed audio, PDF, timing and subtitles use
   immutable uploads to the private shared object bucket and are served from checked publication routes, with byte

@@ -53,7 +53,7 @@ export default async function CzechCommunityRoute({ params, searchParams }: Comm
             initialFullname={participantIdentity.fullname}
             serverTime={new Date().toISOString()}
             articles={<CommunityArticleList communityId={definition.id} />}
-            publicArticles={<CommunityArticleList communityId={definition.id} publicOnly />}
+            publicArticles={<CommunityArticleList communityId={definition.id} waitingRoom />}
         />
     );
 }

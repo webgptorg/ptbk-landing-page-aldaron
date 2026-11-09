@@ -39,6 +39,12 @@ export function getArticleBody(markdown: string, title: string, perex: string): 
     return body;
 }
 
+/** Only the first top-level paragraph is public in the preview of a free member article. */
+export function getArticleOpeningParagraph(markdown: string, title: string, perex: string): string {
+    const [firstBlock] = new Marked().lexer(getArticleBody(markdown, title, perex)).filter(({ type }) => type !== 'space');
+    return firstBlock?.type === 'paragraph' ? firstBlock.raw : '';
+}
+
 /**
  * The renderer is also the editorial alignment contract: w0, w1… identify visible body words in order.
  * A recording maps its actual spoken tokens to these IDs explicitly, including many-to-one pronunciations.

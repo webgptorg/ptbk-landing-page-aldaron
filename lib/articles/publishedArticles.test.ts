@@ -25,7 +25,7 @@ import { getLegacyArticlePlacements } from './legacyArticlePlacements';
 import { readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
 import {
     getLegacyArticleSitemapEntries, getManagedPublicCanonicalArticles, getPublishedArticle,
-    getPublishedCommunityArticle, getPublishedCommunityArticles,
+    getCommunityArticleCards, getCommunityArticleDetail, getPublishedCommunityArticle,
 } from './publishedArticles';
 
 afterEach(() => vi.resetAllMocks());
@@ -46,7 +46,7 @@ describe('article destination resolution', () => {
         expect(await getPublishedCommunityArticle('vyvojari', 'cs', slug)).toMatchObject({
             visibility: 'public', article: { id: legacy.id, markdown: legacy.markdown, canonicalUrl },
         });
-        expect(await getPublishedCommunityArticles('promptbook', true)).toEqual([expect.objectContaining({ id: legacy.id, canonicalUrl })]);
+        expect(await getCommunityArticleCards('promptbook', true)).toEqual([expect.objectContaining({ id: legacy.id, authorName: legacy.author.name })]);
         expect(await getManagedPublicCanonicalArticles(['promptbook'])).toEqual([expect.objectContaining({ id: legacy.id, canonicalUrl })]);
         expect((await getLegacyArticleSitemapEntries('personal', 'cs')).some((article) => article.id === legacy.id)).toBe(false);
         expect(canReadCommunityMemberArticle).not.toHaveBeenCalled();
@@ -66,14 +66,51 @@ describe('article destination resolution', () => {
         vi.mocked(readPublishedManagedArticles).mockResolvedValue([row]);
         vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(false);
         expect(await getPublishedCommunityArticle('vyvojari', 'cs', row.slug)).toBeNull();
-        expect(await getPublishedCommunityArticles('vyvojari')).toEqual([]);
+        expect(await getCommunityArticleCards('vyvojari')).toEqual([]);
         vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(true);
         expect(await getPublishedCommunityArticle('promptbook', 'cs', row.slug)).toBeNull();
-        expect(await getPublishedCommunityArticles('vyvojari', true)).toEqual([]);
+        expect(await getCommunityArticleCards('vyvojari', true)).toEqual([]);
         expect(await getPublishedCommunityArticle('vyvojari', 'cs', row.slug)).toMatchObject({
             article: { title: 'Členský článek' }, visibility: 'members',
         });
         expect(canReadCommunityMemberArticle).toHaveBeenLastCalledWith('vyvojari', 'members');
         expect(await getManagedPublicCanonicalArticles(['vyvojari'])).toEqual([]);
+    });
+
+    it('exposes only a free Promptbook article opening until the same community session is authorized', async () => {
+        const row: ManagedArticleRow = {
+            id: '3082c899-26ad-418e-b638-e15f3c47d9cc', revision: '00000000-0000-4000-8000-000000000000',
+            language: 'cs', slug: 'clanek-s-uvodem', title: 'Článek s úvodem', perex: 'Perex.',
+            markdown: '# Článek s úvodem\n\nPerex.\n\nOtevírací **odstavec**.\n\n## Neveřejná kapitola\n\nSoukromý zbytek.',
+            author_id: 'pavol-hejny', placements: [{ destination: 'promptbook', visibility: 'members' }],
+            canonical_destination: 'promptbook', published_at: '2026-11-09T19:00:00Z',
+            created_at: '2026-11-09T19:00:00Z', updated_at: '2026-11-09T19:00:00Z',
+            audio_asset: null, pdf_asset: null, words_asset: null, subtitles_asset: null,
+        };
+        vi.mocked(getLegacyArticlePlacements).mockResolvedValue({});
+        vi.mocked(readPublishedManagedArticle).mockResolvedValue(row);
+        vi.mocked(readPublishedManagedArticles).mockResolvedValue([row]);
+        vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(false);
+
+        expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toEqual({
+            kind: 'teaser', title: row.title, perex: row.perex, openingMarkdown: 'Otevírací **odstavec**.',
+        });
+        const cards = await getCommunityArticleCards('promptbook', true);
+        expect(cards).toHaveLength(1);
+        expect(cards[0]).not.toHaveProperty('markdown');
+        expect(await getCommunityArticleDetail('vyvojari', 'cs', row.slug)).toBeNull();
+
+        vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(true);
+        expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toMatchObject({
+            kind: 'article', visibility: 'members', article: { markdown: row.markdown },
+        });
+        expect(canReadCommunityMemberArticle).toHaveBeenLastCalledWith('promptbook', 'members');
+
+        const paid = { ...row, placements: [{ destination: 'promptbook', visibility: 'paid' }] } satisfies ManagedArticleRow;
+        vi.mocked(readPublishedManagedArticle).mockResolvedValue(paid);
+        vi.mocked(readPublishedManagedArticles).mockResolvedValue([paid]);
+        vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(false);
+        expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toBeNull();
+        expect(await getCommunityArticleCards('promptbook', true)).toEqual([]);
     });
 });
