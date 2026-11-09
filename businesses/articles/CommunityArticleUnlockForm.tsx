@@ -9,7 +9,7 @@ import {
 } from '@/lib/workshops/workshopConstants';
 import { isWorkshopParticipantFullnameValid } from '@/lib/workshops/workshopParticipantFullname';
 import { useRouter } from 'next/navigation';
-import { useRef, useState, useTransition, type FormEvent } from 'react';
+import { useEffect, useRef, useState, useTransition, type FormEvent } from 'react';
 
 export function CommunityArticleUnlockForm({ language, roomSlug }: {
     readonly language: ArticleLanguage;
@@ -17,11 +17,14 @@ export function CommunityArticleUnlockForm({ language, roomSlug }: {
 }) {
     const router = useRouter();
     const requestInProgress = useRef(false);
+    const [isReady, setReady] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
     const [isRefreshing, startRefresh] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const cs = language === 'cs';
     const busy = isSubmitting || isRefreshing;
+
+    useEffect(() => setReady(true), []);
 
     async function unlock(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -49,7 +52,7 @@ export function CommunityArticleUnlockForm({ language, roomSlug }: {
     }
 
     return (
-        <form className="article-unlock-form" onSubmit={unlock} aria-labelledby="article-unlock-title" aria-busy={busy}>
+        <form className="article-unlock-form" method="post" onSubmit={unlock} aria-labelledby="article-unlock-title" aria-busy={busy}>
             <h2 id="article-unlock-title">{cs ? 'Dočtěte článek zdarma' : 'Read the rest for free'}</h2>
             <p>{cs ? 'Zadejte jméno a e-mail a připojíte se ke komunitě Promptbook.' : 'Enter your name and email to join the Promptbook community.'}</p>
             <div className="article-unlock-fields">
@@ -63,7 +66,7 @@ export function CommunityArticleUnlockForm({ language, roomSlug }: {
                 </label>
             </div>
             {error && <p role="alert">{error}</p>}
-            <button type="submit" className="article-button article-button-primary" disabled={busy}>
+            <button type="submit" className="article-button article-button-primary" disabled={!isReady || busy}>
                 {busy ? (cs ? 'Odemykám…' : 'Unlocking…') : (cs ? 'Odemknout článek' : 'Unlock article')}
             </button>
             <PersonalDataConsentNote language={language} className="article-unlock-privacy" />
