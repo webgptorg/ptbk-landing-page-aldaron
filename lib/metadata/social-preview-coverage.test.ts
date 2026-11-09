@@ -1,4 +1,5 @@
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
+import { COMMUNITIES_PATH } from '@/businesses/community/config';
 import { COMMON_KNOWLEDGE_BOOKS } from '@/lib/common-knowledge/catalog';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
@@ -34,6 +35,7 @@ describe('public sharing preview coverage', () => {
             const legalPath = /^\/(cs|en)\/legal\/[^/]+$/.exec(definition.path);
             const imageSource = knownBook ? '/book/[slug]/opengraph-image.tsx'
                 : legalPath ? `/${legalPath[1]}${legalPath[1] === 'cs' ? '/(marketing)' : ''}/legal/[document]/opengraph-image${legalPath[1] === 'cs' ? '/route.tsx' : '.tsx'}`
+                : definition.path === COMMUNITIES_PATH ? '/cs/(marketing)/komunity/opengraph-image/route.tsx'
                 : `${definition.path}/opengraph-image.tsx`;
             expect(existsSync(join(process.cwd(), 'app', imageSource))).toBe(true);
             if (domain) {

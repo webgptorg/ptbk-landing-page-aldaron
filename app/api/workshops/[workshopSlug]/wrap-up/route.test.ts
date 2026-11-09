@@ -39,6 +39,7 @@ function createRequest(headers?: HeadersInit) {
 
 beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubEnv('COMMUNITY_EMAIL_VERIFICATION_ENABLED', '');
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-20T12:00:00Z'));
     MOCKS.authenticate.mockResolvedValue({ supabase: SUPABASE, workshopRow: WORKSHOP_ROW, participant: PARTICIPANT });
@@ -49,7 +50,10 @@ beforeEach(() => {
     MOCKS.loadPreview.mockResolvedValue({ title: 'Demo', previewImageUrl: 'https://example.com/card.webp' });
     MOCKS.loadImage.mockResolvedValue('data:image/jpeg;base64,cHJldmlldw==');
 });
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+});
 
 describe('authenticated workshop recap preparation', () => {
     it('creates a canonical ad hoc link, shares the selected history and exports only permitted recap fields', async () => {
@@ -57,7 +61,7 @@ describe('authenticated workshop recap preparation', () => {
         const result = await response.json() as WorkshopWrapUpExport;
         expect(response.status).toBe(200);
         expect(response.headers.get('cache-control')).toBe('no-store');
-        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent');
+        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent', true);
         expect(result.source.contentBlocks).toEqual(MATERIALS);
         expect(JSON.stringify(result)).not.toContain('PRIVATE');
         expect(JSON.stringify(result)).not.toContain('private@example.com');
@@ -68,6 +72,17 @@ describe('authenticated workshop recap preparation', () => {
         expect(result.shortUrl).toBe('https://ptbk.io/pdf123');
         expect(result.projectPreviewImage).toMatch(/^data:image\/jpeg/);
         expect(MOCKS.loadHistory).toHaveBeenCalledWith(WORKSHOP.repository, { page: 1, isExpanded: false });
+    });
+
+    it('requests only the publicly readable recap when the room e-mail needs verification', async () => {
+        vi.stubEnv('COMMUNITY_EMAIL_VERIFICATION_ENABLED', 'true');
+        MOCKS.loadState.mockResolvedValue({ state: { ...STATE, contentBlocks: [] } });
+
+        const response = await POST(createRequest(), CONTEXT);
+
+        expect(response.status).toBe(200);
+        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent', false);
+        expect((await response.json() as WorkshopWrapUpExport).source.contentBlocks).toEqual([]);
     });
 
     it.each([401, 404])('does no export work when authentication/publication returns %s', async (status) => {
