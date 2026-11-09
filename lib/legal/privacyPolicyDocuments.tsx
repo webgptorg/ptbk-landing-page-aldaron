@@ -21,7 +21,7 @@ const SUPERVISORY_AUTHORITY_URL = 'https://uoou.gov.cz';
 export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Ochrana osobních údajů',
-        publication: { date: '2026-11-03', isDraft: false },
+        publication: { date: '2026-11-09', isDraft: false },
         perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo weby pavolhejny.cz, pavolhejny.com a ai-ta-krajta.cz či využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
         sections: [
             {
@@ -44,6 +44,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 bullets: [
                     'U nových formulářů ukládáme odděleně účel požadavku, zdroj, čas přijetí, jazyk a verzi informačního textu. U odběru novinek také přesné znění a výslovnou volbu souhlasu pro konkrétní téma a odesílatele AI Web s.r.o. Registrace, poptávka ani stažení PDF samy nezakládají souhlas s newsletterem nebo samostatným marketingem Neonmedia. Záznam o odeslání neověřuje vlastnictví e-mailové schránky. Historickým kontaktům souhlas zpětně nedoplňujeme.',
                     'Údaje z formulářů: jméno a příjmení, e-mailová adresa, telefonní číslo, název firmy, fakturační údaje a text zprávy, kterou nám napíšete.',
+                    'Údaje o online předplatném: fakturační a kontaktní údaje, tarif, případná sleva, verze přijatých podmínek, identifikátory a stav plateb a případné údaje, které doplníte pro podporu. Fakturační údaje ověřujeme v příslušných veřejných registrech, včetně ARES v Česku a slovenského registru účetních závěrek a systému VIES pro nákup ze Slovenska. Údaje o kartě zadáváte přímo ve Stripe.',
                     'Údaje o registraci na akci: zvolený termín, počet účastníků, formát a případný slevový kód.',
                     'Technické údaje o návštěvě: IP adresa, typ a jazyk prohlížeče, typ zařízení, navštívené stránky, čas návštěvy a stránka, ze které jste přišli.',
                     'Údaje z cookies a měřicích nástrojů, a to v rozsahu, ke kterému nám dáte souhlas.',
@@ -55,6 +56,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 bullets: [
                     'Abychom vám odpověděli a domluvili se na spolupráci - na základě jednání o smlouvě a našeho oprávněného zájmu odpovědět na poptávku.',
                     'Abychom vás zaregistrovali na workshop nebo jinou akci, vystavili fakturu a poslali vám podklady - na základě plnění smlouvy a našich zákonných povinností.',
+                    'Abychom ověřili údaje k předplatnému, vyřídili objednávku, vedli přehled plateb a poskytli podporu. Základem je jednání o smlouvě nebo její plnění a naše zákonné povinnosti. U pracovních kontaktů zástupců firem vycházíme také z oprávněného zájmu vyřídit a doložit obchodní vztah.',
                     'Abychom vám posílali novinky - na základě vašeho souhlasu, který můžete kdykoli odvolat.',
                     'Abychom rozuměli tomu, jak web funguje a co návštěvníky zajímá - na základě souhlasu s analytickými cookies.',
                     'Abychom měřili účinnost reklamy - na základě souhlasu s marketingovými cookies.',
@@ -65,6 +67,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 heading: 'Jak dlouho údaje uchováváme',
                 bullets: [
                     'Údaje z poptávkových a registračních formulářů po dobu jednání a následně tři roky od posledního kontaktu.',
+                    'Údaje k předplatnému po dobu smluvního vztahu a poté v rozsahu a po dobu nezbytnou pro splnění zákonných povinností nebo obhajobu právních nároků.',
                     'Účetní doklady deset let, jak nám ukládá zákon.',
                     'Kontakt pro zasílání novinek do doby, než souhlas odvoláte.',
                     'Údaje v analytických a marketingových nástrojích podle nastavení daného nástroje, nejdéle 26 měsíců.',
@@ -76,7 +79,8 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'Osobní údaje neprodáváme. V nezbytném rozsahu je zpřístupňujeme níže uvedeným dodavatelům a určeným obchodním partnerům pro popsané účely. Příjemce není automaticky zpracovatelem; jeho role závisí na skutečné činnosti.',
                 ],
                 bullets: [
-                    'Supabase - databáze, ve které jsou uložené kontakty z formulářů.',
+                    'Supabase – databáze pro kontakty z formulářů a evidenci předplatného.',
+                    <>Stripe zajišťuje platby a vystavení dokladů. Způsob zpracování údajů u Stripe popisují jeho <a href="https://stripe.com/privacy">zásady ochrany osobních údajů</a>.</>,
                     'Google Analytics - měření návštěvnosti webu.',
                     'Meta Pixel - měření účinnosti reklamy na Facebooku a Instagramu.',
                     'LogRocket - záznam chování na webu, který nám pomáhá odhalovat chyby.',
@@ -165,7 +169,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     },
     en: {
         title: 'Privacy Policy',
-        publication: { date: '2026-11-03', isDraft: false },
+        publication: { date: '2026-11-09', isDraft: false },
         perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or pavolhejny.cz, pavolhejny.com and ai-ta-krajta.cz or use the Promptbook services, why we do it, and which rights you have.`,
         sections: [
             {
@@ -188,6 +192,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 bullets: [
                     'For new forms we record the purpose, source, receipt time, language and notice version. Newsletter requests also record the exact wording and explicit consent choice for the named topic and sender AI Web s.r.o. Enquiries, registration and PDF requests do not subscribe you to a newsletter or Neonmedia marketing. A submission does not verify email ownership. We do not retrospectively infer consent for historical contacts.',
                     'Data from forms: name, e-mail address, phone number, company name, billing details, and the message you write to us.',
+                    'Online subscription data: billing and contact information, plan, any discount, accepted terms version, payment identifiers and status, and any information you provide for support. We verify billing information in the relevant public registers, including ARES in Czechia and the Slovak Register of Financial Statements and VIES for orders from Slovakia. You enter your card details directly in Stripe.',
                     'Data about an event registration: the chosen date, the number of participants, the format, and any discount code.',
                     'Technical data about the visit: IP address, browser type and language, device type, visited pages, time of the visit, and the page you came from.',
                     'Data from cookies and measurement tools, to the extent you consent to.',
@@ -199,6 +204,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 bullets: [
                     'To answer you and agree on working together - based on pre-contractual negotiations and our legitimate interest in replying to an enquiry.',
                     'To register you for a workshop or another event, issue an invoice, and send you the materials - based on the performance of the contract and our legal obligations.',
+                    'To verify subscription details, fulfil your order, keep track of payments and provide support, based on steps before entering into the contract, its performance and our legal obligations. For business contacts of company representatives, we also rely on our legitimate interest in administering and documenting the relationship.',
                     'To send you news - based on your consent, which you may withdraw at any time.',
                     'To understand how the website works and what visitors care about - based on your consent to analytics cookies.',
                     'To measure the effectiveness of our advertising - based on your consent to marketing cookies.',
@@ -209,6 +215,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 heading: 'How long we keep the data',
                 bullets: [
                     'Data from enquiry and registration forms for the duration of the negotiations and then three years from the last contact.',
+                    'Subscription information for the duration of the agreement and then to the extent and for as long as necessary to comply with legal obligations or defend legal claims.',
                     'Accounting documents for ten years, as the law requires.',
                     'The contact for sending news until you withdraw your consent.',
                     'Data in analytics and marketing tools according to the settings of the given tool, at most 26 months.',
@@ -220,7 +227,8 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'We do not sell personal data. Necessary information is disclosed to the suppliers and designated business partners described below for the stated purposes. A recipient is not automatically a processor; its role follows its actual activities.',
                 ],
                 bullets: [
-                    'Supabase - the database which holds the contacts from the forms.',
+                    'Supabase – the database that stores form contacts and subscription records.',
+                    <>Stripe handles payments and invoicing. Its <a href="https://stripe.com/privacy">Privacy Policy</a> describes how Stripe processes information.</>,
                     'Google Analytics - measuring website traffic.',
                     'Meta Pixel - measuring the effectiveness of advertising on Facebook and Instagram.',
                     'LogRocket - a recording of behaviour on the website which helps us find bugs.',

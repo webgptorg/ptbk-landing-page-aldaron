@@ -1,6 +1,9 @@
+import Link from 'next/link';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import type { LegalDocument } from '@/lib/legal/legalDocument';
 import { getOperatorIdentification, LEGAL_CONTACT_EMAIL, NEONMEDIA_IDENTIFICATION } from '@/lib/legal/legalOperator';
+
+import { PROMPTBOOK_ONLINE_TERMS_PATH } from './promptbookOnlineTermsVersion';
 
 /** Current B2B product terms; workshop and community terms have their own scope. */
 export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
@@ -10,7 +13,7 @@ export const PRODUCT_TERMS_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage,
             date: '2026-11-03', isDraft: false,
             notice: "Znění 2026-11-03-v5 ze dne 3. listopadu 2026 pro objednávky, které na tyto podmínky odkazují. Konkrétní objednávka určuje rozsah plnění. Nové verze zveřejňujeme s datem; změny běžících smluv oznamujeme postupem uvedeným níže a zachováváme již vzniklá práva.",
         },
-        perex: 'Pravidla pro firemní předplatné, produktovou podporu a vztah mezi klientem, jeho agenturou a dodavatelem Promptbooku. Podmínky workshopů a členství v komunitě zůstávají samostatné.',
+        perex: <>Pravidla pro firemní předplatné, produktovou podporu a vztah mezi klientem, jeho agenturou a dodavatelem Promptbooku. Podmínky workshopů a členství v komunitě zůstávají samostatné. Pro objednávky, které na ně odkazují, platí <Link href={PROMPTBOOK_ONLINE_TERMS_PATH}>podmínky online předplatného</Link>.</>,
         sections: [
             {
                 heading: 'Dodavatel, zákazník a uzavření smlouvy',

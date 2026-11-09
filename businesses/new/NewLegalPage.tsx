@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getLegalDocument } from '@/lib/legal/legalDocuments';
 import { getLegalDocumentPublicationLabel } from '@/lib/legal/legalDocumentPublication';
+import type { LegalDocument } from '@/lib/legal/legalDocument';
 import type { LegalDocumentKind } from '@/lib/legal/legalPagePaths';
 import s from './site.module.css';
 import { LegalNavigation } from './LegalNavigation';
@@ -11,7 +12,13 @@ export function NewLegalPage({ kind, language = 'cs' }: {
     kind: LegalDocumentKind;
     language?: SupportedHomepageLanguage;
 }) {
-    const document = getLegalDocument(kind, language);
+    return <LegalDocumentPage document={getLegalDocument(kind, language)} language={language}/>;
+}
+
+export function LegalDocumentPage({ document, language }: {
+    document: LegalDocument;
+    language: SupportedHomepageLanguage;
+}) {
     return <>
         <header className={s.pageIntro}>
             <Link className={s.breadcrumb} href={`/${language}`}>← Promptbook</Link>

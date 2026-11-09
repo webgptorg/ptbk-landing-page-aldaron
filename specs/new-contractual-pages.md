@@ -47,3 +47,11 @@ Identifikace AI Webu vychází z [Obchodního věstníku, zápis zveřejněný 8
 ## Navazující bríf 3. listopadu 2026
 
 Nové partnerské smlouvy mají 20% provizi na prvních 24 kalendářních měsíců od první placené aktivace licence, bez restartu při přerušení či změně plánu; poměrný základ pro přesahující roční platby, výplata do 30 dní od inkasa. Starší přijaté odlišné dohody se nemění zpětně. Start je průběžné předplatné za 399 Kč a Business za 1 999 Kč měsíčně. Vydání se evidují od 0.115; skutečná prerelease označení se nepřepisují na stabilní 0.115.0. Pokud katalog nemá stabilní řadu, přehled vydaných prerelease je rovnou otevřený. Patička má vyvážené sloupce: produkt sedm odkazů, zdroje šest a oddělenou sekci právních dokumentů.
+
+## Online předplatné Start a Business
+
+Český nákup pro podnikatele používá samostatné znění `2026-11-09-online-v1` na `/cs/legal/podminky-produktu/2026-11-09-online-v1`. V potvrzené objednávce zůstává verze přijatých podmínek, konkrétní vydání enginu, neměnný odkaz na jeho licenci, kanál podpory, cena a sjednaná sleva. Znění zůstává dostupné i pro starší objednávky. Anglický web používá poptávku. Pro spotřebitele je třeba samostatný nákup a podmínky.
+
+Online objednávka zahrnuje samostatně provozovaný projekt a podporu podle tarifu od aktivace. AI Web může pro přesně určené vydání sjednat provozní oprávnění v rozsahu vlastních práv. Předběžné vydání má podporu, pouze pokud je výslovně určeno v objednávce. Samo tím nezíská status stabilního vydání. Rozsah aplikace a relay je v online podmínkách oddělený od aktuálně poskytovaných služeb.
+
+Při nákupu se uplatní nejvýše jeden slevový kód. Změna nebo stažení kódu platí pro nové objednávky, potvrzená sleva doběhne podle původní objednávky. Online cena je základ bez DPH. Připočtení povinné DPH při budoucí obnově se oznamuje nejméně 30 dní předem s možností obnovu vypnout. Partnerské znění `2026-11-09-v6` výslovně zahrnuje slevové kódy do slev snižujících skutečně uhrazený provizní základ.

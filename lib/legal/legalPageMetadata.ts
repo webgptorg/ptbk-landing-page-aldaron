@@ -3,6 +3,7 @@ import { LEGAL_PAGE_PATHS, type LegalDocumentKind } from '@/lib/legal/legalPageP
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
 import type { Metadata } from 'next';
+import { PROMPTBOOK_ONLINE_TERMS_PATH } from './promptbookOnlineTermsVersion';
 
 /**
  * How a legal page introduces itself in a search result
@@ -116,6 +117,15 @@ export const LEGAL_PAGE_DEFINITIONS: Readonly<
     jointPrivacy: { cs: createLegalPageDefinition('jointPrivacy', 'cs'), en: createLegalPageDefinition('jointPrivacy', 'en') },
 };
 
+export const PROMPTBOOK_ONLINE_TERMS_PAGE_DEFINITION: PageMetadataDefinition = {
+    path: PROMPTBOOK_ONLINE_TERMS_PATH,
+    language: 'cs',
+    title: 'Podmínky online předplatného Promptbook',
+    description: 'Podmínky online objednávek tarifů Start a Business, licence enginu, podpory a obnovování.',
+    sitemapPriority: LEGAL_PAGE_SITEMAP_PRIORITY,
+    sitemapChangeFrequency: 'yearly',
+};
+
 /**
  * Every legal page, flattened the way the sitemap registry lists pages
  */
@@ -126,6 +136,7 @@ export const LEGAL_PAGE_DEFINITION_LIST: readonly PageMetadataDefinition[] = [
     LEGAL_PAGE_DEFINITIONS.termsAndConditions.en,
     LEGAL_PAGE_DEFINITIONS.productTerms.cs,
     LEGAL_PAGE_DEFINITIONS.productTerms.en,
+    PROMPTBOOK_ONLINE_TERMS_PAGE_DEFINITION,
     LEGAL_PAGE_DEFINITIONS.partnerTerms.cs,
     LEGAL_PAGE_DEFINITIONS.partnerTerms.en,
     LEGAL_PAGE_DEFINITIONS.engineLicense.cs,

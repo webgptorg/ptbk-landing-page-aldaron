@@ -16,6 +16,7 @@ describe('published legal versions', () => {
     it('retains annual payment and mandatory-law protections alongside the uniform rate', () => {
         const html = renderToStaticMarkup(<NewLegalPage kind="partnerTerms" language="cs"/>);
         expect(html).toContain('jednotných 20 %');
+        expect(html).toContain('po všech uplatněných slevách včetně slevových kódů');
         expect(html).toContain('do 30 kalendářních dnů');
         expect(html).toContain('Roční provize se nevyplácí po dvanáctinách');
         expect(html).toContain('již potvrzených obchodů');
@@ -25,7 +26,7 @@ describe('published legal versions', () => {
         const product = renderToStaticMarkup(<NewLegalPage kind="productTerms" language={language}/>);
         const partner = renderToStaticMarkup(<NewLegalPage kind="partnerTerms" language={language}/>);
         expect(product).toContain('2026-11-03-v5');
-        expect(partner).toContain('2026-11-03-v5');
+        expect(partner).toContain('2026-11-09-v6');
         expect(product).toContain(language === 'cs' ? 'předem výslovně povolit' : 'explicit prior approval');
         expect(product).toContain(language === 'cs' ? 'poměrně podle doby' : 'proportionally to the time');
         expect(product).toContain(language === 'cs' ? 'bez automatického přečerpání' : 'no automatic overage');
