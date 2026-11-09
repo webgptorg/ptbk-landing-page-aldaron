@@ -2,6 +2,7 @@
 export const ADMIN_PERMISSION_DEFINITIONS = [
     { id: 'workshops', label: 'Živé workshopy', path: '/admin/workshops' },
     { id: 'community', label: 'Komunita', path: '/admin/community' },
+    { id: 'articles', label: 'Články', path: '/admin/articles' },
     { id: 'studio', label: 'Studio', path: '/admin/studio' },
     { id: 'contacts', label: 'Kontakty a leady', path: '/admin/contacts' },
     { id: 'shortener', label: 'Zkracovač odkazů', path: '/admin/shortener' },

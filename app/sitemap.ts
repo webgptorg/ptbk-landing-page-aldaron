@@ -1,5 +1,5 @@
 import { getLegacyLegalRedirect } from '@/lib/legal/legalRedirects';
-import { getAllArticles } from '@/lib/articles/load';
+import { getLegacyArticleSitemapEntries, getManagedPublicCanonicalArticles } from '@/lib/articles/publishedArticles';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
@@ -12,7 +12,7 @@ import { SCENARIOS } from '@/businesses/new/economics';
 import { COMPARISONS } from '@/businesses/new/comparisons';
 import { LEGAL_PAGE_DEFINITION_LIST } from '@/lib/legal/legalPageMetadata';
 
-export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 /**
  * Relative importance used for a page which does not state its own
@@ -60,7 +60,7 @@ function createSitemapEntry(definition: PageMetadataDefinition): MetadataRoute.S
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Navigable marketing routes can also be non-indexed discussion drafts.
     const excludedLegalUrls = new Set(LEGAL_PAGE_DEFINITION_LIST
         .filter((definition) => definition.isIndexed === false)
@@ -87,7 +87,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
         ...marketingPages,
         ...pages,
         ...(['cs', 'en'] as const).map((language) => ({ url: getArticleIndexUrl(language, 'promptbook'), changeFrequency: 'weekly' as const, priority: 0.6 })),
-        ...getAllArticles().map((article) => ({
+        ...(await getManagedPublicCanonicalArticles(['promptbook-blog', 'vyvojari', 'promptbook'])).map((article) => ({
+            url: article.canonicalUrl,
+            lastModified: article.updatedAt ?? article.publishedAt,
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+        })),
+        ...(await getLegacyArticleSitemapEntries('promptbook')).map((article) => ({
             url: getArticleUrl(article, 'promptbook'),
             lastModified: article.updatedAt ?? article.publishedAt,
             changeFrequency: 'monthly' as const,

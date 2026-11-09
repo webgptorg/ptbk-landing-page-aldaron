@@ -2,11 +2,16 @@ import { getAllArticles } from '@/lib/articles/load';
 import sitemap from '@/app/sitemap';
 import { INDEXED_PAGE_METADATA_DEFINITIONS } from '@/lib/metadata/page-registry';
 import { PRIMARY_SITE_URL, createPublicUrl } from '@/lib/domains/publicDomainRouting';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/lib/articles/publishedArticles', async () => ({
+    getManagedPublicCanonicalArticles: vi.fn().mockResolvedValue([]),
+    getLegacyArticleSitemapEntries: (await import('@/lib/articles/load')).getAllArticles,
+}));
 
 describe('sitemap', () => {
-    it('contains every and only indexable Promptbook page definition', () => {
-        const entries = sitemap();
+    it('contains every and only indexable Promptbook page definition', async () => {
+        const entries = await sitemap();
         const primaryDefinitions = INDEXED_PAGE_METADATA_DEFINITIONS.filter(
             (definition) => new URL(createPublicUrl(definition.path)).origin === PRIMARY_SITE_URL,
         );
@@ -29,15 +34,16 @@ describe('sitemap', () => {
         expect(entries.map((entry) => entry.url)).not.toContain('https://ptbk.io/cs/online-workshop/participant');
     });
 
-    it('does not pretend that every page changed when the site is deployed', () => {
-        expect(sitemap().filter((entry) => !entry.url.includes('/articles/')).every((entry) => entry.lastModified === undefined)).toBe(true);
+    it('does not pretend that every page changed when the site is deployed', async () => {
+        const entries = await sitemap();
+        expect(entries.filter((entry) => !entry.url.includes('/articles/')).every((entry) => entry.lastModified === undefined)).toBe(true);
         for (const article of getAllArticles()) {
-            expect(sitemap().find((entry) => entry.url.endsWith(`/articles/${article.slug}`))?.lastModified).toBe(article.updatedAt ?? article.publishedAt);
+            expect(entries.find((entry) => entry.url.endsWith(`/articles/${article.slug}`))?.lastModified).toBe(article.updatedAt ?? article.publishedAt);
         }
     });
 
-    it('excludes readable legal discussion drafts from search discovery in both languages', () => {
-        const paths = sitemap().map((page) => new URL(page.url).pathname);
+    it('excludes readable legal discussion drafts from search discovery in both languages', async () => {
+        const paths = (await sitemap()).map((page) => new URL(page.url).pathname);
         for (const language of ['cs', 'en']) {
             expect(paths).toContain(`/${language}`);
             expect(paths).toContain(`/${language}/legal/${language === 'cs' ? 'ochrana-osobnich-udaju' : 'privacy-policy'}`);

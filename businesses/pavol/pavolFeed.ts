@@ -37,7 +37,7 @@ function getPodcastFeedImageUrl(podcast: PavolPodcast, websiteUrl: string): stri
 export function createPavolFeed(articles: readonly Article[], podcasts: readonly PavolPodcast[], language: ArticleLanguage): string {
     const definition = getArticlePodcastDefinition(language, 'personal');
     const items = [
-        ...articles.filter(article => article.authorId === 'pavol-hejny' && article.language === language).map(article => ({
+        ...articles.filter(article => (article.managed || article.authorId === 'pavol-hejny') && article.language === language).map(article => ({
             id: article.id, title: article.title, href: getArticleUrl(article, 'personal'), description: article.perex,
             publishedAt: article.publishedAt, language: article.language, author: article.author.name, imageUrl: undefined,
             audioUrl: article.audio?.url, byteLength: article.audio?.byteLength, duration: article.audio?.duration, subtitlesUrl: article.audio?.subtitlesUrl,

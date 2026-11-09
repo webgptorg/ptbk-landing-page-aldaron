@@ -5,14 +5,14 @@ import type { ArticleLanguage, ArticlePublication } from '@/lib/articles/types';
 import { getArticleIndexUrl, getArticlePodcastUrl } from '@/lib/articles/urls';
 import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
 
-export function ArticleHeader({ language, publication, translations = [] }: {
+export function ArticleHeader({ language, publication, translations = [], indexPath = new URL(getArticleIndexUrl(language, publication)).pathname }: {
     readonly language: ArticleLanguage;
     readonly publication: ArticlePublication;
+    readonly indexPath?: string;
     readonly translations?: readonly { readonly language: ArticleLanguage; readonly url: string; readonly title: string }[];
 }) {
     const personal = publication === 'personal';
     const homePath = personal ? '/' : `/${language}`;
-    const indexPath = new URL(getArticleIndexUrl(language, publication)).pathname;
     return (
         <header className="article-site-header">
             <a className="article-skip-link" href="#article-main">{language === 'cs' ? 'Přejít k obsahu' : 'Skip to content'}</a>
@@ -31,11 +31,15 @@ export function ArticleHeader({ language, publication, translations = [] }: {
     );
 }
 
-export function ArticleFooter({ language, publication }: { readonly language: ArticleLanguage; readonly publication: ArticlePublication }) {
+export function ArticleFooter({ language, publication, indexPath = new URL(getArticleIndexUrl(language, publication)).pathname }: {
+    readonly language: ArticleLanguage;
+    readonly publication: ArticlePublication;
+    readonly indexPath?: string;
+}) {
     const cs = language === 'cs';
     return (
         <footer className="article-footer article-container">
-            <Link className="article-text-link" href={new URL(getArticleIndexUrl(language, publication)).pathname}><ArrowLeft size={16} aria-hidden="true" />{cs ? 'Všechny články' : 'All articles'}</Link>
+            <Link className="article-text-link" href={indexPath}><ArrowLeft size={16} aria-hidden="true" />{cs ? 'Všechny články' : 'All articles'}</Link>
             {publication === 'personal' && <a className="article-text-link" href={getArticlePodcastUrl(language, publication)}>{cs ? 'Odebírat články a podcasty (RSS)' : 'Subscribe to articles and podcasts (RSS)'}</a>}
             <div><span>{publication === 'personal' ? 'Pavol Hejný' : 'Promptbook'}</span><LegalFooterLinks language={language} /></div>
         </footer>

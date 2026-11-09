@@ -11,13 +11,17 @@ import { AnchoringExplorer } from './AnchoringExplorer';
 import { renderArticleCover, renderArticleDocument } from './articleDocument';
 import './articles.css';
 
-export function ArticlePage({ article, publication }: { readonly article: Article; readonly publication: ArticlePublication }) {
+export function ArticlePage({ article, publication, community }: {
+    readonly article: Article;
+    readonly publication: ArticlePublication;
+    readonly community?: { readonly indexPath: string; readonly articlePath: string };
+}) {
     const cs = article.language === 'cs';
-    const document = renderArticleDocument(article.markdown, article.title, article.perex, getArticleAssetUrl(article.id, ''));
+    const document = renderArticleDocument(article.markdown, article.title, article.perex, article.managed ? undefined : getArticleAssetUrl(article.id, ''));
     const cover = renderArticleCover(article.title, article.perex);
     const readingMinutes = Math.max(1, Math.ceil(document.wordCount / 200));
-    const indexPath = new URL(getArticleIndexUrl(article.language, publication)).pathname;
-    const articlePath = new URL(getArticleUrl(article, publication)).pathname;
+    const indexPath = community?.indexPath ?? new URL(getArticleIndexUrl(article.language, publication)).pathname;
+    const articlePath = community?.articlePath ?? new URL(getArticleUrl(article, publication)).pathname;
     const playableArticle = {
         id: article.id,
         title: article.title,
@@ -30,17 +34,17 @@ export function ArticlePage({ article, publication }: { readonly article: Articl
     let explorerInserted = false;
     return (
         <div className="article-site" data-publication={publication} lang={article.language}>
-            <ArticleHeader language={article.language} publication={publication} translations={article.translations} />
+            <ArticleHeader language={article.language} publication={publication} translations={article.translations} indexPath={community?.indexPath} />
             <main id="article-main" tabIndex={-1}>
                 <ArticleTracking articleId={article.id} wordsUrl={article.audio?.wordsUrl}>
                     <header className="article-hero article-container">
-                        <Link href={indexPath} className="article-back-link"><ArrowLeft size={15} aria-hidden="true" />{cs ? 'Články a myšlenky' : 'Articles and ideas'}</Link>
+                        <Link href={indexPath} className="article-back-link"><ArrowLeft size={15} aria-hidden="true" />{community ? (cs ? 'Zpět do komunity' : 'Back to the community') : (cs ? 'Články a myšlenky' : 'Articles and ideas')}</Link>
                         <div className="article-hero-meta"><span className="article-eyebrow">{article.tags[0] ?? (cs ? 'Technologie' : 'Technology')}</span><span className="article-meta-dot" /><time dateTime={article.publishedAt}>{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(article.publishedAt))}</time></div>
                         <h1 dangerouslySetInnerHTML={{ __html: cover.titleHtml }} />
                         <p className="article-perex" dangerouslySetInnerHTML={{ __html: cover.perexHtml }} />
                         <div className="article-byline"><Image src={article.author.photoUrl} width={46} height={46} alt="" /><div><a href={article.author.domains[article.language] ?? article.canonicalUrl}>{article.author.name}</a><span>{readingMinutes} {cs ? 'min čtení' : 'min read'}</span></div></div>
-                        <div className="article-hero-actions"><ArticleAudioButton article={playableArticle} href={articlePath} publication={publication} /><a href={article.pdfUrl} download className="article-button"><Download size={17} aria-hidden="true" />{cs ? 'Stáhnout PDF' : 'Download PDF'}</a><a className="article-text-link" href="#article-contents"><List size={17} aria-hidden="true" />{cs ? 'Obsah článku' : 'Contents'}</a></div>
-                        {!article.audio && <p className="article-audio-note">{cs ? 'Audio verze se připravuje.' : 'The audio edition is being prepared.'}</p>}
+                        <div className="article-hero-actions"><ArticleAudioButton article={playableArticle} href={articlePath} publication={publication} />{article.pdfUrl && <a href={article.pdfUrl} download className="article-button"><Download size={17} aria-hidden="true" />{cs ? 'Stáhnout PDF' : 'Download PDF'}</a>}<a className="article-text-link" href="#article-contents"><List size={17} aria-hidden="true" />{cs ? 'Obsah článku' : 'Contents'}</a></div>
+                        {!article.audio && !article.managed && <p className="article-audio-note">{cs ? 'Audio verze se připravuje.' : 'The audio edition is being prepared.'}</p>}
                     </header>
                     <div className="article-reading-layout article-container">
                         <aside className="article-contents" id="article-contents">
@@ -57,12 +61,12 @@ export function ArticlePage({ article, publication }: { readonly article: Articl
                                     return <div key={section.id ?? `introduction-${index}`}><div dangerouslySetInnerHTML={{ __html: section.html }} />{showExplorer && <AnchoringExplorer language={article.language} />}</div>;
                                 })}
                             </article>
-                            <section className="article-subscribe" aria-labelledby="article-subscribe-title"><p className="article-eyebrow">{cs ? 'Čtení do sluchátek' : 'Ideas to listen to'}</p><h2 id="article-subscribe-title">{cs ? 'Další článek si vezměte s sebou.' : 'Take the next article with you.'}</h2><p>{cs ? 'Přidejte si RSS do své podcastové aplikace. Nové audio články se objeví automaticky.' : 'Add this RSS feed to your podcast app. New audio articles will appear automatically.'}</p><ArticleRssLink language={article.language} url={getArticlePodcastUrl(article.language, publication)} /></section>
+                            {!community && <section className="article-subscribe" aria-labelledby="article-subscribe-title"><p className="article-eyebrow">{cs ? 'Čtení do sluchátek' : 'Ideas to listen to'}</p><h2 id="article-subscribe-title">{cs ? 'Další článek si vezměte s sebou.' : 'Take the next article with you.'}</h2><p>{cs ? 'Přidejte si RSS do své podcastové aplikace. Nové audio články se objeví automaticky.' : 'Add this RSS feed to your podcast app. New audio articles will appear automatically.'}</p><ArticleRssLink language={article.language} url={getArticlePodcastUrl(article.language, publication)} /></section>}
                         </div>
                     </div>
                 </ArticleTracking>
             </main>
-            <ArticleFooter language={article.language} publication={publication} />
+            <ArticleFooter language={article.language} publication={publication} indexPath={community?.indexPath} />
         </div>
     );
 }

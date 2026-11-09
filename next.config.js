@@ -47,6 +47,8 @@ const nextConfig = {
         '/en/pavol/articles/**': ['./articles/**/*'],
         '/cs/pavol/sitemap.xml': ['./articles/**/*'],
         '/en/pavol/sitemap.xml': ['./articles/**/*'],
+        '/sitemap.xml': ['./articles/**/*'],
+        '/api/admin/articles/**': ['./articles/*/content.md', './articles/*/metadata.{yaml,json}', './articles/*/audio/**/*'],
         '/article-podcasts/**': ['./articles/_podcasts/*.png'],
         '/cs/whitepaper': ['./prompts/2026-10-0000-whitepaper.md'],
         '/cs/whitepaper/download': ['./prompts/2026-10-0000-whitepaper.md'],

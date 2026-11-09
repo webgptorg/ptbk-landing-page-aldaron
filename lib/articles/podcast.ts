@@ -101,7 +101,7 @@ function createEpisodeXml(article: Article, publication: ArticlePublication): st
 }
 
 /**
- * Deterministic RSS 2.0 rendered by force-static Next routes at build time.
+ * Deterministic RSS 2.0 from the publication's current article list.
  * The same article keeps its GUID and exact audio URL across independent feeds.
  * No clock, external service, filesystem mutation, hashing, or TTS call is involved.
  */
@@ -115,7 +115,7 @@ export function createArticlePodcastFeed(
         .filter(
             (article) =>
                 article.language === language &&
-                (publication === 'promptbook' || article.authorId === 'pavol-hejny') &&
+                (publication === 'promptbook' || article.managed || article.authorId === 'pavol-hejny') &&
                 hasPublishableAudio(article),
         )
         .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));

@@ -1,13 +1,15 @@
-import { getArticle } from '@/lib/articles/load';
+import { getPublishedArticle } from '@/lib/articles/publishedArticles';
 import { createArticlePageDefinition, createArticleSocialPreviewOptions } from '@/lib/articles/metadata';
 import { createSocialPreviewImage, SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE, SOCIAL_PREVIEW_IMAGE_SIZE } from '@/lib/metadata/social-preview-image';
+
+export const dynamic = 'force-dynamic';
 
 export const alt = 'Článek · Pavol Hejný';
 export const contentType = SOCIAL_PREVIEW_IMAGE_CONTENT_TYPE;
 export const size = SOCIAL_PREVIEW_IMAGE_SIZE;
 
 export default async function ArticleSharingImage({ params }: { params: Promise<{ slug: string }> }) {
-    const article = getArticle((await params).slug, 'cs', 'personal');
+    const article = await getPublishedArticle('cs', (await params).slug, 'personal');
     if (!article) return new Response('Not found', { status: 404 });
     return createSocialPreviewImage(createArticleSocialPreviewOptions(createArticlePageDefinition(article, 'personal'), 'personal'));
 }

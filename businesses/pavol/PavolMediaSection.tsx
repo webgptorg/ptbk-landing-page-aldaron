@@ -13,7 +13,7 @@ import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArticleAudioButton } from '@/businesses/articles/ArticleAudioButton';
-import { getArticles } from '@/lib/articles/load';
+import { getPublishedArticles } from '@/lib/articles/publishedArticles';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
@@ -91,7 +91,7 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
 }) {
     const cs = language === 'cs';
     const content = PAVOL_PAGE_CONTENT[language].media;
-    const articles = rankContent(getArticles(language, 'personal').filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
+    const articles = rankContent((await getPublishedArticles(language, 'personal')).filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
     const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0 && appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
     const highlights = appearances.slice(0, 3);
     const rest = appearances.slice(3);

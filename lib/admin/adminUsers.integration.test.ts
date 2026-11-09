@@ -54,6 +54,7 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
             .match(/ALTER TABLE public\.admin_users DROP CONSTRAINT[\s\S]*?(?=NOTIFY pgrst)/)?.[0];
         if (!messagePermissionMigration) throw new Error('Missing Messages administration permission migration.');
         await database.exec(messagePermissionMigration);
+        await database.exec(readFileSync('migrations/2026-11-0941-article-admin-permission.sql', 'utf8'));
         await database.exec('CREATE TABLE workshops (id uuid PRIMARY KEY, room_kind text);');
     }, 20_000);
     beforeEach(async () => {
@@ -134,6 +135,20 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         expect(await getUnauthorizedResponseOrNull(request('/api/admin/messages/transcribe', 'POST', undefined, cookie))).toBeNull();
         await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: ['contacts'] }), userContext(user));
         expect((await getUnauthorizedResponseOrNull(request('/api/admin/messages/transcribe', 'POST', undefined, cookie)))?.status).toBe(403);
+    });
+
+    it('guards the article editor and its publication and media endpoints with the current articles permission', async () => {
+        const user = await createUser(['articles']);
+        const value = (await login()).cookies.get(ADMIN_SESSION_COOKIE_NAME)!.value;
+        const cookie = `${ADMIN_SESSION_COOKIE_NAME}=${value}`;
+        const articleId = '11111111-1111-4111-8111-111111111111';
+        expect(canAccessAdminPath((await getAdminIdentityForSession(value))!, '/admin/articles')).toBe(true);
+        for (const [path, method] of [['/api/admin/articles', 'GET'], [`/api/admin/articles/${articleId}`, 'PATCH'], [`/api/admin/articles/${articleId}/assets/audio`, 'POST']]) {
+            expect(await getUnauthorizedResponseOrNull(request(path, method, undefined, cookie))).toBeNull();
+        }
+        expect((await getUnauthorizedResponseOrNull(request('/api/admin/messages', 'GET', undefined, cookie)))?.status).toBe(403);
+        await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: ['messages'] }), userContext(user));
+        expect((await getUnauthorizedResponseOrNull(request(`/api/admin/articles/${articleId}/assets/audio`, 'PATCH', undefined, cookie)))?.status).toBe(403);
     });
 
     it('revokes old sessions when disabling, re-enabling, changing passwords and deleting', async () => {

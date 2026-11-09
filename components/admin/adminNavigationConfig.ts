@@ -8,7 +8,7 @@ import {
 import { ADMIN_SHORTENER_PATH } from '@/lib/shortener/shortcodeLinkConstants';
 import { STUDIO_PATH } from '@/lib/recording-studio/studioProjectTypes';
 import { ADMIN_USERS_PATH } from '@/lib/admin/adminUserSchemas';
-import { Bot, MessageSquareText, ContactRound, LayoutDashboard, Link2, Radio, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
+import { Bot, MessageSquareText, ContactRound, FileText, LayoutDashboard, Link2, Radio, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
 
 export type AdminNavigationItem = {
     readonly path: string;
@@ -44,6 +44,12 @@ export const ADMIN_NAVIGATION_ITEMS: readonly AdminNavigationItem[] = [
         title: 'Komunita Promptbooku',
         description: 'Stálá komunitní místnost, její jeviště, účastníci a moderace.',
         icon: UsersRound,
+    },
+    {
+        path: '/admin/articles',
+        label: 'Články',
+        description: 'Obsah, autoři a publikování na webech a v komunitách.',
+        icon: FileText,
     },
     {
         path: STUDIO_PATH,

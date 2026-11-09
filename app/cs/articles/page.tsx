@@ -1,9 +1,11 @@
 import { ArticleIndex } from '@/businesses/articles/ArticleIndex';
-import { getArticles } from '@/lib/articles/load';
+import { getPublishedArticles } from '@/lib/articles/publishedArticles';
 import { createArticleIndexMetadata } from '@/lib/articles/metadata';
 
 export const metadata = createArticleIndexMetadata('cs', 'promptbook');
 
-export default function ArticleIndexPage() {
-    return <ArticleIndex articles={getArticles('cs', 'promptbook')} language="cs" publication="promptbook" />;
+export const dynamic = 'force-dynamic';
+
+export default async function ArticleIndexPage() {
+    return <ArticleIndex articles={await getPublishedArticles('cs', 'promptbook')} language="cs" publication="promptbook" />;
 }

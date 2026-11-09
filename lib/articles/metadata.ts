@@ -9,32 +9,32 @@ function getArticleInternalPath(language: ArticleLanguage, publication: ArticleP
     return `/${language}${publication === 'personal' ? '/pavol' : ''}/articles${slug ? `/${slug}` : ''}`;
 }
 
-export function createArticlePageDefinition(article: Article, publication: ArticlePublication): PageMetadataDefinition {
+export function createArticlePageDefinition(article: Article, publication: ArticlePublication, communityPath?: string): PageMetadataDefinition {
     return {
-        path: getArticleInternalPath(article.language, publication, article.slug),
+        path: communityPath ?? getArticleInternalPath(article.language, publication, article.slug),
         language: article.language,
         title: article.title,
         description: article.perex,
-        brand: { name: publication === 'personal' ? article.author.name : 'Promptbook' },
+        brand: { name: publication === 'personal' ? 'Pavol Hejný' : 'Promptbook' },
         openGraphType: 'article',
         isSocialPreviewImageGenerated: true,
         socialPreviewImagePath: article.coverImage,
     };
 }
 
-export function createArticleMetadata(article: Article, publication: ArticlePublication): Metadata {
-    const base = createPageMetadata(createArticlePageDefinition(article, publication));
+export function createArticleMetadata(article: Article, publication: ArticlePublication, communityPath?: string): Metadata {
+    const base = createPageMetadata(createArticlePageDefinition(article, publication, communityPath));
     const languageAlternates = article.translations.length > 0
         ? Object.fromEntries([[article.language, article.canonicalUrl], ...article.translations.map((variant) => [variant.language, variant.url])])
         : undefined;
     return {
         ...base,
-        title: { absolute: `${article.title} | ${publication === 'personal' ? article.author.name : 'Promptbook'}` },
+        title: { absolute: `${article.title} | ${publication === 'personal' ? 'Pavol Hejný' : 'Promptbook'}` },
         authors: [{ name: article.author.name, url: article.author.domains[article.language] }],
         creator: article.author.name,
         keywords: [...article.tags],
         // Next resolves this whole alternates object at this segment; undefined languages clears inherited ones.
-        alternates: { canonical: article.canonicalUrl, languages: languageAlternates, types: { 'application/rss+xml': getArticlePodcastUrl(article.language, publication) } },
+        alternates: { canonical: article.canonicalUrl, languages: languageAlternates, types: communityPath ? undefined : { 'application/rss+xml': getArticlePodcastUrl(article.language, publication) } },
         openGraph: {
             ...base.openGraph,
             type: 'article', url: article.canonicalUrl,

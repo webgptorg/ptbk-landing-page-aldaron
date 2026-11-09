@@ -24,6 +24,7 @@ export type ArticleAudio = {
 export type Article = {
     readonly id: string;
     readonly translationGroupId: string;
+    readonly managed?: true;
     readonly authorId: string;
     readonly language: ArticleLanguage;
     readonly slug: string;
@@ -37,7 +38,7 @@ export type Article = {
     readonly markdown: string;
     readonly author: ArticleAuthor;
     readonly canonicalUrl: string;
-    readonly pdfUrl: string;
+    readonly pdfUrl?: string;
     readonly audio?: ArticleAudio;
     readonly translations: readonly { readonly language: ArticleLanguage; readonly url: string; readonly title: string }[];
 };

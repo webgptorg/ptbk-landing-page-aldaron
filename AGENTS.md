@@ -150,8 +150,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in either community and select its canonical URL while preserving both original blog links. New articles are edited
   in `/admin/articles` with one source, author, independent publication destinations and one selected canonical. Both language versions of the Promptbook
   and Pavol blogs can publish any registered author's articles. Community publication is independent and can use a
-  community room session or a verified paid entitlement. A publicly released full-text article cannot simultaneously
-  have restricted placements. Drafts and restricted placements stay out of public indexing and feeds.
+  community room session or a verified paid entitlement. Full-text copies share one access type across destinations.
+  Drafts and restricted placements stay out of public indexing and feeds.
   The four `articles/podcast.xml` routes still have deterministic initial prerenders and refresh hourly for admin
   publications. Only reviewed, existing audio becomes an episode. Managed audio, PDF, timing and subtitles use
   immutable uploads to the private shared object bucket and are served from checked publication routes, with byte
@@ -475,6 +475,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   overwrite existing tracks, and no participant endpoint or public database role exposes subtitles.
 - `/admin/community` switches between the configured rooms. Each has its own polls, participants and analytics.
   Vývojáři also offers project moderation, memberships and payments.
+- `/admin/articles` manages one article, one author and its publication destinations. Public destinations are the
+  Promptbook blog, the language-matched personal blog, Vývojáři and Promptbook. A published article has exactly one
+  canonical destination. Git articles keep their existing public URLs and audio, with editable community placement
+  and canonical selection in administration. Preserve existing podcast episode IDs when adding destinations.
+  Managed articles use the same reader and player. Editors explicitly attach PDF, narration, subtitles and reviewed
+  word timing. Private article text and media use the exact community session, with verified email and live membership
+  required for paid content. The public feed and public media endpoint serve only public publications.
 - `/admin/studio` contains addressable `Nahrávání` at `/admin/studio/recording` and `Uložené projekty` at
   `/admin/studio/editor`, with individual recording/project URLs. Legacy recording-studio URLs permanently redirect
   to their recording views; the capture probe and transcription API retain their addresses. One mounted owner,
