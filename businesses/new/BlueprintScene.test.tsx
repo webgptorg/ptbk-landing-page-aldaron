@@ -57,6 +57,25 @@ describe('light blueprint stories', () => {
         expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual(['Contact follow-up', 'Podcast management', 'Website maintenance']);
     });
 
+    it('links the active homepage example to its Czech community article', () => {
+        const { rerender } = render(<BrandStories />);
+        const communityPath = '/cs/komunity/promptbook';
+        expect(screen.getByRole('link', { name: 'Komunita Promptbook' }).getAttribute('href')).toBe(communityPath);
+        expect(screen.getByRole('link', { name: 'Přečíst postup k příkladu Péče o kontakty' }).getAttribute('href'))
+            .toBe(`${communityPath}/clanky/cs/pece-o-kontakty`);
+        fireEvent.click(screen.getByRole('tab', { name: 'Správa podcastů' }));
+        expect(screen.getByRole('link', { name: 'Přečíst postup k příkladu Správa podcastů' }).getAttribute('href'))
+            .toBe(`${communityPath}/clanky/cs/sprava-podcastu`);
+        fireEvent.click(screen.getByRole('tab', { name: 'Údržba webu' }));
+        expect(screen.getByRole('link', { name: 'Přečíst postup k příkladu Údržba webu' }).getAttribute('href'))
+            .toBe(`${communityPath}/clanky/cs/udrzba-webu`);
+
+        rerender(<SiteLocaleProvider locale="en"><BrandStories /></SiteLocaleProvider>);
+        const link = screen.getByRole('link', { name: /Read the walkthrough in Czech/ });
+        expect(link.getAttribute('hreflang')).toBe('cs');
+        expect(link.textContent).toContain('(Czech)');
+    });
+
     it('types actual content only when readable, pauses while hidden and retains the completed scene', () => {
         render(<BrandStories />);
         const panel = screen.getByRole('tabpanel');

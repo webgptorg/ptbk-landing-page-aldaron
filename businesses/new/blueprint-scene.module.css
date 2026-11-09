@@ -5,6 +5,9 @@
 .tabs{display:flex;align-items:center;gap:4px;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
 .stories .tabs button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 20px;flex:0 0 auto;border:0;border-radius:10px;background:transparent;color:#5f718e;font-size:13px;white-space:nowrap;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
 .stories .tabs button svg{flex-shrink:0}.stories .tabs button:hover{color:var(--ptbk-blue);background:#ffffff70}.stories .tabs button[aria-selected=true]{background:#fff;color:var(--ptbk-blue);box-shadow:0 2px 7px #24457710,0 0 0 1px #24457708}
+.storyLinks{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 24px;margin:0 auto 4px;font-size:13px}
+.storyLinks a{display:inline-flex;min-height:36px;align-items:center;color:#4c668c;text-decoration:underline;text-decoration-color:#829bb9;text-underline-offset:4px}
+.storyLinks a:hover{color:var(--ptbk-blue);text-decoration-color:currentColor}.storyLinks a:focus-visible{outline:2px solid var(--ptbk-blue);outline-offset:3px}
 .iconButton{width:44px;height:44px;display:grid;place-items:center;border:1px solid #a3b8d150;border-radius:50%;background:transparent;color:var(--bp-ink);cursor:pointer;flex-shrink:0}.iconButton:disabled{opacity:.35;cursor:default}
 .stories button:focus-visible,.ownership button:focus-visible,.ownership select:focus-visible{outline:2px solid var(--ptbk-blue);outline-offset:3px}
 .canvas{display:block;width:100%;height:auto;max-width:1100px;margin:auto;stroke:var(--bp-line);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:none;overflow:visible}
