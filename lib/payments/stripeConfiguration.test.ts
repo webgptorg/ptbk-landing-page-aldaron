@@ -28,6 +28,8 @@ describe('stripe configuration', () => {
     it('recognises the test gate by its own key', () => {
         expect(isStripeTestSecretKey('sk_test_51Example')).toBe(true);
         expect(isStripeTestSecretKey('sk_live_51Example')).toBe(false);
+        expect(isStripeTestSecretKey('rk_test_51Example')).toBe(true);
+        expect(isStripeTestSecretKey('rk_live_51Example')).toBe(false);
     });
 
     it('reads the key, the webhook secret and which gate it is', () => {

@@ -2,7 +2,10 @@ import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { getPersonalDataConsentNote } from '@/lib/legal/personalDataConsentNotes';
 
 export const CONTACT_NOTICE_VERSION = '2026-11-03.1';
-export type ContactPurpose = 'request' | 'pdf' | 'registration' | 'promptbook-newsletter' | 'podcast-newsletter';
+export type ContactPurpose = 'request' | 'pdf' | 'registration' | 'order' | 'promptbook-newsletter' | 'podcast-newsletter';
+export const PROMPTBOOK_BILLING_CONTACT_SOURCE = 'PromptbookSubscriptionOrder';
+export const PROMPTBOOK_BILLING_CONTACT_NOTICE_VERSION = '2026-11-09.1';
+export const PROMPTBOOK_BILLING_CONTACT_NOTICE = 'Údaje použijeme k vyřízení předplatného, fakturaci a související komunikaci. Nákupem se nepřihlašujete k newsletteru.';
 const SOURCES: Readonly<Record<string, ContactPurpose>> = {
     'newsletter-footer': 'promptbook-newsletter',
     AiTaKrajtaEmailSubscription: 'podcast-newsletter',
@@ -37,7 +40,7 @@ export function getServicePurposeText(language: SupportedHomepageLanguage) {
         : 'We use your details to fulfil this request and communicate about it. Submitting this form does not subscribe you to a newsletter.';
 }
 export type ContactSubmissionEvidence = {
-    version: typeof CONTACT_NOTICE_VERSION;
+    version: typeof CONTACT_NOTICE_VERSION | typeof PROMPTBOOK_BILLING_CONTACT_NOTICE_VERSION;
     receivedAt: string;
     controller: 'AI Web s.r.o.';
     purpose: ContactPurpose;
@@ -67,4 +70,20 @@ export function readContactSubmissionEvidence(body: Record<string, unknown>, sou
 /** Metadata for the notice actually rendered by the current form; never infers newsletter consent. */
 export function createContactNoticeFields(language: SupportedHomepageLanguage = 'cs', marketingConsent = false) {
     return { noticeVersion: CONTACT_NOTICE_VERSION, noticeLanguage: language, marketingConsent };
+}
+
+/** An order is recorded only by the payment flow, outside the public lead-submission source registry. */
+export function createPromptbookBillingContactEvidence(receivedAt: string): ContactSubmissionEvidence {
+    return {
+        version: PROMPTBOOK_BILLING_CONTACT_NOTICE_VERSION,
+        receivedAt,
+        controller: 'AI Web s.r.o.',
+        purpose: 'order',
+        source: PROMPTBOOK_BILLING_CONTACT_SOURCE,
+        language: 'cs',
+        noticeText: PROMPTBOOK_BILLING_CONTACT_NOTICE,
+        consentText: null,
+        marketingConsent: false,
+        emailVerified: false,
+    };
 }

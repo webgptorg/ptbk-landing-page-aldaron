@@ -18,6 +18,7 @@ import {
 import type { ActiveDiscount } from '@/lib/discounts/discountCode';
 import { createStripeAmountFromCzk, STRIPE_CZK_CURRENCY } from '@/lib/payments/stripeAmount';
 import type { StripeGateway } from '@/lib/payments/stripeGateway';
+import { createStripeSubscriptionCouponParameters } from '@/lib/payments/stripeSubscriptionCoupon';
 import type Stripe from 'stripe';
 
 /**
@@ -109,39 +110,13 @@ function createCommunityMembershipMetadata(
     };
 }
 
-/**
- * Creates the Stripe-native discount which controls the subscription after Checkout has finished.
- * Keeping the normal price in the line item means a temporary coupon can expire back to that price
- * without an application timer or a later subscription rewrite.
- */
-function createCommunityMembershipSubscriptionCouponParameters(
-    activeDiscount: ActiveDiscount,
-): Stripe.CouponCreateParams {
-    const sharedParameters = {
-        percent_off: activeDiscount.percent,
-        name: `Sleva ${activeDiscount.percent} %`,
-        metadata: { discountCode: activeDiscount.code },
-    };
-
-    const subscriptionDiscountDurationMonths = activeDiscount.subscriptionDiscountDurationMonths;
-    if (subscriptionDiscountDurationMonths === null) {
-        return { ...sharedParameters, duration: 'forever' };
-    }
-
-    return {
-        ...sharedParameters,
-        duration: 'repeating',
-        duration_in_months: subscriptionDiscountDurationMonths,
-    };
-}
-
 async function createCommunityMembershipSubscriptionCoupon(
     gateway: StripeGateway,
     activeDiscount: ActiveDiscount | null,
 ): Promise<Stripe.Coupon | null> {
     return activeDiscount === null
         ? null
-        : gateway.stripe.coupons.create(createCommunityMembershipSubscriptionCouponParameters(activeDiscount));
+        : gateway.stripe.coupons.create(createStripeSubscriptionCouponParameters(activeDiscount));
 }
 
 /**

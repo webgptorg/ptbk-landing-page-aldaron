@@ -25,7 +25,7 @@ export type StripeConfiguration = {
 };
 
 export function isStripeTestSecretKey(secretKey: string): boolean {
-    return secretKey.startsWith(STRIPE_TEST_SECRET_KEY_PREFIX);
+    return secretKey.startsWith(STRIPE_TEST_SECRET_KEY_PREFIX) || secretKey.startsWith('rk_test_');
 }
 
 function readEnvironmentSecret(environmentVariableName: string): string | null {

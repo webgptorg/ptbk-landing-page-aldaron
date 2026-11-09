@@ -3,6 +3,7 @@ import {
     applyCommunityMembershipSubscriptionChange,
 } from '@/lib/community-membership/communityMembershipActivation';
 import { cancelFailedCommunityMembershipCheckout, getCommunityMembershipDatabaseOrNull } from '@/lib/community-membership/communityMembershipDatabase';
+import { applyPromptbookBillingEvent, getPromptbookBillingEvent } from '@/lib/promptbook-billing/billingEvents';
 import { getStripeGatewayOrNull, type StripeGateway } from '@/lib/payments/stripeGateway';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -78,6 +79,19 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Refused a Stripe webhook with an invalid signature:', error);
         return NextResponse.json({ error: 'Invalid Stripe signature' }, { status: 400 });
+    }
+
+    try {
+        const promptbookEvent = await getPromptbookBillingEvent(gateway.stripe, event);
+        if (promptbookEvent) {
+            const database = getCommunityMembershipDatabaseOrNull();
+            if (!database) return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+            await applyPromptbookBillingEvent(database, gateway.stripe, promptbookEvent, event);
+            return NextResponse.json({ isReceived: true });
+        }
+    } catch (error) {
+        console.error(`Failed to record the Promptbook Stripe event ${event.type}:`, error instanceof Error ? error.message : 'Unknown error');
+        return NextResponse.json({ error: 'Stripe event could not be recorded' }, { status: 500 });
     }
 
     if (!HANDLED_STRIPE_EVENT_TYPES.includes(event.type as (typeof HANDLED_STRIPE_EVENT_TYPES)[number])) {
