@@ -13,6 +13,7 @@ import {
 } from '@/lib/contacts/contactColumnDefinitions';
 import { getContactOriginGroups } from '@/lib/contacts/contactOrigins';
 import { selectContacts, type ContactsSelection } from '@/lib/contacts/contactsSelection';
+import { normalizeSearchText } from '@/lib/contacts/contactValues';
 import { paginateContacts } from '@/lib/contacts/paginateContacts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AddContactForm } from './AddContactForm';
@@ -33,7 +34,7 @@ const CONTACT_COLUMN_WIDTHS_STORAGE_KEY = 'admin-contacts-column-widths';
  * Dashboard which shows, filters, sorts and exports the gathered contacts and leads
  */
 export default function AdminContactsComponent() {
-    const { contacts, isLoading, errorMessage, addContact, editContact, deleteContact } = useContacts();
+    const { contacts, communityParticipants, isLoading, errorMessage, addContact, editContact, deleteContact } = useContacts();
 
     const {
         filter,
@@ -65,6 +66,13 @@ export default function AdminContactsComponent() {
     );
 
     const contactOriginGroups = useMemo(() => getContactOriginGroups(contacts), [contacts]);
+    const matchingCommunityParticipants = useMemo(() => {
+        const searchWords = normalizeSearchText(filter.searchQuery).split(/\s+/).filter(Boolean);
+        return communityParticipants.filter(({ fullname, email, normalizedEmail, communityNames }) => {
+            const searchText = normalizeSearchText([fullname, email, normalizedEmail, ...communityNames].join(' '));
+            return searchWords.every((word) => searchText.includes(word));
+        });
+    }, [communityParticipants, filter.searchQuery]);
 
     const contactsPage = useMemo(
         () => paginateContacts(filteredAndSortedContacts, currentPage, contactsPerPage),
@@ -152,6 +160,22 @@ export default function AdminContactsComponent() {
                         onChangePage={changePage}
                         onChangeContactsPerPage={changeContactsPerPage}
                     />
+                    {matchingCommunityParticipants.length > 0 && (
+                        <details className="mt-6 rounded-lg border bg-white p-4">
+                            <summary className="cursor-pointer font-semibold text-slate-800">
+                                Účastníci komunit bez kontaktního záznamu ({matchingCommunityParticipants.length})
+                            </summary>
+                            <ul className="mt-3 divide-y text-sm">
+                                {matchingCommunityParticipants.map(({ normalizedEmail, fullname, email, communityNames }) => (
+                                    <li key={normalizedEmail} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+                                        <span className="font-medium text-slate-800">{fullname}</span>
+                                        <span className="break-all text-slate-600">{email}</span>
+                                        <span className="text-slate-700">{communityNames.join(' · ')}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </details>
+                    )}
                 </>
             )}
         </div>

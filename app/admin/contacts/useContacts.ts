@@ -1,6 +1,6 @@
 'use client';
 
-import type { AdminJoinedContact } from '@/lib/admin/adminContactJoin';
+import type { AdminCommunityParticipant, AdminJoinedContact } from '@/lib/admin/adminContactJoin';
 import type { ContactChanges, ContactDraft } from '@/lib/contacts/Contact';
 import {
     createContact,
@@ -12,6 +12,7 @@ import { useDebouncedContactSaver } from './useDebouncedContactSaver';
 
 type UseContactsResult = {
     readonly contacts: readonly AdminJoinedContact[];
+    readonly communityParticipants: readonly AdminCommunityParticipant[];
     readonly isLoading: boolean;
     readonly errorMessage: string | null;
     readonly changeContact: (contactId: number, contactChanges: ContactChanges) => void;
@@ -27,6 +28,7 @@ type UseContactsResult = {
  */
 export function useContacts(): UseContactsResult {
     const [contacts, setContacts] = useState<readonly AdminJoinedContact[]>([]);
+    const [communityParticipants, setCommunityParticipants] = useState<readonly AdminCommunityParticipant[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -36,8 +38,9 @@ export function useContacts(): UseContactsResult {
         setIsLoading(true);
 
         try {
-            const loadedContacts = await fetchContacts();
-            setContacts(loadedContacts.map((contact) => ({ ...contact, ...getContactChanges(contact.id) })));
+            const loaded = await fetchContacts();
+            setContacts(loaded.contacts.map((contact) => ({ ...contact, ...getContactChanges(contact.id) })));
+            setCommunityParticipants(loaded.communityParticipants);
             setErrorMessage(null);
             return true;
         } catch (error) {
@@ -52,11 +55,12 @@ export function useContacts(): UseContactsResult {
         let isLoadingActive = true;
 
         void fetchContacts()
-            .then((loadedContacts) => {
+            .then((loaded) => {
                 if (!isLoadingActive) {
                     return;
                 }
-                setContacts(loadedContacts);
+                setContacts(loaded.contacts);
+                setCommunityParticipants(loaded.communityParticipants);
                 setErrorMessage(null);
             })
             .catch((error: Error) => {
@@ -64,6 +68,7 @@ export function useContacts(): UseContactsResult {
                     return;
                 }
                 setContacts([]);
+                setCommunityParticipants([]);
                 setErrorMessage(error.message);
             })
             .finally(() => {
@@ -130,5 +135,5 @@ export function useContacts(): UseContactsResult {
         [reloadContacts, flushContactChanges],
     );
 
-    return { contacts, isLoading, errorMessage, changeContact, addContact, editContact, deleteContact };
+    return { contacts, communityParticipants, isLoading, errorMessage, changeContact, addContact, editContact, deleteContact };
 }

@@ -69,10 +69,10 @@ export async function GET(request: NextRequest) {
     }
 
     const isLoadingAll = request.nextUrl.searchParams.get('showAll') === 'true';
-    const { contacts, errorMessage } = await loadAdminJoinedContacts(supabase, { isLoadingAll });
+    const { contacts, communityParticipants, errorMessage } = await loadAdminJoinedContacts(supabase, { isLoadingAll });
     return contacts === null
         ? NextResponse.json({ error: errorMessage }, { status: 500 })
-        : NextResponse.json({ contacts }, { headers: { 'Cache-Control': 'no-store' } });
+        : NextResponse.json({ contacts, communityParticipants }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function PATCH(request: NextRequest) {

@@ -80,6 +80,13 @@ export type AdminJoinedContact = Contact & {
     readonly contactGroup: AdminContactGroup;
 };
 
+export type AdminCommunityParticipant = {
+    readonly normalizedEmail: string;
+    readonly fullname: string;
+    readonly email: string;
+    readonly communityNames: readonly string[];
+};
+
 type MutableAdminContactGroup = {
     normalizedEmail: string | null;
     contacts: Contact[];
@@ -257,6 +264,32 @@ export function createAdminJoinedContacts(groups: readonly AdminContactGroup[]):
     return groups
         .filter((group) => group.contacts.length > 0)
         .map((group) => ({ ...createMergedContact(group), contactGroup: group }));
+}
+
+/** Show community attendance without creating or inferring a contact submission. */
+export function listCommunityParticipantsWithoutContacts(
+    groups: readonly AdminContactGroup[],
+): readonly AdminCommunityParticipant[] {
+    return groups.flatMap(({ contacts, normalizedEmail, workshopParticipations }) => {
+        if (contacts.length > 0 || normalizedEmail === null) {
+            return [];
+        }
+
+        const participations = workshopParticipations.filter(({ workshopKind }) => workshopKind === 'community');
+        const latest = participations[0];
+        if (latest === undefined) {
+            return [];
+        }
+
+        return [{
+            normalizedEmail,
+            fullname: latest.fullname,
+            email: latest.email,
+            communityNames: Array.from(new Map(
+                participations.map(({ workshopId, workshopTitle }) => [workshopId, workshopTitle] as const),
+            ).values()),
+        }];
+    });
 }
 
 /**

@@ -1,6 +1,8 @@
 import {
     createAdminContactGroups,
     createAdminJoinedContacts,
+    listCommunityParticipantsWithoutContacts,
+    type AdminCommunityParticipant,
     type AdminContactGroup,
     type AdminJoinedContact,
     type AdminWorkshopFeedback,
@@ -69,6 +71,7 @@ type LoadedAdminContactGroups = {
 
 type LoadedAdminJoinedContacts = {
     readonly contacts: readonly AdminJoinedContact[] | null;
+    readonly communityParticipants: readonly AdminCommunityParticipant[];
     readonly errorMessage: string | null;
 };
 
@@ -343,8 +346,13 @@ export async function loadAdminJoinedContacts(
         isWorkshopFeedbackIncluded: options.isWorkshopFeedbackIncluded ?? true,
     });
     if (groups === null) {
-        return { contacts: null, errorMessage };
+        return { contacts: null, communityParticipants: [], errorMessage };
     }
 
-    return { contacts: createAdminJoinedContacts(groups), errorMessage: null };
+    return {
+        contacts: createAdminJoinedContacts(groups),
+        // A partial lead list cannot tell whether an identity has a Contact row.
+        communityParticipants: options.isLoadingAll ? listCommunityParticipantsWithoutContacts(groups) : [],
+        errorMessage: null,
+    };
 }

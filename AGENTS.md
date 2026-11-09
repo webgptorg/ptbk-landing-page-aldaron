@@ -401,8 +401,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   and their stable database room slugs. The former `/cs/komunita` and its subpages permanently redirect to
   Vývojáři, except for the historical calendar feed, which continues to serve the same calendar.
   Room participants, moderation, chat, polls and materials are separate. The administration groups related
-  participation by normalized contact email, with independent room sessions. Vývojáři keeps the existing
-  project gallery and paid membership. Promptbook starts with free access.
+  participation by normalized contact email, with independent room sessions. Contacts shows participants with no
+  contact submission in a separate read-only view, preserving the contact and consent history. Vývojáři keeps the
+  existing project gallery and paid membership. Promptbook starts with free access.
   A published event can appear in either calendar, both, or neither, using one event and registration.
   Existing events default to Vývojáři. AI Supervize Mini cannot be listed in Promptbook.
   Terms show event kind, format/place, price, and status; wherever their

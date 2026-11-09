@@ -1,4 +1,4 @@
-import type { AdminJoinedContact } from '@/lib/admin/adminContactJoin';
+import type { AdminCommunityParticipant, AdminJoinedContact } from '@/lib/admin/adminContactJoin';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import type { Contact, ContactChanges, ContactDraft } from './Contact';
 import { appendSearchParameters } from '@/lib/api/appendSearchParameters';
@@ -51,12 +51,18 @@ async function sendContactsApiMutation<ResponsePayload>(
  *
  * Note: All contacts are loaded at once so the browser can filter, sort and paginate the table while exports include every contact
  */
-export async function fetchContacts(): Promise<Array<AdminJoinedContact>> {
+export async function fetchContacts(): Promise<{
+    readonly contacts: readonly AdminJoinedContact[];
+    readonly communityParticipants: readonly AdminCommunityParticipant[];
+}> {
     const response = await fetch(buildContactsApiUrl({ showAll: 'true' }));
     await assertResponseIsOk(response);
 
-    const payload = (await response.json()) as { contacts?: Array<AdminJoinedContact> | null };
-    return payload.contacts || [];
+    const payload = (await response.json()) as {
+        contacts?: readonly AdminJoinedContact[] | null;
+        communityParticipants?: readonly AdminCommunityParticipant[];
+    };
+    return { contacts: payload.contacts ?? [], communityParticipants: payload.communityParticipants ?? [] };
 }
 
 /**

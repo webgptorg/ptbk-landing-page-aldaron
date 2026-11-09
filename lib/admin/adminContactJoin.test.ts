@@ -6,6 +6,7 @@ import {
     formatAdminWorkshopFeedbacks,
     formatAdminWorkshopParticipations,
     getAdminContactPhoneNumbers,
+    listCommunityParticipantsWithoutContacts,
     normalizeAdminContactEmail,
     type AdminWorkshopFeedback,
     type AdminWorkshopParticipation,
@@ -129,6 +130,33 @@ describe('admin contact joining', () => {
 
         expect(groups).toHaveLength(3);
         expect(createAdminJoinedContacts(groups).map((contact) => contact.id)).toEqual([1, 2]);
+    });
+
+    it('shows one separate directory entry per community participant without adding them to lead exports', () => {
+        const promptbookParticipation = {
+            ...WORKSHOP_PARTICIPATION,
+            workshopKind: 'community' as const,
+            workshopId: 'promptbook-room',
+            workshopTitle: 'Promptbook',
+        };
+        const groups = createAdminContactGroups([createContact({ email: 'existing@example.com' })], [
+            promptbookParticipation,
+            { ...promptbookParticipation, participantId: 'repeat-session', email: 'jana@example.com' },
+            {
+                ...promptbookParticipation, participantId: 'developers-session', email: 'Jana+dev@example.com',
+                workshopId: 'developers-room', workshopTitle: 'Vývojáři',
+            },
+            { ...promptbookParticipation, participantId: 'already-a-contact', email: 'existing+community@example.com' },
+            { ...WORKSHOP_PARTICIPATION, participantId: 'workshop-only', email: 'workshop@example.com' },
+        ]);
+
+        expect(listCommunityParticipantsWithoutContacts(groups)).toEqual([{
+            normalizedEmail: 'jana@example.com',
+            fullname: 'Jana Nováková',
+            email: 'JANA+workshop@EXAMPLE.COM',
+            communityNames: ['Promptbook', 'Vývojáři'],
+        }]);
+        expect(createAdminJoinedContacts(groups).map(({ email }) => email)).toEqual(['existing@example.com']);
     });
 
     it('includes workshop attendance in both grouped contact export formats', () => {

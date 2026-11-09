@@ -17,6 +17,7 @@ const CONTACT: AdminJoinedContact = {
     ipAddress: null, referrer: null, appName: null, placeName: null, url: null,
     contactGroup: { normalizedEmail: 'example@example.com', contacts: [], workshopParticipations: [], workshopFeedbacks: [] },
 };
+const CONTACT_LIST = { contacts: [CONTACT], communityParticipants: [] };
 
 afterEach(async () => {
     cleanup();
@@ -25,7 +26,7 @@ afterEach(async () => {
 });
 
 it('preserves inline edits when adding another contact refreshes an older list', async () => {
-    vi.mocked(fetchContacts).mockResolvedValue([CONTACT]);
+    vi.mocked(fetchContacts).mockResolvedValue(CONTACT_LIST);
     vi.mocked(createContact).mockResolvedValue({ ...CONTACT, id: 2 });
     vi.mocked(updateContact).mockResolvedValue(CONTACT);
     const { result } = renderHook(() => useContacts());
@@ -36,7 +37,7 @@ it('preserves inline edits when adding another contact refreshes an older list',
 });
 
 it('does not treat a failed list refresh as a failed creation that should be repeated', async () => {
-    vi.mocked(fetchContacts).mockResolvedValueOnce([CONTACT]).mockRejectedValueOnce(new Error('Refresh failed'));
+    vi.mocked(fetchContacts).mockResolvedValueOnce(CONTACT_LIST).mockRejectedValueOnce(new Error('Refresh failed'));
     vi.mocked(createContact).mockResolvedValue({ ...CONTACT, id: 2 });
     const { result } = renderHook(() => useContacts());
     await act(async () => undefined);
