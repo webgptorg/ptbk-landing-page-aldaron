@@ -956,10 +956,11 @@ Never fabricate consent for historical contacts or add Neonmedia's unrelated mar
   Private check worktrees live below `.git/ptbk-coder/check-views/`; Git otherwise omits dependency paths exceeding
   260 characters and the ignored-file consistency check fails before any check runs. Keep `.eslintrc.json` marked
   `root: true` so these nested copies resolve only their own ESLint plugins and rules.
-- Put database changes in `migrations/*.sql`. Startup and
+- Put database changes in `migrations/*.sql`. Vercel production `prebuild`, Node.js startup and
   `npm run migrate-database` run `_initialize.sql`, then migrations in filename
   order, recording immutable filenames and checksums in `public."Migration"`.
-  Changed or missing migrations fail, as do queries requiring an unapplied one.
+  Preview and local builds skip production prebuild migrations. Changed or missing migrations fail, as do queries
+  requiring an unapplied one.
 - `npm run test-types` must build before `tsc` to refresh `.next/types`.
 - `npm run test-e2e` uses the Next.js development server; first-request compile
   headroom belongs in `playwright.config.ts`, not individual tests. E2E tests are

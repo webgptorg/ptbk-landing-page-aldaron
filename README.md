@@ -491,7 +491,9 @@ participant APIs or public database roles. They are separate from the ephemeral 
 
 ## Database and migrations
 
-The application applies pending migrations automatically when a Node.js server starts. You can also run them directly:
+Vercel production builds apply pending migrations before Next.js renders pages against the database. Local and
+preview builds skip that step. The Node.js startup hook still checks migrations. To apply them directly, run the
+following command against the intended database.
 
 ```bash
 npm run migrate-database

@@ -5,7 +5,7 @@
     "scripts": {
         "predev": "node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts",
         "dev": "npx kill-port 4009 && next dev -p 4009",
-        "prebuild": "node scripts/ensure-sharp-runtime.cjs && node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts",
+        "prebuild": "npm run migrate-database -- --vercel-production-only && node scripts/ensure-sharp-runtime.cjs && node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
@@ -13,7 +13,7 @@
         "test-e2e": "playwright test",
         "test-e2e:headed": "playwright test --headed",
         "test-types": "npm run build && tsc",
-        "migrate-database": "tsx scripts/migrate-database.ts",
+        "migrate-database": "node --import tsx scripts/migrate-database.ts",
         "backup-database": "tsx scripts/backup-database.ts",
         "backup-database:verify": "tsx scripts/backup-database-verify.ts",
         "delete-test-data": "tsx scripts/delete-test-data.ts",

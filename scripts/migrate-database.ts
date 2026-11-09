@@ -2,6 +2,11 @@ import 'dotenv/config';
 import { migrateDatabase } from '../lib/database/migrateDatabase';
 
 async function main(): Promise<void> {
+    if (process.argv.includes('--vercel-production-only') &&
+        (process.env.VERCEL !== '1' || process.env.VERCEL_ENV !== 'production')) {
+        return;
+    }
+
     try {
         const result = await migrateDatabase({ missingDatabaseUrl: 'throw' });
 
