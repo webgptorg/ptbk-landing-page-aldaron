@@ -10,7 +10,8 @@ import { useAdminDraftProtection } from '@/hooks/useAdminDraftProtection';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
-import { appendMessageTranscript, MESSAGE_AUDIO_ACCEPT } from '@/lib/messages/messageTranscription';
+import { appendMessageTranscript } from '@/lib/messages/messageTranscription';
+import { MESSAGE_MEDIA_ACCEPT } from '@/lib/messages/messageVideoImport';
 import { transcribeMessageFile } from '@/lib/messages/messageTranscriptionClient';
 import { createMessagePrefix, createMessageShareText, getMessageUrl, MESSAGE_CONTEXT_MAX_LENGTH, MESSAGE_DOMAINS, MESSAGE_VALUES_SCHEMA,
     PAVOL_MESSAGE_AGENT_ID, type ManagedMessage, type MessageValues } from '@/lib/messages/messageModel';
@@ -124,7 +125,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
         </div>
         {step === 1 ? <>
             <div className="flex flex-wrap gap-2" aria-label="Další zdroje kontextu">
-                <Button type="button" variant={contextSource === 'file' ? 'secondary' : 'ghost'} disabled={busy} onClick={() => setContextSource(contextSource === 'file' ? 'meeting' : 'file')}>Importovat audio soubor</Button>
+                <Button type="button" variant={contextSource === 'file' ? 'secondary' : 'ghost'} disabled={busy} onClick={() => setContextSource(contextSource === 'file' ? 'meeting' : 'file')}>Importovat audio nebo video</Button>
                 <Button type="button" variant={contextSource === 'text' ? 'secondary' : 'ghost'} disabled={busy} onClick={() => setContextSource(contextSource === 'text' ? 'meeting' : 'text')}>Napsat nebo upravit kontext{values.context ? ` (${new Intl.NumberFormat('cs-CZ').format(values.context.length)} znaků)` : ''}</Button>
             </div>
             <section hidden={contextSource !== 'file'} aria-label="Kontext z audia" className="space-y-3 rounded-xl border border-dashed border-slate-300 p-4"
@@ -133,11 +134,11 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                     event.preventDefault();
                     if (busy || !transcriptionConfigured || pendingTranscript) return;
                     const files = event.dataTransfer.files;
-                    if (files.length !== 1) { setError('Přetáhněte jeden audio soubor.'); return; }
+                    if (files.length !== 1) { setError('Přetáhněte jeden audio nebo video soubor.'); return; }
                     void transcribe(files[0]);
                 }}>
-                <label className="block text-sm font-medium">Audio soubor
-                    <Input type="file" accept={MESSAGE_AUDIO_ACCEPT} disabled={busy || !transcriptionConfigured || Boolean(pendingTranscript)}
+                <label className="block text-sm font-medium">Audio nebo video soubor
+                    <Input type="file" accept={MESSAGE_MEDIA_ACCEPT} disabled={busy || !transcriptionConfigured || Boolean(pendingTranscript)}
                         className="mt-2" onChange={(event) => {
                             const file = event.currentTarget.files?.[0];
                             event.currentTarget.value = '';
@@ -145,7 +146,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                         }} aria-describedby="message-context-audio-help" />
                 </label>
                 <p id="message-context-audio-help" className="text-xs text-slate-500">{transcriptionConfigured
-                    ? 'Vyberte nebo sem přetáhněte nahrávku (např. M4A ze Samsung rekordéru, MP3 nebo WAV, do 2 GB). Výběrem spustíte přepis přes ElevenLabs včetně rozlišení řečníků; spotřebovává kredity. Přepis doplní stávající kontext.'
+                    ? 'Vyberte nebo přetáhněte nahrávku. Z videa (např. MP4) se zvuk oddělí přímo na zařízení. Do ElevenLabs se odešle jen audio (do 2 GB). Přepis s rozlišením řečníků doplní kontext a spotřebuje kredity.'
                     : 'Pro přepis chybí serverové nastavení ElevenLabs.'}</p>
                 {failedAudioFile && <Button type="button" variant="outline" disabled={busy || !transcriptionConfigured} onClick={() => void transcribe(failedAudioFile)}>Zkusit přepis znovu</Button>}
             </section>

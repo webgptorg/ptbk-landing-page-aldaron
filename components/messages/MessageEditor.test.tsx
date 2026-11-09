@@ -76,7 +76,7 @@ describe('two-step message editor', () => {
         mocks.transcribe.mockResolvedValueOnce(transcript);
         render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
         fireEvent.change(screen.getByLabelText('Celý kontext'), { target: { value: 'Moje další poznámky.' } });
-        fireEvent.change(screen.getByLabelText('Audio soubor'), { target: { files: [new File(['audio'], 'Schůzka.m4a', { type: 'audio/mp4' })] } });
+        fireEvent.change(screen.getByLabelText('Audio nebo video soubor'), { target: { files: [new File(['audio'], 'Schůzka.m4a', { type: 'audio/mp4' })] } });
         const context = `Moje další poznámky.\n\n${transcript}`;
         await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(context));
         expect(mocks.request).not.toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('two-step message editor', () => {
         render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
         fireEvent.change(screen.getByLabelText('Celý kontext'), { target: { value: 'Původní kontext.' } });
         const file = new File(['audio'], 'Meeting.m4a');
-        fireEvent.change(screen.getByLabelText('Audio soubor'), { target: { files: [file] } });
+        fireEvent.change(screen.getByLabelText('Audio nebo video soubor'), { target: { files: [file] } });
         expect(await screen.findByRole('alert')).toHaveTextContent('Provider unavailable.');
         expect(screen.getByLabelText('Celý kontext')).toHaveValue('Původní kontext.');
         expect(mocks.transcribe).toHaveBeenCalledOnce();
@@ -108,7 +108,7 @@ describe('two-step message editor', () => {
         mocks.request.mockResolvedValue({ message: TEST_MESSAGE });
         render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured transcriptionConfigured onSaved={() => undefined} onBusy={busy} />);
         fireEvent.click(screen.getByRole('button', { name: '1. Celý kontext' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Importovat audio soubor' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Importovat audio nebo video' }));
         const dropzone = screen.getByRole('region', { name: 'Kontext z audia' });
         const dataTransfer = { files: [new File(['audio'], 'Call.mp3')] };
         fireEvent.drop(dropzone, { dataTransfer }); fireEvent.drop(dropzone, { dataTransfer });
@@ -129,7 +129,7 @@ describe('two-step message editor', () => {
         mocks.transcribe.mockResolvedValueOnce(transcript);
         render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
         fireEvent.change(screen.getByLabelText('Celý kontext'), { target: { value: original } });
-        fireEvent.change(screen.getByLabelText('Audio soubor'), { target: { files: [new File(['audio'], 'meeting.m4a')] } });
+        fireEvent.change(screen.getByLabelText('Audio nebo video soubor'), { target: { files: [new File(['audio'], 'meeting.m4a')] } });
         expect(await screen.findByRole('alert')).toHaveTextContent('Zkraťte kontext');
         expect(screen.getByLabelText('Dokončený přepis')).toHaveValue(transcript);
         expect(screen.getByLabelText('Celý kontext')).toHaveValue(original);

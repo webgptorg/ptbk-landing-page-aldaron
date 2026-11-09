@@ -1,8 +1,12 @@
 /** @vitest-environment jsdom */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { waitFor } from '@testing-library/react';
-const mocks = vi.hoisted(() => ({ request: vi.fn() }));
+const mocks = vi.hoisted(() => ({ request: vi.fn(), extractAudio: vi.fn() }));
 vi.mock('@/lib/admin/requestAdminJson', () => ({ requestAdminJson: mocks.request }));
+vi.mock('./messageVideoImport', async (importOriginal) => ({
+    ...await importOriginal<typeof import('./messageVideoImport')>(),
+    extractMessageAudio: mocks.extractAudio,
+}));
 import { transcribeMessageFile } from './messageTranscriptionClient';
 import { hasPendingAdminWork } from '@/lib/admin/adminPendingSaves';
 
@@ -15,6 +19,7 @@ function createUpload() {
 }
 let upload: ReturnType<typeof createUpload>;
 beforeEach(() => {
+    mocks.extractAudio.mockReset();
     mocks.request.mockReset(); mocks.request.mockResolvedValue({ token: 'one-use-token', modelId: 'scribe_v2' });
     upload = createUpload();
     vi.stubGlobal('XMLHttpRequest', vi.fn(function () { return upload; }));
@@ -39,6 +44,33 @@ describe('direct ElevenLabs message transcription', () => {
         expect(progress).toHaveBeenLastCalledWith('ElevenLabs přepisuje audio a rozlišuje řečníky…');
         upload.onload?.();
         expect(await pending).toBe('Následuje přepsané audio: Schůzka.m4a\n\nÚplný původní přepis.');
+        expect(hasPendingAdminWork()).toBe(false);
+    });
+
+    it('finishes local video extraction before requesting a token and uploads only the extracted track', async () => {
+        const video = new File(['video frames and sound'], 'Screen recording.mp4', { type: 'video/mp4' });
+        const audio = new File(['sound'], 'Screen recording.m4a', { type: 'audio/mp4' });
+        let finish!: (file: File) => void;
+        mocks.extractAudio.mockReturnValueOnce(new Promise<File>((resolve) => { finish = resolve; }));
+        const pending = transcribeMessageFile(video, () => undefined);
+        expect(mocks.extractAudio).toHaveBeenCalledWith(video, expect.any(Function));
+        expect(hasPendingAdminWork()).toBe(true);
+        expect(mocks.request).not.toHaveBeenCalled();
+        expect(upload.send).not.toHaveBeenCalled();
+        finish(audio);
+        await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
+        const uploaded = (upload.send.mock.calls[0][0] as FormData).get('file') as File;
+        expect(uploaded).toMatchObject({ name: audio.name, size: audio.size, type: audio.type });
+        upload.onload?.();
+        expect(await pending).toContain('Screen recording.mp4');
+    });
+
+    it('stops before requesting a token when local extraction fails', async () => {
+        mocks.extractAudio.mockRejectedValueOnce(new Error('V souboru není zvuková stopa k přepisu.'));
+        const video = new File(['video frames'], 'Screen recording.mp4');
+        await expect(transcribeMessageFile(video, () => undefined)).rejects.toThrow('není zvuková stopa');
+        expect(mocks.request).not.toHaveBeenCalled();
+        expect(upload.send).not.toHaveBeenCalled();
         expect(hasPendingAdminWork()).toBe(false);
     });
 

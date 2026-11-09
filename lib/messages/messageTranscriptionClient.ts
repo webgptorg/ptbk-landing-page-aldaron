@@ -1,15 +1,23 @@
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { formatMessageTranscript, validateMessageAudioFile } from './messageTranscription';
+import { extractMessageAudio, isMessageVideoImport } from './messageVideoImport';
 
 /** Only a short-lived, single-use credential reaches the browser; media never crosses a Vercel function. */
 export function transcribeMessageFile(file: File, onProgress: (status: string) => void): Promise<string> {
-    validateMessageAudioFile(file);
+    const isVideoImport = isMessageVideoImport(file);
+    if (!isVideoImport) validateMessageAudioFile(file);
     return protectAdminMutation(async () => {
+        let audioFile = file;
+        if (isVideoImport) {
+            onProgress('Odděluji zvuk na tomto zařízení…');
+            audioFile = await extractMessageAudio(file, (progress) => onProgress(`Odděluji zvuk na tomto zařízení… ${Math.floor(progress * 100)} %`));
+            validateMessageAudioFile(audioFile);
+        }
         onProgress('Připravuji přepis…');
         const { token, modelId } = await requestAdminJson<{ token: string; modelId: string }>('/api/admin/messages/transcribe', { method: 'POST' });
         const form = new FormData();
-        form.append('file', file, file.name);
+        form.append('file', audioFile, audioFile.name);
         form.append('model_id', modelId);
         form.append('diarize', 'true');
         form.append('tag_audio_events', 'true');

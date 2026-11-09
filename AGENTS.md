@@ -45,9 +45,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in place instead of redirecting. `/admin/messages` owns their two-step editor, explicit creation/deletion and
   immediate shared autosave, with no draft/publish states. Context stays separate from the title, short Markdown
   message and message-specific chat introduction. Explicit generation uses the selected shared Book agent.
-  Context may also come from a selected/dropped audio file (including Samsung M4A, up to 2 GB). The authenticated
-  messages API issues an ElevenLabs `batch_scribe` single-use token; original bytes upload directly from the browser,
-  never through Vercel's media body limits. Scribe v2 verbatim text and numbered diarized speakers append to existing
+  Context may also come from a selected/dropped audio file (including Samsung M4A) or a supported video file.
+  The browser extracts a video's primary audio track before requesting an ElevenLabs `batch_scribe` single-use token.
+  Only the extracted or original audio (up to 2 GB) uploads directly from the browser, never through Vercel's media
+  body limits. Failed local extraction never uploads the source video. Scribe v2 verbatim text and numbered diarized speakers append to existing
   context under a filename heading. Missing/incompatible diarization preserves the original text. Transcription is
   explicit, protected as pending admin work and never retried automatically. Retain completed text if it exceeds the
   context limit. External-file audio/token are not stored or reused for summary narration; subsequent summary/speech controls
