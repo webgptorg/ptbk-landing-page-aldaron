@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type FormEvent } from 'react';
+import { COMMUNITIES } from '@/businesses/community/config';
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,6 +74,7 @@ export function ManagedArticleEditor({ article, mediaConfigured, onSaved, onBusy
     const operationInProgress = useRef(false);
     const publicationDraft = useAdminDraftProtection(publication, article !== null);
     const isBusy = Boolean(operation);
+    const hasPublicPlacement = publication.placements.some((placement) => placement.visibility === 'public');
 
     function acceptSavedArticle(updatedArticle: ManagedArticle) {
         savedArticle.current = updatedArticle;
@@ -144,8 +146,10 @@ export function ManagedArticleEditor({ article, mediaConfigured, onSaved, onBusy
                 if (candidate !== destination) return current.placements.filter((placement) => placement.destination === candidate);
                 return visibility ? [{ destination, visibility }] : [];
             });
-            const canonicalDestination = placements.some((placement) => placement.destination === current.canonicalDestination)
-                ? current.canonicalDestination : placements[0]?.destination ?? null;
+            const publicPlacements = placements.filter((placement) => placement.visibility === 'public');
+            const canonicalPlacements = publicPlacements.length ? publicPlacements : placements;
+            const canonicalDestination = canonicalPlacements.find((placement) => placement.destination === current.canonicalDestination)?.destination
+                ?? canonicalPlacements[0]?.destination ?? null;
             return { placements, canonicalDestination };
         });
     }
@@ -204,6 +208,9 @@ export function ManagedArticleEditor({ article, mediaConfigured, onSaved, onBusy
         {article && <form className="space-y-4 border-t border-slate-200 pt-5" onSubmit={submitPublication}>
             <fieldset className="space-y-2" disabled={isBusy}>
                 <legend className="mb-2 text-base font-semibold text-slate-950">Umístění a přístup</legend>
+                {hasPublicPlacement && <p className="text-sm text-slate-600">
+                    Veřejné umístění zpřístupní celý článek i jeho audio a PDF všem. Omezení v komunitě platí jen pro její odkaz.
+                </p>}
                 {ARTICLE_DESTINATIONS.map((destination) => {
                     const placement = publication.placements.find((candidate) => candidate.destination === destination);
                     const label = ARTICLE_DESTINATION_LABELS[destination];
@@ -215,9 +222,22 @@ export function ManagedArticleEditor({ article, mediaConfigured, onSaved, onBusy
                             {isArticleCommunity(destination) ? <select aria-label={`Přístup · ${label}`} className="h-9 rounded-md border border-input bg-background px-2 text-sm" value={placement.visibility} onChange={(event) => {
                                 const visibility = event.target.value;
                                 if (visibility === 'public' || visibility === 'members' || visibility === 'paid') setPlacement(destination, visibility);
-                            }}><option value="public">Veřejné</option><option value="members">Pro členy</option>{destination === 'vyvojari' && <option value="paid">Pro platící členy</option>}</select> : <span className="text-sm text-slate-600">Veřejné</span>}
+                            }}>
+                                <option value="public">Veřejné</option>
+                                <option value="members">Pro členy</option>
+                                {COMMUNITIES[destination].hasPaidMembership && <option value="paid">Pro platící členy</option>}
+                            </select> : <span className="text-sm text-slate-600">Veřejné</span>}
                             <label className="flex items-center gap-2 text-sm">
-                                <input type="radio" name="article-canonical" aria-label={`Hlavní umístění · ${label}`} checked={publication.canonicalDestination === destination} className="accent-cyan-600" onChange={() => setPublication((current) => ({ ...current, canonicalDestination: destination }))} />Hlavní odkaz
+                                <input
+                                    type="radio"
+                                    name="article-canonical"
+                                    aria-label={`Hlavní umístění · ${label}`}
+                                    checked={publication.canonicalDestination === destination}
+                                    disabled={hasPublicPlacement && placement.visibility !== 'public'}
+                                    className="accent-cyan-600"
+                                    onChange={() => setPublication((current) => ({ ...current, canonicalDestination: destination }))}
+                                />
+                                Hlavní odkaz
                             </label>
                         </>}
                     </div>;

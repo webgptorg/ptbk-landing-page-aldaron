@@ -41,14 +41,22 @@ it('only publishes on explicit submit and uses the revision from the preceding c
     });
 });
 
-it('keeps incompatible placements pending for correction without saving or losing the draft', async () => {
+it('publishes mixed access with a public canonical and explains the public copy', async () => {
+    const placements = [
+        { destination: 'personal-blog', visibility: 'public' },
+        { destination: 'vyvojari', visibility: 'paid' },
+    ];
+    request.mockResolvedValueOnce({ article: { ...article, placements, canonicalDestination: 'personal-blog', publishedAt: time } });
     render(<ManagedArticleEditor article={article} mediaConfigured={false} onSaved={vi.fn()} onBusy={vi.fn()} />);
     fireEvent.click(screen.getByLabelText('Komunita Vývojáři'));
     fireEvent.change(screen.getByLabelText('Přístup · Komunita Vývojáři'), { target: { value: 'paid' } });
     fireEvent.click(screen.getByLabelText('Osobní blog'));
+    expect(screen.getByLabelText('Hlavní umístění · Komunita Vývojáři')).toHaveProperty('disabled', true);
+    expect(screen.getByLabelText('Hlavní umístění · Osobní blog')).toHaveProperty('checked', true);
+    expect(screen.getByText(/zpřístupní celý článek i jeho audio a PDF všem/)).toBeTruthy();
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Publikovat článek' })); });
-    expect(request).not.toHaveBeenCalled();
-    expect(screen.getByRole('alert').textContent).toContain('stejný typ přístupu');
-    expect(screen.getByLabelText('Přístup · Komunita Vývojáři')).toHaveProperty('value', 'paid');
-    expect(screen.getByLabelText('Osobní blog')).toHaveProperty('checked', true);
+    expect(request).toHaveBeenCalledOnce();
+    expect(JSON.parse(String(request.mock.calls[0]?.[1]?.body))).toMatchObject({
+        article: { placements, canonicalDestination: 'personal-blog' },
+    });
 });

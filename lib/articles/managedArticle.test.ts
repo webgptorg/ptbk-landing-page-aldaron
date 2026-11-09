@@ -51,7 +51,7 @@ describe('managed article publications', () => {
         expect(getManagedArticleUrl(article, 'promptbook')).toBe('https://ptbk.io/cs/komunity/promptbook/clanky/cs/prace-s-agenty');
     });
 
-    it('rejects public mirrors of gated articles and keeps Promptbook free at launch', () => {
+    it('allows independent visibility with a public canonical and keeps Promptbook free at launch', () => {
         const check = (placements: unknown, canonicalDestination: string) =>
             managedArticleInputSchema.safeParse({ ...article, placements, canonicalDestination }).success;
         expect(check([{ destination: 'promptbook', visibility: 'members' }], 'promptbook')).toBe(true);
@@ -60,10 +60,13 @@ describe('managed article publications', () => {
         expect(check([{ destination: 'personal-blog', visibility: 'members' }], 'personal-blog')).toBe(false);
         expect(check([
             { destination: 'promptbook-blog', visibility: 'public' }, { destination: 'vyvojari', visibility: 'paid' },
-        ], 'promptbook-blog')).toBe(false);
+        ], 'promptbook-blog')).toBe(true);
+        expect(check([
+            { destination: 'promptbook-blog', visibility: 'public' }, { destination: 'vyvojari', visibility: 'paid' },
+        ], 'vyvojari')).toBe(false);
         expect(check([
             { destination: 'vyvojari', visibility: 'paid' }, { destination: 'promptbook', visibility: 'members' },
-        ], 'vyvojari')).toBe(false);
+        ], 'vyvojari')).toBe(true);
         expect(getManagedArticleAssetPath('article-id', 'audio', 'vyvojari')).toBe('/cs/komunity/vyvojari/clanky/media/article-id/audio');
     });
 
@@ -72,15 +75,19 @@ describe('managed article publications', () => {
         try {
             await db.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;');
             await db.exec(readFileSync('migrations/2026-11-0940-managed-articles.sql', 'utf8'));
-            const addArticle = (placements: unknown, canonicalDestination: string | null) => db.query(`
+            const addArticle = (placements: unknown, canonicalDestination: string | null, slug = 'prace-s-agenty') => db.query(`
                 INSERT INTO managed_articles (language, slug, title, perex, markdown, author_id, placements, canonical_destination, published_at)
-                VALUES ('cs', 'prace-s-agenty', 'Titulek', 'Perex', 'Text', 'pavol-hejny', $1::jsonb, $2, now())
-            `, [JSON.stringify(placements), canonicalDestination]);
-            await expect(addArticle([{ destination: 'vyvojari', visibility: 'members' }], 'promptbook')).rejects.toThrow(/check constraint/);
-            await expect(addArticle([
-                { destination: 'vyvojari', visibility: 'paid' }, { destination: 'promptbook-blog', visibility: 'public' },
-            ], 'vyvojari')).rejects.toThrow(/check constraint/);
+                VALUES ('cs', $3, 'Titulek', 'Perex', 'Text', 'pavol-hejny', $1::jsonb, $2, now())
+            `, [JSON.stringify(placements), canonicalDestination, slug]);
             await expect(addArticle([{ destination: 'vyvojari', visibility: 'paid' }], 'vyvojari')).resolves.toBeDefined();
+            await db.exec(readFileSync('migrations/2026-11-0942-article-placement-visibility.sql', 'utf8'));
+            await expect(addArticle([{ destination: 'vyvojari', visibility: 'members' }], 'promptbook', 'chybi-kanonicka-adresa')).rejects.toThrow(/check constraint/);
+            const mixedPlacements = [
+                { destination: 'vyvojari', visibility: 'paid' }, { destination: 'promptbook-blog', visibility: 'public' },
+            ];
+            await expect(addArticle(mixedPlacements, 'vyvojari', 'placena-kanonicka-adresa')).rejects.toThrow(/check constraint/);
+            await expect(addArticle(mixedPlacements, 'promptbook-blog', 'verejna-kanonicka-adresa')).resolves.toBeDefined();
+            expect((await db.query("SELECT slug FROM managed_articles WHERE slug = 'prace-s-agenty'")).rows).toHaveLength(1);
             await expect(db.query(`
                 INSERT INTO legacy_article_placements (legacy_id, communities, canonical_destination)
                 VALUES ('legacy-article', ARRAY['vyvojari'], 'promptbook')

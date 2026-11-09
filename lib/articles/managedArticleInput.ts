@@ -31,8 +31,11 @@ export const managedArticleInputSchema = z.object({
         if (article.canonicalDestination !== null) addIssue('canonicalDestination', 'Koncept nemá kanonické umístění.');
         return;
     }
-    if (!article.canonicalDestination || !destinations.has(article.canonicalDestination)) {
+    const canonicalPlacement = article.placements.find((entry) => entry.destination === article.canonicalDestination);
+    if (!canonicalPlacement) {
         addIssue('canonicalDestination', 'Vyberte jedno z publikovaných umístění jako kanonické.');
+    } else if (canonicalPlacement.visibility !== 'public' && article.placements.some((entry) => entry.visibility === 'public')) {
+        addIssue('canonicalDestination', 'Kanonické umístění veřejného článku musí být veřejné.');
     }
     if (!article.markdown.trim()) addIssue('markdown', 'Před publikací doplňte text článku.');
     if (!article.perex) addIssue('perex', 'Před publikací doplňte perex.');
@@ -41,9 +44,6 @@ export const managedArticleInputSchema = z.object({
     }
     if (article.placements.some((entry) => entry.visibility === 'paid' && isArticleCommunity(entry.destination) && !COMMUNITIES[entry.destination].hasPaidMembership)) {
         addIssue('placements', 'Komunita Promptbook zatím nemá placené členství.');
-    }
-    if (new Set(article.placements.map((entry) => entry.visibility)).size > 1) {
-        addIssue('placements', 'Úplný text článku musí mít ve všech umístěních stejný typ přístupu.');
     }
 });
 export type ManagedArticleInput = z.infer<typeof managedArticleInputSchema>;

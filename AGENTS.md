@@ -150,8 +150,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in either community and select its canonical URL while preserving both original blog links. New articles are edited
   in `/admin/articles` with one source, author, independent publication destinations and one selected canonical. Both language versions of the Promptbook
   and Pavol blogs can publish any registered author's articles. Community publication is independent and can use a
-  community room session or a verified paid entitlement. Full-text copies share one access type across destinations.
-  Drafts and restricted placements stay out of public indexing and feeds.
+  community room session or a verified paid entitlement. Access is selected per destination; a public placement
+  makes the shared text and media public and requires a public canonical. Drafts and restricted placements stay
+  out of public indexing and feeds.
   The four `articles/podcast.xml` routes still have deterministic initial prerenders and refresh hourly for admin
   publications. Only reviewed, existing audio becomes an episode. Managed audio, PDF, timing and subtitles use
   immutable uploads to the private shared object bucket and are served from checked publication routes, with byte

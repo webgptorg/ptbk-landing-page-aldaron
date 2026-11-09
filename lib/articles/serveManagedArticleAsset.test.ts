@@ -40,6 +40,25 @@ describe('direct managed article media', () => {
         expect(signStoredObject).not.toHaveBeenCalled();
     });
 
+    it('keeps a restricted destination gated when the same media is shared publicly elsewhere', async () => {
+        const publicPlacement = { destination: 'personal-blog', visibility: 'public' } as const;
+        const paidPlacement = { destination: 'vyvojari', visibility: 'paid' } as const;
+        vi.mocked(getManagedArticleRow).mockResolvedValue({
+            placements: [publicPlacement, paidPlacement],
+        } as ManagedArticleRow);
+        vi.mocked(canReadManagedArticlePlacement).mockImplementation(async (placement) => placement.visibility === 'public');
+        vi.mocked(getCurrentManagedArticleAsset).mockReturnValue({ key, byteLength: 10, contentHash: 'current' });
+        vi.mocked(signStoredObject).mockResolvedValue(signedUrl);
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('xyz', { status: 206 })));
+
+        expect((await serveManagedArticleAsset(request, { id, kind: 'audio' }, 'vyvojari')).status).toBe(404);
+        expect(signStoredObject).not.toHaveBeenCalled();
+        const publicResponse = await serveManagedArticleAsset(request, { id, kind: 'audio' });
+        expect(publicResponse.status).toBe(206);
+        expect(publicResponse.headers.get('access-control-allow-origin')).toBe('*');
+        expect(vi.mocked(canReadManagedArticlePlacement).mock.calls).toEqual([[paidPlacement], [publicPlacement]]);
+    });
+
     it('streams the authorized byte range without exposing the private storage URL', async () => {
         vi.mocked(getManagedArticleRow).mockResolvedValue({
             placements: [{ destination: 'vyvojari', visibility: 'paid' }],
