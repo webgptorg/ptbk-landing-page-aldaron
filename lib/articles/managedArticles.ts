@@ -197,9 +197,10 @@ export async function replaceManagedArticleAsset(
 export async function readPublishedManagedArticles(language: ArticleLanguage | undefined, destination: ManagedArticleDestination, publicOnly = false): Promise<ManagedArticleRow[]> {
     const client = createSupabaseServiceRoleClient();
     if (!client) return [];
+    const placementFilter = JSON.stringify([publicOnly ? { destination, visibility: 'public' } : { destination }]);
     const { rows } = await loadAllSupabaseRows<ManagedArticleRow>(
         (from, to) => {
-            const query = client.from(TABLE).select('*').contains('placements', [publicOnly ? { destination, visibility: 'public' } : { destination }]);
+            const query = client.from(TABLE).select('*').contains('placements', placementFilter);
             return (language ? query.eq('language', language) : query).order('published_at', { ascending: false }).order('id').range(from, to);
         },
         'read published managed articles',
@@ -211,7 +212,7 @@ export async function readPublishedManagedArticle(language: ArticleLanguage, slu
     const client = createSupabaseServiceRoleClient();
     if (!client || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100) return null;
     const { data, error } = await client.from(TABLE).select('*')
-        .eq('language', language).eq('slug', slug).contains('placements', [{ destination }]).maybeSingle();
+        .eq('language', language).eq('slug', slug).contains('placements', JSON.stringify([{ destination }])).maybeSingle();
     if (error) return null;
     return data as ManagedArticleRow | null;
 }

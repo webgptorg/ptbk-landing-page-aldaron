@@ -1,8 +1,14 @@
 import { PGlite } from '@electric-sql/pglite';
+import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import { managedArticleInputSchema } from './managedArticleInput';
 import { getManagedArticleAssetPath, getManagedArticleUrl } from './managedArticleUrls';
+import { readPublishedManagedArticle, readPublishedManagedArticles } from './managedArticles';
+
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/supabase', () => ({ createSupabaseServiceRoleClient: vi.fn() }));
 
 const article = {
     language: 'cs',
@@ -14,6 +20,23 @@ const article = {
 } as const;
 
 describe('managed article publications', () => {
+    it('encodes article placement containment as JSONB in both PostgREST reads', async () => {
+        const fetch = vi.fn(async (_input: RequestInfo | URL) => Response.json([]));
+        vi.mocked(createSupabaseServiceRoleClient).mockReturnValue(createClient('https://test.example', 'test-key', {
+            global: { fetch }, auth: { autoRefreshToken: false, persistSession: false },
+        }));
+
+        await readPublishedManagedArticles('cs', 'promptbook', true);
+        await readPublishedManagedArticles('cs', 'vyvojari');
+        await readPublishedManagedArticle('cs', 'prace-s-agenty', 'promptbook');
+
+        expect(fetch.mock.calls.map(([input]) => new URL(input.toString()).searchParams.get('placements'))).toEqual([
+            'cs.[{"destination":"promptbook","visibility":"public"}]',
+            'cs.[{"destination":"vyvojari"}]',
+            'cs.[{"destination":"promptbook"}]',
+        ]);
+    });
+
     it('publishes one source at several addresses and requires one of them to be canonical', () => {
         const placements = [
             { destination: 'promptbook-blog', visibility: 'public' },

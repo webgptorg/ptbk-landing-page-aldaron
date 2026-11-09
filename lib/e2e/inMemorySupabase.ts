@@ -107,10 +107,11 @@ class InMemoryQuery {
         return this;
     }
 
-    public contains(column: string, values: readonly unknown[]): this {
+    public contains(column: string, values: string | readonly unknown[]): this {
+        const expectedValues = typeof values === 'string' ? JSON.parse(values) as readonly unknown[] : values;
         this.predicates.push((row) => {
             const columnValues = row[column];
-            return Array.isArray(columnValues) && values.every((value) => columnValues.some((entry) => {
+            return Array.isArray(columnValues) && expectedValues.every((value) => columnValues.some((entry) => {
                 if (value === null || typeof value !== 'object') {
                     return entry === value;
                 }
