@@ -1,3 +1,4 @@
+import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { expect, test } from '@playwright/test';
 import { DEFAULT_EVENT_DETAILS } from '../../lib/events/event';
 import type { WorkshopPublicState } from '../../lib/workshops/workshopTypes';
@@ -5,7 +6,7 @@ import type { WorkshopPublicState } from '../../lib/workshops/workshopTypes';
 const SERVER_TIME = '2026-09-20T10:00:00.000Z';
 const AUTHOR_NAME = 'Jana Nováková';
 const PROJECT_TITLE = 'Projekt čekajícího autora';
-const ROOM_PATHS = ['/cs/online-workshop/participant', '/cs/komunita'] as const;
+const ROOM_PATHS = ['/cs/online-workshop/participant', COMMUNITY_PATH] as const;
 
 test.use({ serviceWorkers: 'block' });
 
@@ -48,7 +49,7 @@ function createRoomState(slug: string, isCommunity: boolean, isTrusted: boolean)
 
 for (const pathname of ROOM_PATHS) {
     test(`refreshes an author's pending total and submissions after trust on ${pathname}`, async ({ page }) => {
-        const isCommunity = pathname === '/cs/komunita';
+        const isCommunity = pathname === COMMUNITY_PATH;
         let isTrusted = false;
         const promotionRequests: unknown[] = [];
         const browserErrors: string[] = [];

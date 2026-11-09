@@ -11,6 +11,7 @@ vi.mock('@/lib/workshops/workshopPublic', () => ({
 }));
 
 import { GET } from './route';
+import { GET as getCommunityCalendar } from '../../komunity/[community]/calendar.ics/route';
 
 const PUBLISHED_WORKSHOPS: readonly WorkshopSummary[] = [
     {
@@ -86,6 +87,7 @@ describe('community calendar feed', () => {
             'inline; filename="promptbook-terminy-akci.ics"',
         );
         expect(response.headers.get('Cache-Control')).toBe('no-store');
+        expect(loadPublishedWorkshopSummariesMock).toHaveBeenCalledWith('vyvojari');
         expect(calendarContent).toContain('X-WR-CALNAME:Termíny akcí Promptbooku');
         expect(calendarContent.match(/BEGIN:VEVENT/g)).toHaveLength(3);
         expect(calendarContent).toContain('SUMMARY:Produkční kód s AI agenty');
@@ -131,5 +133,15 @@ describe('community calendar feed', () => {
         expect(calendarContent).toContain('BEGIN:VCALENDAR');
         expect(calendarContent).toContain('END:VCALENDAR');
         expect(calendarContent).not.toContain('BEGIN:VEVENT');
+    });
+
+    it('reads the Promptbook calendar from the Promptbook publication scope', async () => {
+        loadPublishedWorkshopSummariesMock.mockResolvedValue([]);
+        const response = await getCommunityCalendar(new Request('https://ptbk.io/cs/komunity/promptbook/calendar.ics'), {
+            params: Promise.resolve({ community: 'promptbook' }),
+        });
+
+        expect(loadPublishedWorkshopSummariesMock).toHaveBeenCalledWith('promptbook');
+        expect(await response.text()).toContain('X-WR-CALNAME:Komunita Promptbook – kalendář akcí');
     });
 });

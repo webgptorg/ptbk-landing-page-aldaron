@@ -1,3 +1,4 @@
+import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const COOKIE_PANEL_SELECTOR = '[data-cookie-consent-panel]';
@@ -12,7 +13,7 @@ const COOKIE_PAGE_PATHS = [
     '/en',
     '/cs/pro-firmy',
     '/cs/ochrana-osobnich-udaju',
-    '/cs/komunita',
+    COMMUNITY_PATH,
     '/ai-supervize',
     '/ai-supervize-mini',
     '/ai-ta-krajta',
@@ -40,7 +41,7 @@ async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
 for (const path of COOKIE_PAGE_PATHS) {
     test(`cookie controls fit desktop, phone and landscape viewports: ${path}`, async ({ page }) => {
         const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
-        test.skip(path === '/cs/komunita' && response?.status() === 404, 'No published community in the test database.');
+        test.skip(path === COMMUNITY_PATH && response?.status() === 404, 'No published community in the test database.');
         expect(response?.ok()).toBe(true);
         const panel = page.getByRole('region', { name: 'Cookies', exact: true });
 

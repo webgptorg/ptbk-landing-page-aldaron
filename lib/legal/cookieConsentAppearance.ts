@@ -1,10 +1,13 @@
 import { AI_TA_KRAJTA_COLORS, AI_TA_KRAJTA_PATH } from '@/businesses/ai-ta-krajta/config';
+import { COMMUNITY_PATH, LEGACY_COMMUNITY_PATH } from '@/businesses/community/config';
 import { isWorkshopRoomPath } from '@/lib/workshops/workshopRoomTheme';
 import type { CSSProperties } from 'react';
 
 export type CookieConsentTheme = 'light' | 'dark' | 'podcast' | 'room';
 
-const DARK_COOKIE_CONSENT_PATHS = ['/ai-supervize', '/ai-supervize-mini', '/cs/online-workshop', '/cs/komunita'];
+const DARK_COOKIE_CONSENT_PATHS = [
+    '/ai-supervize', '/ai-supervize-mini', '/cs/online-workshop', LEGACY_COMMUNITY_PATH, `${COMMUNITY_PATH}/clenstvi`,
+];
 
 /** The banner and its portalled settings share the page palette, including the podcast's own brand colors. */
 export const PODCAST_COOKIE_CONSENT_STYLE = {

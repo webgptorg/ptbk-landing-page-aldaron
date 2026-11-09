@@ -31,12 +31,14 @@ import { WorkshopRoomThemeControl } from '@/components/workshops/WorkshopRoomThe
 import { WORKSHOP_ROOM_REFRESH_CONTEXT } from '@/components/workshops/WorkshopRoomRefreshContext';
 import { WorkshopRoomWaitingShell } from '@/components/workshops/WorkshopRoomWaitingShell';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
+import { getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
 import { isWorkshopParticipantModerating } from '@/lib/workshops/workshopModeration';
 import { isWorkshopPanelOffered, type WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import { getWorkshopParticipantSubmissionStatus } from '@/lib/workshops/workshopSubmissionStatus';
 import { WORKSHOP_SEARCH_PARAMETER_NAME } from '@/lib/workshops/workshopParticipantLink';
 import { getWorkshopPollPlacement } from '@/lib/workshops/workshopPollPlacement';
 import { normalizeWorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimaryStageContent';
+import { getPaidCommunityIdForRoom } from '@/lib/community-membership/communityMembershipScope';
 import type { SubscribeToWorkshopRepositoryCommits } from '@/lib/workshops/workshopRepositoryProgress';
 import { selectWorkshopSupplementarySources, type WorkshopSpecialMaterial } from '@/lib/workshops/workshopSpecialMaterials';
 import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
@@ -109,6 +111,10 @@ type OnlineWorkshopParticipantPageProps = {
      */
     readonly mainContentAfterWorkshopNavigation?: ReactNode;
 
+    /** Public content shown before a visitor joins a permanent room. */
+    readonly waitingRoomSupplement?: ReactNode;
+    readonly onRoomSessionEnded?: () => void;
+
     /**
      * A project discussion has no materials of its own, while the shared community room continues to show them.
      */
@@ -142,6 +148,8 @@ export function OnlineWorkshopParticipantPage({
     unavailableConnectionMessage = 'Připojení k workshopu se nepodařilo ověřit.',
     participantHeaderSupplement,
     mainContentAfterWorkshopNavigation,
+    waitingRoomSupplement,
+    onRoomSessionEnded,
     isMaterialsShown = true,
     connectionRequiredContent,
     connectionTermPicker,
@@ -204,6 +212,7 @@ export function OnlineWorkshopParticipantPage({
                 <main className="flex min-h-[calc(100svh-4.5rem)] items-center justify-center bg-room-background text-room-accent">
                     <RefreshCw className="h-7 w-7 animate-spin" aria-label="Ověřuji připojení" />
                 </main>
+                {waitingRoomSupplement}
             </WorkshopRoomWaitingShell>
         );
     }
@@ -221,6 +230,7 @@ export function OnlineWorkshopParticipantPage({
                         connectionTermPicker={connectionTermPicker}
                     />
                 )}
+                {waitingRoomSupplement}
             </WorkshopRoomWaitingShell>
         );
     }
@@ -244,12 +254,14 @@ export function OnlineWorkshopParticipantPage({
                         </button>
                     </div>
                 </main>
+                {waitingRoomSupplement}
             </WorkshopRoomWaitingShell>
         );
     }
 
     const { state } = controller;
     const roomCapabilities = getWorkshopKindCapabilities(state.workshop.kind);
+    const communityIds = getWorkshopCommunityIds(state.workshop.communityIds);
     const isWorkshopPast =
         roomCapabilities.isStageOffered &&
         isWorkshopPhasePast(getWorkshopPhase(state.workshop, Date.parse(state.serverTime)));
@@ -306,11 +318,11 @@ export function OnlineWorkshopParticipantPage({
     ];
     const specialMaterials: readonly WorkshopSpecialMaterial[] = [
         ...selectWorkshopSupplementarySources(stageSourceMaterials, primaryStageContent),
-        ...(roomCapabilities.isCommunityInvitationOffered
+        ...(roomCapabilities.isCommunityInvitationOffered && communityIds.length > 0
             ? [
                   {
                       id: 'community',
-                      content: <CommunityRoomInvitation participantIdentity={state.participant} />,
+                      content: <CommunityRoomInvitation communityIds={communityIds} participantIdentity={state.participant} />,
                       // Note: This is an invitation rather than something the workshop hands over, so a member who
                       //       has not joined the community yet reads it before the materials, while a member who
                       //       already pays for it keeps it at the end as one more way on. It is written as the one
@@ -381,7 +393,11 @@ export function OnlineWorkshopParticipantPage({
                             isModerating={isModerating}
                             isRefreshing={controller.isRefreshing}
                             onChangeFullname={controller.changeFullname}
-                            onDisconnect={roomCapabilities.isDisconnectionOffered ? controller.disconnect : undefined}
+                            onDisconnect={roomCapabilities.isDisconnectionOffered ? async () => {
+                                const isDisconnected = await controller.disconnect();
+                                if (isDisconnected) onRoomSessionEnded?.();
+                                return isDisconnected;
+                            } : undefined}
                         />
                         {/*
                           * Note: Every room which offers the membership says which one its member has and lets them
@@ -432,6 +448,7 @@ export function OnlineWorkshopParticipantPage({
                             wrapUpNavigation={
                                 roomCapabilities.isCommunityInvitationOffered ? (
                                     <WorkshopWrapUpNavigation
+                                        communityIds={communityIds}
                                         workshops={followUpWorkshops}
                                         participantIdentity={state.participant}
                                         currentWorkshopSlug={state.workshop.slug}
@@ -526,7 +543,7 @@ export function OnlineWorkshopParticipantPage({
     return (
         <CommunityMembershipRoomProvider
             workshopSlug={workshopSlug}
-            isMembershipOffered={roomCapabilities.isMembershipOffered}
+            isMembershipOffered={getPaidCommunityIdForRoom(state.workshop.kind, workshopSlug, state.workshop.communityIds) !== null}
         >
             <WorkshopRecordingTimelineProvider workshopSlug={workshopSlug} repository={connectedRepository}>
                 {roomLayout}

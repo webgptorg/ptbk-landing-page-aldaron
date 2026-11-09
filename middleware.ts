@@ -17,6 +17,7 @@ import { isNewSitePublicPath } from './businesses/new/siteConfig';
 import { getPublicShortcodeLinkOnHostname } from './lib/shortener/shortcodeLinkMiddleware';
 import { SHORTCODE_LINK_HOST_HEADER } from './lib/shortener/shortcodeLinkDomains';
 import { STORY_ROOM_PATH } from './lib/workshops/storyRoomPaths';
+import { COMMUNITIES_PATH, COMMUNITY_PATH, LEGACY_COMMUNITY_PATH } from './businesses/community/config';
 
 /**
  * Builds a redirect to an independently branded site's public URL while retaining the browser's query parameters.
@@ -103,6 +104,26 @@ export async function middleware(request: NextRequest) {
         if (legacyDomainRoute) {
             return createPublicDomainRedirectResponse(request, legacyDomainRoute);
         }
+    }
+
+    const communityPath = request.nextUrl.pathname.replace(/\/+$/, '');
+    if (
+        (communityPath === LEGACY_COMMUNITY_PATH || communityPath.startsWith(`${LEGACY_COMMUNITY_PATH}/`)) &&
+        communityPath !== `${LEGACY_COMMUNITY_PATH}/calendar.ics`
+    ) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = `${COMMUNITY_PATH}${communityPath.slice(LEGACY_COMMUNITY_PATH.length)}`;
+        const response = NextResponse.redirect(redirectUrl, 308);
+        response.headers.set('Referrer-Policy', 'origin');
+        if (redirectUrl.search) {
+            response.headers.set('Cache-Control', 'private, no-store');
+        }
+        return response;
+    }
+
+    if (communityPath === COMMUNITIES_PATH || communityPath.startsWith(`${COMMUNITIES_PATH}/`)) {
+        requestHeaders.set('x-promptbook-page-language', 'cs');
+        return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
     if (request.nextUrl.pathname === STORY_ROOM_PATH || request.nextUrl.pathname === `${STORY_ROOM_PATH}/`) {

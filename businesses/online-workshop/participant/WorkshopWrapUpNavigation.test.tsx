@@ -80,7 +80,7 @@ describe('workshop wrap-up navigation', () => {
         expect(screen.getByRole('link', { name: /AI Supervize Mini/ }).textContent).toMatch(/4\s900 Kč/);
 
         const communityLink = new URL(screen.getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')!, 'https://example.com');
-        expect(communityLink.pathname).toBe('/cs/komunita');
+        expect(communityLink.pathname).toBe('/cs/komunity/vyvojari');
         expect(communityLink.searchParams.get('email')).toBe(PARTICIPANT_IDENTITY.email);
         expect(communityLink.searchParams.get('fullname')).toBe(PARTICIPANT_IDENTITY.fullname);
     });
@@ -123,7 +123,7 @@ describe('workshop wrap-up navigation', () => {
         );
 
         expect(screen.getAllByRole('link')).toHaveLength(1);
-        expect(screen.getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')).toBe('/cs/komunita');
+        expect(screen.getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')).toBe('/cs/komunity/vyvojari');
         expect(screen.getByText('Další termín workshopu připravujeme.')).not.toBeNull();
         expect(screen.getByText('Další termín placeného workshopu připravujeme.')).not.toBeNull();
     });

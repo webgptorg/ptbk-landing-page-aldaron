@@ -7,6 +7,16 @@ import {
 import { describe, expect, it } from 'vitest';
 
 describe('sensitive page tracking exclusions', () => {
+    it('keeps community room URLs and article content out of third-party recording', () => {
+        for (const community of ['vyvojari', 'promptbook']) {
+            const room = `/cs/komunity/${community}`;
+            expect(isThirdPartyTrackingAllowed(room)).toBe(false);
+            expect(isGoogleAnalyticsPageViewAllowed(room)).toBe(false);
+            expect(isGoogleAnalyticsAllowed(`${room}/clanky/cs/clensky-clanek`)).toBe(false);
+        }
+        expect(isThirdPartyTrackingAllowed('/cs/komunity')).toBe(true);
+    });
+
     it('excludes admin and workshop participant pages', () => {
         expect(isThirdPartyTrackingAllowed('/admin')).toBe(false);
         expect(isThirdPartyTrackingAllowed('/admin/workshops')).toBe(false);

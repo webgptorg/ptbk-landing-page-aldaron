@@ -1,5 +1,6 @@
+import { COMMUNITIES_PATH } from '@/businesses/community/config';
 import { DISCOUNT_CODE_QUERY_PARAMETER, REGISTRATION_SECTION_ID } from '@/lib/discounts/discountCodeConstants';
-import { AI_SUPERVIZE_MINI_PATH, createDiscountCodePrefillPath } from '@/lib/discounts/discountPlaces';
+import { AI_SUPERVIZE_MINI_PATH, COMMUNITY_MEMBERSHIP_PATH, createDiscountCodePrefillPath } from '@/lib/discounts/discountPlaces';
 import {
     AI_TA_KRAJTA_APP_ICONS,
     AI_TA_KRAJTA_BRAND_NAME,
@@ -32,7 +33,8 @@ const PUBLIC_PAGE_PATHS = [
     AI_TA_KRAJTA_BRANDING_PATH,
     '/hackathon-factory',
     '/cs/online-workshop',
-    '/cs/komunita/clenstvi',
+    COMMUNITIES_PATH,
+    COMMUNITY_MEMBERSHIP_PATH,
     '/cs/pavol',
     '/en/pavol',
     '/cs/ochrana-osobnich-udaju',

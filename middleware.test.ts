@@ -10,6 +10,26 @@ function createRequest(url: string, headers: HeadersInit = {}): NextRequest {
 }
 
 describe('domain middleware', () => {
+    it('keeps legacy community room, membership and project links working with their query intact', async () => {
+        for (const suffix of ['', '/clenstvi', '/projects/project-id']) {
+            const response = await middleware(createRequest(`https://www.ptbk.io/cs/komunita${suffix}?from=invite`));
+            expect(response.status).toBe(308);
+            expect(response.headers.get('location')).toBe(
+                `https://www.ptbk.io/cs/komunity/vyvojari${suffix}?from=invite`,
+            );
+            expect(response.headers.get('cache-control')).toBe('private, no-store');
+        }
+
+        const calendar = await middleware(createRequest('https://www.ptbk.io/cs/komunita/calendar.ics'));
+        expect(calendar.headers.get('location')).toBeNull();
+
+        for (const path of ['/cs/komunity', '/cs/komunity/vyvojari', '/cs/komunity/promptbook']) {
+            const response = await middleware(createRequest(`https://www.ptbk.io${path}`));
+            expect(response.headers.get('location')).toBeNull();
+            expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe('cs');
+        }
+    });
+
     it('serves both explicit brand-kit languages and selects a private unprefixed alias', async () => {
         for (const language of ['cs', 'en']) {
             for (const suffix of ['', '/opengraph-image']) {

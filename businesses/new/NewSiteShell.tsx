@@ -1,5 +1,6 @@
 'use client';
 
+import { COMMUNITIES_PATH } from '@/businesses/community/config';
 import { useSiteLocale } from './LocaleProvider';
 import { usePathname } from 'next/navigation';
 import { SiteLocaleProvider } from './LocaleProvider';
@@ -21,14 +22,15 @@ import f from './footer.module.css';
 
 function LocalizedShell({ children }: { children: ReactNode }) {
     const { t, locale, path } = useSiteLocale();
+    const communityLink = locale === 'cs' ? <Link href={COMMUNITIES_PATH}>Komunity</Link> : null;
 
     return <LeadCaptureProvider><div className={s.site} lang={locale} style={PROMPTBOOK_BRAND_STYLE}>
         <a href="#obsah" className={s.skip}>{t("Přejít na obsah")}</a>
         <header className={s.header}><div className={s.headerInner}>
             <BrandLogo priority/>
-            <nav className={s.desktopNav} aria-label={t("Hlavní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}</nav>
+            <nav className={s.desktopNav} aria-label={t("Hlavní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}</nav>
             <LanguageSwitch/><div className={s.headerAction}><LeadButton interest>{t("Mám zájem")}</LeadButton></div>
-            <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><LeadButton interest>{t("Mám zájem")}</LeadButton></nav></details>
+            <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><LeadButton interest>{t("Mám zájem")}</LeadButton></nav></details>
         </div></header>
         <main id="obsah" className={s.container}>{t(children)}</main>
         <footer className={s.footer}><div className={`${s.footerGrid} ${f.grid}`}>
@@ -73,6 +75,7 @@ function BrandLogo({ priority = false }: { priority?: boolean }) {
 function LanguageSwitch() {
     const pathname = usePathname();
     const { locale } = useSiteLocale();
+    if (pathname === COMMUNITIES_PATH) return null;
     return <nav className={s.languageSwitch} aria-label="Language / Jazyk">{(['cs', 'en'] as const).map(language => <Link key={language} href={localizedPath(pathname, language)} hrefLang={language} lang={language} aria-current={locale === language ? 'page' : undefined} onClick={event => {
         // Preserve the current calculation and anchor, including edits made via native history.
         event.preventDefault();

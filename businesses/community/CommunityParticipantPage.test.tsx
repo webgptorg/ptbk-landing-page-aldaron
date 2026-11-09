@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 
-import { COMMUNITY_WORKSHOP_SLUG } from '@/businesses/community/config';
+import { COMMUNITIES, COMMUNITY_PATH, COMMUNITY_WORKSHOP_SLUG, type CommunityId } from '@/businesses/community/config';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
 import { cleanup, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -16,6 +16,10 @@ type ParticipantRoomProps = {
 };
 
 const participantRoomMocks = vi.hoisted(() => ({ props: {} as ParticipantRoomProps }));
+
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 vi.mock('@/businesses/community/projects/CommunityProjectsSection', () => ({
     CommunityProjectsSection: () => <p>Projekty komunity</p>,
@@ -51,12 +55,22 @@ const COMMUNITY: WorkshopDetails = {
     updatedAt: '2026-08-01T10:00:00+02:00',
 };
 
-function renderCommunityRoom() {
-    render(<CommunityParticipantPage community={COMMUNITY} workshops={[]} initialEmail="" initialFullname="" />);
+function renderCommunityRoom(id: CommunityId = 'vyvojari') {
+    const definition = COMMUNITIES[id];
+    render(
+        <CommunityParticipantPage
+            definition={definition}
+            community={{ ...COMMUNITY, slug: definition.roomSlug }}
+            workshops={[]}
+            initialEmail=""
+            initialFullname=""
+            serverTime="2026-11-09T12:00:00Z"
+        />,
+    );
 }
 
 beforeEach(() => {
-    window.history.replaceState({}, '', '/cs/komunita');
+    window.history.replaceState({}, '', COMMUNITY_PATH);
 });
 
 afterEach(() => {
@@ -69,7 +83,7 @@ describe('community participant page', () => {
         renderCommunityRoom();
 
         expect(participantRoomMocks.props.workshopSlug).toBe(COMMUNITY_WORKSHOP_SLUG);
-        // The one community keeps its address, so no occurrence is ever selected in it.
+        // Permanent rooms do not select an occurrence in the address.
         expect(participantRoomMocks.props.isWorkshopSelectionInUrl).toBe(false);
     });
 
@@ -77,6 +91,13 @@ describe('community participant page', () => {
         renderCommunityRoom();
 
         expect(screen.getByText('Projekty komunity')).toBeDefined();
+    });
+
+    it('opens the Promptbook room without the Developers project gallery', () => {
+        renderCommunityRoom('promptbook');
+
+        expect(participantRoomMocks.props.workshopSlug).toBe(COMMUNITIES.promptbook.roomSlug);
+        expect(screen.queryByText('Projekty komunity')).toBeNull();
     });
 
     it('adds no membership surface of its own, because the shared room shows the one membership', () => {

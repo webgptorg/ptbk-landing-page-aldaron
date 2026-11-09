@@ -723,7 +723,7 @@ describe('online workshop participant room', () => {
         const materialsSection = screen.getByRole('heading', { name: 'Materiály z workshopu' }).closest('section');
 
         expect(communityLink.getAttribute('href')).toBe(
-            '/cs/komunita?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
+            '/cs/komunity/vyvojari?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
         );
         expect(materialsSection?.contains(communityLink)).toBe(true);
         expect(communityLink.closest('article')).not.toBeNull();
@@ -860,7 +860,7 @@ describe('online workshop participant room', () => {
         const wrapUpNavigation = screen.getByRole('navigation', { name: 'Kam po workshopu' });
         expect(wrapUpNavigation.closest('section')?.contains(unlockButton)).toBe(true);
         expect(within(wrapUpNavigation).getByRole('link', { name: /Vstoupit do komunity/ }).getAttribute('href')).toBe(
-            '/cs/komunita?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
+            '/cs/komunity/vyvojari?email=jana%40example.com&fullname=Jana+Nov%C3%A1kov%C3%A1',
         );
         expect(screen.getAllByRole('link', { name: /Vstoupit do komunity/ })).toHaveLength(2);
 

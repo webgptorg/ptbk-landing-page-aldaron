@@ -1,8 +1,8 @@
+import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
 import type { WorkshopPublicState } from '@/lib/workshops/workshopTypes';
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 
-const COMMUNITY_PATH = '/cs/komunita';
 const PARTICIPANT_PATH = '/cs/online-workshop/participant';
 const SERVER_TIME = '2026-09-19T18:00:00.000Z';
 const ROOM_TITLE = 'Test barevného režimu';

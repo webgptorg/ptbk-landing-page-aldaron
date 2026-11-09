@@ -1,4 +1,4 @@
-import CommunityProjectImage from '@/app/cs/komunita/projects/[projectId]/opengraph-image';
+import CommunityProjectImage from '@/app/cs/komunity/vyvojari/projects/[projectId]/opengraph-image';
 import ShortcodeImage from '@/app/[shortcode]/opengraph-image';
 import { createInMemorySupabaseClient } from '@/lib/e2e/inMemorySupabase';
 import { SHORTCODE_LINK_CLICK_TABLE_NAME, SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';

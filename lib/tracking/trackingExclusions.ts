@@ -1,3 +1,4 @@
+import { COMMUNITIES, COMMUNITY_IDS } from '@/businesses/community/config';
 import { ONLINE_WORKSHOP_PARTICIPANT_PATH } from '@/businesses/online-workshop/config';
 import { STORY_ROOM_API_PATH, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
 
@@ -7,7 +8,12 @@ const TRACKING_EXCLUDED_PATH_PREFIXES = [
 const SENSITIVE_TRACKING_QUERY_PARAMETERS = ['email', 'fullname', 'token'] as const;
 
 function isWorkshopParticipantPath(pathname: string): boolean {
-    return pathname === ONLINE_WORKSHOP_PARTICIPANT_PATH || pathname.startsWith(`${ONLINE_WORKSHOP_PARTICIPANT_PATH}/`);
+    return pathname === ONLINE_WORKSHOP_PARTICIPANT_PATH || pathname.startsWith(`${ONLINE_WORKSHOP_PARTICIPANT_PATH}/`) ||
+        COMMUNITY_IDS.some((id) => pathname.replace(/\/+$/, '') === COMMUNITIES[id].path);
+}
+
+function isCommunityArticlePath(pathname: string): boolean {
+    return COMMUNITY_IDS.some((id) => isPathExcluded(pathname, [`${COMMUNITIES[id].path}/clanky`]));
 }
 
 function isPathExcluded(pathname: string, excludedPathPrefixes: readonly string[]): boolean {
@@ -21,7 +27,7 @@ function isPathExcluded(pathname: string, excludedPathPrefixes: readonly string[
  * data. Neither page may receive normal page tracking or session recording.
  */
 export function isThirdPartyTrackingAllowed(pathname: string): boolean {
-    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES) && !isWorkshopParticipantPath(pathname);
+    return isGoogleAnalyticsAllowed(pathname) && !isWorkshopParticipantPath(pathname);
 }
 
 /**
@@ -30,7 +36,8 @@ export function isThirdPartyTrackingAllowed(pathname: string): boolean {
  * temporarily contain a prefilled e-mail address or full name.
  */
 export function isGoogleAnalyticsAllowed(pathname: string): boolean {
-    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) && !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES);
+    return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) &&
+        !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES) && !isCommunityArticlePath(pathname);
 }
 
 export function isGoogleAnalyticsPageViewAllowed(pathname: string): boolean {

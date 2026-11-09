@@ -1,3 +1,4 @@
+import { COMMUNITIES, COMMUNITY_IDS } from '@/businesses/community/config';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -40,11 +41,21 @@ class InMemoryTable {
     private readonly rows: InMemoryRow[] = [];
     private nextId = 1;
 
+    public constructor(private readonly tableName: string) {}
+
     public insert(values: InMemoryRow): InMemoryRow {
+        const now = new Date().toISOString();
         const row = {
+            ...(this.tableName === 'workshop_participants' && {
+                connected_at: now,
+                last_seen_at: now,
+                is_interaction_banned: false,
+                is_trusted: false,
+                is_moderator: false,
+            }),
             ...values,
             id: values.id ?? this.nextId++,
-            createdAt: values.createdAt ?? new Date().toISOString(),
+            createdAt: values.createdAt ?? now,
         };
 
         this.rows.push(row);
@@ -57,16 +68,15 @@ class InMemoryTable {
 }
 
 /**
- * The small PostgREST-shaped query surface public pages exercise. Its Contact
- * rows persist for the lifetime of the E2E server, while every other table is
- * an empty, successful result so optional database-backed public content stays
- * optional just as it is without configured data.
+ * The small PostgREST-shaped query surface public pages exercise. Rows persist
+ * for the lifetime of the E2E server and unseeded tables start empty.
  */
 class InMemoryQuery {
     private readonly predicates: Array<(row: InMemoryRow) => boolean> = [];
     private readonly orders: InMemoryOrder[] = [];
     private rangeStart = 0;
     private rangeEnd: number | null = null;
+    private updateValues: InMemoryRow | null = null;
 
     public constructor(
         private readonly table: InMemoryTable,
@@ -94,6 +104,20 @@ class InMemoryQuery {
 
     public in(column: string, values: readonly unknown[]): this {
         this.predicates.push((row) => values.includes(row[column]));
+        return this;
+    }
+
+    public contains(column: string, values: readonly unknown[]): this {
+        this.predicates.push((row) => {
+            const columnValues = row[column];
+            return Array.isArray(columnValues) && values.every((value) => columnValues.some((entry) => {
+                if (value === null || typeof value !== 'object') {
+                    return entry === value;
+                }
+                return entry !== null && typeof entry === 'object' &&
+                    Object.entries(value).every(([key, expected]) => (entry as InMemoryRow)[key] === expected);
+            }));
+        });
         return this;
     }
 
@@ -139,9 +163,9 @@ class InMemoryQuery {
         return new InMemoryMutation(this.table, insertedRows);
     }
 
-    public update(values: InMemoryRow): InMemoryMutation {
-        const updatedRows = this.getRows().map((row) => Object.assign(row, values));
-        return new InMemoryMutation(this.table, updatedRows);
+    public update(values: InMemoryRow): this {
+        this.updateValues = values;
+        return this;
     }
 
     public delete(): InMemoryMutation {
@@ -185,7 +209,11 @@ class InMemoryQuery {
             return 0;
         });
 
-        return rows.slice(this.rangeStart, this.rangeEnd === null ? undefined : this.rangeEnd + 1);
+        const selectedRows = rows.slice(this.rangeStart, this.rangeEnd === null ? undefined : this.rangeEnd + 1);
+        if (this.updateValues !== null) {
+            for (const row of selectedRows) Object.assign(row, this.updateValues);
+        }
+        return selectedRows;
     }
 }
 
@@ -205,7 +233,9 @@ class InMemoryMutation {
  * the public server endpoints and validation real without requiring a private
  * Supabase credential on a developer machine.
  */
-export function createInMemorySupabaseClient(): SupabaseClient {
+export function createInMemorySupabaseClient(
+    initialRows: Readonly<Record<string, readonly InMemoryRow[]>> = {},
+): SupabaseClient {
     const tables = new Map<string, InMemoryTable>();
 
     const getTable = (tableName: string): InMemoryTable => {
@@ -214,10 +244,15 @@ export function createInMemorySupabaseClient(): SupabaseClient {
             return existingTable;
         }
 
-        const table = new InMemoryTable();
+        const table = new InMemoryTable(tableName);
         tables.set(tableName, table);
         return table;
     };
+
+    for (const [tableName, rows] of Object.entries(initialRows)) {
+        const table = getTable(tableName);
+        for (const row of rows) table.insert(row);
+    }
 
     return {
         from: (tableName: string) => new InMemoryQuery(getTable(tableName)),
@@ -225,7 +260,65 @@ export function createInMemorySupabaseClient(): SupabaseClient {
     } as unknown as SupabaseClient;
 }
 
-let e2eInMemorySupabaseClient: SupabaseClient | null = null;
+const e2eStore = globalThis as typeof globalThis & { promptbookE2eSupabase?: SupabaseClient };
+
+const E2E_WORKSHOP_DEFAULTS = {
+    description: '',
+    is_published: true,
+    is_deleted: false,
+    youtube_video_id: null,
+    preview_youtube_video_id: null,
+    recording_start_offset_seconds: 0,
+    allowed_reactions: [],
+    disabled_panels: [],
+    created_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+};
+
+const E2E_PUBLIC_ROOMS: readonly InMemoryRow[] = [
+    ...COMMUNITY_IDS.map((id) => ({
+        ...E2E_WORKSHOP_DEFAULTS,
+        id: `e2e-community-${id}`,
+        slug: COMMUNITIES[id].roomSlug,
+        title: COMMUNITIES[id].name,
+        description: COMMUNITIES[id].description,
+        room_kind: 'community',
+        event_type: null,
+        location_kind: null,
+        price_czk: null,
+        starts_at: '2026-01-01T00:00:00Z',
+        ends_at: null,
+    })),
+    {
+        ...E2E_WORKSHOP_DEFAULTS,
+        id: 'e2e-shared-workshop',
+        slug: 'e2e-shared-workshop',
+        title: 'Společný workshop',
+        room_kind: 'workshop',
+        event_type: 'online-workshop',
+        location_kind: 'online',
+        location_label: '',
+        price_czk: 0,
+        maximum_participant_count: null,
+        starts_at: '2026-01-10T18:00:00Z',
+        ends_at: '2026-01-10T19:00:00Z',
+        community_slugs: COMMUNITY_IDS,
+    },
+];
+
+const E2E_MEMBER_ARTICLE: InMemoryRow = {
+    id: 'c48df326-fd53-4dc8-a281-60e50d097dcb',
+    language: 'cs',
+    slug: 'e2e-clensky-clanek',
+    title: 'Článek pro členy Vývojářů',
+    perex: 'Členský obsah pro ověření odděleného přístupu.',
+    markdown: 'Obsah dostupný až po vstupu do místnosti Vývojáři.',
+    author_id: 'pavol-hejny',
+    placements: [{ destination: 'vyvojari', visibility: 'members' }],
+    canonical_destination: 'vyvojari',
+    published_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+};
 
 /**
  * Return the isolated client only for the Playwright-owned test server.
@@ -235,6 +328,10 @@ export function getE2eInMemorySupabaseClientOrNull(): SupabaseClient | null {
         return null;
     }
 
-    e2eInMemorySupabaseClient ??= createInMemorySupabaseClient();
-    return e2eInMemorySupabaseClient;
+    // Next compiles handlers and server-rendered pages into separate module graphs.
+    e2eStore.promptbookE2eSupabase ??= createInMemorySupabaseClient({
+        workshops: E2E_PUBLIC_ROOMS,
+        managed_articles: [E2E_MEMBER_ARTICLE],
+    });
+    return e2eStore.promptbookE2eSupabase;
 }

@@ -1,5 +1,5 @@
-import { CZECH_COMMUNITY_INVITATION_COPY } from '@/businesses/community/communityContent';
-import { createCommunityRoomLink } from '@/businesses/community/config';
+import { CZECH_COMMUNITY_ENTRY_LABEL } from '@/businesses/community/communityContent';
+import { COMMUNITIES, DEFAULT_COMMUNITY_ID, createCommunityRoomLink, type CommunityId } from '@/businesses/community/config';
 import { WorkshopEventCard } from '@/components/workshops/WorkshopEventCard';
 import { createCalendarDayKey } from '@/lib/calendar/calendarMonth';
 import { createEventListings } from '@/lib/events/eventListing';
@@ -15,6 +15,7 @@ const WORKSHOP_LOCALE = 'cs-CZ';
 const WORKSHOP_TIME_ZONE = 'Europe/Prague';
 
 type WorkshopWrapUpNavigationProps = {
+    readonly communityIds?: readonly CommunityId[];
     readonly workshops: readonly WorkshopSummary[];
     readonly participantIdentity: WorkshopParticipantIdentity;
     readonly currentWorkshopSlug: string;
@@ -23,6 +24,7 @@ type WorkshopWrapUpNavigationProps = {
 
 /** Follow-up destinations use the same dates, prices, cards and identity hand-off as the community schedule. */
 export function WorkshopWrapUpNavigation({
+    communityIds = [DEFAULT_COMMUNITY_ID],
     workshops,
     participantIdentity,
     currentWorkshopSlug,
@@ -59,14 +61,22 @@ export function WorkshopWrapUpNavigation({
 
     return (
         <nav aria-label="Kam po workshopu" className="mt-6 space-y-5">
-            <Link
-                href={createCommunityRoomLink(participantIdentity)}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-room-accent/40 bg-room-accent/10 px-5 py-2.5 text-sm font-bold text-room-accent transition hover:border-room-accent/70 hover:bg-room-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent focus-visible:ring-offset-2 focus-visible:ring-offset-room-surface"
-            >
-                <Users className="h-4 w-4" aria-hidden="true" />
-                {CZECH_COMMUNITY_INVITATION_COPY.linkLabel}
-                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            {communityIds.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    {communityIds.map((id) => (
+                        <Link
+                            key={id}
+                            href={createCommunityRoomLink(participantIdentity, id)}
+                            aria-label={`${CZECH_COMMUNITY_ENTRY_LABEL} ${COMMUNITIES[id].name}`}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-room-accent/40 bg-room-accent/10 px-5 py-2.5 text-sm font-bold text-room-accent transition hover:border-room-accent/70 hover:bg-room-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-room-accent focus-visible:ring-offset-2 focus-visible:ring-offset-room-surface"
+                        >
+                            <Users className="h-4 w-4" aria-hidden="true" />
+                            {COMMUNITIES[id].name}
+                            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                    ))}
+                </div>
+            )}
             <div className={`grid gap-4 ${recommendations.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                 {recommendations.map(({ label, listing, emptyMessage }) => (
                     <div key={label} className="min-w-0">
