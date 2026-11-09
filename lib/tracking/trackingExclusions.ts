@@ -1,9 +1,10 @@
 import { COMMUNITIES, COMMUNITY_IDS } from '@/businesses/community/config';
+import { isPromptbookBillingPagePath } from '@/businesses/new/siteConfig';
 import { ONLINE_WORKSHOP_PARTICIPANT_PATH } from '@/businesses/online-workshop/config';
 import { STORY_ROOM_API_PATH, STORY_ROOM_PATH } from '@/lib/workshops/storyRoomPaths';
 
 const TRACKING_EXCLUDED_PATH_PREFIXES = [
-    '/admin', '/messages', '/cs/pavol/messages', '/api/messages', STORY_ROOM_PATH, STORY_ROOM_API_PATH,
+    '/admin', '/messages', '/cs/pavol/messages', '/api/messages', '/api/promptbook-billing', STORY_ROOM_PATH, STORY_ROOM_API_PATH,
 ] as const;
 const SENSITIVE_TRACKING_QUERY_PARAMETERS = ['email', 'fullname', 'token'] as const;
 
@@ -37,7 +38,8 @@ export function isThirdPartyTrackingAllowed(pathname: string): boolean {
  */
 export function isGoogleAnalyticsAllowed(pathname: string): boolean {
     return !/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(pathname) &&
-        !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES) && !isCommunityArticlePath(pathname);
+        !isPathExcluded(pathname, TRACKING_EXCLUDED_PATH_PREFIXES) && !isCommunityArticlePath(pathname) &&
+        !isPromptbookBillingPagePath(pathname);
 }
 
 export function isGoogleAnalyticsPageViewAllowed(pathname: string): boolean {
@@ -58,6 +60,10 @@ export function removeSensitiveTrackingParameters(url: string): string {
         if (/^\/[a-z0-9-]+-[A-Za-z0-9]{8}(?:\/opengraph-image)?\/?$/.test(parsedUrl.pathname)) parsedUrl.pathname = '/[unlisted]';
         parsedUrl.pathname = parsedUrl.pathname.replace(/(\/(?:cs\/pavol\/|api\/)?messages)\/[^/]+/g, '$1/[private]');
         if (isPathExcluded(parsedUrl.pathname, [STORY_ROOM_PATH])) parsedUrl.hash = '';
+        if (isPromptbookBillingPagePath(parsedUrl.pathname) || isPathExcluded(parsedUrl.pathname, ['/api/promptbook-billing'])) {
+            parsedUrl.search = '';
+            parsedUrl.hash = '';
+        }
         SENSITIVE_TRACKING_QUERY_PARAMETERS.forEach((parameterName) => parsedUrl.searchParams.delete(parameterName));
         return parsedUrl.toString();
     } catch {

@@ -21,9 +21,9 @@ export function PageIntro({title,children}:{title:string;children?:React.ReactNo
     const { t, locale, path } = useSiteLocale();
 return <header className={s.pageIntro}><Link className={s.breadcrumb} href={path()}>{t("← Promptbook")}</Link><h1>{t(title)}</h1>{children && <p>{t(children)}</p>}</header>;}
 
-export function PricingPage() {
+export function PricingPage({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
     const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t('Ceník')}>{locale === 'en' ? 'Compare self-installation, subscriptions per engine project and a custom offer for your team.' : 'Porovnejte vlastní instalaci, předplatné za projekt enginu a nabídku na míru pro Váš tým.'}</PageIntro><PricingCards full/><div className={s.prose}>
+return <><PageIntro title={t('Ceník')}>{locale === 'en' ? 'Compare self-installation, subscriptions per engine project and a custom offer for your team.' : 'Porovnejte vlastní instalaci, předplatné za projekt enginu a nabídku na míru pro Váš tým.'}</PageIntro><PricingCards full checkoutEnabled={checkoutEnabled}/><div className={s.prose}>
     <h2>{t("Jak se plány účtují")}</h2><p>{t("Start i Business jsou průběžná měsíční předplatná za projekt enginu. Oba podporují pravidelné spouštění i nepřetržitý provoz a lze je používat dlouhodobě. Další obnovení lze zrušit před začátkem dalšího fakturačního období. Start má podporu výrobce bez garantované reakce; Business první věcné posouzení do 16 pracovních hodin.")}</p>
     <h3>{t("Co je jeden projekt?")}</h3><p>{t(COMMERCIAL_TERMS.instance)}</p>
     <h2>{t("Jak počítáme kapacitu")}</h2>

@@ -13,6 +13,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   add-ons within the original 24 months. Public copy, legal terms and calculator scope follow
   `specs/new-commercial-offer.md`; this website does not implement engine metering or billing.
 
+- Czech Start and Business online billing opens only after its deployment configuration is enabled. It uses
+  hosted Stripe Checkout, verified Czech or Slovak business identities, private order and invoice records,
+  versioned accepted terms and a separate Promptbook portal configuration. Existing community purchases and
+  English enquiries use their own flows. Discount administration shares one code registry. Promptbook scopes
+  require explicit selection and an atomic reservation that freezes the terms for each Stripe session. The
+  member area confirms paid periods from verified Stripe events and optional onboarding comes after checkout.
+  See `docs/promptbook-billing.md` for activation, testing, invoices and VAT changes.
+
 - The owner's latest 3 November 2026 instruction publishes current legal texts at `/cs/legal/*` and
   `/en/legal/*`, with dated versions, canonical metadata, indexable sitemap entries and legacy redirects.
   Public documents, metadata, link labels and release-support policy have no discussion-draft status.

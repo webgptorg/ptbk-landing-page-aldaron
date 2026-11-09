@@ -31,7 +31,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     const isBrandedSite = publicDomainRoute !== undefined;
     const marketingLanguage = requestHeaders.get('x-promptbook-page-language');
     const isPrivatePage = requestHeaders.get('x-promptbook-private-message') === '1'
-        || requestHeaders.get('x-promptbook-private-story') === '1';
+        || requestHeaders.get('x-promptbook-private-story') === '1'
+        || requestHeaders.get('x-promptbook-private-billing') === '1';
 
     return (
         <html lang={publicDomainRoute?.notFound.language ?? (marketingLanguage === 'cs' ? 'cs' : 'en')} suppressHydrationWarning>

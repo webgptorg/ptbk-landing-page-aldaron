@@ -194,11 +194,26 @@ describe('domain middleware', () => {
     });
 
     it.each(['https://ptbk.io', 'https://www.ptbk.io'])('keeps explicit marketing language URLs at %s stable', async origin => {
-        for (const path of ['/cs', '/en', '/cs/cenik', '/cs/agendy/email', '/en/agendy/email', '/cs/partnership', '/en/partnership', '/cs/open-source', '/en/open-source', '/opengraph-image', '/en/opengraph-image']) {
+        for (const path of ['/cs', '/en', '/cs/pricing', '/en/pricing', '/cs/agendy/email', '/en/agendy/email', '/cs/partnership', '/en/partnership', '/cs/open-source', '/en/open-source', '/opengraph-image', '/en/opengraph-image']) {
             const response = await middleware(createRequest(`${origin}${path}?volume=47`, { 'accept-language': 'en-US' }));
             expect(response.headers.get('location')).toBeNull();
             expect(response.headers.get('x-middleware-rewrite')).toBeNull();
             expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe(path.startsWith('/en') ? 'en' : 'cs');
+        }
+    });
+
+    it('redirects the legacy pricing alias and keeps checkout and members responses private', async () => {
+        const legacy = await middleware(createRequest('https://www.ptbk.io/cs/cenik?volume=47'));
+        expect(legacy.status).toBe(308);
+        expect(legacy.headers.get('location')).toBe('https://www.ptbk.io/cs/pricing?volume=47');
+
+        for (const path of ['/cs/pricing/objednat/start?code=example', '/cs/pricing/predplatne']) {
+            const response = await middleware(createRequest(`https://www.ptbk.io${path}`, { 'accept-language': 'en-US' }));
+            expect(response.headers.get('location')).toBeNull();
+            expect(response.headers.get('x-middleware-request-x-promptbook-page-language')).toBe('cs');
+            expect(response.headers.get('x-middleware-request-x-promptbook-private-billing')).toBe('1');
+            expect(response.headers.get('cache-control')).toBe('private, no-store');
+            expect(response.headers.get('referrer-policy')).toBe('no-referrer');
         }
     });
 

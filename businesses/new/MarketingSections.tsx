@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { LeadButton } from './LeadCapture';
 import { formatCurrency, licencePrice } from './localization';
 import { COMMERCIAL_TERMS } from './commercialTerms';
-import { sitePath } from './siteConfig';
 import s from './site.module.css';
 import pricing from './pricing.module.css';
 
@@ -17,9 +16,10 @@ export function SecuritySection() {
 }
 
 /** The landing pages show the two subscriptions. The full pricing page also covers self-installation and custom offers. */
-export function PricingCards({ full = false }: { full?: boolean }) {
+export function PricingCards({ full = false, checkoutEnabled = false }: { full?: boolean; checkoutEnabled?: boolean }) {
     const { t, locale, path } = useSiteLocale();
     const en = locale === 'en';
+    const canCheckOut = !en && checkoutEnabled;
     const start = COMMERCIAL_TERMS.startCapacity;
     const business = COMMERCIAL_TERMS.businessCapacity;
     const addons = COMMERCIAL_TERMS.businessAddonsCzk;
@@ -40,7 +40,9 @@ export function PricingCards({ full = false }: { full?: boolean }) {
             ],
             support: en ? 'Manufacturer support without a guaranteed response time' : 'Podpora výrobce bez garantované reakce',
             note: en ? 'No annual commitment. More capacity by upgrading to Business.' : 'Bez ročního závazku. Další kapacita přechodem na Business.',
-            action: <LeadButton secondary className={pricing.action} topic={`Start · ${licencePrice('start', locale)} / ${t('měsíc')}`}>{t('Začít se Startem')}</LeadButton>,
+            action: canCheckOut
+                ? <CheckoutLink plan="start" />
+                : <LeadButton secondary className={pricing.action} topic={`Start · ${licencePrice('start', locale)} / ${t('měsíc')}`}>{t('Začít se Startem')}</LeadButton>,
         },
         {
             id: 'business' as const,
@@ -58,7 +60,9 @@ export function PricingCards({ full = false }: { full?: boolean }) {
             ],
             support: en ? `First substantive response within ${COMMERCIAL_TERMS.responseWorkingHours} working hours` : `První věcná reakce do ${COMMERCIAL_TERMS.responseWorkingHours} pracovních hodin`,
             note: en ? 'No annual commitment. Extra capacity requires your prior approval.' : 'Bez ročního závazku. Rozšíření jen s Vaším předchozím souhlasem.',
-            action: <LeadButton className={pricing.action} topic={t('Business — firemní provoz Promptbooku')}>{t('Probrat Business')}</LeadButton>,
+            action: canCheckOut
+                ? <CheckoutLink plan="business" />
+                : <LeadButton className={pricing.action} topic={t('Business — firemní provoz Promptbooku')}>{t('Probrat Business')}</LeadButton>,
         },
     ];
     const plans = full ? [
@@ -111,6 +115,7 @@ export function PricingCards({ full = false }: { full?: boolean }) {
         <div className={pricing.terms}>
             <p>{en ? 'Excluding VAT. AI, infrastructure and partner services are charged separately.' : 'Bez DPH. AI, infrastruktura a práce partnera se hradí zvlášť.'}</p>
             {!full && <Link href={path('pricing')}>{en ? 'Full pricing and terms' : 'Celý ceník a podmínky'}<ArrowRight size={15} aria-hidden="true"/></Link>}
+            {full && canCheckOut && <a href={path('pricing/predplatne')}>Spravovat předplatné<ArrowRight size={15} aria-hidden="true"/></a>}
         </div>
         {full && <div className={pricing.details}>
             <section className={pricing.detail} aria-labelledby="business-addons-title">
@@ -135,6 +140,15 @@ export function PricingCards({ full = false }: { full?: boolean }) {
             </section>
         </div>}
     </div>;
+}
+
+/** A full navigation unloads third-party scripts before any billing data is entered. */
+function CheckoutLink({ plan }: { readonly plan: 'start' | 'business' }) {
+    const { path } = useSiteLocale();
+    const isStart = plan === 'start';
+    return <a className={`${isStart ? s.secondaryButton : s.button} ${pricing.action}`} href={path(`pricing/objednat/${plan}`)}>
+        {isStart ? 'Začít se Startem' : 'Zvolit Business'}<ArrowRight size={17} aria-hidden="true" />
+    </a>;
 }
 
 export function AudienceSection() {

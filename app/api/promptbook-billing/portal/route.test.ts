@@ -103,7 +103,7 @@ describe('Promptbook subscription order access', () => {
 
         expect(response.status).toBe(200);
         const result = await response.json();
-        expect(result.memberships[0]).toMatchObject({ id: authorizedId, supportedVersion: '0.115.0-5' });
+        expect(result).toMatchObject({ memberships: [{ id: authorizedId, supportedVersion: '0.115.0-5' }] });
         expect(JSON.stringify(result)).not.toMatch(/cus_promptbook|customer@example\.com|Test company|cs_live_Licence/);
     });
 });

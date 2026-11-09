@@ -38,4 +38,16 @@ describe('sensitive page tracking exclusions', () => {
 
         expect(sanitizedUrl).toBe('https://promptbook.studio/admin?view=workshops');
     });
+
+    it('excludes checkout and member data without disabling public pricing analytics', () => {
+        const checkout = '/cs/pricing/objednat/start';
+        const members = '/cs/pricing/predplatne';
+        const paymentReturn = '/api/promptbook-billing/return';
+        for (const path of [checkout, members, paymentReturn]) {
+            expect(isThirdPartyTrackingAllowed(path)).toBe(false);
+            expect(removeSensitiveTrackingParameters(`https://www.ptbk.io${path}?code=internal&session_id=secret#registrace`))
+                .toBe(`https://www.ptbk.io${path}`);
+        }
+        expect(isThirdPartyTrackingAllowed('/cs/pricing')).toBe(true);
+    });
 });

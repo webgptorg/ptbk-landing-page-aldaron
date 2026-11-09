@@ -13,7 +13,7 @@ import { ORGANIZATION_DATA_BOX_ID, ORGANIZATION_LEGAL_NAME, ORGANIZATION_REGISTR
 import { LEGAL_CONTACT_EMAIL, PRIVACY_CONTACT_EMAIL } from '@/lib/legal/legalOperator';
 import { getLegalDocumentLinks } from '@/lib/legal/legalLinks';
 import { LeadButton, LeadCaptureProvider } from './LeadCapture';
-import { NEW_SITE_NAVIGATION } from './siteConfig';
+import { isPromptbookBillingPagePath, NEW_SITE_NAVIGATION } from './siteConfig';
 import { TechnologyIncubation } from './TechnologyIncubation';
 import { ENGINE_REPOSITORY } from './commercialTerms';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
@@ -75,7 +75,7 @@ function BrandLogo({ priority = false }: { priority?: boolean }) {
 function LanguageSwitch() {
     const pathname = usePathname();
     const { locale } = useSiteLocale();
-    if (pathname === COMMUNITIES_PATH) return null;
+    if (pathname === COMMUNITIES_PATH || isPromptbookBillingPagePath(pathname)) return null;
     return <nav className={s.languageSwitch} aria-label="Language / Jazyk">{(['cs', 'en'] as const).map(language => <Link key={language} href={localizedPath(pathname, language)} hrefLang={language} lang={language} aria-current={locale === language ? 'page' : undefined} onClick={event => {
         // Preserve the current calculation and anchor, including edits made via native history.
         event.preventDefault();

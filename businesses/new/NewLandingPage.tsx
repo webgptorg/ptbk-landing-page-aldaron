@@ -19,7 +19,7 @@ import b from './brand.module.css';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_INTRO } from '@/lib/promptbook-brand';
 
 /** One product story, adapted to people running agendas and partners delivering them. */
-export function NewLandingPage({ partnership = false, showTestimonials = true }: { partnership?: boolean; showTestimonials?: boolean }) {
+export function NewLandingPage({ partnership = false, showTestimonials = true, checkoutEnabled = false }: { partnership?: boolean; showTestimonials?: boolean; checkoutEnabled?: boolean }) {
     const { locale, path } = useSiteLocale();
     const en = locale === 'en';
     const intro = partnership
@@ -37,7 +37,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true }:
         {partnership && <PartnerOffer/>}
         <section className={b.pricing} id="cenik" aria-labelledby="pricing-heading">
             <h2 id="pricing-heading">{en ? 'Plans' : 'Ceník'}</h2>
-            <PricingCards/>
+            <PricingCards checkoutEnabled={checkoutEnabled}/>
         </section>
         <EconomicsCalculator initialMode={partnership ? 'partner' : 'company'}/>
         {partnership && <PartnerQuestions/>}

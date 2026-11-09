@@ -13,7 +13,7 @@ import {
 import { createPublicDomainNotFoundHtml } from './lib/domains/publicDomainNotFound';
 import { createPublicDomainRobotsText, createPublicDomainSitemapXml } from './lib/domains/publicDomainMetadata';
 import { getPreferredHomepageLanguage } from './lib/homepage-language';
-import { isNewSitePublicPath } from './businesses/new/siteConfig';
+import { isNewSitePublicPath, isPromptbookBillingPagePath } from './businesses/new/siteConfig';
 import { getPublicShortcodeLinkOnHostname } from './lib/shortener/shortcodeLinkMiddleware';
 import { SHORTCODE_LINK_HOST_HEADER } from './lib/shortener/shortcodeLinkDomains';
 import { STORY_ROOM_PATH } from './lib/workshops/storyRoomPaths';
@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set(SHORTCODE_LINK_HOST_HEADER, requestHostname);
     requestHeaders.set('x-promptbook-private-message', '0');
     requestHeaders.set('x-promptbook-private-story', '0');
+    requestHeaders.set('x-promptbook-private-billing', '0');
     const publicDomainRoute = getPublicDomainRouteByHostname(requestHostname);
 
     // A custom domain keeps its concise public path in the address bar while Next renders the existing nested route.
@@ -169,6 +170,16 @@ export async function middleware(request: NextRequest) {
     }
 
     const { pathname } = request.nextUrl;
+    if (isPromptbookBillingPagePath(pathname)) {
+        requestHeaders.set('x-promptbook-page-language', 'cs');
+        requestHeaders.set('x-promptbook-private-billing', '1');
+        const response = NextResponse.next({ request: { headers: requestHeaders } });
+        response.headers.set('Cache-Control', 'private, no-store');
+        response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        response.headers.set('Referrer-Policy', 'no-referrer');
+        return response;
+    }
+
     const legacyPricing = /^\/(?:cs\/|en\/)?cenik\/?$/.test(pathname);
     if (legacyPricing || isNewSitePublicPath(pathname)) {
         const explicitLanguage = /^\/(cs|en)(?:\/|$)/.exec(pathname)?.[1];
