@@ -154,7 +154,10 @@ export function CreateWorkshopForm({
                         </label>
                         <WorkshopEventFields
                             event={draft.event}
-                            onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, event }))}
+                            communityIds={draft.communityIds}
+                            onChange={(event, communityIds) =>
+                                setDraft((currentDraft) => ({ ...currentDraft, event, communityIds }))
+                            }
                         />
                     </fieldset>
                     <Button type="submit" size="sm" className="w-full" disabled={isSaving}>

@@ -1,3 +1,4 @@
+import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { loadPublicWebPagePreviewImage } from '@/lib/network/publicWebPagePreviewImage';
 import { PublicWebPagePreviewError, scrapePublicWebPagePreview } from '@/lib/network/publicWebPagePreview';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
@@ -57,6 +58,7 @@ async function loadAuthorizedMaterialTarget(
         materialId,
         kind,
         submittedUrl,
+        !isCommunityEmailVerificationRequired(request, authenticatedRequest.participant.email),
     );
     if (target.errorMessage !== null) {
         console.error('Failed to resolve an authorized workshop material preview:', target.errorMessage);

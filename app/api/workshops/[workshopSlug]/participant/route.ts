@@ -1,3 +1,4 @@
+import { writeCommunityArticleSessionCookie } from '@/lib/community-membership/communityArticleSessionCookie';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { getWorkshopInteractionBanResponseOrNull } from '@/lib/workshops/workshopParticipantInteraction';
@@ -91,6 +92,7 @@ export async function DELETE(request: NextRequest, context: WorkshopParticipantR
 
     const response = NextResponse.json({ isDisconnected: true });
     clearWorkshopSessionCookie(response, workshopSlug);
+    writeCommunityArticleSessionCookie(response, workshopSlug, null);
     response.headers.set('Cache-Control', 'no-store');
     return response;
 }

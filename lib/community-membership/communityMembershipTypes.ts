@@ -32,6 +32,7 @@ export type StoredCommunityMembershipStatus = (typeof STORED_COMMUNITY_MEMBERSHI
  *       and what to celebrate. Card details never reach this application at all; they are given to the gate directly.
  */
 export type CommunityMembershipRoomState = {
+    readonly requiresEmailVerification?: true;
     readonly status: CommunityMembershipStatus;
 
     /**

@@ -130,7 +130,7 @@ export function CommunityMembershipLivePreview({ preview }: CommunityMembershipL
     return (
         <figure
             className="relative mx-auto w-full max-w-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#071b27] p-3 shadow-2xl shadow-cyan-950/30 sm:p-5"
-            aria-label="Ukázka diskuze a reakcí v komunitě Promptbooku"
+            aria-label="Ukázka diskuze a reakcí v komunitě Vývojáři"
         >
             <div className="relative flex min-h-[410px] flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-gradient-to-b from-[#0d2a37] to-[#071923] p-4 sm:min-h-[450px] sm:p-6">
                 <WorkshopReactionStream reactions={flyingReactions} className="z-20" />
@@ -141,7 +141,7 @@ export function CommunityMembershipLivePreview({ preview }: CommunityMembershipL
                             <Code2 className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="font-semibold">Komunita Promptbooku</p>
+                            <p className="font-semibold">Vývojáři</p>
                             <p className="text-xs text-cyan-100/55">vývoj a práce s AI</p>
                         </div>
                     </div>

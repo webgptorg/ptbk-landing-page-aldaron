@@ -7,6 +7,7 @@ export type CommunityMembershipApiPaths = {
     readonly checkoutConfirmation: string;
     readonly cancellation: string;
     readonly portal: string;
+    readonly verification: string;
 };
 
 /**
@@ -25,5 +26,6 @@ export function createCommunityMembershipApiPaths(workshopSlug: string): Communi
         checkoutConfirmation: `${membershipPath}/checkout/confirmation`,
         cancellation: `${membershipPath}/cancellation`,
         portal: `${membershipPath}/portal`,
+        verification: `${membershipPath}/verification`,
     };
 }

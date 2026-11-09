@@ -7,11 +7,6 @@ export type WorkshopKindCapabilities = {
     /** Whether Book agents can take part in this room's chat. */
     readonly isAgentsOffered: boolean;
     /**
-     * Whether exactly one room of this kind exists, so nothing offers a choice between rooms or the creation of another
-     */
-    readonly isSingleton: boolean;
-
-    /**
      * Whether the URL of a room is decided once and for all, so its administration neither offers it nor lets an edit
      * disconnect the links leading to it
      */
@@ -93,14 +88,13 @@ export type WorkshopKindCapabilities = {
  * Every room kind together with what it is
  *
  * Note: A workshop occurrence is the live event this infrastructure was built for. The community reuses the very same
- *       secured room, but is one permanent, calm space rather than an occurrence which starts, streams, and ends.
+ *       secured room, as a permanent space without a scheduled stage.
  * Note: This is the one place a room kind is described. Every screen reads it, so a kind added later needs no change
  *       of the room, of its administration, or of the routes behind them.
  */
 const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, WorkshopKindCapabilities>> = {
     workshop: {
         isAgentsOffered: true,
-        isSingleton: false,
         isSlugFixed: false,
         isScheduled: true,
         isEvent: true,
@@ -116,7 +110,6 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
     },
     community: {
         isAgentsOffered: true,
-        isSingleton: true,
         isSlugFixed: true,
         isScheduled: false,
         isEvent: false,
@@ -132,7 +125,6 @@ const WORKSHOP_KIND_CAPABILITY_DEFINITIONS: Readonly<Record<WorkshopKind, Worksh
     },
     project: {
         isAgentsOffered: false,
-        isSingleton: false,
         isSlugFixed: true,
         isScheduled: false,
         isEvent: false,
@@ -177,6 +169,7 @@ const WORKSHOP_PRESENTATION_FIELD_NAMES = ['presentationUrl'] as const;
 const WORKSHOP_SLUG_FIELD_NAMES = ['slug'] as const;
 const WORKSHOP_EVENT_FIELD_NAMES = [
     'eventType',
+    'communityIds',
     'locationKind',
     'locationLabel',
     'priceCzk',
@@ -189,7 +182,7 @@ const WORKSHOP_EVENT_FIELD_NAMES = [
  *
  * Note: The administration already leaves these settings out of its form, so this only refuses a stale or a forged
  *       request which would give a calm room a schedule, a stage, a presentation, or a project that nothing in it
- *       could ever show, or move the only room of its kind to an address every link to it would miss.
+ *       could ever show, or move a permanent room away from its stable address.
  */
 export function getUnsupportedWorkshopKindFieldNames(
     workshopKind: WorkshopKind,

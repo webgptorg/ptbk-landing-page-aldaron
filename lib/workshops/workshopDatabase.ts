@@ -1,4 +1,8 @@
+import { getCommunityByRoomSlug, type CommunityId } from '@/businesses/community/config';
+import { COMMUNITY_WORKSHOP_SLUG } from '@/businesses/community/config';
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
+import { isCommunityEmailVerificationEnabled } from '@/lib/community-membership/communityMembershipIdentity';
+import { getPaidCommunityIdForRoom } from '@/lib/community-membership/communityMembershipScope';
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import { createEventDetailsOrNull } from '@/lib/events/event';
 import { isEventRegistrationGathered, type EventType } from '@/lib/events/eventTypes';
@@ -29,6 +33,7 @@ import {
     WORKSHOP_WATCHING_WINDOW_SECONDS,
 } from '@/lib/workshops/workshopConstants';
 import { getDisplayedWorkshopCommentUpvoteCount, sortWorkshopComments } from '@/lib/workshops/workshopCommentValues';
+import { getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
 import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { getWorkshopKindCapabilities, isWorkshopPollVisibleInRoom } from '@/lib/workshops/workshopKindCapabilities';
 import { materializeWorkshopMaterialShortLinks } from '@/lib/workshops/workshopMaterialLinks';
@@ -61,6 +66,7 @@ import type {
     WorkshopAdminSnapshot,
     WorkshopAdminSummary,
     WorkshopAdminTimelinePoint,
+    WorkshopAttachedAdminPoll,
     WorkshopComment,
     WorkshopCommentAuthor,
     WorkshopCommentReference,
@@ -128,6 +134,7 @@ export type WorkshopRow = {
     /** Kept only so old in-memory rows can still be mapped while the deployment migration is rolled out. */
     readonly deployment_url?: string | null;
     readonly is_published: boolean;
+    readonly community_slugs?: readonly CommunityId[];
 
     /** A removed occurrence remains stored together with its room history and shared-poll attachment. */
     readonly is_deleted: boolean;
@@ -174,6 +181,7 @@ type WorkshopSummaryRow = Pick<
     | 'starts_at'
     | 'ends_at'
     | 'is_published'
+    | 'community_slugs'
     | 'event_type'
     | 'location_kind'
     | 'location_label'
@@ -204,7 +212,7 @@ export type WorkshopEventCardRow = WorkshopSummaryRow &
  * describe the event it is a term of, without exposing its live room configuration.
  */
 export const WORKSHOP_SUMMARY_COLUMNS =
-    'id, room_kind, slug, title, description, starts_at, ends_at, is_published, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
+    'id, room_kind, slug, title, description, starts_at, ends_at, is_published, community_slugs, event_type, location_kind, location_label, price_czk, maximum_participant_count, external_url';
 
 const WORKSHOP_EVENT_CARD_COLUMNS = `${WORKSHOP_SUMMARY_COLUMNS}, youtube_video_id, video_source, recording_start_offset_seconds, github_repository, github_repository_branches, deployment_urls`;
 
@@ -405,6 +413,7 @@ type WorkshopReactionCountRow = {
 
 type WorkshopPollRow = {
     readonly id: string;
+    readonly workshop_id: string;
     readonly question: string;
     readonly is_closed: boolean;
     readonly is_visible: boolean;
@@ -413,7 +422,7 @@ type WorkshopPollRow = {
     readonly updated_at: string;
 };
 
-const WORKSHOP_POLL_COLUMNS = 'id, question, is_closed, is_visible, is_other_option_enabled, created_at, updated_at';
+const WORKSHOP_POLL_COLUMNS = 'id, workshop_id, question, is_closed, is_visible, is_other_option_enabled, created_at, updated_at';
 
 type WorkshopPollOptionRow = {
     readonly id: string;
@@ -567,6 +576,7 @@ export function mapWorkshopSummaryRow(row: WorkshopSummaryRow): WorkshopSummary 
         startsAt: row.starts_at,
         endsAt: row.ends_at,
         isPublished: row.is_published,
+        ...(row.room_kind === 'workshop' ? { communityIds: getWorkshopCommunityIds(row.community_slugs) } : {}),
         event: createEventDetailsOrNull({
             type: row.event_type,
             locationKind: row.location_kind,
@@ -1168,6 +1178,7 @@ async function findPublishedWorkshopRows<Row>(
     supabase: SupabaseClient,
     columns: string,
     eventType?: EventType,
+    communityId?: CommunityId,
 ): Promise<{ readonly rows: readonly Row[] | null; readonly errorMessage: string | null }> {
     return loadAllSupabaseRows<Row>(async (fromIndex, toIndex) => {
         const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
@@ -1181,9 +1192,14 @@ async function findPublishedWorkshopRows<Row>(
                 publishedWorkshopQuery = publishedWorkshopQuery.eq(WORKSHOP_IS_DELETED_COLUMN_NAME, false);
             }
 
-            return (
-                eventType === undefined ? publishedWorkshopQuery : publishedWorkshopQuery.eq('event_type', eventType)
-            )
+            if (eventType !== undefined) {
+                publishedWorkshopQuery = publishedWorkshopQuery.eq('event_type', eventType);
+            }
+            if (communityId !== undefined) {
+                publishedWorkshopQuery = publishedWorkshopQuery.contains('community_slugs', [communityId]);
+            }
+
+            return publishedWorkshopQuery
                 .order('starts_at', { ascending: false })
                 .order('id', { ascending: false })
                 .range(fromIndex, toIndex);
@@ -1196,8 +1212,7 @@ async function findPublishedWorkshopRows<Row>(
 }
 
 /**
- * Lists every published term for the persistent community room, or every published term of one kind of event when a
- * kind is named. Drafts stay private, while past terms stay available as useful community history.
+ * Lists published terms, optionally limited to one event kind or a community's assignments.
  *
  * Note: The very same query answers both questions, so a page which lists the terms of one event and a page which
  *       lists all of them can never disagree about which terms are published.
@@ -1205,11 +1220,13 @@ async function findPublishedWorkshopRows<Row>(
 export async function findPublishedWorkshops(
     supabase: SupabaseClient,
     eventType?: EventType,
+    communityId?: CommunityId,
 ): Promise<readonly WorkshopSummaryRow[]> {
     const { rows, errorMessage } = await findPublishedWorkshopRows<WorkshopSummaryRow>(
         supabase,
         WORKSHOP_SUMMARY_COLUMNS,
         eventType,
+        communityId,
     );
 
     if (rows === null) {
@@ -1226,10 +1243,13 @@ export async function findPublishedWorkshops(
  */
 export async function findPublishedWorkshopEventCardRows(
     supabase: SupabaseClient,
+    communityId?: CommunityId,
 ): Promise<readonly WorkshopEventCardRow[]> {
     const { rows, errorMessage } = await findPublishedWorkshopRows<WorkshopEventCardRow>(
         supabase,
         WORKSHOP_EVENT_CARD_COLUMNS,
+        undefined,
+        communityId,
     );
 
     if (rows === null) {
@@ -1241,15 +1261,18 @@ export async function findPublishedWorkshopEventCardRows(
 }
 
 /**
- * Resolves the one community room. The database allows at most one such row, so `maybeSingle` turns an absent
- * configuration into an ordinary unavailable public page instead of picking an arbitrary room.
+ * Resolves a published permanent room by its stable internal slug.
  */
-export async function findPublishedCommunity(supabase: SupabaseClient): Promise<WorkshopRow | null> {
+export async function findPublishedCommunity(
+    supabase: SupabaseClient,
+    roomSlug: string = COMMUNITY_WORKSHOP_SLUG,
+): Promise<WorkshopRow | null> {
     const { data, error } = await loadWorkshopQueryWithActiveStatus(supabase, (isActiveStatusFilterEnabled) => {
         let workshopQuery = supabase
             .from(WORKSHOP_TABLE_NAME)
             .select('*')
             .eq('room_kind', 'community')
+            .eq('slug', roomSlug)
             .eq('is_published', true);
 
         if (isActiveStatusFilterEnabled) {
@@ -1810,7 +1833,7 @@ export async function loadWorkshopAdminPolls(
 export async function loadWorkshopAttachedAdminPolls(
     supabase: SupabaseClient,
     workshopRow: WorkshopRow,
-): Promise<LoadedWorkshopPolls<WorkshopAdminPoll>> {
+): Promise<LoadedWorkshopPolls<WorkshopAttachedAdminPoll>> {
     if (!getWorkshopKindCapabilities(workshopRow.room_kind).isAttachedCommunityPollsShown) {
         return { polls: [], errorMessage: null };
     }
@@ -1825,8 +1848,31 @@ export async function loadWorkshopAttachedAdminPolls(
         return { polls: [], errorMessage };
     }
 
+    if (loadedPollRows.pollRows.length === 0) {
+        return { polls: [], errorMessage: null };
+    }
+
+    const { data: owners, error: ownerError } = await supabase
+        .from(WORKSHOP_TABLE_NAME)
+        .select('id, slug')
+        .in('id', Array.from(new Set(loadedPollRows.pollRows.map((poll) => poll.workshop_id))))
+        .eq('room_kind', 'community');
+    if (ownerError) {
+        return { polls: [], errorMessage: ownerError.message };
+    }
+
+    const ownerCommunityIds = new Map(
+        (owners ?? []).map((owner) => [owner.id, getCommunityByRoomSlug(owner.slug)?.id ?? null]),
+    );
+    const pollCommunityIds = new Map(
+        loadedPollRows.pollRows.map((poll) => [poll.id, ownerCommunityIds.get(poll.workshop_id) ?? null]),
+    );
+
     return {
-        polls: mapLoadedWorkshopPolls(loadedPollRows, mapWorkshopAdminPollOptionRow),
+        polls: mapLoadedWorkshopPolls(loadedPollRows, mapWorkshopAdminPollOptionRow).map((poll) => ({
+            ...poll,
+            communityId: pollCommunityIds.get(poll.id) ?? null,
+        })),
         errorMessage: null,
     };
 }
@@ -2481,6 +2527,7 @@ export async function loadWorkshopPublicState(
     workshopRow: WorkshopRow,
     participant: WorkshopParticipant,
     commentSort: WorkshopCommentSort,
+    canReadPaidMembership = !isCommunityEmailVerificationEnabled(),
 ): Promise<LoadedWorkshopPublicState> {
     const contentVisibilityCutoff = new Date().toISOString();
     const workshop = mapWorkshopRow(workshopRow);
@@ -2500,11 +2547,14 @@ export async function loadWorkshopPublicState(
     // Note: The membership decides which materials a member sees, so the room asks about it before it assembles what
     //       is visible. A room which does not offer the membership has nothing to unlock, and an answer which does
     //       not arrive keeps the paid materials hidden rather than letting them escape.
+    const paidCommunityId = getPaidCommunityIdForRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
+    const isMembershipOffered = paidCommunityId !== null;
     let isPaidMember = false;
-    if (roomCapabilities.isMembershipOffered) {
+    if (paidCommunityId !== null && canReadPaidMembership) {
         const { membership, errorMessage: membershipErrorMessage } = await loadCommunityMembershipByEmail(
             supabase,
             participant.email,
+            paidCommunityId,
         );
         if (membershipErrorMessage !== null) {
             console.error('Failed to load the community membership of a workshop participant:', membershipErrorMessage);
@@ -2641,7 +2691,7 @@ export async function loadWorkshopPublicState(
     // because nothing of it but its title is going to leave the server.
     const { readableContentBlocks, paidMembersOnlyContentPreviews } = selectWorkshopContentForMember(rawContentBlocks, {
         isPaidMember,
-        isMembershipOffered: roomCapabilities.isMembershipOffered,
+        isMembershipOffered,
     });
     // The recording of an ended workshop is decided here for the very same reason: a member who has not unlocked it
     // receives the teaser published for it instead of the stream, rather than the room merely not playing what it
@@ -2652,7 +2702,7 @@ export async function loadWorkshopPublicState(
         isWorkshopPast,
         isWorkshopUpcoming: workshopRow.room_kind === 'workshop' && workshopPhase !== 'ongoing' && !isWorkshopPast,
         isPaidMember,
-        isMembershipOffered: roomCapabilities.isMembershipOffered,
+        isMembershipOffered,
     });
     const materializedContentResults = await Promise.all(
         readableContentBlocks.map(async (contentBlock) => ({

@@ -1,21 +1,17 @@
 'use client';
 
+import { COMMUNITIES, COMMUNITY_ADMIN_PATH } from '@/businesses/community/config';
 import { Button } from '@/components/ui/button';
 import {
     getWorkshopPollOptionVotePercentage,
     getWorkshopPollVoteCount,
 } from '@/lib/workshops/workshopPollValues';
-import type { WorkshopAdminPoll } from '@/lib/workshops/workshopTypes';
+import type { WorkshopAttachedAdminPoll } from '@/lib/workshops/workshopTypes';
 import { ArrowUpRight, Vote } from 'lucide-react';
 import Link from 'next/link';
 
 type WorkshopAttachedPollListProps = {
-    readonly polls: readonly WorkshopAdminPoll[];
-
-    /**
-     * Where the polls are administered, which is the administration of the community owning them.
-     */
-    readonly pollAdministrationPath?: string;
+    readonly polls: readonly WorkshopAttachedAdminPoll[];
 };
 
 /**
@@ -25,7 +21,7 @@ type WorkshopAttachedPollListProps = {
  *       and its lifecycle stay editable in exactly one place while its aggregate includes the e-mail-shared votes
  *       cast in this occurrence too.
  */
-export function WorkshopAttachedPollList({ polls, pollAdministrationPath }: WorkshopAttachedPollListProps) {
+export function WorkshopAttachedPollList({ polls }: WorkshopAttachedPollListProps) {
     return (
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -38,21 +34,25 @@ export function WorkshopAttachedPollList({ polls, pollAdministrationPath }: Work
                         průběžných výsledků společných pro komunitu a připojené workshopy.
                     </p>
                 </div>
-                {pollAdministrationPath !== undefined && (
-                    <Button asChild variant="outline" size="sm">
-                        <Link href={pollAdministrationPath}>
-                            Spravovat v komunitě <ArrowUpRight className="ml-1.5 h-4 w-4" />
-                        </Link>
-                    </Button>
-                )}
             </div>
 
             <div className="mt-6 space-y-3">
                 {polls.map((poll) => {
                     const totalVoteCount = getWorkshopPollVoteCount(poll);
+                    const community = poll.communityId ? COMMUNITIES[poll.communityId] : null;
                     return (
                         <article key={poll.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <h3 className="font-semibold text-slate-950">{poll.question}</h3>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <h3 className="font-semibold text-slate-950">{poll.question}</h3>
+                                {community && (
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link href={`${COMMUNITY_ADMIN_PATH}?community=${community.id}&tab=polls`}>
+                                            Správa ankety · {community.name}
+                                            <ArrowUpRight className="ml-1.5 h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                )}
+                            </div>
                             <p className="mt-1 text-xs text-slate-500">
                                 {totalVoteCount} hlasů · {poll.isClosed ? 'Hlasování ukončeno' : 'Hlasování probíhá'} ·{' '}
                                 {poll.isVisible ? 'Viditelná pro členy' : 'Skrytá před členy'}

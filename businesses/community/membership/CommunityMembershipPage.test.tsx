@@ -85,7 +85,7 @@ describe('community membership page', () => {
             />,
         );
 
-        expect(screen.getByText('Promptbook > Komunita')).toBeTruthy();
+        expect(screen.getByText('Promptbook > Vývojáři')).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Pavol Hejný, živé webináře máte zdarma.' })).toBeTruthy();
         expect(screen.getByText('Komunita zdarma')).toBeTruthy();
         expect(screen.getAllByText('Placené členství').length).toBeGreaterThan(0);

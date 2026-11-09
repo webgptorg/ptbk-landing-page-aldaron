@@ -100,6 +100,25 @@ describe('saving workshop commit ranges', () => {
     });
 });
 
+describe('saving community publication', () => {
+    it.each([
+        ['ai-supervize-mini', ['vyvojari'], { communityIds: ['promptbook'] }],
+        ['online-workshop', ['vyvojari', 'promptbook'], { eventType: 'ai-supervize-mini' }],
+    ])('validates partial edits against the stored event type and assignments', async (eventType, communityIds, patch) => {
+        const update = vi.fn();
+        getUnauthorizedResponseOrNullMock.mockReturnValue(null);
+        getWorkshopDatabaseOrNullMock.mockReturnValue({ from: () => ({ update }) });
+        findWorkshopByIdMock.mockResolvedValue({ ...WORKSHOP_ROW, event_type: eventType, community_slugs: communityIds });
+        const request = new NextRequest(`https://example.com/api/admin/workshops/${WORKSHOP_ID}`, {
+            method: 'PATCH',
+            body: JSON.stringify(patch),
+        });
+
+        expect((await PATCH(request, ROUTE_CONTEXT)).status).toBe(400);
+        expect(update).not.toHaveBeenCalled();
+    });
+});
+
 describe('admin workshop deletion', () => {
     beforeEach(() => {
         broadcastWorkshopEventMock.mockReset();

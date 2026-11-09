@@ -1,5 +1,8 @@
+import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
+import { writeCommunityArticleSessionCookie } from '@/lib/community-membership/communityArticleSessionCookie';
 import { loadWorkshopPublicState } from '@/lib/workshops/workshopDatabase';
 import { getAuthenticatedWorkshopRequest, isAuthenticatedWorkshopRequest } from '@/lib/workshops/workshopRequest';
+import { readWorkshopSessionToken } from '@/lib/workshops/workshopSession';
 import type { WorkshopCommentSort } from '@/lib/workshops/workshopTypes';
 import { NextRequest, NextResponse } from 'next/server';
 import { scheduleWorkshopAgentWork } from '@/lib/workshops/agents/scheduleWorkshopAgentWork';
@@ -24,6 +27,7 @@ export async function GET(request: NextRequest, context: WorkshopStateRouteConte
         authenticatedRequest.workshopRow,
         authenticatedRequest.participant,
         commentSort,
+        !isCommunityEmailVerificationRequired(request, authenticatedRequest.participant.email),
     );
 
     if (state === null) {
@@ -32,5 +36,9 @@ export async function GET(request: NextRequest, context: WorkshopStateRouteConte
     }
 
     scheduleWorkshopAgentWork(authenticatedRequest.workshopRow.id);
-    return NextResponse.json(state, { headers: { 'Cache-Control': 'no-store' } });
+    const response = NextResponse.json(state, { headers: { 'Cache-Control': 'no-store' } });
+    if (authenticatedRequest.workshopRow.room_kind === 'community') {
+        writeCommunityArticleSessionCookie(response, workshopSlug, readWorkshopSessionToken(request, workshopSlug));
+    }
+    return response;
 }

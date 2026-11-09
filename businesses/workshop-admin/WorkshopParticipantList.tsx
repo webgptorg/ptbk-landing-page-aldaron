@@ -5,6 +5,7 @@ import {
     fetchAdminWorkshopParticipantTimeline,
 } from '@/businesses/workshop-admin/workshopAdminApiClient';
 import { CommunityMembershipStatusBadge } from '@/businesses/community/membership/CommunityMembershipStatusBadge';
+import { COMMUNITIES, COMMUNITY_IDS, type CommunityId } from '@/businesses/community/config';
 import {
     formatWorkshopPresenceDuration,
     formatWorkshopAdminDateTime,
@@ -62,11 +63,7 @@ type WorkshopParticipantListProps = {
     readonly workshopEndsAt: string | null;
     readonly refreshVersion: number;
 
-    /**
-     * The permanent community is the only room whose participants can be joined to a paid membership. Workshop
-     * occurrences keep their established, payment-free participant table.
-     */
-    readonly isCommunityMembershipStatusShown?: boolean;
+    readonly communityId?: CommunityId;
     readonly onChangeInteractionBan: (participantId: string, isInteractionBanned: boolean) => Promise<void>;
     readonly onChangeTrusted: (participantId: string, isTrusted: boolean) => Promise<void>;
 
@@ -90,12 +87,13 @@ export function WorkshopParticipantList({
     workshopStartsAt,
     workshopEndsAt,
     refreshVersion,
-    isCommunityMembershipStatusShown = false,
+    communityId,
     onChangeInteractionBan,
     onChangeTrusted,
     onChangeModerator,
     onDelete,
 }: WorkshopParticipantListProps) {
+    const isCommunityMembershipStatusShown = communityId !== undefined && COMMUNITIES[communityId].hasPaidMembership;
     const searchParams = useSearchParams();
     const selectedCommunityMemberEmail = useMemo(
         () => readCommunityMembershipAdminMemberEmail(new URLSearchParams(searchParams.toString())),
@@ -105,7 +103,7 @@ export function WorkshopParticipantList({
         () => ({
             ...DEFAULT_WORKSHOP_ADMIN_PARTICIPANT_QUERY,
             searchQuery:
-                isCommunityMembershipStatusShown && selectedCommunityMemberEmail !== null
+                communityId !== undefined && selectedCommunityMemberEmail !== null
                     ? selectedCommunityMemberEmail
                     : '',
         }),
@@ -192,7 +190,7 @@ export function WorkshopParticipantList({
 
     useEffect(() => {
         if (
-            !isCommunityMembershipStatusShown ||
+            communityId === undefined ||
             selectedCommunityMemberEmail === null ||
             selectedCommunityMemberEmail === handledCommunityMemberEmailReference.current
         ) {
@@ -205,7 +203,7 @@ export function WorkshopParticipantList({
             searchQuery: selectedCommunityMemberEmail,
             page: 1,
         }));
-    }, [isCommunityMembershipStatusShown, selectedCommunityMemberEmail]);
+    }, [communityId, selectedCommunityMemberEmail]);
 
     const changeParticipantQuery = (changes: Partial<WorkshopAdminParticipantQuery>) => {
         setParticipantQuery((currentQuery) => ({
@@ -299,7 +297,7 @@ export function WorkshopParticipantList({
                         </span>
                         {isCommunityMembershipStatusShown && (
                             <Button asChild type="button" variant="outline" size="sm">
-                                <Link href={createCommunityMembershipAdminPath('memberships')}>
+                                <Link href={createCommunityMembershipAdminPath('memberships', undefined, communityId)}>
                                     <Crown className="mr-1.5 h-4 w-4" /> Placená členství
                                 </Link>
                             </Button>
@@ -379,6 +377,7 @@ export function WorkshopParticipantList({
                                                         href={createCommunityMembershipAdminPath(
                                                             'memberships',
                                                             participant.email,
+                                                            communityId,
                                                         )}
                                                         className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2"
                                                         aria-label={`Otevřít placené členství uživatele ${participant.fullname}`}
@@ -395,6 +394,19 @@ export function WorkshopParticipantList({
                                                     isContactRecordsIncluded
                                                     isWorkshopParticipationsIncluded={false}
                                                 />
+                                                {(participant.participatingCommunityIds?.length ?? 0) > 0 && (
+                                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                                        {COMMUNITY_IDS.filter((id) => participant.participatingCommunityIds?.includes(id)).map((id) => (
+                                                            <Link
+                                                                key={id}
+                                                                href={createCommunityMembershipAdminPath('participants', participant.email, id)}
+                                                                className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-cyan-800 hover:underline"
+                                                            >
+                                                                {COMMUNITIES[id].name}
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell className="min-w-56 align-top text-xs text-slate-600">
                                                 <p>Od {formatWorkshopAdminDateTime(participant.connectedAt)}</p>

@@ -1,3 +1,4 @@
+import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { loadPublicWebPagePreviewImage } from '@/lib/network/publicWebPagePreviewImage';
 import { createPublicShortcodeLinkUrl } from '@/lib/shortener/shortcodeLink';
@@ -28,7 +29,9 @@ export async function POST(request: NextRequest, context: { readonly params: Pro
         return NextResponse.json({ error: 'Shrnutí bude dostupné po skončení workshopu.' }, { status: 409 });
     }
 
-    const { state } = await loadWorkshopPublicState(supabase, workshopRow, participant, 'recent');
+    const { state } = await loadWorkshopPublicState(
+        supabase, workshopRow, participant, 'recent', !isCommunityEmailVerificationRequired(request, participant.email),
+    );
     if (state === null) {
         return NextResponse.json({ error: 'Shrnutí se nepodařilo načíst.' }, { status: 500 });
     }

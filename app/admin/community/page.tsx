@@ -10,9 +10,7 @@ type AdminCommunityPageProps = {
 };
 
 /**
- * Administration of the one persistent community. The reusable dashboard is restricted to the `community` room kind,
- * so workshop occurrences cannot be edited accidentally from this route, and the kind itself takes away what a single
- * permanent room does not have: a choice between rooms, the creation of a second one, and an editable URL.
+ * Administration of the configured permanent community rooms.
  */
 export default async function AdminCommunityPage({ searchParams }: AdminCommunityPageProps) {
     const resolvedSearchParams = await searchParams;

@@ -21,7 +21,7 @@ export const COMMUNITY_MEMBERSHIP_PAGE_DEFINITION: PageMetadataDefinition = {
         `Živě se připojíte zdarma. Členství za ${CURRENT_PAID_MEMBERSHIP_PRICE_LABEL} měsíčně odemkne záznamy, archiv, materiály a přednostní dotazy.`,
     socialDescription:
         `Živé AI webináře jsou zdarma. Za ${CURRENT_PAID_MEMBERSHIP_PRICE_LABEL} měsíčně získáte záznamy, archiv, materiály a přednostní dotazy.`,
-    socialPreviewImageAlt: `Členství Promptbooku: záznamy a materiály za ${CURRENT_PAID_MEMBERSHIP_PRICE_LABEL} měsíčně.`,
+    socialPreviewImageAlt: `Členství v komunitě Vývojáři: záznamy a materiály za ${CURRENT_PAID_MEMBERSHIP_PRICE_LABEL} měsíčně.`,
     isSocialPreviewImageGenerated: true,
     sitemapPriority: 0.7,
     sitemapChangeFrequency: 'monthly',
@@ -36,7 +36,7 @@ export const COMMUNITY_MEMBERSHIP_METADATA: Metadata = {
 export const COMMUNITY_MEMBERSHIP_SOCIAL_PREVIEW_OPTIONS = createSocialPreviewOptions(
     COMMUNITY_MEMBERSHIP_PAGE_DEFINITION,
     {
-        eyebrow: 'Komunita Promptbooku',
+        eyebrow: 'Vývojáři',
         artwork: 'community',
         paletteSeed: {
             backgroundStart: '#061923',

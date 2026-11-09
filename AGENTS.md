@@ -145,11 +145,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Other event miniapps can use the event type registry and the same workshop entry/moderation endpoints.
 
 - Git-backed articles live in `articles/<variant-id>/`: authored Markdown and YAML, a passive JSON provenance manifest,
-  committed PDF, and separately prepared audio assets. Promptbook lists all authors by language at `/cs/articles` and
-  `/en/articles`; Pavol's personal domains publish only his matching-language variants at `/articles`. Canonicals use
-  the author's language-specific domain. Missing translations are never invented. Article text is server-rendered
-  under the existing host-sensitive shell. Four `articles/podcast.xml` routes are deterministic static build outputs;
-  only reviewed, existing audio becomes an episode. ElevenLabs and manifest auditing are explicit editorial commands
+  committed PDF, and separately prepared audio assets. They retain their original placements, canonical URLs and
+  feed GUIDs. Missing translations are never invented. An admin placement overlay can also publish a Git article
+  in either community and select its canonical URL while preserving both original blog links. New articles are edited
+  in `/admin/articles` with one source, author, independent publication destinations and one selected canonical. Both language versions of the Promptbook
+  and Pavol blogs can publish any registered author's articles. Community publication is independent and can use a
+  community room session or a verified paid entitlement. A publicly released full-text article cannot simultaneously
+  have restricted placements. Drafts and restricted placements stay out of public indexing and feeds.
+  The four `articles/podcast.xml` routes still have deterministic initial prerenders and refresh hourly for admin
+  publications. Only reviewed, existing audio becomes an episode. Managed audio, PDF, timing and subtitles use
+  immutable uploads to the private shared object bucket and are served from checked publication routes, with byte
+  ranges for streaming and no public storage URLs. Text edits invalidate stale media and replacing audio invalidates
+  old timing and subtitles. ElevenLabs and manifest auditing are explicit editorial commands
   in `scripts/articles`, never build hooks. The root audio provider owns one persistent media element, local per-track
   history, paused refresh restoration and Media Session. AI ta Krajta retains its original visible controls; article
   and personal-podcast controls offer source navigation in the same place as the follow-text toggle. Follow text
@@ -166,12 +173,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   separately computed acoustic CTC word alignment of the final MP3. Its reviewed map covers title (`t…`), perex
   (`p…`) and body (`w…`) without renumbering body words. Cue intervals are never subdivided into guessed timings.
   A restored player's tracking capability refreshes when that article's valid alignment loads, without autoplay or
-  a seek. Timing JSON uses a same-origin static asset path on every publication; narration keeps its shared stable URL.
+  a seek. Timing JSON is same-origin on every publication. Public narration keeps a shared stable URL.
   Text seeks land at most one millisecond inside the aligned interval so a paused media clock cannot round below it.
   Written text and IDs must both match before tracking attaches. Explicit editorial binary import can use the manual
   `article-audio-import` workflow; it verifies transfer integrity and never runs during a normal build or generates speech.
   `publish-assets.ts` copies only allowed downloads of published articles unchanged into ignored `public/article-assets/`
-  before dev/build. Large MP3s must be CDN static files, never force-static route bodies (Vercel's ISR size limit).
+  before dev/build. Keep large Git-backed MP3s as CDN static files; managed media streams from dynamic routes.
   This file copy performs no hash audit or generation; stable download URLs support cross-origin reads and byte ranges.
   Media duration changes after MP3 seeking update the shared timeline and Media Session without seeking or autoplaying.
   Articles count as complete on the real `ended` event; AI ta Krajta keeps its established 30-second outro tolerance
@@ -388,9 +395,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   site already serves at `/ai-ta-krajta/logo.svg`, `.png` and the cover artwork,
   publishes no colour outside `AI_TA_KRAJTA_COLORS`, and says how the name is
   written; it asks for nothing and sends visitors to the media-kit form.
-- `/cs/komunita` is the permanent Czech community room. It has chat, polls,
-  projects, materials, and published terms, but no schedule, stage, or live
-  updates. Terms show event kind, format/place, price, and status; wherever their
+- `/cs/komunity` links to the two permanent Czech rooms, `/cs/komunity/vyvojari` and
+  `/cs/komunity/promptbook`. The registry in `businesses/community/config.ts` owns both public addresses
+  and their stable database room slugs. The former `/cs/komunita` and its subpages permanently redirect to
+  Vývojáři, except for the historical calendar feed, which continues to serve the same calendar.
+  Room participants, moderation, chat, polls and materials are separate. The administration groups related
+  participation by normalized contact email, with independent room sessions. Vývojáři keeps the existing
+  project gallery and paid membership. Promptbook starts with free access.
+  A published event can appear in either calendar, both, or neither, using one event and registration.
+  Existing events default to Vývojáři. AI Supervize Mini cannot be listed in Promptbook.
+  Terms show event kind, format/place, price, and status; wherever their
   shared mini card is drawn, it shows no star ratings and may show a wide preview
   of its connected project with its title, description, and repository. An ended
   term may show the video length minus the configured recording start offset as
@@ -413,18 +427,17 @@ use cases, and audiences. Keep these rules current when behavior changes.
   which is subscribed to by hand. A browser which refuses the clipboard says so
   and leaves that address readable. Whether a copy is reported as done is decided
   once, in `hooks/useCopyTextToClipboard.ts`.
-- `/cs/komunita/projects` is the full project gallery, ordered by upvotes.
-  `/cs/komunita/projects/<project_id>` shows scraped project details and a
-  moderated discussion. Project-room sessions derive from the community session;
+- `/cs/komunity/vyvojari/projects` is the full project gallery, ordered by upvotes.
+  `/cs/komunity/vyvojari/projects/<project_id>` shows scraped project details and a
+  moderated discussion. Project-room sessions derive from the Vývojáři room session;
   the author moderates their own discussion.
-- `/cs/komunita/clenstvi` offers free community access and the 199 Kč monthly
+- `/cs/komunity/vyvojari/clenstvi` offers free community access and the 199 Kč monthly
   membership. Webinars remain free; paid access adds recordings, archive,
   materials, extra content, priority questions, and Discord/community features.
   The page is prefilled from `fullname` and `email`, supports community discount
   codes, has no new annual plan or trial, and allows cancellation.
-- `/cs/komunita/calendar.ics` publishes the same terms by stable slug, so moved
-  or renamed terms update existing subscriptions. It contains only event terms
-  and public destinations, never subscriber identity.
+- Each community's `calendar.ics` publishes its assigned terms by stable slug, so moved or renamed terms update
+  existing subscriptions. Feeds contain only event terms and public destinations, never subscriber identity.
 - `/admin/workshops` manages terms of every event kind, participants, comments,
   reactions, content, attached community polls, and settings. Every term says both
   of its audiences: the people registered on the landing page of its event, and
@@ -460,8 +473,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   their positions once; recording offsets do not alter stored times. Generation produces a reviewable draft, creation
   is explicit, and existing tracks use the shared autosaved editor. Changed source videos are labelled, imports never
   overwrite existing tracks, and no participant endpoint or public database role exposes subtitles.
-- `/admin/community` manages the permanent community, including polls, project
-  moderation, participants, memberships, payments, and room analytics.
+- `/admin/community` switches between the configured rooms. Each has its own polls, participants and analytics.
+  Vývojáři also offers project moderation, memberships and payments.
 - `/admin/studio` contains addressable `Nahrávání` at `/admin/studio/recording` and `Uložené projekty` at
   `/admin/studio/editor`, with individual recording/project URLs. Legacy recording-studio URLs permanently redirect
   to their recording views; the capture probe and transcription API retain their addresses. One mounted owner,
@@ -720,11 +733,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `lib/workshops/workshopPollPlacement.ts`: the community, which decides in its
   own polls, opens with them, while a workshop, which is only their subject,
   keeps them below the materials it was held for.
-- The participant room owns the membership badge and popup. Community and live
-  workshop rooms use the same membership for the connecting email, and checkout
-  returns to the room where it started. Membership is offered only by room kinds
-  listed in `lib/workshops/workshopKindCapabilities.ts`; project discussions do
-  not offer it.
+- The participant room owns the membership badge and popup. Paid memberships are keyed by community and normalized
+  email. Existing subscriptions, legacy events and shared events use the Vývojáři offer. A Promptbook-only event
+  follows the Promptbook offer, which is free at launch. Checkout returns to the room where it started.
 - Members can open Stripe Customer Portal from the popup. In-app cancellation
   stops only the next renewal, preserves access through the paid period, appears
   in the badge, and can be reversed before that period ends.
@@ -923,8 +934,8 @@ Never fabricate consent for historical contacts or add Neonmedia's unrelated mar
   lists and no longer holds its slug for a replacement. An end may be empty;
   admins can record, adjust, clear, and reopen it. Overview analytics are zoomable and share their
   room, section, lines, reaction, zoom, and keyword metrics through query params.
-- Community administration is the workshop dashboard restricted to the
-  `community` room kind: no room picker, schedule, stage, reactions, or address.
+- Community administration switches between the configured rooms before opening the shared workshop dashboard.
+  This dashboard exposes no community creation, schedule, stage, reactions or editable room address.
   Its membership view filters Stripe lifecycle, prices, discounts, identifiers,
   dates, test/live mode, and links to the exact Stripe checkout/subscription.
   Community analytics cover all measured time and member details show seen times.

@@ -51,14 +51,17 @@ async function changeCommunityMembershipCancellation(
     if (!isAuthenticatedMembershipRoomRequest(authenticatedRequest)) {
         return authenticatedRequest;
     }
+    if (authenticatedRequest.requiresEmailVerification) {
+        return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.emailVerificationRequired }, { status: 403 });
+    }
 
     const gateway = getStripeGatewayOrNull();
     if (gateway === null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipCannotBeManaged }, { status: 503 });
     }
 
-    const { participant, supabase } = authenticatedRequest;
-    const membershipResult = await loadCommunityMembershipByEmail(supabase, participant.email);
+    const { participant, supabase, communityId } = authenticatedRequest;
+    const membershipResult = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
     if (membershipResult.errorMessage !== null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotLoaded }, { status: 500 });
     }
@@ -84,7 +87,7 @@ async function changeCommunityMembershipCancellation(
         return NextResponse.json({ error: cancellationChange.failureMessage }, { status: 500 });
     }
 
-    const refreshedMembershipResult = await loadCommunityMembershipByEmail(supabase, participant.email);
+    const refreshedMembershipResult = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
     if (refreshedMembershipResult.errorMessage !== null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotLoaded }, { status: 500 });
     }

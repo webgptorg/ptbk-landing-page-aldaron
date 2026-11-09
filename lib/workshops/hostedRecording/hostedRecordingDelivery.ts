@@ -1,8 +1,9 @@
 import 'server-only';
 
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
+import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
-import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
+import { getPaidCommunityIdForRoom } from '@/lib/community-membership/communityMembershipScope';
 import { isWorkshopRecordingReadable } from '@/lib/workshops/workshopPaidMembersVideo';
 import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
 import { getAuthenticatedWorkshopRequest, isAuthenticatedWorkshopRequest } from '@/lib/workshops/workshopRequest';
@@ -44,17 +45,17 @@ export async function authorizeHostedRecording(request: NextRequest, workshopSlu
         Date.now() - Date.parse(revision.superseded_at) < SUPERSEDED_VIEWER_GRACE_MILLISECONDS &&
         workshopRow.hosted_recording_revision_id !== null;
     if (!isCurrent && !isGrace) return NextResponse.json({ error: 'Recording unavailable' }, { status: 404 });
-    const capabilities = getWorkshopKindCapabilities(workshopRow.room_kind);
+    const communityId = getPaidCommunityIdForRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
     let isPaidMember = false;
-    if (capabilities.isMembershipOffered) {
-        const result = await loadCommunityMembershipByEmail(supabase, participant.email);
+    if (communityId !== null && !isCommunityEmailVerificationRequired(request, participant.email)) {
+        const result = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
         if (result.errorMessage) return NextResponse.json({ error: 'Membership could not be checked' }, { status: 503 });
         isPaidMember = result.membership !== null && isPaidCommunityMembershipStatus(result.membership.status);
     }
     const phase = getWorkshopPhase({ startsAt: workshopRow.starts_at, endsAt: workshopRow.ends_at });
     const isWorkshopPast = isWorkshopPhasePast(phase);
     if (!isWorkshopRecordingReadable({ isWorkshopPast, isWorkshopUpcoming: phase !== 'ongoing' && !isWorkshopPast,
-        isPaidMember, isMembershipOffered: capabilities.isMembershipOffered }))
+        isPaidMember, isMembershipOffered: communityId !== null }))
         return NextResponse.json({ error: 'Paid membership required' }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
     return { revision, supabase, isLiveWindowLocked: phase === 'ongoing' && !isPaidMember };
 }

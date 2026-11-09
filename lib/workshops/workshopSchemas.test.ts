@@ -338,6 +338,20 @@ describe('workshop request validation', () => {
         expect(workshopUpdateSchema.safeParse({ locationKind: 'onsite' }).success).toBe(true);
     });
 
+    it('supports shared and unlisted workshops, while rejecting invalid community assignments', () => {
+        expect(workshopCreateSchema.parse(VALID_WORKSHOP).communityIds).toEqual(['vyvojari']);
+        expect(workshopCreateSchema.parse({ ...VALID_WORKSHOP, communityIds: ['vyvojari', 'promptbook'] }).communityIds)
+            .toEqual(['vyvojari', 'promptbook']);
+        expect(workshopUpdateSchema.parse({ communityIds: [] }).communityIds).toEqual([]);
+        expect(workshopUpdateSchema.safeParse({ communityIds: ['unknown'] }).success).toBe(false);
+        expect(workshopUpdateSchema.safeParse({ communityIds: ['promptbook', 'promptbook'] }).success).toBe(false);
+        expect(workshopCreateSchema.safeParse({
+            ...VALID_WORKSHOP,
+            eventType: 'ai-supervize-mini',
+            communityIds: ['promptbook'],
+        }).success).toBe(false);
+    });
+
     it('takes the address of a term held by somebody else and canonicalizes it', () => {
         expect(
             workshopCreateSchema.parse({

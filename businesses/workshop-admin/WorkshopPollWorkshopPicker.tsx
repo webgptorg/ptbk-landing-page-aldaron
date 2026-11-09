@@ -2,10 +2,10 @@
 
 import { formatWorkshopAdminDateTime } from '@/businesses/workshop-admin/workshopAdminFormatting';
 import { MAXIMAL_WORKSHOP_POLL_WORKSHOP_COUNT } from '@/lib/workshops/workshopConstants';
-import type { WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
+import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 
 type WorkshopPollWorkshopPickerProps = {
-    readonly workshops: readonly WorkshopAdminSummary[];
+    readonly workshops: readonly WorkshopSummary[];
     readonly selectedWorkshopIds: readonly string[];
     readonly isDisabled: boolean;
     readonly onChange: (selectedWorkshopIds: readonly string[]) => void;

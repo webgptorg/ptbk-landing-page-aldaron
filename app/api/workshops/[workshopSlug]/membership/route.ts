@@ -16,7 +16,7 @@ type CommunityMembershipRouteContext = {
  * What the connected member is told about their own membership.
  *
  * Note: A member is described to themselves alone. The room asks under its own session, which is what proves which
- *       address the answer is about, and the membership of that address is the same one in every room.
+ *       address the answer is about. The room also determines the community whose membership is returned.
  */
 export async function GET(request: NextRequest, context: CommunityMembershipRouteContext) {
     const { workshopSlug } = await context.params;
@@ -25,9 +25,17 @@ export async function GET(request: NextRequest, context: CommunityMembershipRout
         return authenticatedRequest;
     }
 
+    if (authenticatedRequest.requiresEmailVerification) {
+        return NextResponse.json(
+            { ...createCommunityMembershipRoomState(null, null), requiresEmailVerification: true },
+            { headers: { 'Cache-Control': 'no-store' } },
+        );
+    }
+
     const { membership, errorMessage } = await loadCommunityMembershipByEmail(
         authenticatedRequest.supabase,
         authenticatedRequest.participant.email,
+        authenticatedRequest.communityId,
     );
     if (errorMessage !== null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotLoaded }, { status: 500 });

@@ -3,6 +3,8 @@ import {
     COMMUNITY_MEMBERSHIP_CHECKOUT_SESSION_PARAMETER_NAME,
     COMMUNITY_MEMBERSHIP_PAID_RESULT,
     COMMUNITY_MEMBERSHIP_RESULT_PARAMETER_NAME,
+    DEFAULT_COMMUNITY_ID,
+    type CommunityId,
 } from '@/businesses/community/config';
 import {
     COMMUNITY_MEMBERSHIP_NAME,
@@ -47,6 +49,7 @@ export function isStripeCheckoutSessionId(value: unknown): value is string {
  *       address of its member rather than the room identity which happened to open the checkout.
  */
 export const COMMUNITY_MEMBERSHIP_METADATA_KEYS = {
+    communityId: 'communityId',
     memberEmail: 'communityMemberEmail',
     memberFullname: 'communityMemberFullname',
     participantId: 'communityParticipantId',
@@ -94,8 +97,10 @@ export function createCommunityMembershipCheckoutUrls(roomUrl: string): Communit
 function createCommunityMembershipMetadata(
     member: CommunityMembershipMember,
     discountCode: string | null,
+    communityId: CommunityId,
 ): Stripe.MetadataParam {
     return {
+        [COMMUNITY_MEMBERSHIP_METADATA_KEYS.communityId]: communityId,
         [COMMUNITY_MEMBERSHIP_METADATA_KEYS.memberEmail]: normalizeCommunityMemberEmail(member.email),
         [COMMUNITY_MEMBERSHIP_METADATA_KEYS.memberFullname]: member.fullname,
         [COMMUNITY_MEMBERSHIP_METADATA_KEYS.participantId]: member.participantId,
@@ -152,8 +157,9 @@ export async function createCommunityMembershipCheckoutSession(
     price: CommunityMembershipPrice,
     activeDiscount: ActiveDiscount | null,
     urls: CommunityMembershipCheckoutUrls,
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): Promise<Stripe.Checkout.Session> {
-    const metadata = createCommunityMembershipMetadata(member, activeDiscount?.code ?? null);
+    const metadata = createCommunityMembershipMetadata(member, activeDiscount?.code ?? null, communityId);
     const subscriptionCoupon = await createCommunityMembershipSubscriptionCoupon(gateway, activeDiscount);
 
     return gateway.stripe.checkout.sessions.create({

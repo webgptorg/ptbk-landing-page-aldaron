@@ -114,7 +114,7 @@ describe('authorized workshop material preview lookup', () => {
         );
 
         expect(result).toEqual({ targetUrl: null, errorMessage: null });
-        expect(loadMembershipMock).toHaveBeenCalledWith(client, PARTICIPANT.email);
+        expect(loadMembershipMock).toHaveBeenCalledWith(client, PARTICIPANT.email, 'vyvojari');
         expect(loadTrackedDestinationMock).not.toHaveBeenCalled();
     });
 

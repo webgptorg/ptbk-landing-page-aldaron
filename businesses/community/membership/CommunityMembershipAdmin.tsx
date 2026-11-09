@@ -1,5 +1,7 @@
 'use client';
 
+import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
+
 import { CommunityMembershipAdminFilters } from '@/businesses/community/membership/CommunityMembershipAdminFilters';
 import { CommunityMembershipStatusBadge } from '@/businesses/community/membership/CommunityMembershipStatusBadge';
 import { fetchAdminCommunityMembershipPage } from '@/businesses/community/membership/communityMembershipAdminApi';
@@ -40,7 +42,7 @@ function formatOptionalDateTime(timestamp: string | null): string {
  * authoritative, and every record offers the exact Stripe object where an administrator can resolve a payment or
  * subscription while the mirrored lifecycle here stays visible alongside the member who owns it.
  */
-export function CommunityMembershipAdmin() {
+export function CommunityMembershipAdmin({ communityId = DEFAULT_COMMUNITY_ID }: { readonly communityId?: CommunityId }) {
     const searchParams = useSearchParams();
     const [membershipQuery, changeMembershipQuery] = useUrlSynchronizedViewState<CommunityMembershipAdminQuery>({
         parseViewState: parseCommunityMembershipAdminQuery,
@@ -65,7 +67,7 @@ export function CommunityMembershipAdmin() {
         const loadSequence = ++membershipPageLoadSequenceReference.current;
         setIsMembershipsLoading(true);
         try {
-            const loadedMembershipPage = await fetchAdminCommunityMembershipPage(requestedMembershipQuery);
+            const loadedMembershipPage = await fetchAdminCommunityMembershipPage(requestedMembershipQuery, communityId);
             if (loadSequence !== membershipPageLoadSequenceReference.current) {
                 return;
             }
@@ -91,7 +93,7 @@ export function CommunityMembershipAdmin() {
                 setIsMembershipsLoading(false);
             }
         }
-    }, [changeMembershipQuery, requestedMembershipQuery]);
+    }, [changeMembershipQuery, communityId, requestedMembershipQuery]);
 
     useEffect(() => {
         void loadMembershipPage();
@@ -129,7 +131,7 @@ export function CommunityMembershipAdmin() {
                         <Crown className="h-5 w-5 text-amber-500" /> Placená členství a platby
                     </h2>
                     <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
-                        Každý řádek je jedno trvalé členství podle e-mailu. Stav je zrcadlený ze Stripe; platební údaje
+                        Každý řádek je jedno trvalé členství podle e-mailu ve vybrané komunitě. Stav se načítá ze Stripe. Platební údaje
                         a změny předplatného se spravují u stejného záznamu ve Stripe.
                     </p>
                 </div>
@@ -138,7 +140,7 @@ export function CommunityMembershipAdmin() {
                         {membershipCount}
                     </span>
                     <Button asChild type="button" variant="outline" size="sm">
-                        <Link href={createCommunityMembershipAdminPath('participants')}>
+                        <Link href={createCommunityMembershipAdminPath('participants', undefined, communityId)}>
                             <Users className="mr-1.5 h-4 w-4" /> Účastníci komunity
                         </Link>
                     </Button>

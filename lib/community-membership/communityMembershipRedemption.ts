@@ -1,3 +1,4 @@
+import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 import {
     CURRENT_PAID_COMMUNITY_MEMBERSHIP_BILLING_PERIOD,
     CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID,
@@ -42,6 +43,8 @@ export async function redeemCommunityMembership(
     existingMembershipId: string | null,
     discountCodeValue: string,
     isTestPayment: boolean,
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
+    previousCheckoutSessionId: string | null = null,
 ): Promise<CommunityMembershipRedemptionResult> {
     const consumption = await consumeDiscountCode(discountCodeValue, COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID);
     if (consumption.errorMessage !== null) {
@@ -64,6 +67,8 @@ export async function redeemCommunityMembership(
         activeDiscount,
     );
     const { errorMessage } = await saveRedeemedCommunityMembership(supabase, existingMembershipId, {
+        communityId,
+        previousCheckoutSessionId,
         email: member.email,
         fullname: member.fullname,
         planId: CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID,
@@ -79,7 +84,7 @@ export async function redeemCommunityMembership(
 
     // The membership is read back rather than assumed, so the room is answered with the very membership which was
     // written, exactly as every other answer about it is.
-    const { membership } = await loadCommunityMembershipByEmail(supabase, member.email);
+    const { membership } = await loadCommunityMembershipByEmail(supabase, member.email, communityId);
 
     return { status: 'redeemed', membership };
 }

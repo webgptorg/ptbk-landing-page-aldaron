@@ -1,3 +1,4 @@
+import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { DISCOUNT_CODE_QUERY_PARAMETER, REGISTRATION_SECTION_ID } from '@/lib/discounts/discountCodeConstants';
 
 /**
@@ -14,7 +15,7 @@ export type DiscountPlace = {
 };
 
 export const AI_SUPERVIZE_MINI_PATH = '/ai-supervize-mini';
-export const COMMUNITY_MEMBERSHIP_PATH = '/cs/komunita/clenstvi';
+export const COMMUNITY_MEMBERSHIP_PATH = `${COMMUNITY_PATH}/clenstvi`;
 
 export const AI_SUPERVIZE_MINI_ONSITE_DISCOUNT_PLACE_ID = 'ai-supervize-mini-onsite';
 export const AI_SUPERVIZE_MINI_ONLINE_DISCOUNT_PLACE_ID = 'ai-supervize-mini-online';
@@ -37,8 +38,8 @@ export const DISCOUNT_PLACES: readonly DiscountPlace[] = [
     },
     {
         id: COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
-        label: 'Komunita Promptbooku – placené členství',
-        description: 'Záznamy, materiály a další obsah komunity Promptbooku',
+        label: 'Vývojáři – placené členství',
+        description: 'Záznamy, materiály a další obsah komunity Vývojáři',
         pagePath: COMMUNITY_MEMBERSHIP_PATH,
         registrationSectionId: REGISTRATION_SECTION_ID,
     },

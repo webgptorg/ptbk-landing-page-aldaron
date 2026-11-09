@@ -83,11 +83,15 @@ describe('admin community participants membership projection', () => {
         });
     });
 
-    it('adds the membership state to each community participant in one batched membership lookup', async () => {
-        const supabase = {};
+    it('shows both community participations but reads paid membership only for the selected community', async () => {
+        const rpc = vi.fn().mockResolvedValue({ data: [
+            { email: 'jana@example.com', room_slug: 'komunita' },
+            { email: 'jana@example.com', room_slug: 'komunita-promptbook' },
+        ], error: null });
+        const supabase = { rpc };
         getAdminWorkshopDataOrResponseMock.mockResolvedValue({
             supabase,
-            workshopRow: { room_kind: 'community' },
+            workshopRow: { room_kind: 'community', slug: 'komunita' },
         });
         const statusesByEmail = new Map([['jana@example.com', 'active']]);
         loadCommunityMembershipStatusesByEmailsMock.mockResolvedValue({ statusesByEmail, errorMessage: null });
@@ -98,10 +102,25 @@ describe('admin community participants membership projection', () => {
         expect(response.status).toBe(200);
         const responseBody = (await response.json()) as { readonly participants: unknown };
         expect(responseBody.participants).toEqual([
-            { ...PARTICIPANT, contactGroup: null, communityMembershipStatus: 'active' },
+            { ...PARTICIPANT, contactGroup: null, participatingCommunityIds: ['vyvojari', 'promptbook'], communityMembershipStatus: 'active' },
         ]);
-        expect(loadCommunityMembershipStatusesByEmailsMock).toHaveBeenCalledWith(supabase, ['jana@example.com']);
+        expect(rpc).toHaveBeenCalledWith('get_community_participations_by_email', { participant_emails: ['jana@example.com'] });
+        expect(loadCommunityMembershipStatusesByEmailsMock).toHaveBeenCalledWith(supabase, ['jana@example.com'], 'vyvojari');
         expect(getCommunityMembershipStatusByEmailMock).toHaveBeenCalledWith(statusesByEmail, 'jana@example.com');
+    });
+
+    it('never reads Developers paid data for the free Promptbook community', async () => {
+        getAdminWorkshopDataOrResponseMock.mockResolvedValue({
+            supabase: { rpc: vi.fn().mockResolvedValue({ data: [], error: null }) },
+            workshopRow: { room_kind: 'community', slug: 'komunita-promptbook' },
+        });
+
+        const response = await GET(createRequest(), ROUTE_CONTEXT);
+
+        expect(response.status).toBe(200);
+        expect(loadCommunityMembershipStatusesByEmailsMock).not.toHaveBeenCalled();
+        const result = (await response.json()) as { readonly participants: readonly WorkshopAdminParticipant[] };
+        expect(result.participants[0]).not.toHaveProperty('communityMembershipStatus');
     });
 
     it('does not fetch paid membership information for an ordinary workshop participant list', async () => {

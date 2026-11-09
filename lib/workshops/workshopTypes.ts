@@ -1,3 +1,4 @@
+import type { CommunityId } from '@/businesses/community/config';
 import type { AdminContactJoin } from '@/lib/admin/adminContactJoin';
 import type { CommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import type { EventDetails } from '@/lib/events/event';
@@ -8,7 +9,7 @@ import type { WorkshopPrimaryStageContent } from '@/lib/workshops/workshopPrimar
 
 /**
  * A live room is normally one workshop occurrence. The community uses the same resilient room infrastructure, but
- * remains a single, separately administered room across all occurrences.
+ * remains a separately administered room across occurrences.
  */
 export const WORKSHOP_KIND_VALUES = ['workshop', 'community', 'project'] as const;
 
@@ -76,6 +77,7 @@ export type WorkshopSummary = {
     readonly startsAt: string;
     readonly endsAt: string | null;
     readonly isPublished: boolean;
+    readonly communityIds?: readonly CommunityId[];
 
     /**
      * The event this room is a term of, or `null` for a permanent room which is no event at all
@@ -219,6 +221,9 @@ export type WorkshopAdminParticipant = WorkshopParticipant &
          * not fetch or expose it.
          */
         readonly communityMembershipStatus?: CommunityMembershipStatus;
+
+        /** Communities joined under this contact e-mail, regardless of the room being viewed. */
+        readonly participatingCommunityIds?: readonly CommunityId[];
     };
 
 /**
@@ -576,6 +581,10 @@ export type WorkshopAdminPoll = Omit<WorkshopPoll, 'options'> & {
     readonly options: readonly WorkshopAdminPollOption[];
 };
 
+export type WorkshopAttachedAdminPoll = WorkshopAdminPoll & {
+    readonly communityId: CommunityId | null;
+};
+
 export type WorkshopPublicState = {
     readonly serverTime: string;
     readonly workshop: WorkshopDetails;
@@ -653,7 +662,7 @@ export type WorkshopAdminSnapshot = {
      * Note: These are read-only here. They are administered where they belong, in the administration of the community
      *       which owns them, rather than being editable from two places at once.
      */
-    readonly attachedPolls: readonly WorkshopAdminPoll[];
+    readonly attachedPolls: readonly WorkshopAttachedAdminPoll[];
     readonly comments: readonly WorkshopAdminComment[];
 
     /**

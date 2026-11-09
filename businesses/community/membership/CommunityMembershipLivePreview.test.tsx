@@ -70,7 +70,7 @@ describe('community membership live preview', () => {
     it('keeps a readable room when the community cannot be read at all', () => {
         render(<CommunityMembershipLivePreview preview={EMPTY_COMMUNITY_PREVIEW} />);
 
-        expect(screen.getByText('Komunita Promptbooku')).toBeTruthy();
+        expect(screen.getByText('Vývojáři')).toBeTruthy();
         expect(screen.getByText('pro členy')).toBeTruthy();
         expect(screen.queryByText(/zpráv/)).toBeNull();
         expect(screen.getByText('</>')).toBeTruthy();

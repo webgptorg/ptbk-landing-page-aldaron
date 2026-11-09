@@ -1,4 +1,6 @@
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
+import { isCommunityEmailVerificationEnabled } from '@/lib/community-membership/communityMembershipIdentity';
+import { getPaidCommunityIdForRoom } from '@/lib/community-membership/communityMembershipScope';
 import { normalizePublicWebPageUrl } from '@/lib/network/publicWebPageUrl';
 import { SHORTCODE_LINK_TABLE_NAME } from '@/lib/shortener/shortcodeLinkConstants';
 import { getPublicShortcodeLinkAddressOrNull, isShortcodeLinkAvailableOnHostname } from '@/lib/shortener/shortcodeLinkDomains';
@@ -77,12 +79,14 @@ async function isPaidMemberOfWorkshopCommunity(
     supabase: SupabaseClient,
     workshopRow: WorkshopRow,
     participant: WorkshopParticipant,
+    canReadPaidMembership: boolean,
 ): Promise<boolean> {
-    if (!getWorkshopKindCapabilities(workshopRow.room_kind).isMembershipOffered) {
+    const communityId = getPaidCommunityIdForRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
+    if (communityId === null || !canReadPaidMembership) {
         return false;
     }
 
-    const { membership, errorMessage } = await loadCommunityMembershipByEmail(supabase, participant.email);
+    const { membership, errorMessage } = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
     if (errorMessage !== null) {
         return false;
     }
@@ -96,6 +100,7 @@ async function loadOrdinaryMaterialPreviewTarget(
     participant: WorkshopParticipant,
     materialId: string,
     shortUrl: string,
+    canReadPaidMembership: boolean,
 ): Promise<WorkshopMaterialPreviewTargetResult> {
     const { data, error } = await supabase
         .from(WORKSHOP_CONTENT_TABLE_NAME)
@@ -116,7 +121,7 @@ async function loadOrdinaryMaterialPreviewTarget(
     ) {
         return { targetUrl: null, errorMessage: null };
     }
-    if (contentBlock.is_paid_members_only && !(await isPaidMemberOfWorkshopCommunity(supabase, workshopRow, participant))) {
+    if (contentBlock.is_paid_members_only && !(await isPaidMemberOfWorkshopCommunity(supabase, workshopRow, participant, canReadPaidMembership))) {
         return { targetUrl: null, errorMessage: null };
     }
 
@@ -158,18 +163,19 @@ async function loadVideoPreviewTarget(
     workshopRow: WorkshopRow,
     participant: WorkshopParticipant,
     submittedUrl: string,
+    canReadPaidMembership: boolean,
 ): Promise<WorkshopMaterialPreviewTargetResult> {
     const workshop = mapWorkshopRow(workshopRow);
     if (!getWorkshopKindCapabilities(workshopRow.room_kind).isStageOffered) {
         return { targetUrl: null, errorMessage: null };
     }
 
-    const isPaidMember = await isPaidMemberOfWorkshopCommunity(supabase, workshopRow, participant);
+    const isPaidMember = await isPaidMemberOfWorkshopCommunity(supabase, workshopRow, participant, canReadPaidMembership);
     const isWorkshopPast = isWorkshopPhasePast(getWorkshopPhase(workshop, Date.now()));
     const { readableVideo } = selectWorkshopVideoForMember(workshop, {
         isWorkshopPast,
         isPaidMember,
-        isMembershipOffered: getWorkshopKindCapabilities(workshopRow.room_kind).isMembershipOffered,
+        isMembershipOffered: getPaidCommunityIdForRoom(workshop.kind, workshop.slug, workshop.communityIds) !== null,
     });
     if (readableVideo.youtubeVideoId === null) {
         return { targetUrl: null, errorMessage: null };
@@ -197,15 +203,16 @@ export async function loadWorkshopMaterialPreviewTarget(
     materialId: string,
     kind: WorkshopMaterialPreviewKind,
     submittedUrl: string,
+    canReadPaidMembership = !isCommunityEmailVerificationEnabled(),
 ): Promise<WorkshopMaterialPreviewTargetResult> {
     if (kind === 'material') {
-        return loadOrdinaryMaterialPreviewTarget(supabase, workshopRow, participant, materialId, submittedUrl);
+        return loadOrdinaryMaterialPreviewTarget(supabase, workshopRow, participant, materialId, submittedUrl, canReadPaidMembership);
     }
     if (kind === 'presentation' && materialId === 'presentation') {
         return loadPresentationPreviewTarget(supabase, workshopRow, submittedUrl);
     }
     if (kind === 'video' && materialId === 'workshop-video') {
-        return loadVideoPreviewTarget(supabase, workshopRow, participant, submittedUrl);
+        return loadVideoPreviewTarget(supabase, workshopRow, participant, submittedUrl, canReadPaidMembership);
     }
 
     return { targetUrl: null, errorMessage: null };

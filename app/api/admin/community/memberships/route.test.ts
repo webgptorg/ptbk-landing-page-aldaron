@@ -86,6 +86,6 @@ describe('admin community memberships', () => {
             sortDirection: 'DESCENDING',
             page: 1,
             pageSize: 50,
-        });
+        }, 'vyvojari');
     });
 });

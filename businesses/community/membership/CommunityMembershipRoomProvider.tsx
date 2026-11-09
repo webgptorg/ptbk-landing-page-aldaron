@@ -16,11 +16,12 @@ import {
 } from '@/businesses/community/membership/communityMembershipRoomApi';
 import { JsonRequestError } from '@/lib/api/requestJson';
 import { COMMUNITY_MEMBERSHIP_MESSAGES } from '@/lib/community-membership/communityMembershipMessages';
-import type { CommunityMembershipRoomState } from '@/lib/community-membership/communityMembershipTypes';
+import { isPaidCommunityMembershipStatus, type CommunityMembershipRoomState } from '@/lib/community-membership/communityMembershipTypes';
 import { trackGoogleAnalyticsEvent } from '@/lib/tracking/track-google-analytics-event';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 type CommunityMembershipRoomController = {
+    readonly workshopSlug: string;
     /**
      * The membership of the connected member, or `null` while it is not known yet
      */
@@ -120,7 +121,7 @@ export function CommunityMembershipRoomProvider({
     const [isMembershipPortalOpening, setIsMembershipPortalOpening] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [purchaseOutcome, setPurchaseOutcome] = useState<CommunityMembershipPurchaseOutcome | null>(
-        checkoutReturn.result,
+        checkoutReturn.result === 'cancelled' ? 'cancelled' : null,
     );
     const [isMembershipModalOpen, setIsMembershipModalOpen] = useState(false);
     const isMembershipRequestedRef = useRef(false);
@@ -143,10 +144,10 @@ export function CommunityMembershipRoomProvider({
     // The result used to be visible in the in-page membership section. Opening the modal for a returning member keeps
     // that confirmation or cancellation visible after moving the surface out of the room layout.
     useEffect(() => {
-        if (purchaseOutcome !== null) {
+        if (checkoutReturn.result !== null || purchaseOutcome !== null) {
             setIsMembershipModalOpen(true);
         }
-    }, [purchaseOutcome]);
+    }, [checkoutReturn.result, purchaseOutcome]);
 
     const ensureMembershipLoaded = useCallback(() => {
         if (isMembershipRequestedRef.current) {
@@ -175,6 +176,9 @@ export function CommunityMembershipRoomProvider({
         void loadedMembership
             .then((loadedState) => {
                 setMembership(loadedState);
+                if (checkoutSessionId !== null && isPaidCommunityMembershipStatus(loadedState.status)) {
+                    setPurchaseOutcome('paid');
+                }
                 setErrorMessage(null);
             })
             .catch((error: unknown) => {
@@ -192,7 +196,7 @@ export function CommunityMembershipRoomProvider({
             setErrorMessage(null);
 
             try {
-                const { checkoutUrl, membership: redeemedMembership } = await startCommunityMembershipPurchase(
+                const { checkoutUrl, membership: purchasedMembership } = await startCommunityMembershipPurchase(
                     workshopSlug,
                     { discountCode, termsAccepted: true },
                 );
@@ -205,15 +209,17 @@ export function CommunityMembershipRoomProvider({
                     return;
                 }
 
-                // A membership which a voucher covers in full is answered with itself rather than with a gate, so the
-                // room shows it immediately instead of sending the member somewhere to pay nothing.
-                if (redeemedMembership === null) {
+                if (purchasedMembership === null) {
                     throw new Error(COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotOpened);
                 }
 
-                trackGoogleAnalyticsEvent('community_membership_voucher_redeemed');
-                setMembership(redeemedMembership);
-                setPurchaseOutcome('redeemed');
+                if (purchasedMembership.isCoveredByDiscountCode) {
+                    trackGoogleAnalyticsEvent('community_membership_voucher_redeemed');
+                    setPurchaseOutcome('redeemed');
+                } else {
+                    setPurchaseOutcome('paid');
+                }
+                setMembership(purchasedMembership);
                 setIsPurchaseStarting(false);
             } catch (error) {
                 // A member who pressed the button is always answered, including when it was their room session which
@@ -285,6 +291,7 @@ export function CommunityMembershipRoomProvider({
     const membershipRoom: CommunityMembershipRoomController | null = !isMembershipOffered
         ? null
         : {
+              workshopSlug,
               membership,
               isMembershipLoading,
               isPurchaseStarting,

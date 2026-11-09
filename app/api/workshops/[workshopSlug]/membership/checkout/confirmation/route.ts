@@ -1,3 +1,4 @@
+import { DEFAULT_COMMUNITY_ID } from '@/businesses/community/config';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { activateCommunityMembershipFromCheckoutSession } from '@/lib/community-membership/communityMembershipActivation';
@@ -37,6 +38,9 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
     if (!isAuthenticatedMembershipRoomRequest(authenticatedRequest)) {
         return authenticatedRequest;
     }
+    if (authenticatedRequest.requiresEmailVerification) {
+        return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.emailVerificationRequired }, { status: 403 });
+    }
 
     const body = await readJsonObjectOrNull(request);
     const checkoutSessionId = body?.checkoutSessionId;
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentGateUnavailable }, { status: 503 });
     }
 
-    const { participant, supabase } = authenticatedRequest;
+    const { participant, supabase, communityId } = authenticatedRequest;
     let checkoutSession;
     try {
         checkoutSession = await gateway.stripe.checkout.sessions.retrieve(checkoutSessionId);
@@ -59,7 +63,9 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
     }
 
     const checkoutMemberEmail = checkoutSession.metadata?.[COMMUNITY_MEMBERSHIP_METADATA_KEYS.memberEmail] ?? null;
-    if (checkoutMemberEmail !== normalizeCommunityMemberEmail(participant.email)) {
+    const checkoutCommunityId = checkoutSession.metadata?.[COMMUNITY_MEMBERSHIP_METADATA_KEYS.communityId] ??
+        DEFAULT_COMMUNITY_ID;
+    if (checkoutMemberEmail !== normalizeCommunityMemberEmail(participant.email) || checkoutCommunityId !== communityId) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotConfirmed }, { status: 403 });
     }
 
@@ -70,6 +76,9 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
     );
     if (errorMessage !== null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotConfirmed }, { status: 500 });
+    }
+    if (membership === null) {
+        return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotConfirmed }, { status: 404 });
     }
 
     return NextResponse.json(createCommunityMembershipRoomState(membership, gateway.configuration), {

@@ -47,6 +47,8 @@ import { DELETE, POST } from './route';
 
 const SUPABASE = {};
 const AUTHENTICATED_REQUEST = {
+    communityId: 'vyvojari',
+    requiresEmailVerification: false,
     participant: { email: 'jana@example.com' },
     supabase: SUPABASE,
 };
@@ -135,7 +137,7 @@ describe('community membership cancellation endpoint', () => {
 
         expect(response.status).toBe(200);
         expect(getAuthenticatedMembershipRoomRequestMock).toHaveBeenCalledWith(expect.anything(), WORKSHOP_ROOM_SLUG);
-        expect(loadCommunityMembershipByEmailMock).toHaveBeenCalledWith(SUPABASE, 'jana@example.com');
+        expect(loadCommunityMembershipByEmailMock).toHaveBeenCalledWith(SUPABASE, 'jana@example.com', 'vyvojari');
         expect(updateStripeSubscriptionMock).toHaveBeenCalledWith('sub_Example', { cancel_at_period_end: true });
     });
 

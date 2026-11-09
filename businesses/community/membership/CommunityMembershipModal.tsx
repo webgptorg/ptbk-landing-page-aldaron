@@ -4,6 +4,7 @@ import type { CommunityMembershipPurchaseOutcome } from '@/businesses/community/
 import { formatCommunityMembershipPrice } from '@/businesses/community/membership/communityMembershipPrice';
 import { CommunityMembershipPurchasePanel } from '@/businesses/community/membership/CommunityMembershipPurchasePanel';
 import { useCommunityMembershipRoom } from '@/businesses/community/membership/CommunityMembershipRoomProvider';
+import { CommunityMembershipVerificationForm } from '@/businesses/community/membership/CommunityMembershipVerificationForm';
 import { CommunityMembershipSubscriptionManagement } from '@/businesses/community/membership/CommunityMembershipSubscriptionManagement';
 import {
     Dialog,
@@ -79,6 +80,7 @@ export function CommunityMembershipModal() {
         errorMessage,
         purchaseOutcome,
     } = membershipRoom;
+    const requiresEmailVerification = membership?.requiresEmailVerification === true;
     const isPaid = membership !== null && isPaidCommunityMembershipStatus(membership.status);
     const isCancellationScheduled = isPaid && membership?.isCancellationScheduled === true;
     const isPurchasePanelShown = membership !== null && !isPaid && membership.isPurchaseOffered;
@@ -103,14 +105,14 @@ export function CommunityMembershipModal() {
                         </div>
                         <DialogTitle className="flex items-center gap-2 text-2xl tracking-tight text-room-heading">
                             <Crown className="h-5 w-5 text-room-warning" aria-hidden="true" />
-                            {isPaid
+                            {requiresEmailVerification ? 'Ověření e-mailu' : isPaid
                                 ? isCancellationScheduled
                                     ? 'Placené členství končí'
                                     : 'Placené členství je aktivní'
                                 : 'Placené členství komunity'}
                         </DialogTitle>
                         <DialogDescription className="max-w-2xl leading-6 text-room-muted">
-                            {isPaid && membership !== null
+                            {requiresEmailVerification ? 'Ověřte e-mail pro přístup k placenému členství.' : isPaid && membership !== null
                                 ? createPaidMembershipDescription(membership)
                                 : 'Živé webináře zůstávají zdarma. Placené členství přidává záznamy, archiv, praktické materiály a přednost pro vaše dotazy.'}
                         </DialogDescription>
@@ -152,6 +154,10 @@ export function CommunityMembershipModal() {
                         <div className="flex min-h-24 items-center justify-center text-sm text-room-muted">
                             <LoaderCircle className="mr-2 h-5 w-5 animate-spin text-room-accent" /> Načítám členství…
                         </div>
+                    )}
+
+                    {requiresEmailVerification && (
+                        <CommunityMembershipVerificationForm workshopSlug={membershipRoom.workshopSlug} />
                     )}
 
                     {isPurchasePanelShown && membership !== null && (

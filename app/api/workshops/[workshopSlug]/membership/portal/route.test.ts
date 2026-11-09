@@ -63,7 +63,8 @@ const ONLINE_WORKSHOP_ROW = {
 } as unknown as WorkshopRow;
 
 function createAuthenticatedRequest(workshopRow: WorkshopRow) {
-    return { participant: { email: 'jana@example.com' }, supabase: SUPABASE, workshopRow };
+    return { participant: { email: 'jana@example.com' }, supabase: SUPABASE, workshopRow,
+        communityId: 'vyvojari', requiresEmailVerification: false };
 }
 
 const MEMBERSHIP: CommunityMembershipRecord = {
@@ -123,13 +124,26 @@ describe('community membership Stripe portal endpoint', () => {
         vi.restoreAllMocks();
     });
 
+    it('refuses to open the portal before the room member verifies their e-mail when verification is enabled', async () => {
+        getAuthenticatedMembershipRoomRequestMock.mockResolvedValue({
+            ...createAuthenticatedRequest(COMMUNITY_WORKSHOP_ROW),
+            requiresEmailVerification: true,
+        });
+
+        const response = await POST(createRequest('komunita'), createRouteContext('komunita'));
+
+        expect(response.status).toBe(403);
+        expect(loadCommunityMembershipByEmailMock).not.toHaveBeenCalled();
+        expect(createPortalSessionMock).not.toHaveBeenCalled();
+    });
+
     it('opens a short-lived portal for the signed-in member and returns to their community room', async () => {
         const response = await POST(createRequest('komunita'), createRouteContext('komunita'));
 
         expect(response.status).toBe(200);
         expect(createPortalSessionMock).toHaveBeenCalledWith({
             customer: 'cus_Example',
-            return_url: 'https://promptbook.studio/cs/komunita',
+            return_url: 'https://promptbook.studio/cs/komunity/vyvojari',
         });
         expect(await response.json()).toEqual({ portalUrl: PORTAL_SESSION.url });
         expect(response.headers.get('Cache-Control')).toBe('no-store');

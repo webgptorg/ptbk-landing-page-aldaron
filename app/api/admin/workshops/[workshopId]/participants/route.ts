@@ -1,3 +1,4 @@
+import { getCommunityByRoomSlug, type CommunityId } from '@/businesses/community/config';
 import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import { joinAdminContactGroup } from '@/lib/admin/adminContactJoin';
 import { loadAdminContactGroups } from '@/lib/admin/adminContactDatabase';
@@ -9,6 +10,7 @@ import type { StoredCommunityMembershipStatus } from '@/lib/community-membership
 import { getAdminWorkshopDataOrResponse } from '@/lib/workshops/workshopAdminRequest';
 import { loadWorkshopAdminParticipantPage } from '@/lib/workshops/workshopDatabase';
 import { parseWorkshopAdminParticipantQuery } from '@/lib/workshops/workshopAdminParticipantQuery';
+import { normalizeWorkshopParticipantEmail } from '@/lib/workshops/workshopParticipantEmail';
 import { NextRequest, NextResponse } from 'next/server';
 
 type AdminWorkshopParticipantsRouteContext = {
@@ -49,15 +51,30 @@ export async function GET(request: NextRequest, context: AdminWorkshopParticipan
         );
     }
 
-    const isCommunityRoom = workshopData.workshopRow.room_kind === 'community';
-    const membershipStatusesResult = isCommunityRoom
-        ? await loadCommunityMembershipStatusesByEmails(
-              workshopData.supabase,
-              page.participants.map((participant) => participant.email),
-          )
-        : { statusesByEmail: new Map<string, StoredCommunityMembershipStatus>(), errorMessage: null };
-    if (membershipStatusesResult.errorMessage !== null) {
-        return NextResponse.json({ error: membershipStatusesResult.errorMessage }, { status: 500 });
+    const community = workshopData.workshopRow.room_kind === 'community'
+        ? getCommunityByRoomSlug(workshopData.workshopRow.slug)
+        : undefined;
+    const emails = Array.from(new Set(page.participants.map(({ email }) => normalizeWorkshopParticipantEmail(email))));
+    const [membershipStatusesResult, participationsResult] = await Promise.all([
+        community?.hasPaidMembership
+            ? loadCommunityMembershipStatusesByEmails(workshopData.supabase, emails, community.id)
+            : { statusesByEmail: new Map<string, StoredCommunityMembershipStatus>(), errorMessage: null },
+        community !== undefined && emails.length > 0
+            ? workshopData.supabase.rpc('get_community_participations_by_email', { participant_emails: emails })
+            : { data: [], error: null },
+    ]);
+    const participationError = membershipStatusesResult.errorMessage ?? participationsResult.error?.message;
+    if (participationError) {
+        return NextResponse.json({ error: participationError }, { status: 500 });
+    }
+    const communityIdsByEmail = new Map<string, CommunityId[]>();
+    for (const row of (participationsResult.data ?? []) as readonly { email: string; room_slug: string }[]) {
+        const relatedCommunity = getCommunityByRoomSlug(row.room_slug);
+        if (relatedCommunity !== undefined) {
+            const communityIds = communityIdsByEmail.get(row.email) ?? [];
+            communityIds.push(relatedCommunity.id);
+            communityIdsByEmail.set(row.email, communityIds);
+        }
     }
 
     return NextResponse.json(
@@ -66,13 +83,17 @@ export async function GET(request: NextRequest, context: AdminWorkshopParticipan
             participants: page.participants.map((participant) => {
                 const participantWithContactGroup = joinAdminContactGroup(participant, contactGroupsResult.groups ?? []);
 
-                return isCommunityRoom
+                return community !== undefined
                     ? {
                           ...participantWithContactGroup,
-                          communityMembershipStatus: getCommunityMembershipStatusByEmail(
-                              membershipStatusesResult.statusesByEmail,
-                              participant.email,
-                          ),
+                          participatingCommunityIds:
+                              communityIdsByEmail.get(normalizeWorkshopParticipantEmail(participant.email)) ?? [],
+                          ...(community.hasPaidMembership && {
+                              communityMembershipStatus: getCommunityMembershipStatusByEmail(
+                                  membershipStatusesResult.statusesByEmail,
+                                  participant.email,
+                              ),
+                          }),
                       }
                     : participantWithContactGroup;
             }),

@@ -1,3 +1,5 @@
+import { COMMUNITY_IDS } from '@/businesses/community/config';
+import { canPublishWorkshopToCommunity, getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
 import {
     DEFAULT_WORKSHOP_REACTIONS,
     MAXIMAL_ARTIFICIAL_POLL_VOTE_ADJUSTMENT,
@@ -438,6 +440,10 @@ const eventLocationKindSchema = z.custom<EventLocationKind>(
     'Unknown event location',
 );
 const eventLocationLabelSchema = z.string().trim().max(MAXIMAL_EVENT_LOCATION_LABEL_LENGTH);
+const workshopCommunityIdsSchema = z
+    .array(z.enum(COMMUNITY_IDS))
+    .refine((communityIds) => new Set(communityIds).size === communityIds.length, 'Duplicate community assignments');
+export const UNSUPPORTED_WORKSHOP_COMMUNITY_MESSAGE = 'Supervize nelze zveřejnit v komunitě Promptbook.';
 const eventPriceCzkSchema = z.number().int().min(0).max(MAXIMAL_EVENT_PRICE_CZK);
 const eventMaximumParticipantCountSchema = z.number().int().min(1).max(MAXIMAL_EVENT_PARTICIPANT_COUNT).nullable();
 const artificialWatchingParticipantCountSchema = z.number().int().min(0).max(1_000_000);
@@ -467,6 +473,7 @@ export const workshopCreateSchema = z
         startsAt: z.string().datetime({ offset: true }),
         endsAt: nullableTimestampSchema.default(null),
         eventType: eventTypeSchema,
+        communityIds: workshopCommunityIdsSchema.default([...getWorkshopCommunityIds()]),
         locationKind: eventLocationKindSchema,
         locationLabel: eventLocationLabelSchema.default(''),
         priceCzk: eventPriceCzkSchema.default(0),
@@ -502,6 +509,10 @@ export const workshopCreateSchema = z
     .refine(isExternalEventUrlWritten, {
         message: 'An external event needs the address it is held at',
         path: ['externalUrl'],
+    })
+    .refine(({ eventType, communityIds }) => communityIds.every((id) => canPublishWorkshopToCommunity(eventType, id)), {
+        message: UNSUPPORTED_WORKSHOP_COMMUNITY_MESSAGE,
+        path: ['communityIds'],
     });
 
 export const workshopUpdateSchema = z
@@ -512,6 +523,7 @@ export const workshopUpdateSchema = z
         startsAt: z.string().datetime({ offset: true }).optional(),
         endsAt: nullableTimestampSchema.optional(),
         eventType: eventTypeSchema.optional(),
+        communityIds: workshopCommunityIdsSchema.optional(),
         locationKind: eventLocationKindSchema.optional(),
         locationLabel: eventLocationLabelSchema.optional(),
         priceCzk: eventPriceCzkSchema.optional(),

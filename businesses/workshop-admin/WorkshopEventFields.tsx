@@ -1,5 +1,6 @@
 'use client';
 
+import { COMMUNITIES, COMMUNITY_IDS, type CommunityId } from '@/businesses/community/config';
 import { Input } from '@/components/ui/input';
 import type { EventDetails } from '@/lib/events/event';
 import {
@@ -9,10 +10,12 @@ import {
 } from '@/lib/events/eventLocation';
 import { formatEventPrice } from '@/lib/events/eventPrice';
 import { EVENT_TYPE_DEFINITION_LIST, isEventType, isExternalEventType } from '@/lib/events/eventTypes';
+import { canPublishWorkshopToCommunity, getWorkshopCommunityChoices } from '@/lib/workshops/workshopCommunityAssignments';
 
 type WorkshopEventFieldsProps = {
     readonly event: EventDetails;
-    readonly onChange: (event: EventDetails) => void;
+    readonly communityIds: readonly CommunityId[];
+    readonly onChange: (event: EventDetails, communityIds: readonly CommunityId[]) => void;
 };
 
 const ADMIN_SELECT_CLASS_NAME =
@@ -22,7 +25,7 @@ const ADMIN_SELECT_CLASS_NAME =
  * What the chosen kind of event means for the term being written, which is where it will be offered
  */
 const LANDING_PAGE_EVENT_TYPE_HINT = 'Termín se vypíše na landing page tohoto typu akce.';
-const EXTERNAL_EVENT_TYPE_HINT = 'Termín pořádá někdo jiný. Vypíše se v komunitě a odkáže na web pořadatele.';
+const EXTERNAL_EVENT_TYPE_HINT = 'Termín pořádá někdo jiný a odkaz vede na web pořadatele.';
 
 function readOptionalCount(value: string): number | null {
     const count = Number.parseInt(value, 10);
@@ -40,8 +43,10 @@ function readPriceCzk(value: string): number {
  * Note: Creating a term and editing one ask exactly the same questions, so an event never means one thing in one form
  *       and something else in the other.
  */
-export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProps) {
+export function WorkshopEventFields({ event, communityIds, onChange }: WorkshopEventFieldsProps) {
     const isEventHeldExternally = isExternalEventType(event.type);
+    const changeEventDetails = (nextEvent: EventDetails) =>
+        onChange(nextEvent, getWorkshopCommunityChoices(nextEvent.type, communityIds));
 
     return (
         <>
@@ -52,7 +57,7 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                     onChange={(changeEvent) => {
                         const eventType = changeEvent.target.value;
                         if (isEventType(eventType)) {
-                            onChange({
+                            changeEventDetails({
                                 ...event,
                                 type: eventType,
                                 // Note: Only an event held by somebody else has an address of its own, so choosing a
@@ -75,6 +80,38 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                 </span>
             </label>
 
+            <fieldset className="space-y-2 text-sm text-slate-700">
+                <legend className="font-medium">Zobrazit v komunitách</legend>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {COMMUNITY_IDS.map((communityId) => (
+                        <label key={communityId} className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={communityIds.includes(communityId)}
+                                disabled={!canPublishWorkshopToCommunity(event.type, communityId)}
+                                onChange={(change) => onChange(
+                                    event,
+                                    getWorkshopCommunityChoices(
+                                        event.type,
+                                        change.target.checked
+                                            ? [...communityIds, communityId]
+                                            : communityIds.filter((id) => id !== communityId),
+                                    ),
+                                )}
+                                className="h-4 w-4 accent-cyan-600"
+                            />
+                            {COMMUNITIES[communityId].name}
+                        </label>
+                    ))}
+                </div>
+                {canPublishWorkshopToCommunity(event.type, 'promptbook') && (
+                    <p className="text-xs text-slate-500">
+                        Záznam akce zveřejněné jen v komunitě Promptbook je zdarma. U společné akce platí stejná
+                        pravidla přístupu k záznamu jako v komunitě Vývojáři.
+                    </p>
+                )}
+            </fieldset>
+
             {isEventHeldExternally && (
                 <label htmlFor="workshop-external-url" className="text-sm font-medium text-slate-700">
                     URL akce u pořadatele
@@ -83,7 +120,7 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                         type="url"
                         value={event.externalUrl ?? ''}
                         onChange={(changeEvent) =>
-                            onChange({ ...event, externalUrl: changeEvent.target.value.trim() || null })
+                            changeEventDetails({ ...event, externalUrl: changeEvent.target.value.trim() || null })
                         }
                         className="mt-2"
                         placeholder="https://konference.example.com/program"
@@ -103,7 +140,7 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                     onChange={(changeEvent) => {
                         const locationKind = changeEvent.target.value;
                         if (isEventLocationKind(locationKind)) {
-                            onChange({
+                            changeEventDetails({
                                 ...event,
                                 locationKind,
                                 locationLabel: locationKind === 'online' ? '' : event.locationLabel,
@@ -125,7 +162,7 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                     Místo
                     <Input
                         value={event.locationLabel}
-                        onChange={(changeEvent) => onChange({ ...event, locationLabel: changeEvent.target.value })}
+                        onChange={(changeEvent) => changeEventDetails({ ...event, locationLabel: changeEvent.target.value })}
                         className="mt-2"
                         placeholder="Praha"
                         required
@@ -140,7 +177,7 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                     min={0}
                     value={event.priceCzk}
                     onChange={(changeEvent) =>
-                        onChange({ ...event, priceCzk: readPriceCzk(changeEvent.target.value) })
+                        changeEventDetails({ ...event, priceCzk: readPriceCzk(changeEvent.target.value) })
                     }
                     className="mt-2"
                 />
@@ -156,7 +193,7 @@ export function WorkshopEventFields({ event, onChange }: WorkshopEventFieldsProp
                     min={1}
                     value={event.maximumParticipantCount ?? ''}
                     onChange={(changeEvent) =>
-                        onChange({
+                        changeEventDetails({
                             ...event,
                             maximumParticipantCount: readOptionalCount(changeEvent.target.value),
                         })

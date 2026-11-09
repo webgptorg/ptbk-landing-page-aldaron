@@ -1,3 +1,4 @@
+import { DEFAULT_COMMUNITY_ID, getCommunityById } from '@/businesses/community/config';
 import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import {
     getCommunityMembershipDatabaseOrNull,
@@ -19,6 +20,11 @@ export async function GET(request: NextRequest) {
         return unauthorizedResponse;
     }
 
+    const community = getCommunityById(request.nextUrl.searchParams.get('community') ?? DEFAULT_COMMUNITY_ID);
+    if (community === undefined) {
+        return NextResponse.json({ error: 'Komunita neexistuje.' }, { status: 404 });
+    }
+
     const supabase = getCommunityMembershipDatabaseOrNull();
     if (supabase === null) {
         console.error(COMMUNITY_MEMBERSHIP_DATABASE_UNAVAILABLE_MESSAGE);
@@ -28,6 +34,7 @@ export async function GET(request: NextRequest) {
     const { page, errorMessage } = await loadCommunityMembershipAdminPage(
         supabase,
         parseCommunityMembershipAdminQuery(request.nextUrl.searchParams),
+        community.id,
     );
     if (page === null) {
         return NextResponse.json({ error: errorMessage ?? 'Placená členství se nepodařilo načíst.' }, { status: 500 });

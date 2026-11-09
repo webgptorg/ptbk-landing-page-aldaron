@@ -4,6 +4,7 @@ import {
 } from '@/businesses/community/membership/communityMembershipConfig';
 import { createCommunityMembershipPrice } from '@/businesses/community/membership/communityMembershipPrice';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
+import { activateCommunityMembershipFromCheckoutSession } from '@/lib/community-membership/communityMembershipActivation';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import {
     createCommunityMembershipCheckoutSession,
@@ -58,6 +59,7 @@ type CommunityMembershipPurchaseAttempt = {
     readonly gateway: StripeGateway;
     readonly member: CommunityMembershipMember;
     readonly existingMembershipId: string | null;
+    readonly previousCheckoutSessionId: string | null;
     readonly discountCode: string;
 };
 
@@ -90,6 +92,8 @@ async function redeemCommunityMembershipVoucher(attempt: CommunityMembershipPurc
         attempt.existingMembershipId,
         attempt.discountCode,
         attempt.gateway.configuration.isTestMode,
+        attempt.authenticatedRequest.communityId,
+        attempt.previousCheckoutSessionId,
     );
 
     if (status === 'discount-code-refused') {
@@ -136,6 +140,7 @@ async function openCommunityMembershipCheckout(
             createCommunityMembershipCheckoutUrls(
                 createCommunityMembershipRoomUrl(attempt.request, authenticatedRequest.workshopRow),
             ),
+            authenticatedRequest.communityId,
         );
     } catch (error) {
         console.error('Failed to open the community membership checkout:', error);
@@ -151,6 +156,8 @@ async function openCommunityMembershipCheckout(
         authenticatedRequest.supabase,
         attempt.existingMembershipId,
         {
+            communityId: authenticatedRequest.communityId,
+            previousCheckoutSessionId: attempt.previousCheckoutSessionId,
             email: member.email,
             fullname: member.fullname,
             planId: CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID,
@@ -163,6 +170,11 @@ async function openCommunityMembershipCheckout(
         },
     );
     if (errorMessage !== null) {
+        try {
+            await gateway.stripe.checkout.sessions.expire(checkoutSession.id);
+        } catch (error) {
+            console.error('Failed to expire an unused membership checkout:', error);
+        }
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotOpened }, { status: 500 });
     }
 
@@ -191,6 +203,9 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
     if (!isAuthenticatedMembershipRoomRequest(authenticatedRequest)) {
         return authenticatedRequest;
     }
+    if (authenticatedRequest.requiresEmailVerification) {
+        return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.emailVerificationRequired }, { status: 403 });
+    }
 
     const body = await readJsonObjectOrNull(request);
     const checkoutRequest = body === null ? null : readCheckoutRequest(body);
@@ -204,8 +219,8 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentGateUnavailable }, { status: 503 });
     }
 
-    const { participant, supabase } = authenticatedRequest;
-    const currentMembership = await loadCommunityMembershipByEmail(supabase, participant.email);
+    const { participant, supabase, communityId } = authenticatedRequest;
+    const currentMembership = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
     if (currentMembership.errorMessage !== null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotLoaded }, { status: 500 });
     }
@@ -225,12 +240,45 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.discountCodeNotActive }, { status: 409 });
     }
 
+    const previousCheckoutSessionId = currentMembership.membership?.stripeCheckoutSessionId ?? null;
+    if (currentMembership.membership?.status === 'pending' && previousCheckoutSessionId !== null) {
+        try {
+            const previousSession = await gateway.stripe.checkout.sessions.retrieve(previousCheckoutSessionId);
+            // A complete session may still be settling. Stripe is the authority and that payment must retain its row.
+            if (previousSession.status === 'complete') {
+                const { membership, errorMessage } = await activateCommunityMembershipFromCheckoutSession(
+                    gateway, supabase, previousSession,
+                );
+                if (errorMessage !== null) {
+                    return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotConfirmed }, { status: 500 });
+                }
+
+                if (membership !== null && isPaidCommunityMembershipStatus(membership.status)) {
+                    return createPurchaseResponse({
+                        checkoutUrl: null,
+                        membership: createCommunityMembershipRoomState(membership, gateway.configuration),
+                    });
+                }
+                return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentStillProcessing }, { status: 409 });
+            }
+            if (previousSession.status === 'open') {
+                await gateway.stripe.checkout.sessions.expire(previousCheckoutSessionId);
+            } else if (previousSession.status !== 'expired') {
+                return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotOpened }, { status: 502 });
+            }
+        } catch (error) {
+            console.error('Failed to close the previous membership checkout:', error);
+            return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.paymentNotOpened }, { status: 502 });
+        }
+    }
+
     const purchaseAttempt: CommunityMembershipPurchaseAttempt = {
         request,
         authenticatedRequest,
         gateway,
         member: { participantId: participant.id, fullname: participant.fullname, email: participant.email },
         existingMembershipId: currentMembership.membership?.id ?? null,
+        previousCheckoutSessionId,
         discountCode: checkoutRequest.discountCode,
     };
 

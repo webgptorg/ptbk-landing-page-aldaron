@@ -13,7 +13,8 @@ import {
 import { broadcastWorkshopEvent } from '@/lib/workshops/workshopRealtime';
 import { getUnsupportedWorkshopKindFieldNames } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopCommentStatus } from '@/lib/workshops/workshopCommentStatus';
-import { workshopUpdateSchema } from '@/lib/workshops/workshopSchemas';
+import { canPublishWorkshopToCommunity, getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
+import { UNSUPPORTED_WORKSHOP_COMMUNITY_MESSAGE, workshopUpdateSchema } from '@/lib/workshops/workshopSchemas';
 import { createWorkshopUpdateDatabaseValues } from '@/lib/workshops/workshopValues';
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveWorkshopRepositoryCommitBounds } from '@/lib/workshops/fetchWorkshopRepositoryCommitRange';
@@ -92,6 +93,12 @@ export async function PATCH(request: NextRequest, context: AdminWorkshopRouteCon
             { error: `A ${existingWorkshop.room_kind} room has no ${unsupportedFieldNames.join(', ')}` },
             { status: 400 },
         );
+    }
+
+    const eventType = parsedResult.data.eventType ?? existingWorkshop.event_type;
+    const communityIds = parsedResult.data.communityIds ?? getWorkshopCommunityIds(existingWorkshop.community_slugs);
+    if (communityIds.some((id) => !canPublishWorkshopToCommunity(eventType, id))) {
+        return NextResponse.json({ error: UNSUPPORTED_WORKSHOP_COMMUNITY_MESSAGE }, { status: 400 });
     }
 
     if (parsedResult.data.videoSource === 'hosted' && existingWorkshop.hosted_recording_revision_id === null) {

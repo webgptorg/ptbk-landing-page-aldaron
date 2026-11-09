@@ -80,9 +80,12 @@ async function insertInMemoryRow(
     await inMemorySupabase.from(tableName).insert(values).select().single();
 }
 
-async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_ROW): Promise<SupabaseClient> {
+async function createAttachedPollSupabase(
+    workshopRow: WorkshopRow = WORKSHOP_ROW,
+    communityRow: WorkshopRow = COMMUNITY_ROW,
+): Promise<SupabaseClient> {
     const supabase = createInMemorySupabaseClient();
-    await insertInMemoryRow(supabase, 'workshops', COMMUNITY_ROW);
+    await insertInMemoryRow(supabase, 'workshops', communityRow);
     await insertInMemoryRow(supabase, 'workshops', workshopRow);
     await insertInMemoryRow(supabase, 'workshop_poll_workshops', {
         poll_id: POLL_ID,
@@ -90,7 +93,7 @@ async function createAttachedPollSupabase(workshopRow: WorkshopRow = WORKSHOP_RO
     });
     await insertInMemoryRow(supabase, 'workshop_polls', {
         id: POLL_ID,
-        workshop_id: COMMUNITY_ROW.id,
+        workshop_id: communityRow.id,
         question: 'Které téma chcete probrat?',
         is_closed: false,
         is_visible: true,
@@ -310,7 +313,10 @@ describe('shared community poll votes', () => {
         ]);
 
         expect(communityAdminPollResult.errorMessage).toBeNull();
-        expect(workshopAdminPollResult).toEqual(communityAdminPollResult);
+        expect(workshopAdminPollResult.errorMessage).toBeNull();
+        expect(workshopAdminPollResult.polls).toEqual(
+            communityAdminPollResult.polls.map((poll) => ({ ...poll, communityId: 'vyvojari' })),
+        );
         expect(workshopAdminPollResult.polls[0]?.options[0]).toEqual(
             expect.objectContaining({
                 id: SELECTED_OPTION_ID,
@@ -318,6 +324,22 @@ describe('shared community poll votes', () => {
                 artificialVoteCount: 0,
             }),
         );
+    });
+
+    it('keeps an explicit Promptbook poll attachment when the event is moved out of its calendar', async () => {
+        const promptbook = { ...COMMUNITY_ROW, id: 'promptbook-id', slug: 'komunita-promptbook' };
+        const movedWorkshop = { ...WORKSHOP_ROW, community_slugs: ['vyvojari'] } as const;
+        const supabase = await createAttachedPollSupabase(movedWorkshop, promptbook);
+
+        const [attachedAdmin, attachedMember, developersMember] = await Promise.all([
+            loadWorkshopAttachedAdminPolls(supabase, movedWorkshop),
+            loadWorkshopPolls(supabase, movedWorkshop, MEMBER),
+            loadWorkshopPolls(supabase, COMMUNITY_ROW, MEMBER),
+        ]);
+
+        expect(attachedAdmin.polls).toEqual([expect.objectContaining({ id: POLL_ID, communityId: 'promptbook' })]);
+        expect(attachedMember.polls).toEqual([expect.objectContaining({ id: POLL_ID })]);
+        expect(developersMember.polls).toEqual([]);
     });
 
     it('keeps a shared poll when one attached workshop is soft-deleted, without showing the removed occurrence', async () => {

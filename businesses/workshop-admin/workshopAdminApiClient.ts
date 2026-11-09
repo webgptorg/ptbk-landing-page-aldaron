@@ -1,3 +1,4 @@
+import type { CommunityId } from '@/businesses/community/config';
 import type { EventDetails } from '@/lib/events/event';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import type { WorkshopAgentAdminState, WorkshopAgentWriteValues } from '@/lib/workshops/agents/workshopAgentTypes';
@@ -46,6 +47,7 @@ export type WorkshopWriteValues = {
     readonly startsAt?: string;
     readonly endsAt?: string | null;
     readonly eventType?: EventType;
+    readonly communityIds?: readonly CommunityId[];
     readonly locationKind?: EventLocationKind;
     readonly locationLabel?: string;
     readonly priceCzk?: number;

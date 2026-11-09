@@ -1,3 +1,4 @@
+import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 import {
     COMMUNITY_MEMBERSHIP_TABLE_NAME,
     normalizeCommunityMemberEmail,
@@ -15,7 +16,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 const COMMUNITY_MEMBERSHIP_COLUMNS =
     'id, email, fullname, plan_id, status, monthly_price_czk, discount_code, discount_percent, stripe_customer_id, stripe_subscription_id, stripe_checkout_session_id, is_test_payment, is_cancellation_scheduled, current_period_ends_at, activated_at, canceled_at, created_at, updated_at';
 
-const COMMUNITY_MEMBERSHIP_ADMIN_PAGE_FUNCTION_NAME = 'get_community_membership_admin_page';
+const COMMUNITY_MEMBERSHIP_ADMIN_PAGE_FUNCTION_NAME = 'get_scoped_community_membership_admin_page';
 
 type CommunityMembershipRow = {
     readonly id: string;
@@ -90,6 +91,8 @@ export type CommunityMembershipAdminPage = {
  * What one member accepted, however they came by their membership
  */
 export type AcceptedCommunityMembershipValues = {
+    readonly communityId?: CommunityId;
+    readonly previousCheckoutSessionId?: string | null;
     readonly email: string;
     readonly fullname: string;
     readonly planId: string;
@@ -166,12 +169,13 @@ async function loadCommunityMembershipBy(
     column: string,
     value: string,
     operationName: string,
+    communityId?: CommunityId,
 ): Promise<CommunityMembershipLoadResult> {
-    const { data, error } = await supabase
-        .from(COMMUNITY_MEMBERSHIP_TABLE_NAME)
-        .select(COMMUNITY_MEMBERSHIP_COLUMNS)
-        .eq(column, value)
-        .maybeSingle();
+    let query = supabase.from(COMMUNITY_MEMBERSHIP_TABLE_NAME).select(COMMUNITY_MEMBERSHIP_COLUMNS).eq(column, value);
+    if (communityId !== undefined) {
+        query = query.eq('community_id', communityId);
+    }
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
         return { membership: null, errorMessage: reportSupabaseError(operationName, error) };
@@ -186,12 +190,14 @@ async function loadCommunityMembershipBy(
 export function loadCommunityMembershipByEmail(
     supabase: SupabaseClient,
     email: string,
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): Promise<CommunityMembershipLoadResult> {
     return loadCommunityMembershipBy(
         supabase,
         'email',
         normalizeCommunityMemberEmail(email),
         'the membership of a community member',
+        communityId,
     );
 }
 
@@ -214,6 +220,7 @@ export function loadCommunityMembershipByCheckoutSession(
 export async function loadCommunityMembershipStatusesByEmails(
     supabase: SupabaseClient,
     emails: readonly string[],
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): Promise<{
     readonly statusesByEmail: ReadonlyMap<string, StoredCommunityMembershipStatus>;
     readonly errorMessage: string | null;
@@ -228,6 +235,7 @@ export async function loadCommunityMembershipStatusesByEmails(
     const { data, error } = await supabase
         .from(COMMUNITY_MEMBERSHIP_TABLE_NAME)
         .select('email, status')
+        .eq('community_id', communityId)
         .in('email', normalizedEmails);
     if (error) {
         return {
@@ -261,8 +269,10 @@ export function getCommunityMembershipStatusByEmail(
 export async function loadCommunityMembershipAdminPage(
     supabase: SupabaseClient,
     query: CommunityMembershipAdminQuery,
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): Promise<{ readonly page: CommunityMembershipAdminPage | null; readonly errorMessage: string | null }> {
     const pageParameters = {
+        target_community_id: communityId,
         target_search_query: query.searchQuery,
         target_status: query.status,
         target_is_test_payment: query.isTestPayment,
@@ -301,6 +311,7 @@ export async function loadCommunityMembershipAdminPage(
  */
 function createAcceptedCommunityMembershipValues(values: AcceptedCommunityMembershipValues) {
     return {
+        community_id: values.communityId ?? DEFAULT_COMMUNITY_ID,
         email: normalizeCommunityMemberEmail(values.email),
         fullname: values.fullname,
         plan_id: values.planId,
@@ -310,6 +321,7 @@ function createAcceptedCommunityMembershipValues(values: AcceptedCommunityMember
         is_test_payment: values.isTestPayment,
         is_cancellation_scheduled: false,
         requested_by_participant_id: values.requestedByParticipantId,
+        stripe_customer_id: null,
         stripe_subscription_id: null,
         current_period_ends_at: null,
         canceled_at: null,
@@ -323,23 +335,36 @@ async function saveCommunityMembership(
     supabase: SupabaseClient,
     existingMembershipId: string | null,
     membershipValues: Readonly<Record<string, unknown>>,
+    previousCheckoutSessionId: string | null,
     operationName: string,
 ): Promise<{ readonly errorMessage: string | null }> {
-    const { error } =
-        existingMembershipId === null
-            ? await supabase.from(COMMUNITY_MEMBERSHIP_TABLE_NAME).insert(membershipValues)
-            : await supabase
-                  .from(COMMUNITY_MEMBERSHIP_TABLE_NAME)
-                  .update(membershipValues)
-                  .eq('id', existingMembershipId);
+    if (existingMembershipId === null) {
+        const { error } = await supabase.from(COMMUNITY_MEMBERSHIP_TABLE_NAME).insert(membershipValues);
+        return { errorMessage: error ? reportSupabaseError(operationName, error) : null };
+    }
 
-    return { errorMessage: error ? reportSupabaseError(operationName, error) : null };
+    const update = supabase
+        .from(COMMUNITY_MEMBERSHIP_TABLE_NAME)
+        .update(membershipValues)
+        .eq('id', existingMembershipId)
+        .eq('community_id', membershipValues.community_id)
+        .eq('email', membershipValues.email)
+        .in('status', ['pending', 'canceled']);
+    const { data, error } = await (previousCheckoutSessionId === null
+        ? update.is('stripe_checkout_session_id', null)
+        : update.eq('stripe_checkout_session_id', previousCheckoutSessionId)
+    ).select('id');
+
+    return {
+        errorMessage: error ? reportSupabaseError(operationName, error)
+            : data?.length === 1 ? null : 'The community membership changed during checkout.',
+    };
 }
 
 /**
  * Records the offer a member accepted before they are sent to the payment gate.
  *
- * Note: The membership is written before the gate is even opened, so a payment which is confirmed by a webhook long
+ * Note: The membership is written before the Checkout URL is returned, so a payment confirmed by a webhook long
  *       after the browser was closed still finds the member, the plan and the price it belongs to.
  */
 export function saveRequestedCommunityMembership(
@@ -356,6 +381,7 @@ export function saveRequestedCommunityMembership(
             stripe_checkout_session_id: values.stripeCheckoutSessionId,
             activated_at: null,
         },
+        values.previousCheckoutSessionId ?? null,
         'the requested community membership',
     );
 }
@@ -381,6 +407,7 @@ export function saveRedeemedCommunityMembership(
             stripe_checkout_session_id: null,
             activated_at: new Date().toISOString(),
         },
+        values.previousCheckoutSessionId ?? null,
         'the redeemed community membership',
     );
 }
@@ -395,6 +422,7 @@ export function saveRedeemedCommunityMembership(
 export async function markCommunityMembershipPaid(
     supabase: SupabaseClient,
     membershipId: string,
+    stripeCheckoutSessionId: string,
     values: PaidCommunityMembershipValues,
 ): Promise<{ readonly isNewlyPaid: boolean; readonly errorMessage: string | null }> {
     const { data, error } = await supabase
@@ -408,6 +436,7 @@ export async function markCommunityMembershipPaid(
             activated_at: new Date().toISOString(),
         })
         .eq('id', membershipId)
+        .eq('stripe_checkout_session_id', stripeCheckoutSessionId)
         .eq('status', 'pending' satisfies StoredCommunityMembershipStatus)
         .select('id');
 
@@ -416,6 +445,19 @@ export async function markCommunityMembershipPaid(
     }
 
     return { isNewlyPaid: (data ?? []).length > 0, errorMessage: null };
+}
+
+/** Releases a pending attempt after Stripe confirms its asynchronous payment failed. */
+export async function cancelFailedCommunityMembershipCheckout(
+    supabase: SupabaseClient,
+    stripeCheckoutSessionId: string,
+): Promise<{ readonly errorMessage: string | null }> {
+    const { error } = await supabase.from(COMMUNITY_MEMBERSHIP_TABLE_NAME)
+        .update({ status: 'canceled', canceled_at: new Date().toISOString() })
+        .eq('stripe_checkout_session_id', stripeCheckoutSessionId)
+        .eq('status', 'pending');
+
+    return { errorMessage: error ? reportSupabaseError('the failed community membership checkout', error) : null };
 }
 
 /**

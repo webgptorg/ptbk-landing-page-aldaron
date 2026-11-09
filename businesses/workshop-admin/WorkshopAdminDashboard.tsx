@@ -1,6 +1,7 @@
 'use client';
 
 import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
+import { getCommunityByRoomSlug } from '@/businesses/community/config';
 
 import { CreateWorkshopForm } from '@/businesses/workshop-admin/CreateWorkshopForm';
 import {
@@ -73,6 +74,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminEditorErrorProvider } from '@/components/admin/AdminEditorDialog';
 import { useUrlSynchronizedViewState } from '@/hooks/useUrlSynchronizedViewState';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
+import { getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
 import { isWorkshopAdminSection, type WorkshopAdminSection } from '@/lib/workshops/workshopAdminSections';
 import {
     parseWorkshopAdminViewState,
@@ -184,12 +186,7 @@ type WorkshopAdminDashboardProps = {
     readonly emptyStateMessage?: string;
 
     /**
-     * Where the polls asked about this room are administered, which is the room owning them.
-     */
-    readonly attachedPollAdministrationPath?: string;
-
-    /**
-     * A singleton room can add a concern of its own without making the reusable workshop dashboard import or know that
+     * A fixed room can add a concern of its own without making the reusable workshop dashboard import or know that
      * business. The community uses this for durable memberships, which are not a capability of an event occurrence.
      */
     readonly additionalSections?: readonly WorkshopAdminAdditionalSection[];
@@ -201,19 +198,18 @@ export function WorkshopAdminDashboard({
     selectorLabel = 'Workshop',
     subjectLabel = 'workshopu',
     emptyStateMessage = 'Vytvořte první workshop.',
-    attachedPollAdministrationPath,
     additionalSections = [],
 }: WorkshopAdminDashboardProps) {
-    // Note: There is only ever one room of a singleton kind, so nothing offers a choice between rooms of that kind or
-    //       the creation of a second one.
     const {
-        isSingleton,
         isScheduled: isRoomScheduled,
         isStageOffered,
         isPollsOffered,
         isAgentsOffered,
     } = getWorkshopKindCapabilities(workshopKind);
-    const isRoomSelectionOffered = !isSingleton;
+    const isRoomSelectionOffered = workshopKind !== 'community';
+    const community = workshopKind === 'community' && initialWorkshopSlug !== null
+        ? getCommunityByRoomSlug(initialWorkshopSlug)
+        : undefined;
     const [viewState, changeViewState] = useUrlSynchronizedViewState<WorkshopAdminViewState>({
         parseViewState: parseWorkshopAdminViewState,
         serializeViewState: serializeWorkshopAdminViewState,
@@ -261,12 +257,14 @@ export function WorkshopAdminDashboard({
     //       list are one and the same thing. A link which names no room, or a room which is not there any more, opens
     //       the room the administration would have opened anyway.
     const selectedWorkshop = useMemo(
-        () =>
-            workshops.find(({ slug }) => slug === viewState.workshopSlug) ??
-            workshops.find(({ slug }) => slug === initialWorkshopSlug) ??
-            workshops[0] ??
-            null,
-        [initialWorkshopSlug, viewState.workshopSlug, workshops],
+        () => {
+            const initialWorkshop = workshops.find(({ slug }) => slug === initialWorkshopSlug);
+            if (!isRoomSelectionOffered) {
+                return initialWorkshop ?? null;
+            }
+            return workshops.find(({ slug }) => slug === viewState.workshopSlug) ?? initialWorkshop ?? workshops[0] ?? null;
+        },
+        [initialWorkshopSlug, isRoomSelectionOffered, viewState.workshopSlug, workshops],
     );
     const selectedWorkshopId = selectedWorkshop?.id ?? null;
 
@@ -290,11 +288,14 @@ export function WorkshopAdminDashboard({
         }
 
         try {
-            setAttachableWorkshops(await fetchAdminWorkshopList('workshop'));
+            const candidates = await fetchAdminWorkshopList('workshop');
+            setAttachableWorkshops(community === undefined
+                ? candidates
+                : candidates.filter((workshop) => getWorkshopCommunityIds(workshop.communityIds).includes(community.id)));
         } catch (error) {
             setErrorMessage((error as Error).message);
         }
-    }, [isPollsOffered]);
+    }, [community, isPollsOffered]);
 
     const selectWorkshopBySlug = useCallback(
         (workshopSlug: string) => void runAfterAdminSaves(() => changeViewState((previousViewState) => ({ ...previousViewState, workshopSlug }))),
@@ -740,7 +741,7 @@ export function WorkshopAdminDashboard({
                                     workshopStartsAt={scheduleStartsAt}
                                     workshopEndsAt={snapshot.workshop.endsAt}
                                     refreshVersion={snapshotRefreshVersion}
-                                    isCommunityMembershipStatusShown={workshopKind === 'community'}
+                                    communityId={community?.id}
                                     onChangeInteractionBan={handleChangeParticipantInteractionBan}
                                     onChangeTrusted={handleChangeParticipantTrusted}
                                     onChangeModerator={handleChangeParticipantModerator}
@@ -837,10 +838,7 @@ export function WorkshopAdminDashboard({
                                             onDeleteOption={handleDeletePollOption}
                                         />
                                     ) : (
-                                        <WorkshopAttachedPollList
-                                            polls={snapshot.attachedPolls}
-                                            pollAdministrationPath={attachedPollAdministrationPath}
-                                        />
+                                        <WorkshopAttachedPollList polls={snapshot.attachedPolls} />
                                     )}
                                 </TabsContent>
                             )}

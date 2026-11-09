@@ -62,20 +62,22 @@ export function CommunityMembershipBadge() {
         );
     }
 
-    if (!membership.isPurchaseOffered) {
+    if (!membership.isPurchaseOffered && !membership.requiresEmailVerification) {
         return null;
     }
+
+    const label = membership.requiresEmailVerification ? 'Ověřit e-mail' : 'Free členství';
 
     return (
         <button
             type="button"
             onClick={membershipRoom?.openMembershipModal}
             className={`${WORKSHOP_ROOM_BADGE_CLASS_NAME} ${FREE_COMMUNITY_MEMBERSHIP_BADGE_CLASS_NAME}`}
-            aria-label="Free členství. Otevřít možnosti členství"
-            title="Free členství – otevřít možnosti členství"
+            aria-label={`${label}. Otevřít možnosti členství`}
+            title={`${label} – otevřít možnosti členství`}
         >
             <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span>Free členství</span>
+            <span>{label}</span>
             <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         </button>
     );

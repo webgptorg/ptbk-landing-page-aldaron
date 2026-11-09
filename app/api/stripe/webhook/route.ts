@@ -2,7 +2,7 @@ import {
     activateCommunityMembershipFromCheckoutSession,
     applyCommunityMembershipSubscriptionChange,
 } from '@/lib/community-membership/communityMembershipActivation';
-import { getCommunityMembershipDatabaseOrNull } from '@/lib/community-membership/communityMembershipDatabase';
+import { cancelFailedCommunityMembershipCheckout, getCommunityMembershipDatabaseOrNull } from '@/lib/community-membership/communityMembershipDatabase';
 import { getStripeGatewayOrNull, type StripeGateway } from '@/lib/payments/stripeGateway';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,6 +17,7 @@ const STRIPE_SIGNATURE_HEADER_NAME = 'stripe-signature';
 const HANDLED_STRIPE_EVENT_TYPES = [
     'checkout.session.completed',
     'checkout.session.async_payment_succeeded',
+    'checkout.session.async_payment_failed',
     'customer.subscription.updated',
     'customer.subscription.deleted',
 ] as const;
@@ -33,6 +34,10 @@ async function handleStripeEvent(
             event.data.object,
         );
         return { errorMessage };
+    }
+
+    if (event.type === 'checkout.session.async_payment_failed') {
+        return cancelFailedCommunityMembershipCheckout(supabase, event.data.object.id);
     }
 
     if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {

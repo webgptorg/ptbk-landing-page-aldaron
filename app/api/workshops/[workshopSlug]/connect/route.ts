@@ -1,3 +1,5 @@
+import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
+import { writeCommunityArticleSessionCookie } from '@/lib/community-membership/communityArticleSessionCookie';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import {
@@ -60,7 +62,10 @@ export async function POST(request: NextRequest, context: WorkshopConnectRouteCo
     // The story miniapp loads its own view with this same session cookie.
     const { state, errorMessage } = workshopRow.event_type === STORY_EVENT_TYPE
         ? { state: null, errorMessage: null }
-        : await loadWorkshopPublicState(supabase, workshopRow, connection.participant, 'recent');
+        : await loadWorkshopPublicState(
+            supabase, workshopRow, connection.participant, 'recent',
+            !isCommunityEmailVerificationRequired(request, connection.participant.email),
+        );
     if (state === null && workshopRow.event_type !== STORY_EVENT_TYPE) {
         // The session cookie is still returned. The client can retry the state
         // endpoint without creating a duplicate participant row.
@@ -69,6 +74,9 @@ export async function POST(request: NextRequest, context: WorkshopConnectRouteCo
 
     const response = NextResponse.json({ state });
     setWorkshopSessionCookie(response, workshopSlug, connection.sessionToken);
+    if (workshopRow.room_kind === 'community') {
+        writeCommunityArticleSessionCookie(response, workshopSlug, connection.sessionToken);
+    }
     response.headers.set('Cache-Control', 'no-store');
     return response;
 }

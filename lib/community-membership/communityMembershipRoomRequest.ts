@@ -1,5 +1,7 @@
+import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { COMMUNITY_MEMBERSHIP_MESSAGES } from '@/lib/community-membership/communityMembershipMessages';
-import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
+import type { CommunityId } from '@/businesses/community/config';
+import { getPaidCommunityIdForRoom } from '@/lib/community-membership/communityMembershipScope';
 import {
     getAuthenticatedWorkshopRequest,
     isAuthenticatedWorkshopRequest,
@@ -7,15 +9,12 @@ import {
 } from '@/lib/workshops/workshopRequest';
 import { NextRequest, NextResponse } from 'next/server';
 
-export type AuthenticatedMembershipRoomRequest = AuthenticatedWorkshopRequest;
+export type AuthenticatedMembershipRoomRequest = AuthenticatedWorkshopRequest & {
+    readonly communityId: CommunityId;
+    readonly requiresEmailVerification: boolean;
+};
 
-/**
- * Every action on a membership is attached to the member connected to the room it is acted on from.
- *
- * Note: The membership belongs to the address that member connected with, so the community and a workshop occurrence
- *       read and change the very same membership under their own narrowly scoped session. Keeping this check in one
- *       place makes reading, buying, cancelling and managing it follow exactly the same boundary in every room.
- */
+/** The room, rather than the browser, determines which community's subscription may be accessed. */
 export async function getAuthenticatedMembershipRoomRequest(
     request: NextRequest,
     workshopSlug: string,
@@ -25,9 +24,15 @@ export async function getAuthenticatedMembershipRoomRequest(
         return authenticatedRequest;
     }
 
-    return getWorkshopKindCapabilities(authenticatedRequest.workshopRow.room_kind).isMembershipOffered
-        ? authenticatedRequest
-        : NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotOfferedInRoom }, { status: 404 });
+    const { workshopRow } = authenticatedRequest;
+    const communityId = getPaidCommunityIdForRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
+    return communityId === null
+        ? NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotOfferedInRoom }, { status: 404 })
+        : {
+            ...authenticatedRequest,
+            communityId,
+            requiresEmailVerification: isCommunityEmailVerificationRequired(request, authenticatedRequest.participant.email),
+        };
 }
 
 export function isAuthenticatedMembershipRoomRequest(

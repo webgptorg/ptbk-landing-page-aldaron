@@ -8,7 +8,7 @@ describe('community membership metadata', () => {
 
     it('registers the public Czech membership route', () => {
         expect(COMMUNITY_MEMBERSHIP_PAGE_DEFINITION).toMatchObject({
-            path: '/cs/komunita/clenstvi',
+            path: '/cs/komunity/vyvojari/clenstvi',
             language: 'cs',
         });
     });

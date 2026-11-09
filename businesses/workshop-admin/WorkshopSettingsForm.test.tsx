@@ -221,6 +221,30 @@ describe('workshop settings form', () => {
         expect(screen.getByDisplayValue(WORKSHOP.slug).hasAttribute('readonly')).toBe(false);
     });
 
+    it('saves a single event for both communities and removes Promptbook when switched to a supervision', async () => {
+        const { onSave } = renderWorkshopSettingsForm(WORKSHOP);
+        const developers = screen.getByRole('checkbox', { name: 'Vývojáři' }) as HTMLInputElement;
+        const promptbook = screen.getByRole('checkbox', { name: 'Promptbook' }) as HTMLInputElement;
+
+        expect(developers.checked).toBe(true);
+        expect(promptbook.checked).toBe(false);
+
+        fireEvent.click(promptbook);
+        await waitFor(() =>
+            expect(onSave).toHaveBeenLastCalledWith(expect.objectContaining({ communityIds: ['vyvojari', 'promptbook'] })),
+        );
+
+        fireEvent.change(screen.getByLabelText(/Typ akce/), { target: { value: 'ai-supervize-mini' } });
+        expect(promptbook.disabled).toBe(true);
+        expect(promptbook.checked).toBe(false);
+        await waitFor(() =>
+            expect(onSave).toHaveBeenLastCalledWith(expect.objectContaining({
+                eventType: 'ai-supervize-mini',
+                communityIds: ['vyvojari'],
+            })),
+        );
+    });
+
     it('saves a permanent room without sending settings its kind does not have', async () => {
         const { onSave } = renderWorkshopSettingsForm(COMMUNITY);
 

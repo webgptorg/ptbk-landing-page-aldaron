@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { WorkshopPollOptionModerationValues } from '@/lib/workshops/workshopPollOptionModeration';
 import { getWorkshopPollVoteCount } from '@/lib/workshops/workshopPollValues';
-import type { WorkshopAdminPoll, WorkshopAdminSummary } from '@/lib/workshops/workshopTypes';
+import type { WorkshopAdminPoll, WorkshopAdminSummary, WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import {
     ChevronDown,
     ChevronUp,
@@ -84,7 +84,7 @@ type WorkshopPollAdminProps = {
 
 type WorkshopPollFormProps = {
     readonly title: string;
-    readonly attachableWorkshops: readonly WorkshopAdminSummary[];
+    readonly attachableWorkshops: readonly WorkshopSummary[];
     readonly initialValues?: WorkshopPollFormValues;
     readonly onSubmit: (values: WorkshopPollFormValues) => Promise<boolean | readonly WorkshopPollOptionWriteValues[]>;
     readonly onCancel?: () => void;
@@ -548,7 +548,12 @@ export function WorkshopPollAdmin({
                                     <AdminEditorDialog isOpen onClose={() => setEditingPollId(null)} title="Upravit anketu">
                                         <WorkshopPollForm key={poll.id}
                                             title="Upravit anketu"
-                                            attachableWorkshops={attachableWorkshops}
+                                            attachableWorkshops={[
+                                                ...attachableWorkshops,
+                                                ...poll.attachedWorkshops.filter(
+                                                    (attached) => !attachableWorkshops.some((workshop) => workshop.id === attached.id),
+                                                ),
+                                            ]}
                                             initialValues={createPollUpdateValues(poll)}
                                             onSubmit={(values) => onUpdate(poll.id, values)}
                                             onCancel={() => setEditingPollId(null)}

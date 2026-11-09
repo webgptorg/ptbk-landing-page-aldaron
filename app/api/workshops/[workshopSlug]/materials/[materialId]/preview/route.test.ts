@@ -33,7 +33,7 @@ import { GET } from './route';
 const AUTHENTICATED_REQUEST = {
     supabase: { from: vi.fn() },
     workshopRow: { id: 'room-1' },
-    participant: { id: 'participant-1' },
+    participant: { id: 'participant-1', email: 'jana@example.com' },
 };
 const TARGET_URL = 'https://example.com/guide?utm_content=material-1';
 const IMAGE_URL = 'https://cdn.example.com/guide-card.jpg';

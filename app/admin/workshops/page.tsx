@@ -1,4 +1,3 @@
-import { COMMUNITY_ADMIN_PATH } from '@/businesses/community/config';
 import { WorkshopAdminDashboard } from '@/businesses/workshop-admin/WorkshopAdminDashboard';
 import { ADMIN_WORKSHOPS_PATH } from '@/lib/admin/adminConstants';
 import { requireAdminSignedIn } from '@/lib/admin/requireAdminSignedIn';
@@ -27,10 +26,7 @@ export default async function AdminWorkshopsPage({ searchParams }: AdminWorkshop
     return (
         <main className="min-h-screen bg-slate-50">
             <Suspense>
-                <WorkshopAdminDashboard
-                    initialWorkshopSlug={workshopSlug}
-                    attachedPollAdministrationPath={`${COMMUNITY_ADMIN_PATH}?tab=polls`}
-                />
+                <WorkshopAdminDashboard initialWorkshopSlug={workshopSlug} />
             </Suspense>
         </main>
     );

@@ -1,3 +1,4 @@
+import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 import type { CommunityMembershipAdminPage } from '@/lib/community-membership/communityMembershipDatabase';
 import {
     serializeCommunityMembershipAdminQuery,
@@ -21,8 +22,10 @@ async function readCommunityMembershipAdminResponse<ResponseBody>(response: Resp
  */
 export async function fetchAdminCommunityMembershipPage(
     query: CommunityMembershipAdminQuery,
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): Promise<CommunityMembershipAdminPage> {
     const searchParameters = serializeCommunityMembershipAdminQuery(query);
+    searchParameters.set('community', communityId);
     const response = await fetch(`${COMMUNITY_MEMBERSHIP_ADMIN_API_PATH}?${searchParameters}`, { cache: 'no-store' });
     return readCommunityMembershipAdminResponse<CommunityMembershipAdminPage>(response);
 }

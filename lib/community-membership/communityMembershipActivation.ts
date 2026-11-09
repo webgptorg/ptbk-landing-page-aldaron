@@ -1,7 +1,5 @@
-import { COMMUNITY_MEMBERSHIP_METADATA_KEYS } from '@/lib/community-membership/communityMembershipCheckout';
 import {
     loadCommunityMembershipByCheckoutSession,
-    loadCommunityMembershipByEmail,
     markCommunityMembershipPaid,
     saveCommunityMembershipSubscriptionState,
     type CommunityMembershipRecord,
@@ -21,15 +19,6 @@ export type CommunityMembershipActivationResult = {
     readonly errorMessage: string | null;
 };
 
-function readCheckoutSessionMemberEmail(checkoutSession: Stripe.Checkout.Session): string | null {
-    return (
-        checkoutSession.metadata?.[COMMUNITY_MEMBERSHIP_METADATA_KEYS.memberEmail] ??
-        checkoutSession.customer_email ??
-        checkoutSession.customer_details?.email ??
-        null
-    );
-}
-
 /**
  * Whether the gate finished this checkout and the membership behind it is now being paid for
  *
@@ -38,23 +27,6 @@ function readCheckoutSessionMemberEmail(checkoutSession: Stripe.Checkout.Session
  */
 function isCheckoutSessionPaid(checkoutSession: Stripe.Checkout.Session): boolean {
     return checkoutSession.status === 'complete' && checkoutSession.payment_status !== 'unpaid';
-}
-
-async function loadMembershipOfCheckoutSession(
-    supabase: SupabaseClient,
-    checkoutSession: Stripe.Checkout.Session,
-): Promise<CommunityMembershipActivationResult> {
-    const byCheckoutSession = await loadCommunityMembershipByCheckoutSession(supabase, checkoutSession.id);
-    if (byCheckoutSession.membership !== null || byCheckoutSession.errorMessage !== null) {
-        return byCheckoutSession;
-    }
-
-    // A membership is written before its checkout is opened, so this only happens when a gate returns a session this
-    // application never opened. Their address still names the member it would belong to.
-    const memberEmail = readCheckoutSessionMemberEmail(checkoutSession);
-    return memberEmail === null
-        ? { membership: null, errorMessage: null }
-        : loadCommunityMembershipByEmail(supabase, memberEmail);
 }
 
 /**
@@ -85,14 +57,14 @@ export async function activateCommunityMembershipFromCheckoutSession(
     supabase: SupabaseClient,
     checkoutSession: Stripe.Checkout.Session,
 ): Promise<CommunityMembershipActivationResult> {
-    const { membership, errorMessage } = await loadMembershipOfCheckoutSession(supabase, checkoutSession);
+    const { membership, errorMessage } = await loadCommunityMembershipByCheckoutSession(supabase, checkoutSession.id);
     if (membership === null || !isCheckoutSessionPaid(checkoutSession)) {
         return { membership, errorMessage };
     }
 
     const subscription = await readSubscriptionOrNull(checkoutSession.subscription, gateway.stripe);
     const subscriptionState = subscription === null ? null : readCommunityMembershipSubscriptionState(subscription);
-    const paidResult = await markCommunityMembershipPaid(supabase, membership.id, {
+    const paidResult = await markCommunityMembershipPaid(supabase, membership.id, checkoutSession.id, {
         status: subscriptionState?.status ?? 'active',
         stripeCustomerId: typeof checkoutSession.customer === 'string' ? checkoutSession.customer : null,
         stripeSubscriptionId: subscription?.id ?? null,

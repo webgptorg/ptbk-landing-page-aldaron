@@ -1,4 +1,4 @@
-import { COMMUNITY_PATH } from '@/businesses/community/config';
+import { COMMUNITY_PATH, getCommunityByRoomSlug } from '@/businesses/community/config';
 import { createRequestSiteUrl } from '@/lib/api/createRequestSiteUrl';
 import { createLocalEventLinkOrNull } from '@/lib/events/eventLinks';
 import { mapWorkshopSummaryRow, type WorkshopRow } from '@/lib/workshops/workshopDatabase';
@@ -14,7 +14,9 @@ import type { NextRequest } from 'next/server';
  *       so a term held by somebody else never becomes the destination a payment gate returns a member to.
  */
 export function createCommunityMembershipRoomPath(workshop: WorkshopSummary): string {
-    return workshop.kind === 'community' ? COMMUNITY_PATH : (createLocalEventLinkOrNull(workshop) ?? COMMUNITY_PATH);
+    return workshop.kind === 'community'
+        ? (getCommunityByRoomSlug(workshop.slug)?.path ?? COMMUNITY_PATH)
+        : (createLocalEventLinkOrNull(workshop) ?? COMMUNITY_PATH);
 }
 
 /**

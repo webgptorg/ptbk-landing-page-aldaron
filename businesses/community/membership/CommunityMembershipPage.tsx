@@ -1,5 +1,6 @@
 'use client';
 
+import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { ScrollToRegistrationSection } from '@/components/discounts/ScrollToRegistrationSection';
 import { Header } from '@/components/header';
 import { MinimalFooter } from '@/components/minimal-footer';
@@ -138,7 +139,7 @@ function createCommunityRoomHref(fullname: string, email: string): string {
     }
 
     const query = searchParameters.toString();
-    return query ? `/cs/komunita?${query}` : '/cs/komunita';
+    return query ? `${COMMUNITY_PATH}?${query}` : COMMUNITY_PATH;
 }
 
 function MembershipOptionCard({
@@ -276,7 +277,7 @@ export function CommunityMembershipPage({
             <Header
                 language="cs"
                 brandHref="/cs"
-                brandContext={{ label: 'Komunita', href: '/cs/komunita' }}
+                brandContext={{ label: 'Vývojáři', href: COMMUNITY_PATH }}
                 centerContent={
                     <>
                         <Video className="h-4 w-4 text-emerald-600" />

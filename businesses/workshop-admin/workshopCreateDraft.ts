@@ -1,3 +1,4 @@
+import type { CommunityId } from '@/businesses/community/config';
 import {
     createWorkshopEventWriteValues,
     type WorkshopCreateValues,
@@ -9,6 +10,7 @@ import {
 } from '@/businesses/workshop-admin/workshopRepositoryDraft';
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLocal';
 import { DEFAULT_EVENT_DETAILS, type EventDetails } from '@/lib/events/event';
+import { getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
 import { DEFAULT_WORKSHOP_REACTIONS, MAXIMAL_WORKSHOP_SLUG_LENGTH } from '@/lib/workshops/workshopConstants';
 import type { WorkshopPanelKey } from '@/lib/workshops/workshopPanels';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
@@ -35,6 +37,7 @@ export type WorkshopCreateDraft = {
     readonly startsAt: string;
     readonly endsAt: string;
     readonly event: EventDetails;
+    readonly communityIds: readonly CommunityId[];
     readonly youtubeVideoId: string | null;
     readonly primaryStageContent?: WorkshopPrimaryStageContent;
     readonly recordingStartOffsetSeconds: number;
@@ -91,6 +94,7 @@ export function createNewWorkshopDraft(currentTimestamp = Date.now()): WorkshopC
         startsAt: toDateTimeLocalValue(new Date(startsAt).toISOString()),
         endsAt: toDateTimeLocalValue(new Date(startsAt + DEFAULT_WORKSHOP_DURATION_MILLISECONDS).toISOString()),
         event: copyEventDetails(DEFAULT_EVENT_DETAILS),
+        communityIds: getWorkshopCommunityIds(),
         youtubeVideoId: null,
         primaryStageContent: DEFAULT_WORKSHOP_PRIMARY_STAGE_CONTENT,
         recordingStartOffsetSeconds: 0,
@@ -126,6 +130,7 @@ export function createWorkshopDuplicateDraft(
         startsAt: toDateTimeLocalValue(workshop.startsAt),
         endsAt: toDateTimeLocalValue(workshop.endsAt),
         event: copyEventDetails(workshop.event),
+        communityIds: getWorkshopCommunityIds(workshop.communityIds),
         youtubeVideoId: workshop.youtubeVideoId,
         ...(workshop.primaryStageContent === undefined
             ? {}
@@ -161,6 +166,7 @@ export function createWorkshopCreateValues(draft: WorkshopCreateDraft): Workshop
         startsAt,
         endsAt: fromDateTimeLocalValue(draft.endsAt),
         ...createWorkshopEventWriteValues(draft.event),
+        communityIds: draft.communityIds,
         youtubeVideoId: draft.youtubeVideoId,
         ...(draft.primaryStageContent === undefined ? {} : { primaryStageContent: draft.primaryStageContent }),
         recordingStartOffsetSeconds: draft.recordingStartOffsetSeconds,

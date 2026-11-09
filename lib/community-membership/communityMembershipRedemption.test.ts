@@ -60,6 +60,8 @@ describe('redeeming a community membership voucher', () => {
         expect(membership).toBe(REDEEMED_MEMBERSHIP);
         expect(consumeDiscountCode).toHaveBeenCalledWith('voucher-free', 'community-membership');
         expect(saveRedeemedCommunityMembership).toHaveBeenCalledWith(SUPABASE, null, {
+            communityId: 'vyvojari',
+            previousCheckoutSessionId: null,
             email: MEMBER.email,
             fullname: MEMBER.fullname,
             planId: 'membership',

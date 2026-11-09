@@ -1,4 +1,4 @@
-import { COMMUNITY_ADMIN_PATH } from '@/businesses/community/config';
+import { COMMUNITY_ADMIN_PATH, DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 import { normalizeCommunityMemberEmail } from '@/lib/community-membership/communityMembershipTypes';
 
 export const COMMUNITY_MEMBERSHIP_ADMIN_MEMBER_PARAMETER_NAME = 'member';
@@ -12,8 +12,12 @@ export type CommunityMembershipAdminTab = 'participants' | 'memberships';
 export function createCommunityMembershipAdminPath(
     tab: CommunityMembershipAdminTab,
     memberEmail?: string,
+    communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): string {
     const searchParameters = new URLSearchParams({ tab });
+    if (communityId !== DEFAULT_COMMUNITY_ID) {
+        searchParameters.set('community', communityId);
+    }
     const normalizedMemberEmail = memberEmail === undefined ? '' : normalizeCommunityMemberEmail(memberEmail);
 
     if (normalizedMemberEmail !== '') {

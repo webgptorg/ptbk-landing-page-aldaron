@@ -35,14 +35,17 @@ export async function POST(
     if (!isAuthenticatedMembershipRoomRequest(authenticatedRequest)) {
         return authenticatedRequest;
     }
+    if (authenticatedRequest.requiresEmailVerification) {
+        return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.emailVerificationRequired }, { status: 403 });
+    }
 
     const gateway = getStripeGatewayOrNull();
     if (gateway === null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipCannotBeManaged }, { status: 503 });
     }
 
-    const { participant, supabase, workshopRow } = authenticatedRequest;
-    const membershipResult = await loadCommunityMembershipByEmail(supabase, participant.email);
+    const { participant, supabase, workshopRow, communityId } = authenticatedRequest;
+    const membershipResult = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
     if (membershipResult.errorMessage !== null) {
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.membershipNotLoaded }, { status: 500 });
     }

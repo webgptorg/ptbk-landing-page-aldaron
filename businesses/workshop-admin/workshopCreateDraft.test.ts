@@ -61,6 +61,7 @@ describe('workshop creation drafts', () => {
             startsAt: toDateTimeLocalValue('2026-09-02T10:00:00.000Z'),
             endsAt: toDateTimeLocalValue('2026-09-02T11:30:00.000Z'),
             event: DEFAULT_EVENT_DETAILS,
+            communityIds: ['vyvojari'],
         });
     });
 
@@ -72,6 +73,7 @@ describe('workshop creation drafts', () => {
             startsAt: toDateTimeLocalValue(WORKSHOP.startsAt),
             endsAt: toDateTimeLocalValue(WORKSHOP.endsAt),
             event: WORKSHOP.event,
+            communityIds: ['vyvojari'],
             youtubeVideoId: WORKSHOP.youtubeVideoId,
             recordingStartOffsetSeconds: WORKSHOP.recordingStartOffsetSeconds,
             previewYoutubeVideoId: WORKSHOP.previewYoutubeVideoId,
@@ -86,6 +88,13 @@ describe('workshop creation drafts', () => {
 
     it('keeps a duplicate of an unpublished workshop unpublished', () => {
         expect(createWorkshopDuplicateDraft({ ...WORKSHOP, isPublished: false })?.isPublished).toBe(false);
+    });
+
+    it('keeps both publication destinations when duplicating a shared workshop', () => {
+        const communityIds = ['vyvojari', 'promptbook'] as const;
+        const draft = createWorkshopDuplicateDraft({ ...WORKSHOP, communityIds });
+
+        expect(draft && createWorkshopCreateValues(draft)?.communityIds).toEqual(communityIds);
     });
 
     it('leaves a copy of a workshop about no project about no project either', () => {
@@ -119,6 +128,7 @@ describe('workshop creation drafts', () => {
             startsAt: fromDateTimeLocalValue(toDateTimeLocalValue(WORKSHOP.startsAt)),
             endsAt: fromDateTimeLocalValue(toDateTimeLocalValue(WORKSHOP.endsAt)),
             eventType: WORKSHOP.event?.type,
+            communityIds: ['vyvojari'],
             locationKind: WORKSHOP.event?.locationKind,
             locationLabel: WORKSHOP.event?.locationLabel,
             priceCzk: WORKSHOP.event?.priceCzk,

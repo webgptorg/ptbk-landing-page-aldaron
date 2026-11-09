@@ -1,16 +1,15 @@
 # Nastavení platební brány pro členství v komunitě
 
-Členství se nově kupuje přímo v `/cs/komunita`. Připojený člen vidí v místnosti popup **Placené členství komunity**,
+Placené členství komunity Vývojáři se kupuje přímo v `/cs/komunity/vyvojari`. Připojený člen vidí v místnosti popup **Placené členství komunity**,
 zadá jen slevový kód a potvrdí podmínky – jméno ani e-mail už se ho neptáme, protože je místnost zná. Platba pak
-proběhne na zabezpečené stránce Stripe a člen se vrátí zpět do místnosti. Na `/cs/komunita/clenstvi` se nesahalo, ta
-zůstává veřejnou landing page.
+proběhne na zabezpečené stránce Stripe a člen se vrátí zpět do místnosti. Veřejná stránka členství je na `/cs/komunity/vyvojari/clenstvi`.
 
 **Dokud nenastavíte klíče níže, aplikace o placeném členství v místnosti nic neříká** – nikde se neobjeví tlačítko,
 které by nemohlo fungovat. Nic se tedy nerozbije, jen se členství nebude dát koupit.
 
 ## 1. Databáze
 
-Přibyla migrace `migrations/2026-08-3400-community-membership-payments.sql`. Server ji použije sám při startu, ručně:
+Migrace `migrations/2026-11-0902-scoped-community-memberships.sql` přiřadí stávající předplatná komunitě Vývojáři a ponechá původní Stripe identifikátory. Server použije migrace při startu. Ruční spuštění:
 
 ```bash
 npm run migrate-database
@@ -55,6 +54,7 @@ dozvěděla o zrušení členství, neúspěšné platbě nebo o platbě dokonč
 3. Události:
     - `checkout.session.completed`
     - `checkout.session.async_payment_succeeded`
+    - `checkout.session.async_payment_failed`
     - `customer.subscription.updated`
     - `customer.subscription.deleted`
 4. Zkopírujte **Signing secret** (`whsec_…`) do `STRIPE_WEBHOOK_SIGNING_SECRET`.
@@ -103,3 +103,14 @@ uloženo, na které bráně vzniklo.
   spotřebuje až po zaplacení, ne při otevření brány. Pozor na velmi vysoké slevy: minimální částka, kterou umí Stripe
   v CZK strhnout, je 15 Kč.
 - **Měna** je CZK. Účet Stripe ji musí mít povolenou (české účty ji mají).
+
+## Ověření e-mailu pro placený přístup
+
+Před zapnutím `COMMUNITY_EMAIL_VERIFICATION_ENABLED=true` nastavte v Supabase Auth vlastní SMTP,
+povolte přihlášení e-mailem a použijte `{{ .Token }}` v šabloně přihlašovacího e-mailu. Ověřte doručení
+a ověření kódu na běžné adrese mimo tým Supabase. Nastavení vyžaduje stávající veřejný URL a anon klíč
+Supabase i serverový service role klíč.
+
+Se zapnutým ověřením se pro placené materiály, záznamy a správu předplatného vyžaduje ověření e-mailu.
+Bez zapnutého ověření běží stávající přístup k předplatnému Vývojářů přes relaci místnosti se zadaným e-mailem.
+Nové placené články vyžadují ověřenou relaci i aktivní placené členství v dané komunitě.

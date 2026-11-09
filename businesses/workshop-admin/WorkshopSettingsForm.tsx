@@ -24,6 +24,7 @@ import { fromDateTimeLocalValue, toDateTimeLocalValue } from '@/lib/dateTimeLoca
 import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
 import { MAXIMAL_WORKSHOP_RECORDING_START_OFFSET_SECONDS } from '@/lib/workshops/workshopConstants';
+import { getWorkshopCommunityIds } from '@/lib/workshops/workshopCommunityAssignments';
 import { getWorkshopKindCapabilities } from '@/lib/workshops/workshopKindCapabilities';
 import { isWorkshopPanelOfferedByKind } from '@/lib/workshops/workshopPanels';
 import { getWorkshopPhase } from '@/lib/workshops/workshopPhase';
@@ -70,6 +71,7 @@ function createWorkshopSettingsDraft(workshop: WorkshopDetails) {
         startsAt: toDateTimeLocalValue(workshop.startsAt), endsAt: toDateTimeLocalValue(workshop.endsAt),
         selectedEnd: null as WorkshopSelectedEnd | null,
         eventDetails: workshop.event ?? DEFAULT_EVENT_DETAILS,
+        communityIds: getWorkshopCommunityIds(workshop.communityIds),
         primaryStageContent: normalizeWorkshopPrimaryStageContent(workshop.primaryStageContent),
         youtubeVideoId: workshop.youtubeVideoId ?? '', videoSource: workshop.videoSource ?? 'youtube',
         recordingStartOffsetSeconds: workshop.recordingStartOffsetSeconds,
@@ -95,7 +97,7 @@ export function WorkshopSettingsForm({
     const [draft, setDraft] = useState(() => createWorkshopSettingsDraft(workshop));
     const { slug, title, description, startsAt, endsAt, selectedEnd, eventDetails, primaryStageContent, youtubeVideoId, videoSource,
         recordingStartOffsetSeconds, previewYoutubeVideoId, presentationUrl, repositoryDraft, reactionText,
-        disabledPanels, artificialWatchingParticipantCount, isPublished } = draft;
+        disabledPanels, artificialWatchingParticipantCount, isPublished, communityIds } = draft;
     const changeDraft = (changes: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...changes }));
     const startsAtIso = fromDateTimeLocalValue(startsAt);
     const endsAtIso = selectedEnd === null ? fromDateTimeLocalValue(endsAt) : selectedEnd.value;
@@ -129,7 +131,7 @@ export function WorkshopSettingsForm({
             ...(isWatchingCountSettingOffered ? { artificialWatchingParticipantCount } : {}),
             ...(isSlugOffered ? { slug } : {}),
             ...(roomCapabilities.isScheduled && startsAtIso ? { startsAt: startsAtIso, endsAt: endsAtIso } : {}),
-            ...(roomCapabilities.isEvent ? createWorkshopEventWriteValues(eventDetails) : {}),
+            ...(roomCapabilities.isEvent ? { ...createWorkshopEventWriteValues(eventDetails), communityIds } : {}),
             ...(roomCapabilities.isStageOffered
                 ? {
                       primaryStageContent,
@@ -272,7 +274,13 @@ export function WorkshopSettingsForm({
                         </span>
                     </label>
                 )}
-                {roomCapabilities.isEvent && <WorkshopEventFields event={eventDetails} onChange={(eventDetails) => changeDraft({ eventDetails })} />}
+                {roomCapabilities.isEvent && (
+                    <WorkshopEventFields
+                        event={eventDetails}
+                        communityIds={communityIds}
+                        onChange={(eventDetails, communityIds) => changeDraft({ eventDetails, communityIds })}
+                    />
+                )}
                 {roomCapabilities.isStageOffered && (
                     <>
                         <label className="text-sm font-medium text-slate-700">

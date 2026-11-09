@@ -1,3 +1,4 @@
+import type { CommunityId } from '@/businesses/community/config';
 import { selectEventOccurrences, type EventOccurrence } from '@/lib/events/eventOccurrence';
 import type { EventType } from '@/lib/events/eventTypes';
 import { createWorkshopEventCardDetails } from '@/lib/workshops/workshopEventCardDetails';
@@ -77,30 +78,29 @@ export async function loadSelectedPublishedWorkshop(
 }
 
 /**
- * Loads the one published community room. Its data model is shared with workshops so participants get the same
+ * Loads a published community room. Its data model is shared with workshops so participants get the same
  * secure live-room capabilities without a second copy of the session and moderation model.
  */
-export async function loadPublishedCommunity(): Promise<WorkshopDetails | null> {
+export async function loadPublishedCommunity(roomSlug: string): Promise<WorkshopDetails | null> {
     const supabase = getWorkshopDatabaseOrNull();
     if (supabase === null) {
         return null;
     }
 
-    const communityRow = await findPublishedCommunity(supabase);
+    const communityRow = await findPublishedCommunity(supabase, roomSlug);
     return communityRow === null ? null : mapWorkshopRow(communityRow);
 }
 
 /**
- * Lists every published term of every kind of event for the community, including past terms but never the community
- * room itself or unpublished drafts.
+ * Lists published terms of every kind, including past terms. A community calendar passes its own ID.
  */
-export async function loadPublishedWorkshopSummaries(): Promise<readonly WorkshopSummary[]> {
+export async function loadPublishedWorkshopSummaries(communityId?: CommunityId): Promise<readonly WorkshopSummary[]> {
     const supabase = getWorkshopDatabaseOrNull();
     if (supabase === null) {
         return [];
     }
 
-    const workshopRows = await findPublishedWorkshops(supabase);
+    const workshopRows = await findPublishedWorkshops(supabase, undefined, communityId);
     return workshopRows.map(mapWorkshopSummaryRow);
 }
 
@@ -111,13 +111,15 @@ export async function loadPublishedWorkshopSummaries(): Promise<readonly Worksho
  *       reads in one server-side place and never sends a gated recording identifier or feedback to the community
  *       browser.
  */
-export async function loadPublishedWorkshopEventCardSummaries(): Promise<readonly WorkshopEventCardSummary[]> {
+export async function loadPublishedWorkshopEventCardSummaries(
+    communityId: CommunityId,
+): Promise<readonly WorkshopEventCardSummary[]> {
     const supabase = getWorkshopDatabaseOrNull();
     if (supabase === null) {
         return [];
     }
 
-    const workshopRows = await findPublishedWorkshopEventCardRows(supabase);
+    const workshopRows = await findPublishedWorkshopEventCardRows(supabase, communityId);
     const currentTimeMilliseconds = Date.now();
 
     return Promise.all(
