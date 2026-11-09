@@ -5,6 +5,7 @@ import {
 
 export const COMMUNITIES_PATH = '/cs/komunity';
 export const LEGACY_COMMUNITY_PATH = '/cs/komunita';
+export const LEGACY_COMMUNITY_TITLE = 'Komunita Promptbooku';
 export const COMMUNITY_IDS = ['vyvojari', 'promptbook'] as const;
 export type CommunityId = (typeof COMMUNITY_IDS)[number];
 export const DEFAULT_COMMUNITY_ID = 'vyvojari';

@@ -1,4 +1,4 @@
-import type { CommunityDefinition } from '@/businesses/community/config';
+import { DEFAULT_COMMUNITY_ID, LEGACY_COMMUNITY_TITLE, type CommunityDefinition } from '@/businesses/community/config';
 import type { WorkshopConnectionDetails } from '@/businesses/online-workshop/participant/WorkshopConnectionForm';
 import { createAbsoluteUrl } from '@/lib/metadata/site-config';
 import type { WorkshopDetails } from '@/lib/workshops/workshopTypes';
@@ -15,7 +15,7 @@ export function createCzechCommunityConnectionDetails(
         isDescriptionMarkdown: true,
         dateLabel: 'Kdykoli online',
         durationLabel: 'Stálý přístup',
-        roomLabel: definition.hasPaidMembership ? 'Komunita' : 'Komunita zdarma',
+        roomLabel: definition.id === DEFAULT_COMMUNITY_ID ? LEGACY_COMMUNITY_TITLE : 'Komunita zdarma',
         connectionHeading: 'Připojit se do komunity',
         connectionDescription: 'Jméno se zobrazí u vašich komentářů. E-mail ostatní členové komunity neuvidí.',
         submitLabel: CZECH_COMMUNITY_ENTRY_LABEL,

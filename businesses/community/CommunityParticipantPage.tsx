@@ -5,7 +5,7 @@ import {
     createCzechCommunityConnectionDetails,
     createCzechCommunityWorkshopNavigationCopy,
 } from '@/businesses/community/communityContent';
-import { COMMUNITIES_PATH, type CommunityDefinition } from '@/businesses/community/config';
+import { COMMUNITIES_PATH, DEFAULT_COMMUNITY_ID, LEGACY_COMMUNITY_TITLE, type CommunityDefinition } from '@/businesses/community/config';
 import { useCommunityMembershipRoom } from '@/businesses/community/membership/CommunityMembershipRoomProvider';
 import { CommunityProjectsSection } from '@/businesses/community/projects/CommunityProjectsSection';
 import { OnlineWorkshopParticipantPage } from '@/businesses/online-workshop/participant/OnlineWorkshopParticipantPage';
@@ -67,7 +67,7 @@ export function CommunityParticipantPage({
             calendarDetails={null}
             initialEmail={initialEmail}
             initialFullname={initialFullname}
-            roomSubtitle="Komunita"
+            roomSubtitle={definition.id === DEFAULT_COMMUNITY_ID ? LEGACY_COMMUNITY_TITLE : 'Komunita'}
             isWorkshopSelectionInUrl={false}
             materialsTitle={CZECH_COMMUNITY_ROOM_COPY.materialsTitle}
             unavailableConnectionMessage={CZECH_COMMUNITY_ROOM_COPY.unavailableConnectionMessage}

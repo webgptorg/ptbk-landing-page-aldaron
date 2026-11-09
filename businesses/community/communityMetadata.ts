@@ -1,4 +1,4 @@
-import { COMMUNITIES, COMMUNITIES_PATH, DEFAULT_COMMUNITY_ID, type CommunityDefinition } from '@/businesses/community/config';
+import { COMMUNITIES, COMMUNITIES_PATH, DEFAULT_COMMUNITY_ID, LEGACY_COMMUNITY_TITLE, type CommunityDefinition } from '@/businesses/community/config';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
@@ -14,11 +14,12 @@ export const COMMUNITIES_PAGE_DEFINITION: PageMetadataDefinition = {
 };
 
 function createCommunityPageDefinition(community: CommunityDefinition): PageMetadataDefinition {
+    const isLegacyRoom = community.id === DEFAULT_COMMUNITY_ID;
     return {
         path: community.path,
         language: 'cs',
-        title: `${community.name} | Komunita`,
-        socialTitle: community.name,
+        title: isLegacyRoom ? `${LEGACY_COMMUNITY_TITLE} | Workshopy, materiály a diskuze` : `${community.name} | Komunita`,
+        socialTitle: isLegacyRoom ? LEGACY_COMMUNITY_TITLE : community.name,
         description: community.description,
         isSocialPreviewImageGenerated: true,
         isIndexed: false,
