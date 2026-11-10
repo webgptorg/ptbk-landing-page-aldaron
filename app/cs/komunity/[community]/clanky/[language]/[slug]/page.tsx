@@ -7,7 +7,9 @@ import { TERMINAL_TOUR_ARTICLE_FRAMES } from '@/businesses/terminal-tour/termina
 import { isArticleCommunity } from '@/lib/articles/managedArticleInput';
 import { getManagedArticleUrl } from '@/lib/articles/managedArticleUrls';
 import { createArticleMetadata, createArticleStructuredData } from '@/lib/articles/metadata';
+import { COMMUNITY_ARTICLE_COVER_SIZE } from '@/lib/articles/promptbookCommunityArticleCovers';
 import { getCommunityArticleDetail } from '@/lib/articles/publishedArticles';
+import { createAbsoluteUrl } from '@/lib/metadata/site-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +26,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const result = await getPlacement(params);
     const robots = { index: false, follow: false };
     if (!result) return { robots };
-    if (result.kind === 'teaser') return { title: result.title, description: result.perex, robots };
-    if (result.visibility !== 'public') return { title: result.article.title, robots };
+    if (result.kind === 'teaser' || result.visibility !== 'public') {
+        const preview = result.kind === 'teaser' ? result : result.article;
+        const { title, coverImage, coverImageAlt } = preview;
+        const description = result.kind === 'teaser' ? result.perex : undefined;
+        const images = coverImage ? [{ url: createAbsoluteUrl(coverImage), alt: coverImageAlt, ...COMMUNITY_ARTICLE_COVER_SIZE }] : undefined;
+        return {
+            title, description, robots,
+            ...(images && {
+                openGraph: { type: 'article', title, description, images },
+                twitter: { card: 'summary_large_image', title, description, images },
+            }),
+        };
+    }
     const pathname = new URL(getManagedArticleUrl(result.article, result.community)).pathname;
     return createArticleMetadata(result.article, 'promptbook', pathname);
 }
@@ -39,6 +52,8 @@ export default async function CommunityArticlePage({ params }: PageProps) {
         return <CommunityArticleTeaser
             title={result.title}
             perex={result.perex}
+            coverImage={result.coverImage}
+            coverImageAlt={result.coverImageAlt}
             openingMarkdown={result.openingMarkdown}
             language={result.language}
             indexPath={indexPath}

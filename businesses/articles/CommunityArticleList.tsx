@@ -1,7 +1,9 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, Headphones } from 'lucide-react';
 import type { ArticleCommunity } from '@/lib/articles/managedArticleInput';
 import { getManagedArticleUrl } from '@/lib/articles/managedArticleUrls';
+import { COMMUNITY_ARTICLE_COVER_SIZE } from '@/lib/articles/promptbookCommunityArticleCovers';
 import { getCommunityArticleCards } from '@/lib/articles/publishedArticles';
 
 export async function CommunityArticleList({ communityId, waitingRoom }: { readonly communityId: ArticleCommunity; readonly waitingRoom?: boolean }) {
@@ -15,6 +17,9 @@ export async function CommunityArticleList({ communityId, waitingRoom }: { reado
                     {articles.map((article) => (
                         <li key={article.id} className="rounded-xl border border-room-border/10 bg-room-overlay/[0.035] p-4 text-room-heading">
                             <article>
+                                {article.coverImage && (
+                                    <Image className="mb-3 h-auto w-full rounded-lg" src={article.coverImage} alt="" {...COMMUNITY_ARTICLE_COVER_SIZE} unoptimized />
+                                )}
                                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-room-muted">
                                     <span>{article.authorName}</span>
                                     {article.language === 'en' && <span lang="en">EN</span>}

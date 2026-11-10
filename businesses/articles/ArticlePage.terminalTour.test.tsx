@@ -1,4 +1,5 @@
 import { getArticleAuthor } from '@/lib/articles/authors';
+import { getPromptbookCommunityArticleCover } from '@/lib/articles/promptbookCommunityArticleCovers';
 import type { Article } from '@/lib/articles/types';
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -46,7 +47,9 @@ describe('terminal recording links in community articles', () => {
         ['sprava-podcastu', '06-podcast.webp'],
         ['udrzba-webu', '07-web.webp'],
     ])('shows its original agenda frame in the setup section of %s', (slug, filename) => {
-        const html = renderToStaticMarkup(<ArticlePage article={{ ...article, slug }} publication="promptbook" community={community} />);
+        const cover = getPromptbookCommunityArticleCover({ ...article, slug }, community.id);
+        const html = renderToStaticMarkup(<ArticlePage article={{ ...article, slug, ...cover }} publication="promptbook" community={community} />);
+        expect(html).toContain(`src="/community-article-covers/${slug}.jpg"`);
         const link = 'href="/cs/terminal"';
         expect(html.split(link)).toHaveLength(2);
         expect(html.indexOf(link)).toBeGreaterThan(html.indexOf('id="jak-tuhle-agendu-spustit"'));
@@ -83,9 +86,11 @@ describe('terminal recording links in community articles', () => {
             language: article.language,
             indexPath: community.indexPath,
             roomSlug: 'promptbook',
+            ...getPromptbookCommunityArticleCover(article, community.id),
         };
         const html = renderToStaticMarkup(<CommunityArticleTeaser {...teaser} showTerminalGuide />);
         const guideLink = 'href="/cs/terminal"';
+        expect(html).toContain('src="/community-article-covers/pece-o-kontakty.jpg"');
         expect(html.indexOf(guideLink)).toBeGreaterThan(html.indexOf('scénář.'));
         expect(html.indexOf(guideLink)).toBeLessThan(html.indexOf('<form'));
         expect(html).not.toContain('/terminal-tour/');

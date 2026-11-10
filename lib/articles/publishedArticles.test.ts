@@ -80,7 +80,7 @@ describe('article destination resolution', () => {
     it('exposes only a free Promptbook article opening until the same community session is authorized', async () => {
         const row: ManagedArticleRow = {
             id: '3082c899-26ad-418e-b638-e15f3c47d9cc', revision: '00000000-0000-4000-8000-000000000000',
-            language: 'cs', slug: 'clanek-s-uvodem', title: 'Článek s úvodem', perex: 'Perex.',
+            language: 'cs', slug: 'pece-o-kontakty', title: 'Článek s úvodem', perex: 'Perex.',
             markdown: '# Článek s úvodem\n\nPerex.\n\nOtevírací **odstavec**.\n\n## Neveřejná kapitola\n\nSoukromý zbytek.',
             author_id: 'pavol-hejny', placements: [{ destination: 'promptbook', visibility: 'members' }],
             canonical_destination: 'promptbook', published_at: '2026-11-09T19:00:00Z',
@@ -92,17 +92,20 @@ describe('article destination resolution', () => {
         vi.mocked(readPublishedManagedArticles).mockResolvedValue([row]);
         vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(false);
 
+        const coverImage = '/community-article-covers/pece-o-kontakty.jpg';
         expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toEqual({
             kind: 'teaser', title: row.title, perex: row.perex, openingMarkdown: 'Otevírací **odstavec**.',
+            coverImage, coverImageAlt: expect.any(String),
         });
         const cards = await getCommunityArticleCards('promptbook', true);
         expect(cards).toHaveLength(1);
+        expect(cards[0]).toHaveProperty('coverImage', coverImage);
         expect(cards[0]).not.toHaveProperty('markdown');
         expect(await getCommunityArticleDetail('vyvojari', 'cs', row.slug)).toBeNull();
 
         vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(true);
         expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toMatchObject({
-            kind: 'article', visibility: 'members', article: { markdown: row.markdown },
+            kind: 'article', visibility: 'members', article: { markdown: row.markdown, coverImage },
         });
         expect(canReadCommunityMemberArticle).toHaveBeenLastCalledWith('promptbook', 'members');
 

@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, Download, List } from 'lucide-react';
 import type { CommunityId } from '@/businesses/community/config';
 import { TerminalTourArticleLink } from '@/businesses/terminal-tour/TerminalTourArticleLink';
 import { TERMINAL_TOUR_ARTICLE_SECTION_ID } from '@/businesses/terminal-tour/terminalTour';
+import { COMMUNITY_ARTICLE_COVER_SIZE } from '@/lib/articles/promptbookCommunityArticleCovers';
 import type { Article, ArticlePublication } from '@/lib/articles/types';
 import { getArticleAssetUrl, getArticleIndexUrl, getArticlePodcastUrl, getArticleUrl } from '@/lib/articles/urls';
 import { ArticleHeader, ArticleFooter } from './ArticleShell';
@@ -70,6 +71,9 @@ export function ArticlePage({ article, publication, community }: {
                         <div className="article-byline"><Image src={article.author.photoUrl} width={46} height={46} alt="" /><div><a href={article.author.domains[article.language] ?? article.canonicalUrl}>{article.author.name}</a><span>{readingMinutes} {cs ? 'min čtení' : 'min read'}</span></div></div>
                         <div className="article-hero-actions"><ArticleAudioButton article={playableArticle} href={articlePath} publication={publication} />{article.pdfUrl && <a href={article.pdfUrl} download className="article-button"><Download size={17} aria-hidden="true" />{cs ? 'Stáhnout PDF' : 'Download PDF'}</a>}<a className="article-text-link" href="#article-contents"><List size={17} aria-hidden="true" />{cs ? 'Obsah článku' : 'Contents'}</a></div>
                         {!article.audio && !article.managed && <p className="article-audio-note">{cs ? 'Audio verze se připravuje.' : 'The audio edition is being prepared.'}</p>}
+                        {article.coverImage && article.coverImageAlt && (
+                            <Image className="article-hero-cover" src={article.coverImage} alt={article.coverImageAlt} {...COMMUNITY_ARTICLE_COVER_SIZE} unoptimized />
+                        )}
                     </header>
                     <div className="article-reading-layout article-container">
                         <aside className="article-contents" id="article-contents">
