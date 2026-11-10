@@ -1,4 +1,4 @@
 import { ComparisonsPage } from '@/businesses/new/InformationPages';
 import { newPageMetadata } from '@/businesses/new/newMetadata';
-export const metadata = newPageMetadata('srovnani','Srovnání přístupů k AI automatizaci','Promptbook, Claude Code, Codex, n8n, Make, OpenClaw a Paperclip. Kdy dává smysl který přístup a kdy se mohou doplňovat.');
+export const metadata = newPageMetadata('srovnani','Srovnání všech nástrojů','Promptbook a jeho alternativy v jedné tabulce. Porovnejte zaměření, vlastní provoz, plánování a pracovní prostředí.');
 export default ComparisonsPage;

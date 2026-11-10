@@ -3,7 +3,7 @@
 import { useSiteLocale } from './LocaleProvider';
 import { ComparisonTable, ProductComparisonTable } from './ComparisonTable';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { AgendaShowcase } from './AgendaShowcase';
 import { Founders } from './Founders';
 import { StoryTimeline } from './StoryTimeline';
@@ -138,12 +138,11 @@ const scenario=SCENARIOS[scenarioId];return <><PageIntro title={t(scenario.title
 
 export function ComparisonsPage() {
     const { locale } = useSiteLocale();
+    const cs = locale === 'cs';
 
     return <>
-        <PageIntro title="Promptbook versus">
-            {locale === 'cs'
-                ? 'Kde agent běží, co zvládne na pozadí a kdy má smysl který nástroj.'
-                : 'Where each agent runs, what it does in the background and when to choose it.'}
+        <PageIntro title={cs ? 'Srovnání všech nástrojů' : 'Compare all tools'}>
+            {cs ? `Promptbook a ${COMPARISONS.length} alternativ v jedné tabulce. Kliknutím na alternativu otevřete detail.` : `Promptbook and ${COMPARISONS.length} alternatives in one table. Select an alternative to open its comparison.`}
         </PageIntro>
         <ComparisonTable />
         <ClosingCta />
@@ -156,7 +155,22 @@ export function ComparisonPage({ slug }: { slug: string }) {
     const cs = locale === 'cs';
 
     return <>
-        <PageIntro title={`Promptbook versus ${item.name}`}>{item.advantage[locale]}</PageIntro>
+        <header className={s.pageIntro}>
+            <Link className={`${s.breadcrumb} ${s.comparisonBack}`} href={path('srovnani')}>
+                <ArrowLeft size={16} aria-hidden="true" />{cs ? 'Srovnání všech nástrojů' : 'Compare all tools'}
+            </Link>
+            <h1>Promptbook versus {item.name}</h1>
+        </header>
+        <div className={s.comparisonChoices}>
+            <section>
+                <h2>{cs ? 'Kdy zvolit Promptbook' : 'When to choose Promptbook'}</h2>
+                <p>{item.advantage[locale]}</p>
+            </section>
+            <section>
+                <h2>{cs ? 'Kdy zvolit' : 'When to choose'} {item.name}</h2>
+                <p>{item.rows.fit[locale]}</p>
+            </section>
+        </div>
         <ProductComparisonTable item={item} />
         <div className={s.prose}>
             <div className={s.sources}>
@@ -168,7 +182,6 @@ export function ComparisonPage({ slug }: { slug: string }) {
             </div>
             <div className={s.actions}>
                 <LeadButton topic={t(`Srovnání Promptbooku a ${item.name}`)}>{t('Probrat můj use case')}</LeadButton>
-                <Link className={s.textLink} href={path('srovnani')}>{t('Všechna srovnání ')}<ArrowRight size={17} /></Link>
             </div>
         </div>
     </>;
