@@ -410,7 +410,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   written; it asks for nothing and sends visitors to the media-kit form.
 - `/cs/komunity` links to the two permanent Czech rooms, `/cs/komunity/vyvojari` and
   `/cs/komunity/promptbook`. The registry in `businesses/community/config.ts` owns both public addresses
-  and their stable database room slugs. The former `/cs/komunita` and its subpages permanently redirect to
+  and their stable database room slugs. Individual room pages omit the link back to the community directory.
+  The former `/cs/komunita` and its subpages permanently redirect to
   Vývojáři, except for the historical calendar feed, which continues to serve the same calendar.
   Room participants, moderation, chat, polls and materials are separate. The administration groups related
   participation by normalized contact email, with independent room sessions. Contacts shows participants with no

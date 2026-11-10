@@ -5,14 +5,13 @@ import {
     createCzechCommunityConnectionDetails,
     createCzechCommunityWorkshopNavigationCopy,
 } from '@/businesses/community/communityContent';
-import { COMMUNITIES_PATH, DEFAULT_COMMUNITY_ID, LEGACY_COMMUNITY_TITLE, type CommunityDefinition } from '@/businesses/community/config';
+import { DEFAULT_COMMUNITY_ID, LEGACY_COMMUNITY_TITLE, type CommunityDefinition } from '@/businesses/community/config';
 import { useCommunityMembershipRoom } from '@/businesses/community/membership/CommunityMembershipRoomProvider';
 import { CommunityProjectsSection } from '@/businesses/community/projects/CommunityProjectsSection';
 import { OnlineWorkshopParticipantPage } from '@/businesses/online-workshop/participant/OnlineWorkshopParticipantPage';
 import { WorkshopLinksPanel } from '@/components/workshops/WorkshopLinksPanel';
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import type { WorkshopDetails, WorkshopEventCardSummary } from '@/lib/workshops/workshopTypes';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
@@ -54,11 +53,6 @@ export function CommunityParticipantPage({
 }: CommunityParticipantPageProps) {
     const router = useRouter();
     const workshopNavigation = { workshops, ...createCzechCommunityWorkshopNavigationCopy(definition) };
-    const hubLink = (
-        <Link href={COMMUNITIES_PATH} className="mt-5 inline-block text-sm font-semibold text-room-accent underline underline-offset-4">
-            Všechny komunity
-        </Link>
-    );
 
     return (
         <OnlineWorkshopParticipantPage
@@ -74,7 +68,6 @@ export function CommunityParticipantPage({
             workshopNavigation={workshopNavigation}
             waitingRoomSupplement={
                 <div className="mx-auto max-w-4xl space-y-4 px-4 pb-12 text-room-text sm:px-5">
-                    {hubLink}
                     <WorkshopLinksPanel
                         {...workshopNavigation}
                         participantIdentity={EMPTY_IDENTITY}
@@ -87,7 +80,6 @@ export function CommunityParticipantPage({
                 <>
                     {articles && <ConnectedCommunityArticles>{articles}</ConnectedCommunityArticles>}
                     {definition.hasProjects && <CommunityProjectsSection isLimited />}
-                    {hubLink}
                 </>
             }
             onRoomSessionEnded={() => router.refresh()}
