@@ -53,7 +53,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in place instead of redirecting. `/admin/messages` owns their two-step editor, explicit creation/deletion and
   immediate shared autosave, with no draft/publish states. Context stays separate from the title, short Markdown
   message and message-specific chat introduction. Explicit generation uses the selected shared Book agent.
-  Context may also come from a selected/dropped audio file (including Samsung M4A) or a supported video file.
+  Context may also come from selected or dropped audio files (including Samsung M4A) and supported video files.
+  The editor lets the user order these files before explicitly transcribing them in sequence into one context.
+  A failure stops the queue so the user can resume with the remaining files without paying again for completed parts.
   The browser extracts a video's primary audio track before requesting an ElevenLabs `batch_scribe` single-use token.
   Only the extracted or original audio (up to 2 GB) uploads directly from the browser, never through Vercel's media
   body limits. Failed local extraction never uploads the source video. Scribe v2 verbatim text and numbered diarized speakers append to existing

@@ -9,6 +9,10 @@ vi.mock('./MessageMeetingRecorder', () => ({ MessageMeetingRecorder: () => null 
 import { MessageEditor } from './MessageEditor';
 import { TEST_MESSAGE } from '@/lib/messages/messageTestFixtures';
 const agent = { id: TEST_MESSAGE.agentId, name: 'Pavol Hejný', isEnabled: true };
+function openMediaImport() {
+    fireEvent.click(screen.getByRole('button', { name: 'Importovat audio nebo video' }));
+    return screen.getByLabelText('Audio nebo video soubory');
+}
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 describe('two-step message editor', () => {
     it('adopts prepared server links without replacing text typed while the save was pending', async () => {
@@ -71,14 +75,25 @@ describe('two-step message editor', () => {
         expect(body.context).toBe(TEST_MESSAGE.context); expect(body.markdown).toBe('Updated decision.');
         expect(screen.queryByRole('button', { name: /Publikovat/ })).toBeNull();
     });
-    it('inserts an audio transcript into the editable context and sends it through the existing explicit summary flow', async () => {
-        const transcript = 'Následuje přepsané audio: Schůzka.m4a\n\nMluvčí 1:\nDokončíme registraci.';
-        mocks.transcribe.mockResolvedValueOnce(transcript);
+    it('imports mixed recordings in the chosen order and generates one message from the combined context', async () => {
+        const video = new File(['video'], 'Začátek.mp4', { type: 'video/mp4' });
+        const audio = new File(['audio'], 'Pokračování.m4a', { type: 'audio/mp4' });
+        const opening = 'Následuje přepsané audio: Začátek.mp4\n\nMluvčí 1:\nZačínáme.';
+        const continuation = 'Následuje přepsané audio: Pokračování.m4a\n\nMluvčí 1:\nDokončíme registraci.';
+        mocks.transcribe.mockResolvedValueOnce(opening).mockResolvedValueOnce(continuation);
         render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
         fireEvent.change(screen.getByLabelText('Celý kontext'), { target: { value: 'Moje další poznámky.' } });
-        fireEvent.change(screen.getByLabelText('Audio nebo video soubor'), { target: { files: [new File(['audio'], 'Schůzka.m4a', { type: 'audio/mp4' })] } });
-        const context = `Moje další poznámky.\n\n${transcript}`;
+        const input = openMediaImport();
+        expect(input).toHaveAttribute('multiple');
+        fireEvent.change(input, { target: { files: [audio, video] } });
+        fireEvent.change(input, { target: { files: [new File(['audio'], 'Omylem.wav')] } });
+        fireEvent.click(screen.getByRole('button', { name: 'Odebrat „Omylem.wav“' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Posunout „Začátek.mp4“ nahoru' }));
+        expect(mocks.transcribe).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávky' }));
+        const context = `Moje další poznámky.\n\n${opening}\n\n${continuation}`;
         await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(context));
+        expect(mocks.transcribe.mock.calls.map(([file]) => file)).toEqual([video, audio]);
         expect(mocks.request).not.toHaveBeenCalled();
         expect(screen.queryByLabelText('Titulek')).toBeNull();
         mocks.request.mockResolvedValueOnce({ title: 'Registrace', markdown: 'Dokončíme registraci.', introduction: 'Proberme registraci.' });
@@ -87,36 +102,44 @@ describe('two-step message editor', () => {
         expect(mocks.request).toHaveBeenCalledOnce();
         expect(JSON.parse(mocks.request.mock.calls[0][1].body)).toEqual({ context, agentId: agent.id });
     });
-    it('preserves authored context after a failed upload and retries only when requested', async () => {
-        mocks.transcribe.mockRejectedValueOnce(new Error('Provider unavailable.'));
+    it('resumes a failed batch without retranscribing completed recordings', async () => {
+        mocks.transcribe.mockResolvedValueOnce('První část.').mockRejectedValueOnce(new Error('Provider unavailable.'));
         render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
         fireEvent.change(screen.getByLabelText('Celý kontext'), { target: { value: 'Původní kontext.' } });
-        const file = new File(['audio'], 'Meeting.m4a');
-        fireEvent.change(screen.getByLabelText('Audio nebo video soubor'), { target: { files: [file] } });
-        expect(await screen.findByRole('alert')).toHaveTextContent('Provider unavailable.');
-        expect(screen.getByLabelText('Celý kontext')).toHaveValue('Původní kontext.');
-        expect(mocks.transcribe).toHaveBeenCalledOnce();
-        mocks.transcribe.mockResolvedValueOnce('Následuje přepsané audio: Meeting.m4a\n\nVýsledek.');
-        fireEvent.click(screen.getByRole('button', { name: 'Zkusit přepis znovu' }));
-        await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue('Původní kontext.\n\nNásleduje přepsané audio: Meeting.m4a\n\nVýsledek.'));
-        expect(mocks.transcribe).toHaveBeenCalledTimes(2); expect(mocks.request).not.toHaveBeenCalled();
+        const first = new File(['audio'], '1.m4a');
+        const second = new File(['audio'], '2.m4a');
+        const third = new File(['audio'], '3.m4a');
+        fireEvent.change(openMediaImport(), { target: { files: [first, second, third] } });
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávky' }));
+        expect(await screen.findByRole('alert')).toHaveTextContent('„2.m4a“ · Provider unavailable.');
+        expect(screen.getByLabelText('Celý kontext')).toHaveValue('Původní kontext.\n\nPrvní část.');
+        expect(mocks.transcribe.mock.calls.map(([file]) => file)).toEqual([first, second]);
+        mocks.transcribe.mockResolvedValueOnce('Druhá část.').mockResolvedValueOnce('Třetí část.');
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávky' }));
+        await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue('Původní kontext.\n\nPrvní část.\n\nDruhá část.\n\nTřetí část.'));
+        expect(mocks.transcribe.mock.calls.map(([file]) => file)).toEqual([first, second, second, third]);
+        expect(mocks.request).not.toHaveBeenCalled();
     });
-    it('accepts drag and drop once, blocks overlapping transcription and keeps summary narration independent', async () => {
+    it('queues dropped files, blocks overlapping transcription and keeps summary narration independent', async () => {
         let finish!: (value: string) => void;
         mocks.transcribe.mockImplementationOnce(() => new Promise<string>((resolve) => { finish = resolve; }));
         const busy = vi.fn();
         mocks.request.mockResolvedValue({ message: TEST_MESSAGE });
         render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured transcriptionConfigured onSaved={() => undefined} onBusy={busy} />);
         fireEvent.click(screen.getByRole('button', { name: '1. Celý kontext' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Importovat audio nebo video' }));
+        openMediaImport();
         const dropzone = screen.getByRole('region', { name: 'Kontext z audia' });
-        const dataTransfer = { files: [new File(['audio'], 'Call.mp3')] };
-        fireEvent.drop(dropzone, { dataTransfer }); fireEvent.drop(dropzone, { dataTransfer });
+        const dataTransfer = { files: [new File(['audio'], 'Call.mp3'), new File(['video'], 'Call2.mp4')] };
+        mocks.transcribe.mockResolvedValueOnce('Následuje přepsané audio: Call2.mp4\n\nDalší poznámky.');
+        fireEvent.drop(dropzone, { dataTransfer });
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávky' }));
+        fireEvent.drop(dropzone, { dataTransfer });
         expect(mocks.transcribe).toHaveBeenCalledOnce();
         expect(screen.getByLabelText('Celý kontext')).toBeDisabled();
         expect(busy).toHaveBeenLastCalledWith(true);
         finish('Následuje přepsané audio: Call.mp3\n\nPoznámky.');
-        await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(`${TEST_MESSAGE.context}\n\nNásleduje přepsané audio: Call.mp3\n\nPoznámky.`));
+        await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(`${TEST_MESSAGE.context}\n\nNásleduje přepsané audio: Call.mp3\n\nPoznámky.\n\nNásleduje přepsané audio: Call2.mp4\n\nDalší poznámky.`));
+        expect(mocks.transcribe).toHaveBeenCalledTimes(2);
         expect(busy).toHaveBeenLastCalledWith(false);
         await waitFor(() => expect(mocks.request).toHaveBeenCalledOnce(), { timeout: 2000 });
         const body = JSON.parse(mocks.request.mock.calls[0][1].body) as { markdown: string; context: string };
@@ -129,7 +152,9 @@ describe('two-step message editor', () => {
         mocks.transcribe.mockResolvedValueOnce(transcript);
         render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
         fireEvent.change(screen.getByLabelText('Celý kontext'), { target: { value: original } });
-        fireEvent.change(screen.getByLabelText('Audio nebo video soubor'), { target: { files: [new File(['audio'], 'meeting.m4a')] } });
+        const remaining = new File(['audio'], 'meeting-part2.m4a');
+        fireEvent.change(openMediaImport(), { target: { files: [new File(['audio'], 'meeting.m4a'), remaining] } });
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávky' }));
         expect(await screen.findByRole('alert')).toHaveTextContent('Zkraťte kontext');
         expect(screen.getByLabelText('Dokončený přepis')).toHaveValue(transcript);
         expect(screen.getByLabelText('Celý kontext')).toHaveValue(original);
@@ -138,5 +163,9 @@ describe('two-step message editor', () => {
         await waitFor(() => expect(screen.queryByLabelText('Dokončený přepis')).toBeNull());
         expect(screen.getByLabelText('Celý kontext')).toHaveValue(`Kratší poznámky.\n\n${transcript}`);
         expect(mocks.transcribe).toHaveBeenCalledOnce();
+        mocks.transcribe.mockResolvedValueOnce('Pokračování přepisu.');
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávku' }));
+        await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(`Kratší poznámky.\n\n${transcript}\n\nPokračování přepisu.`));
+        expect(mocks.transcribe).toHaveBeenLastCalledWith(remaining, expect.any(Function));
     });
 });

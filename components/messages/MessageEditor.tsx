@@ -17,7 +17,7 @@ import { createMessagePrefix, createMessageShareText, getMessageUrl, MESSAGE_CON
     PAVOL_MESSAGE_AGENT_ID, type ManagedMessage, type MessageValues } from '@/lib/messages/messageModel';
 import type { ManagedAgent } from '@/lib/agents/agentModel';
 import { MessageMeetingRecorder } from './MessageMeetingRecorder';
-import { ArrowLeft, ArrowRight, Copy, ExternalLink, LoaderCircle, Sparkles, Volume2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Copy, ExternalLink, LoaderCircle, Sparkles, Volume2, X } from 'lucide-react';
 
 type AgentChoice = Pick<ManagedAgent, 'id' | 'name' | 'isEnabled'>;
 type Props = { message: ManagedMessage | null; agents: readonly AgentChoice[]; audioConfigured: boolean; transcriptionConfigured: boolean;
@@ -33,7 +33,8 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const [operation, setOperation] = useState('');
     const [error, setError] = useState('');
     const [transcriptionNotice, setTranscriptionNotice] = useState('');
-    const [failedAudioFile, setFailedAudioFile] = useState<File | null>(null);
+    const [queuedFiles, setQueuedFiles] = useState<{ id: number; file: File }[]>([]);
+    const nextFileId = useRef(0);
     const [pendingTranscript, setPendingTranscript] = useState('');
     const [recordingBusy, setRecordingBusy] = useState(false);
     const [contextSource, setContextSource] = useState<'meeting' | 'file' | 'text'>(message ? 'text' : 'meeting');
@@ -71,12 +72,15 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const captureBusy = useCallback((value: boolean) => {
         recordingBusyRef.current = value; setRecordingBusy(value); onBusy(value || operationRef.current);
     }, [onBusy]);
-    const acceptRecordedTranscript = (transcript: string) => {
-        // Cached results can be re-applied after a reload without duplicating existing text.
-        if (valuesRef.current.context.includes(transcript)) return;
+    const appendTranscript = (transcript: string) => {
         const context = appendMessageTranscript(valuesRef.current.context, transcript);
         valuesRef.current = { ...valuesRef.current, context };
         update('context', context);
+    };
+    const acceptRecordedTranscript = (transcript: string) => {
+        // Cached results can be re-applied after a reload without duplicating existing text.
+        if (valuesRef.current.context.includes(transcript)) return;
+        appendTranscript(transcript);
         setContextSource('text');
     };
     const generate = () => run('Generuji texty…', async () => {
@@ -92,28 +96,46 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
         const result = await requestAdminJson<{ message: ManagedMessage }>(`/api/admin/messages/${saved.id}/audio`, { method: 'POST' });
         setSaved(result.message); onSaved(result.message);
     });
-    const transcribe = (file: File) => run('Připravuji přepis…', async () => {
-        setContextSource('file');
-        setTranscriptionNotice(''); setFailedAudioFile(null);
-        let completed = false;
-        try {
-            const transcript = await transcribeMessageFile(file, setOperation);
-            completed = true;
+    const busy = Boolean(operation) || recordingBusy;
+    const importDisabled = busy || !transcriptionConfigured || Boolean(pendingTranscript);
+    const queueFiles = (files: File[]) => {
+        if (importDisabled || operationRef.current || !files.length) return;
+        const entries = files.map(file => ({ id: nextFileId.current++, file }));
+        setQueuedFiles(current => [...current, ...entries]);
+        setError('');
+        setTranscriptionNotice('');
+    };
+    const moveFile = (index: number, destination: number) => {
+        setQueuedFiles(current => {
+            const reordered = [...current];
+            [reordered[index], reordered[destination]] = [reordered[destination], reordered[index]];
+            return reordered;
+        });
+    };
+    const transcribe = () => run('Připravuji přepis…', async () => {
+        setTranscriptionNotice('');
+        for (let index = 0; index < queuedFiles.length; index++) {
+            const { file } = queuedFiles[index];
+            const progress = (status: string) => setOperation(`${index + 1}/${queuedFiles.length} · ${file.name} · ${status}`);
+            progress('Připravuji přepis…');
+            let transcript: string;
+            try {
+                transcript = await transcribeMessageFile(file, progress);
+            } catch (failure) {
+                const reason = failure instanceof Error ? failure.message : 'Přepis se nepodařilo dokončit.';
+                throw new Error(`„${file.name}“ · ${reason}`);
+            }
             // Retain the paid result even if the combined context exceeds its limit.
+            setQueuedFiles(queuedFiles.slice(index + 1));
             setPendingTranscript(transcript);
-            update('context', appendMessageTranscript(values.context, transcript));
-            setContextSource('text');
+            appendTranscript(transcript);
             setPendingTranscript('');
-            setTranscriptionNotice(`Přepis souboru „${file.name}“ byl přidán do kontextu. Text můžete upravit a pokračovat jako obvykle.`);
-        } catch (failure) {
-            if (!completed) setFailedAudioFile(file);
-            throw failure;
         }
+        setContextSource('text');
+        setTranscriptionNotice(queuedFiles.length === 1 ? 'Přepis byl přidán do kontextu.' : 'Přepisy byly přidány do kontextu.');
     });
     const publicUrl = saved ? getMessageUrl({ domain: values.domain, shortcode: `${values.prefix}-${saved.shortcode.split('-').at(-1)}` }) : '';
     const shareText = saved ? createMessageShareText(values.markdown, publicUrl) : '';
-    const busy = Boolean(operation) || recordingBusy;
-
     return <form ref={autosave.formRef} className="space-y-5" onSubmit={(event) => { event.preventDefault(); if (!saved && step === 2) void run('Vytvářím zprávu…', async () => { await save(); }); }}>
         <nav aria-label="Kroky zprávy" className="flex gap-2 border-b border-slate-200 pb-4">
             <Button type="button" variant={step === 1 ? 'default' : 'outline'} disabled={busy} onClick={() => setStep(1)}>1. Celý kontext</Button>
@@ -129,29 +151,41 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                 <Button type="button" variant={contextSource === 'text' ? 'secondary' : 'ghost'} disabled={busy} onClick={() => setContextSource(contextSource === 'text' ? 'meeting' : 'text')}>Napsat nebo upravit kontext{values.context ? ` (${new Intl.NumberFormat('cs-CZ').format(values.context.length)} znaků)` : ''}</Button>
             </div>
             <section hidden={contextSource !== 'file'} aria-label="Kontext z audia" className="space-y-3 rounded-xl border border-dashed border-slate-300 p-4"
-                onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = busy || !transcriptionConfigured || pendingTranscript ? 'none' : 'copy'; }}
+                onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = importDisabled ? 'none' : 'copy'; }}
                 onDrop={(event) => {
                     event.preventDefault();
-                    if (busy || !transcriptionConfigured || pendingTranscript) return;
-                    const files = event.dataTransfer.files;
-                    if (files.length !== 1) { setError('Přetáhněte jeden audio nebo video soubor.'); return; }
-                    void transcribe(files[0]);
+                    queueFiles(Array.from(event.dataTransfer.files));
                 }}>
-                <label className="block text-sm font-medium">Audio nebo video soubor
-                    <Input type="file" accept={MESSAGE_MEDIA_ACCEPT} disabled={busy || !transcriptionConfigured || Boolean(pendingTranscript)}
+                <label className="block text-sm font-medium">Audio nebo video soubory
+                    <Input type="file" multiple accept={MESSAGE_MEDIA_ACCEPT} disabled={importDisabled}
                         className="mt-2" onChange={(event) => {
-                            const file = event.currentTarget.files?.[0];
+                            const files = Array.from(event.currentTarget.files ?? []);
                             event.currentTarget.value = '';
-                            if (file) void transcribe(file);
+                            queueFiles(files);
                         }} aria-describedby="message-context-audio-help" />
                 </label>
                 <p id="message-context-audio-help" className="text-xs text-slate-500">{transcriptionConfigured
-                    ? 'Vyberte nebo přetáhněte nahrávku. Z videa (např. MP4) se zvuk oddělí přímo na zařízení. Do ElevenLabs se odešle jen audio (do 2 GB). Přepis s rozlišením řečníků doplní kontext a spotřebuje kredity.'
+                    ? 'Vyberte nebo přetáhněte nahrávky a seřaďte je podle průběhu schůzky. Z videa se zvuk oddělí na zařízení. Do ElevenLabs se odešle jen audio (do 2 GB na soubor). Přepis spotřebuje kredity.'
                     : 'Pro přepis chybí serverové nastavení ElevenLabs.'}</p>
-                {failedAudioFile && <Button type="button" variant="outline" disabled={busy || !transcriptionConfigured} onClick={() => void transcribe(failedAudioFile)}>Zkusit přepis znovu</Button>}
+                {queuedFiles.length > 0 && <>
+                    <ol aria-label="Pořadí nahrávek" className="space-y-1 text-sm">
+                        {queuedFiles.map(({ id, file }, index) => <li key={id} className="flex items-center gap-2">
+                            <span className="min-w-0 flex-1 break-words">{index + 1}. {file.name}</span>
+                            <Button type="button" variant="ghost" size="icon" disabled={importDisabled || index === 0}
+                                aria-label={`Posunout „${file.name}“ nahoru`} onClick={() => moveFile(index, index - 1)}><ArrowUp className="h-4 w-4" /></Button>
+                            <Button type="button" variant="ghost" size="icon" disabled={importDisabled || index === queuedFiles.length - 1}
+                                aria-label={`Posunout „${file.name}“ dolů`} onClick={() => moveFile(index, index + 1)}><ArrowDown className="h-4 w-4" /></Button>
+                            <Button type="button" variant="ghost" size="icon" disabled={importDisabled} aria-label={`Odebrat „${file.name}“`}
+                                onClick={() => setQueuedFiles(current => current.filter(entry => entry.id !== id))}><X className="h-4 w-4" /></Button>
+                        </li>)}
+                    </ol>
+                    <Button type="button" disabled={importDisabled} onClick={() => void transcribe()}>
+                        {queuedFiles.length === 1 ? 'Přepsat nahrávku' : 'Přepsat nahrávky'}
+                    </Button>
+                </>}
             </section>
             {transcriptionNotice && <p role="status" className="text-sm text-green-800">{transcriptionNotice}</p>}
-            <div hidden={contextSource !== 'text'} className="space-y-2"><label className="block text-sm font-medium">Celý kontext
+            <div hidden={contextSource !== 'text' && !pendingTranscript} className="space-y-2"><label className="block text-sm font-medium">Celý kontext
                 <Textarea value={values.context} onChange={(e) => update('context', e.target.value)} disabled={busy}
                     rows={17} maxLength={MESSAGE_CONTEXT_MAX_LENGTH} className="mt-2 font-mono text-sm" placeholder="Vložte konverzaci, podklady nebo celé myšlenky…" required />
             </label>
@@ -161,7 +195,9 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                     <Textarea value={pendingTranscript} readOnly rows={8} className="mt-2 font-mono text-sm" />
                 </label>
                 <Button type="button" variant="outline" disabled={busy} onClick={() => void run('Přidávám přepis…', async () => {
-                    update('context', appendMessageTranscript(values.context, pendingTranscript)); setPendingTranscript('');
+                    appendTranscript(pendingTranscript);
+                    setPendingTranscript('');
+                    setContextSource(queuedFiles.length ? 'file' : 'text');
                     setTranscriptionNotice('Dokončený přepis byl přidán do kontextu.');
                 })}>Přidat přepis do kontextu</Button>
             </section>}
@@ -225,7 +261,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             </> : <Button type="submit" disabled={busy}>Vytvořit zprávu</Button>}
         </>}
         {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        {operation && <p role="status" className="flex items-center gap-2 text-sm text-slate-600"><LoaderCircle className="h-4 w-4 animate-spin" />{operation}</p>}
+        {operation && <p role="status" className="flex items-center gap-2 text-sm text-slate-600"><LoaderCircle className="h-4 w-4 shrink-0 animate-spin" /><span className="min-w-0 break-words">{operation}</span></p>}
         {saved && <AdminAutosaveStatus {...autosave} />}
     </form>;
 }
