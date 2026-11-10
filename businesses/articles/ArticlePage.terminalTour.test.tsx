@@ -39,13 +39,18 @@ const community = {
 };
 
 describe('terminal recording links in community articles', () => {
-    it.each(['pece-o-kontakty', 'sprava-podcastu', 'udrzba-webu'])('shows one linked frame in the setup section of %s', (slug) => {
+    it.each([
+        ['pece-o-kontakty', '04-agenda.webp'],
+        ['sprava-podcastu', '06-podcast.webp'],
+        ['udrzba-webu', '07-web.webp'],
+    ])('shows its original agenda frame in the setup section of %s', (slug, filename) => {
         const html = renderToStaticMarkup(<ArticlePage article={{ ...article, slug }} publication="promptbook" community={community} />);
         const link = 'href="/cs/terminal"';
         expect(html.split(link)).toHaveLength(2);
         expect(html.indexOf(link)).toBeGreaterThan(html.indexOf('id="jak-tuhle-agendu-spustit"'));
         expect(html.indexOf(link)).toBeLessThan(html.indexOf('id="dalsi-kapitola"'));
-        expect(html).toContain(encodeURIComponent('/terminal-tour/04-agenda.webp'));
+        expect(html).toContain(`href="/terminal-tour/${filename}"`);
+        expect(html).toContain(`src="/terminal-tour/${filename}"`);
     });
 
     it('keeps the card out of other publications and unrelated articles', () => {

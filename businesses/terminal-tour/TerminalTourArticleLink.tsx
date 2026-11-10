@@ -1,18 +1,24 @@
 import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { TERMINAL_TOUR_PATH, TERMINAL_TOUR_STEPS } from './terminalTour';
+import { TERMINAL_TOUR_ARTICLE_FRAMES, TERMINAL_TOUR_PATH } from './terminalTour';
 import styles from './terminalTour.module.css';
 
-export function TerminalTourArticleLink() {
+export function TerminalTourArticleLink({ articleSlug }: { readonly articleSlug: string }) {
+    const frame = TERMINAL_TOUR_ARTICLE_FRAMES.get(articleSlug);
+    if (!frame) return null;
+
     return (
-        <Link className={styles.articleLink} href={TERMINAL_TOUR_PATH}>
-            <Image src={TERMINAL_TOUR_STEPS[3].imagePath} width={1600} height={900} sizes="144px" alt="" />
-            <span>
-                <strong>Ukázka z terminálu</strong>
-                <span>Od instalace Promptbooku po zadání vlastní agendy.</span>
-            </span>
-            <ArrowUpRight size={19} aria-hidden="true" />
-        </Link>
+        <figure className={styles.articleFrame}>
+            <a className={styles.stepPicture} href={frame.imagePath} aria-label={`Otevřít celý snímek · ${frame.title}`}>
+                <Image src={frame.imagePath} width={1600} height={900} alt={frame.imageAlt} unoptimized />
+            </a>
+            <figcaption className={styles.articleFrameCaption}>
+                <span>Zadání agendy · {frame.title}</span>
+                <Link href={TERMINAL_TOUR_PATH}>
+                    Zobrazit celý postup <ArrowUpRight size={16} aria-hidden="true" />
+                </Link>
+            </figcaption>
+        </figure>
     );
 }

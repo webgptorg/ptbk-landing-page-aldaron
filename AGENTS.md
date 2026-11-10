@@ -165,9 +165,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The remaining text and downloads still require its own session.
   Fenced Book examples in the full article use the existing light, read-only BookEditor when near the viewport.
   The server-rendered source remains the fallback and preserves word tracking during narration.
-  The Czech Promptbook articles about contacts, podcast production, and web maintenance link to the terminal
-  recording from their setup sections in the full reader. The public `/cs/terminal` page presents the same
-  genuine CLI capture and five frames. Its MP4 and WebP files are public static assets under `/terminal-tour/`.
+  The Czech Promptbook articles about contacts, podcast production, and web maintenance show their own
+  full-width agenda frame and link to the terminal recording from their setup sections in the full reader.
+  The public `/cs/terminal` page presents the genuine CLI capture, five walkthrough frames and two alternate
+  agenda frames. It describes project setup without an AI tool and the environment-specific IPC startup failure.
+  Its MP4 and WebP files are public static assets under `/terminal-tour/`.
   The four `articles/podcast.xml` routes still have deterministic initial prerenders and refresh hourly for admin
   publications. Only reviewed, existing audio becomes an episode. Managed audio, PDF, timing and subtitles use
   immutable uploads to the private shared object bucket and are served from checked publication routes, with byte

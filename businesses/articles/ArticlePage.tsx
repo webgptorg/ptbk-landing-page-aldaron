@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight, Download, List } from 'lucide-react';
 import type { CommunityId } from '@/businesses/community/config';
 import { TerminalTourArticleLink } from '@/businesses/terminal-tour/TerminalTourArticleLink';
-import { TERMINAL_TOUR_ARTICLE_SECTION_ID, TERMINAL_TOUR_ARTICLE_SLUGS } from '@/businesses/terminal-tour/terminalTour';
+import { TERMINAL_TOUR_ARTICLE_SECTION_ID } from '@/businesses/terminal-tour/terminalTour';
 import type { Article, ArticlePublication } from '@/lib/articles/types';
 import { getArticleAssetUrl, getArticleIndexUrl, getArticlePodcastUrl, getArticleUrl } from '@/lib/articles/urls';
 import { ArticleHeader, ArticleFooter } from './ArticleShell';
@@ -38,7 +38,7 @@ export function ArticlePage({ article, publication, community }: {
         author: { name: article.author.name, photoUrl: article.author.photoUrl },
     };
     const isAnchoringArticle = article.translationGroupId === 'spec-driven-anchoring';
-    const hasTerminalTour = community?.id === 'promptbook' && cs && article.managed && TERMINAL_TOUR_ARTICLE_SLUGS.has(article.slug);
+    const isCzechPromptbookArticle = community?.id === 'promptbook' && cs && article.managed;
     let explorerInserted = false;
     const sections = document.sections.map((section, index) => {
         const showExplorer = isAnchoringArticle && !explorerInserted && Boolean(section.id?.startsWith('anchoring'));
@@ -50,7 +50,9 @@ export function ArticlePage({ article, publication, community }: {
             <div key={section.id ?? `introduction-${index}`}>
                 <div dangerouslySetInnerHTML={{ __html: section.html }} />
                 {showExplorer && <AnchoringExplorer language={article.language} />}
-                {hasTerminalTour && section.id === TERMINAL_TOUR_ARTICLE_SECTION_ID && <TerminalTourArticleLink />}
+                {isCzechPromptbookArticle && section.id === TERMINAL_TOUR_ARTICLE_SECTION_ID && (
+                    <TerminalTourArticleLink articleSlug={article.slug} />
+                )}
             </div>
         );
     });

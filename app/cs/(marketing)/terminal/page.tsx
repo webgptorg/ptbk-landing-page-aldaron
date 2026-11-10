@@ -1,5 +1,6 @@
 import { COMMUNITIES } from '@/businesses/community/config';
 import {
+    TERMINAL_TOUR_OTHER_AGENDAS,
     TERMINAL_TOUR_PAGE_DEFINITION,
     TERMINAL_TOUR_RECORDED_VERSION,
     TERMINAL_TOUR_STEPS,
@@ -43,6 +44,7 @@ export default function TerminalTourPage() {
                             {'commands' in step && <div className={styles.commands}>
                                 {step.commands.map((command) => <code key={command}>{command}</code>)}
                             </div>}
+                            {'note' in step && <p className={styles.stepNote}>{step.note}</p>}
                         </div>
                         <a className={styles.stepPicture} href={step.imagePath} aria-label={`Otevřít celý snímek · ${step.title}`}>
                             <Image src={step.imagePath} width={1600} height={900} alt={step.imageAlt} sizes="(max-width: 720px) 90vw, (max-width: 1180px) 57vw, 680px" />
@@ -50,6 +52,19 @@ export default function TerminalTourPage() {
                     </li>
                 ))}
             </ol>
+            <details className={styles.otherAgendas}>
+                <summary>Další příklady zadání</summary>
+                <div className={styles.otherAgendaFrames}>
+                    {TERMINAL_TOUR_OTHER_AGENDAS.map((frame) => (
+                        <figure key={frame.imagePath}>
+                            <a className={styles.stepPicture} href={frame.imagePath} aria-label={`Otevřít celý snímek · ${frame.title}`}>
+                                <Image src={frame.imagePath} width={1600} height={900} alt={frame.imageAlt} unoptimized />
+                            </a>
+                            <figcaption>{frame.title}</figcaption>
+                        </figure>
+                    ))}
+                </div>
+            </details>
             <nav className={styles.links} aria-label="Další kroky">
                 <Link href="/cs/open-source">Instalační návod</Link>
                 <Link href={`${COMMUNITIES.promptbook.path}#clanky`}>Články komunity Promptbook</Link>
