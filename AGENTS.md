@@ -167,6 +167,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   links syndicated cards to the selected canonical URL. Members-only previews supply just the public card, with
   no private body or recording. The personal RSS adds syndicated articles only with public, current audio and
   links to the same canonical URL, retaining the article ID even if its destinations change.
+  The Promptbook community has its own podcast at `/cs/komunity/promptbook/podcast.xml`. It uses the same
+  episode format, GUID and audio URL for articles publicly placed in that community, and links to the selected
+  canonical address. The room offers the shared subscription dialog before and after joining.
   Fenced Book examples in the full article use the existing light, read-only BookEditor when near the viewport.
   The server-rendered source remains the fallback and preserves word tracking during narration.
   Article images and links to image files open a keyboard-accessible preview on the article page.
@@ -930,6 +933,9 @@ inclusive cutover when changing the projection. Preserve the purpose and evidenc
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.
 
 ### Administration and data rules
+
+- `/admin/feeds` lists the ecosystem's public RSS and calendar subscriptions for signed-in admins.
+  Use the existing publication addresses and Google Calendar subscription links in that directory.
 
 - Workshop and community settings render their shared `WorkshopSettingsForm` directly in the Settings tab,
   with autosave and navigation protection. Other admin creation and editing use the shared `AdminEditorDialog`

@@ -1,4 +1,5 @@
 import { COMMUNITIES, COMMUNITIES_PATH, DEFAULT_COMMUNITY_ID, LEGACY_COMMUNITY_TITLE, type CommunityDefinition } from '@/businesses/community/config';
+import { PROMPTBOOK_COMMUNITY_PODCAST } from '@/businesses/community/communityPodcast';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
 import type { PageMetadataDefinition } from '@/lib/metadata/page-metadata-definition';
@@ -27,8 +28,12 @@ function createCommunityPageDefinition(community: CommunityDefinition): PageMeta
 }
 
 export function createCommunityMetadata(community: CommunityDefinition): Metadata {
+    const metadata = createPageMetadata(createCommunityPageDefinition(community));
     return {
-        ...createPageMetadata(createCommunityPageDefinition(community)),
+        ...metadata,
+        ...(community.id === 'promptbook' && {
+            alternates: { ...metadata.alternates, types: { 'application/rss+xml': PROMPTBOOK_COMMUNITY_PODCAST.feedUrl } },
+        }),
         // Participant links can contain prefilled name and e-mail.
         referrer: 'origin',
     };

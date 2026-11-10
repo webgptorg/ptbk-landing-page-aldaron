@@ -3,12 +3,13 @@ import {
     ADMIN_CONTACTS_PATH,
     ADMIN_DASHBOARD_PATH,
     ADMIN_DISCOUNT_CODES_PATH,
+    ADMIN_FEEDS_PATH,
     ADMIN_WORKSHOPS_PATH,
 } from '@/lib/admin/adminConstants';
 import { ADMIN_SHORTENER_PATH } from '@/lib/shortener/shortcodeLinkConstants';
 import { STUDIO_PATH } from '@/lib/recording-studio/studioProjectTypes';
 import { ADMIN_USERS_PATH } from '@/lib/admin/adminUserSchemas';
-import { Bot, MessageSquareText, ContactRound, FileText, LayoutDashboard, Link2, Radio, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
+import { Bot, MessageSquareText, ContactRound, FileText, LayoutDashboard, Link2, Radio, Rss, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
 
 export type AdminNavigationItem = {
     readonly path: string;
@@ -50,6 +51,12 @@ export const ADMIN_NAVIGATION_ITEMS: readonly AdminNavigationItem[] = [
         label: 'Články',
         description: 'Obsah, autoři a publikování na webech a v komunitách.',
         icon: FileText,
+    },
+    {
+        path: ADMIN_FEEDS_PATH,
+        label: 'Feeds',
+        description: 'Veřejné RSS a odběry kalendářů napříč weby.',
+        icon: Rss,
     },
     {
         path: STUDIO_PATH,

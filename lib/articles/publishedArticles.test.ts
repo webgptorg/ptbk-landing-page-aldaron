@@ -20,6 +20,7 @@ vi.mock('./managedArticles', async (load) => ({
 }));
 
 import { canReadCommunityMemberArticle } from '@/lib/community-membership/communityMembershipArticleAccess';
+import { GET as getPromptbookCommunityPodcast } from '@/app/cs/komunity/promptbook/podcast.xml/route';
 import { getArticle } from './load';
 import { getLegacyArticlePlacements } from './legacyArticlePlacements';
 import { getManagedArticleContentHash, readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
@@ -159,6 +160,40 @@ describe('article destination resolution', () => {
         expect(memberListing).not.toHaveProperty('audio');
         expect(getArticleListingHref(listings.find((article) => article.id === alternateCanonical.id)!, 'personal'))
             .toBe('https://ptbk.io/cs/articles/jina-kanonicka-adresa');
+        expect(canReadCommunityMemberArticle).not.toHaveBeenCalled();
+    });
+
+    it('publishes only playable public Promptbook community articles in its independent podcast', async () => {
+        const row: ManagedArticleRow = {
+            id: 'public', revision: 'revision', language: 'en', slug: 'community-article', title: 'Public article',
+            perex: 'Public summary.', markdown: 'Full article.', author_id: 'pavol-hejny',
+            placements: [{ destination: 'promptbook', visibility: 'public' }, { destination: 'personal-blog', visibility: 'public' }],
+            canonical_destination: 'personal-blog',
+            published_at: '2026-11-10T11:00:00Z', created_at: '2026-11-10T11:00:00Z', updated_at: '2026-11-10T11:00:00Z',
+            audio_asset: null, pdf_asset: null, words_asset: null, subtitles_asset: null,
+        };
+        const audio = { key: 'recording.mp3', byteLength: 4096, duration: 60, contentHash: getManagedArticleContentHash(row) };
+        const legacy = getArticle('co-prichazi-po-generovani-kodu', 'cs')!;
+        vi.mocked(getLegacyArticlePlacements).mockResolvedValue({
+            [legacy.id]: { communities: ['promptbook'], canonicalDestination: 'promptbook' },
+        });
+        vi.mocked(readPublishedManagedArticles).mockResolvedValue([
+            { ...row, audio_asset: audio },
+            { ...row, id: 'pending', slug: 'pending' },
+            { ...row, id: 'members', slug: 'members', audio_asset: audio,
+                placements: [{ destination: 'promptbook', visibility: 'members' }, { destination: 'personal-blog', visibility: 'public' }] },
+            { ...row, id: 'elsewhere', slug: 'elsewhere', audio_asset: audio, placements: [{ destination: 'personal-blog', visibility: 'public' }] },
+        ]);
+
+        const response = await getPromptbookCommunityPodcast();
+        const xml = await response.text();
+        expect(response.headers.get('Content-Type')).toBe('application/rss+xml; charset=utf-8');
+        expect(xml).toContain('<atom:link href="https://ptbk.io/cs/komunity/promptbook/podcast.xml"');
+        expect(xml).toContain('<link>https://pavolhejny.com/articles/community-article</link>');
+        expect(xml).toContain('<enclosure url="https://ptbk.io/api/articles/media/public/audio"');
+        expect(xml).toContain(`<link>https://ptbk.io/cs/komunity/promptbook/clanky/cs/${legacy.slug}</link>`);
+        expect(Array.from(xml.matchAll(/<guid isPermaLink="false">([^<]+)<\/guid>/g), ([, id]) => id)).toEqual(['public', legacy.id]);
+        expect(readPublishedManagedArticles).toHaveBeenCalledWith(undefined, 'promptbook', true);
         expect(canReadCommunityMemberArticle).not.toHaveBeenCalled();
     });
 });

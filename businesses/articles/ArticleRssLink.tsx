@@ -6,8 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import type { ArticleLanguage } from '@/lib/articles/types';
 
 /** A subscription is a choice of actions, never an unexpected XML navigation. */
-export function ArticleRssLink({ url, language, label, className = 'article-text-link' }: {
-    readonly url: string; readonly language: ArticleLanguage; readonly label?: string; readonly className?: string;
+export function ArticleRssLink({ url, language, label, title, className = 'article-text-link' }: {
+    readonly url: string; readonly language: ArticleLanguage; readonly label?: string; readonly title?: string; readonly className?: string;
 }) {
     const [status, setStatus] = useState('');
     const cs = language === 'cs';
@@ -16,7 +16,7 @@ export function ArticleRssLink({ url, language, label, className = 'article-text
     return <Dialog onOpenChange={() => setStatus('')}>
         <DialogTrigger asChild><button type="button" className={`inline-flex items-center gap-2 ${className}`}><Rss size={17} aria-hidden="true" />{label ?? (cs ? 'Odebírat podcast' : 'Subscribe to the podcast')}</button></DialogTrigger>
         <DialogContent className="max-w-md bg-[#faf8f2] text-[#203932]">
-            <DialogHeader><DialogTitle>{cs ? `Podcast ${brand}` : `${brand} podcast`}</DialogTitle>
+            <DialogHeader><DialogTitle>{title ?? (cs ? `Podcast ${brand}` : `${brand} podcast`)}</DialogTitle>
                 <DialogDescription>{cs ? 'Zkopíruj odkaz do své podcastové aplikace, nebo si otevři RSS.' : 'Copy the feed into your podcast app, or open the RSS file.'}</DialogDescription>
             </DialogHeader>
             <input type="text" readOnly value={url} aria-label={cs ? 'Adresa podcastu' : 'Podcast feed address'} onFocus={event => event.currentTarget.select()} className="w-full rounded-xl border border-[#d8dfd7] bg-white p-3 text-sm" />

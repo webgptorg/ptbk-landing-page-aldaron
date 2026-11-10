@@ -6,7 +6,7 @@ import { canReadCommunityMemberArticle } from '@/lib/community-membership/commun
 import { getArticleAuthor } from './authors';
 import { getAllArticles } from './load';
 import { applyLegacyArticlePlacements, getLegacyArticlePlacements } from './legacyArticlePlacements';
-import { isArticleCommunity, type ManagedArticleDestination, type ManagedArticlePlacement } from './managedArticleInput';
+import { isArticleCommunity, type ArticleCommunity, type ManagedArticleDestination, type ManagedArticlePlacement } from './managedArticleInput';
 import { getManagedArticleAssetPath, getManagedArticleUrl } from './managedArticleUrls';
 import { getCurrentManagedArticleAsset, readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
 import type { Article, ArticleLanguage, ArticleListing, ArticlePublication } from './types';
@@ -154,25 +154,44 @@ type CommunityArticleCard = Pick<Article, 'id' | 'title' | 'perex' | 'language' 
     readonly hasAudio: boolean;
 };
 
-export async function getCommunityArticleCards(
-    community: 'vyvojari' | 'promptbook',
-    waitingRoom = false,
-): Promise<readonly CommunityArticleCard[]> {
+async function getCommunityArticleSources(community: ArticleCommunity, publicOnly: boolean) {
     const [rows, legacyPlacements] = await Promise.all([
-        readPublishedManagedArticles(undefined, community, waitingRoom && community !== 'promptbook'),
+        readPublishedManagedArticles(undefined, community, publicOnly),
         getLegacyArticlePlacements(),
     ]);
     const legacyArticles = getAllArticles();
-    const legacy = legacyArticles.filter((article) => legacyPlacements[article.id]?.communities.includes(community))
+    const legacy = legacyArticles.filter((article) => legacyPlacements[article.id]?.communities.includes(community));
+    const reservedSlugs = new Set(legacyArticles.map((article) => `${article.language}/${article.slug}`));
+    return {
+        legacy: legacy.map((article) => applyLegacyArticlePlacements(article, legacyPlacements, legacyArticles)),
+        rows: rows.filter((row) => !reservedSlugs.has(`${row.language}/${row.slug}`)),
+    };
+}
+
+/** Select public community placements without consulting a visitor's membership session. */
+export async function getPublicCommunityArticles(community: ArticleCommunity): Promise<Article[]> {
+    const { rows, legacy } = await getCommunityArticleSources(community, true);
+    return [...legacy, ...rows.flatMap((row) => {
+        const placement = getArticlePlacement(row, community);
+        const article = placement?.visibility === 'public' ? toPublishedArticle(row, placement) : null;
+        return article ? [article] : [];
+    })];
+}
+
+export async function getCommunityArticleCards(
+    community: ArticleCommunity,
+    waitingRoom = false,
+): Promise<readonly CommunityArticleCard[]> {
+    const { rows, legacy } = await getCommunityArticleSources(community, waitingRoom && community !== 'promptbook');
+    const legacyCards = legacy
         .map(({ id, title, perex, language, slug, publishedAt, author, audio }) => ({
             id, title, perex, language, slug, publishedAt, authorName: author.name, hasAudio: Boolean(audio),
         }));
-    const reservedSlugs = new Set(legacyArticles.map((article) => `${article.language}/${article.slug}`));
     const accessByVisibility = new Map<ManagedArticlePlacement['visibility'], Promise<boolean>>();
     const articles = await Promise.all(rows.map(async (row): Promise<CommunityArticleCard | null> => {
         const placement = getArticlePlacement(row, community);
         const author = getArticleAuthor(row.author_id);
-        if (!placement || !author || !row.published_at || reservedSlugs.has(`${row.language}/${row.slug}`)) return null;
+        if (!placement || !author || !row.published_at) return null;
 
         if (placement.visibility !== 'public' && !offersFreeArticleTeaser(community, placement)) {
             if (waitingRoom) return null;
@@ -189,7 +208,7 @@ export async function getCommunityArticleCards(
             publishedAt: row.published_at, authorName: author.name, hasAudio: Boolean(getCurrentManagedArticleAsset(row, 'audio')),
         };
     }));
-    return [...legacy, ...articles.filter((article): article is CommunityArticleCard => article !== null)]
+    return [...legacyCards, ...articles.filter((article): article is CommunityArticleCard => article !== null)]
         .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
 }
 

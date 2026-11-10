@@ -62,6 +62,9 @@ export function getCommunityByRoomSlug(roomSlug: string): CommunityDefinition | 
 /** The existing community keeps its room, subscriptions, projects and historical calendar feed. */
 export const COMMUNITY_PATH = COMMUNITIES[DEFAULT_COMMUNITY_ID].path;
 
+/** The Promptbook room has its own public audio subscription. */
+export const PROMPTBOOK_COMMUNITY_PODCAST_PATH = `${COMMUNITIES.promptbook.path}/podcast.xml`;
+
 /**
  * The public index of creations shared by community members.
  */

@@ -45,6 +45,7 @@ const nextConfig = {
         '/en/articles/**': ['./articles/**/*'],
         '/cs/pavol/articles/**': ['./articles/**/*'],
         '/en/pavol/articles/**': ['./articles/**/*'],
+        '/cs/komunity/promptbook/podcast.xml': ['./articles/**/*'],
         '/cs/pavol/sitemap.xml': ['./articles/**/*'],
         '/en/pavol/sitemap.xml': ['./articles/**/*'],
         '/sitemap.xml': ['./articles/**/*'],

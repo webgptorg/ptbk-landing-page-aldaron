@@ -1,3 +1,5 @@
+import { ADMIN_DASHBOARD_PATH, ADMIN_FEEDS_PATH } from './adminConstants';
+
 /** One registry for delegated access, navigation and the account editor. Users never grant access themselves. */
 export const ADMIN_PERMISSION_DEFINITIONS = [
     { id: 'workshops', label: 'Živé workshopy', path: '/admin/workshops' },
@@ -53,7 +55,7 @@ export function isPathWithin(pathname: string, root: string): boolean {
 export function canAccessAdminPath(identity: AdminIdentity, path: string): boolean {
     if (!path.startsWith('/') || path.startsWith('//')) return false;
     const pathname = new URL(path, 'https://admin.invalid').pathname;
-    if (pathname === '/admin') return true;
+    if (pathname === ADMIN_DASHBOARD_PATH || pathname === ADMIN_FEEDS_PATH) return true;
     if (!isPathWithin(pathname, '/admin') || isPathWithin(pathname, '/admin/login')) return false;
     if (identity.isSuperAdmin) return true;
     const permission = ADMIN_PERMISSION_DEFINITIONS.find((definition) => isPathWithin(pathname, definition.path))?.id;

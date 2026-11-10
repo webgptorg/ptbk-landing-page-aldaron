@@ -38,6 +38,7 @@ export const ADMIN_DASHBOARD_PATH = '/admin';
 export const ADMIN_LOGIN_PATH = '/admin/login';
 export const ADMIN_WORKSHOPS_PATH = '/admin/workshops';
 export const ADMIN_CONTACTS_PATH = '/admin/contacts';
+export const ADMIN_FEEDS_PATH = '/admin/feeds';
 export const ADMIN_DISCOUNT_CODES_PATH = '/admin/discount-codes';
 
 /**

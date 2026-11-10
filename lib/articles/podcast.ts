@@ -72,12 +72,12 @@ export function hasPublishableAudio(article: Pick<Article, 'audio'>): boolean {
     );
 }
 
-function createEpisodeXml(article: Article, publication: ArticlePublication): string {
+function createEpisodeXml(article: Article, articleUrl: string): string {
     const audio = article.audio!;
-    const articleUrl = getArticleUrl(article, publication);
     const articleLabel = article.language === 'cs' ? 'Číst článek' : 'Read the article';
     const originalLabel = article.language === 'cs' ? 'Autorský originál' : 'Canonical original';
-    const description = `<p>${xml(article.perex)}</p><p><a href="${xml(articleUrl)}">${articleLabel}</a> · <a href="${xml(article.canonicalUrl)}">${originalLabel}</a></p>`;
+    const originalLink = articleUrl === article.canonicalUrl ? '' : ` · <a href="${xml(article.canonicalUrl)}">${originalLabel}</a>`;
+    const description = `<p>${xml(article.perex)}</p><p><a href="${xml(articleUrl)}">${articleLabel}</a>${originalLink}</p>`;
     const imageUrl = article.coverImage && isPublicHttpUrl(article.coverImage) ? article.coverImage : undefined;
 
     return `    <item>
@@ -110,14 +110,24 @@ export function createArticlePodcastFeed(
     language: ArticleLanguage,
     publication: ArticlePublication,
 ): string {
-    const definition = getArticlePodcastDefinition(language, publication);
+    return renderArticlePodcastFeed(
+        articles.filter((article) => article.language === language
+            && (publication === 'promptbook' || article.managed || article.authorId === 'pavol-hejny')),
+        language,
+        getArticlePodcastDefinition(language, publication),
+        (article) => getArticleUrl(article, publication),
+    );
+}
+
+/** Render the same episode format for any selection of publicly placed articles. */
+export function renderArticlePodcastFeed(
+    articles: readonly Article[],
+    language: ArticleLanguage,
+    definition: ArticlePodcastDefinition,
+    articleUrl: (article: Article) => string,
+): string {
     const episodes = articles
-        .filter(
-            (article) =>
-                article.language === language &&
-                (publication === 'promptbook' || article.managed || article.authorId === 'pavol-hejny') &&
-                hasPublishableAudio(article),
-        )
+        .filter(hasPublishableAudio)
         .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
     const newestPublication = episodes[0]?.publishedAt;
 
@@ -137,7 +147,7 @@ export function createArticlePodcastFeed(
     <itunes:image href="${xml(definition.imageUrl)}" />
     <image><url>${xml(definition.imageUrl)}</url><title>${xml(definition.title)}</title><link>${xml(definition.websiteUrl)}</link></image>${
         newestPublication ? `\n    <pubDate>${xml(new Date(newestPublication).toUTCString())}</pubDate>` : ''
-    }${episodes.length ? `\n${episodes.map((article) => createEpisodeXml(article, publication)).join('\n')}` : ''}
+    }${episodes.length ? `\n${episodes.map((article) => createEpisodeXml(article, articleUrl(article))).join('\n')}` : ''}
   </channel>
 </rss>
 `;
