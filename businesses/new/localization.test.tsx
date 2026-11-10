@@ -99,17 +99,20 @@ describe('bilingual launch site', () => {
         const element=document.createElement('div');element.innerHTML=html(<ComparisonsPage/>);
         expect(COMPARISONS.length).toBeGreaterThanOrEqual(13);
         expect(element.querySelectorAll('tbody tr').length).toBe(COMPARISONS.length + 1);
-        for (const slug of ['grok-bot','openai-dots','meta-muse','chatgpt']) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();
+        for (const { slug } of COMPARISONS) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();
         expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(COMPARISONS.length);
     });
-    it('links every comparison from the footer and renders a sourced head-to-head table in both languages', () => {
+    it('shows six comparisons and an overview link in the footer and renders sourced details in both languages', () => {
         const shell = document.createElement('div');
         shell.innerHTML = renderToStaticMarkup(<NewSiteShell><div /></NewSiteShell>);
         const nav = shell.querySelector('footer nav[aria-label="Promptbook versus"]');
-        expect(nav?.querySelectorAll('li').length).toBe(COMPARISONS.length);
+        expect(Array.from(nav?.querySelectorAll('a') ?? [], link => link.getAttribute('href'))).toEqual([
+            ...COMPARISONS.slice(0, 6).map(({ slug }) => `/en/srovnani/${slug}`),
+            '/en/srovnani',
+        ]);
+        expect(nav?.querySelector('a[href="/en/srovnani"]')?.textContent).toBe('All comparisons');
 
         for (const item of COMPARISONS) {
-            expect(nav?.querySelector(`a[href="/en/srovnani/${item.slug}"]`)).not.toBeNull();
             for (const locale of ['cs', 'en'] as const) {
                 const page = document.createElement('div');
                 page.innerHTML = html(<ComparisonPage slug={item.slug} />, locale);

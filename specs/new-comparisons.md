@@ -1,6 +1,6 @@
 # Srovnání alternativ
 
-Patička webu má v češtině i angličtině sekci **Promptbook versus** s přímým odkazem na každé srovnání. Nadpis vede na společný přehled `/[locale]/srovnani`. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`. Stávající adresy zůstávají dostupné.
+Patička webu má v češtině i angličtině sekci **Promptbook versus** s odkazy na prvních šest srovnání z přehledu. Poslední odkaz vede na úplný přehled `/[locale]/srovnani`. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`.
 
 Detail začíná konkrétním důvodem, proč pro danou situaci zvažovat Promptbook. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení a doporučení jsou rozbalitelná pod tabulkou. Přehled používá stejné hodnoty pro vlastní provoz a plánované úlohy. Zdroje jsou dostupné u obou pohledů.
 

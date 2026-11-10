@@ -1,7 +1,7 @@
 .grid.grid { grid-template-columns: 1.1fr .8fr 1fr 1.15fr 1.25fr; align-items: start; gap: 36px; }
 .grid nav > strong { margin-bottom: 6px; font-size: 13px; line-height: 1.5; }
-.comparisons, .documents { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
-.comparisons a, .documents a { display: inline-block; line-height: 1.6; padding-block: 2px; }
+.documents { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
+.documents a { display: inline-block; line-height: 1.6; padding-block: 2px; }
 .socials { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; }
 .socials a { display: inline-flex; align-items: center; min-height: 28px; }
 .details {
