@@ -142,7 +142,7 @@ export function ComparisonsPage() {
 
     return <>
         <PageIntro title={cs ? 'Srovnání všech nástrojů' : 'Compare all tools'}>
-            {cs ? `Promptbook a ${COMPARISONS.length} alternativ v jedné tabulce. Kliknutím na alternativu otevřete detail.` : `Promptbook and ${COMPARISONS.length} alternatives in one table. Select an alternative to open its comparison.`}
+            {cs ? `Promptbook a ${COMPARISONS.length} alternativ v jedné tabulce. Kliknutím na název alternativy otevřete detail.` : `Promptbook and ${COMPARISONS.length} alternatives in one table. Select an alternative’s name to open its comparison.`}
         </PageIntro>
         <ComparisonTable />
         <ClosingCta />

@@ -2,7 +2,7 @@ import type { SiteLocale } from './localization';
 
 type Copy = Readonly<Record<SiteLocale, string>>;
 type ComparisonRow = 'runtime' | 'continuity' | 'workspace' | 'model' | 'automation';
-export type ComparisonStatus = 'yes' | 'no' | 'conditional' | 'unknown';
+export type ComparisonStatus = 'yes' | 'no' | 'conditional' | 'partial' | 'unknown';
 export type ComparisonValue = Copy & { status?: ComparisonStatus };
 type ComparisonSummary = Record<ComparisonRow, ComparisonValue> & { useCase: Copy };
 
@@ -73,7 +73,7 @@ export const PROMPTBOOK_SUMMARY: ComparisonSummary = {
     automation: value('Opakované úlohy agentů', 'Recurring agent tasks', 'yes'),
 };
 
-export const COMPARISONS: readonly Comparison[] = [
+export const COMPARISONS = [
     {
         slug: 'grok-bot',
         name: 'Grok Bot',
@@ -111,6 +111,7 @@ export const COMPARISONS: readonly Comparison[] = [
             ['OpenClaw automations', 'https://docs.openclaw.ai/cron'],
             ['OpenClaw multi-agent routing', 'https://docs.openclaw.ai/multi-agent'],
             ['OpenClaw workspace setup', 'https://docs.openclaw.ai/start/openclaw'],
+            ['OpenClaw agent workspaces and sessions', 'https://docs.openclaw.ai/concepts/agent'],
         ],
         advantage: {
             cs: 'Když chcete týmu předat celou agendu, třeba zpracování podcastu od přepisu po podklady k publikaci. Role, úkoly a konverzace jsou soubory jednoho projektu a změny můžete projít v Gitu.',
@@ -225,6 +226,7 @@ export const COMPARISONS: readonly Comparison[] = [
             ['Google: Duet AI becomes Gemini for Google Workspace', 'https://blog.google/products-and-platforms/products/workspace/google-gemini-workspace/'],
             ['Google Workspace Studio', 'https://workspace.google.com/studio/'],
             ['Workspace Studio starters and steps', 'https://support.google.com/workspace-studio/table/17176961?hl=en'],
+            ['Workspace Studio limits', 'https://support.google.com/workspace-studio/answer/16765942?hl=en'],
         ],
         advantage: {
             cs: 'Když jedna agenda potřebuje firemní složky, terminál i webové nástroje. Třeba když agent přepíše lokální nahrávku, připraví článek a předá ho do redakčního systému.',
@@ -340,6 +342,7 @@ export const COMPARISONS: readonly Comparison[] = [
             ['n8n platform and self-hosting', 'https://github.com/n8n-io/n8n'],
             ['n8n self-hosted AI starter kit', 'https://docs.n8n.io/deploy/host-n8n/deploy-with-the-ai-starter-kit.md'],
             ['n8n Schedule Trigger', 'https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.scheduletrigger/'],
+            ['n8n Git and environments', 'https://docs.n8n.io/source-control-environments/'],
         ],
         advantage: {
             cs: 'Když další krok závisí na tom, co agent najde. Třeba při zpracování nejednotných dokladů dostane pravidla pro třídění i výjimky a podle výsledku zvolí další krok.',
@@ -447,4 +450,17 @@ export const COMPARISONS: readonly Comparison[] = [
             fit: { cs: 'Když už pracujete v Microsoft 365 a chcete, aby událost v Power Platform spustila agenta s firemními konektory a existující správou prostředí.', en: 'When you already use Microsoft 365 and want a Power Platform event to trigger an agent with company connectors and existing environment administration.' },
         },
     },
-];
+] as const satisfies readonly Comparison[];
+
+/** A specific project-history difference for tools that also run on your own host. */
+export const PROJECT_HISTORY_COMPARISON = {
+    label: { cs: 'Úkoly a chaty v Gitu projektu', en: 'Tasks and chats in project Git' },
+    promptbook: value('Soubory .book v jednom repozitáři', '.book files in one repository', 'yes'),
+    alternatives: {
+        openclaw: value('Git pro pracovní složku, relace zvlášť', 'Git for workspace files, separate sessions', 'partial'),
+        'claude-code': value('Git pro kód, úlohy a relace zvlášť', 'Git for code, separate tasks and sessions', 'partial'),
+        codex: value('Git pro kód, úlohy a relace zvlášť', 'Git for code, separate tasks and sessions', 'partial'),
+        n8n: value('Git pro workflow, historie běhů zvlášť', 'Git for workflows, separate run history', 'partial'),
+        paperclip: value('Git pro pracovní soubory, úkoly v Paperclipu', 'Git for working files, tasks in Paperclip', 'partial'),
+    } as Readonly<Partial<Record<string, ComparisonValue>>>,
+};
