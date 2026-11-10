@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/twenty-contact-sync",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
