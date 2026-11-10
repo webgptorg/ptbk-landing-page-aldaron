@@ -355,6 +355,31 @@ test('all information and comparison routes stay within the new website',async({
     expect((await visit(page, '/cs/srovnani/not-a-vendor'))?.status()).toBe(404);
 });
 
+test('mobile comparison headings stay clear of the navigation after a footer link and scroll', async ({page}) => {
+    await page.setViewportSize({width:375,height:812});
+    for (const locale of ['cs', 'en']) {
+        await visit(page, `/${locale}`);
+        const footer = page.getByRole('navigation', {name:'Promptbook versus'});
+        await footer.getByRole('link', {name:'OpenClaw', exact:true}).click();
+        await expect(page).toHaveURL(new RegExp(`/${locale}/srovnani/openclaw$`));
+
+        const heading = page.getByRole('heading', {name:'Promptbook versus OpenClaw', exact:true});
+        const navigation = page.getByRole('banner');
+        const headingTop = async () => (await heading.boundingBox())!.y;
+        const navigationBottom = async () => {
+            const box = (await navigation.boundingBox())!;
+            return box.y + box.height;
+        };
+        expect(await headingTop()).toBeGreaterThanOrEqual(await navigationBottom());
+
+        await heading.evaluate(element => {
+            window.scrollBy({top:element.getBoundingClientRect().top - 12, behavior:'instant'});
+        });
+        await expect.poll(headingTop).toBeLessThan(16);
+        expect(await headingTop()).toBeGreaterThanOrEqual(await navigationBottom());
+    }
+});
+
 test('mobile pages, keyboard tabs and reduced motion remain usable',async({page})=>{
     await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:375,height:812});
     for(const path of ['/cs','/cs/partnership','/cs/open-source','/en','/en/partnership','/en/open-source','/cs/kalkulacka','/cs/o-nas']){await visit(page, path);await expect(page.locator('main h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),path).toBe(true);}

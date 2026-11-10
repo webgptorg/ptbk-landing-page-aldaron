@@ -372,6 +372,9 @@
 .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:1100px){.desktopNav{gap:12px;font-size:12px}.headerInner{gap:12px}.headerAction .button{font-size:11px;padding:10px 12px}}
 @media(max-width:900px){.languageSwitch{margin-left:auto}.headerInner{gap:14px}}
+@media (max-width: 760px) {
+    .site:has(main .comparisonTable) .header { position: relative; }
+}
 @media(max-width:600px){.headerInner{padding:10px 24px}.logo{font-size:23px}.tableScroll{border-radius:18px}.comparisonSection{padding:35px 0 55px}.comparisonTable{font-size:13px}.comparisonTable th,.comparisonTable td{padding:10px 8px}.numberHighlight{font-size:clamp(24px,7vw,40px)}}
 @media(max-width:420px){.headerInner{padding-inline:20px}}
 @media(prefers-reduced-motion:reduce){.site .button,.site .secondaryButton{transition:none}.site .button:hover{transform:none}}

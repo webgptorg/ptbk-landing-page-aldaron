@@ -4,6 +4,8 @@ Patička webu má v češtině i angličtině sekci **Promptbook versus** s odka
 
 Detail začíná konkrétním důvodem, proč pro danou situaci zvažovat Promptbook. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení a doporučení jsou rozbalitelná pod tabulkou. Přehled používá stejné hodnoty pro vlastní provoz a plánované úlohy. Zdroje jsou dostupné u obou pohledů.
 
+Na mobilu se hlavička přehledu i detailu posouvá se stránkou, aby při posouvání nezakrývala nadpis.
+
 ## Podklady a aktualizace
 
 - Promptbook se posuzuje podle [Rebornu](https://github.com/webgptorg/promptbook/blob/1292ef33153efe17ea2886f1d2a569ff6c3c0e9e/README.md). Hostitel enginu může být počítač, firemní server nebo VPS. Externí modely a služby dostávají potřebné vstupy, lokální model závisí na adaptéru a úloze.
