@@ -59,6 +59,7 @@ export async function runTwentyContactSync(settings: TwentyContactSyncSettings) 
                     result.needsReview++;
                 } else {
                     result.failed++;
+                    console.warn('Twenty contact delivery failed', { code: errorCode, status: deliveryError?.status });
                     retrySeconds = Math.min(MAXIMUM_RETRY_SECONDS, FIRST_RETRY_SECONDS * 2 ** row.attempts);
                 }
                 const status = deliveryError?.status;
