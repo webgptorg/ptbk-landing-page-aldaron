@@ -21,6 +21,8 @@ are separate operations. Meta, Gmail and Google Contacts are outside this worker
 3. Deploy the database migration through the normal production deployment. Set `TWENTY_CONTACT_SYNC_API_KEY`,
    `TWENTY_CONTACT_SYNC_FROM`, and a long random `CRON_SECRET` as production-only variables. The worker uses the
    existing `DATABASE_URL`. `TWENTY_CONTACT_SYNC_URL` defaults to `https://crm.ptbk.io` and accepts an HTTPS origin.
+   For the Promptbook CRM ingress, set `TWENTY_CONTACT_SYNC_INGRESS_KEY` as a sensitive production variable.
+   This is a separate key for the reverse proxy. Twenty still checks its own scoped API key.
    The worker is inactive without its API key and cutover, and in Vercel Preview.
 4. Schedule authenticated `GET /api/cron/twenty-contact-sync` every five minutes with `Authorization: Bearer`
    followed by `CRON_SECRET`. If using Vercel Cron, confirm Pro or Enterprise before adding the five-minute schedule.

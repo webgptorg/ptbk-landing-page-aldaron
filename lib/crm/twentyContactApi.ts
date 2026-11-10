@@ -23,7 +23,7 @@ export class TwentyContactDeliveryError extends Error {
     }
 }
 
-export type TwentyContactApiSettings = { url: URL; key: string; signal?: AbortSignal };
+export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal };
 
 /** Twenty accepts a caller-supplied UUID. The same identifier survives a lost create response. */
 export function getTwentyContactRecordId(namespace: 'person' | 'source', key: string): string {
@@ -44,7 +44,7 @@ function normalizeEmail(value?: string | null): string | undefined {
     return value?.trim().toLowerCase();
 }
 
-export function createTwentyContactApi({ url, key, signal }: TwentyContactApiSettings) {
+export function createTwentyContactApi({ url, key, ingressKey, signal }: TwentyContactApiSettings) {
     async function request<Result>(path: string, method: 'GET' | 'POST' | 'PATCH', body?: object): Promise<Result> {
         const timeout = AbortSignal.timeout(4000);
         let response: Response;
@@ -52,7 +52,11 @@ export function createTwentyContactApi({ url, key, signal }: TwentyContactApiSet
             response = await fetch(new URL(`/rest/${path}`, url), {
                 method,
                 body: body === undefined ? undefined : JSON.stringify(body),
-                headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+                headers: {
+                    Authorization: `Bearer ${key}`,
+                    'Content-Type': 'application/json',
+                    ...(ingressKey ? { 'X-PTBK-Twenty-Sync': ingressKey } : {}),
+                },
                 signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
                 cache: 'no-store',
                 redirect: 'error',

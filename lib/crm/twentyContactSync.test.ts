@@ -25,15 +25,30 @@ describe('Twenty contact sources', () => {
     it('verifies both CRM objects using read-only requests', async () => {
         const request = vi.fn(async (url: URL, options: RequestInit) => {
             expect(options.method).toBe('GET');
+            expect(options.redirect).toBe('error');
             expect(url.searchParams.get('limit')).toBe('1');
             expect(url.searchParams.get('fields')).toBe('id');
             return list(url.pathname.split('/').at(-1)!, []);
         });
         vi.stubGlobal('fetch', request);
 
-        const api = createTwentyContactApi({ url: new URL('https://crm.invalid'), key: 'test' });
+        const url = new URL('https://crm.invalid');
+        const api = createTwentyContactApi({ url, key: 'twenty-token', ingressKey: 'proxy-token' });
         await expect(api.verifyConnectivity()).resolves.toBeUndefined();
         expect(request.mock.calls.map(([url]) => url.pathname)).toEqual(['/rest/people', '/rest/contactSources']);
+        for (const [, options] of request.mock.calls) {
+            const headers = new Headers(options.headers);
+            expect(headers.get('authorization')).toBe('Bearer twenty-token');
+            expect(headers.get('x-ptbk-twenty-sync')).toBe('proxy-token');
+        }
+
+        request.mockClear();
+        await createTwentyContactApi({ url, key: 'twenty-token' }).verifyConnectivity();
+        for (const [, options] of request.mock.calls) {
+            const headers = new Headers(options.headers);
+            expect(headers.get('authorization')).toBe('Bearer twenty-token');
+            expect(headers.has('x-ptbk-twenty-sync')).toBe(false);
+        }
     });
 
     it('links a matching secondary address without changing the existing Person', async () => {

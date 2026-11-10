@@ -13,6 +13,7 @@ export type TwentyContactSyncSettings = TwentyContactApiSettings & { from: strin
 export function getTwentyContactSyncSettings(): TwentyContactSyncSettings | null {
     if (process.env.VERCEL_ENV === 'preview') return null;
     const key = process.env.TWENTY_CONTACT_SYNC_API_KEY?.trim();
+    const ingressKey = process.env.TWENTY_CONTACT_SYNC_INGRESS_KEY?.trim();
     const from = process.env.TWENTY_CONTACT_SYNC_FROM?.trim();
     if (!key || !from) return null;
     if (!/T.+(?:Z|[+-]\d{2}:\d{2})$/.test(from) || !Number.isFinite(Date.parse(from))) {
@@ -23,7 +24,7 @@ export function getTwentyContactSyncSettings(): TwentyContactSyncSettings | null
     if (url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
         throw new Error('Invalid Twenty contact sync origin');
     }
-    return { url, key, from };
+    return { url, key, ingressKey, from };
 }
 
 export async function runTwentyContactSync(settings: TwentyContactSyncSettings) {
