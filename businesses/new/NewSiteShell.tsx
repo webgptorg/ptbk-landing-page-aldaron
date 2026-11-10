@@ -47,12 +47,12 @@ function LocalizedShell({ children }: { children: ReactNode }) {
             <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href={path('branding')} hrefLang={locale}>{locale === 'cs' ? 'Logo a značka' : 'Brand kit'}</Link><Link href={COMMUNITIES.promptbook.path} hrefLang="cs" prefetch={false}>{locale === 'cs' ? 'Komunita Promptbook' : 'Promptbook community (Czech)'}</Link></nav>
             <nav aria-label="Promptbook versus">
                 <strong>Promptbook versus</strong>
+                <Link href={path('srovnani')}>{locale === 'cs' ? 'Srovnání všech nástrojů' : 'Compare all tools'}</Link>
                 {COMPARISONS.slice(0, 6).map(item => (
                     <Link key={item.slug} href={path(`srovnani/${item.slug}`)} prefetch={false}>
                         {item.slug === 'google-workspace' ? 'Gemini (Duet AI)' : item.name}
                     </Link>
                 ))}
-                <Link href={path('srovnani')}>{locale === 'cs' ? 'Všechna srovnání' : 'All comparisons'}</Link>
             </nav>
             <nav className={f.legal} aria-label={locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}>
                 <strong><Link href={`/${locale}/legal`}>{locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}</Link></strong>

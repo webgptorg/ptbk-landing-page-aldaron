@@ -52,7 +52,7 @@ describe('bilingual launch site', () => {
         expect(displayFieldValue('volume',300,'en',22)).toBe(300);
     });
     it.each(['cs', 'en'] as const)('shares Start and Business while keeping pricing details off the landing pages in %s', locale => {
-        for (const [page, full] of [[<NewLandingPage/>, false], [<NewLandingPage partnership/>, false], [<PricingPage/>, true]] as const) {
+        for (const [page, full] of [[<NewLandingPage key="home"/>, false], [<NewLandingPage key="partners" partnership/>, false], [<PricingPage key="pricing"/>, true]] as const) {
             const element = document.createElement('div');
             element.innerHTML = html(page, locale);
             const plans = Array.from(element.querySelectorAll('[data-plan]'), card => card.getAttribute('data-plan'));
@@ -100,22 +100,31 @@ describe('bilingual launch site', () => {
         expect(COMPARISONS.length).toBeGreaterThanOrEqual(13);
         expect(element.querySelectorAll('tbody tr').length).toBe(COMPARISONS.length + 1);
         for (const { slug } of COMPARISONS) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();
-        expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(COMPARISONS.length);
+        expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(COMPARISONS.length + 1);
+        expect(Array.from(element.querySelectorAll('thead th'), cell => cell.textContent)).toEqual([
+            'Tool', 'Best suited for', 'Self-hosted option', 'Scheduling', 'Workspace',
+        ]);
+        const openClaw = element.querySelector('a[href="/en/srovnani/openclaw"]')!.closest('tr')!;
+        expect(openClaw.textContent).toContain('Assistants in messaging channels');
+        expect(openClaw.querySelectorAll('td [data-status="yes"]')).toHaveLength(2);
     });
     it('shows six comparisons and an overview link in the footer and renders sourced details in both languages', () => {
         const shell = document.createElement('div');
         shell.innerHTML = renderToStaticMarkup(<NewSiteShell><div /></NewSiteShell>);
         const nav = shell.querySelector('footer nav[aria-label="Promptbook versus"]');
         expect(Array.from(nav?.querySelectorAll('a') ?? [], link => link.getAttribute('href'))).toEqual([
-            ...COMPARISONS.slice(0, 6).map(({ slug }) => `/en/srovnani/${slug}`),
             '/en/srovnani',
+            ...COMPARISONS.slice(0, 6).map(({ slug }) => `/en/srovnani/${slug}`),
         ]);
-        expect(nav?.querySelector('a[href="/en/srovnani"]')?.textContent).toBe('All comparisons');
+        expect(nav?.querySelector('a[href="/en/srovnani"]')?.textContent).toBe('Compare all tools');
 
         for (const item of COMPARISONS) {
             for (const locale of ['cs', 'en'] as const) {
                 const page = document.createElement('div');
                 page.innerHTML = html(<ComparisonPage slug={item.slug} />, locale);
+                expect(page.querySelector('header a')?.getAttribute('href')).toBe(`/${locale}/srovnani`);
+                expect(Array.from(page.querySelectorAll('section > p'), paragraph => paragraph.textContent)).toContain(item.advantage[locale]);
+                expect(Array.from(page.querySelectorAll('section > p'), paragraph => paragraph.textContent)).toContain(item.rows.fit[locale]);
                 expect(Array.from(page.querySelectorAll('thead th'), cell => cell.textContent)).toEqual([
                     locale === 'cs' ? 'Parametr' : 'Feature',
                     'Promptbook',
@@ -126,6 +135,15 @@ describe('bilingual launch site', () => {
                 for (const [, href] of item.sources) expect(page.querySelector(`a[href="${href}"]`)).not.toBeNull();
             }
         }
+    });
+    it.each(['cs', 'en'] as const)('uses plain company-computer wording in the %s homepage hero', locale => {
+        const element = document.createElement('div');
+        element.innerHTML = html(<NewLandingPage/>, locale);
+        const hero = element.querySelector('[data-landing-hero]')!;
+        expect(hero.textContent).toContain(locale === 'cs'
+            ? 'Tým agentů si spustíte na firemním počítači.'
+            : 'Run your team of agents on your company computer.');
+        expect(hero.textContent).not.toContain('VPS');
     });
     it('exports the same calculation in localized currency, language and share URL', () => {
         const state=defaultCalculatorState();const before=calculateEconomics(state.input);

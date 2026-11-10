@@ -349,7 +349,7 @@
 .languageSwitch a[aria-current=page]{background:none;color:#1b2739;font-weight:600}
 .headerInner{gap:20px}
 .desktopNav{gap:18px}
-.comparisonSection{padding:55px 0 80px}
+.comparisonSection{padding:0 0 56px}
 .tableEyebrow{display:block;color:#4a5bac;font-size:11px;font-weight:650;letter-spacing:.16em;margin-bottom:15px}
 .tableScroll{overflow-x:auto;border:1px solid #dde3f1;border-radius:24px;background:white;box-shadow:0 18px 60px -36px #19286650;scrollbar-color:#bcc7e5 transparent}
 .comparisonTable{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;text-align:left;font-size:15px;line-height:1.4}
@@ -362,6 +362,11 @@
 .comparisonTable tr[data-featured=true]>*{background:#edf2ff;color:#243b88}
 .site .tableSource{display:block;font-size:11px;font-weight:450;color:#52617b;margin-top:5px}
 .comparisonTable tbody tr:last-child>*{border-bottom:0}
+.overviewTable{min-width:760px}
+.overviewTable thead th:first-child{width:20%}
+.overviewTable thead th:nth-child(2){width:24%}
+.overviewTable tbody th a:first-child:hover{text-decoration:underline;text-underline-offset:3px}
+.tableScrollHint{display:none}
 .metricStatus{display:flex;align-items:center;gap:5px;font-weight:650}
 .metricStatus svg{flex-shrink:0}
 .metricStatus[data-status=yes]{color:#166047}
@@ -375,12 +380,19 @@
 @media (max-width: 760px) {
     .site:has(main .comparisonTable) .header { position: relative; }
 }
-@media(max-width:600px){.headerInner{padding:10px 24px}.logo{font-size:23px}.tableScroll{border-radius:18px}.comparisonSection{padding:35px 0 55px}.comparisonTable{font-size:13px}.comparisonTable th,.comparisonTable td{padding:10px 8px}.numberHighlight{font-size:clamp(24px,7vw,40px)}}
+@media(max-width:600px){.headerInner{padding:10px 24px}.logo{font-size:23px}.tableScroll{border-radius:18px}.comparisonSection{padding-bottom:36px}.comparisonTable{font-size:13px}.comparisonTable th,.comparisonTable td{padding:10px 8px}.numberHighlight{font-size:clamp(24px,7vw,40px)}}
 @media(max-width:420px){.headerInner{padding-inline:20px}}
 @media(prefers-reduced-motion:reduce){.site .button,.site .secondaryButton{transition:none}.site .button:hover{transform:none}}
 
 .productComparisonTable th:first-child{width:29%}
 .productComparisonTable tr>*:nth-child(2){background:#f1f5ff}
+.comparisonBack{align-items:center;gap:7px}
+.comparisonBack:hover{text-decoration:underline;text-underline-offset:3px}
+.comparisonChoices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.comparisonChoices section{padding:19px 22px;border:1px solid var(--line);border-radius:18px}
+.comparisonChoices section:first-child{background:#f1f5ff;border-color:#dce5fa}
+.site .comparisonChoices h2{font-size:20px;line-height:1.25;letter-spacing:-.02em;font-weight:600;margin-bottom:6px}
+.site .comparisonChoices p{font-size:15px;line-height:1.55;color:var(--ink)}
 .comparisonDetails{margin-top:20px;border:1px solid #dde3f1;border-radius:16px}
 .comparisonDetails summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;font-size:14px;font-weight:650;list-style:none}
 .comparisonDetails summary::-webkit-details-marker{display:none}
@@ -389,7 +401,16 @@
 .comparisonDetail{display:grid;grid-template-columns:29% 1fr 1fr;gap:16px;padding:14px 18px;border-top:1px solid #e9edf6}
 .comparisonDetail h3,.comparisonDetail p{margin:0;font-size:14px;line-height:1.55}
 .comparisonDetail p strong{display:block;margin-bottom:4px}
+@media(max-width:810px){
+    .site .tableScrollHint{display:block;font-size:13px;margin-bottom:8px}
+    .overviewTable tr>*:first-child{position:sticky;left:0;border-right:1px solid var(--line)}
+    .overviewTable tbody tr:not([data-featured])>th{background:white}
+}
 @media(max-width:600px){
+    .comparisonChoices{grid-template-columns:1fr;gap:8px}
+    .comparisonChoices section{padding:14px}
+    .site .comparisonChoices h2{font-size:18px}
+    .site .comparisonChoices p{font-size:14px}
     .comparisonDetails summary{padding:12px}
     .comparisonDetail{grid-template-columns:1fr 1fr;gap:8px;padding:12px}
     .comparisonDetail h3{grid-column:1/-1}

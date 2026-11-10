@@ -1,8 +1,8 @@
 # Srovnání alternativ
 
-Patička webu má v češtině i angličtině sekci **Promptbook versus** s odkazy na prvních šest srovnání z přehledu. Poslední odkaz vede na úplný přehled `/[locale]/srovnani`. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`.
+Patička webu má v češtině i angličtině sekci **Promptbook versus**. První odkaz vede na společnou tabulku `/[locale]/srovnani`, následuje šest přímých odkazů. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`. Z tabulky se na detail přechází přes název nástroje. Záhlaví detailu vede zpět na společnou tabulku.
 
-Detail začíná konkrétním důvodem, proč pro danou situaci zvažovat Promptbook. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení a doporučení jsou rozbalitelná pod tabulkou. Přehled používá stejné hodnoty pro vlastní provoz a plánované úlohy. Zdroje jsou dostupné u obou pohledů.
+Detail začíná dvěma konkrétními situacemi, kdy zvolit Promptbook a kdy druhý nástroj. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení je rozbalitelné pod tabulkou. Společná tabulka má jeden řádek pro každý nástroj, samostatný sloupec pro typické použití a sdílí hodnoty pro vlastní provoz, plánování a pracovní prostředí s detailem. Na úzké obrazovce se tabulka posouvá do strany a název nástroje zůstává viditelný. Zdroje jsou dostupné u obou pohledů.
 
 Na mobilu se hlavička přehledu i detailu posouvá se stránkou, aby při posouvání nezakrývala nadpis.
 
