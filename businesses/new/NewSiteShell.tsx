@@ -17,6 +17,7 @@ import { LeadButton, LeadCaptureProvider } from './LeadCapture';
 import { isPromptbookBillingPagePath, NEW_SITE_NAVIGATION } from './siteConfig';
 import { TechnologyIncubation } from './TechnologyIncubation';
 import { ENGINE_REPOSITORY } from './commercialTerms';
+import { COMPARISONS } from './comparisons';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
 import s from './site.module.css';
 import f from './footer.module.css';
@@ -43,7 +44,15 @@ function LocalizedShell({ children }: { children: ReactNode }) {
                 </div>
             </div>
             <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('pricing')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={`/${locale}/releases`}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
-            <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('srovnani')}>{t("Srovnání")}</Link><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href={path('branding')} hrefLang={locale}>{locale === 'cs' ? 'Logo a značka' : 'Brand kit'}</Link><Link href={COMMUNITIES.promptbook.path} hrefLang="cs" prefetch={false}>{locale === 'cs' ? 'Komunita Promptbook' : 'Promptbook community (Czech)'}</Link></nav>
+            <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href={path('branding')} hrefLang={locale}>{locale === 'cs' ? 'Logo a značka' : 'Brand kit'}</Link><Link href={COMMUNITIES.promptbook.path} hrefLang="cs" prefetch={false}>{locale === 'cs' ? 'Komunita Promptbook' : 'Promptbook community (Czech)'}</Link></nav>
+            <nav aria-label="Promptbook versus">
+                <strong><Link href={path('srovnani')}>Promptbook versus</Link></strong>
+                <ul className={f.comparisons}>
+                    {COMPARISONS.map(item => <li key={item.slug}>
+                        <Link href={path(`srovnani/${item.slug}`)} prefetch={false}>{item.name}</Link>
+                    </li>)}
+                </ul>
+            </nav>
             <nav className={f.legal} aria-label={locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}>
                 <strong><Link href={`/${locale}/legal`}>{locale === 'cs' ? 'Právní dokumenty' : 'Legal documents'}</Link></strong>
                 <ul className={f.documents}>{getLegalDocumentLinks(locale).map(link => <li key={link.href}><Link href={link.href}>{link.text}</Link></li>)}</ul>

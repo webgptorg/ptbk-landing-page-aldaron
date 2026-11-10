@@ -371,3 +371,16 @@
 @media(max-width:600px){.headerInner{padding:10px 24px}.logo{font-size:23px}.tableScroll{border-radius:18px}.comparisonSection{padding:35px 0 55px}.comparisonTable th,.comparisonTable td{padding:17px}.comparisonTable th:first-child{min-width:145px}.numberHighlight{font-size:clamp(24px,7vw,40px)}}
 @media(max-width:420px){.headerInner{padding-inline:20px}}
 @media(prefers-reduced-motion:reduce){.site .button,.site .secondaryButton{transition:none}.site .button:hover{transform:none}}
+
+.productComparisonTable { min-width: 0; }
+.productComparisonTable th:first-child {
+    position: static;
+    min-width: 0;
+    width: 21%;
+}
+.productComparisonTable td { min-width: 0; max-width: none; width: 39.5%; }
+.productComparisonTable td:nth-child(2) { background: #f4f7ff; }
+@media (max-width: 600px) {
+    .productComparisonTable th, .productComparisonTable td { padding: 10px 8px; overflow-wrap: anywhere; }
+    .productComparisonTable { font-size: 12px; }
+}

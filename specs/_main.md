@@ -23,7 +23,7 @@ Promptbook zajišťuje dlouhodobé firemní AI agendy. Klient vlastní pracovní
 
 ## Rozsah cest
 
-`/`, `/open-source`, `/partnership`, `/kalkulacka`, `/pricing`, `/agendy`, `/agendy/{email|documents|social|video|coding}`, `/srovnani`, `/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip|grok-bot|openai-dots|meta-muse|chatgpt}`, `/o-nas`, `/bezpecnost`, `/faq`, `/soukromi`, `/podminky`.
+`/`, `/open-source`, `/partnership`, `/kalkulacka`, `/pricing`, `/agendy`, `/agendy/{email|documents|social|video|coding}`, `/srovnani`, `/srovnani/{claude-code|codex|n8n|make|openclaw|paperclip|grok-bot|openai-dots|meta-muse|chatgpt|google-workspace|claude-cowork|microsoft-copilot-studio}`, `/o-nas`, `/bezpecnost`, `/faq`, `/soukromi`, `/podminky`.
 
 Původní jazykové adresy `/cs/cenik` a `/en/cenik` se trvale přesměrují na `/cs/pricing` a `/en/pricing` se zachováním query. Interní marketingové odkazy používají jazykové prefixy `/cs` a `/en`; přepínač zachová cestu, query a fragment. GitHub, zdroje srovnání, obchodní rejstřík a sociální profily jsou záměrně externí. Právní dokumenty používají existující společný obsah a zachovávají jeho právní odkazy. Údaje o firmě a fotografie pocházejí ze stávajícího webu, nevytvářejí se nové identity.
 

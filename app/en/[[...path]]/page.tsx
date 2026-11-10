@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props) {
         return newPageMetadata(key, translate(item.title, 'en'), translate(item.description, 'en'), 'en');
     }
     const item = route.length === 2 && route[0] === 'srovnani' ? COMPARISONS.find(item => item.slug === route[1]) : undefined;
-    return item ? newPageMetadata(key, `Promptbook and ${item.name}`, translate(item.question, 'en'), 'en') : {};
+    return item ? newPageMetadata(key, `Promptbook versus ${item.name}`, item.advantage.en, 'en') : {};
 }
 export default async function Page({ params, searchParams }: Props) {
     const route = (await params).path ?? [];

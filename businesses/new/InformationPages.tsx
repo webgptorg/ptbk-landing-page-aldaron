@@ -1,7 +1,7 @@
 'use client';
 
 import { useSiteLocale } from './LocaleProvider';
-import { ComparisonTable } from './ComparisonTable';
+import { ComparisonTable, ProductComparisonTable } from './ComparisonTable';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { AgendaShowcase } from './AgendaShowcase';
@@ -13,7 +13,7 @@ import { OwnershipScene } from './OwnershipScene';
 import { COMMERCIAL_TERMS, ENGINE_REPOSITORY } from './commercialTerms';
 import { SCENARIOS, type ScenarioId } from './economics';
 import { changeScenario, defaultCalculatorState, calculatorPath } from './calculatorState';
-import { COMPARISONS, COMPARISON_REVIEW_DATE } from './comparisons';
+import { COMPARISONS, COMPARISON_REVIEW_DATE, REBORN_SOURCE } from './comparisons';
 import { sitePath } from './siteConfig';
 import s from './site.module.css';
 
@@ -136,9 +136,40 @@ export function AgendaPage({scenarioId}:{scenarioId:ScenarioId}){
     const { t, locale, path } = useSiteLocale();
 const scenario=SCENARIOS[scenarioId];return <><PageIntro title={t(scenario.title)}>{t(scenario.description)}</PageIntro><AgendaShowcase initialScenario={scenarioId}/><section className={s.section}><div className={s.threeColumns}>{['Co předáte','Co se děje','Co dostanete'].map((title,i) => <article className={s.card} key={title}><h3>{t(title)}</h3><p>{t(AGENDA_DETAILS[scenarioId][i])}</p></article>)}</div><div className={s.actions}><LeadButton topic={t(`Nasazení agendy — ${t(scenario.title)}`)}>{t("Probrat tuto agendu")}</LeadButton><Link className={s.secondaryButton} href={calculatorPath(changeScenario(defaultCalculatorState(),scenarioId),locale)}>{t("Spočítat tuto agendu ")}<ArrowRight size={17}/></Link></div></section></>;}
 
-export function ComparisonsPage(){
+export function ComparisonsPage() {
+    const { locale } = useSiteLocale();
+
+    return <>
+        <PageIntro title="Promptbook versus">
+            {locale === 'cs'
+                ? 'Kde agent běží, co zvládne na pozadí a kdy má smysl který nástroj.'
+                : 'Where each agent runs, what it does in the background and when to choose it.'}
+        </PageIntro>
+        <ComparisonTable />
+        <ClosingCta />
+    </>;
+}
+
+export function ComparisonPage({ slug }: { slug: string }) {
     const { t, locale, path } = useSiteLocale();
-return <><PageIntro title={t("Vyberte přístup. Ne nálepku.")}>{t("Vývojový agent, vizuální workflow, osobní asistent nebo dlouhodobá firemní agenda. Rozdíl je v tom, jakou práci potřebujete předat.")}</PageIntro><div className={s.prose}><p>{t("Promptbook stavíme pro dlouhodobé agendy na klientově infrastruktuře s odděleným ovládáním a partnerským nasazením. Není jediný nástroj, který umí pracovat na pozadí. A někdy dává smysl používat více nástrojů společně.")}</p></div><ComparisonTable/><div className={s.sectionTitle}><h2>{t("Podrobně, přístup po přístupu.")}</h2></div><div className={s.twoColumns}>{COMPARISONS.map(item => <article className={s.card} key={item.slug}><h3>{t("Promptbook a ")}{t(item.name)}</h3><p>{t(item.capability)}</p><Link className={s.textLink} href={path(`srovnani/${item.slug}`)}>{t("Kdy zvolit který ")}<ArrowRight size={17}/></Link><div className={s.sources}><a href={item.source}>{t(item.sourceTitle)}{t(" ↗")}</a></div></article>)}</div><p className={`${s.small} ${s.section}`}>{t("Srovnání podle oficiálních zdrojů, kontrola ")}{t(COMPARISON_REVIEW_DATE)}{t(". Doporučení vhodnosti je náš pohled, ne výkonnostní benchmark. Nezaměňujeme „neuvedeno ve zdroji“ za „produkt to neumí“.")}</p><ClosingCta/></>;}
-export function ComparisonPage({slug}:{slug:string}){
-    const { t, locale, path } = useSiteLocale();
-const item=COMPARISONS.find(item=>item.slug===slug)!;return <><PageIntro title={t(`Promptbook a ${item.name}`)}>{t(item.question)}</PageIntro><div className={s.twoColumns}><article className={s.card}><h2>{t(item.name)}</h2><p style={{marginTop:20}}>{t(item.capability)}</p><div className={s.sources}><a href={item.source}>{t(item.sourceTitle)}{t(" ↗")}</a></div></article><article className={s.card}><h2>{t("Promptbook")}</h2><p style={{marginTop:20}}>{t("Dlouhodobá agenda nad vašimi pracovními soubory a kontextem. Engine běží ve vašem prostředí, ovládání je oddělené a nasazení může zajistit partner, který zná vaši firmu.")}</p></article></div><div className={s.prose}><h2>{t("Kdy zvažovat ")}{t(item.name)}</h2><p>{t(item.fit)}</p><h2>{t("Kdy zvažovat Promptbook")}</h2><p>{t(item.difference)}</p><h2>{t("Vyzkoušejte stejný proces")}</h2><p>{t("Porovnejte na vlastních podkladech kvalitu výsledku, potřebný dohled, celkové náklady a způsob předání do provozu. Nejen cenu licence nebo jeden hezký výstup.")}</p><div className={s.actions}><LeadButton topic={t(`Srovnání Promptbooku a ${item.name}`)}>{t("Probrat můj use case")}</LeadButton><Link className={s.textLink} href={path('srovnani')}>{t("Všechna srovnání ")}<ArrowRight size={17}/></Link></div><div className={s.sources}><p>{t("Podklad: ")}<a href={item.source}>{t(item.sourceTitle)}</a>{t(". Kontrola ")}{t('reviewed' in item ? item.reviewed : '15. října 2026')}{t(". Popis alternativy vychází z jejího zdroje; vhodnost a vymezení Promptbooku jsou naše produktové doporučení. Nejde o nezávislý test nebo přehled všech funkcí.")}</p></div></div></>;}
+    const item = COMPARISONS.find(comparison => comparison.slug === slug)!;
+    const cs = locale === 'cs';
+
+    return <>
+        <PageIntro title={`Promptbook versus ${item.name}`}>{item.advantage[locale]}</PageIntro>
+        <ProductComparisonTable item={item} />
+        <div className={s.prose}>
+            <div className={s.sources}>
+                <p>{cs ? 'Dokumentace ověřena' : 'Documentation reviewed'} {COMPARISON_REVIEW_DATE[locale]}.</p>
+                <ul>
+                    <li><a href={REBORN_SOURCE}>Promptbook Reborn · 1292ef3</a></li>
+                    {item.sources.map(([title, href]) => <li key={href}><a href={href}>{title}</a></li>)}
+                </ul>
+            </div>
+            <div className={s.actions}>
+                <LeadButton topic={t(`Srovnání Promptbooku a ${item.name}`)}>{t('Probrat můj use case')}</LeadButton>
+                <Link className={s.textLink} href={path('srovnani')}>{t('Všechna srovnání ')}<ArrowRight size={17} /></Link>
+            </div>
+        </div>
+    </>;
+}
