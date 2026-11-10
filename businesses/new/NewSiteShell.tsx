@@ -1,6 +1,7 @@
 'use client';
 
 import { COMMUNITIES, COMMUNITIES_PATH } from '@/businesses/community/config';
+import { TERMINAL_TOUR_PATH } from '@/businesses/terminal-tour/terminalTour';
 import { useSiteLocale } from './LocaleProvider';
 import { usePathname } from 'next/navigation';
 import { SiteLocaleProvider } from './LocaleProvider';
@@ -75,7 +76,7 @@ function BrandLogo({ priority = false }: { priority?: boolean }) {
 function LanguageSwitch() {
     const pathname = usePathname();
     const { locale } = useSiteLocale();
-    if (pathname === COMMUNITIES_PATH || isPromptbookBillingPagePath(pathname)) return null;
+    if (pathname === COMMUNITIES_PATH || pathname === TERMINAL_TOUR_PATH || isPromptbookBillingPagePath(pathname)) return null;
     return <nav className={s.languageSwitch} aria-label="Language / Jazyk">{(['cs', 'en'] as const).map(language => <Link key={language} href={localizedPath(pathname, language)} hrefLang={language} lang={language} aria-current={locale === language ? 'page' : undefined} onClick={event => {
         // Preserve the current calculation and anchor, including edits made via native history.
         event.preventDefault();

@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight, Download, List } from 'lucide-react';
+import type { CommunityId } from '@/businesses/community/config';
+import { TerminalTourArticleLink } from '@/businesses/terminal-tour/TerminalTourArticleLink';
+import { TERMINAL_TOUR_ARTICLE_SECTION_ID, TERMINAL_TOUR_ARTICLE_SLUGS } from '@/businesses/terminal-tour/terminalTour';
 import type { Article, ArticlePublication } from '@/lib/articles/types';
 import { getArticleAssetUrl, getArticleIndexUrl, getArticlePodcastUrl, getArticleUrl } from '@/lib/articles/urls';
 import { ArticleHeader, ArticleFooter } from './ArticleShell';
@@ -15,7 +18,7 @@ import './articles.css';
 export function ArticlePage({ article, publication, community }: {
     readonly article: Article;
     readonly publication: ArticlePublication;
-    readonly community?: { readonly indexPath: string; readonly articlePath: string };
+    readonly community?: { readonly id: CommunityId; readonly indexPath: string; readonly articlePath: string };
 }) {
     const cs = article.language === 'cs';
     const document = renderArticleDocument(
@@ -35,6 +38,7 @@ export function ArticlePage({ article, publication, community }: {
         author: { name: article.author.name, photoUrl: article.author.photoUrl },
     };
     const isAnchoringArticle = article.translationGroupId === 'spec-driven-anchoring';
+    const hasTerminalTour = community?.id === 'promptbook' && cs && article.managed && TERMINAL_TOUR_ARTICLE_SLUGS.has(article.slug);
     let explorerInserted = false;
     const sections = document.sections.map((section, index) => {
         const showExplorer = isAnchoringArticle && !explorerInserted && Boolean(section.id?.startsWith('anchoring'));
@@ -42,7 +46,13 @@ export function ArticlePage({ article, publication, community }: {
         if (section.id?.startsWith('o-autorovi') || section.id?.startsWith('about-the-author')) {
             return <section key={section.id} className="article-authored-bio" aria-labelledby={section.id}><Image src={article.author.photoUrl} width={84} height={84} alt={article.author.name} /><div><div dangerouslySetInnerHTML={{ __html: section.html }} /><a className="article-text-link" href={article.author.domains[article.language] ?? article.canonicalUrl}>{cs ? 'Více o autorovi' : 'About the author'}<ArrowUpRight size={15} aria-hidden="true" /></a></div></section>;
         }
-        return <div key={section.id ?? `introduction-${index}`}><div dangerouslySetInnerHTML={{ __html: section.html }} />{showExplorer && <AnchoringExplorer language={article.language} />}</div>;
+        return (
+            <div key={section.id ?? `introduction-${index}`}>
+                <div dangerouslySetInnerHTML={{ __html: section.html }} />
+                {showExplorer && <AnchoringExplorer language={article.language} />}
+                {hasTerminalTour && section.id === TERMINAL_TOUR_ARTICLE_SECTION_ID && <TerminalTourArticleLink />}
+            </div>
+        );
     });
     return (
         <div className="article-site" data-publication={publication} lang={article.language}>

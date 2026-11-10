@@ -18,6 +18,7 @@ import { getPublicShortcodeLinkOnHostname } from './lib/shortener/shortcodeLinkM
 import { SHORTCODE_LINK_HOST_HEADER } from './lib/shortener/shortcodeLinkDomains';
 import { STORY_ROOM_PATH } from './lib/workshops/storyRoomPaths';
 import { COMMUNITIES_PATH, COMMUNITY_PATH, LEGACY_COMMUNITY_PATH } from './businesses/community/config';
+import { TERMINAL_TOUR_PATH } from './businesses/terminal-tour/terminalTour';
 
 /**
  * Builds a redirect to an independently branded site's public URL while retaining the browser's query parameters.
@@ -122,7 +123,7 @@ export async function middleware(request: NextRequest) {
         return response;
     }
 
-    if (communityPath === COMMUNITIES_PATH || communityPath.startsWith(`${COMMUNITIES_PATH}/`)) {
+    if (communityPath === TERMINAL_TOUR_PATH || communityPath === COMMUNITIES_PATH || communityPath.startsWith(`${COMMUNITIES_PATH}/`)) {
         requestHeaders.set('x-promptbook-page-language', 'cs');
         return NextResponse.next({ request: { headers: requestHeaders } });
     }

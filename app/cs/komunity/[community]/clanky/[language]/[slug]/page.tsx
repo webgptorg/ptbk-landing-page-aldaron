@@ -50,6 +50,7 @@ export default async function CommunityArticlePage({ params }: PageProps) {
             __html: JSON.stringify(createArticleStructuredData(article)).replace(/</g, '\\u003c'),
         }} />}
         <ArticlePage article={article} publication="promptbook" community={{
+            id: community,
             indexPath,
             articlePath: new URL(getManagedArticleUrl(article, community)).pathname,
         }} />

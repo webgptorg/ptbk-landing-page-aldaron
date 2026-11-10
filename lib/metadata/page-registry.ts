@@ -15,6 +15,7 @@ import { HOMEPAGE_PAGE_DEFINITIONS } from '@/businesses/homepage/homepageMetadat
 import { ONLINE_WORKSHOP_PAGE_DEFINITION } from '@/businesses/online-workshop/onlineWorkshopMetadata';
 import { PAVOL_PAGE_DEFINITIONS } from '@/businesses/pavol/pavolMetadata';
 import { PRO_FIRMY_PAGE_DEFINITION } from '@/businesses/pro-firmy/proFirmyMetadata';
+import { TERMINAL_TOUR_PAGE_DEFINITION } from '@/businesses/terminal-tour/terminalTour';
 import { WHITEPAPER_PAGE_DEFINITIONS } from '@/businesses/whitepaper/whitepaperMetadata';
 import { COMMON_KNOWLEDGE_PAGE_DEFINITIONS } from '@/lib/common-knowledge/metadata';
 import { CITIES_CS_PAGE_DEFINITION } from '@/businesses/pro-mesta/citiesCsMetadata';
@@ -46,6 +47,7 @@ const PAGE_METADATA_DEFINITIONS: readonly PageMetadataDefinition[] = [
     AI_SUPERVIZE_MINI_PAGE_DEFINITION,
     ONLINE_WORKSHOP_PAGE_DEFINITION,
     COMMUNITIES_PAGE_DEFINITION,
+    TERMINAL_TOUR_PAGE_DEFINITION,
     COMMUNITY_MEMBERSHIP_PAGE_DEFINITION,
     HACKATHON_FACTORY_PAGE_DEFINITION,
     AI_TA_KRAJTA_PAGE_DEFINITION,
