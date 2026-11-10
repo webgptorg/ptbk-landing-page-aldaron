@@ -1,14 +1,20 @@
 import type { SiteLocale } from './localization';
 
 type Copy = Readonly<Record<SiteLocale, string>>;
-type ComparisonRow = 'runtime' | 'continuity' | 'workspace' | 'model' | 'automation' | 'fit';
+type ComparisonRow = 'runtime' | 'continuity' | 'workspace' | 'model' | 'automation';
+export type ComparisonStatus = 'yes' | 'no' | 'conditional' | 'unknown';
+export type ComparisonValue = Copy & { status?: ComparisonStatus };
+type ComparisonSummary = Record<ComparisonRow, ComparisonValue>;
+
+const value = (cs: string, en: string, status?: ComparisonStatus): ComparisonValue => ({ cs, en, status });
 
 export type Comparison = {
     slug: string;
     name: string;
     sources: readonly [string, string][];
     advantage: Copy;
-    rows: Record<ComparisonRow, Copy>;
+    summary: ComparisonSummary;
+    rows: Record<ComparisonRow | 'fit', Copy>;
 };
 
 export const COMPARISON_REVIEW_DATE = { cs: '10. listopadu 2026', en: '10 November 2026' };
@@ -18,7 +24,7 @@ export const REBORN_SOURCE = 'https://github.com/webgptorg/promptbook/blob/1292e
 export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; promptbook: Copy }> = [
     {
         id: 'runtime',
-        label: { cs: 'Kde agent běží', en: 'Where the agent runs' },
+        label: { cs: 'Vlastní provoz', en: 'Self-hosting' },
         promptbook: {
             cs: 'Engine, který spouští a plánuje práci agentů, běží na Vašem počítači, firemním serveru nebo VPS ve Vaší správě.',
             en: 'The engine that runs and schedules agent work lives on your computer, company server or VPS under your control.',
@@ -26,7 +32,7 @@ export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; pr
     },
     {
         id: 'continuity',
-        label: { cs: 'Když vypnete počítač', en: 'When you shut down your computer' },
+        label: { cs: 'Běh při vypnutém počítači', en: 'Runs with your computer off' },
         promptbook: {
             cs: 'Zavření ovládacího okna práci nepřeruší. Vypnutí stroje s enginem ji zastaví. Engine na běžícím serveru může pracovat dál.',
             en: 'Closing the controls leaves work running. Shutting down the engine host stops it. An engine on a running server can continue.',
@@ -34,7 +40,7 @@ export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; pr
     },
     {
         id: 'workspace',
-        label: { cs: 'Soubory a pracovní prostředí', en: 'Files and workspace' },
+        label: { cs: 'Pracovní prostředí', en: 'Workspace' },
         promptbook: {
             cs: 'Agenti, úkoly a konverzace jsou čitelné soubory ve Vašem projektu. Změny souborů vidíte v Gitu a průběh práce v záznamech úloh.',
             en: 'Agents, tasks and conversations are readable files in your project. Review file changes in Git and inspect task traces.',
@@ -42,7 +48,7 @@ export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; pr
     },
     {
         id: 'model',
-        label: { cs: 'Model a zpracování vstupů', en: 'Model and input processing' },
+        label: { cs: 'AI model', en: 'AI model' },
         promptbook: {
             cs: 'Volíte podporovaný nástroj a model. Externí služby dostávají potřebné vstupy. Použití lokálního modelu závisí na adaptéru a úloze.',
             en: 'Choose a supported AI tool and model. External services receive the inputs they need. Local model use depends on the adapter and task.',
@@ -50,21 +56,26 @@ export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; pr
     },
     {
         id: 'automation',
-        label: { cs: 'Jak se práce spouští', en: 'How work starts' },
+        label: { cs: 'Úlohy podle plánu', en: 'Scheduled tasks' },
         promptbook: {
             cs: 'Svěříte týmu agentů průběžnou agendu s cílem a pravidly. Engine spouští jednotlivé i opakované úlohy.',
             en: 'Give a team of agents an ongoing responsibility, goal and rules. The engine runs one-off and recurring tasks.',
         },
     },
-    {
-        id: 'fit',
-        label: { cs: 'Kdy dává smysl', en: 'When it fits' },
-        promptbook: {
-            cs: 'Když chcete předat firemní agendu a spravovat její provoz, pravidla a pracovní projekt u sebe.',
-            en: 'When you want to delegate ongoing business work and keep its runtime, rules and project under your control.',
-        },
-    },
 ];
+
+export const PROMPTBOOK_FIT: Copy = {
+    cs: 'Když chcete předat firemní agendu a spravovat její provoz, pravidla a pracovní projekt u sebe.',
+    en: 'When you want to delegate ongoing business work and keep its runtime, rules and project under your control.',
+};
+
+export const PROMPTBOOK_SUMMARY: ComparisonSummary = {
+    runtime: value('Počítač, server, VPS', 'Computer, server, VPS', 'yes'),
+    continuity: value('Pokud běží na jiném stroji', 'When hosted elsewhere', 'conditional'),
+    workspace: value('Soubory projektu a Git', 'Project files and Git'),
+    model: value('Volba nástroje a modelu', 'Choice of tool and model'),
+    automation: value('Opakované úlohy agentů', 'Recurring agent tasks', 'yes'),
+};
 
 export const COMPARISONS: readonly Comparison[] = [
     {
@@ -77,6 +88,13 @@ export const COMPARISONS: readonly Comparison[] = [
         advantage: {
             cs: 'Promptbook si nainstalujete tam, kde má běžet celá agenda. Stejný stroj řídí úkoly a hostí pracovní projekt.',
             en: 'Install Promptbook where you want the whole operation to run. The same host coordinates tasks and holds the working project.',
+        },
+        summary: {
+            runtime: value('Cloud xAI, přístup k desktopu', 'xAI cloud, desktop access', 'no'),
+            continuity: value('Cloudové rutiny', 'Cloud routines', 'yes'),
+            workspace: value('Sdílený cloudový počítač', 'Shared cloud computer'),
+            model: value('Grok', 'Grok'),
+            automation: value('Rutiny botů', 'Bot routines', 'yes'),
         },
         rows: {
             runtime: { cs: 'Boti běží na trvalém cloudovém počítači služby. Na Vašem desktopu mohou s povolením spouštět jednotlivé příkazy.', en: 'Bots run on the service’s persistent cloud computer. With permission, they can run individual commands on your desktop.' },
@@ -99,6 +117,13 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'Obě řešení můžete provozovat u sebe. Promptbook je navržený kolem firemního projektu, ve kterém má každý agent svou roli a změny pracovních souborů můžete kontrolovat v Gitu.',
             en: 'Both can run on infrastructure you manage. Promptbook is organized around a business project with explicit agent roles and working-file changes you can review in Git.',
         },
+        summary: {
+            runtime: value('Vlastní Gateway', 'Your own Gateway', 'yes'),
+            continuity: value('Pokud Gateway běží jinde', 'When Gateway runs elsewhere', 'conditional'),
+            workspace: value('Adresáře agentů', 'Agent workspaces'),
+            model: value('Cloudové i lokální', 'Cloud and local'),
+            automation: value('Plánované úlohy Gateway', 'Gateway scheduled jobs', 'yes'),
+        },
         rows: {
             runtime: { cs: 'Gateway provozujete na vlastním zařízení nebo vzdáleném hostiteli. Řídí relace, kanály a plánování.', en: 'Run the Gateway on your own device or a remote host. It coordinates sessions, channels and scheduling.' },
             continuity: { cs: 'Vzdálená Gateway může běžet dál. Plánované úlohy potřebují běžící Gateway.', en: 'A remote Gateway can keep running. Scheduled jobs need the Gateway to be running.' },
@@ -119,12 +144,19 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'Promptbook dává správu stroje i pracovního projektu do Vašich rukou. Jednu agendu můžete rozdělit mezi několik agentů s vlastními pravidly.',
             en: 'Promptbook gives you control of the host and working project. Split ongoing work among several agents with their own rules.',
         },
+        summary: {
+            runtime: value('Cloud OpenAI', 'OpenAI cloud', 'no'),
+            continuity: value('Cloudový počítač dotu', 'Cloud computer for each dot', 'yes'),
+            workspace: value('Připojené aplikace a podklady', 'Connected apps and files'),
+            model: value('GPT-6 Astra', 'GPT-6 Astra'),
+            automation: value('Připomínky a opakované kontroly', 'Reminders and recurring checks', 'yes'),
+        },
         rows: {
             runtime: { cs: 'Dot má vlastní cloudový počítač v prostředí OpenAI.', en: 'A dot has its own cloud computer in OpenAI’s environment.' },
             continuity: { cs: 'Práce na cloudovém počítači může pokračovat bez zapnutého desktopu.', en: 'Cloud computer work can continue with your desktop switched off.' },
             workspace: { cs: 'Pracuje s podklady a aplikacemi připojenými k dotu. Firemní nastavení určuje workspace.', en: 'It works with material and apps connected to the dot. The workspace governs enterprise settings.' },
             model: { cs: 'OpenAI pro doty uvádí GPT-6 Astra.', en: 'OpenAI lists GPT-6 Astra as the model powering dots.' },
-            automation: { cs: 'Průběžná práce na cílech a možnost delegovat do vláken ChatGPT Work nebo Codex.', en: 'Ongoing work toward goals with delegation to ChatGPT Work or Codex threads.' },
+            automation: { cs: 'Průběžná práce na cílech, plánované kontroly a možnost delegovat do vláken ChatGPT Work nebo Codex.', en: 'Ongoing goal-based work, scheduled checks and delegation to ChatGPT Work or Codex threads.' },
             fit: { cs: 'Pro osobního asistenta integrovaného do služeb OpenAI a připojených aplikací.', en: 'For a personal assistant integrated with OpenAI services and connected apps.' },
         },
     },
@@ -138,6 +170,13 @@ export const COMPARISONS: readonly Comparison[] = [
         advantage: {
             cs: 'S Promptbookem volíte, který počítač hostí tým agentů, a firemní agendu uchováváte ve vlastním projektu.',
             en: 'With Promptbook, you choose which computer hosts your agent team and keep the business workflow in your own project.',
+        },
+        summary: {
+            runtime: value('Cloud Meta', 'Meta cloud', 'no'),
+            continuity: value('Cloudové relace', 'Cloud sessions', 'yes'),
+            workspace: value('Prohlížeč a připojené aplikace', 'Browser and connected apps'),
+            model: value('Muse Spark', 'Muse Spark'),
+            automation: value('Ověřená je práce na cílech', 'Goal-based work is documented', 'unknown'),
         },
         rows: {
             runtime: { cs: 'Agent běží v dedikovaném cloudovém prostředí Muse Secure VM spravovaném službou Meta.', en: 'The agent runs in a dedicated cloud environment, Muse Secure VM, managed by Meta.' },
@@ -160,6 +199,13 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'Promptbook drží pravidla, úlohy i historii ve Vašem pracovním projektu. Můžete jej spravovat na vlastním serveru a volit nástroje podle agendy.',
             en: 'Promptbook keeps rules, tasks and history in your working project. Run it on your own server and choose tools for the job.',
         },
+        summary: {
+            runtime: value('Cloud OpenAI', 'OpenAI cloud', 'no'),
+            continuity: value('Plánované úlohy', 'Scheduled tasks', 'yes'),
+            workspace: value('Chaty, soubory a aplikace', 'Chats, files and apps'),
+            model: value('Podle plánu a režimu', 'Varies by plan and mode'),
+            automation: value('Plánované úlohy a agenti', 'Scheduled tasks and agents', 'yes'),
+        },
         rows: {
             runtime: { cs: 'ChatGPT je služba OpenAI. Režim agenta má vlastní virtuální prohlížeč pro online úlohy.', en: 'ChatGPT is an OpenAI service. Agent mode has a virtual browser for online tasks.' },
             continuity: { cs: 'Plánované úlohy služby mohou běžet i při vypnutém počítači.', en: 'The service’s scheduled tasks can run with your computer switched off.' },
@@ -181,6 +227,13 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'Promptbook běží tam, kde máte pracovní projekt, a umí v jedné agendě spojit soubory, terminál i prohlížeč bez vazby na jednu kancelářskou sadu.',
             en: 'Promptbook runs where you keep the working project and can combine files, a terminal and a browser in one workflow across office suites.',
         },
+        summary: {
+            runtime: value('Cloud Google', 'Google cloud', 'no'),
+            continuity: value('Postupy ve Workspace Studio', 'Workspace Studio flows', 'yes'),
+            workspace: value('Gmail, Disk a integrace', 'Gmail, Drive and integrations'),
+            model: value('Gemini', 'Gemini'),
+            automation: value('Workspace Studio', 'Workspace Studio', 'yes'),
+        },
         rows: {
             runtime: { cs: 'V asistenci a automatizaci Google Workspace. Pro opakované postupy slouží Workspace Studio.', en: 'Within Google Workspace assistance and automation. Workspace Studio handles recurring workflows.' },
             continuity: { cs: 'Postupy ve Workspace Studio se spouštějí ve službě Google podle nastavených spouštěčů.', en: 'Workspace Studio flows run in Google’s service when their configured triggers fire.' },
@@ -201,6 +254,13 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'V Promptbooku na Vašem stroji běží i samotné řízení úloh. To se hodí, když má firemní agenda pracovat dlouhodobě se soubory na serveru, který spravujete.',
             en: 'Promptbook also coordinates the tasks on your own host. That fits ongoing business work with files on a server you manage.',
         },
+        summary: {
+            runtime: value('Cloud Anthropic, přístup přes Desktop', 'Anthropic cloud, Desktop access', 'no'),
+            continuity: value('Cloudové úlohy', 'Cloud tasks', 'yes'),
+            workspace: value('Aplikace a vybrané složky', 'Apps and selected folders'),
+            model: value('Claude', 'Claude'),
+            automation: value('Plánované úlohy', 'Scheduled tasks', 'yes'),
+        },
         rows: {
             runtime: { cs: 'Relace běží na serverech Anthropic. Claude Desktop zprostředkuje přístup k povoleným lokálním zdrojům.', en: 'Sessions run on Anthropic’s servers. Claude Desktop bridges access to permitted local resources.' },
             continuity: { cs: 'Cloudová relace pokračuje. Přístup k místním souborům a prohlížeči přes Desktop potřebuje běžící aplikaci.', en: 'The cloud session continues. Access to local files and the browser through Desktop needs the app to stay open.' },
@@ -215,18 +275,26 @@ export const COMPARISONS: readonly Comparison[] = [
         name: 'Claude Code',
         sources: [
             ['Claude Code overview', 'https://code.claude.com/docs/en/overview'],
+            ['Run prompts on a schedule', 'https://code.claude.com/docs/en/scheduled-tasks'],
             ['Run Claude Code programmatically', 'https://code.claude.com/docs/en/headless'],
         ],
         advantage: {
             cs: 'Claude Code můžete zapojit přímo do Promptbooku. Promptbook k němu přidává agendu s vlastními rolemi, pravidly, plánováním a historií úloh.',
             en: 'Claude Code can be one of Promptbook’s tools. Promptbook adds an ongoing workflow with its own roles, rules, schedules and task history.',
         },
+        summary: {
+            runtime: value('Vlastní terminál, volitelně cloud', 'Local CLI, optional cloud', 'yes'),
+            continuity: value('Vzdálené relace', 'Remote sessions', 'conditional'),
+            workspace: value('Repozitář a terminál', 'Repository and terminal'),
+            model: value('Claude', 'Claude'),
+            automation: value('Relace, Desktop i cloud', 'Session, Desktop and cloud', 'yes'),
+        },
         rows: {
             runtime: { cs: 'CLI spouštíte ve svém terminálu nebo CI. Anthropic nabízí i samostatné webové prostředí.', en: 'Run the CLI in your terminal or CI. Anthropic also offers a separate web environment.' },
             continuity: { cs: 'Lokální běh vyžaduje zapnutý hostitelský stroj. Vzdálený běh závisí na svém hostiteli.', en: 'Local work requires the host machine to stay on. Remote work depends on its own host.' },
             workspace: { cs: 'Při lokálním běhu pracuje s repozitářem a nástroji v povoleném pracovním prostředí.', en: 'In a local run it works with the repository and tools in its permitted workspace.' },
             model: { cs: 'Modely Claude. Připojení a volba modelu se řídí konfigurací Claude Code.', en: 'Claude models. Connection and model choice follow the Claude Code configuration.' },
-            automation: { cs: 'Interaktivní práce a programové spuštění pro skripty nebo CI.', en: 'Interactive work and programmatic runs for scripts or CI.' },
+            automation: { cs: 'Úlohy lze naplánovat v relaci, desktopové aplikaci i cloudu. Claude Code lze také spouštět ze skriptů nebo CI.', en: 'Schedule tasks in a session, on Desktop or in the cloud. Claude Code can also run from scripts or CI.' },
             fit: { cs: 'Pro přímou práci vývojáře s kódem nebo vlastní automatizaci ve skriptech.', en: 'For developers working directly with code or building their own scripted automation.' },
         },
     },
@@ -236,17 +304,25 @@ export const COMPARISONS: readonly Comparison[] = [
         sources: [
             ['Using Codex with your ChatGPT plan', 'https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan'],
             ['Using Codex Cloud', 'https://help.openai.com/en/articles/20001545-using-codex-cloud'],
+            ['Scheduled tasks', 'https://learn.chatgpt.com/docs/automations?surface=app'],
         ],
         advantage: {
             cs: 'Promptbook může Codex využít jako pracovní nástroj. Nad ním řídí průběžnou agendu, role a opakované úlohy v projektu, který máte u sebe.',
             en: 'Promptbook can use Codex as a tool and coordinate ongoing work, roles and recurring tasks in your own project.',
+        },
+        summary: {
+            runtime: value('Vlastní terminál, volitelně cloud', 'Local CLI, optional cloud', 'yes'),
+            continuity: value('Codex Cloud', 'Codex Cloud', 'conditional'),
+            workspace: value('Lokální nebo cloudový repozitář', 'Local or cloud repository'),
+            model: value('Podle režimu a konfigurace', 'Varies by mode and configuration'),
+            automation: value('Plánované úlohy v aplikaci', 'Scheduled tasks in the app', 'yes'),
         },
         rows: {
             runtime: { cs: 'Codex má lokální režim pro vývojové prostředí a Codex Cloud pro úlohy na počítačích OpenAI.', en: 'Codex has a local mode for your development environment and Codex Cloud for tasks on OpenAI-managed computers.' },
             continuity: { cs: 'Vypnutí lokálního hostitele zastaví práci na něm. Codex Cloud na něm nezávisí.', en: 'Shutting down a local host stops work on it. Codex Cloud runs independently of it.' },
             workspace: { cs: 'V lokálním režimu povolené soubory na stroji. V cloudu izolované pracovní prostředí se zdroji připojenými k úloze.', en: 'Permitted files on the machine in local mode. An isolated workspace with task resources in cloud mode.' },
             model: { cs: 'Modely dostupné v Codexu podle zvoleného režimu a konfigurace.', en: 'Models available to Codex for the selected mode and configuration.' },
-            automation: { cs: 'Vývojové úlohy v aplikaci, CLI či cloudu a neinteraktivní běhy ve skriptech.', en: 'Coding tasks in the app, CLI or cloud, plus non-interactive scripted runs.' },
+            automation: { cs: 'Vedle vývojových úloh v aplikaci, CLI a cloudu lze nastavit opakované úlohy. Ty s lokálním projektem potřebují zapnutý stroj a běžící aplikaci.', en: 'Alongside coding tasks in the app, CLI and cloud, you can schedule recurring work. Local project tasks need the machine and app running.' },
             fit: { cs: 'Pro vývoj a kontrolu změn kódu s volbou lokálních či vzdálených úloh.', en: 'For coding and code review with a choice of local or remote tasks.' },
         },
     },
@@ -261,6 +337,13 @@ export const COMPARISONS: readonly Comparison[] = [
         advantage: {
             cs: 'Obě řešení nabízejí vlastní nasazení. V Promptbooku svěřujete agentovi cíl a pravidla pro celou agendu, což se hodí, když se další krok mění podle situace.',
             en: 'Both offer self-hosting. Promptbook gives an agent a goal and rules for the whole workflow, useful when the next step changes with the situation.',
+        },
+        summary: {
+            runtime: value('Vlastní instance nebo n8n Cloud', 'Own instance or n8n Cloud', 'yes'),
+            continuity: value('Pokud instance běží jinde', 'When hosted elsewhere', 'conditional'),
+            workspace: value('Vizuální workflow a uzly', 'Visual workflows and nodes'),
+            model: value('Více poskytovatelů, i lokálně', 'Multiple providers, including local'),
+            automation: value('Plán a události', 'Schedules and events', 'yes'),
         },
         rows: {
             runtime: { cs: 'n8n Cloud nebo vlastní instance n8n.', en: 'n8n Cloud or your own n8n instance.' },
@@ -283,6 +366,13 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'Promptbook na Vašem stroji provozuje samotný engine agendy. To se hodí pro průběžnou práci s místním projektem a prohlížečem.',
             en: 'Promptbook runs the workflow engine itself on your host. That fits ongoing work with a local project and browser.',
         },
+        summary: {
+            runtime: value('Cloud Make, síťový konektor', 'Make cloud, network connector', 'no'),
+            continuity: value('Cloudové scénáře', 'Cloud scenarios', 'yes'),
+            workspace: value('Scénáře a moduly', 'Scenarios and modules'),
+            model: value('Podle připojení agenta', 'Varies by agent connection'),
+            automation: value('Plán a události', 'Schedules and events', 'yes'),
+        },
         rows: {
             runtime: { cs: 'Scénáře běží v Make. Enterprise konektor zprostředkuje přístup k podporovaným systémům ve vlastní síti.', en: 'Scenarios run in Make. The Enterprise connector bridges access to supported systems on your own network.' },
             continuity: { cs: 'Scénáře ve službě mohou běžet bez desktopu. Kroky přes místní konektor potřebují dostupný konektor.', en: 'Service scenarios can run without your desktop. Steps through an on-premise connector need it to be available.' },
@@ -303,6 +393,13 @@ export const COMPARISONS: readonly Comparison[] = [
             cs: 'Obě řešení umějí řídit tým agentů ve vlastní správě. Promptbook nabízí editovatelný projekt z Book souborů a možnost dodat jednu konkrétní agendu s implementačním partnerem.',
             en: 'Both can coordinate self-managed agent teams. Promptbook offers an editable project made of Book files and the option to roll out one specific workflow with an implementation partner.',
         },
+        summary: {
+            runtime: value('Vlastní instance', 'Own instance', 'yes'),
+            continuity: value('Pokud běží na jiném stroji', 'When hosted elsewhere', 'conditional'),
+            workspace: value('Role, cíle a rozpočty', 'Roles, goals and budgets'),
+            model: value('Podle adaptéru', 'Varies by adapter'),
+            automation: value('Plán a události', 'Schedules and events', 'yes'),
+        },
         rows: {
             runtime: { cs: 'Paperclip lze hostovat u sebe. Adaptéry mohou spouštět agenty lokálně nebo je volat přes vzdálené rozhraní.', en: 'Paperclip can be self-hosted. Adapters can run agents locally or call them through a remote interface.' },
             continuity: { cs: 'Práce závisí na běžícím Paperclipu a dostupnosti konkrétního běhového prostředí agenta.', en: 'Work depends on Paperclip staying up and the specific agent runtime being available.' },
@@ -322,6 +419,13 @@ export const COMPARISONS: readonly Comparison[] = [
         advantage: {
             cs: 'Promptbook umožňuje hostovat běh agendy i její pracovní soubory ve vlastním prostředí a spravovat je mimo závislost na jedné kancelářské platformě.',
             en: 'Promptbook lets you host both the workflow runtime and its files in your own environment, independently of a single office platform.',
+        },
+        summary: {
+            runtime: value('Microsoft Power Platform', 'Microsoft Power Platform', 'no'),
+            continuity: value('Cloudové toky', 'Cloud flows', 'yes'),
+            workspace: value('Znalosti, nástroje a konektory', 'Knowledge, tools and connectors'),
+            model: value('Podle konfigurace', 'Varies by configuration'),
+            automation: value('Události a plánované toky', 'Events and scheduled flows', 'yes'),
         },
         rows: {
             runtime: { cs: 'Agenti jsou nasazení v prostředí Microsoft Copilot Studio a Power Platform.', en: 'Agents are deployed in Microsoft Copilot Studio and Power Platform environments.' },

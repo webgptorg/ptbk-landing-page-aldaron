@@ -7,7 +7,12 @@ export const PROMPTBOOK_BRAND_STYLE = Object.fromEntries(
     Object.entries(brand.colors).map(([name, value]) => [`--ptbk-${name}`, value]),
 ) as CSSProperties;
 
+export const PROMPTBOOK_DEPLOYMENT = {
+    cs: 'Tým agentů si spustíte na svém počítači, firemním serveru nebo VPS.',
+    en: 'Run your team of agents on your own computer, company server or VPS.',
+};
+
 export const PROMPTBOOK_INTRO = {
-    cs: ['Předáte agendu.', 'Nastavíte pravidla.', 'Spustíte agenty.', 'Pracují sami.', 'Ozvou se, jen když Vás potřebují.', 'Vy máte kdykoliv přehled.'],
-    en: ['Hand over a responsibility.', 'Set the rules.', 'Start your agents.', 'They work independently.', 'They ask only when they need you.', 'You can check in at any time.'],
+    cs: ['Předáte agendu a nastavíte pravidla.', 'Agenti pracují samostatně a ozvou se, když Vás potřebují.'],
+    en: ['Hand over ongoing work and set the rules.', 'Your agents work independently and check in when they need you.'],
 };
