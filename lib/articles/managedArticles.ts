@@ -227,14 +227,16 @@ export async function attachManagedArticleNarration(
     return toManagedArticle(data as ManagedArticleRow);
 }
 
-export async function readPublishedManagedArticles(language: ArticleLanguage | undefined, destination: ManagedArticleDestination, publicOnly = false): Promise<ManagedArticleRow[]> {
+export async function readPublishedManagedArticles(language: ArticleLanguage | undefined, destination: ManagedArticleDestination, publicOnly = false, authorId?: string): Promise<ManagedArticleRow[]> {
     const client = createSupabaseServiceRoleClient();
     if (!client) return [];
     const placementFilter = JSON.stringify([publicOnly ? { destination, visibility: 'public' } : { destination }]);
     const { rows } = await loadAllSupabaseRows<ManagedArticleRow>(
         (from, to) => {
             const query = client.from(TABLE).select('*').contains('placements', placementFilter);
-            return (language ? query.eq('language', language) : query).order('published_at', { ascending: false }).order('id').range(from, to);
+            if (language) query.eq('language', language);
+            if (authorId) query.eq('author_id', authorId);
+            return query.order('published_at', { ascending: false }).order('id').range(from, to);
         },
         'read published managed articles',
     );

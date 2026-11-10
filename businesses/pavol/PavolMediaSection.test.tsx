@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Article } from '@/lib/articles/types';
-import { getPublishedArticles } from '@/lib/articles/publishedArticles';
+import { getPersonalArticleListings } from '@/lib/articles/publishedArticles';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolMediaSection } from './PavolMediaSection';
 import { PavolPodcastIndex } from './PavolPodcastIndex';
@@ -14,7 +14,7 @@ vi.mock('@/components/audio-player/AudioPlayerProvider', () => ({
     useAudioPlayerControls: () => ({ track: null, isPlaying: false, getProgress: () => undefined, playTrack }),
 }));
 vi.mock('@/lib/workshops/workshopPublic', () => ({ loadPublishedWorkshopSummaries: vi.fn().mockResolvedValue([]) }));
-vi.mock('@/lib/articles/publishedArticles', () => ({ getPublishedArticles: vi.fn() }));
+vi.mock('@/lib/articles/publishedArticles', () => ({ getPersonalArticleListings: vi.fn() }));
 vi.mock('./fetchPavolPodcasts', () => ({ fetchPavolPodcasts: vi.fn() }));
 
 const articles: Article[] = Array.from({ length: 12 }, (_, index) => ({
@@ -40,7 +40,7 @@ afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe('personal homepage previews and archives', () => {
     it.each(['cs', 'en'] as const)('shows separate bounded previews in %s and keeps article playback on the homepage', async (language) => {
-        vi.mocked(getPublishedArticles).mockResolvedValue(articles);
+        vi.mocked(getPersonalArticleListings).mockResolvedValue(articles);
         vi.mocked(fetchPavolPodcasts).mockResolvedValue(podcasts);
         const { container } = render(await PavolMediaSection({ language, revalidateSeconds: 3600 }));
         const articleSection = container.querySelector<HTMLElement>('#articles')!;

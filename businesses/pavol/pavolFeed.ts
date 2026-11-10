@@ -1,6 +1,5 @@
-import type { Article, ArticleLanguage } from '@/lib/articles/types';
-import { getArticlePodcastDefinition } from '@/lib/articles/podcast';
-import { getArticleUrl } from '@/lib/articles/urls';
+import type { ArticleLanguage, ArticleListing } from '@/lib/articles/types';
+import { getArticlePodcastDefinition, hasPublishableAudio } from '@/lib/articles/podcast';
 import { AI_TA_KRAJTA_NAME } from '@/businesses/ai-ta-krajta/config';
 import { PAVOL_KRAJTA_SHOW_ARTWORK_URL } from './pavolPodcastArtwork';
 import { topicFromSourceTitle } from './pavolPodcastCopy';
@@ -34,11 +33,12 @@ function getPodcastFeedImageUrl(podcast: PavolPodcast, websiteUrl: string): stri
 }
 
 /** One existing subscription address per language; source GUIDs and recordings remain unchanged. */
-export function createPavolFeed(articles: readonly Article[], podcasts: readonly PavolPodcast[], language: ArticleLanguage): string {
+export function createPavolFeed(articles: readonly ArticleListing[], podcasts: readonly PavolPodcast[], language: ArticleLanguage): string {
     const definition = getArticlePodcastDefinition(language, 'personal');
     const items = [
-        ...articles.filter(article => (article.managed || article.authorId === 'pavol-hejny') && article.language === language).map(article => ({
-            id: article.id, title: article.title, href: getArticleUrl(article, 'personal'), description: article.perex,
+        ...articles.filter(article => (article.managed || article.authorId === 'pavol-hejny') && article.language === language
+            && (!article.syndicated || hasPublishableAudio(article))).map(article => ({
+            id: article.id, title: article.title, href: article.canonicalUrl, description: article.perex,
             publishedAt: article.publishedAt, language: article.language, author: article.author.name, imageUrl: undefined,
             audioUrl: article.audio?.url, byteLength: article.audio?.byteLength, duration: article.audio?.duration, subtitlesUrl: article.audio?.subtitlesUrl,
         })),

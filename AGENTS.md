@@ -163,6 +163,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   out of public indexing and feeds. Free member articles in the Promptbook community expose their title, perex and
   opening paragraph before entry. The inline name and email form opens that room and refreshes the current article.
   The remaining text and downloads still require its own session.
+  The language-matched Pavol blog also lists Pavol's published Promptbook community articles automatically and
+  links syndicated cards to the selected canonical URL. Members-only previews supply just the public card, with
+  no private body or recording. The personal RSS adds syndicated articles only with public, current audio and
+  links to the same canonical URL, retaining the article ID even if its destinations change.
   Fenced Book examples in the full article use the existing light, read-only BookEditor when near the viewport.
   The server-rendered source remains the fallback and preserves word tracking during narration.
   Article images and links to image files open a keyboard-accessible preview on the article page.

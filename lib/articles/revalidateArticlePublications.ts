@@ -10,6 +10,10 @@ export function revalidateArticlePublications(...articles: readonly (Publication
         if (!article) continue;
         const { language, placements } = article;
         for (const placement of placements) {
+            if (placement.destination === 'promptbook') {
+                paths.add(`/${language}/pavol`);
+                paths.add(`/${language}/pavol/articles/podcast.xml`);
+            }
             if (placement.visibility !== 'public') continue;
             if (placement.destination === 'personal-blog') {
                 paths.add(`/${language}/pavol`);

@@ -13,8 +13,8 @@ import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArticleAudioButton } from '@/businesses/articles/ArticleAudioButton';
-import { getPublishedArticles } from '@/lib/articles/publishedArticles';
-import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
+import { getPersonalArticleListings } from '@/lib/articles/publishedArticles';
+import { getArticleIndexUrl, getArticleListingHref } from '@/lib/articles/urls';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolPodcastCard } from './PavolPodcastCard';
 import { PavolTalksSection } from './PavolTalksSection';
@@ -91,7 +91,7 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
 }) {
     const cs = language === 'cs';
     const content = PAVOL_PAGE_CONTENT[language].media;
-    const articles = rankContent((await getPublishedArticles(language, 'personal')).filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
+    const articles = rankContent((await getPersonalArticleListings(language)).filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
     const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0 && appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
     const highlights = appearances.slice(0, 3);
     const rest = appearances.slice(3);
@@ -117,7 +117,7 @@ export async function PavolMediaSection({ language, revalidateSeconds }: {
                 <PavolSectionHeading eyebrow={cs ? 'Články' : 'Articles'} title={cs ? 'Moje články a myšlenky' : 'My articles and thoughts'} description={cs ? 'O AI, vývoji softwaru a rozhodnutích kolem nich. Čtěte, nebo si články poslechněte přímo tady.' : 'On AI, software development, and the decisions around them. Read or listen right here.'} />
                 {articles.length ? <div className="mt-6 grid gap-6 md:grid-cols-2">
                     {articles.map((article) => {
-                        const href = new URL(getArticleUrl(article, 'personal')).pathname;
+                        const href = getArticleListingHref(article, 'personal');
                         return <article key={article.id} className="pavol-article-card">
                             <time dateTime={article.publishedAt} className="pavol-recording-meta">{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(article.publishedAt))}</time>
                             <h3><Link href={href}>{article.title}</Link></h3>

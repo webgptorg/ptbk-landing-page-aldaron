@@ -66,6 +66,24 @@ describe('combined personal RSS', () => {
         expect(xml).toContain('spec-driven-anchoring-cs');
         expect(xml).toContain(articles[0].audio!.url);
     });
+
+    it('adds syndicated articles only with valid audio and links to their chosen canonical URLs', () => {
+        const article = getArticles('cs', 'personal')[0];
+        const canonicalUrl = 'https://ptbk.io/cs/komunity/promptbook/clanky/cs/komunitni-clanek';
+        const syndicated = { ...article, id: 'community-id', syndicated: true, canonicalUrl } as const;
+        const xml = createPavolFeed([
+            syndicated, syndicated,
+            { ...syndicated, id: 'member-preview', audio: undefined },
+            { ...syndicated, id: 'unusable-audio', audio: { ...article.audio!, byteLength: 0 } },
+        ], [], 'cs');
+        const doc = new DOMParser().parseFromString(xml, 'application/xml');
+        expect(doc.querySelector('parsererror')).toBeNull();
+        expect(doc.querySelectorAll('item')).toHaveLength(1);
+        expect(doc.querySelector('item guid')?.textContent).toBe('community-id');
+        expect(doc.querySelector('item link')?.textContent).toBe(canonicalUrl);
+        expect(doc.querySelector('item enclosure')?.getAttribute('url')).toBe(article.audio!.url);
+    });
+
     it('includes readable articles while narration is pending, marks Czech recordings in English, and rejects unsafe links', () => {
         const articles = getArticles('en', 'personal');
         const xml = createPavolFeed(articles, [appearance, { ...appearance, id: 'unsafe', href: 'javascript:alert(1)' }], 'en');

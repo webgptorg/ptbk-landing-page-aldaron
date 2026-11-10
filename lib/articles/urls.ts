@@ -1,4 +1,4 @@
-import type { Article, ArticleLanguage, ArticlePublication } from './types';
+import type { Article, ArticleLanguage, ArticleListing, ArticlePublication } from './types';
 
 /** All publications consume the same immutable asset URL, including both podcast enclosures. */
 export const ARTICLE_ASSET_ORIGIN = 'https://ptbk.io';
@@ -11,6 +11,10 @@ export function getArticleIndexUrl(language: ArticleLanguage, publication: Artic
 
 export function getArticleUrl(article: Pick<Article, 'language' | 'slug'>, publication: ArticlePublication): string {
     return `${getArticleIndexUrl(article.language, publication)}/${article.slug}`;
+}
+
+export function getArticleListingHref(article: ArticleListing, publication: ArticlePublication): string {
+    return article.syndicated ? article.canonicalUrl : new URL(getArticleUrl(article, publication)).pathname;
 }
 
 export function getArticlePodcastUrl(language: ArticleLanguage, publication: ArticlePublication): string {

@@ -24,8 +24,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const result = await getPlacement(params);
     const robots = { index: false, follow: false };
     if (!result) return { robots };
-    if (result.kind === 'teaser') return { title: result.title, description: result.perex, robots };
-    if (result.visibility !== 'public') return { title: result.article.title, robots };
+    if (result.kind === 'teaser') {
+        return { title: result.title, description: result.perex, alternates: { canonical: result.canonicalUrl }, robots };
+    }
+    if (result.visibility !== 'public') {
+        return { title: result.article.title, alternates: { canonical: result.article.canonicalUrl }, robots };
+    }
     const pathname = new URL(getManagedArticleUrl(result.article, result.community)).pathname;
     return createArticleMetadata(result.article, 'promptbook', pathname);
 }

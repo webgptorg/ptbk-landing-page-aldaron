@@ -22,11 +22,12 @@ vi.mock('./managedArticles', async (load) => ({
 import { canReadCommunityMemberArticle } from '@/lib/community-membership/communityMembershipArticleAccess';
 import { getArticle } from './load';
 import { getLegacyArticlePlacements } from './legacyArticlePlacements';
-import { readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
+import { getManagedArticleContentHash, readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
 import {
     getLegacyArticleSitemapEntries, getManagedPublicCanonicalArticles, getPublishedArticle,
-    getCommunityArticleCards, getCommunityArticleDetail, getPublishedCommunityArticle,
+    getCommunityArticleCards, getCommunityArticleDetail, getPersonalArticleListings, getPublishedCommunityArticle,
 } from './publishedArticles';
+import { getArticleListingHref } from './urls';
 
 afterEach(() => vi.resetAllMocks());
 
@@ -94,6 +95,7 @@ describe('article destination resolution', () => {
 
         expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toEqual({
             kind: 'teaser', title: row.title, perex: row.perex, openingMarkdown: 'Otevírací **odstavec**.',
+            canonicalUrl: 'https://ptbk.io/cs/komunity/promptbook/clanky/cs/clanek-s-uvodem',
         });
         const cards = await getCommunityArticleCards('promptbook', true);
         expect(cards).toHaveLength(1);
@@ -112,5 +114,51 @@ describe('article destination resolution', () => {
         vi.mocked(canReadCommunityMemberArticle).mockResolvedValue(false);
         expect(await getCommunityArticleDetail('promptbook', 'cs', row.slug)).toBeNull();
         expect(await getCommunityArticleCards('promptbook', true)).toEqual([]);
+    });
+
+    it('syndicates only eligible Promptbook articles by Pavol, preserving access and canonical URLs', async () => {
+        const row: ManagedArticleRow = {
+            id: 'public', revision: 'revision', language: 'cs', slug: 'verejny-clanek', title: 'Veřejný článek',
+            perex: 'Perex.', markdown: 'Celý text.', author_id: 'pavol-hejny',
+            placements: [{ destination: 'promptbook', visibility: 'public' }], canonical_destination: 'promptbook',
+            published_at: '2026-11-10T11:00:00Z', created_at: '2026-11-10T11:00:00Z', updated_at: '2026-11-10T11:00:00Z',
+            audio_asset: null, pdf_asset: null, words_asset: null, subtitles_asset: null,
+        };
+        const audio = { key: 'recording.mp3', byteLength: 4096, duration: 60, contentHash: getManagedArticleContentHash(row) };
+        const member: ManagedArticleRow = {
+            ...row, id: 'member', slug: 'clensky-clanek', placements: [{ destination: 'promptbook', visibility: 'members' }],
+            audio_asset: audio,
+        };
+        const both: ManagedArticleRow = {
+            ...row, id: 'both', slug: 'clanek-na-obou-webech',
+            placements: [...row.placements, { destination: 'personal-blog', visibility: 'public' }],
+        };
+        const alternateCanonical: ManagedArticleRow = {
+            ...row, id: 'alternate', slug: 'jina-kanonicka-adresa',
+            placements: [...member.placements, { destination: 'promptbook-blog', visibility: 'public' }],
+            canonical_destination: 'promptbook-blog',
+        };
+        vi.mocked(getLegacyArticlePlacements).mockResolvedValue({});
+        vi.mocked(readPublishedManagedArticles).mockImplementation(async (_language, destination) => destination === 'personal-blog'
+            ? [both]
+            : [{ ...row, audio_asset: audio }, member, both, alternateCanonical,
+                { ...row, id: 'other-author', author_id: 'other' },
+                { ...row, id: 'other-language', language: 'en' },
+                { ...row, id: 'draft', canonical_destination: null },
+                { ...row, id: 'paid', placements: [{ destination: 'promptbook', visibility: 'paid' }] }]);
+
+        const listings = await getPersonalArticleListings('cs');
+        expect(vi.mocked(readPublishedManagedArticles)).toHaveBeenCalledWith('cs', 'promptbook', false, 'pavol-hejny');
+        expect(listings.filter((article) => article.managed).map((article) => article.id)).toEqual(['alternate', 'both', 'member', 'public']);
+        const publicListing = listings.find((article) => article.id === row.id)!;
+        expect(getArticleListingHref(publicListing, 'personal')).toBe('https://ptbk.io/cs/komunity/promptbook/clanky/cs/verejny-clanek');
+        expect(publicListing.audio?.url).toBe('https://ptbk.io/api/articles/media/public/audio');
+        const memberListing = listings.find((article) => article.id === member.id)!;
+        expect(getArticleListingHref(memberListing, 'personal')).toBe('https://ptbk.io/cs/komunity/promptbook/clanky/cs/clensky-clanek');
+        expect(memberListing).not.toHaveProperty('markdown');
+        expect(memberListing).not.toHaveProperty('audio');
+        expect(getArticleListingHref(listings.find((article) => article.id === alternateCanonical.id)!, 'personal'))
+            .toBe('https://ptbk.io/cs/articles/jina-kanonicka-adresa');
+        expect(canReadCommunityMemberArticle).not.toHaveBeenCalled();
     });
 });

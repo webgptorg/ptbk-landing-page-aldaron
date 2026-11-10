@@ -59,7 +59,7 @@ function isPublicHttpUrl(value: string): boolean {
 }
 
 /** A pending narration must never become a podcast episode with an imaginary enclosure. */
-function hasPublishableAudio(article: Article): boolean {
+export function hasPublishableAudio(article: Pick<Article, 'audio'>): boolean {
     const audio = article.audio;
     return Boolean(
         audio &&

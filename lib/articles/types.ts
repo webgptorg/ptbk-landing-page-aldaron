@@ -43,6 +43,13 @@ export type Article = {
     readonly translations: readonly { readonly language: ArticleLanguage; readonly url: string; readonly title: string }[];
 };
 
+/** A public card can link to a member preview without carrying the private article body or audio. */
+export type ArticleListing = Pick<Article, 'id' | 'managed' | 'authorId' | 'author' | 'language' | 'slug' | 'title'
+    | 'perex' | 'publishedAt' | 'prominence' | 'canonicalUrl' | 'coverImage' | 'audio'> & {
+    readonly markdown?: string;
+    readonly syndicated?: true;
+};
+
 /** Human-authored editorial metadata; technical recording provenance lives separately in metadata.json. */
 export type ArticleEditorialMetadata = Pick<Article, 'id' | 'translationGroupId' | 'authorId' | 'language' | 'slug' | 'title' | 'perex' | 'publishedAt'> & {
     readonly updatedAt?: string;

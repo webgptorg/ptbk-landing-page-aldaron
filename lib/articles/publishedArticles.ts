@@ -9,10 +9,11 @@ import { applyLegacyArticlePlacements, getLegacyArticlePlacements } from './lega
 import { isArticleCommunity, type ManagedArticleDestination, type ManagedArticlePlacement } from './managedArticleInput';
 import { getManagedArticleAssetPath, getManagedArticleUrl } from './managedArticleUrls';
 import { getCurrentManagedArticleAsset, readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
-import type { Article, ArticleLanguage, ArticlePublication } from './types';
+import type { Article, ArticleLanguage, ArticleListing, ArticlePublication } from './types';
 import { ARTICLE_ASSET_ORIGIN } from './urls';
 
 const BLOG_DESTINATIONS = { promptbook: 'promptbook-blog', personal: 'personal-blog' } as const;
+const PAVOL_AUTHOR_ID = 'pavol-hejny';
 
 export function getArticlePlacement(row: ManagedArticleRow, destination: ManagedArticleDestination): ManagedArticlePlacement | undefined {
     return row.placements.find((placement) => placement.destination === destination);
@@ -51,7 +52,7 @@ export const getPublishedArticle = cache(async (
 ): Promise<Article | undefined> => {
     const legacyArticles = getAllArticles();
     const legacy = legacyArticles.find((article) => article.slug === slug && article.language === language
-        && (publication === 'promptbook' || article.authorId === 'pavol-hejny'));
+        && (publication === 'promptbook' || article.authorId === PAVOL_AUTHOR_ID));
     if (legacy) return applyLegacyArticlePlacements(legacy, await getLegacyArticlePlacements(), legacyArticles);
     const destination = BLOG_DESTINATIONS[publication];
     const row = await readPublishedManagedArticle(language, slug, destination);
@@ -65,7 +66,7 @@ export async function getPublishedArticles(language: ArticleLanguage, publicatio
         readPublishedManagedArticles(language, destination, true), getLegacyArticlePlacements(),
     ]);
     const legacyArticles = getAllArticles();
-    const legacy = legacyArticles.filter((article) => article.language === language && (publication === 'promptbook' || article.authorId === 'pavol-hejny'))
+    const legacy = legacyArticles.filter((article) => article.language === language && (publication === 'promptbook' || article.authorId === PAVOL_AUTHOR_ID))
         .map((article) => applyLegacyArticlePlacements(article, legacyPlacements, legacyArticles));
     const reservedSlugs = new Set(legacy.map(({ slug }) => slug));
     return [...legacy, ...managed.flatMap((row) => {
@@ -75,13 +76,43 @@ export async function getPublishedArticles(language: ArticleLanguage, publicatio
     })].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
 }
 
-type CommunityArticleDetail =
-    | { readonly kind: 'article'; readonly article: Article; readonly visibility: ManagedArticlePlacement['visibility'] }
-    | { readonly kind: 'teaser'; readonly title: string; readonly perex: string; readonly openingMarkdown: string };
-
 function offersFreeArticleTeaser(community: 'vyvojari' | 'promptbook', placement: ManagedArticlePlacement): boolean {
     return community === 'promptbook' && placement.visibility === 'members';
 }
+
+/** The personal site and its RSS use the same editorial placements and article IDs. */
+export async function getPersonalArticleListings(language: ArticleLanguage): Promise<ArticleListing[]> {
+    const [personal, community] = await Promise.all([
+        getPublishedArticles(language, 'personal'),
+        readPublishedManagedArticles(language, 'promptbook', false, PAVOL_AUTHOR_ID),
+    ]);
+    const listings = new Map<string, ArticleListing>(personal.map((article) => [article.id, article]));
+    for (const row of community) {
+        if (!row.published_at || !row.canonical_destination || row.author_id !== PAVOL_AUTHOR_ID
+            || row.language !== language || listings.has(row.id)) continue;
+        const source = getArticlePlacement(row, 'promptbook');
+        if (!source || (source.visibility !== 'public' && !offersFreeArticleTeaser('promptbook', source))) continue;
+
+        const canonical = getArticlePlacement(row, row.canonical_destination);
+        if (canonical?.visibility === 'public') {
+            const article = toPublishedArticle(row, canonical);
+            if (article) listings.set(row.id, { ...article, syndicated: true });
+        } else if (canonical?.destination === 'promptbook' && offersFreeArticleTeaser('promptbook', canonical)) {
+            const author = getArticleAuthor(row.author_id);
+            if (!author) continue;
+            listings.set(row.id, {
+                id: row.id, managed: true, authorId: author.id, author, language: row.language, slug: row.slug,
+                title: row.title, perex: row.perex, publishedAt: row.published_at, syndicated: true,
+                canonicalUrl: getManagedArticleUrl(row, canonical.destination),
+            });
+        }
+    }
+    return Array.from(listings.values()).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id));
+}
+
+type CommunityArticleDetail =
+    | { readonly kind: 'article'; readonly article: Article; readonly visibility: ManagedArticlePlacement['visibility'] }
+    | { readonly kind: 'teaser'; readonly title: string; readonly perex: string; readonly openingMarkdown: string; readonly canonicalUrl: string };
 
 export const getCommunityArticleDetail = cache(async (
     community: 'vyvojari' | 'promptbook',
@@ -97,7 +128,7 @@ export const getCommunityArticleDetail = cache(async (
             : null;
     }
     const row = await readPublishedManagedArticle(language, slug, community);
-    if (!row) return null;
+    if (!row?.canonical_destination || !row.published_at) return null;
     const placement = getArticlePlacement(row, community);
     if (!placement) return null;
     if (!await canReadManagedArticlePlacement(placement)) {
@@ -106,6 +137,7 @@ export const getCommunityArticleDetail = cache(async (
             title: row.title,
             perex: row.perex,
             openingMarkdown: getArticleOpeningParagraph(row.markdown, row.title, row.perex),
+            canonicalUrl: getManagedArticleUrl(row, row.canonical_destination),
         } : null;
     }
     const article = toPublishedArticle(row, placement);
@@ -188,7 +220,7 @@ export async function getLegacyArticleSitemapEntries(publication: ArticlePublica
     const placements = await getLegacyArticlePlacements();
     return legacyArticles.filter((article) => {
         const overlay = placements[article.id];
-        return (!language || article.language === language) && (publication === 'promptbook' || article.authorId === 'pavol-hejny')
+        return (!language || article.language === language) && (publication === 'promptbook' || article.authorId === PAVOL_AUTHOR_ID)
             && (!overlay || overlay.canonicalDestination === BLOG_DESTINATIONS[publication]);
     }).map((article) => applyLegacyArticlePlacements(article, placements, legacyArticles));
 }
