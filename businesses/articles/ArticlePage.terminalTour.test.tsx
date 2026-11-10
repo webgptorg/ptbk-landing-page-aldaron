@@ -40,7 +40,7 @@ const community = {
 
 describe('terminal recording links in community articles', () => {
     it.each([
-        ['pece-o-kontakty', '04-agenda.webp'],
+        ['pece-o-kontakty', '08-contacts.webp'],
         ['sprava-podcastu', '06-podcast.webp'],
         ['udrzba-webu', '07-web.webp'],
     ])('shows its original agenda frame in the setup section of %s', (slug, filename) => {
@@ -51,6 +51,15 @@ describe('terminal recording links in community articles', () => {
         expect(html.indexOf(link)).toBeLessThan(html.indexOf('id="dalsi-kapitola"'));
         expect(html).toContain(`href="/terminal-tour/${filename}"`);
         expect(html).toContain(`src="/terminal-tour/${filename}"`);
+        const disclosure = html.match(/<details[^>]*><summary>Další kroky v terminálu<\/summary>(.*?)<\/details>/)?.[1];
+        expect(disclosure?.match(/src="\/terminal-tour\/[^"]+"/g)).toEqual([
+            'src="/terminal-tour/01-install.webp"',
+            'src="/terminal-tour/02-console.webp"',
+            'src="/terminal-tour/03-project.webp"',
+            'src="/terminal-tour/05-result.webp"',
+        ]);
+        expect(disclosure).toContain('Nainstaluj Promptbook');
+        expect(disclosure).toContain('Zkontroluj uložený projekt');
     });
 
     it('keeps the card out of other publications and unrelated articles', () => {

@@ -167,6 +167,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The server-rendered source remains the fallback and preserves word tracking during narration.
   The Czech Promptbook articles about contacts, podcast production, and web maintenance show their own
   full-width agenda frame and link to the terminal recording from their setup sections in the full reader.
+  A collapsed disclosure below the agenda frame contains the shared installation, console, new project and result frames.
   The public `/cs/terminal` page presents the genuine CLI capture, five walkthrough frames and two alternate
   agenda frames. It describes project setup without an AI tool and the environment-specific IPC startup failure.
   Its MP4 and WebP files are public static assets under `/terminal-tour/`.

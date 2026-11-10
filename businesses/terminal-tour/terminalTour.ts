@@ -79,7 +79,7 @@ export const TERMINAL_TOUR_OTHER_AGENDAS = [
 export const TERMINAL_TOUR_ARTICLE_FRAMES: ReadonlyMap<string, AgendaFrame> = new Map<string, AgendaFrame>([
     ['pece-o-kontakty', {
         title: 'Péče o kontakty',
-        imagePath: TERMINAL_TOUR_STEPS[3].imagePath,
+        imagePath: `${MEDIA_PATH}/08-contacts.webp`,
         imageAlt: 'Zadání agendy pro péči o kontakty v terminálovém průvodci.',
     }],
     ['sprava-podcastu', TERMINAL_TOUR_OTHER_AGENDAS[0]],

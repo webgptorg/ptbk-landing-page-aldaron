@@ -152,12 +152,14 @@
 }
 .articleFrame {
     width: 100%;
-    margin: 1.6rem 0 2.4rem;
+    margin: 1.6rem 0 .8rem;
 }
-.articleFrame .stepPicture {
+.articleFrame .stepPicture,
+.articleSteps .stepPicture {
     cursor: zoom-in;
 }
-:global(.article-prose) .articleFrame img {
+:global(.article-prose) .articleFrame img,
+:global(.article-prose) .articleSteps img {
     display: block;
     width: 100%;
     height: auto;
@@ -180,4 +182,36 @@
     align-items: center;
     gap: .25rem;
     font-weight: 650;
+}
+
+.articleSteps {
+    margin-bottom: 2.4rem;
+}
+.articleSteps summary {
+    width: fit-content;
+    color: var(--article-accent);
+    font-size: .93rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+:global(.article-prose) .articleSteps ul {
+    display: grid;
+    gap: 1.25rem;
+    margin: .9rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+:global(.article-prose) .articleSteps li {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+.articleSteps figure {
+    margin: 0;
+}
+.articleSteps figcaption {
+    margin-top: .35rem;
+    color: var(--article-muted);
+    font-size: .86rem;
+    line-height: 1.5;
 }
