@@ -25,7 +25,7 @@
 | `PROMPTBOOK_BILLING_SK_ENABLED` | `true` po ověření VIES a slovenského dokladu včetně souhrnného hlášení. |
 | `PROMPTBOOK_BILLING_SK_INVOICE_TEMPLATE_ID`, `PROMPTBOOK_BILLING_SUPPLIER_TAX_ID` | Slovenská šablona a platné DIČ AI Webu uváděné na dokladu. |
 | `PROMPTBOOK_BILLING_EMAIL_VERIFICATION_ENABLED` | `true` po ověření e-mailové obnovy přístupu v Supabase. |
-| `PROMPTBOOK_TWENTY_API_KEY` | Volitelné zapnutí synchronizace firem, kontaktů a nákupů do firemního Twenty. Zápis do stávajících kontaktů funguje samostatně. |
+| `PROMPTBOOK_TWENTY_API_KEY` | Volitelný klíč s vlastními oprávněními pro přímý zápis firem, obchodních případů a poznámek do Twenty. Standardní synchronizace zdrojů kontaktů používá stávající úlohu a tento klíč nepotřebuje. |
 
 ## Ověření a evidence
 

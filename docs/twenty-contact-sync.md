@@ -1,8 +1,9 @@
 # Twenty contact synchronization
 
-The worker reads committed contact forms, community and workshop attendance, workshop feedback, and live paid
-community memberships. Existing Supabase writes and form responses are independent of the worker. Feedback and
-membership changes after the cutover update the same source record. Contact edits, deletions and marketing outreach
+The worker reads committed contact forms, community and workshop attendance, workshop feedback, live paid
+community memberships, and paid Promptbook orders. Existing Supabase writes and form responses are independent of
+the worker. Feedback, membership and paid-order onboarding changes after the cutover update the same source record.
+Contact edits, deletions and marketing outreach
 are separate operations. Meta, Gmail and Google Contacts are outside this worker's data flow.
 
 ## Deployment
@@ -45,3 +46,7 @@ are separate operations. Meta, Gmail and Google Contacts are outside this worker
   only validated values from `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, and `utm_id`. The projection keeps
   recorded purpose-specific evidence and selected context. It omits IP addresses, browser strings, session tokens,
   detailed interaction telemetry, free-text staff notes, invoice details, discount codes, and Stripe identifiers.
+- A Promptbook order uses its existing `web:contact:<id>` key once a positive live card payment is recorded. Its
+  source shows the plan, first paid date, registered company name, country and company registration number. Optional
+  onboarding phone and message update that source when supplied or cleared. Tax IDs, billing addresses and invoice
+  amounts stay in the billing system. The existing People and contact sources permissions cover this projection.

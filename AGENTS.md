@@ -903,8 +903,9 @@ ownership or override a subsequent withdrawal. No email confirmation or campaign
 Use the shared notice on every new public contact form and register its source before accepting submissions.
 Never fabricate consent for historical contacts or add Neonmedia's unrelated marketing to the grant.
 
-Twenty receives an asynchronous projection of committed Contact rows, workshop attendance and feedback, and paid
-community membership. Source writes have no dependency on Twenty. Keep the stable `web:<source>:<id>` keys and the
+Twenty receives an asynchronous projection of committed Contact rows, workshop attendance and feedback, paid
+community memberships and live paid Promptbook orders. Order onboarding updates the same `web:contact:<id>` source.
+Source writes have no dependency on Twenty. Keep the stable `web:<source>:<id>` keys and the
 inclusive cutover when changing the projection. Preserve the purpose and evidence per submission and leave an
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.
 

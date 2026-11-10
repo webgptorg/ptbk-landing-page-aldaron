@@ -13,6 +13,7 @@ const SOURCE: TwentyContactSource = {
     occurredAt: EVENT_DATE, details: { message: 'Contact enquiry' },
 };
 const PERSON_ID = 'c7e25adb-ff15-427c-b777-e5f63ed2ace5';
+const BILLING_ORDER_ID = 'b8214bb6-35aa-4393-9171-4ed6d09303e6';
 
 function list(plural: string, rows: object[]) {
     return Response.json({ data: { [plural]: rows }, pageInfo: { hasNextPage: false, endCursor: null } });
@@ -116,12 +117,13 @@ describe('Twenty contact sources', () => {
         expect(mapTwentyContactSource({ ...row, email: 'e2e-record@example.com' })).toBe('test_contact');
     });
 
-    it('reconciles delayed source writes and changed membership versions without changing the source tables', async () => {
+    it('reconciles delayed source writes and changed membership or purchase details', async () => {
         const database = new PGlite();
         try {
             await database.exec(`
                 CREATE ROLE anon;
                 CREATE ROLE authenticated;
+                CREATE ROLE service_role;
                 CREATE TABLE public."Contact" (
                     id integer, "createdAt" timestamptz, email text, fullname text, phone text,
                     "placeName" text, url text, "appName" text, referrer text, "userNote" text,
@@ -147,13 +149,46 @@ describe('Twenty contact sources', () => {
                     ('active', '2026-11-01', '2026-11-09T12:30:00Z', 'active', false),
                     ('test', '2026-11-09T12:00:00Z', '2026-11-09T12:30:00Z', 'active', true);
             `);
+            await database.exec(readFileSync(new URL('../../migrations/2026-11-0961-promptbook-billing-orders.sql', import.meta.url), 'utf8'));
+            await database.exec(readFileSync(new URL('../../migrations/2026-11-0962-promptbook-billing-contacts.sql', import.meta.url), 'utf8'));
             await database.exec(readFileSync(new URL('../../migrations/2026-11-0963-twenty-contact-sync.sql', import.meta.url), 'utf8'));
+            await database.exec(`
+                INSERT INTO promptbook_orders (
+                    id, created_at, plan, email, country, company_id, company_name, vat_id, billing_address,
+                    terms_version, engine_version, engine_licence_url, support_email, billing_origin,
+                    invoice_template_id, base_amount, discount_code, is_test, first_paid_at, stripe_customer_id
+                )
+                SELECT id::uuid, '2026-11-09T12:21:00Z', 'business', 'billing@acme.invalid', 'CZ', '12345678', 'ACME',
+                    'private-vat-id', '{"line1":"private-address"}', 'terms', 'engine', 'licence', 'support',
+                    'https://www.ptbk.io', 'template', 199900, 'private-discount', is_test, paid_at::timestamptz,
+                    'private-stripe-id-' || id
+                FROM (VALUES
+                    ('${BILLING_ORDER_ID}', false, '2026-11-09T12:25:00Z'),
+                    ('b8214bb6-35aa-4393-9171-4ed6d09303e7', true, '2026-11-09T12:25:00Z'),
+                    ('b8214bb6-35aa-4393-9171-4ed6d09303e8', false, NULL)
+                ) AS orders(id, is_test, paid_at);
+                INSERT INTO public."Contact" (id, "createdAt", email, "placeName", "promptbookBillingOrderId", "submissionEvidence")
+                SELECT row_number() OVER (ORDER BY id) + 2, '2026-11-09T12:29:00Z', email, 'PromptbookSubscriptionOrder', id,
+                       '{"purpose":"order","marketingConsent":false}'::jsonb
+                FROM promptbook_orders;
+                INSERT INTO twenty_contact_sync (external_id, source_version, attempts) VALUES ('web:contact:3', '1', 0);
+            `);
             const transaction = { query: <Row extends Record<string, unknown>>(sql: string, values?: readonly unknown[]) =>
                 database.query<Row>(sql, values ? [...values] : undefined) };
             const rows = await loadTwentyContactSyncRows(transaction, FROM, 10);
             expect(rows.map(({ external_id }) => external_id)).toEqual([
-                'web:membership:active', 'web:attendance:join', 'web:contact:2', 'web:feedback:feedback',
+                'web:membership:active', 'web:attendance:join', 'web:contact:2', 'web:contact:3', 'web:feedback:feedback',
             ]);
+            const billingSource = mapTwentyContactSource(rows[3]);
+            expect(billingSource).toMatchObject({
+                externalId: 'web:contact:3', email: null, name: 'Promptbook Business', sourceType: 'promptbook-subscription',
+                occurredAt: '2026-11-09T12:25:00.000Z',
+                details: {
+                    planId: 'business', billingCompany: 'ACME', billingCompanyId: '12345678', billingCountry: 'CZ',
+                    identityReview: 'shared_email', submissionEvidence: { purpose: 'order', marketingConsent: false },
+                },
+            });
+            expect(JSON.stringify(billingSource)).not.toContain('private-');
             for (const row of rows) {
                 const isFailed = row.external_id === 'web:contact:2';
                 await recordTwentyContactSyncResult(transaction, row, isFailed ? 'twenty_unreachable' : null, isFailed ? 300 : null);
@@ -164,14 +199,28 @@ describe('Twenty contact sources', () => {
                 INSERT INTO public."Contact" (id, "createdAt") VALUES (1, '2026-11-09T12:00:00Z');
                 UPDATE community_memberships SET updated_at = '2026-11-09T12:45:00Z', status = 'canceled' WHERE id = 'active';
                 UPDATE workshop_feedback SET updated_at = '2026-11-09T12:50:00Z', rating = 5 WHERE id = 'feedback';
+                UPDATE promptbook_orders SET phone = '+420 777 123 456', onboarding_note = 'Onboarding detail'
+                    WHERE id = '${BILLING_ORDER_ID}';
                 UPDATE twenty_contact_sync SET next_attempt_at = now() WHERE external_id = 'web:contact:2';
             `);
             const replay = await loadTwentyContactSyncRows(transaction, FROM, 10);
             expect(replay.map(({ external_id, attempts }) => [external_id, attempts])).toEqual([
-                ['web:membership:active', 0], ['web:contact:1', 0], ['web:contact:2', 1], ['web:feedback:feedback', 0],
+                ['web:membership:active', 0], ['web:contact:1', 0], ['web:contact:2', 1], ['web:contact:3', 0], ['web:feedback:feedback', 0],
             ]);
             expect(replay[0].details.status).toBe('canceled');
-            expect(replay[3].details.rating).toBe(5);
+            expect(replay[3].source_version).not.toBe(rows[3].source_version);
+            expect(mapTwentyContactSource(replay[3])).toMatchObject({
+                externalId: 'web:contact:3', details: { submittedPhone: '+420 777 123 456', message: 'Onboarding detail' },
+            });
+            expect(replay[4].details.rating).toBe(5);
+
+            for (const row of replay) await recordTwentyContactSyncResult(transaction, row, null);
+            expect(await loadTwentyContactSyncRows(transaction, FROM, 10)).toEqual([]);
+            await database.exec(`UPDATE promptbook_orders SET phone = NULL, onboarding_note = NULL WHERE id = '${BILLING_ORDER_ID}';`);
+            const afterClear = await loadTwentyContactSyncRows(transaction, FROM, 10);
+            expect(afterClear).toHaveLength(1);
+            expect(afterClear[0].external_id).toBe('web:contact:3');
+            expect(afterClear[0].details).not.toHaveProperty('message');
         } finally {
             await database.close();
         }

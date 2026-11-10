@@ -74,6 +74,7 @@ function mapContactDetails(row: TwentyContactSyncRow, sourceName: string): Recor
 }
 
 function getSourceType(row: TwentyContactSyncRow, sourceName: string): string {
+    if (row.kind === 'promptbook-order') return 'promptbook-subscription';
     if (row.kind === 'membership') return 'community-membership';
     if (row.kind === 'attendance' || row.kind === 'feedback') {
         const room = row.details.roomKind === 'community' || row.details.roomKind === 'project'
@@ -96,6 +97,9 @@ export function mapTwentyContactSource(row: TwentyContactSyncRow): TwentyContact
 
     const sourceName = row.source_name?.trim() || (row.kind === 'contact' ? 'Unspecified form' : row.kind);
     const sourceType = getSourceType(row, sourceName);
+    const name = row.kind === 'promptbook-order'
+        ? row.details.planId === 'business' ? 'Promptbook Business' : 'Promptbook Start'
+        : sourceName;
     const identityReview = !isEmailAddressValid(email) ? 'missing_or_invalid_email'
         : SHARED_EMAIL_LOCAL_PARTS.has(localPart.split('+')[0]) ? 'shared_email' : undefined;
     const details = row.kind === 'contact' ? mapContactDetails(row, sourceName) : row.details;
@@ -105,7 +109,7 @@ export function mapTwentyContactSource(row: TwentyContactSyncRow): TwentyContact
         email: identityReview ? null : email,
         fullname: row.fullname?.trim() ?? '',
         phone: row.phone,
-        name: sourceName,
+        name,
         sourceType,
         sourceName,
         sourceUrl: cleanSourceUrl(sourceUrl),
