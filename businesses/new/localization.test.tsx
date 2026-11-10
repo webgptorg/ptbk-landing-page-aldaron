@@ -10,12 +10,14 @@ import { AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, Se
 import { NewLegalPage } from './NewLegalPage';
 import { EconomicsCalculator } from './EconomicsCalculator';
 import { createCalculationPdfDefinition } from './calculationPdf';
-import { COMPARISONS } from './comparisons';
+import { COMPARISONS, COMPARISON_ROWS, REBORN_SOURCE } from './comparisons';
+import { NewSiteShell } from './NewSiteShell';
 import { SCENARIOS, calculateEconomics, type ScenarioId } from './economics';
 import { calculationShareUrl, defaultCalculatorState, parseCalculatorState } from './calculatorState';
 import { localizedPath, localeFromPath, licencePrice, type SiteLocale } from './localization';
 import { displayFieldValue, storedFieldValue } from './localizedCalculator';
-vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
+vi.mock('./TechnologyIncubation', () => ({ TechnologyIncubation: () => null }));
+vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams(), usePathname: () => '/en' }));
 function html(node: ReactNode, locale: SiteLocale = 'en') {
     return renderToStaticMarkup(<SiteLocaleProvider locale={locale}><LeadCaptureProvider>{node}</LeadCaptureProvider></SiteLocaleProvider>);
 }
@@ -79,11 +81,14 @@ describe('bilingual launch site', () => {
         expect(remainingCzech(text(node)), String(_name)).toEqual([]);
         const element=document.createElement('div'); element.innerHTML=html(node);
         const links=Array.from(element.querySelectorAll('a[href^="/"]'));
-        expect(links.every(link => link.getAttribute('href')?.startsWith('/en') || (
-            _name === 'open-source' && link.getAttribute('href') === '/cs/terminal' && link.getAttribute('hreflang') === 'cs'
-        ))).toBe(true);
+        expect(links.filter(link => !(link.getAttribute('href')?.startsWith('/en') || (
+            link.getAttribute('hreflang') === 'cs' && (
+                (_name === 'open-source' && link.getAttribute('href') === '/cs/terminal') ||
+                (_name === 'home' && /^\/cs\/komunity\/promptbook(?:\/clanky\/cs\/[^/]+)?$/.test(link.getAttribute('href') ?? ''))
+            )
+        ))).map(link => link.getAttribute('href'))).toEqual([]);
     });
-    it('retains localized legal documents and a sourced comparison table with all ten alternatives', () => {
+    it('retains localized legal documents and a sourced comparison table with every alternative', () => {
         expect(text(<NewLegalPage kind="privacyPolicy" language="en"/>)).toContain('Privacy');
         for (const kind of ['productTerms', 'partnerTerms', 'engineLicense'] as const) {
             const rendered=text(<NewLegalPage kind={kind} language="en"/>);
@@ -92,9 +97,32 @@ describe('bilingual launch site', () => {
             expect(rendered).not.toContain('Návrh k projednání');
         }
         const element=document.createElement('div');element.innerHTML=html(<ComparisonsPage/>);
-        expect(element.querySelectorAll('tbody tr').length).toBe(11);
+        expect(COMPARISONS.length).toBeGreaterThanOrEqual(13);
+        expect(element.querySelectorAll('tbody tr').length).toBe(COMPARISONS.length + 1);
         for (const slug of ['grok-bot','openai-dots','meta-muse','chatgpt']) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();
-        expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(10);
+        expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(COMPARISONS.length);
+    });
+    it('links every comparison from the footer and renders a sourced head-to-head table in both languages', () => {
+        const shell = document.createElement('div');
+        shell.innerHTML = renderToStaticMarkup(<NewSiteShell><div /></NewSiteShell>);
+        const nav = shell.querySelector('footer nav[aria-label="Promptbook versus"]');
+        expect(nav?.querySelectorAll('li').length).toBe(COMPARISONS.length);
+
+        for (const item of COMPARISONS) {
+            expect(nav?.querySelector(`a[href="/en/srovnani/${item.slug}"]`)).not.toBeNull();
+            for (const locale of ['cs', 'en'] as const) {
+                const page = document.createElement('div');
+                page.innerHTML = html(<ComparisonPage slug={item.slug} />, locale);
+                expect(Array.from(page.querySelectorAll('thead th'), cell => cell.textContent)).toEqual([
+                    locale === 'cs' ? 'Parametr' : 'Feature',
+                    'Promptbook',
+                    item.name,
+                ]);
+                expect(page.querySelectorAll('tbody th[scope="row"]').length).toBe(COMPARISON_ROWS.length);
+                expect(page.querySelector(`a[href="${REBORN_SOURCE}"]`)).not.toBeNull();
+                for (const [, href] of item.sources) expect(page.querySelector(`a[href="${href}"]`)).not.toBeNull();
+            }
+        }
     });
     it('exports the same calculation in localized currency, language and share URL', () => {
         const state=defaultCalculatorState();const before=calculateEconomics(state.input);
