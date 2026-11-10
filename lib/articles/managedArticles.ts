@@ -194,6 +194,39 @@ export async function replaceManagedArticleAsset(
     return toManagedArticle(data as ManagedArticleRow);
 }
 
+export async function claimManagedArticleNarration(row: ManagedArticleRow, token: string): Promise<void> {
+    const now = new Date();
+    const lease = { audio_generation_token: token, audio_generation_until: new Date(now.getTime() + 10 * 60_000).toISOString() };
+    // Use two conditional writes, as with Messages, to avoid PostgREST's OR + RETURNING bug.
+    for (const unclaimed of [true, false]) {
+        const query = getDatabase().update(lease).eq('id', row.id).eq('revision', row.revision);
+        const { data, error } = await (unclaimed ? query.is('audio_generation_until', null)
+            : query.lt('audio_generation_until', now.toISOString())).select('id').maybeSingle();
+        if (error) return writeError(error);
+        if (data) return;
+    }
+    await requireManagedArticleRow(row.id, row.revision);
+    throw managedArticleError('Předčítání tohoto článku se již generuje.', 409);
+}
+
+export async function releaseManagedArticleNarration(id: string, token: string): Promise<void> {
+    const { error } = await getDatabase().update({ audio_generation_token: null, audio_generation_until: null })
+        .eq('id', id).eq('audio_generation_token', token);
+    if (error) console.error('Could not release managed article narration lease.');
+}
+
+export async function attachManagedArticleNarration(
+    row: ManagedArticleRow, token: string, assets: Pick<ManagedArticleRow, 'audio_asset' | 'words_asset' | 'subtitles_asset'>,
+): Promise<ManagedArticle> {
+    const { data, error } = await getDatabase().update({
+        ...assets, revision: randomUUID(), updated_at: new Date().toISOString(),
+        audio_generation_token: null, audio_generation_until: null,
+    }).eq('id', row.id).eq('revision', row.revision).eq('audio_generation_token', token).select('*').maybeSingle();
+    if (error) return writeError(error);
+    if (!data) throw managedArticleError('Článek se během generování změnil. Načtěte aktuální stav.', 409);
+    return toManagedArticle(data as ManagedArticleRow);
+}
+
 export async function readPublishedManagedArticles(language: ArticleLanguage | undefined, destination: ManagedArticleDestination, publicOnly = false): Promise<ManagedArticleRow[]> {
     const client = createSupabaseServiceRoleClient();
     if (!client) return [];

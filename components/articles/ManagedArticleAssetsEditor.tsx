@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type FormEvent } from 'react';
+import { Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
@@ -16,7 +17,7 @@ const ASSET_LABELS: Record<ManagedArticleAssetKind, string> = {
     words: 'Časování slov (JSON)',
     subtitles: 'Titulky (VTT)',
 };
-const ASSET_KINDS = Object.keys(ASSET_LABELS) as ManagedArticleAssetKind[];
+const MANUAL_AUDIO_KINDS = ['audio', 'words', 'subtitles'] as const;
 
 function readAudioDuration(file: File): Promise<number> {
     return new Promise((resolve, reject) => {
@@ -57,6 +58,7 @@ function mediaRequest<Body>(url: string, method: 'POST' | 'PATCH' | 'DELETE', bo
 type AssetEditorProps = {
     readonly article: ManagedArticle;
     readonly isConfigured: boolean;
+    readonly narrationConfigured: boolean;
     readonly isBusy: boolean;
     readonly onRun: (label: string, action: () => Promise<void>) => Promise<boolean>;
     readonly onSaved: (article: ManagedArticle) => void;
@@ -67,12 +69,42 @@ type AssetEditorProps = {
 type PendingUpload = { readonly file: File; readonly revision: string; readonly key: string; readonly duration?: number };
 
 export function ManagedArticleAssetsEditor(props: AssetEditorProps) {
+    const { article, flushContent, getCurrentArticle, onRun, onSaved } = props;
+
+    function generateNarration() {
+        void onRun('Generuji předčítání přes ElevenLabs…', async () => {
+            if (!(await flushContent())) throw new Error('Nejprve dokončete uložení obsahu článku.');
+            const current = getCurrentArticle();
+            if (!current) return;
+            const result = await requestAdminJson<{ article: ManagedArticle }>(`${ARTICLES_ADMIN_API}/${current.id}/audio`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ expectedRevision: current.revision }),
+            }, 'Předčítání se nepodařilo vygenerovat.');
+            onSaved(result.article);
+        });
+    }
+
     return <section className="space-y-3 border-t border-slate-200 pt-5" aria-labelledby="article-media-heading">
         <h3 className="text-base font-semibold text-slate-950" id="article-media-heading">Předčítání a soubory</h3>
-        {props.isConfigured ? <>
-            <p className="text-sm text-slate-600">Přiložte připravenou nahrávku, PDF nebo podklady pro přehrávač. Po úpravě textu nahrajte odpovídající verzi souborů.</p>
-            {ASSET_KINDS.map((kind) => <ArticleAssetForm key={kind} kind={kind} {...props} />)}
-        </> : <p className="text-sm text-slate-600">Pro nahrávání souborů musí být nakonfigurované úložiště.</p>}
+        <div className="flex flex-wrap items-center gap-3">
+            <Button type="button" variant={article.assets.audio ? 'outline' : 'default'}
+                disabled={props.isBusy || !props.narrationConfigured} onClick={generateNarration}>
+                <Volume2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                {article.assets.audio ? 'Přegenerovat audio přes ElevenLabs' : 'Vygenerovat audio přes ElevenLabs'}
+            </Button>
+            {article.assets.audio && <p role="status" className="text-sm text-slate-600">
+                Audio je připojeno{article.assets.words && article.assets.subtitles ? ' včetně časování slov a titulků.' : '.'}
+            </p>}
+        </div>
+        {!props.narrationConfigured && <p className="text-sm text-slate-600">Pro generování musí být nastavené ElevenLabs a úložiště.</p>}
+        {props.isConfigured && <>
+            <details>
+                <summary className="cursor-pointer text-sm font-medium text-slate-700">Ruční správa audia a titulků</summary>
+                <div className="mt-2 space-y-2">
+                    {MANUAL_AUDIO_KINDS.map((kind) => <ArticleAssetForm key={kind} kind={kind} {...props} />)}
+                </div>
+            </details>
+            <ArticleAssetForm kind="pdf" {...props} />
+        </>}
     </section>;
 }
 

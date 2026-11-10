@@ -25,7 +25,7 @@ it('only publishes on explicit submit and uses the revision from the preceding c
     request.mockResolvedValueOnce({ article: { ...article, title: 'Nový název', revision: secondRevision } });
     const placements = [{ destination: 'promptbook-blog', visibility: 'public' }, { destination: 'promptbook', visibility: 'public' }];
     request.mockResolvedValueOnce({ article: { ...article, title: 'Nový název', placements, canonicalDestination: 'promptbook', publishedAt: time } });
-    render(<ManagedArticleEditor article={article} mediaConfigured={false} onSaved={vi.fn()} onBusy={vi.fn()} />);
+    render(<ManagedArticleEditor article={article} mediaConfigured={false} narrationConfigured={false} onSaved={vi.fn()} onBusy={vi.fn()} />);
     fireEvent.click(screen.getByLabelText('Komunita Promptbook'));
     fireEvent.click(screen.getByLabelText('Blog Promptbooku'));
     fireEvent.change(screen.getByLabelText('Název'), { target: { value: 'Nový název' } });
@@ -47,7 +47,7 @@ it('publishes mixed access with a public canonical and explains the public copy'
         { destination: 'vyvojari', visibility: 'paid' },
     ];
     request.mockResolvedValueOnce({ article: { ...article, placements, canonicalDestination: 'personal-blog', publishedAt: time } });
-    render(<ManagedArticleEditor article={article} mediaConfigured={false} onSaved={vi.fn()} onBusy={vi.fn()} />);
+    render(<ManagedArticleEditor article={article} mediaConfigured={false} narrationConfigured={false} onSaved={vi.fn()} onBusy={vi.fn()} />);
     fireEvent.click(screen.getByLabelText('Komunita Vývojáři'));
     fireEvent.change(screen.getByLabelText('Přístup · Komunita Vývojáři'), { target: { value: 'paid' } });
     fireEvent.click(screen.getByLabelText('Osobní blog'));
@@ -59,4 +59,25 @@ it('publishes mixed access with a public canonical and explains the public copy'
     expect(JSON.parse(String(request.mock.calls[0]?.[1]?.body))).toMatchObject({
         article: { placements, canonicalDestination: 'personal-blog' },
     });
+});
+
+it('generates once on click using the revision of the newly saved text', async () => {
+    const saved = { ...article, markdown: 'Upravený text článku', revision: secondRevision };
+    const withNarration = { ...saved, assets: { audio: { byteLength: 1024 }, words: { byteLength: 100 }, subtitles: { byteLength: 200 } } };
+    const onSaved = vi.fn();
+    request.mockResolvedValueOnce({ article: saved }).mockResolvedValueOnce({ article: withNarration });
+    render(<ManagedArticleEditor article={article} mediaConfigured narrationConfigured onSaved={onSaved} onBusy={vi.fn()} />);
+
+    fireEvent.change(screen.getByLabelText('Text článku (Markdown)'), { target: { value: saved.markdown } });
+    expect(request).not.toHaveBeenCalled();
+    const generate = screen.getByRole('button', { name: 'Vygenerovat audio přes ElevenLabs' });
+    await act(async () => { fireEvent.click(generate); fireEvent.click(generate); });
+
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(request.mock.calls[0]?.[1]?.method).toBe('PATCH');
+    expect(request.mock.calls[1]?.[0]).toBe(`/api/admin/articles/${article.id}/audio`);
+    expect(request.mock.calls[1]?.[1]).toMatchObject({
+        method: 'POST', body: JSON.stringify({ expectedRevision: secondRevision }),
+    });
+    expect(onSaved).toHaveBeenLastCalledWith(withNarration);
 });

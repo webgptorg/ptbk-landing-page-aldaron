@@ -133,7 +133,7 @@ export function ArticlesAdmin() {
             </ul>
         </section>}
         <AdminEditorDialog isOpen={editor !== undefined} onClose={() => setEditor(undefined)} canClose={() => !isBusy} title={editor ? 'Upravit článek' : 'Nový článek'} className="max-w-4xl">
-            {editor !== undefined && <ManagedArticleEditor key={editor?.id ?? 'new'} article={editor} mediaConfigured={data?.mediaConfigured ?? false} onSaved={acceptSavedArticle} onBusy={setIsBusy} />}
+            {editor !== undefined && <ManagedArticleEditor key={editor?.id ?? 'new'} article={editor} mediaConfigured={data?.mediaConfigured ?? false} narrationConfigured={data?.narrationConfigured ?? false} onSaved={acceptSavedArticle} onBusy={setIsBusy} />}
         </AdminEditorDialog>
         <AdminEditorDialog isOpen={gitEditor !== null} onClose={() => setGitEditor(null)} canClose={() => !isBusy} title={gitEditor?.title ?? 'Upravit umístění'}>
             {gitEditor && <GitArticlePublicationEditor key={gitEditor.id} article={gitEditor} onSaved={(publication) => acceptGitPublication(gitEditor, publication)} onBusy={setIsBusy} />}

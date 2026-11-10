@@ -59,11 +59,12 @@ function saveArticle(input: ManagedArticleInput, expected?: Pick<ManagedArticle,
 type EditorProps = {
     readonly article: ManagedArticle | null;
     readonly mediaConfigured: boolean;
+    readonly narrationConfigured: boolean;
     readonly onSaved: (article: ManagedArticle) => void;
     readonly onBusy: (busy: boolean) => void;
 };
 
-export function ManagedArticleEditor({ article, mediaConfigured, onSaved, onBusy }: EditorProps) {
+export function ManagedArticleEditor({ article, mediaConfigured, narrationConfigured, onSaved, onBusy }: EditorProps) {
     const [content, setContent] = useState<Content>(() => getContent(article));
     const [publication, setPublication] = useState<Publication>(() => getPublication(article));
     const [operation, setOperation] = useState('');
@@ -248,7 +249,7 @@ export function ManagedArticleEditor({ article, mediaConfigured, onSaved, onBusy
             </Button>
             {article.canonicalDestination && <a className="ml-3 text-sm text-cyan-700 underline" href={getManagedArticleUrl(article, article.canonicalDestination)} target="_blank" rel="noreferrer">Otevřít hlavní odkaz</a>}
         </form>}
-        {article && <ManagedArticleAssetsEditor article={article} isConfigured={mediaConfigured} isBusy={isBusy} onRun={run} onSaved={acceptSavedArticle} flushContent={autosave.flush} getCurrentArticle={() => savedArticle.current} />}
+        {article && <ManagedArticleAssetsEditor article={article} isConfigured={mediaConfigured} narrationConfigured={narrationConfigured} isBusy={isBusy} onRun={run} onSaved={acceptSavedArticle} flushContent={autosave.flush} getCurrentArticle={() => savedArticle.current} />}
         {operation && <p role="status" className="text-sm text-slate-600">{operation}</p>}
         {notice && <p role="status" className="text-sm text-emerald-700">{notice}</p>}
         {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}

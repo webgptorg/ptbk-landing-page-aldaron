@@ -24,7 +24,9 @@ export function GET(request: NextRequest) {
                 canonicalUrl: legacyPlacements[id] ? getManagedArticleUrl({ language, slug }, publication.canonicalDestination) : canonicalUrl,
             };
         });
-        return articleAdminJson({ articles, gitArticles, mediaConfigured: Boolean(process.env.OBJECT_STORAGE_BUCKET?.trim()) } satisfies ArticleAdminList);
+        const mediaConfigured = Boolean(process.env.OBJECT_STORAGE_BUCKET?.trim());
+        const narrationConfigured = mediaConfigured && Boolean(process.env.ELEVENLABS_API_KEY?.trim());
+        return articleAdminJson({ articles, gitArticles, mediaConfigured, narrationConfigured } satisfies ArticleAdminList);
     });
 }
 

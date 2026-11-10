@@ -32,4 +32,5 @@ export type ArticleAdminList = {
     readonly articles: ManagedArticleSummary[];
     readonly gitArticles: GitArticleSummary[];
     readonly mediaConfigured: boolean;
+    readonly narrationConfigured: boolean;
 };

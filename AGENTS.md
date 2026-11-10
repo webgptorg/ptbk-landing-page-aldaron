@@ -502,8 +502,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   canonical destination. Git articles keep their existing public URLs and audio, with editable community placement
   and canonical selection in administration. Preserve existing podcast episode IDs when adding destinations.
   Managed articles use the same reader and player. Editors explicitly attach PDF, narration, subtitles and reviewed
-  word timing. Private article text and media use the exact community session, with verified email and live membership
-  required for paid content. The public feed and public media endpoint serve only public publications.
+  word timing. The primary action generates narration, measured word timing and WebVTT together using the Messages
+  ElevenLabs narrator and reader word IDs. It runs only on an explicit click, after content saves. A fenced generation
+  lease and article revision prevent concurrent billed requests and stale attachments. Manual audio and sidecars stay
+  in a secondary disclosure. Private article text and media use the exact community session, with verified email and
+  live membership required for paid content. The public feed and public media endpoint serve only public publications.
 - `/admin/studio` contains addressable `Nahrávání` at `/admin/studio/recording` and `Uložené projekty` at
   `/admin/studio/editor`, with individual recording/project URLs. Legacy recording-studio URLs permanently redirect
   to their recording views; the capture probe and transcription API retain their addresses. One mounted owner,
