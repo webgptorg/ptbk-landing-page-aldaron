@@ -1,3 +1,4 @@
+import { PROMPTBOOK_DEPLOYMENT } from '@/lib/promptbook-brand';
 import { localizedPath, type SiteLocale } from './localization';
 import { createPageMetadata } from '@/lib/metadata/create-page-metadata';
 import { createSocialPreviewOptions } from '@/lib/metadata/create-social-preview-options';
@@ -17,7 +18,7 @@ export const NEW_PAGE_DEFINITIONS: Record<SiteLocale, PageMetadataDefinition> = 
         languageAlternates: { cs: localizedPath('', 'cs'), en: localizedPath('', 'en') },
         title: 'Promptbook — Dřív jste AI úkolovali. Teď pracuje pro Vás.',
         socialTitle: 'Dřív jste AI úkolovali. Teď pracuje pro Vás.',
-        description: 'Vaše AI. Na Vašem stroji. Pod Vaší kontrolou. Předáte agendu, nastavíte pravidla a agenti pracují dál. Vlastní engine, aplikace a podpora.',
+        description: `${PROMPTBOOK_DEPLOYMENT.cs} Předáte agendu, nastavíte pravidla a agenti pracují dál.`,
         socialPreviewImageAlt: 'Promptbook — Vaše AI, na Vašem stroji, pod Vaší kontrolou',
         isSocialPreviewImageGenerated: true, isIndexed: true,
     },
@@ -26,7 +27,7 @@ export const NEW_PAGE_DEFINITIONS: Record<SiteLocale, PageMetadataDefinition> = 
         languageAlternates: { cs: localizedPath('', 'cs'), en: localizedPath('', 'en') },
         title: 'Promptbook — You used to give AI tasks. Now it works for you.',
         socialTitle: 'You used to give AI tasks. Now it works for you.',
-        description: 'Your AI. On your machine. Under your control. Hand over ongoing work, set the rules and let agents continue. Your own engine, app and support.',
+        description: `${PROMPTBOOK_DEPLOYMENT.en} Hand over ongoing work, set the rules and let agents continue.`,
         socialPreviewImageAlt: 'Promptbook — your AI, on your machine, under your control',
         isSocialPreviewImageGenerated: true, isIndexed: true,
     },

@@ -16,7 +16,7 @@ import { BrandTestimonials } from './BrandTestimonials';
 import { PricingCards } from './MarketingSections';
 import { InlineContactForm } from './InlineContactForm';
 import b from './brand.module.css';
-import { PROMPTBOOK_BRAND, PROMPTBOOK_INTRO } from '@/lib/promptbook-brand';
+import { PROMPTBOOK_BRAND, PROMPTBOOK_DEPLOYMENT, PROMPTBOOK_INTRO } from '@/lib/promptbook-brand';
 
 /** One product story, adapted to people running agendas and partners delivering them. */
 export function NewLandingPage({ partnership = false, showTestimonials = true, checkoutEnabled = false }: { partnership?: boolean; showTestimonials?: boolean; checkoutEnabled?: boolean }) {
@@ -29,6 +29,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true, c
         <section className={b.hero} aria-labelledby="brand-heading" data-landing-hero data-testid="brand-hero">
             <HeroBackdrop/>
             <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <HeroHeadline key={locale} firstLine={PROMPTBOOK_BRAND.messages[locale].headline.split('. ')[0]}/>}</h1>
+            {!partnership && <p className={b.heroDeployment}>{PROMPTBOOK_DEPLOYMENT[locale]}</p>}
             <StagedIntro sentences={intro}/>
             <BrandActions partner={partnership}/>
         </section>
