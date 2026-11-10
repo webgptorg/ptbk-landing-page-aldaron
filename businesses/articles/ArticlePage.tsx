@@ -5,6 +5,7 @@ import type { Article, ArticlePublication } from '@/lib/articles/types';
 import { getArticleAssetUrl, getArticleIndexUrl, getArticlePodcastUrl, getArticleUrl } from '@/lib/articles/urls';
 import { ArticleHeader, ArticleFooter } from './ArticleShell';
 import { ArticleAudioButton } from './ArticleAudioButton';
+import { ArticleBookExamples } from './ArticleBookExamples';
 import { ArticleRssLink } from './ArticleRssLink';
 import { ArticleTracking } from './ArticleTracking';
 import { AnchoringExplorer } from './AnchoringExplorer';
@@ -17,7 +18,10 @@ export function ArticlePage({ article, publication, community }: {
     readonly community?: { readonly indexPath: string; readonly articlePath: string };
 }) {
     const cs = article.language === 'cs';
-    const document = renderArticleDocument(article.markdown, article.title, article.perex, article.managed ? undefined : getArticleAssetUrl(article.id, ''));
+    const document = renderArticleDocument(
+        article.markdown, article.title, article.perex,
+        article.managed ? undefined : getArticleAssetUrl(article.id, ''), { bookExamples: true },
+    );
     const cover = renderArticleCover(article.title, article.perex);
     const readingMinutes = Math.max(1, Math.ceil(document.wordCount / 200));
     const indexPath = community?.indexPath ?? new URL(getArticleIndexUrl(article.language, publication)).pathname;
@@ -32,6 +36,14 @@ export function ArticlePage({ article, publication, community }: {
     };
     const isAnchoringArticle = article.translationGroupId === 'spec-driven-anchoring';
     let explorerInserted = false;
+    const sections = document.sections.map((section, index) => {
+        const showExplorer = isAnchoringArticle && !explorerInserted && Boolean(section.id?.startsWith('anchoring'));
+        if (showExplorer) explorerInserted = true;
+        if (section.id?.startsWith('o-autorovi') || section.id?.startsWith('about-the-author')) {
+            return <section key={section.id} className="article-authored-bio" aria-labelledby={section.id}><Image src={article.author.photoUrl} width={84} height={84} alt={article.author.name} /><div><div dangerouslySetInnerHTML={{ __html: section.html }} /><a className="article-text-link" href={article.author.domains[article.language] ?? article.canonicalUrl}>{cs ? 'Více o autorovi' : 'About the author'}<ArrowUpRight size={15} aria-hidden="true" /></a></div></section>;
+        }
+        return <div key={section.id ?? `introduction-${index}`}><div dangerouslySetInnerHTML={{ __html: section.html }} />{showExplorer && <AnchoringExplorer language={article.language} />}</div>;
+    });
     return (
         <div className="article-site" data-publication={publication} lang={article.language}>
             <ArticleHeader language={article.language} publication={publication} translations={article.translations} indexPath={community?.indexPath} />
@@ -51,16 +63,9 @@ export function ArticlePage({ article, publication, community }: {
                             <details open><summary>{cs ? 'V tomto článku' : 'In this article'}</summary><nav aria-label={cs ? 'Kapitoly článku' : 'Article chapters'}>{document.chapters.map((chapter, index) => <a key={chapter.id} href={`#${chapter.id}`}><span>{(index + 1).toString().padStart(2, '0')}</span>{chapter.title}</a>)}</nav></details>
                         </aside>
                         <div className="article-reading-column">
-                            <article className="article-prose" aria-label={article.title}>
-                                {document.sections.map((section, index) => {
-                                    const showExplorer = isAnchoringArticle && !explorerInserted && Boolean(section.id?.startsWith('anchoring'));
-                                    if (showExplorer) explorerInserted = true;
-                                    if (section.id?.startsWith('o-autorovi') || section.id?.startsWith('about-the-author')) {
-                                        return <section key={section.id} className="article-authored-bio" aria-labelledby={section.id}><Image src={article.author.photoUrl} width={84} height={84} alt={article.author.name} /><div><div dangerouslySetInnerHTML={{ __html: section.html }} /><a className="article-text-link" href={article.author.domains[article.language] ?? article.canonicalUrl}>{cs ? 'Více o autorovi' : 'About the author'}<ArrowUpRight size={15} aria-hidden="true" /></a></div></section>;
-                                    }
-                                    return <div key={section.id ?? `introduction-${index}`}><div dangerouslySetInnerHTML={{ __html: section.html }} />{showExplorer && <AnchoringExplorer language={article.language} />}</div>;
-                                })}
-                            </article>
+                            {document.hasBookExamples
+                                ? <ArticleBookExamples title={article.title}>{sections}</ArticleBookExamples>
+                                : <article className="article-prose" aria-label={article.title}>{sections}</article>}
                             {!community && <section className="article-subscribe" aria-labelledby="article-subscribe-title"><p className="article-eyebrow">{cs ? 'Čtení do sluchátek' : 'Ideas to listen to'}</p><h2 id="article-subscribe-title">{cs ? 'Další článek si vezměte s sebou.' : 'Take the next article with you.'}</h2><p>{cs ? 'Přidejte si RSS do své podcastové aplikace. Nové audio články se objeví automaticky.' : 'Add this RSS feed to your podcast app. New audio articles will appear automatically.'}</p><ArticleRssLink language={article.language} url={getArticlePodcastUrl(article.language, publication)} /></section>}
                         </div>
                     </div>

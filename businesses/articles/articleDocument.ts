@@ -50,10 +50,17 @@ export function getArticleOpeningParagraph(markdown: string, title: string, pere
  * A recording maps its actual spoken tokens to these IDs explicitly, including many-to-one pronunciations.
  * Raw HTML is omitted, and authored links are limited to safe web/mail/fragment destinations.
  */
-export function renderArticleDocument(markdown: string, title: string, perex: string, assetBaseUrl?: string) {
+export function renderArticleDocument(
+    markdown: string,
+    title: string,
+    perex: string,
+    assetBaseUrl?: string,
+    { bookExamples = false }: { readonly bookExamples?: boolean } = {},
+) {
     const words: ArticleDocumentWord[] = [];
     const chapters: ArticleChapter[] = [];
     const usedIds = new Map<string, number>();
+    let bookExampleCount = 0;
     function annotate(value: string, alreadyEscaped = false): string {
         return value.replace(/\S+/g, (word) => {
             const id = `w${words.length}`;
@@ -69,8 +76,11 @@ export function renderArticleDocument(markdown: string, title: string, perex: st
             },
             codespan({ text }) { return `<code>${annotate(decodeText(text))}</code>`; },
             code({ text, lang }) {
-                const language = lang?.split(/\s/)[0].replace(/[^a-z\d-]/gi, '');
-                return `<pre><code${language ? ` class="language-${language}"` : ''}>${annotate(text)}</code></pre>\n`;
+                const syntax = lang?.split(/\s/)[0];
+                const language = syntax?.replace(/[^a-z\d-]/gi, '');
+                const source = `<pre><code${language ? ` class="language-${language}"` : ''}>${annotate(text)}</code></pre>`;
+                if (!bookExamples || syntax?.toLowerCase() !== 'book') return `${source}\n`;
+                return `<div class="article-book-example">${source}<div data-article-book="${bookExampleCount++}"></div></div>\n`;
             },
             heading({ tokens, depth, text }) {
                 const level = Math.max(2, Math.min(depth, 6));
@@ -111,6 +121,7 @@ export function renderArticleDocument(markdown: string, title: string, perex: st
         chapters,
         words,
         wordCount: words.length,
+        hasBookExamples: bookExampleCount > 0,
         sections: html.split(/(?=<h2 id=")/).filter(Boolean).map((section) => ({
             id: section.match(/^<h2 id="([^"]+)"/)?.[1],
             html: section,

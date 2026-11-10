@@ -163,6 +163,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   out of public indexing and feeds. Free member articles in the Promptbook community expose their title, perex and
   opening paragraph before entry. The inline name and email form opens that room and refreshes the current article.
   The remaining text and downloads still require its own session.
+  Fenced Book examples in the full article use the existing light, read-only BookEditor when near the viewport.
+  The server-rendered source remains the fallback and preserves word tracking during narration.
   The four `articles/podcast.xml` routes still have deterministic initial prerenders and refresh hourly for admin
   publications. Only reviewed, existing audio becomes an episode. Managed audio, PDF, timing and subtitles use
   immutable uploads to the private shared object bucket and are served from checked publication routes, with byte

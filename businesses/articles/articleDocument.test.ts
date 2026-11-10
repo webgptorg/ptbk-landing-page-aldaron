@@ -35,6 +35,26 @@ describe('article document rendering and narration word identity', () => {
         expect(renderArticleDocument(source, '', '').words).toEqual(result.words);
     });
 
+    it('marks fenced Book blocks, including nested blocks, without changing source or narration words', () => {
+        const source = [
+            'Úvod.', '', '~~~book', 'AGENT Pomocník', 'GOAL Use <tag> & quotes.', '~~~', '',
+            '> ```book', '> RULE Ask first.', '> ```', '',
+            '```ts', 'const value = 1;', '```', '', '`book`', '',
+            '    AGENT Indented', '', 'Závěr.',
+        ].join('\n');
+        const plain = renderArticleDocument(source, '', '');
+        const enhanced = renderArticleDocument(source, '', '', undefined, { bookExamples: true });
+        expect(plain.hasBookExamples).toBe(false);
+        expect(enhanced.hasBookExamples).toBe(true);
+        expect(enhanced.words).toEqual(plain.words);
+        expect(enhanced.html.match(/data-article-book="\d+"/g)).toEqual(['data-article-book="0"', 'data-article-book="1"']);
+        expect(enhanced.html).toContain('&lt;tag&gt;');
+        expect(enhanced.html).toContain('<pre><code class="language-ts">');
+        expect(enhanced.html).toContain('<blockquote>\n<div class="article-book-example">');
+        expect(enhanced.html).not.toContain('<tag>');
+        expect(renderArticleDocument('`book`', '', '', undefined, { bookExamples: true }).hasBookExamples).toBe(false);
+    });
+
     it('escapes technical notation without changing the readable text', () => {
         const result = renderArticleDocument('`<value> & item`\n\nA & B.', '', '');
         expect(result.html).toContain('&lt;value&gt;');

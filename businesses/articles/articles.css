@@ -99,6 +99,22 @@
 .article-prose code { border-radius: .3rem; padding: .12em .3em; background: var(--article-soft); font-size: .82em; }
 .article-prose pre { padding: 1.4rem; margin-block: 2rem; border-radius: .7rem; background: var(--article-ink); color: #f3f6fa; font-size: .85rem; line-height: 1.8; overflow-x: auto; }
 .article-prose pre code { padding: 0; border-radius: 0; background: transparent; font-size: inherit; }
+.article-book-example { position: relative; margin-block: 2rem; }
+.article-prose .article-book-example > pre {
+    margin: 0;
+    color: #18283e;
+    background: #fff;
+    border: 1px solid var(--article-line);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.article-book-example > [data-article-book] { position: absolute; inset: 0; min-width: 0; visibility: hidden; }
+/* The original word spans stay available and become visible whenever narration follows the text. */
+.article-book-example:not([data-tracking='true'] *):has([data-book-component='BookEditor']) > pre { display: none; }
+.article-book-example:not([data-tracking='true'] *) > [data-article-book]:has([data-book-component='BookEditor']) {
+    position: relative;
+    visibility: visible;
+}
 .article-prose hr { margin-block: 3rem; border: 0; border-top: 1px solid var(--article-line); }
 .article-prose img { max-width: 100%; height: auto; margin: 2rem auto; border-radius: .6rem; }
 .article-prose table { display: block; width: 100%; margin-block: 2rem; border-collapse: collapse; overflow-x: auto; font-size: .85em; }
