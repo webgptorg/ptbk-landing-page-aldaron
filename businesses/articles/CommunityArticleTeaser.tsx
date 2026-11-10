@@ -1,6 +1,8 @@
 import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { TERMINAL_TOUR_PATH } from '@/businesses/terminal-tour/terminalTour';
+import { COMMUNITY_ARTICLE_COVER_SIZE } from '@/lib/articles/promptbookCommunityArticleCovers';
 import type { ArticleLanguage } from '@/lib/articles/types';
 import { renderArticleDocument } from './articleDocument';
 import { ArticleFooter, ArticleHeader } from './ArticleShell';
@@ -8,9 +10,11 @@ import { ArticleMedia } from './ArticleMedia';
 import { CommunityArticleUnlockForm } from './CommunityArticleUnlockForm';
 import './articles.css';
 
-export function CommunityArticleTeaser({ title, perex, openingMarkdown, language, indexPath, roomSlug, showTerminalGuide }: {
+export function CommunityArticleTeaser({ title, perex, coverImage, coverImageAlt, openingMarkdown, language, indexPath, roomSlug, showTerminalGuide }: {
     readonly title: string;
     readonly perex: string;
+    readonly coverImage?: string;
+    readonly coverImageAlt?: string;
     readonly openingMarkdown: string;
     readonly language: ArticleLanguage;
     readonly indexPath: string;
@@ -29,6 +33,9 @@ export function CommunityArticleTeaser({ title, perex, openingMarkdown, language
                     </Link>
                     <h1>{title}</h1>
                     <p className="article-perex">{perex}</p>
+                    {coverImage && coverImageAlt && (
+                        <Image className="article-hero-cover" src={coverImage} alt={coverImageAlt} {...COMMUNITY_ARTICLE_COVER_SIZE} unoptimized />
+                    )}
                 </header>
                 <div className="article-container article-teaser-body">
                     {opening && <ArticleMedia language={language}><div className="article-prose" dangerouslySetInnerHTML={{ __html: opening }} /></ArticleMedia>}

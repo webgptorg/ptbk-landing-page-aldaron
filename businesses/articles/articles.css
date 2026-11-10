@@ -47,6 +47,7 @@
 .article-meta-dot { width: 3px; height: 3px; background: var(--article-muted); border-radius: 50%; }
 .article-hero h1 { max-width: 1010px; margin: 0; font-family: var(--font-outfit), sans-serif; font-size: clamp(2.5rem, 5.8vw, 4.75rem); font-weight: 500; letter-spacing: -.055em; line-height: 1.09; text-wrap: balance; }
 .article-perex { max-width: 790px; margin-top: 1.65rem; color: var(--article-muted); font-size: clamp(1.05rem, 1.65vw, 1.3rem); font-weight: 400; line-height: 1.7; text-wrap: pretty; }
+.article-hero-cover { display: block; width: 100%; height: auto; margin-top: clamp(1.6rem, 4vw, 3rem); border: 1px solid var(--article-line); border-radius: clamp(.8rem, 2vw, 1.25rem); }
 .article-byline { display: flex; align-items: center; gap: .8rem; margin-top: 2.1rem; }
 .article-byline > img { width: 46px; height: 46px; padding-top: 3px; object-fit: cover; object-position: top; background: var(--article-soft); border-radius: 50%; }
 .article-byline > div { display: grid; gap: .2rem; font-size: .8rem; }

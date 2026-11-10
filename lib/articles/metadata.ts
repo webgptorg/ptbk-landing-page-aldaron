@@ -19,6 +19,7 @@ export function createArticlePageDefinition(article: Article, publication: Artic
         openGraphType: 'article',
         isSocialPreviewImageGenerated: true,
         socialPreviewImagePath: article.coverImage,
+        socialPreviewImageAlt: article.coverImageAlt,
     };
 }
 

@@ -35,6 +35,7 @@ export type Article = {
     readonly prominence?: number;
     readonly tags: readonly string[];
     readonly coverImage?: string;
+    readonly coverImageAlt?: string;
     readonly markdown: string;
     readonly author: ArticleAuthor;
     readonly canonicalUrl: string;

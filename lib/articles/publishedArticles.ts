@@ -9,6 +9,7 @@ import { applyLegacyArticlePlacements, getLegacyArticlePlacements } from './lega
 import { isArticleCommunity, type ManagedArticleDestination, type ManagedArticlePlacement } from './managedArticleInput';
 import { getManagedArticleAssetPath, getManagedArticleUrl } from './managedArticleUrls';
 import { getCurrentManagedArticleAsset, readPublishedManagedArticle, readPublishedManagedArticles, type ManagedArticleRow } from './managedArticles';
+import { getPromptbookCommunityArticleCover } from './promptbookCommunityArticleCovers';
 import type { Article, ArticleLanguage, ArticlePublication } from './types';
 import { ARTICLE_ASSET_ORIGIN } from './urls';
 
@@ -35,6 +36,7 @@ function toPublishedArticle(row: ManagedArticleRow, placement: ManagedArticlePla
         slug: row.slug, title: row.title, perex: row.perex, markdown: row.markdown,
         publishedAt: row.published_at, updatedAt: row.updated_at, tags: [], translations: [],
         canonicalUrl: getManagedArticleUrl(row, row.canonical_destination),
+        ...getPromptbookCommunityArticleCover(row, placement.destination),
         pdfUrl: getCurrentManagedArticleAsset(row, 'pdf') ? assetPath('pdf') : undefined,
         audio: audio?.duration ? {
             url: assetUrl('audio'), duration: audio.duration, byteLength: audio.byteLength, mimeType: 'audio/mpeg',
@@ -77,7 +79,8 @@ export async function getPublishedArticles(language: ArticleLanguage, publicatio
 
 type CommunityArticleDetail =
     | { readonly kind: 'article'; readonly article: Article; readonly visibility: ManagedArticlePlacement['visibility'] }
-    | { readonly kind: 'teaser'; readonly title: string; readonly perex: string; readonly openingMarkdown: string };
+    | ({ readonly kind: 'teaser'; readonly title: string; readonly perex: string; readonly openingMarkdown: string }
+        & Pick<Article, 'coverImage' | 'coverImageAlt'>);
 
 function offersFreeArticleTeaser(community: 'vyvojari' | 'promptbook', placement: ManagedArticlePlacement): boolean {
     return community === 'promptbook' && placement.visibility === 'members';
@@ -106,6 +109,7 @@ export const getCommunityArticleDetail = cache(async (
             title: row.title,
             perex: row.perex,
             openingMarkdown: getArticleOpeningParagraph(row.markdown, row.title, row.perex),
+            ...getPromptbookCommunityArticleCover(row, community),
         } : null;
     }
     const article = toPublishedArticle(row, placement);
@@ -117,7 +121,7 @@ export async function getPublishedCommunityArticle(community: 'vyvojari' | 'prom
     return detail?.kind === 'article' ? { article: detail.article, visibility: detail.visibility } : null;
 }
 
-type CommunityArticleCard = Pick<Article, 'id' | 'title' | 'perex' | 'language' | 'slug' | 'publishedAt'> & {
+type CommunityArticleCard = Pick<Article, 'id' | 'title' | 'perex' | 'language' | 'slug' | 'publishedAt' | 'coverImage'> & {
     readonly authorName: string;
     readonly hasAudio: boolean;
 };
@@ -155,6 +159,7 @@ export async function getCommunityArticleCards(
         return {
             id: row.id, title: row.title, perex: row.perex, language: row.language, slug: row.slug,
             publishedAt: row.published_at, authorName: author.name, hasAudio: Boolean(getCurrentManagedArticleAsset(row, 'audio')),
+            ...getPromptbookCommunityArticleCover(row, community),
         };
     }));
     return [...legacy, ...articles.filter((article): article is CommunityArticleCard => article !== null)]
