@@ -4,6 +4,7 @@ import { TERMINAL_TOUR_PATH } from '@/businesses/terminal-tour/terminalTour';
 import type { ArticleLanguage } from '@/lib/articles/types';
 import { renderArticleDocument } from './articleDocument';
 import { ArticleFooter, ArticleHeader } from './ArticleShell';
+import { ArticleMedia } from './ArticleMedia';
 import { CommunityArticleUnlockForm } from './CommunityArticleUnlockForm';
 import './articles.css';
 
@@ -17,7 +18,7 @@ export function CommunityArticleTeaser({ title, perex, openingMarkdown, language
     readonly showTerminalGuide: boolean;
 }) {
     const cs = language === 'cs';
-    const opening = renderArticleDocument(openingMarkdown, title, perex).html;
+    const opening = renderArticleDocument(openingMarkdown, title, perex, undefined, { mediaLanguage: language }).html;
     return (
         <div className="article-site" data-publication="promptbook" lang={language}>
             <ArticleHeader language={language} publication="promptbook" indexPath={indexPath} />
@@ -30,7 +31,7 @@ export function CommunityArticleTeaser({ title, perex, openingMarkdown, language
                     <p className="article-perex">{perex}</p>
                 </header>
                 <div className="article-container article-teaser-body">
-                    {opening && <div className="article-prose" dangerouslySetInnerHTML={{ __html: opening }} />}
+                    {opening && <ArticleMedia language={language}><div className="article-prose" dangerouslySetInnerHTML={{ __html: opening }} /></ArticleMedia>}
                     {showTerminalGuide && (
                         <p className="article-terminal-guide">
                             S Promptbookem začínáte? <Link href={TERMINAL_TOUR_PATH}>Podívejte se na instalaci a založení projektu v terminálu.</Link>

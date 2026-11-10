@@ -165,6 +165,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The remaining text and downloads still require its own session.
   Fenced Book examples in the full article use the existing light, read-only BookEditor when near the viewport.
   The server-rendered source remains the fallback and preserves word tracking during narration.
+  Article images and links to image files open a keyboard-accessible preview on the article page.
+  Standalone MP4, WebM, Ogg video and YouTube links have inline players. YouTube loads on explicit play and
+  both kinds retain the original link. These presentation options keep Markdown and narration word IDs intact.
   The Czech Promptbook articles about contacts, podcast production, and web maintenance link to the public
   terminal recording from their free previews and from their setup sections, before the article's own agenda frame.
   A collapsed disclosure below the agenda frame contains the shared installation, console, new project and result frames.

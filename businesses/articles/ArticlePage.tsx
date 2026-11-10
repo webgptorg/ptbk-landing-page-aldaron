@@ -9,6 +9,7 @@ import { getArticleAssetUrl, getArticleIndexUrl, getArticlePodcastUrl, getArticl
 import { ArticleHeader, ArticleFooter } from './ArticleShell';
 import { ArticleAudioButton } from './ArticleAudioButton';
 import { ArticleBookExamples } from './ArticleBookExamples';
+import { ArticleMedia } from './ArticleMedia';
 import { ArticleRssLink } from './ArticleRssLink';
 import { ArticleTracking } from './ArticleTracking';
 import { AnchoringExplorer } from './AnchoringExplorer';
@@ -23,7 +24,7 @@ export function ArticlePage({ article, publication, community }: {
     const cs = article.language === 'cs';
     const document = renderArticleDocument(
         article.markdown, article.title, article.perex,
-        article.managed ? undefined : getArticleAssetUrl(article.id, ''), { bookExamples: true },
+        article.managed ? undefined : getArticleAssetUrl(article.id, ''), { bookExamples: true, mediaLanguage: article.language },
     );
     const cover = renderArticleCover(article.title, article.perex);
     const readingMinutes = Math.max(1, Math.ceil(document.wordCount / 200));
@@ -75,9 +76,11 @@ export function ArticlePage({ article, publication, community }: {
                             <details open><summary>{cs ? 'V tomto článku' : 'In this article'}</summary><nav aria-label={cs ? 'Kapitoly článku' : 'Article chapters'}>{document.chapters.map((chapter, index) => <a key={chapter.id} href={`#${chapter.id}`}><span>{(index + 1).toString().padStart(2, '0')}</span>{chapter.title}</a>)}</nav></details>
                         </aside>
                         <div className="article-reading-column">
-                            {document.hasBookExamples
-                                ? <ArticleBookExamples title={article.title}>{sections}</ArticleBookExamples>
-                                : <article className="article-prose" aria-label={article.title}>{sections}</article>}
+                            <ArticleMedia key={article.id} language={article.language}>
+                                {document.hasBookExamples
+                                    ? <ArticleBookExamples title={article.title}>{sections}</ArticleBookExamples>
+                                    : <article className="article-prose" aria-label={article.title}>{sections}</article>}
+                            </ArticleMedia>
                             {!community && <section className="article-subscribe" aria-labelledby="article-subscribe-title"><p className="article-eyebrow">{cs ? 'Čtení do sluchátek' : 'Ideas to listen to'}</p><h2 id="article-subscribe-title">{cs ? 'Další článek si vezměte s sebou.' : 'Take the next article with you.'}</h2><p>{cs ? 'Přidejte si RSS do své podcastové aplikace. Nové audio články se objeví automaticky.' : 'Add this RSS feed to your podcast app. New audio articles will appear automatically.'}</p><ArticleRssLink language={article.language} url={getArticlePodcastUrl(article.language, publication)} /></section>}
                         </div>
                     </div>

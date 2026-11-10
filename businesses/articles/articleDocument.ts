@@ -1,4 +1,6 @@
-import { Marked } from 'marked';
+import { Marked, type Tokens } from 'marked';
+import { createYoutubeEmbedUrl, extractYoutubeVideoId } from '@/lib/youtube/youtubeEmbed';
+import type { ArticleLanguage } from '@/lib/articles/types';
 
 export type ArticleDocumentWord = { readonly id: string; readonly text: string };
 export type ArticleChapter = { readonly id: string; readonly title: string };
@@ -9,6 +11,30 @@ function escapeHtml(value: string): string {
 
 function decodeText(value: string): string {
     return value.replace(/&(amp|lt|gt|quot|#39);/g, (_, entity: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity] ?? '');
+}
+
+const IMAGE_EXTENSION = /\.(?:png|jpe?g|webp|svg|avif|gif|bmp|ico|apng)$/i;
+const VIDEO_EXTENSION = /\.(?:mp4|webm|ogv)$/i;
+
+function getMediaUrl(href: string, assetBaseUrl?: string): string | undefined {
+    try {
+        const decoded = decodeURIComponent(href);
+        if (/[\\\t\r\n]/.test(decoded) || decoded.split(/[/?#]/).some((segment) => segment === '..' || segment === '.')) return;
+        if (href.startsWith('/') && !href.startsWith('//')) return href;
+        const url = /^https?:\/\//i.test(href)
+            ? new URL(href)
+            : assetBaseUrl && /^images\/[a-z\d_./-]+$/i.test(href) && IMAGE_EXTENSION.test(href)
+                ? new URL(href, assetBaseUrl)
+                : undefined;
+        if (url && /^https?:$/.test(url.protocol) && !url.username && !url.password) return url.href;
+    } catch { /* Invalid paths leave the authored text readable. */ }
+}
+
+function getYoutubeStart(url: URL): number | undefined {
+    const time = url.searchParams.get('start') ?? url.searchParams.get('t') ?? url.hash.slice(1).replace(/^t=/, '');
+    if (/^\d+$/.test(time)) return Number(time);
+    const duration = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(time);
+    if (duration) return Number(duration[1] ?? 0) * 3600 + Number(duration[2] ?? 0) * 60 + Number(duration[3] ?? 0);
 }
 
 /** Cover words have their own stable IDs, so adding cover tracking never renumbers body words. */
@@ -55,12 +81,23 @@ export function renderArticleDocument(
     title: string,
     perex: string,
     assetBaseUrl?: string,
-    { bookExamples = false }: { readonly bookExamples?: boolean } = {},
+    { bookExamples = false, mediaLanguage }: { readonly bookExamples?: boolean; readonly mediaLanguage?: ArticleLanguage } = {},
 ) {
     const words: ArticleDocumentWord[] = [];
     const chapters: ArticleChapter[] = [];
     const usedIds = new Map<string, number>();
     let bookExampleCount = 0;
+    let insideLink = false;
+    const imageLabel = mediaLanguage === 'cs' ? 'Zvětšit obrázek' : 'Enlarge image';
+    const playLabel = mediaLanguage === 'cs' ? 'Přehrát video' : 'Play video';
+
+    function renderImage({ href, text }: Tokens.Image, source = getMediaUrl(href, assetBaseUrl), preview = source): string {
+        if (!source) return escapeHtml(text);
+        const image = `<img src="${escapeHtml(source)}" alt="${escapeHtml(text)}" loading="lazy" decoding="async" />`;
+        if (!mediaLanguage || insideLink || !preview) return image;
+        const label = text ? `${imageLabel} · ${text}` : imageLabel;
+        return `<a class="article-image-preview" href="${escapeHtml(preview)}" data-article-image aria-haspopup="dialog" aria-label="${escapeHtml(label)}">${image}</a>`;
+    }
     function annotate(value: string, alreadyEscaped = false): string {
         return value.replace(/\S+/g, (word) => {
             const id = `w${words.length}`;
@@ -91,27 +128,45 @@ export function renderArticleDocument(
                 if (level === 2) chapters.push({ id, title: decodeText(text.replace(/[*_`]/g, '')) });
                 return `<h${level} id="${id}">${this.parser.parseInline(tokens)}</h${level}>\n`;
             },
+            paragraph({ tokens }) {
+                const [link] = tokens;
+                const source = mediaLanguage && tokens.length === 1 && link?.type === 'link' && getMediaUrl((link as Tokens.Link).href);
+                if (!source) return false;
+                const url = new URL(source, 'https://ptbk.io');
+                const youtubeId = source.startsWith('/') ? null : extractYoutubeVideoId(source);
+                if (!youtubeId && !VIDEO_EXTENSION.test(url.pathname)) return false;
+                const caption = `<p class="article-video-source">${this.parser.parseInline(tokens)}</p>`;
+                if (!youtubeId) {
+                    return `<div class="article-video"><video controls playsinline preload="none" src="${escapeHtml(source)}" aria-label="${playLabel}"></video>${caption}</div>\n`;
+                }
+                const embed = createYoutubeEmbedUrl(youtubeId, { isAutoplayed: true, isInlinePlayback: true, startAtSeconds: getYoutubeStart(url) });
+                return `<div class="article-video"><div class="article-youtube-frame"><a href="${escapeHtml(source)}" data-article-youtube="${escapeHtml(embed)}">${playLabel}</a></div>${caption}</div>\n`;
+            },
             link({ href, title: linkTitle, tokens }) {
+                const validLink = /^(?:https?:\/\/|mailto:|\/|#)/i.test(href) && !href.startsWith('//');
+                const titleAttribute = linkTitle ? ` title="${escapeHtml(linkTitle)}"` : '';
+                const mediaUrl = mediaLanguage && getMediaUrl(href, assetBaseUrl);
+                const isImageLink = Boolean(mediaUrl && IMAGE_EXTENSION.test(new URL(mediaUrl, 'https://ptbk.io').pathname));
+                const [firstToken] = tokens;
+                if (mediaLanguage && tokens.length === 1 && firstToken?.type === 'image') {
+                    const image = firstToken as Tokens.Image;
+                    const source = getMediaUrl(image.href, assetBaseUrl);
+                    if (source) {
+                        if (mediaUrl && (isImageLink || mediaUrl === source)) return renderImage(image, source, mediaUrl);
+                        const preview = renderImage(image, source);
+                        if (!validLink) return preview;
+                        const destination = linkTitle || (mediaLanguage === 'cs' ? 'Otevřít odkaz' : 'Open link');
+                        return `<span class="article-linked-image">${preview}<a class="article-image-destination" href="${escapeHtml(href)}">${escapeHtml(destination)}</a></span>`;
+                    }
+                }
+                insideLink = true;
                 const content = this.parser.parseInline(tokens);
-                if (!/^(?:https?:\/\/|mailto:|\/|#)/i.test(href) || href.startsWith('//')) return content;
-                return `<a href="${escapeHtml(href)}"${linkTitle ? ` title="${escapeHtml(linkTitle)}"` : ''}>${content}</a>`;
+                insideLink = false;
+                if (mediaUrl && isImageLink) return `<a href="${escapeHtml(mediaUrl)}"${titleAttribute} data-article-image aria-haspopup="dialog">${content}</a>`;
+                if (!validLink) return content;
+                return `<a href="${escapeHtml(href)}"${titleAttribute}>${content}</a>`;
             },
-            image({ href, text }) {
-                let source: string | undefined;
-                try {
-                    const decoded = decodeURIComponent(href);
-                    if (decoded.includes('\\') || decoded.split(/[/?#]/).some((segment) => segment === '..' || segment === '.')) return escapeHtml(text);
-                    if (/^images\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|avif)$/i.test(href) && assetBaseUrl) {
-                        const base = new URL(assetBaseUrl);
-                        if (/^https?:$/.test(base.protocol) && !base.username && !base.password) source = new URL(href, base).href;
-                    } else if (/^https?:\/\//i.test(href)) {
-                        const image = new URL(href);
-                        if (!image.username && !image.password) source = image.href;
-                    } else if (href.startsWith('/') && !href.startsWith('//')) source = href;
-                } catch { /* Invalid paths leave the authored alternative text readable. */ }
-                if (!source) return escapeHtml(text);
-                return `<img src="${escapeHtml(source)}" alt="${escapeHtml(text)}" loading="lazy" />`;
-            },
+            image: renderImage,
         },
     });
     const body = getArticleBody(markdown, title, perex);

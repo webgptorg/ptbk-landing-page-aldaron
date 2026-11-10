@@ -74,4 +74,34 @@ describe('article document rendering and narration word identity', () => {
         const result = renderArticleDocument(`![Popis](<${image}>)`, '', '', 'https://ptbk.io/article-assets/article-cs/');
         expect(result.html).not.toContain('<img');
     });
+
+    it('previews article images, including linked originals, without creating nested links', () => {
+        const source = [
+            '![Obrázek](/diagram.webp)',
+            '[![Náhled](/thumb.png)](/original.png?size=full)',
+            '[![Logo](/logo.png)](https://example.com/ "Zdroj")',
+            '[Celý obrázek](/original.png)',
+        ].join('\n\n');
+        const result = renderArticleDocument(source, '', '', undefined, { mediaLanguage: 'cs' });
+        expect(result.html).toContain('href="/diagram.webp" data-article-image');
+        expect(result.html).toContain('href="/original.png?size=full" data-article-image');
+        expect(result.html).toContain('href="/logo.png" data-article-image');
+        expect(result.html).toContain('</a><a class="article-image-destination" href="https://example.com/">Zdroj</a>');
+        expect(result.html).toContain('href="/original.png" data-article-image');
+        expect(result.words).toEqual(renderArticleDocument(source, '', '').words);
+    });
+
+    it('adds players to standalone video links and keeps contextual links and narration words', () => {
+        const source = [
+            '[Záznam](/terminal-tour/demo.mp4?download=1)',
+            '[Video](https://youtu.be/dQw4w9WgXcQ?t=1m15s)',
+            'Více v [pořadu](https://youtu.be/dQw4w9WgXcQ).',
+        ].join('\n\n');
+        const result = renderArticleDocument(source, '', '', undefined, { mediaLanguage: 'cs' });
+        expect(result.html).toContain('<video controls playsinline preload="none" src="/terminal-tour/demo.mp4?download=1"');
+        expect(result.html).toContain('data-article-youtube="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&amp;playsinline=1&amp;start=75"');
+        expect(result.html.match(/data-article-youtube/g)).toHaveLength(1);
+        expect(result.html).not.toContain('<iframe');
+        expect(result.words).toEqual(renderArticleDocument(source, '', '').words);
+    });
 });
