@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { ArticlePage } from './ArticlePage';
+import { CommunityArticleTeaser } from './CommunityArticleTeaser';
 
 vi.mock('./ArticleTracking', () => ({
     ArticleTracking: ({ children }: { children: ReactNode }) => children,
@@ -13,6 +14,7 @@ vi.mock('./ArticleBookExamples', () => ({
     ArticleBookExamples: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock('./ArticleRssLink', () => ({ ArticleRssLink: () => null }));
+vi.mock('./CommunityArticleUnlockForm', () => ({ CommunityArticleUnlockForm: () => <form /> }));
 
 const markdown = '## Jak tuhle agendu spustit\n\nText postupu.\n\n## Další kapitola\n\nObsah.';
 const article: Article = {
@@ -48,10 +50,11 @@ describe('terminal recording links in community articles', () => {
         const link = 'href="/cs/terminal"';
         expect(html.split(link)).toHaveLength(2);
         expect(html.indexOf(link)).toBeGreaterThan(html.indexOf('id="jak-tuhle-agendu-spustit"'));
-        expect(html.indexOf(link)).toBeLessThan(html.indexOf('id="dalsi-kapitola"'));
+        expect(html.indexOf(link)).toBeLessThan(html.indexOf(`href="/terminal-tour/${filename}"`));
+        expect(html.indexOf(`href="/terminal-tour/${filename}"`)).toBeLessThan(html.indexOf('id="dalsi-kapitola"'));
         expect(html).toContain(`href="/terminal-tour/${filename}"`);
         expect(html).toContain(`src="/terminal-tour/${filename}"`);
-        const disclosure = html.match(/<details[^>]*><summary>Další kroky v terminálu<\/summary>(.*?)<\/details>/)?.[1];
+        const disclosure = html.match(/<details[^>]*><summary>Instalace a založení projektu na snímcích<\/summary>(.*?)<\/details>/)?.[1];
         expect(disclosure?.match(/src="\/terminal-tour\/[^"]+"/g)).toEqual([
             'src="/terminal-tour/01-install.webp"',
             'src="/terminal-tour/02-console.webp"',
@@ -70,5 +73,23 @@ describe('terminal recording links in community articles', () => {
         expect(renderToStaticMarkup(<ArticlePage
             article={{ ...article, slug: 'jiny-clanek' }} publication="promptbook" community={community}
         />)).not.toContain('href="/cs/terminal"');
+    });
+
+    it('offers the public guide after the opening paragraph and before the unlock form', () => {
+        const teaser = {
+            title: article.title,
+            perex: article.perex,
+            openingMarkdown: 'Úvodní scénář.',
+            language: article.language,
+            indexPath: community.indexPath,
+            roomSlug: 'promptbook',
+        };
+        const html = renderToStaticMarkup(<CommunityArticleTeaser {...teaser} showTerminalGuide />);
+        const guideLink = 'href="/cs/terminal"';
+        expect(html.indexOf(guideLink)).toBeGreaterThan(html.indexOf('scénář.'));
+        expect(html.indexOf(guideLink)).toBeLessThan(html.indexOf('<form'));
+        expect(html).not.toContain('/terminal-tour/');
+        expect(renderToStaticMarkup(<CommunityArticleTeaser {...teaser} showTerminalGuide={false} />))
+            .not.toContain(guideLink);
     });
 });

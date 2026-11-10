@@ -1,18 +1,20 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { TERMINAL_TOUR_PATH } from '@/businesses/terminal-tour/terminalTour';
 import type { ArticleLanguage } from '@/lib/articles/types';
 import { renderArticleDocument } from './articleDocument';
 import { ArticleFooter, ArticleHeader } from './ArticleShell';
 import { CommunityArticleUnlockForm } from './CommunityArticleUnlockForm';
 import './articles.css';
 
-export function CommunityArticleTeaser({ title, perex, openingMarkdown, language, indexPath, roomSlug }: {
+export function CommunityArticleTeaser({ title, perex, openingMarkdown, language, indexPath, roomSlug, showTerminalGuide }: {
     readonly title: string;
     readonly perex: string;
     readonly openingMarkdown: string;
     readonly language: ArticleLanguage;
     readonly indexPath: string;
     readonly roomSlug: string;
+    readonly showTerminalGuide: boolean;
 }) {
     const cs = language === 'cs';
     const opening = renderArticleDocument(openingMarkdown, title, perex).html;
@@ -29,6 +31,11 @@ export function CommunityArticleTeaser({ title, perex, openingMarkdown, language
                 </header>
                 <div className="article-container article-teaser-body">
                     {opening && <div className="article-prose" dangerouslySetInnerHTML={{ __html: opening }} />}
+                    {showTerminalGuide && (
+                        <p className="article-terminal-guide">
+                            S Promptbookem začínáte? <Link href={TERMINAL_TOUR_PATH}>Podívejte se na instalaci a založení projektu v terminálu.</Link>
+                        </p>
+                    )}
                     <CommunityArticleUnlockForm language={language} roomSlug={roomSlug} />
                 </div>
             </main>

@@ -2,6 +2,8 @@
 
 `/cs/open-source` a `/en/open-source` jsou stručným instalačním rozcestníkem. Jeden nadpis, krátký pokyn, výběr způsobu instalace a obsah zvolené záložky. Bez opakovaného produktového hero, benefitů, přehledu ovládání, prodejních sekcí a výzvy ke hvězdičce. Dole pouze GitHub, dokumentace, BUSL-1.1 a stávající kontakt pro pomoc s instalací.
 
+Za zvolenou instalační metodou je v obou jazycích přehratelný záznam od instalace přes npm po založení projektu a zadání první agendy. Video sdílí soubor a náhled s `/cs/terminal`, kam vede odkaz na postup krok za krokem. Anglická stránka výslovně uvádí, že záznam i návod jsou česky.
+
 ## Způsoby instalace
 
 Pět přístupných záložek: **Claude Code / Codex / AI** (první a výchozí), **npm**, **Shell**, **Windows EXE**, **VPS / cloud**. Šipky cyklí volby, Home/End přejdou na první/poslední. Přesná vazba tab/panel, viditelné zaměření a vodorovně posuvné záložky na mobilu.

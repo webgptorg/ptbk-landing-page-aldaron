@@ -165,8 +165,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The remaining text and downloads still require its own session.
   Fenced Book examples in the full article use the existing light, read-only BookEditor when near the viewport.
   The server-rendered source remains the fallback and preserves word tracking during narration.
-  The Czech Promptbook articles about contacts, podcast production, and web maintenance show their own
-  full-width agenda frame and link to the terminal recording from their setup sections in the full reader.
+  The Czech Promptbook articles about contacts, podcast production, and web maintenance link to the public
+  terminal recording from their free previews and from their setup sections, before the article's own agenda frame.
   A collapsed disclosure below the agenda frame contains the shared installation, console, new project and result frames.
   The public `/cs/terminal` page presents the genuine CLI capture, five walkthrough frames and two alternate
   agenda frames. It describes project setup without an AI tool and the environment-specific IPC startup failure.
@@ -236,7 +236,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   and the engine's shared Ubuntu installer guide. DigitalOcean is the first cloud option and opens its Droplet
   startup-script guide; Azure opens the paid deployment form and AWS opens the EC2 CloudFormation upload guide.
   Label the copy/upload steps. AI sign-in and agenda setup remain attended over SSH; both languages share resources.
-  The installation page stays concise: one heading, method tabs, the selected command/prompt and resource links.
+  The installation page keeps the terminal recording next to its method tabs and selected command or prompt.
+  The English installation page labels the Czech recording explicitly. The steps link to `/cs/terminal`.
   Shell uses /install.sh, a thin attended wrapper over the engine installer, then opens ordinary ptbk init as
   promptbook with /dev/tty restored; failures never initialize a project. Ubuntu 24.04 x86-64, systemd and
   root/sudo are explicit. Native VPS AI login instructions live in a disclosure. Omit repeated product,

@@ -78,8 +78,10 @@ describe('bilingual launch site', () => {
     ])('renders %s in English from the initial render', (_name,node) => {
         expect(remainingCzech(text(node)), String(_name)).toEqual([]);
         const element=document.createElement('div'); element.innerHTML=html(node);
-        const links=Array.from(element.querySelectorAll('a[href^="/"]')).map(a=>a.getAttribute('href'));
-        expect(links.every(link=>link?.startsWith('/en'))).toBe(true);
+        const links=Array.from(element.querySelectorAll('a[href^="/"]'));
+        expect(links.every(link => link.getAttribute('href')?.startsWith('/en') || (
+            _name === 'open-source' && link.getAttribute('href') === '/cs/terminal' && link.getAttribute('hreflang') === 'cs'
+        ))).toBe(true);
     });
     it('retains localized legal documents and a sourced comparison table with all ten alternatives', () => {
         expect(text(<NewLegalPage kind="privacyPolicy" language="en"/>)).toContain('Privacy');

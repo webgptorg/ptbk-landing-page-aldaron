@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArticlePage } from '@/businesses/articles/ArticlePage';
 import { CommunityArticleTeaser } from '@/businesses/articles/CommunityArticleTeaser';
 import { COMMUNITIES } from '@/businesses/community/config';
+import { TERMINAL_TOUR_ARTICLE_FRAMES } from '@/businesses/terminal-tour/terminalTour';
 import { isArticleCommunity } from '@/lib/articles/managedArticleInput';
 import { getManagedArticleUrl } from '@/lib/articles/managedArticleUrls';
 import { createArticleMetadata, createArticleStructuredData } from '@/lib/articles/metadata';
@@ -16,7 +17,7 @@ async function getPlacement(params: PageProps['params']) {
     const { community, language, slug } = await params;
     if (!isArticleCommunity(community) || (language !== 'cs' && language !== 'en')) return null;
     const result = await getCommunityArticleDetail(community, language, slug);
-    return result ? { ...result, community, language } as const : null;
+    return result ? { ...result, community, language, slug } as const : null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -42,6 +43,8 @@ export default async function CommunityArticlePage({ params }: PageProps) {
             language={result.language}
             indexPath={indexPath}
             roomSlug={definition.roomSlug}
+            showTerminalGuide={result.community === 'promptbook' && result.language === 'cs'
+                && TERMINAL_TOUR_ARTICLE_FRAMES.has(result.slug)}
         />;
     }
     const { article, community, visibility } = result;

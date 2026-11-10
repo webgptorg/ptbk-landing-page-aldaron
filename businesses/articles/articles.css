@@ -69,6 +69,8 @@
 .article-contents a > span { flex-shrink: 0; color: var(--article-accent); font-size: .58rem; font-variant-numeric: tabular-nums; }
 .article-contents a:hover { color: var(--article-accent); }
 .article-teaser-body { max-width: 750px; }
+.article-terminal-guide { margin-block: 1rem; color: var(--article-muted); font-size: .94rem; line-height: 1.6; }
+.article-terminal-guide a { color: var(--article-accent); text-decoration: underline; }
 .article-unlock-form { margin-top: 2rem; border: 1px solid var(--article-line); border-radius: 1rem; background: var(--article-soft); padding: clamp(1rem, 4vw, 1.75rem); }
 .article-unlock-form h2 { margin: 0 0 .35rem; font-family: var(--font-outfit), sans-serif; font-size: 1.55rem; font-weight: 550; }
 .article-unlock-form > p { margin: .45rem 0 1rem; color: var(--article-muted); }

@@ -55,6 +55,12 @@
 .providers svg { position: absolute; top: 21px; right: 14px; }
 .note { margin-top: 18px !important; font-size: 12px; }
 .note a { margin-left: 8px; color: #243f77 !important; text-decoration: underline !important; text-underline-offset: 3px; }
+.tour { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); align-items: center; gap: 24px; margin-top: 20px; padding: 18px 24px; border: 1px solid #dbe4ef; border-radius: 16px; background: #f5f8fd; }
+.tourCopy h2 { font-size: 23px !important; line-height: 1.25 !important; }
+.tourCopy p { margin-top: 8px !important; font-size: 14px; line-height: 1.6; }
+.tourCopy .textLink { font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.tourCopy .textLink svg { flex-shrink: 0; }
+.tourVideo { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #172339; }
 .resources { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-top: 20px; }
 .resources a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #526781 !important; font-size: 12px; }
 .resources a:hover, .textLink:hover, .login a:hover { text-decoration: underline !important; text-underline-offset: 4px; }
@@ -77,5 +83,7 @@
     .providers { grid-template-columns: 1fr; }
     .providers a { gap: 5px; padding: 16px 36px 16px 16px; }
     .providers svg { top: 17px; }
+    .tour { grid-template-columns: 1fr; gap: 8px; padding: 18px; }
+    .tourCopy h2 { font-size: 21px !important; }
     .resources { gap: 5px 18px; }
 }

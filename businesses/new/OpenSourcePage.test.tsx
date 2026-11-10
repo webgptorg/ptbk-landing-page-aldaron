@@ -163,7 +163,18 @@ describe('self-hosted installation entry point', () => {
         expect(element.querySelector('h1')?.textContent).toBe(locale === 'en' ? 'Install Promptbook' : 'Instalace Promptbooku');
         expect(element.textContent).toContain('BUSL-1.1');
         const internalLinks = Array.from(element.querySelectorAll('a[href^="/"]'));
-        expect(internalLinks.every(link => link.getAttribute('href')?.startsWith(`/${locale}`))).toBe(true);
+        const tour = within(element).getByRole('link', { name: locale === 'en' ? 'Open the illustrated guide (in Czech)' : 'Otevřít návod se snímky terminálu' });
+        expect(tour.getAttribute('href')).toBe('/cs/terminal');
+        expect(tour.getAttribute('hreflang')).toBe('cs');
+        const video = element.querySelector('video');
+        expect(video?.hasAttribute('controls')).toBe(true);
+        expect(video?.hasAttribute('playsinline')).toBe(true);
+        expect(video?.getAttribute('preload')).toBe('none');
+        expect(video?.querySelector('source')?.getAttribute('src')).toBe('/terminal-tour/walkthrough.mp4');
+        const videoDescriptionId = video?.getAttribute('aria-describedby');
+        expect(Array.from(element.querySelectorAll('[id]')).find(node => node.id === videoDescriptionId)?.textContent)
+            .toContain(locale === 'en' ? 'Czech recording' : 'Od instalace přes npm');
+        expect(internalLinks.filter(link => link !== tour).every(link => link.getAttribute('href')?.startsWith(`/${locale}`))).toBe(true);
         const [title, description] = OPEN_SOURCE_PAGE_COPY[locale];
         const metadata = newPageMetadata('open-source', title, description, locale);
         expect(metadata.alternates?.canonical).toBe(`https://ptbk.io/${locale}/open-source`);

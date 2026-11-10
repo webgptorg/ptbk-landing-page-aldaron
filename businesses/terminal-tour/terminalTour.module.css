@@ -167,21 +167,10 @@
     border-radius: 0;
 }
 .articleFrameCaption {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: .25rem 1rem;
     margin-top: .55rem;
     color: var(--article-muted);
     font-size: .86rem;
     line-height: 1.5;
-}
-.articleFrameCaption a {
-    display: inline-flex;
-    align-items: center;
-    gap: .25rem;
-    font-weight: 650;
 }
 
 .articleSteps {

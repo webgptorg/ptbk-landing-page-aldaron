@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, Copy, Github, Terminal } from 'lucide-react';
+import { TERMINAL_TOUR_PATH, TERMINAL_TOUR_STEPS, TERMINAL_TOUR_VIDEO_PATH } from '@/businesses/terminal-tour/terminalTour';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
@@ -26,6 +27,9 @@ const METHODS: readonly InstallMethod[] = ['ai', 'npm', 'shell', 'windows', 'ser
 const COPY = {
     cs: {
         back: '← Promptbook', title: 'Instalace Promptbooku', intro: 'Vyberte si způsob instalace.',
+        tourTitle: 'Instalace krok za krokem ve videu',
+        tourDescription: 'Od instalace přes npm po založení projektu a zadání první agendy.',
+        tourGuide: 'Otevřít návod se snímky terminálu',
         repository: 'GitHub', methods: 'Způsob instalace',
         aiTitle: 'Instalace přes AI agenta',
         aiText: 'Vložte prompt do Claude Code, Codexu nebo jiného agenta s přístupem k terminálu.',
@@ -69,6 +73,9 @@ Ověř běžící engine i registraci spuštění po restartu a předej mi termi
     },
     en: {
         back: '← Promptbook', title: 'Install Promptbook', intro: 'Choose an installation method.',
+        tourTitle: 'Terminal walkthrough',
+        tourDescription: 'Czech recording · Install with npm, create a project and describe its first job.',
+        tourGuide: 'Open the illustrated guide (in Czech)',
         repository: 'GitHub', methods: 'Installation method',
         aiTitle: 'Install with your AI agent',
         aiText: 'Paste the prompt into Claude Code, Codex or another agent with terminal access.',
@@ -224,6 +231,19 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
                         {release && <CommandBlock title="Bash / SSH" labels={copy} commands={shellCommand} />}
                     </>}
             </div>)}
+        </section>
+        <section className={s.tour} aria-labelledby={`${id}-tour-title`}>
+            <div className={s.tourCopy}>
+                <h2 id={`${id}-tour-title`}>{copy.tourTitle}</h2>
+                <p id={`${id}-tour-description`}>{copy.tourDescription}</p>
+                <Link className={s.textLink} href={TERMINAL_TOUR_PATH} hrefLang="cs">
+                    {copy.tourGuide}<ArrowRight size={14} aria-hidden="true" />
+                </Link>
+            </div>
+            <video className={s.tourVideo} aria-labelledby={`${id}-tour-title`} aria-describedby={`${id}-tour-description`}
+                controls playsInline preload="none" poster={TERMINAL_TOUR_STEPS[1].imagePath}>
+                <source src={TERMINAL_TOUR_VIDEO_PATH} type="video/mp4" />
+            </video>
         </section>
         <footer className={s.resources}>
             <a href={REPOSITORY}><Github size={16} aria-hidden="true" />{copy.repository}</a>
