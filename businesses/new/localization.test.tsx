@@ -88,7 +88,7 @@ describe('bilingual launch site', () => {
             )
         ))).map(link => link.getAttribute('href'))).toEqual([]);
     });
-    it('retains localized legal documents and a sourced comparison table with every alternative', () => {
+    it('retains localized legal documents', () => {
         expect(text(<NewLegalPage kind="privacyPolicy" language="en"/>)).toContain('Privacy');
         for (const kind of ['productTerms', 'partnerTerms', 'engineLicense'] as const) {
             const rendered=text(<NewLegalPage kind={kind} language="en"/>);
@@ -96,17 +96,30 @@ describe('bilingual launch site', () => {
             expect(rendered).toContain('2026');
             expect(rendered).not.toContain('Návrh k projednání');
         }
-        const element=document.createElement('div');element.innerHTML=html(<ComparisonsPage/>);
-        expect(COMPARISONS.length).toBeGreaterThanOrEqual(13);
-        expect(element.querySelectorAll('tbody tr').length).toBe(COMPARISONS.length + 1);
-        for (const { slug } of COMPARISONS) expect(element.querySelector(`a[href="/en/srovnani/${slug}"]`)).not.toBeNull();
-        expect(element.querySelectorAll('tbody a[href^="https://"]').length).toBe(COMPARISONS.length + 1);
-        expect(Array.from(element.querySelectorAll('thead th'), cell => cell.textContent)).toEqual([
-            'Tool', 'Best suited for', 'Self-hosted option', 'Scheduling', 'Workspace',
+    });
+    it.each(['cs', 'en'] as const)('compares both Promptbook variants and every alternative by feature in %s', locale => {
+        const element = document.createElement('div');
+        element.innerHTML = html(<ComparisonsPage/>, locale);
+        const table = element.querySelector('table')!;
+        const columns = Array.from(table.querySelectorAll('thead th[scope="col"]'), cell => cell.textContent);
+        expect(columns).toEqual([
+            locale === 'cs' ? 'Parametr' : 'Feature', 'Promptbook App', 'Promptbook Open Source',
+            ...COMPARISONS.map(item => item.name),
         ]);
-        const openClaw = element.querySelector('a[href="/en/srovnani/openclaw"]')!.closest('tr')!;
-        expect(openClaw.textContent).toContain('Assistants in messaging channels');
-        expect(openClaw.querySelectorAll('td [data-status="yes"]')).toHaveLength(2);
+        expect(COMPARISONS.length).toBeGreaterThanOrEqual(13);
+        for (const { slug } of COMPARISONS) expect(table.querySelector(`thead a[href="/${locale}/srovnani/${slug}"]`)).not.toBeNull();
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        expect(rows).toHaveLength(10);
+        for (const row of rows) {
+            expect(row.querySelectorAll('th[scope="row"]')).toHaveLength(1);
+            expect(row.querySelectorAll('td')).toHaveLength(COMPARISONS.length + 2);
+        }
+        const price = rows.find(row => row.querySelector('th')?.textContent === (locale === 'cs' ? 'Příklad ceny' : 'Example price'))!;
+        const paid = price.querySelector('td:nth-child(2)')!;
+        const free = price.querySelector('td:nth-child(3)')!;
+        expect(paid.textContent).toContain(locale === 'cs' ? '399 Kč' : '$19');
+        expect(free.textContent).toContain(locale === 'cs' ? '0 Kč za povolené použití' : '$0 for permitted use');
+        expect(price.querySelectorAll('a[href^="https://"]')).toHaveLength(COMPARISONS.length);
     });
     it('shows six comparisons and an overview link in the footer and renders sourced details in both languages', () => {
         const shell = document.createElement('div');
@@ -130,19 +143,24 @@ describe('bilingual launch site', () => {
                     'Promptbook',
                     item.name,
                 ]);
-                expect(page.querySelectorAll('tbody th[scope="row"]').length).toBe(COMPARISON_ROWS.length);
+                const sameHosting = item.summary.runtime.status === 'yes';
+                expect(page.querySelectorAll('tbody th[scope="row"]').length).toBe(COMPARISON_ROWS.length + Number(sameHosting));
+                const advantage = page.querySelectorAll('tbody tr[data-comparison-advantage="true"]');
+                expect(advantage).toHaveLength(1);
+                expect(Array.from(advantage[0].querySelectorAll('[data-status]'), cell => cell.getAttribute('data-status')))
+                    .toEqual(['yes', sameHosting ? 'partial' : 'no']);
                 expect(page.querySelector(`a[href="${REBORN_SOURCE}"]`)).not.toBeNull();
                 for (const [, href] of item.sources) expect(page.querySelector(`a[href="${href}"]`)).not.toBeNull();
             }
         }
     });
-    it.each(['cs', 'en'] as const)('uses plain company-computer wording in the %s homepage hero', locale => {
+    it.each(['cs', 'en'] as const)('names both a personal laptop and a company server in the %s homepage hero', locale => {
         const element = document.createElement('div');
         element.innerHTML = html(<NewLandingPage/>, locale);
         const hero = element.querySelector('[data-landing-hero]')!;
         expect(hero.textContent).toContain(locale === 'cs'
-            ? 'Tým agentů si spustíte na firemním počítači.'
-            : 'Run your team of agents on your company computer.');
+            ? 'Tým agentů si spustíte na vlastním notebooku nebo firemním serveru.'
+            : 'Run your team of agents on your own laptop or a company server.');
         expect(hero.textContent).not.toContain('VPS');
     });
     it('exports the same calculation in localized currency, language and share URL', () => {

@@ -8,8 +8,8 @@ export const PROMPTBOOK_BRAND_STYLE = Object.fromEntries(
 ) as CSSProperties;
 
 export const PROMPTBOOK_DEPLOYMENT = {
-    cs: 'Tým agentů si spustíte na firemním počítači.',
-    en: 'Run your team of agents on your company computer.',
+    cs: 'Tým agentů si spustíte na vlastním notebooku nebo firemním serveru.',
+    en: 'Run your team of agents on your own laptop or a company server.',
 };
 
 export const PROMPTBOOK_INTRO = {

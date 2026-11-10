@@ -2,7 +2,9 @@
 
 Patička webu má v češtině i angličtině sekci **Promptbook versus**. První odkaz vede na společnou tabulku `/[locale]/srovnani`, následuje šest přímých odkazů. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`. Z tabulky se na detail přechází přes název nástroje. Záhlaví detailu vede zpět na společnou tabulku.
 
-Detail začíná dvěma konkrétními situacemi, kdy zvolit Promptbook a kdy druhý nástroj. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení je rozbalitelné pod tabulkou. Společná tabulka má jeden řádek pro každý nástroj, samostatný sloupec pro typické použití a sdílí hodnoty pro vlastní provoz, plánování a pracovní prostředí s detailem. Na úzké obrazovce se tabulka posouvá do strany a název nástroje zůstává viditelný. Zdroje jsou dostupné u obou pohledů.
+Detail začíná dvěma konkrétními situacemi, kdy zvolit Promptbook a kdy druhý nástroj. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. V každém detailu je zvýrazněn jeden doložitelný rozdíl ve prospěch Promptbooku. U alternativ s vlastním provozem porovnává ukládání úkolů a chatů jako souborů projektu v Gitu. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení je rozbalitelné pod tabulkou.
+
+Společná tabulka má jeden řádek pro každý parametr a jeden sloupec pro každý nástroj. První dva sloupce patří Promptbook App a Promptbook Open Source, vizuálně odděleným od alternativ. Přehled sdílí technické hodnoty s detaily. Cena, účtovací jednotka, příklad kapacity a licence mají vlastní řádky. Ceny uvádějí příklady tarifů s odkazy na zdroje. U veřejného enginu platí podmínky licence konkrétní verze. Posuvná oblast má přístupný název, názvy sloupců a parametrů zůstávají při posunu viditelné.
 
 Na mobilu se hlavička přehledu i detailu posouvá se stránkou, aby při posouvání nezakrývala nadpis.
 
