@@ -54,9 +54,12 @@ export function PromptbookRobotHead() {
             const bounds = svg.getBoundingClientRect();
             // The center of the head in the neutral 112 × 112 view box.
             const x = clientX - (bounds.left + bounds.width / 2);
-            const y = clientY - (bounds.top + bounds.height * 45.12 / 112);
-            // There is much less room above the mascot than beside it.
-            lookAt({ x: clamp(x / 180), y: clamp(y / Math.max(bounds.height, 1)) });
+            const headY = bounds.top + bounds.height * 45.12 / 112;
+            const y = clientY - headY;
+            // Reach the upward pose in the short gap toward the menu, even near the viewport edge.
+            // Keep the existing downward response over one full mascot height.
+            const verticalRange = y < 0 ? Math.min(bounds.height * .6, headY) : bounds.height;
+            lookAt({ x: clamp(x / 180), y: clamp(y / Math.max(verticalRange, 1)) });
         };
 
         function trackPointer(event: PointerEvent) {
@@ -143,7 +146,9 @@ export function PromptbookRobotHead() {
     }, []);
 
     const yaw = .55 * look.head.x;
-    const pitch = -.4 * look.head.y;
+    // A stronger upward tilt counters the downward-looking isometric view.
+    // Stay just below its .615-radian elevation so the top face remains visible.
+    const pitch = -(look.head.y < 0 ? .6 : .4) * look.head.y;
     const cosYaw = Math.cos(yaw);
     const sinYaw = Math.sin(yaw);
     const cosPitch = Math.cos(pitch);

@@ -103,8 +103,17 @@ describe('hero working headline', () => {
 
         move(container.querySelector('header')!, 30);
         const upwardSlope = Number(face.getAttribute('transform')!.slice(7, -1).split(' ')[1]);
-        expect(upwardSlope).toBeLessThan(restSlope);
+        // At menu height the face must visibly lift out of the default downward-looking view.
+        expect(upwardSlope).toBeLessThan(2);
         expect(eyes.getAttribute('transform')).toBe('translate(0 -0.05)');
+
+        const headY = 118 + 88 * 45.12 / 112;
+        move(hero, headY - 44);
+        const upwardEyes = Number(eyes.getAttribute('transform')!.slice(10, -1).split(' ')[1]);
+        move(hero, headY + 44);
+        const downwardEyes = Number(eyes.getAttribute('transform')!.slice(10, -1).split(' ')[1]);
+        expect(Math.abs(upwardEyes)).toBeGreaterThan(downwardEyes * 1.5);
+        expect(downwardEyes).toBeCloseTo(.025);
 
         move(hero, 350);
         const downwardSlope = Number(face.getAttribute('transform')!.slice(7, -1).split(' ')[1]);
