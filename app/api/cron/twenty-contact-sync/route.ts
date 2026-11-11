@@ -1,3 +1,4 @@
+import { runTwentyCommerceSync } from '@/lib/crm/runTwentyCommerceSync';
 import { timingSafeEqual } from 'node:crypto';
 import { getTwentyContactSyncSettings, runTwentyContactSync } from '@/lib/crm/runTwentyContactSync';
 import { createTwentyContactApi, TwentyContactDeliveryError } from '@/lib/crm/twentyContactApi';
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
 
         const result = await runTwentyContactSync(settings);
         if (result.failed > 0) console.error('Twenty contact sync failed to deliver records', result);
-        return Response.json({ enabled: true, ...result }, { status: result.failed > 0 ? 502 : 200 });
+        const commerce = process.env.TWENTY_COMMERCE_SYNC_ENABLED === 'true' ? await runTwentyCommerceSync() : {enabled:false};
+        return Response.json({ enabled: true, ...result, commerce }, { status: result.failed > 0 ? 502 : 200 });
     } catch (error) {
         if (error instanceof TwentyContactDeliveryError) {
             return Response.json({ connected: false, error: error.code }, { status: 502 });

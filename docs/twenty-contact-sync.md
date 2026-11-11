@@ -65,3 +65,50 @@ under stable `stripe:subscription:<id>` keys. Unrecognized payments are reported
 People are matched by primary or secondary email; ambiguous/shared identities remain flagged for review. No
 payment, subscription, consent, campaign or Person profile is changed. A replay verifies the same source IDs,
 relations and details. Logs contain aggregate counts only.
+
+## Customer purchases and lifetime spending
+
+The commerce projection is separate from contact provenance and is gated by
+`TWENTY_COMMERCE_SYNC_ENABLED=true` (production only). Keep it disabled until schema setup and a verified initial
+import have succeeded. It adds native **Nákupy** (`ptbkPurchases`) and **Platby** (`ptbkPayments`) objects. A recurring
+subscription is one purchase with separate successful payment receipts. One-time charges are separate purchases.
+The canonical receipt is the captured, positive, live Stripe charge, with a deterministic opaque external key;
+seeing the same receipt through an invoice and the charges API cannot add it twice. Stripe identifiers stay outside
+CRM. Paid invoices without an identifiable Stripe receipt stop the projection for review; they never fabricate
+customer spending. Test, declined and uncaptured charges do not count. No charge, refund, email or payout is created.
+
+**Celkem zaplaceno** measures the customer's gross paid amount, including any tax, before processing fees. Refunds
+are separate and do not reduce this measure of willingness to pay. Company totals combine all receipts billed to
+that legal entity. A Person's **Nákupy přes kontakt – celkem** is a contact-context view of the same receipts;
+**Z toho vlastní nákupy** excludes company purchases. Never sum Person and Company card totals together. A sole
+trader is a Company linked to the human Person, using the same receipts, just like other business payers.
+A purchase has independent company and contact relations, so a contact can represent several firms even though
+Twenty's native employment relation has one company. Existing employment is preserved. Company registration and
+billing country form the legal key; no email-domain or fuzzy-name matching is used. An existing company with the same name but no verified legal key requires review instead of an automatic merger.
+Ambiguous identities require review, never a guessed merger.
+
+Totals are fully recomputed and overwritten from canonical receipts, never incremented. Each currency stays
+separate. A single-currency card has a native Currency field; a multi-currency card leaves that scalar empty and
+shows exact amounts per currency in **Zaplaceno podle měny**. Payouts from Stripe are never customer receipts.
+Future bank settlement should reconcile with these receipts; a Stripe payout must never create a second sale.
+
+### Activation and access
+
+On 11 November the current production key could read People but `GET /rest/companies` returned
+`PERMISSION_DENIED`. The Nginx ingress also returned HTTP 403 for `/rest/metadata/objects`.
+The new commerce projection is therefore prepared but **not activated or imported**.
+
+1. In Twenty administration, extend **Promptbook · synchronizace kontaktů** only as needed: People read/create/update,
+   Companies read/create/update, and purchases/payments read/create/update. Deletion is unnecessary. Schema setup
+   separately needs administrative data-model permissions. Keep those temporary setup permissions separate from
+   the normal worker wherever possible.
+2. On DigitalOcean droplet `promptbook-crm` (`610990828`), inspect the actual Nginx ingress rules. Allow only the
+   required authenticated commerce object routes and the temporary schema setup routes. Preserve both ingress
+   authentication and Twenty's own scoped authorization; do not remove the gate or expose anonymous APIs.
+3. Run `node --import tsx scripts/crm/sync-customer-purchases.ts --dry-run` in production for aggregate source counts.
+4. Run `node --import tsx scripts/crm/sync-customer-purchases.ts --apply --setup --verify` with authorized schema access.
+   This creates only missing fields/objects, imports historical receipts, re-reads saved amounts and card totals,
+   and replays the import. `replayWrites: 0` confirms unchanged records on a second pass.
+5. Inspect both objects and a business/sole-trader Person and Company in the CRM UI. Confirm visible relations and
+   card totals before setting `TWENTY_COMMERCE_SYNC_ENABLED=true` in Vercel production and redeploying. The existing
+   five-minute contact cron then also runs commerce synchronization. Remove temporary schema permissions after setup.

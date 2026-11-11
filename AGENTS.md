@@ -952,6 +952,12 @@ community memberships and live paid Promptbook orders. Order onboarding updates 
 Paid orders also project current subscription state, cancellation, paid period and payment/refund history in minor
 currency units. Stripe identifiers and invoice URLs stay in billing. Historical paid Stripe imports are explicit
 operator commands, match existing source keys and People by primary or secondary email, and never charge or email.
+A separate, default-off commerce projection uses canonical live captured Stripe receipts to populate native
+Nákupy/Platby objects and recomputed per-currency spending on Company and Person cards. Company totals belong to
+the legal payer; Person totals are a view of receipts through that contact, with own spending separately labelled.
+A sole trader uses both cards without duplicating receipts. Gross paid amounts retain refunds as a separate metric.
+No processing fees, payouts or guessed exchange rates affect willingness-to-pay totals. Activation requires verified
+schema permissions, historical import/readback/replay and `TWENTY_COMMERCE_SYNC_ENABLED=true`; see the CRM sync doc.
 Source writes have no dependency on Twenty. Keep the stable `web:<source>:<id>` keys and the
 inclusive cutover when changing the projection. Preserve the purpose and evidence per submission and leave an
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.

@@ -26,7 +26,7 @@ export class TwentyContactDeliveryError extends Error {
 export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal };
 
 /** Twenty accepts a caller-supplied UUID. The same identifier survives a lost create response. */
-export function getTwentyContactRecordId(namespace: 'person' | 'source', key: string): string {
+export function getTwentyContactRecordId(namespace: 'person' | 'source' | 'purchase' | 'payment' | 'company', key: string): string {
     const uuidNamespace = Buffer.from('de15a140b9b84edd8ee3be1db4f6263d', 'hex');
     const bytes = createHash('sha1').update(uuidNamespace).update(`${namespace}:${key}`).digest().subarray(0, 16);
     bytes[6] = (bytes[6] & 0x0f) | 0x50;
@@ -217,5 +217,5 @@ export function createTwentyContactApi({ url, key, ingressKey, signal }: TwentyC
         }
     }
 
-    return { deliverSource, verifyConnectivity };
+    return { deliverSource, verifyConnectivity, request, listRecords, getRecord, createRecord, findPeopleByEmail, findOrCreatePerson };
 }
