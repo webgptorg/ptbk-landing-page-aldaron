@@ -71,6 +71,22 @@ describe('homepage paper backdrop lifecycle', () => {
         expect(pinch.defaultPrevented).toBe(false); expect(frames.size).toBe(0);
     });
 
+    it('anchors grain under the mascot feet while surrounding paper reacts to pointer and scroll', () => {
+        const headline = document.createElement('span');
+        headline.setAttribute('data-hero-heading', '');
+        headline.innerHTML = '<svg data-promptbook-robot></svg>';
+        page.append(headline);
+        vi.spyOn(headline.firstElementChild!, 'getBoundingClientRect').mockReturnValue({ left: 139, top: 100, width: 112, height: 112 } as DOMRect);
+        stop = startPaperBackdrop(layer); tick();
+        const original = fill.mock.calls.map(call => call.slice());
+        const beneathFeet = original.map(([x, y], index) => ({ x, y, index })).filter(({ x, y }) => Math.abs(x - 195) < 24 && Math.abs(y - 203) < 6);
+        expect(beneathFeet.length).toBeGreaterThan(5);
+        pointer(); page.dispatchEvent(new WheelEvent('wheel', { deltaY: 300 }));
+        for (let frame = 0; frame < 12; frame++) { fill.mockClear(); tick(); }
+        for (const { index } of beneathFeet) expect(fill.mock.calls[index]).toEqual(original[index]);
+        expect(fill.mock.calls.some(([x, y], index) => Math.abs(x - original[index][0]) > .5 || Math.abs(y - original[index][1]) > .5)).toBe(true);
+    });
+
     it('keeps reduced motion static and stops scheduling when the tab is hidden', () => {
         Object.assign(reduced, { matches: true });
         stop = startPaperBackdrop(layer); tick();

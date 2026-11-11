@@ -1,11 +1,21 @@
-import { memo } from 'react';
+import { memo, useId } from 'react';
 import { PromptbookRobotHead } from './PromptbookRobotHead';
 import s from './hero-headline.module.css';
 
 /** The working pose of the Robot Studio mascot (4cab138) at its default angle. */
 export const PromptbookRobot = memo(function PromptbookRobot() {
+    const groundId = useId();
     return <svg viewBox="0 0 112 112" fill="none" aria-hidden="true" focusable="false" data-promptbook-robot>
-        <ellipse cx="56" cy="103" rx="24" ry="2.5" fill="#17386C" opacity=".08"/>
+        <defs><radialGradient id={groundId}>
+            <stop stopColor="#17386C" stopOpacity=".16"/>
+            <stop offset=".65" stopColor="#17386C" stopOpacity=".06"/>
+            <stop offset="1" stopColor="#17386C" stopOpacity="0"/>
+        </radialGradient></defs>
+        <g data-promptbook-robot-ground>
+            <ellipse cx="56" cy="103" rx="34" ry="7" fill={`url(#${groundId})`}/>
+            <ellipse cx="44.6" cy="102" rx="9" ry="2.4" fill="#17386C" opacity=".14"/>
+            <ellipse cx="67.4" cy="102" rx="9" ry="2.4" fill="#17386C" opacity=".14"/>
+        </g>
         <g stroke="#17386C" strokeWidth=".55" strokeLinejoin="round">
             <polygon points="35.6,98.11 44.57,103.29 44.57,92.93 35.6,87.74" fill="#DBE6F7"/>
             <polygon points="35.6,87.74 44.57,92.93 53.55,87.74 44.57,82.56" fill="#EFF4FD"/>

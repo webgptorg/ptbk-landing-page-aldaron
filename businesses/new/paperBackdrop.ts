@@ -5,6 +5,7 @@ type Contact = {
 type Trail = Contact & { born: number };
 type Grain = { x: number; y: number; vx: number; vy: number };
 type QuietZone = { x: number; y: number; w: number; h: number };
+type Ground = { x: number; y: number; rx: number; ry: number };
 
 const STRENGTH = .4;
 const COLORS = [[130, 151, 180], [112, 140, 176], [150, 164, 185]];
@@ -27,6 +28,7 @@ export function startPaperBackdrop(layer: HTMLDivElement) {
     const grains = new Map<string, Grain>();
     const trails: Trail[] = [];
     let quiet: QuietZone[] = [];
+    let ground: Ground | null = null;
     let width = 0, height = 0, dpr = 1, energy = 0, wind = 0, time = 0;
     let frame: number | undefined, lastFrame = 0, scrollY = window.scrollY, lastWheel = 0;
     let disposed = false;
@@ -62,6 +64,15 @@ export function startPaperBackdrop(layer: HTMLDivElement) {
             const r = el.getBoundingClientRect();
             return { x: r.left - b.left - 18, y: r.top - b.top - 12, w: r.width + 36, h: r.height + 24 };
         }).filter(r => r.w > 30 && r.h > 12);
+        const robot = page!.querySelector('[data-hero-heading] [data-promptbook-robot]');
+        const r = robot?.getBoundingClientRect();
+        // The mascot's feet meet the ground at (56, 103) in its 112-unit viewBox.
+        // Page-space coordinates keep this patch under them through native scroll.
+        ground = r && r.width > 0 && r.height > 0 ? {
+            x: r.left - b.left + r.width * .5,
+            y: r.top - b.top + r.height * 103 / 112,
+            rx: r.width * .42, ry: r.height * .13,
+        } : null;
         queue();
     }
 
@@ -123,10 +134,15 @@ export function startPaperBackdrop(layer: HTMLDivElement) {
                     dy += (ay / (d + 24) * 62 + p.vy * .6) * g;
                 }
                 const key = `${i},${j}`, p = grains.get(key) || { x: 0, y: 0, vx: 0, vy: 0 };
-                if (reduced.matches) { p.x = p.y = p.vx = p.vy = 0; }
+                const distance = ground ? Math.hypot((x - ground.x) / ground.rx, (y - ground.y) / ground.ry) : Infinity;
+                const edge = clamp((distance - 1) / 1.5, 0, 1);
+                const mobility = edge * edge * (3 - 2 * edge);
+                // Keep the paper beneath the feet still, feathering back into
+                // normal motion so there is no visible tile or hard boundary.
+                if (reduced.matches || mobility === 0) { p.x = p.y = p.vx = p.vy = 0; }
                 else {
-                    p.vx = (p.vx + (dx * STRENGTH + energy * Math.sin(y * .012 + time) * 30 - p.x) * .07) * .78;
-                    p.vy = (p.vy + (dy * STRENGTH + wind * energy * 17 - p.y) * .07) * .78;
+                    p.vx = (p.vx + ((dx * STRENGTH + energy * Math.sin(y * .012 + time) * 30) * mobility - p.x) * .07) * .78;
+                    p.vy = (p.vy + ((dy * STRENGTH + wind * energy * 17) * mobility - p.y) * .07) * .78;
                     p.x += p.vx; p.y += p.vy;
                 }
                 grains.set(key, p); visible.add(key);
