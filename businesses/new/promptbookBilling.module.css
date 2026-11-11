@@ -208,6 +208,49 @@
     flex: 1 1 130px;
 }
 
+.companySearch {
+    position: relative;
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.companyResults {
+    position: absolute;
+    top: 78px;
+    z-index: 2;
+    display: grid;
+    width: 100%;
+    max-height: 290px;
+    margin: 0;
+    padding: 4px;
+    overflow-y: auto;
+    list-style: none;
+    border: 1px solid #bdcbdf;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 12px 30px #17386c20;
+}
+
+.companyResults li {
+    display: grid;
+    gap: 3px;
+    padding: 11px 9px;
+    border-radius: 5px;
+    color: #1c2b46;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.companyResults li[aria-selected='true'] {
+    background: #eaf0fa;
+    outline: 1px solid #5987cb;
+}
+
+.companyResults span {
+    font-size: 13px;
+}
+
 .billing .agreement {
     grid-template-columns: auto 1fr;
     align-items: start;

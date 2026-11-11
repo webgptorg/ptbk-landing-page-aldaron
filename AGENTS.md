@@ -19,7 +19,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   English enquiries use their own flows. Discount administration shares one code registry. Promptbook scopes
   require explicit selection and an atomic reservation that freezes the terms for each Stripe session. The
   member area confirms paid periods from verified Stripe events and optional onboarding comes after checkout.
-  IČO is optional; register lookup fills editable billing details. Orders from 11 November use online-v2 with
+  Business purchase is selected by default and requires IČO; consumer purchase hides company identifiers. Optional Czech company-name autocomplete and IČO lookup fill editable billing details; registry failures never block manual Czech checkout. Slovak name lookup is not available. Orders from 11 November use online-v2 with
   consumer withdrawal rights and a downloadable full contract; online-v1 keeps its original wording and URL.
   Immediate-start requests do not waive the consumer’s 14-day withdrawal/full-refund right.
   See `docs/promptbook-billing.md` for activation, testing, invoices and VAT changes.

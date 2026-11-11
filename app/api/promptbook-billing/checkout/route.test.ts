@@ -85,6 +85,14 @@ beforeEach(() => {
 });
 
 describe('Promptbook order checkout input', () => {
+    it('requires IČO for an explicit business purchase and excludes identifiers from a consumer purchase', async () => {
+        expect((await POST(request({ ...input, isBusiness: true }))).status).toBe(400);
+        expect((await POST(request({ ...input, isBusiness: false, companyId: '21012288' }))).status).toBe(400);
+        expect((await POST(request({ ...input, isBusiness: false, vatId: 'CZ21012288' }))).status).toBe(400);
+        expect(createCheckout).not.toHaveBeenCalled();
+        expect((await POST(request({ ...input, isBusiness: false }))).status).toBe(200);
+    });
+
     it('accepts a consumer without an IČO and retains normalized manual billing details and note', async () => {
         const response = await POST(request(input));
         expect(response.status).toBe(200);
