@@ -86,3 +86,9 @@
     .robotIntro,.robotInstructions,.robotPoses{break-inside:avoid}
     .resources{flex-direction:row}
 }
+
+.fontDownloads{margin-top:28px;padding-top:22px;border-top:1px solid var(--border)}
+.fontDownloads h3{font-size:20px;margin-bottom:10px}
+.fontDownloads p{max-width:75ch;font-size:14px;line-height:1.65;margin-bottom:12px}
+.fontDownloads .downloads{margin-top:8px;gap:12px 20px}
+@media print{.fontDownloads{margin-top:18px;padding-top:14px;break-inside:avoid}.fontDownloads h3{font-size:16px}.fontDownloads p{font-size:12px}.fontDownloads .downloads{font-size:11px;gap:6px 16px}}

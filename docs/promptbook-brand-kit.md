@@ -24,8 +24,10 @@ files have their own paths and explicit static-file allowlist entries.
 The 11 November 2026 website typography selection is Exo 2 (headings, 600) with
 Barlow (body/UI, 400–700). The localized marketing shell loads complete local WOFF2
 files from `public/fonts/promptbook`, with their OFL notices and source checksums.
-The website's type specimens use this pair. The outlined Inter wordmark and the
-previously exported Outfit/Inter slide/social templates retain their original artwork.
+The website, editable SVG slide/social templates, rendered PNGs and localized PDF
+guides use this pair. The outlined Inter wordmark retains its original artwork.
+The kit includes desktop TTFs, web WOFF2 files, a relative fonts.css, source checksums
+and both OFL notices. A separate font ZIP is available from the typography section.
 
 Use Promptbook in text and `promptbook` in the logo. The official abbreviation
 is `ptbk` in lowercase. The CLI command uses the same spelling.
@@ -62,9 +64,12 @@ python scripts/brand/generate.py
 
 This explicit editorial command generates the committed SVGs, transparent PNGs,
 localized 16:9 and social templates, Markdown rules, JSON tokens, CSS variables and
-an optional ZIP with stable entry dates. Raster templates use local Outfit/Inter
+an optional ZIP with stable entry dates. Raster templates use local Exo 2/Barlow
 through Fontconfig; they require no font-network request. Template SVG text stays
-editable and requires those fonts. Font licences are already in `public/fonts/workshop`.
+editable and requires the bundled TTF fonts. Font files, notices, author credits and
+provenance are in `public/fonts/promptbook`; outlined wordmark sources keep Inter.
+The generated CSS/JSON/Markdown carry the same typography tokens. Both the full
+kit ZIP and the fonts-only ZIP contain the complete font files and licences.
 Generation never runs during a website build or calls an AI provider.
 
 The full Czech and English PDFs print the actual localized pages. With the site

@@ -17,7 +17,17 @@
     "heading": "Exo 2",
     "body": "Barlow",
     "wordmark": "Inter Medium (500) / Inter Bold (700)",
-    "abbreviation": "Inter Medium (500)"
+    "abbreviation": "Inter Medium (500)",
+    "headingWeight": 600,
+    "bodyWeights": [
+      400,
+      500,
+      600,
+      700
+    ],
+    "headingTracking": "-0.025em",
+    "headingLineHeight": 1.18,
+    "bodyLineHeight": 1.6
   },
   "logo": {
     "geometry": "regular point-up hexagon; isometric PB mark",

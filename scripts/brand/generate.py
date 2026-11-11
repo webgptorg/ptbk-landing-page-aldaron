@@ -84,12 +84,18 @@ for locale, message in BRAND['messages'].items():
     for kind, width, height in [('slide',1600,900),('social',1200,630)]:
         content = f'<rect width="{width}" height="{height}" fill="{COLORS["surface"]}"/>'
         content += f'<g transform="translate(64 48) scale(.65)">{lockup()}</g>'
-        content += f'<g font-family="Outfit, sans-serif" font-size="{width/22}" font-weight="600" fill="{COLORS["ink"]}"><text x="64" y="{height*.48}">{escape(first)}</text><text x="64" y="{height*.61}" fill="{COLORS["blue"]}">{escape(second)}</text></g>'
-        content += f'<text x="64" y="{height-48}" font-family="Inter, sans-serif" font-size="24" fill="{COLORS["ink"]}">ptbk.io</text>'
+        content += f'<g font-family="&quot;{escape(BRAND["fonts"]["heading"])}&quot;, sans-serif" font-size="{width/22}" font-weight="600" letter-spacing="-.025em" fill="{COLORS["ink"]}"><text x="64" y="{height*.48}">{escape(first)}</text><text x="64" y="{height*.61}" fill="{COLORS["blue"]}">{escape(second)}</text></g>'
+        content += f'<text x="64" y="{height-48}" font-family="&quot;{escape(BRAND["fonts"]["body"])}&quot;, sans-serif" font-size="24" fill="{COLORS["ink"]}">ptbk.io</text>'
         (OUT/f'promptbook-{kind}-{locale}.svg').write_text(svg(width,height,content,'Promptbook — '+message['headline']))
 
 (OUT/'brand.json').write_text(json.dumps(BRAND,ensure_ascii=False,indent=2)+'\n')
-(OUT/'brand.css').write_text(':root {\n'+''.join(f'  --ptbk-{key}: {value};\n' for key,value in COLORS.items())+'}\n')
+(OUT/'brand.css').write_text(':root {\n'+''.join(f'  --ptbk-{key}: {value};\n' for key,value in COLORS.items())+f'''  --ptbk-font-heading: "{BRAND['fonts']['heading']}", Arial, sans-serif;
+  --ptbk-font-body: "{BRAND['fonts']['body']}", Arial, sans-serif;
+  --ptbk-heading-weight: 600;
+  --ptbk-heading-tracking: -.025em;
+  --ptbk-heading-line-height: 1.18;
+  --ptbk-body-line-height: 1.6;
+'''+'}\n')
 (OUT/'brand.md').write_text(f'''# Promptbook brand kit
 
 Updated: {BRAND['updatedAt']}. Contact: {BRAND['contact']}.
@@ -107,7 +113,13 @@ Full wordmark: Inter Medium (500) for prompt, Inter Bold (700) for book, at equa
 The abbreviated ptbk wordmark is entirely Inter Medium (500).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
 Logo SVGs contain vector paths, with no embedded bitmap or font dependency.
-Editable slide/social templates require Outfit and Inter; their PNG exports do not.
+Editable slide/social templates require Exo 2 and Barlow; their PNG exports do not.
+Install the TTF files from fonts/ before editing. For websites, keep fonts/fonts.css
+beside the WOFF2 files. The fonts include Czech characters. Distribute their OFL
+notices and author credits with them; both families use SIL Open Font License 1.1.
+Headings use 600, -.025em tracking and 1.18 line height. Body/UI uses Barlow 400,
+emphasis 500-700 and 1.6 line height. Never recreate the outlined Inter wordmark
+using the heading font: use the supplied logo artwork.
 
 ## Czech
 
@@ -145,10 +157,22 @@ Screenshots must be genuine current captures. Do not fabricate customer evidence
 # Sharp renders deterministic PNGs from these vectors. Font outlines make logos portable.
 subprocess.run(['node', str(ROOT/'scripts/brand/export-robot.cjs')],cwd=ROOT,check=True)
 subprocess.run(['node', str(ROOT/'scripts/brand/rasterize.cjs')],cwd=ROOT,check=True)
+font_files = sorted((ROOT/'public/fonts/promptbook').iterdir())
+with zipfile.ZipFile(OUT/'promptbook-fonts.zip','w',zipfile.ZIP_DEFLATED) as archive:
+    for path in font_files:
+        if path.is_file():
+            info=zipfile.ZipInfo(path.name,date_time=(2026,11,11,0,0,0))
+            info.compress_type=zipfile.ZIP_DEFLATED
+            archive.writestr(info,path.read_bytes())
 with zipfile.ZipFile(OUT/'promptbook-brand-kit.zip','w',zipfile.ZIP_DEFLATED) as archive:
     for path in sorted(OUT.iterdir()):
         if path.suffix != '.zip':
             info=zipfile.ZipInfo(path.name,date_time=(2026,11,5,0,0,0))
+            info.compress_type=zipfile.ZIP_DEFLATED
+            archive.writestr(info,path.read_bytes())
+    for path in font_files:
+        if path.is_file():
+            info=zipfile.ZipInfo(f'fonts/{path.name}',date_time=(2026,11,11,0,0,0))
             info.compress_type=zipfile.ZIP_DEFLATED
             archive.writestr(info,path.read_bytes())
 print('Generated SVG, PNG, templates, brand rules, CSS, JSON and optional ZIP.')

@@ -77,5 +77,37 @@
       "source_sha256": "84e6a4d61e7c3e21f3c50ea6a4f7e5303a3467864c038be6ea3759bab8d547f9",
       "conversion": "Lossless WOFF2 compression; complete original glyph repertoire retained."
     }
+  ],
+  "desktopFonts": [
+    {
+      "file": "Barlow-Bold.ttf",
+      "sha256": "84e6a4d61e7c3e21f3c50ea6a4f7e5303a3467864c038be6ea3759bab8d547f9",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-Bold.ttf",
+      "license": "barlow-OFL.txt"
+    },
+    {
+      "file": "Barlow-Medium.ttf",
+      "sha256": "f8906f762cb73dca441da034bc363b2d8e2e68bc10d5c05e58717646c20cc4b4",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-Medium.ttf",
+      "license": "barlow-OFL.txt"
+    },
+    {
+      "file": "Barlow-Regular.ttf",
+      "sha256": "95aa02c7c43096e0dd44d787ba6216864a67157e402adab59b35572e0c1577ea",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-Regular.ttf",
+      "license": "barlow-OFL.txt"
+    },
+    {
+      "file": "Barlow-SemiBold.ttf",
+      "sha256": "86577cb32f8abe3673db53ca0f4221e6856751a4f6730c867e00f720f8bb1fc5",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-SemiBold.ttf",
+      "license": "barlow-OFL.txt"
+    },
+    {
+      "file": "Exo2-Variable.ttf",
+      "sha256": "205a448676a2586f9c57c25f3d5c58ca8db7e6cf5edf7506783a010c6fe2bfb5",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/exo2/Exo2%5Bwght%5D.ttf",
+      "license": "exo2-OFL.txt"
+    }
   ]
 }

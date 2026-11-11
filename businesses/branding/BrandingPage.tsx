@@ -81,6 +81,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <div className={s.donts}>
                 {[['stretch', text('Nedeformovat', 'Do not stretch')], ['rotate', text('Neotáčet', 'Do not rotate')], ['recolor', text('Nepřebarvovat', 'Do not recolor')], ['lowContrast', text('Neztratit kontrast', 'Keep contrast')]].map(([kind,label]) => <figure key={kind}><div className={`${s.wrong} ${s[kind]}`}><Image src={brand.assets.symbolBlue} width={64} height={64} alt=""/><span aria-hidden="true">×</span></div><figcaption>{label}</figcaption></figure>)}
             </div>
+
         </section>
 
         <section id="colors" className={s.section} aria-labelledby="colors-heading">
@@ -101,6 +102,12 @@ export function BrandingPage({ language }: { language: Language }) {
                 <div><a className={s.fontName} href="https://fonts.google.com/specimen/Exo+2">{brand.fonts.heading} ↗</a><p>{text('Nadpisy · 600', 'Headings · 600')}</p><p className={s.headingSample}>{messages.headline}</p><p><a href="/fonts/promptbook/exo2-OFL.txt">SIL OFL 1.1 ↗</a></p></div>
                 <div><a className={s.fontName} href="https://fonts.google.com/specimen/Barlow">{brand.fonts.body} ↗</a><p>{text('Text 400 · zvýraznění 500–700', 'Body 400 · emphasis 500–700')}</p><p className={s.bodySample}>{messages.short}</p><p>{text('V logotypu je „prompt“ v Inter Medium (500) a „book“ v Inter Bold (700) ve stejné velikosti. Zkratka „ptbk“ je celá v Inter Medium (500).', 'The full wordmark uses Inter Medium (500) for “prompt” and Inter Bold (700) for “book” at the same size. The entire “ptbk” abbreviation uses Inter Medium (500).')}</p><p className={s.diacritics} lang="cs">Příliš žluťoučký kůň úpěl ďábelské ódy. 0123456789</p><p><a href="/fonts/promptbook/barlow-OFL.txt">SIL OFL 1.1 ↗</a></p></div>
             </div>
+            <div className={s.fontDownloads}>
+                <h3>{text('Písma ke stažení', 'Download the fonts')}</h3>
+                <p>{text('TTF nainstalujte do počítače pro úpravy prezentací a SVG. Pro web použijte WOFF2 a přiložený stylopis. Obě rodiny mají českou diakritiku a licenci SIL OFL 1.1; autorské údaje a licence jsou součástí balíčku.', 'Install the TTF files on your computer to edit presentations and SVGs. For websites, use WOFF2 and the included stylesheet. Both families include Czech characters and use SIL OFL 1.1; author credits and licences are included.')}</p>
+                <div className={s.downloads}><a href="/brand/promptbook-fonts.zip" download>{text('Obě rodiny · ZIP', 'Both families · ZIP')}</a><a href="/fonts/promptbook/Exo2-Variable.ttf" download>Exo 2 · TTF</a><a href="/fonts/promptbook/Exo2-Variable.woff2" download>Exo 2 · WOFF2</a><a href="/fonts/promptbook/fonts.css" download>{text('Stylopis pro web', 'Web stylesheet')}</a></div>
+                <div className={s.downloads}>{(['Regular', 'Medium', 'SemiBold', 'Bold'] as const).map((weight, index) => <a key={weight} href={`/fonts/promptbook/Barlow-${weight}.ttf`} download>Barlow {400 + index * 100} · TTF</a>)}</div>
+            </div>
         </section>
 
         <section id="copy" className={s.section} aria-labelledby="copy-heading">
@@ -115,7 +122,7 @@ export function BrandingPage({ language }: { language: Language }) {
             <h2 id="examples-heading">{text('Šablony', 'Templates')}</h2>
             <div className={s.templates}>{(['slide', 'social'] as const).map(kind => <figure key={kind}><Image src={`/brand/promptbook-${kind}-${language}.png`} width={kind === 'slide' ? 1600 : 1200} height={kind === 'slide' ? 900 : 630} alt={text(kind === 'slide' ? 'Šablona prezentačního slidu' : 'Šablona příspěvku na sociální sítě',kind === 'slide' ? 'Presentation slide template' : 'Social post template')}/><figcaption><h3>{kind === 'slide' ? text('Prezentace · 16 : 9', 'Presentation · 16 : 9') : text('Sociální sítě · 1200 × 630', 'Social · 1200 × 630')}</h3><Downloads base={`/brand/promptbook-${kind}-${language}`} pngLabel="PNG"/></figcaption></figure>)}</div>
             <div className={s.partnerExample}><div><p>{text('AI agenti pro naše klienty', 'AI agents for our clients')}</p><Image src={brand.assets.lockupLight} width={230} height={Math.round(230 * lockupHeight / lockupWidth)} alt="Promptbook"/></div><div><h3>{text('Partnerský web', 'Partner website')}</h3><p>{text('Použijte celé logo s odkazem na ptbk.io. Vlastní značku nechte oddělenou.', 'Use the complete logo linked to ptbk.io. Keep your own brand separate.')}</p><Downloads base="/brand/promptbook-lockup-light" pngLabel="PNG"/></div></div>
-            <p className={s.note}>{text('SVG šablony lze upravit; používají Outfit a Inter. PNG mají písma vykreslená.', 'SVG templates are editable and use Outfit and Inter. PNGs have the fonts rendered in.')}</p>
+            <p className={s.note}>{text('SVG šablony lze upravit; používají Exo 2 a Barlow. Nejdřív si nainstalujte přiložená písma. PNG mají písma vykreslená.', 'SVG templates are editable and use Exo 2 and Barlow. Install the included fonts first. PNGs have the fonts rendered in.')}</p>
 
         </section>
 

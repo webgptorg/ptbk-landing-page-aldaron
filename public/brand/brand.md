@@ -15,7 +15,13 @@ Full wordmark: Inter Medium (500) for prompt, Inter Bold (700) for book, at equa
 The abbreviated ptbk wordmark is entirely Inter Medium (500).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.
 Logo SVGs contain vector paths, with no embedded bitmap or font dependency.
-Editable slide/social templates require Outfit and Inter; their PNG exports do not.
+Editable slide/social templates require Exo 2 and Barlow; their PNG exports do not.
+Install the TTF files from fonts/ before editing. For websites, keep fonts/fonts.css
+beside the WOFF2 files. The fonts include Czech characters. Distribute their OFL
+notices and author credits with them; both families use SIL Open Font License 1.1.
+Headings use 600, -.025em tracking and 1.18 line height. Body/UI uses Barlow 400,
+emphasis 500-700 and 1.6 line height. Never recreate the outlined Inter wordmark
+using the heading font: use the supplied logo artwork.
 
 ## Czech
 

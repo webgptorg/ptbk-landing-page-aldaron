@@ -21,7 +21,8 @@ describe('Promptbook brand kit', () => {
         expect(downloads.length).toBeGreaterThan(15);
         for (const link of downloads) expect(existsSync(`public${link.getAttribute('href')}`), link.href).toBe(true);
         for (const asset of Object.values(brand.assets)) expect(container.querySelector(`a[download][href="${asset}"]`)).not.toBeNull();
-        expect(container.querySelectorAll('a[download][href$=".zip"]')).toHaveLength(1);
+        expect(container.querySelector('a[download][href="/brand/promptbook-brand-kit.zip"]')).not.toBeNull();
+        expect(container.querySelector('#type a[download][href="/brand/promptbook-fonts.zip"]')).not.toBeNull();
         const robot = container.querySelector('#robot');
         expect(robot?.querySelectorAll('[data-robot-pose]')).toHaveLength(5);
         expect(robot?.querySelector('[data-robot-viewer] select')?.children).toHaveLength(5);

@@ -4,6 +4,15 @@
  * Copied article downloads and Monaco runtime files use separate bounded allowlists.
  */
 export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
+    '/brand/promptbook-fonts.zip',
+    '/fonts/promptbook/Barlow-Bold.ttf',
+    '/fonts/promptbook/Barlow-Medium.ttf',
+    '/fonts/promptbook/Barlow-Regular.ttf',
+    '/fonts/promptbook/Barlow-SemiBold.ttf',
+    '/fonts/promptbook/Exo2-Variable.ttf',
+    '/fonts/promptbook/README.md',
+    '/fonts/promptbook/fonts.css',
+
     '/people/pavol-hejny-hat.webp',
     '/people/pavol-hejny-studio-neat.webp',
     '/sponsors/technology-incubation-cs.png',

@@ -6,4 +6,10 @@
   --ptbk-surface: #EEF4FB;
   --ptbk-white: #FFFFFF;
   --ptbk-black: #000000;
+  --ptbk-font-heading: "Exo 2", Arial, sans-serif;
+  --ptbk-font-body: "Barlow", Arial, sans-serif;
+  --ptbk-heading-weight: 600;
+  --ptbk-heading-tracking: -.025em;
+  --ptbk-heading-line-height: 1.18;
+  --ptbk-body-line-height: 1.6;
 }
