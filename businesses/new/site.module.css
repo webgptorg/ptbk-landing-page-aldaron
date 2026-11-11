@@ -386,6 +386,11 @@
 @media(max-width:900px){.languageSwitch{margin-left:auto}.headerInner{gap:14px}}
 @media (max-width: 760px) {
     .site:has(main .comparisonTable) .header { position: relative; }
+    .overviewScroll { max-height: none; }
+    .overviewTable thead th { position: static; top: auto; padding: 8px; font-size: 12px; line-height: 1.25; }
+    .overviewTable thead th:first-child { position: sticky; }
+    .overviewTable thead a { display: inline; }
+    .overviewTable thead a svg { display: none; }
 }
 @media(max-width:600px){.headerInner{padding:10px 24px}.logo{font-size:23px}.tableScroll{border-radius:18px}.comparisonSection{padding-bottom:36px}.comparisonTable{font-size:13px}.comparisonTable th,.comparisonTable td{padding:10px 8px}.numberHighlight{font-size:clamp(24px,7vw,40px)}}
 @media(max-width:420px){.headerInner{padding-inline:20px}}

@@ -4,9 +4,9 @@ Patička webu má v češtině i angličtině sekci **Promptbook versus**. Prvn�
 
 Detail začíná dvěma konkrétními situacemi, kdy zvolit Promptbook a kdy druhý nástroj. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, pracovní prostředí, AI model a plánované úlohy. V každém detailu je zvýrazněn jeden doložitelný rozdíl ve prospěch Promptbooku. U alternativ s vlastním provozem porovnává ukládání úkolů a chatů jako souborů projektu v Gitu. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení je rozbalitelné pod tabulkou.
 
-Společná tabulka má jeden řádek pro každý parametr a jeden sloupec pro každý nástroj. První dva sloupce patří Promptbook App a Promptbook Open Source, vizuálně odděleným od alternativ. Přehled sdílí technické hodnoty s detaily. Cena, účtovací jednotka, příklad kapacity a licence mají vlastní řádky. Ceny uvádějí příklady tarifů s odkazy na zdroje. U veřejného enginu platí podmínky licence konkrétní verze. Posuvná oblast má přístupný název, názvy sloupců a parametrů zůstávají při posunu viditelné.
+Společná tabulka má jeden řádek pro každý parametr a jeden sloupec pro každý nástroj. První dva sloupce patří Promptbook App a Promptbook Open Source, vizuálně odděleným od alternativ. Přehled sdílí technické hodnoty s detaily. Cena, účtovací jednotka, příklad kapacity a licence mají vlastní řádky. Ceny uvádějí příklady tarifů s odkazy na zdroje. U veřejného enginu platí podmínky licence konkrétní verze. Posuvná oblast má přístupný název. Na desktopu názvy sloupců a parametrů zůstávají při posunu viditelné.
 
-Na mobilu se hlavička přehledu i detailu posouvá se stránkou, aby při posouvání nezakrývala nadpis.
+Na mobilu se hlavička přehledu i detailu posouvá se stránkou, aby při posouvání nezakrývala nadpis. Tabulka má vodorovný posuv a připnutý sloupec parametrů. Výšku obsahu neomezuje vnitřní svislý posuv. Kompaktní záhlaví tabulky se posouvá se stránkou.
 
 ## Podklady a aktualizace
 
