@@ -20,7 +20,7 @@ Comparisons need primary sources and a review date. Do not deny competitors' aut
 
 Present both founders equally with larger, bottom-aligned cutout portraits and verified email/phone contacts. Jiří’s portrait is on the left of his text; Pavol’s portrait is on the right of his text. The cards mirror one another, and portraits meet the bottom edge of their cards. Use a simple contact heading instead of a promotional sentence.
 
-The 11 November portrait revision uses the matched `jiri-jahn-studio.webp` and `pavol-hejny-studio.webp` cutouts in the shared Founders cards. Jiří's source is the owner's new navy-suit photograph. Both retain their identity, have neutral soft lighting and clean transparent edges; Pavol's conference lanyard and badge are removed. Preserve this pair's consistent framing across both languages and all marketing placements.
+The 11 November portrait revision uses the matched `jiri-jahn-studio.webp` and `pavol-hejny-studio.webp` cutouts in the shared Founders cards. Jiří's source is the owner's new navy-suit photograph. The owner's follow-up puts both founders in suits with inward-facing three-quarter poses: Jiří on the left looks right, Pavol on the right looks left. Jiří wears a navy business suit and tie; Pavol wears a charcoal suit and open-collar blue shirt without a tie, reflecting their business and technology roles. Both retain their identity, have neutral soft lighting, clean transparent edges and consistent framing across both languages and all marketing placements.
 
 Keep specs, focused tests and public behavior aligned. Never submit test leads to the production contact database.
 
