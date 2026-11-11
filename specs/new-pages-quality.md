@@ -10,7 +10,7 @@ Veřejné cesty mají jeden zdroj. České `/cs` routy sdílejí implementaci ko
 
 Navazující zadání z 11. listopadu zachovává Pavolův schválený portrét a odstraňuje pouze vyčnívající pramen za uchem vlevo na obrázku. Odvozený `pavol-hejny-studio-neat.webp` mění v tomto místě jen průhlednost; obličej, oblečení a postoj jsou původní. Tmavě vínově hnědý plstěný klobouk podle dodané fotografie je samostatný průhledný `pavol-hejny-hat.webp`, vykreslený druhým obrázkem. Poloha i měřítko vycházejí ze společného rámce portrétu na mobilu i počítači. `showPavolHat={false}` klobouk odstraní bez výměny portrétu. Původní zdrojový portrét a Jiřího fotografie zůstávají zachované.
 
-Pozdější oprava nahrazuje původní výřez klobouku foceného zespodu nově vytvořeným kloboukem pro perspektivu téměř v úrovni očí. Má menší krempu, mírný náklon podle hlavy a světlo sladěné s portrétem. Jemný kontaktní stín je samostatná CSS vrstva; mizí spolu s kloboukem. Obě fotografie zůstávají beze změny obrazových dat.
+Pozdější oprava nejprve nasazuje klobouk přímo na portrét a z výsledku odděluje pouze jeho viditelné části. Krempa má průhledný výřez podle hlavy a zakřivené strany kolem spánků, aby nepůsobila jako plochý ovál položený na vlasech. Tvar, náklon a světlo jsou součástí assetu; CSS ho nezrcadlí ani neotáčí. Jemný kontaktní stín je samostatná CSS vrstva a mizí spolu s kloboukem. Obě fotografie zůstávají beze změny obrazových dat.
 
 Zadání z 11. listopadu 2026 odstraňuje „Náš příběh“ / „Our story“ z hlavního i mobilního menu. Stránka příběhu, odkaz v patičce a odkaz pod zakladateli zůstávají dostupné. České menu má pouze „Komunita“ s přímým odkazem na `/cs/komunity/promptbook`, bez mezikroku přes rozcestník komunit.
 

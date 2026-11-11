@@ -63,28 +63,27 @@
     user-select: none;
 }
 
+/* The fitted brim already contains its head-shaped occlusion and camera angle. */
 .hat {
     position: absolute;
-    left: 30.09%;
-    top: -5.90%;
-    width: 41.67%;
+    left: 31.48%;
+    top: -3.13%;
+    width: 39.81%;
     max-width: none;
     height: auto;
-    transform: rotate(-3deg) scaleX(-1);
-    transform-origin: 50% 80%;
 }
 
 /* The removable brim casts a soft contact shadow, without changing the portrait. */
 .hatShadow {
     position: absolute;
     left: 39.35%;
-    top: 9.03%;
+    top: 8.80%;
     width: 25.93%;
     height: 4.86%;
     border-radius: 50%;
     background: radial-gradient(ellipse at 50% 0%, rgb(31 20 18 / 28%), rgb(31 20 18 / 11%) 42%, transparent 75%);
     mix-blend-mode: multiply;
-    transform: rotate(2deg);
+    transform: rotate(-6deg);
 }
 
 .content {
