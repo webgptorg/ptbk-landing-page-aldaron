@@ -21,7 +21,7 @@ const SUPERVISORY_AUTHORITY_URL = 'https://uoou.gov.cz';
 export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Ochrana osobních údajů',
-        publication: { date: '2026-11-09', isDraft: false },
+        publication: { date: '2026-11-11', isDraft: false },
         perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo weby pavolhejny.cz, pavolhejny.com a ai-ta-krajta.cz či využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
         sections: [
             {
@@ -57,6 +57,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'Abychom vám odpověděli a domluvili se na spolupráci - na základě jednání o smlouvě a našeho oprávněného zájmu odpovědět na poptávku.',
                     'Abychom vás zaregistrovali na workshop nebo jinou akci, vystavili fakturu a poslali vám podklady - na základě plnění smlouvy a našich zákonných povinností.',
                     'Abychom ověřili údaje k předplatnému, vyřídili objednávku, vedli přehled plateb a poskytli podporu. Základem je jednání o smlouvě nebo její plnění a naše zákonné povinnosti. U pracovních kontaktů zástupců firem vycházíme také z oprávněného zájmu vyřídit a doložit obchodní vztah.',
+                    'Abychom Vám doručili přihlašovací kód a ověřili přístup k předplatnému – na základě plnění smlouvy a našeho oprávněného zájmu na zabezpečení služby.',
                     'Abychom vám posílali novinky - na základě vašeho souhlasu, který můžete kdykoli odvolat.',
                     'Abychom rozuměli tomu, jak web funguje a co návštěvníky zajímá - na základě souhlasu s analytickými cookies.',
                     'Abychom měřili účinnost reklamy - na základě souhlasu s marketingovými cookies.',
@@ -81,6 +82,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 bullets: [
                     'Supabase – databáze pro kontakty z formulářů a evidenci předplatného.',
                     <>Stripe zajišťuje platby a vystavení dokladů. Způsob zpracování údajů u Stripe popisují jeho <a href="https://stripe.com/privacy">zásady ochrany osobních údajů</a>.</>,
+                    <>Resend (Plus Five Five, Inc., USA) doručuje přihlašovací kódy. Zpracovává e-mail příjemce, obsah zprávy a doručovací metadata v USA podle <a href="https://resend.com/legal/dpa">zpracovatelského ujednání včetně standardních smluvních doložek</a>.</>,
                     'Google Analytics - měření návštěvnosti webu.',
                     'Meta Pixel - měření účinnosti reklamy na Facebooku a Instagramu.',
                     'LogRocket - záznam chování na webu, který nám pomáhá odhalovat chyby.',
@@ -169,7 +171,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     },
     en: {
         title: 'Privacy Policy',
-        publication: { date: '2026-11-09', isDraft: false },
+        publication: { date: '2026-11-11', isDraft: false },
         perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or pavolhejny.cz, pavolhejny.com and ai-ta-krajta.cz or use the Promptbook services, why we do it, and which rights you have.`,
         sections: [
             {
@@ -205,6 +207,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                     'To answer you and agree on working together - based on pre-contractual negotiations and our legitimate interest in replying to an enquiry.',
                     'To register you for a workshop or another event, issue an invoice, and send you the materials - based on the performance of the contract and our legal obligations.',
                     'To verify subscription details, fulfil your order, keep track of payments and provide support, based on steps before entering into the contract, its performance and our legal obligations. For business contacts of company representatives, we also rely on our legitimate interest in administering and documenting the relationship.',
+                    'To deliver sign-in codes and verify access to your subscription – based on contract performance and our legitimate interest in keeping the service secure.',
                     'To send you news - based on your consent, which you may withdraw at any time.',
                     'To understand how the website works and what visitors care about - based on your consent to analytics cookies.',
                     'To measure the effectiveness of our advertising - based on your consent to marketing cookies.',
@@ -229,6 +232,7 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
                 bullets: [
                     'Supabase – the database that stores form contacts and subscription records.',
                     <>Stripe handles payments and invoicing. Its <a href="https://stripe.com/privacy">Privacy Policy</a> describes how Stripe processes information.</>,
+                    <>Resend (Plus Five Five, Inc., USA) delivers sign-in codes. It processes the recipient’s email address, message content and delivery metadata in the United States under its <a href="https://resend.com/legal/dpa">Data Processing Addendum, including the Standard Contractual Clauses</a>.</>,
                     'Google Analytics - measuring website traffic.',
                     'Meta Pixel - measuring the effectiveness of advertising on Facebook and Instagram.',
                     'LogRocket - a recording of behaviour on the website which helps us find bugs.',
