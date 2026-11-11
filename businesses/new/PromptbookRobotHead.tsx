@@ -20,8 +20,7 @@ export function PromptbookRobotHead() {
 
     useEffect(() => {
         const svg = head.current?.ownerSVGElement;
-        const hero = svg?.closest<HTMLElement>('[data-landing-hero]');
-        if (!svg || !hero) return;
+        if (!svg) return;
 
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let target = CENTER;
@@ -63,14 +62,8 @@ export function PromptbookRobotHead() {
         };
 
         function trackPointer(event: PointerEvent) {
-            if (motion.matches || !event.isPrimary || event.pointerType === 'touch' || activeTouch !== undefined) return;
+            if (motion.matches || !event.isPrimary || activeTouch !== undefined) return;
             if (event.pointerType !== 'mouse' && event.type !== 'pointerdown' && activePointer !== event.pointerId) return;
-            // Include the header above the hero, where an upward-looking pointer lands.
-            const bounds = hero!.getBoundingClientRect();
-            if (bounds.bottom <= 0 || bounds.top >= window.innerHeight || event.clientY > bounds.bottom) {
-                release(event);
-                return;
-            }
             activePointer = event.pointerId;
             trackPosition(event.clientX, event.clientY);
         }
@@ -116,29 +109,31 @@ export function PromptbookRobotHead() {
             setLook(REST);
         }
 
-        document.addEventListener('pointerdown', trackPointer, { passive: true });
-        document.addEventListener('pointermove', trackPointer, { passive: true });
+        // Observe before link/menu handlers, without cancelling clicks, scroll or pinch gestures.
+        const observe = { capture: true, passive: true };
+        document.addEventListener('pointerdown', trackPointer, observe);
+        document.addEventListener('pointermove', trackPointer, observe);
         document.documentElement.addEventListener('pointerleave', release);
-        hero.addEventListener('touchstart', startTouch, { passive: true });
-        window.addEventListener('touchmove', moveTouch, { passive: true });
-        window.addEventListener('touchend', endTouch, { passive: true });
-        window.addEventListener('touchcancel', endTouch, { passive: true });
-        window.addEventListener('pointerup', lift);
-        window.addEventListener('pointercancel', release);
+        document.addEventListener('touchstart', startTouch, observe);
+        document.addEventListener('touchmove', moveTouch, observe);
+        document.addEventListener('touchend', endTouch, observe);
+        document.addEventListener('touchcancel', endTouch, observe);
+        document.addEventListener('pointerup', lift, observe);
+        document.addEventListener('pointercancel', release, observe);
         window.addEventListener('blur', reset);
         document.addEventListener('visibilitychange', reset);
         motion.addEventListener('change', reset);
         return () => {
             if (frame !== undefined) window.cancelAnimationFrame(frame);
-            document.removeEventListener('pointerdown', trackPointer);
-            document.removeEventListener('pointermove', trackPointer);
+            document.removeEventListener('pointerdown', trackPointer, true);
+            document.removeEventListener('pointermove', trackPointer, true);
             document.documentElement.removeEventListener('pointerleave', release);
-            hero.removeEventListener('touchstart', startTouch);
-            window.removeEventListener('touchmove', moveTouch);
-            window.removeEventListener('touchend', endTouch);
-            window.removeEventListener('touchcancel', endTouch);
-            window.removeEventListener('pointerup', lift);
-            window.removeEventListener('pointercancel', release);
+            document.removeEventListener('touchstart', startTouch, true);
+            document.removeEventListener('touchmove', moveTouch, true);
+            document.removeEventListener('touchend', endTouch, true);
+            document.removeEventListener('touchcancel', endTouch, true);
+            document.removeEventListener('pointerup', lift, true);
+            document.removeEventListener('pointercancel', release, true);
             window.removeEventListener('blur', reset);
             document.removeEventListener('visibilitychange', reset);
             motion.removeEventListener('change', reset);

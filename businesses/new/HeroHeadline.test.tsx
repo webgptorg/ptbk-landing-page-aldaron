@@ -81,7 +81,7 @@ describe('hero working headline', () => {
         expect(eyes.getAttribute('transform')).toBe(restingEyes);
     });
 
-    it('looks up above the hero, looks down below its head and rests beyond the hero', () => {
+    it('looks up above the hero and keeps following the pointer anywhere on the page', () => {
         const { container } = render(<><header data-testid="header"/><section data-landing-hero><HeroHeadline/></section><footer/></>);
         const hero = container.querySelector('[data-landing-hero]')!;
         const svg = hero.querySelector('svg')!;
@@ -121,10 +121,100 @@ describe('hero working headline', () => {
         expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
 
         move(container.querySelector('footer')!, 800);
-        expect(face.getAttribute('transform')).toBe(rest);
+        expect(face.getAttribute('transform')).not.toBe(rest);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
 
+        act(() => { document.documentElement.dispatchEvent(Object.assign(new Event('pointerleave'), { pointerId: 1 })); vi.advanceTimersByTime(1200); });
+        expect(face.getAttribute('transform')).toBe(rest);
         reduced = true;
         move(container.querySelector('header')!, 30);
+        expect(face.getAttribute('transform')).toBe(rest);
+    });
+
+
+    it.each(['cs', 'en'] as const)('tracks touches on header links and below the hero without cancelling native actions (%s)', locale => {
+        const clicked = vi.fn();
+        const { container } = render(<SiteLocaleProvider locale={locale}>
+            <header><a href="#robot-menu-target" onClick={clicked}
+                onTouchStart={event => event.stopPropagation()}
+                onTouchMove={event => event.stopPropagation()}
+                onTouchEnd={event => event.stopPropagation()}
+                onTouchCancel={event => event.stopPropagation()}>Menu</a></header>
+            <section data-landing-hero id="robot-menu-target"><HeroHeadline/></section><footer/>
+        </SiteLocaleProvider>);
+        const link = container.querySelector('a')!;
+        const svg = container.querySelector('[data-promptbook-robot]')!;
+        const face = svg.querySelector('[data-promptbook-robot-head] g')!;
+        const eyes = face.querySelector('[data-promptbook-robot-eyes]')!;
+        vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(456, 118, 88, 88));
+        const rest = face.getAttribute('transform');
+        const first = { identifier: 1, clientX: 500, clientY: 30 } as Touch;
+        const second = { identifier: 2, clientX: 20, clientY: 30 } as Touch;
+
+        function touch(target: Element, type: string, touches: Touch[], changedTouches: Touch[]) {
+            const event = new TouchEvent(type, { bubbles: true, cancelable: true, touches, changedTouches });
+            act(() => {
+                expect(target.dispatchEvent(event)).toBe(true);
+                vi.advanceTimersByTime(1200);
+            });
+            expect(event.defaultPrevented).toBe(false);
+        }
+
+        touch(link, 'touchstart', [first], [first]);
+        expect(face.getAttribute('transform')).not.toBe(rest);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 -0.05)');
+        act(() => {
+            link.dispatchEvent(Object.assign(new Event('pointercancel', { bubbles: true }), { pointerId: 1, pointerType: 'touch' }));
+            vi.advanceTimersByTime(1200);
+        });
+        expect(eyes.getAttribute('transform')).toBe('translate(0 -0.05)');
+
+        const moved = { ...first, clientY: 800 } as Touch;
+        touch(link, 'touchmove', [moved], [moved]);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
+        touch(link, 'touchstart', [moved, second], [second]);
+        touch(link, 'touchend', [moved], [second]);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
+        touch(link, 'touchcancel', [], [moved]);
+        expect(face.getAttribute('transform')).toBe(rest);
+
+        const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+        act(() => { expect(link.dispatchEvent(click)).toBe(true); });
+        expect(clicked).toHaveBeenCalledTimes(1);
+        expect(click.defaultPrevented).toBe(false);
+
+        touch(container.querySelector('footer')!, 'touchstart', [moved], [moved]);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
+        touch(container.querySelector('footer')!, 'touchend', [], [moved]);
+        expect(face.getAttribute('transform')).toBe(rest);
+    });
+
+    it.each(['touch', 'pen'])('supports pointer-only %s input on a menu that stops propagation', pointerType => {
+        const { container } = render(<>
+            <header><a href="#robot-pointer-target"
+                onPointerDown={event => event.stopPropagation()}
+                onPointerMove={event => event.stopPropagation()}
+                onPointerUp={event => event.stopPropagation()}>Menu</a></header>
+            <section data-landing-hero id="robot-pointer-target"><HeroHeadline/></section>
+        </>);
+        const link = container.querySelector('a')!;
+        const svg = container.querySelector('[data-promptbook-robot]')!;
+        const face = svg.querySelector('[data-promptbook-robot-head] g')!;
+        const eyes = face.querySelector('[data-promptbook-robot-eyes]')!;
+        vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(456, 118, 88, 88));
+        const rest = face.getAttribute('transform');
+        function pointer(type: string, clientY: number) {
+            const event = Object.assign(new Event(type, { bubbles: true, cancelable: true }), {
+                pointerType, pointerId: 1, isPrimary: true, clientX: 500, clientY,
+            });
+            act(() => { expect(link.dispatchEvent(event)).toBe(true); vi.advanceTimersByTime(1200); });
+            expect(event.defaultPrevented).toBe(false);
+        }
+        pointer('pointerdown', 30);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 -0.05)');
+        pointer('pointermove', 800);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
+        pointer('pointerup', 800);
         expect(face.getAttribute('transform')).toBe(rest);
     });
 
