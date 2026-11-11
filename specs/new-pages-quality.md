@@ -18,6 +18,8 @@ Kalkulačka zůstává výraznou samostatnou kartou s popsaným přínosem a obd
 
 ## Zakladatelé a firma
 
+Úprava fotografií z 11. listopadu 2026 používá ve sdílených kartách nové sladěné průhledné portréty `jiri-jahn-studio.webp` a `pavol-hejny-studio.webp`. Jiří má novou dodanou fotografii v modrém obleku; Pavol přirozeně retušovaný portrét bez konferenční visačky. Světlo, barevnost a měřítko jsou sjednocené, podoba obou zůstává zachovaná. Obě jazykové verze a marketingové podstránky používají stejnou dvojici.
+
 Pavol Hejný a Jiří Jahn jsou rovnocenní spoluzakladatelé. Oba mají stejnou vizuální prioritu, větší skutečný portrét, jméno, roli a ověřený e-mail/telefon. Jiřího jméno a role jsou na mobilu zarovnané doprava stejně jako kontakty. Jiří je vlevo od svého textu; Pavol vpravo od svého textu. Karty jsou zrcadlově uspořádané a spodní okraje portrétů lícují se spodní hranou karet. Jednoduchý nadpis „Kontakt“ nahrazuje větu „Za Promptbookem stojíme oba“. Pavol: technologie; Jiří: obchod. Jediné jméno v konfiguraci SLA nesmí znamenat jediného zakladatele na webu.
 
 Patička přebírá oficiální údaje ze stávajícího repozitáře: **AI Web s.r.o., IČO 21012288, datová schránka hzuu4yn**, odkazy na rejstřík, právní kontakt a osobní údaje. Nepřepisovat je podle nepřesného hlasového přepisu názvu firmy a nevymýšlet adresu nebo DIČ. Právní dokumenty používají existující společné znění.

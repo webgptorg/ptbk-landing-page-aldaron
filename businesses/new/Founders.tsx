@@ -6,12 +6,15 @@ import { useSiteLocale } from './LocaleProvider';
 import { LeadButton } from './LeadCapture';
 import s from './founders.module.css';
 
-/** Public contacts and original portrait assets from components/team-section.tsx. */
+import jiriPortrait from '@/public/people/jiri-jahn-studio.webp';
+import pavolPortrait from '@/public/people/pavol-hejny-studio.webp';
+
+/** Verified public contacts and matched, naturally retouched founder portraits. */
 const founders = [
     {
         name: 'Jiří Jahn',
         role: 'Spoluzakladatel · obchod',
-        image: 'jiri-jahn',
+        image: jiriPortrait,
         email: 'jiri@ptbk.io',
         phone: '+420 777 090 067',
         phoneHref: '+420777090067',
@@ -21,7 +24,7 @@ const founders = [
     {
         name: 'Pavol Hejný',
         role: 'Spoluzakladatel · technologie',
-        image: 'pavol-hejny',
+        image: pavolPortrait,
         email: 'pavol@ptbk.io',
         phone: '+420 777 759 767',
         phoneHref: '+420777759767',
@@ -40,9 +43,7 @@ export function Founders({ compact = false }: { compact?: boolean }) {
                 <article className={`${s.founder} ${index === 1 ? s.reverse : ''}`} key={person.name} data-testid="founder-card">
                     <div className={s.portrait}>
                         <Image
-                            src={`/people/${person.image}-transparent.png`}
-                            width={person.image === 'jiri-jahn' ? 669 : 545}
-                            height={person.image === 'jiri-jahn' ? 1080 : 950}
+                            src={person.image}
                             alt={person.name}
                             sizes="(max-width: 500px) 40vw, (max-width: 900px) 220px, 240px"
                         />
