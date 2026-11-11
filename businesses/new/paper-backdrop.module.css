@@ -1,0 +1,40 @@
+.backdrop {
+    position: absolute;
+    z-index: -1;
+    inset-block: 0;
+    inset-inline: calc(50% - 50vw);
+    overflow: clip;
+    pointer-events: none;
+    background-color: #f9fafc;
+}
+
+.backdrop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 95% 580px at 7% 240px, rgba(112, 140, 176, .25), transparent),
+        radial-gradient(ellipse 90% 660px at 96% 620px, rgba(150, 164, 185, .23), transparent),
+        radial-gradient(ellipse 110% 19% at 25% 44%, rgba(130, 151, 180, .16), transparent),
+        radial-gradient(ellipse 90% 25% at 88% 78%, rgba(112, 140, 176, .18), transparent);
+}
+
+.backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--paper-noise);
+    background-size: 384px 384px;
+    opacity: .62;
+}
+
+.canvas {
+    position: absolute;
+    left: 0;
+    display: block;
+    width: 100%;
+}
+
+@media (forced-colors: active) {
+    .backdrop { display: none; }
+}

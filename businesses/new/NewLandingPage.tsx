@@ -10,6 +10,7 @@ import { EconomicsCalculator } from './EconomicsCalculator';
 import { Founders } from './Founders';
 import { BrandActions } from './BrandActions';
 import { HeroBackdrop } from './HeroBackdrop';
+import { PaperBackdrop } from './PaperBackdrop';
 import { HeroHeadline } from './HeroHeadline';
 import { BrandStories } from './BrandStories';
 import { BrandTestimonials } from './BrandTestimonials';
@@ -25,9 +26,10 @@ export function NewLandingPage({ partnership = false, showTestimonials = true, c
     const intro = partnership
         ? (en ? ['Bring clients AI that takes care of ongoing work.', 'You know their business.', 'We provide the engine, app and product support.', 'You earn from your services and a share of their licence.'] : ['Dodávejte klientům AI, která se průběžně stará o jejich práci.', 'Vy znáte jejich podnikání.', 'My dodáváme engine, aplikaci a produktovou podporu.', 'Vyděláváte na svých službách i podílu z licence.'])
         : PROMPTBOOK_INTRO[locale];
-    return <div className={b.brandPage}>
+    return <div className={`${b.brandPage}${partnership ? '' : ` ${b.paperPage}`}`}>
+        {!partnership && <PaperBackdrop/>}
         <section className={b.hero} aria-labelledby="brand-heading" data-landing-hero data-testid="brand-hero">
-            <HeroBackdrop/>
+            {partnership && <HeroBackdrop/>}
             <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <HeroHeadline key={locale} firstLine={PROMPTBOOK_BRAND.messages[locale].headline.split('. ')[0]}/>}</h1>
             {!partnership && <p className={b.heroDeployment}>{PROMPTBOOK_DEPLOYMENT[locale]}</p>}
             <StagedIntro sentences={intro}/>
