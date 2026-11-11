@@ -4,6 +4,10 @@ const VIDEO_EXTENSIONS = ['.mov', '.m4v', '.mkv'];
 const SHARED_MEDIA_EXTENSION = /\.(mp4|webm|3gp|3gpp|ogg)$/i;
 
 export const MESSAGE_MEDIA_ACCEPT = [MESSAGE_AUDIO_ACCEPT, 'video/*', ...VIDEO_EXTENSIONS].join(',');
+export type MessageMediaInspection = {
+    selectedAudioTrackId: number;
+    audioTracks: { id: number; codec: string | null; channels: number; sampleRate: number; durationSeconds: number }[];
+};
 
 export function isMessageVideoImport(file: File): boolean {
     const name = file.name.toLowerCase();
@@ -12,13 +16,21 @@ export function isMessageVideoImport(file: File): boolean {
 }
 
 /** Read the selected file locally and send only its primary audio track for transcription. */
-export async function extractMessageAudio(file: File, onProgress: (progress: number) => void): Promise<File> {
+export async function extractMessageAudio(file: File, onProgress: (progress: number) => void,
+    onInspection?: (inspection: MessageMediaInspection) => void): Promise<File> {
     const { ALL_FORMATS, BlobSource, BufferTarget, Conversion, Input, Mp4OutputFormat, Output, WebMOutputFormat } = await import('mediabunny');
     const input = new Input({ formats: ALL_FORMATS, source: new BlobSource(file) });
     const unsupported = 'Zvuk z tohoto souboru se nepodařilo oddělit. Zkuste video MP4 se zvukem AAC nebo samostatný audio soubor.';
     try {
         const audio = await input.getPrimaryAudioTrack().catch(() => { throw new Error(unsupported); });
         if (!audio) throw new Error('V souboru není zvuková stopa k přepisu.');
+        if (onInspection) {
+            const tracks = await input.getAudioTracks();
+            onInspection({ selectedAudioTrackId: audio.id, audioTracks: await Promise.all(tracks.map(async track => ({
+                id: track.id, codec: await track.getCodec(), channels: await track.getNumberOfChannels(),
+                sampleRate: await track.getSampleRate(), durationSeconds: await track.computeDuration(),
+            }))) });
+        }
 
         // A generic file type can also be an ordinary audio recording in a shared container.
         if (!file.type.startsWith('video/') && SHARED_MEDIA_EXTENSION.test(file.name) && !(await input.getVideoTracks()).length) {

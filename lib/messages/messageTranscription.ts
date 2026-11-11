@@ -13,7 +13,7 @@ export function validateMessageAudioFile(file: Pick<File, 'name' | 'type' | 'siz
 }
 
 const transcriptSchema = z.object({
-    text: z.string().refine((text) => Boolean(text.trim())),
+    text: z.string(),
 });
 const transcriptWordsSchema = z.object({
     words: z.array(z.object({
@@ -26,6 +26,9 @@ export function formatMessageTranscript(filename: string, result: unknown): stri
     const parsed = transcriptSchema.safeParse(result);
     if (!parsed.success) throw new Error('ElevenLabs nevrátilo čitelný přepis. Před dalším pokusem zkontrolujte historii přepisů.', { cause: parsed.error });
     const { text } = parsed.data;
+    if (!text.trim()) {
+        throw new Error('ElevenLabs zpracovalo audio, ale nerozpoznalo žádnou řeč. Přepis je prázdný. Zkontrolujte oddělené audio tlačítkem „Zkontrolovat audio“ a poslechněte si ho před dalším placeným pokusem.');
+    }
     // Optional word metadata must never invalidate a usable, already-paid transcript.
     const wordData = transcriptWordsSchema.safeParse(result);
     const words = wordData.success ? wordData.data.words : undefined;

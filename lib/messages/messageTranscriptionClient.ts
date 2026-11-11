@@ -2,7 +2,8 @@ import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { protectAdminMutation } from '@/lib/admin/protectAdminMutation';
 import { JsonRequestError } from '@/lib/api/requestJson';
 import { formatMessageTranscript, validateMessageAudioFile } from './messageTranscription';
-import { extractMessageAudio, isMessageVideoImport } from './messageVideoImport';
+import { extractMessageAudio, isMessageVideoImport, type MessageMediaInspection } from './messageVideoImport';
+import { analyzeMessageAudio, type MessageAudioAnalysis } from './messageAudioAnalysis';
 
 type FileMetadata = Pick<File, 'name' | 'size' | 'type' | 'lastModified'>;
 export type MessageTranscriptionReport = {
@@ -13,6 +14,8 @@ export type MessageTranscriptionReport = {
     stage: string;
     source: FileMetadata;
     audio?: FileMetadata;
+    sourceMedia?: MessageMediaInspection;
+    audioAnalysis?: MessageAudioAnalysis;
     browser: { userAgent: string; language: string; online: boolean };
     request: { endpoint: string; parameters?: Record<string, string> };
     events: { at: string; stage: string }[];
@@ -25,9 +28,25 @@ function fileMetadata(file: File): FileMetadata {
     return { name: file.name, size: file.size, type: file.type, lastModified: file.lastModified };
 }
 
+export type PreparedMessageAudio = { file: File; sourceMedia?: MessageMediaInspection; analysis: MessageAudioAnalysis };
+
+/** Local inspection and playback preparation. It never requests a token or uploads media. */
+export async function prepareMessageTranscriptionAudio(file: File, onProgress: (status: string) => void): Promise<PreparedMessageAudio> {
+    let sourceMedia: MessageMediaInspection | undefined;
+    let audio = file;
+    if (isMessageVideoImport(file)) {
+        onProgress('Odděluji zvuk na tomto zařízení…');
+        audio = await extractMessageAudio(file, progress => onProgress(`Odděluji zvuk na tomto zařízení… ${Math.floor(progress * 100)} %`), inspection => { sourceMedia = inspection; });
+    }
+    validateMessageAudioFile(audio);
+    onProgress('Kontroluji zvukový signál na tomto zařízení…');
+    return { file: audio, sourceMedia, analysis: await analyzeMessageAudio(audio) };
+}
+
 /** Only a short-lived, single-use credential reaches the browser; media never crosses a Vercel function. */
 export function transcribeMessageFile(file: File, onProgress: (status: string) => void,
-    onDiagnostics?: (report: MessageTranscriptionReport) => void): Promise<string> {
+    onDiagnostics?: (report: MessageTranscriptionReport) => void,
+    onPreparedAudio?: (audio: PreparedMessageAudio) => void): Promise<string> {
     const report: MessageTranscriptionReport = {
         attemptId: crypto.randomUUID(), startedAt: new Date().toISOString(), outcome: 'running', stage: 'validation',
         source: fileMetadata(file), browser: { userAgent: navigator.userAgent, language: navigator.language, online: navigator.onLine },
@@ -42,14 +61,17 @@ export function transcribeMessageFile(file: File, onProgress: (status: string) =
     return protectAdminMutation(async () => {
         try {
             stage('validation');
-            let audioFile = file;
-            if (isMessageVideoImport(file)) {
-                stage('audio-extraction');
-                onProgress('Odděluji zvuk na tomto zařízení…');
-                audioFile = await extractMessageAudio(file, (progress) => onProgress(`Odděluji zvuk na tomto zařízení… ${Math.floor(progress * 100)} %`));
-            }
+            stage(isMessageVideoImport(file) ? 'audio-extraction' : 'audio-analysis');
+            const prepared = await prepareMessageTranscriptionAudio(file, onProgress);
+            const audioFile = prepared.file;
             report.audio = fileMetadata(audioFile);
-            validateMessageAudioFile(audioFile);
+            report.sourceMedia = prepared.sourceMedia;
+            report.audioAnalysis = prepared.analysis;
+            onPreparedAudio?.(prepared);
+            stage('audio-validation');
+            if (prepared.analysis.status === 'silent') {
+                throw new Error('V odděleném audiu nebyl nalezen zvukový signál. Poslechněte si ho a ověřte zvuk v původní nahrávce. Placený přepis se nespustil.');
+            }
             stage('single-use-token');
             onProgress('Připravuji přepis…');
             const { token, modelId } = await requestAdminJson<{ token: string; modelId: string }>('/api/admin/messages/transcribe', { method: 'POST' });

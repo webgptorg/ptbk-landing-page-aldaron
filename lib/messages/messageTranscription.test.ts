@@ -41,7 +41,7 @@ describe('meeting transcript as message context', () => {
     });
 
     it('refuses an empty result without changing an existing context', () => {
-        expect(() => formatMessageTranscript('empty.wav', { text: '  ' })).toThrow('čitelný přepis');
+        expect(() => formatMessageTranscript('empty.wav', { text: '  ' })).toThrow('nerozpoznalo žádnou řeč');
         const context = 'Authored context.\n';
         expect(appendMessageTranscript(context, 'Complete transcript.')).toBe(`${context}\n\nComplete transcript.`);
         expect(appendMessageTranscript('', 'Complete transcript.')).toBe('Complete transcript.');

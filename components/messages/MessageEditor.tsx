@@ -12,12 +12,13 @@ import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { appendMessageTranscript } from '@/lib/messages/messageTranscription';
 import { MESSAGE_MEDIA_ACCEPT } from '@/lib/messages/messageVideoImport';
-import { transcribeMessageFile, type MessageTranscriptionReport } from '@/lib/messages/messageTranscriptionClient';
+import { prepareMessageTranscriptionAudio, transcribeMessageFile, type MessageTranscriptionReport, type PreparedMessageAudio } from '@/lib/messages/messageTranscriptionClient';
 import { createMessagePrefix, createMessageShareText, getMessageUrl, MESSAGE_CONTEXT_MAX_LENGTH, MESSAGE_DOMAINS, MESSAGE_VALUES_SCHEMA,
     PAVOL_MESSAGE_AGENT_ID, type ManagedMessage, type MessageValues } from '@/lib/messages/messageModel';
 import type { ManagedAgent } from '@/lib/agents/agentModel';
 import { MessageMeetingRecorder } from './MessageMeetingRecorder';
 import { MessageTranscriptionDiagnostics } from './MessageTranscriptionDiagnostics';
+import { MessageImportedAudioPreview } from './MessageImportedAudioPreview';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Copy, ExternalLink, LoaderCircle, Sparkles, Volume2, X } from 'lucide-react';
 
 type AgentChoice = Pick<ManagedAgent, 'id' | 'name' | 'isEnabled'>;
@@ -35,7 +36,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const [error, setError] = useState('');
     const [transcriptionNotice, setTranscriptionNotice] = useState('');
     const [transcriptionReports, setTranscriptionReports] = useState<MessageTranscriptionReport[]>([]);
-    const [queuedFiles, setQueuedFiles] = useState<{ id: number; file: File }[]>([]);
+    const [queuedFiles, setQueuedFiles] = useState<{ id: number; file: File; prepared?: PreparedMessageAudio }[]>([]);
     const nextFileId = useRef(0);
     const [pendingTranscript, setPendingTranscript] = useState('');
     const [recordingBusy, setRecordingBusy] = useState(false);
@@ -114,15 +115,23 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             return reordered;
         });
     };
+    const acceptPreparedAudio = (id: number, prepared: PreparedMessageAudio) => {
+        setQueuedFiles(current => current.map(entry => entry.id === id ? { ...entry, prepared } : entry));
+    };
+    const inspectAudio = (id: number, file: File) => run('Připravuji audio ke kontrole…', async () => {
+        const prepared = await prepareMessageTranscriptionAudio(file, setOperation);
+        acceptPreparedAudio(id, prepared);
+    });
     const transcribe = () => run('Připravuji přepis…', async () => {
         setTranscriptionNotice('');
         for (let index = 0; index < queuedFiles.length; index++) {
-            const { file } = queuedFiles[index];
+            const { id, file } = queuedFiles[index];
             const progress = (status: string) => setOperation(`${index + 1}/${queuedFiles.length} · ${file.name} · ${status}`);
             progress('Připravuji přepis…');
             let transcript: string;
             try {
-                transcript = await transcribeMessageFile(file, progress, report => setTranscriptionReports(current => [...current, report]));
+                transcript = await transcribeMessageFile(file, progress, report => setTranscriptionReports(current => [...current, report]),
+                    prepared => acceptPreparedAudio(id, prepared));
             } catch (failure) {
                 const reason = failure instanceof Error ? failure.message : 'Přepis se nepodařilo dokončit.';
                 throw new Error(`„${file.name}“ · ${reason}`);
@@ -171,7 +180,8 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                     : 'Pro přepis chybí serverové nastavení ElevenLabs.'}</p>
                 {queuedFiles.length > 0 && <>
                     <ol aria-label="Pořadí nahrávek" className="space-y-1 text-sm">
-                        {queuedFiles.map(({ id, file }, index) => <li key={id} className="flex items-center gap-2">
+                        {queuedFiles.map(({ id, file, prepared }, index) => <li key={id} className="space-y-2">
+                            <div className="flex items-center gap-2">
                             <span className="min-w-0 flex-1 break-words">{index + 1}. {file.name}</span>
                             <Button type="button" variant="ghost" size="icon" disabled={importDisabled || index === 0}
                                 aria-label={`Posunout „${file.name}“ nahoru`} onClick={() => moveFile(index, index - 1)}><ArrowUp className="h-4 w-4" /></Button>
@@ -179,6 +189,9 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                                 aria-label={`Posunout „${file.name}“ dolů`} onClick={() => moveFile(index, index + 1)}><ArrowDown className="h-4 w-4" /></Button>
                             <Button type="button" variant="ghost" size="icon" disabled={importDisabled} aria-label={`Odebrat „${file.name}“`}
                                 onClick={() => setQueuedFiles(current => current.filter(entry => entry.id !== id))}><X className="h-4 w-4" /></Button>
+                            </div>
+                            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => void inspectAudio(id, file)}>Zkontrolovat audio</Button>
+                            {prepared && <MessageImportedAudioPreview audio={prepared} />}
                         </li>)}
                     </ol>
                     <Button type="button" disabled={importDisabled} onClick={() => void transcribe()}>

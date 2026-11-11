@@ -1,13 +1,14 @@
 /** @vitest-environment jsdom */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { waitFor } from '@testing-library/react';
-const mocks = vi.hoisted(() => ({ request: vi.fn(), extractAudio: vi.fn() }));
+const mocks = vi.hoisted(() => ({ request: vi.fn(), extractAudio: vi.fn(), analyzeAudio: vi.fn() }));
 vi.mock('@/lib/admin/requestAdminJson', () => ({ requestAdminJson: mocks.request }));
+vi.mock('./messageAudioAnalysis', () => ({ analyzeMessageAudio: mocks.analyzeAudio }));
 vi.mock('./messageVideoImport', async (importOriginal) => ({
     ...await importOriginal<typeof import('./messageVideoImport')>(),
     extractMessageAudio: mocks.extractAudio,
 }));
-import { transcribeMessageFile, type MessageTranscriptionReport } from './messageTranscriptionClient';
+import { prepareMessageTranscriptionAudio, transcribeMessageFile, type MessageTranscriptionReport } from './messageTranscriptionClient';
 import { hasPendingAdminWork } from '@/lib/admin/adminPendingSaves';
 
 function createUpload() {
@@ -22,6 +23,8 @@ function createUpload() {
 let upload: ReturnType<typeof createUpload>;
 beforeEach(() => {
     mocks.extractAudio.mockReset();
+    mocks.analyzeAudio.mockReset();
+    mocks.analyzeAudio.mockResolvedValue({ status: 'signal-detected', decodedSeconds: 0.02, peak: 0.2 });
     mocks.request.mockReset(); mocks.request.mockResolvedValue({ token: 'one-use-token', modelId: 'scribe_v2' });
     upload = createUpload();
     vi.stubGlobal('XMLHttpRequest', vi.fn(function () { return upload; }));
@@ -55,7 +58,7 @@ describe('direct ElevenLabs message transcription', () => {
         let finish!: (file: File) => void;
         mocks.extractAudio.mockReturnValueOnce(new Promise<File>((resolve) => { finish = resolve; }));
         const pending = transcribeMessageFile(video, () => undefined);
-        expect(mocks.extractAudio).toHaveBeenCalledWith(video, expect.any(Function));
+        expect(mocks.extractAudio).toHaveBeenCalledWith(video, expect.any(Function), expect.any(Function));
         expect(hasPendingAdminWork()).toBe(true);
         expect(mocks.request).not.toHaveBeenCalled();
         expect(upload.send).not.toHaveBeenCalled();
@@ -165,5 +168,32 @@ describe('direct ElevenLabs message transcription', () => {
         await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
         upload.onload?.(); await result;
         expect(JSON.stringify(diagnostic.mock.calls[0][0])).not.toContain('one-use-token');
+    });
+
+    it('prepares playback locally and rejects proven silence before any token request or upload', async () => {
+        const audio = file();
+        const analysis = { status: 'silent', decodedSeconds: 253.65, peak: 0 };
+        mocks.analyzeAudio.mockResolvedValue(analysis);
+        const prepared = await prepareMessageTranscriptionAudio(audio, () => undefined);
+        expect(prepared).toEqual({ file: audio, sourceMedia: undefined, analysis });
+        expect(mocks.request).not.toHaveBeenCalled();
+        expect(upload.send).not.toHaveBeenCalled();
+        const diagnostic = vi.fn(), onPrepared = vi.fn();
+        await expect(transcribeMessageFile(audio, () => undefined, diagnostic, onPrepared)).rejects.toThrow('Placený přepis se nespustil');
+        expect(onPrepared).toHaveBeenCalledWith(prepared);
+        expect(diagnostic.mock.calls[0][0]).toMatchObject({ outcome: 'failed', audioAnalysis: analysis, stage: 'audio-validation' });
+        expect(mocks.request).not.toHaveBeenCalled();
+    });
+
+    it('reports a provider no-speech result specifically while retaining the prepared audio for playback', async () => {
+        const diagnostic = vi.fn(), onPrepared = vi.fn();
+        upload.responseText = '{"language_code":"en","language_probability":0,"text":"","words":[],"transcription_id":"R4udOY7yNEHZiOR5b5Tt","audio_duration_secs":253.6533125}';
+        const pending = transcribeMessageFile(file(), () => undefined, diagnostic, onPrepared);
+        const failure = expect(pending).rejects.toThrow('nerozpoznalo žádnou řeč');
+        await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
+        upload.onload?.(); await failure;
+        expect(onPrepared).toHaveBeenCalledOnce();
+        expect(diagnostic.mock.calls[0][0].response.body).toBe(upload.responseText);
+        expect(mocks.request).toHaveBeenCalledOnce();
     });
 });

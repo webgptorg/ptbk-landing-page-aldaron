@@ -66,9 +66,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   File imports retain an admin-only copyable JSON report of every attempt, including source/extracted file metadata,
   stages, request parameters, HTTP status, exposed request ID, full raw response and error details. Reports stay in
   the open editor's memory, separate from public message context. Tokens and credential-bearing URLs are excluded.
+  An explicit local audio check offers playback and download of the exact extracted audio before paid transcription.
+  Signal analysis streams decoded samples and accepts any detected channel signal. Only a completed silent scan blocks
+  token creation; unsupported local decoding preserves encoded uploads. Reports include source audio-track metadata
+  and signal measurements. Empty provider text is reported as no recognized speech, never fabricated or appended.
   Non-JSON and asynchronous responses remain diagnosable without automatically retrying paid transcription. Transcription is
   explicit, protected as pending admin work and never retried automatically. Retain completed text if it exceeds the
-  context limit. External-file audio/token are not stored or reused for summary narration; subsequent summary/speech controls
+  context limit. External-file audio/token are not persisted or reused for summary narration; subsequent summary/speech controls
   retain their existing behavior. Transcription uses the existing server-only ElevenLabs key independently of storage.
   The context editor leads with Meeting Studio; file import and manual context are separate secondary views.
   Meeting Studio is a fullscreen, focus-trapped recorder with a large record/pause/resume control, recorded-content

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { ALL_FORMATS, BlobSource, EncodedPacketSink, Input } from 'mediabunny';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { extractMessageAudio, isMessageVideoImport } from './messageVideoImport';
 
 async function recording(name: string, type?: string): Promise<File> {
@@ -11,7 +11,8 @@ async function recording(name: string, type?: string): Promise<File> {
 it('extracts only audio from an untyped video and copies its encoded Opus data', async () => {
     const video = await recording('camera.webm');
     expect(isMessageVideoImport(video)).toBe(true);
-    const audio = await extractMessageAudio(video, () => undefined);
+    const inspection = vi.fn();
+    const audio = await extractMessageAudio(video, () => undefined, inspection);
     expect(audio.type).toBe('audio/webm');
     expect(audio.size).toBeLessThan(video.size);
     const source = new Input({ formats: ALL_FORMATS, source: new BlobSource(video) });
@@ -21,6 +22,8 @@ it('extracts only audio from an untyped video and copies its encoded Opus data',
         const [track] = await extracted.getAudioTracks();
         expect(await track.getCodec()).toBe('opus');
         const primaryAudio = (await source.getAudioTracks())[0];
+        expect(inspection).toHaveBeenCalledWith({ selectedAudioTrackId: primaryAudio.id,
+            audioTracks: [expect.objectContaining({ id: primaryAudio.id, codec: 'opus' })] });
         const firstOriginalPacket = await new EncodedPacketSink(primaryAudio).getFirstPacket();
         const firstExtractedPacket = await new EncodedPacketSink(track).getFirstPacket();
         expect(firstExtractedPacket?.data).toEqual(firstOriginalPacket?.data);

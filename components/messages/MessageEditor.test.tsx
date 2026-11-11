@@ -2,9 +2,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-const mocks = vi.hoisted(() => ({ request: vi.fn(), transcribe: vi.fn() }));
+const mocks = vi.hoisted(() => ({ request: vi.fn(), transcribe: vi.fn(), prepare: vi.fn() }));
 vi.mock('@/lib/admin/requestAdminJson', () => ({ requestAdminJson: mocks.request }));
-vi.mock('@/lib/messages/messageTranscriptionClient', () => ({ transcribeMessageFile: mocks.transcribe }));
+vi.mock('@/lib/messages/messageTranscriptionClient', () => ({ transcribeMessageFile: mocks.transcribe, prepareMessageTranscriptionAudio: mocks.prepare }));
 vi.mock('./MessageMeetingRecorder', () => ({ MessageMeetingRecorder: () => null }));
 import { MessageEditor } from './MessageEditor';
 import { TEST_MESSAGE } from '@/lib/messages/messageTestFixtures';
@@ -167,7 +167,7 @@ describe('two-step message editor', () => {
         mocks.transcribe.mockResolvedValueOnce('Pokračování přepisu.');
         fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávku' }));
         await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(`Kratší poznámky.\n\n${transcript}\n\nPokračování přepisu.`));
-        expect(mocks.transcribe).toHaveBeenLastCalledWith(remaining, expect.any(Function), expect.any(Function));
+        expect(mocks.transcribe).toHaveBeenLastCalledWith(remaining, expect.any(Function), expect.any(Function), expect.any(Function));
     });
     it('shows and copies the complete diagnostic history across a failed attempt and an explicit retry', async () => {
         const writeText = vi.fn().mockResolvedValue(undefined);
@@ -202,5 +202,25 @@ describe('two-step message editor', () => {
         const copied = JSON.parse(writeText.mock.calls[0][0]) as { attempts: MessageTranscriptionReport[] };
         expect(copied.attempts.map(attempt => attempt.attemptId)).toEqual(['attempt-1', 'attempt-2']);
         expect(mocks.request).not.toHaveBeenCalled();
+    });
+    it('provides local audio playback and download without starting transcription', async () => {
+        const createUrl = vi.fn().mockReturnValue('blob:local-preview');
+        const revokeUrl = vi.fn();
+        const OriginalUrl = URL;
+        vi.stubGlobal('URL', class extends OriginalUrl {
+            static createObjectURL = createUrl;
+            static revokeObjectURL = revokeUrl;
+        });
+        const audio = new File(['audio'], 'call.m4a', { type: 'audio/mp4' });
+        mocks.prepare.mockResolvedValue({ file: audio, analysis: { status: 'signal-detected', decodedSeconds: 0.02, peak: 0.5 } });
+        render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.change(openMediaImport(), { target: { files: [new File(['video'], 'call.mp4')] } });
+        fireEvent.click(screen.getByRole('button', { name: 'Zkontrolovat audio' }));
+        expect(await screen.findByLabelText('Kontrola audia – call.m4a')).toHaveAttribute('src', 'blob:local-preview');
+        expect(screen.getByRole('link', { name: 'Stáhnout audio ke kontrole' })).toHaveAttribute('download', 'call.m4a');
+        expect(mocks.transcribe).not.toHaveBeenCalled();
+        expect(mocks.request).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('button', { name: 'Odebrat „call.mp4“' }));
+        expect(revokeUrl).toHaveBeenCalledWith('blob:local-preview');
     });
 });
