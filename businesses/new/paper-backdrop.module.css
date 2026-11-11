@@ -5,13 +5,14 @@
     inset-inline: calc(50% - 50vw);
     overflow: clip;
     pointer-events: none;
-    background-color: #f9fafc;
+    background-color: #fdfdfe;
 }
 
 .backdrop::before {
     content: '';
     position: absolute;
     inset: 0;
+    opacity: .2;
     background:
         radial-gradient(ellipse 95% 580px at 7% 240px, rgba(112, 140, 176, .25), transparent),
         radial-gradient(ellipse 90% 660px at 96% 620px, rgba(150, 164, 185, .23), transparent),
@@ -25,10 +26,11 @@
     inset: 0;
     background-image: var(--paper-noise);
     background-size: 384px 384px;
-    opacity: .62;
+    opacity: .12;
 }
 
 .canvas {
+    opacity: .2;
     position: absolute;
     left: 0;
     display: block;

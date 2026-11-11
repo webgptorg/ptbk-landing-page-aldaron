@@ -6,6 +6,8 @@ Nejnovější večerní zadání z 25. října 2026 platí shodně pro českou a
 
 Zadání z 11. listopadu 2026 přenáší na českou a anglickou homepage přesnou kombinaci z laboratoře pozadí: **Papír / Původní · Jen zrno / síla 40 %**. Modrošedá paleta, velikost zrna a jemné souvislé tónování odpovídají schválenému náhledu. Pozadí pokrývá hlavní obsah a končí před patičkou; hlavička je čistě bílá, patička zůstává bez textury. Laboratorní přepínače se nezobrazují. Kurzor, více současných dotyků i scroll jemně přeskupují zrna při zachování nativního posouvání a přiblížení. V klidu a na skryté kartě animace neběží. Omezený pohyb zachová statické zrno; ve vynucených barvách se dekorace skryje. Partnerská stránka ponechává hladký světle modrý přechod a měkký odlesk z 8. listopadu.
 
+Pozdější zadání z 11. listopadu 2026 výrazně zeslabuje sytost i texturu: podklad je téměř bílý `#fdfdfe`, tónovací pole a interaktivní canvas mají krytí 20 %, statická textura 12 % místo původních 62 %. Modrošedé zrno má být jen nepatrně znatelné na mobilu i počítači v obou jazycích. Síla pohybu, velikost zrn, ukotvení pod robůtkem a pravidla přístupnosti zůstávají zachované.
+
 ### Pořadí bloků
 
 Zem pod robůtkem má malé pevné jádro: zrno pod chodidly nereaguje na kurzor ani scroll, směrem do okolí se pohyb plynule obnovuje. Poloha se měří z aktuální velikosti SVG a při scrollování zůstává spojená s robůtkem v obsahu stránky. Jemný okolní stín a dva kontaktní stíny pod chodidly zdůrazňují oporu; hlava i ruce si ponechávají svůj pohyb. Nevzniká viditelný podstavec.
