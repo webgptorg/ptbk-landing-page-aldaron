@@ -11,6 +11,7 @@ import {
 import { useSiteLocale } from './LocaleProvider';
 import { licencePrice, type SiteLocale } from './localization';
 import { ALTERNATIVE_COMMERCIAL_TERMS, COMMERCIAL_ROWS } from './comparisonCommercial';
+import { CAPABILITY_REVIEW_DATE, PROMPTBOOK_CAPABILITY_SOURCES } from './comparisonCapabilities';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 import s from './site.module.css';
 
@@ -30,6 +31,7 @@ const OVERVIEW_FEATURES = [
 const PUBLIC_ENGINE_SUMMARY = {
     ...PROMPTBOOK_SUMMARY,
     useCase: { cs: 'Vývoj a testování u sebe', en: 'Development and testing on your own host' },
+    remote: { cs: 'Lokální Console; použití vzdálené Appky dle licence', en: 'Local Console; remote App use subject to licence', status: 'conditional' as const },
 };
 
 const PUBLIC_ENGINE_TERMS = {
@@ -110,7 +112,9 @@ export function ComparisonTable() {
                 ? 'Vlastní provoz označuje běh nástroje ve Vašem prostředí. AI model může běžet jinde. Ceny jsou orientační a mohou se lišit podle země, tarifu a spotřeby.'
                 : 'Self-hosting means the tool runs in your environment. The AI model may run elsewhere. Example prices can vary by country, plan and usage.'}
             {' '}{cs ? 'Zdroje ověřeny' : 'Sources reviewed'} {COMPARISON_REVIEW_DATE[locale]}.
+            {' '}{cs ? 'Integrace, modely a přístup ověřeny' : 'Integrations, models and access reviewed'} {CAPABILITY_REVIEW_DATE[locale]}.
         </p>
+        <ComparisonSecurityNote />
     </section>;
 }
 
@@ -142,6 +146,7 @@ export function ProductComparisonTable({ item }: { item: Comparison }) {
                 </tbody>
             </table>
         </div>
+        <ComparisonSecurityNote />
         <details className={s.comparisonDetails}>
             <summary>
                 {cs ? 'Podrobnosti k parametrům' : 'Feature details'}
@@ -154,4 +159,16 @@ export function ProductComparisonTable({ item }: { item: Comparison }) {
             </section>)}
         </details>
     </>;
+}
+
+/** Keep the scope of E2E and Git visible, including on individual comparisons. */
+function ComparisonSecurityNote() {
+    const { locale, path } = useSiteLocale();
+    return <p className={s.tableNote}>
+        {locale === 'cs'
+            ? 'E2E chrání spojení App–engine. Externí AI a služby dostávají povolené vstupy. Git uchovává historii souborů; nešifruje je ani nevrací externí akce. Wallet zůstává mimo Git.'
+            : 'E2E protects the App–engine connection. External AI and services receive authorized inputs. Git keeps file history; it does not encrypt files or undo external actions. Wallet stays outside Git.'}
+        {' '}<Link href={path('bezpecnost')}>{locale === 'cs' ? 'Data a bezpečnost' : 'Data and security'} ↗</Link>
+        {' '}<Link href={PROMPTBOOK_CAPABILITY_SOURCES[3][1]}>{locale === 'cs' ? 'Architektura spojení' : 'Connection architecture'} ↗</Link>
+    </p>;
 }

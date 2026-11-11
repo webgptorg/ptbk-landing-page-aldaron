@@ -1,19 +1,29 @@
 import type { SiteLocale } from './localization';
+import {
+    ALTERNATIVE_CAPABILITIES, ALTERNATIVE_DATA_LOCATIONS, ALTERNATIVE_MODELS, CAPABILITY_ROWS,
+    CAPABILITY_SOURCES, PROMPTBOOK_CAPABILITIES, type CapabilityRow,
+} from './comparisonCapabilities';
 
 type Copy = Readonly<Record<SiteLocale, string>>;
-type ComparisonRow = 'runtime' | 'continuity' | 'workspace' | 'model' | 'automation';
+type BasicComparisonRow = 'runtime' | 'continuity' | 'workspace' | 'model' | 'automation';
+type ComparisonRow = BasicComparisonRow | CapabilityRow;
 export type ComparisonStatus = 'yes' | 'no' | 'conditional' | 'partial' | 'unknown';
 export type ComparisonValue = Copy & { status?: ComparisonStatus };
-type ComparisonSummary = Record<ComparisonRow, ComparisonValue> & { useCase: Copy };
+type BasicComparisonSummary = Record<BasicComparisonRow, ComparisonValue> & { useCase: Copy };
 
 const value = (cs: string, en: string, status?: ComparisonStatus): ComparisonValue => ({ cs, en, status });
 
-export type Comparison = {
+type BasicComparison = {
     slug: string;
     name: string;
     sources: readonly [string, string][];
     advantage: Copy;
-    summary: ComparisonSummary;
+    summary: BasicComparisonSummary;
+    rows: Record<BasicComparisonRow | 'fit', Copy>;
+};
+
+export type Comparison = Omit<BasicComparison, 'rows' | 'summary'> & {
+    summary: BasicComparisonSummary & Record<CapabilityRow, ComparisonValue>;
     rows: Record<ComparisonRow | 'fit', Copy>;
 };
 
@@ -40,18 +50,18 @@ export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; pr
     },
     {
         id: 'workspace',
-        label: { cs: 'Pracovní prostředí', en: 'Workspace' },
+        label: { cs: 'Kde jsou Vaše data', en: 'Where your data lives' },
         promptbook: {
-            cs: 'Agenti, úkoly a konverzace jsou čitelné soubory ve Vašem projektu. Změny souborů vidíte v Gitu a průběh práce v záznamech úloh.',
-            en: 'Agents, tasks and conversations are readable files in your project. Review file changes in Git and inspect task traces.',
+            cs: 'Agenti, úkoly a konverzace zůstávají v souborech projektu na Vašem stroji, s dohledatelnou historií změn v Gitu. Git nešifruje soubory ani nevrací akce v cizích službách; Wallet do něj nepatří.',
+            en: 'Agents, tasks and conversations stay in project files on your host, with an auditable Git change history. Git does not encrypt files or undo actions in external services; Wallet stays outside it.',
         },
     },
     {
         id: 'model',
-        label: { cs: 'AI model', en: 'AI model' },
+        label: { cs: 'AI modely', en: 'AI models' },
         promptbook: {
-            cs: 'Volíte podporovaný nástroj a model. Externí služby dostávají potřebné vstupy. Použití lokálního modelu závisí na adaptéru a úloze.',
-            en: 'Choose a supported AI tool and model. External services receive the inputs they need. Local model use depends on the adapter and task.',
+            cs: 'Claude, GPT, Gemini, Qwen a další modely přes podporované nástroje a rozšiřitelné integrace, včetně lokálních modelů podle adaptéru a úlohy. Nejste vázáni na jediného výrobce. Externí modely dostávají potřebné vstupy.',
+            en: 'Claude, GPT, Gemini, Qwen and other models through supported tools and extensible integrations, including local models depending on the adapter and task. You are not tied to one vendor. External models receive the inputs they need.',
         },
     },
     {
@@ -62,18 +72,20 @@ export const COMPARISON_ROWS: ReadonlyArray<{ id: ComparisonRow; label: Copy; pr
             en: 'Give a team of agents an ongoing responsibility, goal and rules. The engine runs one-off and recurring tasks.',
         },
     },
+    ...CAPABILITY_ROWS,
 ];
 
-export const PROMPTBOOK_SUMMARY: ComparisonSummary = {
+export const PROMPTBOOK_SUMMARY: Comparison['summary'] = {
     useCase: value('Průběžné firemní agendy', 'Ongoing business operations'),
     runtime: value('Váš počítač nebo server', 'Your computer or server', 'yes'),
     continuity: value('Pokud běží na jiném stroji', 'When hosted elsewhere', 'conditional'),
-    workspace: value('Soubory projektu a Git', 'Project files and Git'),
-    model: value('Volba nástroje a modelu', 'Choice of tool and model'),
+    workspace: value('U Vás: soubory projektu s historií změn v Gitu.', 'On your host: project files with Git change history.'),
+    model: value('Claude, GPT, Gemini, Qwen, … i lokální. Automatická volba podle úlohy z dostupných modelů.', 'Claude, GPT, Gemini, Qwen, … including local. Automatic choice from available models for the task.'),
     automation: value('Opakované úlohy agentů', 'Recurring agent tasks', 'yes'),
+    ...PROMPTBOOK_CAPABILITIES,
 };
 
-export const COMPARISONS = [
+const BASIC_COMPARISONS = [
     {
         slug: 'grok-bot',
         name: 'Grok Bot',
@@ -450,7 +462,20 @@ export const COMPARISONS = [
             fit: { cs: 'Když už pracujete v Microsoft 365 a chcete, aby událost v Power Platform spustila agenta s firemními konektory a existující správou prostředí.', en: 'When you already use Microsoft 365 and want a Power Platform event to trigger an agent with company connectors and existing environment administration.' },
         },
     },
-] as const satisfies readonly Comparison[];
+] as const satisfies readonly BasicComparison[];
+
+// The overview and all details share the same reviewed technical values.
+export const COMPARISONS: readonly Comparison[] = BASIC_COMPARISONS.map(item => {
+    const capabilities = ALTERNATIVE_CAPABILITIES[item.slug];
+    const workspace = ALTERNATIVE_DATA_LOCATIONS[item.slug];
+    const model = ALTERNATIVE_MODELS[item.slug];
+    return {
+        ...item,
+        sources: [...item.sources, ...CAPABILITY_SOURCES[item.slug]],
+        summary: { ...item.summary, workspace, model, ...capabilities },
+        rows: { ...item.rows, workspace, model, ...capabilities },
+    };
+});
 
 /** A specific project-history difference for tools that also run on your own host. */
 export const PROJECT_HISTORY_COMPARISON = {

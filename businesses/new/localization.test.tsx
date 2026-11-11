@@ -109,11 +109,22 @@ describe('bilingual launch site', () => {
         expect(COMPARISONS.length).toBeGreaterThanOrEqual(13);
         for (const { slug } of COMPARISONS) expect(table.querySelector(`thead a[href="/${locale}/srovnani/${slug}"]`)).not.toBeNull();
         const rows = Array.from(table.querySelectorAll('tbody tr'));
-        expect(rows).toHaveLength(10);
+        expect(rows).toHaveLength(15);
         for (const row of rows) {
             expect(row.querySelectorAll('th[scope="row"]')).toHaveLength(1);
             expect(row.querySelectorAll('td')).toHaveLength(COMPARISONS.length + 2);
         }
+        const technicalLabels = locale === 'cs'
+            ? ['Integrace', 'Hesla a přístupy', 'Trust model', 'Ovládání z mobilu', 'AI nástroje a jejich výběr', 'Kde jsou Vaše data', 'AI modely']
+            : ['Integrations', 'Passwords and credentials', 'Trust model', 'Mobile and remote control', 'AI tools and selection', 'Where your data lives', 'AI models'];
+        for (const label of technicalLabels) {
+            const row = rows.find(row => row.querySelector('th')?.textContent === label)!;
+            expect(row, label).toBeDefined();
+            expect(Array.from(row.querySelectorAll('td')).every(cell => Boolean(cell.textContent?.trim()))).toBe(true);
+        }
+        const appText = rows.map(row => row.querySelector('td')?.textContent).join(' ');
+        for (const term of ['Claude', 'GPT', 'Gemini', 'Qwen', 'Codex', 'Wallet', 'Zero Trust', 'E2E', 'Git']) expect(appText).toContain(term);
+        expect(element.textContent).toContain(locale === 'cs' ? 'Externí AI a služby dostávají povolené vstupy.' : 'External AI and services receive authorized inputs.');
         const price = rows.find(row => row.querySelector('th')?.textContent === (locale === 'cs' ? 'Příklad ceny' : 'Example price'))!;
         const paid = price.querySelector('td:nth-child(2)')!;
         const free = price.querySelector('td:nth-child(3)')!;
@@ -143,6 +154,11 @@ describe('bilingual launch site', () => {
                     'Promptbook',
                     item.name,
                 ]);
+                for (const row of Array.from(page.querySelectorAll('tbody tr'))) {
+                    expect(Array.from(row.querySelectorAll('td')).every(cell => Boolean(cell.textContent?.trim())), item.slug).toBe(true);
+                }
+                expect(page.textContent).toContain(locale === 'cs' ? 'Lokální šifrovaný Wallet' : 'Local encrypted Wallet');
+                expect(page.textContent).toContain('Zero Trust');
                 const sameHosting = item.summary.runtime.status === 'yes';
                 expect(page.querySelectorAll('tbody th[scope="row"]').length).toBe(COMPARISON_ROWS.length + Number(sameHosting));
                 const advantage = page.querySelectorAll('tbody tr[data-comparison-advantage="true"]');

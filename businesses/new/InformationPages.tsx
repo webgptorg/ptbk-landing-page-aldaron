@@ -14,6 +14,7 @@ import { COMMERCIAL_TERMS, ENGINE_REPOSITORY } from './commercialTerms';
 import { SCENARIOS, type ScenarioId } from './economics';
 import { changeScenario, defaultCalculatorState, calculatorPath } from './calculatorState';
 import { COMPARISONS, COMPARISON_REVIEW_DATE, REBORN_SOURCE } from './comparisons';
+import { CAPABILITY_REVIEW_DATE, PROMPTBOOK_CAPABILITY_SOURCES } from './comparisonCapabilities';
 import { sitePath } from './siteConfig';
 import s from './site.module.css';
 
@@ -174,10 +175,10 @@ export function ComparisonPage({ slug }: { slug: string }) {
         <ProductComparisonTable item={item} />
         <div className={s.prose}>
             <div className={s.sources}>
-                <p>{cs ? 'Dokumentace ověřena' : 'Documentation reviewed'} {COMPARISON_REVIEW_DATE[locale]}.</p>
+                <p>{cs ? 'Základní parametry ověřeny' : 'Core features reviewed'} {COMPARISON_REVIEW_DATE[locale]}.{' '}{cs ? 'Integrace, modely a přístup ověřeny' : 'Integrations, models and access reviewed'} {CAPABILITY_REVIEW_DATE[locale]}.</p>
                 <ul>
                     <li><a href={REBORN_SOURCE}>Promptbook Reborn · 1292ef3</a></li>
-                    {item.sources.map(([title, href]) => <li key={href}><a href={href}>{title}</a></li>)}
+                    {[...PROMPTBOOK_CAPABILITY_SOURCES, ...item.sources].map(([title, href]) => <li key={href}><a href={href}>{title}</a></li>)}
                 </ul>
             </div>
             <div className={s.actions}>
