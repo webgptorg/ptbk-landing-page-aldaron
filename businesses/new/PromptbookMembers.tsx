@@ -209,19 +209,21 @@ function MembershipCard({
             {membership.cancelAtPeriodEnd && <p>Předplatné se po tomto období neobnoví.</p>}
             {hasAccess && supportedVersion && <p>Podporovaná verze enginu {supportedVersion}.</p>}
             {hasAccess && (
-                <div className={styles.memberActions}>
-                    <Link className={site.textLink} href="/cs/open-source">
-                        Nainstalovat engine <ArrowRight size={15} aria-hidden="true" />
+                <>
+                    <Link className={`${site.button} ${styles.memberInstall}`} href="/cs/open-source">
+                        Nainstalovat engine <ArrowRight size={18} aria-hidden="true" />
                     </Link>
-                    <a className={site.textLink} href={`mailto:${supportEmail || COMMERCIAL_TERMS.contact}`}>
-                        Produktová podpora
-                    </a>
-                    {membership.engineLicenceUrl && (
-                        <a className={site.textLink} href={membership.engineLicenceUrl} rel="noreferrer">
-                            Licence enginu
+                    <div className={styles.memberActions}>
+                        <a className={site.textLink} href={`mailto:${supportEmail || COMMERCIAL_TERMS.contact}`}>
+                            Produktová podpora
                         </a>
-                    )}
-                </div>
+                        {membership.engineLicenceUrl && (
+                            <a className={site.textLink} href={membership.engineLicenceUrl} rel="noreferrer">
+                                Licence enginu
+                            </a>
+                        )}
+                    </div>
+                </>
             )}
             <div className={styles.memberActions}>
                 {membership.confirmationUrl && (

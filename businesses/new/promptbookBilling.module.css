@@ -316,6 +316,11 @@
     justify-content: space-between;
 }
 
+.memberInstall {
+    justify-self: start;
+    margin: 6px 0;
+}
+
 .memberStatus {
     padding: 4px 9px;
     border-radius: 7px;
@@ -350,6 +355,10 @@
 
     .upgrade button {
         width: 100%;
+    }
+
+    .memberInstall {
+        justify-self: stretch;
     }
 }
 
