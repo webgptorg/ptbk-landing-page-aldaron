@@ -35,3 +35,7 @@
 @media(max-width:370px){.visualLine{font-size:.82em}}
 @media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.headline .initialLetter{color:inherit!important}.underline path,.check path{stroke-dashoffset:0!important}}
 @media(forced-colors:active){.headline,.firstLine,.headline .initialLetter{color:CanvasText!important}.underline,.check{stroke:CanvasText}}
+
+/* Keep the approved typewriter geometry, using the selected heading's rhythm. */
+.headline{line-height:1.18}
+.visualLine{font-size:1em;letter-spacing:inherit}

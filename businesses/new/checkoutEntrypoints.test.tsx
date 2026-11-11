@@ -14,6 +14,11 @@ import { NewSiteShell } from './NewSiteShell';
 const navigation = vi.hoisted(() => ({ pathname: '/cs' }));
 const checkoutPath = '/cs/pricing/objednat/start';
 
+vi.mock('next/image', () => ({ default: ({ priority: _priority, ...props }: Record<string, unknown>) => <img {...props}/> }));
+vi.mock('./typography', () => ({
+    promptbookHeading: { variable: 'font-promptbook-heading' },
+    promptbookBody: { variable: 'font-promptbook-body' },
+}));
 vi.mock('next/navigation', () => ({
     usePathname: () => navigation.pathname,
     useSearchParams: () => new URLSearchParams(),

@@ -102,7 +102,7 @@ Light artwork is transparent for white surfaces. Use the transparent white artwo
 ink blue {COLORS['blue']} or the all-white lockup with its solid black {COLORS['black']} background.
 Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
-complete lockup 160 px. Headings: Outfit. Body: Inter.
+complete lockup 160 px. Headings: {BRAND['fonts']['heading']} (600). Body: {BRAND['fonts']['body']} (400–700).
 Full wordmark: Inter Medium (500) for prompt, Inter Bold (700) for book, at equal sizes.
 The abbreviated ptbk wordmark is entirely Inter Medium (500).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.

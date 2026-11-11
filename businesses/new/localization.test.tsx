@@ -16,6 +16,11 @@ import { SCENARIOS, calculateEconomics, type ScenarioId } from './economics';
 import { calculationShareUrl, defaultCalculatorState, parseCalculatorState } from './calculatorState';
 import { localizedPath, localeFromPath, licencePrice, type SiteLocale } from './localization';
 import { displayFieldValue, storedFieldValue } from './localizedCalculator';
+vi.mock('next/image', () => ({ default: ({ priority: _priority, ...props }: Record<string, unknown>) => <img {...props}/> }));
+vi.mock('./typography', () => ({
+    promptbookHeading: { variable: 'font-promptbook-heading' },
+    promptbookBody: { variable: 'font-promptbook-body' },
+}));
 vi.mock('./TechnologyIncubation', () => ({ TechnologyIncubation: () => null }));
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams(), usePathname: () => '/en' }));
 function html(node: ReactNode, locale: SiteLocale = 'en') {

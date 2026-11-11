@@ -427,3 +427,7 @@
     .comparisonDetail h3{grid-column:1/-1}
     .comparisonDetail p{font-size:13px}
 }
+/* Approved 11 November typography: local Exo 2 headings and Barlow text/UI.
+   Keep these tokens on this shell, since other brands share the root layout. */
+.site{--font-outfit:var(--font-promptbook-heading);--font-inter:var(--font-promptbook-body);letter-spacing:0;font-optical-sizing:auto}
+.site h1,.site h2,.site h3{font-weight:600;letter-spacing:-.012em}

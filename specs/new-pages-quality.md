@@ -1,5 +1,7 @@
 # Společná kvalita a akceptace webu
 
+Výběr z 11. listopadu 2026 nahrazuje dřívější Outfit/Inter variantou **1 · Exo 2** z typografického náhledu: nadpisy Exo 2 600, text a UI Barlow 400–700. Hlavní nadpis má proklad 1,18, rozestupy −0,025 em a 1,02násobek původní responzivní velikosti; podnadpis Exo 2 500, procesní věty Barlow. Platí pro český a anglický marketingový web. Lokální WOFF2 obsahují českou diakritiku, autorské údaje a licence SIL OFL 1.1. Obrysové logo v Inter a písma ostatních značkových webů zůstávají samostatná.
+
 ## Veřejné cesty po přepnutí 23. října 2026
 
 Na výslovný pokyn vlastníka žije český web na `/cs` a anglický na `/en`, včetně marketingových podstránek. Kořen `/` a marketingové cesty bez jazykového prefixu přesměrovávají podle `Accept-Language`; explicitní jazykové URL se nemění. Původní `/new` adresy se trvale přesměrují se zachováním query parametrů. Značkové domény, články, workshopy, administrace a jiné formuláře se nemění. Sdílené kontaktní a právní mechanismy se používají beze změny kontraktu.

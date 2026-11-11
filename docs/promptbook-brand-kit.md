@@ -21,6 +21,12 @@ files have their own paths and explicit static-file allowlist entries.
 
 ## Brand name
 
+The 11 November 2026 website typography selection is Exo 2 (headings, 600) with
+Barlow (body/UI, 400–700). The localized marketing shell loads complete local WOFF2
+files from `public/fonts/promptbook`, with their OFL notices and source checksums.
+The website's type specimens use this pair. The outlined Inter wordmark and the
+previously exported Outfit/Inter slide/social templates retain their original artwork.
+
 Use Promptbook in text and `promptbook` in the logo. The official abbreviation
 is `ptbk` in lowercase. The CLI command uses the same spelling.
 

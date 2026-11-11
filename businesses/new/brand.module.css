@@ -92,3 +92,10 @@
 .storyLink{display:flex;justify-content:flex-end;margin-top:26px}
 .storyLink a{display:inline-flex;align-items:center;gap:9px;min-height:44px;color:#243f77!important;font-size:14px}
 @media(prefers-reduced-motion:reduce){.heroReveal,.processSentence{animation:none;opacity:1;transform:none}}
+
+/* Approved Exo 2 / Barlow typography, matching the selected full-page study. */
+.brandPage .hero h1{font-size:calc(clamp(42px,6.3vw,80px)*1.02);font-weight:600;letter-spacing:-.025em;line-height:1.18}
+.brandPage .heroDeployment{font-weight:500;letter-spacing:-.012em}
+.brandPage .heroDeployment + .processIntro{font-family:var(--font-inter),sans-serif;font-size:clamp(16px,1.7vw,19px);line-height:1.6;letter-spacing:0;max-width:650px}
+.brandPage .processSentence{display:block}
+@media(max-width:680px){.brandPage .hero h1{font-size:calc(clamp(32px,8.8vw,58px)*1.02)}}

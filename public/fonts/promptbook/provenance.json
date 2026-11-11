@@ -1,0 +1,81 @@
+{
+  "google_fonts_commit": "c30b221beb0c1da59d563feb91ec8656a1fa972a",
+  "fonts": [
+    {
+      "slug": "exo2",
+      "family": "Exo 2",
+      "file": "Exo2-Variable.woff2",
+      "license": "exo2-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/exo2/Exo2%5Bwght%5D.ttf",
+      "sha256": "6cd00e00ae903d99ec70bef2bbc7ffe66355b9bb5a09203267f5e8205efa0eb7",
+      "bytes": 303940,
+      "axes": {
+        "wght": [
+          100.0,
+          400.0,
+          900.0
+        ]
+      },
+      "weight": 400,
+      "czech_verified": true,
+      "source_sha256": "205a448676a2586f9c57c25f3d5c58ca8db7e6cf5edf7506783a010c6fe2bfb5",
+      "conversion": "Lossless WOFF2 compression; complete original glyph repertoire retained."
+    },
+    {
+      "slug": "barlow",
+      "family": "Barlow",
+      "file": "Barlow-Regular.woff2",
+      "license": "barlow-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-Regular.ttf",
+      "sha256": "81728cb5147a04025dcb833c59f6e924f3914cc21e7f21ed4acf093e4d867c6e",
+      "bytes": 104068,
+      "axes": {},
+      "weight": 400,
+      "czech_verified": true,
+      "source_sha256": "95aa02c7c43096e0dd44d787ba6216864a67157e402adab59b35572e0c1577ea",
+      "conversion": "Lossless WOFF2 compression; complete original glyph repertoire retained."
+    },
+    {
+      "slug": "barlow",
+      "family": "Barlow",
+      "file": "Barlow-Medium.woff2",
+      "license": "barlow-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-Medium.ttf",
+      "sha256": "a07fc10c756b8fd8e69beddd982d5c4e38c0218324da69b60773b1e9aa34da6e",
+      "bytes": 103536,
+      "axes": {},
+      "weight": 500,
+      "czech_verified": true,
+      "source_sha256": "f8906f762cb73dca441da034bc363b2d8e2e68bc10d5c05e58717646c20cc4b4",
+      "conversion": "Lossless WOFF2 compression; complete original glyph repertoire retained."
+    },
+    {
+      "slug": "barlow",
+      "family": "Barlow",
+      "file": "Barlow-SemiBold.woff2",
+      "license": "barlow-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-SemiBold.ttf",
+      "sha256": "2bf00cb81f37aa6de565240e09674384b4ad731067b2f304c870bcd301ec7d42",
+      "bytes": 108348,
+      "axes": {},
+      "weight": 600,
+      "czech_verified": true,
+      "source_sha256": "86577cb32f8abe3673db53ca0f4221e6856751a4f6730c867e00f720f8bb1fc5",
+      "conversion": "Lossless WOFF2 compression; complete original glyph repertoire retained."
+    },
+    {
+      "slug": "barlow",
+      "family": "Barlow",
+      "file": "Barlow-Bold.woff2",
+      "license": "barlow-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/c30b221beb0c1da59d563feb91ec8656a1fa972a/ofl/barlow/Barlow-Bold.ttf",
+      "sha256": "731fb63a05f6772964596eda13fa1cd2f160f3306a60474d5d26298447776780",
+      "bytes": 108220,
+      "axes": {},
+      "weight": 700,
+      "czech_verified": true,
+      "source_sha256": "84e6a4d61e7c3e21f3c50ea6a4f7e5303a3467864c038be6ea3759bab8d547f9",
+      "conversion": "Lossless WOFF2 compression; complete original glyph repertoire retained."
+    }
+  ]
+}

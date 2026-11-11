@@ -1,6 +1,6 @@
 # Promptbook brand kit
 
-Updated: 2026-11-08. Contact: pavol@ptbk.io.
+Updated: 2026-11-11. Contact: pavol@ptbk.io.
 
 Name: Promptbook. Visual wordmark: promptbook (no trailing dot).
 Official abbreviation: ptbk (lowercase). CLI command: ptbk.
@@ -10,7 +10,7 @@ Light artwork is transparent for white surfaces. Use the transparent white artwo
 ink blue #17386C or the all-white lockup with its solid black #000000 background.
 Keep at least 1/4 of
 the symbol's height clear on all sides. Minimum digital widths: symbol 32 px,
-complete lockup 160 px. Headings: Outfit. Body: Inter.
+complete lockup 160 px. Headings: Exo 2 (600). Body: Barlow (400–700).
 Full wordmark: Inter Medium (500) for prompt, Inter Bold (700) for book, at equal sizes.
 The abbreviated ptbk wordmark is entirely Inter Medium (500).
 In the complete lockup, the cube's vertical edge matches the wordmark's cap height.

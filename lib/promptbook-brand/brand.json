@@ -2,7 +2,7 @@
   "name": "Promptbook",
   "wordmark": "promptbook",
   "abbreviation": "ptbk",
-  "updatedAt": "2026-11-08",
+  "updatedAt": "2026-11-11",
   "contact": "pavol@ptbk.io",
   "colors": {
     "blue": "#17386C",
@@ -13,7 +13,7 @@
     "white": "#FFFFFF",
     "black": "#000000"
   },
-  "fonts": { "heading": "Outfit", "body": "Inter", "wordmark": "Inter Medium (500) / Inter Bold (700)", "abbreviation": "Inter Medium (500)" },
+  "fonts": { "heading": "Exo 2", "body": "Barlow", "wordmark": "Inter Medium (500) / Inter Bold (700)", "abbreviation": "Inter Medium (500)" },
   "logo": {
     "geometry": "regular point-up hexagon; isometric PB mark",
     "viewBox": [0, 0, 128, 128],

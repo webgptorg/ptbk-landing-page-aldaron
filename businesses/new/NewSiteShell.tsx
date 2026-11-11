@@ -19,6 +19,7 @@ import { TechnologyIncubation } from './TechnologyIncubation';
 import { ENGINE_REPOSITORY } from './commercialTerms';
 import { COMPARISONS } from './comparisons';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand';
+import { promptbookBody, promptbookHeading } from './typography';
 import s from './site.module.css';
 import f from './footer.module.css';
 
@@ -31,7 +32,7 @@ function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; ch
         ? <a href={path('pricing/objednat/start')} className={s.button}>{t("Mám zájem")}<ArrowUpRight size={17} aria-hidden="true" /></a>
         : <LeadButton interest>{t("Mám zájem")}</LeadButton>;
 
-    return <LeadCaptureProvider><div className={s.site} lang={locale} style={PROMPTBOOK_BRAND_STYLE}>
+    return <LeadCaptureProvider><div className={`${s.site} ${promptbookHeading.variable} ${promptbookBody.variable}`} lang={locale} style={PROMPTBOOK_BRAND_STYLE}>
         <a href="#obsah" className={s.skip}>{t("Přejít na obsah")}</a>
         <header className={s.header}><div className={s.headerInner}>
             <BrandLogo priority/>
