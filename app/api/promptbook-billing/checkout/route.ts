@@ -23,6 +23,7 @@ const checkoutSchema = z.object({
     plan: z.enum(['start', 'business']),
     email: z.string().trim().email().max(254).transform((email) => email.toLowerCase()),
     country: z.enum(['CZ', 'SK']),
+    isBusiness: z.boolean().optional(),
     companyId: z.string().trim().max(16).optional().transform((id) => id?.replace(/\s/g, '') || null)
         .refine((id) => id === null || /^\d{8}$/.test(id)),
     vatId: z.string().trim().max(24).optional().transform((vatId) => vatId?.replace(/\s/g, '').toUpperCase() || null),
@@ -41,6 +42,8 @@ const checkoutSchema = z.object({
     acceptedTerms: z.literal(true),
     termsVersion: z.literal(PROMPTBOOK_ONLINE_TERMS_VERSION),
 }).refine(({ promoCode, expectedDiscount }) => Boolean(promoCode) === Boolean(expectedDiscount))
+    .refine(({ isBusiness, companyId, vatId }) => isBusiness === undefined ||
+        (isBusiness ? companyId !== null : companyId === null && vatId === null))
     .refine(({ companyId, immediateStart }) => companyId !== null || immediateStart)
     .refine(({ country, billingAddress }) => country === billingAddress.country);
 

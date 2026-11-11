@@ -53,6 +53,7 @@ export function PromptbookCheckout({
 }: PromptbookCheckoutProps) {
     const [plan, setPlan] = useState(initialPlan);
     const [country, setCountry] = useState<'CZ' | 'SK'>('CZ');
+    const [isBusiness, setIsBusiness] = useState(true);
     const [companyId, setCompanyId] = useState('');
     const [vatId, setVatId] = useState('');
     const [billingDetails, setBillingDetails] = useState({ name: '', line1: '', city: '', postal_code: '' });
@@ -92,7 +93,7 @@ export function PromptbookCheckout({
                 : '');
 
     useEffect(() => {
-        if (!/^\d{8}$/.test(companyId)) {
+        if (!isBusiness || !/^\d{8}$/.test(companyId)) {
             setIdentityStatus('');
             return;
         }
@@ -123,7 +124,7 @@ export function PromptbookCheckout({
             current = false;
             window.clearTimeout(timeout);
         };
-    }, [companyId, country, vatId]);
+    }, [isBusiness, companyId, country, vatId]);
 
     function changePlan(nextPlan: 'start' | 'business') {
         if (submitting.current || nextPlan === plan) return;
@@ -150,8 +151,9 @@ export function PromptbookCheckout({
         const order = {
             plan,
             country,
-            companyId: companyId.trim(),
-            vatId: companyId.trim() ? vatId.trim() || undefined : undefined,
+            isBusiness,
+            companyId: isBusiness ? companyId.trim() : '',
+            vatId: isBusiness ? vatId.trim() || undefined : undefined,
             billingName: billingDetails.name.trim(),
             billingAddress: {
                 line1: billingDetails.line1.trim(),
@@ -280,6 +282,11 @@ export function PromptbookCheckout({
                         <section className={styles.billing} aria-labelledby="billing-title">
                             <h2 id="billing-title">Fakturační údaje</h2>
                             {canceled && <p role="status">Platba nebyla dokončena. Můžete ji zkusit znovu.</p>}
+                            <label className={styles.agreement}>
+                                <input type="checkbox" name="isBusiness" checked={isBusiness}
+                                    onChange={(event) => setIsBusiness(event.target.checked)} disabled={busy} />
+                                <span>Nakupuji na firmu</span>
+                            </label>
                             <label>
                                 Země
                                 <select
@@ -295,11 +302,12 @@ export function PromptbookCheckout({
                                     {availability.slovakiaEnabled && <option value="SK">Slovensko</option>}
                                 </select>
                             </label>
-                            <div className={styles.fieldRow}>
+                            {isBusiness && <div className={styles.fieldRow}>
                                 <label>
-                                    <span>IČO <span className={styles.optional}>(nepovinné)</span></span>
+                                    IČO
                                     <input
                                         name="companyId"
+                                        required
                                         inputMode="numeric"
                                         pattern="[0-9]{8}"
                                         maxLength={8}
@@ -309,9 +317,8 @@ export function PromptbookCheckout({
                                         disabled={busy}
                                     />
                                 </label>
-                                {companyId.trim() !== '' && (
                                     <label>
-                                        {country === 'SK' ? 'IČ DPH' : 'DIČ (nepovinné)'}
+                                        {country === 'SK' ? 'IČ DPH' : 'DIČ'}
                                         <input
                                             name="vatId"
                                             required={country === 'SK'}
@@ -323,12 +330,11 @@ export function PromptbookCheckout({
                                             disabled={busy}
                                         />
                                     </label>
-                                )}
-                            </div>
-                            {identityStatus && <p className={styles.small} role="status">{identityStatus}</p>}
+                            </div>}
+                            {isBusiness && identityStatus && <p className={styles.small} role="status">{identityStatus}</p>}
                             <label>
-                                Jméno nebo firma
-                                <input name="billingName" required autoComplete="name" maxLength={200}
+                                {isBusiness ? 'Název firmy' : 'Jméno a příjmení'}
+                                <input name="billingName" required autoComplete={isBusiness ? 'organization' : 'name'} maxLength={200}
                                     value={billingDetails.name} onChange={(event) => editBillingField('name', event.target.value)} disabled={busy} />
                             </label>
                             <label>
@@ -373,7 +379,7 @@ export function PromptbookCheckout({
                                     .
                                 </span>
                             </label>
-                            {companyId.trim() === '' && (
+                            {!isBusiness && (
                                 <label className={styles.agreement}>
                                     <input name="immediateStart" type="checkbox" required disabled={busy} />
                                     <span>Chci zpřístupnit předplatné ihned.</span>

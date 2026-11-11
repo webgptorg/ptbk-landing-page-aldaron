@@ -1,6 +1,6 @@
 # Online předplatné Promptbooku
 
-České platební odkazy se zobrazí po zapnutí prodeje. Start stojí 399 Kč měsíčně za projekt a Business 1 999 Kč. Anglický web vede na poptávku. Objednávka dovoluje přepnout tarif bez ztráty vyplněných údajů. Spotřebitelé i podnikatelé z Česka a Slovenska mohou nakoupit; IČO se vyplňuje jen při nákupu na firmu. Fakturační jméno nebo název a adresu lze vyplnit ručně. Vyhledání IČO doplní údaje z ARES nebo slovenského Registru účtovných závierok a zákazník je může opravit. IČ DPH slouží k ověření příslušného daňového režimu ve VIES, nikoli jako podmínka spotřebitelského nákupu. Volitelná poznámka se uchovává s objednávkou.
+České platební odkazy se zobrazí po zapnutí prodeje. Start stojí 399 Kč měsíčně za projekt a Business 1 999 Kč. Anglický web vede na poptávku. Objednávka dovoluje přepnout tarif bez ztráty vyplněných údajů. Spotřebitelé i podnikatelé z Česka a Slovenska mohou nakoupit; Zaškrtávátko „Nakupuji na firmu“ je ve výchozím stavu zapnuté a vyžaduje IČO. Po vypnutí se IČO a DIČ skryjí a do objednávky se neposílají; zůstanou osobní fakturační údaje. Fakturační jméno nebo název a adresu lze vyplnit ručně. Vyhledání IČO doplní údaje z ARES nebo slovenského Registru účtovných závierok a zákazník je může opravit. IČ DPH slouží k ověření příslušného daňového režimu ve VIES, nikoli jako podmínka spotřebitelského nákupu. Volitelná poznámka se uchovává s objednávkou.
 
 ## Spotřebitelské objednávky a podmínky
 
