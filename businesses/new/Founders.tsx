@@ -7,7 +7,8 @@ import { LeadButton } from './LeadCapture';
 import s from './founders.module.css';
 
 import jiriPortrait from '@/public/people/jiri-jahn-studio.webp';
-import pavolPortrait from '@/public/people/pavol-hejny-studio.webp';
+import pavolPortrait from '@/public/people/pavol-hejny-studio-neat.webp';
+import pavolHat from '@/public/people/pavol-hejny-hat.webp';
 
 /** Verified public contacts and matched, naturally retouched founder portraits. */
 const founders = [
@@ -34,7 +35,7 @@ const founders = [
 ] as const;
 
 /** Equal, mirrored cards: both portraits end at the bottom of their card. */
-export function Founders({ compact = false }: { compact?: boolean }) {
+export function Founders({ compact = false, showPavolHat = true }: { compact?: boolean; showPavolHat?: boolean }) {
     const { t } = useSiteLocale();
 
     return (
@@ -42,11 +43,18 @@ export function Founders({ compact = false }: { compact?: boolean }) {
             {founders.map((person, index) => (
                 <article className={`${s.founder} ${index === 1 ? s.reverse : ''}`} key={person.name} data-testid="founder-card">
                     <div className={s.portrait}>
-                        <Image
-                            src={person.image}
-                            alt={person.name}
-                            sizes="(max-width: 500px) 40vw, (max-width: 900px) 220px, 240px"
-                        />
+                        <div className={s.portraitCrop}>
+                            <Image
+                                src={person.image}
+                                alt={person.name}
+                                sizes="(max-width: 500px) 40vw, (max-width: 900px) 220px, 240px"
+                            />
+                        </div>
+                        {index === 1 && showPavolHat && (
+                            <div className={s.accessoryFrame} aria-hidden="true">
+                                <Image className={s.hat} src={pavolHat} alt="" sizes="140px" draggable={false} />
+                            </div>
+                        )}
                     </div>
                     <div className={s.content}>
                         <h3>{person.name}</h3>

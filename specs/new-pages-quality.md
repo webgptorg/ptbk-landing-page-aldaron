@@ -8,6 +8,8 @@ Veřejné cesty mají jeden zdroj. České `/cs` routy sdílejí implementaci ko
 
 ## Vzhled a navigace — aktuální zadání 24. října 2026
 
+Navazující zadání z 11. listopadu zachovává Pavolův schválený portrét a odstraňuje pouze vyčnívající pramen za uchem vlevo na obrázku. Odvozený `pavol-hejny-studio-neat.webp` mění v tomto místě jen průhlednost; obličej, oblečení a postoj jsou původní. Tmavě vínově hnědý plstěný klobouk podle dodané fotografie je samostatný průhledný `pavol-hejny-hat.webp`, vykreslený druhým obrázkem. Poloha i měřítko vycházejí ze společného rámce portrétu na mobilu i počítači. `showPavolHat={false}` klobouk odstraní bez výměny portrétu. Původní zdrojový portrét a Jiřího fotografie zůstávají zachované.
+
 Zadání z 11. listopadu 2026 odstraňuje „Náš příběh“ / „Our story“ z hlavního i mobilního menu. Stránka příběhu, odkaz v patičce a odkaz pod zakladateli zůstávají dostupné. České menu má pouze „Komunita“ s přímým odkazem na `/cs/komunity/promptbook`, bez mezikroku přes rozcestník komunit.
 
 Hlavní i partnerská landing page mají stejný světlý vizuální jazyk: téměř bílé pozadí, černý text, modrá původního loga (`#000080`), Outfit pro nadpisy a Inter pro text. Hlavička i patička obsahují původní symbol a slovo `promptbook` bez tečky; `prompt` je černě a `book` modře. Hero nadpisy nemají závěrečné tečky. Otevřené kompozice a jemně tónované pásy neskládají stránku do řady tmavých krabic. Prostorové objekty mají tenké světlé hrany, měkké stíny a jemnou paralaxu, bez tvrdých extruzí. Technické podrobnosti nepřebírají hero.

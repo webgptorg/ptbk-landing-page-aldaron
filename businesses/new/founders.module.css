@@ -25,16 +25,23 @@
 }
 
 .portrait {
+    position: relative;
     grid-column: 1;
     grid-row: 1;
     align-self: end;
     height: 360px;
     min-width: 0;
-    overflow: hidden;
     border-radius: 0 0 0 24px;
 }
 
-.portrait img {
+.portraitCrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.portraitCrop img {
     display: block;
     position: relative;
     left: 50%;
@@ -42,6 +49,27 @@
     max-width: none;
     height: 100%;
     transform: translateX(-50%);
+}
+
+/* Share the portrait's intrinsic 1080 × 1440 coordinates at every breakpoint. */
+.accessoryFrame {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    aspect-ratio: 1080 / 1440;
+    transform: translateX(-50%);
+    pointer-events: none;
+    user-select: none;
+}
+
+.hat {
+    position: absolute;
+    left: 27.78%;
+    top: -6.67%;
+    width: 48.15%;
+    max-width: none;
+    height: auto;
 }
 
 .content {
