@@ -135,6 +135,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Public random file-ID links recheck source domain; admin links require messages permission. Export links use
   durable IDs. No account or storage/API credential changes are introduced.
   Message deletion cascades to its history. No login is introduced. See `docs/messages.md` for configuration.
+- The comparison overview `/cs/srovnani` and `/en/srovnani` offers a page-selected Book adviser through the allowlisted `SiteAgentChat` registry. It shares the existing floating chat behavior and private turn storage, with separate `site-comparison-cs/en` sources. Its ordinary Book and histories live in `/admin/agents`; homepage and Messages placements retain their behavior. The adviser can recommend competitors and uses the current comparison catalogue server-side. See `specs/new-comparisons.md`.
 - `/admin/agents` administers the existing shared `workshop_agents` Books, including Pavol Hejný. Internal UUIDs
   have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents
   cannot be deleted out from under messages/history; they can be disabled or reassigned. Separate `messages` and

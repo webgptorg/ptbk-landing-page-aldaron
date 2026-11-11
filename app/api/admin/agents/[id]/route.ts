@@ -1,3 +1,4 @@
+import { SITE_AGENT_EMBEDS } from '@/lib/site-agents/registry';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAgentDatabase, mapAgent } from '@/lib/agents/agentDatabase';
 import { AGENT_VALUES_SCHEMA } from '@/lib/agents/agentModel';
@@ -16,6 +17,7 @@ export function PATCH(request: NextRequest, { params }: Context) {
 export function DELETE(request: NextRequest, { params }: Context) {
     return withMessagesAdmin(request, async () => {
         const id = requireRecordId((await params).id);
+        if (Object.values(SITE_AGENT_EMBEDS).some(embed => embed.agentId === id)) return NextResponse.json({ error: 'Agent je přiřazený k veřejnému chatu. Můžete upravit jeho Book nebo jej vypnout.' }, { status: 409 });
         const { data, error } = await getAgentDatabase().from('workshop_agents').delete().eq('id', id).select('id').maybeSingle();
         if (error?.code === '23503') return NextResponse.json({ error: 'Agent je použitý ve zprávách nebo historii workshopů. Můžete jej vypnout nebo nejprve změnit přiřazení.' }, { status: 409 });
         if (error) throw new Error('Agenta se nepodařilo odstranit.');

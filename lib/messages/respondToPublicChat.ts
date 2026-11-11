@@ -29,7 +29,7 @@ async function boundedJson(request: Request): Promise<unknown> {
 
 export async function respondToPublicChat(request: Request, subject: {
     source: ChatConversationSource; rateKey: string; agentId: string; introduction: string;
-    markdown: string; context: string; instructions: string;
+    markdown: string; context: string; instructions: string; unavailableMessage?: string;
 }) {
     const instructions = subject.instructions;
     const json = (value: unknown, status = 200) => Response.json(value, { status, headers: MESSAGE_RESPONSE_HEADERS });
@@ -70,11 +70,11 @@ export async function respondToPublicChat(request: Request, subject: {
         catch { console.warn('Message chat failure could not be recorded.'); }
         return json({ error, retryAsNew: true }, status);
     };
-    if (!process.env.OPENAI_API_KEY?.trim()) return fail('Chat teď není dostupný. Celý kontext si můžeš stáhnout nahoře.', 503);
+    if (!process.env.OPENAI_API_KEY?.trim()) return fail(subject.unavailableMessage ?? 'Chat teď není dostupný. Celý kontext si můžeš stáhnout nahoře.', 503);
     let reply: string;
     try {
         const agent = await loadManagedAgent(subject.agentId);
-        if (!agent || !agent.isEnabled) return fail('Chat teď není dostupný. Celý kontext si můžeš stáhnout nahoře.', 503);
+        if (!agent || !agent.isEnabled) return fail(subject.unavailableMessage ?? 'Chat teď není dostupný. Celý kontext si můžeš stáhnout nahoře.', 503);
         const inputs = files.length ? await (await import('./messageAttachmentDatabase')).createChatAttachmentInputs(files) : [];
         reply = await runManagedAgent(agent, instructions, JSON.stringify({
             message: subject.markdown, fullContext: subject.context, conversation: turns,

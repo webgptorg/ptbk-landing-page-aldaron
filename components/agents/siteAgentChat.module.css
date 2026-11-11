@@ -1,0 +1,19 @@
+.embed {
+    --article-paper: #fff;
+    --article-ink: #17386c;
+    --article-line: #e3e8ef;
+    --article-muted: #687383;
+    --article-soft: #eef3fa;
+    --article-accent: #17386c;
+    --cookie-surface: #fff;
+    --cookie-text: #1b2739;
+    --cookie-border: #e3e8ef;
+    --cookie-accent: #17386c;
+}
+.embed :global(.floating-conversation-header h2) {
+    margin: 0;
+    font: 600 14px/1.4 var(--font-inter), sans-serif;
+    letter-spacing: normal;
+}
+.embed :global(.message-chat p) { color: inherit; }
+.embed :global(.message-chat .message-chat-markdown a) { color: var(--article-accent); text-decoration: underline; }

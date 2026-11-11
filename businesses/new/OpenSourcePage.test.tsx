@@ -198,7 +198,7 @@ describe('self-hosted installation entry point', () => {
             ['npm', locale === 'cs' ? 'Nainstalujte balíček' : 'Install the package'],
             ['Claude Code / Codex / AI', locale === 'cs' ? 'Vložte ho do AI agenta' : 'Paste it into your AI agent'],
         ]) {
-            fireEvent.click(screen.getByRole('tab', { name: tab, exact: true }));
+            fireEvent.click(screen.getByRole('tab', { name: tab }));
             expect(within(region()).getByRole('heading', { name: text })).toBeTruthy();
             expect(within(region()).getAllByRole('listitem')).toHaveLength(3);
             const video = region().querySelector('video');

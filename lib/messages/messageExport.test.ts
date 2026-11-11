@@ -19,6 +19,15 @@ describe('portable message exports', () => {
         expect(book).toContain('CHAT MESSAGE {Pavol Hejný}');
         expect(createMessageTextExport(chat, 'md')).toContain('## Návštěvník');
     });
+    it('exports a different adviser with its own name and branding while preserving the personal defaults', () => {
+        const chat = { ...document, kind: 'chat' as const, sourceUrl: 'https://www.ptbk.io/cs/srovnani',
+            assistantName: 'Poradce s výběrem AI', brandLabel: 'Promptbook · ptbk.io',
+            turns: [{ role: 'assistant' as const, content: 'Zvažte n8n.' }] };
+        expect(createMessageTextExport(chat, 'book')).toContain('CHAT MEMBER {Poradce s výběrem AI}');
+        expect(createMessageTextExport(chat, 'md')).toContain('## Poradce s výběrem AI');
+        expect(createMessageTextExport(chat, 'md')).not.toContain('Pavol Hejný');
+        expect(createMessagePdfDefinition(chat).info?.author).toBe('Poradce s výběrem AI');
+    });
     it('uses an HTML comment in Markdown and a quiet footer in plain text and PDF', () => {
         expect(createMessageTextExport(document, 'md')).toContain('<!-- Zpráva od Pavola Hejného');
         const text = createMessageTextExport({ ...document, content: '**Důležité**\n\n[Zdroj](https://example.com)' }, 'txt');

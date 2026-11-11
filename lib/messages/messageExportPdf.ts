@@ -8,7 +8,7 @@ export function createMessagePdfDefinition(document: MessageExportDocument): TDo
     return {
         pageSize: 'A4', pageMargins: [44, 44, 44, 48],
         defaultStyle: { font: 'Inter', fontSize: 10, lineHeight: 1.3, color: '#243c34' },
-        info: { title: document.title, author: 'Pavol Hejný', subject: document.sourceUrl },
+        info: { title: document.title, author: document.assistantName ?? 'Pavol Hejný', subject: document.sourceUrl },
         content: [
             { text: document.title, font: 'Outfit', fontSize: 23, margin: [0, 0, 0, 12] },
             { text: document.sourceUrl, link: document.sourceUrl, color: '#65776e', fontSize: 8, margin: [0, 0, 0, 20] },

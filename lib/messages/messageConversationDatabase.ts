@@ -1,4 +1,5 @@
 import 'server-only';
+import type { SiteAgentSourceKey } from '@/lib/site-agents/registry';
 import { createHash } from 'node:crypto';
 import { getAgentDatabase } from '@/lib/agents/agentDatabase';
 import type { MessageChatTurn } from './messageTypes';
@@ -11,7 +12,7 @@ type TurnRow = {
     attachments?: RecordedMessageChatTurn['attachments'];
 };
 const turnColumns = 'id,question,introduction,reply,status,error_message,created_at,completed_at,request_hash,attachments';
-export type ChatConversationSource = string | { readonly sourceKey: 'pavol-cs' | 'pavol-en' };
+export type ChatConversationSource = string | { readonly sourceKey: 'pavol-cs' | 'pavol-en' | SiteAgentSourceKey };
 const sourceFields = (source: ChatConversationSource) => typeof source === 'string' ? { message_id: source } : { source_key: source.sourceKey };
 function mapTurn(row: TurnRow): RecordedMessageChatTurn {
     return { id: row.id, question: row.question, introduction: row.introduction, reply: row.reply,

@@ -11,8 +11,8 @@ import { chatAttachmentHref } from '@/lib/messages/messageAttachments';
 const date = (value: string) => new Intl.DateTimeFormat('cs-CZ', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Europe/Prague' }).format(new Date(value));
 
 /** Read-only histories never share or replace the message editor's autosaved draft. */
-export function MessageConversations({ messageId, language }: { readonly messageId?: string; readonly language?: 'cs' | 'en' }) {
-    const base = language ? `/api/admin/messages/personal/${language}/conversations` : `/api/admin/messages/${messageId}/conversations`;
+export function MessageConversations({ messageId, language, endpoint, assistantName = 'Pavol Hejný' }: { readonly messageId?: string; readonly language?: 'cs' | 'en'; readonly endpoint?: string; readonly assistantName?: string }) {
+    const base = endpoint ?? (language ? `/api/admin/messages/personal/${language}/conversations` : `/api/admin/messages/${messageId}/conversations`);
     const [conversations, setConversations] = useState<MessageConversation[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
     const [turns, setTurns] = useState<RecordedMessageChatTurn[]>([]);
@@ -49,8 +49,8 @@ export function MessageConversations({ messageId, language }: { readonly message
             if (mounted.current && request === generation.current) setError(failure instanceof Error ? failure.message : 'Rozhovor se nepodařilo načíst.');
         } finally { if (mounted.current && request === generation.current) setLoading(false); }
     }
-    const copy = [turns[0]?.introduction ? `Pavol Hejný: ${turns[0].introduction}` : '', ...turns.map((turn) =>
-        `${date(turn.createdAt)}\nNávštěvník: ${turn.question}\n${(turn.attachments ?? []).map((file) => `${file.name}: ${typeof window === 'undefined' ? '' : window.location.origin}${chatAttachmentHref(file.id, true)}`).join('\n')}\n${turn.reply ? `Pavol Hejný: ${turn.reply}` : turn.status === 'failed' ? `Chyba: ${turn.errorMessage}` : 'Odpověď není dokončená.'}`,
+    const copy = [turns[0]?.introduction ? `${assistantName}: ${turns[0].introduction}` : '', ...turns.map((turn) =>
+        `${date(turn.createdAt)}\nNávštěvník: ${turn.question}\n${(turn.attachments ?? []).map((file) => `${file.name}: ${typeof window === 'undefined' ? '' : window.location.origin}${chatAttachmentHref(file.id, true)}`).join('\n')}\n${turn.reply ? `${assistantName}: ${turn.reply}` : turn.status === 'failed' ? `Chyba: ${turn.errorMessage}` : 'Odpověď není dokončená.'}`,
     )].filter(Boolean).join('\n\n');
 
     return <div className="space-y-5">
@@ -64,11 +64,11 @@ export function MessageConversations({ messageId, language }: { readonly message
                 <Button variant="outline" size="sm" onClick={() => { generation.current++; setLoading(false); setSelected(null); setTurns([]); setError(''); }}>Zpět na konverzace</Button>
                 {turns.length > 0 && !moreTurns && <CopyTextButton text={copy} label="Kopírovat konverzaci" />}
             </div>
-            {turns[0]?.introduction && <div className="rounded-xl bg-slate-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">Pavol Hejný · úvod chatu</p><p className="whitespace-pre-wrap break-words text-sm">{turns[0].introduction}</p></div>}
+            {turns[0]?.introduction && <div className="rounded-xl bg-slate-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">{assistantName} · úvod chatu</p><p className="whitespace-pre-wrap break-words text-sm">{turns[0].introduction}</p></div>}
             <ol className="space-y-5" aria-label="Zaznamenaný rozhovor">
                 {turns.map((turn) => <li key={turn.id} className="space-y-3 border-b border-slate-200 pb-5">
                     <div className="rounded-xl bg-cyan-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">Návštěvník · <time dateTime={turn.createdAt}>{date(turn.createdAt)}</time></p><p className="whitespace-pre-wrap break-words text-sm">{turn.question}</p><MessageAttachments files={turn.attachments} admin /></div>
-                    {turn.reply ? <div className="rounded-xl bg-slate-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">Pavol Hejný{turn.completedAt && <> · <time dateTime={turn.completedAt}>{date(turn.completedAt)}</time></>}</p><p className="whitespace-pre-wrap break-words text-sm">{turn.reply}</p></div>
+                    {turn.reply ? <div className="rounded-xl bg-slate-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">{assistantName}{turn.completedAt && <> · <time dateTime={turn.completedAt}>{date(turn.completedAt)}</time></>}</p><p className="whitespace-pre-wrap break-words text-sm">{turn.reply}</p></div>
                         : <p className="text-sm text-slate-500">{turn.status === 'failed' ? `Odpověď se nezdařila: ${turn.errorMessage}` : 'Odpověď se připravuje nebo byla přerušena. Dotaz je uložený.'}</p>}
                 </li>)}
             </ol>

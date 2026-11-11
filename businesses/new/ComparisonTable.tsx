@@ -9,10 +9,10 @@ import {
     type Comparison, type ComparisonValue,
 } from './comparisons';
 import { useSiteLocale } from './LocaleProvider';
-import { licencePrice, type SiteLocale } from './localization';
+import type { SiteLocale } from './localization';
 import { ALTERNATIVE_COMMERCIAL_TERMS, COMMERCIAL_ROWS } from './comparisonCommercial';
 import { CAPABILITY_REVIEW_DATE, PROMPTBOOK_CAPABILITY_SOURCES } from './comparisonCapabilities';
-import { COMMERCIAL_TERMS } from './commercialTerms';
+import { getPromptbookAppTerms, PUBLIC_ENGINE_SUMMARY, PUBLIC_ENGINE_TERMS } from './comparisonProducts';
 import s from './site.module.css';
 
 const STATUS = {
@@ -27,19 +27,6 @@ const OVERVIEW_FEATURES = [
     { id: 'useCase', label: { cs: 'Hodí se pro', en: 'Best suited for' } },
     ...COMPARISON_ROWS,
 ] as const;
-
-const PUBLIC_ENGINE_SUMMARY = {
-    ...PROMPTBOOK_SUMMARY,
-    useCase: { cs: 'Vývoj a testování u sebe', en: 'Development and testing on your own host' },
-    remote: { cs: 'Lokální Console; použití vzdálené Appky dle licence', en: 'Local Console; remote App use subject to licence', status: 'conditional' as const },
-};
-
-const PUBLIC_ENGINE_TERMS = {
-    price: { cs: '0 Kč za povolené použití', en: '$0 for permitted use' },
-    billing: { cs: 'Vlastní hosting a AI', en: 'Your hosting and AI' },
-    allowance: { cs: 'Bez produktové podpory a SLA', en: 'No product support or SLA' },
-    licensing: { cs: 'Veřejná licence dané verze', en: 'Version-specific public licence' },
-};
 
 function MetricCell({ value, locale, source }: { value: ComparisonValue; locale: SiteLocale; source?: string }) {
     if (!value.status) return <td>
@@ -60,17 +47,7 @@ function MetricCell({ value, locale, source }: { value: ComparisonValue; locale:
 export function ComparisonTable() {
     const { locale, path } = useSiteLocale();
     const cs = locale === 'cs';
-    const start = licencePrice('start', locale);
-    const business = licencePrice('business', locale);
-    const { startCapacity, businessCapacity } = COMMERCIAL_TERMS;
-    const agentCount = `${startCapacity.specialists} / ${businessCapacity.specialists}`;
-    const userCount = `${startCapacity.users} / ${businessCapacity.users}`;
-    const appTerms = {
-        price: { cs: `Start ${start} · Business ${business} za měsíc`, en: `Start ${start} · Business ${business} per month` },
-        billing: { cs: 'Za projekt enginu. AI a infrastruktura zvlášť.', en: 'Per engine project. AI and infrastructure separate.' },
-        allowance: { cs: `Start / Business: ${agentCount} odborných agentů, ${userCount} uživatelů`, en: `Start / Business: ${agentCount} specialist agents, ${userCount} users` },
-        licensing: { cs: 'Produkční licence Start / Business', en: 'Start / Business production licence' },
-    };
+    const appTerms = getPromptbookAppTerms(locale);
 
     return <section className={s.comparisonSection} aria-labelledby="comparison-table-title">
         <h2 id="comparison-table-title" className={s.srOnly}>{cs ? 'Srovnávací tabulka nástrojů' : 'Tool comparison table'}</h2>

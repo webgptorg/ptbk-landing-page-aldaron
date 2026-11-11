@@ -3,6 +3,7 @@
 import { useSiteLocale } from './LocaleProvider';
 import { ComparisonTable, ProductComparisonTable } from './ComparisonTable';
 import Link from 'next/link';
+import { SiteAgentChat } from '@/components/agents/SiteAgentChat';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { AgendaShowcase } from './AgendaShowcase';
 import { Founders } from './Founders';
@@ -146,6 +147,7 @@ export function ComparisonsPage() {
             {cs ? `Promptbook a ${COMPARISONS.length} alternativ v jedné tabulce. Kliknutím na název alternativy otevřete detail.` : `Promptbook and ${COMPARISONS.length} alternatives in one table. Select an alternative’s name to open its comparison.`}
         </PageIntro>
         <ComparisonTable />
+        <SiteAgentChat embedId="comparison" language={locale} />
         <ClosingCta />
     </>;
 }

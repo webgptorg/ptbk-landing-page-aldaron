@@ -132,6 +132,14 @@ describe('bilingual launch site', () => {
         expect(free.textContent).toContain(locale === 'cs' ? '0 Kč za povolené použití' : '$0 for permitted use');
         expect(price.querySelectorAll('a[href^="https://"]')).toHaveLength(COMPARISONS.length);
     });
+    it.each(['cs', 'en'] as const)('mounts the adviser only in the comparison overview in %s', locale => {
+        const overview = document.createElement('div'); overview.innerHTML = html(<ComparisonsPage />, locale);
+        expect(overview.querySelector('h1')?.textContent).toBe('Promptbook versus');
+        const label = locale === 'cs' ? 'Poradit s výběrem AI' : 'Help me choose an AI tool';
+        expect(overview.querySelector(`button[aria-label="${label}"]`)).not.toBeNull();
+        const detail = document.createElement('div'); detail.innerHTML = html(<ComparisonPage slug="n8n" />, locale);
+        expect(detail.querySelector(`button[aria-label="${label}"]`)).toBeNull();
+    });
     it('shows six comparisons and an overview link in the footer and renders sourced details in both languages', () => {
         const shell = document.createElement('div');
         shell.innerHTML = renderToStaticMarkup(<NewSiteShell><div /></NewSiteShell>);
