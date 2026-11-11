@@ -2,7 +2,7 @@
 
 `/cs/open-source` a `/en/open-source` jsou stručným instalačním rozcestníkem. Jeden nadpis, krátký pokyn, výběr způsobu instalace a obsah zvolené záložky. Bez opakovaného produktového hero, benefitů, přehledu ovládání, prodejních sekcí a výzvy ke hvězdičce. Dole pouze GitHub, dokumentace, BUSL-1.1 a stávající kontakt pro pomoc s instalací.
 
-Za zvolenou instalační metodou je v obou jazycích přehratelný záznam od instalace přes npm po založení projektu a zadání první agendy. Video sdílí soubor a náhled s `/cs/terminal`, kam vede odkaz na postup krok za krokem. Anglická stránka výslovně uvádí, že záznam i návod jsou česky.
+Za zvolenou instalační metodou je v obou jazycích odpovídající tříkrokový postup. Změna záložky mění celý postup; AI rozlišuje také Váš počítač a VPS přes SSH. macOS ukazuje stažení DMG, přesunutí aplikace do Aplikací a první spuštění; Windows vlastní EXE instalátor, Shell SSH bootstrap a cloud přípravu serveru. Podrobný návod pro Mac vede na dokumentaci desktopové aplikace. Pouze npm obsahuje existující terminálové video a odkaz na `/cs/terminal`; anglická stránka označuje jeho češtinu. Přepnutí z npm video odpojí, takže nezůstává hrát u jiné metody.
 
 ## Způsoby instalace
 

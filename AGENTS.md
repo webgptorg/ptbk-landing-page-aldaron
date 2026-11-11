@@ -259,8 +259,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   and the engine's shared Ubuntu installer guide. DigitalOcean is the first cloud option and opens its Droplet
   startup-script guide; Azure opens the paid deployment form and AWS opens the EC2 CloudFormation upload guide.
   Label the copy/upload steps. AI sign-in and agenda setup remain attended over SSH; both languages share resources.
-  The installation page keeps the terminal recording next to its method tabs and selected command or prompt.
-  The English installation page labels the Czech recording explicitly. The steps link to `/cs/terminal`.
+  The installation walkthrough follows the selected method and the AI local/SSH target in both languages.
+  macOS shows DMG download, dragging the app into Applications and launching the app, with the desktop guide.
+  Only npm shows the terminal recording and `/cs/terminal` link; English labels its Czech audio.
   Shell uses /install.sh, a thin attended wrapper over the engine installer, then opens ordinary ptbk init as
   promptbook with /dev/tty restored; failures never initialize a project. Ubuntu 24.04 x86-64, systemd and
   root/sudo are explicit. Native VPS AI login instructions live in a disclosure. Omit repeated product,

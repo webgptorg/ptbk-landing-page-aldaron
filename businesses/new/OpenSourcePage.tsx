@@ -7,13 +7,9 @@ import { TERMINAL_TOUR_PATH, TERMINAL_TOUR_STEPS, TERMINAL_TOUR_VIDEO_PATH } fro
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
+import { getInstallationWalkthrough, type InstallMethod, type InstallTarget } from './installationWalkthrough';
 import type { ProductRelease } from '@/lib/releases/catalog';
 import s from './open-source.module.css';
-
-/** Direct installation choices; AI-assisted setup stays first. */
-type InstallMethod = 'ai' | 'npm' | 'shell' | 'windows' | 'macos' | 'server';
-/** Destination for the user's local coding agent. */
-type InstallTarget = 'local' | 'server';
 
 /** Shared, inspectable installation resources. */
 const REPOSITORY = 'https://github.com/webgptorg/promptbook';
@@ -27,7 +23,7 @@ const METHODS: readonly InstallMethod[] = ['ai', 'npm', 'shell', 'windows', 'mac
 const COPY = {
     cs: {
         back: '← Promptbook', title: 'Instalace Promptbooku', intro: 'Vyberte si způsob instalace.',
-        tourTitle: 'Instalace krok za krokem ve videu',
+        tourTitle: 'Instalace krok za krokem',
         tourDescription: 'Od instalace přes npm po založení projektu a zadání první agendy.',
         tourGuide: 'Otevřít návod se snímky terminálu',
         repository: 'GitHub', methods: 'Způsob instalace',
@@ -78,7 +74,7 @@ Ověř běžící engine i registraci spuštění po restartu a předej mi termi
     },
     en: {
         back: '← Promptbook', title: 'Install Promptbook', intro: 'Choose an installation method.',
-        tourTitle: 'Terminal walkthrough',
+        tourTitle: 'Installation step by step',
         tourDescription: 'Czech recording · Install with npm, create a project and describe its first job.',
         tourGuide: 'Open the illustrated guide (in Czech)',
         repository: 'GitHub', methods: 'Installation method',
@@ -157,6 +153,7 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
     const macos = release?.downloads?.macos;
     const [method, setMethod] = useState<InstallMethod>('ai');
     const [target, setTarget] = useState<InstallTarget>('local');
+    const walkthrough = getInstallationWalkthrough(locale, method, target);
     const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const id = useId();
 
@@ -253,18 +250,28 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
                     </>}
             </div>)}
         </section>
-        <section className={s.tour} aria-labelledby={`${id}-tour-title`}>
+        <section className={`${s.tour}${method === 'npm' ? ` ${s.tourWithVideo}` : ''}`} aria-labelledby={`${id}-tour-title`}>
             <div className={s.tourCopy}>
-                <h2 id={`${id}-tour-title`}>{copy.tourTitle}</h2>
-                <p id={`${id}-tour-description`}>{copy.tourDescription}</p>
-                <Link className={s.textLink} href={TERMINAL_TOUR_PATH} hrefLang="cs">
-                    {copy.tourGuide}<ArrowRight size={14} aria-hidden="true" />
-                </Link>
+                <h2 id={`${id}-tour-title`}>{copy.tourTitle} · {walkthrough.name}</h2>
+                <ol className={s.tourSteps} role="list">
+                    {walkthrough.steps.map(step => <li key={step.title}>
+                        <h3>{step.title}</h3><p>{step.text}</p>
+                    </li>)}
+                </ol>
+                {method === 'npm' && <>
+                    <p id={`${id}-tour-description`}>{copy.tourDescription}</p>
+                    <Link className={s.textLink} href={TERMINAL_TOUR_PATH} hrefLang="cs">
+                        {copy.tourGuide}<ArrowRight size={14} aria-hidden="true" />
+                    </Link>
+                </>}
+                {method === 'macos' && <a className={s.textLink} href={`${REPOSITORY}/blob/reborn/2026-10/apps/desktop/README.md#macos-installation`}>
+                    {locale === 'cs' ? 'Podrobný návod pro macOS' : 'Detailed macOS guide'}<ArrowRight size={14} aria-hidden="true" />
+                </a>}
             </div>
-            <video className={s.tourVideo} aria-labelledby={`${id}-tour-title`} aria-describedby={`${id}-tour-description`}
+            {method === 'npm' && <video className={s.tourVideo} aria-labelledby={`${id}-tour-title`} aria-describedby={`${id}-tour-description`}
                 controls playsInline preload="none" poster={TERMINAL_TOUR_STEPS[1].imagePath}>
                 <source src={TERMINAL_TOUR_VIDEO_PATH} type="video/mp4" />
-            </video>
+            </video>}
         </section>
         <footer className={s.resources}>
             <a href={REPOSITORY}><Github size={16} aria-hidden="true" />{copy.repository}</a>

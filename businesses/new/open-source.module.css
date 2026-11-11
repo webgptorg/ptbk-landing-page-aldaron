@@ -56,11 +56,20 @@
 .providers svg { position: absolute; top: 21px; right: 14px; }
 .note { margin-top: 18px !important; font-size: 12px; }
 .note a { margin-left: 8px; color: #243f77 !important; text-decoration: underline !important; text-underline-offset: 3px; }
-.tour { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); align-items: center; gap: 24px; margin-top: 20px; padding: 18px 24px; border: 1px solid #dbe4ef; border-radius: 16px; background: #f5f8fd; }
+.tour { margin-top: 20px; padding: 22px 24px; border: 1px solid #dbe4ef; border-radius: 16px; background: #f5f8fd; }
+.tourWithVideo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); align-items: center; gap: 24px; }
 .tourCopy h2 { font-size: 23px !important; line-height: 1.25 !important; }
 .tourCopy p { margin-top: 8px !important; font-size: 14px; line-height: 1.6; }
 .tourCopy .textLink { font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
 .tourCopy .textLink svg { flex-shrink: 0; }
+.tourSteps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; counter-reset: installation-step; list-style: none; margin: 22px 0 0; padding: 0; }
+.tourSteps li { min-width: 0; counter-increment: installation-step; }
+.tourSteps li::before { content: counter(installation-step); display: grid; place-items: center; width: 28px; height: 28px; margin-bottom: 10px; border-radius: 50%; background: #e1eaf8; color: #17386c; font-size: 13px; font-weight: 600; }
+.tourSteps h3 { margin: 0; font-size: 15px !important; line-height: 1.4 !important; }
+.tourSteps p { margin-top: 6px !important; font-size: 13px; line-height: 1.6; }
+.tourWithVideo .tourSteps { grid-template-columns: 1fr; gap: 14px; margin-bottom: 18px; }
+.tourWithVideo .tourSteps li { position: relative; padding-left: 38px; }
+.tourWithVideo .tourSteps li::before { position: absolute; left: 0; top: 0; }
 .tourVideo { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #172339; }
 .resources { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-top: 20px; }
 .resources a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #526781 !important; font-size: 12px; }
@@ -85,6 +94,7 @@
     .providers a { gap: 5px; padding: 16px 36px 16px 16px; }
     .providers svg { top: 17px; }
     .tour { grid-template-columns: 1fr; gap: 8px; padding: 18px; }
+    .tourSteps { grid-template-columns: 1fr; gap: 18px; }
     .tourCopy h2 { font-size: 21px !important; }
     .resources { gap: 5px 18px; }
 }

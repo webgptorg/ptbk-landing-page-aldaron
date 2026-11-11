@@ -177,22 +177,50 @@ describe('self-hosted installation entry point', () => {
         expect(element.querySelector('h1')?.textContent).toBe(locale === 'en' ? 'Install Promptbook' : 'Instalace Promptbooku');
         expect(element.textContent).toContain('BUSL-1.1');
         const internalLinks = Array.from(element.querySelectorAll('a[href^="/"]'));
-        const tour = within(element).getByRole('link', { name: locale === 'en' ? 'Open the illustrated guide (in Czech)' : 'Otevřít návod se snímky terminálu' });
-        expect(tour.getAttribute('href')).toBe('/cs/terminal');
-        expect(tour.getAttribute('hreflang')).toBe('cs');
-        const video = element.querySelector('video');
-        expect(video?.hasAttribute('controls')).toBe(true);
-        expect(video?.hasAttribute('playsinline')).toBe(true);
-        expect(video?.getAttribute('preload')).toBe('none');
-        expect(video?.querySelector('source')?.getAttribute('src')).toBe('/terminal-tour/walkthrough.mp4');
-        const videoDescriptionId = video?.getAttribute('aria-describedby');
-        expect(Array.from(element.querySelectorAll('[id]')).find(node => node.id === videoDescriptionId)?.textContent)
-            .toContain(locale === 'en' ? 'Czech recording' : 'Od instalace přes npm');
-        expect(internalLinks.filter(link => link !== tour).every(link => link.getAttribute('href')?.startsWith(`/${locale}`))).toBe(true);
+        const guide = within(element).getByRole('heading', { name: locale === 'en' ? 'Installation step by step · AI agent · Your computer' : 'Instalace krok za krokem · AI agent · Váš počítač' }).closest('section')!;
+        expect(within(guide).getAllByRole('listitem')).toHaveLength(3);
+        expect(element.querySelector('video')).toBeNull();
+        expect(internalLinks.every(link => link.getAttribute('href')?.startsWith(`/${locale}`))).toBe(true);
         const [title, description] = OPEN_SOURCE_PAGE_COPY[locale];
         const metadata = newPageMetadata('open-source', title, description, locale);
         expect(metadata.alternates?.canonical).toBe(`https://ptbk.io/${locale}/open-source`);
         expect(metadata.alternates?.languages).toMatchObject({ cs: 'https://ptbk.io/cs/open-source', en: 'https://ptbk.io/en/open-source' });
+    });
+
+    it.each(['cs', 'en'] as const)('matches the %s walkthrough to each installer and shows the terminal video only for npm', locale => {
+        render(page(locale));
+        const region = () => screen.getByRole('region', { name: locale === 'cs' ? /^Instalace krok za krokem/ : /^Installation step by step/ });
+        for (const [tab, text] of [
+            ['macOS DMG', locale === 'cs' ? 'Přetáhněte aplikaci do Aplikací' : 'Drag the app into Applications'],
+            ['Windows EXE', locale === 'cs' ? 'Spusťte instalátor' : 'Run the installer'],
+            ['Shell', locale === 'cs' ? 'Spusťte instalační příkaz' : 'Run the installation command'],
+            ['VPS / cloud', locale === 'cs' ? 'Vyberte poskytovatele' : 'Choose a provider'],
+            ['npm', locale === 'cs' ? 'Nainstalujte balíček' : 'Install the package'],
+            ['Claude Code / Codex / AI', locale === 'cs' ? 'Vložte ho do AI agenta' : 'Paste it into your AI agent'],
+        ]) {
+            fireEvent.click(screen.getByRole('tab', { name: tab, exact: true }));
+            expect(within(region()).getByRole('heading', { name: text })).toBeTruthy();
+            expect(within(region()).getAllByRole('listitem')).toHaveLength(3);
+            const video = region().querySelector('video');
+            if (tab === 'npm') {
+                expect(video?.querySelector('source')?.getAttribute('src')).toBe('/terminal-tour/walkthrough.mp4');
+                expect(video?.hasAttribute('controls')).toBe(true);
+                expect(video?.hasAttribute('playsinline')).toBe(true);
+                expect(video?.getAttribute('preload')).toBe('none');
+                expect(within(region()).getByRole('link', { name: locale === 'cs' ? 'Otevřít návod se snímky terminálu' : 'Open the illustrated guide (in Czech)' }).getAttribute('href')).toBe('/cs/terminal');
+                expect(region().textContent).toContain(locale === 'cs' ? 'Od instalace přes npm' : 'Czech recording');
+            } else {
+                expect(video).toBeNull();
+                expect(region().querySelector('a[href="/cs/terminal"]')).toBeNull();
+            }
+            if (tab === 'macOS DMG') {
+                expect(region().textContent).not.toContain('npm install');
+                expect(within(region()).getByRole('link').getAttribute('href')).toContain('apps/desktop/README.md#macos-installation');
+            }
+        }
+        fireEvent.click(screen.getByRole('radio', { name: locale === 'cs' ? 'VPS přes SSH' : 'VPS over SSH' }));
+        expect(region().getAttribute('aria-labelledby')).toBeTruthy();
+        expect(within(region()).getByRole('heading', { name: locale === 'cs' ? 'Zkopírujte prompt pro VPS' : 'Copy the VPS prompt' })).toBeTruthy();
     });
 
     it.each(['cs', 'en'] as const)('copies the same complete VPS installer from the %s Shell tab', async locale => {
