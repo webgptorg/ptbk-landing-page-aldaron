@@ -52,6 +52,7 @@ export function Founders({ compact = false, showPavolHat = true }: { compact?: b
                         </div>
                         {index === 1 && showPavolHat && (
                             <div className={s.accessoryFrame} aria-hidden="true">
+                                <span className={s.hatShadow} />
                                 <Image className={s.hat} src={pavolHat} alt="" sizes="140px" draggable={false} />
                             </div>
                         )}

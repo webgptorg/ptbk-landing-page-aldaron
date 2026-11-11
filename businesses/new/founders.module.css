@@ -65,11 +65,26 @@
 
 .hat {
     position: absolute;
-    left: 27.78%;
-    top: -6.67%;
-    width: 48.15%;
+    left: 30.09%;
+    top: -5.90%;
+    width: 41.67%;
     max-width: none;
     height: auto;
+    transform: rotate(-3deg) scaleX(-1);
+    transform-origin: 50% 80%;
+}
+
+/* The removable brim casts a soft contact shadow, without changing the portrait. */
+.hatShadow {
+    position: absolute;
+    left: 39.35%;
+    top: 9.03%;
+    width: 25.93%;
+    height: 4.86%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 0%, rgb(31 20 18 / 28%), rgb(31 20 18 / 11%) 42%, transparent 75%);
+    mix-blend-mode: multiply;
+    transform: rotate(2deg);
 }
 
 .content {
