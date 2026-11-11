@@ -27,8 +27,17 @@ describe('meeting transcript as message context', () => {
     it.each([
         { text: 'Celý přepis, včetně detailů.' },
         { text: 'Celý přepis, včetně detailů.', words: [{ text: 'Different provider text', speaker_id: 'a' }] },
+        { text: 'Celý přepis, včetně detailů.', words: null },
+        { text: 'Celý přepis, včetně detailů.', words: [null] },
+        { text: 'Celý přepis, včetně detailů.', words: [{ text: null }] },
+        { text: 'Celý přepis, včetně detailů.', words: [{ text: 'Celý', speaker_id: 42 }] },
     ])('retains the full original transcription when diarization is absent or incompatible', (result) => {
         expect(formatMessageTranscript('notes.m4a', result)).toBe('Následuje přepsané audio: notes.m4a\n\nCelý přepis, včetně detailů.');
+    });
+
+    it('accepts nullable optional word metadata without rejecting the original text', () => {
+        expect(formatMessageTranscript('call.m4a', { text: 'Ano.', words: [{ text: 'Ano.', type: null, speaker_id: 'a' }] }))
+            .toContain('Mluvčí 1:\nAno.');
     });
 
     it('refuses an empty result without changing an existing context', () => {

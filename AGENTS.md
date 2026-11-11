@@ -62,7 +62,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   The browser extracts a video's primary audio track before requesting an ElevenLabs `batch_scribe` single-use token.
   Only the extracted or original audio (up to 2 GB) uploads directly from the browser, never through Vercel's media
   body limits. Failed local extraction never uploads the source video. Scribe v2 verbatim text and numbered diarized speakers append to existing
-  context under a filename heading. Missing/incompatible diarization preserves the original text. Transcription is
+  context under a filename heading. Missing/malformed/incompatible word metadata preserves the original text.
+  File imports retain an admin-only copyable JSON report of every attempt, including source/extracted file metadata,
+  stages, request parameters, HTTP status, exposed request ID, full raw response and error details. Reports stay in
+  the open editor's memory, separate from public message context. Tokens and credential-bearing URLs are excluded.
+  Non-JSON and asynchronous responses remain diagnosable without automatically retrying paid transcription. Transcription is
   explicit, protected as pending admin work and never retried automatically. Retain completed text if it exceeds the
   context limit. External-file audio/token are not stored or reused for summary narration; subsequent summary/speech controls
   retain their existing behavior. Transcription uses the existing server-only ElevenLabs key independently of storage.

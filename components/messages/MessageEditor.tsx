@@ -12,11 +12,12 @@ import { AdminSaveValidationError } from '@/lib/admin/AdminSaveQueue';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import { appendMessageTranscript } from '@/lib/messages/messageTranscription';
 import { MESSAGE_MEDIA_ACCEPT } from '@/lib/messages/messageVideoImport';
-import { transcribeMessageFile } from '@/lib/messages/messageTranscriptionClient';
+import { transcribeMessageFile, type MessageTranscriptionReport } from '@/lib/messages/messageTranscriptionClient';
 import { createMessagePrefix, createMessageShareText, getMessageUrl, MESSAGE_CONTEXT_MAX_LENGTH, MESSAGE_DOMAINS, MESSAGE_VALUES_SCHEMA,
     PAVOL_MESSAGE_AGENT_ID, type ManagedMessage, type MessageValues } from '@/lib/messages/messageModel';
 import type { ManagedAgent } from '@/lib/agents/agentModel';
 import { MessageMeetingRecorder } from './MessageMeetingRecorder';
+import { MessageTranscriptionDiagnostics } from './MessageTranscriptionDiagnostics';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Copy, ExternalLink, LoaderCircle, Sparkles, Volume2, X } from 'lucide-react';
 
 type AgentChoice = Pick<ManagedAgent, 'id' | 'name' | 'isEnabled'>;
@@ -33,6 +34,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const [operation, setOperation] = useState('');
     const [error, setError] = useState('');
     const [transcriptionNotice, setTranscriptionNotice] = useState('');
+    const [transcriptionReports, setTranscriptionReports] = useState<MessageTranscriptionReport[]>([]);
     const [queuedFiles, setQueuedFiles] = useState<{ id: number; file: File }[]>([]);
     const nextFileId = useRef(0);
     const [pendingTranscript, setPendingTranscript] = useState('');
@@ -120,7 +122,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             progress('Připravuji přepis…');
             let transcript: string;
             try {
-                transcript = await transcribeMessageFile(file, progress);
+                transcript = await transcribeMessageFile(file, progress, report => setTranscriptionReports(current => [...current, report]));
             } catch (failure) {
                 const reason = failure instanceof Error ? failure.message : 'Přepis se nepodařilo dokončit.';
                 throw new Error(`„${file.name}“ · ${reason}`);
@@ -260,7 +262,8 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                 </section>
             </> : <Button type="submit" disabled={busy}>Vytvořit zprávu</Button>}
         </>}
-        {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="break-words rounded-lg bg-red-50 p-3 text-sm text-red-700 [overflow-wrap:anywhere]">{error}</p>}
+        <MessageTranscriptionDiagnostics reports={transcriptionReports} />
         {operation && <p role="status" className="flex items-center gap-2 text-sm text-slate-600"><LoaderCircle className="h-4 w-4 shrink-0 animate-spin" /><span className="min-w-0 break-words">{operation}</span></p>}
         {saved && <AdminAutosaveStatus {...autosave} />}
     </form>;

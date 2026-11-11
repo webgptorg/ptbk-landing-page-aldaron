@@ -7,14 +7,16 @@ vi.mock('./messageVideoImport', async (importOriginal) => ({
     ...await importOriginal<typeof import('./messageVideoImport')>(),
     extractMessageAudio: mocks.extractAudio,
 }));
-import { transcribeMessageFile } from './messageTranscriptionClient';
+import { transcribeMessageFile, type MessageTranscriptionReport } from './messageTranscriptionClient';
 import { hasPendingAdminWork } from '@/lib/admin/adminPendingSaves';
 
 function createUpload() {
     return {
         open: vi.fn(), send: vi.fn(), upload: { onprogress: null as ((event: ProgressEvent) => void) | null, onload: null as (() => void) | null },
         onload: null as (() => void) | null, onerror: null as (() => void) | null, onabort: null as (() => void) | null, ontimeout: null as (() => void) | null,
-        responseType: '', timeout: 0, status: 200, response: { text: 'Úplný původní přepis.' } as unknown,
+        responseType: '', timeout: 0, status: 200, statusText: 'OK',
+        getResponseHeader: vi.fn((name: string) => name === 'request-id' ? 'provider-request-123' : 'application/json'),
+        responseText: JSON.stringify({ text: 'Úplný původní přepis.' }),
     };
 }
 let upload: ReturnType<typeof createUpload>;
@@ -84,12 +86,84 @@ describe('direct ElevenLabs message transcription', () => {
     });
 
     it('reports a provider rejection and never creates an auth token for an invalid file', async () => {
-        expect(() => transcribeMessageFile(new File(['not audio'], 'file.txt'), () => undefined)).toThrow('audio soubor');
+        await expect(transcribeMessageFile(new File(['not audio'], 'file.txt'), () => undefined)).rejects.toThrow('audio soubor');
         expect(mocks.request).not.toHaveBeenCalled();
         const pending = transcribeMessageFile(file(), () => undefined);
         const failure = expect(pending).rejects.toThrow('HTTP 429');
         await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
         upload.status = 429; upload.onload?.(); await failure;
         expect(upload.send).toHaveBeenCalledOnce();
+    });
+
+    it('retains valid paid text with malformed word metadata and reports source, audio, stages and the full provider response', async () => {
+        const diagnostic = vi.fn();
+        const video = new File(['video frames and sound'], 'Screen.mp4', { type: 'video/mp4' });
+        const audio = new File(['sound'], 'Screen.m4a', { type: 'audio/mp4' });
+        mocks.extractAudio.mockResolvedValueOnce(audio);
+        upload.responseText = JSON.stringify({ text: 'Zaplacený přepis.', words: [{ text: null }], transcription_id: 'transcript-123' });
+        const pending = transcribeMessageFile(video, () => undefined, diagnostic);
+        await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
+        upload.onload?.();
+        expect(await pending).toContain('Zaplacený přepis.');
+        const report: MessageTranscriptionReport = diagnostic.mock.calls[0][0];
+        expect(report).toMatchObject({ outcome: 'completed', stage: 'complete',
+            source: { name: video.name, size: video.size }, audio: { name: audio.name, size: audio.size },
+            response: { status: 200, requestId: 'provider-request-123', body: upload.responseText } });
+        expect(report.events.map(event => event.stage)).toContain('audio-extraction');
+        expect(report.request.parameters).toMatchObject({ webhook: 'false', use_multi_channel: 'false' });
+        expect(JSON.stringify(report)).not.toContain('one-use-token');
+    });
+
+    it.each([
+        { status: 200, body: '{"text":"Ready","words":[null]}', succeeds: true },
+        { status: 200, body: '{"text":"  ","words":[]}', succeeds: false },
+        { status: 200, body: '<html>upstream error</html>', succeeds: false },
+        { status: 202, body: '{"request_id":"accepted-123"}', succeeds: false },
+        { status: 429, body: '{"detail":{"message":"Quota exceeded"}}', succeeds: false },
+    ])('keeps the raw response for HTTP $status without repeating the paid request', async ({ status, body, succeeds }) => {
+        const diagnostic = vi.fn();
+        upload.status = status; upload.responseText = body;
+        const pending = transcribeMessageFile(file(), () => undefined, diagnostic);
+        const result = succeeds ? expect(pending).resolves.toContain('Ready') : expect(pending).rejects.toThrow();
+        await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
+        upload.onload?.();
+        await result;
+        expect(diagnostic).toHaveBeenCalledOnce();
+        expect(diagnostic.mock.calls[0][0]).toMatchObject({ outcome: succeeds ? 'completed' : 'failed', response: { status, body } });
+        expect(upload.send).toHaveBeenCalledOnce();
+        expect(mocks.request).toHaveBeenCalledOnce();
+    });
+
+    it('includes local extraction and token failures in the report before any media upload', async () => {
+        const diagnostic = vi.fn();
+        mocks.extractAudio.mockRejectedValueOnce(new Error('Unsupported codec'));
+        await expect(transcribeMessageFile(new File(['frames'], 'video.mp4', { type: 'video/mp4' }), () => undefined, diagnostic)).rejects.toThrow('Unsupported codec');
+        expect(diagnostic.mock.calls[0][0]).toMatchObject({ outcome: 'failed', stage: 'audio-extraction', error: { message: 'Unsupported codec' } });
+        mocks.request.mockRejectedValueOnce(new Error('Token HTTP 503'));
+        await expect(transcribeMessageFile(file(), () => undefined, diagnostic)).rejects.toThrow('Token HTTP 503');
+        expect(diagnostic.mock.calls[1][0]).toMatchObject({ outcome: 'failed', stage: 'single-use-token' });
+        expect(upload.send).not.toHaveBeenCalled();
+    });
+
+    it('redacts the single-use credential even if the provider echoes it in an error', async () => {
+        const diagnostic = vi.fn();
+        upload.status = 403;
+        upload.responseText = '{"detail":"Invalid one-use-token"}';
+        const pending = transcribeMessageFile(file(), () => undefined, diagnostic);
+        const result = expect(pending).rejects.toThrow('HTTP 403');
+        await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
+        upload.onload?.(); await result;
+        expect(diagnostic.mock.calls[0][0].response.body).toBe('{"detail":"Invalid [REDACTED]"}');
+        expect(JSON.stringify(diagnostic.mock.calls[0][0])).not.toContain('one-use-token');
+    });
+
+    it('redacts credentials from JSON parse diagnostics as well as the raw response', async () => {
+        const diagnostic = vi.fn();
+        upload.responseText = 'one-use-token is not JSON';
+        const pending = transcribeMessageFile(file(), () => undefined, diagnostic);
+        const result = expect(pending).rejects.toThrow('platný JSON');
+        await waitFor(() => expect(upload.send).toHaveBeenCalledOnce());
+        upload.onload?.(); await result;
+        expect(JSON.stringify(diagnostic.mock.calls[0][0])).not.toContain('one-use-token');
     });
 });

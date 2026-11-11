@@ -8,12 +8,13 @@ vi.mock('@/lib/messages/messageTranscriptionClient', () => ({ transcribeMessageF
 vi.mock('./MessageMeetingRecorder', () => ({ MessageMeetingRecorder: () => null }));
 import { MessageEditor } from './MessageEditor';
 import { TEST_MESSAGE } from '@/lib/messages/messageTestFixtures';
+import type { MessageTranscriptionReport } from '@/lib/messages/messageTranscriptionClient';
 const agent = { id: TEST_MESSAGE.agentId, name: 'Pavol Hejný', isEnabled: true };
 function openMediaImport() {
     fireEvent.click(screen.getByRole('button', { name: 'Importovat audio nebo video' }));
     return screen.getByLabelText('Audio nebo video soubory');
 }
-afterEach(() => { cleanup(); vi.resetAllMocks(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); vi.unstubAllGlobals(); });
 describe('two-step message editor', () => {
     it('adopts prepared server links without replacing text typed while the save was pending', async () => {
         let complete!: (value: unknown) => void;
@@ -166,6 +167,40 @@ describe('two-step message editor', () => {
         mocks.transcribe.mockResolvedValueOnce('Pokračování přepisu.');
         fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávku' }));
         await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue(`Kratší poznámky.\n\n${transcript}\n\nPokračování přepisu.`));
-        expect(mocks.transcribe).toHaveBeenLastCalledWith(remaining, expect.any(Function));
+        expect(mocks.transcribe).toHaveBeenLastCalledWith(remaining, expect.any(Function), expect.any(Function));
+    });
+    it('shows and copies the complete diagnostic history across a failed attempt and an explicit retry', async () => {
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        vi.stubGlobal('navigator', { clipboard: { writeText } });
+        const report: MessageTranscriptionReport = {
+            attemptId: 'attempt-1', startedAt: '2026-11-11T08:00:00Z', outcome: 'failed', stage: 'transcript-formatting',
+            source: { name: 'call.mp4', size: 1234, type: 'video/mp4', lastModified: 0 },
+            browser: { userAgent: 'Chrome Android', language: 'cs', online: true },
+            request: { endpoint: 'https://api.elevenlabs.io/v1/speech-to-text' }, events: [],
+            response: { status: 200, statusText: 'OK', contentType: 'application/json', requestId: 'request-123', body: '{"unexpected":"raw response"}' },
+        };
+        mocks.transcribe.mockImplementationOnce(async (_file, _progress, onDiagnostics) => {
+            onDiagnostics(report); throw new Error('Nečitelný přepis.');
+        });
+        render(<MessageEditor message={null} agents={[agent]} audioConfigured={false} transcriptionConfigured onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.change(openMediaImport(), { target: { files: [new File(['video'], 'call.mp4')] } });
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávku' }));
+        await screen.findByRole('alert');
+        const raw = screen.getByLabelText('Surový technický report přepisu') as HTMLTextAreaElement;
+        expect(raw.closest('details')).toHaveAttribute('open');
+        expect(raw.value).toContain('request-123');
+        expect(screen.getByLabelText('Celý kontext')).toHaveValue('');
+        mocks.transcribe.mockImplementationOnce(async (_file, _progress, onDiagnostics) => {
+            onDiagnostics({ ...report, attemptId: 'attempt-2', outcome: 'completed', stage: 'complete' });
+            return 'Dokončený přepis.';
+        });
+        fireEvent.click(screen.getByRole('button', { name: 'Přepsat nahrávku' }));
+        await waitFor(() => expect(screen.getByLabelText('Celý kontext')).toHaveValue('Dokončený přepis.'));
+        fireEvent.click(screen.getByText('Technický report přepisu'));
+        fireEvent.click(screen.getByRole('button', { name: 'Kopírovat technický report' }));
+        await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+        const copied = JSON.parse(writeText.mock.calls[0][0]) as { attempts: MessageTranscriptionReport[] };
+        expect(copied.attempts.map(attempt => attempt.attemptId)).toEqual(['attempt-1', 'attempt-2']);
+        expect(mocks.request).not.toHaveBeenCalled();
     });
 });

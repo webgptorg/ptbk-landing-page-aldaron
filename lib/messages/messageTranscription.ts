@@ -14,16 +14,21 @@ export function validateMessageAudioFile(file: Pick<File, 'name' | 'type' | 'siz
 
 const transcriptSchema = z.object({
     text: z.string().refine((text) => Boolean(text.trim())),
+});
+const transcriptWordsSchema = z.object({
     words: z.array(z.object({
-        text: z.string(), type: z.string().optional(), speaker_id: z.string().nullable().optional(),
+        text: z.string(), type: z.string().nullish(), speaker_id: z.string().nullish(),
     })).optional(),
 });
 
 /** Slice the provider's original text, rather than reconstructing or summarizing its words. */
 export function formatMessageTranscript(filename: string, result: unknown): string {
     const parsed = transcriptSchema.safeParse(result);
-    if (!parsed.success) throw new Error('ElevenLabs nevrátilo čitelný přepis. Před dalším pokusem zkontrolujte historii přepisů.');
-    const { text, words } = parsed.data;
+    if (!parsed.success) throw new Error('ElevenLabs nevrátilo čitelný přepis. Před dalším pokusem zkontrolujte historii přepisů.', { cause: parsed.error });
+    const { text } = parsed.data;
+    // Optional word metadata must never invalidate a usable, already-paid transcript.
+    const wordData = transcriptWordsSchema.safeParse(result);
+    const words = wordData.success ? wordData.data.words : undefined;
     let transcript = text.trim();
     if (words?.some((word) => word.speaker_id)) {
         const labels = new Map<string, number>();
