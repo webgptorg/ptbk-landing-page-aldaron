@@ -71,28 +71,32 @@
 .hatInterior {
     position: absolute;
     left: 35.46%;
-    top: 7.29%;
+    top: 8.13%;
     width: 32.41%;
     height: 10.42%;
     border-radius: 50%;
     background: radial-gradient(ellipse at 65% 30%, #39251f, #251712 65%, #30201a);
+    transform: scaleY(.94);
+    transform-origin: 50% 17%;
 }
 
 /* The fitted brim already contains its head-shaped occlusion and camera angle. */
 .hat {
     position: absolute;
     left: 31.48%;
-    top: -3.13%;
+    top: -2.29%;
     width: 39.81%;
     max-width: none;
     height: auto;
+    transform: scaleY(.94);
+    transform-origin: 50% 65%;
 }
 
 /* Clip the removable contact shadow to the original portrait alpha, not the background. */
 .hatShadow {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 16% 4.5% at 51% 8.2%, rgb(30 18 14 / 42%), rgb(30 18 14 / 25%) 40%, transparent 85%);
+    background: radial-gradient(ellipse 16% 4.23% at 51% 9.08%, rgb(30 18 14 / 42%), rgb(30 18 14 / 25%) 40%, transparent 85%);
     mask-size: 100% 100%;
     mask-position: center;
     mask-repeat: no-repeat;
