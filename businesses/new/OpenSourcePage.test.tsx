@@ -17,25 +17,35 @@ function page(locale: 'cs' | 'en' = 'en', releases?: Parameters<typeof OpenSourc
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('self-hosted installation entry point', () => {
-    it('uses the same preview version for the AI prompt, npm, shell and Windows download', () => {
+    it.each(['cs', 'en'] as const)('uses the same preview version for %s commands and Windows/macOS downloads', locale => {
         const version = '0.119.0-75';
         const url = `https://github.com/webgptorg/promptbook/releases/download/v${version}/Promptbook-Setup-${version}-windows-x64.exe`;
-        render(page('en', { preview: {
+        const macUrl = (arch: string) => `https://github.com/webgptorg/promptbook/releases/download/v${version}/Promptbook-${version}-macos-${arch}-unsigned.dmg`;
+        render(page(locale, { preview: {
             version, prerelease: true, publishedAt: '2026-11-08', listedAt: '2026-11-08',
-            downloads: { windows: { url, checksumUrl: `${url}.sha256` } },
+            downloads: { windows: { url, checksumUrl: `${url}.sha256` }, macos: {
+                arm64: { url: macUrl('arm64'), checksumUrl: `${macUrl('arm64')}.sha256`, unsigned: true },
+                x64: { url: macUrl('x64'), checksumUrl: `${macUrl('x64')}.sha256`, unsigned: true },
+            } },
         } }));
-        expect(screen.getByText(`Preview release ${version}`)).toBeTruthy();
+        expect(screen.getByText(`${locale === 'cs' ? 'Verze k vyzkoušení' : 'Preview release'} ${version}`)).toBeTruthy();
         expect(screen.getByRole('tabpanel').textContent).toContain(`npm install --global ptbk@${version}`);
         fireEvent.click(screen.getByRole('tab', { name: 'npm' }));
         expect(screen.getByRole('tabpanel').textContent).toContain(`npm install --global ptbk@${version}`);
         fireEvent.click(screen.getByRole('tab', { name: 'Shell' }));
         expect(screen.getByRole('tabpanel').textContent).toContain(`bash -s -- --version ${version}`);
         fireEvent.click(screen.getByRole('tab', { name: 'Windows EXE' }));
-        expect(screen.getByRole('link', { name: /Choose a Windows EXE/ }).getAttribute('href')).toBe(url);
+        expect(screen.getByRole('link', { name: locale === 'cs' ? /Vybrat Windows EXE/ : /Choose a Windows EXE/ }).getAttribute('href')).toBe(url);
         expect(screen.getByRole('link', { name: 'SHA-256' }).getAttribute('href')).toBe(`${url}.sha256`);
+        fireEvent.click(screen.getByRole('tab', { name: 'macOS DMG' }));
+        expect(screen.getByRole('link', { name: /^(Stáhnout pro|Download for) Apple Silicon/ }).getAttribute('href')).toBe(macUrl('arm64'));
+        expect(screen.getByRole('link', { name: /^(Stáhnout pro|Download for) Intel/ }).getAttribute('href')).toBe(macUrl('x64'));
+        expect(screen.getByRole('link', { name: 'SHA-256 · Apple Silicon' }).getAttribute('href')).toBe(`${macUrl('arm64')}.sha256`);
+        expect(screen.getByRole('link', { name: 'SHA-256 · Intel' }).getAttribute('href')).toBe(`${macUrl('x64')}.sha256`);
+        expect(screen.getByRole('tabpanel').textContent).toContain(locale === 'cs' ? 'není podepsaná' : 'unsigned');
     });
 
-    it('starts with the AI prompt and moves through all five methods from the keyboard', () => {
+    it('starts with the AI prompt and moves through all six methods from the keyboard', () => {
         render(page());
         const ai = screen.getByRole('tab', { name: 'Claude Code / Codex / AI' });
         expect(screen.getAllByRole('tab')[0]).toBe(ai);
@@ -62,7 +72,11 @@ describe('self-hosted installation entry point', () => {
         expect(screen.getByRole('link', { name: 'Choose a Windows EXE' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/releases');
         expect(screen.getByRole('tabpanel').textContent).toContain('Promptbook-Setup-<version>-windows-x64.exe');
 
-        fireEvent.keyDown(windows, { key: 'End' });
+        fireEvent.keyDown(windows, { key: 'ArrowRight' });
+        const macos = screen.getByRole('tab', { name: 'macOS DMG' });
+        expect(document.activeElement).toBe(macos);
+        expect(screen.getByRole('link', { name: 'Choose a macOS DMG on GitHub' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/releases');
+        fireEvent.keyDown(macos, { key: 'End' });
         const server = screen.getByRole('tab', { name: 'VPS / cloud' });
         expect(document.activeElement).toBe(server);
         expect(screen.getByRole('tabpanel').textContent).toContain('connect over SSH and finish setup');

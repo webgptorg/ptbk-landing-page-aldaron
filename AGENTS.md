@@ -255,7 +255,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `/cs/open-source` and `/en/open-source` open on **Claude Code / Codex / AI**, with readable, copyable local-computer
   and existing-VPS-over-SSH prompts for a coding agent running on the user's computer. Preserve existing setup, use
   native headless authentication under the engine account, and hand over a verified terminal dashboard. Prompt copy
-  feedback follows the selected target and reports real clipboard failure. Other tabs retain npm, the Ubuntu VPS shell bootstrap, Windows EXE releases
+  feedback follows the selected target and reports real clipboard failure. Other tabs retain npm, the Ubuntu VPS shell bootstrap, Windows EXE releases and macOS DMGs for Apple Silicon/Intel with matching checksums and unsigned-preview labels
   and the engine's shared Ubuntu installer guide. DigitalOcean is the first cloud option and opens its Droplet
   startup-script guide; Azure opens the paid deployment form and AWS opens the EC2 CloudFormation upload guide.
   Label the copy/upload steps. AI sign-in and agenda setup remain attended over SSH; both languages share resources.

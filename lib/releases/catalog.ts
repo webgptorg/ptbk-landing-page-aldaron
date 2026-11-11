@@ -1,7 +1,7 @@
 import catalog from './catalog.json';
 import { compareReleaseVersions, parseReleaseVersion } from './version';
 
-export type ReleaseDownload = { url: string; checksumUrl: string };
+export type ReleaseDownload = { url: string; checksumUrl: string; unsigned?: boolean };
 
 export type ProductRelease = {
     version: string;
@@ -11,7 +11,7 @@ export type ProductRelease = {
     npmUrl?: string;
     githubUrl?: string;
     notes?: string;
-    downloads?: { windows?: ReleaseDownload };
+    downloads?: { windows?: ReleaseDownload; macos?: { arm64?: ReleaseDownload; x64?: ReleaseDownload } };
     installable?: boolean;
     /** A published minimum may only be extended. Prereleases never acquire support. */
     supportUntil?: string;

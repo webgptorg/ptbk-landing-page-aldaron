@@ -11,7 +11,7 @@ import type { ProductRelease } from '@/lib/releases/catalog';
 import s from './open-source.module.css';
 
 /** Direct installation choices; AI-assisted setup stays first. */
-type InstallMethod = 'ai' | 'npm' | 'shell' | 'windows' | 'server';
+type InstallMethod = 'ai' | 'npm' | 'shell' | 'windows' | 'macos' | 'server';
 /** Destination for the user's local coding agent. */
 type InstallTarget = 'local' | 'server';
 
@@ -21,7 +21,7 @@ const SERVER_GUIDE = `${REPOSITORY}/blob/reborn/2026-10/deploy/README.md`;
 const INSTALLER_URL = 'https://www.ptbk.io/install.sh';
 const SHELL_COMMAND = `curl -fsSL ${INSTALLER_URL} | bash`;
 const AZURE_DEPLOY = `https://portal.azure.com/#create/Microsoft.Template/uri/${encodeURIComponent('https://raw.githubusercontent.com/webgptorg/promptbook/reborn/2026-10/deploy/azure/azuredeploy.json')}`;
-const METHODS: readonly InstallMethod[] = ['ai', 'npm', 'shell', 'windows', 'server'];
+const METHODS: readonly InstallMethod[] = ['ai', 'npm', 'shell', 'windows', 'macos', 'server'];
 
 /** Localized instructions share the same executable commands. */
 const COPY = {
@@ -63,6 +63,11 @@ Ověř běžící engine i registraci spuštění po restartu a předej mi termi
         windowsTitle: 'Windows instalátor',
         windowsText: 'Stáhněte EXE z GitHub Releases. Doplní potřebné závislosti a otevře nastavení projektu.',
         download: 'Vybrat Windows EXE',
+        macosTitle: 'Aplikace pro macOS',
+        macosText: 'Stáhněte DMG pro svůj Mac, otevřete ho a přetáhněte Promptbook do složky Aplikace.',
+        macosArm64: 'Stáhnout pro Apple Silicon', macosX64: 'Stáhnout pro Intel',
+        macosReleases: 'Vybrat macOS DMG na GitHubu',
+        macosUnsigned: 'Tato zkušební aplikace není podepsaná. macOS může při prvním otevření vyžadovat povolení v Nastavení systému → Soukromí a zabezpečení.',
         serverTab: 'VPS / cloud', serverTitle: 'Nový server',
         serverText: 'Vyberte poskytovatele. Po vytvoření serveru se připojte přes SSH a dokončete nastavení.',
         digitalOceanHint: 'Vložit startovací skript', awsHint: 'Nahrát CloudFormation šablonu', azureHint: 'Otevřít formulář nasazení',
@@ -109,6 +114,11 @@ Verify the running engine and boot-start registration, then hand over the termin
         windowsTitle: 'Windows installer',
         windowsText: 'Download the EXE from GitHub Releases. It adds the required dependencies and opens project setup.',
         download: 'Choose a Windows EXE',
+        macosTitle: 'macOS application',
+        macosText: 'Download the DMG for your Mac, open it and drag Promptbook into Applications.',
+        macosArm64: 'Download for Apple Silicon', macosX64: 'Download for Intel',
+        macosReleases: 'Choose a macOS DMG on GitHub',
+        macosUnsigned: 'This preview application is unsigned. On first launch, macOS may require approval in System Settings → Privacy & Security.',
         serverTab: 'VPS / cloud', serverTitle: 'New server',
         serverText: 'Choose a provider. After creating the server, connect over SSH and finish setup.',
         digitalOceanHint: 'Paste the startup script', awsHint: 'Upload the CloudFormation template', azureHint: 'Open the deployment form',
@@ -144,6 +154,7 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
     const npmCommand = `npm install --global ptbk${release ? `@${release.version}` : ''}`;
     const shellCommand = release ? `${SHELL_COMMAND} -s -- --version ${release.version}` : SHELL_COMMAND;
     const windows = release?.downloads?.windows;
+    const macos = release?.downloads?.macos;
     const [method, setMethod] = useState<InstallMethod>('ai');
     const [target, setTarget] = useState<InstallTarget>('local');
     const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -184,13 +195,13 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
                     id={`${id}-${item}`} type="button" role="tab" aria-selected={method === item}
                     aria-controls={`${id}-panel-${item}`} tabIndex={method === item ? 0 : -1}
                     onClick={() => setMethod(item)} onKeyDown={event => moveTab(event, index)}>
-                    {item === 'ai' ? 'Claude Code / Codex / AI' : item === 'npm' ? 'npm' : item === 'shell' ? 'Shell' : item === 'server' ? copy.serverTab : 'Windows EXE'}
+                    {item === 'ai' ? 'Claude Code / Codex / AI' : item === 'npm' ? 'npm' : item === 'shell' ? 'Shell' : item === 'server' ? copy.serverTab : item === 'macos' ? 'macOS DMG' : 'Windows EXE'}
                 </button>)}
             </div>
             {METHODS.map(item => <div key={item} hidden={method !== item} id={`${id}-panel-${item}`} role="tabpanel" aria-labelledby={`${id}-${item}`} tabIndex={0} className={s.panel}>
                 <div className={s.methodIntro}>
-                    <h2>{item === 'ai' ? copy.aiTitle : item === 'npm' ? copy.npmTitle : item === 'shell' ? copy.shellTitle : item === 'server' ? copy.serverTitle : copy.windowsTitle}</h2>
-                    <p>{item === 'ai' ? copy.aiText : item === 'npm' ? copy.npmText : item === 'shell' ? copy.shellText : item === 'server' ? copy.serverText : copy.windowsText}</p>
+                    <h2>{item === 'ai' ? copy.aiTitle : item === 'npm' ? copy.npmTitle : item === 'shell' ? copy.shellTitle : item === 'server' ? copy.serverTitle : item === 'macos' ? copy.macosTitle : copy.windowsTitle}</h2>
+                    <p>{item === 'ai' ? copy.aiText : item === 'npm' ? copy.npmText : item === 'shell' ? copy.shellText : item === 'server' ? copy.serverText : item === 'macos' ? copy.macosText : copy.windowsText}</p>
                 </div>
                 {item === 'ai' ? <>
                     <fieldset className={s.targetChoice}>
@@ -221,7 +232,17 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
                         <a href={windows?.url ?? `${REPOSITORY}/releases`} className={s.primaryLink}>{copy.download}{windows && ` · ${release?.version}`}<ArrowRight size={17} aria-hidden="true" /></a>
                         {windows && <a href={windows.checksumUrl}>SHA-256</a>}
                         {!windows && <code>Promptbook-Setup-&lt;version&gt;-windows-x64.exe</code>}
-                    </div> : <>
+                    </div> : item === 'macos' ? <>
+                        {(['arm64', 'x64'] as const).map(arch => {
+                            const download = macos?.[arch];
+                            return download && <div key={arch} className={s.download}>
+                                <a href={download.url} className={s.primaryLink}>{arch === 'arm64' ? copy.macosArm64 : copy.macosX64} · {release?.version}<ArrowRight size={17} aria-hidden="true" /></a>
+                                <a href={download.checksumUrl} aria-label={`SHA-256 · ${arch === 'arm64' ? 'Apple Silicon' : 'Intel'}`}>SHA-256</a>
+                            </div>;
+                        })}
+                        {!macos?.arm64 && !macos?.x64 && <a href={release?.githubUrl ?? `${REPOSITORY}/releases`} className={s.primaryLink}>{copy.macosReleases}<ArrowRight size={17} aria-hidden="true" /></a>}
+                        {(macos?.arm64?.unsigned || macos?.x64?.unsigned) && <p className={s.note}>{copy.macosUnsigned}</p>}
+                    </> : <>
                         <div className={s.providers}>
                             <a href={`${SERVER_GUIDE}#digitalocean`}><strong>DigitalOcean</strong><span>{copy.digitalOceanHint}</span><ArrowRight size={17} aria-hidden="true" /></a>
                             <a href={AZURE_DEPLOY}><strong>Azure</strong><span>{copy.azureHint}</span><ArrowRight size={17} aria-hidden="true" /></a>

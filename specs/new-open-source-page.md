@@ -6,7 +6,7 @@ Za zvolenou instalační metodou je v obou jazycích přehratelný záznam od in
 
 ## Způsoby instalace
 
-Pět přístupných záložek: **Claude Code / Codex / AI** (první a výchozí), **npm**, **Shell**, **Windows EXE**, **VPS / cloud**. Šipky cyklí volby, Home/End přejdou na první/poslední. Přesná vazba tab/panel, viditelné zaměření a vodorovně posuvné záložky na mobilu.
+Šest přístupných záložek: **Claude Code / Codex / AI** (první a výchozí), **npm**, **Shell**, **Windows EXE**, **macOS DMG**, **VPS / cloud**. Šipky cyklí volby, Home/End přejdou na první/poslední. Přesná vazba tab/panel, viditelné zaměření a vodorovně posuvné záložky na mobilu.
 
 AI nabízí stručné lidsky čitelné prompty pro **Váš počítač** a **VPS přes SSH**, určené místnímu agentovi s terminálem. Obsahuje aktuální README/návod, zachování dat, doplnění předpokladů, publikovaný balíček, běžný init, nativní přihlášení, ověření výsledku a předání dashboardu. VPS používá existující SSH přístup, Ubuntu 24.04 x86-64, účet `promptbook` pro engine i harness, headless prohlížeč a nativní přihlašovací odkazy/kódy. Nekupuje server ani nevyžaduje tajné údaje v chatu. Celý zvolený prompt se kopíruje, při změně cíle se smaže staré potvrzení; cíl přetrvá změnu záložky.
 
@@ -17,6 +17,8 @@ Shell je pro čisté **Ubuntu 24.04 x64 se systemd**, přes interaktivní SSH, j
 Rozbalitelné přihlášení na VPS uvádí `codex login --device-auth` a `claude auth login` s odkazy na oficiální dokumentaci. Odkaz/kód dokončí uživatel na vlastním počítači nebo telefonu pod stejným serverovým účtem `promptbook`. Jde o dostupné nativní postupy, nikoliv tvrzení, že engine již automaticky implementuje všechny cílové požadavky onboardingu.
 
 Windows odkazuje na veřejné GitHub Releases a pojmenování `Promptbook-Setup-<version>-windows-x64.exe`; nevymýšlí pevnou aktuální verzi ani neexistující asset.
+
+macOS nabízí DMG zvlášť pro Apple Silicon a Intel se SHA-256 odkazy ze stejné zvolené verze katalogu. Synchronizace zařadí pouze skutečně nahrané neprázdné assety s kontrolním součtem; upřednostní podepsané pojmenování před `-unsigned`. Nepodepsané aplikace mají stručné upozornění pro první otevření. Chybějící DMG odkazuje na GitHub vydání, nikdy na vymyšlený soubor.
 
 Cloud ponechá **DigitalOcean první**, Azure a AWS. Každá volba má přímý odkaz a krátký popis skutečného kroku: vložení startovacího skriptu, formulář Azure, nahrání CloudFormation. Sdílí návod `deploy/README.md` a Azure ARM šablonu ve větvi `reborn/2026-10`. Server je placený a po jeho přípravě se inicializace a AI přihlášení dokončí přes SSH. Web server nezakládá ani nepřebírá klíče.
 

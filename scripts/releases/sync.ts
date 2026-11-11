@@ -39,13 +39,22 @@ async function main() {
         const windowsUrl = uploaded(windowsName);
         const checksumUrl = uploaded(`${windowsName}.sha256`);
         const windows = windowsUrl && checksumUrl ? { url: windowsUrl, checksumUrl } : undefined;
+        const macos = Object.fromEntries((['arm64', 'x64'] as const).flatMap(arch => {
+            // Prefer a signed DMG, but retain explicitly labelled unsigned previews.
+            for (const suffix of ['', '-unsigned']) {
+                const name = `Promptbook-${version}-macos-${arch}${suffix}.dmg`;
+                const url = uploaded(name), checksumUrl = uploaded(`${name}.sha256`);
+                if (url && checksumUrl) return [[arch, { url, checksumUrl, unsigned: suffix === '-unsigned' }]];
+            }
+            return [];
+        }));
         // Existing publication, first-listing and support promises are immutable in automatic sync.
         records.set(version, {
             version, publishedAt: old?.publishedAt ?? publishedAt, listedAt: old?.listedAt ?? now,
             prerelease: old?.prerelease ?? (!!parseReleaseVersion(version)?.prerelease || !!gh?.prerelease),
             ...(npm.versions[version] || old?.npmUrl ? { npmUrl: `https://www.npmjs.com/package/ptbk/v/${version}` } : {}),
             ...(gh || old?.githubUrl ? { githubUrl: gh?.html_url ?? old.githubUrl } : {}),
-            ...(windows ? { downloads: { windows } } : {}),
+            ...(windows || Object.keys(macos).length ? { downloads: { ...(windows ? { windows } : {}), ...(Object.keys(macos).length ? { macos } : {}) } } : {}),
             ...(windows && npm.versions[version]?.dist?.tarball ? { installable: true } : {}),
             ...(old?.notes || gh?.body ? { notes: old?.notes ?? gh.body.slice(0, 4000) } : {}),
             ...(old?.supportUntil ? { supportUntil: old.supportUntil } : {}),

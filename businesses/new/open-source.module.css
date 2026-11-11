@@ -43,6 +43,7 @@
 .login a { display: inline-block; margin: 6px 0 10px; color: #243f77 !important; }
 .login .terminal { margin-bottom: 16px; }
 .download { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.download + .download { margin-top: 12px; }
 .download code { max-width: 100%; overflow-wrap: anywhere; color: #526781; font-size: 12px; }
 .primaryLink { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 46px; padding: 12px 18px; border-radius: 8px; background: #243f77; color: #fff !important; font-size: 14px; }
 .primaryLink:hover { background: #35568f; }

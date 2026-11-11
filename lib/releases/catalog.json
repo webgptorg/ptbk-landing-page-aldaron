@@ -1,6 +1,197 @@
 {
-  "checkedAt": "2026-11-08T13:33:24.053Z",
+  "checkedAt": "2026-11-11T12:46:22.843Z",
   "releases": [
+    {
+      "version": "0.119.0-93",
+      "publishedAt": "2026-11-10T20:43:45.315Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-93",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-93",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-93/Promptbook-Setup-0.119.0-93-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-93/Promptbook-Setup-0.119.0-93-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-93/Promptbook-0.119.0-93-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-93/Promptbook-0.119.0-93-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-93 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-93` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-93-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-93 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `a7294f3100a44d0a7c040097f4104540127c95efa764b0f78e6f15bc143723d4`.\n"
+    },
+    {
+      "version": "0.119.0-85",
+      "publishedAt": "2026-11-09T10:46:54.011Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-85",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-85",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-85/Promptbook-Setup-0.119.0-85-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-85/Promptbook-Setup-0.119.0-85-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-85/Promptbook-0.119.0-85-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-85/Promptbook-0.119.0-85-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-85/Promptbook-0.119.0-85-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-85/Promptbook-0.119.0-85-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-85 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-85` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-85-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-85 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `9f4c8f349e91876c4d264bf4a30224dc53f94c9e1f906ba45bfd65d27bf58888`.\n"
+    },
+    {
+      "version": "0.119.0-84",
+      "publishedAt": "2026-11-09T05:18:27.598Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-84",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-84",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-84/Promptbook-Setup-0.119.0-84-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-84/Promptbook-Setup-0.119.0-84-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-84/Promptbook-0.119.0-84-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-84/Promptbook-0.119.0-84-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-84/Promptbook-0.119.0-84-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-84/Promptbook-0.119.0-84-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-84 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-84` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-84-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-84 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `68f49caf2c55e0adbc1a0647f13d5586f25561eb72198553b1c798f630c8cc3c`.\n"
+    },
+    {
+      "version": "0.119.0-80",
+      "publishedAt": "2026-11-09T01:26:19.595Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-80",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-80",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-80/Promptbook-Setup-0.119.0-80-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-80/Promptbook-Setup-0.119.0-80-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-80/Promptbook-0.119.0-80-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-80/Promptbook-0.119.0-80-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-80/Promptbook-0.119.0-80-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-80/Promptbook-0.119.0-80-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-80 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-80` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-80-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-80 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `e862b2d093964b0228d78ce8a10d0e988e99b1ca11aba5a59586a7b227a76913`.\n"
+    },
+    {
+      "version": "0.119.0-79",
+      "publishedAt": "2026-11-08T23:01:32.394Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-79",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-79",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-79/Promptbook-Setup-0.119.0-79-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-79/Promptbook-Setup-0.119.0-79-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-79/Promptbook-0.119.0-79-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-79/Promptbook-0.119.0-79-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-79/Promptbook-0.119.0-79-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-79/Promptbook-0.119.0-79-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-79 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-79` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-79-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-79 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `8ad38b884fca8445e89980aa4949cacd16cafeef86c7a4fad5a35c67856321a1`.\n"
+    },
+    {
+      "version": "0.119.0-78",
+      "publishedAt": "2026-11-08T20:15:35.148Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-78",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-78",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-78/Promptbook-Setup-0.119.0-78-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-78/Promptbook-Setup-0.119.0-78-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-78/Promptbook-0.119.0-78-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-78/Promptbook-0.119.0-78-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-78/Promptbook-0.119.0-78-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-78/Promptbook-0.119.0-78-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-78 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-78` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-78-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-78 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `32c1b03c4fdc3d8dc66067512c54e900791508abaf8c85d151bebb2bdaa14861`.\n"
+    },
+    {
+      "version": "0.119.0-77",
+      "publishedAt": "2026-11-08T19:04:16.254Z",
+      "listedAt": "2026-11-11T12:46:22.843Z",
+      "prerelease": true,
+      "npmUrl": "https://www.npmjs.com/package/ptbk/v/0.119.0-77",
+      "githubUrl": "https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-77",
+      "downloads": {
+        "windows": {
+          "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-77/Promptbook-Setup-0.119.0-77-windows-x64.exe",
+          "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-77/Promptbook-Setup-0.119.0-77-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-77/Promptbook-0.119.0-77-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-77/Promptbook-0.119.0-77-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-77/Promptbook-0.119.0-77-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-77/Promptbook-0.119.0-77-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
+        }
+      },
+      "installable": true,
+      "notes": "Promptbook 0.119.0-77 and its matching Book language extension.\n\n- **npm:** `npm install -g ptbk@0.119.0-77` (the ordinary CLI installation).\n- **Windows installer:** `Promptbook-Setup-0.119.0-77-windows-x64.exe` prepares missing prerequisites (Node.js, npm, Git), installs ptbk 0.119.0-77 globally, offers the local desktop client (selected by default), and creates an empty first-project folder. Required missing software is prepared inside the installer; AI harnesses are selected later in project setup. It then opens the selected desktop or CLI presentation of `ptbk init`, where the project itself is initialized (intent, tools, login, Git and the background start). SHA-256: `62eddb4fb1ebeeb5d8efa3a9943e90d1c755bce71a60eccc8cab3387d2e59af5`.\n"
+    },
     {
       "version": "0.119.0-75",
       "publishedAt": "2026-11-07T22:53:45.117Z",
@@ -12,6 +203,18 @@
         "windows": {
           "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-Setup-0.119.0-75-windows-x64.exe",
           "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-Setup-0.119.0-75-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-0.119.0-75-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-0.119.0-75-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-0.119.0-75-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-75/Promptbook-0.119.0-75-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
         }
       },
       "installable": true,
@@ -28,6 +231,18 @@
         "windows": {
           "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-Setup-0.119.0-74-windows-x64.exe",
           "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-Setup-0.119.0-74-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-74/Promptbook-0.119.0-74-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
         }
       },
       "installable": true,
@@ -44,6 +259,18 @@
         "windows": {
           "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-Setup-0.119.0-72-windows-x64.exe",
           "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-Setup-0.119.0-72-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-0.119.0-72-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-0.119.0-72-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-0.119.0-72-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-72/Promptbook-0.119.0-72-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
         }
       },
       "installable": true,
@@ -60,6 +287,18 @@
         "windows": {
           "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-Setup-0.119.0-71-windows-x64.exe",
           "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-Setup-0.119.0-71-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-0.119.0-71-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-0.119.0-71-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-0.119.0-71-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-71/Promptbook-0.119.0-71-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
         }
       },
       "installable": true,
@@ -76,6 +315,18 @@
         "windows": {
           "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-Setup-0.119.0-70-windows-x64.exe",
           "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-Setup-0.119.0-70-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-0.119.0-70-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-0.119.0-70-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-0.119.0-70-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-70/Promptbook-0.119.0-70-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
         }
       },
       "installable": true,
@@ -92,6 +343,18 @@
         "windows": {
           "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-Setup-0.119.0-67-windows-x64.exe",
           "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-Setup-0.119.0-67-windows-x64.exe.sha256"
+        },
+        "macos": {
+          "arm64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-0.119.0-67-macos-arm64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-0.119.0-67-macos-arm64-unsigned.dmg.sha256",
+            "unsigned": true
+          },
+          "x64": {
+            "url": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-0.119.0-67-macos-x64-unsigned.dmg",
+            "checksumUrl": "https://github.com/webgptorg/promptbook/releases/download/v0.119.0-67/Promptbook-0.119.0-67-macos-x64-unsigned.dmg.sha256",
+            "unsigned": true
+          }
         }
       },
       "installable": true,
