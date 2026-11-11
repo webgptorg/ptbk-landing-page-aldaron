@@ -25,7 +25,7 @@ import f from './footer.module.css';
 function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; checkoutEnabled: boolean }) {
     const { t, locale, path } = useSiteLocale();
     const pathname = usePathname();
-    const communityLink = locale === 'cs' ? <Link href={COMMUNITIES_PATH}>Komunity</Link> : null;
+    const communityLink = locale === 'cs' ? <Link href={COMMUNITIES.promptbook.path}>Komunita</Link> : null;
     const showCheckout = checkoutEnabled && locale === 'cs' && (pathname === '/cs' || pathname === '/cs/');
     const headerAction = showCheckout
         ? <a href={path('pricing/objednat/start')} className={s.button}>{t("Mám zájem")}<ArrowUpRight size={17} aria-hidden="true" /></a>

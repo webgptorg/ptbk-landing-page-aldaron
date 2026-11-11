@@ -8,6 +8,8 @@ Veřejné cesty mají jeden zdroj. České `/cs` routy sdílejí implementaci ko
 
 ## Vzhled a navigace — aktuální zadání 24. října 2026
 
+Zadání z 11. listopadu 2026 odstraňuje „Náš příběh“ / „Our story“ z hlavního i mobilního menu. Stránka příběhu, odkaz v patičce a odkaz pod zakladateli zůstávají dostupné. České menu má pouze „Komunita“ s přímým odkazem na `/cs/komunity/promptbook`, bez mezikroku přes rozcestník komunit.
+
 Hlavní i partnerská landing page mají stejný světlý vizuální jazyk: téměř bílé pozadí, černý text, modrá původního loga (`#000080`), Outfit pro nadpisy a Inter pro text. Hlavička i patička obsahují původní symbol a slovo `promptbook` bez tečky; `prompt` je černě a `book` modře. Hero nadpisy nemají závěrečné tečky. Otevřené kompozice a jemně tónované pásy neskládají stránku do řady tmavých krabic. Prostorové objekty mají tenké světlé hrany, měkké stíny a jemnou paralaxu, bez tvrdých extruzí. Technické podrobnosti nepřebírají hero.
 
 Tři pracovní příběhy jsou v jediném kompaktním karuselu hned za hero. Nejnovější zadání z 25. října 2026 vybírá světlý blueprint: konkrétní vstup, práce a výsledek jsou přímo ve vizualizaci. Nad nimi je krátký nadpis vysvětlující použití agentů a jednorádkové taby v pořadí kontakty, podcasty, web, bez play/pause nebo viditelného štítku Ukázka. Propojená scéna aplikace a enginu je pouze na podstránce bezpečnosti se dvěma nezávislými selecty; hlavní a partnerská stránka na ni stručně odkazují. Scroll normálně posouvá stránku bez připnutí. Modelový charakter ukázek zůstává v přístupném popisu SVG, přístupný popis obsahuje podmínku nastavených přístupů/pravidel. Původní pětizáložkové demo zůstává na přehledu agend a detailech podle [specifikace produktu](new-product-page.md).

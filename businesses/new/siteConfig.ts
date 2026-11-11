@@ -24,5 +24,5 @@ export function isNewSitePublicPath(pathname: string): boolean {
 }
 export const NEW_SITE_NAVIGATION = [
     ['Agendy', 'agendy'], ['Pro partnery', 'partnership'], ['Ceník', 'pricing'],
-    ['Srovnání', 'srovnani'], ['Náš příběh', 'o-nas'],
+    ['Srovnání', 'srovnani'],
 ] as const;

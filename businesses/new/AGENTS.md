@@ -1,5 +1,7 @@
 # Promptbook launch website
 
+The 11 November navigation revision removes Our story from both desktop and mobile header menus in both languages. Keep the story page, its footer link and the lower homepage link accessible. The Czech header uses the singular `Komunita` and links directly to `COMMUNITIES.promptbook.path`, not the communities index.
+
 The 11 November 2026 checkout revision supersedes the earlier homepage enquiry CTA. When Czech billing is enabled, the Czech homepage hero and desktop/mobile header actions use full navigation to `/cs/pricing/objednat/start`, where the buyer can switch plans. English, partnership and disabled-checkout enquiry flows retain their contact actions.
 
 Read `../../specs/_main.md` and the relevant linked specification before edits. The owner authorized the root cutover on 23 October 2026. Public marketing paths start at `/cs` (Czech) and `/en` (English); `/` and unprefixed marketing paths redirect according to browser language, preserving queries; `/new` is a legacy prefix and permanently redirects on public requests. Preserve other businesses, articles, workshops and administration.
