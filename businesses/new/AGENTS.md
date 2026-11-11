@@ -1,5 +1,7 @@
 # Promptbook launch website
 
+The 11 November 2026 checkout revision supersedes the earlier homepage enquiry CTA. When Czech billing is enabled, the Czech homepage hero and desktop/mobile header actions use full navigation to `/cs/pricing/objednat/start`, where the buyer can switch plans. English, partnership and disabled-checkout enquiry flows retain their contact actions.
+
 Read `../../specs/_main.md` and the relevant linked specification before edits. The owner authorized the root cutover on 23 October 2026. Public marketing paths start at `/cs` (Czech) and `/en` (English); `/` and unprefixed marketing paths redirect according to browser language, preserving queries; `/new` is a legacy prefix and permanently redirects on public requests. Preserve other businesses, articles, workshops and administration.
 
 The latest owner feedback is dated 24 October 2026. It replaces the former roadmap badges and book-writing metaphor and simplifies the existing branding. No public “today/planned”, MangoWeb deadline, “current website”, or instruction to write a book. Do not translate `book`; it is not a customer prerequisite. The main and partnership CTA collects nonbinding interest and has a smaller installation link underneath. The form explains follow-up and app availability without a date; remove the extra follow-up sentence below the hero CTA. Both Jiří Jahn (business) and Pavol Hejný (technology) are equal cofounders.

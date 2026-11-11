@@ -9,7 +9,7 @@ import { localeFromPath, localizedPath } from './localization';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Menu } from 'lucide-react';
+import { ArrowUpRight, Menu } from 'lucide-react';
 import { ORGANIZATION_DATA_BOX_ID, ORGANIZATION_LEGAL_NAME, ORGANIZATION_REGISTRATION_NUMBER } from '@/lib/metadata/site-config';
 import { LEGAL_CONTACT_EMAIL, PRIVACY_CONTACT_EMAIL } from '@/lib/legal/legalOperator';
 import { getLegalDocumentLinks } from '@/lib/legal/legalLinks';
@@ -22,17 +22,22 @@ import { PROMPTBOOK_BRAND, PROMPTBOOK_BRAND_STYLE } from '@/lib/promptbook-brand
 import s from './site.module.css';
 import f from './footer.module.css';
 
-function LocalizedShell({ children }: { children: ReactNode }) {
+function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; checkoutEnabled: boolean }) {
     const { t, locale, path } = useSiteLocale();
+    const pathname = usePathname();
     const communityLink = locale === 'cs' ? <Link href={COMMUNITIES_PATH}>Komunity</Link> : null;
+    const showCheckout = checkoutEnabled && locale === 'cs' && (pathname === '/cs' || pathname === '/cs/');
+    const headerAction = showCheckout
+        ? <a href={path('pricing/objednat/start')} className={s.button}>{t("Mám zájem")}<ArrowUpRight size={17} aria-hidden="true" /></a>
+        : <LeadButton interest>{t("Mám zájem")}</LeadButton>;
 
     return <LeadCaptureProvider><div className={s.site} lang={locale} style={PROMPTBOOK_BRAND_STYLE}>
         <a href="#obsah" className={s.skip}>{t("Přejít na obsah")}</a>
         <header className={s.header}><div className={s.headerInner}>
             <BrandLogo priority/>
             <nav className={s.desktopNav} aria-label={t("Hlavní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}</nav>
-            <LanguageSwitch/><div className={s.headerAction}><LeadButton interest>{t("Mám zájem")}</LeadButton></div>
-            <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><LeadButton interest>{t("Mám zájem")}</LeadButton></nav></details>
+            <LanguageSwitch/><div className={s.headerAction}>{headerAction}</div>
+            <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link>{headerAction}</nav></details>
         </div></header>
         <main id="obsah" className={s.container}>{t(children)}</main>
         <footer className={s.footer}><div className={`${s.footerGrid} ${f.grid}`}>
@@ -93,7 +98,7 @@ function LanguageSwitch() {
         window.location.assign(localizedPath(window.location.pathname, language) + window.location.search + window.location.hash);
     }}>{language === 'cs' ? 'CZ' : 'EN'}</Link>)}</nav>;
 }
-export function NewSiteShell({ children }: { children: ReactNode }) {
+export function NewSiteShell({ children, checkoutEnabled = false }: { children: ReactNode; checkoutEnabled?: boolean }) {
     const locale = localeFromPath(usePathname());
-    return <SiteLocaleProvider locale={locale}><LocalizedShell>{children}</LocalizedShell></SiteLocaleProvider>;
+    return <SiteLocaleProvider locale={locale}><LocalizedShell checkoutEnabled={checkoutEnabled}>{children}</LocalizedShell></SiteLocaleProvider>;
 }

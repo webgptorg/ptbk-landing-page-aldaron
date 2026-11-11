@@ -31,7 +31,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true, c
             <h1 id="brand-heading">{partnership ? <>{en ? 'Your clients. Your services' : 'Vaši klienti. Vaše služby'}<span className={b.heroReveal}>{en ? 'Our technology' : 'Naše technologie'}</span></> : <HeroHeadline key={locale} firstLine={PROMPTBOOK_BRAND.messages[locale].headline.split('. ')[0]}/>}</h1>
             {!partnership && <p className={b.heroDeployment}>{PROMPTBOOK_DEPLOYMENT[locale]}</p>}
             <StagedIntro sentences={intro}/>
-            <BrandActions partner={partnership}/>
+            <BrandActions partner={partnership} checkoutEnabled={checkoutEnabled}/>
         </section>
         <BrandStories partnership={partnership}/>
         <Link className={b.securityTeaser} href={path('bezpecnost')}><ShieldCheck size={22} strokeWidth={1.5} aria-hidden="true"/><span>{en ? 'Your data. Your rules.' : 'Vaše data i pravidla zůstávají Vaše.'}</span><span className={b.securityTeaserLink}>{en ? 'How it works' : 'Jak to funguje'}<ArrowRight size={16}/></span></Link>

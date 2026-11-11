@@ -1,21 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
 import s from './brand.module.css';
+import site from './site.module.css';
 
-/** The main enquiry action sets the width for both secondary links. */
-export function BrandActions({ partner = false }: { partner?: boolean }) {
+/** The primary action sets the width for both secondary links. */
+export function BrandActions({ partner = false, checkoutEnabled = false }: { partner?: boolean; checkoutEnabled?: boolean }) {
     const { locale, path } = useSiteLocale();
     const en = locale === 'en';
+    const checkoutHref = !partner && !en && checkoutEnabled ? path('pricing/objednat/start') : null;
+    const label = en ? (partner ? 'Bring Promptbook to my clients' : 'Free up my time') : (partner ? 'Chci nasazovat klientům' : 'Chci uvolnit ruce');
     return <div className={s.primaryActions}>
-        <LeadButton interest heading={partner ? undefined : (en ? 'What would you like AI to take over?' : 'Co za Vás má AI převzít?')} topic={en
+        {checkoutHref ? <a href={checkoutHref} className={site.button}>
+            {label}<ArrowUpRight size={17} aria-hidden="true" />
+        </a> : <LeadButton interest heading={partner ? undefined : (en ? 'What would you like AI to take over?' : 'Co za Vás má AI převzít?')} topic={en
             ? (partner ? 'Partnership — deploying Promptbook for clients' : 'Handing work over to AI')
             : (partner ? 'Partnerství — nasazování Promptbooku klientům' : 'Předání práce AI')}>
-            {en ? (partner ? 'Bring Promptbook to my clients' : 'Free up my time') : (partner ? 'Chci nasazovat klientům' : 'Chci uvolnit ruce')}
-        </LeadButton>
+            {label}
+        </LeadButton>}
         <div className={s.secondaryActions}>
             <Link href={path('open-source')}>
                 <span>{en ? 'Install the engine yourself' : 'Nainstalujte engine u sebe'}</span><ArrowRight size={14} aria-hidden="true"/>
