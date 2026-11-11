@@ -43,6 +43,11 @@ export function Founders({ compact = false, showPavolHat = true }: { compact?: b
             {founders.map((person, index) => (
                 <article className={`${s.founder} ${index === 1 ? s.reverse : ''}`} key={person.name} data-testid="founder-card">
                     <div className={s.portrait}>
+                        {index === 1 && showPavolHat && (
+                            <div className={`${s.accessoryFrame} ${s.hatRearFrame}`} aria-hidden="true">
+                                <span className={s.hatInterior} />
+                            </div>
+                        )}
                         <div className={s.portraitCrop}>
                             <Image
                                 src={person.image}
@@ -52,7 +57,7 @@ export function Founders({ compact = false, showPavolHat = true }: { compact?: b
                         </div>
                         {index === 1 && showPavolHat && (
                             <div className={s.accessoryFrame} aria-hidden="true">
-                                <span className={s.hatShadow} />
+                                <span className={s.hatShadow} style={{ maskImage: `url(${person.image.src})`, WebkitMaskImage: `url(${person.image.src})` }} />
                                 <Image className={s.hat} src={pavolHat} alt="" sizes="140px" draggable={false} />
                             </div>
                         )}
