@@ -360,7 +360,19 @@
 .comparisonTable tbody th a:first-child{display:inline-flex;align-items:center;gap:6px}
 .comparisonTable tbody th a svg{flex-shrink:0}
 .comparisonTable td{color:#384864}
-.site .tableSource{display:block;font-size:11px;font-weight:450;color:#52617b;margin-top:5px}
+.comparisonToolbar{display:flex;justify-content:flex-end;margin-bottom:16px}
+.priceToggle{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:13px}
+.priceToggle>span{margin-right:8px;color:#52617b}
+.priceToggle button{min-height:40px;padding:8px 13px;border:1px solid #dde3f1;border-radius:10px;background:white;color:#384864;cursor:pointer;font:inherit}
+.priceToggle button[aria-pressed=true]{background:#e7efff;border-color:#a8b8d8;color:#17386c;font-weight:650}
+.priceToggle button:hover{border-color:#17386c}
+.priceToggle button:focus-visible{outline:2px solid #17386c;outline-offset:3px}
+.comparisonSources{margin-top:20px;font-size:13px;color:#52617b}
+.comparisonSources summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none}
+.comparisonSources summary::-webkit-details-marker{display:none}
+.comparisonSources[open] summary svg{transform:rotate(180deg)}
+.comparisonSources ul{display:flex;flex-wrap:wrap;gap:8px 20px;padding:12px 0 0;list-style:none}
+.comparisonSources a:hover,.comparisonSources a:focus-visible{text-decoration:underline}
 .comparisonTable tbody tr:last-child>*{border-bottom:0}
 .overviewScroll{max-height:min(75vh,52rem);max-height:min(75svh,52rem)}
 .overviewTable{--comparison-parameter-width:10rem;--comparison-tool-width:11rem;width:calc(var(--comparison-parameter-width) + var(--comparison-tool-width) * var(--comparison-tool-count))}

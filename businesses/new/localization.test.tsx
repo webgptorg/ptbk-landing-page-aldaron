@@ -135,7 +135,8 @@ describe('bilingual launch site', () => {
         const free = price.querySelector('td:nth-child(3)')!;
         expect(paid.textContent).toContain(locale === 'cs' ? '399 Kč' : '$19');
         expect(free.textContent).toContain(locale === 'cs' ? '0 Kč za povolené použití' : '$0 for permitted use');
-        expect(price.querySelectorAll('a[href^="https://"]')).toHaveLength(COMPARISONS.length);
+        expect(price.querySelectorAll('a')).toHaveLength(0);
+        expect(element.querySelectorAll('details a[href^="https://"]')).toHaveLength(COMPARISONS.length);
     });
     it.each(['cs', 'en'] as const)('mounts the adviser only in the comparison overview in %s', locale => {
         const overview = document.createElement('div'); overview.innerHTML = html(<ComparisonsPage />, locale);

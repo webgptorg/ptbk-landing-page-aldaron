@@ -10,6 +10,8 @@ Na mobilu se hlavička přehledu i detailu posouvá se stránkou, aby při posou
 
 ## Podklady a aktualizace
 
+Revize cen 11. listopadu 2026 přesouvá cenové zdroje z jednotlivých buněk do rozbalovacího seznamu pod tabulkou. Odkazy přes názvy nástrojů nadále vedou na podrobná srovnání se zdroji. Přepínač nad přehledem zachovává původní měny nebo převádí číselné ceny do Kč v češtině a USD v angličtině. Názvy tarifů, měsíční období, roční závazek a spotřební účtování se nemění. Fixní česká a anglická nabídka Promptbooku zůstává zachována. Číselné ceny a jejich původní znění vznikají společně v `comparisonPrices.ts`; nepřepočítávají se parsováním hotového textu. Převod používá datovaný kurz ČNB z 11. 11. 2026 (USD 21,91 Kč, EUR 24,38 Kč), má značku ≈ a pod tabulkou datum, hodnoty i zdroj kurzu. Jde o snapshot stejně jako u cenových podkladů, ne živý kurz. Neupravuje modelový kurz kalkulačky ani účtované ceny.
+
 - Promptbook se posuzuje podle [Rebornu](https://github.com/webgptorg/promptbook/blob/1292ef33153efe17ea2886f1d2a569ff6c3c0e9e/README.md). Hostitel enginu může být počítač, firemní server nebo VPS. Externí modely a služby dostávají potřebné vstupy, lokální model závisí na adaptéru a úloze.
 - Cloudová služba může pokračovat bez desktopu a zároveň potřebovat jeho dostupnost pro místní akce. Lokální konektor, běh agenta a místo zpracování modelem jsou samostatné vlastnosti.
 - Vlastní provoz nabízejí také OpenClaw, n8n a Paperclip. Claude Code a Codex lze porovnat jako samostatné nástroje i zapojit do Promptbooku. Gemini pro Google Workspace je nástupce názvu Duet AI, Workspace Studio pokrývá automatizace.

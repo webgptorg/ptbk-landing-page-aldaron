@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import { ArrowUpRight, Check, ChevronDown, Minus, X } from 'lucide-react';
 import {
@@ -13,6 +13,7 @@ import type { SiteLocale } from './localization';
 import { ALTERNATIVE_COMMERCIAL_TERMS, COMMERCIAL_ROWS } from './comparisonCommercial';
 import { CAPABILITY_REVIEW_DATE, PROMPTBOOK_CAPABILITY_SOURCES } from './comparisonCapabilities';
 import { getPromptbookAppTerms, PUBLIC_ENGINE_SUMMARY, PUBLIC_ENGINE_TERMS } from './comparisonProducts';
+import { COMPARISON_EXCHANGE_RATES, displayComparisonPrice, type ComparisonPriceMode } from './comparisonPrices';
 import s from './site.module.css';
 
 const STATUS = {
@@ -28,11 +29,8 @@ const OVERVIEW_FEATURES = [
     ...COMPARISON_ROWS,
 ] as const;
 
-function MetricCell({ value, locale, source }: { value: ComparisonValue; locale: SiteLocale; source?: string }) {
-    if (!value.status) return <td>
-        {value[locale]}
-        {source && <Link className={s.tableSource} href={source}>{locale === 'cs' ? 'Zdroj ceny' : 'Pricing source'} ↗</Link>}
-    </td>;
+function MetricCell({ value, locale }: { value: ComparisonValue; locale: SiteLocale }) {
+    if (!value.status) return <td>{value[locale]}</td>;
     const { Icon, ...label } = STATUS[value.status];
 
     return <td>
@@ -48,9 +46,21 @@ export function ComparisonTable() {
     const { locale, path } = useSiteLocale();
     const cs = locale === 'cs';
     const appTerms = getPromptbookAppTerms(locale);
+    const [priceMode, setPriceMode] = useState<ComparisonPriceMode>('original');
 
     return <section className={s.comparisonSection} aria-labelledby="comparison-table-title">
         <h2 id="comparison-table-title" className={s.srOnly}>{cs ? 'Srovnávací tabulka nástrojů' : 'Tool comparison table'}</h2>
+        <div className={s.comparisonToolbar}>
+            <div className={s.priceToggle} role="group" aria-label={cs ? 'Zobrazení cen' : 'Price display'}>
+                <span>{cs ? 'Ceny' : 'Prices'}</span>
+                <button type="button" aria-pressed={priceMode === 'original'} onClick={() => setPriceMode('original')}>
+                    {cs ? 'Původní měny' : 'Original currencies'}
+                </button>
+                <button type="button" aria-pressed={priceMode === 'converted'} onClick={() => setPriceMode('converted')}>
+                    {cs ? 'V Kč' : 'In USD'}
+                </button>
+            </div>
+        </div>
         <p className={s.tableScrollHint} id="comparison-table-hint">
             {cs ? 'Posuňte tabulku do strany pro další nástroje.' : 'Scroll sideways to see more tools.'}
         </p>
@@ -74,16 +84,21 @@ export function ComparisonTable() {
                     </tr>)}
                     {COMMERCIAL_ROWS.map(row => <tr key={row.id}>
                         <th scope="row">{row[locale]}</th>
-                        <MetricCell value={appTerms[row.id]} locale={locale} source={row.id === 'price' ? path('pricing') : undefined} />
-                        <MetricCell value={PUBLIC_ENGINE_TERMS[row.id]} locale={locale} source={row.id === 'price' ? getLegalPagePath('engineLicense', locale) : undefined} />
+                        <MetricCell value={appTerms[row.id]} locale={locale} />
+                        <MetricCell value={PUBLIC_ENGINE_TERMS[row.id]} locale={locale} />
                         {COMPARISONS.map(item => {
                             const terms = ALTERNATIVE_COMMERCIAL_TERMS[item.slug];
-                            return <MetricCell key={item.slug} value={terms[row.id]} locale={locale} source={row.id === 'price' ? terms.source : undefined} />;
+                            return <MetricCell key={item.slug} value={row.id === 'price' ? displayComparisonPrice(terms.price, locale, priceMode) : terms[row.id]} locale={locale} />;
                         })}
                     </tr>)}
                 </tbody>
             </table>
         </div>
+        {priceMode === 'converted' && <p className={s.tableNote}>
+            {cs ? '≈ Orientační přepočet. Kurz ČNB z 11. 11. 2026: 1 USD = 21,91 Kč; 1 EUR = 24,38 Kč.'
+                : '≈ Indicative conversion. CNB rates on 11 Nov 2026: USD 1 = CZK 21.91; EUR 1 = CZK 24.38.'}
+            {' '}<a href={COMPARISON_EXCHANGE_RATES.source}>{cs ? 'Použitý kurz' : 'Exchange rate source'} ↗</a>
+        </p>}
         <p className={s.tableNote}>
             {cs
                 ? 'Vlastní provoz označuje běh nástroje ve Vašem prostředí. AI model může běžet jinde. Ceny jsou orientační a mohou se lišit podle země, tarifu a spotřeby.'
@@ -92,6 +107,14 @@ export function ComparisonTable() {
             {' '}{cs ? 'Integrace, modely a přístup ověřeny' : 'Integrations, models and access reviewed'} {CAPABILITY_REVIEW_DATE[locale]}.
         </p>
         <ComparisonSecurityNote />
+        <details className={s.comparisonSources}>
+            <summary>{cs ? 'Zdroje cen' : 'Pricing sources'}<ChevronDown size={16} aria-hidden="true" /></summary>
+            <ul>
+                <li><Link href={path('pricing')}>Promptbook App ↗</Link></li>
+                <li><Link href={getLegalPagePath('engineLicense', locale)}>Promptbook Open Source ↗</Link></li>
+                {COMPARISONS.map(item => <li key={item.slug}><a href={ALTERNATIVE_COMMERCIAL_TERMS[item.slug].source}>{item.name} ↗</a></li>)}
+            </ul>
+        </details>
     </section>;
 }
 
