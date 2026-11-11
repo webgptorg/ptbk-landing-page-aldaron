@@ -91,6 +91,10 @@
     font-size: clamp(23px, 3vw, 29px);
 }
 
+.page .upgrade p {
+    color: #e9f0fb;
+}
+
 .upgrade button {
     display: inline-flex;
     align-items: center;
