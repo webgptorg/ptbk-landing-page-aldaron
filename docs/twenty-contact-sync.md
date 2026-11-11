@@ -51,4 +51,17 @@ are separate operations. Meta, Gmail and Google Contacts are outside this worker
 - A Promptbook order uses its existing `web:contact:<id>` key once a positive live card payment is recorded. Its
   source shows the plan, first paid date, registered company name, country and company registration number. Optional
   onboarding phone and message update that source when supplied or cleared. Tax IDs, billing addresses and invoice
-  amounts stay in the billing system. The existing People and contact sources permissions cover this projection.
+  URLs stay in the billing system. The source also includes `paidCustomer`, `subscriptionStatus`,
+  `cancelAtPeriodEnd`, `paidThrough` and `paymentHistory`. Payment and refund amounts use minor currency units
+  with an explicit currency; no Stripe identifiers or payment-method data are copied. Changes invalidate the
+  delivery version, including cancellations, renewals and refunds. The existing People and contact sources permissions cover this projection.
+
+## Explicit historical paid-customer import
+
+Run `node --import tsx scripts/crm/import-stripe-paid-customers.ts` in the configured production environment
+for an aggregate dry run. Add `--apply` for the explicitly approved import. It reads live positive paid Stripe
+invoices, uses the existing web source for known orders and memberships, and imports older recognized subscriptions
+under stable `stripe:subscription:<id>` keys. Unrecognized payments are reported and left for review. Existing
+People are matched by primary or secondary email; ambiguous/shared identities remain flagged for review. No
+payment, subscription, consent, campaign or Person profile is changed. A replay verifies the same source IDs,
+relations and details. Logs contain aggregate counts only.

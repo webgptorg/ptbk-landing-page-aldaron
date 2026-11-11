@@ -944,6 +944,9 @@ Never fabricate consent for historical contacts or add Neonmedia's unrelated mar
 
 Twenty receives an asynchronous projection of committed Contact rows, workshop attendance and feedback, paid
 community memberships and live paid Promptbook orders. Order onboarding updates the same `web:contact:<id>` source.
+Paid orders also project current subscription state, cancellation, paid period and payment/refund history in minor
+currency units. Stripe identifiers and invoice URLs stay in billing. Historical paid Stripe imports are explicit
+operator commands, match existing source keys and People by primary or secondary email, and never charge or email.
 Source writes have no dependency on Twenty. Keep the stable `web:<source>:<id>` keys and the
 inclusive cutover when changing the projection. Preserve the purpose and evidence per submission and leave an
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.

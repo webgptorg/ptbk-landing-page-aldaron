@@ -230,7 +230,27 @@ describe('Twenty contact sources', () => {
             });
             expect(replay[4].details.rating).toBe(5);
 
-            for (const row of replay) await recordTwentyContactSyncResult(transaction, row, null);
+            await database.exec(`UPDATE promptbook_orders SET status = 'past_due', cancel_at_period_end = true
+                WHERE id = '${BILLING_ORDER_ID}';
+                INSERT INTO promptbook_invoices (stripe_invoice_id, order_id, paid_at, amount_paid, card_amount,
+                    refunded_amount, currency) VALUES ('private-invoice', '${BILLING_ORDER_ID}',
+                    '2026-11-09T12:25:00Z', 199900, 199900, 50000, 'czk');`);
+            const payments = await loadTwentyContactSyncRows(transaction, FROM, 10);
+            const paid = payments.find((row) => row.kind === 'promptbook-order')!;
+            expect(paid.source_version).not.toBe(replay[3].source_version);
+            expect(paid.details).toMatchObject({
+                paidCustomer: true, subscriptionStatus: 'past_due', cancelAtPeriodEnd: true,
+                paymentHistory: [{ amountPaidMinor: 199900, refundedAmountMinor: 50000, currency: 'czk' }],
+            });
+            expect(JSON.stringify(paid.details)).not.toContain('private-invoice');
+            await recordTwentyContactSyncResult(transaction, paid, null);
+            expect(await loadTwentyContactSyncRows(transaction, FROM, 10, {
+                includeDelivered: true, kinds: ['promptbook-order'],
+            })).toHaveLength(1);
+
+            for (const row of replay.filter((row) => row.kind !== 'promptbook-order')) {
+                await recordTwentyContactSyncResult(transaction, row, null);
+            }
             expect(await loadTwentyContactSyncRows(transaction, FROM, 10)).toEqual([]);
             await database.exec(`UPDATE promptbook_orders SET phone = NULL, onboarding_note = NULL WHERE id = '${BILLING_ORDER_ID}';`);
             const afterClear = await loadTwentyContactSyncRows(transaction, FROM, 10);

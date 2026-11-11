@@ -48,6 +48,16 @@ const CONTACT_SYNC_CANDIDATES_SQL = `
                 'planId', o.plan, 'billingName', o.company_name, 'customerType', o.customer_type,
                 'billingCompany', CASE WHEN o.company_id IS NOT NULL THEN o.company_name END,
                 'billingCountry', o.country, 'billingCompanyId', o.company_id, 'firstPaidAt', o.first_paid_at,
+                'paidCustomer', true, 'subscriptionStatus', o.status,
+                'cancelAtPeriodEnd', o.cancel_at_period_end, 'paidThrough', o.paid_through,
+                'paymentHistory', COALESCE((
+                    SELECT jsonb_agg(jsonb_build_object(
+                        'paidAt', i.paid_at, 'paidThrough', i.paid_through,
+                        'amountPaidMinor', i.amount_paid, 'refundedAmountMinor', i.refunded_amount,
+                        'currency', i.currency
+                    ) ORDER BY i.paid_at, i.stripe_invoice_id)
+                    FROM public.promptbook_invoices i WHERE i.order_id = o.id
+                ), '[]'::jsonb),
                 'message', NULLIF(concat_ws(E'\n\n', NULLIF(o.order_note, ''), NULLIF(o.onboarding_note, '')), ''),
                 'submissionEvidence', c."submissionEvidence"
             )) AS details
@@ -85,7 +95,8 @@ const CONTACT_SYNC_CANDIDATES_SQL = `
            CASE WHEN sources.source_version = state.source_version THEN state.attempts ELSE 0 END AS attempts
     FROM sources
     LEFT JOIN public.twenty_contact_sync state USING (external_id)
-    WHERE state.external_id IS NULL OR state.source_version <> sources.source_version OR state.next_attempt_at <= now()
+    WHERE ($3::boolean OR state.external_id IS NULL OR state.source_version <> sources.source_version OR state.next_attempt_at <= now())
+      AND ($4::text[] IS NULL OR sources.kind = ANY($4::text[]))
     ORDER BY sources.occurred_at, sources.external_id
     LIMIT $2`;
 
@@ -93,8 +104,11 @@ export async function loadTwentyContactSyncRows(
     transaction: DatabaseTransaction,
     from: string,
     limit: number,
+    options: { includeDelivered?: boolean; kinds?: readonly TwentyContactSyncRow['kind'][] } = {},
 ): Promise<readonly TwentyContactSyncRow[]> {
-    const { rows } = await transaction.query<TwentyContactSyncRow>(CONTACT_SYNC_CANDIDATES_SQL, [from, limit]);
+    const { rows } = await transaction.query<TwentyContactSyncRow>(CONTACT_SYNC_CANDIDATES_SQL, [
+        from, limit, options.includeDelivered ?? false, options.kinds ?? null,
+    ]);
     return rows;
 }
 
