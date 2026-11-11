@@ -55,12 +55,19 @@ export function PromptbookRobotHead() {
             // The center of the head in the neutral 112 × 112 view box.
             const x = clientX - (bounds.left + bounds.width / 2);
             const y = clientY - (bounds.top + bounds.height * 45.12 / 112);
-            lookAt({ x: clamp(x / 180), y: clamp(y / 180) });
+            // There is much less room above the mascot than beside it.
+            lookAt({ x: clamp(x / 180), y: clamp(y / Math.max(bounds.height, 1)) });
         };
 
         function trackPointer(event: PointerEvent) {
             if (motion.matches || !event.isPrimary || event.pointerType === 'touch' || activeTouch !== undefined) return;
             if (event.pointerType !== 'mouse' && event.type !== 'pointerdown' && activePointer !== event.pointerId) return;
+            // Include the header above the hero, where an upward-looking pointer lands.
+            const bounds = hero!.getBoundingClientRect();
+            if (bounds.bottom <= 0 || bounds.top >= window.innerHeight || event.clientY > bounds.bottom) {
+                release(event);
+                return;
+            }
             activePointer = event.pointerId;
             trackPosition(event.clientX, event.clientY);
         }
@@ -106,9 +113,9 @@ export function PromptbookRobotHead() {
             setLook(REST);
         }
 
-        hero.addEventListener('pointerdown', trackPointer, { passive: true });
-        hero.addEventListener('pointermove', trackPointer, { passive: true });
-        hero.addEventListener('pointerleave', release);
+        document.addEventListener('pointerdown', trackPointer, { passive: true });
+        document.addEventListener('pointermove', trackPointer, { passive: true });
+        document.documentElement.addEventListener('pointerleave', release);
         hero.addEventListener('touchstart', startTouch, { passive: true });
         window.addEventListener('touchmove', moveTouch, { passive: true });
         window.addEventListener('touchend', endTouch, { passive: true });
@@ -120,9 +127,9 @@ export function PromptbookRobotHead() {
         motion.addEventListener('change', reset);
         return () => {
             if (frame !== undefined) window.cancelAnimationFrame(frame);
-            hero.removeEventListener('pointerdown', trackPointer);
-            hero.removeEventListener('pointermove', trackPointer);
-            hero.removeEventListener('pointerleave', release);
+            document.removeEventListener('pointerdown', trackPointer);
+            document.removeEventListener('pointermove', trackPointer);
+            document.documentElement.removeEventListener('pointerleave', release);
             hero.removeEventListener('touchstart', startTouch);
             window.removeEventListener('touchmove', moveTouch);
             window.removeEventListener('touchend', endTouch);
@@ -136,7 +143,7 @@ export function PromptbookRobotHead() {
     }, []);
 
     const yaw = .55 * look.head.x;
-    const pitch = -.26 * look.head.y;
+    const pitch = -.4 * look.head.y;
     const cosYaw = Math.cos(yaw);
     const sinYaw = Math.sin(yaw);
     const cosPitch = Math.cos(pitch);

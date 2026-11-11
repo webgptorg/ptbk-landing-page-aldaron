@@ -34,6 +34,8 @@ describe('hero working headline', () => {
         const face = hero.querySelector('[data-promptbook-robot-head] g')!;
         const eyes = face.querySelector('[data-promptbook-robot-eyes]')!;
         const foot = hero.querySelector('[data-promptbook-robot] > g > polygon')!;
+        vi.spyOn(hero, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 70, 1000, 700));
+        vi.spyOn(hero.querySelector('svg')!, 'getBoundingClientRect').mockReturnValue(new DOMRect(456, 118, 88, 88));
         const getPose = () => face.getAttribute('transform');
         const rest = getPose();
         const restingEyes = eyes.getAttribute('transform');
@@ -41,7 +43,7 @@ describe('hero working headline', () => {
 
         function pointer(type: string, pointerType: 'mouse' | 'touch', clientX: number) {
             act(() => {
-                hero.dispatchEvent(Object.assign(new Event(type, { bubbles: true }), {
+                (type === 'pointerleave' ? document.documentElement : hero).dispatchEvent(Object.assign(new Event(type, { bubbles: true }), {
                     pointerType, pointerId: 1, isPrimary: true, clientX, clientY: 100,
                 }));
                 vi.advanceTimersByTime(800);
@@ -60,23 +62,61 @@ describe('hero working headline', () => {
             });
         }
 
-        pointer('pointermove', 'mouse', 160);
+        pointer('pointermove', 'mouse', 660);
         expect(getPose()).not.toBe(rest);
         expect(eyes.getAttribute('transform')).not.toBe(restingEyes);
         expect(foot.getAttribute('points')).toBe(footPoints);
-        pointer('pointerleave', 'mouse', 160);
+        pointer('pointerleave', 'mouse', 660);
         expect(getPose()).toBe(rest);
 
-        touch('touchstart', -160);
+        touch('touchstart', 340);
         const left = getPose();
         expect(left).not.toBe(rest);
-        pointer('pointercancel', 'touch', -160);
+        pointer('pointercancel', 'touch', 340);
         expect(getPose()).toBe(left);
-        touch('touchmove', 160);
+        touch('touchmove', 660);
         expect(getPose()).not.toBe(left);
-        touch('touchcancel', 160);
+        touch('touchcancel', 660);
         expect(getPose()).toBe(rest);
         expect(eyes.getAttribute('transform')).toBe(restingEyes);
+    });
+
+    it('looks up above the hero, looks down below its head and rests beyond the hero', () => {
+        const { container } = render(<><header data-testid="header"/><section data-landing-hero><HeroHeadline/></section><footer/></>);
+        const hero = container.querySelector('[data-landing-hero]')!;
+        const svg = hero.querySelector('svg')!;
+        const face = hero.querySelector('[data-promptbook-robot-head] g')!;
+        const eyes = face.querySelector('[data-promptbook-robot-eyes]')!;
+        vi.spyOn(hero, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 70, 1000, 700));
+        vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(456, 118, 88, 88));
+        const rest = face.getAttribute('transform');
+        const restSlope = Number(rest!.slice(7, -1).split(' ')[1]);
+
+        function move(target: Element, clientY: number) {
+            act(() => {
+                target.dispatchEvent(Object.assign(new Event('pointermove', { bubbles: true }), {
+                    pointerType: 'mouse', pointerId: 1, isPrimary: true, clientX: 500, clientY,
+                }));
+                vi.advanceTimersByTime(1200);
+            });
+        }
+
+        move(container.querySelector('header')!, 30);
+        const upwardSlope = Number(face.getAttribute('transform')!.slice(7, -1).split(' ')[1]);
+        expect(upwardSlope).toBeLessThan(restSlope);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 -0.05)');
+
+        move(hero, 350);
+        const downwardSlope = Number(face.getAttribute('transform')!.slice(7, -1).split(' ')[1]);
+        expect(downwardSlope).toBeGreaterThan(restSlope);
+        expect(eyes.getAttribute('transform')).toBe('translate(0 0.05)');
+
+        move(container.querySelector('footer')!, 800);
+        expect(face.getAttribute('transform')).toBe(rest);
+
+        reduced = true;
+        move(container.querySelector('header')!, 30);
+        expect(face.getAttribute('transform')).toBe(rest);
     });
 
     it('starts with the complete accessible promise and changes activities only after the introduction', () => {

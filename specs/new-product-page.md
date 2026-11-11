@@ -17,7 +17,7 @@ Zadání z 11. listopadu 2026 přenáší na českou a anglickou homepage přesn
 7. **Kontakt**, oba rovnocenní zakladatelé se zrcadlovými portréty a ověřenými kontakty. Na mobilu jsou Jiřího jméno i role zarovnané doprava stejně jako kontakty; kontaktní blok zůstává dole vpravo. Siluety stále vystupují z karet a lícují s jejich spodním okrajem. Odkaz na příběh je až pod kartami.
 8. Viditelný formulář **Napište nám** doplňuje existující modál. Společná patička odkazuje na komunitu Promptbook a bezpečnost a zobrazuje logo i Technologickou inkubaci.
 
-Na české i anglické hlavní stránce robůtek sleduje kurzor a první prst, který se dotkne úvodní sekce. Oči reagují rychleji a hlava je plynule následuje. Robůtek sleduje prst i při nativním posouvání stránky. Po odchodu kurzoru nebo ukončení dotyku se vrací do výchozí polohy. Při omezeném pohybu má statickou pracovní pózu.
+Na české i anglické hlavní stránce robůtek sleduje kurzor v úvodní sekci i v prostoru nad ní včetně hlavičky, aby se mohl viditelně podívat nahoru. Svislá citlivost odpovídá velikosti robůtka; hlava se naklání nahoru i dolů. Sleduje také první prst, který se dotkne úvodní sekce. Oči reagují rychleji a hlava je plynule následuje. Robůtek sleduje prst i při nativním posouvání stránky. Po odchodu kurzoru pod úvodní sekci či z okna nebo po ukončení dotyku se vrací do výchozí polohy. Při omezeném pohybu má statickou pracovní pózu.
 
 ## Tři pracovní příběhy
 
