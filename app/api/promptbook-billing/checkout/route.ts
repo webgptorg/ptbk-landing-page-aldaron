@@ -6,7 +6,7 @@ import { getStripeGatewayOrNull } from '@/lib/payments/stripeGateway';
 import { createStripeAmountFromCzk } from '@/lib/payments/stripeAmount';
 import { BILLING_ORDER_ID_PATTERN, writeOrderAccessCookie } from '@/lib/promptbook-billing/billingAccess';
 import { createPromptbookCheckout, PROMPTBOOK_CHECKOUT_MAX_AGE_MS } from '@/lib/promptbook-billing/billingCheckout';
-import { BillingIdentityError, resolvePromptbookBillingIdentity } from '@/lib/promptbook-billing/billingIdentity';
+import { BillingIdentityError, resolvePromptbookCheckoutIdentity } from '@/lib/promptbook-billing/billingIdentity';
 import { getBillingDatabase, loadPromptbookOrder, PROMPTBOOK_ORDERS_TABLE } from '@/lib/promptbook-billing/billingOrders';
 import { getBillingOrigin, getBillingSetting, getPromptbookBillingAvailability, PROMPTBOOK_MEMBER_PATH, PROMPTBOOK_ONLINE_TERMS_VERSION } from '@/lib/promptbook-billing/config';
 import { COMMERCIAL_TERMS } from '@/businesses/new/commercialTerms';
@@ -23,13 +23,26 @@ const checkoutSchema = z.object({
     plan: z.enum(['start', 'business']),
     email: z.string().trim().email().max(254).transform((email) => email.toLowerCase()),
     country: z.enum(['CZ', 'SK']),
-    companyId: z.string().trim().regex(/^\d{8}$/),
+    companyId: z.string().trim().max(16).optional().transform((id) => id?.replace(/\s/g, '') || null)
+        .refine((id) => id === null || /^\d{8}$/.test(id)),
     vatId: z.string().trim().max(24).optional().transform((vatId) => vatId?.replace(/\s/g, '').toUpperCase() || null),
+    billingName: z.string().trim().min(1).max(200),
+    billingAddress: z.object({
+        line1: z.string().trim().min(1).max(200),
+        city: z.string().trim().min(1).max(100),
+        postal_code: z.string().trim().max(10).transform((code) => code.replace(/\s/g, ''))
+            .refine((code) => /^\d{5}$/.test(code)),
+        country: z.enum(['CZ', 'SK']),
+    }),
+    note: z.string().trim().max(4000).optional().transform((note) => note || null),
+    immediateStart: z.boolean().optional().default(false),
     promoCode: z.string().trim().max(100).optional().transform((code) => normalizeDiscountCode(code ?? '') || null),
     expectedDiscount: z.object({ percent: z.number().positive().max(100), months: z.number().int().positive().max(36).nullable() }).nullable(),
     acceptedTerms: z.literal(true),
     termsVersion: z.literal(PROMPTBOOK_ONLINE_TERMS_VERSION),
-}).refine(({ promoCode, expectedDiscount }) => Boolean(promoCode) === Boolean(expectedDiscount));
+}).refine(({ promoCode, expectedDiscount }) => Boolean(promoCode) === Boolean(expectedDiscount))
+    .refine(({ companyId, immediateStart }) => companyId !== null || immediateStart)
+    .refine(({ country, billingAddress }) => country === billingAddress.country);
 
 function fail(error: string, status: number) {
     return NextResponse.json({ error }, { status, headers: NO_STORE });
@@ -61,9 +74,7 @@ export async function POST(request: NextRequest) {
     try {
         let order = await loadPromptbookOrder(database, input.requestId);
         if (!order) {
-            const identity = await resolvePromptbookBillingIdentity({
-                country: input.country, companyId: input.companyId, vatId: input.vatId ?? undefined,
-            });
+            const identity = await resolvePromptbookCheckoutIdentity(input);
             const { error } = await database.from(PROMPTBOOK_ORDERS_TABLE).upsert({
                 id: input.requestId,
                 plan: input.plan,
@@ -71,6 +82,10 @@ export async function POST(request: NextRequest) {
                 country: identity.country,
                 company_id: identity.companyId,
                 company_name: identity.name,
+                customer_type: identity.customerType,
+                tax_treatment: identity.taxTreatment,
+                order_note: input.note,
+                immediate_start: input.immediateStart,
                 vat_id: identity.vatId ?? null,
                 billing_address: identity.address,
                 terms_version: input.termsVersion,
@@ -78,8 +93,8 @@ export async function POST(request: NextRequest) {
                 engine_licence_url: availability.engineLicenceUrl,
                 support_email: availability.supportEmail,
                 billing_origin: getBillingOrigin(request),
-                invoice_template_id: getBillingSetting(`PROMPTBOOK_BILLING_${identity.country}_INVOICE_TEMPLATE_ID`),
-                supplier_tax_id: identity.country === 'SK' ? getBillingSetting('PROMPTBOOK_BILLING_SUPPLIER_TAX_ID') : null,
+                invoice_template_id: getBillingSetting(`PROMPTBOOK_BILLING_${identity.taxTreatment === 'reverse_charge' ? 'SK' : 'CZ'}_INVOICE_TEMPLATE_ID`),
+                supplier_tax_id: identity.taxTreatment === 'reverse_charge' ? getBillingSetting('PROMPTBOOK_BILLING_SUPPLIER_TAX_ID') : null,
                 base_amount: createStripeAmountFromCzk(input.plan === 'start' ? COMMERCIAL_TERMS.startCzk : COMMERCIAL_TERMS.businessCzk),
                 discount_code: input.promoCode,
                 discount_percent: input.expectedDiscount?.percent ?? null,
@@ -91,7 +106,13 @@ export async function POST(request: NextRequest) {
         }
 
         if (!order || order.email !== input.email || order.plan !== input.plan || order.country !== input.country ||
-            order.company_id !== input.companyId || order.vat_id !== (input.country === 'SK' ? input.vatId : null) ||
+            order.company_id !== input.companyId || order.vat_id !== input.vatId ||
+            order.company_name !== input.billingName || order.billing_address.line1 !== input.billingAddress.line1 ||
+            order.billing_address.city !== input.billingAddress.city ||
+            order.billing_address.postal_code !== input.billingAddress.postal_code ||
+            order.billing_address.country !== input.billingAddress.country ||
+            order.customer_type !== (input.companyId ? 'business' : 'consumer') ||
+            order.order_note !== input.note || order.immediate_start !== input.immediateStart ||
             order.discount_code !== input.promoCode || order.discount_percent !== (input.expectedDiscount?.percent ?? null) ||
             order.discount_months !== (input.expectedDiscount?.months ?? null) || order.terms_version !== input.termsVersion ||
             order.billing_origin !== getBillingOrigin(request) || order.is_test !== gateway.configuration.isTestMode) {

@@ -39,6 +39,7 @@ type Membership = {
     readonly engineLicenceUrl: string | null;
     readonly termsVersion: string;
     readonly firstPaidAt: string | null;
+    readonly confirmationUrl: string | null;
 };
 
 type MembersResponse = {
@@ -223,6 +224,11 @@ function MembershipCard({
                 </div>
             )}
             <div className={styles.memberActions}>
+                {membership.confirmationUrl && (
+                    <a className={site.textLink} href={membership.confirmationUrl} download>
+                        Potvrzení objednávky
+                    </a>
+                )}
                 {membership.invoiceUrl && (
                     <a className={site.textLink} href={membership.invoiceUrl} rel="noreferrer">
                         Poslední faktura <ExternalLink size={15} aria-hidden="true" />

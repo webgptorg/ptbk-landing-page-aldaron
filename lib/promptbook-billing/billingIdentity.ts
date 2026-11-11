@@ -2,19 +2,20 @@ import 'server-only';
 
 import { z } from 'zod';
 
-type BillingCountry = 'CZ' | 'SK';
+export type BillingCountry = 'CZ' | 'SK';
+export type PromptbookBillingAddress = {
+    line1: string;
+    city: string;
+    postal_code: string;
+    country: BillingCountry;
+};
 
 export type PromptbookBillingIdentity = {
     country: BillingCountry;
     companyId: string;
     vatId?: string;
     name: string;
-    address: {
-        line1: string;
-        city: string;
-        postal_code: string;
-        country: BillingCountry;
-    };
+    address: PromptbookBillingAddress;
 };
 
 export class BillingIdentityError extends Error {
@@ -166,11 +167,7 @@ function getMatchingSlovakPostalCode(
     return postalCode;
 }
 
-async function resolveSlovakBusiness(companyId: string, vatId?: string): Promise<PromptbookBillingIdentity> {
-    if (!vatId || !/^SK\d{10}$/.test(vatId)) {
-        throw new BillingIdentityError('Pro nákup na slovenskou firmu zadejte IČ DPH ve formátu SK a deset číslic.');
-    }
-
+async function loadSlovakCompanies(companyId: string) {
     const companiesUrl = new URL(`${SLOVAK_ACCOUNTING_REGISTER_API}/uctovne-jednotky`);
     companiesUrl.search = new URLSearchParams({
         ico: companyId,
@@ -182,16 +179,24 @@ async function resolveSlovakBusiness(companyId: string, vatId?: string): Promise
         throw new BillingIdentityError('Slovenské IČO se nepodařilo jednoznačně ověřit. Obraťte se na podporu.');
     }
 
+    return Promise.all(records.id.map(async (id) => {
+        const company = await readRegistry(
+            slovakCompanySchema,
+            `${SLOVAK_ACCOUNTING_REGISTER_API}/uctovna-jednotka?id=${id}`,
+            REGISTRY_UNAVAILABLE,
+        );
+        if (!company || company.id !== id) throw new BillingIdentityError(REGISTRY_UNAVAILABLE, 503);
+        return company;
+    }));
+}
+
+async function resolveSlovakBusiness(companyId: string, vatId?: string): Promise<PromptbookBillingIdentity> {
+    if (!vatId || !/^SK\d{10}$/.test(vatId)) {
+        throw new BillingIdentityError('Pro nákup na slovenskou firmu zadejte IČ DPH ve formátu SK a deset číslic.');
+    }
+
     const [companies, vat] = await Promise.all([
-        Promise.all(records.id.map(async (id) => {
-            const company = await readRegistry(
-                slovakCompanySchema,
-                `${SLOVAK_ACCOUNTING_REGISTER_API}/uctovna-jednotka?id=${id}`,
-                REGISTRY_UNAVAILABLE,
-            );
-            if (!company || company.id !== id) throw new BillingIdentityError(REGISTRY_UNAVAILABLE, 503);
-            return company;
-        })),
+        loadSlovakCompanies(companyId),
         readRegistry(viesVatSchema, VIES_API, VIES_UNAVAILABLE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -226,15 +231,65 @@ async function resolveSlovakBusiness(companyId: string, vatId?: string): Promise
     };
 }
 
-/** Verify the legal billing identity before creating the card checkout. */
+/** Registry suggestions for the editable billing form; reverse charge additionally verifies VIES. */
 export async function resolvePromptbookBillingIdentity(
     input: { country: BillingCountry; companyId: string; vatId?: string },
 ): Promise<PromptbookBillingIdentity> {
     if (input.country !== 'CZ' && input.country !== 'SK') {
-        throw new BillingIdentityError('Objednávka je dostupná pro podnikatele z Česka a Slovenska.');
+        throw new BillingIdentityError('Objednávka je dostupná pro zákazníky z Česka a Slovenska.');
     }
     const companyId = normalizeId(input.companyId);
     const vatId = normalizeId(input.vatId ?? '') || undefined;
     if (!/^\d{8}$/.test(companyId)) throw new BillingIdentityError('Zadejte osmimístné IČO.');
     return input.country === 'CZ' ? resolveCzechBusiness(companyId, vatId) : resolveSlovakBusiness(companyId, vatId);
+}
+
+/** A Slovak lookup can suggest its registered address before the optional VAT field is filled. */
+export async function suggestPromptbookBillingIdentity(
+    input: { country: BillingCountry; companyId: string; vatId?: string },
+): Promise<PromptbookBillingIdentity> {
+    const companyId = normalizeId(input.companyId);
+    if (!/^\d{8}$/.test(companyId)) throw new BillingIdentityError('Zadejte osmimístné IČO.');
+    if (input.country !== 'SK' || input.vatId?.trim()) return resolvePromptbookBillingIdentity(input);
+    const companies = await loadSlovakCompanies(companyId);
+    const matches = companies.filter((company) => company.ico === companyId && !company.datumZrusenia &&
+        /^\d{5}$/.test(normalizeId(company.psc)));
+    if (matches.length !== 1) throw new BillingIdentityError('Slovenské IČO se nepodařilo jednoznačně ověřit.');
+    const company = matches[0]!;
+    return {
+        country: 'SK', companyId, name: company.nazovUJ,
+        address: { line1: company.ulica, city: company.mesto, postal_code: normalizeId(company.psc), country: 'SK' },
+    };
+}
+
+/** Keep the customer's edits, using registries only to establish a claimed reverse-charge tax identity. */
+export async function resolvePromptbookCheckoutIdentity(input: {
+    country: BillingCountry;
+    companyId: string | null;
+    vatId: string | null;
+    billingName: string;
+    billingAddress: PromptbookBillingAddress;
+}) {
+    const companyId = normalizeId(input.companyId ?? '') || null;
+    const vatId = normalizeId(input.vatId ?? '') || null;
+    if (input.billingAddress.country !== input.country) {
+        throw new BillingIdentityError('Země fakturační adresy musí odpovídat vybrané zemi.');
+    }
+    if (companyId && !/^\d{8}$/.test(companyId)) throw new BillingIdentityError('Zadejte osmimístné IČO.');
+    if (!companyId && vatId) throw new BillingIdentityError('DIČ vyplňte spolu s IČO.');
+    if (companyId && input.country === 'CZ' && vatId && !/^CZ\d{8,10}$/.test(vatId)) {
+        throw new BillingIdentityError('Zadejte DIČ ve formátu CZ a osm až deset číslic.');
+    }
+    if (companyId && input.country === 'SK') {
+        await resolvePromptbookBillingIdentity({ country: 'SK', companyId, vatId: vatId ?? undefined });
+    }
+    return {
+        country: input.country,
+        companyId,
+        vatId,
+        name: input.billingName,
+        address: input.billingAddress,
+        customerType: companyId ? 'business' as const : 'consumer' as const,
+        taxTreatment: companyId && input.country === 'SK' ? 'reverse_charge' as const : 'domestic' as const,
+    };
 }

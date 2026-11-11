@@ -77,6 +77,12 @@ function toDate(seconds: number) {
     return new Date(seconds * 1000).toISOString();
 }
 
+/** A late initial invoice may correct an earlier-observed renewal, but renewals never move acceptance later. */
+export function getPromptbookOrderConfirmedAt(previous: string | null, invoicePaidAt: string | null): string | null {
+    const dates = [previous, invoicePaidAt].flatMap((value) => value ? [Date.parse(value)] : []);
+    return dates.length ? new Date(Math.min(...dates)).toISOString() : null;
+}
+
 async function storePaidInvoice(database: SupabaseClient, stripe: Stripe, orderId: string, invoice: Stripe.Invoice) {
     if (invoice.status !== 'paid' || invoice.currency !== 'czk' || invoice.status_transitions.paid_at === null) return;
 
@@ -164,9 +170,11 @@ export async function applyPromptbookBillingEvent(
 
     const firstPaid = await database.from('promptbook_invoices').select('paid_at')
         .eq('order_id', order.id).gt('card_amount', 0).order('paid_at', { ascending: true }).limit(1).maybeSingle();
+    const firstConfirmed = await database.from('promptbook_invoices').select('paid_at')
+        .eq('order_id', order.id).order('paid_at', { ascending: true }).limit(1).maybeSingle();
     const mostRecent = await database.from('promptbook_invoices').select('paid_through, hosted_invoice_url, amount_paid')
         .eq('order_id', order.id).order('paid_through', { ascending: false, nullsFirst: false }).limit(1).maybeSingle();
-    if (firstPaid.error || mostRecent.error) throw new Error('Promptbook invoice history lookup failed');
+    if (firstPaid.error || firstConfirmed.error || mostRecent.error) throw new Error('Promptbook invoice history lookup failed');
 
     const { data, error } = await database.from(PROMPTBOOK_ORDERS_TABLE).update({
         revision: order.revision + 1,
@@ -179,6 +187,7 @@ export async function applyPromptbookBillingEvent(
         invoice_url: mostRecent.data?.hosted_invoice_url ?? null,
         amount_paid: mostRecent.data?.amount_paid ?? null,
         first_paid_at: firstPaid.data?.paid_at ?? null,
+        confirmed_at: getPromptbookOrderConfirmedAt(order.confirmed_at, firstConfirmed.data?.paid_at ?? null),
     }).eq('id', order.id).eq('revision', order.revision).select('id');
     if (error || data.length !== 1) throw new Error('Promptbook order updated concurrently or could not be saved', { cause: error });
 

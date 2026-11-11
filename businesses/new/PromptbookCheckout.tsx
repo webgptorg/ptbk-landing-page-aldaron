@@ -19,7 +19,7 @@ import {
 } from '@/lib/legal/promptbookOnlineTermsVersion';
 import { ArrowLeft, ArrowRight, LockKeyhole } from 'lucide-react';
 import Link from 'next/link';
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 import { formatPromptbookBillingAmount } from './promptbookBillingPresentation';
 import styles from './promptbookBilling.module.css';
@@ -36,20 +36,28 @@ type PromptbookCheckoutProps = {
         readonly isTest: boolean;
     };
     readonly promotion: ActiveDiscount | null;
+    readonly promotionsByPlan?: Partial<Record<'start' | 'business', ActiveDiscount | null>>;
     readonly initialDiscountCode: string;
     readonly initialActiveDiscountByPlaceId: ActiveDiscountByPlaceId;
     readonly canceled: boolean;
 };
 
 export function PromptbookCheckout({
-    plan,
+    plan: initialPlan,
     availability,
     promotion,
+    promotionsByPlan,
     initialDiscountCode,
     initialActiveDiscountByPlaceId,
     canceled,
 }: PromptbookCheckoutProps) {
+    const [plan, setPlan] = useState(initialPlan);
     const [country, setCountry] = useState<'CZ' | 'SK'>('CZ');
+    const [companyId, setCompanyId] = useState('');
+    const [vatId, setVatId] = useState('');
+    const [billingDetails, setBillingDetails] = useState({ name: '', line1: '', city: '', postal_code: '' });
+    const editedBillingFields = useRef(new Set<keyof typeof billingDetails>());
+    const [identityStatus, setIdentityStatus] = useState('');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const [quoteExpired, setQuoteExpired] = useState(false);
@@ -58,6 +66,7 @@ export function PromptbookCheckout({
     );
     const lastAttempt = useRef<{ key: string; requestId: string } | null>(null);
     const submitting = useRef(false);
+    const currentPromotion = promotionsByPlan?.[plan] ?? (plan === initialPlan ? promotion : null);
     const discountPlaceId = getPromptbookDiscountPlaceId(plan);
     const discount = useDiscountCodeValidation({
         initialDiscountCode: validatedQuote?.code ?? initialDiscountCode,
@@ -82,6 +91,57 @@ export function PromptbookCheckout({
                 ? 'Tento kód pro vybraný tarif neplatí.'
                 : '');
 
+    useEffect(() => {
+        if (!/^\d{8}$/.test(companyId)) {
+            setIdentityStatus('');
+            return;
+        }
+        let current = true;
+        setIdentityStatus('Dohledáváme údaje…');
+        const timeout = window.setTimeout(() => {
+            void sendJson<{
+                name: string;
+                address: { line1: string; city: string; postal_code: string };
+            }>('/api/promptbook-billing/identity', 'POST', { country, companyId, vatId: vatId.trim() || undefined })
+                .then((identity) => {
+                    if (!current) return;
+                    const resolved = { name: identity.name, ...identity.address };
+                    setBillingDetails((details) => {
+                        const updated = { ...details };
+                        for (const key of ['name', 'line1', 'city', 'postal_code'] as const) {
+                            if (!editedBillingFields.current.has(key) || details[key] === '') updated[key] = resolved[key];
+                        }
+                        return updated;
+                    });
+                    setIdentityStatus('Údaje načtené. Můžete je upravit.');
+                })
+                .catch(() => {
+                    if (current) setIdentityStatus('Údaje se nepodařilo dohledat. Vyplňte je ručně.');
+                });
+        }, 400);
+        return () => {
+            current = false;
+            window.clearTimeout(timeout);
+        };
+    }, [companyId, country, vatId]);
+
+    function changePlan(nextPlan: 'start' | 'business') {
+        if (submitting.current || nextPlan === plan) return;
+        setPlan(nextPlan);
+        setQuoteExpired(false);
+        setError('');
+        lastAttempt.current = null;
+        const url = new URL(window.location.href);
+        url.pathname = `/cs/pricing/objednat/${nextPlan}`;
+        url.searchParams.delete('stav');
+        window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+
+    function editBillingField(key: keyof typeof billingDetails, value: string) {
+        editedBillingFields.current.add(key);
+        setBillingDetails((details) => ({ ...details, [key]: value }));
+    }
+
     async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (submitting.current || !discountReady || quoteExpired) return;
@@ -90,12 +150,21 @@ export function PromptbookCheckout({
         const order = {
             plan,
             country,
-            companyId: String(fields.get('companyId')).trim(),
-            vatId: country === 'SK' ? String(fields.get('vatId')).trim() : undefined,
+            companyId: companyId.trim(),
+            vatId: companyId.trim() ? vatId.trim() || undefined : undefined,
+            billingName: billingDetails.name.trim(),
+            billingAddress: {
+                line1: billingDetails.line1.trim(),
+                city: billingDetails.city.trim(),
+                postal_code: billingDetails.postal_code.trim(),
+                country,
+            },
+            note: String(fields.get('note') ?? '').trim(),
             email: String(fields.get('email')).trim(),
             promoCode: activeDiscount ? normalizeDiscountCode(discount.discountCode) : undefined,
             expectedDiscount: activeDiscount ? { percent: activeDiscount.percent, months: duration } : null,
             acceptedTerms: fields.get('terms') === 'on',
+            immediateStart: fields.get('immediateStart') === 'on',
             termsVersion: PROMPTBOOK_ONLINE_TERMS_VERSION,
         };
         const key = JSON.stringify(order);
@@ -144,8 +213,7 @@ export function PromptbookCheckout({
                 <ArrowLeft size={16} aria-hidden="true" /> Ceník
             </Link>
             <header className={styles.heading}>
-                <h1>Promptbook {planName}</h1>
-                <p>Měsíční předplatné za jeden projekt enginu</p>
+                <h1>Objednávka</h1>
             </header>
             {!availability.enabled ? (
                 <div className={styles.empty}>
@@ -157,21 +225,54 @@ export function PromptbookCheckout({
             ) : (
                 <>
                     {availability.isTest && <p role="status">Testovací platba ve Stripe.</p>}
-                    {promotion && (
+                    <fieldset className={styles.plans} disabled={busy}>
+                        <legend>Plán</legend>
+                        {(['start', 'business'] as const).map((option) => (
+                            <label className={styles.plan} key={option} data-selected={plan === option}>
+                                <input
+                                    type="radio"
+                                    name="plan"
+                                    value={option}
+                                    checked={plan === option}
+                                    onChange={() => changePlan(option)}
+                                />
+                                <span>
+                                    <strong>{option === 'start' ? 'Start' : 'Business'}</strong>
+                                    <span>{formatPromptbookBillingAmount((option === 'start' ? COMMERCIAL_TERMS.startCzk : COMMERCIAL_TERMS.businessCzk) * 100)} / měsíc</span>
+                                    <small>{option === 'start' ? '3 agenti · 1 uživatel' : '10 agentů · 5 uživatelů'}</small>
+                                </span>
+                            </label>
+                        ))}
+                    </fieldset>
+                    {plan === 'start' && (
+                        <aside className={styles.upgrade} aria-labelledby="upgrade-title">
+                            <div>
+                                <h2 id="upgrade-title">Více možností s Business</h2>
+                                <p>10 agentů, 5 uživatelů a reakce podpory do 16 pracovních hodin.</p>
+                            </div>
+                            <button type="button" onClick={() => changePlan('business')} disabled={busy}>
+                                Vybrat Business <ArrowRight size={17} aria-hidden="true" />
+                            </button>
+                        </aside>
+                    )}
+                    {currentPromotion && (
                         <div className={styles.promotion}>
                             <p>
-                                <strong>Nabídka pro první zákazníky</strong> {promotion.percent} %{' '}
-                                {promotion.subscriptionDiscountDurationMonths === null
+                                <strong>{currentPromotion.percent} %{' '}
+                                {currentPromotion.subscriptionDiscountDurationMonths === null
                                     ? 'po dobu předplatného'
-                                    : `na první ${formatSubscriptionDiscountDurationMonthCount(promotion.subscriptionDiscountDurationMonths)}`}
+                                    : currentPromotion.subscriptionDiscountDurationMonths === 3
+                                      ? 'na tři měsíce'
+                                      : `na ${formatSubscriptionDiscountDurationMonthCount(currentPromotion.subscriptionDiscountDurationMonths)}`}
+                                {' '}pro první zákazníky</strong>
                             </p>
                             <button
                                 className={styles.promotionAction}
                                 type="button"
-                                disabled={busy || activeDiscount?.code === promotion.code}
-                                onClick={() => discount.setDiscountCode(promotion.code)}
+                                disabled={busy || activeDiscount?.code === currentPromotion.code}
+                                onClick={() => discount.setDiscountCode(currentPromotion.code)}
                             >
-                                {activeDiscount?.code === promotion.code ? 'Sleva uplatněna' : 'Uplatnit slevu'}
+                                {activeDiscount?.code === currentPromotion.code ? 'Sleva uplatněna' : 'Uplatnit slevu'}
                             </button>
                         </div>
                     )}
@@ -180,11 +281,14 @@ export function PromptbookCheckout({
                             <h2 id="billing-title">Fakturační údaje</h2>
                             {canceled && <p role="status">Platba nebyla dokončena. Můžete ji zkusit znovu.</p>}
                             <label>
-                                Země podnikání
+                                Země
                                 <select
                                     name="country"
                                     value={country}
-                                    onChange={(event) => setCountry(event.target.value === 'SK' ? 'SK' : 'CZ')}
+                                    onChange={(event) => {
+                                        setCountry(event.target.value === 'SK' ? 'SK' : 'CZ');
+                                        setVatId('');
+                                    }}
                                     disabled={busy}
                                 >
                                     <option value="CZ">Česko</option>
@@ -193,30 +297,56 @@ export function PromptbookCheckout({
                             </label>
                             <div className={styles.fieldRow}>
                                 <label>
-                                    IČO
+                                    <span>IČO <span className={styles.optional}>(nepovinné)</span></span>
                                     <input
                                         name="companyId"
-                                        required
                                         inputMode="numeric"
                                         pattern="[0-9]{8}"
                                         maxLength={8}
                                         placeholder="8 číslic"
+                                        value={companyId}
+                                        onChange={(event) => setCompanyId(event.target.value)}
                                         disabled={busy}
                                     />
                                 </label>
-                                {country === 'SK' && (
+                                {companyId.trim() !== '' && (
                                     <label>
-                                        IČ DPH
+                                        {country === 'SK' ? 'IČ DPH' : 'DIČ (nepovinné)'}
                                         <input
                                             name="vatId"
-                                            required
-                                            pattern="[Ss][Kk][0-9]{10}"
+                                            required={country === 'SK'}
+                                            pattern={country === 'SK' ? '[Ss][Kk][0-9]{10}' : '[Cc][Zz][0-9]{8,10}'}
                                             maxLength={12}
-                                            placeholder="SK…"
+                                            placeholder={country === 'SK' ? 'SK…' : 'CZ…'}
+                                            value={vatId}
+                                            onChange={(event) => setVatId(event.target.value)}
                                             disabled={busy}
                                         />
                                     </label>
                                 )}
+                            </div>
+                            {identityStatus && <p className={styles.small} role="status">{identityStatus}</p>}
+                            <label>
+                                Jméno nebo firma
+                                <input name="billingName" required autoComplete="name" maxLength={200}
+                                    value={billingDetails.name} onChange={(event) => editBillingField('name', event.target.value)} disabled={busy} />
+                            </label>
+                            <label>
+                                Ulice a číslo
+                                <input name="line1" required autoComplete="address-line1" maxLength={200}
+                                    value={billingDetails.line1} onChange={(event) => editBillingField('line1', event.target.value)} disabled={busy} />
+                            </label>
+                            <div className={styles.fieldRow}>
+                                <label>
+                                    Město
+                                    <input name="city" required autoComplete="address-level2" maxLength={100}
+                                        value={billingDetails.city} onChange={(event) => editBillingField('city', event.target.value)} disabled={busy} />
+                                </label>
+                                <label>
+                                    PSČ
+                                    <input name="postalCode" required autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{3} ?[0-9]{2}" maxLength={6}
+                                        value={billingDetails.postal_code} onChange={(event) => editBillingField('postal_code', event.target.value)} disabled={busy} />
+                                </label>
                             </div>
                             <label>
                                 E-mail
@@ -229,17 +359,26 @@ export function PromptbookCheckout({
                                     disabled={busy}
                                 />
                             </label>
-                            <p className={styles.small}>Fakturační název a adresu dohledáme podle IČO.</p>
+                            <label>
+                                <span>Poznámka <span className={styles.optional}>(nepovinné)</span></span>
+                                <textarea name="note" rows={2} maxLength={4000} disabled={busy} />
+                            </label>
                             <label className={styles.agreement}>
                                 <input name="terms" type="checkbox" required disabled={busy} />
                                 <span>
-                                    Objednávám v rámci podnikání a souhlasím s{' '}
+                                    Souhlasím s{' '}
                                     <Link href={PROMPTBOOK_ONLINE_TERMS_PATH} target="_blank" rel="noreferrer">
                                         podmínkami předplatného
                                     </Link>
                                     .
                                 </span>
                             </label>
+                            {companyId.trim() === '' && (
+                                <label className={styles.agreement}>
+                                    <input name="immediateStart" type="checkbox" required disabled={busy} />
+                                    <span>Chci zpřístupnit předplatné ihned.</span>
+                                </label>
+                            )}
                             <p className={styles.small}>
                                 {PROMPTBOOK_BILLING_CONTACT_NOTICE}{' '}
                                 <Link href={LEGAL_PAGE_PATHS.privacyPolicy.cs} target="_blank" rel="noreferrer">
@@ -249,6 +388,7 @@ export function PromptbookCheckout({
                         </section>
                         <section className={styles.summary} aria-labelledby="order-title">
                             <h2 id="order-title">Přehled objednávky</h2>
+                            <p><strong>Promptbook {planName}</strong></p>
                             <div className={styles.price} aria-live="polite">
                                 <strong>{formatPromptbookBillingAmount(amount)}</strong>
                                 <span>
@@ -259,20 +399,8 @@ export function PromptbookCheckout({
                                 </span>
                                 {duration !== null && <p>Poté {formatPromptbookBillingAmount(baseAmount)} měsíčně.</p>}
                             </div>
-                            <p>
-                                Vlastní instalace enginu {availability.supportedVersion} a produktová podpora.{' '}
-                                {plan === 'business'
-                                    ? 'První věcná reakce do 16 pracovních hodin.'
-                                    : 'Bez garantované doby reakce.'}
-                            </p>
                             <p className={styles.small}>
-                                <a href={availability.engineLicenceUrl} target="_blank" rel="noreferrer">
-                                    Licence enginu
-                                </a>{' '}
-                                · <a href={`mailto:${availability.supportEmail}`}>Kontakt na podporu</a>
-                            </p>
-                            <p className={styles.small}>
-                                Předplatné se obnovuje automaticky. Obnovu můžete zrušit před dalším obdobím.
+                                Automatické měsíční obnovení. Zrušíte kdykoliv.
                             </p>
                             <label>
                                 <span>

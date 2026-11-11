@@ -9,8 +9,12 @@ export type PromptbookOrder = {
     plan: 'start' | 'business';
     email: string;
     country: 'CZ' | 'SK';
-    company_id: string;
+    company_id: string | null;
     company_name: string;
+    customer_type: 'business' | 'consumer';
+    tax_treatment: 'domestic' | 'reverse_charge';
+    order_note: string | null;
+    immediate_start: boolean;
     vat_id: string | null;
     billing_address: { line1: string; city: string; postal_code: string; country: 'CZ' | 'SK' };
     terms_version: string;
@@ -35,6 +39,7 @@ export type PromptbookOrder = {
     invoice_url: string | null;
     amount_paid: number | null;
     first_paid_at: string | null;
+    confirmed_at: string | null;
     phone: string | null;
     onboarding_note: string | null;
 };

@@ -11,6 +11,8 @@ const order = {
     country: 'SK',
     company_id: '12345678',
     company_name: 'Example SK',
+    customer_type: 'business',
+    tax_treatment: 'reverse_charge',
     vat_id: 'SK1234567890',
     billing_address: { line1: 'Príklad 1', city: 'Bratislava', postal_code: '81101', country: 'SK' },
     terms_version: '2026-11-09-online-v1',
@@ -30,6 +32,28 @@ function mockStripe() {
 }
 
 describe('Promptbook Stripe checkout', () => {
+    it.each(['CZ', 'SK'] as const)('creates a %s consumer invoice without business fields or reverse charge', async (country) => {
+        const { stripe, customer } = mockStripe();
+        await createPromptbookCheckout(stripe, {
+            ...order, country, company_id: null, vat_id: null, supplier_tax_id: null,
+            company_name: 'Eva Nová', customer_type: 'consumer', tax_treatment: 'domestic',
+            billing_address: { ...order.billing_address, country },
+        } as PromptbookOrder, null);
+        const data = customer.mock.calls[0]?.[0];
+        expect(data).toMatchObject({ name: 'Eva Nová', tax_exempt: 'none' });
+        expect(data).not.toHaveProperty('business_name');
+        expect(data).not.toHaveProperty('tax_id_data');
+        expect(data.invoice_settings.footer).toContain('Dodavatel není plátcem DPH.');
+        expect(data.invoice_settings.footer).not.toContain('reverse charge');
+        expect(data.invoice_settings.custom_fields).not.toContainEqual(expect.objectContaining({ name: 'IČO odběratele' }));
+    });
+
+    it('requires verified tax treatment in addition to a Slovak country for reverse charge', async () => {
+        const { stripe, customer } = mockStripe();
+        await createPromptbookCheckout(stripe, { ...order, tax_treatment: 'domestic' } as PromptbookOrder, null);
+        expect(customer.mock.calls[0]?.[0].tax_exempt).toBe('none');
+    });
+
     it('keeps the regular monthly price and applies a snapshotted coupon for three months', async () => {
         const { stripe, coupon, session, customer } = mockStripe();
         await createPromptbookCheckout(stripe, order as PromptbookOrder, {
@@ -59,6 +83,9 @@ describe('Promptbook Stripe checkout', () => {
                 footer: expect.stringContaining('Daň odvede zákazník'),
             }),
         }), { idempotencyKey: `promptbook-customer-${order.id}` });
+        expect(customer.mock.calls[0]?.[0].invoice_settings.footer).toContain(
+            '/cs/legal/podminky-produktu/2026-11-09-online-v1',
+        );
     });
 
     it('does not offer a second discount or collect unverified tax identifiers in Stripe', async () => {

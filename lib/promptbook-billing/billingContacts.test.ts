@@ -56,6 +56,60 @@ describe('Promptbook paid order contact sync', () => {
         }, evidence.source)).toBeNull();
     });
 
+    it('keeps the consumer order note when onboarding is added or cleared', async () => {
+        vi.stubEnv('PROMPTBOOK_TWENTY_API_KEY', '');
+        upsert.mockResolvedValue({ error: null });
+        const updateWhere = vi.fn().mockResolvedValue({ error: null });
+        update.mockReturnValue({ eq: updateWhere });
+        const consumer = { ...order, company_id: null, company_name: 'Jana Nováková', order_note: 'Poznámka k nákupu' };
+
+        await syncPromptbookBillingContact(consumer);
+        expect(upsert.mock.calls[0][0]).toMatchObject({
+            fullname: 'Jana Nováková',
+            userNote: 'Poznámka k nákupu',
+            ourNote: expect.stringContaining('Zákazník: Jana Nováková'),
+        });
+        expect(upsert.mock.calls[0][0].ourNote).not.toMatch(/Firma:|IČO/);
+
+        await syncPromptbookBillingContact({ ...consumer, onboarding_note: 'Prosím zavolat' }, { isOnboardingUpdate: true });
+        expect(update).toHaveBeenLastCalledWith({ phone: null, userNote: 'Poznámka k nákupu\n\nProsím zavolat' });
+        await syncPromptbookBillingContact(consumer, { isOnboardingUpdate: true });
+        expect(update).toHaveBeenLastCalledWith({ phone: null, userNote: 'Poznámka k nákupu' });
+    });
+
+    it('records a consumer purchase without inventing a company or changing an existing person relation', async () => {
+        vi.stubEnv('PROMPTBOOK_TWENTY_API_KEY', 'test-key');
+        upsert.mockResolvedValue({ error: null });
+        const records = new Set<string>();
+        const requests: { method: string; path: string; body?: Record<string, unknown> }[] = [];
+        vi.stubGlobal('fetch', vi.fn(async (url: URL, options: RequestInit) => {
+            const body = options.body ? JSON.parse(String(options.body)) as Record<string, unknown> : undefined;
+            requests.push({ method: options.method!, path: url.pathname, body });
+            if (url.pathname === '/rest/people' && options.method === 'GET') {
+                return Response.json({ data: { people: [{
+                    id: 'existing-person', emails: { primaryEmail: order.email }, companyId: 'existing-company',
+                }] } });
+            }
+            if (options.method === 'POST') {
+                records.add(`${url.pathname}/${body!.id}`);
+                return Response.json({});
+            }
+            return new Response(null, { status: records.has(url.pathname) ? 200 : 404 });
+        }));
+        const consumer = { ...order, company_id: null, company_name: 'Jana Nováková', order_note: 'Nákup pro sebe' };
+
+        await syncPromptbookBillingContact(consumer);
+        await syncPromptbookBillingContact(consumer);
+
+        expect(requests.some(({ path }) => path.startsWith('/rest/companies'))).toBe(false);
+        expect(requests.some(({ method }) => method === 'PATCH')).toBe(false);
+        const writes = requests.filter(({ method }) => method === 'POST');
+        expect(writes.map(({ path }) => path)).toEqual(['/rest/opportunities', '/rest/notes', '/rest/noteTargets']);
+        expect(writes[0].body).toMatchObject({ id: order.id, pointOfContactId: 'existing-person' });
+        expect(writes[0].body).not.toHaveProperty('companyId');
+        expect(writes[1].body).toMatchObject({ bodyV2: { markdown: 'Nákup pro sebe' } });
+    });
+
     it('reuses an existing contact and makes Twenty retries converge on the same company and purchase', async () => {
         vi.stubEnv('PROMPTBOOK_TWENTY_API_KEY', 'test-key');
         upsert.mockResolvedValue({ error: null });

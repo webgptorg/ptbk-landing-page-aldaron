@@ -12,7 +12,11 @@ const TWENTY_TIMEOUT_MS = 5000;
 type PromptbookBillingContactOrder = Pick<PromptbookOrder,
     | 'id' | 'email' | 'plan' | 'country' | 'company_id' | 'company_name' | 'vat_id' | 'billing_address'
     | 'created_at' | 'first_paid_at' | 'phone' | 'onboarding_note' | 'is_test'
->;
+> & Partial<Pick<PromptbookOrder, 'order_note'>>;
+
+function getContactNote(order: PromptbookBillingContactOrder): string | null {
+    return [order.order_note?.trim(), order.onboarding_note?.trim()].filter(Boolean).join('\n\n') || null;
+}
 
 function billingRecordId(kind: string, key: string) {
     const bytes = createHash('sha256').update(`promptbook-billing:${kind}:${key}`).digest();
@@ -79,29 +83,34 @@ async function syncTwenty(
 ) {
     const twenty = createTwentyClient(apiKey);
     const email = order.email.trim().toLowerCase();
-    const companyId = billingRecordId('company', `${order.country}:${order.company_id}`);
-    await ensureTwentyRecord(twenty, 'companies', companyId, {
-        name: order.company_name,
-        address: {
-            addressStreet1: order.billing_address.line1,
-            addressCity: order.billing_address.city,
-            addressPostcode: order.billing_address.postal_code,
-            addressCountry: order.country,
-        },
-    });
+    const companyId = order.company_id ? billingRecordId('company', `${order.country}:${order.company_id}`) : null;
+    if (companyId) {
+        await ensureTwentyRecord(twenty, 'companies', companyId, {
+            name: order.company_name,
+            address: {
+                addressStreet1: order.billing_address.line1,
+                addressCity: order.billing_address.city,
+                addressPostcode: order.billing_address.postal_code,
+                addressCountry: order.country,
+            },
+        });
+    }
 
     const existingPerson = await findTwentyPerson(twenty, email);
     let personId = existingPerson?.id;
     if (!personId) {
         personId = billingRecordId('person', email);
         try {
-            await ensureTwentyRecord(twenty, 'people', personId, { emails: { primaryEmail: email }, companyId });
+            await ensureTwentyRecord(twenty, 'people', personId, {
+                emails: { primaryEmail: email },
+                ...(companyId ? { companyId } : {}),
+            });
         } catch (error) {
             const concurrentPerson = await findTwentyPerson(twenty, email);
             if (!concurrentPerson) throw error;
             personId = concurrentPerson.id;
         }
-    } else if (!existingPerson?.companyId) {
+    } else if (companyId && !existingPerson?.companyId) {
         const response = await twenty(`people/${personId}`, 'PATCH', { companyId });
         if (!response.ok) throw new Error(`Twenty could not link the Promptbook contact (HTTP ${response.status}).`);
     }
@@ -110,15 +119,16 @@ async function syncTwenty(
         name: `Promptbook ${planName} · ${order.company_name}`,
         stage: 'CUSTOMER',
         closeDate: order.first_paid_at,
-        companyId,
+        ...(companyId ? { companyId } : {}),
         pointOfContactId: personId,
     });
 
-    if (isOnboardingUpdate || order.phone || order.onboarding_note) {
+    const contactNote = getContactNote(order);
+    if (isOnboardingUpdate || order.phone || contactNote) {
         const noteId = billingRecordId('onboarding-note', order.id);
         const lines = [
             ...(order.phone ? [`Telefon: ${order.phone}`] : []),
-            ...(order.onboarding_note?.split(/\r?\n/) ?? []),
+            ...(contactNote?.split(/\r?\n/) ?? []),
         ];
         const note = {
             title: `Onboarding Promptbook ${planName}`,
@@ -158,19 +168,20 @@ export async function syncPromptbookBillingContact(
     if (!contacts) throw new Error('Promptbook billing contacts database is unavailable.');
 
     const planName = order.plan === 'start' ? 'Start' : 'Business';
-    const contactDetails = { phone: order.phone ?? null, userNote: order.onboarding_note ?? null };
+    const contactDetails = { phone: order.phone ?? null, userNote: getContactNote(order) };
     const { error: insertError } = await contacts.upsert(
         {
             promptbookBillingOrderId: order.id,
             email: order.email,
+            ...(!order.company_id ? { fullname: order.company_name } : {}),
             appName: 'Promptbook',
             placeName: PROMPTBOOK_BILLING_CONTACT_SOURCE,
             isContacted: false,
             isWaitlisted: false,
             ourNote: [
                 `Předplatné Promptbook ${planName}`,
-                `Firma: ${order.company_name}`,
-                `IČO (${order.country}): ${order.company_id}`,
+                `${order.company_id ? 'Firma' : 'Zákazník'}: ${order.company_name}`,
+                ...(order.company_id ? [`IČO (${order.country}): ${order.company_id}`] : []),
                 ...(order.vat_id ? [`IČ DPH: ${order.vat_id}`] : []),
                 `Objednávka: ${order.id}`,
             ].join('\n'),

@@ -27,10 +27,11 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
     const query = await searchParams;
     const initialDiscountCode = typeof query.code === 'string' ? query.code.slice(0, MAXIMAL_DISCOUNT_CODE_LENGTH) : '';
     const discountPlaceId = getPromptbookDiscountPlaceId(plan);
+    const discountPlaces = [getPromptbookDiscountPlaceId('start'), getPromptbookDiscountPlaceId('business')];
     const [promotion, discount] = availability.enabled
         ? await Promise.all([
               loadPromotedDiscountsByPlace(),
-              initialDiscountCode ? loadActiveDiscountsByPlace(initialDiscountCode, [discountPlaceId]) : null,
+              initialDiscountCode ? loadActiveDiscountsByPlace(initialDiscountCode, discountPlaces) : null,
           ])
         : [null, null];
 
@@ -39,6 +40,10 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
             plan={plan}
             availability={availability}
             promotion={promotion?.activeDiscountByPlaceId[discountPlaceId] ?? null}
+            promotionsByPlan={{
+                start: promotion?.activeDiscountByPlaceId[getPromptbookDiscountPlaceId('start')] ?? null,
+                business: promotion?.activeDiscountByPlaceId[getPromptbookDiscountPlaceId('business')] ?? null,
+            }}
             initialDiscountCode={initialDiscountCode}
             initialActiveDiscountByPlaceId={discount?.errorMessage === null ? discount.activeDiscountByPlaceId : {}}
             canceled={query.stav === 'zruseno'}

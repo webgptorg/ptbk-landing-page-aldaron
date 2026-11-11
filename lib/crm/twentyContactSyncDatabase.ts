@@ -38,13 +38,17 @@ const CONTACT_SYNC_CANDIDATES_SQL = `
 
         UNION ALL
         SELECT 'web:contact:' || c.id, 'promptbook-order:' || md5(jsonb_build_array(o.phone, projection.details)::text),
-               o.first_paid_at, 'promptbook-order', o.email, c.fullname, o.phone, c."placeName", c.url, projection.details
+               o.first_paid_at, 'promptbook-order', o.email,
+               COALESCE(c.fullname, CASE WHEN o.company_id IS NULL THEN o.company_name END),
+               o.phone, c."placeName", c.url, projection.details
         FROM public.promptbook_orders o
         JOIN public."Contact" c ON c."promptbookBillingOrderId" = o.id
         CROSS JOIN LATERAL (
             SELECT jsonb_strip_nulls(jsonb_build_object(
-                'planId', o.plan, 'billingCompany', o.company_name, 'billingCountry', o.country,
-                'billingCompanyId', o.company_id, 'firstPaidAt', o.first_paid_at, 'message', o.onboarding_note,
+                'planId', o.plan, 'billingName', o.company_name, 'customerType', o.customer_type,
+                'billingCompany', CASE WHEN o.company_id IS NOT NULL THEN o.company_name END,
+                'billingCountry', o.country, 'billingCompanyId', o.company_id, 'firstPaidAt', o.first_paid_at,
+                'message', NULLIF(concat_ws(E'\n\n', NULLIF(o.order_note, ''), NULLIF(o.onboarding_note, '')), ''),
                 'submissionEvidence', c."submissionEvidence"
             )) AS details
         ) projection

@@ -4,7 +4,7 @@ import { createStripeSubscriptionCouponParameters } from '@/lib/payments/stripeS
 import { ORGANIZATION_REGISTRATION_NUMBER } from '@/lib/metadata/site-config';
 import type Stripe from 'stripe';
 import { type PromptbookOrder } from './billingOrders';
-import { PROMPTBOOK_ONLINE_TERMS_PATH } from './config';
+import { getPromptbookOnlineTermsPath } from '@/lib/legal/promptbookOnlineTermsVersion';
 
 export const PROMPTBOOK_CHECKOUT_MAX_AGE_MS = 20 * 60 * 1000;
 const STRIPE_SESSION_LIFETIME_MS = 60 * 60 * 1000;
@@ -21,25 +21,29 @@ export async function createPromptbookCheckout(
     discount: ActiveDiscount | null,
 ) {
     const metadata = { [PROMPTBOOK_ORDER_METADATA]: order.id };
-    const reverseCharge = order.country === 'SK';
+    const termsPath = getPromptbookOnlineTermsPath(order.terms_version);
+    if (!termsPath) throw new Error('Unknown Promptbook order terms edition');
+    const business = order.customer_type === 'business' && Boolean(order.company_id);
+    const reverseCharge = business && order.country === 'SK' && order.tax_treatment === 'reverse_charge' &&
+        Boolean(order.vat_id && order.supplier_tax_id);
     const invoiceFooter = [
         reverseCharge ? `DIČ dodavatele: ${order.supplier_tax_id}. Daň odvede zákazník (reverse charge).` : 'Dodavatel není plátcem DPH.',
-        `Podmínky objednávky: https://www.ptbk.io${PROMPTBOOK_ONLINE_TERMS_PATH}`,
+        `Podmínky objednávky: https://www.ptbk.io${termsPath}`,
     ].join('\n');
     const customer = await stripe.customers.create({
         metadata,
-        business_name: order.company_name,
+        ...(business ? { business_name: order.company_name } : {}),
         name: order.company_name,
         email: order.email,
         preferred_locales: ['cs'],
         address: order.billing_address,
         tax_exempt: reverseCharge ? 'reverse' : 'none',
-        ...(order.vat_id ? { tax_id_data: [{ type: 'eu_vat', value: order.vat_id }] } : {}),
+        ...(business && order.vat_id ? { tax_id_data: [{ type: 'eu_vat', value: order.vat_id }] } : {}),
         invoice_settings: {
             rendering_options: { template: order.invoice_template_id },
             footer: invoiceFooter,
             custom_fields: [
-                { name: 'IČO odběratele', value: order.company_id },
+                ...(business && order.company_id ? [{ name: 'IČO odběratele', value: order.company_id }] : []),
                 { name: 'IČO dodavatele', value: String(ORGANIZATION_REGISTRATION_NUMBER) },
                 { name: 'Verze podmínek', value: order.terms_version },
                 { name: 'Verze enginu', value: order.engine_version.slice(0, 140) },

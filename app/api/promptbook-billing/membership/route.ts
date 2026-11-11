@@ -4,6 +4,7 @@ import {
     memberResponse,
 } from '@/lib/promptbook-billing/memberAccess';
 import { getPromptbookBillingAvailability } from '@/lib/promptbook-billing/config';
+import { hasPromptbookOrderConfirmation } from '@/lib/promptbook-billing/billingConfirmation';
 import type { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -28,6 +29,9 @@ export async function GET(request: NextRequest) {
                 termsVersion: order.terms_version,
                 baseAmount: order.base_amount,
                 firstPaidAt: order.first_paid_at,
+                confirmationUrl: hasPromptbookOrderConfirmation(order)
+                    ? `/api/promptbook-billing/confirmation?id=${encodeURIComponent(order.id)}`
+                    : null,
             })),
             supportEmail,
             supportedVersion,

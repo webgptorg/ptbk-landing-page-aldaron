@@ -167,6 +167,7 @@ describe('Twenty contact sources', () => {
             await database.exec(readFileSync(new URL('../../migrations/2026-11-0961-promptbook-billing-orders.sql', import.meta.url), 'utf8'));
             await database.exec(readFileSync(new URL('../../migrations/2026-11-0962-promptbook-billing-contacts.sql', import.meta.url), 'utf8'));
             await database.exec(readFileSync(new URL('../../migrations/2026-11-0963-twenty-contact-sync.sql', import.meta.url), 'utf8'));
+            await database.exec(readFileSync(new URL('../../migrations/2026-11-1100-promptbook-consumer-orders.sql', import.meta.url), 'utf8'));
             await database.exec(`
                 INSERT INTO promptbook_orders (
                     id, created_at, plan, email, country, company_id, company_name, vat_id, billing_address,
@@ -236,6 +237,28 @@ describe('Twenty contact sources', () => {
             expect(afterClear).toHaveLength(1);
             expect(afterClear[0].external_id).toBe('web:contact:3');
             expect(afterClear[0].details).not.toHaveProperty('message');
+
+            await recordTwentyContactSyncResult(transaction, afterClear[0], null);
+            await database.exec(`UPDATE promptbook_orders SET
+                company_id = NULL, customer_type = 'consumer', company_name = 'Jana Nováková', vat_id = NULL,
+                order_note = 'Poznámka k nákupu', onboarding_note = 'Doplněné požadavky'
+                WHERE id = '${BILLING_ORDER_ID}';`);
+            const consumerRows = await loadTwentyContactSyncRows(transaction, FROM, 10);
+            expect(consumerRows).toHaveLength(1);
+            expect(consumerRows[0].details).not.toHaveProperty('billingCompany');
+            expect(consumerRows[0].details).not.toHaveProperty('billingCompanyId');
+            expect(mapTwentyContactSource(consumerRows[0])).toMatchObject({
+                fullname: 'Jana Nováková',
+                details: {
+                    billingName: 'Jana Nováková', customerType: 'consumer',
+                    message: 'Poznámka k nákupu\n\nDoplněné požadavky',
+                },
+            });
+            await recordTwentyContactSyncResult(transaction, consumerRows[0], null);
+            await database.exec(`UPDATE promptbook_orders SET onboarding_note = NULL WHERE id = '${BILLING_ORDER_ID}';`);
+            const clearedConsumerRows = await loadTwentyContactSyncRows(transaction, FROM, 10);
+            expect(clearedConsumerRows).toHaveLength(1);
+            expect(clearedConsumerRows[0].details.message).toBe('Poznámka k nákupu');
         } finally {
             await database.close();
         }

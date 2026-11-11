@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { JsonRequestError, sendJson } from '@/lib/api/requestJson';
 import { validateDiscountCode } from '@/lib/discounts/discountCodeApi';
+import { getPromptbookDiscountPlaceId } from '@/lib/discounts/discountPlaces';
 import { PromptbookCheckout } from './PromptbookCheckout';
 
 vi.mock('@/lib/api/requestJson', async (importOriginal) => ({
@@ -15,6 +16,7 @@ vi.mock('@/lib/discounts/discountCodeApi', () => ({ validateDiscountCode: vi.fn(
 afterEach(() => {
     cleanup();
     vi.resetAllMocks();
+    window.history.replaceState(null, '', '/');
 });
 
 const promotion = {
@@ -32,17 +34,30 @@ const availability = {
     isTest: false,
 };
 
-function renderCheckout(enabled = true) {
+function renderCheckout(enabled = true, slovakiaEnabled = false) {
     return render(
         <PromptbookCheckout
             plan="start"
-            availability={{ ...availability, enabled }}
+            availability={{ ...availability, enabled, slovakiaEnabled }}
             promotion={promotion}
+            promotionsByPlan={{ start: promotion, business: promotion }}
             initialDiscountCode=""
             initialActiveDiscountByPlaceId={{}}
             canceled={false}
         />,
     );
+}
+
+function fillBillingDetails() {
+    fireEvent.change(screen.getByLabelText('Jméno nebo firma'), { target: { value: 'Pavol Hejný' } });
+    fireEvent.change(screen.getByLabelText('Ulice a číslo'), { target: { value: 'Testovací 1' } });
+    fireEvent.change(screen.getByLabelText('Město'), { target: { value: 'Praha' } });
+    fireEvent.change(screen.getByLabelText('PSČ'), { target: { value: '19016' } });
+    fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'test@example.com' } });
+}
+
+function checkoutCalls() {
+    return vi.mocked(sendJson).mock.calls.filter(([url]) => url === '/api/promptbook-billing/checkout');
 }
 
 describe('Promptbook checkout', () => {
@@ -57,8 +72,8 @@ describe('Promptbook checkout', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Uplatnit slevu' }));
         expect(await screen.findByText(/279,30\sKč/)).toBeTruthy();
         expect(screen.getByText(/Poté 399\sKč měsíčně/)).toBeTruthy();
-        fireEvent.change(screen.getByLabelText('IČO'), { target: { value: '21012288' } });
-        fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'test@example.com' } });
+        fireEvent.change(screen.getByLabelText(/IČO/), { target: { value: '21012288' } });
+        fillBillingDetails();
         fireEvent.click(screen.getByRole('checkbox'));
         fireEvent.click(screen.getByRole('button', { name: 'Pokračovat k platbě' }));
         await waitFor(() =>
@@ -75,12 +90,87 @@ describe('Promptbook checkout', () => {
         );
         fireEvent.click(await screen.findByRole('button', { name: 'Ověřit nabídku znovu' }));
         expect(await screen.findByText(/319,20\sKč/)).toBeTruthy();
-        expect(sendJson).toHaveBeenCalledTimes(1);
+        expect(checkoutCalls()).toHaveLength(1);
     });
 
     it('withholds the billing form when the payment configuration is unavailable', () => {
         renderCheckout(false);
         expect(screen.queryByRole('button', { name: 'Pokračovat k platbě' })).toBeNull();
         expect(screen.queryByLabelText('E-mail')).toBeNull();
+    });
+
+    it('preserves the order fields when switching plans and validates an arbitrary code for the new plan', async () => {
+        const customDiscount = { ...promotion, code: 'PARTNER20', percent: 20 };
+        vi.mocked(validateDiscountCode).mockResolvedValueOnce(customDiscount).mockResolvedValueOnce(null);
+        vi.mocked(sendJson).mockRejectedValue(new JsonRequestError('Testovací odmítnutí.', 502));
+        renderCheckout();
+        fillBillingDetails();
+        fireEvent.change(screen.getByLabelText(/Poznámka/), { target: { value: 'Prosím o kontakt.' } });
+        fireEvent.change(screen.getByLabelText(/Slevový kód/), { target: { value: 'PARTNER20' } });
+        expect(await screen.findByText(/319,20\sKč/)).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: /Vybrat Business/ }));
+        expect(window.location.pathname).toBe('/cs/pricing/objednat/business');
+        expect(screen.getByLabelText('Jméno nebo firma').getAttribute('value')).toBe('Pavol Hejný');
+        expect((screen.getByLabelText(/Poznámka/) as HTMLTextAreaElement).value).toBe('Prosím o kontakt.');
+        expect(screen.queryByRole('button', { name: /Vybrat Business/ })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Pokračovat k platbě' }).hasAttribute('disabled')).toBe(true);
+        expect(await screen.findByText('Tento kód pro vybraný tarif neplatí.')).toBeTruthy();
+        expect(validateDiscountCode).toHaveBeenLastCalledWith('PARTNER20', getPromptbookDiscountPlaceId('business'));
+
+        fireEvent.change(screen.getByLabelText(/Slevový kód/), { target: { value: '' } });
+        fireEvent.click(screen.getByRole('checkbox', { name: /Souhlasím/ }));
+        fireEvent.click(screen.getByRole('checkbox', { name: /Chci zpřístupnit/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Pokračovat k platbě' }));
+        await waitFor(() => expect(checkoutCalls()[0]?.[2]).toEqual(expect.objectContaining({ plan: 'business', promoCode: undefined, expectedDiscount: null })));
+        fireEvent.click(await screen.findByRole('radio', { name: /Start/ }));
+        expect(window.location.pathname).toBe('/cs/pricing/objednat/start');
+        expect((screen.getByLabelText('E-mail') as HTMLInputElement).value).toBe('test@example.com');
+    });
+
+    it('allows a consumer to order without IČO or VAT ID and sends their billing details and note', async () => {
+        vi.mocked(sendJson).mockRejectedValue(new JsonRequestError('Testovací odmítnutí.', 502));
+        renderCheckout(true, true);
+        fillBillingDetails();
+        fireEvent.change(screen.getByLabelText('Země'), { target: { value: 'SK' } });
+        fireEvent.change(screen.getByLabelText(/Poznámka/), { target: { value: 'Moje objednávka' } });
+        expect(screen.queryByLabelText('IČ DPH')).toBeNull();
+        expect(screen.getByLabelText(/IČO/).hasAttribute('required')).toBe(false);
+        fireEvent.click(screen.getByRole('checkbox', { name: /Souhlasím/ }));
+        fireEvent.click(screen.getByRole('checkbox', { name: /Chci zpřístupnit/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Pokračovat k platbě' }));
+        await waitFor(() => expect(checkoutCalls()[0]?.[2]).toEqual(expect.objectContaining({
+            country: 'SK', companyId: '', vatId: undefined, billingName: 'Pavol Hejný',
+            billingAddress: { line1: 'Testovací 1', city: 'Praha', postal_code: '19016', country: 'SK' },
+            note: 'Moje objednávka', acceptedTerms: true, immediateStart: true,
+        })));
+    });
+
+    it('fills in registry details without overwriting a manual correction made while lookup is pending', async () => {
+        let completeLookup: ((identity: unknown) => void) | undefined;
+        vi.mocked(sendJson).mockImplementation(() => new Promise((resolve) => { completeLookup = resolve; }));
+        renderCheckout();
+        fireEvent.change(screen.getByLabelText(/IČO/), { target: { value: '21012288' } });
+        await waitFor(() => expect(sendJson).toHaveBeenCalledWith('/api/promptbook-billing/identity', 'POST', {
+            country: 'CZ', companyId: '21012288', vatId: undefined,
+        }));
+        fireEvent.change(screen.getByLabelText('Jméno nebo firma'), { target: { value: 'Vlastní název' } });
+        completeLookup?.({ name: 'AI Web s.r.o.', address: { line1: 'Registr 2', city: 'Praha', postal_code: '11000', country: 'CZ' } });
+        await screen.findByText('Údaje načtené. Můžete je upravit.');
+        expect((screen.getByLabelText('Jméno nebo firma') as HTMLInputElement).value).toBe('Vlastní název');
+        expect((screen.getByLabelText('Ulice a číslo') as HTMLInputElement).value).toBe('Registr 2');
+        fireEvent.change(screen.getByLabelText('Ulice a číslo'), { target: { value: 'Moje adresa 3' } });
+        expect((screen.getByLabelText('Ulice a číslo') as HTMLInputElement).value).toBe('Moje adresa 3');
+    });
+
+    it('discards the previous registry response after changing the country', async () => {
+        let completeLookup: ((identity: unknown) => void) | undefined;
+        vi.mocked(sendJson).mockImplementation(() => new Promise((resolve) => { completeLookup = resolve; }));
+        renderCheckout(true, true);
+        fireEvent.change(screen.getByLabelText(/IČO/), { target: { value: '21012288' } });
+        await waitFor(() => expect(sendJson).toHaveBeenCalled());
+        fireEvent.change(screen.getByLabelText('Země'), { target: { value: 'SK' } });
+        completeLookup?.({ name: 'Stará odpověď', address: { line1: 'Registr 2', city: 'Praha', postal_code: '11000' } });
+        await waitFor(() => expect((screen.getByLabelText('Jméno nebo firma') as HTMLInputElement).value).toBe(''));
     });
 });

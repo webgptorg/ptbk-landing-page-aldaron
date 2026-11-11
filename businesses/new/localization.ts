@@ -1,11 +1,11 @@
 import { LEGAL_PAGE_PATHS, LEGAL_DOCUMENT_KINDS } from '@/lib/legal/legalPagePaths';
-import { PROMPTBOOK_ONLINE_TERMS_PATH } from '@/lib/legal/promptbookOnlineTermsVersion';
+import { getPromptbookOnlineTermsPath, PROMPTBOOK_ONLINE_TERMS_VERSIONS } from '@/lib/legal/promptbookOnlineTermsVersion';
 import english from './locales/en.json';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 export type SiteLocale = 'cs' | 'en';
 export const localeFromPath = (pathname: string): SiteLocale => /^\/(?:new\/)?en(?:\/|$)/.test(pathname) ? 'en' : 'cs';
 export function localizedPath(path = '', locale: SiteLocale = 'cs') {
-    if (path === PROMPTBOOK_ONLINE_TERMS_PATH && locale === 'en') return LEGAL_PAGE_PATHS.productTerms.en;
+    if (locale === 'en' && PROMPTBOOK_ONLINE_TERMS_VERSIONS.some(version => getPromptbookOnlineTermsPath(version) === path)) return LEGAL_PAGE_PATHS.productTerms.en;
     const legalKind = LEGAL_DOCUMENT_KINDS.find(kind => Object.values(LEGAL_PAGE_PATHS[kind]).includes(path));
     if (legalKind) return LEGAL_PAGE_PATHS[legalKind][locale];
     const suffix = path.replace(/^\/new(?=\/|\?|#|$)/, '').replace(/^\/(?:cs|en)(?=\/|\?|#|$)/, '').replace(/^\/+/, '');

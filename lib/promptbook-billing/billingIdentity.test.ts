@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BillingIdentityError, resolvePromptbookBillingIdentity } from './billingIdentity';
+import { BillingIdentityError, resolvePromptbookBillingIdentity, resolvePromptbookCheckoutIdentity, suggestPromptbookBillingIdentity } from './billingIdentity';
 
 vi.mock('server-only', () => ({}));
 
@@ -55,6 +55,49 @@ function stubSlovakRegistries(vies: Partial<typeof SK_VIES>) {
 }
 
 describe('Promptbook billing identity', () => {
+    it.each(['CZ', 'SK'] as const)('accepts a %s consumer without querying business registries', async (country) => {
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+        const address = { line1: 'Vlastní 12', city: 'Město', postal_code: '12345', country };
+        await expect(resolvePromptbookCheckoutIdentity({
+            country, companyId: null, vatId: null, billingName: 'Eva Nová', billingAddress: address,
+        })).resolves.toMatchObject({
+            companyId: null, customerType: 'consumer', taxTreatment: 'domestic',
+            name: 'Eva Nová', address,
+        });
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps manually corrected Czech business details even during an ARES outage', async () => {
+        const fetchMock = vi.fn().mockRejectedValue(new Error('network'));
+        vi.stubGlobal('fetch', fetchMock);
+        const address = { line1: 'Doručovací 99', city: 'Brno', postal_code: '60200', country: 'CZ' as const };
+        await expect(resolvePromptbookCheckoutIdentity({
+            country: 'CZ', companyId: CZ_COMPANY.ico, vatId: null,
+            billingName: 'Vlastní fakturační název', billingAddress: address,
+        })).resolves.toMatchObject({
+            customerType: 'business', taxTreatment: 'domestic', name: 'Vlastní fakturační název', address,
+        });
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps edited Slovak billing address after verifying the business VAT identity', async () => {
+        stubSlovakRegistries({});
+        const address = { line1: 'Poštová 99', city: 'Bratislava', postal_code: '81101', country: 'SK' as const };
+        await expect(resolvePromptbookCheckoutIdentity({
+            country: 'SK', companyId: SK_COMPANY.ico, vatId: 'SK0987654321',
+            billingName: 'Skúšobná fakturační pobočka', billingAddress: address,
+        })).resolves.toMatchObject({ name: 'Skúšobná fakturační pobočka', address, taxTreatment: 'reverse_charge' });
+    });
+
+    it('suggests Slovak business details before a VAT number is entered without granting reverse charge', async () => {
+        const fetchMock = stubSlovakRegistries({});
+        await expect(suggestPromptbookBillingIdentity({ country: 'SK', companyId: SK_COMPANY.ico })).resolves.toMatchObject({
+            companyId: SK_COMPANY.ico, name: SK_COMPANY.nazovUJ,
+        });
+        expect(fetchMock.mock.calls.some(([url]) => new URL(url).hostname === 'ec.europa.eu')).toBe(false);
+    });
+
     it('uses the Czech company and address from ARES without inventing a tax ID', async () => {
         const fetchMock = vi.fn().mockResolvedValue(Response.json(CZ_COMPANY));
         vi.stubGlobal('fetch', fetchMock);
