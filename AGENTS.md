@@ -388,6 +388,8 @@ use cases, and audiences. Keep these rules current when behavior changes.
   estimates. The fixed mini-player, newest-episode header button, person/search/
   episode/play/archive/collaboration filters, and section hash are shareable as
   query/hash state; the snake game is local state. Person clicks filter episodes.
+  The hero play button uses `Pustit díl #<number>`, falling back to the publisher's explicit numbered introduction
+  when the title/feed omit it, then `Pustit poslední díl`. Its display label never exposes or changes the URL slug.
   Everyone in the roster has a 320-pixel square transparent PNG in
   `public/people/ai-ta-krajta`, normalized from the show's covers or a published
   personal portrait. `aiTaKrajtaPortraits.md` records the sources and cutout workflow;

@@ -2,7 +2,10 @@
 
 import { useAiTaKrajtaPageState } from '@/businesses/ai-ta-krajta/AiTaKrajtaPageState';
 import { AiTaKrajtaSnakeTerrarium } from '@/businesses/ai-ta-krajta/AiTaKrajtaSnakeTerrarium';
-import { formatAiTaKrajtaEstimate } from '@/businesses/ai-ta-krajta/aiTaKrajtaFormatting';
+import {
+    formatAiTaKrajtaEstimate,
+    readAiTaKrajtaEpisodeNumberFromSummary,
+} from '@/businesses/ai-ta-krajta/aiTaKrajtaFormatting';
 import { AI_TA_KRAJTA_PLATFORMS, AI_TA_KRAJTA_SECTION_IDS } from '@/businesses/ai-ta-krajta/config';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
 import { ArrowUpRight, Play } from 'lucide-react';
@@ -25,6 +28,10 @@ function AiTaKrajtaFact({ label, value }: { readonly label: string; readonly val
 export function AiTaKrajtaHero() {
     const { archive, newestPlayableEpisode, playEpisode } = useAiTaKrajtaPageState();
     const { estimatedSubscriberCount, estimatedListeningHours } = archive.statistics;
+    const newestEpisodeNumber =
+        newestPlayableEpisode === null
+            ? null
+            : newestPlayableEpisode.number ?? readAiTaKrajtaEpisodeNumberFromSummary(newestPlayableEpisode.summary);
 
     return (
         <section className="relative overflow-hidden">
@@ -62,9 +69,9 @@ export function AiTaKrajtaHero() {
                             className="inline-flex h-12 items-center gap-2 rounded-full bg-[#ff6b6b] px-6 text-base font-semibold text-[#1a201c] transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Play className="h-5 w-5 fill-current" />
-                            {newestPlayableEpisode === null
-                                ? 'Poslední díl'
-                                : `Pustit díl ${newestPlayableEpisode.slug}`}
+                            {newestEpisodeNumber === null
+                                ? 'Pustit poslední díl'
+                                : `Pustit díl #${newestEpisodeNumber}`}
                         </button>
 
                         <a

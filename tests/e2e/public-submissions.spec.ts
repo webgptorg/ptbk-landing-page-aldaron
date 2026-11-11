@@ -220,10 +220,11 @@ test('plays the newest AI ta Krajta episode from the header', async ({ page }) =
 test('resumes a half-played AI ta Krajta episode where its listener left it', async ({ page }) => {
     await page.goto('/ai-ta-krajta');
 
-    // Note: The feed decides which episode is the newest one, so the test reads it off the page instead of naming a
-    //       díl which is the newest only until the next Thursday.
-    const listenButtonLabel = await page.getByRole('button', { name: /^Pustit díl / }).textContent();
-    const episodeSlug = (listenButtonLabel ?? '').replace('Pustit díl ', '').trim();
+    // The display number can differ from the URL identifier, so read the selected recording from playback state.
+    const listenButton = page.getByRole('button', { name: /^Pustit (?:díl #\d+|poslední díl)$/ });
+    await listenButton.click();
+    await expect(page).toHaveURL(/[?&]episode=/);
+    const episodeSlug = new URL(page.url()).searchParams.get('episode') ?? '';
     expect(episodeSlug).not.toBe('');
 
     await page.evaluate(
@@ -245,7 +246,7 @@ test('resumes a half-played AI ta Krajta episode where its listener left it', as
 
     await expect(page.locator('section#dily').getByText('Zbývá 25:00')).toBeVisible();
 
-    await page.getByRole('button', { name: `Pustit díl ${episodeSlug}` }).click();
+    await listenButton.click();
 
     // Note: The five seconds are the rewind which leads a listener back into the sentence they were interrupted in.
     await expect(page.getByLabel('Pozice v dílu')).toHaveValue('295');

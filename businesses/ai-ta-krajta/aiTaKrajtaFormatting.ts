@@ -7,6 +7,14 @@ const SMALL_ESTIMATE_ROUNDING_INCREMENT = 100;
 const MEDIUM_ESTIMATE_ROUNDING_INCREMENT = 500;
 const LARGE_ESTIMATE_ROUNDING_INCREMENT = 5_000;
 
+/** Reads the publisher's explicit episode number from an introduction when its title and RSS tag omit it. */
+export function readAiTaKrajtaEpisodeNumberFromSummary(summary: string): number | null {
+    const match = /^(?:Vítejte|Vítáme vás)\s+u\s+(\d+)\.\s+dílu\b/i.exec(summary.trim());
+    const number = Number(match?.[1]);
+
+    return Number.isSafeInteger(number) && number > 0 ? number : null;
+}
+
 /**
  * Writes the day an episode came out, for example `27. srpna 2026`
  */
