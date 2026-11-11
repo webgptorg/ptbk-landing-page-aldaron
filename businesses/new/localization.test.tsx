@@ -140,7 +140,7 @@ describe('bilingual launch site', () => {
             '/en/srovnani',
             ...COMPARISONS.slice(0, 6).map(({ slug }) => `/en/srovnani/${slug}`),
         ]);
-        expect(nav?.querySelector('a[href="/en/srovnani"]')?.textContent).toBe('Compare all tools');
+        expect(nav?.querySelector('a[href="/en/srovnani"]')?.textContent).toBe('Promptbook versus');
 
         for (const item of COMPARISONS) {
             for (const locale of ['cs', 'en'] as const) {

@@ -1,6 +1,6 @@
 # Srovnání alternativ
 
-Patička webu má v češtině i angličtině sekci **Promptbook versus**. První odkaz vede na společnou tabulku `/[locale]/srovnani`, následuje šest přímých odkazů. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`. Z tabulky se na detail přechází přes název nástroje. Záhlaví detailu vede zpět na společnou tabulku.
+Patička webu má v češtině i angličtině sekci **Promptbook versus**. Nadpis přehledu, jeho metadata, první odkaz i návrat z detailu používají název **Promptbook versus**; nejde o úplný seznam nástrojů. První odkaz vede na společnou tabulku `/[locale]/srovnani`, následuje šest přímých odkazů. Každá alternativa má vlastní stránku `/[locale]/srovnani/{slug}`. Z tabulky se na detail přechází přes název nástroje. Záhlaví detailu vede zpět na společnou tabulku.
 
 Detail začíná dvěma konkrétními situacemi, kdy zvolit Promptbook a kdy druhý nástroj. Kompaktní tabulka ukazuje vlastní provoz, práci při vypnutém počítači, umístění dat, AI modely a plánované úlohy. V každém detailu je zvýrazněn jeden doložitelný rozdíl ve prospěch Promptbooku. U alternativ s vlastním provozem porovnává ukládání úkolů a chatů jako souborů projektu v Gitu. Stavy mají ikonu i text a podmínka je vidět přímo v buňce. Delší vysvětlení je rozbalitelné pod tabulkou.
 

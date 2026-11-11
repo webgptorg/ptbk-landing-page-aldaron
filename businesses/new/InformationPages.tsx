@@ -142,7 +142,7 @@ export function ComparisonsPage() {
     const cs = locale === 'cs';
 
     return <>
-        <PageIntro title={cs ? 'Srovnání všech nástrojů' : 'Compare all tools'}>
+        <PageIntro title={'Promptbook versus'}>
             {cs ? `Promptbook a ${COMPARISONS.length} alternativ v jedné tabulce. Kliknutím na název alternativy otevřete detail.` : `Promptbook and ${COMPARISONS.length} alternatives in one table. Select an alternative’s name to open its comparison.`}
         </PageIntro>
         <ComparisonTable />
@@ -158,7 +158,7 @@ export function ComparisonPage({ slug }: { slug: string }) {
     return <>
         <header className={s.pageIntro}>
             <Link className={`${s.breadcrumb} ${s.comparisonBack}`} href={path('srovnani')}>
-                <ArrowLeft size={16} aria-hidden="true" />{cs ? 'Srovnání všech nástrojů' : 'Compare all tools'}
+                <ArrowLeft size={16} aria-hidden="true" />{'Promptbook versus'}
             </Link>
             <h1>Promptbook versus {item.name}</h1>
         </header>

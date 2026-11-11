@@ -19,7 +19,7 @@ const pages: Record<string, [string, string]> = {
     agendy: ['Choose your workflow', 'Explore email, accounting documents, social content, video and website maintenance workflows.'],
     pricing: ['Pricing and support', `Free for self-installation, Start at ${licencePrice('start', 'en')} and Business at ${licencePrice('business', 'en')} monthly per engine project, custom Enterprise and partner terms.`],
     kalkulacka: ['Cost and benefit calculator', 'Calculate the complete economics of your workflow or partner service. Edit assumptions, share a link and download a PDF.'],
-    srovnani: ['Compare all tools', 'Compare Promptbook and its alternatives in one table by use case, self-hosting, scheduling and workspace.'],
+    srovnani: ['Promptbook versus', 'Compare Promptbook and its alternatives in one table by use case, self-hosting, scheduling and workspace.'],
     'o-nas': ['Our story and founders', 'Jiří Jahn and Pavol Hejný, equal cofounders of Promptbook. From website chatbots to ongoing business workflows.'],
     bezpecnost: ['Your data and security', 'Your own working context, end-to-end encrypted controls and clear boundaries for external models and tools.'],
     faq: ['Questions and answers', 'Practical answers about deployment, data, models, licences and support before your first workflow.'],
