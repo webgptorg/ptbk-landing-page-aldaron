@@ -9,12 +9,12 @@ const WALKTHROUGHS = {
         'ai-local': { name: 'AI agent · Váš počítač', steps: [
             { title: 'Zkopírujte prompt', text: 'Nahoře vyberte Váš počítač a zkopírujte celý prompt.' },
             { title: 'Vložte ho do AI agenta', text: 'Použijte Claude Code, Codex nebo jiného agenta s přístupem k terminálu na svém počítači.' },
-            { title: 'Dokončete nastavení', text: 'Odpovězte na otázky k projektu a dokončete přihlášení vybraného AI nástroje.' },
+            { title: 'Dokončete nastavení', text: 'Agent použije předem zadané instalační volby. Dokončete případné přihlášení a povinná potvrzení nástroje nebo systému.' },
         ] },
         'ai-server': { name: 'AI agent · VPS přes SSH', steps: [
             { title: 'Zkopírujte prompt pro VPS', text: 'Nahoře vyberte VPS přes SSH. Připravte si adresu existujícího serveru a SSH uživatele.' },
             { title: 'Spusťte svého AI agenta', text: 'Prompt vložte do agenta na svém počítači. Připojí se na VPS Vaším místním SSH přístupem.' },
-            { title: 'Dokončete přihlášení', text: 'Otevřete přihlašovací odkaz AI nástroje a dokončete průvodce projektem přes SSH.' },
+            { title: 'Dokončete přihlášení', text: 'Agent použije předem zadané volby. Doplňte případné chybějící SSH údaje, otevřete přihlašovací odkaz a dokončete povinná potvrzení.' },
         ] },
         npm: { name: 'npm', steps: [
             { title: 'Otevřete terminál', text: 'Připravte Node.js, npm a Git podle požadavků výše.' },
@@ -46,12 +46,12 @@ const WALKTHROUGHS = {
         'ai-local': { name: 'AI agent · Your computer', steps: [
             { title: 'Copy the prompt', text: 'Select Your computer above and copy the complete prompt.' },
             { title: 'Paste it into your AI agent', text: 'Use Claude Code, Codex or another agent with terminal access on your computer.' },
-            { title: 'Complete setup', text: 'Answer the project questions and finish signing in to your selected AI tool.' },
+            { title: 'Complete setup', text: 'The agent uses the installation choices supplied in advance. Complete any sign-in and mandatory tool or system approvals.' },
         ] },
         'ai-server': { name: 'AI agent · VPS over SSH', steps: [
             { title: 'Copy the VPS prompt', text: 'Select VPS over SSH above. Have your existing server address and SSH user ready.' },
             { title: 'Run your local AI agent', text: 'Paste the prompt into the agent on your computer. It connects using your local SSH access.' },
-            { title: 'Finish signing in', text: 'Open the AI tool’s login link and complete project setup over SSH.' },
+            { title: 'Finish signing in', text: 'The agent uses the supplied defaults. Provide any missing SSH details, open the sign-in link and complete mandatory approvals.' },
         ] },
         npm: { name: 'npm', steps: [
             { title: 'Open your terminal', text: 'Have Node.js, npm and Git ready according to the requirements above.' },
