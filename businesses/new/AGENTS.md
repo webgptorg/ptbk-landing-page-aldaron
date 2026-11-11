@@ -1,5 +1,7 @@
 # Promptbook launch website
 
+The latest 11 November headline selection supersedes the instant activity swap and fixed phrase sizing below: apply laboratory **06 · Psací stroj / Plynulá** to both localized homepages. Erase the old verb, pause briefly, then type the new one over 1,560 ms; leave 3,200 ms between replacements. The word slot eases to the next word's measured width over 650 ms, including font-load and responsive remeasurement. Keep the complete line centered, reserve its longest outer geometry and preserve the robot, native input, accessible initial promise, offscreen/hidden pause and static reduced motion. Czech cycles through pracuje, vyvíjí, účtuje, plánuje, píše, přepisuje, analyzuje and testuje, with localized English activities. Do not include laboratory controls.
+
 The 11 November navigation revision removes Our story from both desktop and mobile header menus in both languages. Keep the story page, its footer link and the lower homepage link accessible. The Czech header uses the singular `Komunita` and links directly to `COMMUNITIES.promptbook.path`, not the communities index.
 
 The 11 November 2026 checkout revision supersedes the earlier homepage enquiry CTA. When Czech billing is enabled, the Czech homepage hero and desktop/mobile header actions use full navigation to `/cs/pricing/objednat/start`, where the buyer can switch plans. English, partnership and disabled-checkout enquiry flows retain their contact actions.

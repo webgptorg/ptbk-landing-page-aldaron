@@ -218,18 +218,33 @@ describe('hero working headline', () => {
         expect(face.getAttribute('transform')).toBe(rest);
     });
 
-    it('starts with the complete accessible promise and changes activities only after the introduction', () => {
+    it('deletes, pauses and types the next word while changing its reserved width and keeping one accessible promise', () => {
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+            return new DOMRect(0, 0, this.dataset.heroMeasure === 'pracuje' ? 120 : 80, 40);
+        });
         const { container } = render(<h1><HeroHeadline firstLine="Dřív jste AI úkolovali"/></h1>);
         const heading = screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' });
         const activity = () => container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity');
+        const typed = () => container.querySelector('[data-hero-typed]')?.textContent;
+        const slot = container.querySelector<HTMLElement>('[data-hero-word-slot]')!;
         expect(activity()).toBe('pracuje');
+        expect(typed()).toBe('pracuje');
+        expect(slot.style.width).toBe('120px');
         act(() => vi.advanceTimersByTime(5000));
         expect(activity()).toBe('pracuje');
-        act(() => vi.advanceTimersByTime(1000));
-        expect(activity()).toBe('účtuje');
-        expect(screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' })).toBe(heading);
-        act(() => vi.advanceTimersByTime(4200));
+        act(() => vi.advanceTimersByTime(600));
         expect(activity()).toBe('vyvíjí');
+        expect(typed()).toBe('pracu');
+        expect(slot.style.width).toBe('80px');
+        act(() => vi.advanceTimersByTime(450));
+        expect(typed()).toBe('');
+        act(() => vi.advanceTimersByTime(300));
+        expect(typed()).toBe('v');
+        act(() => vi.advanceTimersByTime(650));
+        expect(typed()).toBe('vyvíjí');
+        expect(screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' })).toBe(heading);
+        act(() => vi.advanceTimersByTime(3200));
+        expect(activity()).toBe('účtuje');
     });
 
     it('preserves active time while the tab or headline is hidden', () => {
@@ -241,13 +256,15 @@ describe('hero working headline', () => {
         expect(activity()).toBe('pracuje');
         act(() => { visibility = 'visible'; document.dispatchEvent(new Event('visibilitychange')); });
         act(() => vi.advanceTimersByTime(2500));
-        expect(activity()).toBe('účtuje');
+        expect(activity()).toBe('vyvíjí');
+        const pausedText = container.querySelector('[data-hero-typed]')?.textContent;
         act(() => intersect(false));
         act(() => vi.advanceTimersByTime(20000));
-        expect(activity()).toBe('účtuje');
-        act(() => intersect(true));
-        act(() => vi.advanceTimersByTime(4200));
         expect(activity()).toBe('vyvíjí');
+        expect(container.querySelector('[data-hero-typed]')?.textContent).toBe(pausedText);
+        act(() => intersect(true));
+        act(() => vi.advanceTimersByTime(4760));
+        expect(activity()).toBe('účtuje');
     });
 
     it('shows a static localized promise for reduced motion, including preference changes', () => {
@@ -259,8 +276,10 @@ describe('hero working headline', () => {
         expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('works');
         act(() => { reduced = false; changeMotion(); });
         act(() => vi.advanceTimersByTime(6000));
-        expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('plans');
+        expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('codes');
         act(() => { reduced = true; changeMotion(); });
         expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe('works');
+        expect(container.querySelector('[data-hero-typed]')?.textContent).toBe('works');
+        expect(container.querySelector('i')).toBeNull();
     });
 });

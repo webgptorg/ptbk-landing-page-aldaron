@@ -6,12 +6,13 @@ import { PromptbookRobot } from './PromptbookRobot';
 import s from './hero-headline.module.css';
 
 const COPY = {
-    cs: { prefix: 'Teď', suffix: 'pro', you: 'Vás', activities: ['pracuje', 'účtuje', 'vyvíjí', 'přepisuje', 'plánuje', 'píše'] },
-    en: { prefix: 'Now it', suffix: 'for', you: 'you', activities: ['works', 'plans', 'writes', 'codes', 'files', 'replies'] },
+    cs: { prefix: 'Teď', suffix: 'pro', you: 'Vás', activities: ['pracuje', 'vyvíjí', 'účtuje', 'plánuje', 'píše', 'přepisuje', 'analyzuje', 'testuje'] },
+    en: { prefix: 'Now it', suffix: 'for', you: 'you', activities: ['works', 'codes', 'plans', 'writes', 'files', 'replies', 'analyzes', 'tests'] },
 } as const;
 const FIRST_CHANGE_MS = 5400;
-const CHANGE_PERIOD_MS = 4200;
-const SWAP_MS = 480;
+// Variant 06 + fluid width from the approved word-motion laboratory.
+const TYPEWRITER_MS = 1560;
+const CHANGE_PERIOD_MS = TYPEWRITER_MS + 3200;
 
 /** One quiet working character; the clock runs only while the headline is visible. */
 export function HeroHeadline({ firstLine }: { firstLine?: string }) {
@@ -21,6 +22,33 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
     const [elapsed, setElapsed] = useState(0);
     const [animated, setAnimated] = useState(true);
     const [running, setRunning] = useState(true);
+    const [wordWidths, setWordWidths] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        const element = root.current;
+        if (!element) return;
+        let disposed = false;
+        function measure() {
+            if (disposed || !element) return;
+            const widths: Record<string, number> = {};
+            element.querySelectorAll<HTMLElement>('[data-hero-measure]').forEach(word => {
+                widths[word.dataset.heroMeasure!] = Math.ceil(word.getBoundingClientRect().width);
+            });
+            setWordWidths(widths);
+        }
+        measure();
+        const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+        observer?.observe(element);
+        document.fonts?.ready.then(measure);
+        document.fonts?.addEventListener('loadingdone', measure);
+        window.addEventListener('resize', measure);
+        return () => {
+            disposed = true;
+            observer?.disconnect();
+            document.fonts?.removeEventListener('loadingdone', measure);
+            window.removeEventListener('resize', measure);
+        };
+    }, [locale]);
 
     useEffect(() => {
         const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -64,7 +92,13 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
 
     const cycle = elapsed < FIRST_CHANGE_MS ? -1 : Math.floor((elapsed - FIRST_CHANGE_MS) / CHANGE_PERIOD_MS);
     const index = cycle < 0 ? 0 : (cycle + 1) % copy.activities.length;
-    const swapping = cycle >= 0 && (elapsed - FIRST_CHANGE_MS) % CHANGE_PERIOD_MS < SWAP_MS;
+    const progress = cycle < 0 ? 1 : Math.min(1, ((elapsed - FIRST_CHANGE_MS) % CHANGE_PERIOD_MS) / TYPEWRITER_MS);
+    const swapping = progress < 1;
+    const previous = copy.activities[(index + copy.activities.length - 1) % copy.activities.length];
+    const activity = copy.activities[index];
+    const typed = !swapping ? activity : progress < .4
+        ? previous.slice(0, Math.ceil(previous.length * (1 - progress / .4)))
+        : progress < .51 ? '' : activity.slice(0, Math.floor(activity.length * ((progress - .51) / .49)));
     const stage = !animated ? 'still' : elapsed < 1000 ? 'writing' : elapsed < 1700 ? 'checking' : swapping ? 'swapping' : 'idle';
     const verbOffset = copy.prefix.length + 1;
     const suffixOffset = verbOffset + copy.activities[0].length + 1;
@@ -74,18 +108,26 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
         <span className={s.robot} aria-hidden="true"><PromptbookRobot/></span>
         {firstLine && <><span className={s.firstLine}>{firstLine}</span>{' '}</>}
         <span className={s.srOnly}>{initial}</span>
-        <span className={s.visualLine} aria-hidden="true" data-hero-activity={copy.activities[index]}>
-            {copy.activities.map((activity, phraseIndex) => <span key={activity} className={s.phrase} data-active={phraseIndex === index} data-swapping={phraseIndex === index && swapping}>
-                {cycle < 0 && phraseIndex === 0 ? <InitialText text={copy.prefix}/> : copy.prefix}{' '}
-                <span className={s.activity}>{cycle < 0 && phraseIndex === 0 ? <InitialText text={activity} offset={verbOffset}/> : activity}</span>{' '}
+        <span className={s.visualLine} aria-hidden="true" data-hero-activity={activity}>
+            {copy.activities.map(word => <span key={word} className={s.phraseSizer}>
+                <span>{copy.prefix}</span>
+                <span className={s.activitySizer} data-hero-measure={word}>{word}</span>
+                <span>{copy.suffix} {copy.you}</span>
+            </span>)}
+            <span className={s.phrase}>
+                <span>{cycle < 0 ? <InitialText text={copy.prefix}/> : copy.prefix}</span>{' '}
+                <span className={s.activity} data-hero-word-slot style={{ width: wordWidths[activity] }}>
+                    <span className={s.activitySizer}>{activity}</span>
+                    <span className={s.typed} data-hero-typed>{cycle < 0 ? <InitialText text={typed} offset={verbOffset}/> : typed}{swapping && <i className={s.caret}/>}</span>
+                </span>{' '}
                 <span className={s.forYou}>
-                    {cycle < 0 && phraseIndex === 0 ? <InitialText text={copy.suffix} offset={suffixOffset}/> : copy.suffix}{' '}
-                    <span className={s.you}>{cycle < 0 && phraseIndex === 0 ? <InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/> : copy.you}
+                    {cycle < 0 ? <InitialText text={copy.suffix} offset={suffixOffset}/> : copy.suffix}{' '}
+                    <span className={s.you}>{cycle < 0 ? <InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/> : copy.you}
                         <svg className={s.underline} viewBox="0 0 100 12" preserveAspectRatio="none" fill="none"><path d="M3 7Q49 11 95 4" pathLength="1"/></svg>
                     </span>
                     <svg className={s.check} viewBox="0 0 24 24" fill="none"><path d="m4 12 5 5L20 6" pathLength="1"/></svg>
                 </span>
-            </span>)}
+            </span>
         </span>
     </span>;
 }

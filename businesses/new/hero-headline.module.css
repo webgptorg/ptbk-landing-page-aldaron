@@ -1,11 +1,14 @@
 .headline{position:relative;display:block;padding-top:104px;color:var(--ptbk-blue);line-height:1.12}
 .firstLine{display:block;color:#1b2739}
-/* Each complete phrase occupies the same grid cell. Its spaces remain natural,
-   while the longest phrase reserves the outer geometry before animation starts. */
+/* Invisible complete phrases reserve the outer geometry. Only the verb slot
+   changes width; the visible sentence stays centered with natural word gaps. */
 .visualLine{display:grid;grid-template-areas:'phrase';justify-content:center;align-items:baseline;margin-top:.14em;font-size:.93em;letter-spacing:-.055em}
-.phrase{grid-area:phrase;justify-self:center;white-space:nowrap;visibility:hidden}
-.phrase[data-active=true]{visibility:visible}
-.activity{display:inline-block;position:relative}
+.phrase,.phraseSizer{grid-area:phrase;justify-self:center;display:flex;align-items:baseline;gap:.19em;white-space:nowrap}
+.phraseSizer{visibility:hidden;pointer-events:none}
+.activity{display:inline-block;position:relative;flex:none;text-align:left;transition:width .65s cubic-bezier(.22,.75,.2,1)}
+.activitySizer{display:block;visibility:hidden;white-space:pre;padding-right:4px}
+.typed{position:absolute;top:0;left:0;white-space:pre}
+.caret{display:inline-block;vertical-align:-.03em;width:2px;height:.73em;margin-left:2px;background:#5077ad}
 .forYou{position:relative;white-space:nowrap}
 .you{position:relative}
 .underline{position:absolute;left:-.02em;bottom:-.09em;width:104%;height:.11em;overflow:visible;stroke:#7896d3;stroke-width:1.7;stroke-linecap:round}
@@ -21,7 +24,6 @@
 .headline[data-stage=swapping] .robotArm{animation:robot-change .48s ease-in-out both}
 .headline[data-animated=true] .underline path,.headline[data-animated=true] .check path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw-line .45s cubic-bezier(.16,1,.3,1) .95s both}
 .headline[data-animated=true] .check path{animation-delay:1.2s}
-.phrase[data-swapping=true] .activity{animation:word-replace .38s cubic-bezier(.16,1,.3,1) both}
 .headline[data-running=false] *,.headline[data-running=false] *::after{animation-play-state:paused!important}
 .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @keyframes ink-in{to{color:var(--ptbk-blue)}}
@@ -29,8 +31,7 @@
 @keyframes robot-write{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
 @keyframes robot-nod{0%,100%{transform:none}45%{transform:translateY(1.5px) rotate(3deg)}}
 @keyframes robot-change{0%,100%{transform:none}40%{transform:rotate(-8deg)}}
-@keyframes word-replace{from{opacity:0;transform:translateY(.18em)}to{opacity:1;transform:none}}
 @media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.visualLine{font-size:.9em;margin-top:.18em}}
 @media(max-width:370px){.visualLine{font-size:.82em}}
-@media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important}.headline .initialLetter{color:inherit!important}.underline path,.check path{stroke-dashoffset:0!important}}
+@media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.headline .initialLetter{color:inherit!important}.underline path,.check path{stroke-dashoffset:0!important}}
 @media(forced-colors:active){.headline,.firstLine,.headline .initialLetter{color:CanvasText!important}.underline,.check{stroke:CanvasText}}
