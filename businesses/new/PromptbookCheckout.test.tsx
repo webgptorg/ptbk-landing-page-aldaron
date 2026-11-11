@@ -71,6 +71,18 @@ describe('Promptbook checkout', () => {
         expect(screen.getByLabelText(/Chci zpřístupnit/).hasAttribute('required')).toBe(true);
     });
 
+    it('keeps personal and company names separate when changing the buyer type', () => {
+        renderCheckout();
+        fireEvent.change(screen.getByLabelText('Název firmy'), { target: { value: 'Moje firma' } });
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Nakupuji na firmu' }));
+        expect((screen.getByLabelText('Jméno a příjmení') as HTMLInputElement).value).toBe('');
+        fireEvent.change(screen.getByLabelText('Jméno a příjmení'), { target: { value: 'Eva Nová' } });
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Nakupuji na firmu' }));
+        expect((screen.getByLabelText('Název firmy') as HTMLInputElement).value).toBe('Moje firma');
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Nakupuji na firmu' }));
+        expect((screen.getByLabelText('Jméno a příjmení') as HTMLInputElement).value).toBe('Eva Nová');
+    });
+
     it('displays the exact price through the introductory period and requires reconfirmation if the quote changes', async () => {
         vi.mocked(validateDiscountCode)
             .mockResolvedValueOnce(promotion)
@@ -187,5 +199,53 @@ describe('Promptbook checkout', () => {
         fireEvent.change(screen.getByLabelText('Země'), { target: { value: 'SK' } });
         completeLookup?.({ name: 'Stará odpověď', address: { line1: 'Registr 2', city: 'Praha', postal_code: '11000' } });
         await waitFor(() => expect((screen.getByLabelText(/Název firmy|Jméno a příjmení/) as HTMLInputElement).value).toBe(''));
+    });
+
+    it('selects a company by name and keeps every subsequently edited value in the checkout', async () => {
+        const company = { country: 'CZ', companyId: '21012288', vatId: 'CZ21012288', name: 'AI Web s.r.o.',
+            address: { line1: 'Registr 2', city: 'Praha', postal_code: '11000', country: 'CZ' } };
+        vi.mocked(sendJson).mockImplementation(async (url) => {
+            if (url === '/api/promptbook-billing/company-search') return { companies: [company], hasMore: false };
+            if (url === '/api/promptbook-billing/identity') return company;
+            throw new JsonRequestError('Testovací odmítnutí.', 502);
+        });
+        renderCheckout();
+        const name = screen.getByRole('combobox', { name: 'Název firmy' });
+        fireEvent.focus(name);
+        fireEvent.change(name, { target: { value: 'AI Web' } });
+        fireEvent.click(await screen.findByRole('option', { name: /AI Web s.r.o./ }));
+        expect((screen.getByLabelText('IČO') as HTMLInputElement).value).toBe('21012288');
+        expect((screen.getByLabelText('DIČ') as HTMLInputElement).value).toBe('CZ21012288');
+        expect((screen.getByLabelText('Ulice a číslo') as HTMLInputElement).value).toBe('Registr 2');
+        fireEvent.change(name, { target: { value: 'Moje pobočka' } });
+        fireEvent.change(screen.getByLabelText('Ulice a číslo'), { target: { value: 'Vlastní 3' } });
+        fireEvent.change(screen.getByLabelText('Město'), { target: { value: 'Brno' } });
+        fireEvent.change(screen.getByLabelText('PSČ'), { target: { value: '60200' } });
+        fireEvent.change(screen.getByLabelText('DIČ'), { target: { value: '' } });
+        fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'test@example.com' } });
+        fireEvent.click(screen.getByRole('checkbox', { name: /Souhlasím/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Pokračovat k platbě' }));
+        await waitFor(() => expect(checkoutCalls()[0]?.[2]).toEqual(expect.objectContaining({
+            companyId: '21012288', vatId: undefined, billingName: 'Moje pobočka',
+            billingAddress: { line1: 'Vlastní 3', city: 'Brno', postal_code: '60200', country: 'CZ' },
+        })));
+    });
+
+    it('refreshes autofilled details when IČO changes after choosing a company by name', async () => {
+        const company = { country: 'CZ', companyId: '21012288', name: 'AI Web s.r.o.',
+            address: { line1: 'Registr 2', city: 'Praha', postal_code: '11000', country: 'CZ' } };
+        vi.mocked(sendJson).mockImplementation(async (url, _method, body) => {
+            if (url === '/api/promptbook-billing/company-search') return { companies: [company], hasMore: false };
+            return (body as { companyId: string }).companyId === '12345678'
+                ? { ...company, name: 'Druhá firma', address: { ...company.address, line1: 'Nová 4' } } : company;
+        });
+        renderCheckout();
+        const name = screen.getByRole('combobox', { name: 'Název firmy' });
+        fireEvent.focus(name);
+        fireEvent.change(name, { target: { value: 'AI Web' } });
+        fireEvent.click(await screen.findByRole('option', { name: /AI Web s.r.o./ }));
+        fireEvent.change(screen.getByLabelText('IČO'), { target: { value: '12345678' } });
+        await waitFor(() => expect((name as HTMLInputElement).value).toBe('Druhá firma'));
+        expect((screen.getByLabelText('Ulice a číslo') as HTMLInputElement).value).toBe('Nová 4');
     });
 });

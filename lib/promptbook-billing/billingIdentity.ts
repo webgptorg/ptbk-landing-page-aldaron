@@ -29,6 +29,7 @@ const ARES_API = 'https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-s
 const SLOVAK_ACCOUNTING_REGISTER_API = 'https://www.registeruz.sk/cruz-public/api';
 const VIES_API = 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number';
 const REGISTRY_TIMEOUT_MS = 5_000;
+const MAX_CZECH_COMPANY_SEARCH_MATCHES = 8;
 const MAX_SLOVAK_REGISTRY_MATCHES = 5;
 const REGISTRY_UNAVAILABLE = 'Firemní registr teď není dostupný. Zkuste to prosím znovu za chvíli.';
 const VIES_UNAVAILABLE = 'Ověření ve VIES teď není dostupné. Zkuste to prosím znovu za chvíli.';
@@ -109,6 +110,13 @@ async function resolveCzechBusiness(companyId: string, vatId?: string): Promise<
     if (vatId && (!/^CZ\d{8,10}$/.test(vatId) || company.dic !== vatId)) {
         throw new BillingIdentityError('Zadané DIČ neodpovídá tomuto subjektu v ARES.');
     }
+    return formatCzechBillingIdentity(company, vatId);
+}
+
+function formatCzechBillingIdentity(
+    company: z.infer<typeof aresCompanySchema>,
+    vatId?: string,
+): PromptbookBillingIdentity {
     const seat = company.sidlo;
     const street = seat.nazevUlice || seat.nazevCastiObce || seat.nazevObce;
     const houseNumber = seat.typCisloDomovni === 2 ? `č. ev. ${seat.cisloDomovni}` : String(seat.cisloDomovni);
@@ -117,7 +125,7 @@ async function resolveCzechBusiness(companyId: string, vatId?: string): Promise<
         : '';
     return {
         country: 'CZ',
-        companyId,
+        companyId: company.ico,
         ...(vatId ? { vatId } : {}),
         name: company.obchodniJmeno,
         address: {
@@ -127,6 +135,56 @@ async function resolveCzechBusiness(companyId: string, vatId?: string): Promise<
             country: 'CZ',
         },
     };
+}
+
+/** Optional ARES suggestions: choosing one never locks or verifies the customer's submitted billing details. */
+export async function searchPromptbookBillingCompanies(input: { country: BillingCountry; query: string }): Promise<{
+    companies: PromptbookBillingIdentity[];
+    hasMore: boolean;
+}> {
+    if (input.country !== 'CZ') {
+        throw new BillingIdentityError('Vyhledávání podle názvu je dostupné pro české firmy. Slovenské údaje vyplňte ručně.');
+    }
+    const query = input.query.trim().replace(/\s+/g, ' ');
+    if (query.length < 3 || query.length > 120) {
+        throw new BillingIdentityError('Pro vyhledání firmy zadejte alespoň tři znaky názvu.', 400);
+    }
+    const matchesSchema = z.object({
+        pocetCelkem: z.number().int().nonnegative(),
+        ekonomickeSubjekty: z.array(z.unknown()).max(MAX_CZECH_COMPANY_SEARCH_MATCHES),
+    });
+    let result: z.infer<typeof matchesSchema>;
+    try {
+        const response = await fetch(`${ARES_API}/vyhledat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ obchodniJmeno: query, start: 0, pocet: MAX_CZECH_COMPANY_SEARCH_MATCHES }),
+            next: { revalidate: 300 },
+            redirect: 'error',
+            signal: AbortSignal.timeout(REGISTRY_TIMEOUT_MS),
+        });
+        if (response.status === 400) {
+            throw new BillingIdentityError('Upřesněte název firmy, nebo údaje vyplňte ručně.');
+        }
+        if (!response.ok) throw new Error('Company search failed');
+        result = matchesSchema.parse(await response.json());
+    } catch (error) {
+        if (error instanceof BillingIdentityError) throw error;
+        throw new BillingIdentityError('ARES teď není dostupný. Údaje můžete vyplnit ručně.', 503);
+    }
+    const seen = new Set<string>();
+    const companies = result.ekonomickeSubjekty.flatMap((value) => {
+        const parsed = aresCompanySchema.safeParse(value);
+        if (!parsed.success) return [];
+        const company = parsed.data;
+        if (!/^\d{8}$/.test(company.ico) || company.datumZaniku || company.sidlo.kodStatu !== 'CZ' || seen.has(company.ico)) {
+            return [];
+        }
+        seen.add(company.ico);
+        const vatId = company.dic && /^CZ\d{8,10}$/.test(company.dic) ? company.dic : undefined;
+        return [formatCzechBillingIdentity(company, vatId)];
+    });
+    return { companies, hasMore: result.pocetCelkem > result.ekonomickeSubjekty.length };
 }
 
 function normalizeRegistryText(value: string): string {
