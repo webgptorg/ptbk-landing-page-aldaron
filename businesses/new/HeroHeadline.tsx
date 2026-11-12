@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useSiteLocale } from './LocaleProvider';
 import { PromptbookRobot } from './PromptbookRobot';
+import { HeroUnderline } from './HeroUnderline';
 import s from './hero-headline.module.css';
 
 const COPY = {
@@ -15,7 +16,7 @@ const TYPEWRITER_MS = 1560;
 const CHANGE_PERIOD_MS = TYPEWRITER_MS + 3200;
 
 /** One quiet working character; the clock runs only while the headline is visible. */
-export function HeroHeadline({ firstLine }: { firstLine?: string }) {
+export function HeroHeadline({ firstLine, underlineReplay = 0 }: { firstLine?: string; underlineReplay?: number }) {
     const { locale } = useSiteLocale();
     const copy = COPY[locale];
     const root = useRef<HTMLSpanElement>(null);
@@ -103,6 +104,7 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
     const verbOffset = copy.prefix.length + 1;
     const suffixOffset = verbOffset + copy.activities[0].length + 1;
     const initial = `${copy.prefix} ${copy.activities[0]} ${copy.suffix} ${copy.you}`;
+    const underlineGeneration = cycle < 0 ? 0 : cycle + (swapping ? 0 : 1);
 
     return <span ref={root} className={s.headline} data-hero-heading data-animated={animated} data-running={running} data-stage={stage}>
         <span className={s.robot} aria-hidden="true"><PromptbookRobot/></span>
@@ -123,10 +125,7 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
                 <span className={s.forYou}>
                     {cycle < 0 ? <InitialText text={copy.suffix} offset={suffixOffset}/> : copy.suffix}{' '}
                     <span className={s.you}>{cycle < 0 ? <InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/> : copy.you}
-                        <svg className={s.underline} data-hero-underline="double" viewBox="0 0 160 32" preserveAspectRatio="none" fill="none" focusable="false">
-                            <path d="M4 10Q73 15 154 7" pathLength="1" strokeWidth="3.2"/>
-                            <path d="M24 22Q82 18 142 20" pathLength="1" strokeWidth="2"/>
-                        </svg>
+                        <HeroUnderline generation={underlineGeneration} locale={locale} replay={underlineReplay}/>
                     </span>
                 </span>
             </span>

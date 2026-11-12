@@ -28,6 +28,30 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('hero working headline', () => {
+    it('keeps the ink still during typing, then creates a new drawing only after a completed word', () => {
+        const { container } = render(<HeroHeadline/>);
+        const ink = () => container.querySelector('[data-hero-underline]')!.getAttribute('data-ink-seed');
+        const first = ink();
+        act(() => vi.advanceTimersByTime(6000));
+        expect(ink()).toBe(first);
+        act(() => vi.advanceTimersByTime(1000));
+        expect(ink()).not.toBe(first);
+        const second = ink();
+        act(() => { visibility = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); });
+        act(() => vi.advanceTimersByTime(20000));
+        expect(ink()).toBe(second);
+    });
+
+    it('retains a static drawing with reduced motion and unique mask IDs for two headlines', () => {
+        reduced = true;
+        const { container } = render(<><HeroHeadline/><HeroHeadline/></>);
+        const initial = Array.from(container.querySelectorAll('[data-ink-seed]')).map(el => el.getAttribute('data-ink-seed'));
+        const ids = Array.from(container.querySelectorAll('mask')).map(el => el.id);
+        expect(new Set(ids).size).toBe(4);
+        act(() => vi.advanceTimersByTime(30000));
+        expect(Array.from(container.querySelectorAll('[data-ink-seed]')).map(el => el.getAttribute('data-ink-seed'))).toEqual(initial);
+    });
+
     it('moves the eyes and head toward the pointer and returns to rest on touch cancellation', () => {
         const { container } = render(<section data-landing-hero><HeroHeadline/></section>);
         const hero = container.querySelector('[data-landing-hero]')!;

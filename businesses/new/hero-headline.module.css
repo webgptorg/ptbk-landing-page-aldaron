@@ -11,9 +11,11 @@
 .caret{display:inline-block;vertical-align:-.03em;width:2px;height:.73em;margin-left:2px;background:#5077ad}
 .forYou{position:relative;white-space:nowrap}
 .you{position:relative}
-/* Approved laboratory variant 4: a shorter, lighter second pen stroke. */
-.underline{position:absolute;left:-5%;bottom:-.25em;width:110%;height:.34em;overflow:visible;pointer-events:none}
-.underline path{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+/* Bounded pressure and grain: a brush-like stroke, followed by a signature return. */
+.underline{position:absolute;left:-5%;bottom:-.27em;width:110%;height:max(.43em,16px);overflow:visible;pointer-events:none}
+.inkStroke{fill:currentColor}
+.inkMask{forced-color-adjust:none}
+.inkReveal{stroke-dasharray:1;stroke-dashoffset:0}
 .robot{position:absolute;top:0;left:50%;width:88px;height:88px;transform:translateX(-50%);line-height:0}
 .robot>svg{width:100%;height:100%;overflow:visible}
 .robotHead{transform-origin:56px 64.18px;transform-box:view-box}
@@ -23,8 +25,7 @@
 .headline[data-stage=writing] .robotArm{animation:robot-write .3s ease-in-out infinite alternate}
 .headline[data-stage=checking] .robotHead{animation:robot-nod .65s ease-in-out both}
 .headline[data-stage=swapping] .robotArm{animation:robot-change .48s ease-in-out both}
-.headline[data-animated=true] .underline path{stroke-dasharray:1;animation:draw-line .78s cubic-bezier(.4,.05,.2,1) .95s both}
-.headline[data-animated=true] .underline path:nth-child(2){animation-delay:1.19s}
+.headline[data-animated=true] .inkReveal{animation:draw-line var(--ink-duration) cubic-bezier(.4,.05,.2,1) var(--ink-delay) both}
 .headline[data-running=false] *,.headline[data-running=false] *::after{animation-play-state:paused!important}
 .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @keyframes ink-in{to{color:var(--ptbk-blue)}}
@@ -34,8 +35,8 @@
 @keyframes robot-change{0%,100%{transform:none}40%{transform:rotate(-8deg)}}
 @media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.visualLine{font-size:.9em;margin-top:.18em}}
 @media(max-width:370px){.visualLine{font-size:.82em}}
-@media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.headline .initialLetter{color:inherit!important}.underline path{stroke-dashoffset:0!important}}
-@media(forced-colors:active){.headline,.firstLine,.headline .initialLetter{color:CanvasText!important}.underline path{stroke:CanvasText}}
+@media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.headline .initialLetter{color:inherit!important}.inkReveal{stroke-dashoffset:0!important}}
+@media(forced-colors:active){.headline,.firstLine,.headline .initialLetter{color:CanvasText!important}.inkStroke{fill:CanvasText}}
 
 /* Keep the approved typewriter geometry, using the selected heading's rhythm. */
 .headline{line-height:1.18}
