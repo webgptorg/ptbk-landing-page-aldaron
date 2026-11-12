@@ -1,9 +1,8 @@
 import { PAVOL_CONTAINER_CLASS_NAME } from '@/businesses/pavol/layout';
 import type { PavolPageContent } from '@/businesses/pavol/pavolContent';
+import { PavolPortrait } from '@/components/people/PavolPortrait';
 import { Button } from '@/components/ui/button';
-import PAVOL_PORTRAIT from '@/public/people/pavol-hejny-transparent.png';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
-import Image from 'next/image';
 
 export function PavolHero({ content, onPrimaryAction }: { readonly content: PavolPageContent['hero']; readonly onPrimaryAction?: () => void }) {
     return (
@@ -61,13 +60,13 @@ export function PavolHero({ content, onPrimaryAction }: { readonly content: Pavo
                 <figure className="pavol-portrait relative mx-auto w-full max-w-[500px]">
                     <div className="pavol-portrait-frame">
                         <div aria-hidden="true" className="pavol-portrait-disc" />
-                        <Image
-                            src={PAVOL_PORTRAIT}
-                            alt="Pavol Hejný"
-                            priority
-                            sizes="(min-width: 1280px) 430px, (min-width: 1024px) 36vw, (min-width: 640px) 430px, 86vw"
-                            className="pavol-portrait-image"
-                        />
+                        <div className="pavol-portrait-image">
+                            <PavolPortrait
+                                priority
+                                sizes="(min-width: 1280px) 380px, (min-width: 1024px) 32vw, (min-width: 640px) 380px, 76vw"
+                                hatSizes="(min-width: 640px) 160px, 31vw"
+                            />
+                        </div>
                     </div>
                     <figcaption className="flex items-center gap-4 border-b border-[var(--pavol-border)] py-5 text-xs font-medium tracking-wide text-[var(--pavol-muted)]">
                         <span aria-hidden="true" className="h-px flex-1 bg-[var(--pavol-border)]" />

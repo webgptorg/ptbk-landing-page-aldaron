@@ -5,10 +5,10 @@ import Image from 'next/image';
 import { useSiteLocale } from './LocaleProvider';
 import { LeadButton } from './LeadCapture';
 import s from './founders.module.css';
+import { PavolPortrait } from '@/components/people/PavolPortrait';
 
 import jiriPortrait from '@/public/people/jiri-jahn-studio.webp';
 import pavolPortrait from '@/public/people/pavol-hejny-studio-neat.webp';
-import pavolHat from '@/public/people/pavol-hejny-hat.webp';
 
 /** Verified public contacts and matched, naturally retouched founder portraits. */
 const founders = [
@@ -43,22 +43,18 @@ export function Founders({ compact = false, showPavolHat = true }: { compact?: b
             {founders.map((person, index) => (
                 <article className={`${s.founder} ${index === 1 ? s.reverse : ''}`} key={person.name} data-testid="founder-card">
                     <div className={s.portrait}>
-                        {index === 1 && showPavolHat && (
-                            <div className={`${s.accessoryFrame} ${s.hatRearFrame}`} aria-hidden="true">
-                                <span className={s.hatInterior} />
-                            </div>
-                        )}
-                        <div className={s.portraitCrop}>
-                            <Image
-                                src={person.image}
-                                alt={person.name}
+                        {index === 1 ? (
+                            <PavolPortrait
+                                showHat={showPavolHat}
                                 sizes="(max-width: 500px) 40vw, (max-width: 900px) 220px, 240px"
                             />
-                        </div>
-                        {index === 1 && showPavolHat && (
-                            <div className={s.accessoryFrame} aria-hidden="true">
-                                <span className={s.hatShadow} style={{ maskImage: `url(${person.image.src})`, WebkitMaskImage: `url(${person.image.src})` }} />
-                                <Image className={s.hat} src={pavolHat} alt="" sizes="140px" draggable={false} />
+                        ) : (
+                            <div className={s.portraitCrop}>
+                                <Image
+                                    src={person.image}
+                                    alt={person.name}
+                                    sizes="(max-width: 500px) 40vw, (max-width: 900px) 220px, 240px"
+                                />
                             </div>
                         )}
                     </div>

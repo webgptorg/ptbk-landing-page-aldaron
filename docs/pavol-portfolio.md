@@ -4,6 +4,10 @@ The 109-entry public catalogue is derived from the reviewed D-confidence entries
 
 Prominence is stored in the content: 1 neutral, above 1 promotes, between 0 and 1 reduces, 0 omits homepage selections. The shared ranking halves the temporal component after two years and keeps archive items discoverable. Podcasts keep strict newest/oldest sorting and use show diversity plus one guaranteed AI ta Krajta appearance in the homepage four. Feed ordering stays chronological.
 
+## Homepage portrait
+
+Both personal domains use the approved charcoal-blazer portrait and fitted burgundy-brown hat from Promptbook through `components/people/PavolPortrait.tsx`. The unchanged image assets, intrinsic alignment, rear lining and alpha-masked contact shadow are shared. The hat remains removable with `showHat={false}`. The personal hero retains its sage frame and gold disc, with headroom above the hat and consistent framing on mobile and desktop.
+
 ## Real images
 
 - public/pavol/projects/collboard-ui.png: https://raw.githubusercontent.com/collboard/modules-sdk/main/media/collboard.png
