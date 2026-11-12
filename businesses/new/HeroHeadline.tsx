@@ -123,9 +123,11 @@ export function HeroHeadline({ firstLine }: { firstLine?: string }) {
                 <span className={s.forYou}>
                     {cycle < 0 ? <InitialText text={copy.suffix} offset={suffixOffset}/> : copy.suffix}{' '}
                     <span className={s.you}>{cycle < 0 ? <InitialText text={copy.you} offset={suffixOffset + copy.suffix.length + 1}/> : copy.you}
-                        <svg className={s.underline} viewBox="0 0 100 12" preserveAspectRatio="none" fill="none"><path d="M3 7Q49 11 95 4" pathLength="1"/></svg>
+                        <svg className={s.underline} data-hero-underline="double" viewBox="0 0 160 32" preserveAspectRatio="none" fill="none" focusable="false">
+                            <path d="M4 10Q73 15 154 7" pathLength="1" strokeWidth="3.2"/>
+                            <path d="M24 22Q82 18 142 20" pathLength="1" strokeWidth="2"/>
+                        </svg>
                     </span>
-                    <svg className={s.check} viewBox="0 0 24 24" fill="none"><path d="m4 12 5 5L20 6" pathLength="1"/></svg>
                 </span>
             </span>
         </span>

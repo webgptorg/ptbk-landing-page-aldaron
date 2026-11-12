@@ -2,6 +2,8 @@
 
 ## Hlavní stránka `/cs` a `/en`
 
+Výběr ze screenshotu z 12. listopadu 2026 nahrazuje vlasové podtržení a oddělenou fajfku variantou **4 · Dvojitý** z náhledu `promptbook-ink-underline`. Pod „Vás“ i „you“ jsou přesné dva inkoustově modré tahy: první plnější, druhý kratší a jemnější. SVG má viewBox 160 × 32, šířku 110 % slova, výšku .34em a spodní odsazení -.25em. Zaoblené tahy mají neměnnou vizuální tloušťku 3.2 a 2 px. Po úvodním dopsání se každý nakreslí během 780 ms s easingem cubic-bezier(.4,.05,.2,1); první začíná v 950 ms a druhý o 240 ms později. Podtržení potom zůstává v klidu i při změnách činnosti. Rozložení, robot a vybraný psací stroj se zachovávají. Skrytá karta a nadpis mimo viewport pozastaví animaci; omezený pohyb ukáže celé statické tahy, vynucené barvy použijí CanvasText.
+
 Nejnovější večerní zadání z 25. října 2026 platí shodně pro českou a anglickou hlavní i partnerskou stránku. Zachovává světlý blueprint, jednoduchost a prémiový, plynulý dojem. Původní pětizáložkové demo zůstává pouze na přehledu agend a detailech.
 
 Zadání z 11. listopadu 2026 přenáší na českou a anglickou homepage přesnou kombinaci z laboratoře pozadí: **Papír / Původní · Jen zrno / síla 40 %**. Modrošedá paleta, velikost zrna a jemné souvislé tónování odpovídají schválenému náhledu. Pozadí pokrývá hlavní obsah a končí před patičkou; hlavička je čistě bílá, patička zůstává bez textury. Laboratorní přepínače se nezobrazují. Kurzor, více současných dotyků i scroll jemně přeskupují zrna při zachování nativního posouvání a přiblížení. V klidu a na skryté kartě animace neběží. Omezený pohyb zachová statické zrno; ve vynucených barvách se dekorace skryje. Partnerská stránka ponechává hladký světle modrý přechod a měkký odlesk z 8. listopadu.
