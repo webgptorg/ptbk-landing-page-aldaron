@@ -27,6 +27,13 @@ export async function GET(request: Request) {
         const result = await runTwentyContactSync(settings);
         if (result.failed > 0) console.error('Twenty contact sync failed to deliver records', result);
         const commerce = process.env.TWENTY_COMMERCE_SYNC_ENABLED === 'true' ? await runTwentyCommerceSync() : {enabled:false};
+        if ('payments' in commerce) {
+            console.info('TWENTY_COMMERCE_SYNC', {
+                purchases:commerce.purchases, payments:commerce.payments,
+                writes:'writes' in commerce ? commerce.writes : 0,
+                needsReview:'needsReview' in commerce ? commerce.needsReview : 0,
+            });
+        }
         return Response.json({ enabled: true, ...result, commerce }, { status: result.failed > 0 ? 502 : 200 });
     } catch (error) {
         if (error instanceof TwentyContactDeliveryError) {

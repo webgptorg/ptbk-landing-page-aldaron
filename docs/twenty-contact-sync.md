@@ -96,7 +96,7 @@ Future bank settlement should reconcile with these receipts; a Stripe payout mus
 
 On 11 November the current production key could read People but `GET /rest/companies` returned
 `PERMISSION_DENIED`. The Nginx ingress also returned HTTP 403 for `/rest/metadata/objects`.
-The new commerce projection is therefore prepared but **not activated or imported**.
+These access gaps were resolved during the verified production activation on 13 November 2026.
 
 1. In Twenty administration, extend **Promptbook · synchronizace kontaktů** only as needed: People read/create/update,
    Companies read/create/update, and purchases/payments read/create/update. Deletion is unnecessary. Schema setup
@@ -119,4 +119,10 @@ If production Secrets cannot be pulled locally, enable `TWENTY_COMMERCE_OPERATOR
 
 ### Activation checkpoint · 13 November 2026
 
-Companies read/update access has been added to the existing integration role; soft and permanent deletion remain disabled. The authenticated ingress now admits commerce routes and temporary schema POST/GET routes, with anonymous requests verified as HTTP 403. The integration role temporarily has Data model permission for setup. The owner operator is deployed but paused (`TWENTY_COMMERCE_OPERATOR_ENABLED=false`) after the browser disconnected before source inspection, schema setup or import. Commerce synchronization remains disabled. To resume, reconnect the browser, re-enable the attended operator for production, open `/admin/twenty-commerce`, run inspection/setup, grant read/update on the two new objects, then run verified import/replay and inspect the CRM. Remove the temporary Data model permission and schema ingress routes even if setup is interrupted. Enable the regular commerce flag only after successful readback and zero-write replay; disable the owner operator again.
+Production import and readback succeeded for **6 purchases, 11 unique Stripe receipts, 6 contacts and 1 company buyer**. Gross captured receipts total **CZK 2,209.90**; refunds total CZK 0.00. Stored receipt totals and contact totals match the Stripe snapshot. Both verification passes completed with **writes: 0**, **verified: 11**, **needsReview: 0**, and **replayWrites: 0** after the historical import. The Company card and its contact show the same underlying business purchase; the contact's own-purchase total remains empty for that business receipt.
+
+The scoped integration role has read/update access only to People, Companies, Contact Sources, Purchases and Payments; deletion stays disabled. Temporary Data model permission has been removed (no settings permission flags remain), and Nginx uses the permanent commerce ingress without metadata setup routes. Anonymous commerce and metadata requests return HTTP 403. The existing ingress gate and Twenty authorization remain active.
+
+Vercel production is configured with `TWENTY_COMMERCE_SYNC_ENABLED=true` and `TWENTY_COMMERCE_OPERATOR_ENABLED=false`. The existing `*/5 * * * *` cron performs regular synchronization after deployment. Successful commerce runs log only aggregate purchase/payment counts, writes and review count under `TWENTY_COMMERCE_SYNC`; no contact identities or financial amounts are logged there.
+
+Native Twenty REST details covered by regression checks: metadata APIs support both direct and legacy envelopes with pagination; full Person snapshots retain scalar company IDs so employment is preserved; an empty Currency is compared consistently with Twenty's null-subfield representation, preventing repeated writes to a business contact's empty personal-spend field.
