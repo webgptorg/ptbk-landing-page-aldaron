@@ -15,7 +15,7 @@ type Backup = { key: string; sha256: string; createdAt: string; counts: Record<s
 const tables = ['people', 'companies', 'contactSources', 'opportunities', 'tasks', 'dashboards', 'ptbkPurchases', 'ptbkPayments'] as const;
 
 function apiFor(settings: TwentyContactApiSettings) {
-    return createTwentyContactApi({ ...settings, timeoutMs: 30000 });
+    return createTwentyContactApi({ ...settings, timeoutMs: 30000, minRequestIntervalMs: 1100 });
 }
 export function metadataFields(object: MetadataObject): Field[] {
     return Array.isArray(object.fields) ? object.fields : object.fields?.edges?.map(({ node }) => node) ?? [];

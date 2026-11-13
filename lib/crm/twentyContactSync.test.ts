@@ -22,6 +22,22 @@ function list(plural: string, rows: object[]) {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('Twenty contact sources', () => {
+    it('spaces paginated maintenance requests without slowing the ordinary worker', async () => {
+        vi.useFakeTimers();
+        const starts: number[] = [];
+        vi.stubGlobal('fetch', async () => { starts.push(Date.now()); return list('people', []); });
+        try {
+            const maintenance = createTwentyContactApi({ url: new URL('https://crm.invalid'), key: 'test', minRequestIntervalMs: 1100 });
+            const completed = Promise.all([maintenance.request('people', 'GET'), maintenance.request('people', 'GET'), maintenance.request('people', 'GET')]);
+            await vi.runAllTimersAsync();
+            await completed;
+            expect(starts.map((at) => at - starts[0])).toEqual([0, 1100, 2200]);
+            starts.length = 0;
+            const regular = createTwentyContactApi({ url: new URL('https://crm.invalid'), key: 'test' });
+            await Promise.all([regular.request('people', 'GET'), regular.request('people', 'GET')]);
+            expect(starts[1]).toBe(starts[0]);
+        } finally { vi.useRealTimers(); }
+    });
     it('verifies both CRM objects using read-only requests', async () => {
         const request = vi.fn(async (url: URL, options: RequestInit) => {
             expect(options.method).toBe('GET');

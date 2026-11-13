@@ -28,7 +28,7 @@ export class TwentyContactDeliveryError extends Error {
 }
 
 export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal; timeoutMs?: number;
-    sourceGroups?: TwentySourceGroups; operationalFrom?: string };
+    sourceGroups?: TwentySourceGroups; operationalFrom?: string; minRequestIntervalMs?: number };
 
 /** Twenty accepts a caller-supplied UUID. The same identifier survives a lost create response. */
 export function getTwentyContactRecordId(namespace: 'person' | 'source' | 'purchase' | 'payment' | 'company', key: string): string {
@@ -49,8 +49,15 @@ function normalizeEmail(value?: string | null): string | undefined {
     return value?.trim().toLowerCase();
 }
 
-export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs = 4000, sourceGroups, operationalFrom }: TwentyContactApiSettings) {
+export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs = 4000, sourceGroups, operationalFrom, minRequestIntervalMs = 0 }: TwentyContactApiSettings) {
+    let nextRequestAt = 0;
     async function request<Result>(path: string, method: 'GET' | 'POST' | 'PATCH', body?: object): Promise<Result> {
+        // Attended bulk maintenance shares the CRM rate budget with the unchanged live worker.
+        if (minRequestIntervalMs > 0) {
+            const wait = Math.max(0, nextRequestAt - Date.now());
+            nextRequestAt = Math.max(Date.now(), nextRequestAt) + minRequestIntervalMs;
+            if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+        }
         const timeout = AbortSignal.timeout(timeoutMs);
         let response: Response;
         try {
