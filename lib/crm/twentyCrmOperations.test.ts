@@ -3,7 +3,7 @@ import { gzipSync } from 'node:zlib';
 const mocks = vi.hoisted(() => ({ request: vi.fn(), list: vi.fn(), upload: vi.fn(), download: vi.fn() }));
 vi.mock('./twentyContactApi', () => ({ createTwentyContactApi: () => ({ request: mocks.request, listRecords: mocks.list }) }));
 vi.mock('@/lib/storage/objectStorage', () => ({ putStoredObject: mocks.upload, getObjectStorage: () => ({ download: mocks.download }) }));
-import { backupTwentyCrm, canApplyTwentyCrmPatch, CRM_OPERATION_FIELDS, CRM_OPERATION_VERSION, ensureTwentyCrmOperationalFields, inspectTwentyCrm, loadTwentyCrmBackup, planTwentyCrmEnrichment, readHistoricalMetaContext } from './twentyCrmOperations';
+import { backupTwentyCrm, canApplyTwentyCrmPatch, CRM_OPERATION_FIELDS, CRM_OPERATION_VERSION, ensureTwentyCrmOperationalFields, inspectTwentyCrm, loadTwentyCrmBackup, planTwentyCrmEnrichment, readHistoricalMetaContext, verifyTwentyCrmPreservation } from './twentyCrmOperations';
 const settings = { url: new URL('https://crm.invalid'), key: 'test' };
 const key = 'private/crm-operations/3f7fe7df-1c9c-4d47-b054-ce746d49d565.json.gz';
 const objects = () => ['person', 'company', 'opportunity', 'ptbkPurchase'].map((nameSingular) => ({ id: nameSingular, nameSingular, namePlural: `${nameSingular}s`, labelPlural: nameSingular, fields: [] as { id: string; name: string; type: string }[] }));
@@ -112,5 +112,21 @@ describe('non-destructive CRM operations', () => {
             .toEqual([{ ptbkHistoricalRole: 'founder' }]);
         expect(planTwentyCrmEnrichment({ people: [{ ...person, ptbkHistoricalEvidence: 'other:source' }], contactSources: [source] }, {})).toEqual([]);
         expect(planTwentyCrmEnrichment({ people: [{ ...person, ptbkHistoricalAt: '2026-05-03T12:00:00Z' }], contactSources: [source] }, {})).toEqual([]);
+    });
+    it('verifies original data while allowing additive fields and the approved previously-empty source parent', () => {
+        const before = { version: CRM_OPERATION_VERSION, createdAt: '2026-11-13T10:00:00Z', metadata: [{ id: 'person', nameSingular: 'person', namePlural: 'people', labelPlural: 'People',
+            fields: [{ id: 'person-name', name: 'name', label: 'Name', type: 'TEXT' }] }], unavailable: {}, records: {
+            people: [{ id: 'person', name: 'Original name' }], contactSources: [{ id: 'source', sourceType: 'website', nadrazenyZdrojId: null }],
+        } };
+        const after = { ...before, records: { people: [{ id: 'person', name: 'Original name', ptbkHistoricalNeed: 'Added evidence' }],
+            contactSources: [{ id: 'source', sourceType: 'website', nadrazenyZdrojId: 'web-group' }, { id: 'web-group', sourceType: 'source-group', nadrazenyZdrojId: null }],
+        } };
+        expect(verifyTwentyCrmPreservation(before, after, { website: 'web-group' })).toMatchObject({ verified: true, preservedRecords: 2, approvedParentFills: 1 });
+        expect(verifyTwentyCrmPreservation(before, { ...after, records: { ...after.records, people: [{ id: 'person', name: 'Overwritten' }] } }, { website: 'web-group' }))
+            .toMatchObject({ verified: false, changedFields: { 'people.name': 1 } });
+        expect(verifyTwentyCrmPreservation(before, { ...after, records: { ...after.records, people: [] } }, { website: 'web-group' }))
+            .toMatchObject({ verified: false, missingRecords: { people: 1 } });
+        expect(verifyTwentyCrmPreservation(before, after, { website: 'different-group' }).verified).toBe(false);
+        expect(verifyTwentyCrmPreservation(before, { ...after, metadata: [{ ...before.metadata[0], fields: [{ ...before.metadata[0].fields[0], type: 'NUMBER' }] }] }, { website: 'web-group' }).verified).toBe(false);
     });
 });

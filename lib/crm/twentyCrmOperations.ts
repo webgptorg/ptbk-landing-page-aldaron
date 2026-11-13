@@ -389,3 +389,49 @@ export async function enrichTwentyCrm(settings: TwentyContactApiSettings, backup
     }
     return result;
 }
+
+/** Read-only comparison with the pre-change snapshot; never automatically roll back newer work. */
+export function verifyTwentyCrmPreservation(before: Snapshot, after: Snapshot, sourceGroups: TwentySourceGroups) {
+    const missingRecords: Record<string, number> = {};
+    const changedFields: Record<string, number> = {};
+    const changedDefinitions: string[] = [];
+    let preservedRecords = 0;
+    let approvedParentFills = 0;
+    for (const object of before.metadata) {
+        const current = after.metadata.find((candidate) => candidate.id === object.id);
+        for (const field of metadataFields(object)) {
+            const saved = current && metadataFields(current).find((candidate) => candidate.id === field.id);
+            if (!saved || ['name', 'label', 'type', 'options'].some((key) => JSON.stringify(canonical(field[key])) !== JSON.stringify(canonical(saved[key])))) {
+                changedDefinitions.push(`${object.nameSingular}.${field.name}`);
+            }
+        }
+    }
+    for (const [table, originals] of Object.entries(before.records)) {
+        const current = new Map((after.records[table] ?? []).map((record) => [record.id, record]));
+        for (const original of originals) {
+            const saved = current.get(original.id);
+            if (!saved) { missingRecords[table] = (missingRecords[table] ?? 0) + 1; continue; }
+            preservedRecords++;
+            const category = getTwentySourceCategory(String(original.sourceType ?? ''));
+            const approvedParent = table === 'contactSources' && isBlank(original.nadrazenyZdrojId)
+                && category && sourceGroups[category] && saved.nadrazenyZdrojId === sourceGroups[category];
+            if (approvedParent) approvedParentFills++;
+            for (const key of Object.keys(original)) {
+                if (['updatedAt', 'updatedBy'].includes(key) || (approvedParent && ['nadrazenyZdrojId', 'nadrazenyZdroj'].includes(key))) continue;
+                if (JSON.stringify(canonical(original[key])) !== JSON.stringify(canonical(saved[key]))) {
+                    const name = `${table}.${key}`;
+                    changedFields[name] = (changedFields[name] ?? 0) + 1;
+                }
+            }
+        }
+    }
+    return { verified: !Object.keys(missingRecords).length && !Object.keys(changedFields).length && !changedDefinitions.length,
+        preservedRecords, approvedParentFills, missingRecords, changedFields, changedDefinitions,
+        beforeCounts: counts(before), currentCounts: counts(after), unavailable: after.unavailable };
+}
+
+export async function verifyTwentyCrmBackupPreservation(settings: TwentyContactApiSettings, backupKey: string) {
+    const before = await loadTwentyCrmBackup(backupKey);
+    const after = await snapshot(settings);
+    return { backupKey, ...verifyTwentyCrmPreservation(before.snapshot, after, settings.sourceGroups ?? {}) };
+}
