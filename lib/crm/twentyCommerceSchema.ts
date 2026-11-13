@@ -5,17 +5,27 @@ type MetadataObject = { id: string; nameSingular: string; namePlural: string; fi
 export const COMMERCE_SCHEMA_VERSION = '2026-11-11-v1';
 export async function ensureTwentyCommerceSchema(settings: TwentyContactApiSettings, apply: boolean) {
     const api = createTwentyContactApi({ ...settings, timeoutMs: 30000 });
-    const response = await api.request<{ data: { objects: MetadataObject[] } }>('metadata/objects', 'GET');
-    const objects = response.data.objects;
-    if (!Array.isArray(objects)) throw new Error('commerce_invalid_metadata');
+    type MetadataList = { data: MetadataObject[] | { objects: MetadataObject[] }; pageInfo?: { hasNextPage: boolean; endCursor: string | null } };
+    const objects: MetadataObject[] = [];
+    const params = new URLSearchParams({ limit: '100' });
+    for (;;) {
+        const response = await api.request<MetadataList>(`metadata/objects?${params}`, 'GET');
+        const page = Array.isArray(response.data) ? response.data : response.data?.objects;
+        if (!Array.isArray(page)) throw new Error('commerce_invalid_metadata');
+        objects.push(...page);
+        if (!response.pageInfo?.hasNextPage) break;
+        const cursor = response.pageInfo.endCursor;
+        if (!cursor || params.get('starting_after') === cursor) throw new Error('commerce_invalid_metadata_cursor');
+        params.set('starting_after', cursor);
+    }
     async function object(nameSingular: string, namePlural: string, labelSingular: string, labelPlural: string, icon: string) {
         let metadata = objects.find((item) => item.nameSingular === nameSingular);
         if (!metadata && apply) {
             console.log('CRM_COMMERCE_SCHEMA_OBJECT', nameSingular);
-            const created = await api.request<{ data: { createOneObject: MetadataObject } }>('metadata/objects','POST',{
+            const created = await api.request<MetadataObject | { data: { createOneObject: MetadataObject } }>('metadata/objects','POST',{
                 nameSingular, namePlural, labelSingular, labelPlural, icon, isLabelSyncedWithName: false,
             });
-            metadata = created.data.createOneObject;
+            metadata = 'id' in created ? created : created.data?.createOneObject;
             if (!metadata?.id) throw new Error('commerce_invalid_object_create');
             objects.push(metadata);
         }
@@ -32,12 +42,13 @@ export async function ensureTwentyCommerceSchema(settings: TwentyContactApiSetti
         if (!apply) throw new Error(`commerce_missing_field_${metadata.nameSingular}_${name}`);
         await new Promise((resolve) => setTimeout(resolve,700));
         console.log('CRM_COMMERCE_SCHEMA_FIELD', `${metadata.nameSingular}.${name}`);
-        const result = await api.request<{ data: { createOneField: MetadataField } }>('metadata/fields','POST',{
+        const result = await api.request<MetadataField | { data: { createOneField: MetadataField } }>('metadata/fields','POST',{
             objectMetadataId: metadata.id, name, type, label, icon: type === 'CURRENCY' ? 'IconCurrencyDollar' : 'IconList',
             isLabelSyncedWithName: false, ...extra,
         });
-        if (!result.data.createOneField?.id) throw new Error('commerce_invalid_field_create');
-        fields.push(result.data.createOneField);
+        const createdField = 'id' in result ? result : result.data?.createOneField;
+        if (!createdField?.id) throw new Error('commerce_invalid_field_create');
+        fields.push(createdField);
         metadata.fields = fields;
     }
     const person = await object('person','people','Osoba','Lidé','IconUser');
