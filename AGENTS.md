@@ -965,6 +965,8 @@ Source writes have no dependency on Twenty. Keep the stable `web:<source>:<id>` 
 inclusive cutover when changing the projection. Preserve the purpose and evidence per submission and leave an
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.
 
+The separately gated `/api/admin/twenty-crm` attended operator backs up accessible CRM records and metadata to the existing private object bucket, verifies stored bytes, and adds operational fields without rewriting existing definitions or records. It uses the same superadmin/cross-site guard, requires `TWENTY_CRM_OPERATOR_ENABLED=true`, never runs on GET/build/preview, and must be disabled after setup. CRM remains the working source of truth; the old master spreadsheet is an archive. Historical qualification answers must retain dates and must not become current interest, consent or confirmed partnership. See `docs/twenty-crm-operations.md`.
+
 ### Administration and data rules
 
 - `/admin/feeds` lists the ecosystem's public RSS and calendar subscriptions for signed-in admins.
