@@ -299,17 +299,18 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
 - Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
-  Their homepages show `#articles` before `#podcasts`, articles limited to ten and podcasts to four server-rendered items with a localized
-  Show more link. Articles retain newest-first matching-language publication and the existing audio button;
-  podcasts combine editorial prominence, recency and show diversity before taking four, including one AI ta Krajta episode. Header and footer links scroll to those
-  homepage sections. `/articles` and `/podcasts` list only their own complete type; the podcast archive retains
-  its sort selector, hourly sources, shared player, localized metadata and sitemap entries. Archive navigation
-  returns to homepage anchors and preserves client-side playback, while language links keep the archive path.
-  Podcasts live separately at `#podcasts`: reviewed external episodes refresh their selected RSS enclosures and
+  Their compact homepages use six sections: introduction, three concise service options, Promptbook and H-edu,
+  two faithful testimonial excerpts, one `#writing` selection and contact. The selection contains at most three
+  items: the latest matching-language article, one matching-language recording and the nearest owned ongoing/upcoming
+  event (otherwise an archival talk). English does not feature Czech recordings. Legacy `#articles`, `#podcasts`,
+  `#talks` and `#media` remain anchor aliases. Complete original testimonials and press mentions remain available
+  in native disclosures. Header navigation has four links; archives return to the homepage anchors and preserve
+  playback and language paths. `/articles` and `/podcasts` retain their complete type-specific archives. Podcast
+  sources refresh hourly, retain the shared player, localized metadata and sitemap entries. Reviewed external episodes
   retain verified recordings during outages; AI ta Krajta reads the shared merged episodes without audience-profile
   fetches and filters by the resolved `pavol-hejny` roster entry. Both homepages revalidate hourly, so new credited
   episodes appear without a second editorial entry or deployment. Show links stay canonical on `ai-ta-krajta.cz`.
-  The English homepage marks original Czech recordings with a flag. Personal podcasts use the persistent article
+  The English podcast archive marks original Czech recordings with a flag. Personal podcasts use the persistent article
   player and shared history; AI ta Krajta keeps its own controls. Missing public audio retains a publisher link.
   All personal podcast appearances share Smart ordering by default: the newest episode stays first,
   then each position takes the newest remaining episode from a different show whenever possible. Each show's own
@@ -322,7 +323,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Their shared ivory, forest-green and gold design uses the existing portrait and project marks, with a featured
   project, static editorial testimonials and responsive section layouts; visual tokens stay in `layout.ts` and `pavol.css`.
   `/projects` lists the verified public project catalogue; private Sites and unresolved authorship stay out of the publication.
-  The three compact service cards cover agent delivery with partners, consulting, and training. Approved training formats are behind a disclosure; the consulting deliverables and a separate process section await editorial approval. Introductory-call actions preselect a call while preserving custom drafts. Three concise experience metrics replace the combined audience/training count. Collboard and H-edu have separate real interface screenshots; H-edu has an editorial teaching frame and Promptbook reuses the existing blueprint scenario in compact landscape form. Three case studies are integrated into project cards and expanded in the archive. Project feature selection, articles, media and podcasts
+  Three plain service columns cover agent delivery with colleagues, consulting and training. `/training` owns the approved training formats and AI Supervize link, with reciprocal language metadata. Introductory-call and training actions preselect their inquiry while preserving custom drafts. The introduction keeps only the 15+ years of development label; no separate metrics section is rendered. Collboard and H-edu have separate real interface screenshots; H-edu has an editorial teaching frame and Promptbook reuses the existing blueprint scenario in compact landscape form. Full project screenshots and three case studies remain in the archive. Project feature selection, articles, media and podcasts
   accept editorial `prominence` (1 neutral, 0 omitted from homepage); two years halves temporal rank. Chronological
   podcast sorting remains available. Both podcast archives share ArchiveSearchField and accent-insensitive matching.
   `/talks` and its homepage preview read the same public workshop summaries as the community calendar. Only the
@@ -334,11 +335,11 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Their AI ta Krajta items prefix the topic with the show name and the published number, including split parts. Unnumbered specials use the show name alone.
   These items use the matching YouTube episode thumbnail in a 1400-pixel square JPEG that preserves the whole frame.
   Missing videos or thumbnails use the publisher's full-bleed square show cover. The artwork route is scoped to the personal domains.
-  They are linked from both archives and the footer through a subscription dialog with copy, explicit XML and supported Subscribe on Android actions. The footer label is Podcast. Personal feeds use the versioned portrait-led podcast cover; feed URLs and GUIDs stay stable. Promptbook article-only feeds stay independent.
+  They are linked from both archives and the footer through a subscription dialog with copy, explicit XML and supported Subscribe on Android actions. The compact footer lists social links once, the Podcast subscription control, privacy/legal links and cookie settings. The footer label is Podcast. Personal feeds use the versioned portrait-led podcast cover; feed URLs and GUIDs stay stable. Promptbook article-only feeds stay independent.
   Their compact header offers canonical language links, a keyboard skip link, and a native mobile navigation menu with reduced-motion-aware icon and panel transitions.
   The introduction, projects, testimonials, and media remain readable without animated reveals; older media
   appearances open through a native disclosure. Service enquiries use the existing `/api/waitlist` contact source,
-  prefill only an empty or unchanged template message, preserve custom drafts when the service changes or sending
+  show only name, email and message, preserve service attribution and explicit language, prefill only an empty or unchanged template message, preserve custom drafts when the service changes or sending
   fails, and prevent edits or duplicate submissions while a request is pending.
 - `/ai-supervize-mini` is the Czech one-day AI Supervize page. Published terms,
   prices, capacities, places, FAQs, registration, and participant information

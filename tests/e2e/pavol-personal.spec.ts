@@ -1,4 +1,5 @@
 import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
+import { CONTACT_NOTICE_VERSION } from '@/lib/contacts/contactSubmissionPolicy';
 import { expect, test } from '@playwright/test';
 
 const LOCAL_SERVER_URL = new URL(process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4009');
@@ -90,22 +91,19 @@ for (const SITE of PERSONAL_SITES) {
         const MESSAGE = CONTACT.getByLabel(CONTENT.contact.formMessageLabel, { exact: true });
         const NAME = CONTACT.getByLabel(CONTENT.contact.formNameLabel, { exact: true });
         const EMAIL = CONTACT.getByLabel(CONTENT.contact.formEmailLabel, { exact: true });
-        const INQUIRY = CONTACT.getByLabel(CONTENT.contact.inquiryLabel, { exact: true });
         const [CONSULTING, WORKSHOP] = CONTENT.services.items;
+        await expect(CONTACT.locator('input')).toHaveCount(2);
+        await expect(CONTACT.locator('select')).toHaveCount(0);
 
         await page.getByRole('link', { name: CONSULTING.buttonLabel, exact: true }).click();
         await expect(MESSAGE).toHaveValue(CONSULTING.prefillMessage);
-        await INQUIRY.selectOption(WORKSHOP.id);
+        await page.getByRole('link', { name: WORKSHOP.buttonLabel, exact: true }).click();
         await expect(MESSAGE).toHaveValue(WORKSHOP.prefillMessage);
-        await INQUIRY.selectOption('');
-        await expect(MESSAGE).toHaveValue('');
 
         await NAME.fill('  Test Visitor  ');
         await EMAIL.fill('visitor@example.com');
-        await CONTACT.getByLabel(CONTENT.contact.formCompanyLabel, { exact: false }).fill('Example Company');
         await MESSAGE.fill('My own description.\nPlease keep this second line.');
         await page.getByRole('link', { name: CONSULTING.buttonLabel, exact: true }).click();
-        await expect(INQUIRY).toHaveValue(CONSULTING.id);
         await expect(NAME).toHaveValue('  Test Visitor  ');
         await expect(MESSAGE).toHaveValue('My own description.\nPlease keep this second line.');
 
@@ -116,14 +114,18 @@ for (const SITE of PERSONAL_SITES) {
             fullname: 'Test Visitor',
             email: 'visitor@example.com',
             placeName: `PavolPersonalPage-${SITE.language}`,
+            noticeVersion: CONTACT_NOTICE_VERSION,
+            noticeLanguage: SITE.language,
+            marketingConsent: false,
         });
         expect(REQUESTS[0].userNote).toContain(`Selected inquiry: ${CONSULTING.id}`);
-        expect(REQUESTS[0].userNote).toContain('Company: Example Company');
+        expect(REQUESTS[0].userNote).toContain('Company: (not provided)');
         expect(REQUESTS[0].userNote).toContain('My own description.\nPlease keep this second line.');
 
         await CONTACT.getByRole('button', { name: CONTENT.contact.submitLabel }).click();
         await expect(NAME).toBeDisabled();
-        await expect(INQUIRY).toBeDisabled();
+        await expect(EMAIL).toBeDisabled();
+        await expect(MESSAGE).toBeDisabled();
         await expect(CONTACT.getByRole('button', { name: CONTENT.contact.submittingLabel })).toBeDisabled();
         await expect.poll(() => REQUESTS.length).toBe(2);
         finishSubmission!();
@@ -147,8 +149,10 @@ for (const SITE of PERSONAL_SITES) {
                 body: recording.subarray(start, end + 1),
             });
         });
-        await page.goto(SITE_URL.toString());
-        const CARD = page.locator('#podcasts article').filter({ has: page.getByRole('heading', { name: 'Podcastový průřez feat. AI ta Krajta' }) });
+        await page.goto(new URL('/podcasts', SITE_URL).toString());
+        const CARD = page.locator('.pavol-podcast-card').filter({
+            has: page.locator('h2 a[href="https://www.datatalk.cz/podcast/epizoda-157"]'),
+        });
         if (SITE.language === 'en') await expect(CARD.getByLabel('Audio in Czech', { exact: true })).toBeVisible();
         await CARD.getByRole('button', { name: /^(Poslechnout|Listen):/ }).click();
         const PLAYER = page.locator('[data-article-player]');
@@ -191,7 +195,12 @@ for (const SITE of PERSONAL_SITES) {
         // Warm the article's development compilation before starting the finite test recording.
         await page.goto(articleUrl.toString());
         await page.goto(SITE_URL.toString());
-        await page.locator('#articles').getByRole('button', { name: 'Poslechnout článek', exact: true }).click();
+        await page.locator('#writing').getByRole('link', { name: 'Všechny články', exact: true }).click();
+        await expect(page).toHaveURL(new URL('/articles', SITE_URL).toString());
+        const articleCard = page.locator('.article-index-card').filter({
+            has: page.locator('h2 a[href="/articles/co-prichazi-po-generovani-kodu"]'),
+        });
+        await articleCard.getByRole('button', { name: 'Poslechnout článek', exact: true }).click();
         const player = page.locator('[data-article-player]');
         const audio = page.locator('audio');
         await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
@@ -218,17 +227,33 @@ for (const SITE of PERSONAL_SITES) {
             await page.goto(SITE_URL.toString());
             await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
             await expect(page.locator('#testimonials blockquote').first().locator('..')).toHaveCSS('opacity', '1');
-            const ARCHIVE = page.locator('#media details');
-            await ARCHIVE.locator('summary').click();
-            await expect(ARCHIVE.getByRole('heading', { name: /Most interesting browser APIs/ })).toBeVisible();
-            await expect(ARCHIVE.locator('article')).toHaveCount(4);
-            await expect(page.locator('#podcasts').getByRole('heading', { name: /Podcastový průřez/ })).toBeVisible();
+            const WRITING = page.locator('#writing');
+            await expect(WRITING.getByRole('heading', { level: 2 })).toHaveText(
+                SITE.language === 'cs' ? 'Píšu a mluvím' : 'Writing & speaking',
+            );
+            const PREVIEW_COUNT = await WRITING.locator('article').count();
+            expect(PREVIEW_COUNT).toBeGreaterThan(0);
+            expect(PREVIEW_COUNT).toBeLessThanOrEqual(3);
+            const PRESS = WRITING.locator('details');
+            await expect(PRESS).not.toHaveAttribute('open');
+            await PRESS.getByText(SITE.language === 'cs' ? 'V médiích' : 'In the media', { exact: true }).click();
+            await expect(PRESS).toHaveAttribute('open', '');
+            await expect(PRESS.getByRole('link', { name: /Euro.cz/ })).toBeVisible();
+            for (const ARCHIVE_PATH of ['/articles', '/podcasts', '/talks']) {
+                await expect(WRITING.locator(`a[href="${ARCHIVE_PATH}"]`)).toBeVisible();
+            }
             const FALLBACK = page.locator('#contact noscript p');
             await expect(FALLBACK).toBeVisible();
             await expect(FALLBACK).toHaveText(CONTENT.contact.javascriptRequiredMessage);
             await expect(
                 page.locator('#contact').getByRole('button', { name: CONTENT.contact.submitLabel }),
             ).toBeDisabled();
+            await WRITING.locator('a[href="/talks"]').click();
+            await expect(page).toHaveURL(new URL('/talks', SITE_URL).toString());
+            await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+                SITE.language === 'cs' ? 'Akce, přednášky a workshopy' : 'Events, talks and workshops',
+            );
+            await expect(page.getByRole('heading', { name: /Most interesting browser APIs/ })).toBeVisible();
         });
     });
 }

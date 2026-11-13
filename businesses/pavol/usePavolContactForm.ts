@@ -28,11 +28,15 @@ export function usePavolContactForm(language: SupportedHomepageLanguage) {
 
     useEffect(() => {
         setIsReady(true);
-        if (new URLSearchParams(window.location.search).get('inquiry') === 'intro-call') {
-            setSelectedServiceId('intro-call');
-            setFields(current => current.message.trim() ? current : { ...current, message: callMessage });
+        const inquiry = new URLSearchParams(window.location.search).get('inquiry');
+        const service = CONTENT.services.items.find(item => item.id === inquiry);
+        if (inquiry === 'intro-call' || service) {
+            setSelectedServiceId(inquiry === 'intro-call' ? inquiry : service!.id);
+            setFields(current => current.message.trim() ? current : {
+                ...current, message: inquiry === 'intro-call' ? callMessage : service!.prefillMessage,
+            });
         }
-    }, [callMessage]);
+    }, [callMessage, CONTENT.services.items]);
 
     function selectService(serviceId: string) {
         if (IS_REQUEST_PENDING.current) return;
@@ -76,6 +80,7 @@ export function usePavolContactForm(language: SupportedHomepageLanguage) {
         setError(null);
         try {
             await subscribeToWaitlist({
+                language,
                 fullname: fields.name.trim(),
                 email: fields.email.trim(),
                 placeName: `PavolPersonalPage-${language}`,

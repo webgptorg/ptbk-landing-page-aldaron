@@ -44,7 +44,7 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                     <Image src="/logo/pavol-hejny-ph.svg" alt="" width={32} height={32} className="h-8 w-8" />
                     <span>Pavol Hejný</span>
                 </Link>
-                <nav aria-label={CONTENT.navigationLabel} className="hidden items-center gap-1 xl:flex">
+                <nav aria-label={CONTENT.navigationLabel} className="hidden items-center gap-1 lg:flex">
                     {CONTENT.navItems.map((ITEM) => (
                         <Link
                             key={ITEM.href}
@@ -85,7 +85,7 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                     </Button>
                     <details
                         ref={MENU_REF}
-                        className="pavol-mobile-menu xl:hidden"
+                        className="pavol-mobile-menu lg:hidden"
                         onKeyDown={(event) => {
                             if (event.key !== 'Escape') return;
                             closeMenu();
