@@ -14,7 +14,9 @@ function memoryApi(){
         if(!rows) throw new Error('unexpected route '+url.pathname);
         if(options.method==='GET'){
             if(id)return Response.json({data:{[singular[plural]]:rows.find(row=>row.id===id)}});
-            return Response.json({data:{[plural]:rows},pageInfo:{hasNextPage:false,endCursor:null}});
+            const selected=url.searchParams.get('fields')?.split(',');
+            const projected=selected ? rows.map(row=>Object.fromEntries(Object.entries(row).filter(([key])=>key==='id'||selected.includes(key)))) : rows;
+            return Response.json({data:{[plural]:projected},pageInfo:{hasNextPage:false,endCursor:null}});
         }
         const body=JSON.parse(options.body as string) as Record<string,unknown>;
         const capital=singular[plural][0].toUpperCase()+singular[plural].slice(1);
@@ -57,6 +59,14 @@ describe('CRM purchase and payment attribution',()=>{
         expect(records.companies[0].ptbkPaid).toBeNull();
         expect(records.companies[0].ptbkTotalsByCurrency).toContain('USD');
         expect(records.ptbkPayments).toHaveLength(2);
+    });
+    it('preserves existing employment when a contact buys for one different company',async()=>{
+        const records=memoryApi(); records.people[0].companyId='existing-employer';
+        const settings={url:new URL('https://crm.invalid'),key:'test'};
+        const snapshot={purchases:[purchase],payments:[receipt]};
+        await syncTwentyCommerce(settings,snapshot,true);
+        expect(records.people[0].companyId).toBe('existing-employer');
+        expect((await syncTwentyCommerce(settings,snapshot,true)).writes).toBe(0);
     });
     it('preserves existing company affiliation when one contact buys for two companies',async()=>{
         const records=memoryApi(); records.people[0].companyId='existing-company';

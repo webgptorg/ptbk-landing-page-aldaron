@@ -24,7 +24,8 @@ const same = (left: unknown, right: unknown): boolean => {
 /** Each receipt is stored once; company and contact cards are two views of those same receipts. */
 export async function syncTwentyCommerce(settings: TwentyContactApiSettings, snapshot: CommerceSnapshot, verify = false) {
     const api = createTwentyContactApi(settings);
-    const people = await api.listRecords<RecordData>('people',undefined,'id,name,emails,company,ptbkPaid,ptbkRefunded,ptbkPersonalPaid,ptbkTotalsByCurrency,ptbkPaymentCount,ptbkLastPaidAt');
+    // Keep scalar relation IDs in the snapshot: selecting the relation name alone can omit companyId.
+    const people = await api.listRecords<RecordData>('people');
     const companies = await api.listRecords<RecordData>('companies',undefined,'id,name,ptbkBuyerKey,ptbkRegistrationNumber,ptbkBillingCountry,ptbkPaid,ptbkRefunded,ptbkTotalsByCurrency,ptbkPaymentCount,ptbkLastPaidAt');
     const purchases = await api.listRecords<RecordData>('ptbkPurchases');
     const payments = await api.listRecords<RecordData>('ptbkPayments');
