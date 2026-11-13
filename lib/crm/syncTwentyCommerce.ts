@@ -15,6 +15,11 @@ function totalFields(payments: readonly CommercePayment[], prefix = '') {
 }
 const same = (left: unknown, right: unknown): boolean => {
     if ((left === '' || left === undefined) && right === null) return true;
+    // Twenty serializes a cleared Currency field as its two null subfields.
+    if (right === null && left && typeof left === 'object' && 'amountMicros' in left && 'currencyCode' in left) {
+        const value = left as Record<string,unknown>;
+        return [value.amountMicros,value.currencyCode].every((part) => part === null || part === undefined || part === '');
+    }
     if (left && right && typeof left === 'object' && typeof right === 'object') {
         return Object.entries(right).every(([key,value]) => same((left as Record<string,unknown>)[key],value));
     }

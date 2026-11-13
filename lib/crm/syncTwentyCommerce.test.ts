@@ -15,7 +15,9 @@ function memoryApi(){
         if(options.method==='GET'){
             if(id)return Response.json({data:{[singular[plural]]:rows.find(row=>row.id===id)}});
             const selected=url.searchParams.get('fields')?.split(',');
-            const projected=selected ? rows.map(row=>Object.fromEntries(Object.entries(row).filter(([key])=>key==='id'||selected.includes(key)))) : rows;
+            // Native Twenty REST expands an empty Currency into null subfields.
+            const restRows=rows.map(row=>plural==='people' ? {...row,ptbkPersonalPaid:row.ptbkPersonalPaid ?? {amountMicros:null,currencyCode:null}} : row);
+            const projected=selected ? restRows.map(row=>Object.fromEntries(Object.entries(row).filter(([key])=>key==='id'||selected.includes(key)))) : restRows;
             return Response.json({data:{[plural]:projected},pageInfo:{hasNextPage:false,endCursor:null}});
         }
         const body=JSON.parse(options.body as string) as Record<string,unknown>;
@@ -59,6 +61,16 @@ describe('CRM purchase and payment attribution',()=>{
         expect(records.companies[0].ptbkPaid).toBeNull();
         expect(records.companies[0].ptbkTotalsByCurrency).toContain('USD');
         expect(records.ptbkPayments).toHaveLength(2);
+    });
+    it('does not rewrite an empty personal Currency returned by Twenty for a business contact',async()=>{
+        const records=memoryApi();
+        const settings={url:new URL('https://crm.invalid'),key:'test'};
+        const snapshot={purchases:[purchase],payments:[receipt]};
+        await syncTwentyCommerce(settings,snapshot,true);
+        expect(records.people[0].ptbkPersonalPaid).toBeNull();
+        expect((await syncTwentyCommerce(settings,snapshot,true)).writes).toBe(0);
+        await syncTwentyCommerce(settings,{purchases:[{...purchase,company:null}],payments:[receipt]},true);
+        expect(records.people[0].ptbkPersonalPaid).toMatchObject({amountMicros:'1000000000',currencyCode:'CZK'});
     });
     it('preserves existing employment when a contact buys for one different company',async()=>{
         const records=memoryApi(); records.people[0].companyId='existing-employer';
