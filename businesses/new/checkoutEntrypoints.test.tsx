@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { SiteLocaleProvider } from './LocaleProvider';
 import { LeadCaptureProvider } from './LeadCapture';
 import { BrandActions } from './BrandActions';
+import { NewLandingPage } from './NewLandingPage';
 import { NewSiteShell } from './NewSiteShell';
 const nav=vi.hoisted(()=>({pathname:'/cs'}));
 vi.mock('next/navigation',()=>({usePathname:()=>nav.pathname,useSearchParams:()=>new URLSearchParams()}));
@@ -26,8 +27,18 @@ describe('approved Czech trial and English contact boundaries',()=>{
  });
  it('keeps both Czech header actions on trial, and English headers on contacts',()=>{
   for(const locale of ['cs','en'] as const){nav.pathname='/'+locale;const root=markup(<NewSiteShell checkoutEnabled><div/></NewSiteShell>);const header=root.querySelector('header')!;
+   expect(header.querySelectorAll('details a[href="/cs/pricing/predplatne"]')).toHaveLength(locale==='cs'?1:0);
    expect(header.querySelectorAll('a[href="/cs/pricing/zkouska"]')).toHaveLength(locale==='cs'?2:0);
    if(locale==='en')expect(Array.from(header.querySelectorAll('button')).filter(b=>b.textContent==='I’m interested')).toHaveLength(2);
   }
  });
+});
+
+it.each(['cs','en'] as const)('keeps the complete partner landing and header on recruitment in %s',locale=>{
+ nav.pathname='/'+locale+'/partnership';
+ const root=markup(<NewSiteShell checkoutEnabled><NewLandingPage partnership checkoutEnabled showTestimonials={false}/></NewSiteShell>);
+ expect(root.querySelector('a[href*="/objednat/"]')).toBeNull();
+ expect(root.querySelector('a[href*="/zkouska"]')).toBeNull();
+ expect(root.textContent).toContain(locale==='cs'?'Ceník pro vaše klienty':'Plans for your clients');
+ expect(Array.from(root.querySelectorAll('button')).filter(button=>button.textContent===(locale==='cs'?'Probrat partnerství':'Discuss partnership'))).toHaveLength(2);
 });

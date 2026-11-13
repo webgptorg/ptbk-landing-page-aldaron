@@ -17,7 +17,7 @@ export function SecuritySection() {
 }
 
 /** The landing pages show the two subscriptions. The full pricing page also covers self-installation and custom offers. */
-export function PricingCards({ full = false, checkoutEnabled = false }: { full?: boolean; checkoutEnabled?: boolean }) {
+export function PricingCards({ full = false, checkoutEnabled = false, showActions = true }: { full?: boolean; checkoutEnabled?: boolean; showActions?: boolean }) {
     const { t, locale, path } = useSiteLocale();
     const en = locale === 'en';
     const canCheckOut = !en && checkoutEnabled;
@@ -104,7 +104,7 @@ export function PricingCards({ full = false, checkoutEnabled = false }: { full?:
                     <strong className={pricing.amount}>{plan.amount}</strong>
                     <span className={pricing.period}>{plan.period}</span>
                 </div>
-                {plan.action}
+                {showActions && plan.action}
                 <ul className={pricing.features}>
                     {(full ? plan.features : [plan.features[0], locale === 'en' ? `${plan.id === 'business' ? 10 : 1} Promptbook community ${plan.id === 'business' ? 'seats' : 'seat'}` : `${plan.id === 'business' ? 10 : 1} ${plan.id === 'business' ? 'míst' : 'místo'} v komunitě Promptbook`, locale === 'en' ? 'Recurring work in your own environment' : 'Dlouhodobé agendy ve vašem prostředí']).map(feature => <li key={feature}><Check size={17} aria-hidden="true"/><span>{feature}</span></li>)}
                     {full && 'support' in plan && <li className={plan.id === 'start' ? pricing.excluded : ''}>

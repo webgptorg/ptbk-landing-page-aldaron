@@ -31,7 +31,10 @@ function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; ch
     useEffect(() => { referralFromBrowser(); }, [pathname]);
     const communityLink = <><Link href={COMMUNITIES.promptbook.path} hrefLang="cs">{locale === 'cs' ? 'Komunita' : 'Community (CZ)'}</Link><Link href={path('pricing')}>{locale === 'cs' ? 'Ceník' : 'Pricing'}</Link></>;
     const showCheckout = locale === 'cs';
-    const headerAction = showCheckout
+    const partnerPage = /^\/(?:cs|en)\/partnership(?:\/|$)/.test(pathname ?? '');
+    const headerAction = partnerPage
+        ? <LeadButton interest topic={locale === 'cs' ? 'Partnerství — nasazování Promptbooku klientům' : 'Partnership — deploying Promptbook for clients'}>{locale === 'cs' ? 'Probrat partnerství' : 'Discuss partnership'}</LeadButton>
+        : showCheckout
         ? <a href={path('pricing/zkouska')} className={s.button}>Vyzkoušet Business zdarma<ArrowUpRight size={17} aria-hidden="true" /></a>
         : <LeadButton interest>{t("Mám zájem")}</LeadButton>;
 
@@ -41,7 +44,7 @@ function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; ch
             <BrandLogo priority/>
             <nav className={s.desktopNav} aria-label={t("Hlavní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}</nav>
             <LanguageSwitch/><Link className={s.utilityLink} href={path('o-nas#kontakt')}>{locale === 'cs' ? 'Podpora' : 'Support'}</Link>{locale === 'cs' && <a className={s.utilityLink} href={path('pricing/predplatne')}>Přihlásit se</a>}<div className={s.headerAction}>{headerAction}</div>
-            <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link>{headerAction}</nav></details>
+            <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}<Link href={path('o-nas#kontakt')}>{locale === 'cs' ? 'Podpora' : 'Support'}</Link>{locale === 'cs' && <a href={path('pricing/predplatne')}>Přihlásit se</a>}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link>{headerAction}</nav></details>
         </div></header>
         <main id="obsah" className={s.container}>{t(children)}</main>
         <footer className={s.footer}><div className={`${s.footerGrid} ${f.grid}`}>
