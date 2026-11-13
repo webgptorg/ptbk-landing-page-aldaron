@@ -1,3 +1,4 @@
+import { isPromptbookLicenseRoom } from '@/lib/promptbook-licensing/communityAccess';
 import { getCommunityByRoomSlug, type CommunityId } from '@/businesses/community/config';
 import { COMMUNITY_WORKSHOP_SLUG } from '@/businesses/community/config';
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
@@ -2528,6 +2529,7 @@ export async function loadWorkshopPublicState(
     participant: WorkshopParticipant,
     commentSort: WorkshopCommentSort,
     canReadPaidMembership = !isCommunityEmailVerificationEnabled(),
+    hasVerifiedLicenseAccess = false,
 ): Promise<LoadedWorkshopPublicState> {
     const contentVisibilityCutoff = new Date().toISOString();
     const workshop = mapWorkshopRow(workshopRow);
@@ -2548,8 +2550,9 @@ export async function loadWorkshopPublicState(
     //       is visible. A room which does not offer the membership has nothing to unlock, and an answer which does
     //       not arrive keeps the paid materials hidden rather than letting them escape.
     const paidCommunityId = getPaidCommunityIdForRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
-    const isMembershipOffered = paidCommunityId !== null;
-    let isPaidMember = false;
+    const licenseRoom = isPromptbookLicenseRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
+    const isMembershipOffered = paidCommunityId !== null || licenseRoom;
+    let isPaidMember = licenseRoom && hasVerifiedLicenseAccess;
     if (paidCommunityId !== null && canReadPaidMembership) {
         const { membership, errorMessage: membershipErrorMessage } = await loadCommunityMembershipByEmail(
             supabase,

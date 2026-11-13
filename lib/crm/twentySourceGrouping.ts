@@ -20,9 +20,9 @@ export function readTwentySourceGroups(raw?: string): TwentySourceGroups | undef
 
 export function getTwentySourceCategory(sourceType: string): TwentySourceCategory | undefined {
     if (sourceType === 'website') return 'website';
-    if (sourceType === 'promptbook-subscription') return 'license';
+    if (['promptbook-subscription','promptbook-trial'].includes(sourceType)) return 'license';
     if (['workshop-registration', 'workshop-attendance', 'workshop-feedback'].includes(sourceType)) return 'workshop';
-    if (['community-registration', 'community-membership', 'community-attendance', 'community-feedback'].includes(sourceType)) return 'community';
+    if (['promptbook-article-proposal','community-registration', 'community-membership', 'community-attendance', 'community-feedback'].includes(sourceType)) return 'community';
     if (['project-attendance', 'project-feedback'].includes(sourceType)) return 'project';
     return undefined;
 }

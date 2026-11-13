@@ -443,3 +443,5 @@
    Keep these tokens on this shell, since other brands share the root layout. */
 .site{--font-outfit:var(--font-promptbook-heading);--font-inter:var(--font-promptbook-body);letter-spacing:0;font-optical-sizing:auto}
 .site h1,.site h2,.site h3{font-weight:600;letter-spacing:-.012em}
+
+.utilityLink{font-size:12px;white-space:nowrap}.headerInner{gap:16px}.desktopNav{gap:16px}@media(max-width:1180px){.utilityLink{display:none}}

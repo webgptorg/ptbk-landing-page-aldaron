@@ -1,3 +1,5 @@
+> Revize vlastníka 13. listopadu 2026: viz [realizace spuštění](../docs/launch-2026-11-13.md), která nahrazuje starší CTA, navigaci, velkou kalkulačku na homepage, dostupnost vzdáleného ovládání a technické blokování licencemi. Vizuální specifikace zůstává.
+
 # Web Promptbooku
 
 Specifikace hlavního webu publikovaného na `/cs` (česky) a `/en` (anglicky). Kořen `/` a marketingové cesty bez prefixu se podle jazyka prohlížeče přesměrují na `/cs` nebo `/en` se zachováním query parametrů. Přesměrování závislé na jazyce je dočasné a nesmí se sdíleně cachovat; explicitní jazykové cesty se nemění. Vlastník výslovně schválil přepnutí 23. října 2026. Staré cesty `/new` se trvale přesměrují na odpovídající cesty bez prefixu se zachováním query parametrů. České `/cs` routy znovu používají stránky v `app/(marketing)`, anglické v samostatné catch-all routě vedle existujících článků a whitepaperu. Ostatní značkové weby, články, workshopy a administrace si zachovávají své cesty.

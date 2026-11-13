@@ -1,3 +1,7 @@
+## Latest owner authorization: 13 November 2026
+
+The launch revision in `docs/launch-2026-11-13.md` supersedes older homepage, navigation, trial, availability and commercial enforcement descriptions below. Web is authorized directly on main; preserve existing visual work and all unrelated systems. No outbound messages to people without approval. Missing/expired/over-capacity licensing is advisory only. English remains contact/CRM only; online sale and trial serve CZ/SK. Immutable accepted legal editions remain intact.
+
 ## Context
 
 This repository contains Promptbook landing pages for different businesses,

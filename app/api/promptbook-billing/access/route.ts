@@ -1,3 +1,4 @@
+import { ensureLicenseAccount } from '@/lib/promptbook-licensing/accounts';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import { PROMPTBOOK_ORDERS_TABLE } from '@/lib/promptbook-billing/billingOrders';
@@ -7,9 +8,24 @@ import {
     memberResponse,
     rejectCrossSiteMemberRequest,
     writeMemberEmailCookie,
+    MEMBERSHIP_EMAIL_COOKIE,
 } from '@/lib/promptbook-billing/memberAccess';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+
+/** Clear verified membership and this browser's purchase receipts together. */
+export async function DELETE(request: NextRequest) {
+    const rejected = rejectCrossSiteMemberRequest(request);
+    if (rejected) return rejected;
+    const response = memberResponse({ signedOut: true });
+    response.cookies.set(MEMBERSHIP_EMAIL_COOKIE, '', { path: '/', maxAge: 0, httpOnly: true, sameSite: 'lax' });
+    for (const cookie of request.cookies.getAll()) {
+        if (/^ptbk_order_[0-9a-f-]{36}$/i.test(cookie.name)) {
+            response.cookies.set(cookie.name, '', { path: '/api/promptbook-billing', maxAge: 0, httpOnly: true, sameSite: 'lax' });
+        }
+    }
+    return response;
+}
 
 const emailSchema = z.string().trim().toLowerCase().max(254).refine(isEmailAddressValid);
 const accessSchema = z.discriminatedUnion('action', [
@@ -35,17 +51,8 @@ export async function POST(request: NextRequest) {
 
     const { email, action } = parsed.data;
     if (action === 'send') {
-        const { database, isTest } = context;
-        const { data, error } = await database.from(PROMPTBOOK_ORDERS_TABLE).select('id')
-            .eq('is_test', isTest).eq('email', email).not('stripe_customer_id', 'is', null)
-            .neq('status', 'pending').limit(1);
-        if (error) {
-            return memberResponse({ error: 'Kód teď nelze odeslat. Zkuste to za chvíli.' }, 503);
-        }
-        if (data?.length) {
-            // Same public response for known and unknown addresses. Provider limits still apply to sending.
-            await auth.signInWithOtp({ email }).catch(() => undefined);
-        }
+        // The same verified identity serves new trials and purchases; never disclose whether an address is known.
+        await auth.signInWithOtp({ email }).catch(() => undefined);
         return memberResponse({ isCodeSent: true });
     }
 
@@ -54,6 +61,7 @@ export async function POST(request: NextRequest) {
         return memberResponse({ error: 'Kód je neplatný nebo jeho platnost vypršela.' }, error?.status === 429 ? 429 : 403);
     }
 
+    try { await ensureLicenseAccount(email); } catch { return memberResponse({ error: 'Účet se nepodařilo připravit. Zkuste přihlášení znovu.' }, 503); }
     const response = memberResponse({ isVerified: true });
     return writeMemberEmailCookie(request, response, email)
         ? response

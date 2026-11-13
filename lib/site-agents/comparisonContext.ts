@@ -1,4 +1,5 @@
 import 'server-only';
+import { APPROACH_COMPARISONS } from '@/businesses/new/approachComparisons';
 import { COMPARISONS, COMPARISON_ROWS, COMPARISON_REVIEW_DATE, PROMPTBOOK_SUMMARY, PROJECT_HISTORY_COMPARISON, REBORN_SOURCE } from '@/businesses/new/comparisons';
 import { ALTERNATIVE_COMMERCIAL_TERMS, COMMERCIAL_ROWS } from '@/businesses/new/comparisonCommercial';
 import { CAPABILITY_REVIEW_DATE, PROMPTBOOK_CAPABILITY_SOURCES } from '@/businesses/new/comparisonCapabilities';
@@ -17,6 +18,8 @@ export function getComparisonAgentData(language: SiteAgentLanguage) {
             openSource: { summary: PUBLIC_ENGINE_SUMMARY, terms: PUBLIC_ENGINE_TERMS },
             commercialTerms: COMMERCIAL_TERMS, sources: [REBORN_SOURCE, ...PROMPTBOOK_CAPABILITY_SOURCES],
         },
+        currentAvailability: 'Local Console is available. Remote control app is in preparation; relay connectivity alone is not finished control. Czech trial and sale: CZ/SK only. English enquiries remain contact-only.',
+        approaches: APPROACH_COMPARISONS,
         projectHistory: PROJECT_HISTORY_COMPARISON,
         alternatives: COMPARISONS.map(item => ({ ...item,
             commercial: ALTERNATIVE_COMMERCIAL_TERMS[item.slug], path: `/${language}/srovnani/${item.slug}` })),

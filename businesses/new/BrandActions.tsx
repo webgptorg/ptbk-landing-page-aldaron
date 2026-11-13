@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { LeadButton } from './LeadCapture';
+import { PurchaseActions } from './PurchaseActions';
 import { useSiteLocale } from './LocaleProvider';
 import s from './brand.module.css';
 import site from './site.module.css';
@@ -14,7 +15,7 @@ export function BrandActions({ partner = false, checkoutEnabled = false }: { par
     const checkoutHref = !partner && !en && checkoutEnabled ? path('pricing/objednat/start') : null;
     const label = en ? (partner ? 'Bring Promptbook to my clients' : 'Free up my time') : (partner ? 'Chci nasazovat klientům' : 'Chci uvolnit ruce');
     return <div className={s.primaryActions}>
-        {checkoutHref ? <a href={checkoutHref} className={site.button}>
+        {!partner && !en ? <PurchaseActions/> : checkoutHref ? <a href={checkoutHref} className={site.button}>
             {label}<ArrowUpRight size={17} aria-hidden="true" />
         </a> : <LeadButton interest heading={partner ? undefined : (en ? 'What would you like AI to take over?' : 'Co za Vás má AI převzít?')} topic={en
             ? (partner ? 'Partnership — deploying Promptbook for clients' : 'Handing work over to AI')
@@ -23,7 +24,7 @@ export function BrandActions({ partner = false, checkoutEnabled = false }: { par
         </LeadButton>}
         <div className={s.secondaryActions}>
             <Link href={path('open-source')}>
-                <span>{en ? 'Install the engine yourself' : 'Nainstalujte engine u sebe'}</span><ArrowRight size={14} aria-hidden="true"/>
+                <span>{en ? 'Public source and self-installation' : 'Veřejný kód a vlastní instalace'}</span><ArrowRight size={14} aria-hidden="true"/>
             </Link>
             <Link href={path(partner ? '' : 'partnership')}>
                 <span>{partner ? (en ? 'Explore Promptbook' : 'Prohlédnout Promptbook') : (en ? 'For partners · 20% software share' : 'Pro partnery · 20 % podíl ze softwaru')}</span><ArrowRight size={14} aria-hidden="true"/>

@@ -1,3 +1,4 @@
+import { APPROACH_COMPARISONS } from '@/businesses/new/approachComparisons';
 import { getLegacyLegalRedirect } from '@/lib/legal/legalRedirects';
 import { getLegacyArticleSitemapEntries, getManagedPublicCanonicalArticles } from '@/lib/articles/publishedArticles';
 import { getArticleIndexUrl, getArticleUrl } from '@/lib/articles/urls';
@@ -67,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .map((definition) => createAbsoluteUrl(definition.path)));
     const marketingPaths = ['', ...NEW_SITE_SECTIONS,
         ...Object.keys(SCENARIOS).map(id => `agendy/${id}`),
-        ...COMPARISONS.map(item => `srovnani/${item.slug}`),
+        ...[...COMPARISONS, ...APPROACH_COMPARISONS].map(item => `srovnani/${item.slug}`),
     ];
     const marketingPages = marketingPaths.flatMap(path => (['cs', 'en'] as const).map(language => ({
         url: createAbsoluteUrl(localizedPath(path, language)),

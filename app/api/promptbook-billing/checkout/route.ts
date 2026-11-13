@@ -35,6 +35,7 @@ const checkoutSchema = z.object({
             .refine((code) => /^\d{5}$/.test(code)),
         country: z.enum(['CZ', 'SK']),
     }),
+    referralCode: z.string().trim().max(80).regex(/^[A-Za-z0-9_-]*$/).optional().default(''),
     note: z.string().trim().max(4000).optional().transform((note) => note || null),
     immediateStart: z.boolean().optional().default(false),
     promoCode: z.string().trim().max(100).optional().transform((code) => normalizeDiscountCode(code ?? '') || null),
@@ -88,6 +89,7 @@ export async function POST(request: NextRequest) {
                 customer_type: identity.customerType,
                 tax_treatment: identity.taxTreatment,
                 order_note: input.note,
+                referral_code: input.referralCode || null,
                 immediate_start: input.immediateStart,
                 vat_id: identity.vatId ?? null,
                 billing_address: identity.address,
@@ -115,7 +117,7 @@ export async function POST(request: NextRequest) {
             order.billing_address.postal_code !== input.billingAddress.postal_code ||
             order.billing_address.country !== input.billingAddress.country ||
             order.customer_type !== (input.companyId ? 'business' : 'consumer') ||
-            order.order_note !== input.note || order.immediate_start !== input.immediateStart ||
+            (order.referral_code ?? '') !== input.referralCode || order.order_note !== input.note || order.immediate_start !== input.immediateStart ||
             order.discount_code !== input.promoCode || order.discount_percent !== (input.expectedDiscount?.percent ?? null) ||
             order.discount_months !== (input.expectedDiscount?.months ?? null) || order.terms_version !== input.termsVersion ||
             order.billing_origin !== getBillingOrigin(request) || order.is_test !== gateway.configuration.isTestMode) {

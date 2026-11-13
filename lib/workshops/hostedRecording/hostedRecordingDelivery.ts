@@ -1,3 +1,4 @@
+import { isPromptbookLicenseRoom, verifiedLicenseCommunityAccess } from '@/lib/promptbook-licensing/communityAccess';
 import 'server-only';
 
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
@@ -46,7 +47,8 @@ export async function authorizeHostedRecording(request: NextRequest, workshopSlu
         workshopRow.hosted_recording_revision_id !== null;
     if (!isCurrent && !isGrace) return NextResponse.json({ error: 'Recording unavailable' }, { status: 404 });
     const communityId = getPaidCommunityIdForRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
-    let isPaidMember = false;
+    const licenseRoom = isPromptbookLicenseRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs);
+    let isPaidMember = licenseRoom && await verifiedLicenseCommunityAccess(request, participant.email);
     if (communityId !== null && !isCommunityEmailVerificationRequired(request, participant.email)) {
         const result = await loadCommunityMembershipByEmail(supabase, participant.email, communityId);
         if (result.errorMessage) return NextResponse.json({ error: 'Membership could not be checked' }, { status: 503 });
@@ -55,7 +57,7 @@ export async function authorizeHostedRecording(request: NextRequest, workshopSlu
     const phase = getWorkshopPhase({ startsAt: workshopRow.starts_at, endsAt: workshopRow.ends_at });
     const isWorkshopPast = isWorkshopPhasePast(phase);
     if (!isWorkshopRecordingReadable({ isWorkshopPast, isWorkshopUpcoming: phase !== 'ongoing' && !isWorkshopPast,
-        isPaidMember, isMembershipOffered: communityId !== null }))
+        isPaidMember, isMembershipOffered: communityId !== null || licenseRoom }))
         return NextResponse.json({ error: 'Paid membership required' }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
     return { revision, supabase, isLiveWindowLocked: phase === 'ongoing' && !isPaidMember };
 }

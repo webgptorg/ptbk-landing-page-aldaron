@@ -8,7 +8,7 @@ import { localizedPath } from '@/businesses/new/localization';
 import { getLegalLinks } from './legalLinks';
 import { LEGAL_PAGE_METADATA } from './legalPageMetadata';
 import { legalRouteMetadata, legalRouteParams } from './legalRoute';
-import { PROMPTBOOK_ONLINE_TERMS_PATH, PROMPTBOOK_ONLINE_TERMS_VERSION, PROMPTBOOK_ONLINE_TERMS_V1_VERSION, PROMPTBOOK_ONLINE_TERMS_VERSIONS, getPromptbookOnlineTermsPath } from './promptbookOnlineTermsVersion';
+import { PROMPTBOOK_ONLINE_TERMS_PATH, PROMPTBOOK_ONLINE_TERMS_VERSION, PROMPTBOOK_ONLINE_TERMS_V1_VERSION, PROMPTBOOK_ONLINE_TERMS_V2_VERSION, PROMPTBOOK_ONLINE_TERMS_VERSIONS, getPromptbookOnlineTermsPath } from './promptbookOnlineTermsVersion';
 import { getPromptbookOnlineTermsDocument } from './promptbookOnlineTermsDocument';
 import { LEGAL_PAGE_DEFINITION_LIST } from './legalPageMetadata';
 describe('canonical legal navigation', () => {
@@ -74,7 +74,7 @@ describe('accepted online agreements', () => {
 
     it('applies consumer withdrawal and the full refund to v2 without rewriting v1', () => {
         const old = getPromptbookOnlineTermsDocument(PROMPTBOOK_ONLINE_TERMS_V1_VERSION)!;
-        const current = getPromptbookOnlineTermsDocument(PROMPTBOOK_ONLINE_TERMS_VERSION)!;
+        const current = getPromptbookOnlineTermsDocument(PROMPTBOOK_ONLINE_TERMS_V2_VERSION)!;
         const text = current.sections.flatMap(section => section.paragraphs ?? []).join(' ');
         expect(current.publication?.date).toBe('2026-11-11');
         expect(current.perex).toContain('spotřebitele');
@@ -84,6 +84,15 @@ describe('accepted online agreements', () => {
         expect(text).toContain('nejpozději do 14 dnů');
         expect(text).toContain('stejným způsobem');
         expect(text).toContain('budoucí obnovování');
+        expect(current.sections.some(section => section.heading === 'Vzor odstoupení od smlouvy')).toBe(true);
+    });
+
+    it('publishes the no-card trial separately while keeping consumer protections', () => {
+        const current = getPromptbookOnlineTermsDocument(PROMPTBOOK_ONLINE_TERMS_VERSION)!;
+        const text = current.sections.flatMap(section => [...(section.paragraphs ?? []), ...(section.bullets ?? [])]).join(' ');
+        expect(current.publication?.date).toBe('2026-11-13');
+        expect(text).toContain('Kartu ani placenou objednávku');
+        expect(text).toContain('celou přijatou cenu bez poměrné srážky');
         expect(current.sections.some(section => section.heading === 'Vzor odstoupení od smlouvy')).toBe(true);
     });
 

@@ -8,6 +8,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 import { formatPromptbookBillingAmount } from './promptbookBillingPresentation';
 import styles from './promptbookBilling.module.css';
+import { MembershipAccess } from './MembershipAccess';
+import { LicenseMemberPanel } from './LicenseMemberPanel';
 import site from './site.module.css';
 
 const MEMBERS_API = '/api/promptbook-billing/membership';
@@ -112,6 +114,7 @@ export function PromptbookMembers({ confirming }: { readonly confirming: boolean
                     {error}
                 </p>
             )}
+            <LicenseMemberPanel/>
             {waiting && <p role="status">Ověřujeme platbu…</p>}
             {!waiting && !error && result === null && <p role="status">Načítáme předplatné…</p>}
             {!waiting && (error || (confirming && result && isPaymentPending(result))) && (
@@ -313,97 +316,6 @@ function MembershipOnboarding({ membershipId }: { readonly membershipId: string 
             <button className={site.secondaryButton} disabled={status === 'saving'} type="submit">
                 {status === 'saving' ? 'Ukládáme…' : 'Uložit údaje'}
             </button>
-        </form>
-    );
-}
-
-function MembershipAccess({ onVerified }: { readonly onVerified: () => void }) {
-    const [email, setEmail] = useState('');
-    const [awaitingCode, setAwaitingCode] = useState(false);
-    const [pending, setPending] = useState(false);
-    const [verified, setVerified] = useState(false);
-    const [error, setError] = useState('');
-
-    async function submit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        if (pending) return;
-        const fields = new FormData(event.currentTarget);
-        setError('');
-        setPending(true);
-        try {
-            if (awaitingCode) {
-                await sendJson(ACCESS_API, 'POST', {
-                    action: 'verify',
-                    email,
-                    code: String(fields.get('code')).trim(),
-                });
-                setVerified(true);
-                onVerified();
-            } else {
-                await sendJson(ACCESS_API, 'POST', { action: 'send', email });
-                setAwaitingCode(true);
-            }
-        } catch (error: unknown) {
-            setError(error instanceof Error ? error.message : 'Přihlášení se nepodařilo. Zkuste to prosím znovu.');
-        } finally {
-            setPending(false);
-        }
-    }
-
-    return verified ? (
-        <p role="status">E-mail jsme ověřili.</p>
-    ) : (
-        <form className={styles.onboarding} onSubmit={submit} aria-busy={pending}>
-            {awaitingCode && <p role="status">Pokud k e-mailu evidujeme nákup, poslali jsme Vám přihlašovací kód.</p>}
-            <label>
-                E-mail z objednávky
-                <input
-                    type="email"
-                    required
-                    autoComplete="email"
-                    value={email}
-                    maxLength={254}
-                    disabled={pending || awaitingCode}
-                    onChange={(event) => setEmail(event.target.value)}
-                />
-            </label>
-            {awaitingCode && (
-                <label>
-                    Přihlašovací kód
-                    <input
-                        name="code"
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        pattern="[0-9]{6,10}"
-                        maxLength={10}
-                        required
-                        disabled={pending}
-                    />
-                </label>
-            )}
-            {error && (
-                <p className={site.error} role="alert">
-                    {error}
-                </p>
-            )}
-            <div className={styles.memberActions}>
-                <button className={site.button} type="submit" disabled={pending}>
-                    {pending ? 'Ověřujeme…' : awaitingCode ? 'Přihlásit se' : 'Poslat přihlašovací kód'}
-                </button>
-                {awaitingCode && (
-                    <button
-                        className={site.secondaryButton}
-                        type="button"
-                        disabled={pending}
-                        onClick={() => {
-                            setAwaitingCode(false);
-                            setError('');
-                        }}
-                    >
-                        Použít jiný e-mail
-                    </button>
-                )}
-            </div>
         </form>
     );
 }

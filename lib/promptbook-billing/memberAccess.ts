@@ -7,7 +7,7 @@ import { getBillingOrigin, getBillingSetting } from '@/lib/promptbook-billing/co
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
-const MEMBERSHIP_EMAIL_COOKIE = 'promptbook_billing_email';
+export const MEMBERSHIP_EMAIL_COOKIE = 'promptbook_member_v2';
 const MEMBERSHIP_EMAIL_COOKIE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 export const MEMBER_RESPONSE_HEADERS = { 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' };
 
@@ -49,13 +49,13 @@ export function writeMemberEmailCookie(request: NextRequest, response: NextRespo
         httpOnly: true,
         secure: getBillingOrigin(request).startsWith('https:'),
         sameSite: 'lax',
-        path: '/api/promptbook-billing',
+        path: '/',
         maxAge: MEMBERSHIP_EMAIL_COOKIE_MAX_AGE_SECONDS,
     });
     return true;
 }
 
-function readMemberEmailCookie(request: NextRequest): string | null {
+export function readMemberEmailCookie(request: { readonly cookies: { get(name: string): { value: string } | undefined } }): string | null {
     const value = request.cookies.get(MEMBERSHIP_EMAIL_COOKIE)?.value;
     if (!value || value.length > 512 || !getMemberEmailAuth()) {
         return null;

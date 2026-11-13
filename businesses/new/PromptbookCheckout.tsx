@@ -19,6 +19,7 @@ import {
 } from '@/lib/legal/promptbookOnlineTermsVersion';
 import { ArrowLeft, ArrowRight, LockKeyhole } from 'lucide-react';
 import Link from 'next/link';
+import { referralFromBrowser } from '@/lib/promptbook-licensing/referral';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { COMMERCIAL_TERMS } from './commercialTerms';
 import { formatPromptbookBillingAmount } from './promptbookBillingPresentation';
@@ -53,6 +54,8 @@ export function PromptbookCheckout({
     initialActiveDiscountByPlaceId,
     canceled,
 }: PromptbookCheckoutProps) {
+    const [referral, setReferral] = useState('');
+    useEffect(() => { const saved=referralFromBrowser();setReferral(saved);if(!saved)void fetch('/api/promptbook-billing/licenses').then(async response=>{if(!response.ok)return;const data:unknown=await response.json();if(data&&typeof data==='object'&&'referral' in data&&typeof data.referral==='string')setReferral(data.referral);}).catch(()=>undefined); }, []);
     const [plan, setPlan] = useState(initialPlan);
     const [country, setCountry] = useState<'CZ' | 'SK'>('CZ');
     const [isBusiness, setIsBusiness] = useState(true);
@@ -185,6 +188,7 @@ export function PromptbookCheckout({
                 country,
             },
             note: String(fields.get('note') ?? '').trim(),
+            referralCode: referral.trim(),
             email: String(fields.get('email')).trim(),
             promoCode: activeDiscount ? normalizeDiscountCode(discount.discountCode) : undefined,
             expectedDiscount: activeDiscount ? { percent: activeDiscount.percent, months: duration } : null,
@@ -305,6 +309,7 @@ export function PromptbookCheckout({
                         <section className={styles.billing} aria-labelledby="billing-title">
                             <h2 id="billing-title">Fakturační údaje</h2>
                             {canceled && <p role="status">Platba nebyla dokončena. Můžete ji zkusit znovu.</p>}
+                            <label><span>Doporučil vás někdo? (nepovinné)</span><input maxLength={80} pattern="[A-Za-z0-9_-]*" value={referral} onChange={event => setReferral(event.target.value)} disabled={busy}/><small>Doporučovací kód je nezávislý na slevovém kódu.</small></label>
                             <label className={styles.agreement}>
                                 <input type="checkbox" name="isBusiness" checked={isBusiness}
                                     onChange={(event) => changeCustomerType(event.target.checked)} disabled={busy} />

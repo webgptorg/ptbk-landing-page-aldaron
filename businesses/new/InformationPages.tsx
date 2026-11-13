@@ -18,6 +18,9 @@ import { COMPARISONS, COMPARISON_REVIEW_DATE, REBORN_SOURCE } from './comparison
 import { CAPABILITY_REVIEW_DATE, PROMPTBOOK_CAPABILITY_SOURCES } from './comparisonCapabilities';
 import { sitePath } from './siteConfig';
 import s from './site.module.css';
+import { FAQ } from './faqData';
+import { ComparisonOverview, ComparisonContext } from './ComparisonOverview';
+import { PurchaseActions } from './PurchaseActions';
 
 export function PageIntro({title,children}:{title:string;children?:React.ReactNode}) {
     const { t, locale, path } = useSiteLocale();
@@ -57,7 +60,7 @@ export function SecurityPage(){
     const { t, path, locale } = useSiteLocale();
     return <>
         <PageIntro title={t("Kontext zůstává váš.")}>{t("Vlastní soubory a agenti. Oddělené ovládání. Jasná hranice mezi přenosem do aplikace a použitím AI modelu.")}</PageIntro>
-        <OwnershipScene />
+        <p className={s.small}>{locale === 'en' ? 'The remote control app is in preparation. The diagram explains its architecture; today use the local Console.' : 'Vzdálenou ovládací appku připravujeme. Schéma vysvětluje její architekturu; dnes použijte lokální Console.'}</p><OwnershipScene />
         <div className={s.prose}>
             <h2>{t("Engine pracuje ve vašem prostředí")}</h2>
             <p>{t("Engine běží na Vašem počítači, firemním serveru nebo pronajatém serveru pod Vaší kontrolou. Tady jsou pracovní soubory, pravidla a kontext agend. Zavření aplikace, odhlášení, ztráta zařízení ani výpadek spojení samy o sobě neruší zadanou práci. Stroj s enginem musí zůstat dostupný.")}</p>
@@ -94,31 +97,6 @@ export function SecurityPage(){
     </>;
 }
 
-const FAQ = [
-    ['Musím umět programovat?', 'Pro běžné ovládání ne. Technické nastavení a připojení vašich systémů může vyřešit partner. Vy určíte práci, pravidla a hranice schvalování.'],
-    ['Čím se agenda liší od chatbota?', 'Chat obvykle začíná otázkou. Agenda má vymezenou dlouhodobou práci a reaguje na další podklady nebo naplánované úkoly. Není potřeba znovu popisovat každý jednotlivý krok.'],
-    ['Funguje to i s vypnutým notebookem?', 'Ano, pokud engine běží na jiném dostupném stroji, například na vašem serveru. Když vypnete přímo počítač s enginem, zastaví se i jeho práce.'],
-    ['Co když AI udělá chybu?', 'Nastavíte oprávnění a schvalování citlivých kroků, počítáte s kontrolou výstupů a řešením výjimek. Autonomie neznamená bezchybnost ani převzetí odborné odpovědnosti.'],
-    ['Kam jdou naše data?', 'Pracovní kontext a soubory jsou ve Vašem prostředí. Aplikace a engine spolu komunikují end-to-end šifrovaně; relay ani centrální backend tento pracovní obsah nedešifrují. Účet a předplatné jsou oddělené. Externí modely a připojené nástroje dostávají vstupy, které jim Vaše agenda odešle.'],
-    ['Mohou si agenti měnit naše pravidla?', 'Postupy a znalosti mohou zlepšovat jen v mezích, které jim určíte. Pevné cíle, zákazy a hranice schvalování sami nemění, ani při opravě nebo aktualizaci. Můžete také uzavřít celé zadání agenta proti automatickému přepisování. Pevná pravidla měníte Vy.'],
-    ['Mohu si své agenty a práci odnést?', 'Ano. Agenti, úkoly, konverzace a nastavení jsou čitelné soubory ve vašem projektu. Můžete je otevřít běžným editorem, zálohovat a přenést. Promptbook při dokončených změnách standardně vytváří Git historii, takže vidíte i předchozí verze.'],
-    ['Mohu změnit AI nebo použít lokální model?', 'Ano, v rámci podporovaných harnessů a modelů. Role, pravidla a soubory přitom zůstávají ve vašem projektu. Lokální model vyžaduje kompatibilní napojení harnessu a odpovídající hardware; kvalitu a schopnost pracovat s nástroji ověřte na své agendě. Externí nástroje mohou data odesílat i při použití lokálního modelu.'],
-    ['Jak svou agendu ovládám?', 'V aplikaci zadáváte práci chatem a projekt můžete spustit, pozastavit, obnovit, zastavit nebo restartovat. Lokální dashboard otevřete přímo na stroji s enginem bez párování; vzdálené ovládání používá ověřené end-to-end šifrované spojení.'],
-    ['Co když aplikaci zavřu nebo ztratím spojení?', 'Engine pokračuje na svém dostupném stroji podle zadaných pravidel i po zavření aplikace, odhlášení nebo ztrátě zařízení. Nedostupné spojení samo o sobě neznamená zastavený projekt. Ruční pauza přeruší automatickou práci, ale ponechá chat a ovládání dostupné; zastavení ukončí běh enginu.'],
-    ['Jak fungují automatické aktualizace?', 'Ve výchozím nastavení engine ve volné chvíli instaluje stabilní opravné a menší verze v rámci stejné hlavní verze. Automatiku můžete vypnout nebo připnout verzi. Předběžná vydání se sama nezapínají; pokud už na jednom jste, postupujete po něm ke stabilní verzi a pak zůstáváte na stabilních vydáních. Ruční pauza i zastavení zůstávají platné.'],
-    ['Jak začnu na vlastním serveru?', 'V aplikaci získáte příkaz pro svůj VPS. Po připojení pokračujete nastavením první agendy a přihlášením k vybraným AI nástrojům. Přihlašovací kroky dokončujete Vy v chráněném rozhraní nebo terminálu; hesla ani přihlašovací kódy neposíláte do běžného chatu. S nasazením může pomoci partner.'],
-    ['Je engine zdarma?', 'Veřejný kód má vlastní licenční podmínky. Samostatný vývoj a neprodukční testování jsou bez licenčního poplatku podle licence dané verze. Produkční použití se řídí právy konkrétní verze a případnou komerční licencí Start či Business.'],
-    ['Co znamená jeden projekt?', COMMERCIAL_TERMS.instance],
-    ['Jak se počítají odborní agenti?', COMMERCIAL_TERMS.specialists],
-    ['Kdo je ovládající uživatel?', COMMERCIAL_TERMS.users],
-    ['Co je instance harnessu?', COMMERCIAL_TERMS.harnesses],
-    ['Co je oddělený webový profil?', COMMERCIAL_TERMS.browserProfiles],
-    ['Jak se účtují rozšíření Businessu?', COMMERCIAL_TERMS.expansion],
-    ['Mohu zůstat na Startu nebo změnit plán?', COMMERCIAL_TERMS.planChanges],
-    ['Znamená 24/7 provoz i podporu v noci?', 'Ne. Business má první věcnou reakci do 16 pracovních hodin v definovaném pracovním okně, nikoli nepřetržitou pohotovost, garanci opravy nebo dostupnosti. Podrobnosti jsou v ceníku.'],
-    ['Kdo nám řešení nasadí?', 'Partner, který s vámi vybere agendu a postará se o nastavení i běžnou péči podle dohody. Promptbook poskytuje technologii a licenční produktovou podporu. Samostatné technické nasazení je také možné.'],
-    ['Musím odejít od svých současných nástrojů?', 'Ne nutně. Podívejte se na srovnání jednotlivých přístupů. Některé nástroje, například coding harnessy, mohou být součástí vašeho řešení s Promptbookem.'],
-] as const;
 export function FaqPage(){
     const { t, locale, path } = useSiteLocale();
 return <><PageIntro title={t("Otázky před první agendou.")}/><div className={s.faq}>{FAQ.map(([question,answer]) => <details key={question}><summary>{t(question)}</summary><p>{t(answer)}</p></details>)}</div><section className={s.section}><div className={s.actions}><Link className={s.secondaryButton} href={path('pricing')}>{t("Ceník a SLA")}</Link><Link className={s.secondaryButton} href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link></div></section><ClosingCta/></>;}
@@ -144,9 +122,9 @@ export function ComparisonsPage() {
 
     return <>
         <PageIntro title={'Promptbook versus'}>
-            {cs ? `Promptbook a ${COMPARISONS.length} alternativ v jedné tabulce. Kliknutím na název alternativy otevřete detail.` : `Promptbook and ${COMPARISONS.length} alternatives in one table. Select an alternative’s name to open its comparison.`}
+            {cs ? 'Vyberte podle práce, kterou potřebujete dlouhodobě zajistit. Podrobné parametry a zdroje najdete o krok dál.' : 'Choose by the ongoing responsibility you need to cover. Detailed parameters and sources are one step away.'}
         </PageIntro>
-        <ComparisonTable />
+        <ComparisonOverview />
         <SiteAgentChat embedId="comparison" language={locale} />
         <ClosingCta />
     </>;
@@ -174,7 +152,7 @@ export function ComparisonPage({ slug }: { slug: string }) {
                 <p>{item.rows.fit[locale]}</p>
             </section>
         </div>
-        <ProductComparisonTable item={item} />
+        <ComparisonContext item={item}/><ProductComparisonTable item={item} />
         <div className={s.prose}>
             <div className={s.sources}>
                 <p>{cs ? 'Základní parametry ověřeny' : 'Core features reviewed'} {COMPARISON_REVIEW_DATE[locale]}.{' '}{cs ? 'Integrace, modely a přístup ověřeny' : 'Integrations, models and access reviewed'} {CAPABILITY_REVIEW_DATE[locale]}.</p>

@@ -42,8 +42,8 @@ export const CAPABILITY_ROWS: ReadonlyArray<{ id: CapabilityRow; label: Copy; pr
     {
         id: 'remote', label: { cs: 'Ovládání z mobilu', en: 'Mobile and remote control' },
         promptbook: {
-            cs: 'Z ovládací Appky zadáváte práci, sledujete chat a řídíte projekt přes ověřené E2E spojení s vlastním enginem. Lokální Console má samostatný přístup na stroji s enginem. Zavření Appky agendu nezastaví.',
-            en: 'Use the control App to assign work, follow chats and manage the project over an authenticated E2E connection to your own engine. The local Console has separate access on the engine host. Closing the App does not stop the operation.',
+            cs: 'Vzdálenou ovládací appku připravujeme. Ověřené E2E spojení přes relay již existuje, samotné propojení však neznamená hotové ovládání. Dnes použijte lokální Console; její zavření běh enginu nezastaví.',
+            en: 'The remote control app is in preparation. Authenticated E2E relay connectivity exists, but connectivity alone is not finished control. Today use the local Console; closing it does not stop the engine.',
         },
     },
     {
@@ -59,7 +59,7 @@ export const PROMPTBOOK_CAPABILITIES: Capabilities = {
     integrations: v('Univerzální prohlížeč. Webové aplikace i bez konektoru.', 'Universal browser. Web apps even without a connector.'),
     credentials: v('Lokální šifrovaný Wallet; hesla mimo kontext agenta.', 'Local encrypted Wallet; passwords outside the agent’s context.'),
     trust: v('Zero Trust: E2E App–engine. Relay pracovní obsah nečte.', 'Zero Trust: E2E App–engine. The relay cannot read working content.'),
-    remote: v('Appka přes E2E k Vašemu enginu', 'App over E2E to your own engine', 'yes'),
+    remote: v('Vzdálenou appku připravujeme; lokální Console je dostupná', 'Remote app in preparation; local Console available', 'conditional'),
     harnesses: v('Codex, Claude Code, Gemini CLI, Qwen Code, OpenCode, … Automatická volba podle úlohy a dostupnosti.', 'Codex, Claude Code, Gemini CLI, Qwen Code, OpenCode, … Automatic choice by task and availability.'),
 };
 

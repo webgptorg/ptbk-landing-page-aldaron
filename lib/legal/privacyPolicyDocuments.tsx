@@ -21,9 +21,15 @@ const SUPERVISORY_AUTHORITY_URL = 'https://uoou.gov.cz';
 export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage, LegalDocument>> = {
     cs: {
         title: 'Ochrana osobních údajů',
-        publication: { date: '2026-11-11', isDraft: false },
+        publication: { date: '2026-11-13', isDraft: false },
         perex: `Tyto zásady popisují, jaké osobní údaje o vás zpracováváme, když navštívíte web ${SITE_HOST} nebo weby pavolhejny.cz, pavolhejny.com a ai-ta-krajta.cz či využijete služeb Promptbook, proč to děláme a jaká máte práva.`,
         sections: [
+            {heading:'Účet, licence, doporučení a nabídky článků',paragraphs:[
+                'Ověřený e-mail, identifikátor účtu, zkoušku, licenční parametry a přidělená komunitní místa evidujeme pro vyřízení požadavku a plnění smlouvy. Členská sekce může bezpečně propojit ověřenou identitu s ovládací appkou. Appka dostává potřebné identifikátory a kapacity, nikoli seznam komunitních míst či pracovní obsah enginu.',
+                'Doporučovací kód a historii přiřazení evidujeme pro doložení původu obchodu a vypořádání partnerského vztahu; slevový kód evidujeme samostatně. Po otevření doporučovacího odkazu si prohlížeč pamatuje jen kód a jeho platnost nejvýše 90 dní. Kód lze před objednáním opravit nebo vymazat. Tato evidence sama nezakládá marketingový souhlas.',
+                'Nabídky článků obsahují jméno, e-mail, téma, popis a případný odkaz na návrh. Použijeme je k vyřízení nabídky a domluvě s autorem; odeslání neznamená zveřejnění ani přihlášení k newsletteru. Nové požadavky jdou do stejné evidence kontaktů a Twenty CRM se svým účelem a původem. Platí níže uvedené doby uchování podle skutečného účelu.',
+                'manGoweb je dodavatel softwaru; samotná tato role nezakládá rutinní přístup ke kontaktům nebo obsahu enginu. Případný servisní přístup se předem omezí na potřebný účel a rozsah s odpovídajícími oprávněními a smluvním ujednáním.'
+            ]},
             {
                 heading: 'Kdo vaše údaje zpracovává',
                 paragraphs: [
@@ -171,9 +177,15 @@ export const PRIVACY_POLICY_DOCUMENTS: Readonly<Record<SupportedHomepageLanguage
     },
     en: {
         title: 'Privacy Policy',
-        publication: { date: '2026-11-11', isDraft: false },
+        publication: { date: '2026-11-13', isDraft: false },
         perex: `This policy describes which personal data we process when you visit ${SITE_HOST} or pavolhejny.cz, pavolhejny.com and ai-ta-krajta.cz or use the Promptbook services, why we do it, and which rights you have.`,
         sections: [
+            {heading:'Accounts, licenses, referrals and article proposals',paragraphs:[
+                'We record verified email, account identifier, trials, license parameters and assigned community seats to handle the request and perform the contract. The member area can securely link verified identity to the control app. The app receives necessary identifiers and capacities, not community-seat lists or engine working content.',
+                'We retain referral attribution and its history to establish deal provenance and settle the partner relationship. Discount codes are recorded separately. After opening a referral link, the browser remembers only its code and expiry for at most 90 days. The code can be corrected or cleared before purchase. This does not create marketing consent.',
+                'Article proposals contain name, email, topic, description and an optional draft link. We use these to handle the proposal and communicate with the author; submission does not publish an article or subscribe anyone to a newsletter. Requests use the same contact records and Twenty CRM with their purpose and provenance. The purpose-specific retention periods below apply.',
+                'manGoweb supplies software; that role does not itself grant routine access to contacts or engine content. Any service access is limited in advance to its necessary purpose and scope, with appropriate permissions and contractual arrangements.'
+            ]},
             {
                 heading: 'Who processes your data',
                 paragraphs: [

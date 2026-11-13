@@ -82,6 +82,8 @@ function getSourceType(row: TwentyContactSyncRow, sourceName: string): string {
             : 'workshop';
         return `${room}-${row.kind}`;
     }
+    if (sourceName === 'promptbook-business-trial') return 'promptbook-trial';
+    if (sourceName === 'promptbook-article-proposal') return 'promptbook-article-proposal';
     if (sourceName === COMMUNITY_MEMBERSHIP_REGISTRATION_PLACE_NAME) return 'community-registration';
     if (EVENT_REGISTRATION_PLACE_NAMES.includes(sourceName)) return 'workshop-registration';
     return 'website';

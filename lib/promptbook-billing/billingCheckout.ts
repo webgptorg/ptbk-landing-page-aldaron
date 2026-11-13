@@ -20,7 +20,7 @@ export async function createPromptbookCheckout(
     order: PromptbookOrder,
     discount: ActiveDiscount | null,
 ) {
-    const metadata = { [PROMPTBOOK_ORDER_METADATA]: order.id };
+    const metadata = { [PROMPTBOOK_ORDER_METADATA]: order.id, ...(order.referral_code ? { promptbookReferral: order.referral_code } : {}) };
     const termsPath = getPromptbookOnlineTermsPath(order.terms_version);
     if (!termsPath) throw new Error('Unknown Promptbook order terms edition');
     const business = order.customer_type === 'business' && Boolean(order.company_id);

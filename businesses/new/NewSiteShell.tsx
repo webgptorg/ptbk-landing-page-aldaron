@@ -4,6 +4,8 @@ import { COMMUNITIES, COMMUNITIES_PATH } from '@/businesses/community/config';
 import { TERMINAL_TOUR_PATH } from '@/businesses/terminal-tour/terminalTour';
 import { useSiteLocale } from './LocaleProvider';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { referralFromBrowser } from '@/lib/promptbook-licensing/referral';
 import { SiteLocaleProvider } from './LocaleProvider';
 import { localeFromPath, localizedPath } from './localization';
 import type { ReactNode } from 'react';
@@ -26,10 +28,11 @@ import f from './footer.module.css';
 function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; checkoutEnabled: boolean }) {
     const { t, locale, path } = useSiteLocale();
     const pathname = usePathname();
-    const communityLink = locale === 'cs' ? <Link href={COMMUNITIES.promptbook.path}>Komunita</Link> : null;
-    const showCheckout = checkoutEnabled && locale === 'cs' && (pathname === '/cs' || pathname === '/cs/');
+    useEffect(() => { referralFromBrowser(); }, [pathname]);
+    const communityLink = <><Link href={COMMUNITIES.promptbook.path} hrefLang="cs">{locale === 'cs' ? 'Komunita' : 'Community (CZ)'}</Link><Link href={path('pricing')}>{locale === 'cs' ? 'Ceník' : 'Pricing'}</Link></>;
+    const showCheckout = locale === 'cs';
     const headerAction = showCheckout
-        ? <a href={path('pricing/objednat/start')} className={s.button}>{t("Mám zájem")}<ArrowUpRight size={17} aria-hidden="true" /></a>
+        ? <a href={path('pricing/zkouska')} className={s.button}>Vyzkoušet Business zdarma<ArrowUpRight size={17} aria-hidden="true" /></a>
         : <LeadButton interest>{t("Mám zájem")}</LeadButton>;
 
     return <LeadCaptureProvider><div className={`${s.site} ${promptbookHeading.variable} ${promptbookBody.variable}`} lang={locale} style={PROMPTBOOK_BRAND_STYLE}>
@@ -37,7 +40,7 @@ function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; ch
         <header className={s.header}><div className={s.headerInner}>
             <BrandLogo priority/>
             <nav className={s.desktopNav} aria-label={t("Hlavní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}</nav>
-            <LanguageSwitch/><div className={s.headerAction}>{headerAction}</div>
+            <LanguageSwitch/><Link className={s.utilityLink} href={path('o-nas#kontakt')}>{locale === 'cs' ? 'Podpora' : 'Support'}</Link>{locale === 'cs' && <a className={s.utilityLink} href={path('pricing/predplatne')}>Přihlásit se</a>}<div className={s.headerAction}>{headerAction}</div>
             <details className={s.mobileMenu}><summary aria-label={t("Otevřít navigaci")}><Menu /></summary><nav aria-label={t("Mobilní navigace")}>{NEW_SITE_NAVIGATION.map(([label, destination]) => <Link key={destination} href={path(destination)}>{t(label)}</Link>)}{communityLink}<Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link>{headerAction}</nav></details>
         </div></header>
         <main id="obsah" className={s.container}>{t(children)}</main>
@@ -49,7 +52,7 @@ function LocalizedShell({ children, checkoutEnabled }: { children: ReactNode; ch
                     <a href="https://discord.gg/x3QWNaa89N">Discord</a>
                 </div>
             </div>
-            <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('pricing')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={`/${locale}/releases`}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
+            <nav aria-label={t("Produkt v patičce")}><strong>{t("Promptbook")}</strong><Link href={path('agendy')}>{t("Agendy")}</Link><Link href={path('partnership')}>{t("Partnerství")}</Link><Link href={path('doporucovani')}>{locale === 'cs' ? 'Doporučování Promptbooku' : 'Refer Promptbook'}</Link><Link href={path('pricing')}>{t("Ceník")}</Link><Link href={path('kalkulacka')}>{t("Kalkulačka")}</Link><Link href={path('open-source')}>{t("Vlastní instalace")}</Link><Link href={`/${locale}/releases`}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link><a href={ENGINE_REPOSITORY}>{t("GitHub")}</a></nav>
             <nav aria-label={t("Zdroje v patičce")}><strong>{t("Více informací")}</strong><Link href={path('bezpecnost')}>{t("Data a bezpečnost")}</Link><Link href={path('faq')}>{t("Otázky a odpovědi")}</Link><Link href={path('o-nas')}>{t("Náš příběh a kontakt")}</Link><Link href={path('whitepaper')}>APT whitepaper</Link><Link href="/book">Common knowledge</Link><Link href={path('branding')} hrefLang={locale}>{locale === 'cs' ? 'Logo a značka' : 'Brand kit'}</Link><Link href={COMMUNITIES.promptbook.path} hrefLang="cs" prefetch={false}>{locale === 'cs' ? 'Komunita Promptbook' : 'Promptbook community (Czech)'}</Link></nav>
             <nav aria-label="Promptbook versus">
                 <strong>Promptbook versus</strong>

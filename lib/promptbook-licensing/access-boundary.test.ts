@@ -1,0 +1,32 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import { NextRequest } from 'next/server';
+const fakes = vi.hoisted(() => ({ seat: vi.fn(), email: vi.fn() }));
+vi.mock('server-only', () => ({}));
+vi.mock('./accounts', () => ({ hasLicenseCommunityAccess: fakes.seat }));
+vi.mock('@/lib/promptbook-billing/memberAccess', () => ({ readMemberEmailCookie: fakes.email }));
+import { verifiedLicenseCommunityAccess, isPromptbookLicenseRoom } from './communityAccess';
+import { isLicenseAppRequest } from './appAuthentication';
+afterEach(() => { vi.unstubAllEnvs(); vi.resetAllMocks(); });
+it('requires both verified ownership of the exact email and a current seat', async () => {
+    fakes.email.mockReturnValue('guest@example.test');
+    const request = new NextRequest('https://www.ptbk.io/api/workshops/komunita-promptbook/state');
+    expect(await verifiedLicenseCommunityAccess(request, 'paid@example.test')).toBe(false);
+    expect(fakes.seat).not.toHaveBeenCalled();
+    fakes.email.mockReturnValue('paid@example.test');
+    fakes.seat.mockResolvedValue(false);
+    expect(await verifiedLicenseCommunityAccess(request, 'paid@example.test')).toBe(false);
+    fakes.seat.mockResolvedValue(true);
+    expect(await verifiedLicenseCommunityAccess(request, 'PAID@example.test')).toBe(true);
+    expect(isPromptbookLicenseRoom('community', 'komunita-vyvojari')).toBe(false);
+    expect(isPromptbookLicenseRoom('workshop', 'shared', ['promptbook', 'vyvojari'])).toBe(false);
+});
+it('keeps the App license API closed without the dedicated server credential', () => {
+    vi.stubEnv('PROMPTBOOK_APP_LICENSE_SECRET', 'x'.repeat(32));
+    const request = (value?: string) => new Request('https://www.ptbk.io/api/promptbook-billing/app/licenses', { headers: value ? { authorization: value } : {} });
+    expect(isLicenseAppRequest(request())).toBe(false);
+    expect(isLicenseAppRequest(request('Bearer wrong'))).toBe(false);
+    expect(isLicenseAppRequest(request('Bearer ' + 'y'.repeat(32)))).toBe(false);
+    expect(isLicenseAppRequest(request('Bearer ' + 'x'.repeat(32)))).toBe(true);
+    vi.stubEnv('PROMPTBOOK_APP_LICENSE_SECRET', '');
+    expect(isLicenseAppRequest(request('Bearer ' + 'x'.repeat(32)))).toBe(false);
+});

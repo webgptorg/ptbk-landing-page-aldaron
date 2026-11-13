@@ -1,3 +1,4 @@
+import { verifiedLicenseCommunityAccess, isPromptbookLicenseRoom } from '@/lib/promptbook-licensing/communityAccess';
 import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { loadPublicWebPagePreviewImage } from '@/lib/network/publicWebPagePreviewImage';
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest, context: { readonly params: Pro
 
     const { state } = await loadWorkshopPublicState(
         supabase, workshopRow, participant, 'recent', !isCommunityEmailVerificationRequired(request, participant.email),
+        isPromptbookLicenseRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs) && await verifiedLicenseCommunityAccess(request, participant.email),
     );
     if (state === null) {
         return NextResponse.json({ error: 'Shrnutí se nepodařilo načíst.' }, { status: 500 });

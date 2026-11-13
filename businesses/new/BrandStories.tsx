@@ -7,6 +7,16 @@ import { useSiteLocale } from './LocaleProvider';
 import { BlueprintScene } from './BlueprintScene';
 import { useBlueprintPlayback } from './useBlueprintPlayback';
 import s from './blueprint-scene.module.css';
+import x from './launch.module.css';
+const continuity = { cs: [
+ ['Den 1 · Pravidla a kontext', 'Týden 1 · Nové kontakty a domluvené follow-upy', 'Další týdny · Zpětná vazba upraví další péči'],
+ ['Den 1 · Formát a publikační pravidla', 'Každý díl · Podklady, přepis a příprava výstupů', 'Další díly · Navazuje na plán i vaše připomínky'],
+ ['Den 1 · Repozitář a pravidla nasazení', 'Průběžně · Nové požadavky, opravy a kontroly', 'Další týdny · Hlídá stav a navazuje na změny'],
+], en: [
+ ['Day 1 · Rules and context', 'Week 1 · New contacts and agreed follow-ups', 'Following weeks · Feedback shapes ongoing care'],
+ ['Day 1 · Format and publication rules', 'Each episode · Materials, transcript and outputs', 'Next episodes · Continues the plan with your feedback'],
+ ['Day 1 · Repository and release rules', 'Ongoing · New requests, fixes and checks', 'Following weeks · Tracks state and builds on changes'],
+] };
 const choices = [
     { id: 'relationships', Icon: Users, articleSlug: 'pece-o-kontakty' },
     { id: 'podcast', Icon: Mic, articleSlug: 'sprava-podcastu' },
@@ -28,7 +38,7 @@ export function BrandStories({ partnership = false }: { partnership?: boolean })
         const next = event.key === 'ArrowRight' ? (index + 1) % 3 : event.key === 'ArrowLeft' ? (index + 2) % 3 : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : null;
         if (next !== null) { event.preventDefault(); select(next, true); }
     }
-    return <section ref={root} className={s.stories} aria-labelledby={id+'-heading'} data-testid="brand-carousel" data-partnership={partnership} data-running={playback.running}>
+    return <section id="priklady" ref={root} className={s.stories} aria-labelledby={id+'-heading'} data-testid="brand-carousel" data-partnership={partnership} data-running={playback.running}>
         <header className={s.storyHeading}><h2 id={id+'-heading'}>{en ? 'Use cases' : 'Příklady použití'}</h2></header>
         <div className={s.toolbar}>
             <div className={s.tabs} role="tablist" aria-label={en ? 'Choose an example' : 'Vyberte ukázku'}>
@@ -49,7 +59,7 @@ export function BrandStories({ partnership = false }: { partnership?: boolean })
                     {en ? 'Promptbook community (Czech)' : 'Komunita Promptbook'}
                 </Link>
             </div>}
-            <BlueprintScene key={activeChoice.id} kind={activeChoice.id} step={playback.step} progress={playback.progress} visibleStage={playback.visibleStage}/>
+            <p className={x.notice}>{en ? 'Illustrative agenda, not a screenshot of the upcoming remote app. Today you use the local Console.' : 'Modelová ukázka agendy, nikoli snímek připravované vzdálené appky. Dnes pracujete v lokální Console.'}</p><ol className={x.timeline}>{continuity[locale][active].map(text=><li key={text}>{text}</li>)}</ol><BlueprintScene key={activeChoice.id} kind={activeChoice.id} step={playback.step} progress={playback.progress} visibleStage={playback.visibleStage}/>
         </article>
     </section>;
 }

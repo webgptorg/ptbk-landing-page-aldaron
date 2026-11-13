@@ -12,10 +12,10 @@ const TWENTY_TIMEOUT_MS = 5000;
 type PromptbookBillingContactOrder = Pick<PromptbookOrder,
     | 'id' | 'email' | 'plan' | 'country' | 'company_id' | 'company_name' | 'vat_id' | 'billing_address'
     | 'created_at' | 'first_paid_at' | 'phone' | 'onboarding_note' | 'is_test'
-> & Partial<Pick<PromptbookOrder, 'order_note'>>;
+> & Partial<Pick<PromptbookOrder, 'order_note' | 'referral_code'>>;
 
 function getContactNote(order: PromptbookBillingContactOrder): string | null {
-    return [order.order_note?.trim(), order.onboarding_note?.trim()].filter(Boolean).join('\n\n') || null;
+    return [order.referral_code ? `Doporučení: ${order.referral_code} (evidence, provize nepotvrzena)` : null, order.order_note?.trim(), order.onboarding_note?.trim()].filter(Boolean).join('\n\n') || null;
 }
 
 function billingRecordId(kind: string, key: string) {

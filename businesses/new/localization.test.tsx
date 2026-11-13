@@ -8,6 +8,7 @@ import { NewLandingPage } from './NewLandingPage';
 import { OpenSourcePage } from './OpenSourcePage';
 import { AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage } from './InformationPages';
 import { NewLegalPage } from './NewLegalPage';
+import { ComparisonTable } from './ComparisonTable';
 import { EconomicsCalculator } from './EconomicsCalculator';
 import { createCalculationPdfDefinition } from './calculationPdf';
 import { COMPARISONS, COMPARISON_ROWS, REBORN_SOURCE } from './comparisons';
@@ -65,9 +66,9 @@ describe('bilingual launch site', () => {
             const start = element.querySelector('[data-plan="start"]')!.textContent!;
             const business = element.querySelector('[data-plan="business"]')!.textContent!;
             expect(start).toContain(locale === 'cs' ? '3 aktivovaní odborní agenti' : '3 active specialist agents');
-            expect(start).toContain(locale === 'cs' ? '1 ovládající uživatel' : '1 controlling user');
+            expect(start).toContain(full ? (locale === 'cs' ? '1 ovládající uživatel' : '1 controlling user') : (locale === 'cs' ? '1 místo v komunitě Promptbook' : '1 Promptbook community seat'));
             expect(business).toContain(locale === 'cs' ? '10 aktivovaných odborných agentů' : '10 active specialist agents');
-            expect(business).toContain(locale === 'cs' ? '5 ovládajících uživatelů' : '5 controlling users');
+            expect(business).toContain(full ? (locale === 'cs' ? '5 ovládajících uživatelů' : '5 controlling users') : (locale === 'cs' ? '10 míst v komunitě Promptbook' : '10 Promptbook community seats'));
             const rates = Array.from(element.querySelectorAll('section[aria-labelledby="business-addons-title"] td')).map(cell => cell.textContent);
             expect(rates).toEqual(full ? (locale === 'cs' ? ['99 Kč', '99 Kč', '49 Kč'] : ['99 CZK', '99 CZK', '49 CZK']) : []);
             if (full) {
@@ -104,7 +105,7 @@ describe('bilingual launch site', () => {
     });
     it.each(['cs', 'en'] as const)('compares both Promptbook variants and every alternative by feature in %s', locale => {
         const element = document.createElement('div');
-        element.innerHTML = html(<ComparisonsPage/>, locale);
+        element.innerHTML = html(<ComparisonTable/>, locale);
         const table = element.querySelector('table')!;
         const columns = Array.from(table.querySelectorAll('thead th[scope="col"]'), cell => cell.textContent);
         expect(columns).toEqual([

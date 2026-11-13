@@ -1,8 +1,8 @@
 /** Current commercial terms. Public pricing, calculations and exports share these exact terms. */
 export const COMMERCIAL_TERMS = {
-    version: '2026-11-03-v5', displayCzkPerUsd: 22, startCzk: 399, businessCzk: 1999, startUsd: 19, businessUsd: 100,
-    startCapacity: { specialists: 3, users: 1, harnesses: 1, browserProfiles: 1 },
-    businessCapacity: { specialists: 10, users: 5, harnesses: null, browserProfiles: 5 },
+    version: '2026-11-13-v6', displayCzkPerUsd: 22, startCzk: 399, businessCzk: 1999, startUsd: 19, businessUsd: 100,
+    startCapacity: { specialists: 3, users: 1, harnesses: 1, browserProfiles: 1, communitySeats: 1 },
+    businessCapacity: { specialists: 10, users: 5, harnesses: null, browserProfiles: 5, communitySeats: 10 },
     businessAddonsCzk: { specialist: 99, user: 99, browserProfile: 49 },
     partnerSharePercent: 20, annualPartnerSharePercent: 20, partnerCommissionMonths: 24, responseWorkingHours: 16, contact: 'jiri@ptbk.io',
     supportWindow: 'Pondělí–pátek, 9:00–17:00, Europe/Prague, mimo české státní a ostatní svátky.',
@@ -11,8 +11,8 @@ export const COMMERCIAL_TERMS = {
     users: 'Ovládající uživatel je konkrétní člověk oprávněný zadávat nebo měnit práci projektu. Více jeho zařízení znamená stále jednoho uživatele. Technik agentury se počítá stejně jako člověk klienta. Příjemci reportů a dalších výstupů ani samotný kontakt s podporou výrobce se nepočítají.',
     harnesses: 'Instance harnessu je jedno aktivní připojení s vlastní konfigurací a přihlašovacím kontextem. Více úloh nebo relací nad stejným připojením počet nezvyšuje. Start zahrnuje jednu instanci; Business počet licenčně neomezuje. Podmínky, limity a platby poskytovatele AI platí samostatně.',
     browserProfiles: 'Webový profil odděluje přihlašovací identitu. Jeden profil může používat mnoho webů; jednotlivé weby, záložky a integrace se samostatně nepočítají.',
-    expansion: 'Příplatky Businessu se účtují za kapacitu nad zahrnutý základ poměrně podle doby její aktivace v daném fakturačním období, nikoli podle vytížení, počtu zpráv nebo odpovědí. Polovina období znamená polovinu měsíční sazby. Placené rozšíření musí klient předem výslovně povolit a sjednat měsíční rozpočet. Výchozí stav je bez automatického přečerpání: před limitem přijde upozornění, nepovolená placená kapacita se neaktivuje a cena se sama nezmění. Rozpracované úlohy se kvůli dosažení kapacitního limitu neruší. Podkladem vyúčtování je kontrolovatelný přehled kapacity a doby aktivace.',
-    planChanges: 'Start můžete používat dlouhodobě. Další kapacitu získáte přechodem na Business. Upgrade zachovává stejný projekt a data a vyžaduje potvrzení placené změny. Downgrade začne od dalšího fakturačního období, až projekt splní limity Startu. Změna plánu ani rozšíření neobnovují 24měsíční provizní období.',
+    expansion: 'Příplatky Businessu se účtují za kapacitu nad zahrnutý základ poměrně podle doby její aktivace v daném fakturačním období, nikoli podle vytížení, počtu zpráv nebo odpovědí. Polovina období znamená polovinu měsíční sazby. Placené rozšíření musí klient předem výslovně povolit a sjednat měsíční rozpočet. Výchozí stav je bez automatického přečerpání: před limitem přijde upozornění, překročení se zobrazí jako upozornění, běh ani ovládání se neblokují a cena se sama nezmění. Rozpracované úlohy se kvůli dosažení kapacitního limitu neruší. Podkladem vyúčtování je kontrolovatelný přehled kapacity a doby aktivace.',
+    planChanges: 'Start můžete používat dlouhodobě. Další kapacitu získáte přechodem na Business. Upgrade zachovává stejný projekt a data a vyžaduje potvrzení placené změny. Downgrade začne od dalšího fakturačního období; případné překročení kapacity se pouze zobrazí jako upozornění. Změna plánu ani rozšíření neobnovují 24měsíční provizní období.',
     calculationScope: 'Kalkulačka počítá základní předplatné vybraného plánu. Předem povolená kapacitní rozšíření Businessu jsou další položkou a nejsou ve výsledku zahrnuta. Partnerská provize se vztahuje i na tyto placené softwarové příplatky.',
     exclusions: 'Hosting, databáze, úložiště, spotřeba AI modelů a externí služby se platí samostatně. Samostatně se platí také návrh řešení, instalace, integrace, školení a průběžná práce agentury.',
     support: 'Business zahrnuje první posouzení hlášených problémů platformy. První věcná reakce do 16 pracovních hodin znamená posouzení, žádost o potřebné podklady nebo návrh dalšího postupu. Automatické potvrzení přijetí není věcná reakce.',

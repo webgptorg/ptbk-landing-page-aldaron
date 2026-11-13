@@ -1,3 +1,6 @@
+import { APPROACH_COMPARISONS } from '@/businesses/new/approachComparisons';
+import { ApproachComparisonPage } from '@/businesses/new/ApproachComparisonPage';
+import { GuidesPage, CapabilitiesPage, ReferralPage } from '@/businesses/new/GuidePages';
 import { getInstallationReleases } from '@/lib/releases/catalog';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
@@ -14,6 +17,9 @@ import { NewLegalPage } from '@/businesses/new/NewLegalPage';
 import { LEGAL_PAGE_METADATA } from '@/lib/legal/legalPageMetadata';
 import s from '@/businesses/new/site.module.css';
 const pages: Record<string, [string, string]> = {
+ navody: ['Quickstart and guides', 'From installation to an ongoing agenda.'],
+ 'co-umi': ['What Promptbook does', 'An agent team for ongoing responsibilities.'],
+ doporucovani: ['Refer Promptbook', 'Referral cooperation and terms.'],
     '': [NEW_PAGE_DEFINITIONS.en.title, NEW_PAGE_DEFINITIONS.en.description],
     partnership: [PARTNERSHIP_PAGE_DEFINITIONS.en.title, PARTNERSHIP_PAGE_DEFINITIONS.en.description],
     agendy: ['Choose your workflow', 'Explore email, accounting documents, social content, video and website maintenance workflows.'],
@@ -32,7 +38,7 @@ const pages: Record<string, [string, string]> = {
 };
 type Props = { params: Promise<{ path?: string[] }>; searchParams: Promise<{ testimonials?: string | string[] }> };
 export function generateStaticParams() {
-    return [...Object.keys(pages).map(path => ({ path: path ? path.split('/') : [] })), ...Object.keys(SCENARIOS).map(id => ({ path: ['agendy', id] })), ...COMPARISONS.map(item => ({ path: ['srovnani', item.slug] }))];
+    return [...Object.keys(pages).map(path => ({ path: path ? path.split('/') : [] })), ...Object.keys(SCENARIOS).map(id => ({ path: ['agendy', id] })), ...[...COMPARISONS, ...APPROACH_COMPARISONS].map(item => ({ path: ['srovnani', item.slug] }))];
 }
 export async function generateMetadata({ params }: Props) {
     const route = (await params).path ?? [];
@@ -47,12 +53,18 @@ export async function generateMetadata({ params }: Props) {
         const item = SCENARIOS[route[1] as ScenarioId];
         return newPageMetadata(key, translate(item.title, 'en'), translate(item.description, 'en'), 'en');
     }
+    const approach = route.length===2&&route[0]==='srovnani'?APPROACH_COMPARISONS.find(item=>item.slug===route[1]):undefined;
+    if(approach)return newPageMetadata(key,`Promptbook versus ${approach.name.en}`,approach.difference.en,'en');
     const item = route.length === 2 && route[0] === 'srovnani' ? COMPARISONS.find(item => item.slug === route[1]) : undefined;
     return item ? newPageMetadata(key, `Promptbook versus ${item.name}`, item.advantage.en, 'en') : {};
 }
 export default async function Page({ params, searchParams }: Props) {
     const route = (await params).path ?? [];
     const key = route.join('/');
+    if(route.length===2&&route[0]==='srovnani'&&APPROACH_COMPARISONS.some(item=>item.slug===route[1]))return <ApproachComparisonPage slug={route[1]}/>;
+    if (key === 'navody') return <GuidesPage/>;
+    if (key === 'co-umi') return <CapabilitiesPage/>;
+    if (key === 'doporucovani') return <ReferralPage/>;
     const query = await searchParams;
     if (route.length === 2 && route[0] === 'agendy' && Object.hasOwn(SCENARIOS, route[1])) return <AgendaPage scenarioId={route[1] as ScenarioId}/>;
     if (route.length === 2 && route[0] === 'srovnani' && COMPARISONS.some(item => item.slug === route[1])) return <ComparisonPage slug={route[1]}/>;

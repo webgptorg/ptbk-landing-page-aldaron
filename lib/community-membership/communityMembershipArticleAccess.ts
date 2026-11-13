@@ -1,4 +1,6 @@
 import 'server-only';
+import { readMemberEmailCookie } from '@/lib/promptbook-billing/memberAccess';
+import { hasLicenseCommunityAccess } from '@/lib/promptbook-licensing/accounts';
 
 import { COMMUNITIES, type CommunityId } from '@/businesses/community/config';
 import { loadCommunityMembershipByEmail } from '@/lib/community-membership/communityMembershipDatabase';
@@ -20,9 +22,10 @@ export async function canReadCommunityMemberArticle(
 ): Promise<boolean> {
     const community = COMMUNITIES[communityId];
     const cookieStore = await cookies();
-    const verifiedEmail = access === 'paid' && community.hasPaidMembership && isCommunityEmailVerificationEnabled()
+    const licenseEmail = communityId === 'promptbook' ? readMemberEmailCookie({cookies: cookieStore}) : null;
+    const verifiedEmail = licenseEmail ?? (access === 'paid' && community.hasPaidMembership && isCommunityEmailVerificationEnabled()
         ? readVerifiedCommunityEmail(cookieStore.get(COMMUNITY_VERIFIED_EMAIL_COOKIE)?.value)
-        : null;
+        : null);
     if (access === 'paid' && verifiedEmail === null) {
         return false;
     }
@@ -56,6 +59,9 @@ export async function canReadCommunityMemberArticle(
         return false;
     }
 
+    if (communityId === 'promptbook') {
+        return licenseEmail !== null && await hasLicenseCommunityAccess(licenseEmail);
+    }
     const { membership } = await loadCommunityMembershipByEmail(supabase, data.email, communityId);
     return membership !== null && !membership.isTestPayment && isPaidCommunityMembershipStatus(membership.status);
 }

@@ -10,6 +10,8 @@ const SOURCES: Readonly<Record<string, ContactPurpose>> = {
     'newsletter-footer': 'promptbook-newsletter',
     AiTaKrajtaEmailSubscription: 'podcast-newsletter',
     'new-website-contact': 'request',
+    'promptbook-article-proposal': 'request',
+    'promptbook-business-trial': 'registration',
     'new-calculator-pdf': 'pdf',
     'PavolPersonalPage-cs': 'request',
     'PavolPersonalPage-en': 'request',

@@ -1,3 +1,4 @@
+import { verifiedLicenseCommunityAccess, isPromptbookLicenseRoom } from '@/lib/promptbook-licensing/communityAccess';
 import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { writeCommunityArticleSessionCookie } from '@/lib/community-membership/communityArticleSessionCookie';
 import { loadWorkshopPublicState } from '@/lib/workshops/workshopDatabase';
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest, context: WorkshopStateRouteConte
         authenticatedRequest.participant,
         commentSort,
         !isCommunityEmailVerificationRequired(request, authenticatedRequest.participant.email),
+        isPromptbookLicenseRoom(authenticatedRequest.workshopRow.room_kind, authenticatedRequest.workshopRow.slug, authenticatedRequest.workshopRow.community_slugs) && await verifiedLicenseCommunityAccess(request, authenticatedRequest.participant.email),
     );
 
     if (state === null) {

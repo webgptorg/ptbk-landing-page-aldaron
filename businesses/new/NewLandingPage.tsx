@@ -16,6 +16,7 @@ import { BrandStories } from './BrandStories';
 import { BrandTestimonials } from './BrandTestimonials';
 import { PricingCards } from './MarketingSections';
 import { InlineContactForm } from './InlineContactForm';
+import { RulesSection, QuickStartTeaser, LaunchFaq, LaunchClosing } from './LaunchSections';
 import b from './brand.module.css';
 import { PROMPTBOOK_BRAND, PROMPTBOOK_DEPLOYMENT, PROMPTBOOK_INTRO } from '@/lib/promptbook-brand';
 
@@ -35,14 +36,14 @@ export function NewLandingPage({ partnership = false, showTestimonials = true, c
             <StagedIntro sentences={intro}/>
             <BrandActions partner={partnership} checkoutEnabled={checkoutEnabled}/>
         </section>
-        <BrandStories partnership={partnership}/>
+        <BrandStories partnership={partnership}/>{!partnership && <><RulesSection/><QuickStartTeaser/></>}
         <Link className={b.securityTeaser} href={path('bezpecnost')}><ShieldCheck size={22} strokeWidth={1.5} aria-hidden="true"/><span>{en ? 'Your data. Your rules.' : 'Vaše data i pravidla zůstávají Vaše.'}</span><span className={b.securityTeaserLink}>{en ? 'How it works' : 'Jak to funguje'}<ArrowRight size={16}/></span></Link>
         {partnership && <PartnerOffer/>}
         <section className={b.pricing} id="cenik" aria-labelledby="pricing-heading">
             <h2 id="pricing-heading">{en ? 'Plans' : 'Ceník'}</h2>
             <PricingCards checkoutEnabled={checkoutEnabled}/>
         </section>
-        <EconomicsCalculator initialMode={partnership ? 'partner' : 'company'}/>
+        {partnership && <EconomicsCalculator initialMode="partner"/>}
         {partnership && <PartnerQuestions/>}
         {showTestimonials && <BrandTestimonials/>}
         <section className={b.founders} id="kontakt" aria-labelledby="contact-heading">
@@ -50,7 +51,7 @@ export function NewLandingPage({ partnership = false, showTestimonials = true, c
             <Founders compact/>
             <div className={b.storyLink}><Link href={path('o-nas')}>{en ? 'Our story' : 'Náš příběh'}<ArrowRight size={16}/></Link></div>
         </section>
-        <InlineContactForm partnership={partnership}/>
+        {partnership ? <InlineContactForm partnership/> : <><LaunchFaq/><LaunchClosing/></>}
     </div>;
 }
 

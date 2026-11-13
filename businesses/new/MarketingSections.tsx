@@ -3,6 +3,7 @@
 import { useSiteLocale } from './LocaleProvider';
 import { ArrowRight, Check, LockKeyhole, Server, Smartphone } from 'lucide-react';
 import Link from 'next/link';
+import { PurchaseActions } from './PurchaseActions';
 import { LeadButton } from './LeadCapture';
 import { formatCurrency, licencePrice } from './localization';
 import { COMMERCIAL_TERMS } from './commercialTerms';
@@ -37,6 +38,7 @@ export function PricingCards({ full = false, checkoutEnabled = false }: { full?:
                 en ? `${start.browserProfiles} separate browser profile` : `${start.browserProfiles} oddělený webový profil`,
                 en ? 'Core and system roles do not use specialist places' : 'Core a systémové role mimo limit odborníků',
                 en ? 'Scheduling and continuous operation' : 'Pravidelné spouštění i nepřetržitý provoz',
+                en ? '1 Promptbook community seat' : '1 místo v komunitě Promptbook',
             ],
             support: en ? 'Manufacturer support without a guaranteed response time' : 'Podpora výrobce bez garantované reakce',
             note: en ? 'No annual commitment. More capacity by upgrading to Business.' : 'Bez ročního závazku. Další kapacita přechodem na Business.',
@@ -57,18 +59,19 @@ export function PricingCards({ full = false, checkoutEnabled = false }: { full?:
                 en ? `${business.browserProfiles} separate browser profiles included` : `${business.browserProfiles} oddělených webových profilů v ceně`,
                 en ? 'Core and system roles do not use specialist places' : 'Core a systémové role mimo limit odborníků',
                 en ? 'Scheduling and continuous operation' : 'Pravidelné spouštění i nepřetržitý provoz',
+                en ? '10 Promptbook community seats' : '10 míst v komunitě Promptbook',
             ],
             support: en ? `First substantive response within ${COMMERCIAL_TERMS.responseWorkingHours} working hours` : `První věcná reakce do ${COMMERCIAL_TERMS.responseWorkingHours} pracovních hodin`,
             note: en ? 'No annual commitment. Extra capacity requires your prior approval.' : 'Bez ročního závazku. Rozšíření jen s Vaším předchozím souhlasem.',
-            action: canCheckOut
-                ? <CheckoutLink plan="business" />
+            action: !en
+                ? <PurchaseActions compact />
                 : <LeadButton className={pricing.action} topic={t('Business — firemní provoz Promptbooku')}>{t('Probrat Business')}</LeadButton>,
         },
     ];
     const plans = full ? [
         {
             id: 'free',
-            name: 'Free',
+            name: en ? 'Public source' : 'Veřejný kód',
             amount: formatCurrency(0, locale),
             purpose: en ? 'Install the public engine in your own environment' : 'Nainstalujte si veřejně dostupný engine u sebe',
             period: en ? 'licence fee for permitted use' : 'licenční poplatek za povolené použití',
@@ -103,8 +106,8 @@ export function PricingCards({ full = false, checkoutEnabled = false }: { full?:
                 </div>
                 {plan.action}
                 <ul className={pricing.features}>
-                    {plan.features.map(feature => <li key={feature}><Check size={17} aria-hidden="true"/><span>{feature}</span></li>)}
-                    {'support' in plan && <li className={plan.id === 'start' ? pricing.excluded : ''}>
+                    {(full ? plan.features : [plan.features[0], locale === 'en' ? `${plan.id === 'business' ? 10 : 1} Promptbook community ${plan.id === 'business' ? 'seats' : 'seat'}` : `${plan.id === 'business' ? 10 : 1} ${plan.id === 'business' ? 'míst' : 'místo'} v komunitě Promptbook`, locale === 'en' ? 'Recurring work in your own environment' : 'Dlouhodobé agendy ve vašem prostředí']).map(feature => <li key={feature}><Check size={17} aria-hidden="true"/><span>{feature}</span></li>)}
+                    {full && 'support' in plan && <li className={plan.id === 'start' ? pricing.excluded : ''}>
                         {plan.id === 'start' ? <span className={pricing.dash} aria-hidden="true">—</span> : <Check size={17} aria-hidden="true"/>}
                         <span>{plan.support}</span>
                     </li>}
@@ -147,7 +150,7 @@ function CheckoutLink({ plan }: { readonly plan: 'start' | 'business' }) {
     const { path } = useSiteLocale();
     const isStart = plan === 'start';
     return <a className={`${isStart ? s.secondaryButton : s.button} ${pricing.action}`} href={path(`pricing/objednat/${plan}`)}>
-        {isStart ? 'Začít se Startem' : 'Zvolit Business'}<ArrowRight size={17} aria-hidden="true" />
+        {isStart ? 'Koupit Start' : 'Koupit Business rovnou'}<ArrowRight size={17} aria-hidden="true" />
     </a>;
 }
 

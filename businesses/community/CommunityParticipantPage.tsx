@@ -12,6 +12,8 @@ import { OnlineWorkshopParticipantPage } from '@/businesses/online-workshop/part
 import { WorkshopLinksPanel } from '@/components/workshops/WorkshopLinksPanel';
 import { isPaidCommunityMembershipStatus } from '@/lib/community-membership/communityMembershipTypes';
 import type { WorkshopDetails, WorkshopEventCardSummary } from '@/lib/workshops/workshopTypes';
+import { ArticleProposal } from './ArticleProposal';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
@@ -73,11 +75,13 @@ export function CommunityParticipantPage({
                         participantIdentity={EMPTY_IDENTITY}
                         serverTime={serverTime}
                     />
+                    {definition.id === 'promptbook' && <><Link href="/cs/pricing/predplatne">Mám členství v Promptbooku →</Link><ArticleProposal fullname={initialFullname} email={initialEmail}/></>}
                     {publicArticles}
                 </div>
             }
             mainContentAfterWorkshopNavigation={
                 <>
+                    {definition.id === 'promptbook' && <ArticleProposal fullname={initialFullname} email={initialEmail}/>}
                     {articles && <ConnectedCommunityArticles>{articles}</ConnectedCommunityArticles>}
                     {definition.hasProjects && <CommunityProjectsSection isLimited />}
                 </>

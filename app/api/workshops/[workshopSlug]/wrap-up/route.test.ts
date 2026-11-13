@@ -7,6 +7,7 @@ const MOCKS = vi.hoisted(() => ({
     authenticate: vi.fn(), mapWorkshop: vi.fn(), loadState: vi.fn(), createShortLink: vi.fn(),
     loadHistory: vi.fn(), loadPreview: vi.fn(), loadImage: vi.fn(),
 }));
+vi.mock('@/lib/promptbook-licensing/communityAccess', () => ({ verifiedLicenseCommunityAccess: async () => false, isPromptbookLicenseRoom: () => false }));
 vi.mock('@/lib/workshops/workshopRequest', () => ({
     getAuthenticatedWorkshopRequest: MOCKS.authenticate,
     isAuthenticatedWorkshopRequest: (value: unknown) => !(value instanceof NextResponse),
@@ -61,7 +62,7 @@ describe('authenticated workshop recap preparation', () => {
         const result = await response.json() as WorkshopWrapUpExport;
         expect(response.status).toBe(200);
         expect(response.headers.get('cache-control')).toBe('no-store');
-        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent', true);
+        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent', true, false);
         expect(result.source.contentBlocks).toEqual(MATERIALS);
         expect(JSON.stringify(result)).not.toContain('PRIVATE');
         expect(JSON.stringify(result)).not.toContain('private@example.com');
@@ -81,7 +82,7 @@ describe('authenticated workshop recap preparation', () => {
         const response = await POST(createRequest(), CONTEXT);
 
         expect(response.status).toBe(200);
-        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent', false);
+        expect(MOCKS.loadState).toHaveBeenCalledWith(SUPABASE, WORKSHOP_ROW, PARTICIPANT, 'recent', false, false);
         expect((await response.json() as WorkshopWrapUpExport).source.contentBlocks).toEqual([]);
     });
 

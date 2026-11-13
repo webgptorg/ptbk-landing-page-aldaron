@@ -1,3 +1,4 @@
+import { verifiedLicenseCommunityAccess, isPromptbookLicenseRoom } from '@/lib/promptbook-licensing/communityAccess';
 import { isCommunityEmailVerificationRequired } from '@/lib/community-membership/communityMembershipIdentity';
 import { writeCommunityArticleSessionCookie } from '@/lib/community-membership/communityArticleSessionCookie';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest, context: WorkshopConnectRouteCo
         : await loadWorkshopPublicState(
             supabase, workshopRow, connection.participant, 'recent',
             !isCommunityEmailVerificationRequired(request, connection.participant.email),
+        isPromptbookLicenseRoom(workshopRow.room_kind, workshopRow.slug, workshopRow.community_slugs) && await verifiedLicenseCommunityAccess(request, connection.participant.email),
         );
     if (state === null && workshopRow.event_type !== STORY_EVENT_TYPE) {
         // The session cookie is still returned. The client can retry the state

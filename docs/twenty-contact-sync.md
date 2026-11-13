@@ -126,3 +126,7 @@ The scoped integration role has read/update access only to People, Companies, Co
 Vercel production is configured with `TWENTY_COMMERCE_SYNC_ENABLED=true` and `TWENTY_COMMERCE_OPERATOR_ENABLED=false`. The existing `*/5 * * * *` cron performs regular synchronization after deployment. Successful commerce runs log only aggregate purchase/payment counts, writes and review count under `TWENTY_COMMERCE_SYNC`; no contact identities or financial amounts are logged there.
 
 Native Twenty REST details covered by regression checks: metadata APIs support both direct and legacy envelopes with pagination; full Person snapshots retain scalar company IDs so employment is preserved; an empty Currency is compared consistently with Twenty's null-subfield representation, preventing repeated writes to a business contact's empty personal-spend field.
+
+## Nové zdroje při spuštění 13. 11. 2026
+
+`promptbook-business-trial` vzniká atomicky s explicitní zkouškou, nejvýše jednou za grant; `promptbook-article-proposal` je redakční nabídka z Contact API s celým textem a původem. Projekce zachovává současné `web:contact:<id>`, účel a skutečné notice evidence. Zkouška je kategorie licence, nabídka článku komunita; ani jedna není newsletterový souhlas či platba. Doporučení placené objednávky zůstává v poznámce stejného placeného kontaktu. Tato změna nezapíná commerce sync, nemění cutover ani nereimportuje staré CRM.

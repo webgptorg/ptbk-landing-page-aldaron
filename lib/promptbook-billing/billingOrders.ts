@@ -14,6 +14,7 @@ export type PromptbookOrder = {
     customer_type: 'business' | 'consumer';
     tax_treatment: 'domestic' | 'reverse_charge';
     order_note: string | null;
+    referral_code?: string | null;
     immediate_start: boolean;
     vat_id: string | null;
     billing_address: { line1: string; city: string; postal_code: string; country: 'CZ' | 'SK' };
