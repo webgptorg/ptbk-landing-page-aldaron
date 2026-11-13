@@ -2,6 +2,7 @@ import { runDatabaseTransaction } from '@/lib/database/runDatabaseTransaction';
 import { createTwentyContactApi, TwentyContactDeliveryError, type TwentyContactApiSettings } from './twentyContactApi';
 import { mapTwentyContactSource } from './twentyContactSource';
 import { acquireTwentyContactSyncLock, loadTwentyContactSyncRows, recordTwentyContactSyncResult } from './twentyContactSyncDatabase';
+import { readTwentySourceGroups } from './twentySourceGrouping';
 
 const MAXIMUM_BATCH_SIZE = 25;
 const MAXIMUM_WORKER_MILLISECONDS = 25000;
@@ -24,7 +25,9 @@ export function getTwentyContactSyncSettings(): TwentyContactSyncSettings | null
     if (url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
         throw new Error('Invalid Twenty contact sync origin');
     }
-    return { url, key, ingressKey, from };
+    const rawOperationalFrom = process.env.TWENTY_CRM_OPERATIONAL_FROM?.trim();
+    const operationalFrom = rawOperationalFrom && Number.isFinite(Date.parse(rawOperationalFrom)) ? rawOperationalFrom : undefined;
+    return { url, key, ingressKey, from, sourceGroups: readTwentySourceGroups(process.env.TWENTY_CONTACT_SOURCE_GROUPS), operationalFrom };
 }
 
 export async function runTwentyContactSync(settings: TwentyContactSyncSettings) {

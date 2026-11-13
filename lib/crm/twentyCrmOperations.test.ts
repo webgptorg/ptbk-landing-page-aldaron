@@ -3,10 +3,10 @@ import { gzipSync } from 'node:zlib';
 const mocks = vi.hoisted(() => ({ request: vi.fn(), list: vi.fn(), upload: vi.fn(), download: vi.fn() }));
 vi.mock('./twentyContactApi', () => ({ createTwentyContactApi: () => ({ request: mocks.request, listRecords: mocks.list }) }));
 vi.mock('@/lib/storage/objectStorage', () => ({ putStoredObject: mocks.upload, getObjectStorage: () => ({ download: mocks.download }) }));
-import { backupTwentyCrm, CRM_OPERATION_FIELDS, CRM_OPERATION_VERSION, ensureTwentyCrmOperationalFields, inspectTwentyCrm, loadTwentyCrmBackup } from './twentyCrmOperations';
+import { backupTwentyCrm, canApplyTwentyCrmPatch, CRM_OPERATION_FIELDS, CRM_OPERATION_VERSION, ensureTwentyCrmOperationalFields, inspectTwentyCrm, loadTwentyCrmBackup, planTwentyCrmEnrichment, readHistoricalMetaContext } from './twentyCrmOperations';
 const settings = { url: new URL('https://crm.invalid'), key: 'test' };
 const key = 'private/crm-operations/3f7fe7df-1c9c-4d47-b054-ce746d49d565.json.gz';
-const objects = () => ['person', 'company', 'opportunity'].map((nameSingular) => ({ id: nameSingular, nameSingular, namePlural: `${nameSingular}s`, labelPlural: nameSingular, fields: [] as { id: string; name: string; type: string }[] }));
+const objects = () => ['person', 'company', 'opportunity', 'ptbkPurchase'].map((nameSingular) => ({ id: nameSingular, nameSingular, namePlural: `${nameSingular}s`, labelPlural: nameSingular, fields: [] as { id: string; name: string; type: string }[] }));
 function backup(metadata = objects(), overrides = {}) {
     const bytes = gzipSync(Buffer.from(JSON.stringify({ version: CRM_OPERATION_VERSION, createdAt: new Date().toISOString(), metadata, records: { people: [], companies: [], contactSources: [] }, unavailable: {}, ...overrides })));
     mocks.download.mockResolvedValue({ data: new Blob([bytes]), error: null });
@@ -78,5 +78,28 @@ describe('non-destructive CRM operations', () => {
         backup(objects(), { createdAt: '2026-01-01T00:00:00Z' });
         await expect(ensureTwentyCrmOperationalFields(settings, key)).rejects.toThrow('crm_fresh_backup_required');
         expect(mocks.request).not.toHaveBeenCalled();
+    });
+    it('extracts only explicit historical questionnaire fields with dates, without creating a current enquiry', () => {
+        const details = { field_data: [
+            { name: 's_čím_potřebujete_u_ai_nejvíce_pomoci?', values: ['automatizace_rutiny'] },
+            { name: 'jak_velký_je_váš_tým?', values: ['11-50'] },
+            { name: 'jaká_je_vaše_role_ve_firmě?', values: ['zakladatel/ceo'] },
+        ], message: 'An unrelated private message must not become a qualification field' };
+        expect(readHistoricalMetaContext(details)).toEqual({ need: 'automatizace_rutiny', teamSize: '11-50', role: 'zakladatel/ceo' });
+        const original = { id: 'person', name: { firstName: 'User name' }, ptbkAgenda: 'Current confirmed agenda' };
+        const plan = planTwentyCrmEnrichment({ people: [original], contactSources: [{ id: 'source', personId: 'person', externalId: 'meta:original', sourceType: 'meta-lead', occurredAt: '2026-05-02T12:00:00Z', details: JSON.stringify(details) }] }, {});
+        expect(plan).toHaveLength(1);
+        expect(plan[0].fields).toMatchObject({ ptbkHistoricalNeed: 'automatizace_rutiny', ptbkHistoricalAt: '2026-05-02T12:00:00Z', ptbkHistoricalEvidence: 'meta:original' });
+        expect(plan[0].fields).not.toHaveProperty('ptbkRelationshipStage');
+        expect(plan[0].fields).not.toHaveProperty('ptbkAgenda');
+        expect(original.ptbkAgenda).toBe('Current confirmed agenda');
+    });
+    it('preserves manual groups and historical blocks and refuses a concurrent edit to the target field', () => {
+        const plan = planTwentyCrmEnrichment({ people: [{ id: 'person', ptbkHistoricalNeed: 'Keep manual note' }],
+            contactSources: [{ id: 'source', sourceType: 'website', nadrazenyZdrojId: 'manual' }], companies: [] }, { website: 'configured' });
+        expect(plan).toEqual([]);
+        const patch = { table: 'people', singular: 'person', record: { id: 'person', ptbkHistoricalNeed: null }, fields: { ptbkHistoricalNeed: 'old questionnaire' } };
+        expect(canApplyTwentyCrmPatch({ id: 'person', ptbkHistoricalNeed: null }, patch)).toBe(true);
+        expect(canApplyTwentyCrmPatch({ id: 'person', ptbkHistoricalNeed: 'Human just edited' }, patch)).toBe(false);
     });
 });

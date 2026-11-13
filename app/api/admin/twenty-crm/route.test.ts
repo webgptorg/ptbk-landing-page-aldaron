@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-const mocks = vi.hoisted(() => ({ guard: vi.fn(), settings: vi.fn(), inspect: vi.fn(), backup: vi.fn(), schema: vi.fn(), load: vi.fn() }));
+const mocks = vi.hoisted(() => ({ guard: vi.fn(), settings: vi.fn(), inspect: vi.fn(), backup: vi.fn(), schema: vi.fn(), load: vi.fn(), enrich: vi.fn(), health: vi.fn(), sync: vi.fn() }));
 vi.mock('@/lib/admin/adminApiGuard', () => ({ getUnauthorizedResponseOrNull: mocks.guard }));
-vi.mock('@/lib/crm/runTwentyContactSync', () => ({ getTwentyContactSyncSettings: mocks.settings }));
-vi.mock('@/lib/crm/twentyCrmOperations', () => ({ backupTwentyCrm: mocks.backup, ensureTwentyCrmOperationalFields: mocks.schema, inspectTwentyCrm: mocks.inspect, loadTwentyCrmBackup: mocks.load }));
+vi.mock('@/lib/crm/runTwentyContactSync', () => ({ getTwentyContactSyncSettings: mocks.settings, runTwentyContactSync: mocks.sync }));
+vi.mock('@/lib/crm/twentyCrmOperations', () => ({ backupTwentyCrm: mocks.backup, ensureTwentyCrmOperationalFields: mocks.schema, inspectTwentyCrm: mocks.inspect, loadTwentyCrmBackup: mocks.load, enrichTwentyCrm: mocks.enrich, inspectTwentyCrmSyncHealth: mocks.health }));
 import { GET, POST } from './route';
 const request = (action = 'inspect', backupKey = '', contentType = 'application/x-www-form-urlencoded') => new NextRequest('https://www.ptbk.io/api/admin/twenty-crm', {
     method: 'POST', headers: { 'content-type': contentType }, body: new URLSearchParams({ action, backupKey }),
@@ -47,5 +47,12 @@ describe('attended CRM operator authorization', () => {
         expect(html).toContain('crm_operator_failed'); expect(html).not.toContain('Bearer secret');
         expect(html).not.toContain('customer@example.invalid');
         expect(response.headers.get('cache-control')).toBe('private, no-store');
+    });
+    it('distinguishes a refused or busy regular sync from successful processing', async () => {
+        mocks.sync.mockResolvedValue({ failed: 1, busy: false });
+        expect((await POST(request('sync'))).status).toBe(502);
+        mocks.sync.mockResolvedValue({ failed: 0, busy: true });
+        expect((await POST(request('sync'))).status).toBe(409);
+        expect(mocks.schema).not.toHaveBeenCalled();
     });
 });

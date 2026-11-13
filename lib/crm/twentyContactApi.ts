@@ -1,15 +1,19 @@
 import { createHash } from 'node:crypto';
 import type { TwentyContactSource } from './twentyContactSource';
+import { getTwentySourceCategory, type TwentySourceGroups } from './twentySourceGrouping';
 
 type TwentyRecord = { id: string };
 type Person = TwentyRecord & {
     emails?: { primaryEmail?: string | null; additionalEmails?: string[] | null };
+    ptbkRelationshipStage?: string | null;
+    ptbkLastEnquiryAt?: string | null;
 };
 type SourceRecord = TwentyRecord & Partial<Pick<
     TwentyContactSource, 'externalId' | 'name' | 'sourceType' | 'sourceName' | 'sourceUrl' | 'occurredAt'
 >> & {
     personId?: string | null;
     details?: string | null;
+    nadrazenyZdrojId?: string | null;
 };
 type TwentyList<RecordType> = {
     data: Record<string, RecordType[]>;
@@ -23,7 +27,8 @@ export class TwentyContactDeliveryError extends Error {
     }
 }
 
-export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal; timeoutMs?: number };
+export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal; timeoutMs?: number;
+    sourceGroups?: TwentySourceGroups; operationalFrom?: string };
 
 /** Twenty accepts a caller-supplied UUID. The same identifier survives a lost create response. */
 export function getTwentyContactRecordId(namespace: 'person' | 'source' | 'purchase' | 'payment' | 'company', key: string): string {
@@ -44,7 +49,7 @@ function normalizeEmail(value?: string | null): string | undefined {
     return value?.trim().toLowerCase();
 }
 
-export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs = 4000 }: TwentyContactApiSettings) {
+export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs = 4000, sourceGroups, operationalFrom }: TwentyContactApiSettings) {
     async function request<Result>(path: string, method: 'GET' | 'POST' | 'PATCH', body?: object): Promise<Result> {
         const timeout = AbortSignal.timeout(timeoutMs);
         let response: Response;
@@ -162,6 +167,40 @@ export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs
         return person;
     }
 
+    async function projectOperationalContext(source: TwentyContactSource, record: SourceRecord, personId: string | null) {
+        // Optional projections follow the committed primary delivery. Their failure never loses a web submission.
+        const category = getTwentySourceCategory(source.sourceType);
+        const parentId = category ? sourceGroups?.[category] : undefined;
+        if (parentId && parentId !== record.id && !record.nadrazenyZdrojId) {
+            try {
+                await request(`contactSources/${record.id}`, 'PATCH', { nadrazenyZdrojId: parentId });
+            } catch (error) {
+                console.warn('Twenty source grouping needs review', { code: error instanceof TwentyContactDeliveryError ? error.code : 'grouping_failed' });
+            }
+        }
+        if (!operationalFrom || !personId) return;
+        const evidence = source.details.submissionEvidence;
+        const enquiry = source.sourceType === 'website' && evidence !== null && typeof evidence === 'object'
+            && !Array.isArray(evidence) && (evidence as Record<string, unknown>).purpose === 'request';
+        const paid = source.sourceType === 'promptbook-subscription' && source.details.paidCustomer === true;
+        if (!enquiry && !paid) return;
+        try {
+            const person = await getRecord<Person>('people', 'person', personId);
+            if (!person) return;
+            const patch: Record<string, string> = {};
+            if (!person.ptbkRelationshipStage) {
+                if (paid) patch.ptbkRelationshipStage = 'CUSTOMER';
+                else if (Date.parse(source.occurredAt) >= Date.parse(operationalFrom)) patch.ptbkRelationshipStage = 'NEW_ENQUIRY';
+            }
+            if (enquiry && Date.parse(source.occurredAt) > Date.parse(person.ptbkLastEnquiryAt || '1970-01-01T00:00:00Z')) {
+                patch.ptbkLastEnquiryAt = source.occurredAt;
+            }
+            if (Object.keys(patch).length) await request(`people/${personId}`, 'PATCH', patch);
+        } catch (error) {
+            console.warn('Twenty operational context needs review', { code: error instanceof TwentyContactDeliveryError ? error.code : 'projection_failed' });
+        }
+    }
+
     async function deliverSource(source: TwentyContactSource): Promise<'linked' | 'unlinked'> {
         const { externalId, name, sourceType, sourceName, sourceUrl, occurredAt, details } = source;
         const candidates = await listRecords<SourceRecord>('contactSources', `externalId[eq]:${JSON.stringify(externalId)}`);
@@ -195,6 +234,7 @@ export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs
                     throw new TwentyContactDeliveryError('twenty_invalid_update');
                 }
             }
+            await projectOperationalContext(source, existing, personId);
             return personId === null ? 'unlinked' : 'linked';
         }
 
@@ -205,6 +245,7 @@ export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs
         if (saved.externalId !== externalId || (saved.personId ?? null) !== personId) {
             throw new TwentyContactDeliveryError('review_source_identity_changed');
         }
+        await projectOperationalContext(source, saved, personId);
         return personId === null ? 'unlinked' : 'linked';
     }
 

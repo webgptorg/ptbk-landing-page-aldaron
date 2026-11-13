@@ -966,6 +966,7 @@ inclusive cutover when changing the projection. Preserve the purpose and evidenc
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.
 
 The separately gated `/api/admin/twenty-crm` attended operator backs up accessible CRM records and metadata to the existing private object bucket, verifies stored bytes, and adds operational fields without rewriting existing definitions or records. It uses the same superadmin/cross-site guard, requires `TWENTY_CRM_OPERATOR_ENABLED=true`, never runs on GET/build/preview, and must be disabled after setup. CRM remains the working source of truth; the old master spreadsheet is an archive. Historical qualification answers must retain dates and must not become current interest, consent or confirmed partnership. See `docs/twenty-crm-operations.md`.
+Its explicit, journalled enrichment fills empty new fields only and preserves unrelated fields with readback verification. Optional production `TWENTY_CONTACT_SOURCE_GROUPS` and `TWENTY_CRM_OPERATIONAL_FROM` are enabled only after schema/group verification. Source grouping follows successful primary delivery, preserves manual parents, and cannot block contact intake. Current enquiry initialization requires recorded request evidence after activation; historical questionnaires never become current leads. Enter the owner operator through `/admin/twenty-crm`, retaining the existing cross-site guard.
 
 ### Administration and data rules
 
