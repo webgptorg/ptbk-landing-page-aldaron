@@ -11,11 +11,7 @@ export function PavolHero({ content, onPrimaryAction }: { readonly content: Pavo
                 className={`${PAVOL_CONTAINER_CLASS_NAME} grid items-center gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-12`}
             >
                 <div className="relative z-10 min-w-0">
-                    <p className="pavol-eyebrow max-w-md">
-                        <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-[var(--pavol-accent)]" />
-                        {content.eyebrow}
-                    </p>
-                    <h1 className="pavol-hero-name mt-7 font-medium text-[var(--pavol-ink)]">
+                    <h1 className="pavol-hero-name font-medium text-[var(--pavol-ink)]">
                         {content.title}
                         <span aria-hidden="true" className="ml-1 inline-block h-[0.09em] w-[0.09em] rounded-full bg-[var(--pavol-accent)]" />
                     </h1>
@@ -36,26 +32,12 @@ export function PavolHero({ content, onPrimaryAction }: { readonly content: Pavo
                                 <ArrowUpRight aria-hidden="true" className="ml-2 h-5 w-5" />
                             </a>
                         </Button>
-                        <Button
-                            asChild
-                            size="lg"
-                            variant="outline"
-                            className="h-14 rounded-full border-[var(--pavol-border)] bg-transparent px-6 text-sm hover:bg-[var(--pavol-warm)]"
-                        >
-                            <a href="#projects">
+                            <a href="#projects" className="inline-flex min-h-11 items-center justify-center gap-2 px-2 text-sm font-medium underline underline-offset-4">
                                 {content.secondaryAction}
                                 <ArrowDown aria-hidden="true" className="ml-2 h-4 w-4" />
                             </a>
-                        </Button>
                     </div>
-                    <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-xs leading-relaxed text-[var(--pavol-muted)]">
-                        {content.badges.map((BADGE) => (
-                            <li key={BADGE} className="flex items-center gap-1.5">
-                                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-[var(--pavol-accent)]" />
-                                {BADGE}
-                            </li>
-                        ))}
-                    </ul>
+                    <p className="mt-6 text-xs text-[var(--pavol-muted)]">{content.badges.at(-1)}</p>
                 </div>
                 <figure className="pavol-portrait relative mx-auto w-full max-w-[500px]">
                     <div className="pavol-portrait-frame">
@@ -68,10 +50,6 @@ export function PavolHero({ content, onPrimaryAction }: { readonly content: Pavo
                             />
                         </div>
                     </div>
-                    <figcaption className="flex items-center gap-4 border-b border-[var(--pavol-border)] py-5 text-xs font-medium tracking-wide text-[var(--pavol-muted)]">
-                        <span aria-hidden="true" className="h-px flex-1 bg-[var(--pavol-border)]" />
-                        <span>{content.portraitCaption}</span>
-                    </figcaption>
                 </figure>
             </div>
         </section>

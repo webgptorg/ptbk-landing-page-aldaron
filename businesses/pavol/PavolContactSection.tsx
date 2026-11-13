@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-import { ArrowUpRight, CheckCircle2, Loader2, Send } from 'lucide-react';
+import { CheckCircle2, Loader2, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 export function PavolContactSection({
@@ -40,14 +40,6 @@ export function PavolContactSection({
             type: 'email',
             isRequired: true,
         },
-        {
-            name: 'company',
-            label: CONTACT.formCompanyLabel,
-            placeholder: CONTACT.formCompanyPlaceholder,
-            autoComplete: 'organization',
-            type: 'text',
-            isRequired: false,
-        },
     ] as const;
 
     useEffect(() => {
@@ -71,25 +63,8 @@ export function PavolContactSection({
                         }}>{language === 'cs' ? 'Kopírovat e-mail' : 'Copy email'}</button>
                         {copyStatus && <span role="status" className="w-full text-sm text-[var(--pavol-muted)]">{copyStatus}</span>}
                     </div>
-                    <div className="mt-10 border-t border-[var(--pavol-border)] pt-7 lg:mt-16">
-                        <h3 className="text-sm font-semibold text-[var(--pavol-ink)]">{CONTACT.otherContactsTitle}</h3>
-                        <ul className="mt-4 flex flex-wrap gap-2">
-                            {CONTACT.links.map((LINK) => (
-                                <li key={LINK.href}>
-                                    <a
-                                        href={LINK.href}
-                                        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--pavol-border)] px-4 text-sm text-[var(--pavol-ink)] transition-colors hover:bg-[var(--pavol-warm)]"
-                                    >
-                                        {LINK.icon && <LINK.icon aria-hidden="true" className="h-4 w-4" />}
-                                        {LINK.label}
-                                        <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5 text-slate-500" />
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
                 </div>
-                <div className="pavol-contact-form rounded-2xl border border-[var(--pavol-border)] bg-white p-5 sm:p-8 lg:p-10">
+                <div className="pavol-contact-form">
                     {form.isSubmitted ? (
                         <div
                             ref={SUCCESS_REF}
@@ -128,42 +103,17 @@ export function PavolContactSection({
                                 className="space-y-5 disabled:opacity-70"
                             >
                                 <legend className="sr-only">{CONTACT.title}</legend>
-                                <div>
-                                    <label htmlFor="pavol-inquiry" className="text-sm font-semibold text-slate-700">
-                                        {CONTACT.inquiryLabel}
-                                    </label>
-                                    <select
-                                        id="pavol-inquiry"
-                                        name="inquiry"
-                                        value={form.selectedServiceId}
-                                        onChange={(event) => form.selectService(event.target.value)}
-                                        className="mt-2 h-12 w-full min-w-0 rounded-md border border-slate-200 bg-white px-3 text-sm"
-                                    >
-                                        <option value="">{CONTACT.generalInquiryLabel}</option>
-                                        <option value="intro-call">{language === 'cs' ? 'Úvodní hovor' : 'Introductory call'}</option>
-                                        {CONTENT.services.items.map((SERVICE) => (
-                                            <option key={SERVICE.id} value={SERVICE.id}>
-                                                {SERVICE.title}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
                                 <div className="grid gap-5 sm:grid-cols-2">
                                     {FIELDS.map((FIELD) => (
                                         <div
                                             key={FIELD.name}
-                                            className={FIELD.name === 'company' ? 'sm:col-span-2' : 'min-w-0'}
+                                            className="min-w-0"
                                         >
                                             <label
                                                 htmlFor={`pavol-${FIELD.name}`}
                                                 className="text-sm font-semibold text-slate-700"
                                             >
-                                                {FIELD.label}{' '}
-                                                {!FIELD.isRequired && (
-                                                    <span className="ml-2 font-normal text-slate-500">
-                                                        ({CONTACT.optionalLabel})
-                                                    </span>
-                                                )}
+                                                {FIELD.label}
                                             </label>
                                             <Input
                                                 id={`pavol-${FIELD.name}`}
