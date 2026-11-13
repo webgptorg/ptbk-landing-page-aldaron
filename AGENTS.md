@@ -958,6 +958,9 @@ the legal payer; Person totals are a view of receipts through that contact, with
 A sole trader uses both cards without duplicating receipts. Gross paid amounts retain refunds as a separate metric.
 No processing fees, payouts or guessed exchange rates affect willingness-to-pay totals. Activation requires verified
 schema permissions, historical import/readback/replay and `TWENTY_COMMERCE_SYNC_ENABLED=true`; see the CRM sync doc.
+The production-only `/api/admin/twenty-commerce` operator uses the existing superadmin and cross-site guard,
+requires `TWENTY_COMMERCE_OPERATOR_ENABLED=true`, and runs inspection/setup/verified import only on explicit form POST.
+GET never writes; credentials stay in production. Disable the operator after activation and remove temporary schema access.
 Source writes have no dependency on Twenty. Keep the stable `web:<source>:<id>` keys and the
 inclusive cutover when changing the projection. Preserve the purpose and evidence per submission and leave an
 uncertain Person relation for review. Deployment and retry instructions are in `docs/twenty-contact-sync.md`.

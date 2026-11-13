@@ -112,3 +112,7 @@ The new commerce projection is therefore prepared but **not activated or importe
 5. Inspect both objects and a business/sole-trader Person and Company in the CRM UI. Confirm visible relations and
    card totals before setting `TWENTY_COMMERCE_SYNC_ENABLED=true` in Vercel production and redeploying. The existing
    five-minute contact cron then also runs commerce synchronization. Remove temporary schema permissions after setup.
+
+### Owner-only production operator
+
+If production Secrets cannot be pulled locally, enable `TWENTY_COMMERCE_OPERATOR_ENABLED=true` for one production deployment and open `/api/admin/twenty-commerce` while signed in as the environment superadmin. The existing admin guard rejects delegated users and cross-site requests. GET is read-only. Explicit same-origin form POST actions separately run source inspection, idempotent schema setup, and verified import/replay in the existing production environment; no credentials leave that environment. Responses contain aggregate counts and allowlisted error codes only. Preview/development and disabled deployments return 404. Schema operations allow 30 seconds per request; the normal contact API retains its four-second timeout. After verification, remove the temporary data-model permission and schema routes, set the operator flag to false, enable the regular commerce flag, and redeploy. No build hook imports customer data.

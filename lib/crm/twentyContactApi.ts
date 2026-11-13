@@ -23,7 +23,7 @@ export class TwentyContactDeliveryError extends Error {
     }
 }
 
-export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal };
+export type TwentyContactApiSettings = { url: URL; key: string; ingressKey?: string; signal?: AbortSignal; timeoutMs?: number };
 
 /** Twenty accepts a caller-supplied UUID. The same identifier survives a lost create response. */
 export function getTwentyContactRecordId(namespace: 'person' | 'source' | 'purchase' | 'payment' | 'company', key: string): string {
@@ -44,9 +44,9 @@ function normalizeEmail(value?: string | null): string | undefined {
     return value?.trim().toLowerCase();
 }
 
-export function createTwentyContactApi({ url, key, ingressKey, signal }: TwentyContactApiSettings) {
+export function createTwentyContactApi({ url, key, ingressKey, signal, timeoutMs = 4000 }: TwentyContactApiSettings) {
     async function request<Result>(path: string, method: 'GET' | 'POST' | 'PATCH', body?: object): Promise<Result> {
-        const timeout = AbortSignal.timeout(4000);
+        const timeout = AbortSignal.timeout(timeoutMs);
         let response: Response;
         try {
             response = await fetch(new URL(`/rest/${path}`, url), {

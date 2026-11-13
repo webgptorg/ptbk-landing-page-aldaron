@@ -4,7 +4,7 @@ type MetadataField = { id: string; name: string; type: string };
 type MetadataObject = { id: string; nameSingular: string; namePlural: string; fields: MetadataField[] | { edges: { node: MetadataField }[] } };
 export const COMMERCE_SCHEMA_VERSION = '2026-11-11-v1';
 export async function ensureTwentyCommerceSchema(settings: TwentyContactApiSettings, apply: boolean) {
-    const api = createTwentyContactApi(settings);
+    const api = createTwentyContactApi({ ...settings, timeoutMs: 30000 });
     const response = await api.request<{ data: { objects: MetadataObject[] } }>('metadata/objects', 'GET');
     const objects = response.data.objects;
     if (!Array.isArray(objects)) throw new Error('commerce_invalid_metadata');
