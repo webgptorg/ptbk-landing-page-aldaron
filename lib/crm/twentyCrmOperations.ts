@@ -242,7 +242,7 @@ const normalizeKey = (value: string) => value.normalize('NFD').replace(/[\u0300-
 const metaAliases = {
     need: ['ai_need', 'aiNeed', 's_čím_potřebujete_u_ai_nejvíce_pomoci?'],
     teamSize: ['team_size', 'teamSize', 'jak_velký_je_váš_tým?'],
-    role: ['role', 'jaká_je_vaše_role_ve_firmě?'],
+    role: ['role', 'companyRole', 'jaká_je_vaše_role_ve_firmě?'],
 };
 /** Read only explicit questionnaire fields, including Meta field_data arrays; never mine unrelated private prose. */
 export function readHistoricalMetaContext(details: unknown): HistoricalMeta {
@@ -298,13 +298,18 @@ export function planTwentyCrmEnrichment(records: Snapshot['records'], sourceGrou
     for (const person of records.people ?? []) {
         const fields: Record<string, unknown> = {};
         const context = historical.get(person.id);
-        if (context && historicalFields.every((field) => isBlank(person[field]))) {
+        const emptyHistory = historicalFields.every((field) => isBlank(person[field]));
+        const sameHistory = context && person.ptbkHistoricalEvidence === String(context.source.externalId ?? context.source.id)
+            && Date.parse(String(person.ptbkHistoricalAt)) === Date.parse(String(context.source.occurredAt));
+        if (context && (emptyHistory || sameHistory)) {
             const { need, teamSize, role } = context.context;
-            if (need) fields.ptbkHistoricalNeed = need;
-            if (teamSize) fields.ptbkHistoricalTeamSize = teamSize;
-            if (role) fields.ptbkHistoricalRole = role;
-            fields.ptbkHistoricalAt = context.source.occurredAt;
-            fields.ptbkHistoricalEvidence = String(context.source.externalId ?? context.source.id);
+            if (need && isBlank(person.ptbkHistoricalNeed)) fields.ptbkHistoricalNeed = need;
+            if (teamSize && isBlank(person.ptbkHistoricalTeamSize)) fields.ptbkHistoricalTeamSize = teamSize;
+            if (role && isBlank(person.ptbkHistoricalRole)) fields.ptbkHistoricalRole = role;
+            if (emptyHistory) {
+                fields.ptbkHistoricalAt = context.source.occurredAt;
+                fields.ptbkHistoricalEvidence = String(context.source.externalId ?? context.source.id);
+            }
         }
         if (customers.has(person.id) && isBlank(person.ptbkRelationshipStage)) fields.ptbkRelationshipStage = 'CUSTOMER';
         const emails = person.emails as { primaryEmail?: string } | undefined;

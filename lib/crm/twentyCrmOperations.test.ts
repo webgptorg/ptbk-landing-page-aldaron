@@ -102,4 +102,15 @@ describe('non-destructive CRM operations', () => {
         expect(canApplyTwentyCrmPatch({ id: 'person', ptbkHistoricalNeed: null }, patch)).toBe(true);
         expect(canApplyTwentyCrmPatch({ id: 'person', ptbkHistoricalNeed: 'Human just edited' }, patch)).toBe(false);
     });
+    it('fills a newly recognized historical role only from the same recorded source and date', () => {
+        const at = '2026-05-02T12:00:00Z';
+        const source = { id: 'source', personId: 'person', externalId: 'meta:original', sourceType: 'meta-ads', occurredAt: at,
+            details: JSON.stringify({ formAnswers: { aiNeed: 'routine', teamSize: '11-50', companyRole: 'founder' } }) };
+        const person = { id: 'person', ptbkHistoricalNeed: 'Keep edited historical text', ptbkHistoricalTeamSize: '11-50',
+            ptbkHistoricalAt: at, ptbkHistoricalEvidence: 'meta:original', ptbkHistoricalRole: null };
+        expect(planTwentyCrmEnrichment({ people: [person], contactSources: [source] }, {}).map((patch) => patch.fields))
+            .toEqual([{ ptbkHistoricalRole: 'founder' }]);
+        expect(planTwentyCrmEnrichment({ people: [{ ...person, ptbkHistoricalEvidence: 'other:source' }], contactSources: [source] }, {})).toEqual([]);
+        expect(planTwentyCrmEnrichment({ people: [{ ...person, ptbkHistoricalAt: '2026-05-03T12:00:00Z' }], contactSources: [source] }, {})).toEqual([]);
+    });
 });
