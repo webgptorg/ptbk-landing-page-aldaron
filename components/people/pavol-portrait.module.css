@@ -14,6 +14,23 @@
     border-radius: inherit;
 }
 
+.revealHat {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.revealHat:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+}
+
 .photo {
     display: block;
     position: relative;
@@ -76,4 +93,32 @@
     -webkit-mask-position: center;
     -webkit-mask-repeat: no-repeat;
     mix-blend-mode: multiply;
+}
+
+/* Only a discovered hat flies in; a URL-enabled hat is already fitted. */
+.hatArriving .hat {
+    animation: hatFlight 700ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.hatArriving .hatInterior,
+.hatArriving .hatShadow {
+    animation: hatContact 700ms ease-out both;
+}
+
+@keyframes hatFlight {
+    from { opacity: 0; transform: translate(80%, -150%) rotate(26deg) scaleY(.94); }
+    15% { opacity: 1; }
+    78% { transform: translate(0, -4%) rotate(-3deg) scaleY(.94); }
+    to { opacity: 1; transform: scaleY(.94); }
+}
+
+@keyframes hatContact {
+    0%, 75% { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hatArriving .hat,
+    .hatArriving .hatInterior,
+    .hatArriving .hatShadow { animation: none; }
 }

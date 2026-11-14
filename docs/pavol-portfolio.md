@@ -6,7 +6,7 @@ Prominence is stored in the content: 1 neutral, above 1 promotes, between 0 and 
 
 ## Homepage portrait
 
-Both personal domains use the approved charcoal-blazer portrait and fitted burgundy-brown hat from Promptbook through `components/people/PavolPortrait.tsx`. The unchanged image assets, intrinsic alignment, rear lining and alpha-masked contact shadow are shared. The hat remains removable with `showHat={false}`. The personal hero retains its sage frame and gold disc, with headroom above the hat and consistent framing on mobile and desktop.
+Both personal domains use the approved charcoal-blazer portrait through `components/people/PavolPortrait.tsx`. Since 14 November the fitted burgundy-brown hat is hidden by default, including its rear lining and contact shadow. `?hat=1` (alias `?head=1`) shows it; three clicks/taps on the portrait within one second reveal it with a short flight, or immediately under reduced motion. Native keyboard/assistive activation also works. Discovery is not persisted, and `showHat={false}` disables activation entirely. The unchanged image assets, intrinsic alignment, sage frame and gold disc remain shared and consistently framed on mobile and desktop.
 
 ## Real images
 
