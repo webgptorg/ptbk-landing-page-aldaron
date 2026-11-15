@@ -1,145 +1,109 @@
-import {
-    pavolMediaAppearances as PAVOL_MEDIA_APPEARANCES,
-    pavolMediaMoreHref as PAVOL_MEDIA_MORE_URL,
-    type PavolMediaAppearance,
-} from '@/businesses/pavol/config-media';
-import { rankContent } from '@/lib/content/contentRanking';
-import { PAVOL_CONTAINER_CLASS_NAME } from '@/businesses/pavol/layout';
-import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
-import { PavolSectionHeading } from '@/businesses/pavol/PavolSectionHeading';
-import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
-import { cn } from '@/lib/utils';
-import { ArrowUpRight, ChevronDown } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { ArticleAudioButton } from '@/businesses/articles/ArticleAudioButton';
 import { getPersonalArticleListings } from '@/lib/articles/publishedArticles';
-import { getArticleIndexUrl, getArticleListingHref } from '@/lib/articles/urls';
+import { getArticleListingHref } from '@/lib/articles/urls';
+import { rankContent } from '@/lib/content/contentRanking';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { convertMarkdownToPlainText } from '@/lib/text/markdownText';
+import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
+import { loadPublishedWorkshopSummaries } from '@/lib/workshops/workshopPublic';
+import { ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
+import { pavolMediaAppearances } from './config-media';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
-import { PavolPodcastCard } from './PavolPodcastCard';
-import { PavolTalksSection } from './PavolTalksSection';
-import { selectPavolHomepagePodcasts } from './pavolPodcastOrder';
+import { PAVOL_CONTAINER_CLASS_NAME } from './layout';
+import { PavolPodcastAudioButton } from './PavolPodcastAudioButton';
+import { createPavolPodcastTrack } from './pavolPodcasts';
+import { getPavolTalks } from './pavolTalks';
 
-const HOMEPAGE_ITEM_LIMIT = 10;
+/** A homepage excerpt keeps authored wording; complete descriptions remain in the archives. */
+function excerpt(text: string): string {
+    const plain = convertMarkdownToPlainText(text).replace(/\s+/g, ' ').trim();
+    return plain.length <= 150 ? plain : `${plain.slice(0, 150).replace(/\s+\S*$/, '').trimEnd()}…`;
+}
 
-function MediaAppearanceCard({ appearance }: { readonly appearance: PavolMediaAppearance }) {
-    const IS_HIGHLIGHT = true;
-    return (
-        <article className="h-full">
-            <a
-                href={appearance.href}
-                className={cn(
-                    'group flex h-full overflow-hidden rounded-2xl border border-[var(--pavol-border)] bg-white transition-colors hover:border-[var(--pavol-accent)]',
-                    IS_HIGHLIGHT ? 'flex-col' : 'flex-col gap-5 p-5 sm:flex-row',
-                )}
-            >
-                <div
-                    aria-hidden="true"
-                    style={
-                        appearance.thumbnailBackgroundColor
-                            ? { backgroundColor: appearance.thumbnailBackgroundColor }
-                            : undefined
-                    }
-                    className={cn(
-                        'relative flex shrink-0 items-center justify-center overflow-hidden bg-slate-100 text-3xl font-bold',
-                        IS_HIGHLIGHT ? 'h-56 w-full sm:h-64' : 'h-32 w-full rounded-lg sm:h-28 sm:w-40',
-                        appearance.thumbnailClassName,
-                    )}
-                >
-                    {appearance.imageSrc ? (
-                        <Image
-                            src={appearance.imageSrc}
-                            alt=""
-                            fill
-                            sizes={
-                                IS_HIGHLIGHT
-                                    ? '(min-width: 1280px) 520px, (min-width: 768px) 42vw, 90vw'
-                                    : '(min-width: 640px) 160px, 90vw'
-                            }
-                            className="object-contain transition-transform duration-300 motion-safe:group-hover:scale-105"
-                        />
-                    ) : (
-                        (appearance.thumbnailLabel ?? appearance.source)
-                    )}
-                </div>
-                <div className={cn('flex min-w-0 flex-1 flex-col', IS_HIGHLIGHT && 'p-6 sm:p-8')}>
-                    <div className="flex items-center justify-between gap-3 text-xs font-semibold text-[var(--pavol-accent)]">
-                        <span>
-                            {appearance.kind}{' '}
-                            <span aria-hidden="true" className="px-1 text-slate-400">
-                                /
-                            </span>{' '}
-                            {appearance.source}
-                        </span>
-                        <span className={IS_HIGHLIGHT ? 'pavol-link-arrow' : undefined}>
-                            <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" />
-                        </span>
-                    </div>
-                    <h3 className="mt-3 text-2xl font-medium leading-snug tracking-tight text-[var(--pavol-ink)]">
-                        {appearance.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-[var(--pavol-muted)]">{appearance.description}</p>
-                </div>
-            </a>
-        </article>
-    );
+function dateLabel(date: string, language: SupportedHomepageLanguage): string {
+    return new Intl.DateTimeFormat(language === 'cs' ? 'cs-CZ' : 'en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Prague',
+    }).format(new Date(date));
 }
 
 /** Server-rendered sources stay outside the contact form's client boundary. */
 export async function PavolMediaSection({ language, revalidateSeconds }: {
-    readonly language: SupportedHomepageLanguage; readonly revalidateSeconds: number;
+    readonly language: SupportedHomepageLanguage;
+    readonly revalidateSeconds: number;
 }) {
     const cs = language === 'cs';
-    const content = PAVOL_PAGE_CONTENT[language].media;
-    const articles = rankContent((await getPersonalArticleListings(language)).filter(article => article.prominence !== 0)).slice(0, HOMEPAGE_ITEM_LIMIT);
-    const appearances = rankContent(PAVOL_MEDIA_APPEARANCES[language].filter(appearance => appearance.prominence !== 0 && appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
-    const highlights = appearances.slice(0, 3);
-    const rest = appearances.slice(3);
-    const [talks, podcasts] = await Promise.all([PavolTalksSection({ language }), fetchPavolPodcasts(language, revalidateSeconds)]);
-    return <>
-        {talks}
-        <section id="media" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
-            <div className={PAVOL_CONTAINER_CLASS_NAME}>
-                <PavolSectionHeading eyebrow={content.eyebrow} title={content.title} description={content.description} />
-                <div className="mt-8 grid gap-5 md:grid-cols-3">{highlights.map(appearance => <MediaAppearanceCard key={appearance.href} appearance={appearance} />)}</div>
-                {rest.length > 0 && <details className="group/media mt-8 border-y border-[var(--pavol-border)] py-6">
-                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-base font-medium [&::-webkit-details-marker]:hidden">
-                        <span>{content.restLabel} <span className="ml-2 font-mono text-sm font-normal text-[var(--pavol-muted)]">({rest.length})</span></span>
-                        <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 transition-transform group-open/media:rotate-180" />
-                    </summary>
-                    <div className="mt-6 space-y-4">{rest.map((appearance) => <MediaAppearanceCard key={appearance.href} appearance={appearance} />)}</div>
-                </details>}
-                <a href={PAVOL_MEDIA_MORE_URL} className="pavol-source-link mt-5">{content.moreLabel}<ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
+    const [allArticles, allPodcasts, workshops] = await Promise.all([
+        getPersonalArticleListings(language),
+        fetchPavolPodcasts(language, revalidateSeconds),
+        loadPublishedWorkshopSummaries(),
+    ]);
+    const article = allArticles.filter(item => item.language === language && item.prominence !== 0)
+        .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
+    // English readers get an English recording on the homepage; the full archive keeps every language.
+    const podcast = allPodcasts.filter(item => item.language === language && item.prominence !== 0)
+        .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
+    const track = podcast ? createPavolPodcastTrack(podcast, language) : null;
+    const now = Date.now();
+    const allTalks = getPavolTalks(workshops, language).filter(talk => talk.prominence !== 0
+        && (!talk.textLanguage || talk.textLanguage === language));
+    const currentEventIds = new Set(workshops.filter(workshop => !isWorkshopPhasePast(getWorkshopPhase(workshop, now)))
+        .map(workshop => workshop.slug));
+    const currentTalks = allTalks.filter(talk => currentEventIds.has(talk.id))
+        .sort((a, b) => (Date.parse(a.publishedAt ?? '') || 0) - (Date.parse(b.publishedAt ?? '') || 0));
+    const talk = currentTalks[0] ?? rankContent(allTalks)[0];
+    const press = rankContent(pavolMediaAppearances[language].filter(appearance => appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
+    const articleHref = article ? getArticleListingHref(article, 'personal') : null;
+
+    return <section id="writing" tabIndex={-1} className="pavol-section outline-none">
+        <div className={PAVOL_CONTAINER_CLASS_NAME}>
+            {/* Existing shared links still land at the now unified selection. */}
+            {['articles', 'podcasts', 'talks', 'media'].map(id => <span key={id} id={id} className="block scroll-mt-24" />)}
+            <h2 className="pavol-section-title text-4xl font-medium tracking-tight sm:text-5xl">{cs ? 'Píšu a mluvím' : 'Writing & speaking'}</h2>
+            <div className="mt-8 divide-y divide-[var(--pavol-border)] border-y border-[var(--pavol-border)]">
+                {article && articleHref && <article className="py-6 sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
+                    <div className="pavol-recording-meta content-start"><span>{cs ? 'Článek' : 'Article'}</span><time dateTime={article.publishedAt}>{dateLabel(article.publishedAt, language)}</time></div>
+                    <div>
+                        <h3 className="mt-2 text-xl font-medium tracking-tight sm:mt-0 sm:text-2xl"><Link href={articleHref}>{article.title}</Link></h3>
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(article.perex)}</p>
+                        <div className="pavol-recording-actions mt-3">
+                            <ArticleAudioButton article={{ id: article.id, title: article.title, language: article.language, coverImage: article.coverImage, audio: article.audio, author: { name: article.author.name, photoUrl: article.author.photoUrl } }} href={articleHref} publication="personal" />
+                            <Link href={articleHref} className="pavol-source-link">{cs ? 'Číst článek' : 'Read article'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+                        </div>
+                    </div>
+                </article>}
+                {podcast && <article className="py-6 sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
+                    <div className="pavol-recording-meta content-start"><span>{podcast.source} {podcast.episodeLabel}</span><time dateTime={podcast.publishedAt}>{dateLabel(podcast.publishedAt, language)}</time></div>
+                    <div>
+                        <h3 lang={podcast.textLanguage ?? podcast.language} className="mt-2 text-xl font-medium tracking-tight sm:mt-0 sm:text-2xl"><a href={podcast.href}>{podcast.title}</a></h3>
+                        <p lang={podcast.textLanguage ?? language} className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(podcast.description)}</p>
+                        <div className="pavol-recording-actions mt-3">
+                            {track && <PavolPodcastAudioButton track={track} />}
+                            <a href={podcast.href} className="pavol-source-link">{cs ? 'Původní díl' : 'Original episode'}<ArrowUpRight size={15} aria-hidden="true" /></a>
+                        </div>
+                    </div>
+                </article>}
+                {talk && <article className="py-6 sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
+                    <div className="pavol-recording-meta content-start"><span>{currentEventIds.has(talk.id) ? (cs ? 'Setkáme se' : 'Upcoming event') : talk.source}</span>{talk.publishedAt && <time dateTime={talk.publishedAt}>{dateLabel(talk.publishedAt, language)}</time>}</div>
+                    <div lang={talk.textLanguage}>
+                        <h3 className="mt-2 text-xl font-medium tracking-tight sm:mt-0 sm:text-2xl"><a href={talk.href}>{talk.title}</a></h3>
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(talk.description)}</p>
+                        <a href={talk.href} className="pavol-source-link mt-3">{cs ? 'Podrobnosti' : 'Details'}<ArrowUpRight size={15} aria-hidden="true" /></a>
+                    </div>
+                </article>}
             </div>
-        </section>
-        <section id="articles" tabIndex={-1} className="pavol-section outline-none">
-            <div className={PAVOL_CONTAINER_CLASS_NAME}>
-                <PavolSectionHeading eyebrow={cs ? 'Články' : 'Articles'} title={cs ? 'Moje články a myšlenky' : 'My articles and thoughts'} description={cs ? 'O AI, vývoji softwaru a rozhodnutích kolem nich. Čtěte, nebo si články poslechněte přímo tady.' : 'On AI, software development, and the decisions around them. Read or listen right here.'} />
-                {articles.length ? <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    {articles.map((article) => {
-                        const href = getArticleListingHref(article, 'personal');
-                        return <article key={article.id} className="pavol-article-card">
-                            <time dateTime={article.publishedAt} className="pavol-recording-meta">{new Intl.DateTimeFormat(cs ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(article.publishedAt))}</time>
-                            <h3><Link href={href}>{article.title}</Link></h3>
-                            <p>{article.perex}</p>
-                            <div className="pavol-recording-actions">
-                                <ArticleAudioButton article={{ id: article.id, title: article.title, language: article.language, coverImage: article.coverImage, audio: article.audio, author: { name: article.author.name, photoUrl: article.author.photoUrl } }} href={href} publication="personal" />
-                                <Link href={href} className="pavol-source-link">{cs ? 'Číst článek' : 'Read article'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-                            </div>
-                        </article>;
-                    })}
-                </div> : <p className="mt-5 text-[var(--pavol-muted)]">{cs ? 'Nové články se objeví zde.' : 'English articles are still ahead. You can already read and listen to the Czech edition.'}{!cs && <> <a href={getArticleIndexUrl('cs', 'personal')} className="underline underline-offset-4">České články ↗</a></>}</p>}
-                <Link href="/articles" className="pavol-source-link mt-6" aria-label={cs ? 'Zobrazit víc článků' : 'Show more articles'}>{cs ? 'Zobrazit víc' : 'Show more'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-            </div>
-        </section>
-        <section id="podcasts" tabIndex={-1} className="pavol-section bg-[var(--pavol-warm)] outline-none">
-            <div className={PAVOL_CONTAINER_CLASS_NAME}>
-                <PavolSectionHeading eyebrow={cs ? 'Do sluchátek' : 'For your headphones'} title={cs ? 'Podcasty, kde mě uslyšíte' : 'Podcasts you can hear me on'} description={cs ? 'Rozhovory o AI, vývoji a vzdělávání. Poslouchejte přímo tady, nebo otevřete původní díl.' : 'Conversations about AI, software, and education. Listen here or open the original episode. Czech recordings are marked with a flag.'} />
-                <div className="pavol-podcast-list mt-8" data-podcast-order="smart">
-                    {selectPavolHomepagePodcasts(podcasts).map((podcast) => <PavolPodcastCard key={podcast.id} podcast={podcast} language={language} />)}
-                </div>
-                <Link href="/podcasts" className="pavol-source-link mt-6" aria-label={cs ? 'Zobrazit víc podcastů' : 'Show more podcasts'}>{cs ? 'Zobrazit víc' : 'Show more'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-            </div>
-        </section>
-    </>;
+            <nav aria-label={cs ? 'Další články a vystoupení' : 'More writing and appearances'} className="mt-5 flex flex-wrap gap-x-7 gap-y-1">
+                <Link href="/articles" className="pavol-source-link">{cs ? 'Všechny články' : 'All articles'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+                <Link href="/podcasts" className="pavol-source-link">{cs ? 'Všechny podcasty' : 'All podcasts'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+                <Link href="/talks" className="pavol-source-link">{cs ? 'Všechny akce' : 'All events'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+            </nav>
+            {press.length > 0 && <details className="mt-4 border-t border-[var(--pavol-border)] pt-3">
+                <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">{cs ? 'V médiích' : 'In the media'}</summary>
+                <ul className="space-y-5 pb-3 pt-2">{press.map(appearance => <li key={appearance.href}>
+                    <a href={appearance.href} className="pavol-source-link">{appearance.source} · {appearance.title}<ArrowUpRight size={15} aria-hidden="true" /></a>
+                    <p className="max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{appearance.description}</p>
+                </li>)}</ul>
+            </details>}
+        </div>
+    </section>;
 }

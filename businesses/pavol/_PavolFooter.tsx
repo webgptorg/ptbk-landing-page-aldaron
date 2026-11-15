@@ -1,91 +1,62 @@
 'use client';
 
-import type { PavolLink } from '@/businesses/pavol/pavolContent';
+import { ArticleRssLink } from '@/businesses/articles/ArticleRssLink';
 import { PAVOL_CONTAINER_CLASS_NAME } from '@/businesses/pavol/layout';
 import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
-import { LegalFooterLinks } from '@/components/legal/LegalFooterLinks';
-import { Button } from '@/components/ui/button';
-import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { usePublicNavigationUrl } from '@/components/public-site-navigation-provider';
 import { getArticlePodcastUrl } from '@/lib/articles/urls';
-import { Send } from 'lucide-react';
-import { ArticleRssLink } from '@/businesses/articles/ArticleRssLink';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { COOKIE_SETTINGS_HASH } from '@/lib/legal/cookieSettingsHash';
+import { getLegalHubPath, getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import Image from 'next/image';
 import Link from 'next/link';
 
-function FooterLinkColumn({ title, links, subscription }: { title: string; links: PavolLink[]; subscription?: SupportedHomepageLanguage }) {
-    return (
-        <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">{title}</h3>
-            <ul className="mt-5 space-y-3">
-                {links.map((link) => (
-                    <li key={`${title}-${link.href}`}>
-                        <Link
-                            href={link.href}
-                            className="inline-flex items-center gap-2 text-sm text-slate-200 transition-colors duration-200 hover:text-white"
-                        >
-                            {link.icon ? <link.icon className="h-4 w-4 shrink-0" /> : null}
-                            {link.label}
-                        </Link>
-                    </li>
-                ))}
-                {subscription && <li><ArticleRssLink language={subscription} url={getArticlePodcastUrl(subscription, 'personal')} label="Podcast" className="text-sm text-slate-200 hover:text-white" /></li>}
-            </ul>
-        </div>
-    );
-}
-
 export function PavolFooter({ language, isHomepage = true }: { language: SupportedHomepageLanguage; readonly isHomepage?: boolean }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language];
-    const sectionPrefix = isHomepage ? '' : '/';
+    const homeHref = isHomepage ? '#main-content' : '/';
+    const privacyHref = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
+    const legalHref = usePublicNavigationUrl(getLegalHubPath(language));
 
     return (
         <footer className="border-t border-[var(--pavol-border)] bg-[var(--pavol-ink)] text-white">
-            <div className={`${PAVOL_CONTAINER_CLASS_NAME} py-16`}>
-                <div className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_repeat(2,minmax(0,0.7fr))]">
-                    <div className="max-w-md">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/10">
-                                <Image
-                                    src="/logo/pavol-hejny-ph.svg"
-                                    alt="Pavol Hejný"
-                                    width={36}
-                                    height={36}
-                                    className="h-9 w-9 invert"
+            <div className={`${PAVOL_CONTAINER_CLASS_NAME} py-8 sm:py-10`}>
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                    <Link href={homeHref} className="inline-flex w-fit items-center gap-2.5 rounded-md font-[family-name:var(--font-outfit)] text-lg font-medium">
+                        <Image src="/logo/pavol-hejny-ph.svg" alt="" width={28} height={28} className="h-7 w-7 invert" />
+                        Pavol Hejný
+                    </Link>
+                    <nav aria-label={CONTENT.footer.connectTitle}>
+                        <ul className="flex flex-wrap items-center gap-x-5 gap-y-1">
+                            {CONTENT.contact.links.map((link) => (
+                                <li key={link.href}>
+                                    <a href={link.href} className="inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm text-slate-200 transition-colors hover:text-white">
+                                        {link.icon && <link.icon aria-hidden="true" className="h-3.5 w-3.5" />}
+                                        {link.label}
+                                    </a>
+                                </li>
+                            ))}
+                            <li>
+                                <ArticleRssLink
+                                    language={language}
+                                    url={getArticlePodcastUrl(language, 'personal')}
+                                    label="Podcast"
+                                    className="inline-flex min-h-11 items-center text-sm text-slate-200 hover:text-white"
                                 />
-                            </div>
-
-                            <div>
-                                <p className="font-[family-name:var(--font-outfit)] text-2xl font-medium">Pavol Hejný</p>
-                                <p className="mt-1 text-sm text-slate-300">{CONTENT.hero.eyebrow}</p>
-                            </div>
-                        </div>
-
-                        <p className="mt-6 text-sm leading-7 text-slate-300">{CONTENT.footer.description}</p>
-
-                        <Button
-                            asChild
-                            size="lg"
-                            className="mt-8 rounded-full bg-white px-7 text-[var(--pavol-ink)] hover:bg-white/90"
-                        >
-                            <Link href={`${sectionPrefix}#contact`}>
-                                {CONTENT.footer.primaryAction}
-                                <Send className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
-                    </div>
-
-                    <FooterLinkColumn title={CONTENT.footer.navigationTitle} links={[...CONTENT.header.navItems, { label: language === 'cs' ? 'Čísla' : 'By the numbers', href: '#numbers' }, { label: language === 'cs' ? 'Média' : 'Media', href: '#media' }].map((item) => ({ ...item, href: `${sectionPrefix}${item.href}` }))} />
-                    <FooterLinkColumn title={CONTENT.footer.connectTitle} links={CONTENT.contact.links} subscription={language} />
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
-
-                <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-slate-400">© Pavol Hejný. {CONTENT.footer.rightsReservedText}</p>
-
-                    <LegalFooterLinks
-                        language={language}
-                        className="text-sm"
-                        linkClassName="text-slate-400 hover:text-white"
-                    />
+                <div className="mt-5 flex flex-col gap-3 border-t border-white/10 pt-5 text-xs text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+                    <p>© Pavol Hejný. {CONTENT.footer.rightsReservedText}</p>
+                    <nav aria-label={language === 'cs' ? 'Právní informace' : 'Legal information'}>
+                        <ul className="flex flex-wrap gap-x-5 gap-y-2">
+                            <li><Link href={privacyHref} className="hover:text-white">{language === 'cs' ? 'Ochrana osobních údajů' : 'Privacy policy'}</Link></li>
+                            <li><Link href={legalHref} className="hover:text-white">{language === 'cs' ? 'Právní dokumenty' : 'Legal documents'}</Link></li>
+                            <li><a href={COOKIE_SETTINGS_HASH} className="hover:text-white" onClick={() => {
+                                if (window.location.hash === COOKIE_SETTINGS_HASH) window.dispatchEvent(new Event('hashchange'));
+                            }}>Cookies</a></li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </footer>

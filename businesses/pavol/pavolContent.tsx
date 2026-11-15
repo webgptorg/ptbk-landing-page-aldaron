@@ -109,12 +109,9 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
     cs: {
         header: {
             navItems: [
-                { label: 'Jak vám pomohu', href: '#services' },
-                { label: 'Reference', href: '#testimonials' },
+                { label: 'Spolupráce', href: '#services' },
                 { label: 'Projekty', href: '#projects' },
-                { label: 'Akce', href: '#talks' },
-                { label: 'Články', href: '#articles' },
-                { label: 'Podcasty', href: '#podcasts' },
+                { label: 'Píšu a mluvím', href: '#writing' },
                 { label: 'Kontakt', href: '#contact' },
             ],
             primaryAction: 'Domluvit hovor',
@@ -130,20 +127,19 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             introduction: 'Navrhuji AI agentní týmy.\nA stavím s nimi produkty.',
             portraitCaption: 'Vývojář · AI konzultant · Lektor',
             description:
-                'Vyvíjím Promptbook a pomáhám firmám zapojit AI agenty do skutečné práce. Od návrhu jejich rolí a pravidel přes první prototyp až po každodenní provoz.',
+                'Vyvíjím Promptbook a pomáhám firmám zapojit AI agenty do každodenní práce.',
             badges: ['AI konzultace', 'Workshopy a přednášky', '15+ let vývoje'],
             primaryAction: 'Domluvit hovor',
             secondaryAction: 'Moje projekty',
         },
         services: {
-            eyebrow: 'S čím pomohu',
-            title: 'S čím vám pomůžeme',
-            description:
-                'AI agenty pro vás navrhneme a nasadíme, probereme vaše otázky nebo naučíme tým s AI pracovat. Na realizaci podle potřeby spolupracuji s našimi partnery.',
+            eyebrow: '',
+            title: 'S čím vám pomohu',
+            description: '',
             items: [
                 {
                     id: 'ai-agents', icon: Bot, title: 'AI agenti pro vaši firmu',
-                    description: 'Navrhneme a nasadíme AI agenty pro konkrétní práci ve vaší firmě. Napojíme je na vaše nástroje a ověříme je při skutečném používání.',
+                    description: 'Navrhnu agenty pro vaši firemní agendu a s kolegy je propojím s vašimi nástroji.',
                     topics: ['Návrh rolí a pravidel agentů', 'Propojení s vašimi nástroji', 'Nasazení a ověření v provozu'],
                     buttonLabel: 'Probrat nasazení agentů',
                     prefillMessage: 'Dobrý den, Pavole. Máme zájem o nasazení AI agentů v naší firmě.',
@@ -153,7 +149,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                     icon: BrainCircuit,
                     title: 'AI konzultace',
                     description:
-                        'Strategie, výběr nástrojů, vendor lock-in, bezpečnost dat, práce s AI agenty a cesta od dema k běžnému provozu.',
+                        'Pomohu vám vybrat nástroje a rozhodnout, kde a jak má AI ve vašem týmu smysl.',
                     topics: [
                         'Konkrétní použití ve vašem týmu',
                         'Výběr nástrojů a práce s daty',
@@ -171,7 +167,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                         { title: 'Workshop · přibližně 3-4 hodiny', description: 'Práce nad úlohami vašeho týmu, vlastní výstup a postup pro další práci.' },
                     ],
                     description:
-                        'Přednášky, workshopy a školení pro firmy, produktové týmy a vývojáře. Ukážeme konkrétní použití AI a společně si ho vyzkoušíme.',
+                        'Naučím váš tým pracovat s AI na vlastních úlohách. Pro firmy i vývojáře.',
                     topics: [
                         'Praktické příklady pro váš obor',
                         'Vývoj s AI a kontrola kvality',
@@ -183,15 +179,14 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             ],
         },
         testimonials: {
-            eyebrow: 'Reference',
+            eyebrow: '',
             title: 'Lidé, se kterými jsem pracoval',
-            description: 'Reference z projektů, školení, workshopů i delší spolupráce.',
+            description: '',
         },
         projects: {
-            eyebrow: 'Projekty',
-            title: 'Od aplikací po AI agenty',
-            description:
-                'Vyvíjím už více než polovinu života. Pracoval jsem na webových aplikacích, vzdělávacích produktech i AI agentech. Tady jsou projekty, které nejlépe ukazují, čemu se věnuji dnes.',
+            eyebrow: '',
+            title: 'Co stavím',
+            description: '',
         },
         numbers: {
             eyebrow: 'Čísla',
@@ -207,7 +202,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             moreLabel: 'Další výstupy na LinkedIn',
         },
         contact: {
-            eyebrow: 'Kontakt',
+            eyebrow: '',
             title: 'Napište mi, co řešíte',
             description: 'Napište stručně, co řešíte. Ozvu se do 24 hodin.',
             formNameLabel: 'Jméno',
@@ -251,12 +246,9 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
     en: {
         header: {
             navItems: [
-                { label: 'How I can help', href: '#services' },
-                { label: 'What people say', href: '#testimonials' },
+                { label: 'Work with me', href: '#services' },
                 { label: 'Projects', href: '#projects' },
-                { label: 'Events', href: '#talks' },
-                { label: 'Articles', href: '#articles' },
-                { label: 'Podcasts', href: '#podcasts' },
+                { label: 'Writing & speaking', href: '#writing' },
                 { label: 'Contact', href: '#contact' },
             ],
             primaryAction: "Let's talk",
@@ -271,20 +263,19 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             title: 'Pavol Hejný',
             introduction: 'I design AI agent teams.\nAnd build products with them.',
             portraitCaption: 'Developer · AI consultant · Educator',
-            description: 'I develop Promptbook and help companies put AI agents to work. From defining their roles and rules to a first prototype and everyday use.',
+            description: 'I develop Promptbook and help companies put AI agents to work.',
             badges: ['AI consulting', 'Workshops and talks', '15+ years building software'],
             primaryAction: "Let's talk",
             secondaryAction: 'See my projects',
         },
         services: {
-            eyebrow: 'How I can help',
-            title: 'What I can help with',
-            description:
-                'We can design and deploy AI agents, help you make decisions, or teach your team to work with AI. I bring in our partners where their expertise fits the project.',
+            eyebrow: '',
+            title: 'Work with me',
+            description: '',
             items: [
                 {
                     id: 'ai-agents', icon: Bot, title: 'AI agents for your company',
-                    description: 'We design and deploy AI agents for specific work in your company. We connect them to your tools and verify how they perform in everyday use.',
+                    description: 'I design agents for your company’s ongoing work and bring in colleagues to connect them to your tools.',
                     topics: ['Agent roles and rules', 'Connections to your tools', 'Deployment and real-world validation'],
                     buttonLabel: 'Discuss deploying agents',
                     prefillMessage: 'Hi Pavol, we would like to discuss deploying AI agents in our company.',
@@ -294,7 +285,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                     icon: BrainCircuit,
                     title: 'AI consulting',
                     description:
-                        'Strategy, tool selection, vendor lock-in, data security, AI agents, and the move from demo to daily use.',
+                        'I help you choose tools and decide where AI can make a useful difference in your team.',
                     topics: [
                         'Useful applications for your team',
                         'Tool selection and data security',
@@ -312,7 +303,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
                         { title: 'Workshop · around 3-4 hours', description: 'Work on your team’s tasks, create a concrete result and take away a method you can use again.' },
                     ],
                     description:
-                        'Talks, workshops and training for companies, product teams and developers. We show practical uses of AI and work through them together.',
+                        'I teach your team to use AI on their own tasks. For companies and developers.',
                     topics: [
                         'Practical examples for your field',
                         'Development with AI and quality control',
@@ -324,15 +315,14 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             ],
         },
         testimonials: {
-            eyebrow: 'What people say',
+            eyebrow: '',
             title: 'People I have worked with',
-            description: 'Notes from projects, training, workshops, and longer collaborations.',
+            description: '',
         },
         projects: {
-            eyebrow: 'Projects',
-            title: 'From apps to AI agents',
-            description:
-                'I have been building software for more than half my life. I have worked on web apps, education products, and AI agents. These projects show the kind of work I do today.',
+            eyebrow: '',
+            title: 'What I build',
+            description: '',
         },
         numbers: {
             eyebrow: 'By the numbers',
@@ -348,7 +338,7 @@ export const PAVOL_PAGE_CONTENT: Record<SupportedHomepageLanguage, PavolPageCont
             moreLabel: 'More on LinkedIn',
         },
         contact: {
-            eyebrow: 'Contact',
+            eyebrow: '',
             title: 'Tell me what you need help with',
             description: 'Tell me briefly what you need help with. I will reply within 24 hours.',
             formNameLabel: 'Name',

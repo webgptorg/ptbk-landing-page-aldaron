@@ -8,14 +8,14 @@ type PavolSectionHeadingProps = {
 export function PavolSectionHeading({ eyebrow, title, description, as: Heading = 'h2' }: PavolSectionHeadingProps) {
     return (
         <div className="pavol-section-heading max-w-2xl">
-            <p className="pavol-eyebrow">
+            {eyebrow && <p className="pavol-eyebrow">
                 <span aria-hidden="true" className="h-px w-7 shrink-0 bg-current" />
                 {eyebrow}
-            </p>
-            <Heading className="pavol-section-title mt-5 text-4xl font-medium leading-[1.1] tracking-[-0.035em] sm:text-5xl lg:text-[3.5rem]">
+            </p>}
+            <Heading className={`pavol-section-title ${eyebrow ? 'mt-5' : ''} text-3xl font-medium leading-[1.1] tracking-[-0.035em] sm:text-4xl lg:text-5xl`}>
                 {title}
             </Heading>
-            <p className="pavol-section-description mt-5 max-w-xl text-base leading-relaxed sm:text-lg">{description}</p>
+            {description && <p className="pavol-section-description mt-4 max-w-xl text-base leading-relaxed">{description}</p>}
         </div>
     );
 }

@@ -6,7 +6,6 @@ import { PAVOL_PAGE_CONTENT } from '@/businesses/pavol/pavolContent';
 import { PavolContactSection } from '@/businesses/pavol/PavolContactSection';
 import { PavolHeader } from '@/businesses/pavol/PavolHeader';
 import { PavolHero } from '@/businesses/pavol/PavolHero';
-import { PavolNumbersSection } from '@/businesses/pavol/PavolNumbersSection';
 import { PavolProjectsSection } from '@/businesses/pavol/PavolProjectsSection';
 import { PavolServicesSection } from '@/businesses/pavol/PavolServicesSection';
 import { PavolTestimonialsSection } from '@/businesses/pavol/PavolTestimonialsSection';
@@ -24,7 +23,6 @@ export function PavolPage({ language, media }: { readonly language: SupportedHom
             <PavolHeader language={language} onPrimaryAction={() => FORM.selectService('intro-call')} />
             <main id="main-content" tabIndex={-1} className="outline-none">
                 <PavolHero content={PAVOL_PAGE_CONTENT[language].hero} onPrimaryAction={() => FORM.selectService('intro-call')} />
-                <PavolNumbersSection language={language} />
                 <PavolServicesSection language={language} form={FORM} />
                 <PavolProjectsSection language={language} />
                 <PavolTestimonialsSection language={language} />

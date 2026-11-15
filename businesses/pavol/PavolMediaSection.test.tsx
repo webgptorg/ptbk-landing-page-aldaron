@@ -1,12 +1,14 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Article } from '@/lib/articles/types';
 import { getPersonalArticleListings } from '@/lib/articles/publishedArticles';
+import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
+import { loadPublishedWorkshopSummaries } from '@/lib/workshops/workshopPublic';
+import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolMediaSection } from './PavolMediaSection';
 import { PavolPodcastIndex } from './PavolPodcastIndex';
-import { PAVOL_PAGE_CONTENT } from './pavolContent';
 import { PAVOL_PODCAST_METADATA } from './pavolPodcastMetadata';
 
 const { playTrack } = vi.hoisted(() => ({ playTrack: vi.fn() }));
@@ -35,37 +37,77 @@ const podcasts = [
         href: 'https://example.com/episode', publishedAt: '2025-01-01T12:00:00Z', language: 'cs' as const,
         audioUrl: 'https://example.com/other.mp3', durationInSeconds: 60 },
 ];
+function workshop(slug: string, startsAt: string, endsAt: string | null): WorkshopSummary {
+    return { id: slug, kind: 'workshop', slug, title: `Workshop ${slug}`, description: 'Short introduction.\n\n- More detail in the archive.',
+        startsAt, endsAt, isPublished: true, event: DEFAULT_EVENT_DETAILS };
+}
 
-afterEach(() => { cleanup(); vi.clearAllMocks(); });
+beforeEach(() => {
+    vi.mocked(loadPublishedWorkshopSummaries).mockResolvedValue([]);
+    vi.mocked(getPersonalArticleListings).mockResolvedValue(articles);
+    vi.mocked(fetchPavolPodcasts).mockResolvedValue(podcasts);
+});
+afterEach(() => { cleanup(); vi.clearAllMocks(); vi.useRealTimers(); });
 
 describe('personal homepage previews and archives', () => {
-    it.each(['cs', 'en'] as const)('shows separate bounded previews in %s and keeps article playback on the homepage', async (language) => {
-        vi.mocked(getPersonalArticleListings).mockResolvedValue(articles);
-        vi.mocked(fetchPavolPodcasts).mockResolvedValue(podcasts);
+    it.each(['cs', 'en'] as const)('shows one compact selection in %s and keeps matching-language article playback', async (language) => {
+        const localizedArticles = articles.map(article => ({ ...article, language,
+            canonicalUrl: `https://pavolhejny.${language === 'cs' ? 'cz' : 'com'}/articles/${article.slug}` }));
+        const localizedPodcasts = podcasts.map(podcast => ({ ...podcast, language }));
+        vi.mocked(getPersonalArticleListings).mockResolvedValue(localizedArticles);
+        vi.mocked(fetchPavolPodcasts).mockResolvedValue(localizedPodcasts);
         const { container } = render(await PavolMediaSection({ language, revalidateSeconds: 3600 }));
-        const articleSection = container.querySelector<HTMLElement>('#articles')!;
-        const podcastSection = container.querySelector<HTMLElement>('#podcasts')!;
-        expect(Array.from(container.querySelectorAll('section'), (section) => section.id)).toEqual(['talks', 'media', 'articles', 'podcasts']);
-        expect(within(articleSection).getAllByRole('article')).toHaveLength(10);
-        expect(within(podcastSection).getAllByRole('article')).toHaveLength(4);
-        // The older alternative show must enter the preview before the ten-item cut.
-        expect(within(podcastSection).getAllByRole('heading')[2].textContent).toBe('Other show episode');
-        expect(within(articleSection).getByRole('link', { name: language === 'cs' ? 'Zobrazit víc článků' : 'Show more articles' }).getAttribute('href')).toBe('/articles');
-        expect(within(podcastSection).getByRole('link', { name: language === 'cs' ? 'Zobrazit víc podcastů' : 'Show more podcasts' }).getAttribute('href')).toBe('/podcasts');
-        expect(PAVOL_PAGE_CONTENT[language].header.navItems.filter((item) => ['#articles', '#podcasts'].includes(item.href)).map((item) => item.href)).toEqual(['#articles', '#podcasts']);
-        fireEvent.click(within(articleSection).getAllByRole('button', { name: 'Poslechnout článek' })[0]);
-        expect(playTrack).toHaveBeenCalledWith(expect.objectContaining({ id: 'article-0', kind: 'article', href: '/articles/article-0', appearance: 'personal' }));
+        const section = container.querySelector<HTMLElement>('#writing')!;
+        expect(Array.from(container.querySelectorAll('section'), element => element.id)).toEqual(['writing']);
+        expect(within(section).getAllByRole('article')).toHaveLength(3);
+        expect(screen.getByRole('heading', { name: 'Article 0' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Podcast 0' })).toBeTruthy();
+        expect(screen.queryByRole('heading', { name: 'Article 1' })).toBeNull();
+        for (const archive of ['articles', 'podcasts', 'talks']) {
+            expect(section.querySelector(`a[href="/${archive}"]`)).not.toBeNull();
+            expect(section.querySelector(`#${archive}`)).not.toBeNull();
+        }
+        expect(section.querySelector('#media')).not.toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: language === 'cs' ? 'Poslechnout článek' : 'Listen to article' }));
+        expect(playTrack).toHaveBeenCalledWith(expect.objectContaining({ id: 'article-0', kind: 'article', href: '/articles/article-0', appearance: 'personal', language }));
+    });
+
+    it('omits Czech recordings from the English homepage without removing their archive', async () => {
+        vi.mocked(getPersonalArticleListings).mockResolvedValue(articles); // A wrong-language source must not leak into this preview.
+        const { container } = render(await PavolMediaSection({ language: 'en', revalidateSeconds: 3600 }));
+        expect(screen.queryByRole('heading', { name: 'Article 0' })).toBeNull();
+        expect(screen.queryByRole('heading', { name: 'Podcast 0' })).toBeNull();
+        expect(container.querySelector('a[href="/podcasts"]')).not.toBeNull();
+        expect(container.querySelector('details summary')?.textContent).toBe('In the media');
+    });
+
+    it('selects the nearest upcoming owned workshop rather than historical or later events', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-11-13T12:00:00Z'));
+        vi.mocked(loadPublishedWorkshopSummaries).mockResolvedValue([
+            workshop('past', '2026-11-12T10:00:00Z', '2026-11-12T11:00:00Z'),
+            workshop('later', '2026-12-01T10:00:00Z', null),
+            workshop('next', '2026-11-14T10:00:00Z', null),
+            { ...workshop('unpublished', '2026-11-13T13:00:00Z', null), isPublished: false },
+            { ...workshop('other-lecturer', '2026-11-13T13:00:00Z', null), event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: 'https://example.com' } },
+        ]);
+        render(await PavolMediaSection({ language: 'cs', revalidateSeconds: 3600 }));
+        expect(screen.getByRole('heading', { name: 'Workshop next' })).toBeTruthy();
+        expect(screen.queryByRole('heading', { name: 'Workshop past' })).toBeNull();
+        expect(screen.queryByRole('heading', { name: 'Workshop later' })).toBeNull();
+        expect(screen.queryByRole('heading', { name: 'Workshop unpublished' })).toBeNull();
+        expect(screen.queryByRole('heading', { name: 'Workshop other-lecturer' })).toBeNull();
+        expect(screen.getAllByRole('article')).toHaveLength(3);
     });
 
     it.each(['cs', 'en'] as const)('keeps all podcasts, only podcasts, and working homepage navigation in the %s archive', async (language) => {
-        vi.mocked(fetchPavolPodcasts).mockResolvedValue(podcasts);
         const { container } = render(await PavolPodcastIndex({ language, revalidateSeconds: 3600 }));
         expect(screen.getAllByRole('article')).toHaveLength(13);
         expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
         expect(screen.queryByText('Article 0')).toBeNull();
         expect((screen.getByRole('combobox', { name: language === 'cs' ? 'Řazení' : 'Sort by' }) as HTMLSelectElement).value).toBe('smart');
-        expect(container.querySelector('header a[href="/#articles"]')).not.toBeNull();
-        expect(container.querySelector('footer a[href="/#podcasts"]')).not.toBeNull();
+        expect(container.querySelector('header a[href="/#writing"]')).not.toBeNull();
+        expect(within(container.querySelector('footer')!).getByRole('button', { name: 'Podcast' })).toBeTruthy();
         expect(container.querySelector('a[hreflang="en"]')?.getAttribute('href')).toBe('https://pavolhejny.com/podcasts');
         expect(PAVOL_PODCAST_METADATA[language].alternates?.canonical).toBe(`https://pavolhejny.${language === 'cs' ? 'cz' : 'com'}/podcasts`);
     });

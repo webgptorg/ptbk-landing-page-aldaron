@@ -35,7 +35,51 @@ function ProjectMark({ project }: { readonly project: PavolProject }) {
     );
 }
 
+function SelectedProjects({ language }: { readonly language: SupportedHomepageLanguage }) {
+    const CONTENT = PAVOL_PAGE_CONTENT[language].projects;
+    const PROJECTS = ['Promptbook', 'H-edu'].flatMap(title => PAVOL_PROJECTS[language].filter(project => project.title === title));
+
+    return (
+        <section id="projects" tabIndex={-1} className="pavol-projects pavol-section bg-[var(--pavol-ink)] text-[var(--pavol-paper)] outline-none">
+            <div className={PAVOL_CONTAINER_CLASS_NAME}>
+                <PavolSectionHeading {...CONTENT} />
+                <div className="mt-9 grid gap-9 md:grid-cols-[1.25fr_1fr] md:gap-12">
+                    {PROJECTS.map((PROJECT, index) => (
+                        <article key={PROJECT.title} className="border-t border-white/20 pt-6">
+                            <div className="flex items-center gap-4">
+                                <ProjectMark project={PROJECT} />
+                                <h3 className={cn('font-medium tracking-tight', index === 0 ? 'text-3xl text-[var(--pavol-gold)] sm:text-4xl' : 'text-2xl sm:text-3xl')}>
+                                    {PROJECT.title}
+                                </h3>
+                            </div>
+                            <p className="mt-5 max-w-xl text-base leading-relaxed text-[#c4d0c6]">
+                                {PROJECT.title === 'Promptbook'
+                                    ? PROJECT.caseStudy?.role
+                                    : language === 'cs'
+                                        ? 'Vytvořil jsem první prototyp interaktivních učebnic a navrhl jejich architekturu. Prototyp pomohl týmu získat investici.'
+                                        : 'I built the first prototype of these interactive textbooks and designed the architecture. The prototype helped the team secure investment.'}
+                            </p>
+                            <div className="mt-5 flex flex-wrap gap-5">
+                                {PROJECT.links.map(LINK => (
+                                    <a key={LINK.href} href={LINK.href} className="inline-flex min-h-11 items-center gap-3 text-sm font-medium underline decoration-white/30 underline-offset-4 hover:decoration-current">
+                                        {LINK.label}
+                                        {LINK.icon && <LINK.icon aria-hidden="true" className="h-4 w-4" />}
+                                    </a>
+                                ))}
+                            </div>
+                        </article>
+                    ))}
+                </div>
+                <Link href="/projects" className="mt-7 inline-flex min-h-11 items-center gap-3 text-sm underline decoration-white/30 underline-offset-4 hover:decoration-current">
+                    {language === 'cs' ? 'Všechny projekty' : 'All projects'} →
+                </Link>
+            </div>
+        </section>
+    );
+}
+
 export function PavolProjectsSection({ language, isArchive = false }: { readonly language: SupportedHomepageLanguage; readonly isArchive?: boolean }) {
+    if (!isArchive) return <SelectedProjects language={language} />;
     const CONTENT = PAVOL_PAGE_CONTENT[language].projects;
     return (
         <section

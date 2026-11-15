@@ -1,6 +1,6 @@
 .pavol-site {
     color-scheme: light;
-    --pavol-section-space: clamp(4rem, 7vw, 6.5rem);
+    --pavol-section-space: clamp(3rem, 5vw, 4.5rem);
 }
 
 .pavol-site ::selection {
@@ -213,10 +213,6 @@
     font-size: 1.5rem;
     line-height: 1.5;
     letter-spacing: -0.025em;
-}
-
-.pavol-contact-form {
-    box-shadow: 0 12px 40px rgb(32 57 50 / 5%);
 }
 
 .pavol-contact-form :is(input, select, textarea) {

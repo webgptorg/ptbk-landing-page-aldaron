@@ -39,3 +39,18 @@ The approved portfolio changes are committed separately on `main`. Build, TypeSc
 Commit `80106041aaa7622858628b286177fc75abe0f6da` adds slow-migration lock diagnostics without logging SQL text, credentials or application records. It passed the migration tests and TypeScript, but Vercel refused its deployment with HTTP 402, `api-deployments-free-per-day`, reporting more than 100 deployments and a one-day retry interval. No billing or plan changes were made.
 
 Production was therefore rolled back to the preceding deployment `dpl_7xoZyX5VXUMZZxyFdNivArQcce7h` (commit `723c4d3e2fd45d89009baaae85a8721ce43e42fb`). Both personal domains, ptbk.io and AI ta Krajta returned HTTP 200 afterward. The new portfolio changes remain on `main`, not on the restored production version. Once deployment capacity is available, inspect the migration lock diagnostics, fix the actual blocker and verify a persisted chat question, generated reply and authenticated history before promoting this release again.
+
+## Homepage simplification, 13 November 2026
+
+Both personal homepages now share a shorter six-section composition with four navigation links. The original
+portrait and branding remain. Services have concise descriptions and attributed contact links. Training formats
+live at `/training`; the form has only name, email and message and still uses the versioned personal enquiry
+source, consent evidence and asynchronous CRM projection. Query-selected training and introductory-call drafts
+remain editable. No backend or database schema changes are required.
+
+Promptbook and H-edu are the homepage project selection; the project catalogue and complete case studies remain
+at `/projects`. Two exact testimonial excerpts link through a native disclosure to all five full originals.
+One writing/speaking section selects at most three items, preserves article and podcast playback, retains old
+section hash aliases and links to complete article, podcast and event archives. English homepage selection uses
+matching-language content; the archives retain original Czech recordings and language labels. Press coverage is
+still accessible in a native disclosure. Footer links include podcast subscriptions and cookie settings.
