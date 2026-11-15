@@ -1,5 +1,7 @@
 > Revize vlastníka 13. listopadu 2026: viz [realizace spuštění](../docs/launch-2026-11-13.md), která nahrazuje starší CTA, navigaci, velkou kalkulačku na homepage, dostupnost vzdáleného ovládání a technické blokování licencemi. Vizuální specifikace zůstává.
 
+Navazující vizuální oprava z 15. listopadu 2026 zesiluje původní obrysy rukopisu o 6,5 SVG jednotky se zaoblenými spoji, aby odpovídaly váze nadpisu Exo 2 600. Stejně se rozšíří odkrývací masky, včetně diakritiky. Druhý řádek používá velikost `min(1em, 8.8cqi)` podle skutečné šířky nadpisu, přirozené mezislovní mezery 0,28 em a plynulou šířku jednotlivých slov. Celá věta se vejde i s nejdelším slovesem na úzký mobil; žádné ořezávání ani vodorovné roztahování stránky. Tvary, rozestupy písmen, časování, klidné podtržení a přístupnost zůstávají zachované.
+
 Pozdější oprava vlastníka z 15. listopadu 2026 nahrazuje ručně sestavenou abecedu skutečnými výstupy Calligrapher.ai, styl 9, čitelnost 0,75 a šířka tahu 0,76. Celé kresby slov zachovávají původní tvary, přítlak a rozestupy písmen; diakritika anglického generátoru je doplněna z jeho vlastních tahů podle [provenience](../docs/hero-calligrapher.md). Místo pevného prostoru nejdelšího slova se skutečná šířka plynule mění během 350 ms. Okolo slov jsou běžné mezery; svislé místo pro dolní tahy zůstává vyhrazené. Ostatní časování, podtržení a přístupnost se zachovávají. Tato oprava má přednost před předchozím popisem vlastní abecedy a pevné šířky.
 
 # Web Promptbooku

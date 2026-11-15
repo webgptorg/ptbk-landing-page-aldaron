@@ -1,9 +1,9 @@
-.headline{position:relative;display:block;padding-top:104px;color:var(--ptbk-blue);line-height:1.12}
+.headline{position:relative;display:block;padding-top:104px;color:var(--ptbk-blue);line-height:1.18;container-type:inline-size}
 .firstLine{display:block;color:#1b2739}
 /* Each complete word keeps Calligrapher's spacing. Its true width closes the
    empty longest-word slot; only horizontal geometry eases between words. */
-.visualLine{display:grid;grid-template-areas:'phrase';justify-content:center;align-items:baseline;margin-top:.14em;padding-bottom:.42em;font-size:.93em;letter-spacing:-.055em}
-.phrase{grid-area:phrase;justify-self:center;display:flex;align-items:center;gap:.16em;white-space:nowrap}
+.visualLine{display:grid;grid-template-areas:'phrase';justify-content:center;align-items:baseline;margin-top:.14em;padding-bottom:.42em;font-size:min(1em,8.8cqi);letter-spacing:inherit}
+.phrase{grid-area:phrase;justify-self:center;display:flex;align-items:center;gap:.28em;white-space:nowrap}
 .activity{display:inline-block;position:relative;flex:none;height:1.18em;transition:width .35s cubic-bezier(.22,.75,.2,1)}
 .handwritingLayer{position:absolute;inset:0;opacity:1;transition:opacity .18s linear}
 .handwritingLayer[data-fading=true]{opacity:0}
@@ -31,11 +31,6 @@
 @keyframes robot-write{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
 @keyframes robot-nod{0%,100%{transform:none}45%{transform:translateY(1.5px) rotate(3deg)}}
 @keyframes robot-change{0%,100%{transform:none}40%{transform:rotate(-8deg)}}
-@media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.headline .visualLine{font-size:.88em;margin-top:.18em}}
-@media(max-width:370px){.headline .visualLine{font-size:.76em}}
+@media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.visualLine{margin-top:.18em}}
 @media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.inkReveal,.penStroke{stroke-dashoffset:0!important}.handwritingLayer{opacity:1!important}}
 @media(forced-colors:active){.headline,.firstLine{color:CanvasText!important}.inkStroke{fill:CanvasText}}
-
-/* Match the selected heading's rhythm. */
-.headline{line-height:1.18}
-.visualLine{font-size:1em;letter-spacing:inherit}
