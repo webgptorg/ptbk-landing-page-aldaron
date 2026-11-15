@@ -1,12 +1,51 @@
 .headline{position:relative;display:block;padding-top:104px;color:var(--ptbk-blue);line-height:1.18;container-type:inline-size}
 .firstLine{display:block;color:#1b2739}
-/* Each complete word keeps Calligrapher's spacing. Its true width closes the
-   empty longest-word slot; only horizontal geometry eases between words. */
+/* Each activity keeps its own natural width; the sentence stays centered. */
 .visualLine{display:grid;grid-template-areas:'phrase';justify-content:center;align-items:baseline;margin-top:.14em;padding-bottom:.42em;font-size:min(1em,8.8cqi);letter-spacing:inherit}
 .phrase{grid-area:phrase;justify-self:center;display:flex;align-items:center;gap:.28em;white-space:nowrap}
 .activity{display:inline-block;position:relative;flex:none;height:1.18em;transition:width .35s cubic-bezier(.22,.75,.2,1)}
-.handwritingLayer{position:absolute;inset:0;opacity:1;transition:opacity .18s linear}
-.handwritingLayer[data-fading=true]{opacity:0}
+.wordMeasure,.activityWord{font-kerning:none;font-variant-ligatures:none}
+.wordMeasure{display:inline-block;visibility:hidden;white-space:pre;line-height:1.18}
+.activityLayer{position:absolute;inset:0;opacity:1;transition:opacity .18s linear}
+.activityLayer[data-fading=true]{opacity:0}
+.activityWord{position:relative;display:inline-block;line-height:1.18;white-space:nowrap}
+.wordBody{display:inline-block}
+.codeWord{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.86em;letter-spacing:-.06em;line-height:calc(1.18 / .86)}
+.letter{display:inline-block;vertical-align:top}
+.glyph{display:inline-block}
+.activityDetail{position:absolute;pointer-events:none}
+/* Working: one confident assembly, with three quiet progress blocks. */
+.headline[data-animated=true] [data-hero-motion=assemble] .wordBody{animation:work-assemble .8s cubic-bezier(.22,.75,.2,1) .12s both}
+[data-hero-motion=assemble] .activityDetail{bottom:-.12em;left:0;width:.72em;height:.045em;background:linear-gradient(90deg,currentColor 0 27%,transparent 27% 36%,currentColor 36% 63%,transparent 63% 72%,currentColor 72%);opacity:0;transform-origin:left}
+.headline[data-animated=true] [data-hero-motion=assemble] .activityDetail{animation:work-progress 1.2s .12s both}
+/* Development: compact terminal lettering, a precise block caret. */
+.headline[data-animated=true] [data-hero-motion=code] .wordBody{animation:code-type 1.05s steps(var(--letter-count),end) .12s both}
+[data-hero-motion=code] .activityDetail{left:100%;top:.27em;width:.09em;height:.75em;background:currentColor;opacity:0}
+.headline[data-animated=true] [data-hero-motion=code] .activityDetail{animation:code-caret 1.05s steps(var(--letter-count),end) .12s both}
+/* Accounting/filing: short mechanical reels settle onto a receipt rule. */
+[data-hero-motion=ledger] .letter{overflow:hidden;padding-block:.16em;margin-block:-.16em}
+.headline[data-animated=true] [data-hero-motion=ledger] .glyph{animation:ledger-reel .46s steps(3,end) calc(120ms + var(--letter-index)*65ms) both}
+[data-hero-motion=ledger] .activityDetail{left:0;right:0;bottom:-.1em;height:.025em;border-bottom:.025em dotted currentColor;opacity:.35}
+.headline[data-animated=true] [data-hero-motion=ledger] .activityDetail{animation:ledger-rule .32s .85s both}
+/* Planning: letters arrive in ordered pairs, then align on their common baseline. */
+.headline[data-animated=true] [data-hero-motion=plan] .glyph{animation:plan-align .5s cubic-bezier(.22,.75,.2,1) calc(120ms + var(--pair-index)*140ms) both}
+[data-hero-motion=plan] .activityDetail{left:0;right:0;bottom:-.12em;height:.1em;border-left:1px solid currentColor;border-right:1px solid currentColor;border-bottom:1px solid currentColor;opacity:0}
+.headline[data-animated=true] [data-hero-motion=plan] .activityDetail{animation:plan-guide 1.2s .12s both}
+/* Transcription/replies: phrases arrive in bursts, with a thin text caret. */
+[data-hero-motion=transcribe] .letter{position:relative}
+.headline[data-animated=true] [data-hero-motion=transcribe] .glyph{animation:transcribe-letter .01s step-end var(--transcribe-delay) both}
+[data-hero-motion=transcribe] .letter::after{content:'';position:absolute;right:-.025em;top:.2em;width:.025em;height:.8em;background:currentColor;opacity:0}
+.headline[data-animated=true] [data-hero-motion=transcribe] .letter::after{animation:transcribe-caret .18s step-end var(--transcribe-delay) both}
+/* Analysis: a single reading beam resolves the complete word from left to right. */
+.headline[data-animated=true] [data-hero-motion=scan] .wordBody{animation:scan-resolve 1.15s linear .12s both}
+[data-hero-motion=scan] .activityDetail{left:100%;top:.12em;width:.035em;height:1em;background:currentColor;box-shadow:0 0 .13em currentColor;opacity:0}
+.headline[data-animated=true] [data-hero-motion=scan] .activityDetail{animation:scan-beam 1.15s linear .12s both}
+/* Testing: successive checks settle, followed by one restrained completion tick. */
+.headline[data-animated=true] [data-hero-motion=verify] .glyph{animation:test-letter .16s linear calc(120ms + var(--letter-index)*90ms) both}
+[data-hero-motion=verify] .activityDetail{left:100%;top:-.06em;width:.22em;height:.22em;margin-left:.04em}
+[data-hero-motion=verify] .activityDetail svg{display:block;width:100%;height:100%;overflow:visible}
+[data-hero-motion=verify] .activityDetail path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:0}
+.headline[data-animated=true] [data-hero-motion=verify] .activityDetail path{animation:test-tick .3s ease-out 1s both}
 .handwriting{position:absolute;left:0;top:-.09em;height:1.9em;overflow:visible}
 .penStroke{stroke-dasharray:1;stroke-dashoffset:0}
 .headline[data-animated=true] .penStroke{animation:draw-line var(--pen-duration) cubic-bezier(.35,.05,.55,.95) var(--pen-delay) both}
@@ -25,12 +64,26 @@
 .headline[data-stage=checking] .robotHead{animation:robot-nod .65s ease-in-out both}
 .headline[data-stage=swapping] .robotArm{animation:robot-change .48s ease-in-out both}
 .headline[data-animated=true] .inkReveal{animation:draw-line var(--ink-duration) cubic-bezier(.4,.05,.2,1) var(--ink-delay) both}
-.headline[data-running=false] *,.headline[data-running=false] *::after{animation-play-state:paused!important}
+.headline[data-running=false] *,.headline[data-running=false] *::before,.headline[data-running=false] *::after{animation-play-state:paused!important}
 .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @keyframes draw-line{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes robot-write{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
 @keyframes robot-nod{0%,100%{transform:none}45%{transform:translateY(1.5px) rotate(3deg)}}
 @keyframes robot-change{0%,100%{transform:none}40%{transform:rotate(-8deg)}}
+@keyframes work-assemble{from{opacity:0;transform:translateX(-.16em);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+@keyframes work-progress{0%{opacity:0;transform:scaleX(.05)}25%{opacity:.4}75%{opacity:.4;transform:scaleX(1)}100%{opacity:0;transform:scaleX(1)}}
+@keyframes code-type{from{clip-path:inset(-.2em 100% -.2em -.02em)}to{clip-path:inset(-.2em -.02em -.2em -.02em)}}
+@keyframes code-caret{0%{left:0;opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
+@keyframes ledger-reel{0%{opacity:0;transform:translateY(-1.1em)}20%{opacity:.45}100%{opacity:1;transform:none}}
+@keyframes ledger-rule{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+@keyframes plan-align{from{opacity:0;transform:translate(var(--step-offset),.25em)}to{opacity:1;transform:none}}
+@keyframes plan-guide{0%,100%{opacity:0}30%,75%{opacity:.25}}
+@keyframes transcribe-letter{from{opacity:0}to{opacity:1}}
+@keyframes transcribe-caret{0%,90%{opacity:1}100%{opacity:0}}
+@keyframes scan-resolve{0%{opacity:.2;clip-path:inset(-.2em 100% -.2em 0)}100%{opacity:1;clip-path:inset(-.2em -.02em -.2em 0)}}
+@keyframes scan-beam{0%{left:0;opacity:0}12%,86%{opacity:.6}100%{left:100%;opacity:0}}
+@keyframes test-letter{from{opacity:.22}to{opacity:1}}
+@keyframes test-tick{from{stroke-dashoffset:20}to{stroke-dashoffset:0}}
 @media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.visualLine{margin-top:.18em}}
-@media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.inkReveal,.penStroke{stroke-dashoffset:0!important}.handwritingLayer{opacity:1!important}}
+@media(prefers-reduced-motion:reduce){.headline *,.headline *::before,.headline *::after{animation:none!important;transition:none!important}.inkReveal,.penStroke{stroke-dashoffset:0!important}.activityLayer{opacity:1!important}}
 @media(forced-colors:active){.headline,.firstLine{color:CanvasText!important}.inkStroke{fill:CanvasText}}

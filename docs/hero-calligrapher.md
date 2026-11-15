@@ -1,5 +1,18 @@
 # Homepage handwriting
 
+## Activity-specific animation, 16 November
+
+Only `píše` / `writes` now uses these Calligrapher paths. The other retained
+exports remain unchanged as source assets. `HeroActivity` gives the other actions
+distinct assembly, code, accounting/filing, planning, transcription/reply, scan
+and verification entrances. They use the brand heading typeface, with compact
+system monospace for code, and settle before the existing 1,320 ms entrance
+budget ends. The original word rotation, hold/fade timing and one-time underline
+remain unchanged. A complete hidden copy measures each word in its actual
+font; ResizeObserver and font readiness refresh the width, including on phones.
+No-JavaScript and reduced-motion output remain complete; the shared clock and
+CSS pause every effect while hidden/offscreen.
+
 The 15 November correction replaces the original hand-built alphabet with whole
 word drawings exported from **https://www.calligrapher.ai/** in the owner's
 browser: Style **9** (internal value 21), Legibility **0.75**, Stroke Width
@@ -34,5 +47,7 @@ with normal word gaps. It does not reserve the longest word inside the sentence.
 Constant vertical space accommodates long handwritten descenders. Hidden tabs,
 offscreen pause, static reduced motion and accessible initial copy are retained.
 
-Checks: all 16 Czech/English activity drawings, complete mask rendering, rotation,
-width changes, unique masks, visibility pause and reduced-motion behavior.
+Checks: all eight activity modes in Czech/English, original writing paths,
+unique masks, one accessible promise, rotation, unchanged underline, visibility
+pause and reduced-motion behavior. Browser QA checks all 16 complete phrases
+at viewport widths 320, 360, 390, 768 and 1440 pixels.

@@ -28,7 +28,7 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('hero working headline', () => {
-    it('keeps the underline still while handwritten activities change', () => {
+    it('keeps the underline still while activity styles change', () => {
         const { container } = render(<HeroHeadline/>);
         const ink = () => container.querySelector('[data-hero-underline]')!.getAttribute('data-ink-seed');
         const first = ink();
@@ -47,7 +47,7 @@ describe('hero working headline', () => {
         const { container } = render(<><HeroHeadline/><HeroHeadline/></>);
         const initial = Array.from(container.querySelectorAll('[data-ink-seed]')).map(el => el.getAttribute('data-ink-seed'));
         const ids = Array.from(container.querySelectorAll('mask')).map(el => el.id);
-        expect(ids.length).toBeGreaterThan(4);
+        expect(ids.length).toBeGreaterThanOrEqual(4);
         expect(new Set(ids).size).toBe(ids.length);
         act(() => vi.advanceTimersByTime(30000));
         expect(Array.from(container.querySelectorAll('[data-ink-seed]')).map(el => el.getAttribute('data-ink-seed'))).toEqual(initial);
@@ -243,34 +243,35 @@ describe('hero working headline', () => {
         expect(face.getAttribute('transform')).toBe(rest);
     });
 
-    it.each(['cs', 'en'] as const)('draws original Calligrapher activities at their own widths with one accessible promise (%s)', locale => {
+    it.each(['cs', 'en'] as const)('gives each activity its own motion with one accessible promise (%s)', locale => {
         const words = locale === 'cs'
             ? ['pracuje', 'vyvíjí', 'účtuje', 'plánuje', 'píše', 'přepisuje', 'analyzuje', 'testuje']
             : ['works', 'codes', 'plans', 'writes', 'files', 'replies', 'analyzes', 'tests'];
+        const modes = locale === 'cs'
+            ? ['assemble', 'code', 'ledger', 'plan', 'handwriting', 'transcribe', 'scan', 'verify']
+            : ['assemble', 'code', 'plan', 'handwriting', 'ledger', 'transcribe', 'scan', 'verify'];
         const promise = locale === 'cs' ? 'Teď pracuje pro Vás' : 'Now it works for you';
         const { container } = render(<SiteLocaleProvider locale={locale}><h1><HeroHeadline/></h1></SiteLocaleProvider>);
         const heading = screen.getByRole('heading', { name: promise });
         const slot = container.querySelector<HTMLElement>('[data-hero-word-slot]')!;
-        const width = slot.style.width;
-        let shortWidth = 0;
-        const firstDrawing = container.querySelector('[data-hero-handwriting]');
-        expect(firstDrawing?.getAttribute('data-hero-handwriting')).toBe(words[0]);
-        act(() => vi.advanceTimersByTime(4850));
-        expect(container.querySelector('[data-fading]')?.getAttribute('data-fading')).toBe('true');
-        act(() => vi.advanceTimersByTime(150));
-        for (let index = 1; index < words.length; index++) {
-            const drawing = container.querySelector('[data-hero-handwriting]')!;
-            expect(drawing).not.toBe(firstDrawing);
-            expect(drawing.getAttribute('data-hero-handwriting')).toBe(words[index]);
-            expect(drawing.querySelectorAll('path').length).toBeGreaterThanOrEqual(words[index].length);
-            expect(drawing.getAttribute('data-handwriting-source')).toBe('calligrapher-style-9');
-            if (index === 4) { shortWidth = parseFloat(slot.style.width); expect(shortWidth).toBeLessThan(parseFloat(width)); }
-            if (index === 6) expect(parseFloat(slot.style.width)).toBeGreaterThan(shortWidth);
+        const underline = container.querySelector('[data-hero-underline]');
+        for (let index = 0; index < words.length; index++) {
+            expect(slot.getAttribute('data-hero-motion')).toBe(modes[index]);
+            expect(container.querySelector('[data-hero-typed]')?.textContent).toBe(words[index]);
+            const drawing = container.querySelector('[data-hero-handwriting]');
+            if (modes[index] === 'handwriting') {
+                expect(drawing?.getAttribute('data-hero-handwriting')).toBe(words[index]);
+                expect(drawing?.getAttribute('data-handwriting-source')).toBe('calligrapher-style-9');
+                expect(drawing!.querySelectorAll('path').length).toBeGreaterThan(words[index].length);
+            } else expect(drawing).toBeNull();
             expect(screen.getByRole('heading', { name: promise })).toBe(heading);
-            act(() => vi.advanceTimersByTime(5000));
+            expect(container.querySelector('[data-hero-underline]')).toBe(underline);
+            act(() => vi.advanceTimersByTime(4850));
+            expect(container.querySelector('[data-fading]')?.getAttribute('data-fading')).toBe('true');
+            act(() => vi.advanceTimersByTime(150));
         }
-        expect(container.querySelector('[data-hero-handwriting]')?.getAttribute('data-hero-handwriting')).toBe(words[0]);
-        expect(container.querySelector('i')).toBeNull();
+        expect(slot.getAttribute('data-hero-motion')).toBe('assemble');
+        expect(container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity')).toBe(words[0]);
     });
 
     it('preserves active time while the tab or headline is hidden', () => {

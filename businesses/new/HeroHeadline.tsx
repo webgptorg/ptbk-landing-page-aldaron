@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useSiteLocale } from './LocaleProvider';
 import { PromptbookRobot } from './PromptbookRobot';
 import { HeroUnderline } from './HeroUnderline';
-import { HeroHandwriting, HANDWRITING_DELAY_MS, HANDWRITING_MS } from './HeroHandwriting';
-import { handwritingFor } from './heroHandwriting';
+import { HANDWRITING_DELAY_MS, HANDWRITING_MS } from './HeroHandwriting';
+import { ACTIVITY_MOTIONS, HeroActivity } from './HeroActivity';
 import s from './hero-headline.module.css';
 
 const COPY = {
@@ -69,7 +69,7 @@ export function HeroHeadline({ firstLine, underlineReplay = 0 }: { firstLine?: s
     const phase = elapsed % CHANGE_PERIOD_MS;
     const activity = copy.activities[cycle % copy.activities.length];
     const fading = animated && phase >= WRITTEN_MS + HOLD_MS;
-    const stage = !animated ? 'still' : phase < WRITTEN_MS ? 'writing' : 'idle';
+    const stage = !animated ? 'still' : phase < WRITTEN_MS ? ACTIVITY_MOTIONS[activity] === 'handwriting' ? 'writing' : 'working' : 'idle';
     const initial = `${copy.prefix} ${copy.activities[0]} ${copy.suffix} ${copy.you}`;
 
     return <span ref={root} className={s.headline} data-hero-heading data-animated={animated} data-running={running} data-stage={stage}>
@@ -79,12 +79,7 @@ export function HeroHeadline({ firstLine, underlineReplay = 0 }: { firstLine?: s
         <span className={s.visualLine} aria-hidden="true" data-hero-activity={activity}>
             <span className={s.phrase}>
                 <span>{copy.prefix}</span>{' '}
-                <span className={s.activity} data-hero-word-slot style={{ width: `${handwritingFor(activity).width / 100}em` }}>
-                    <span className={s.srOnly} data-hero-typed>{activity}</span>
-                    <span key={`${locale}-${cycle}`} className={s.handwritingLayer} data-fading={fading}>
-                        <HeroHandwriting word={activity}/>
-                    </span>
-                </span>{' '}
+                <HeroActivity word={activity} generation={`${locale}-${cycle}`} fading={fading}/>{' '}
                 <span className={s.forYou}>
                     {copy.suffix}{' '}
                     <span className={s.you}>{copy.you}
