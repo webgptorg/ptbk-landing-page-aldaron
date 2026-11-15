@@ -303,12 +303,16 @@ use cases, and audiences. Keep these rules current when behavior changes.
   `https://pavolhejny.com/` personal sites, respectively. Their own domain roots
   rewrite to the existing localized routes.
 - Pavol's Czech and English personal sites share the same layout and localized content in `businesses/pavol`.
-  Their compact homepages use six sections: introduction, three concise service options, Promptbook and H-edu,
-  two faithful testimonial excerpts, one `#writing` selection and contact. The selection contains at most three
-  items: the latest matching-language article, one matching-language recording and the nearest owned ongoing/upcoming
-  event (otherwise an archival talk). English does not feature Czech recordings. Legacy `#articles`, `#podcasts`,
-  `#talks` and `#media` remain anchor aliases. Complete original testimonials and press mentions remain available
-  in native disclosures. Header navigation has four links; archives return to the homepage anchors and preserve
+  Their compact homepages lead with introduction and a curated `#writing` selection, followed by three concise
+  service options, Promptbook and H-edu, two faithful testimonial excerpts and contact. The media selection contains
+  at most five items, ordered by the editable homepage-only interest scores in `pavolHomepageSelection.ts`, with date
+  breaking ties. Defaults prioritize the latest credited AI ta Krajta episode, Data Talk, the native code-generation
+  article, Euro.cz and a different external podcast show. Syndicated articles default to zero interest; archives and
+  feeds retain all publications. One episode per show and canonical URL deduplication keep the selection diverse.
+  Both languages retain important Czech recordings with explicit original-audio labels. The first two shows have
+  prominent actual logos, playback buttons and real durations; missing enclosures keep a publisher listening link.
+  AI ta Krajta reuses its canonical snake artwork. Logo and hero restyling remain proposals awaiting selection. Legacy `#articles`, `#podcasts`,
+  `#talks` and `#media` remain anchor aliases. Complete original testimonials remain in a native disclosure; selected press links are directly visible. Header navigation has four links; archives return to the homepage anchors and preserve
   playback and language paths. `/articles` and `/podcasts` retain their complete type-specific archives. Podcast
   sources refresh hourly, retain the shared player, localized metadata and sitemap entries. Reviewed external episodes
   retain verified recordings during outages; AI ta Krajta reads the shared merged episodes without audience-profile

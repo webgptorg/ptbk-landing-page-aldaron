@@ -54,3 +54,19 @@ One writing/speaking section selects at most three items, preserves article and 
 section hash aliases and links to complete article, podcast and event archives. English homepage selection uses
 matching-language content; the archives retain original Czech recordings and language labels. Press coverage is
 still accessible in a native disclosure. Footer links include podcast subscriptions and cookie settings.
+
+## Curated media revision, 15 November 2026
+
+The personal homepage now presents writing and speaking directly after the introduction. Five entries at most
+are selected by homepage-only editorial interest rather than by one slot per type or newest date alone.
+`businesses/pavol/pavolHomepageSelection.ts` owns the scores: latest credited AI ta Krajta episode 100, Data Talk 90,
+Pavol's native code-generation article 80, Euro.cz 70, another external podcast 60, other native articles 40,
+other press 20 and syndicated articles 0. Exact article/episode/URL keys can override the defaults; zero omits
+only that homepage entry. An original `prominence: 0` remains a hard omission. Date breaks interest ties.
+One episode per show and canonical publication deduplication keep the selection compact. The canonical episode
+loader remains the authority for Pavol's participation. Archives, feeds, permissions and original content are unchanged.
+
+Both languages show the curated podcasts, labelling original Czech audio on English pages. The first two show
+identities, actual logos, real duration and playback controls are prominent. Missing public audio exposes a
+publisher listening link. AI ta Krajta reuses the same snake drawing as its own site, including in the personal
+podcast archive. Personal logo and portrait-background concepts remain preview proposals, not deployed changes.

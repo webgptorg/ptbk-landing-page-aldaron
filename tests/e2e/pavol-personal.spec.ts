@@ -232,13 +232,19 @@ for (const SITE of PERSONAL_SITES) {
                 SITE.language === 'cs' ? 'Píšu a mluvím' : 'Writing & speaking',
             );
             const PREVIEW_COUNT = await WRITING.locator('article').count();
-            expect(PREVIEW_COUNT).toBeGreaterThan(0);
-            expect(PREVIEW_COUNT).toBeLessThanOrEqual(3);
-            const PRESS = WRITING.locator('details');
-            await expect(PRESS).not.toHaveAttribute('open');
-            await PRESS.getByText(SITE.language === 'cs' ? 'V médiích' : 'In the media', { exact: true }).click();
-            await expect(PRESS).toHaveAttribute('open', '');
-            await expect(PRESS.getByRole('link', { name: /Euro.cz/ })).toBeVisible();
+            expect(PREVIEW_COUNT).toBeGreaterThanOrEqual(2);
+            expect(PREVIEW_COUNT).toBeLessThanOrEqual(5);
+            const KRAJTA = WRITING.locator('article').nth(0);
+            const DATA_TALK = WRITING.locator('article').nth(1);
+            await expect(KRAJTA.getByRole('img', { name: 'AI ta Krajta', exact: true })).toBeVisible();
+            await expect(DATA_TALK.getByRole('img', { name: 'Data Talk', exact: true })).toBeVisible();
+            if (SITE.language === 'en') {
+                await expect(KRAJTA.getByLabel('Audio in Czech', { exact: true })).toBeVisible();
+                await expect(DATA_TALK.getByLabel('Audio in Czech', { exact: true })).toBeVisible();
+            }
+            await expect(WRITING.locator('details')).toHaveCount(0);
+            await expect(WRITING.locator('a[href*="euro.cz/clanky/"]').first()).toBeVisible();
+            expect(await WRITING.evaluate(element => Boolean(element.compareDocumentPosition(document.getElementById('services')!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
             for (const ARCHIVE_PATH of ['/articles', '/podcasts', '/talks']) {
                 await expect(WRITING.locator(`a[href="${ARCHIVE_PATH}"]`)).toBeVisible();
             }

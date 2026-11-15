@@ -622,3 +622,18 @@
 .pavol-education-preview img { border-radius: 8px; box-shadow: 0 6px 22px #20393218; transform: rotate(-1deg); }
 .pavol-education-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .pavol-education-links span { border: 1px solid #cbded7; padding: 5px 10px; border-radius: 30px; background: #ffffff90; font-size: 11px; }
+
+/* The personal homepage leads with recognisable shows and visible playback. */
+.pavol-featured-recording { display: flex; min-width: 0; flex-direction: column; padding: clamp(1.25rem, 2.5vw, 1.75rem); border: 1px solid var(--pavol-border); border-radius: 1rem; background: #f1f3ec; }
+.pavol-featured-recording h3, .pavol-selected-story h3 { overflow-wrap: anywhere; }
+.pavol-featured-recording h3 a:hover, .pavol-selected-story h3 a:hover { text-decoration: underline; text-underline-offset: .2em; }
+.pavol-podcast-identity { background: var(--pavol-warm); color: var(--pavol-accent); }
+.pavol-selected-story { min-width: 0; padding-block: 1.25rem; border-top: 1px solid var(--pavol-border); }
+.pavol-editorial-selection .pavol-featured-recording { padding: 1.25rem 0; border: 0; border-top: 1px solid var(--pavol-border); border-radius: 0; background: transparent; }
+.pavol-editorial-selection .pavol-podcast-identity { width: 2.75rem; height: 2.75rem; }
+.pavol-editorial-selection .pavol-featured-recording h3 { margin-top: .75rem; font-size: 1.25rem; }
+.pavol-editorial-selection .pavol-featured-recording > p { display: none; }
+.pavol-editorial-selection .pavol-featured-recording > div:last-child { margin-top: .75rem; }
+@media (max-width: 359px) {
+    .pavol-podcast-card > .pavol-podcast-identity { width: 2.5rem; height: 2.5rem; }
+}

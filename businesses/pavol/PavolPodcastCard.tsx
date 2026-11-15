@@ -1,9 +1,9 @@
-import Image from 'next/image';
-import { ArrowUpRight, ChevronDown, Clock3, Headphones } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Clock3 } from 'lucide-react';
 import { formatPodcastEpisodeDuration } from '@/lib/podcast/podcastEpisodeDuration';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { createPavolPodcastTrack, type PavolPodcast } from './pavolPodcasts';
 import { PavolPodcastAudioButton } from './PavolPodcastAudioButton';
+import { PavolPodcastIdentity } from './PavolPodcastIdentity';
 
 export function PavolPodcastCard({ podcast, language, headingAs: Heading = 'h3' }: {
     readonly podcast: PavolPodcast; readonly language: SupportedHomepageLanguage;
@@ -18,11 +18,7 @@ export function PavolPodcastCard({ podcast, language, headingAs: Heading = 'h3' 
         : podcast.description;
 
     return <article className="pavol-podcast-card">
-        <div className="pavol-podcast-art" aria-hidden="true">
-            {podcast.imageSrc
-                ? <Image src={podcast.imageSrc} alt="" fill sizes="48px" className="object-contain" />
-                : <Headphones size={24} strokeWidth={1.5} />}
-        </div>
+        <PavolPodcastIdentity podcast={podcast} />
         <div className="pavol-podcast-content">
             <div className="pavol-recording-meta">
                 <span className="pavol-podcast-source">{podcast.source} {podcast.episodeLabel}</span>

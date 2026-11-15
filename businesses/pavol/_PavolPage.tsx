@@ -23,10 +23,10 @@ export function PavolPage({ language, media }: { readonly language: SupportedHom
             <PavolHeader language={language} onPrimaryAction={() => FORM.selectService('intro-call')} />
             <main id="main-content" tabIndex={-1} className="outline-none">
                 <PavolHero content={PAVOL_PAGE_CONTENT[language].hero} onPrimaryAction={() => FORM.selectService('intro-call')} />
+                {media}
                 <PavolServicesSection language={language} form={FORM} />
                 <PavolProjectsSection language={language} />
                 <PavolTestimonialsSection language={language} />
-                {media}
                 <PavolContactSection language={language} form={FORM} />
             </main>
             <PavolFooter language={language} />

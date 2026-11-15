@@ -1,110 +1,132 @@
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Article } from '@/lib/articles/types';
+import type { ArticleListing } from '@/lib/articles/types';
 import { getPersonalArticleListings } from '@/lib/articles/publishedArticles';
-import { DEFAULT_EVENT_DETAILS } from '@/lib/events/event';
-import { loadPublishedWorkshopSummaries } from '@/lib/workshops/workshopPublic';
-import type { WorkshopSummary } from '@/lib/workshops/workshopTypes';
+import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PavolMediaSection } from './PavolMediaSection';
 import { PavolPodcastIndex } from './PavolPodcastIndex';
 import { PAVOL_PODCAST_METADATA } from './pavolPodcastMetadata';
+import type { PavolPodcast } from './pavolPodcasts';
 
 const { playTrack } = vi.hoisted(() => ({ playTrack: vi.fn() }));
 vi.mock('@/components/audio-player/AudioPlayerProvider', () => ({
     useAudioPlayerControls: () => ({ track: null, isPlaying: false, getProgress: () => undefined, playTrack }),
 }));
-vi.mock('@/lib/workshops/workshopPublic', () => ({ loadPublishedWorkshopSummaries: vi.fn().mockResolvedValue([]) }));
 vi.mock('@/lib/articles/publishedArticles', () => ({ getPersonalArticleListings: vi.fn() }));
 vi.mock('./fetchPavolPodcasts', () => ({ fetchPavolPodcasts: vi.fn() }));
 
-const articles: Article[] = Array.from({ length: 12 }, (_, index) => ({
-    id: `article-${index}`, translationGroupId: `article-${index}`, authorId: 'pavol-hejny',
-    language: 'cs', slug: `article-${index}`, title: `Article ${index}`, perex: 'Article introduction.',
-    publishedAt: new Date(Date.UTC(2026, 9, 30 - index)).toISOString(), tags: [], markdown: 'Article body.',
-    canonicalUrl: `https://pavolhejny.cz/articles/article-${index}`, pdfUrl: '/article.pdf', translations: [],
-    author: { id: 'pavol-hejny', name: 'Pavol Hejný', photoUrl: '/people/pavol-hejny-transparent-square.png', bio: { cs: '', en: '' }, domains: { cs: 'https://pavolhejny.cz' }, socialLinks: [] },
-    audio: { url: `https://pavolhejny.cz/audio/${index}.mp3`, duration: 60, byteLength: 1000, mimeType: 'audio/mpeg' },
-}));
-const podcasts = [
-    ...Array.from({ length: 12 }, (_, index) => ({
-        id: `podcast-${index}`, source: 'AI ta Krajta', title: `Podcast ${index}`, description: 'Podcast description.',
+function articleListings(language: SupportedHomepageLanguage): ArticleListing[] {
+    const slug = language === 'cs' ? 'co-prichazi-po-generovani-kodu' : 'what-comes-after-code-generation';
+    const native: ArticleListing = {
+        id: `spec-driven-anchoring-${language}`, authorId: 'pavol-hejny', language,
+        slug, title: 'Native 50-year article', perex: 'Article introduction.', publishedAt: '2026-10-20T12:00:00Z',
+        canonicalUrl: `https://pavolhejny.${language === 'cs' ? 'cz' : 'com'}/articles/${slug}`,
+        author: { id: 'pavol-hejny', name: 'Pavol Hejný', photoUrl: '/people/pavol-hejny-transparent-square.png', bio: { cs: '', en: '' }, domains: {}, socialLinks: [] },
+        audio: { url: 'https://example.com/native-article.mp3', duration: 60, byteLength: 1000, mimeType: 'audio/mpeg' },
+    };
+    return [native, ...Array.from({ length: 11 }, (_, index) => ({
+        ...native, id: `syndicated-${index}`, slug: `syndicated-${index}`, title: `New syndicated article ${index}`,
+        syndicated: true as const, publishedAt: new Date(Date.UTC(2026, 10, 14 - index)).toISOString(),
+        canonicalUrl: `https://ptbk.io/${language}/komunity/promptbook/clanky/syndicated-${index}`,
+    }))];
+}
+const podcasts: PavolPodcast[] = [
+    ...Array.from({ length: 11 }, (_, index) => ({
+        id: `ai-ta-krajta:${index}`, source: 'AI ta Krajta', title: `Podcast ${index}`, description: 'Podcast description.',
         href: `https://ai-ta-krajta.cz/?episode=${index}`, publishedAt: new Date(Date.UTC(2026, 9, 30 - index)).toISOString(),
         language: 'cs' as const, audioUrl: `https://example.com/${index}.mp3`, durationInSeconds: 60,
     })),
+    { id: 'datatalk', source: 'Data Talk', title: 'Data Talk episode', description: 'A conversation about development.',
+        href: 'https://www.datatalk.cz/podcast/epizoda-157', publishedAt: '2025-10-16T12:00:00Z', language: 'cs',
+        audioUrl: 'https://example.com/datatalk.mp3', durationInSeconds: 60, imageSrc: '/pavol/media/datatalk.png' },
     { id: 'other-show', source: 'Other show', title: 'Other show episode', description: 'Another conversation.',
-        href: 'https://example.com/episode', publishedAt: '2025-01-01T12:00:00Z', language: 'cs' as const,
+        href: 'https://example.com/episode', publishedAt: '2026-07-15T12:00:00Z', language: 'cs',
         audioUrl: 'https://example.com/other.mp3', durationInSeconds: 60 },
 ];
-function workshop(slug: string, startsAt: string, endsAt: string | null): WorkshopSummary {
-    return { id: slug, kind: 'workshop', slug, title: `Workshop ${slug}`, description: 'Short introduction.\n\n- More detail in the archive.',
-        startsAt, endsAt, isPublished: true, event: DEFAULT_EVENT_DETAILS };
-}
 
 beforeEach(() => {
-    vi.mocked(loadPublishedWorkshopSummaries).mockResolvedValue([]);
-    vi.mocked(getPersonalArticleListings).mockResolvedValue(articles);
+    vi.mocked(getPersonalArticleListings).mockResolvedValue(articleListings('cs'));
     vi.mocked(fetchPavolPodcasts).mockResolvedValue(podcasts);
 });
-afterEach(() => { cleanup(); vi.clearAllMocks(); vi.useRealTimers(); });
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe('personal homepage previews and archives', () => {
-    it.each(['cs', 'en'] as const)('shows one compact selection in %s and keeps matching-language article playback', async (language) => {
-        const localizedArticles = articles.map(article => ({ ...article, language,
-            canonicalUrl: `https://pavolhejny.${language === 'cs' ? 'cz' : 'com'}/articles/${article.slug}` }));
-        const localizedPodcasts = podcasts.map(podcast => ({ ...podcast, language }));
-        vi.mocked(getPersonalArticleListings).mockResolvedValue(localizedArticles);
-        vi.mocked(fetchPavolPodcasts).mockResolvedValue(localizedPodcasts);
+    it.each(['cs', 'en'] as const)('features Krajta and Data Talk before the native article, Euro and another show in %s', async (language) => {
+        vi.mocked(getPersonalArticleListings).mockResolvedValue(articleListings(language));
         const { container } = render(await PavolMediaSection({ language, revalidateSeconds: 3600 }));
         const section = container.querySelector<HTMLElement>('#writing')!;
+        const cards = within(section).getAllByRole('article');
         expect(Array.from(container.querySelectorAll('section'), element => element.id)).toEqual(['writing']);
-        expect(within(section).getAllByRole('article')).toHaveLength(3);
-        expect(screen.getByRole('heading', { name: 'Article 0' })).toBeTruthy();
-        expect(screen.getByRole('heading', { name: 'Podcast 0' })).toBeTruthy();
-        expect(screen.queryByRole('heading', { name: 'Article 1' })).toBeNull();
+        expect(cards).toHaveLength(5);
+        expect(cards.slice(0, 2).map(card => within(card).getByRole('img').getAttribute('aria-label')))
+            .toEqual(['AI ta Krajta', 'Data Talk']);
+        expect(within(cards[0]).getByRole('heading').textContent).toBe('Podcast 0');
+        expect(within(cards[1]).getByRole('heading').textContent).toBe('Data Talk episode');
+        expect(within(cards[2]).getByRole('heading').textContent).toBe('Native 50-year article');
+        expect(within(cards[3]).getByText('Euro.cz')).toBeTruthy();
+        expect(within(cards[4]).getByRole('heading').textContent).toBe('Other show episode');
+        expect(screen.queryByRole('heading', { name: /^New syndicated article/ })).toBeNull();
+        expect(screen.queryByRole('heading', { name: 'Podcast 1' })).toBeNull();
+        const brand = within(cards[0]).getByRole('img', { name: 'AI ta Krajta' });
+        expect(brand.querySelector('svg path')).not.toBeNull();
         for (const archive of ['articles', 'podcasts', 'talks']) {
             expect(section.querySelector(`a[href="/${archive}"]`)).not.toBeNull();
             expect(section.querySelector(`#${archive}`)).not.toBeNull();
         }
         expect(section.querySelector('#media')).not.toBeNull();
-        fireEvent.click(screen.getByRole('button', { name: language === 'cs' ? 'Poslechnout článek' : 'Listen to article' }));
-        expect(playTrack).toHaveBeenCalledWith(expect.objectContaining({ id: 'article-0', kind: 'article', href: '/articles/article-0', appearance: 'personal', language }));
+
+        fireEvent.click(within(cards[0]).getByRole('button', { name: language === 'cs' ? 'Poslechnout: Podcast 0' : 'Listen: Podcast 0' }));
+        expect(playTrack).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'ai-ta-krajta:0', src: 'https://example.com/0.mp3', kind: 'podcast', appearance: 'personal', language }));
+        fireEvent.click(within(cards[1]).getByRole('button', { name: language === 'cs' ? 'Poslechnout: Data Talk episode' : 'Listen: Data Talk episode' }));
+        expect(playTrack).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'datatalk', src: 'https://example.com/datatalk.mp3', href: 'https://www.datatalk.cz/podcast/epizoda-157', kind: 'podcast', language }));
+        fireEvent.click(within(cards[2]).getByRole('button', { name: language === 'cs' ? 'Poslechnout článek' : 'Listen to article' }));
+        expect(playTrack).toHaveBeenLastCalledWith(expect.objectContaining({ id: `spec-driven-anchoring-${language}`, kind: 'article', appearance: 'personal', language }));
     });
 
-    it('omits Czech recordings from the English homepage without removing their archive', async () => {
-        vi.mocked(getPersonalArticleListings).mockResolvedValue(articles); // A wrong-language source must not leak into this preview.
+    it('keeps original Czech recordings on the English homepage with an explicit audio-language label', async () => {
+        // A wrong-language article source must still stay out of this preview.
+        vi.mocked(getPersonalArticleListings).mockResolvedValue(articleListings('cs'));
         const { container } = render(await PavolMediaSection({ language: 'en', revalidateSeconds: 3600 }));
-        expect(screen.queryByRole('heading', { name: 'Article 0' })).toBeNull();
-        expect(screen.queryByRole('heading', { name: 'Podcast 0' })).toBeNull();
+        expect(screen.queryByRole('heading', { name: 'Native 50-year article' })).toBeNull();
+        expect(screen.getByRole('heading', { name: 'Podcast 0' })).toBeTruthy();
+        const first = container.querySelector<HTMLElement>('#writing article')!;
+        expect(within(first).getByLabelText('Audio in Czech', { exact: true })).toBeTruthy();
+        expect(within(first).getByRole('button', { name: 'Listen: Podcast 0' })).toBeTruthy();
         expect(container.querySelector('a[href="/podcasts"]')).not.toBeNull();
-        expect(container.querySelector('details summary')?.textContent).toBe('In the media');
     });
 
-    it('selects the nearest upcoming owned workshop rather than historical or later events', async () => {
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date('2026-11-13T12:00:00Z'));
-        vi.mocked(loadPublishedWorkshopSummaries).mockResolvedValue([
-            workshop('past', '2026-11-12T10:00:00Z', '2026-11-12T11:00:00Z'),
-            workshop('later', '2026-12-01T10:00:00Z', null),
-            workshop('next', '2026-11-14T10:00:00Z', null),
-            { ...workshop('unpublished', '2026-11-13T13:00:00Z', null), isPublished: false },
-            { ...workshop('other-lecturer', '2026-11-13T13:00:00Z', null), event: { ...DEFAULT_EVENT_DETAILS, type: 'external', externalUrl: 'https://example.com' } },
-        ]);
-        render(await PavolMediaSection({ language: 'cs', revalidateSeconds: 3600 }));
-        expect(screen.getByRole('heading', { name: 'Workshop next' })).toBeTruthy();
-        expect(screen.queryByRole('heading', { name: 'Workshop past' })).toBeNull();
-        expect(screen.queryByRole('heading', { name: 'Workshop later' })).toBeNull();
-        expect(screen.queryByRole('heading', { name: 'Workshop unpublished' })).toBeNull();
-        expect(screen.queryByRole('heading', { name: 'Workshop other-lecturer' })).toBeNull();
-        expect(screen.getAllByRole('article')).toHaveLength(3);
+    it('uses only the publisher destination when a featured recording has no verified audio', async () => {
+        vi.mocked(fetchPavolPodcasts).mockResolvedValue(podcasts.map(podcast => podcast.id === 'ai-ta-krajta:0' ? { ...podcast, audioUrl: null } : podcast));
+        const { container } = render(await PavolMediaSection({ language: 'cs', revalidateSeconds: 3600 }));
+        const first = container.querySelector<HTMLElement>('#writing article')!;
+        expect(within(first).queryByRole('button', { name: 'Poslechnout: Podcast 0' })).toBeNull();
+        const publisher = within(first).getByRole('link', { name: 'Poslechnout u vydavatele' });
+        expect(publisher.getAttribute('href')).toBe('https://ai-ta-krajta.cz/?episode=0');
+        expect(first.querySelector('audio, source, a[href$=".mp3"]')).toBeNull();
+        expect(playTrack).not.toHaveBeenCalled();
+    });
+
+    it.each(['cs', 'en'] as const)('server-renders the bounded selection and direct Euro link in %s before JavaScript', async language => {
+        vi.mocked(getPersonalArticleListings).mockResolvedValue(articleListings(language));
+        const html = renderToStaticMarkup(await PavolMediaSection({ language, revalidateSeconds: 3600 }));
+        const document = new DOMParser().parseFromString(html, 'text/html');
+        const cards = Array.from(document.querySelectorAll('#writing article'));
+        expect(cards).toHaveLength(5);
+        expect(cards.slice(0, 2).map(card => card.querySelector('[role="img"]')?.getAttribute('aria-label')))
+            .toEqual(['AI ta Krajta', 'Data Talk']);
+        expect(cards[2].textContent).toContain('Native 50-year article');
+        expect(cards[3].querySelector('a')?.getAttribute('href')).toContain('euro.cz');
+        expect(document.querySelector('#writing details')).toBeNull();
     });
 
     it.each(['cs', 'en'] as const)('keeps all podcasts, only podcasts, and working homepage navigation in the %s archive', async (language) => {
         const { container } = render(await PavolPodcastIndex({ language, revalidateSeconds: 3600 }));
         expect(screen.getAllByRole('article')).toHaveLength(13);
         expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-        expect(screen.queryByText('Article 0')).toBeNull();
+        expect(screen.queryByText('Native 50-year article')).toBeNull();
         expect((screen.getByRole('combobox', { name: language === 'cs' ? 'Řazení' : 'Sort by' }) as HTMLSelectElement).value).toBe('smart');
         expect(container.querySelector('header a[href="/#writing"]')).not.toBeNull();
         expect(within(container.querySelector('footer')!).getByRole('button', { name: 'Podcast' })).toBeTruthy();

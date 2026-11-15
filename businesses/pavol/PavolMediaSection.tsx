@@ -1,24 +1,22 @@
 import { ArticleAudioButton } from '@/businesses/articles/ArticleAudioButton';
 import { getPersonalArticleListings } from '@/lib/articles/publishedArticles';
 import { getArticleListingHref } from '@/lib/articles/urls';
-import { rankContent } from '@/lib/content/contentRanking';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
+import { formatPodcastEpisodeDuration } from '@/lib/podcast/podcastEpisodeDuration';
 import { convertMarkdownToPlainText } from '@/lib/text/markdownText';
-import { getWorkshopPhase, isWorkshopPhasePast } from '@/lib/workshops/workshopPhase';
-import { loadPublishedWorkshopSummaries } from '@/lib/workshops/workshopPublic';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, FileText, Headphones, Play } from 'lucide-react';
 import Link from 'next/link';
 import { pavolMediaAppearances } from './config-media';
 import { fetchPavolPodcasts } from './fetchPavolPodcasts';
 import { PAVOL_CONTAINER_CLASS_NAME } from './layout';
 import { PavolPodcastAudioButton } from './PavolPodcastAudioButton';
-import { createPavolPodcastTrack } from './pavolPodcasts';
-import { getPavolTalks } from './pavolTalks';
+import { PavolPodcastIdentity } from './PavolPodcastIdentity';
+import { createPavolPodcastTrack, type PavolPodcast } from './pavolPodcasts';
+import { selectPavolHomepageItems, type PavolHomepageItem } from './pavolHomepageSelection';
 
-/** A homepage excerpt keeps authored wording; complete descriptions remain in the archives. */
 function excerpt(text: string): string {
     const plain = convertMarkdownToPlainText(text).replace(/\s+/g, ' ').trim();
-    return plain.length <= 150 ? plain : `${plain.slice(0, 150).replace(/\s+\S*$/, '').trimEnd()}…`;
+    return plain.length <= 115 ? plain : `${plain.slice(0, 115).replace(/\s+\S*$/, '').trimEnd()}…`;
 }
 
 function dateLabel(date: string, language: SupportedHomepageLanguage): string {
@@ -27,83 +25,86 @@ function dateLabel(date: string, language: SupportedHomepageLanguage): string {
     }).format(new Date(date));
 }
 
-/** Server-rendered sources stay outside the contact form's client boundary. */
+function PodcastFeature({ podcast, language }: {
+    readonly podcast: PavolPodcast;
+    readonly language: SupportedHomepageLanguage;
+}) {
+    const cs = language === 'cs';
+    const track = createPavolPodcastTrack(podcast, language);
+    return <article className="pavol-featured-recording" data-homepage-kind="podcast">
+        <div className="flex items-center gap-4">
+            <PavolPodcastIdentity podcast={podcast} featured />
+            <div className="min-w-0">
+                <p className="text-lg font-semibold tracking-tight">{podcast.source}</p>
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-[var(--pavol-muted)]">
+                    <Headphones size={14} aria-hidden="true" />{cs ? 'Podcast k poslechu' : 'Listen to the podcast'}
+                    {podcast.episodeLabel && <span>· {podcast.episodeLabel}</span>}
+                    {podcast.language !== language && <span className="pavol-language-badge" aria-label={podcast.language === 'cs' ? 'Audio in Czech' : 'Audio in English'}>· {podcast.language === 'cs' ? 'Audio in Czech' : 'Audio in English'}</span>}
+                </p>
+            </div>
+        </div>
+        <h3 lang={podcast.textLanguage ?? podcast.language} className="mt-5 text-xl font-medium leading-snug tracking-tight sm:text-2xl"><a href={podcast.href}>{podcast.title}</a></h3>
+        <p lang={podcast.textLanguage ?? language} className="mb-5 mt-3 text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(podcast.description)}</p>
+        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2">
+            {track ? <PavolPodcastAudioButton track={track} /> : <a href={podcast.href} className="pavol-play-button"><Play size={17} aria-hidden="true" />{cs ? 'Poslechnout u vydavatele' : 'Listen at the publisher'}</a>}
+            {podcast.durationInSeconds !== null && <span className="text-xs text-[var(--pavol-muted)]">{formatPodcastEpisodeDuration(podcast.durationInSeconds)}</span>}
+            {track && <a href={podcast.href} className="pavol-source-link">{cs ? 'Původní díl' : 'Original episode'}<ArrowUpRight size={14} aria-hidden="true" /></a>}
+        </div>
+    </article>;
+}
+
+function SelectedItem({ selected, language }: {
+    readonly selected: PavolHomepageItem;
+    readonly language: SupportedHomepageLanguage;
+}) {
+    if (selected.kind === 'podcast') return <PodcastFeature podcast={selected.item} language={language} />;
+    const cs = language === 'cs';
+    const article = selected.kind === 'article' ? selected.item : null;
+    const media = selected.kind === 'media' ? selected.item : null;
+    const href = article ? getArticleListingHref(article, 'personal') : media!.href;
+    const title = article?.title ?? media!.title;
+    return <article className="pavol-selected-story" data-homepage-kind={selected.kind}>
+        <div className="flex items-center gap-3 text-sm font-medium text-[var(--pavol-accent)]">
+            <FileText size={19} aria-hidden="true" />
+            <span>{article ? (cs ? 'Moje myšlenky' : 'My writing') : media!.source}</span>
+            {article && <time dateTime={article.publishedAt} className="text-xs font-normal text-[var(--pavol-muted)]">{dateLabel(article.publishedAt, language)}</time>}
+        </div>
+        <h3 className="mt-3 text-xl font-medium leading-snug tracking-tight"><Link href={href}>{title}</Link></h3>
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1">
+            {article && <ArticleAudioButton article={{ id: article.id, title: article.title, language: article.language, coverImage: article.coverImage, audio: article.audio, author: { name: article.author.name, photoUrl: article.author.photoUrl } }} href={href} publication="personal" />}
+            <Link href={href} className="pavol-source-link">{cs ? 'Číst článek' : 'Read article'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+        </div>
+    </article>;
+}
+
+/** Editorial interest leads; recency only breaks ties inside a source or interest level. */
 export async function PavolMediaSection({ language, revalidateSeconds }: {
     readonly language: SupportedHomepageLanguage;
     readonly revalidateSeconds: number;
 }) {
     const cs = language === 'cs';
-    const [allArticles, allPodcasts, workshops] = await Promise.all([
-        getPersonalArticleListings(language),
-        fetchPavolPodcasts(language, revalidateSeconds),
-        loadPublishedWorkshopSummaries(),
+    const [articles, podcasts] = await Promise.all([
+        getPersonalArticleListings(language), fetchPavolPodcasts(language, revalidateSeconds),
     ]);
-    const article = allArticles.filter(item => item.language === language && item.prominence !== 0)
-        .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
-    // English readers get an English recording on the homepage; the full archive keeps every language.
-    const podcast = allPodcasts.filter(item => item.language === language && item.prominence !== 0)
-        .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
-    const track = podcast ? createPavolPodcastTrack(podcast, language) : null;
-    const now = Date.now();
-    const allTalks = getPavolTalks(workshops, language).filter(talk => talk.prominence !== 0
-        && (!talk.textLanguage || talk.textLanguage === language));
-    const currentEventIds = new Set(workshops.filter(workshop => !isWorkshopPhasePast(getWorkshopPhase(workshop, now)))
-        .map(workshop => workshop.slug));
-    const currentTalks = allTalks.filter(talk => currentEventIds.has(talk.id))
-        .sort((a, b) => (Date.parse(a.publishedAt ?? '') || 0) - (Date.parse(b.publishedAt ?? '') || 0));
-    const talk = currentTalks[0] ?? rankContent(allTalks)[0];
-    const press = rankContent(pavolMediaAppearances[language].filter(appearance => appearance.kind !== 'Přednáška' && appearance.kind !== 'Talk'));
-    const articleHref = article ? getArticleListingHref(article, 'personal') : null;
-
+    const selected = selectPavolHomepageItems({ language, articles, podcasts, appearances: pavolMediaAppearances[language] });
+    const lead = selected.slice(0, 2);
+    const rest = selected.slice(2);
     return <section id="writing" tabIndex={-1} className="pavol-section outline-none">
         <div className={PAVOL_CONTAINER_CLASS_NAME}>
-            {/* Existing shared links still land at the now unified selection. */}
             {['articles', 'podcasts', 'talks', 'media'].map(id => <span key={id} id={id} className="block scroll-mt-24" />)}
             <h2 className="pavol-section-title text-4xl font-medium tracking-tight sm:text-5xl">{cs ? 'Píšu a mluvím' : 'Writing & speaking'}</h2>
-            <div className="mt-8 divide-y divide-[var(--pavol-border)] border-y border-[var(--pavol-border)]">
-                {article && articleHref && <article className="py-6 sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
-                    <div className="pavol-recording-meta content-start"><span>{cs ? 'Článek' : 'Article'}</span><time dateTime={article.publishedAt}>{dateLabel(article.publishedAt, language)}</time></div>
-                    <div>
-                        <h3 className="mt-2 text-xl font-medium tracking-tight sm:mt-0 sm:text-2xl"><Link href={articleHref}>{article.title}</Link></h3>
-                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(article.perex)}</p>
-                        <div className="pavol-recording-actions mt-3">
-                            <ArticleAudioButton article={{ id: article.id, title: article.title, language: article.language, coverImage: article.coverImage, audio: article.audio, author: { name: article.author.name, photoUrl: article.author.photoUrl } }} href={articleHref} publication="personal" />
-                            <Link href={articleHref} className="pavol-source-link">{cs ? 'Číst článek' : 'Read article'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-                        </div>
-                    </div>
-                </article>}
-                {podcast && <article className="py-6 sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
-                    <div className="pavol-recording-meta content-start"><span>{podcast.source} {podcast.episodeLabel}</span><time dateTime={podcast.publishedAt}>{dateLabel(podcast.publishedAt, language)}</time></div>
-                    <div>
-                        <h3 lang={podcast.textLanguage ?? podcast.language} className="mt-2 text-xl font-medium tracking-tight sm:mt-0 sm:text-2xl"><a href={podcast.href}>{podcast.title}</a></h3>
-                        <p lang={podcast.textLanguage ?? language} className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(podcast.description)}</p>
-                        <div className="pavol-recording-actions mt-3">
-                            {track && <PavolPodcastAudioButton track={track} />}
-                            <a href={podcast.href} className="pavol-source-link">{cs ? 'Původní díl' : 'Original episode'}<ArrowUpRight size={15} aria-hidden="true" /></a>
-                        </div>
-                    </div>
-                </article>}
-                {talk && <article className="py-6 sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
-                    <div className="pavol-recording-meta content-start"><span>{currentEventIds.has(talk.id) ? (cs ? 'Setkáme se' : 'Upcoming event') : talk.source}</span>{talk.publishedAt && <time dateTime={talk.publishedAt}>{dateLabel(talk.publishedAt, language)}</time>}</div>
-                    <div lang={talk.textLanguage}>
-                        <h3 className="mt-2 text-xl font-medium tracking-tight sm:mt-0 sm:text-2xl"><a href={talk.href}>{talk.title}</a></h3>
-                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{excerpt(talk.description)}</p>
-                        <a href={talk.href} className="pavol-source-link mt-3">{cs ? 'Podrobnosti' : 'Details'}<ArrowUpRight size={15} aria-hidden="true" /></a>
-                    </div>
-                </article>}
-            </div>
+            {lead.length > 0 && <div className="pavol-recording-features mt-8 grid gap-5 md:grid-cols-2">
+                {lead.map(item => <SelectedItem key={item.key} selected={item} language={language} />)}
+            </div>}
+            {rest.length > 0 && <div className="pavol-editorial-selection mt-6 grid gap-x-9 md:grid-cols-3">
+                {rest.map(item => <SelectedItem key={item.key} selected={item} language={language} />)}
+            </div>}
             <nav aria-label={cs ? 'Další články a vystoupení' : 'More writing and appearances'} className="mt-5 flex flex-wrap gap-x-7 gap-y-1">
-                <Link href="/articles" className="pavol-source-link">{cs ? 'Všechny články' : 'All articles'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
                 <Link href="/podcasts" className="pavol-source-link">{cs ? 'Všechny podcasty' : 'All podcasts'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
-                <Link href="/talks" className="pavol-source-link">{cs ? 'Všechny akce' : 'All events'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+                <Link href="/articles" className="pavol-source-link">{cs ? 'Všechny články' : 'All articles'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
+                <Link href="/talks" className="pavol-source-link">{cs ? 'Přednášky a akce' : 'Talks and events'}<ArrowUpRight size={15} aria-hidden="true" /></Link>
             </nav>
-            {press.length > 0 && <details className="mt-4 border-t border-[var(--pavol-border)] pt-3">
-                <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">{cs ? 'V médiích' : 'In the media'}</summary>
-                <ul className="space-y-5 pb-3 pt-2">{press.map(appearance => <li key={appearance.href}>
-                    <a href={appearance.href} className="pavol-source-link">{appearance.source} · {appearance.title}<ArrowUpRight size={15} aria-hidden="true" /></a>
-                    <p className="max-w-2xl text-sm leading-relaxed text-[var(--pavol-muted)]">{appearance.description}</p>
-                </li>)}</ul>
-            </details>}
+            {!selected.length && <p className="mt-5 text-[var(--pavol-muted)]">{cs ? 'Další rozhovory a články najdete v přehledech.' : 'Find more conversations and articles in the archives.'}</p>}
         </div>
     </section>;
 }
