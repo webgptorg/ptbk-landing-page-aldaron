@@ -1,0 +1,141 @@
+.heroActions {
+    display: grid;
+    gap: 16px;
+    width: min(100%, 36rem);
+    margin: 32px auto 0;
+}
+
+.purchaseActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+    width: 100%;
+    max-width: 36rem;
+    margin: 28px auto 0;
+}
+
+.heroActions > .purchaseActions { margin: 0; }
+
+.purchaseActions > a.action,
+.heroActions > .enquiry {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 54px;
+    padding: 14px 22px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    transition: background .2s, border-color .2s, color .2s;
+}
+
+.purchaseActions > a.primary,
+.heroActions > .enquiry {
+    color: #fff;
+    background: #1c2b46;
+    box-shadow: 0 4px 14px #1c2b4612;
+}
+
+.purchaseActions > a.primary:hover,
+.heroActions > .enquiry:hover { background: #2f4974; }
+
+.heroActions > .enquiry {
+    justify-self: center;
+    width: min(100%, 22rem);
+}
+
+.purchaseActions > a.secondary {
+    color: #1c2b46;
+    background: #ffffffb3;
+    border-color: #cbd5e1;
+}
+
+.purchaseActions > a.secondary:hover {
+    background: #eef3fa;
+    border-color: #9bacbf;
+}
+
+.purchaseActions > button.consult {
+    grid-column: 1 / -1;
+    justify-self: center;
+    min-width: 0;
+    min-height: 44px;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px 16px;
+    gap: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none;
+    color: #435570;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.purchaseActions > button.consult:hover {
+    color: #17386c;
+    background: #eaf0f780;
+    transform: none;
+}
+
+.resources {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 16px;
+    padding-top: 12px;
+    border-top: 1px solid #dce4ee;
+}
+
+.resources > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 4px;
+    border-radius: 6px;
+    color: #52647e;
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: center;
+    text-decoration: none;
+}
+
+.resources span { text-wrap: balance; }
+.resources svg,
+.purchaseActions svg,
+.enquiry svg { flex-shrink: 0; }
+.resources > a:hover { color: #17386c; }
+.resources > a:hover span,
+.resources > a:focus-visible span,
+.purchaseActions > button.consult:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+    .heroActions { max-width: 22rem; margin-top: 28px; }
+    .purchaseActions { grid-template-columns: minmax(0, 1fr); max-width: 22rem; }
+    .resources { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .purchaseActions > a.action,
+    .heroActions > .enquiry { transition: none; }
+}
+
+@media (forced-colors: active) {
+    .purchaseActions > a.action,
+    .heroActions > .enquiry { border-color: ButtonText; }
+    .resources { border-color: GrayText; }
+}

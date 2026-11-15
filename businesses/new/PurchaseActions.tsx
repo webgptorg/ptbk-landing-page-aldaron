@@ -1,8 +1,8 @@
 'use client';
-import Link from 'next/link';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
-import s from './site.module.css';
+import s from './actions.module.css';
+import site from './site.module.css';
 /** Czech trial and direct purchase are separate; English enquiries keep the existing CRM route. */
 export function PurchaseActions({ compact = false }: { compact?: boolean }) {
     const { locale, path } = useSiteLocale();
@@ -12,21 +12,25 @@ export function PurchaseActions({ compact = false }: { compact?: boolean }) {
                 Discuss my agenda
             </LeadButton>
         );
+    if (compact)
+        return (
+            <div className={site.actions}>
+                <a className={site.button} href={path('pricing/zkouska')}>
+                    Vyzkoušet Business zdarma
+                </a>
+            </div>
+        );
     return (
-        <div className={s.actions}>
-            <a className={s.button} href={path('pricing/zkouska')}>
+        <div className={s.purchaseActions}>
+            <a className={`${s.action} ${s.primary}`} href={path('pricing/zkouska')}>
                 Vyzkoušet Business zdarma
             </a>
-            {!compact && (
-                <>
-                    <a className={s.textLink} href={path('pricing/objednat/business')}>
-                        Koupit Business rovnou
-                    </a>
-                    <LeadButton secondary topic="Pomoc s první agendou">
-                        Poradit se
-                    </LeadButton>
-                </>
-            )}
+            <a className={`${s.action} ${s.secondary}`} href={path('pricing/objednat/business')}>
+                Koupit Business rovnou
+            </a>
+            <LeadButton secondary className={s.consult} topic="Pomoc s první agendou">
+                Poradit se
+            </LeadButton>
         </div>
     );
 }
