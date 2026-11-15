@@ -28,14 +28,14 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('hero working headline', () => {
-    it('keeps the ink still during typing, then creates a new drawing only after a completed word', () => {
+    it('keeps the underline still while handwritten activities change', () => {
         const { container } = render(<HeroHeadline/>);
         const ink = () => container.querySelector('[data-hero-underline]')!.getAttribute('data-ink-seed');
         const first = ink();
         act(() => vi.advanceTimersByTime(6000));
         expect(ink()).toBe(first);
         act(() => vi.advanceTimersByTime(1000));
-        expect(ink()).not.toBe(first);
+        expect(ink()).toBe(first);
         const second = ink();
         act(() => { visibility = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); });
         act(() => vi.advanceTimersByTime(20000));
@@ -242,33 +242,31 @@ describe('hero working headline', () => {
         expect(face.getAttribute('transform')).toBe(rest);
     });
 
-    it('deletes, pauses and types the next word while changing its reserved width and keeping one accessible promise', () => {
-        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
-            return new DOMRect(0, 0, this.dataset.heroMeasure === 'pracuje' ? 120 : 80, 40);
-        });
-        const { container } = render(<h1><HeroHeadline firstLine="Dřív jste AI úkolovali"/></h1>);
-        const heading = screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' });
-        const activity = () => container.querySelector('[data-hero-activity]')?.getAttribute('data-hero-activity');
-        const typed = () => container.querySelector('[data-hero-typed]')?.textContent;
+    it.each(['cs', 'en'] as const)('draws complete activities in a stable slot with one accessible promise (%s)', locale => {
+        const words = locale === 'cs'
+            ? ['pracuje', 'vyvíjí', 'účtuje', 'plánuje', 'píše', 'přepisuje', 'analyzuje', 'testuje']
+            : ['works', 'codes', 'plans', 'writes', 'files', 'replies', 'analyzes', 'tests'];
+        const promise = locale === 'cs' ? 'Teď pracuje pro Vás' : 'Now it works for you';
+        const { container } = render(<SiteLocaleProvider locale={locale}><h1><HeroHeadline/></h1></SiteLocaleProvider>);
+        const heading = screen.getByRole('heading', { name: promise });
         const slot = container.querySelector<HTMLElement>('[data-hero-word-slot]')!;
-        expect(activity()).toBe('pracuje');
-        expect(typed()).toBe('pracuje');
-        expect(slot.style.width).toBe('120px');
-        act(() => vi.advanceTimersByTime(5000));
-        expect(activity()).toBe('pracuje');
-        act(() => vi.advanceTimersByTime(600));
-        expect(activity()).toBe('vyvíjí');
-        expect(typed()).toBe('pracu');
-        expect(slot.style.width).toBe('80px');
-        act(() => vi.advanceTimersByTime(450));
-        expect(typed()).toBe('');
-        act(() => vi.advanceTimersByTime(300));
-        expect(typed()).toBe('v');
-        act(() => vi.advanceTimersByTime(650));
-        expect(typed()).toBe('vyvíjí');
-        expect(screen.getByRole('heading', { name: 'Dřív jste AI úkolovali Teď pracuje pro Vás' })).toBe(heading);
-        act(() => vi.advanceTimersByTime(3200));
-        expect(activity()).toBe('účtuje');
+        const width = slot.style.width;
+        const firstDrawing = container.querySelector('[data-hero-handwriting]');
+        expect(firstDrawing?.getAttribute('data-hero-handwriting')).toBe(words[0]);
+        act(() => vi.advanceTimersByTime(4850));
+        expect(container.querySelector('[data-fading]')?.getAttribute('data-fading')).toBe('true');
+        act(() => vi.advanceTimersByTime(150));
+        for (let index = 1; index < words.length; index++) {
+            const drawing = container.querySelector('[data-hero-handwriting]')!;
+            expect(drawing).not.toBe(firstDrawing);
+            expect(drawing.getAttribute('data-hero-handwriting')).toBe(words[index]);
+            expect(drawing.querySelectorAll('path').length).toBeGreaterThanOrEqual(words[index].length);
+            expect(slot.style.width).toBe(width);
+            expect(screen.getByRole('heading', { name: promise })).toBe(heading);
+            act(() => vi.advanceTimersByTime(5000));
+        }
+        expect(container.querySelector('[data-hero-handwriting]')?.getAttribute('data-hero-handwriting')).toBe(words[0]);
+        expect(container.querySelector('i')).toBeNull();
     });
 
     it('preserves active time while the tab or headline is hidden', () => {
