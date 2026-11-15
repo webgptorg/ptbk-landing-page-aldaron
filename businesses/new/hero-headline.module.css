@@ -1,12 +1,13 @@
 .headline{position:relative;display:block;padding-top:104px;color:var(--ptbk-blue);line-height:1.12}
 .firstLine{display:block;color:#1b2739}
-/* Reserve the longest handwritten activity so drawing never moves the sentence. */
-.visualLine{display:grid;grid-template-areas:'phrase';justify-content:center;align-items:baseline;margin-top:.14em;font-size:.93em;letter-spacing:-.055em}
+/* Each complete word keeps Calligrapher's spacing. Its true width closes the
+   empty longest-word slot; only horizontal geometry eases between words. */
+.visualLine{display:grid;grid-template-areas:'phrase';justify-content:center;align-items:baseline;margin-top:.14em;padding-bottom:.42em;font-size:.93em;letter-spacing:-.055em}
 .phrase{grid-area:phrase;justify-self:center;display:flex;align-items:center;gap:.16em;white-space:nowrap}
-.activity{display:inline-block;position:relative;flex:none;height:1.18em}
+.activity{display:inline-block;position:relative;flex:none;height:1.18em;transition:width .35s cubic-bezier(.22,.75,.2,1)}
 .handwritingLayer{position:absolute;inset:0;opacity:1;transition:opacity .18s linear}
 .handwritingLayer[data-fading=true]{opacity:0}
-.handwriting{position:absolute;left:50%;top:.04em;transform:translateX(-50%);height:1.333333em;overflow:visible}
+.handwriting{position:absolute;left:0;top:-.09em;height:1.9em;overflow:visible}
 .penStroke{stroke-dasharray:1;stroke-dashoffset:0}
 .headline[data-animated=true] .penStroke{animation:draw-line var(--pen-duration) cubic-bezier(.35,.05,.55,.95) var(--pen-delay) both}
 .forYou{position:relative;white-space:nowrap}
@@ -30,8 +31,8 @@
 @keyframes robot-write{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
 @keyframes robot-nod{0%,100%{transform:none}45%{transform:translateY(1.5px) rotate(3deg)}}
 @keyframes robot-change{0%,100%{transform:none}40%{transform:rotate(-8deg)}}
-@media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.headline .visualLine{font-size:.78em;margin-top:.18em}}
-@media(max-width:370px){.headline .visualLine{font-size:.7em}}
+@media(max-width:680px){.headline{padding-top:92px}.robot{width:78px;height:78px}.headline .visualLine{font-size:.88em;margin-top:.18em}}
+@media(max-width:370px){.headline .visualLine{font-size:.76em}}
 @media(prefers-reduced-motion:reduce){.headline *,.headline *::after{animation:none!important;transition:none!important}.inkReveal,.penStroke{stroke-dashoffset:0!important}.handwritingLayer{opacity:1!important}}
 @media(forced-colors:active){.headline,.firstLine{color:CanvasText!important}.inkStroke{fill:CanvasText}}
 

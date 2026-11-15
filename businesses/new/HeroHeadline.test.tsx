@@ -47,7 +47,8 @@ describe('hero working headline', () => {
         const { container } = render(<><HeroHeadline/><HeroHeadline/></>);
         const initial = Array.from(container.querySelectorAll('[data-ink-seed]')).map(el => el.getAttribute('data-ink-seed'));
         const ids = Array.from(container.querySelectorAll('mask')).map(el => el.id);
-        expect(new Set(ids).size).toBe(4);
+        expect(ids.length).toBeGreaterThan(4);
+        expect(new Set(ids).size).toBe(ids.length);
         act(() => vi.advanceTimersByTime(30000));
         expect(Array.from(container.querySelectorAll('[data-ink-seed]')).map(el => el.getAttribute('data-ink-seed'))).toEqual(initial);
     });
@@ -242,7 +243,7 @@ describe('hero working headline', () => {
         expect(face.getAttribute('transform')).toBe(rest);
     });
 
-    it.each(['cs', 'en'] as const)('draws complete activities in a stable slot with one accessible promise (%s)', locale => {
+    it.each(['cs', 'en'] as const)('draws original Calligrapher activities at their own widths with one accessible promise (%s)', locale => {
         const words = locale === 'cs'
             ? ['pracuje', 'vyvíjí', 'účtuje', 'plánuje', 'píše', 'přepisuje', 'analyzuje', 'testuje']
             : ['works', 'codes', 'plans', 'writes', 'files', 'replies', 'analyzes', 'tests'];
@@ -251,6 +252,7 @@ describe('hero working headline', () => {
         const heading = screen.getByRole('heading', { name: promise });
         const slot = container.querySelector<HTMLElement>('[data-hero-word-slot]')!;
         const width = slot.style.width;
+        let shortWidth = 0;
         const firstDrawing = container.querySelector('[data-hero-handwriting]');
         expect(firstDrawing?.getAttribute('data-hero-handwriting')).toBe(words[0]);
         act(() => vi.advanceTimersByTime(4850));
@@ -261,7 +263,9 @@ describe('hero working headline', () => {
             expect(drawing).not.toBe(firstDrawing);
             expect(drawing.getAttribute('data-hero-handwriting')).toBe(words[index]);
             expect(drawing.querySelectorAll('path').length).toBeGreaterThanOrEqual(words[index].length);
-            expect(slot.style.width).toBe(width);
+            expect(drawing.getAttribute('data-handwriting-source')).toBe('calligrapher-style-9');
+            if (index === 4) { shortWidth = parseFloat(slot.style.width); expect(shortWidth).toBeLessThan(parseFloat(width)); }
+            if (index === 6) expect(parseFloat(slot.style.width)).toBeGreaterThan(shortWidth);
             expect(screen.getByRole('heading', { name: promise })).toBe(heading);
             act(() => vi.advanceTimersByTime(5000));
         }

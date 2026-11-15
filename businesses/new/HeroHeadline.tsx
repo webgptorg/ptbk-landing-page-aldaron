@@ -16,8 +16,6 @@ const HOLD_MS = 3500;
 const FADE_MS = 180;
 const WRITTEN_MS = HANDWRITING_DELAY_MS + HANDWRITING_MS;
 const CHANGE_PERIOD_MS = WRITTEN_MS + HOLD_MS + FADE_MS;
-const WORD_WIDTH = Object.fromEntries(Object.entries(COPY).map(([locale, copy]) =>
-    [locale, Math.max(...copy.activities.map(word => handwritingFor(word).width)) / 90]));
 
 /** One quiet working character; the clock runs only while the headline is visible. */
 export function HeroHeadline({ firstLine, underlineReplay = 0 }: { firstLine?: string; underlineReplay?: number }) {
@@ -81,7 +79,7 @@ export function HeroHeadline({ firstLine, underlineReplay = 0 }: { firstLine?: s
         <span className={s.visualLine} aria-hidden="true" data-hero-activity={activity}>
             <span className={s.phrase}>
                 <span>{copy.prefix}</span>{' '}
-                <span className={s.activity} data-hero-word-slot style={{ width: `${WORD_WIDTH[locale]}em` }}>
+                <span className={s.activity} data-hero-word-slot style={{ width: `${handwritingFor(activity).width / 100}em` }}>
                     <span className={s.srOnly} data-hero-typed>{activity}</span>
                     <span key={`${locale}-${cycle}`} className={s.handwritingLayer} data-fading={fading}>
                         <HeroHandwriting word={activity}/>
