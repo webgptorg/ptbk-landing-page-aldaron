@@ -19,6 +19,13 @@ the relevant i dots are replaced; j dots and all original letter contours stay.
 These additions are recorded in the preparation script and never silently
 passed off as native Czech generation.
 
+The follow-up weight correction retains each original contour and expands its edge
+by 6.5 SVG units with rounded joins, matching the adjacent Exo 2 600 strokes.
+Reveal masks expand by the same amount so the added weight is not clipped.
+The entire second line uses `min(1em, 8.8cqi)` within an inline-size headline
+container, retaining .28em word gaps and room for the longest activity on phones.
+No original SVG data or inter-letter spacing is changed.
+
 Each pressure-shaped ribbon retains its original filled contour. The animation
 mask follows the centerline recovered from its paired outline points, in the
 original writing order. Unique mask IDs preserve SSR/hydration and multiple
