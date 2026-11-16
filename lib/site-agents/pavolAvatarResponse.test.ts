@@ -46,4 +46,12 @@ describe('full-avatar knowledge reaches the model', () => {
         expect(payload.input[0].content[0].text).not.toContain('managedSourceBook');
         expect(payload.input[0].content[0].text).not.toContain('první prototyp');
     });
+    it('records and returns a valid long interview answer instead of replacing it with a generic error', async () => {
+        const reply = 'A detailed answer. '.repeat(1000);
+        mocks.fetch.mockResolvedValueOnce(Response.json({ output: [{ content: [{ type: 'output_text', text: reply }] }] }));
+        const response = await respondToPublicChat(request(), subject);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({ reply: reply.trim() });
+        expect(mocks.finish).toHaveBeenCalledWith('saved', { reply: reply.trim() });
+    });
 });

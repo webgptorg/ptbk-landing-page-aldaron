@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CHAT_ATTACHMENT_MAX_COUNT, messageAttachmentSchema } from './messageAttachments';
+import { CHAT_QUESTION_MAX_CHARACTERS } from './messageChatLimits';
 
 export const storedChatTurnSchema = z.object({
     role: z.enum(['user', 'assistant']), content: z.string(), createdAt: z.string().datetime().optional(),
@@ -7,7 +8,7 @@ export const storedChatTurnSchema = z.object({
 });
 const sessionSchema = z.object({
     version: z.literal(1), conversationId: z.string().uuid(), turns: z.array(storedChatTurnSchema),
-    draft: z.string().max(4000), retry: z.object({ history: z.string(), id: z.string().uuid() }).nullable(),
+    draft: z.string().max(CHAT_QUESTION_MAX_CHARACTERS), retry: z.object({ history: z.string(), id: z.string().uuid() }).nullable(),
     attachments: messageAttachmentSchema.array().max(CHAT_ATTACHMENT_MAX_COUNT).default([]),
 });
 export type MessageChatSession = z.infer<typeof sessionSchema>;

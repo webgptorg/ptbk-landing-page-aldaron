@@ -1,5 +1,6 @@
 import type { ArticleWordTimings } from '@/businesses/articles/articleTiming';
 import { CHAT_ATTACHMENT_CONTEXT_MAX_BYTES, CHAT_ATTACHMENT_CONTEXT_MAX_COUNT, CHAT_ATTACHMENT_MAX_COUNT, messageAttachmentSchema, type MessageChatAttachment } from './messageAttachments';
+import { CHAT_CONTEXT_MAX_CHARACTERS, CHAT_QUESTION_MAX_CHARACTERS, CHAT_REPLY_MAX_CHARACTERS } from './messageChatLimits';
 
 export type SharedMessage = {
     readonly version: 1;
@@ -26,12 +27,12 @@ export function parseMessageChatTurns(value: unknown): MessageChatTurn[] | null 
         if (!entry || typeof entry !== 'object') return null;
         const turn = entry as Record<string, unknown>;
         if ((turn.role !== 'user' && turn.role !== 'assistant') ||
-            typeof turn.content !== 'string' || !turn.content.trim() || turn.content.length > (turn.role === 'user' ? 4000 : 12000)) return null;
+            typeof turn.content !== 'string' || !turn.content.trim() || turn.content.length > (turn.role === 'user' ? CHAT_QUESTION_MAX_CHARACTERS : CHAT_REPLY_MAX_CHARACTERS)) return null;
         const files = messageAttachmentSchema.array().max(CHAT_ATTACHMENT_MAX_COUNT).safeParse(turn.attachments ?? []);
         if (!files.success || (turn.role === 'assistant' && files.data.length > 0)) return null;
         fileCount += files.data.length; fileBytes += files.data.reduce((total, file) => total + file.byteLength, 0);
         length += turn.content.length;
         turns.push({ role: turn.role, content: turn.content.trim(), ...(files.data.length ? { attachments: files.data } : {}) });
     }
-    return length <= 16000 && fileCount <= CHAT_ATTACHMENT_CONTEXT_MAX_COUNT && fileBytes <= CHAT_ATTACHMENT_CONTEXT_MAX_BYTES && turns[turns.length - 1]?.role === 'user' ? turns : null;
+    return length <= CHAT_CONTEXT_MAX_CHARACTERS && fileCount <= CHAT_ATTACHMENT_CONTEXT_MAX_COUNT && fileBytes <= CHAT_ATTACHMENT_CONTEXT_MAX_BYTES && turns[turns.length - 1]?.role === 'user' ? turns : null;
 }

@@ -9,6 +9,7 @@ import { beginMessageChatTurn, finishMessageChatTurn } from '@/lib/messages/mess
 import type { ChatConversationSource } from '@/lib/messages/messageConversationDatabase';
 import { allowPublicChatRequest } from './publicChatRateLimit';
 import type { ChatAttachmentRow } from './messageAttachmentDatabase';
+import { CHAT_REPLY_MAX_CHARACTERS } from './messageChatLimits';
 
 async function boundedJson(request: Request): Promise<unknown> {
     const reader = request.body?.getReader();
@@ -83,7 +84,7 @@ export async function respondToPublicChat(request: Request, subject: {
             ...(subject.includeSourceBook ? { managedSourceBook: agent.bookSource } : {}),
         }), request.signal, inputs);
     } catch { return fail('Odpověď se nepodařilo načíst. Zkus to prosím znovu.', 502); }
-    if (!reply.trim() || reply.length > 12000) return fail('Odpověď se nepodařilo připravit.', 502);
+    if (!reply.trim() || reply.length > CHAT_REPLY_MAX_CHARACTERS) return fail('Odpověď se nepodařilo připravit.', 502);
     try { await finishMessageChatTurn(saved.turn.id, { reply: reply.trim() }); }
     catch { return json({ error: 'Výsledek konverzace se nepodařilo uložit. Zkus to prosím znovu.' }, 503); }
     return json({ reply: reply.trim() });
