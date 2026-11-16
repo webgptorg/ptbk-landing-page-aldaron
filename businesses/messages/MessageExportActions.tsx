@@ -47,7 +47,7 @@ export function MessageExportActions({ label, subject, filename, loadDocument, l
             return <DropdownMenu key={action}>
                 <DropdownMenuTrigger asChild><button type="button" className="message-export-button" disabled={pending || disabled} aria-label={`${title} ${subject}`}>
                     {pending ? <LoaderCircle size={14} className="message-chat-loading" aria-hidden="true" /> : action === 'download' ? <Download size={14} aria-hidden="true" /> : copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                    {title}
+                    <span className="message-export-button-label">{title}</span>
                 </button></DropdownMenuTrigger>
                 <DropdownMenuContent className="message-export-menu" align="end">
                     {[...MESSAGE_TEXT_FORMATS, ...(action === 'download' ? ['pdf' as const] : [])].map((format) => <DropdownMenuItem key={format} onSelect={() => void perform(action, format)}>{labels[format]}</DropdownMenuItem>)}

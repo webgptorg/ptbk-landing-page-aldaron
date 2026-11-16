@@ -36,6 +36,8 @@ describe('full-page avatar using the shared conversation', () => {
         expect(screen.getByRole('button', { name: 'Kopírovat konverzaci' })).toBeEnabled();
         const previous = payload.conversationId;
         fireEvent.click(screen.getByRole('button', { name: 'Nový chat' }));
+        expect(screen.getByRole('log')).toHaveTextContent('Začal bych požadovaným chováním.');
+        fireEvent.click(screen.getByRole('button', { name: 'Začít nový chat' }));
         expect(screen.getByRole('log')).not.toHaveTextContent('Začal bych požadovaným chováním.');
         await waitFor(() => expect((JSON.parse(localStorage.getItem('pavol-chat:v1:site-pavol-avatar-cs')!) as { conversationId: string }).conversationId).not.toBe(previous));
         expect(localStorage.getItem('pavol-chat:v1:pavol-cs')).toBe('leave the lightweight chat alone');

@@ -152,6 +152,12 @@ use cases, and audiences. Keep these rules current when behavior changes.
   or Messages sessions. Only the redacted public edition of the private avatar is seeded. Never add private
   source conversations, family details or internal agreements to this public context. The original agent and
   homepage chat stay unchanged. Domain and language checks apply to chat, file upload and durable file reads.
+  The shared composer grows with the draft and offers expansion, individual-message copy, explicit retry,
+  interruptible waiting and file-drop feedback. Automatic scroll yields to reading older messages and offers
+  a latest-message jump. Page mode fits the viewport and confirms local reset; touch Enter inserts a newline.
+  Valid replies up to 48,000 characters persist fully after the additive limit migration; questions remain
+  bounded at 4,000 and model context at 16,000. Long prior replies use marked beginning/end excerpts only in
+  that model window, never in displayed/exported or stored history. See `docs/pavol-avatar.md`.
 - `/cs/pribeh` is the miniapp for the `story` event type. The existing workshop term, name/e-mail session,
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
   cast. Approved participants edit room Books in the shared highlighted BookEditor with debounced, ordered autosave.

@@ -7,10 +7,34 @@ cookie controls are suppressed as on unlisted Messages pages. Knowing the URL is
 this is not a confidential channel or an authentication mechanism.
 
 The page uses the existing `FloatingAgentChat` session/composer in `page` mode. Floating placements keep
-their previous behavior. New chat, persisted browser drafts and history, retry IDs, Markdown, attachment
+their source, endpoints and local histories. New chat, persisted browser drafts and history, retry IDs, Markdown, attachment
 picker/drop/pasted images and Download/Copy exports all use the existing Messages implementation.
 The existing limits remain four images/PDFs/UTF-8 text files of up to 4 MiB per question. Model context
 is bounded separately from the full visible/exported history.
+
+## Conversation UX
+
+The page fits the current viewport below the personal-site header. Its transcript owns scrolling while
+the composer remains available, including on narrow screens. Message bodies have a bounded reading width;
+code and tables scroll inside their message. The same shared component provides per-message copy with
+actual clipboard feedback, expanding/growing drafts, a question-length counter, file-drop feedback and
+an explicit retry after failed requests. Suggested opening questions only fill the draft; they never send
+or call a model until the reader submits. Page-mode New chat confirms before clearing the current local
+draft/history; it does not delete private administrative records.
+
+Automatic scrolling follows the latest message only while the reader is near the bottom. Reading older
+messages keeps the position and offers a Latest message button. Pending replies have a readable status
+and a Stop waiting action. Stopping aborts the client wait, preserves the draft/files and uncertain request
+identity, and does not claim that an external generation was certainly undone. Non-JSON proxy errors also
+retain that identity for deduplicated retry. Desktop Enter submits, Shift+Enter adds a line; touch-screen
+Enter keeps its normal newline behavior, with an explicit send button.
+
+The previous 12,000-character reply cap rejected valid long interview answers after generation. Migration
+`2026-11-1601-long-public-chat-replies.sql` widens only the stored reply check to 48,000 characters. The
+server and model-window validator share that bound. Questions remain at 4,000 characters and model input
+at 16,000; display, exports and administrative history retain the complete reply. An oversized recent answer
+contributes a clearly marked beginning/end excerpt to the model window rather than dropping all its context.
+The migration changes no existing record, source, agent, authorization or grant.
 
 ## Agent and administration
 
