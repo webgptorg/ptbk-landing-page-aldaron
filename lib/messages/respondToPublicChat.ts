@@ -30,6 +30,8 @@ async function boundedJson(request: Request): Promise<unknown> {
 export async function respondToPublicChat(request: Request, subject: {
     source: ChatConversationSource; rateKey: string; agentId: string; introduction: string;
     markdown: string; context: string; instructions: string; unavailableMessage?: string;
+    /** Opt in only for reviewed public Books: this compiler does not inline prose KNOWLEDGE. */
+    includeSourceBook?: boolean;
 }) {
     const instructions = subject.instructions;
     const json = (value: unknown, status = 200) => Response.json(value, { status, headers: MESSAGE_RESPONSE_HEADERS });
@@ -78,6 +80,7 @@ export async function respondToPublicChat(request: Request, subject: {
         const inputs = files.length ? await (await import('./messageAttachmentDatabase')).createChatAttachmentInputs(files) : [];
         reply = await runManagedAgent(agent, instructions, JSON.stringify({
             message: subject.markdown, fullContext: subject.context, conversation: turns,
+            ...(subject.includeSourceBook ? { managedSourceBook: agent.bookSource } : {}),
         }), request.signal, inputs);
     } catch { return fail('Odpověď se nepodařilo načíst. Zkus to prosím znovu.', 502); }
     if (!reply.trim() || reply.length > 12000) return fail('Odpověď se nepodařilo připravit.', 502);

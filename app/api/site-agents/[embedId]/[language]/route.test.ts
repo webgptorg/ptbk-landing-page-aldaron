@@ -24,4 +24,20 @@ describe('allowlisted public Book embed', () => {
         expect((await POST(request('ptbk.io','https://unrelated.example'), params())).status).toBe(403);
         expect(mocks.respond).not.toHaveBeenCalled();
     });
+    it('selects the full avatar only on its matching personal domain and keeps its context separate', async () => {
+        for (const [language, host] of [['cs', 'www.pavolhejny.cz'], ['en', 'pavolhejny.com']]) {
+            expect((await POST(request(host), params('pavol-avatar', language))).status).toBe(200);
+            const subject = mocks.respond.mock.calls.at(-1)?.[1];
+            expect(subject.agentId).toBe(SITE_AGENT_EMBEDS['pavol-avatar'].agentId);
+            expect(subject.source).toEqual({ sourceKey: `site-pavol-avatar-${language}` });
+            expect(subject.includeSourceBook).toBe(true);
+            expect(subject.context).toContain('No access to private accounts');
+            expect(subject.instructions).toContain('no browser, accounts or action tools');
+        }
+        mocks.respond.mockClear();
+        for (const [language, host] of [['cs', 'pavolhejny.com'], ['en', 'pavolhejny.cz'], ['cs', 'ptbk.io'], ['cs', 'ai-ta-krajta.cz']]) {
+            expect((await POST(request(host), params('pavol-avatar', language))).status).toBe(404);
+        }
+        expect(mocks.respond).not.toHaveBeenCalled();
+    });
 });

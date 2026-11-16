@@ -84,6 +84,7 @@ const AI_TA_KRAJTA_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes']
 
 const PAVOL_PUBLIC_PATH_SUFFIXES: PublicDomainRoute['publicPathSuffixes'] = [
     { path: '', isIndexed: true },
+    { path: '/avatar' },
     { path: '/articles', isIndexed: true },
     { path: '/podcasts', isIndexed: true },
     { path: '/projects', isIndexed: true },

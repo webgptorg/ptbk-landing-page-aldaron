@@ -1,0 +1,55 @@
+# Pavol's full personal avatar
+
+The direct addresses are `https://pavolhejny.cz/avatar` and `https://pavolhejny.com/avatar`.
+They require no login and are intentionally unlisted: no homepage, menu, footer, feed or sitemap links.
+Page metadata and middleware send noindex/noarchive, private no-store and no-referrer. Analytics and
+cookie controls are suppressed as on unlisted Messages pages. Knowing the URL is sufficient access;
+this is not a confidential channel or an authentication mechanism.
+
+The page uses the existing `FloatingAgentChat` session/composer in `page` mode. Floating placements keep
+their previous behavior. New chat, persisted browser drafts and history, retry IDs, Markdown, attachment
+picker/drop/pasted images and Download/Copy exports all use the existing Messages implementation.
+The existing limits remain four images/PDFs/UTF-8 text files of up to 4 MiB per question. Model context
+is bounded separately from the full visible/exported history.
+
+## Agent and administration
+
+`SITE_AGENT_EMBEDS['pavol-avatar']` selects the dedicated managed agent
+`cad89f1a-21bf-47f0-a93e-72bc33f5fe3f`, named **Pavol Hejný · plný avatar**. Edit its Book or disable it
+in `/admin/agents`. The same row serves both languages; each has separate conversation history buttons.
+The public endpoint never accepts an arbitrary agent UUID. Existing deletion protection also covers this agent.
+
+Migration `2026-11-1600-pavol-full-avatar.sql` seeds a detailed public conversational edition derived from
+the owner-requested personal avatar of 16 November 2026. It preserves his voice, reasoning, public career,
+documented positions, synthetic examples and public reference links. It excludes private source URLs,
+personal/family facts, internal commercial arrangements, infrastructure and client records. Text instructions
+alone cannot protect information given to a public model; the private original is not deployed or sent to it.
+The seed fits the existing 50,000-character editor/validation limit and compiles with the actual site runtime.
+
+The database Book is the runtime authority, not a bundled fallback. `ON CONFLICT DO NOTHING` preserves
+subsequent admin edits and disabled state. No existing agent is updated. The original uniquely named
+`Pavol Hejný` and its lightweight homepage endpoints remain unchanged. The full avatar uses the existing
+server-side OpenAI configuration and adapter, without new keys, accounts, tools or live account access.
+The current site compiler does not inline prose `KNOWLEDGE` blocks. This placement therefore explicitly
+passes its complete current database Book as quoted model context in addition to the compiled instructions.
+It does not execute knowledge URLs or tools, and it never returns the Book to the browser. Other placements
+keep their previous context behavior. A provider-payload test checks that the public career and views reach
+the actual Responses request, rather than merely existing in storage.
+
+## History and files
+
+The ordinary private tables retain history under `site-pavol-avatar-cs` and `site-pavol-avatar-en`, separate
+from Messages, `pavol-cs/en`, and comparison advisers. File uploads, question persistence, model inputs,
+durable links and administration reuse the existing handlers. Host/language checks bind Czech chat/files
+to `pavolhejny.cz` and English chat/files to `pavolhejny.com`, including www aliases. Same-origin requests,
+file-byte validation, bounded bodies, rate limits and source/conversation ownership checks remain enforced.
+Visitors are told that the author can later read conversations and attachments. Anonymous database roles
+cannot enumerate histories or file records. Preview hosts and local development follow the embed registry's
+existing preview policy; public primary and podcast domains cannot use this avatar.
+
+## Validation
+
+Tests exercise the actual Book compiler, migration replay/edit preservation, old-agent preservation,
+separate histories, private database grants, page metadata/indexing, chat/upload/file host checks,
+inline attachment submission, refresh restoration, locale separation and new-chat isolation. Existing
+Messages, adviser and middleware regression tests cover the retained floating behavior.

@@ -11,7 +11,7 @@ import { getLegalHubPath, getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export function PavolFooter({ language, isHomepage = true }: { language: SupportedHomepageLanguage; readonly isHomepage?: boolean }) {
+export function PavolFooter({ language, isHomepage = true, showCookieSettings = true }: { language: SupportedHomepageLanguage; readonly isHomepage?: boolean; readonly showCookieSettings?: boolean }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language];
     const homeHref = isHomepage ? '#main-content' : '/';
     const privacyHref = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
@@ -52,9 +52,9 @@ export function PavolFooter({ language, isHomepage = true }: { language: Support
                         <ul className="flex flex-wrap gap-x-5 gap-y-2">
                             <li><Link href={privacyHref} className="hover:text-white">{language === 'cs' ? 'Ochrana osobních údajů' : 'Privacy policy'}</Link></li>
                             <li><Link href={legalHref} className="hover:text-white">{language === 'cs' ? 'Právní dokumenty' : 'Legal documents'}</Link></li>
-                            <li><a href={COOKIE_SETTINGS_HASH} className="hover:text-white" onClick={() => {
+                            {showCookieSettings && <li><a href={COOKIE_SETTINGS_HASH} className="hover:text-white" onClick={() => {
                                 if (window.location.hash === COOKIE_SETTINGS_HASH) window.dispatchEvent(new Event('hashchange'));
-                            }}>Cookies</a></li>
+                            }}>Cookies</a></li>}
                         </ul>
                     </nav>
                 </div>

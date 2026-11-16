@@ -10,6 +10,18 @@ function createRequest(url: string, headers: HeadersInit = {}): NextRequest {
 }
 
 describe('domain middleware', () => {
+    it('serves unlisted avatar pages with private response headers and leaves them out of each sitemap', async () => {
+        for (const [host, language] of [['pavolhejny.cz', 'cs'], ['www.pavolhejny.com', 'en']]) {
+            const response = await middleware(createRequest(`https://${host}/avatar?from=test`));
+            expect(response.headers.get('x-middleware-rewrite')).toBe(`https://${host}/${language}/pavol/avatar?from=test`);
+            expect(response.headers.get('x-middleware-request-x-promptbook-private-avatar')).toBe('1');
+            expect(response.headers.get('cache-control')).toContain('no-store');
+            expect(response.headers.get('x-robots-tag')).toContain('noindex');
+            expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+        }
+        const spoof = await middleware(createRequest('https://pavolhejny.cz/', { 'x-promptbook-private-avatar': '1' }));
+        expect(spoof.headers.get('x-middleware-request-x-promptbook-private-avatar')).toBe('0');
+    });
     it('keeps legacy community room, membership and project links working with their query intact', async () => {
         for (const suffix of ['', '/clenstvi', '/projects/project-id']) {
             const response = await middleware(createRequest(`https://www.ptbk.io/cs/komunita${suffix}?from=invite`));

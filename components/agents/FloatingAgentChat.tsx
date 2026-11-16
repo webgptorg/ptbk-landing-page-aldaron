@@ -18,6 +18,7 @@ export type FloatingAgentChatProps = {
     readonly introduction?: string; readonly language?: SupportedHomepageLanguage;
     readonly title: string; readonly icon: ReactNode; readonly launcherLabel: string;
     readonly conversationTitle: string; readonly id?: string; readonly brandLabel?: string;
+    readonly variant?: 'floating' | 'page';
 };
 
 /** Shared chat behavior; each embed has its own server endpoint and browser conversation. */
@@ -25,9 +26,10 @@ export function FloatingAgentChat(props: FloatingAgentChatProps) {
     return <AgentChatSession key={props.sourceKey} {...props} />;
 }
 function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introduction = '', language = 'cs',
-    title, icon, launcherLabel, conversationTitle, id = sourceKey, brandLabel }: FloatingAgentChatProps) {
+    title, icon, launcherLabel, conversationTitle, id = sourceKey, brandLabel, variant = 'floating' }: FloatingAgentChatProps) {
     const cs = language === 'cs';
     const [open, setOpen] = useState(false);
+    const visible = variant === 'page' || open;
     const { session, updateSession, reset, ready, storageFailed } = useMessageChatSession(sourceKey, introduction);
     const { turns, draft, attachments } = session;
     const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
@@ -44,8 +46,8 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
     useEffect(() => { if (open) input.current?.focus(); }, [open]);
     useEffect(() => {
         const element = historyElement.current;
-        if (open && element) element.scrollTo({ top: element.scrollHeight });
-    }, [turns, pendingQuestion, open]);
+        if (visible && element) element.scrollTo({ top: element.scrollHeight });
+    }, [turns, pendingQuestion, visible]);
 
     async function submit(event: FormEvent) {
         event.preventDefault();
@@ -94,10 +96,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
         }
     }
 
-    return <FloatingConversation id={id} open={open} onOpenChange={setOpen} title={title}
-        icon={icon}
-        launcherLabel={launcherLabel} closeLabel={cs ? 'Zavřít chat' : 'Close chat'} panelClassName="message-chat">
-            <div className="message-chat-content" onDragOver={(event) => { if (attachmentEndpoint && event.dataTransfer.types.includes('Files')) event.preventDefault(); }}
+    const content = <div className="message-chat-content" onDragOver={(event) => { if (attachmentEndpoint && event.dataTransfer.types.includes('Files')) event.preventDefault(); }}
                 onDrop={(event) => { if (attachmentEndpoint && event.dataTransfer.files.length) { event.preventDefault(); void uploadFiles(Array.from(event.dataTransfer.files)); } }}>
             <div className="message-chat-tools"><button type="button" disabled={pending || uploading || !ready} onClick={() => { reset(); setError(''); input.current?.focus(); }}>
                 <MessageSquarePlus size={15} aria-hidden="true" /> {cs ? 'Nový chat' : 'New chat'}
@@ -134,6 +133,13 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
             </form>
             {error && <p className="message-chat-error" role="alert">{error}</p>}
             {storageFailed && <p className="message-chat-error" role="status">{cs ? 'Konverzaci se nepodařilo uložit v tomto prohlížeči.' : 'This browser could not save the conversation.'}</p>}
-            </div>
+            </div>;
+    if (variant === 'page') return <section id={id} className="message-chat message-chat-page" aria-label={conversationTitle}>
+        <header className="message-chat-page-heading">{icon}<h2>{title}</h2></header>
+        {content}
+    </section>;
+    return <FloatingConversation id={id} open={open} onOpenChange={setOpen} title={title} icon={icon}
+        launcherLabel={launcherLabel} closeLabel={cs ? 'Zavřít chat' : 'Close chat'} panelClassName="message-chat">
+        {content}
     </FloatingConversation>;
 }

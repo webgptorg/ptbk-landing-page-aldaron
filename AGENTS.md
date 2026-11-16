@@ -144,6 +144,14 @@ use cases, and audiences. Keep these rules current when behavior changes.
   have no public agent route. Editing reuses the workshop Book editor; room assignments remain separate. Used agents
   cannot be deleted out from under messages/history; they can be disabled or reassigned. Separate `messages` and
   `agents` delegated permissions guard their pages and APIs.
+- `/avatar` on both personal domains is an unlisted, no-login full-page chat with Pavol's detailed public avatar.
+  It is deliberately absent from navigation, sitemaps and feeds, and uses noindex/no-store/no-referrer responses
+  without analytics or cookie controls. Reuse `FloatingAgentChat` in page mode, including files, paste/drop,
+  browser-local draft/history, new chat and exports. The separate ordinary Book `Pavol Hejný · plný avatar`
+  and CS/EN histories live in `/admin/agents`; `site-pavol-avatar-cs/en` never reuse the lightweight homepage
+  or Messages sessions. Only the redacted public edition of the private avatar is seeded. Never add private
+  source conversations, family details or internal agreements to this public context. The original agent and
+  homepage chat stay unchanged. Domain and language checks apply to chat, file upload and durable file reads.
 - `/cs/pribeh` is the miniapp for the `story` event type. The existing workshop term, name/e-mail session,
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
   cast. Approved participants edit room Books in the shared highlighted BookEditor with debounced, ordered autosave.

@@ -44,4 +44,16 @@ describe('durable attachment links', () => {
         expect(mocks.load).not.toHaveBeenCalled(); expect(mocks.sign).not.toHaveBeenCalled();
         expect((await adminGet(admin, params)).status).toBe(307);
     });
+    it('keeps full-avatar attachments on their language domain and refuses unknown sources', async () => {
+        for (const [source, host, other] of [['site-pavol-avatar-cs', 'pavolhejny.cz', 'pavolhejny.com'], ['site-pavol-avatar-en', 'pavolhejny.com', 'pavolhejny.cz']]) {
+            mocks.load.mockResolvedValue({ id, message_id: null, source_key: source, object_key: 'private/original' });
+            expect((await GET(request(host), params)).status).toBe(307);
+            mocks.sign.mockClear();
+            expect((await GET(request(other), params)).status).toBe(404);
+            expect((await GET(request('ptbk.io'), params)).status).toBe(404);
+            expect(mocks.sign).not.toHaveBeenCalled();
+        }
+        mocks.load.mockResolvedValue({ id, message_id: null, source_key: 'unknown', object_key: 'private/original' });
+        expect((await GET(request('pavolhejny.com'), params)).status).toBe(404);
+    });
 });

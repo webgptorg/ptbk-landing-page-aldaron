@@ -1,0 +1,10 @@
+.pavol-avatar-page {
+    --article-ink: var(--pavol-ink);
+    --article-muted: var(--pavol-muted);
+    --article-accent: var(--pavol-accent);
+    --article-line: var(--pavol-border);
+    --article-soft: var(--pavol-warm);
+    --article-paper: var(--pavol-paper);
+}
+.pavol-avatar-eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--pavol-accent); }
+.pavol-avatar-page :is(button, a, textarea):focus-visible { outline: 2px solid var(--pavol-accent); outline-offset: 3px; }

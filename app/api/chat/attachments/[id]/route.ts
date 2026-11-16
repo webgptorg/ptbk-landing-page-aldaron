@@ -4,6 +4,7 @@ import { getPublicRequestHostname, normalizeHostname } from '@/lib/domains/publi
 import { loadChatAttachment } from '@/lib/messages/messageAttachmentDatabase';
 import { MESSAGE_RESPONSE_HEADERS } from '@/lib/messages/messageDatabase';
 import { signStoredObject } from '@/lib/storage/objectStorage';
+import { canReadSiteAgentAttachment } from '@/lib/site-agents/requestAccess';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 /** The random file ID is a durable unlisted read capability; CDN signatures remain short-lived. */
@@ -18,7 +19,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         if (file.message_id) {
             const { data, error } = await getAgentDatabase().from('messages').select('domain').eq('id', file.message_id).maybeSingle();
             if (error || !data || data.domain !== host) return missing();
-        } else if (host !== (file.source_key === 'pavol-cs' ? 'pavolhejny.cz' : 'pavolhejny.com')) return missing();
+        } else if (file.source_key === 'pavol-cs' || file.source_key === 'pavol-en') {
+            if (host !== (file.source_key === 'pavol-cs' ? 'pavolhejny.cz' : 'pavolhejny.com')) return missing();
+        } else if (!file.source_key || !canReadSiteAgentAttachment(file.source_key, request.headers)) return missing();
         return new Response(null, { status: 307, headers: { ...MESSAGE_RESPONSE_HEADERS, Location: await signStoredObject(file.object_key) } });
     } catch { return new Response(null, { status: 503, headers: MESSAGE_RESPONSE_HEADERS }); }
 }

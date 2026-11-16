@@ -38,6 +38,7 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-promptbook-private-message', '0');
     requestHeaders.set('x-promptbook-private-story', '0');
     requestHeaders.set('x-promptbook-private-billing', '0');
+    requestHeaders.set('x-promptbook-private-avatar', '0');
     const publicDomainRoute = getPublicDomainRouteByHostname(requestHostname);
 
     // A custom domain keeps its concise public path in the address bar while Next renders the existing nested route.
@@ -59,7 +60,14 @@ export async function middleware(request: NextRequest) {
         if (internalPathname) {
             const rewriteUrl = request.nextUrl.clone();
             rewriteUrl.pathname = internalPathname;
-
+            if (publicDomainRoute.notFound.appearance === 'personal' && /\/avatar\/?$/.test(internalPathname)) {
+                requestHeaders.set('x-promptbook-private-avatar', '1');
+                const response = NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
+                response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+                response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+                response.headers.set('Referrer-Policy', 'no-referrer');
+                return response;
+            }
             return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
         }
 
@@ -202,6 +210,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
+    if (/^\/(cs|en)\/pavol\/avatar\/?$/.test(request.nextUrl.pathname)) requestHeaders.set('x-promptbook-private-avatar', '1');
     return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
