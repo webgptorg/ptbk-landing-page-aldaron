@@ -81,7 +81,7 @@
 .message-chat-page-heading .message-chat-tools { padding: 0; border: 0; }
 .message-chat-page .message-chat-history { max-height: none; padding: 1.5rem max(1.25rem, calc((100% - 46rem) / 2)); scroll-padding-bottom: 1rem; }
 .message-chat-page .message-chat-history-content { gap: 1.75rem; }
-.message-chat-page .message-chat-transcript { min-height: 6rem; }
+.message-chat-page .message-chat-transcript { min-height: 6rem; flex-basis: 0; }
 .message-chat-page .message-chat-composer { flex-shrink: 1; min-height: 0; overflow-y: auto; }
 .message-chat-page .message-chat-turn { font-size: .98rem; line-height: 1.8; }
 .message-chat-page .message-chat-speaker { font-size: .72rem; }
