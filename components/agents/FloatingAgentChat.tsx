@@ -76,6 +76,8 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
     const input = useRef<HTMLTextAreaElement>(null);
     const form = useRef<HTMLFormElement>(null);
     const fileInput = useRef<HTMLInputElement>(null);
+    const contentElement = useRef<HTMLDivElement>(null);
+    const composerElement = useRef<HTMLDivElement>(null);
     const historyElement = useRef<HTMLDivElement>(null);
     const historyContent = useRef<HTMLDivElement>(null);
     const followLatest = useRef(true);
@@ -99,14 +101,29 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
         const resize = () => {
             const element = input.current;
             if (!element) return;
-            const limit = Math.max(64, Math.min(expanded ? 420 : 200, window.innerHeight * (expanded ? .5 : .28)));
-            element.style.height = '0px';
+            let limit = Math.max(64, Math.min(expanded ? 420 : 200, window.innerHeight * (expanded ? .5 : .28)));
+            element.style.height = '48px';
+            if (variant === 'page' && contentElement.current && composerElement.current) {
+                const content = contentElement.current;
+                const composer = composerElement.current;
+                const otherHeight = Array.from(content.children).reduce((height, child) => {
+                    if (child === composer || child.classList.contains('message-chat-transcript') || child.classList.contains('message-chat-drop-target')) return height;
+                    const style = window.getComputedStyle(child);
+                    return height + child.getBoundingClientRect().height + parseFloat(style.marginTop || '0') + parseFloat(style.marginBottom || '0');
+                }, 0);
+                // Leave a readable portion of history above the editor, including on short screens.
+                const available = content.clientHeight - composer.offsetHeight - otherHeight - 96 + element.offsetHeight;
+                limit = Math.min(limit, Math.max(48, available));
+            }
             element.style.height = `${Math.min(limit, Math.max(48, element.scrollHeight))}px`;
         };
         resize();
+        const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
+        if (variant === 'page' && contentElement.current) observer?.observe(contentElement.current);
+        if (variant === 'page' && composerElement.current) observer?.observe(composerElement.current);
         window.addEventListener('resize', resize);
-        return () => window.removeEventListener('resize', resize);
-    }, [draft, visible, expanded, pending]);
+        return () => { observer?.disconnect(); window.removeEventListener('resize', resize); };
+    }, [draft, visible, expanded, pending, variant, attachments.length, error, storageFailed, confirmReset, uploading, session.retry]);
     useEffect(() => {
         const element = historyElement.current;
         if (!visible || !element) return;
@@ -188,7 +205,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
             loadDocument={async () => ({ kind: 'chat', title: conversationTitle, language, assistantName: title, brandLabel,
                 createdAt: turns.find(turn => turn.createdAt)?.createdAt ?? new Date().toISOString(), sourceUrl: `${window.location.origin}${window.location.pathname}`, turns })} />
     </div>;
-    const content = <div className={`message-chat-content${dragging ? ' message-chat-is-dragging' : ''}`}
+    const content = <div ref={contentElement} className={`message-chat-content${dragging ? ' message-chat-is-dragging' : ''}`}
         onDragEnter={event => { if (attachmentEndpoint && event.dataTransfer.types.includes('Files')) { event.preventDefault(); dragDepth.current++; if (!pending && !uploading) setDragging(true); } }}
         onDragLeave={event => { if (event.currentTarget.contains(event.relatedTarget as Node | null)) return; dragDepth.current = 0; setDragging(false); }}
         onDragOver={event => { if (attachmentEndpoint && event.dataTransfer.types.includes('Files')) event.preventDefault(); }}
@@ -220,7 +237,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
             </div>
             {awayFromLatest && <button type="button" className="message-chat-jump" onClick={jumpToLatest}><ArrowDown size={15} aria-hidden="true" />{cs ? 'K nejnovější zprávě' : 'Latest message'}</button>}
         </div>
-        <div className={`message-chat-composer${expanded ? ' message-chat-composer-expanded' : ''}`}>
+        <div ref={composerElement} className={`message-chat-composer${expanded ? ' message-chat-composer-expanded' : ''}`}>
             {error && <div className="message-chat-error-card" role="alert"><p>{error}</p>
                 {requestFailed && <button type="button" disabled={pending || uploading || !ready} onClick={() => form.current?.requestSubmit()}><RotateCcw size={14} aria-hidden="true" />{cs ? 'Zkusit znovu' : 'Try again'}</button>}
             </div>}
