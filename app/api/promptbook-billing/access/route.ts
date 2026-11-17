@@ -2,6 +2,7 @@ import { ensureLicenseAccount } from '@/lib/promptbook-licensing/accounts';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import { PROMPTBOOK_ORDERS_TABLE } from '@/lib/promptbook-billing/billingOrders';
+import { getBillingOrigin, PROMPTBOOK_MEMBER_PATH } from '@/lib/promptbook-billing/config';
 import {
     getMemberBillingContext,
     getMemberEmailAuth,
@@ -52,11 +53,26 @@ export async function POST(request: NextRequest) {
     const { email, action } = parsed.data;
     if (action === 'send') {
         // The same verified identity serves new trials and purchases; never disclose whether an address is known.
-        await auth.signInWithOtp({ email }).catch(() => undefined);
-        return memberResponse({ isCodeSent: true });
+        try {
+            // Supabase's email templates must contain .Token; the API method alone does not select code delivery.
+            const { error } = await auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: new URL(PROMPTBOOK_MEMBER_PATH, getBillingOrigin(request)).href },
+            });
+            if (!error) return memberResponse({ isCodeSent: true });
+            return memberResponse({ error: 'Kód se nepodařilo odeslat. Zkuste to prosím později.' }, error.status === 429 ? 429 : 503);
+        } catch {
+            return memberResponse({ error: 'Kód se nepodařilo odeslat. Zkuste to prosím později.' }, 503);
+        }
     }
 
-    const { data, error } = await auth.verifyOtp({ email, token: parsed.data.code, type: 'email' });
+    let result: Awaited<ReturnType<typeof auth.verifyOtp>>;
+    try {
+        result = await auth.verifyOtp({ email, token: parsed.data.code, type: 'email' });
+    } catch {
+        return memberResponse({ error: 'Kód se teď nepodařilo ověřit. Zkuste to prosím znovu.' }, 503);
+    }
+    const { data, error } = result;
     if (error || !data.user?.email_confirmed_at || data.user.email?.trim().toLowerCase() !== email) {
         return memberResponse({ error: 'Kód je neplatný nebo jeho platnost vypršela.' }, error?.status === 429 ? 429 : 403);
     }

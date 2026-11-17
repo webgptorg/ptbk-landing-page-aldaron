@@ -4,6 +4,8 @@ The launch revision in `docs/launch-2026-11-13.md` supersedes older homepage, na
 
 ## Context
 
+Billing email access uses Supabase numeric OTP, never the default Magic Link template. Both Magic Link and Confirm signup must use `config/supabase-email-otp.html` in the production Auth project; deploying the website does not apply these external settings. Keep provider delivery failures visible as generic 503/429 responses, never report `isCodeSent` after failure, and never create a member cookie/account before verified matching mailbox ownership. Exact setup and verification are in `docs/promptbook-billing.md`.
+
 This repository contains Promptbook landing pages for different businesses,
 use cases, and audiences. Keep these rules current when behavior changes.
 
