@@ -1,6 +1,8 @@
+vi.mock('@/lib/pavol-avatar/auth',()=>({getAvatarPrincipal:mocks.principal}));
+vi.mock('@/lib/pavol-avatar/service',()=>({canReadAvatarConversation:mocks.owner}));
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
-const mocks = vi.hoisted(() => ({ load: vi.fn(), sign: vi.fn(), db: vi.fn(), denied: vi.fn() }));
+const mocks = vi.hoisted(() => ({ load: vi.fn(), sign: vi.fn(), db: vi.fn(), denied: vi.fn(), principal:vi.fn(), owner:vi.fn() }));
 vi.mock('@/lib/messages/messageAttachmentDatabase', () => ({ loadChatAttachment: mocks.load }));
 vi.mock('@/lib/messages/messageDatabase', () => ({ MESSAGE_RESPONSE_HEADERS: { 'Cache-Control': 'private, no-store' } }));
 vi.mock('@/lib/storage/objectStorage', () => ({ signStoredObject: mocks.sign }));
@@ -56,4 +58,9 @@ describe('durable attachment links', () => {
         mocks.load.mockResolvedValue({ id, message_id: null, source_key: 'unknown', object_key: 'private/original' });
         expect((await GET(request('pavolhejny.com'), params)).status).toBe(404);
     });
+});
+
+describe('account avatar uploads',()=>{
+ it('never converts a private file id into an anonymous CDN capability',async()=>{mocks.load.mockResolvedValue({id,message_id:null,source_key:'avatar-account-cs',conversation_id:'private-chat',object_key:'private/customer'});mocks.principal.mockResolvedValue(null);expect((await GET(request(),params)).status).toBe(404);expect(mocks.sign).not.toHaveBeenCalled();});
+ it('requires the verified conversation owner and denies removed or foreign conversations',async()=>{mocks.load.mockResolvedValue({id,message_id:null,source_key:'avatar-account-cs',conversation_id:'private-chat',object_key:'private/customer'});const principal={id:'owner',email:'owner@example.test'};mocks.principal.mockResolvedValue(principal);mocks.owner.mockResolvedValue(false);expect((await GET(request(),params)).status).toBe(404);expect(mocks.sign).not.toHaveBeenCalled();mocks.owner.mockResolvedValue(true);expect((await GET(request(),params)).status).toBe(307);expect(mocks.owner).toHaveBeenCalledWith(principal,'private-chat');});
 });

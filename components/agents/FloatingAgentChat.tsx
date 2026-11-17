@@ -25,6 +25,8 @@ export type FloatingAgentChatProps = {
     readonly conversationTitle: string; readonly id?: string; readonly brandLabel?: string;
     readonly variant?: 'floating' | 'page'; readonly subtitle?: string;
     readonly suggestions?: readonly string[];
+    readonly onResponse?: () => void;
+    readonly enableVoice?: boolean;
 };
 
 /** Shared chat behavior; each embed has its own server endpoint and browser conversation. */
@@ -62,7 +64,7 @@ function ChatTurn({ turn, title, cs, introduction = false }: {
 }
 
 function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introduction = '', language = 'cs',
-    title, icon, launcherLabel, conversationTitle, id = sourceKey, brandLabel, variant = 'floating', subtitle, suggestions = [] }: FloatingAgentChatProps) {
+    title, icon, launcherLabel, conversationTitle, id = sourceKey, brandLabel, variant = 'floating', subtitle, suggestions = [], onResponse, enableVoice = true }: FloatingAgentChatProps) {
     const cs = language === 'cs';
     const [open, setOpen] = useState(false);
     const visible = variant === 'page' || open;
@@ -214,6 +216,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                 { ...questionTurn, createdAt }, { role: 'assistant', content: result.reply, createdAt: new Date().toISOString(),
                     ...(voiceResult ? { turnId: voiceResult.turnId, voice: voiceResult.voice } : {}) }] };
             latestSession.current = next; updateSession(next); setExpanded(false);
+            onResponse?.();
         } catch (failure) {
             if (spokenQuestion) {
                 // A spoken question remains visible even if its reply never began. Preserve any typed draft.
@@ -316,7 +319,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                     }} />
                 <div className="message-chat-composer-controls">
                     <div className="message-chat-composer-options">
-                        {voiceStatus === 'off' && <button type="button" className="message-chat-voice-start" onClick={startVoice} disabled={pending || uploading || !ready} aria-label={cs ? 'Mluvit s AI avatarem Pavlovým hlasem' : 'Talk to the AI avatar in Pavol’s voice'} title={cs ? 'Mluvit s AI avatarem Pavlovým hlasem' : 'Talk to the AI avatar in Pavol’s voice'}><Mic size={18} aria-hidden="true" /><span>{cs ? 'Mluvit' : 'Talk'}</span></button>}
+                        {enableVoice && voiceStatus === 'off' && <button type="button" className="message-chat-voice-start" onClick={startVoice} disabled={pending || uploading || !ready} aria-label={cs ? 'Mluvit s AI avatarem Pavlovým hlasem' : 'Talk to the AI avatar in Pavol’s voice'} title={cs ? 'Mluvit s AI avatarem Pavlovým hlasem' : 'Talk to the AI avatar in Pavol’s voice'}><Mic size={18} aria-hidden="true" /><span>{cs ? 'Mluvit' : 'Talk'}</span></button>}
                         {attachmentEndpoint && <><input ref={fileInput} type="file" multiple accept={CHAT_ATTACHMENT_ACCEPT} className="sr-only" tabIndex={-1} aria-label={cs ? 'Vybrat přílohy' : 'Choose attachments'}
                             onChange={event => { void uploadFiles(Array.from(event.target.files ?? [])); event.target.value = ''; }} />
                         <button type="button" className="message-chat-attach" disabled={pending || uploading || !ready || attachments.length >= 4} aria-label={cs ? 'Přiložit soubor' : 'Attach file'}

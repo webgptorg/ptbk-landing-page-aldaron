@@ -1,7 +1,7 @@
 # Pavol's full personal avatar
 
 The direct addresses are `https://pavolhejny.cz/avatar` and `https://pavolhejny.com/avatar`.
-They require no login and are intentionally unlisted: no homepage, menu, footer, feed or sitemap links.
+With PAVOL_AVATAR_ENABLED disabled they require no login. The account-based paid pilot is documented in [pavol-avatar-commerce.md](pavol-avatar-commerce.md). These addresses remain intentionally unlisted: no homepage, menu, footer, feed or sitemap links.
 Page metadata and middleware send noindex/noarchive, private no-store and no-referrer. Analytics and
 cookie controls are suppressed as on unlisted Messages pages. Knowing the URL is sufficient access;
 this is not a confidential channel or an authentication mechanism.

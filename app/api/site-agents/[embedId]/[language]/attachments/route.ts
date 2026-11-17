@@ -1,3 +1,4 @@
+import { isAvatarEnabled } from '@/lib/pavol-avatar/config';
 import { MESSAGE_RESPONSE_HEADERS } from '@/lib/messages/messageDatabase';
 import { uploadPublicChatAttachment } from '@/lib/messages/messageAttachmentUpload';
 import { canAccessSiteAgent } from '@/lib/site-agents/requestAccess';
@@ -11,5 +12,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ emb
     if (embedId !== 'pavol-avatar' || (language !== 'cs' && language !== 'en') || !canAccessSiteAgent(embedId, language, request.headers)) {
         return new Response(null, { status: 404, headers: MESSAGE_RESPONSE_HEADERS });
     }
+    if (isAvatarEnabled()) return (await import('@/app/api/pavol-avatar/attachments/route')).POST(request);
     return uploadPublicChatAttachment(request, { sourceKey: siteAgentSourceKey(embedId as SiteAgentEmbedId, language) });
 }

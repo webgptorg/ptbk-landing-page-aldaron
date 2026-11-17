@@ -1,3 +1,4 @@
+import { isAvatarEnabled } from '@/lib/pavol-avatar/config';
 import { MESSAGE_RESPONSE_HEADERS } from '@/lib/messages/messageDatabase';
 import { respondToPublicChat } from '@/lib/messages/respondToPublicChat';
 import { getSiteAgentEmbed, siteAgentSourceKey, type SiteAgentEmbedId } from '@/lib/site-agents/registry';
@@ -12,6 +13,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ emb
     const embed = getSiteAgentEmbed(embedId);
     if (!embed || (language !== 'cs' && language !== 'en') || !canAccessSiteAgent(embedId, language, request.headers)) {
         return Response.json({ error: 'Not found.' }, { status: 404, headers: MESSAGE_RESPONSE_HEADERS });
+    }
+    if (embedId === 'pavol-avatar' && isAvatarEnabled()) {
+        return (await import('@/app/api/pavol-avatar/chat/route')).POST(request);
     }
     const origin = request.headers.get('origin');
     if (origin && origin !== new URL(request.url).origin) return Response.json({ error: 'Invalid request.' }, { status: 403, headers: MESSAGE_RESPONSE_HEADERS });

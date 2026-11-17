@@ -251,6 +251,9 @@ export function getInternalPathname(publicDomainRoute: PublicDomainRoute, public
     );
 
     if (publicPathSuffix === undefined) {
+        if (publicDomainRoute.notFound.appearance === 'personal' && /^\/avatar\/legal(?:\/(?:terms|privacy)\/[a-z0-9-]+)?$/.test(normalizedPublicPathname)) {
+            return publicDomainRoute.internalPath + normalizedPublicPathname;
+        }
         // Article variants retain the personal site's localized route and 404 behavior.
         if (publicDomainRoute.notFound.appearance === 'personal' && /^\/articles\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\/opengraph-image)?$/.test(normalizedPublicPathname)) {
             return `${publicDomainRoute.internalPath}${normalizedPublicPathname}`;

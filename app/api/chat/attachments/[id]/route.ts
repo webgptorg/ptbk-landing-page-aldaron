@@ -1,3 +1,5 @@
+import { getAvatarPrincipal } from '@/lib/pavol-avatar/auth';
+import { canReadAvatarConversation } from '@/lib/pavol-avatar/service';
 import { z } from 'zod';
 import { getAgentDatabase } from '@/lib/agents/agentDatabase';
 import { getPublicRequestHostname, normalizeHostname } from '@/lib/domains/publicDomainRouting';
@@ -16,7 +18,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         const file = await loadChatAttachment(id);
         if (!file) return missing();
         const host = normalizeHostname(getPublicRequestHostname(request.headers));
-        if (file.message_id) {
+        if (file.source_key === 'avatar-account-cs' || file.source_key === 'avatar-account-en') {
+            const expectedHost=file.source_key==='avatar-account-cs'?'pavolhejny.cz':'pavolhejny.com';
+            if(host!==expectedHost) return missing();
+            const principal=await getAvatarPrincipal(request);
+            if(!principal || !await canReadAvatarConversation(principal,file.conversation_id)) return missing();
+        } else if (file.message_id) {
             const { data, error } = await getAgentDatabase().from('messages').select('domain').eq('id', file.message_id).maybeSingle();
             if (error || !data || data.domain !== host) return missing();
         } else if (file.source_key === 'pavol-cs' || file.source_key === 'pavol-en') {

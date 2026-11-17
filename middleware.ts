@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
         if (internalPathname) {
             const rewriteUrl = request.nextUrl.clone();
             rewriteUrl.pathname = internalPathname;
-            if (publicDomainRoute.notFound.appearance === 'personal' && /\/avatar\/?$/.test(internalPathname)) {
+            if (publicDomainRoute.notFound.appearance === 'personal' && /\/avatar(?:\/|$)/.test(internalPathname)) {
                 requestHeaders.set('x-promptbook-private-avatar', '1');
                 const response = NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
                 response.headers.set('Cache-Control', 'private, no-store, max-age=0');
@@ -210,7 +210,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
-    if (/^\/(cs|en)\/pavol\/avatar\/?$/.test(request.nextUrl.pathname)) requestHeaders.set('x-promptbook-private-avatar', '1');
+    if (/^\/(cs|en)\/pavol\/avatar(?:\/|$)/.test(request.nextUrl.pathname)) requestHeaders.set('x-promptbook-private-avatar', '1');
     return NextResponse.next({ request: { headers: requestHeaders } });
 }
 

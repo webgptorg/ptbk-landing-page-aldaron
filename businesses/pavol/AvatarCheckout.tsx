@@ -1,0 +1,45 @@
+'use client';
+import { useRef, useState, type FormEvent } from 'react';
+import { CompanyNameInput } from '@/businesses/new/CompanyNameInput';
+import { AVATAR_PUBLIC_PRICE_CZK,AVATAR_PUBLIC_TERMS_PATH,AVATAR_PUBLIC_PRIVACY_PATH,AVATAR_PUBLIC_TERMS_VERSION } from '@/lib/pavol-avatar/presentation';
+import type { PromptbookBillingIdentity } from '@/lib/promptbook-billing/billingIdentity';
+
+export function AvatarCheckout({cs,limit,onCancel,slovakiaEnabled=false}:{cs:boolean;limit:number;onCancel:()=>void;slovakiaEnabled?:boolean}) {
+ const[country,setCountry]=useState<'CZ'|'SK'>('CZ'),[business,setBusiness]=useState(false);
+ const[fullname,setFullname]=useState(''),[name,setName]=useState(''),[companyId,setCompanyId]=useState(''),[vatId,setVatId]=useState('');
+ const[address,setAddress]=useState({line1:'',city:'',postal_code:''}),[terms,setTerms]=useState(false),[immediate,setImmediate]=useState(false);
+ const[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const attempt=useRef<{fingerprint:string;id:string}|null>(null);
+ function choose(company:PromptbookBillingIdentity){setName(company.name);setCompanyId(company.companyId);setVatId(company.vatId??'');setAddress(company.address);}
+ async function submit(event:FormEvent){event.preventDefault();if(busy)return;setBusy(true);setError('');
+  try{const payload={
+   fullname,country,customerType:business?'business':'individual',companyId:business?companyId:undefined,vatId:business?vatId:undefined,billingName:name,
+   billingAddress:{...address,country},termsAccepted:terms,immediateStartAccepted:immediate,termsVersion:AVATAR_PUBLIC_TERMS_VERSION,
+  };const fingerprint=JSON.stringify(payload);if(attempt.current?.fingerprint!==fingerprint)attempt.current={fingerprint,id:crypto.randomUUID()};
+  const response=await fetch('/api/pavol-avatar/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,requestId:attempt.current.id})});const data=await response.json() as {url?:unknown;error?:string};if(!response.ok||typeof data.url!=='string')throw new Error(data.error??(cs?'Objednávku se nepodařilo vytvořit.':'Could not create checkout.'));
+  const target=new URL(data.url);if(target.hostname!=='checkout.stripe.com')throw new Error('Invalid checkout');window.location.assign(target.href);
+  }catch(failure){setError(failure instanceof Error?failure.message:'Checkout unavailable');setBusy(false);}
+ }
+ return <form className="avatar-checkout avatar-form" onSubmit={event=>void submit(event)}>
+  <div className="avatar-section-heading"><h2>{cs?'Objednat Full':'Subscribe to Full'}</h2><button type="button" onClick={onCancel}>{cs?'Zpět':'Back'}</button></div>
+  <p className="avatar-price"><strong>{AVATAR_PUBLIC_PRICE_CZK.toLocaleString(cs?'cs-CZ':'en-GB')} Kč</strong> / {cs?'měsíc':'month'}</p>
+  <p>{cs?'Automaticky obnovované měsíční předplatné.':'Automatically renewing monthly subscription.'} {limit} {cs?'otázek za kalendářní měsíc; web, MCP a Telegram sdílejí jeden limit.':'questions per calendar month; shared across web, MCP and Telegram.'}</p>
+  <fieldset disabled={busy}><legend>{cs?'Fakturační údaje':'Billing details'}</legend>
+   <label>{cs?'Tvoje jméno':'Your name'}<input name="fullname" autoComplete="name" required maxLength={200} value={fullname} onChange={e=>setFullname(e.target.value)}/></label>
+   <label>{cs?'Země':'Country'}<select value={country} onChange={e=>setCountry(e.target.value as 'CZ'|'SK')}><option value="CZ">Česko</option>{slovakiaEnabled&&<option value="SK">Slovensko</option>}</select></label>
+   <label className="avatar-check"><input type="checkbox" checked={business} onChange={e=>setBusiness(e.target.checked)}/>{cs?'Nakupuji na firmu':'Purchase for a business'}</label>
+   {business?<><CompanyNameInput value={name} disabled={busy} searchEnabled={country==='CZ'} onChange={setName} onSelect={choose}/>
+    <div className="avatar-form-row"><label>IČO<input name="companyId" required inputMode="numeric" pattern="[0-9]{8}" value={companyId} onChange={e=>setCompanyId(e.target.value)}/></label>
+    <label>{country==='SK'?'IČ DPH':'DIČ'}<input name="vatId" required={country==='SK'} value={vatId} onChange={e=>setVatId(e.target.value)} maxLength={24}/></label></div></>
+    :<label>{cs?'Fakturační jméno':'Billing name'}<input name="billingName" required autoComplete="billing name" maxLength={200} value={name} onChange={e=>setName(e.target.value)}/></label>}
+   <label>{cs?'Ulice a číslo':'Street and number'}<input required name="line1" autoComplete="billing street-address" maxLength={200} value={address.line1} onChange={e=>setAddress({...address,line1:e.target.value})}/></label>
+   <div className="avatar-form-row"><label>{cs?'Město':'City'}<input required autoComplete="billing address-level2" maxLength={120} value={address.city} onChange={e=>setAddress({...address,city:e.target.value})}/></label>
+   <label>{cs?'PSČ':'Postal code'}<input required autoComplete="billing postal-code" maxLength={16} value={address.postal_code} onChange={e=>setAddress({...address,postal_code:e.target.value})}/></label></div>
+   <label className="avatar-check"><input type="checkbox" required checked={terms} onChange={e=>setTerms(e.target.checked)}/><span>{cs?'Souhlasím s ':'I accept the '}<a href={AVATAR_PUBLIC_TERMS_PATH} target="_blank" rel="noopener noreferrer">{cs?'podmínkami avatara':'avatar terms'}</a>{cs?' a beru na vědomí ':' and acknowledge the '}<a href={AVATAR_PUBLIC_PRIVACY_PATH} target="_blank" rel="noopener noreferrer">{cs?'informace o soukromí':'privacy notice'}</a>.</span></label>
+   <label className="avatar-check"><input type="checkbox" required checked={immediate} onChange={e=>setImmediate(e.target.checked)}/><span>{cs?'Žádám o okamžité zpřístupnění služby. Moje zákonné právo odstoupit tím nezaniká.':'I request immediate access. This does not waive my statutory withdrawal rights.'}</span></label>
+   <button className="avatar-button" type="submit" disabled={busy||!terms||!immediate}>{busy?(cs?'Otevírám platbu…':'Opening checkout…'):(cs?'Objednat s povinností platby':'Order with obligation to pay')}</button>
+  </fieldset>
+  {error&&<p className="avatar-error" role="alert">{error}</p>}
+  <p className="avatar-small">{cs?'Prodávající: AI Web s.r.o., IČO 21012288. Neplátce DPH. Konečnou částku potvrdíš před platbou ve Stripe. Předplatné lze zrušit ke konci uhrazeného období.':'Seller: AI Web s.r.o., company no. 21012288. Not a Czech VAT payer. Confirm the final total in Stripe before payment. Cancel renewal at the end of your paid period.'}</p>
+ </form>;
+}

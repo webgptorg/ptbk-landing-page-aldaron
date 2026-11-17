@@ -14,7 +14,7 @@ type TurnRow = {
     voice_status?: VoicePlayback['status'] | null; spoken_reply?: string | null;
 };
 const turnColumns = 'id,question,introduction,reply,status,error_message,created_at,completed_at,request_hash,attachments,voice_status,spoken_reply';
-export type ChatConversationSource = string | { readonly sourceKey: 'pavol-cs' | 'pavol-en' | SiteAgentSourceKey };
+export type ChatConversationSource = string | { readonly sourceKey: 'pavol-cs' | 'pavol-en' | 'avatar-account-cs' | 'avatar-account-en' | SiteAgentSourceKey };
 const sourceFields = (source: ChatConversationSource) => typeof source === 'string' ? { message_id: source } : { source_key: source.sourceKey };
 function mapTurn(row: TurnRow): RecordedMessageChatTurn {
     return { id: row.id, question: row.question, introduction: row.introduction, reply: row.reply,

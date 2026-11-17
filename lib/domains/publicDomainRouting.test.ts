@@ -134,3 +134,14 @@ describe('public domain routing', () => {
         expect(publicFiles.filter((file) => !isSharedDeploymentAssetPath(file))).toEqual([]);
     });
 });
+
+describe('avatar legal product routes',()=>{
+ it('keeps avatar contracts on the matching personal brand',()=>{
+  const czech=getPublicDomainRouteByHostname('pavolhejny.cz')!;
+  const english=getPublicDomainRouteByHostname('pavolhejny.com')!;
+  expect(getInternalPathname(czech,'/avatar/legal')).toBe('/cs/pavol/avatar/legal');
+  expect(getInternalPathname(czech,'/avatar/legal/terms/2026-11-17-v1')).toBe('/cs/pavol/avatar/legal/terms/2026-11-17-v1');
+  expect(getInternalPathname(english,'/avatar/legal/privacy/2026-11-17-v1')).toBe('/en/pavol/avatar/legal/privacy/2026-11-17-v1');
+  expect(getInternalPathname(czech,'/avatar/legal/anything/else')).toBeUndefined();
+ });
+});

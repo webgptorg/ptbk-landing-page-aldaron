@@ -28,6 +28,7 @@ export const SHARED_PUBLIC_ASSET_PATHS: readonly string[] = [
     '/terminal-tour/walkthrough.mp4',
 
     '/CNAME',
+    '/chat-voice-worklet.js',
     '/brand/brand.css',
     '/brand/brand.json',
     '/brand/brand.md',

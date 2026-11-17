@@ -23,6 +23,7 @@ export async function runManagedAgent(
     attachments: readonly AgentAttachmentInput[] = [],
     options?: AgentRunOptions,
     stream?: { readonly onText: (delta: string) => void; readonly maxOutputTokens?: number },
+    onUsage?: (usage: {model:string;inputTokens:number;outputTokens:number}) => void,
 ): Promise<string> {
     if (!agent.isEnabled) throw Object.assign(new Error('Agent je vypnutý.'), { status: 409 });
     const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -83,8 +84,9 @@ export async function runManagedAgent(
                     if (!completed || !text.trim()) throw new Error('Spojení s modelem se přerušilo.');
                     return text.trim();
                 }
-                const result = await response.json() as { output?: { content?: { type?: string; text?: string }[] }[] };
+                const result = await response.json() as { usage?: {input_tokens?:number;output_tokens?:number}; output?: { content?: { type?: string; text?: string }[] }[] };
                 const text = (result.output ?? []).flatMap((item) => (item.content ?? []).filter((part) => part.type === 'output_text').map((part) => part.text ?? '')).join('\n').trim();
+                onUsage?.({model,inputTokens:Math.max(0,result.usage?.input_tokens??0),outputTokens:Math.max(0,result.usage?.output_tokens??0)});
                 if (!text) throw Object.assign(new Error('Model nevrátil textovou odpověď.'), { status: 502 });
                 return text;
             })(),
