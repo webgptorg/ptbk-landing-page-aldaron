@@ -1,3 +1,4 @@
+import { applyAvatarStripeEvent } from '@/lib/pavol-avatar/billing';
 import {
     activateCommunityMembershipFromCheckoutSession,
     applyCommunityMembershipSubscriptionChange,
@@ -79,6 +80,13 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Refused a Stripe webhook with an invalid signature:', error);
         return NextResponse.json({ error: 'Invalid Stripe signature' }, { status: 400 });
+    }
+
+    try {
+        if (await applyAvatarStripeEvent(gateway.stripe, event)) return NextResponse.json({ isReceived: true });
+    } catch (error) {
+        console.error('Failed to persist avatar Stripe event', event.type);
+        return NextResponse.json({ error: 'Avatar payment event could not be recorded' }, { status: 500 });
     }
 
     try {
