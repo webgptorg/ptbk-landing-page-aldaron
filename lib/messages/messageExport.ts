@@ -1,6 +1,7 @@
 import { convertMarkdownToPlainText } from '@/lib/text/markdownText';
 import type { MessageChatTurn } from './messageTypes';
 import { chatAttachmentHref } from './messageAttachments';
+import { voicePlaybackDescription } from '@/lib/voice-chat/voicePlaybackDescription';
 
 export const MESSAGE_TEXT_FORMATS = ['book', 'md', 'txt'] as const;
 export type MessageTextFormat = typeof MESSAGE_TEXT_FORMATS[number];
@@ -26,7 +27,7 @@ const singleLine = (text: string) => text.replace(/[\r\n\t]+/g, ' ').trim();
 const speaker = (turn: MessageChatTurn, cs: boolean, assistantName = 'Pavol Hejný') => turn.role === 'user' ? cs ? 'Návštěvník' : 'Visitor' : assistantName;
 function turnMarkdown(document: MessageExportDocument, turn: MessageChatTurn): string {
     const files = (turn.attachments ?? []).map((file) => `[${file.name.replace(/[\\\[\]]/g, '\\$&')}](${new URL(chatAttachmentHref(file.id), document.sourceUrl).href})`);
-    return [turn.content, ...files].join('\n\n');
+    return [turn.content, ...(turn.voice ? [voicePlaybackDescription(turn.voice, document.language)] : []), ...files].join('\n\n');
 }
 
 /** Shared by downloads and clipboard; PDF reads the same source document. */

@@ -122,3 +122,12 @@
     .message-action-button { width: 34px; height: 36px; }
     .message-chat-form textarea { font-size: 1rem; }
 }
+
+.message-chat-voice { display: flex; align-items: center; gap: .5rem; margin-bottom: .65rem; padding: .7rem .8rem; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 14px; background: color-mix(in srgb, #56a9b9 10%, transparent); }
+.message-chat-voice > div { display: grid; gap: .15rem; flex: 1; min-width: 0; }
+.message-chat-voice strong { font-size: .78rem; }
+.message-chat-voice [role='status'] { font-size: .74rem; opacity: .8; }
+.message-chat-voice > button { display: grid; place-items: center; min-width: 40px; min-height: 40px; border-radius: 50%; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); }
+.message-chat-live-transcript { padding: .35rem .6rem; margin: 0 0 .5rem; font-size: .85rem; opacity: .8; max-height: 6rem; overflow-y: auto; overflow-wrap: anywhere; }
+.message-chat-voice-note { margin-top: .5rem; font-size: .74rem; opacity: .7; overflow-wrap: anywhere; }
+.message-chat-voice-start { display: inline-flex; align-items: center; gap: .4rem; }

@@ -10,6 +10,9 @@ import type { ChatConversationSource } from '@/lib/messages/messageConversationD
 import { allowPublicChatRequest } from './publicChatRateLimit';
 import type { ChatAttachmentRow } from './messageAttachmentDatabase';
 import { CHAT_REPLY_MAX_CHARACTERS } from './messageChatLimits';
+import { handleVoiceAction } from '@/lib/voice-chat/voiceActions';
+import { verifyVoiceSession } from '@/lib/voice-chat/voiceSession';
+import { streamVoiceReply } from '@/lib/voice-chat/streamVoiceReply';
 
 async function boundedJson(request: Request): Promise<unknown> {
     const reader = request.body?.getReader();
@@ -38,15 +41,18 @@ export async function respondToPublicChat(request: Request, subject: {
     const json = (value: unknown, status = 200) => Response.json(value, { status, headers: MESSAGE_RESPONSE_HEADERS });
     const origin = request.headers.get('origin');
     if (origin && origin !== new URL(request.url).origin) return json({ error: 'Neplatný požadavek.' }, 403);
-    const body = await boundedJson(request) as { messages?: unknown; conversationId?: unknown; requestId?: unknown } | null;
+    const body = await boundedJson(request) as Record<string, unknown> | null;
+    if (body?.action === 'voice-start' || body?.action === 'voice-playback') return handleVoiceAction(request, subject, body);
     let turns = parseMessageChatTurns(body?.messages);
     if (!turns) return json({ error: 'Otázka je příliš dlouhá nebo nemá správný formát.' }, 400);
     const ids = z.object({ conversationId: z.string().uuid().optional(), requestId: z.string().uuid().optional() })
         .safeParse({ conversationId: body?.conversationId, requestId: body?.requestId });
     if (!ids.success) return json({ error: 'Neplatný požadavek.' }, 400);
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-    if (!allowPublicChatRequest(`${subject.rateKey}:${ip}`)) return json({ error: 'Chvilku prosím počkej a zkus otázku znovu.' }, 429);
     const conversationId = ids.data.conversationId ?? randomUUID();
+    const voice = body?.voiceSession ? verifyVoiceSession(body.voiceSession, subject.source, conversationId, request) : null;
+    if (body?.voiceSession && !voice) return json({ error: 'Hlasová relace vypršela. Spusť hlasový chat znovu.' }, 403);
+    if (!allowPublicChatRequest(voice ? 'voice-turn:' + ip : subject.rateKey + ':' + ip, voice ? 60 : 15)) return json({ error: 'Chvilku prosím počkej a zkus otázku znovu.' }, 429);
     let files: ChatAttachmentRow[] = [];
     if (turns.some((turn) => turn.attachments?.length)) {
         try {
@@ -58,7 +64,7 @@ export async function respondToPublicChat(request: Request, subject: {
     let saved: Awaited<ReturnType<typeof beginMessageChatTurn>>;
     try {
         saved = await beginMessageChatTurn(subject.source, conversationId,
-            ids.data.requestId ?? randomUUID(), subject.introduction, turns);
+            ids.data.requestId ?? randomUUID(), subject.introduction, turns, !!voice);
     } catch { return json({ error: 'Otázku se nepodařilo uložit. Zkus to prosím znovu.' }, 503); }
     if (!saved.isNew) {
         if (saved.turn.status === 'completed' && saved.turn.reply) return json({ reply: saved.turn.reply });
@@ -79,6 +85,9 @@ export async function respondToPublicChat(request: Request, subject: {
         const agent = await loadManagedAgent(subject.agentId);
         if (!agent || !agent.isEnabled) return fail(subject.unavailableMessage ?? 'Chat teď není dostupný. Celý kontext si můžeš stáhnout nahoře.', 503);
         const inputs = files.length ? await (await import('./messageAttachmentDatabase')).createChatAttachmentInputs(files) : [];
+        if (voice) return streamVoiceReply(request, { turnId: saved.turn.id, agent, instruction: instructions,
+            context: JSON.stringify({ message: subject.markdown, fullContext: subject.context, conversation: turns,
+                ...(subject.includeSourceBook ? { managedSourceBook: agent.bookSource } : {}) }), inputs, voiceId: voice.voiceId });
         reply = await runManagedAgent(agent, instructions, JSON.stringify({
             message: subject.markdown, fullContext: subject.context, conversation: turns,
             ...(subject.includeSourceBook ? { managedSourceBook: agent.bookSource } : {}),

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+vi.mock('server-only', () => ({}));
 const mocks = vi.hoisted(() => ({ source: vi.fn(), agent: vi.fn(), run: vi.fn(), begin: vi.fn(), finish: vi.fn(), resolveFiles: vi.fn(), fileInputs: vi.fn() }));
 vi.mock('@/lib/messages/messageDatabase', () => ({ loadMessageByShortcode: mocks.source, MESSAGE_RESPONSE_HEADERS: { 'Cache-Control': 'private, no-store' } }));
 vi.mock('@/lib/agents/agentDatabase', () => ({ loadManagedAgent: mocks.agent }));
@@ -22,7 +23,7 @@ describe('message-specific Book chat', () => {
         expect(mocks.source).toHaveBeenCalledWith(TEST_MESSAGE.shortcode, 'pavolhejny.cz');
         const [agent, , context] = mocks.run.mock.calls[0];
         expect(agent.bookSource).toBe('Current Book'); expect(context).toContain(TEST_MESSAGE.context); expect(context).not.toContain('forged replacement');
-        expect(mocks.begin).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), expect.any(String), TEST_MESSAGE.introduction, [{ role: 'user', content: 'Co zbývá?' }]);
+        expect(mocks.begin).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), expect.any(String), TEST_MESSAGE.introduction, [{ role: 'user', content: 'Co zbývá?' }], false);
         expect(mocks.begin.mock.invocationCallOrder[0]).toBeLessThan(mocks.run.mock.invocationCallOrder[0]);
         expect(mocks.finish).toHaveBeenCalledWith('saved', { reply: 'Ještě rozhodneme.' });
     });
@@ -71,7 +72,7 @@ describe('message-specific Book chat', () => {
         const response = await POST(request(turns), params);
         expect(response.status).toBe(200);
         expect(mocks.resolveFiles).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), turns);
-        expect(mocks.begin).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), expect.any(String), TEST_MESSAGE.introduction, turns);
+        expect(mocks.begin).toHaveBeenCalledWith(TEST_MESSAGE.id, expect.any(String), expect.any(String), TEST_MESSAGE.introduction, turns, false);
         expect(mocks.begin.mock.invocationCallOrder[0]).toBeLessThan(mocks.fileInputs.mock.invocationCallOrder[0]);
         expect(mocks.run.mock.calls[0][4]).toEqual(inputs);
         mocks.begin.mockClear(); mocks.run.mockClear(); mocks.resolveFiles.mockRejectedValueOnce(new Error('Wrong scope'));

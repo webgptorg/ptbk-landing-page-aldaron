@@ -1,5 +1,6 @@
 import 'server-only';
 import type { ManagedAgent } from './agentModel';
+import { readStreamLines } from './readStreamEvents';
 
 export type AgentAttachmentInput = { readonly label: string } & (
     { readonly kind: 'text'; readonly text: string } | { readonly kind: 'image' | 'pdf'; readonly url: string }
@@ -21,6 +22,7 @@ export async function runManagedAgent(
     signal?: AbortSignal,
     attachments: readonly AgentAttachmentInput[] = [],
     options?: AgentRunOptions,
+    stream?: { readonly onText: (delta: string) => void; readonly maxOutputTokens?: number },
 ): Promise<string> {
     if (!agent.isEnabled) throw Object.assign(new Error('Agent je vypnutý.'), { status: 409 });
     const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -45,7 +47,8 @@ export async function runManagedAgent(
                 const response = await fetch('https://api.openai.com/v1/responses', {
                     method: 'POST', signal: controller.signal,
                     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model, store: false, max_output_tokens: options?.maxOutputTokens ?? 6000,
+                    body: JSON.stringify({ model, store: false, max_output_tokens: stream?.maxOutputTokens ?? options?.maxOutputTokens ?? 6000,
+                        ...(stream ? { stream: true } : {}),
                         instructions: options?.systemInstruction ?? bookInstructions,
                         ...(options ? { text: { format: {
                             type: 'json_schema', name: 'workshop_story_line', strict: true, schema: options.jsonSchema,
@@ -62,6 +65,23 @@ export async function runManagedAgent(
                 if (!response.ok) {
                     console.warn('Message agent request failed.', { model, status: response.status });
                     throw Object.assign(new Error(response.status === 429 ? 'Model je právě vytížený. Zkuste to za chvíli.' : `Generování selhalo (OpenAI HTTP ${response.status}).`), { status: response.status === 429 ? 429 : 502 });
+                }
+                if (stream) {
+                    if (!response.body) throw new Error('Model nevrátil stream odpovědi.');
+                    let text = '', completed = false;
+                    for await (const line of readStreamLines(response.body, controller.signal)) {
+                        if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+                        const event = JSON.parse(line.slice(6)) as { type?: string; delta?: string };
+                        if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
+                            text += event.delta;
+                            if (text.length > 48_000) throw new Error('Odpověď překročila délkový limit.');
+                            stream.onText(event.delta);
+                        }
+                        if (event.type === 'response.completed') completed = true;
+                        if (event.type === 'error' || event.type === 'response.failed' || event.type === 'response.incomplete') throw new Error('Generování nebylo dokončeno.');
+                    }
+                    if (!completed || !text.trim()) throw new Error('Spojení s modelem se přerušilo.');
+                    return text.trim();
                 }
                 const result = await response.json() as { output?: { content?: { type?: string; text?: string }[] }[] };
                 const text = (result.output ?? []).flatMap((item) => (item.content ?? []).filter((part) => part.type === 'output_text').map((part) => part.text ?? '')).join('\n').trim();

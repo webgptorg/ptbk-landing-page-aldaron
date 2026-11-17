@@ -4,30 +4,34 @@ import { createHash } from 'node:crypto';
 import { getAgentDatabase } from '@/lib/agents/agentDatabase';
 import type { MessageChatTurn } from './messageTypes';
 import type { MessageConversationPage, MessageConversationTurnsPage, RecordedMessageChatTurn } from './messageConversationTypes';
+import type { VoicePlayback } from '@/lib/voice-chat/types';
 
 type TurnRow = {
     id: string; question: string; introduction: string; reply: string | null;
     status: RecordedMessageChatTurn['status']; error_message: string | null;
     created_at: string; completed_at: string | null; request_hash: string;
     attachments?: RecordedMessageChatTurn['attachments'];
+    voice_status?: VoicePlayback['status'] | null; spoken_reply?: string | null;
 };
-const turnColumns = 'id,question,introduction,reply,status,error_message,created_at,completed_at,request_hash,attachments';
+const turnColumns = 'id,question,introduction,reply,status,error_message,created_at,completed_at,request_hash,attachments,voice_status,spoken_reply';
 export type ChatConversationSource = string | { readonly sourceKey: 'pavol-cs' | 'pavol-en' | SiteAgentSourceKey };
 const sourceFields = (source: ChatConversationSource) => typeof source === 'string' ? { message_id: source } : { source_key: source.sourceKey };
 function mapTurn(row: TurnRow): RecordedMessageChatTurn {
     return { id: row.id, question: row.question, introduction: row.introduction, reply: row.reply,
-        status: row.status, errorMessage: row.error_message, createdAt: row.created_at, completedAt: row.completed_at, attachments: row.attachments ?? [] };
+        status: row.status, errorMessage: row.error_message, createdAt: row.created_at, completedAt: row.completed_at, attachments: row.attachments ?? [],
+        ...(row.voice_status ? { voice: { status: row.voice_status, spokenText: row.spoken_reply ?? '' } } : {}) };
 }
 
 /** Save before calling the model, including questions whose generation fails or is interrupted. */
 export async function beginMessageChatTurn(messageId: ChatConversationSource, conversationId: string, requestId: string,
-    introduction: string, turns: readonly MessageChatTurn[]): Promise<{ turn: RecordedMessageChatTurn; isNew: boolean }> {
+    introduction: string, turns: readonly MessageChatTurn[], voice = false): Promise<{ turn: RecordedMessageChatTurn; isNew: boolean }> {
     const client = getAgentDatabase();
     const requestHash = createHash('sha256').update(JSON.stringify(turns)).digest('hex');
     const { data, error } = await client.from('message_chat_turns').insert({
         ...sourceFields(messageId), conversation_id: conversationId, request_id: requestId,
         request_hash: requestHash, question: turns[turns.length - 1].content, introduction,
         attachments: turns[turns.length - 1].attachments ?? [],
+        ...(voice ? { voice_status: 'streaming', spoken_reply: '' } : {}),
     }).select(turnColumns).single();
     if (!error && data) return { turn: mapTurn(data as TurnRow), isNew: true };
     if (error?.code === '23505') {
@@ -69,4 +73,12 @@ export async function listMessageConversationTurns(messageId: ChatConversationSo
         .order('created_at').order('id').range(offset, offset + limit);
     if (error || !data) throw new Error('Rozhovor se nepodařilo načíst.');
     return { turns: (data as TurnRow[]).slice(0, limit).map(mapTurn), hasMore: data.length > limit };
+}
+
+/** Signed sessions and domain/source checks precede every transcript-only acknowledgement. */
+export async function recordMessageVoicePlayback(source: ChatConversationSource, conversationId: string, turnId: string, playback: VoicePlayback) {
+    const { data, error } = await getAgentDatabase().from('message_chat_turns').update({ voice_status: playback.status, spoken_reply: playback.spokenText })
+        .match(sourceFields(source)).eq('conversation_id', conversationId).eq('id', turnId).not('voice_status', 'is', null)
+        .select('id').maybeSingle();
+    if (error || !data) throw new Error('Stav přehrávání se nepodařilo uložit.');
 }

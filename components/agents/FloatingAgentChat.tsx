@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowDown, ArrowUp, Check, ChevronRight, Copy, LoaderCircle, Maximize2, MessageSquarePlus, Minimize2, Paperclip, RotateCcw, Square } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, ChevronRight, Copy, LoaderCircle, Maximize2, MessageSquarePlus, Mic, MicOff, Minimize2, Paperclip, PhoneOff, RotateCcw, Square } from 'lucide-react';
 import { FloatingConversation } from '@/components/floating/FloatingConversation';
 import type { SupportedHomepageLanguage } from '@/lib/homepage-language';
 import '@/businesses/messages/messageChat.css';
@@ -15,6 +15,8 @@ import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { CHAT_ATTACHMENT_ACCEPT } from '@/lib/messages/messageAttachments';
 import { CHAT_QUESTION_MAX_CHARACTERS } from '@/lib/messages/messageChatLimits';
 import { selectMessageChatContext } from '@/lib/messages/messageChatContext';
+import { BrowserVoiceChat, type VoiceStatus } from '@/lib/voice-chat/BrowserVoiceChat';
+import { voicePlaybackDescription } from '@/lib/voice-chat/voicePlaybackDescription';
 
 export type FloatingAgentChatProps = {
     readonly sourceKey: string; readonly endpoint: string; readonly attachmentEndpoint?: string;
@@ -45,6 +47,7 @@ function ChatTurn({ turn, title, cs, introduction = false }: {
             </time>}
         </div>
         <MarkdownContent className="message-chat-markdown" content={turn.content} />
+        {turn.voice && <p className="message-chat-voice-note">{voicePlaybackDescription(turn.voice, cs ? 'cs' : 'en')}</p>}
         <MessageAttachments files={turn.attachments} language={cs ? 'cs' : 'en'} />
         {!introduction && <div className="message-chat-turn-actions">
             <button type="button" onClick={() => void copyText(turn.content)} aria-label={copyLabel} title={copyLabel}>
@@ -73,6 +76,16 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
     const [confirmReset, setConfirmReset] = useState(false);
     const [dragging, setDragging] = useState(false);
     const [awayFromLatest, setAwayFromLatest] = useState(false);
+    const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>('off');
+    const [voiceMuted, setVoiceMuted] = useState(false);
+    const [voicePartial, setVoicePartial] = useState('');
+    const [streamingReply, setStreamingReply] = useState('');
+    const voice = useRef<BrowserVoiceChat | null>(null);
+    const submitPromise = useRef<Promise<void>>(Promise.resolve());
+    const latestSession = useRef(session);
+    latestSession.current = session;
+    const sendCurrent = useRef(sendQuestion);
+    sendCurrent.current = sendQuestion;
     const input = useRef<HTMLTextAreaElement>(null);
     const form = useRef<HTMLFormElement>(null);
     const fileInput = useRef<HTMLInputElement>(null);
@@ -88,7 +101,8 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
     const { uploading, uploadFiles } = useMessageChatAttachments({ session, updateSession, ready, pending,
         onError: message => { setError(message); setRequestFailed(false); }, endpoint: attachmentEndpoint ?? '' });
 
-    useEffect(() => () => inFlight.current?.abort(), []);
+    useEffect(() => () => { voice.current?.stop(); inFlight.current?.abort(); }, []);
+    useEffect(() => { if (!visible) voice.current?.stop(); }, [visible]);
     useEffect(() => { if (open) input.current?.focus(); }, [open]);
     useEffect(() => {
         setSlowReply(false);
@@ -129,7 +143,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
         if (!visible || !element) return;
         if (followLatest.current) element.scrollTo({ top: element.scrollHeight });
         else setAwayFromLatest(true);
-    }, [turns, pendingQuestion, visible]);
+    }, [turns, pendingQuestion, streamingReply, voicePartial, visible]);
     useEffect(() => {
         if (!visible || !historyContent.current || typeof ResizeObserver === 'undefined') return;
         const observer = new ResizeObserver(() => {
@@ -146,6 +160,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
         historyElement.current?.scrollTo({ top: historyElement.current.scrollHeight });
     }
     function newChat() {
+        voice.current?.stop();
         reset(); setError(''); setRequestFailed(false); setConfirmReset(false); setExpanded(false);
         jumpToLatest(); input.current?.focus();
     }
@@ -154,46 +169,86 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
         setError(cs ? 'Čekání bylo přerušeno. Otázka i přílohy zůstaly zachované.' : 'Waiting was stopped. Your question and attachments are still here.');
         setRequestFailed(true);
     }
-    async function submit(event: FormEvent) {
+    function submit(event: FormEvent) {
         event.preventDefault();
-        const question = draft.trim() || (attachments.length ? cs ? 'Podívej se prosím na přiložené soubory.' : 'Please look at the attached files.' : '');
-        if (!question || inFlight.current || !ready || uploading) return;
-        const createdAt = new Date().toISOString();
-        const controller = new AbortController();
-        inFlight.current = controller;
+        submitPromise.current = sendQuestion(undefined, voice.current?.active ? voice.current.sessionToken : undefined);
+    }
+    async function sendQuestion(spokenQuestion?: string, voiceSession?: string) {
+        const current = latestSession.current, { turns, attachments } = current;
+        const question = spokenQuestion?.trim() || current.draft.trim() || (attachments.length ? cs ? 'Podívej se prosím na přiložené soubory.' : 'Please look at the attached files.' : '');
+        if (!question || inFlight.current || !ready) return;
+        if (uploading || question.length > CHAT_QUESTION_MAX_CHARACTERS) {
+            voice.current?.stop();
+            setError(cs ? 'Otázku teď nelze odeslat. Dokonči nahrávání příloh a případně otázku zkrať.' : 'Finish uploading attachments and shorten the question if needed.');
+            if (spokenQuestion && question.length <= CHAT_QUESTION_MAX_CHARACTERS && !current.draft.trim()) {
+                const next = { ...current, draft: question }; latestSession.current = next; updateSession(next);
+            }
+            return;
+        }
+        const createdAt = new Date().toISOString(), controller = new AbortController();
+        inFlight.current = controller; if (voiceSession) voice.current?.beginTurn();
         followLatest.current = true; setAwayFromLatest(false);
-        setPendingQuestion(question); setError(''); setRequestFailed(false); setConfirmReset(false);
+        setPendingQuestion(question); setStreamingReply(''); setError(''); setRequestFailed(false); setConfirmReset(false);
         const questionTurn = { role: 'user' as const, content: question, ...(attachments.length ? { attachments } : {}) };
-        const history = selectMessageChatContext(turns, questionTurn);
-        const serializedHistory = JSON.stringify(history);
-        const retry = session.retry?.history === serializedHistory ? session.retry : { history: serializedHistory, id: crypto.randomUUID() };
-        const submitted = { ...session, retry };
-        updateSession(submitted);
+        const history = selectMessageChatContext(turns, questionTurn), serializedHistory = JSON.stringify(history);
+        const retry = current.retry?.history === serializedHistory ? current.retry : { history: serializedHistory, id: crypto.randomUUID() };
+        const submitted = { ...current, retry };
+        latestSession.current = submitted; updateSession(submitted);
+        let voiceResult: Awaited<ReturnType<BrowserVoiceChat['readReply']>> | undefined;
         try {
             const response = await fetch(endpoint, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: history, conversationId: session.conversationId, requestId: retry.id }), signal: controller.signal,
+                body: JSON.stringify({ messages: history, conversationId: current.conversationId, requestId: retry.id, ...(voiceSession ? { voiceSession } : {}) }),
+                signal: controller.signal,
             });
-            const result = await response.json().catch(() => null) as { reply?: unknown; error?: unknown; retryAsNew?: unknown } | null;
-            if (!response.ok || typeof result?.reply !== 'string') {
-                // Explicit failures can start a new attempt. Unknown network/proxy outcomes keep the request ID.
+            if (response.ok && response.headers.get('Content-Type')?.includes('application/x-ndjson') && voice.current) {
+                voiceResult = await voice.current.readReply(response, controller.signal, text => setStreamingReply(text));
+            }
+            const result: { reply?: unknown; error?: unknown; retryAsNew?: unknown } | null = voiceResult ?? await response.json().catch(() => null);
+            if (!response.ok || typeof result?.reply !== 'string' || !result.reply.trim()) {
                 if (result && (result.retryAsNew === true || (response.status !== 409 && response.status !== 503))) updateSession({ ...submitted, retry: null });
                 throw new Error(typeof result?.error === 'string' ? result.error : cs ? 'Spojení se přerušilo nebo server neodpověděl. Zkus otázku znovu.' : 'The connection was interrupted or the server did not reply. Please try again.');
             }
-            if (controller.signal.aborted) return;
-            updateSession({ ...submitted, retry: null, draft: '', attachments: [], turns: [...turns,
-                { ...questionTurn, createdAt },
-                { role: 'assistant', content: result.reply, createdAt: new Date().toISOString() }] });
-            setExpanded(false);
+            if (controller.signal.aborted && !voiceResult?.reply) return;
+            const next: MessageChatSession = { ...submitted, retry: null, draft: spokenQuestion ? current.draft : '', attachments: [], turns: [...turns,
+                { ...questionTurn, createdAt }, { role: 'assistant', content: result.reply, createdAt: new Date().toISOString(),
+                    ...(voiceResult ? { turnId: voiceResult.turnId, voice: voiceResult.voice } : {}) }] };
+            latestSession.current = next; updateSession(next); setExpanded(false);
         } catch (failure) {
+            if (spokenQuestion) {
+                // A spoken question remains visible even if its reply never began. Preserve any typed draft.
+                const next: MessageChatSession = { ...submitted, retry: null, attachments: [], turns: [...turns, { ...questionTurn, createdAt }] };
+                latestSession.current = next; updateSession(next);
+            }
             if (!controller.signal.aborted) {
                 setError(failure instanceof TypeError ? cs ? 'Spojení se přerušilo. Otázka i přílohy zůstaly zachované.' : 'The connection was interrupted. Your question and attachments are still here.'
                     : failure instanceof Error ? failure.message : cs ? 'Odpověď se nepodařilo načíst.' : 'The reply could not be loaded.');
-                setRequestFailed(true);
+                setRequestFailed(!spokenQuestion);
+                if (voiceSession) voice.current?.stop();
             }
         } finally {
-            if (inFlight.current === controller) { inFlight.current = null; setPendingQuestion(null); }
+            if (inFlight.current === controller) { inFlight.current = null; setPendingQuestion(null); setStreamingReply(''); }
         }
+    }
+    function startVoice() {
+        if (voice.current?.active || pending || !ready || uploading) return;
+        setError(''); setVoiceMuted(false);
+        const instance = new BrowserVoiceChat({ endpoint, conversationId: session.conversationId, language,
+            onStatus: setVoiceStatus, onPartial: setVoicePartial,
+            onError: message => { setError(message); setRequestFailed(false); },
+            onInterrupt: () => inFlight.current?.abort(),
+            async onUtterance(text, token) {
+                await submitPromise.current;
+                const sending = sendCurrent.current(text, token); submitPromise.current = sending; await sending;
+            },
+            onPlayback(turnId, playback) {
+                const current = latestSession.current;
+                if (!current.turns.some(turn => turn.turnId === turnId)) return;
+                const next = { ...current, turns: current.turns.map(turn => turn.turnId === turnId ? { ...turn, voice: playback } : turn) };
+                latestSession.current = next; updateSession(next);
+            },
+        });
+        voice.current = instance; void instance.start();
     }
 
     const tools = <div className="message-chat-tools">
@@ -229,15 +284,22 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                     </div>}
                     {pendingQuestion && <>
                         <ChatTurn turn={{ role: 'user', content: pendingQuestion, attachments }} title={title} cs={cs} />
-                        <div className="message-chat-pending" role="status"><LoaderCircle size={17} className="message-chat-loading" aria-hidden="true" />
+                        {streamingReply && <ChatTurn turn={{ role: 'assistant', content: streamingReply }} title={title} cs={cs} />}
+                        {!streamingReply && <div className="message-chat-pending" role="status"><LoaderCircle size={17} className="message-chat-loading" aria-hidden="true" />
                             <span>{slowReply ? cs ? 'Delší odpověď může chvíli trvat…' : 'A longer answer may take a moment…' : cs ? 'Připravuji odpověď…' : 'Preparing a reply…'}</span>
-                        </div>
+                        </div>}
                     </>}
                 </div>
             </div>
             {awayFromLatest && <button type="button" className="message-chat-jump" onClick={jumpToLatest}><ArrowDown size={15} aria-hidden="true" />{cs ? 'K nejnovější zprávě' : 'Latest message'}</button>}
         </div>
         <div ref={composerElement} className={`message-chat-composer${expanded ? ' message-chat-composer-expanded' : ''}`}>
+            {voiceStatus !== 'off' && <div className="message-chat-voice" role="group" aria-label={cs ? 'Hlasový chat' : 'Voice chat'}>
+                <div><strong>{cs ? 'AI avatar · Pavolův hlas' : 'AI avatar · Pavol’s voice'}</strong><span role="status">{voiceStatus === 'connecting' ? cs ? 'Připojuji mikrofon…' : 'Connecting microphone…' : voiceMuted ? cs ? 'Mikrofon ztlumen' : 'Microphone muted' : voiceStatus === 'speaking' ? cs ? 'Mluvím · můžeš mi skočit do řeči' : 'Speaking · you can interrupt' : voiceStatus === 'thinking' ? cs ? 'Přemýšlím…' : 'Thinking…' : cs ? 'Poslouchám…' : 'Listening…'}</span></div>
+                <button type="button" onClick={() => { const value = !voiceMuted; setVoiceMuted(value); voice.current?.mute(value); }} aria-label={voiceMuted ? cs ? 'Zapnout mikrofon' : 'Unmute microphone' : cs ? 'Ztlumit mikrofon' : 'Mute microphone'} aria-pressed={voiceMuted}>{voiceMuted ? <MicOff size={17} /> : <Mic size={17} />}</button>
+                <button type="button" onClick={() => voice.current?.stop()} aria-label={cs ? 'Ukončit hlasový chat' : 'End voice chat'}><PhoneOff size={17} /></button>
+            </div>}
+            {voicePartial && <p className="message-chat-live-transcript" aria-live="off">{voicePartial}</p>}
             {error && <div className="message-chat-error-card" role="alert"><p>{error}</p>
                 {requestFailed && <button type="button" disabled={pending || uploading || !ready} onClick={() => form.current?.requestSubmit()}><RotateCcw size={14} aria-hidden="true" />{cs ? 'Zkusit znovu' : 'Try again'}</button>}
             </div>}
@@ -254,6 +316,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                     }} />
                 <div className="message-chat-composer-controls">
                     <div className="message-chat-composer-options">
+                        {voiceStatus === 'off' && <button type="button" className="message-chat-voice-start" onClick={startVoice} disabled={pending || uploading || !ready} aria-label={cs ? 'Mluvit s AI avatarem Pavlovým hlasem' : 'Talk to the AI avatar in Pavol’s voice'} title={cs ? 'Mluvit s AI avatarem Pavlovým hlasem' : 'Talk to the AI avatar in Pavol’s voice'}><Mic size={18} aria-hidden="true" /><span>{cs ? 'Mluvit' : 'Talk'}</span></button>}
                         {attachmentEndpoint && <><input ref={fileInput} type="file" multiple accept={CHAT_ATTACHMENT_ACCEPT} className="sr-only" tabIndex={-1} aria-label={cs ? 'Vybrat přílohy' : 'Choose attachments'}
                             onChange={event => { void uploadFiles(Array.from(event.target.files ?? [])); event.target.value = ''; }} />
                         <button type="button" className="message-chat-attach" disabled={pending || uploading || !ready || attachments.length >= 4} aria-label={cs ? 'Přiložit soubor' : 'Attach file'}

@@ -5,6 +5,8 @@ import { CHAT_QUESTION_MAX_CHARACTERS } from './messageChatLimits';
 export const storedChatTurnSchema = z.object({
     role: z.enum(['user', 'assistant']), content: z.string(), createdAt: z.string().datetime().optional(),
     attachments: messageAttachmentSchema.array().max(CHAT_ATTACHMENT_MAX_COUNT).optional(),
+    voice: z.object({ status: z.enum(['streaming', 'completed', 'interrupted', 'failed']), spokenText: z.string().max(6000) }).optional(),
+    turnId: z.string().uuid().optional(),
 });
 const sessionSchema = z.object({
     version: z.literal(1), conversationId: z.string().uuid(), turns: z.array(storedChatTurnSchema),

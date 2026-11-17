@@ -8,7 +8,10 @@ export function selectMessageChatContext(turns: readonly MessageChatTurn[], ques
     let length = question.content.length;
     let fileCount = question.attachments?.length ?? 0;
     let fileBytes = question.attachments?.reduce((total, file) => total + file.byteLength, 0) ?? 0;
-    for (const turn of turns.slice(-14).reverse()) {
+    for (const original of turns.slice(-14).reverse()) {
+        const turn = original.voice && original.voice.status !== 'completed'
+            ? { ...original, content: original.content + '\n[Voice playback was not completed. Confirmed played portion: ' + JSON.stringify(original.voice.spokenText) + '. The next phrase may have been partly audible.]' }
+            : original;
         const files = turn.attachments ?? [];
         const bytes = files.reduce((total, file) => total + file.byteLength, 0);
         if (fileCount + files.length > CHAT_ATTACHMENT_CONTEXT_MAX_COUNT || fileBytes + bytes > CHAT_ATTACHMENT_CONTEXT_MAX_BYTES) break;

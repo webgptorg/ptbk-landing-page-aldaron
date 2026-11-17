@@ -7,6 +7,7 @@ import { requestAdminJson } from '@/lib/admin/requestAdminJson';
 import type { MessageConversation, MessageConversationPage, MessageConversationTurnsPage, RecordedMessageChatTurn } from '@/lib/messages/messageConversationTypes';
 import { MessageAttachments } from './MessageAttachments';
 import { chatAttachmentHref } from '@/lib/messages/messageAttachments';
+import { voicePlaybackDescription } from '@/lib/voice-chat/voicePlaybackDescription';
 
 const date = (value: string) => new Intl.DateTimeFormat('cs-CZ', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Europe/Prague' }).format(new Date(value));
 
@@ -50,7 +51,7 @@ export function MessageConversations({ messageId, language, endpoint, assistantN
         } finally { if (mounted.current && request === generation.current) setLoading(false); }
     }
     const copy = [turns[0]?.introduction ? `${assistantName}: ${turns[0].introduction}` : '', ...turns.map((turn) =>
-        `${date(turn.createdAt)}\nNávštěvník: ${turn.question}\n${(turn.attachments ?? []).map((file) => `${file.name}: ${typeof window === 'undefined' ? '' : window.location.origin}${chatAttachmentHref(file.id, true)}`).join('\n')}\n${turn.reply ? `${assistantName}: ${turn.reply}` : turn.status === 'failed' ? `Chyba: ${turn.errorMessage}` : 'Odpověď není dokončená.'}`,
+        `${date(turn.createdAt)}\nNávštěvník: ${turn.question}\n${(turn.attachments ?? []).map((file) => `${file.name}: ${typeof window === 'undefined' ? '' : window.location.origin}${chatAttachmentHref(file.id, true)}`).join('\n')}\n${turn.reply ? `${assistantName}: ${turn.reply}` : turn.status === 'failed' ? `Chyba: ${turn.errorMessage}` : 'Odpověď není dokončená.'}${turn.voice ? '\n' + voicePlaybackDescription(turn.voice, 'cs') : ''}`,
     )].filter(Boolean).join('\n\n');
 
     return <div className="space-y-5">
@@ -70,6 +71,7 @@ export function MessageConversations({ messageId, language, endpoint, assistantN
                     <div className="rounded-xl bg-cyan-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">Návštěvník · <time dateTime={turn.createdAt}>{date(turn.createdAt)}</time></p><p className="whitespace-pre-wrap break-words text-sm">{turn.question}</p><MessageAttachments files={turn.attachments} admin /></div>
                     {turn.reply ? <div className="rounded-xl bg-slate-50 p-4"><p className="mb-1 text-xs font-semibold text-slate-500">{assistantName}{turn.completedAt && <> · <time dateTime={turn.completedAt}>{date(turn.completedAt)}</time></>}</p><p className="whitespace-pre-wrap break-words text-sm">{turn.reply}</p></div>
                         : <p className="text-sm text-slate-500">{turn.status === 'failed' ? `Odpověď se nezdařila: ${turn.errorMessage}` : 'Odpověď se připravuje nebo byla přerušena. Dotaz je uložený.'}</p>}
+                    {turn.voice && <p className="text-xs text-slate-500">{voicePlaybackDescription(turn.voice, 'cs')}</p>}
                 </li>)}
             </ol>
             {!loading && !error && turns.length === 0 && <p className="text-sm text-slate-500">V této konverzaci nejsou žádné dotazy.</p>}

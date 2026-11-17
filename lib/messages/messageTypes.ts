@@ -16,7 +16,8 @@ export type SharedMessage = {
     readonly timings?: ArticleWordTimings;
 };
 
-export type MessageChatTurn = { readonly role: 'user' | 'assistant'; readonly content: string; readonly attachments?: readonly MessageChatAttachment[] };
+export type MessageChatTurn = { readonly role: 'user' | 'assistant'; readonly content: string; readonly attachments?: readonly MessageChatAttachment[];
+    readonly voice?: import('@/lib/voice-chat/types').VoicePlayback };
 
 /** The browser cannot supply system instructions, source documents or unlimited conversation history. */
 export function parseMessageChatTurns(value: unknown): MessageChatTurn[] | null {
