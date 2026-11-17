@@ -1,0 +1,9 @@
+{
+  "publication": {
+    "date": "2026-11-13",
+    "isDraft": false
+  },
+  "sourceAtMigration": "lib/legal/privacyPolicyDocuments.tsx",
+  "language": "cs",
+  "product": "promptbook"
+}

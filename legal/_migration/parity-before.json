@@ -1,0 +1,86 @@
+[
+  {
+    "relativePath": "promptbook/cs/privacy-policy.md",
+    "sourceAtMigration": "lib/legal/privacyPolicyDocuments.tsx",
+    "language": "cs",
+    "fingerprint": "97718e86c6da295a70921530f6ae78b5d489bf0fbf4bdbeb8391013a8ee9d0ba"
+  },
+  {
+    "relativePath": "promptbook/en/privacy-policy.md",
+    "sourceAtMigration": "lib/legal/privacyPolicyDocuments.tsx",
+    "language": "en",
+    "fingerprint": "ed34a570b2bfbef646213e4c27da0cd30e7b786e3be89db7053e38f121b399d4"
+  },
+  {
+    "relativePath": "community/cs/terms-and-conditions.md",
+    "sourceAtMigration": "lib/legal/termsAndConditionsDocuments.tsx",
+    "language": "cs",
+    "fingerprint": "676951c90fe2b8a972125a41c455228cca61deefa3f4a7ea4cddc433072ea22b"
+  },
+  {
+    "relativePath": "community/en/terms-and-conditions.md",
+    "sourceAtMigration": "lib/legal/termsAndConditionsDocuments.tsx",
+    "language": "en",
+    "fingerprint": "faf1f81f7e9debd4e64edb8f87bc7df40493bd30bd45a8318edd1640fd932013"
+  },
+  {
+    "relativePath": "promptbook/cs/partner-terms.md",
+    "sourceAtMigration": "lib/legal/partnerTermsDocuments.ts",
+    "language": "cs",
+    "fingerprint": "6662d88f75237434206a66cc18fa498613e7409906072ccaccf33ec158ccd4e6"
+  },
+  {
+    "relativePath": "promptbook/en/partner-terms.md",
+    "sourceAtMigration": "lib/legal/partnerTermsDocuments.ts",
+    "language": "en",
+    "fingerprint": "6cb0d83e615b872fc55c7b5396096d5699335189c5a4c8eba7ea6d9c39b3e39b"
+  },
+  {
+    "relativePath": "promptbook/cs/engine-license.md",
+    "sourceAtMigration": "lib/legal/engineLicenseDocuments.tsx",
+    "language": "cs",
+    "fingerprint": "9274145c4f939b79c7a51b34572bdb92aa8d8a884a24a71b51af825340beec1a"
+  },
+  {
+    "relativePath": "promptbook/en/engine-license.md",
+    "sourceAtMigration": "lib/legal/engineLicenseDocuments.tsx",
+    "language": "en",
+    "fingerprint": "b7f8dd4e8b1b963c61a8f49e05dd17a7613265a846e7e9616c051531f4d28b4b"
+  },
+  {
+    "relativePath": "shared-campaigns/cs/joint-processing.md",
+    "sourceAtMigration": "lib/legal/jointPrivacyDocuments.ts",
+    "language": "cs",
+    "fingerprint": "36f9da27d408b9c0f90bf60403ccf74646e5e6591d098ff6703e67cfdcd49161"
+  },
+  {
+    "relativePath": "shared-campaigns/en/joint-processing.md",
+    "sourceAtMigration": "lib/legal/jointPrivacyDocuments.ts",
+    "language": "en",
+    "fingerprint": "d158232e067496ba36cd56b95a3c31a92420f23caf2dd72d0c262b8a9f993b6b"
+  },
+  {
+    "relativePath": "promptbook/cs/product-terms-2026-11-03-v5.md",
+    "sourceAtMigration": "lib/legal/productTermsV5Documents.tsx",
+    "language": "cs",
+    "fingerprint": "9089572f2f1e7fd6e4897017faf76146aa2bbff1c0bd4eedfb5108b7127b32c7"
+  },
+  {
+    "relativePath": "promptbook/en/product-terms-2026-11-03-v5.md",
+    "sourceAtMigration": "lib/legal/productTermsV5Documents.tsx",
+    "language": "en",
+    "fingerprint": "e38fac8696bfc8408fc89d2ccb19dbcb9d843540a668d6f28ff1c15acc7a9281"
+  },
+  {
+    "relativePath": "promptbook/cs/online-terms-2026-11-09-online-v1.md",
+    "sourceAtMigration": "lib/legal/promptbookOnlineTermsV1Document.tsx",
+    "language": "cs",
+    "fingerprint": "ef9c42c2f9ad7836ed9dd19b5169d95cae7d3b7b8386ee3214be5f17cfbf5119"
+  },
+  {
+    "relativePath": "promptbook/cs/online-terms-2026-11-11-online-v2.md",
+    "sourceAtMigration": "lib/legal/promptbookOnlineTermsV2Document.tsx",
+    "language": "cs",
+    "fingerprint": "f7db1332384bf6e9d3e372eaa033c4723d8d632e32db320409962befe2709893"
+  }
+]

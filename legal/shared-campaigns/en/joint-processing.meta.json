@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-03",
+    "isDraft": false,
+    "notice": "Information about responsibilities in project cooperation. A relevant Article 26 joint-controller arrangement or Article 28 processing agreement must be effective before that processing starts. This public notice does not replace those agreements or a legal basis for marketing."
+  },
+  "sourceAtMigration": "lib/legal/jointPrivacyDocuments.ts",
+  "language": "en",
+  "product": "shared-campaigns"
+}

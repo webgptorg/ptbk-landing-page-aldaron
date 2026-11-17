@@ -36,7 +36,7 @@ const nextConfig = {
     images: { unoptimized: true },
     serverExternalPackages: ['pg', '@promptbook/node', '@promptbook/core'],
     outputFileTracingIncludes: {
-        '/*': ['./migrations/**/*.sql'],
+        '/*': ['./migrations/**/*.sql', './legal/**/*.md', './legal/**/*.json'],
         '/api/ai-ta-krajta/episodes/search': ['./podcasts/transcripts/**/*.vtt'],
         '/book/**': ['./knowledge/**/*.book'],
         '/cs/pavol': ['./articles/**/*'],

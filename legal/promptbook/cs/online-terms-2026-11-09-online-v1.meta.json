@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-09",
+    "isDraft": false,
+    "notice": "Znění 2026-11-09-online-v1. Platí pro online objednávky, které na ně výslovně odkazují."
+  },
+  "sourceAtMigration": "lib/legal/promptbookOnlineTermsV1Document.tsx",
+  "language": "cs",
+  "product": "promptbook"
+}

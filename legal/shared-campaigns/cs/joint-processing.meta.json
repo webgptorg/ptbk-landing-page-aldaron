@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-03",
+    "isDraft": false,
+    "notice": "Informace o rozdělení rolí při projektové spolupráci. Pro konkrétní společné zpracování musí být předem účinné ujednání podle čl. 26 GDPR; pro práci podle pokynů smlouva podle čl. 28. Samotná veřejná informace nenahrazuje tato ujednání ani právní titul pro marketing."
+  },
+  "sourceAtMigration": "lib/legal/jointPrivacyDocuments.ts",
+  "language": "cs",
+  "product": "shared-campaigns"
+}

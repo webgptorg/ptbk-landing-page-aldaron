@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-09",
+    "isDraft": false,
+    "notice": "Version dated 9 November 2026 (2026-11-09-v6). This edition clarifies how discount codes affect the commission base from 2026-11-03-v5. These terms form part of a partner agreement when accepted; an enquiry alone does not create a partnership. The partner sheet identifies the partner, scope and commission period. A new version does not rewrite previously accepted agreements."
+  },
+  "sourceAtMigration": "lib/legal/partnerTermsDocuments.ts",
+  "language": "en",
+  "product": "promptbook"
+}

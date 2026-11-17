@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-03",
+    "isDraft": false,
+    "notice": "Version dated 3 November 2026 (2026-11-03-v5) for orders incorporating these terms. The order defines the service scope. New versions carry a publication date; changes to existing agreements follow the notice procedure below and preserve accrued rights."
+  },
+  "sourceAtMigration": "lib/legal/productTermsV5Documents.tsx",
+  "language": "en",
+  "product": "promptbook"
+}

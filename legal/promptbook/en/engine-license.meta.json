@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-03",
+    "isDraft": false,
+    "notice": "Version dated 3 November 2026. Rights to a particular release follow its accompanying licence and the expressly accepted order. This page defines commercial permission and does not rewrite earlier grants. New versions have their own date and scope."
+  },
+  "sourceAtMigration": "lib/legal/engineLicenseDocuments.tsx",
+  "language": "en",
+  "product": "promptbook"
+}

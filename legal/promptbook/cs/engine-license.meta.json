@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-03",
+    "isDraft": false,
+    "notice": "Znění ze dne 3. listopadu 2026. Práva ke konkrétnímu vydání určuje přiložená licence a výslovně přijatá objednávka. Tato stránka vymezuje pravidla komerčního oprávnění a nepřepisuje dříve udělené licence. Nové verze mají vlastní datum a rozsah."
+  },
+  "sourceAtMigration": "lib/legal/engineLicenseDocuments.tsx",
+  "language": "cs",
+  "product": "promptbook"
+}

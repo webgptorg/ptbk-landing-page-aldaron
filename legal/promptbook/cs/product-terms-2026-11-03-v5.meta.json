@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-03",
+    "isDraft": false,
+    "notice": "Znění 2026-11-03-v5 ze dne 3. listopadu 2026 pro objednávky, které na tyto podmínky odkazují. Konkrétní objednávka určuje rozsah plnění. Nové verze zveřejňujeme s datem; změny běžících smluv oznamujeme postupem uvedeným níže a zachováváme již vzniklá práva."
+  },
+  "sourceAtMigration": "lib/legal/productTermsV5Documents.tsx",
+  "language": "cs",
+  "product": "promptbook"
+}

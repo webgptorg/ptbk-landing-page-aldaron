@@ -1,0 +1,10 @@
+{
+  "publication": {
+    "date": "2026-11-09",
+    "isDraft": false,
+    "notice": "Znění 2026-11-09-v6 ze dne 9. listopadu 2026. Upřesňuje základ provize ze znění 2026-11-03-v5 o slevové kódy. Podmínky se stávají součástí konkrétní partnerské smlouvy jejím přijetím; samotné odeslání poptávky partnerství nezakládá. Partnerský list určuje partnera, rozsah a dobu nároku. Nové znění nepřepisuje dříve přijaté dohody."
+  },
+  "sourceAtMigration": "lib/legal/partnerTermsDocuments.ts",
+  "language": "cs",
+  "product": "promptbook"
+}
