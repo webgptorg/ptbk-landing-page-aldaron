@@ -28,6 +28,7 @@ export function getAvatarAvailability() {
         billingEnabled: authEnabled && process.env.PAVOL_AVATAR_BILLING_ENABLED === 'true' &&
             !!stripe?.webhookSigningSecret && /^(?:sk|rk)_(?:live|test)_/.test(stripe.secretKey) &&
             (!isTest || process.env.NODE_ENV !== 'production'),
+        telegramEnabled: !!process.env.PAVOL_AVATAR_TELEGRAM_BOT_TOKEN?.trim() && !!process.env.PAVOL_AVATAR_TELEGRAM_BOT_USERNAME?.trim() && (process.env.PAVOL_AVATAR_TELEGRAM_WEBHOOK_SECRET?.trim().length??0)>=32,
         isTest, slovakiaEnabled: process.env.PAVOL_AVATAR_SK_ENABLED === 'true',
         limits: { free: limit('PAVOL_AVATAR_FREE_MONTHLY_LIMIT', 5), light: limit('PAVOL_AVATAR_LIGHT_MONTHLY_LIMIT', 50), full: limit('PAVOL_AVATAR_FULL_MONTHLY_LIMIT', 500) },
     };

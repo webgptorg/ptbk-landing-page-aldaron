@@ -11,7 +11,7 @@ import './pavolAvatar.css';
 export function PavolAvatarPage({ language }: { readonly language: SupportedHomepageLanguage }) {
     const cs = language === 'cs';
     const availability=getAvatarAvailability();
-    return <div className="pavol-site pavol-avatar-page min-h-screen bg-[var(--pavol-paper)] text-[var(--pavol-ink)]" style={PAVOL_SITE_STYLE}>
+    return <div data-account-mode={availability.enabled || undefined} className="pavol-site pavol-avatar-page min-h-screen bg-[var(--pavol-paper)] text-[var(--pavol-ink)]" style={PAVOL_SITE_STYLE}>
         <PavolHeader language={language} pagePath="/avatar" />
         <main id="main-content" tabIndex={-1} className="pavol-avatar-main outline-none">
             <div className={`${PAVOL_CONTAINER_CLASS_NAME} pavol-avatar-shell`}>
