@@ -204,7 +204,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
             if (response.ok && response.headers.get('Content-Type')?.includes('application/x-ndjson') && voice.current) {
                 voiceResult = await voice.current.readReply(response, controller.signal, text => setStreamingReply(text));
             }
-            const result: { reply?: unknown; error?: unknown; retryAsNew?: unknown } | null = voiceResult ?? await response.json().catch(() => null);
+            const result = (voiceResult ?? await response.json().catch(() => null)) as { reply?: unknown; error?: unknown; retryAsNew?: unknown } | null;
             if (!response.ok || typeof result?.reply !== 'string' || !result.reply.trim()) {
                 if (result && (result.retryAsNew === true || (response.status !== 409 && response.status !== 503))) updateSession({ ...submitted, retry: null });
                 throw new Error(typeof result?.error === 'string' ? result.error : cs ? 'Spojení se přerušilo nebo server neodpověděl. Zkus otázku znovu.' : 'The connection was interrupted or the server did not reply. Please try again.');

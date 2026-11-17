@@ -170,3 +170,7 @@ read their label. The speech script retains renderer word IDs across silent URLs
 only to actually spoken words. Missing or incompatible provider alignment still disables tracking. New requests
 explicitly enable ElevenLabs text normalization for numbers, dates and currencies. Neither deployment nor saving
 automatically calls ElevenLabs; stored audio and timing remain unchanged until the existing explicit controls act.
+
+## Live voice conversations
+
+All shared public chats can use Pavol’s exact ElevenLabs voice with live transcription in their existing conversation. See [shared voice chat](chat-voice.md) for setup, credit billing, interruption records, lifecycle and verification limits.

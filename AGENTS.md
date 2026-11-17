@@ -160,6 +160,13 @@ use cases, and audiences. Keep these rules current when behavior changes.
   Valid replies up to 48,000 characters persist fully after the additive limit migration; questions remain
   bounded at 4,000 and model context at 16,000. Long prior replies use marked beginning/end excerpts only in
   that model window, never in displayed/exported or stored history. See `docs/pavol-avatar.md`.
+- Shared public chats support explicit realtime voice through the existing Book/context and private conversation history.
+  Use Scribe Realtime plus streamed TTS with exactly Pavol Hejný 2026; verify the actual configured voice and fail
+  if it is missing or ambiguous. Never substitute a stock voice or change subscription/top-up settings.
+  Domain/origin checks precede single-use tokens and signed source/conversation capabilities. Stop microphone,
+  generation and playback on end, close, reset, navigation or interruption. Preserve typed drafts and generated text;
+  separate conservative confirmed playback metadata in administration and exports. No raw audio archive.
+  See `docs/chat-voice.md` for account billing, bounds, migration and physical-device verification limits.
 - `/cs/pribeh` is the miniapp for the `story` event type. The existing workshop term, name/e-mail session,
   participant trust and moderation govern creative actions on the server. Public readers can see stories and the
   cast. Approved participants edit room Books in the shared highlighted BookEditor with debounced, ordered autosave.

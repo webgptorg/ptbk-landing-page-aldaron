@@ -77,3 +77,7 @@ Tests exercise the actual Book compiler, migration replay/edit preservation, old
 separate histories, private database grants, page metadata/indexing, chat/upload/file host checks,
 inline attachment submission, refresh restoration, locale separation and new-chat isolation. Existing
 Messages, adviser and middleware regression tests cover the retained floating behavior.
+
+## Live voice
+
+The page uses the shared [realtime voice conversation](chat-voice.md), including the exact Pavol Hejný 2026 voice, one text/voice history, microphone controls and conservative interruption metadata. It does not create a second avatar or change the Book context.
