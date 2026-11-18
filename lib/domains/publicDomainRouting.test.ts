@@ -112,6 +112,8 @@ describe('public domain routing', () => {
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/narration.mp3')).toBe(true);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/words.json')).toBe(true);
         expect(isSharedDeploymentAssetPath('/vendor/monaco/0.54.0/vs/loader.js')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/vendor/swagger-ui/swagger-ui-bundle.js')).toBe(true);
+        expect(isSharedDeploymentAssetPath('/vendor/swagger-ui/credentials.json')).toBe(false);
         expect(isSharedDeploymentAssetPath('/vendor/monaco/0.54.0/vs/../credentials.json')).toBe(false);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/audio/script.txt')).toBe(false);
         expect(isSharedDeploymentAssetPath('/article-assets/spec-driven-anchoring-cs/metadata.json')).toBe(false);
@@ -129,7 +131,7 @@ describe('public domain routing', () => {
         const publicFiles = listPublicAssetPaths(join(process.cwd(), 'public'));
         // Generated public assets have bounded namespaces and are verified separately.
         expect([...SHARED_PUBLIC_ASSET_PATHS].sort()).toEqual(publicFiles.filter((file) =>
-            !file.startsWith('/article-assets/') && !file.startsWith('/vendor/monaco/'),
+            !file.startsWith('/article-assets/') && !file.startsWith('/vendor/monaco/') && !file.startsWith('/vendor/swagger-ui/'),
         ).sort());
         expect(publicFiles.filter((file) => !isSharedDeploymentAssetPath(file))).toEqual([]);
     });

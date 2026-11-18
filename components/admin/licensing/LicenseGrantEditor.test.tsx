@@ -18,7 +18,7 @@ it('explicitly creates a direct licence with numeric rights and no purchase fiel
     expect(fakes.request).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button',{name:'Vytvořit licenci'}));
     await waitFor(() => expect(saved).toHaveBeenCalled());
-    const body=JSON.parse(fakes.request.mock.calls[0]![1].body);
+    const body=JSON.parse(fakes.request.mock.calls[0]![1].body) as Record<string,unknown>;
     expect(body.action).toBe('grant');expect(body.requestId).toMatch(/^[a-f0-9-]{36}$/);expect(body.email).toBe('customer@example.test');
     expect(body.capabilities).toEqual(capabilitiesForPlan('business'));expect(body).not.toHaveProperty('orderId');expect(body).not.toHaveProperty('stripe_subscription_id');
 });

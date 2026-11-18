@@ -1,5 +1,9 @@
 # Licenční badge V0 pro App / manGoweb
 
+OpenAPI ke stažení: `https://www.ptbk.io/api/promptbook-billing/app/openapi.json?download=1`.
+Swagger: `https://www.ptbk.io/api/promptbook-billing/app/docs`.
+Licenční administrace a provázání plateb jsou popsané v [administraci licencí](license-administration.md).
+
 Revize vlastníka: 18. 11. 2026. Web je jediná autorita plateb, zkoušek a grantů. Tento krok umožňuje osobnímu
 přihlášenému účtu App zobrazit stav licence a odkaz. Běh, vytváření enginů, úlohy ani ovládání se podle licence
 neblokují. Aktuální množství používání se ve V0 nevyhodnocuje.

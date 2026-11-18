@@ -280,6 +280,7 @@ export function isSharedDeploymentAssetPath(pathname: string): boolean {
     if (/^\/vendor\/monaco\/\d+\.\d+\.\d+\/(?:LICENSE|ThirdPartyNotices\.txt|vs\/(?:[a-z0-9_][a-z0-9_.-]*\/)*[a-z0-9_][a-z0-9_.-]*\.(?:js|css|ttf))$/i.test(pathname)) return true;
     if (/^\/article-assets\/[a-z0-9][a-z0-9-]*\/(?:content\.md|article\.pdf|images\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|avif)|audio\/(?:narration\.mp3|subtitles\.vtt|words\.json))$/.test(pathname)) return true;
     if (/^\/article-podcasts\/(?:promptbook|pavol-hejny)\.png$/.test(pathname)) return true;
+    if (['/vendor/swagger-ui/swagger-ui-bundle.js','/vendor/swagger-ui/swagger-ui.css','/vendor/swagger-ui/license-docs.js','/vendor/swagger-ui/LICENSE','/vendor/swagger-ui/NOTICE'].includes(pathname)) return true;
     return SHARED_PUBLIC_ASSET_PATH_SET.has(pathname);
 }
 

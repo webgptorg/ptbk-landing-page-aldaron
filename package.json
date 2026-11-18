@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "predev": "node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts",
+        "predev": "node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts && node scripts/prepare-license-api-assets.cjs",
         "dev": "npx kill-port 4009 && next dev -p 4009",
-        "prebuild": "npm run migrate-database -- --vercel-production-only && node scripts/ensure-sharp-runtime.cjs && node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts",
+        "prebuild": "npm run migrate-database -- --vercel-production-only && node scripts/ensure-sharp-runtime.cjs && node scripts/prepare-book-editor-assets.cjs && node --import tsx scripts/articles/publish-assets.ts && node scripts/prepare-license-api-assets.cjs",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
@@ -99,10 +99,12 @@
         "sonner": "^2.0.3",
         "spacetrim": "^0.11.60",
         "stripe": "^22.6.0",
+        "swagger-ui-dist": "5.35.0",
         "tailwind-merge": "^3.1.0",
         "tw-animate-css": "^1.2.5",
         "vaul": "^1.1.2",
-        "zod": "^3.24.2"
+        "zod": "^3.24.2",
+        "zod-to-json-schema": "3.25.2"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.27.1",

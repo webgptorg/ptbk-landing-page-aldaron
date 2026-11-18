@@ -4,6 +4,15 @@ The launch revision in `docs/launch-2026-11-13.md` supersedes older homepage, na
 
 ## Context
 
+The owner's 18 November licence administration revision uses `/admin/promptbook-licensing` for manual CRUD and paid/trial rights,
+and `/admin/promptbook-subscriptions` for cross-linked Promptbook, community and avatar purchases/subscriptions/payments.
+Both remain superadmin-only. Direct manual grants create no order/payment/subscription; 100% checkout discounts retain the
+existing purchase flow. Manual changes are revision-checked and atomically audited; deletion retains history and revokes access.
+Existing grants use the shared autosave/dialog conventions, while creation and lifecycle actions remain explicit. Never edit paid
+contracts or restart trials here. Public OpenAPI/Swagger are at `/api/promptbook-billing/app/openapi.json` and `/api/promptbook-billing/app/docs`.
+Generate schemas from runtime validators, serve pinned Swagger assets locally, and expose no credentials or billing data in App API.
+See `docs/license-administration.md`.
+
 The 18 November licensing V0 adds an authenticated server-only POST email lookup at the existing App license route.
 Keep GET's strict numeric v1 snapshot intact; the separate POST envelope carries a Czech display label and advisory
 status for the verified personal App identity. Queries never create accounts/trials/payments or write CRM. Exclude

@@ -1,15 +1,12 @@
 import { createHash } from 'node:crypto';
 import { NextRequest } from 'next/server';
-import { z } from 'zod';
 import { memberResponse } from '@/lib/promptbook-billing/memberAccess';
 import { isLicenseAppRequest } from '@/lib/promptbook-licensing/appAuthentication';
 import { licenseDatabase, type LicenseAccount } from '@/lib/promptbook-licensing/accounts';
-const schema = z
-    .object({ code: z.string().regex(/^[A-Za-z0-9_-]{43}$/), challenge: z.string().regex(/^[A-Za-z0-9_-]{43}$/) })
-    .strict();
+import { licenseExchangeRequestSchema, licenseExchangeResponseSchema } from '@/lib/promptbook-licensing/exchangeContract';
 export async function POST(request: NextRequest) {
     if (!isLicenseAppRequest(request)) return memberResponse({ error: 'Unauthorized' }, 401);
-    const parsed = schema.safeParse(await request.json().catch(() => null));
+    const parsed = licenseExchangeRequestSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return memberResponse({ error: 'Invalid ticket' }, 400);
     try {
         const database = licenseDatabase();
@@ -32,7 +29,7 @@ export async function POST(request: NextRequest) {
             .single<LicenseAccount>();
         if (account.error) throw new Error('Account unavailable');
         // Mailbox ownership was verified by the website, not asserted by a purchase form.
-        return memberResponse({ version: 1, subject: account.data.id, email: account.data.email, emailVerified: true });
+        return memberResponse(licenseExchangeResponseSchema.parse({ version: 1, subject: account.data.id, email: account.data.email, emailVerified: true }));
     } catch {
         return memberResponse({ error: 'Temporarily unavailable' }, 503);
     }
