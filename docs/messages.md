@@ -6,6 +6,14 @@ full context. The explicit generation button derives a subject, editable message
 selected Book. Step two also offers the domain, editable kebab-case prefix and optional speech. Long contexts are
 fetched only when opening an editor, rather than with every row in the list.
 
+The short-message editor offers one-click limits of 160, 300, 600 or 1,000 characters, an editable 100–50,000
+character limit and paragraph, Markdown bullet-list or single-sentence formats. Every explicit rewrite sends the
+entire current original context and selected Book to the same admin-only generator, never the existing summary.
+It returns only Markdown and leaves the title, introduction, address and full context intact. Limits include
+spaces, newlines and Markdown syntax; over-limit model output is rejected without replacing the draft or making
+an automatic paid retry. The character counter reflects the current text. The previous text can be restored;
+ordinary autosave applies to existing messages, while new-message creation stays explicit.
+
 Step one also accepts a selected or dropped audio file (including Samsung Recorder M4A, up to 2 GB). Selecting one
 explicitly starts ElevenLabs Scribe transcription with automatic language detection, speaker diarization and verbatim
 output. The result is appended to the existing editable context under `Následuje přepsané audio: <filename>`; source

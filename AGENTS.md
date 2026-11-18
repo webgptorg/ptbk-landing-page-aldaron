@@ -62,6 +62,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   in place instead of redirecting. `/admin/messages` owns their two-step editor, explicit creation/deletion and
   immediate shared autosave, with no draft/publish states. Context stays separate from the title, short Markdown
   message and message-specific chat introduction. Explicit generation uses the selected shared Book agent.
+  Short-message rewrites offer quick/custom character limits and paragraph, bullet-list or single-sentence formats.
+  Every rewrite derives only new message Markdown from the entire original context, never a prior summary, and
+  preserves the other fields. Over-limit model results leave the draft intact without automatic paid retries.
   Context may also come from selected or dropped audio files (including Samsung M4A) and supported video files.
   The editor lets the user order these files before explicitly transcribing them in sequence into one context.
   A failure stops the queue so the user can resume with the remaining files without paying again for completed parts.
