@@ -1,4 +1,5 @@
 'use client';
+import { createExpectedDiscount, type ExpectedDiscount } from '@/lib/discounts/discountPricing';
 
 import {
     CURRENT_PAID_COMMUNITY_MEMBERSHIP_BILLING_PERIOD,
@@ -66,7 +67,7 @@ type CommunityMembershipPurchasePanelProps = {
     readonly isPaymentInTestMode: boolean;
     readonly isPurchaseStarting: boolean;
     readonly errorMessage: string | null;
-    readonly onPurchase: (discountCode: string) => void;
+    readonly onPurchase: (discountCode: string, expectedDiscount?: ExpectedDiscount | null) => void;
 };
 
 /**
@@ -196,6 +197,7 @@ export function CommunityMembershipPurchasePanel({
         initialDiscountCode: '',
         initialActiveDiscountByPlaceId: NO_INITIAL_ACTIVE_DISCOUNTS,
         discountPlaceId: COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
+        baseAmount: CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100,
     });
     // The button asks for exactly what the card will be charged, discount included, rather than for the list price.
     const price = createCommunityMembershipPrice(
@@ -203,7 +205,7 @@ export function CommunityMembershipPurchasePanel({
         CURRENT_PAID_COMMUNITY_MEMBERSHIP_BILLING_PERIOD,
         discountCodeValidation.activeDiscount,
     );
-    const isCoveredByDiscountCode = isSubscriptionDiscountFullAndPermanent(discountCodeValidation.activeDiscount);
+    const isCoveredByDiscountCode = isSubscriptionDiscountFullAndPermanent(discountCodeValidation.activeDiscount, CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100);
     const purchaseAction = createCommunityMembershipPurchaseAction(
         isCoveredByDiscountCode,
         price.finalMonthlyEquivalentCzk,
@@ -220,7 +222,7 @@ export function CommunityMembershipPurchasePanel({
         }
 
         setIsValidationShown(false);
-        onPurchase(discountCodeValidation.discountCode);
+        onPurchase(discountCodeValidation.discountCode, createExpectedDiscount(discountCodeValidation.activeDiscount, CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100, true));
     };
 
     return (

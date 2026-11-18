@@ -1,3 +1,4 @@
+import { discountPriceRuleSchema, validateDiscountPriceRule } from './discountPricing';
 import { isDiscountCodeNormalized, normalizeDiscountCode } from '@/lib/discounts/discountCode';
 import {
     MAXIMAL_DISCOUNT_CODE_INPUT_LENGTH,
@@ -60,15 +61,21 @@ export const discountCodeValuesSchema = z
         isEnabled: z.boolean(),
         isPromoted: z.boolean().default(false),
         placeIds: discountPlaceIdsSchema,
+        appliesEverywhere: z.boolean().optional(),
+        priceRule: discountPriceRuleSchema.nullable().optional(),
         maximumUseCount: maximumUseCountSchema,
         subscriptionDiscountDurationMonths: subscriptionDiscountDurationMonthsSchema,
+    })
+    .superRefine((discountCode, context) => {
+        try { validateDiscountPriceRule(discountCode.priceRule); }
+        catch (error) { context.addIssue({ code: z.ZodIssueCode.custom, path: ['priceRule'], message: error instanceof Error ? error.message : 'Neplatný vzorec.' }); }
     })
     .refine((discountCode) => Date.parse(discountCode.endsAt) >= Date.parse(discountCode.startsAt), {
         message: 'Konec platnosti musí být po začátku platnosti.',
         path: ['endsAt'],
     })
     .refine((discountCode) => !discountCode.isPromoted || (
-        !discountCode.code.includes('*') && discountCode.placeIds.some(isPromptbookDiscountPlaceId)
+        !discountCode.code.includes('*') && (discountCode.appliesEverywhere || discountCode.placeIds.some(isPromptbookDiscountPlaceId))
     ), {
         message: 'Zveřejnit lze přesný kód s výslovně vybraným tarifem Promptbooku.',
         path: ['isPromoted'],

@@ -1,3 +1,4 @@
+import type { ExpectedDiscount } from '@/lib/discounts/discountPricing';
 import { requestJson, sendJson } from '@/lib/api/requestJson';
 import { createCommunityMembershipApiPaths } from '@/lib/community-membership/communityMembershipApiPaths';
 import type {
@@ -11,6 +12,7 @@ import type {
 export type CommunityMembershipPurchaseValues = {
     readonly discountCode: string;
     readonly termsAccepted: true;
+    readonly expectedDiscount?: ExpectedDiscount | null;
 };
 
 /**

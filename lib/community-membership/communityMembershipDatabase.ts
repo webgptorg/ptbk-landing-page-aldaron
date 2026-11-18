@@ -1,3 +1,4 @@
+import type { DiscountSnapshot } from '@/lib/discounts/discountPricing';
 import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 import {
     COMMUNITY_MEMBERSHIP_TABLE_NAME,
@@ -14,7 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  * Note: This stays one literal, because the database client reads the requested columns out of the text itself.
  */
 const COMMUNITY_MEMBERSHIP_COLUMNS =
-    'id, email, fullname, plan_id, status, monthly_price_czk, discount_code, discount_percent, stripe_customer_id, stripe_subscription_id, stripe_checkout_session_id, is_test_payment, is_cancellation_scheduled, current_period_ends_at, activated_at, canceled_at, created_at, updated_at';
+    'id, email, fullname, plan_id, status, monthly_price_czk, discount_code, discount_percent, discount_snapshot, stripe_customer_id, stripe_subscription_id, stripe_checkout_session_id, is_test_payment, is_cancellation_scheduled, current_period_ends_at, activated_at, canceled_at, created_at, updated_at';
 
 const COMMUNITY_MEMBERSHIP_ADMIN_PAGE_FUNCTION_NAME = 'get_scoped_community_membership_admin_page';
 
@@ -27,6 +28,7 @@ type CommunityMembershipRow = {
     readonly monthly_price_czk: number;
     readonly discount_code: string | null;
     readonly discount_percent: number;
+    readonly discount_snapshot?: DiscountSnapshot | null;
     readonly stripe_customer_id: string | null;
     readonly stripe_subscription_id: string | null;
     readonly stripe_checkout_session_id: string | null;
@@ -55,6 +57,7 @@ export type CommunityMembershipRecord = {
     readonly monthlyPriceCzk: number;
     readonly discountCode: string | null;
     readonly discountPercent: number;
+    readonly discountSnapshot?: DiscountSnapshot | null;
     readonly stripeCustomerId: string | null;
     readonly stripeSubscriptionId: string | null;
     readonly stripeCheckoutSessionId: string | null;
@@ -99,6 +102,7 @@ export type AcceptedCommunityMembershipValues = {
     readonly monthlyPriceCzk: number;
     readonly discountCode: string | null;
     readonly discountPercent: number;
+    readonly discountSnapshot?: DiscountSnapshot | null;
     readonly isTestPayment: boolean;
     readonly requestedByParticipantId: string;
 };
@@ -140,6 +144,7 @@ function mapCommunityMembershipValues(
         monthlyPriceCzk: row.monthly_price_czk,
         discountCode: row.discount_code,
         discountPercent: row.discount_percent,
+        ...(row.discount_snapshot !== undefined ? { discountSnapshot: row.discount_snapshot } : {}),
         stripeCustomerId: row.stripe_customer_id,
         stripeSubscriptionId: row.stripe_subscription_id,
         stripeCheckoutSessionId: row.stripe_checkout_session_id,
@@ -318,6 +323,7 @@ function createAcceptedCommunityMembershipValues(values: AcceptedCommunityMember
         monthly_price_czk: values.monthlyPriceCzk,
         discount_code: values.discountCode,
         discount_percent: values.discountPercent,
+        ...(values.discountSnapshot !== undefined ? { discount_snapshot: values.discountSnapshot } : {}),
         is_test_payment: values.isTestPayment,
         is_cancellation_scheduled: false,
         requested_by_participant_id: values.requestedByParticipantId,

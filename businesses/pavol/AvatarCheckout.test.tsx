@@ -87,7 +87,7 @@ describe('avatar discount checkout UI', () => {
         render(<AvatarCheckout cs={false} limit={500} onCancel={vi.fn()} />); fillPayer(); await enterCode();
         expect(screen.getByText('0 Kč')).toBeVisible();
         if (duration === null) {
-            expect(screen.getByText('Permanent 100% discount. No payment card is required.')).toBeVisible();
+            expect(screen.getByText('Free for the lifetime of this subscription. No payment card is required.')).toBeVisible();
             expect(screen.getByRole('button', { name: 'Activate Full for free' })).toBeEnabled();
         } else {
             expect(screen.getByText('Discount for the first 3 months, then 1,000 Kč per month.')).toBeVisible();
@@ -100,4 +100,29 @@ describe('avatar discount checkout UI', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('15 Kč minimum card payment');
         expect(pay()).toBeDisabled(); expect(submissions()).toEqual([]);
     });
+    it('shows a human fixed-price summary and submits the exact custom quote', async () => {
+        const original = fetchMock.getMockImplementation()!;
+        fetchMock.mockImplementation(async (url: string, options: RequestInit) => url === '/api/discount-codes/validate' ? Response.json({ activeDiscount: {
+            code: 'TWENTY', percent: 30, priceRule: { kind: 'fixed', amount: 20, currency: 'CZK' }, definitionVersion: 4, remainingUseCount: null, subscriptionDiscountDurationMonths: 3,
+        } }) : original(url, options));
+        render(<AvatarCheckout cs={false} limit={500} onCancel={vi.fn()} />); fillPayer();
+        fireEvent.change(screen.getByLabelText('Discount code'), { target: { value: 'TWENTY' } });
+        expect(await screen.findByText('Special price 20 Kč.')).toBeVisible();
+        expect(screen.getByText('20 Kč')).toBeVisible();
+        expect(screen.queryByText(/Active discount: 30/)).toBeNull();
+        fireEvent.click(pay()); await screen.findByRole('alert');
+        expect(submissions()[0].expectedDiscount).toMatchObject({ priceRule: { kind: 'fixed', amount: 20, currency: 'CZK' }, definitionVersion: 4, finalAmount: 2000, months: 3 });
+    });
+    it('keeps an undefined formula result from crashing the page or enabling checkout', async () => {
+        const original = fetchMock.getMockImplementation()!;
+        fetchMock.mockImplementation(async (url: string, options: RequestInit) => url === '/api/discount-codes/validate' ? Response.json({ activeDiscount: {
+            code: 'FORMULA', percent: 30, priceRule: { kind: 'formula', expression: '1 / (price - 1000)', currency: 'CZK' }, definitionVersion: 1, remainingUseCount: null, subscriptionDiscountDurationMonths: 3,
+        } }) : original(url, options));
+        render(<AvatarCheckout cs={false} limit={500} onCancel={vi.fn()} />); fillPayer();
+        fireEvent.change(screen.getByLabelText('Discount code'), { target: { value: 'FORMULA' } });
+        await screen.findByText('The code could not be checked. Please try again.');
+        expect(pay()).toBeDisabled(); expect(submissions()).toEqual([]);
+        expect(screen.getByText('1,000 Kč')).toBeVisible();
+    });
+
 });

@@ -1,3 +1,4 @@
+import { calculateDiscountedAmount, createDiscountSnapshot, type DiscountSnapshot } from '@/lib/discounts/discountPricing';
 import {
     AI_SUPERVIZE_MINI_WORKSHOP_CONFIG,
     AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_TYPE,
@@ -94,6 +95,7 @@ export type AiSupervizeMiniStoredWorkshopRegistration = {
     readonly discountCodeEntered: string | null;
     readonly discountCodeUsed: string | null;
     readonly discountPercentApplied: number;
+    readonly discountSnapshot?: DiscountSnapshot | null;
     readonly unitPriceCzk: number;
     readonly basePriceCzk: number;
     readonly discountAmountCzk: number;
@@ -243,8 +245,7 @@ export function createAiSupervizeMiniWorkshopPrice(
     activeDiscount: ActiveDiscount | null,
 ): AiSupervizeMiniWorkshopPrice {
     const basePriceCzk = event.event.priceCzk * participantCount;
-    const discountAmountCzk =
-        activeDiscount === null ? 0 : Math.round((basePriceCzk * activeDiscount.percent) / 100);
+    const discountAmountCzk = basePriceCzk - calculateDiscountedAmount(Math.round(basePriceCzk * 100), activeDiscount, true) / 100;
 
     return {
         basePriceCzk,
@@ -279,7 +280,8 @@ export function createAiSupervizeMiniStoredWorkshopRegistration(
         userNote: registrationRequest.userNote.trim() || null,
         discountCodeEntered: registrationRequest.discountCode.trim() || null,
         discountCodeUsed: activeDiscount?.code ?? null,
-        discountPercentApplied: activeDiscount?.percent ?? 0,
+        discountPercentApplied: activeDiscount?.priceRule ? 0 : activeDiscount?.percent ?? 0,
+        discountSnapshot: createDiscountSnapshot(activeDiscount, Math.round(workshopPrice.basePriceCzk * 100), true),
         unitPriceCzk: event.event.priceCzk,
         basePriceCzk: workshopPrice.basePriceCzk,
         discountAmountCzk: workshopPrice.discountAmountCzk,

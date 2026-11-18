@@ -113,10 +113,10 @@ function createCommunityMembershipMetadata(
 async function createCommunityMembershipSubscriptionCoupon(
     gateway: StripeGateway,
     activeDiscount: ActiveDiscount | null,
+    baseAmount: number,
 ): Promise<Stripe.Coupon | null> {
-    return activeDiscount === null
-        ? null
-        : gateway.stripe.coupons.create(createStripeSubscriptionCouponParameters(activeDiscount));
+    const parameters = activeDiscount && createStripeSubscriptionCouponParameters(activeDiscount, baseAmount);
+    return parameters ? gateway.stripe.coupons.create(parameters) : null;
 }
 
 /**
@@ -135,10 +135,11 @@ export async function createCommunityMembershipCheckoutSession(
     communityId: CommunityId = DEFAULT_COMMUNITY_ID,
 ): Promise<Stripe.Checkout.Session> {
     const metadata = createCommunityMembershipMetadata(member, activeDiscount?.code ?? null, communityId);
-    const subscriptionCoupon = await createCommunityMembershipSubscriptionCoupon(gateway, activeDiscount);
+    const subscriptionCoupon = await createCommunityMembershipSubscriptionCoupon(gateway, activeDiscount, createStripeAmountFromCzk(price.baseMonthlyEquivalentCzk));
 
     return gateway.stripe.checkout.sessions.create({
         mode: 'subscription',
+        ...(activeDiscount?.subscriptionDiscountDurationMonths != null ? { payment_method_collection: 'always' as const } : {}),
         locale: 'cs',
         customer_email: normalizeCommunityMemberEmail(member.email),
         client_reference_id: member.participantId,

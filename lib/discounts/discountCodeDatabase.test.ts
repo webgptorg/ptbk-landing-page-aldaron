@@ -64,7 +64,7 @@ describe('submitted discount-code loading', () => {
             eq: vi.fn().mockReturnThis(),
             lte: vi.fn().mockReturnThis(),
             gte: vi.fn().mockReturnThis(),
-            overlaps: vi.fn().mockReturnThis(),
+            or: vi.fn().mockReturnThis(),
             order: vi.fn().mockReturnThis(),
             then: (onFulfilled: (value: unknown) => unknown) => Promise.resolve(onFulfilled({
                 data: [
@@ -108,7 +108,7 @@ describe('submitted discount-code loading', () => {
         const rpc = vi.fn().mockResolvedValue({ data: [{ status: 'applied', code: 'LETNI_*', percent: 30, remaining_use_count: 0, subscription_discount_duration_months: 3 }], error: null });
         createSupabaseServiceRoleClientMock.mockReturnValue({ rpc });
         const result = await reserveSubscriptionDiscountCode(' letní 30 ', 'pavol-avatar-full', 'order-id');
-        expect(rpc).toHaveBeenCalledWith('reserve_subscription_discount_code', { submitted_code: 'LETNI_30', place_id: 'pavol-avatar-full', reservation_id: 'order-id' });
+        expect(rpc).toHaveBeenCalledWith('reserve_subscription_discount_code_v2', { submitted_code: 'LETNI_30', place_id: 'pavol-avatar-full', reservation_id: 'order-id' });
         expect(result).toMatchObject({ status: 'applied', activeDiscount: { percent: 30, subscriptionDiscountDurationMonths: 3 } });
         rpc.mockClear();
         expect(await reservePromptbookDiscountCode('LETNI_30', 'pavol-avatar-full', 'order-id')).toMatchObject({ status: 'unusable' });

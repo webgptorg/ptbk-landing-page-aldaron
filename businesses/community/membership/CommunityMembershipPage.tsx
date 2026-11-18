@@ -1,4 +1,5 @@
 'use client';
+import { CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN } from './communityMembershipConfig';
 
 import { COMMUNITY_PATH } from '@/businesses/community/config';
 import { ScrollToRegistrationSection } from '@/components/discounts/ScrollToRegistrationSection';
@@ -250,6 +251,7 @@ export function CommunityMembershipPage({
         initialDiscountCode,
         initialActiveDiscountByPlaceId,
         discountPlaceId: COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
+        baseAmount: CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100,
     });
     const basicHref = useMemo(
         () => createCommunityRoomHref(initialFullname, initialEmail),

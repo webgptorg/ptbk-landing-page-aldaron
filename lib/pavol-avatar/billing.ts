@@ -1,3 +1,4 @@
+import { discountMatchesExpected, expectedDiscountSchema, snapshotFromExpected, type DiscountSnapshot } from '@/lib/discounts/discountPricing';
 import 'server-only';
 import { ensureAvatarStripeWebhook } from './webhookPreflight';
 import { createHash } from 'node:crypto';
@@ -9,7 +10,7 @@ import { resolvePromptbookCheckoutIdentity } from '@/lib/promptbook-billing/bill
 import { getOperatorIdentification } from '@/lib/legal/legalOperator';
 import { avatarLegalContractSnapshot } from '@/lib/legal/productLegalAvatar';
 import { isSubscriptionDiscountFullAndPermanent, normalizeDiscountCode } from '@/lib/discounts/discountCode';
-import { MAXIMAL_DISCOUNT_CODE_INPUT_LENGTH, MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT } from '@/lib/discounts/discountCodeConstants';
+import { MAXIMAL_DISCOUNT_CODE_INPUT_LENGTH } from '@/lib/discounts/discountCodeConstants';
 import { reserveSubscriptionDiscountCode, settleSubscriptionDiscountReservation } from '@/lib/discounts/discountCodeDatabase';
 import { PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID } from '@/lib/discounts/discountPlaces';
 import { createStripeSubscriptionCouponParameters } from '@/lib/payments/stripeSubscriptionCoupon';
@@ -26,7 +27,7 @@ export const avatarCheckoutSchema = z.object({
     companyId: z.string().trim().max(16).optional(), vatId: z.string().trim().max(24).optional(), billingName: z.string().trim().min(1).max(200), billingAddress: address,
     termsAccepted: z.literal(true), immediateStartAccepted: z.literal(true), termsVersion: z.literal(AVATAR_TERMS_VERSION),
     discountCode: z.string().trim().max(MAXIMAL_DISCOUNT_CODE_INPUT_LENGTH).transform(normalizeDiscountCode).optional().default(''),
-    expectedDiscount: z.object({ percent: z.number().int().min(1).max(100), months: z.number().int().min(1).max(MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT).nullable() }).nullable().optional().default(null),
+    expectedDiscount: expectedDiscountSchema.nullable().optional().default(null),
 }).refine(value => Boolean(value.discountCode) === Boolean(value.expectedDiscount));
 export type AvatarCheckoutInput = z.input<typeof avatarCheckoutSchema>;
 export type AvatarOrder = {
@@ -44,6 +45,7 @@ export type AvatarOrder = {
     discount_code: string | null;
     discount_percent: number | null;
     discount_months: number | null;
+    discount_snapshot?: DiscountSnapshot | null;
     currency: string;
     terms_version: string;
     seller: Record<string, unknown>;
@@ -288,12 +290,15 @@ export async function createAvatarCheckout(request: Request, principal: AvatarPr
         throw new AvatarBillingError('Platební relace vypršela. Odešlete nový formulář.', 409, 'checkout_expired');
     }
     const baseAmount = existing?.base_amount ?? AVATAR_PRICE_CZK * 100;
-    const quotedAmount = baseAmount - Math.round(baseAmount * (expectedDiscount?.percent ?? 0) / 100);
+    const quotedSnapshot = snapshotFromExpected(submittedDiscountCode || null, expectedDiscount, baseAmount);
+    const quotedAmount = quotedSnapshot?.finalAmount ?? baseAmount;
+    if (expectedDiscount?.finalAmount !== undefined && expectedDiscount.finalAmount !== quotedAmount) throw new AvatarBillingError('Cena se změnila. Ověřte kód znovu.', 409, 'discount_changed');
     if (quotedAmount > 0 && quotedAmount < STRIPE_CZK_MINIMUM_CHARGE_AMOUNT)
         throw new AvatarBillingError('Cena po této slevě je pod minimální částkou 15 Kč pro platbu kartou.', 422);
     if (!existing) {
         const inserted = await db.from('avatar_orders').insert({ id: input.requestId, principal_id: principal.id, email: principal.email, fullname: input.fullname, customer_type: input.customerType, billing_name: identity.name,
             company_id: identity.companyId, vat_id: identity.vatId, billing_address: identity.address, country: input.country, base_amount: AVATAR_PRICE_CZK * 100,
+            discount_snapshot: quotedSnapshot,
             discount_code: submittedDiscountCode || null, discount_percent: expectedDiscount?.percent ?? null, discount_months: expectedDiscount?.months ?? null,
             currency: 'czk', terms_version: AVATAR_TERMS_VERSION, immediate_start_accepted: true, request_fingerprint: fingerprint, legal_snapshot: avatarLegalContractSnapshot('cs'), usage_limits: availability.limits,
             seller: { name: 'AI Web s.r.o.', companyId: '21012288', identification: getOperatorIdentification('cs'), legalEmail: 'legal@ptbk.io', privacyEmail: 'privacy@ptbk.io' }, status: 'pending', is_test: availability.isTest });
@@ -307,7 +312,8 @@ export async function createAvatarCheckout(request: Request, principal: AvatarPr
         ? await reserveSubscriptionDiscountCode(order.discount_code, PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID, order.id) : null;
     if (reservation?.errorMessage) throw new AvatarBillingError('Slevový kód teď nelze ověřit. Zkuste stejnou objednávku znovu.');
     const discount = reservation?.activeDiscount ?? null;
-    if (order.discount_code && (!discount || discount.percent !== order.discount_percent || discount.subscriptionDiscountDurationMonths !== order.discount_months)) {
+    if (order.discount_code && !discountMatchesExpected(discount, { percent: order.discount_percent!, months: order.discount_months,
+        ...(order.discount_snapshot ? { priceRule: order.discount_snapshot.priceRule, definitionVersion: order.discount_snapshot.definitionVersion, finalAmount: order.discount_snapshot.finalAmount } : {}) }, order.base_amount)) {
         await closeAvatarCheckout(db, order);
         throw new AvatarBillingError('Sleva už není dostupná za zobrazených podmínek. Ověřte kód znovu.', 409, 'discount_changed');
     }
@@ -323,8 +329,9 @@ export async function createAvatarCheckout(request: Request, principal: AvatarPr
         ...(identity.companyId && identity.vatId ? { tax_id_data: [{ type: 'eu_vat' as const, value: identity.vatId }] } : {}),
         invoice_settings: { ...(template ? { rendering_options: { template } } : {}), custom_fields: [{ name: 'IČO dodavatele', value: '21012288' }, ...(identity.companyId ? [{ name: 'IČO odběratele', value: identity.companyId }] : []), { name: 'Podmínky avatara', value: AVATAR_TERMS_VERSION }],
             footer: (reverse ? 'DIČ dodavatele: ' + supplierVat + '. Daň odvede zákazník (reverse charge).' : 'Dodavatel není plátcem DPH.') + '\nPavolův AI avatar. Podmínky: ' + origin + AVATAR_TERMS_PATH } }, { idempotencyKey: 'avatar-customer-' + order.id });
-    const coupon = discount ? await gateway.stripe.coupons.create(createStripeSubscriptionCouponParameters(discount), { idempotencyKey: 'avatar-coupon-' + order.id }) : null;
-    const session = await gateway.stripe.checkout.sessions.create({ mode: 'subscription', customer: customer.id, locale: 'cs', client_reference_id: order.id, payment_method_types: ['card'], payment_method_collection: isSubscriptionDiscountFullAndPermanent(discount) ? 'if_required' : 'always', adaptive_pricing: { enabled: false },
+    const couponParameters = discount && createStripeSubscriptionCouponParameters(discount, order.base_amount);
+    const coupon = couponParameters ? await gateway.stripe.coupons.create(couponParameters, { idempotencyKey: 'avatar-coupon-' + order.id }) : null;
+    const session = await gateway.stripe.checkout.sessions.create({ mode: 'subscription', customer: customer.id, locale: 'cs', client_reference_id: order.id, payment_method_types: ['card'], payment_method_collection: isSubscriptionDiscountFullAndPermanent(discount, order.base_amount) ? 'if_required' : 'always', adaptive_pricing: { enabled: false },
         success_url: origin + '/api/pavol-avatar/return?session_id={CHECKOUT_SESSION_ID}', cancel_url: origin + '/avatar?payment=cancelled', expires_at: Math.floor((Date.parse(order.created_at) + 3600000) / 1000),
         line_items: [{ quantity: 1, price_data: { currency: 'czk', unit_amount: order.base_amount, tax_behavior: 'exclusive', recurring: { interval: 'month' }, product_data: { name: 'Pavolův AI avatar · Full', description: 'Měsíční předplatné pro jednoho člověka', metadata: { product: 'pavol-avatar' } } } }],
         ...(coupon ? { discounts: [{ coupon: coupon.id }] } : {}),

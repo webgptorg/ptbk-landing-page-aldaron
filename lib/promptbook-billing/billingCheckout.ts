@@ -1,4 +1,4 @@
-import type { ActiveDiscount } from '@/lib/discounts/discountCode';
+import { isSubscriptionDiscountFullAndPermanent, type ActiveDiscount } from '@/lib/discounts/discountCode';
 import { STRIPE_CZK_CURRENCY } from '@/lib/payments/stripeAmount';
 import { createStripeSubscriptionCouponParameters } from '@/lib/payments/stripeSubscriptionCoupon';
 import { ORGANIZATION_REGISTRATION_NUMBER } from '@/lib/metadata/site-config';
@@ -50,7 +50,8 @@ export async function createPromptbookCheckout(
             ],
         },
     }, { idempotencyKey: `promptbook-customer-${order.id}` });
-    const coupon = discount && await stripe.coupons.create(createStripeSubscriptionCouponParameters(discount), {
+    const couponParameters = discount && createStripeSubscriptionCouponParameters(discount, order.base_amount);
+    const coupon = couponParameters && await stripe.coupons.create(couponParameters, {
         idempotencyKey: `promptbook-coupon-${order.id}`,
     });
 
@@ -59,7 +60,7 @@ export async function createPromptbookCheckout(
         locale: 'cs',
         customer: customer.id,
         payment_method_types: ['card'],
-        payment_method_collection: 'always',
+        payment_method_collection: isSubscriptionDiscountFullAndPermanent(discount, order.base_amount) ? 'if_required' : 'always',
         adaptive_pricing: { enabled: false },
         client_reference_id: order.id,
         expires_at: Math.floor((Date.parse(order.created_at) + STRIPE_SESSION_LIFETIME_MS) / 1000),

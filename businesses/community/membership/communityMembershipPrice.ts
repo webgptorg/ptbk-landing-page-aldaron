@@ -1,3 +1,4 @@
+import { calculateDiscountedAmount } from '@/lib/discounts/discountPricing';
 import type { ActiveDiscount } from '@/lib/discounts/discountCode';
 import {
     COMMUNITY_MEMBERSHIP_YEARLY_MONTH_COUNT,
@@ -39,9 +40,8 @@ export function createCommunityMembershipPrice(
     const plan = getCommunityMembershipPlan(planId);
     const billedMonthCount = billingPeriod === 'yearly' ? COMMUNITY_MEMBERSHIP_YEARLY_MONTH_COUNT : 1;
     const baseBillingPriceCzk = getCommunityMembershipBaseBillingPriceCzk(planId, plan, billingPeriod);
-    const discountAmountCzk =
-        activeDiscount === null ? 0 : Math.round((baseBillingPriceCzk * activeDiscount.percent) / 100);
-    const finalBillingPriceCzk = baseBillingPriceCzk - discountAmountCzk;
+    const finalBillingPriceCzk = calculateDiscountedAmount(Math.round(baseBillingPriceCzk * 100), activeDiscount, true) / 100;
+    const discountAmountCzk = baseBillingPriceCzk - finalBillingPriceCzk;
 
     return {
         baseBillingPriceCzk,
@@ -53,5 +53,5 @@ export function createCommunityMembershipPrice(
 }
 
 export function formatCommunityMembershipPrice(amountCzk: number): string {
-    return `${amountCzk.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} Kč`;
+    return `${amountCzk.toLocaleString('cs-CZ', { maximumFractionDigits: 2 })} Kč`;
 }

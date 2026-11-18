@@ -1,4 +1,5 @@
 'use client';
+import { describeDiscount } from '@/lib/discounts/discountPricing';
 
 import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 
@@ -212,9 +213,9 @@ export function CommunityMembershipAdmin({ communityId = DEFAULT_COMMUNITY_ID }:
                                             <p className="mt-1 text-sm text-slate-600">
                                                 {formatCommunityMembershipPrice(membership.monthlyPriceCzk)} / měsíc
                                             </p>
-                                            {membership.discountPercent > 0 && (
+                                            {(membership.discountSnapshot || membership.discountPercent > 0) && (
                                                 <p className="mt-1 text-xs text-emerald-700">
-                                                    Sleva {membership.discountPercent} %
+                                                    {describeDiscount(membership.discountSnapshot ? { percent: membership.discountSnapshot.percent, priceRule: membership.discountSnapshot.priceRule } : { percent: membership.discountPercent })}
                                                     {membership.discountCode === null ? '' : ` · ${membership.discountCode}`}
                                                 </p>
                                             )}

@@ -44,7 +44,7 @@ export function DiscountCodeField({ inputId, validation, appearance = 'light', l
                 />
             </div>
             <p id={`${inputId}-status`} role="status" className={cn('mt-1 text-xs', surfaceClassNames.hint)}>
-                {getDiscountCodeMessage({ discountCode, activeDiscount, isValidationPending, validationError, language })}
+                {getDiscountCodeMessage({ discountCode, activeDiscount, isValidationPending, validationError, language, finalAmount: validation.finalAmount })}
             </p>
         </div>
     );

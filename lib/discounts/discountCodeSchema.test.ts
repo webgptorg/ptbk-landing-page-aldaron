@@ -77,3 +77,14 @@ describe('discount-code write schema', () => {
         ).toBe(false);
     });
 });
+
+
+describe('custom discount definitions', () => {
+    it('accepts a 1 CZK definition independently of the card minimum and rejects executable formula syntax', () => {
+        const input = { code: 'ONE', percent: 10, startsAt: '2026-11-18T00:00:00Z', endsAt: '2027-01-01T00:00:00Z', isEnabled: true, placeIds: [], appliesEverywhere: true, maximumUseCount: null,
+            priceRule: { kind: 'fixed', amount: 1, currency: 'CZK' } };
+        expect(discountCodeValuesSchema.safeParse(input).success).toBe(true);
+        expect(discountCodeValuesSchema.safeParse({ ...input, priceRule: { kind: 'formula', expression: 'process.env.SECRET', currency: 'CZK' } }).success).toBe(false);
+        expect(discountCodeValuesSchema.safeParse({ ...input, priceRule: { kind: 'fixed', amount: -1, currency: 'CZK' } }).success).toBe(false);
+    });
+});

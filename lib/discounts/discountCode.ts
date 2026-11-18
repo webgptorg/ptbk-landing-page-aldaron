@@ -1,3 +1,4 @@
+import { calculateDiscountedAmount, type DiscountPriceRule } from './discountPricing';
 import { MAXIMAL_DISCOUNT_CODE_LENGTH, MAXIMAL_DISCOUNT_PERCENT } from '@/lib/discounts/discountCodeConstants';
 import { isPromptbookDiscountPlaceId } from '@/lib/discounts/discountPlaces';
 
@@ -17,6 +18,8 @@ export type ActiveDiscount = SubscriptionDiscountDuration & {
     /** The exact code or wildcard rule which granted this discount. */
     readonly code: string;
     readonly percent: number;
+    readonly priceRule?: DiscountPriceRule | null;
+    readonly definitionVersion?: number;
     readonly remainingUseCount: number | null;
 };
 
@@ -26,12 +29,16 @@ export type DiscountCodeValues = SubscriptionDiscountDuration & {
     /** An exact code, or a glob rule in which each `*` matches zero or more code characters. */
     readonly code: string;
     readonly percent: number;
+    readonly priceRule?: DiscountPriceRule | null;
+    readonly definitionVersion?: number;
     readonly startsAt: string;
     readonly endsAt: string;
     readonly isEnabled: boolean;
 
     /** Empty includes all places that do not require explicit selection. */
     readonly placeIds: readonly string[];
+    /** Explicit global scope, including Promptbook. Missing preserves historical scope. */
+    readonly appliesEverywhere?: boolean;
 
     /** Shows an exact code as an offer on the selected Promptbook checkout pages. */
     readonly isPromoted?: boolean;
@@ -82,15 +89,16 @@ export function isDiscountCodeActive(
     return currentMilliseconds >= startsAtMilliseconds && currentMilliseconds <= endsAtMilliseconds;
 }
 
-export function isDiscountCodeValidForAllPlaces(discountCode: Pick<DiscountCodeValues, 'placeIds'>): boolean {
-    return discountCode.placeIds.length === 0;
+export function isDiscountCodeValidForAllPlaces(discountCode: Pick<DiscountCodeValues, 'placeIds' | 'appliesEverywhere'>): boolean {
+    return discountCode.appliesEverywhere === true || discountCode.placeIds.length === 0;
 }
 
 export function isDiscountCodeValidInPlace(
-    discountCode: Pick<DiscountCodeValues, 'placeIds'>,
+    discountCode: Pick<DiscountCodeValues, 'placeIds' | 'appliesEverywhere'>,
     discountPlaceId: string,
 ): boolean {
     return (
+        discountCode.appliesEverywhere === true ||
         discountCode.placeIds.includes(discountPlaceId) ||
         (isDiscountCodeValidForAllPlaces(discountCode) && !isPromptbookDiscountPlaceId(discountPlaceId))
     );
@@ -122,11 +130,12 @@ export function isSubscriptionDiscountPermanent(discount: SubscriptionDiscountDu
  *       either a discount or none, and each of them asks this same question.
  */
 export function isSubscriptionDiscountFullAndPermanent(
-    discount: (SubscriptionDiscountDuration & Pick<ActiveDiscount, 'percent'>) | null,
+    discount: (SubscriptionDiscountDuration & Pick<ActiveDiscount, 'percent' | 'priceRule'>) | null,
+    baseAmount?: number,
 ): boolean {
     return (
         discount !== null &&
-        discount.percent >= MAXIMAL_DISCOUNT_PERCENT &&
+        (discount.priceRule ? baseAmount !== undefined && calculateDiscountedAmount(baseAmount, discount) === 0 : discount.percent >= MAXIMAL_DISCOUNT_PERCENT) &&
         isSubscriptionDiscountPermanent(discount)
     );
 }
@@ -164,6 +173,8 @@ export function createActiveDiscount(discountCode: DiscountCode): ActiveDiscount
     return {
         code: discountCode.code,
         percent: discountCode.percent,
+        ...(discountCode.priceRule ? { priceRule: discountCode.priceRule } : {}),
+        ...(discountCode.definitionVersion !== undefined ? { definitionVersion: discountCode.definitionVersion } : {}),
         remainingUseCount: getRemainingDiscountCodeUseCount(discountCode),
         subscriptionDiscountDurationMonths: discountCode.subscriptionDiscountDurationMonths,
     };
