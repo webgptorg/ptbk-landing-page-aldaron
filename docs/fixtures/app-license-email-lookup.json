@@ -1,0 +1,259 @@
+[
+  {
+    "name": "active",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "active",
+      "display": {
+        "label": "Business"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": {
+        "version": 1,
+        "subject": "4408b4d6-6005-4b77-97eb-fdd67847ee92",
+        "generatedAt": "2026-11-18T20:00:00.000Z",
+        "refreshAfterSeconds": 900,
+        "enforcement": "advisory",
+        "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+        "grants": [
+          {
+            "id": "4408b4d6-6005-4b77-97eb-fdd67847ee93",
+            "validFrom": "2026-11-01T00:00:00.000Z",
+            "validUntil": "2026-12-01T00:00:00.000Z",
+            "capabilities": {
+              "engineProjects": 1,
+              "specialists": 10,
+              "controllingUsers": 5,
+              "harnessInstances": null,
+              "browserProfiles": 5,
+              "remoteControl": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "trial",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "trial",
+      "display": {
+        "label": "Business – zkušební období"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": {
+        "version": 1,
+        "subject": "4408b4d6-6005-4b77-97eb-fdd67847ee92",
+        "generatedAt": "2026-11-18T20:00:00.000Z",
+        "refreshAfterSeconds": 900,
+        "enforcement": "advisory",
+        "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+        "grants": [
+          {
+            "id": "4408b4d6-6005-4b77-97eb-fdd67847ee94",
+            "validFrom": "2026-11-18T00:00:00.000Z",
+            "validUntil": "2026-12-02T00:00:00.000Z",
+            "capabilities": {
+              "engineProjects": 1,
+              "specialists": 10,
+              "controllingUsers": 5,
+              "harnessInstances": null,
+              "browserProfiles": 5,
+              "remoteControl": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "multiple",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "active",
+      "display": {
+        "label": "2 aktivní licence"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": {
+        "version": 1,
+        "subject": "4408b4d6-6005-4b77-97eb-fdd67847ee92",
+        "generatedAt": "2026-11-18T20:00:00.000Z",
+        "refreshAfterSeconds": 900,
+        "enforcement": "advisory",
+        "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+        "grants": [
+          {
+            "id": "4408b4d6-6005-4b77-97eb-fdd67847ee95",
+            "validFrom": "2026-11-01T00:00:00.000Z",
+            "validUntil": "2026-12-01T00:00:00.000Z",
+            "capabilities": {
+              "engineProjects": 1,
+              "specialists": 3,
+              "controllingUsers": 1,
+              "harnessInstances": 1,
+              "browserProfiles": 1,
+              "remoteControl": true
+            }
+          },
+          {
+            "id": "4408b4d6-6005-4b77-97eb-fdd67847ee93",
+            "validFrom": "2026-11-01T00:00:00.000Z",
+            "validUntil": "2026-12-01T00:00:00.000Z",
+            "capabilities": {
+              "engineProjects": 1,
+              "specialists": 10,
+              "controllingUsers": 5,
+              "harnessInstances": null,
+              "browserProfiles": 5,
+              "remoteControl": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "scheduled",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "scheduled",
+      "display": {
+        "label": "Licence začne platit později"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": {
+        "version": 1,
+        "subject": "4408b4d6-6005-4b77-97eb-fdd67847ee92",
+        "generatedAt": "2026-11-18T20:00:00.000Z",
+        "refreshAfterSeconds": 900,
+        "enforcement": "advisory",
+        "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+        "grants": []
+      }
+    }
+  },
+  {
+    "name": "expired",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "expired",
+      "display": {
+        "label": "Platnost licence skončila"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": {
+        "version": 1,
+        "subject": "4408b4d6-6005-4b77-97eb-fdd67847ee92",
+        "generatedAt": "2026-11-18T20:00:00.000Z",
+        "refreshAfterSeconds": 900,
+        "enforcement": "advisory",
+        "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+        "grants": []
+      }
+    }
+  },
+  {
+    "name": "none-known",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "none",
+      "display": {
+        "label": "Bez aktivní licence"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": {
+        "version": 1,
+        "subject": "4408b4d6-6005-4b77-97eb-fdd67847ee92",
+        "generatedAt": "2026-11-18T20:00:00.000Z",
+        "refreshAfterSeconds": 900,
+        "enforcement": "advisory",
+        "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+        "grants": []
+      }
+    }
+  },
+  {
+    "name": "none-unknown",
+    "httpStatus": 200,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "schemaVersion": 1,
+      "status": "none",
+      "display": {
+        "label": "Bez aktivní licence"
+      },
+      "manageUrl": "https://www.ptbk.io/cs/pricing/predplatne",
+      "generatedAt": "2026-11-18T20:00:00.000Z",
+      "refreshAfterSeconds": 900,
+      "enforcement": "advisory",
+      "snapshot": null
+    }
+  },
+  {
+    "name": "outage",
+    "httpStatus": 503,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "error": "Temporarily unavailable"
+    }
+  },
+  {
+    "name": "legacy-account-missing",
+    "httpStatus": 503,
+    "request": {
+      "email": "customer@example.test"
+    },
+    "response": {
+      "error": "Temporarily unavailable",
+      "code": "license_account_backfill_required"
+    }
+  }
+]

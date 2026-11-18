@@ -7,15 +7,27 @@ import {
     type PromptbookOrder,
 } from '@/lib/promptbook-billing/billingOrders';
 import { getStripeConfigurationOrNull } from '@/lib/payments/stripeConfiguration';
+import { licenseCapabilitiesSchema, licenseSnapshotSchema, type LicenseSnapshot } from './contract';
 import {
-    capabilitiesForPlan,
-    isGrantCurrent,
-    licenseCapabilitiesSchema,
-    type LicenseGrant,
-    type LicenseSnapshot,
-} from './contract';
+    grantDates,
+    isAccountGrantCurrent,
+    isSoftwareGrant,
+    numericGrant,
+    subscriptionGrant,
+    type AccountGrant,
+    type PaidLicenseInvoice,
+} from './grants';
 
 export type LicenseAccount = { id: string; email: string; is_test: boolean; referral_code: string | null };
+type CustomGrantRow = {
+    id: string;
+    valid_from: string;
+    valid_until: string | null;
+    capabilities: unknown;
+    community_seats: number;
+    kind: 'trial' | 'partner' | 'custom';
+    campaign: string | null;
+};
 export function licenseDatabase() {
     const database = getBillingDatabase();
     if (!database) throw new Error('License storage unavailable');
@@ -43,60 +55,79 @@ export async function verifiedLicenseAccount(request: NextRequest): Promise<Lice
     if (result.error) throw new Error('Account unavailable');
     return result.data;
 }
-export async function accountGrants(account: LicenseAccount) {
+/** Page explicitly: PostgREST's default row cap must not silently drop a customer's grants/history. */
+async function licenseRows<T>(page: (offset: number) => PromiseLike<{ data: T[] | null; error: unknown }>): Promise<T[]> {
+    const rows: T[] = [];
+    for (let offset = 0; offset <= 10_000; offset += 500) {
+        const result = await page(offset);
+        if (result.error || !result.data) throw new Error('License evidence unavailable');
+        rows.push(...result.data);
+        if (rows.length > 10_000) throw new Error('License evidence exceeds read bound');
+        if (result.data.length < 500) return rows;
+    }
+    throw new Error('License evidence exceeds read bound');
+}
+export function accountOrders(email: string, isTest: boolean): Promise<PromptbookOrder[]> {
+    return licenseRows<PromptbookOrder>((offset) => licenseDatabase()
+        .from(PROMPTBOOK_ORDERS_TABLE).select('*').eq('email', email).eq('is_test', isTest)
+        .order('id').range(offset, offset + 499));
+}
+export async function accountGrants(account: LicenseAccount): Promise<AccountGrant[]> {
     const database = licenseDatabase();
     const [custom, paid] = await Promise.all([
-        database.from('promptbook_license_grants').select('*').eq('account_id', account.id).order('created_at'),
-        database
-            .from(PROMPTBOOK_ORDERS_TABLE)
-            .select('*')
-            .eq('email', account.email)
-            .eq('is_test', account.is_test)
-            .not('paid_through', 'is', null)
-            .limit(1000),
+        licenseRows<CustomGrantRow>((offset) => database.from('promptbook_license_grants').select('*')
+            .eq('account_id', account.id).order('id').range(offset, offset + 499)),
+        accountOrders(account.email, account.is_test),
     ]);
-    if (custom.error || paid.error) throw new Error('Grants unavailable');
-    const grants: (LicenseGrant & { communitySeats: number; kind: string; campaign?: string })[] = [
-        ...(custom.data ?? []).map((row) => ({
-            id: row.id,
-            validFrom: row.valid_from,
-            validUntil: row.valid_until,
-            capabilities: licenseCapabilitiesSchema.parse(row.capabilities),
-            communitySeats: row.community_seats,
-            kind: row.kind,
-            campaign: row.campaign,
-        })),
-        ...((paid.data ?? []) as PromptbookOrder[])
-            .filter((row) => row.confirmed_at && row.stripe_subscription_id && row.paid_through)
-            .map((row) => ({
+    const paidIds = paid.filter((order) => order.confirmed_at && order.stripe_subscription_id && order.paid_through)
+        .map((order) => order.id);
+    const invoices: PaidLicenseInvoice[] = [];
+    for (let index = 0; index < paidIds.length; index += 100) {
+        invoices.push(...await licenseRows<PaidLicenseInvoice>((offset) => database.from('promptbook_invoices')
+            .select('order_id,paid_at,paid_through,amount_paid,refunded_amount')
+            .in('order_id', paidIds.slice(index, index + 100)).order('stripe_invoice_id').range(offset, offset + 499)));
+    }
+    const grants: AccountGrant[] = [
+        ...custom.map((row) => {
+            if (!['trial', 'partner', 'custom'].includes(row.kind)) throw new Error('Unknown grant kind');
+            return {
                 id: row.id,
-                validFrom: row.confirmed_at!,
-                validUntil: row.paid_through,
-                capabilities: capabilitiesForPlan(row.plan),
-                communitySeats: row.plan === 'business' ? 10 : 1,
-                kind: 'subscription',
-            })),
+                ...grantDates(row.valid_from, row.valid_until),
+                capabilities: licenseCapabilitiesSchema.parse(row.capabilities),
+                communitySeats: row.community_seats,
+                kind: row.kind,
+                campaign: row.campaign,
+                label: row.kind === 'trial' ? 'Business – zkušební období' : 'Licence na míru',
+            };
+        }),
+        ...paid.flatMap((order) => {
+            const grant = subscriptionGrant(order, invoices.filter((invoice) => invoice.order_id === order.id));
+            return grant ? [grant] : [];
+        }),
     ];
     return grants;
 }
 /** Community grants stay on the website and never enter the App API. */
 export async function licenseSnapshot(account: LicenseAccount): Promise<LicenseSnapshot> {
     const grants = await accountGrants(account);
-    return {
+    return accountSnapshot(account, grants, new Date());
+}
+export function accountSnapshot(account: LicenseAccount, grants: AccountGrant[], now: Date): LicenseSnapshot {
+    return licenseSnapshotSchema.parse({
         version: 1,
         subject: account.id,
-        generatedAt: new Date().toISOString(),
+        generatedAt: now.toISOString(),
         refreshAfterSeconds: 900,
         enforcement: 'advisory',
         manageUrl: 'https://www.ptbk.io/cs/pricing/predplatne',
         grants: grants
-            .filter((grant) => isGrantCurrent(grant, Date.now()))
-            .map(({ id, validFrom, validUntil, capabilities }) => ({ id, validFrom, validUntil, capabilities })),
-    };
+            .filter((grant) => isSoftwareGrant(grant) && isAccountGrantCurrent(grant, now.getTime()))
+            .map(numericGrant),
+    });
 }
 export async function communitySeatLimit(account: LicenseAccount): Promise<number> {
     return (await accountGrants(account))
-        .filter((grant) => isGrantCurrent(grant, Date.now()))
+        .filter((grant) => isAccountGrantCurrent(grant, Date.now()))
         .reduce((sum, grant) => sum + grant.communitySeats, 0);
 }
 export async function hasLicenseCommunityAccess(email: string): Promise<boolean> {
