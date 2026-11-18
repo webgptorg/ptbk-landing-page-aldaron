@@ -9,6 +9,7 @@ import { MarkdownContent } from '@/components/markdown-content';
 import { useMessageChatSession } from '@/hooks/useMessageChatSession';
 import type { MessageChatSession } from '@/lib/messages/messageChatSession';
 import { MessageExportActions } from '@/businesses/messages/MessageExportActions';
+import { createConversationExportTitle } from '@/lib/messages/messageExport';
 import { MessageAttachments } from '@/components/messages/MessageAttachments';
 import { useMessageChatAttachments } from '@/hooks/useMessageChatAttachments';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
@@ -267,8 +268,9 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
             if (variant === 'page' && (hasConversation || draft.trim() || attachments.length)) setConfirmReset(true);
             else newChat();
         }}><MessageSquarePlus size={16} aria-hidden="true" /><span>{cs ? 'Nový chat' : 'New chat'}</span></button>
-        <MessageExportActions subject={cs ? 'konverzaci' : 'conversation'} filename={cs ? 'konverzace' : 'conversation'} language={language} disabled={pending || !ready || turns.length === 0}
-            loadDocument={async () => ({ kind: 'chat', title: conversationTitle, language, assistantName: title, brandLabel,
+        <MessageExportActions subject={cs ? 'konverzaci' : 'conversation'} language={language} disabled={pending || !ready || turns.length === 0}
+            loadDocument={async () => ({ kind: 'chat', title: createConversationExportTitle(turns, conversationTitle), sourceTitle: conversationTitle,
+                conversationId: session.conversationId, language, assistantName: title, brandLabel,
                 createdAt: turns.find(turn => turn.createdAt)?.createdAt ?? new Date().toISOString(), sourceUrl: `${window.location.origin}${window.location.pathname}`, turns })} />
     </div>;
     const content = <div ref={contentElement} data-empty={!hasConversation || undefined} className={`message-chat-content${dragging ? ' message-chat-is-dragging' : ''}`}

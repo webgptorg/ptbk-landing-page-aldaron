@@ -8,6 +8,16 @@ const get = (asset: string, host = 'pavolhejny.cz') => GET(new Request(`https://
 beforeEach(() => { mocks.load.mockResolvedValue(TEST_MESSAGE); mocks.audio.mockReturnValue(null); mocks.sign.mockResolvedValue('https://cdn.example/signed-audio'); });
 afterEach(() => vi.clearAllMocks());
 describe('message exports and CDN audio', () => {
+    it.each(['md', 'book', 'txt'])('names direct %s downloads with the full message slug and includes source metadata', async format => {
+        const response = await get(`context.${format}`);
+        expect(response.headers.get('content-disposition')).toBe(`attachment; filename="${TEST_MESSAGE.shortcode}-cely-kontext.${format}"`);
+        const text = await response.text();
+        expect(text).toContain(`Zdroj: https://pavolhejny.cz/${TEST_MESSAGE.shortcode}`);
+        expect(text).toContain(TEST_MESSAGE.context);
+        expect(text).toContain('Exportováno:');
+        const message = await get(`message.${format}`);
+        expect(message.headers.get('content-disposition')).toBe(`attachment; filename="${TEST_MESSAGE.shortcode}-zprava.${format}"`);
+    });
     it('exports branded text formats with the original content and source link', async () => {
         expect(await (await get('message.md')).text()).toContain(`Ahoj týme,\n\nPosílám i celý kontext, který si můžete na odkazu přečíst nebo stáhnout:\nhttps://pavolhejny.cz/${TEST_MESSAGE.shortcode}\n\n`);
         const full = await get('context.md'); expect(await full.text()).toContain(TEST_MESSAGE.context); expect(await (await get('context.book')).text()).toContain('KNOWLEDGE'); expect(await (await get('context.txt')).text()).toContain('Pavola Hejného'); expect(full.headers.get('cache-control')).toContain('no-store');

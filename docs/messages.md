@@ -119,6 +119,23 @@ Literal fences grow beyond any pasted fence, so quoted Book controls stay data. 
 footnote and a quiet PDF footer carry Pavol's attribution and the personal-domain source. Browser PDF generation
 shares the existing local Unicode fonts, Markdown renderer and PDF engine with workshop exports.
 
+Download names come from the exported document, never a generic client-side `kontext` or `konverzace` label.
+Messages and full contexts use the complete current URL slug (including its case-sensitive shortcode suffix), then
+`-zprava` / `-cely-kontext` and the chosen extension. English exports use `-message` / `-full-context`.
+For example: `dalsi-kroky-xi121J0i-cely-kontext.book`. Direct text downloads and browser-generated files, including
+PDF, share `createMessageExportFilename`.
+
+Chats across Messages, the personal homepage, avatar and comparison adviser use a normalized topic from the first
+substantive visitor question (skipping a standalone greeting), the recorded start time in Europe/Prague, a short stable conversation ID and
+`-konverzace` / `-conversation`. The full question stays in the transcript. Attachment-only/empty chats fall back
+to their placement's conversation title; no model call is needed to name an export. An example is
+`jak-pripojit-engine-2026-11-18_18-30-00-a3307473-konverzace.md`.
+
+Portable provenance includes document type/title, source page, source creation/conversation start, export time,
+and chat identity/assistant/placement when present. Markdown has this metadata in a leading HTML comment;
+plain text has a readable header; Books use a literal `NOTE`; PDFs show the full clickable source URL, dates and
+conversation ID in the footer. This does not insert metadata into stored source context or rewrite chat turns.
+
 Chat file input accepts a picker, a drop anywhere in the conversation body and pasted screenshots (Ctrl/Cmd+V).
 Up to four PNG/JPEG/WebP/GIF images, PDFs or UTF-8 TXT/Markdown/Book/CSV/JSON files can accompany a question,
 each at most 4 MiB; text files additionally stay within 60,000 characters. The small-file upload route bounds

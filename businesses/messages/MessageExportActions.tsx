@@ -5,13 +5,13 @@ import { Check, Copy, Download, LoaderCircle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { downloadBlobFile } from '@/lib/downloadBlobFile';
-import { createMessageTextExport, MESSAGE_TEXT_FORMATS, type MessageExportDocument, type MessageTextFormat } from '@/lib/messages/messageExport';
+import { createMessageExportFilename, createMessageTextExport, MESSAGE_TEXT_FORMATS, type MessageExportDocument, type MessageTextFormat } from '@/lib/messages/messageExport';
 import './messageExports.css';
 
 type ExportFormat = MessageTextFormat | 'pdf';
 const labels: Record<ExportFormat, string> = { book: 'Book (.book)', md: 'Markdown (.md)', txt: 'Text (.txt)', pdf: 'PDF (.pdf)' };
-export function MessageExportActions({ label, subject, filename, loadDocument, language = 'cs', disabled = false }: {
-    readonly label?: string; readonly subject: string; readonly filename: string; readonly language?: 'cs' | 'en';
+export function MessageExportActions({ label, subject, loadDocument, language = 'cs', disabled = false }: {
+    readonly label?: string; readonly subject: string; readonly language?: 'cs' | 'en';
     readonly loadDocument: (signal: AbortSignal) => Promise<MessageExportDocument>; readonly disabled?: boolean;
 }) {
     const cs = language === 'cs';
@@ -24,16 +24,17 @@ export function MessageExportActions({ label, subject, filename, loadDocument, l
         const controller = new AbortController(); request.current = controller;
         setPending(true); setError(false);
         try {
-            const document = await loadDocument(controller.signal);
+            const loaded = await loadDocument(controller.signal);
+            const document = { ...loaded, exportedAt: new Date().toISOString() };
             if (controller.signal.aborted) return;
             if (format === 'pdf') {
                 const { renderMessagePdf } = await import('@/lib/messages/messageExportPdf');
                 const blob = await renderMessagePdf(document);
-                if (!controller.signal.aborted) downloadBlobFile({ blob, fileName: `${filename}.pdf` });
+                if (!controller.signal.aborted) downloadBlobFile({ blob, fileName: createMessageExportFilename(document, format) });
             } else {
                 const text = createMessageTextExport(document, format);
                 if (action === 'copy') await copyText(text);
-                else downloadBlobFile({ blob: new Blob([text], { type: format === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8' }), fileName: `${filename}.${format}` });
+                else downloadBlobFile({ blob: new Blob([text], { type: format === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8' }), fileName: createMessageExportFilename(document, format) });
             }
         } catch { if (!controller.signal.aborted) setError(true); }
         finally { if (request.current === controller) { request.current = null; setPending(false); } }

@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import '@testing-library/jest-dom/vitest';
 vi.mock('@/components/markdown-content', () => ({ MarkdownContent: ({ content }: { content: string }) => <div>{content}</div> }));
 import { FloatingAgentChat } from './FloatingAgentChat';
+import { messageChatStorageKey } from '@/lib/messages/messageChatSession';
 
 const fetchMock = vi.fn();
 const props = { sourceKey: 'ux-test', endpoint: '/api/test', attachmentEndpoint: '/api/test/files',
@@ -15,6 +16,35 @@ const type = (text: string) => fireEvent.change(screen.getByRole('textbox'), { t
 const send = () => fireEvent.click(screen.getByRole('button', { name: 'Odeslat otázku' }));
 
 describe('shared chat interaction', () => {
+    it('exports the complete restored conversation with its topic, source page and stable identity', async () => {
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+        try {
+            const conversationId = 'a3307473-e95b-4e34-9e84-1c15daecf238';
+            localStorage.setItem(messageChatStorageKey(props.sourceKey), JSON.stringify({
+                version: 1, conversationId, draft: '', retry: null, attachments: [], turns: [
+                    { role: 'assistant', content: 'Welcome' },
+                    { role: 'user', content: 'Jak připojit engine?', createdAt: '2026-11-18T12:00:00Z' },
+                    { role: 'assistant', content: 'Úplná odpověď. '.repeat(1000), createdAt: '2026-11-18T12:01:00Z' },
+                ],
+            }));
+            render(<FloatingAgentChat {...props} />);
+            fireEvent.keyDown(screen.getByRole('button', { name: 'Kopírovat konverzaci' }), { key: 'Enter' });
+            fireEvent.click(await screen.findByRole('menuitem', { name: 'Markdown (.md)' }));
+            await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+            const exported = writeText.mock.calls[0][0] as string;
+            expect(exported).toMatch(/^# Jak připojit engine\?/);
+            expect(exported).toContain(`Zdroj: ${window.location.origin}${window.location.pathname}`);
+            expect(exported).toContain(`ID konverzace: ${conversationId}`);
+            expect(exported).toContain('Rozhovor v: Conversation');
+            expect(exported).toContain('Úplná odpověď. '.repeat(1000));
+            expect(fetchMock).not.toHaveBeenCalled();
+        } finally {
+            if (clipboard) Object.defineProperty(navigator, 'clipboard', clipboard);
+            else Reflect.deleteProperty(navigator, 'clipboard');
+        }
+    });
     it('offers a question without sending it, expands long drafts, and protects them from accidental reset', () => {
         render(<FloatingAgentChat {...props} />);
         fireEvent.click(screen.getByRole('button', { name: 'Explain anchoring' }));

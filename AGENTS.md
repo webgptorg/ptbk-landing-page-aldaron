@@ -137,6 +137,10 @@ use cases, and audiences. Keep these rules current when behavior changes.
   PDF. Book exports use canonical AGENT/KNOWLEDGE or CHAT/MEMBER/MESSAGE with safe literal content and NOTE provenance;
   Markdown uses an attribution comment, plain text a footnote, PDF a subtle personal-domain footer. PDF rendering
   reuses the workshop's local fonts and shared browser engine. Full context is fetched only on explicit export.
+  Downloads use one document-derived filename helper: full message URL slug plus zprava/cely-kontext, or the chat's
+  first-question topic, Prague start time, short conversation ID and konverzace (localized for English). Browser
+  blobs and direct text downloads agree. Export provenance identifies type/title, source URL, dates and chat identity
+  in a Markdown comment, plain-text header, literal Book NOTE or PDF footer; stored source text remains unchanged.
   Public chat accepts picked/dropped files and pasted screenshots: four images/PDFs/UTF-8 text files of at most
   4 MiB per question (text at most 60,000 characters). Bounded same-origin/domain-scoped uploads use the existing
   private CDN bucket. File records are private and scoped to the source/conversation; IDs are resolved server-side
