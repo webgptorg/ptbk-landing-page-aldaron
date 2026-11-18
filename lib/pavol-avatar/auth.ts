@@ -1,4 +1,5 @@
 import 'server-only';
+import { createEmailLoginRedirect } from '@/lib/auth/emailLogin';
 import { createHash, randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import type { NextResponse } from 'next/server';
@@ -72,29 +73,36 @@ export async function allowAvatarAuthAttempt(request: Request, email = ''): Prom
         if (data !== true) throw new AvatarError('Příliš mnoho pokusů. Zkuste to za několik minut.', 429);
     }
 }
-/** Optional avatar-branded link delivery. The shared Supabase numeric-OTP templates remain untouched. */
-export async function sendAvatarEmail(request: Request, email: string, discountCode?: string): Promise<'magic-link' | 'otp'> {
+/** Both shared OTP and optional branded delivery return to the initiating page. */
+export async function sendAvatarEmail(request: Request, email: string, discountCode?: string, returnTo?: string): Promise<'magic-link' | 'otp'> {
     const availability = getAvatarAvailability();
     if (!availability.authEnabled) throw new AvatarError('Přihlášení avatara teď není dostupné.');
+    const redirect = createEmailLoginRedirect(request, 'avatar', '/avatar', returnTo);
+    if (discountCode) {
+        const next = new URL(redirect.searchParams.get('next')!, redirect.origin);
+        next.searchParams.set(DISCOUNT_CODE_QUERY_PARAMETER, normalizeDiscountCode(discountCode));
+        redirect.searchParams.set('next', next.pathname + next.search + next.hash);
+    }
     if (availability.authMethod === 'magic-link') {
         const generated = await getAvatarDatabase().auth.admin.generateLink({ type: 'magiclink', email });
         const hash = generated.data?.properties?.hashed_token;
         if (generated.error || !hash) throw new AvatarError('Přihlašovací odkaz se nepodařilo vytvořit.');
-        const link = new URL('/avatar', getAvatarOrigin(request));
-        if (discountCode) link.searchParams.set(DISCOUNT_CODE_QUERY_PARAMETER, normalizeDiscountCode(discountCode));
-        link.hash = new URLSearchParams({ login_token: hash, login_email: email }).toString();
+        const code = generated.data?.properties?.email_otp;
+        if (!code || !/^\d{6,10}$/.test(code)) throw new AvatarError('Přihlašovací kód se nepodařilo vytvořit.');
+        const link = new URL(redirect);
+        link.hash = new URLSearchParams({ token_hash: hash }).toString();
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST', signal: AbortSignal.timeout(10000),
             headers: { Authorization: `Bearer ${process.env.PAVOL_AVATAR_EMAIL_API_KEY!.trim()}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ from: process.env.PAVOL_AVATAR_EMAIL_FROM!.trim(), to: [email],
                 subject: 'Přihlášení · Pavolův AI avatar',
-                text: `Pavolův AI avatar\n\nPřihlaste se jednorázovým odkazem:\n${link.href}\n\nPokud jste přihlášení nepožadovali, zprávu ignorujte. Odkaz nikomu nepřeposílejte.\nProvozovatel: AI Web s.r.o.` }),
+                text: `Pavolův AI avatar\n\nPřihlaste se jednorázovým odkazem:\n${link.href}\n\nNebo na původní stránce zadejte jednorázový kód: ${code}\n\nPokud jste přihlášení nepožadovali, zprávu ignorujte. Odkaz ani kód nikomu nepřeposílejte.\nProvozovatel: AI Web s.r.o.` }),
         });
         const receipt = await response.json().catch(() => null) as { id?: unknown } | null;
         if (!response.ok || typeof receipt?.id !== 'string') throw new AvatarError('Přihlašovací odkaz se nepodařilo odeslat.', response.status === 429 ? 429 : 503);
         return 'magic-link';
     }
-    const { error } = await getAvatarEmailAuth().signInWithOtp({ email, options: { shouldCreateUser: true } });
+    const { error } = await getAvatarEmailAuth().signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: redirect.href } });
     if (error) throw new AvatarError('Přihlašovací kód se nepodařilo odeslat.', error.status === 429 ? 429 : 503);
     return 'otp';
 }

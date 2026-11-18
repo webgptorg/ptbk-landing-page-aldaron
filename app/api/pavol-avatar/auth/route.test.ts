@@ -37,7 +37,7 @@ describe('avatar passwordless ownership verification',()=>{
         mocks.send.mockResolvedValue('magic-link');
         const result=await POST(request({email:'person@example.test',discountCode:' letní 30 '}));
         expect(result.status).toBe(200);
-        expect(mocks.send).toHaveBeenCalledWith(expect.any(Request),'person@example.test','letní 30');
+        expect(mocks.send).toHaveBeenCalledWith(expect.any(Request),'person@example.test','letní 30',undefined);
         expect(mocks.session).not.toHaveBeenCalled(); expect(mocks.verify).not.toHaveBeenCalled();
     });
 });

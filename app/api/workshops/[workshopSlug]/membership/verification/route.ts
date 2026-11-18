@@ -1,3 +1,4 @@
+import { createEmailLoginRedirect } from '@/lib/auth/emailLogin';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import {
@@ -37,13 +38,20 @@ export async function POST(request: NextRequest, context: { readonly params: Pro
     const email = normalizeCommunityMemberEmail(room.participant.email);
     const body = await readJsonObjectOrNull(request);
     if (body?.action === 'send') {
-        const { error } = await auth.signInWithOtp({ email });
-        return error === null
-            ? NextResponse.json({ isCodeSent: true }, { headers: NO_STORE })
-            : NextResponse.json(
-                { error: 'Kód se nepodařilo odeslat. Zkontrolujte adresu a zkuste to později.' },
-                { status: error.status === 429 ? 429 : 503, headers: NO_STORE },
-            );
+        try {
+            const redirect = createEmailLoginRedirect(request, 'community', '/cs/komunity/vyvojari',
+                typeof body.returnTo === 'string' ? body.returnTo : undefined);
+            const { error } = await auth.signInWithOtp({ email, options: { emailRedirectTo: redirect.href } });
+            return error === null
+                ? NextResponse.json({ isCodeSent: true }, { headers: NO_STORE })
+                : NextResponse.json(
+                    { error: 'Kód se nepodařilo odeslat. Zkontrolujte adresu a zkuste to později.' },
+                    { status: error.status === 429 ? 429 : 503, headers: NO_STORE },
+                );
+        } catch {
+            return NextResponse.json({ error: 'Kód se nepodařilo odeslat. Zkuste to prosím později.' },
+                { status: 503, headers: NO_STORE });
+        }
     }
 
     const code = body?.code;

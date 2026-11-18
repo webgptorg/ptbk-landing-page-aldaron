@@ -39,7 +39,7 @@ describe('member email authentication', () => {
         expect(await response.json()).toEqual({ isCodeSent: true });
         expect(fakes.send).toHaveBeenCalledWith({
             email: 'member@example.com',
-            options: { emailRedirectTo: 'https://ptbk.io/cs/pricing/predplatne' },
+            options: { emailRedirectTo: 'https://ptbk.io/api/auth/email?flow=billing&next=%2Fcs%2Fpricing%2Fpredplatne' },
         });
         expect(response.headers.get('set-cookie')).toBeNull();
         expect(fakes.account).not.toHaveBeenCalled();
@@ -67,10 +67,9 @@ describe('member email authentication', () => {
     });
 
     it('never copies a caller-controlled host into the return URL', async () => {
-        await POST(request({ action: 'send', email: 'member@example.com' }, { host: 'attacker.example' }));
-        expect(fakes.send).toHaveBeenCalledWith(expect.objectContaining({
-            options: { emailRedirectTo: 'https://www.ptbk.io/cs/pricing/predplatne' },
-        }));
+        const response = await POST(request({ action: 'send', email: 'member@example.com' }, { host: 'attacker.example' }));
+        expect(response.status).toBe(503);
+        expect(fakes.send).not.toHaveBeenCalled();
     });
 
     it('creates the account and signed member cookie only after confirmed matching ownership', async () => {

@@ -44,7 +44,7 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
  },[cs,refresh]);
  async function authenticate(event:FormEvent){event.preventDefault();if(busy)return;setBusy(true);setError('');
   try{const discountCode=new URLSearchParams(window.location.search).get(DISCOUNT_CODE_QUERY_PARAMETER);
-   const data=await jsonRequest<{isVerified?:boolean;method?:'otp'|'magic-link'}>('/api/pavol-avatar/auth','POST',{email,...(code?{code}:discountCode?{discountCode}:{})});
+   const data=await jsonRequest<{isVerified?:boolean;method?:'otp'|'magic-link'}>('/api/pavol-avatar/auth','POST',{email,...(code?{code}:{returnTo:window.location.pathname+window.location.search+window.location.hash,...(discountCode?{discountCode}:{})})});
    if(data.isVerified){setSent(null);setCode('');setTab(discountCheckoutRequested()?'plans':'chat');await refresh();}else setSent(data.method??state.availability.authMethod);
   }catch(failure){setError(failure instanceof Error?failure.message:'Přihlášení se nepodařilo.');}finally{setBusy(false);}
  }
@@ -103,8 +103,9 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
   {!state.principal&&!loading&&<form className="avatar-login avatar-form" onSubmit={event=>void authenticate(event)}>
    <div><h2>{cs?'Vstoupit bez hesla':'Continue without a password'}</h2><p>{cs?'Stejný e-mail propojí tvůj přístup, předplatné a komunitní benefit.':'One verified email connects your access, subscription and membership benefit.'}</p></div>
    <label htmlFor="avatar-email">E-mail<input id="avatar-email" type="email" required autoComplete="email" maxLength={254} value={email} disabled={busy||!!sent} onChange={event=>setEmail(event.target.value)}/></label>
-   {sent==='otp'&&<label>{cs?'Kód z e-mailu':'Email code'}<input inputMode="numeric" autoComplete="one-time-code" required minLength={6} maxLength={12} value={code} disabled={busy} onChange={event=>setCode(event.target.value)}/></label>}
-   {sent==='magic-link'?<p role="status">{cs?'Otevři přihlašovací odkaz, který jsme poslali e-mailem.':'Open the sign-in link sent to your email.'}</p>:<button className="avatar-button" disabled={busy||!state.availability.authEnabled} type="submit">{busy?(cs?'Chvilku…':'Please wait…'):sent?(cs?'Ověřit kód':'Verify code'):state.availability.authMethod==='magic-link'?(cs?'Poslat přihlašovací odkaz':'Send sign-in link'):(cs?'Poslat přihlašovací kód':'Send sign-in code')}</button>}
+   {sent&&<label>{cs?'Kód z e-mailu':'Email code'}<input inputMode="numeric" autoComplete="one-time-code" required minLength={6} maxLength={12} value={code} disabled={busy} onChange={event=>setCode(event.target.value)}/></label>}
+   {sent&&<p role="status">{cs?'Otevři přihlašovací odkaz z e-mailu, nebo zde zadej kód.':'Open the sign-in link in your email, or enter the code here.'}</p>}
+   <button className="avatar-button" disabled={busy||!state.availability.authEnabled} type="submit">{busy?(cs?'Chvilku…':'Please wait…'):sent?(cs?'Ověřit kód':'Verify code'):state.availability.authMethod==='magic-link'?(cs?'Poslat přihlašovací odkaz':'Send sign-in link'):(cs?'Poslat přihlašovací kód':'Send sign-in code')}</button>
    {sent&&<button type="button" disabled={busy} onClick={()=>{setSent(null);setCode('');}}>{cs?'Použít jiný e-mail nebo poslat znovu':'Change email or send again'}</button>}
    <p className="avatar-small">{cs?'Odesláním žádáš o přístup ke službě. Nejde o přihlášení k marketingu.':'You are requesting service access, not subscribing to marketing.'} <a href={AVATAR_PUBLIC_PRIVACY_PATH}>{cs?'Soukromí':'Privacy'}</a></p>
   </form>}

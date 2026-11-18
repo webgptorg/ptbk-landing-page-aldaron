@@ -27,13 +27,16 @@ describe('verified avatar identity',()=>{
     });
     it('preserves a normalized discount in a new-tab magic link while keeping the credential in its fragment',async()=>{
         vi.stubEnv('PAVOL_AVATAR_EMAIL_API_KEY','isolated-test-key');vi.stubEnv('PAVOL_AVATAR_EMAIL_FROM','Avatar <avatar@example.test>');
-        mock.generateLink.mockResolvedValue({data:{properties:{hashed_token:'a'.repeat(64)}},error:null});
+        mock.generateLink.mockResolvedValue({data:{properties:{hashed_token:'a'.repeat(64),email_otp:'123456'}},error:null});
         const delivery=vi.fn().mockResolvedValue(Response.json({id:'isolated-receipt'}));vi.stubGlobal('fetch',delivery);
         expect(await sendAvatarEmail(new Request('https://pavolhejny.com/api'),'buyer@example.test',' letní 30 ')).toBe('magic-link');
         const payload=JSON.parse(delivery.mock.calls[0][1].body) as {text:string};
         const link=new URL(payload.text.split('\n').find((line:string)=>line.startsWith('https://'))!);
-        expect(link.origin).toBe('https://pavolhejny.com'); expect(link.pathname).toBe('/avatar');
-        expect(link.searchParams.get('code')).toBe('LETNI_30'); expect(link.searchParams.has('login_token')).toBe(false);
-        expect(new URLSearchParams(link.hash.slice(1)).get('login_token')).toBe('a'.repeat(64));
+        expect(link.origin).toBe('https://pavolhejny.com'); expect(link.pathname).toBe('/api/auth/email');
+        expect(link.searchParams.get('flow')).toBe('avatar');
+        const destination=new URL(link.searchParams.get('next')!,link.origin);
+        expect(destination.pathname).toBe('/avatar'); expect(destination.searchParams.get('code')).toBe('LETNI_30');
+        expect(payload.text).toContain('123456'); expect(link.searchParams.has('login_token')).toBe(false);
+        expect(new URLSearchParams(link.hash.slice(1)).get('token_hash')).toBe('a'.repeat(64));
     });
 });

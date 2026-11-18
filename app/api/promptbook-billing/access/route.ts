@@ -1,8 +1,9 @@
+import { createEmailLoginRedirect } from '@/lib/auth/emailLogin';
 import { ensureLicenseAccount } from '@/lib/promptbook-licensing/accounts';
 import { readJsonObjectOrNull } from '@/lib/api/readJsonObjectOrNull';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import { PROMPTBOOK_ORDERS_TABLE } from '@/lib/promptbook-billing/billingOrders';
-import { getBillingOrigin, PROMPTBOOK_MEMBER_PATH } from '@/lib/promptbook-billing/config';
+import { PROMPTBOOK_MEMBER_PATH } from '@/lib/promptbook-billing/config';
 import {
     getMemberBillingContext,
     getMemberEmailAuth,
@@ -30,7 +31,7 @@ export async function DELETE(request: NextRequest) {
 
 const emailSchema = z.string().trim().toLowerCase().max(254).refine(isEmailAddressValid);
 const accessSchema = z.discriminatedUnion('action', [
-    z.object({ action: z.literal('send'), email: emailSchema }),
+    z.object({ action: z.literal('send'), email: emailSchema, returnTo: z.string().max(4096).optional() }),
     z.object({ action: z.literal('verify'), email: emailSchema, code: z.string().trim().regex(/^\d{6,10}$/) }),
 ]);
 
@@ -54,10 +55,10 @@ export async function POST(request: NextRequest) {
     if (action === 'send') {
         // The same verified identity serves new trials and purchases; never disclose whether an address is known.
         try {
-            // Supabase's email templates must contain .Token; the API method alone does not select code delivery.
+            // Both the clickable link and numeric code use the same single-use Supabase credential.
             const { error } = await auth.signInWithOtp({
                 email,
-                options: { emailRedirectTo: new URL(PROMPTBOOK_MEMBER_PATH, getBillingOrigin(request)).href },
+                options: { emailRedirectTo: createEmailLoginRedirect(request, 'billing', PROMPTBOOK_MEMBER_PATH, parsed.data.returnTo).href },
             });
             if (!error) return memberResponse({ isCodeSent: true });
             return memberResponse({ error: 'Kód se nepodařilo odeslat. Zkuste to prosím později.' }, error.status === 429 ? 429 : 503);

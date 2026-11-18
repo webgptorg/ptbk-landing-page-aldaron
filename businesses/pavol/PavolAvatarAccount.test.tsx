@@ -102,7 +102,7 @@ describe('avatar account and subscription boundaries', () => {
         expect(screen.queryByRole('button', { name: 'Odhlásit' })).not.toBeInTheDocument();
         expect(screen.getByLabelText('E-mail')).toBeEnabled();
         const body = JSON.parse(String(callsTo('/api/pavol-avatar/auth', 'POST')[0][1].body));
-        expect(body).toEqual({ email: 'buyer@example.test' });
+        expect(body).toEqual({ email: 'buyer@example.test', returnTo: '/avatar' });
         expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
     });
 
@@ -161,7 +161,7 @@ describe('avatar account and subscription boundaries', () => {
         expect(await screen.findByRole('heading', { name: 'Objednat Full' })).toBeVisible();
         expect(await screen.findByDisplayValue('SHARED')).toBeVisible();
         expect(await screen.findByText('700 Kč')).toBeVisible();
-        expect(JSON.parse(String(callsTo('/api/pavol-avatar/auth', 'POST')[0][1].body))).toEqual({ email: principal.email, discountCode: 'SHARED' });
+        expect(JSON.parse(String(callsTo('/api/pavol-avatar/auth', 'POST')[0][1].body))).toEqual({ email: principal.email, discountCode: 'SHARED', returnTo: '/avatar?code=SHARED' });
         expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
     });
     it('does not open another purchase from a discount link for a current Full subscriber', async () => {

@@ -17,7 +17,7 @@ export function CommunityMembershipVerificationForm({ workshopSlug }: { readonly
         setErrorMessage(null);
         try {
             await sendJson(createCommunityMembershipApiPaths(workshopSlug).verification, 'POST',
-                action === 'send' ? { action } : { action, code });
+                action === 'send' ? { action, returnTo: window.location.pathname + window.location.search + window.location.hash } : { action, code });
             if (action === 'verify') {
                 window.location.reload();
             } else {
@@ -52,7 +52,7 @@ export function CommunityMembershipVerificationForm({ workshopSlug }: { readonly
                     <Button type="submit" disabled={isBusy}>Ověřit e-mail</Button>
                 </>
             ) : (
-                <p className="text-sm text-room-muted">Kód pošleme na e-mail, se kterým jste se připojili do místnosti.</p>
+                <p className="text-sm text-room-muted">Přihlašovací odkaz a kód pošleme na e-mail, se kterým jste se připojili do místnosti.</p>
             )}
             <Button type="button" variant={isCodeSent ? 'outline' : 'default'} disabled={isBusy}
                 onClick={() => void submit('send')}>

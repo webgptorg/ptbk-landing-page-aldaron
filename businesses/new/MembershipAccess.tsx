@@ -27,7 +27,7 @@ export function MembershipAccess({ onVerified }: { readonly onVerified: () => vo
                 setVerified(true);
                 onVerified();
             } else {
-                await sendJson(ACCESS_API, 'POST', { action: 'send', email });
+                await sendJson(ACCESS_API, 'POST', { action: 'send', email, returnTo: window.location.pathname + window.location.search + window.location.hash });
                 setAwaitingCode(true);
             }
         } catch (error: unknown) {
@@ -41,7 +41,7 @@ export function MembershipAccess({ onVerified }: { readonly onVerified: () => vo
         <p role="status">E-mail jsme ověřili.</p>
     ) : (
         <form className={styles.onboarding} onSubmit={submit} aria-busy={pending}>
-            {awaitingCode && <p role="status">Přihlašovací kód vám přijde e-mailem.</p>}
+            {awaitingCode && <p role="status">E-mailem vám přijde přihlašovací odkaz a kód. Můžete se rovnou prokliknout nebo zadat kód zde.</p>}
             <label>
                 Váš e-mail
                 <input

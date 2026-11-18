@@ -27,12 +27,12 @@ A community benefit never creates an avatar Stripe subscription and cancelling F
 
 ## Authentication
 
-The existing Supabase project and SMTP numeric OTP template continue working without modification.
+The existing Supabase project provides both numeric OTP and a clickable email sign-in link after the shared templates and redirect allow-list are updated. See [ecosystem email sign-in](email-sign-in.md) for the required external configuration; deploying the web alone does not change it.
 Passwords are not introduced. Cookies contain opaque revocable account-session tokens; only hashes are stored.
 A verified mailbox is required even for Free to enforce account-based allowances.
 Set PAVOL_AVATAR_EMAIL_API_KEY and PAVOL_AVATAR_EMAIL_FROM for avatar-branded one-time Resend links.
 Link credentials use an immediately removed URL fragment, not a query string; the server verifies the Supabase token before issuing its own session.
-Without this optional sender, the interface accurately offers an email code instead.
+Without this optional sender, shared Supabase delivery provides the same origin-preserving link and numeric code. The original domain, page, query and section are retained for both delivery paths.
 Authentication does not grant Full; separate product invoices and paid periods determine access.
 
 ## Checkout and records

@@ -24,26 +24,11 @@ Pro elektronicky poskytované služby slovenským spotřebitelům evidujte zemi 
 
 ## Nastavení nasazení
 
-### Přihlašovací e-mail: kód, nikoli Magic Link
+### Přihlašovací e-mail: odkaz i kód
 
-`signInWithOtp` samo nevybírá číselný kód: o obsahu zprávy rozhoduje produkční šablona Supabase. Výchozí šablona s `{{ .ConfirmationURL }}` posílá odkaz a neodpovídá zdejšímu formuláři. Kontrola ze 17. listopadu zachytila právě takovou zprávu a následnou chybu 500 na doméně Vercelu; bez přístupu k Auth konfiguraci a konkrétnímu cíli nelze určit interní příčinu této 500.
+Revize vlastníka z 18. listopadu 2026 doplňuje kód o přímé klikací přihlášení. Všechny odesílací cesty uchovávají původní doménu, stránku, query i sekci; avatar ani komunita se nepřesměrují do členské sekce Promptbooku. Stávající číselné ověření zůstává. Relace vzniká pouze po ověření potvrzeného e-mailu poskytovatelem.
 
-Ve **správném projektu podle produkčního `NEXT_PUBLIC_SUPABASE_URL`** nejprve soukromě uchovejte aktuální dotčené hodnoty, poté nastavte v Authentication → Email Templates obě šablony:
-
-| Šablona | Předmět | Obsah |
-|---|---|---|
-| Magic Link / OTP | Váš přihlašovací kód do Promptbooku | Přesný obsah `config/supabase-email-otp.html` |
-| Confirm signup | Váš přihlašovací kód do Promptbooku | Stejný obsah; první přihlášení může zakládat Auth uživatele. |
-
-Šablona obsahuje pouze `{{ .Token }}`, žádný potvrzovací odkaz ani přihlašovací token v URL. Slouží také dosavadnímu kódovému ověření komunity. Při použití Management API jde o pole `mailer_subjects_magic_link`, `mailer_templates_magic_link_content`, `mailer_subjects_confirmation` a `mailer_templates_confirmation_content`; neposílejte jiné konfigurační hodnoty.
-
-V Authentication → URL Configuration ověřte `Site URL` = `https://ptbk.io` a v seznamu povolených návratových adres zachovejte potřebné stávající položky a přidejte přesné `https://ptbk.io/cs/pricing/predplatne` a `https://www.ptbk.io/cs/pricing/predplatne`. API předává tuto produkční návratovou adresu výslovně. Samotná změna adresy nenahrazuje kódovou šablonu ani ověření na webu; staré vydané e-maily se změnou neopraví. Neměňte SMTP klíče, uživatele, hesla ani ochrany Auth.
-
-Úspěšná odpověď `isCodeSent` znamená přijetí požadavku Supabase, nikoli prokázané doručení do schránky. API vrací při odmítnutí odeslání 503 nebo 429 a při výpadku ověření 503, bez textu poskytovatele a bez přihlášení. Účet a členská cookie vznikají až po potvrzeném e-mailu odpovídajícím zadané adrese.
-
-Po uložení konfiguraci znovu přečtěte a z účtu vlastníka vyžádejte **nový** kód. Ověřte český předmět, číselný kód, přihlášení v původním prohlížeči a nepřítomnost přesměrování na Vercel. Samostatně ověřte novou adresu se souhlasem jejího vlastníka; neaktivujte tím zkoušku ani platbu. Nasazení webu tyto externí Auth šablony samo nemění.
-
-Dokumentace Supabase: [šablony a proměnné](https://supabase.com/docs/guides/auth/auth-email-templates), [signInWithOtp](https://supabase.com/docs/reference/javascript/auth-signinwithotp).
+Společný callback, povinná změna obou externích šablon Supabase, povolené návraty a ověřovací postup jsou v [Přihlášení odkazem a kódem](email-sign-in.md). Nasazení webu samo tyto externí šablony nenastaví. Chyby poskytovatele zůstávají 503/429 a nesmějí se vydávat za odeslaný kód. SMTP ani ostatní nastavení Auth se nemění.
 
 | Proměnná | Hodnota nebo účel |
 |---|---|
