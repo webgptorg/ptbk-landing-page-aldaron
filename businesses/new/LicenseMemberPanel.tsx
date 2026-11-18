@@ -90,7 +90,7 @@ export function LicenseMemberPanel() {
     }
     const trial = state?.grants?.find((g) => g.campaign === 'business-launch-2026');
     return (
-        <section className={styles.empty} aria-busy={busy}>
+        <section className={`${styles.empty} ${styles.licensePanel}`} aria-busy={busy}>
             <h2>Licence a členství</h2>
             {error && (
                 <p role="alert" className={s.error}>
@@ -118,7 +118,7 @@ export function LicenseMemberPanel() {
                         appky nabídneme prvním uživatelům další zkoušku.
                     </p>
                     {!trial ? (
-                        <form onSubmit={activate} className={styles.onboarding}>
+                        <form onSubmit={activate} className={`${styles.onboarding} ${styles.trialForm}`}>
                             <h3>Spustit Business zdarma</h3>
                             <label>
                                 Země
@@ -137,18 +137,21 @@ export function LicenseMemberPanel() {
                                     disabled={busy}
                                 />
                             </label>
-                            <label>
-                                <input type="checkbox" required disabled={busy} /> Engine mám připravený a chci spustit
-                                14 dní Business.
+                            <label className={styles.agreement}>
+                                <input type="checkbox" required disabled={busy} />
+                                <span>Engine mám připravený a chci spustit 14 dní Business.</span>
                             </label>
-                            <label>
-                                <input type="checkbox" required disabled={busy} /> Souhlasím s{' '}
-                                <Link href="/cs/legal/podminky-produktu/2026-11-13-online-v3" target="_blank">
-                                    podmínkami zkoušky a předplatného
-                                </Link>
-                                .
+                            <label className={styles.agreement}>
+                                <input type="checkbox" required disabled={busy} />
+                                <span>
+                                    Souhlasím s{' '}
+                                    <Link href="/cs/legal/podminky-produktu/2026-11-13-online-v3" target="_blank">
+                                        podmínkami zkoušky a předplatného
+                                    </Link>
+                                    .
+                                </span>
                             </label>
-                            <p>
+                            <p className={styles.trialNote}>
                                 Bez karty a bez automatické platby. AI a případný server hradíte sami. Business zahrnuje
                                 10 míst v komunitě. Údaje používáme pro zkoušku a související komunikaci, bez přihlášení
                                 k newsletteru.

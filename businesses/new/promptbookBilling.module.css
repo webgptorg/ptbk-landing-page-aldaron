@@ -182,7 +182,7 @@
 
 .billing :is(input:not([type='checkbox']), select, textarea),
 .summary input,
-.onboarding :is(input, textarea) {
+.onboarding :is(input:not([type='checkbox']), select, textarea) {
     width: 100%;
     min-width: 0;
     padding: 11px 12px;
@@ -251,21 +251,29 @@
     font-size: 13px;
 }
 
-.billing .agreement {
+.billing .agreement,
+.onboarding .agreement {
     grid-template-columns: auto 1fr;
     align-items: start;
     gap: 9px;
+    min-height: 44px;
     font-weight: 400;
+    cursor: pointer;
 }
 
 .agreement input {
-    width: 18px;
-    height: 18px;
-    margin: 2px 0 0;
+    width: 20px;
+    height: 20px;
+    margin: 3px 0 0;
     accent-color: #17386c;
 }
 
-.page :is(.small, .agreement, .empty) a {
+.agreement > span {
+    min-width: 0;
+}
+
+.page :is(.small, .agreement, .empty) a,
+.onboarding .agreement a {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
@@ -337,6 +345,36 @@
 
 .onboarding textarea {
     resize: vertical;
+}
+
+.licensePanel {
+    width: min(100%, 760px);
+    margin: clamp(24px, 5vw, 56px) auto;
+}
+
+.empty.licensePanel h2 {
+    font-size: clamp(28px, 4vw, 36px);
+}
+
+.trialForm {
+    gap: 18px;
+}
+
+.onboarding.trialForm h3 {
+    font-size: clamp(24px, 3vw, 28px);
+    line-height: 1.25;
+}
+
+.trialForm :is(input:not([type='checkbox']), select, button) {
+    min-height: 48px;
+}
+
+.trialNote {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f4f7fb;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 @media (max-width: 690px) {
