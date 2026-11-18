@@ -42,7 +42,10 @@ are excluded from anonymous database lists, feeds and sitemaps. Social previews 
 and author, not excerpts of the wider context. A receiving platform can cache its preview independently of our site.
 
 The public summary does not contain its own sharing URL. The export and admin **Kopírovat zprávu s odkazem** action
-add it after an opening greeting, or at the start otherwise. The full context is exported unchanged. Public chat
+add a natural explanation that the link provides the full context to read or download, followed by the current URL.
+This stays near the start, after any authored greeting and opening thank-you sentence; neither is invented.
+English greetings use English wording, with the personal domain deciding when there is no greeting. The same
+composer supplies the admin preview, clipboard and all short-message export formats. The full context is exported unchanged. Public chat
 combines the current shared Book with the current message and wider context; every new submitted question and actual server reply is stored privately in `message_chat_turns`. The Messages list
 offers **Konverzace** for each message, with separate anonymous conversations, Prague timestamps, full paginated
 transcripts, generation failures and copying. The public UI and anonymous access stay the same. Each opened page

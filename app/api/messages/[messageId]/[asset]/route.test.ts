@@ -9,7 +9,7 @@ beforeEach(() => { mocks.load.mockResolvedValue(TEST_MESSAGE); mocks.audio.mockR
 afterEach(() => vi.clearAllMocks());
 describe('message exports and CDN audio', () => {
     it('exports branded text formats with the original content and source link', async () => {
-        expect(await (await get('message.md')).text()).toContain(`Ahoj týme,\n\nhttps://pavolhejny.cz/${TEST_MESSAGE.shortcode}\n\n`);
+        expect(await (await get('message.md')).text()).toContain(`Ahoj týme,\n\nPosílám i celý kontext, který si můžete na odkazu přečíst nebo stáhnout:\nhttps://pavolhejny.cz/${TEST_MESSAGE.shortcode}\n\n`);
         const full = await get('context.md'); expect(await full.text()).toContain(TEST_MESSAGE.context); expect(await (await get('context.book')).text()).toContain('KNOWLEDGE'); expect(await (await get('context.txt')).text()).toContain('Pavola Hejného'); expect(full.headers.get('cache-control')).toContain('no-store');
     });
     it('rechecks domain and code before exposing data or signing any object', async () => {

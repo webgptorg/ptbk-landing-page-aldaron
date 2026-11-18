@@ -40,11 +40,24 @@ describe('expanded message authoring and sharing', () => {
         expect(MESSAGE_VALUES_SCHEMA.safeParse(v).success).toBe(true);
         expect(MESSAGE_VALUES_SCHEMA.safeParse({ ...v, domain: 'ptbk.io' }).success).toBe(false);
     });
-    it('adds exactly one link after a supplied greeting or at the start without changing the page text', () => {
+    it('explains the context link after a supplied greeting or at the start without changing the page text', () => {
         const url = getMessageUrl(TEST_MESSAGE);
-        expect(createMessageShareText(TEST_MESSAGE.markdown, url)).toBe(`Ahoj týme,\n\n${url}\n\nNejdřív dokončíme registraci a první použití.`);
-        expect(createMessageShareText('Rozhodnutí: první použití.', url)).toBe(`${url}\n\nRozhodnutí: první použití.`);
+        const context = `Posílám i celý kontext, který si můžete na odkazu přečíst nebo stáhnout:\n${url}`;
+        expect(createMessageShareText(TEST_MESSAGE.markdown, url)).toBe(`Ahoj týme,\n\n${context}\n\nNejdřív dokončíme registraci a první použití.`);
+        expect(createMessageShareText('Rozhodnutí: první použití.', url)).toBe(`${context}\n\nRozhodnutí: první použití.`);
         expect(TEST_MESSAGE.markdown).not.toContain(url);
+    });
+    it('keeps the author’s thanks next to the context link and preserves the rest of a Slack-style message', () => {
+        const url = getMessageUrl(TEST_MESSAGE);
+        const markdown = 'Ahoj,\n\nDíky za dnešní schůzku. Za mě je teď hlavní prioritou dokončit onboarding a připojení enginu.\n\n- Další kroky';
+        expect(createMessageShareText(markdown, url)).toBe(`Ahoj,\n\nDíky za dnešní schůzku. Posílám i celý kontext, který si můžete na odkazu přečíst nebo stáhnout:\n${url}\n\nZa mě je teď hlavní prioritou dokončit onboarding a připojení enginu.\n\n- Další kroky`);
+    });
+    it('uses English for English greetings and the English domain without inventing a greeting or thanks', () => {
+        const url = `https://pavolhejny.com/${TEST_MESSAGE.shortcode}`;
+        const context = `I’m also sharing the full context, which you can read or download here:\n${url}`;
+        expect(createMessageShareText('Hi team,\n\nThanks for today’s meeting. Next, finish onboarding.', url)).toBe(`Hi team,\n\nThanks for today’s meeting. ${context}\n\nNext, finish onboarding.`);
+        expect(createMessageShareText('- Finish onboarding.', url)).toBe(`${context}\n\n- Finish onboarding.`);
+        expect(createMessageShareText('Ahoj,\n\nDokončíme onboarding.', url)).toContain('Posílám i celý kontext');
     });
     it('uses the particular subject and expansion preview without exposing the full context', () => {
         const metadata = createMessageMetadata(TEST_MESSAGE);

@@ -103,7 +103,9 @@ use cases, and audiences. Keep these rules current when behavior changes.
   only the Recording Studio's ordinary explicit deletion removes its raw backup. The ordered transcription path
   shares file-import logic, retains paid results before context validation, and never automatically retries billing.
   See `docs/message-meeting-recorder.md` for implementation, recovery, limits and checks.
-  The sender's copy/export adds the current URL at the start or after a greeting; the public text remains clean.
+  The sender's copy/export explains that the current URL offers the full context to read or download. The link
+  follows any authored greeting and opening thanks, otherwise leads the message; never invent either. Share previews,
+  clipboard and message downloads use the same composer, with Czech/English wording. The public text remains clean.
   Shortener lists message entries with a Messages edit link; its mutation API cannot edit/delete them. Private
   `messages` rows and their codes are hidden from anonymous database enumeration; a known URL alone grants access.
   No old `/messages/<capability>` route or compatibility redirect is retained. Pages stay outside sitemaps and feeds,
