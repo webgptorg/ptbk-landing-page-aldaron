@@ -16,6 +16,54 @@ function openMediaImport() {
 }
 afterEach(() => { cleanup(); vi.resetAllMocks(); vi.unstubAllGlobals(); });
 describe('two-step message editor', () => {
+    it('repeatedly rewrites from the entire original context and preserves the other fields', async () => {
+        const original = { ...TEST_MESSAGE, context: `${TEST_MESSAGE.context}\n${'Full original detail. '.repeat(100)}` };
+        const variants = ['První krátká varianta.', '- Další varianta z původních podkladů.'];
+        mocks.request.mockImplementation(async (url, options) => url === '/api/admin/messages/generate'
+            ? { markdown: variants.shift() }
+            : { message: { ...original, ...(JSON.parse(options.body) as Partial<typeof original>) } });
+        render(<MessageEditor message={original} agents={[agent]} audioConfigured={false} transcriptionConfigured={false} onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.click(screen.getByRole('button', { name: '300 znaků' }));
+        await waitFor(() => expect(screen.getByLabelText('Krátká zpráva')).toHaveValue('První krátká varianta.'));
+        fireEvent.change(screen.getByLabelText('Formát'), { target: { value: 'bullets' } });
+        fireEvent.change(screen.getByLabelText('Limit znaků'), { target: { value: '450' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Upravit zprávu' }));
+        await waitFor(() => expect(screen.getByLabelText('Krátká zpráva')).toHaveValue('- Další varianta z původních podkladů.'));
+        const generations = mocks.request.mock.calls.filter(([url]) => url === '/api/admin/messages/generate');
+        expect(generations.map(([, options]) => JSON.parse(options.body))).toEqual([
+            { context: original.context, agentId: agent.id, summary: { maxCharacters: 300, format: 'paragraphs' } },
+            { context: original.context, agentId: agent.id, summary: { maxCharacters: 450, format: 'bullets' } },
+        ]);
+        expect(screen.getByLabelText('Titulek')).toHaveValue(original.title);
+        expect(screen.getByLabelText('Úvodní zpráva chatu')).toHaveValue(original.introduction);
+        expect(screen.getByLabelText('Prefix adresy')).toHaveValue(original.prefix);
+        fireEvent.click(screen.getByRole('button', { name: 'Vrátit předchozí text' }));
+        expect(screen.getByLabelText('Krátká zpráva')).toHaveValue('První krátká varianta.');
+        fireEvent.click(screen.getByRole('button', { name: '1. Celý kontext' }));
+        expect(screen.getByLabelText('Celý kontext')).toHaveValue(original.context);
+        await screen.findByText('Uloženo', {}, { timeout: 2000 });
+    });
+    it('keeps the current summary when shortening fails and prevents overlapping generation', async () => {
+        let fail!: (error: Error) => void;
+        mocks.request.mockReturnValueOnce(new Promise((_resolve, reject) => { fail = reject; }));
+        render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured={false} transcriptionConfigured={false} onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.click(screen.getByRole('button', { name: '160 znaků' }));
+        expect(screen.getByRole('button', { name: '300 znaků' })).toBeDisabled();
+        expect(screen.getByLabelText('Krátká zpráva')).toBeDisabled();
+        fail(new Error('Agent překročil limit.'));
+        expect(await screen.findByRole('alert')).toHaveTextContent('Agent překročil limit.');
+        expect(screen.getByLabelText('Krátká zpráva')).toHaveValue(TEST_MESSAGE.markdown);
+        expect(mocks.request).toHaveBeenCalledOnce();
+    });
+    it('validates custom limits without blocking ordinary message autosave', async () => {
+        mocks.request.mockResolvedValue({ message: { ...TEST_MESSAGE, markdown: 'Ručně upravená zpráva.' } });
+        render(<MessageEditor message={TEST_MESSAGE} agents={[agent]} audioConfigured={false} transcriptionConfigured={false} onSaved={() => undefined} onBusy={() => undefined} />);
+        fireEvent.change(screen.getByLabelText('Limit znaků'), { target: { value: '50' } });
+        expect(screen.getByRole('button', { name: 'Upravit zprávu' })).toBeDisabled();
+        fireEvent.change(screen.getByLabelText('Krátká zpráva'), { target: { value: 'Ručně upravená zpráva.' } });
+        await waitFor(() => expect(mocks.request).toHaveBeenCalledOnce(), { timeout: 2000 });
+        expect(mocks.request.mock.calls[0][0]).toBe(`/api/admin/messages/${TEST_MESSAGE.id}`);
+    });
     it('adopts prepared server links without replacing text typed while the save was pending', async () => {
         let complete!: (value: unknown) => void;
         const raw = 'Viz https://example.com/doc';

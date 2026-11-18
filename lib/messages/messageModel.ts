@@ -43,11 +43,21 @@ export function getMessageUrl(message: Pick<ManagedMessage, 'shortcode' | 'domai
     return `https://${message.domain}/${message.shortcode}`;
 }
 
-/** Sharing adds the link only to the exported text, immediately after an opening greeting when present. */
+/** Sharing explains the context link after the author's greeting/thanks, without changing the stored message. */
 export function createMessageShareText(markdown: string, url: string): string {
     const greeting = /^(\s*(?:Ahoj|Dobrý den|Čau|Zdravím|Hi|Hello|Dear)\b[^\n.!?]{0,100}?(?:,|!|\n))(?:[ \t]*\r?\n)?/i.exec(markdown);
-    if (greeting) return `${greeting[1].trimEnd()}\n\n${url}\n\n${markdown.slice(greeting[0].length).trimStart()}`.trimEnd();
-    return `${url}\n\n${markdown}`;
+    const body = (greeting ? markdown.slice(greeting[0].length) : markdown).trimStart();
+    const thanks = /^(?:Díky|Děkuji|Děkuju|Děkujeme|Thanks|Thank you)\b[^\n.!?]*(?:[.!?](?=\s|$)|(?=\r?\n|$))/i.exec(body);
+    const english = greeting ? /^\s*(?:Hi|Hello|Dear)\b/i.test(greeting[1])
+        : /^https:\/\/(?:www\.)?pavolhejny\.com(?:\/|$)/i.test(url);
+    const explanation = english
+        ? 'I’m also sharing the full context, which you can read or download here:'
+        : 'Posílám i celý kontext, který si můžete na odkazu přečíst nebo stáhnout:';
+    return [
+        greeting?.[1].trimEnd(),
+        `${thanks ? `${thanks[0].trimEnd()} ` : ''}${explanation}\n${url}`,
+        (thanks ? body.slice(thanks[0].length) : body).trimStart(),
+    ].filter(Boolean).join('\n\n').trimEnd();
 }
 
 export type MessageListItem = Pick<ManagedMessage, 'id' | 'shortcodeLinkId' | 'shortcode' | 'title' | 'prefix' | 'domain' | 'createdAt' | 'updatedAt'>;

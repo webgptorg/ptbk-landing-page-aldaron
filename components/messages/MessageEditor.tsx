@@ -16,6 +16,7 @@ import { prepareMessageTranscriptionAudio, transcribeMessageFile, type MessageTr
 import { createMessagePrefix, createMessageShareText, getMessageUrl, MESSAGE_CONTEXT_MAX_LENGTH, MESSAGE_DOMAINS, MESSAGE_VALUES_SCHEMA,
     PAVOL_MESSAGE_AGENT_ID, type ManagedMessage, type MessageValues } from '@/lib/messages/messageModel';
 import type { ManagedAgent } from '@/lib/agents/agentModel';
+import { MESSAGE_SUMMARY_FORMAT_LABELS, MESSAGE_SUMMARY_SCHEMA, type MessageSummary } from '@/lib/messages/messageSummary';
 import { MessageMeetingRecorder } from './MessageMeetingRecorder';
 import { MessageTranscriptionDiagnostics } from './MessageTranscriptionDiagnostics';
 import { MessageImportedAudioPreview } from './MessageImportedAudioPreview';
@@ -34,6 +35,9 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     const [step, setStep] = useState(message ? 2 : 1);
     const [operation, setOperation] = useState('');
     const [error, setError] = useState('');
+    const [summaryLimit, setSummaryLimit] = useState('600');
+    const [summaryFormat, setSummaryFormat] = useState<MessageSummary['format']>('paragraphs');
+    const [previousMarkdown, setPreviousMarkdown] = useState<string | null>(null);
     const [transcriptionNotice, setTranscriptionNotice] = useState('');
     const [transcriptionReports, setTranscriptionReports] = useState<MessageTranscriptionReport[]>([]);
     const [queuedFiles, setQueuedFiles] = useState<{ id: number; file: File; prepared?: PreparedMessageAudio }[]>([]);
@@ -92,7 +96,19 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ context: values.context, agentId: values.agentId }),
         });
         setValues((current) => ({ ...current, ...result, prefix: !saved || current.prefix === createMessagePrefix(current.title) ? createMessagePrefix(result.title) : current.prefix }));
+        setPreviousMarkdown(null);
         setStep(2);
+    });
+    const rewriteSummary = (maxCharacters: number) => run('Upravuji zprávu z celého kontextu…', async () => {
+        const current = valuesRef.current;
+        if (!current.context.trim()) throw new Error('Nejprve vložte celý kontext.');
+        const summary = MESSAGE_SUMMARY_SCHEMA.parse({ maxCharacters, format: summaryFormat });
+        const result = await requestAdminJson<Pick<MessageValues, 'markdown'>>('/api/admin/messages/generate', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context: current.context, agentId: current.agentId, summary }),
+        });
+        setPreviousMarkdown(current.markdown);
+        update('markdown', result.markdown);
     });
     const generateAudio = () => run('Generuji nahrávku…', async () => {
         if (!saved || !(await autosave.saveNow())) throw new Error('Nejprve dokončete uložení zprávy.');
@@ -147,6 +163,7 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
     });
     const publicUrl = saved ? getMessageUrl({ domain: values.domain, shortcode: `${values.prefix}-${saved.shortcode.split('-').at(-1)}` }) : '';
     const shareText = saved ? createMessageShareText(values.markdown, publicUrl) : '';
+    const summaryOptionsValid = MESSAGE_SUMMARY_SCHEMA.safeParse({ maxCharacters: Number(summaryLimit), format: summaryFormat }).success;
     return <form ref={autosave.formRef} className="space-y-5" onSubmit={(event) => { event.preventDefault(); if (!saved && step === 2) void run('Vytvářím zprávu…', async () => { await save(); }); }}>
         <nav aria-label="Kroky zprávy" className="flex gap-2 border-b border-slate-200 pb-4">
             <Button type="button" variant={step === 1 ? 'default' : 'outline'} disabled={busy} onClick={() => setStep(1)}>1. Celý kontext</Button>
@@ -236,9 +253,42 @@ export function MessageEditor({ message, agents, audioConfigured, transcriptionC
                     setValues((current) => ({ ...current, title, prefix: current.prefix === createMessagePrefix(current.title) ? createMessagePrefix(title) : current.prefix }));
                 }} />
             </label>
-            <label className="block text-sm font-medium">Krátká zpráva
-                <Textarea value={values.markdown} disabled={busy} required maxLength={50_000} rows={12} className="mt-2" onChange={(e) => update('markdown', e.target.value)} />
-            </label>
+            <section className="space-y-2" aria-label="Úprava krátké zprávy">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label htmlFor="message-summary" className="text-sm font-medium">Krátká zpráva</label>
+                    <span className={`text-xs ${values.markdown.length > Number(summaryLimit) ? 'text-amber-700' : 'text-slate-500'}`}>
+                        {new Intl.NumberFormat('cs-CZ').format(values.markdown.length)} znaků
+                    </span>
+                </div>
+                <div className="space-y-2 rounded-lg bg-slate-50 p-3">
+                    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Rychlé zkrácení">
+                        <span className="text-xs text-slate-600">Zkrátit na:</span>
+                        {[160, 300, 600, 1000].map(limit => <Button key={limit} type="button" variant="outline" size="sm" disabled={busy || !values.context.trim()}
+                            onClick={() => { setSummaryLimit(String(limit)); void rewriteSummary(limit); }}>
+                            {new Intl.NumberFormat('cs-CZ').format(limit)} znaků
+                        </Button>)}
+                    </div>
+                    <div className="flex flex-wrap items-end gap-2">
+                        <label className="text-xs text-slate-600">Formát
+                            <select value={summaryFormat} disabled={busy} onChange={event => setSummaryFormat(event.target.value as MessageSummary['format'])}
+                                className="mt-1 block h-9 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-900">
+                                {Object.entries(MESSAGE_SUMMARY_FORMAT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                            </select>
+                        </label>
+                        <label className="text-xs text-slate-600">Limit znaků
+                            <Input value={summaryLimit} disabled={busy} inputMode="numeric" className="mt-1 h-9 w-28 bg-white text-slate-900"
+                                onChange={event => setSummaryLimit(event.target.value)} />
+                        </label>
+                        <Button type="button" variant="outline" size="sm" disabled={busy || !values.context.trim() || !summaryOptionsValid}
+                            onClick={() => void rewriteSummary(Number(summaryLimit))}><Sparkles className="mr-2 h-4 w-4" />Upravit zprávu</Button>
+                        {previousMarkdown !== null && <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={() => {
+                            update('markdown', previousMarkdown); setPreviousMarkdown(null);
+                        }}>Vrátit předchozí text</Button>}
+                    </div>
+                    <p id="message-summary-help" className="text-xs text-slate-500">Vždy z celého kontextu. Limit 100–50 000 znaků včetně mezer a formátování.</p>
+                </div>
+                <Textarea id="message-summary" aria-describedby="message-summary-help" value={values.markdown} disabled={busy} required maxLength={50_000} rows={12} onChange={(e) => update('markdown', e.target.value)} />
+            </section>
             <label className="block text-sm font-medium">Úvodní zpráva chatu
                 <Textarea value={values.introduction} disabled={busy} maxLength={4000} rows={3} className="mt-2" onChange={(e) => update('introduction', e.target.value)} />
             </label>

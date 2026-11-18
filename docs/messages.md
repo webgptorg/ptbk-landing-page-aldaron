@@ -6,6 +6,14 @@ full context. The explicit generation button derives a subject, editable message
 selected Book. Step two also offers the domain, editable kebab-case prefix and optional speech. Long contexts are
 fetched only when opening an editor, rather than with every row in the list.
 
+The short-message editor offers one-click limits of 160, 300, 600 or 1,000 characters, an editable 100–50,000
+character limit and paragraph, Markdown bullet-list or single-sentence formats. Every explicit rewrite sends the
+entire current original context and selected Book to the same admin-only generator, never the existing summary.
+It returns only Markdown and leaves the title, introduction, address and full context intact. Limits include
+spaces, newlines and Markdown syntax; over-limit model output is rejected without replacing the draft or making
+an automatic paid retry. The character counter reflects the current text. The previous text can be restored;
+ordinary autosave applies to existing messages, while new-message creation stays explicit.
+
 Step one also accepts a selected or dropped audio file (including Samsung Recorder M4A, up to 2 GB). Selecting one
 explicitly starts ElevenLabs Scribe transcription with automatic language detection, speaker diarization and verbatim
 output. The result is appended to the existing editable context under `Následuje přepsané audio: <filename>`; source
@@ -34,7 +42,10 @@ are excluded from anonymous database lists, feeds and sitemaps. Social previews 
 and author, not excerpts of the wider context. A receiving platform can cache its preview independently of our site.
 
 The public summary does not contain its own sharing URL. The export and admin **Kopírovat zprávu s odkazem** action
-add it after an opening greeting, or at the start otherwise. The full context is exported unchanged. Public chat
+add a natural explanation that the link provides the full context to read or download, followed by the current URL.
+This stays near the start, after any authored greeting and opening thank-you sentence; neither is invented.
+English greetings use English wording, with the personal domain deciding when there is no greeting. The same
+composer supplies the admin preview, clipboard and all short-message export formats. The full context is exported unchanged. Public chat
 combines the current shared Book with the current message and wider context; every new submitted question and actual server reply is stored privately in `message_chat_turns`. The Messages list
 offers **Konverzace** for each message, with separate anonymous conversations, Prague timestamps, full paginated
 transcripts, generation failures and copying. The public UI and anonymous access stay the same. Each opened page
