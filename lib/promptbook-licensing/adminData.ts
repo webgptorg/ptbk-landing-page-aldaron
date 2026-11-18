@@ -19,15 +19,19 @@ export async function loadLicenseDetail(id: string, source: string, isTest: bool
     if (found.error) throw new Error('License unavailable');
     if (!found.data) return null;
     const license = found.data;
-    const [history, subscriptions, account, referral] = await Promise.all([
+    const [history, subscriptions, account, referral, paired] = await Promise.all([
         db.from('promptbook_license_grant_history').select('id,action,actor,reason,created_at').eq('grant_id', id).order('id', { ascending: false }).limit(101),
         db.from('promptbook_admin_subscriptions').select('*').eq('email', license.email).eq('is_test', isTest).order('created_at', { ascending: false }).limit(101),
         db.from('promptbook_license_accounts').select('id,referral_code').eq('id', license.account_id ?? '00000000-0000-0000-0000-000000000000').maybeSingle(),
         db.from('promptbook_referral_history').select('id,code,reason,created_at').eq('account_id', license.account_id ?? '00000000-0000-0000-0000-000000000000').order('id', { ascending: false }).limit(100),
+        license.order_id ? db.from('promptbook_admin_subscriptions').select('*').eq('product','promptbook').eq('id',license.order_id).eq('is_test',isTest).maybeSingle<AdminSubscription>() : Promise.resolve({data:null,error:null}),
     ]);
-    if (history.error || subscriptions.error || account.error || referral.error) throw new Error('License relations unavailable');
+    if (history.error || subscriptions.error || account.error || referral.error || paired.error) throw new Error('License relations unavailable');
+    const related = subscriptions.data.slice(0,100) as AdminSubscription[];
+    // A paid licence must retain its exact order link even when newer purchases fill the account's first page.
+    if (paired.data && !related.some((item) => item.product === 'promptbook' && item.id === paired.data!.id)) related.unshift(paired.data);
     return { license, history: history.data.slice(0,100), historyHasMore: history.data.length > 100,
-        subscriptions: subscriptions.data.slice(0,100), subscriptionsHasMore: subscriptions.data.length > 100,
+        subscriptions: related, subscriptionsHasMore: subscriptions.data.length > 100,
         account: account.data, referralHistory: referral.data };
 }
 
