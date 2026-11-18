@@ -10,6 +10,9 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname),
+            // Next replaces this marker with an empty module in its server runtime. Vitest also runs these routes
+            // on the server; keep the production client-import protection in Next's own build untouched.
+            'server-only': path.resolve(__dirname, 'node_modules/next/dist/compiled/server-only/empty.js'),
         },
     },
     test: {
