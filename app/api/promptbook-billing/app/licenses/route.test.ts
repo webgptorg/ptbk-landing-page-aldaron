@@ -34,7 +34,7 @@ function storage(options: { accounts?: Rows[]; orders?: Rows[]; grants?: Rows[];
     const database = createInMemorySupabaseClient({
         promptbook_license_accounts: options.accounts ?? [account],
         promptbook_orders: options.orders ?? [],
-        promptbook_license_grants: options.grants ?? [],
+        promptbook_license_grants: (options.grants ?? []).map((grant) => ({ revoked_at:null, deleted_at:null, ...grant })),
         promptbook_invoices: options.invoices ?? [],
     });
     const rejectWrite = () => { throw new Error('Read API attempted a mutation'); };
@@ -79,6 +79,14 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); });
 
 describe('read-only production email lookup through the real resolver', () => {
+    it('excludes deactivated and deleted manual rights from both lookup and numeric snapshots', async () => {
+        storage({ grants:[{...manual,revoked_at:NOW}] });
+        expect((await lookup()).snapshot?.grants).toEqual([]);
+        storage({ grants:[{...manual,deleted_at:NOW}] });
+        expect((await lookup()).snapshot?.grants).toEqual([]);
+        storage({ grants:[{...manual,display_label:'Partner – individuální Business'}] });
+        expect((await lookup()).display.label).toBe('Partner – individuální Business');
+    });
     it('normalizes trim/case, preserves purchased capacities, unlimited values and one clock', async () => {
         storage({ orders: [order], invoices: [invoice] });
         const result = await lookup({ email: '  CUSTOMER@EXAMPLE.TEST  ' });

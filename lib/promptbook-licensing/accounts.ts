@@ -27,6 +27,7 @@ type CustomGrantRow = {
     community_seats: number;
     kind: 'trial' | 'partner' | 'custom';
     campaign: string | null;
+    display_label: string;
 };
 export function licenseDatabase() {
     const database = getBillingDatabase();
@@ -76,7 +77,8 @@ export async function accountGrants(account: LicenseAccount): Promise<AccountGra
     const database = licenseDatabase();
     const [custom, paid] = await Promise.all([
         licenseRows<CustomGrantRow>((offset) => database.from('promptbook_license_grants').select('*')
-            .eq('account_id', account.id).order('id').range(offset, offset + 499)),
+            .eq('account_id', account.id).is('revoked_at', null).is('deleted_at', null)
+            .order('id').range(offset, offset + 499)),
         accountOrders(account.email, account.is_test),
     ]);
     const paidIds = paid.filter((order) => order.confirmed_at && order.stripe_subscription_id && order.paid_through)
@@ -97,7 +99,7 @@ export async function accountGrants(account: LicenseAccount): Promise<AccountGra
                 communitySeats: row.community_seats,
                 kind: row.kind,
                 campaign: row.campaign,
-                label: row.kind === 'trial' ? 'Business – zkušební období' : 'Licence na míru',
+                label: row.kind === 'trial' ? 'Business – zkušební období' : row.display_label || 'Licence na míru',
             };
         }),
         ...paid.flatMap((order) => {

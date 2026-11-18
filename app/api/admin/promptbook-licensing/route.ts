@@ -1,106 +1,68 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
+import { getAdminIdentityForSession } from '@/lib/admin/adminIdentity';
+import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 import { memberResponse } from '@/lib/promptbook-billing/memberAccess';
 import { licenseDatabase } from '@/lib/promptbook-licensing/accounts';
-import { licenseCapabilitiesSchema } from '@/lib/promptbook-licensing/contract';
-const schema = z.discriminatedUnion('action', [
-    z
-        .object({
-            action: z.literal('grant'),
-            email: z.string().trim().toLowerCase().email().max(254),
-            kind: z.enum(['partner', 'custom']),
-            communitySeats: z.number().int().min(0).max(1000),
-            capabilities: licenseCapabilitiesSchema,
-            validUntil: z.string().datetime().nullable(),
-            reason: z.string().trim().min(5).max(1000),
-        })
-        .strict(),
-    z
-        .object({
-            action: z.literal('referral'),
-            accountId: z.string().uuid(),
-            code: z
-                .string()
-                .trim()
-                .max(80)
-                .regex(/^[A-Za-z0-9_-]*$/),
-            reason: z.string().trim().min(5).max(1000),
-        })
-        .strict(),
-]);
-/** Unknown admin sections are superadmin-only through the existing guard. */
+import { licenseAdminMutationSchema, type AdminLicense } from '@/lib/promptbook-licensing/adminContract';
+import { adminEmailPattern, loadLicenseDetail, readAdminPageQuery } from '@/lib/promptbook-licensing/adminData';
+import { readBoundedJson } from '@/lib/api/readBoundedJson';
+
+/** Private billing sections stay superadmin-only through the existing session and cross-site guards. */
 export async function POST(request: NextRequest) {
     const rejected = await getUnauthorizedResponseOrNull(request);
     if (rejected) return rejected;
-    const parsed = schema.safeParse(await request.json().catch(() => null));
-    if (!parsed.success) return memberResponse({ error: 'Neplatné zadání.' }, 400);
+    const parsed = licenseAdminMutationSchema.safeParse(await readBoundedJson(request, 16_384).catch(() => null));
+    if (!parsed.success) return memberResponse({ error: 'Neplatné zadání. Zkontrolujte kapacity, důvod a platnost.' }, 400);
     try {
         const db = licenseDatabase();
         const p = parsed.data;
-        if (p.action === 'grant') {
-            const added = await db
-                .from('promptbook_license_accounts')
-                .upsert({ email: p.email, is_test: false }, { onConflict: 'email,is_test', ignoreDuplicates: true });
-            if (added.error) throw new Error();
-            const account = await db
-                .from('promptbook_license_accounts')
-                .select('id')
-                .eq('email', p.email)
-                .eq('is_test', false)
-                .single();
-            if (account.error) throw new Error();
-            const grant = await db
-                .from('promptbook_license_grants')
-                .insert({
-                    account_id: account.data.id,
-                    kind: p.kind,
-                    capabilities: p.capabilities,
-                    community_seats: p.communitySeats,
-                    valid_until: p.validUntil,
-                    reason: p.reason,
-                });
-            if (grant.error) throw new Error();
-        } else {
-            const result = await db.rpc('correct_promptbook_referral', {
-                p_account: p.accountId,
-                p_code: p.code || null,
-                p_reason: p.reason,
-            });
-            if (result.error) throw new Error();
+        if (p.action === 'referral') {
+            const response = await db.rpc('correct_promptbook_referral', { p_account: p.accountId, p_code: p.code || null, p_reason: p.reason });
+            if (response.error) throw new Error('Referral unavailable');
+            return memberResponse({ saved: true });
         }
-        return memberResponse({ saved: true });
-    } catch {
-        return memberResponse({ error: 'Změnu nelze uložit.' }, 503);
-    }
+        const identity = await getAdminIdentityForSession(request.cookies.get(ADMIN_SESSION_COOKIE_NAME)?.value);
+        if (!identity?.isSuperAdmin) return memberResponse({ error: 'Forbidden' }, 403);
+        const fields = p.action === 'grant' || p.action === 'update' ? p : null;
+        const validFrom = fields?.validFrom ?? new Date().toISOString();
+        if (fields?.validUntil && Date.parse(fields.validUntil) <= Date.parse(validFrom)) return memberResponse({ error: 'Konec platnosti musí následovat po začátku.' }, 400);
+        const result = await db.rpc('admin_mutate_promptbook_grant', {
+            p_action: p.action, p_email: p.action === 'grant' ? p.email : null,
+            p_grant: 'grantId' in p ? p.grantId : p.action === 'grant' ? p.requestId ?? null : null, p_revision: 'revision' in p ? p.revision : null,
+            p_kind: fields?.kind ?? null, p_label: fields?.label ?? null, p_capabilities: fields?.capabilities ?? null,
+            p_seats: fields?.communitySeats ?? null, p_from: fields ? validFrom : null, p_until: fields?.validUntil ?? null,
+            p_reason: p.reason, p_actor: identity.username, p_is_test: p.isTest,
+        });
+        if (result.error) {
+            if (result.error.code === '40001') return memberResponse({ error: 'Záznam mezitím změnil jiný administrátor. Načtěte aktuální verzi.' }, 409);
+            if (result.error.code === 'P0002') return memberResponse({ error: 'Licence nebyla nalezena.' }, 404);
+            if (result.error.code === '22023') return memberResponse({ error: 'Tento záznam nelze upravit.' }, 400);
+            throw new Error('Grant unavailable');
+        }
+        return memberResponse({ saved: true, grantId: result.data });
+    } catch { return memberResponse({ error: 'Změnu nelze uložit.' }, 503); }
 }
+
 export async function GET(request: NextRequest) {
     const rejected = await getUnauthorizedResponseOrNull(request);
     if (rejected) return rejected;
     try {
-        const db = licenseDatabase();
-        const email = request.nextUrl.searchParams.get('email')?.trim().toLowerCase();
-        if (!email || !z.string().email().safeParse(email).success) return memberResponse({ accounts: [] });
-        const accounts = await db
-            .from('promptbook_license_accounts')
-            .select('*')
-            .eq('email', email)
-            .eq('is_test', false);
-        if (accounts.error) throw new Error();
-        const ids = accounts.data.map((a) => a.id);
-        if (!ids.length) return memberResponse({ accounts: [] });
-        const [grants, history] = await Promise.all([
-            db.from('promptbook_license_grants').select('*').in('account_id', ids),
-            db
-                .from('promptbook_referral_history')
-                .select('*')
-                .in('account_id', ids)
-                .order('created_at', { ascending: false })
-                .limit(100),
-        ]);
-        if (grants.error || history.error) throw new Error();
-        return memberResponse({ accounts: accounts.data, grants: grants.data, history: history.data });
-    } catch {
-        return memberResponse({ error: 'Evidence není dostupná.' }, 503);
+        const params = request.nextUrl.searchParams;
+        const { offset, isTest, query, limit } = readAdminPageQuery(params);
+        if (params.has('grant')) {
+            const detail = await loadLicenseDetail(z.string().uuid().parse(params.get('grant')), z.enum(['manual','subscription']).parse(params.get('source') ?? 'manual'), isTest);
+            return detail ? memberResponse(detail) : memberResponse({ error: 'Licence nebyla nalezena.' }, 404);
+        }
+        const state = z.enum(['all','active','scheduled','expired','revoked','deleted','unverified']).parse(params.get('state') ?? 'all');
+        let lookup = licenseDatabase().from('promptbook_admin_licenses').select('*', { count: 'exact' }).eq('is_test', isTest);
+        if (state !== 'all') lookup = lookup.eq('state', state);
+        if (query) lookup = lookup.ilike('email', adminEmailPattern(query));
+        const result = await lookup.order('created_at', { ascending: false }).order('id').range(offset, offset+limit-1);
+        if (result.error) throw new Error('License list unavailable');
+        return memberResponse({ items: result.data as AdminLicense[], total: result.count ?? 0, offset, limit });
+    } catch (error) {
+        return error instanceof z.ZodError ? memberResponse({ error: 'Neplatný filtr.' }, 400) : memberResponse({ error: 'Evidence není dostupná.' }, 503);
     }
 }
