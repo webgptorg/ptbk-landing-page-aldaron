@@ -4,6 +4,14 @@ The launch revision in `docs/launch-2026-11-13.md` supersedes older homepage, na
 
 ## Context
 
+The 18 November licensing V0 adds an authenticated server-only POST email lookup at the existing App license route.
+Keep GET's strict numeric v1 snapshot intact; the separate POST envelope carries a Czech display label and advisory
+status for the verified personal App identity. Queries never create accounts/trials/payments or write CRM. Exclude
+community-only zero-project grants and test data; database/reconciliation failures are 503, never `none`. Reuse
+local paid/refund evidence through the shared resolver. Legacy account backfill is a separate dry-run-first operator,
+never startup/prebuild or a read side effect. Do not activate the shared key for an unfinished App consumer. See
+`docs/app-license-email-lookup.md` for schema, fixtures and manGoweb integration; V0 needs no usage/coverage gates.
+
 The owner's 18 November 2026 revision requires both a clickable sign-in link and the existing numeric OTP in every ecosystem authentication email. Preserve the initiating domain, page, query and section for Promptbook, the avatar and community rooms through the shared `/api/auth/email` callback. Both Magic Link and Confirm signup must use `config/supabase-email-otp.html` in the production Auth project, with the callback redirects allowlisted; deploying the website does not apply these external settings. See `docs/email-sign-in.md`. Keep provider delivery failures visible as generic 503/429 responses, never report `isCodeSent` after failure, and never create a member cookie/account before verified matching mailbox ownership. Exact setup and verification are in `docs/promptbook-billing.md`.
 
 This repository contains Promptbook landing pages for different businesses,

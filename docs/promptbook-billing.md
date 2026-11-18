@@ -2,6 +2,9 @@
 
 # Online předplatné Promptbooku
 
+Pro informativní stav osobní licence v ovládací App platí [serverový lookup V0 podle e-mailu](app-license-email-lookup.md)
+z 18. 11. 2026. Zachovává původní GET snapshot a doplňuje POST, schémata, fixture a předání manGoweb.
+
 České platební odkazy se zobrazí po zapnutí prodeje. Start stojí 399 Kč měsíčně za projekt a Business 1 999 Kč. Anglický web vede na poptávku. Objednávka dovoluje přepnout tarif bez ztráty vyplněných údajů. Spotřebitelé i podnikatelé z Česka a Slovenska mohou nakoupit; Zaškrtávátko „Nakupuji na firmu“ je ve výchozím stavu zapnuté a vyžaduje IČO. Po vypnutí se IČO a DIČ skryjí a do objednávky se neposílají; zůstanou osobní fakturační údaje. Fakturační jméno nebo název a adresu lze vyplnit ručně. U české firmy lze od tří znaků názvu vybrat z nejvýše osmi návrhů ARES; výběr doplní IČO, dostupné DIČ a adresu. Vyhledání IČO doplní údaje z ARES nebo slovenského Registru účtovných závierok a zákazník je může opravit. Vyhledávání podle názvu je jen české; pro Slovensko zůstává IČO a ruční zadání. Prázdné výsledky či výpadek ARES nákup neblokují, všechny údaje lze napsat či změnit ručně. Pomalá odpověď nevrací starší návrhy ani nepřepisuje mezitím opravená pole. IČ DPH slouží k ověření příslušného daňového režimu ve VIES, nikoli jako podmínka spotřebitelského nákupu. Volitelná poznámka se uchovává s objednávkou.
 
 Po zpřístupnění předplatného je hlavní akcí v jeho kartě na `/cs/pricing/predplatne` výrazné tlačítko „Nainstalovat engine“ vedoucí na `/cs/open-source`. Na mobilu vyplní šířku karty. Produktová podpora, licence a fakturační akce zůstávají pod ním jako vedlejší možnosti.
