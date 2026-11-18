@@ -20,6 +20,8 @@
 .pavol-header[data-application=true] > div { gap: .5rem; }
 .pavol-header[data-application=true] .pavol-header-actions { gap: .35rem; }
 .pavol-app-header-actions:empty { display: none; }
+/* A transform on ::details-content would contain the full-width navigation at the trigger's width. */
+.pavol-app-menu::details-content, .pavol-app-menu[open]::details-content { transform: none; transition: opacity .24s ease, content-visibility .24s allow-discrete; }
 .pavol-app-auth { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-width: 40px; min-height: 44px; padding: .5rem; border-radius: .75rem; font-size: .8rem; }
 .pavol-app-auth:hover { background: var(--pavol-warm); }
 .pavol-app-auth:disabled { opacity: .5; }
