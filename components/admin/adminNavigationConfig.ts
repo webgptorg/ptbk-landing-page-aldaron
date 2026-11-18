@@ -82,7 +82,8 @@ export const ADMIN_NAVIGATION_ITEMS: readonly AdminNavigationItem[] = [
         description: 'Platnost, místa a použití slevových kódů pro placené registrace.',
         icon: TicketPercent,
     },
-    { path: '/admin/promptbook-licensing', label: 'Licence a komunitní místa', description: 'Ověřené účty, individuální granty a audit doporučení.', icon: ShieldCheck },
+    { path: '/admin/promptbook-licensing', label: 'Licence', description: 'Licence z nákupů, zkoušky, ruční přidělení bez objednávky a historie změn.', icon: ShieldCheck },
+    { path: '/admin/promptbook-subscriptions', label: 'Předplatná a objednávky', description: 'Licence, komunitní členství a avatar s propojenými platbami.', icon: ShieldCheck },
     { path: '/admin/messages', label: 'Messages', description: 'Zprávy s širším kontextem, hlasem a rozhovorem.', icon: MessageSquareText },
     { path: '/admin/agents', label: 'Agents', description: 'Sdílení Book agenti pro zprávy i workshopy.', icon: Bot },
     {
