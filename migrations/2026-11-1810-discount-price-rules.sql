@@ -199,7 +199,7 @@ CREATE FUNCTION public.record_purchase_discount_snapshot() RETURNS trigger
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = pg_catalog, public AS $$
 DECLARE reference text;
 BEGIN
-    reference := CASE WHEN TG_TABLE_NAME = 'community_memberships' THEN COALESCE(to_jsonb(NEW)->>'stripe_checkout_session_id', NEW.id::text) ELSE NEW.id::text END;
+    reference := CASE WHEN TG_TABLE_NAME = 'community_memberships' THEN COALESCE(to_jsonb(NEW)->>'stripe_checkout_session_id', NEW.id::text || ':' || md5(NEW.discount_snapshot::text)) ELSE NEW.id::text END;
     IF NEW.discount_snapshot IS NOT NULL THEN
         INSERT INTO public.discount_purchase_snapshots(product,purchase_id,snapshot)
         VALUES(TG_TABLE_NAME,reference,NEW.discount_snapshot) ON CONFLICT DO NOTHING;

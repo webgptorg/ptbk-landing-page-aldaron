@@ -72,4 +72,11 @@ describe('additive discount rule migration in PostgreSQL', () => {
             expect((await reserve(other)).rows[0]).toMatchObject({ status: 'applied', price_rule: { amount: 20 } });
         } finally { await db.exec('RESET ROLE'); }
     });
+    it('keeps different accepted voucher conditions when the same membership row is reused', async () => {
+        await db.query('INSERT INTO community_memberships(id,discount_snapshot) VALUES($1,$2)', [id, JSON.stringify({ version: 1, code: 'FIRST', finalAmount: 0 })]);
+        await db.query('UPDATE community_memberships SET discount_snapshot=$2 WHERE id=$1', [id, JSON.stringify({ version: 1, code: 'SECOND', finalAmount: 0 })]);
+        const history = await db.query(`SELECT snapshot FROM discount_purchase_snapshots WHERE product=$1 ORDER BY snapshot->>'code'`, ['community_memberships']);
+        expect(history.rows).toEqual([{ snapshot: { version: 1, code: 'FIRST', finalAmount: 0 } }, { snapshot: { version: 1, code: 'SECOND', finalAmount: 0 } }]);
+    });
+
 });

@@ -274,7 +274,7 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                             if (!nextIsValidForAllPlaces && values.placeIds.length === 0) {
                                 updateValue(
                                     'placeIds',
-                                    getDiscountCodePlaces([]).map((discountPlace) => discountPlace.id),
+                                    getDiscountCodePlaces([], values.appliesEverywhere).map((discountPlace) => discountPlace.id),
                                 );
                             }
                         }}
