@@ -1,4 +1,5 @@
 import { ContactSubmissionEvidenceDetails } from './ContactSubmissionEvidenceDetails';
+import { InternalPurchasePaymentDetails } from './InternalPurchasePaymentDetails';
 import { formatWorkshopPresenceDuration, formatWorkshopAdminDateTime } from '@/businesses/workshop-admin/workshopAdminFormatting';
 import { CONTACT_COLUMN_DEFINITIONS } from '@/lib/contacts/contactColumnDefinitions';
 import { formatContactValueForDisplay } from '@/lib/contacts/contactValues';
@@ -111,6 +112,7 @@ function AdminContactRecordDetails({ contactGroup }: { readonly contactGroup: Ad
                 <div className="mt-2 space-y-3">
                     {contactGroup.contacts.map((contact) => (
                         <dl key={contact.id} className="space-y-1 border-l-2 border-slate-200 pl-2">
+                            {contact.oneTimePayment && <div><dt className="font-medium">Úhrada nákupu</dt><dd><InternalPurchasePaymentDetails payment={contact.oneTimePayment} /></dd></div>}
                             <div><dt className="font-medium">Účel a zaznamenaná volba</dt><dd><ContactSubmissionEvidenceDetails evidence={contact.submissionEvidence} /></dd></div>
                             {CONTACT_COLUMN_DEFINITIONS.map((column) => {
                                 const value = formatContactValueForDisplay(contact, column.key);

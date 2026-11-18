@@ -4,6 +4,7 @@
 
 import { AI_SUPERVIZE_MINI_EVENT_TYPE } from '@/businesses/ai-supervize-mini/config';
 import type { EventOccurrence } from '@/lib/events/eventOccurrence';
+import { createInternalOneTimePayment, createOneTimePaymentQuote, STRIPE_CZK_PAYMENT_POLICY } from '@/lib/payments/paymentCollectionPolicy';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -162,5 +163,26 @@ describe('AI Supervize Mini registration form', () => {
             );
         });
         expect(screen.getByText('Jste na čekací listině')).toBeTruthy();
+    });
+
+    it.each([0, 1, 14.99])('shows %s CZK as free before submission and confirms the recorded purchase', async (amount) => {
+        const payment = createInternalOneTimePayment(createOneTimePaymentQuote(Math.round(amount * 100), STRIPE_CZK_PAYMENT_POLICY));
+        submitAiSupervizeMiniWorkshopRegistrationMock.mockResolvedValue({ isWaitlisted: false, oneTimePayment: payment,
+            workshopAvailabilities: [{ eventSlug: ONSITE_EVENT.slug, registeredParticipantCount: 1, remainingSeatCount: 9 }],
+            workshopPrice: { basePriceCzk: 12000, discountAmountCzk: 12000 - amount, finalPriceCzk: amount } });
+        render(<AiSupervizeMiniRegistrationForm events={[ONSITE_EVENT]} currentTime={CURRENT_TIME}
+            initialDiscountCode="FIXED" initialActiveDiscountByPlaceId={{ 'ai-supervize-mini-onsite': {
+                code: 'FIXED', percent: 100, remainingUseCount: null, subscriptionDiscountDurationMonths: null,
+                priceRule: { kind: 'fixed', amount, currency: 'CZK' },
+            } }} initialWorkshopAvailabilities={[{ eventSlug: ONSITE_EVENT.slug, registeredParticipantCount: 0, remainingSeatCount: 10 }]} />);
+        expect(screen.getByText('Zdarma (0 Kč)')).toBeTruthy();
+        expect(screen.getByText('Dobrá zpráva: tento nákup máte zdarma.')).toBeTruthy();
+        fireEvent.change(screen.getByLabelText('Jméno a příjmení'), { target: { value: 'Jana Nováková' } });
+        fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'jana@example.com' } });
+        fireEvent.change(screen.getByLabelText('Firma / organizace'), { target: { value: 'Firma s.r.o.' } });
+        fireEvent.change(screen.getByLabelText('Fakturační údaje'), { target: { value: 'Fakturační adresa' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Dokončit zdarma' }));
+        expect(await screen.findByText('Registrace je dokončená')).toBeTruthy();
+        expect(screen.getByText(/Za tento nákup vám nic neúčtujeme/)).toBeTruthy();
     });
 });

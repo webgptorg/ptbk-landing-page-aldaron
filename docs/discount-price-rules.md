@@ -66,12 +66,42 @@ evidence použití kódu nepřepočítává zaplacenou cenu.
 
 ## Malé a nulové částky
 
-Cenu 1 Kč nebo 10 Kč lze definovat a zobrazit v náhledu. Současná korunová
-platba kartou odmítne kladnou částku pod 15 Kč s jasnou chybou. Nikdy částku
-automaticky nezvýší. Pro skutečné malé kartové platby lze zvolit například 20 Kč.
-Trvalá nulová cena nepotřebuje kartu; dočasná nulová cena ji vyžaduje kvůli
-následným běžným obnovám. Platba i přístupy nadále podléhají stávajícímu
-ověření serverem a Stripe.
+Cenu 1 Kč nebo 10 Kč lze definovat a zobrazit v náhledu. U **jednorázového
+nákupu** se nula i kladná částka pod minimem vybrané brány dokončí bez účtování.
+Souhrn jasně říká „Zdarma (0 Kč)“, ukáže případnou prominutou částku a tlačítko
+„Dokončit zdarma“. Nevzniká Stripe Checkout, platba kartou ani pozdější dluh.
+Přesně 15 Kč už pod dnešní minimum nespadá a pokračuje původní cestou.
+
+`lib/payments/paymentCollectionPolicy.ts` odděluje pravidlo produktu od omezení
+brány: dnešní `STRIPE_CZK_PAYMENT_POLICY` stanoví 1 500 haléřů. Jiná brána nebo
+měna dostane vlastní politiku a verzi. Rozhoduje celková cena objednávky po slevě
+v haléřích, nikoli cena jednoho místa. Částka se nikdy nezvedá na minimum.
+
+Aktuální jednorázová placená nabídka je registrace AI Supervize Mini. Její běžná
+kladná cena se už dříve ukládala pro následné ruční vyřízení/fakturaci; tato
+změna nezavádí nový kartový checkout. Když je cena pod minimem, server ji znovu
+spočítá a uloží `Contact.oneTimePayment`. Databázový trigger v témže transakčním
+zápisu vytvoří neměnný soukromý `internal_purchase_payments` se stavem `paid`,
+způsobem `no_charge`, skutečně přijatou částkou 0 a částkou k úhradě 0. Uchová
+odděleně cenu po slevě, prominutí, důvod, politiku brány, fakturační údaje,
+celou registraci a přijatou kopii slevy. Selhání evidence úhrady vrátí zpět také
+zápis kontaktu; server nikdy nevrátí úspěšný nákup bez uložené evidence.
+Spotřeba použití kódu zachovává stávající samostatné atomické RPC.
+
+Kontakt dál spouští dosavadní zpracování registrace, kapacitu a kontaktní outbox.
+Čekací listina není dokončený nákup a placený záznam nevytváří. Editace ani smazání
+kontaktu nemění kopii úhrady a fakturačních údajů. V administraci kontaktu je
+vidět „Zaplaceno · bez účtování“. Budoucí generátor faktur musí zpracovávat i tyto
+interní úhrady, vycházet z částky k úhradě 0 a uvést prominutí; nesmí čekat jen na
+Stripe webhook nebo vykazovat původní 1 Kč jako přijaté peníze. Automatické
+vystavení jednorázové faktury touto změnou nevzniká. Historické nákupy se nemění.
+
+**Předplatné je samostatný případ:** u licencí, členství a avatara se kladná
+podlimitní měsíční částka nadále odmítá. Trvalá nulová cena nepotřebuje kartu;
+dočasná nulová cena ji vyžaduje kvůli následným běžným obnovám. Jednorázové
+prominutí nesmí zrušit budoucí placené obnovy nebo změnit přijatou smlouvu.
+Interní bezplatné dokončení testuje objednávku, evidenci a navazující kroky,
+nikoli skutečné stržení kartou.
 
 ## Nasazení a ověření
 

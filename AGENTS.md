@@ -1121,6 +1121,14 @@ sites. Missing/false retains historical empty-scope exclusions; do not widen exi
 Every accepted order freezes its definition/version, base/final amounts, currency and duration. Subscription
 reservations return their frozen rule on retries, including after editing/deletion. Stripe receives a separate
 percentage or resolved amount coupon with the accepted duration. Never re-evaluate paid subscriptions using today's
-code, rewrite old contracts or create production test purchases/codes. Below-minimum positive card amounts are
-refused clearly without raising the configured price; permanent zero prices skip cards and temporary ones collect
-a renewal card. Schema updates are additive and older RPC signatures remain available. See docs/discount-price-rules.md.
+code, rewrite old contracts or create production test purchases/codes. The owner's subsequent 18 November revision
+completes zero and below-provider-minimum **one-time** purchases internally, without a card or Stripe session.
+`paymentCollectionPolicy.ts` owns provider/currency thresholds (currently Stripe CZK 1500 minor units), separate
+from discount definitions. Workshop summaries show free completion and any waived amount. The server-authored
+`Contact.oneTimePayment` and private immutable `internal_purchase_payments` receipt commit together; keep status
+paid, actual money received zero, the original price and waiver separate, plus frozen buyer/registration/discount
+evidence for future invoices. Waitlist entries are not completed purchases. Preserve existing registration,
+capacity and Contact outbox behavior. Do not backfill historical receipts or fabricate Stripe IDs/cash revenue.
+This bypass does not test a real card charge or introduce automatic one-time invoicing. Recurring positive
+below-minimum prices remain refused; permanent zero subscriptions skip cards and temporary ones collect a renewal
+card. Schema updates are additive and older RPC signatures remain available. See docs/discount-price-rules.md.

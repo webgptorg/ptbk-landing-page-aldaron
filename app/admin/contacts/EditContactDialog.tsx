@@ -8,6 +8,7 @@ import {
     type ContactTextValues,
 } from '@/lib/contacts/Contact';
 import { ContactSubmissionEvidenceDetails } from '@/components/admin/ContactSubmissionEvidenceDetails';
+import { InternalPurchasePaymentDetails } from '@/components/admin/InternalPurchasePaymentDetails';
 import { ContactForm } from './ContactForm';
 
 type EditContactDialogProps = {
@@ -25,6 +26,7 @@ export function EditContactDialog(props: EditContactDialogProps) {
     return (
         <AdminEditorDialog isOpen onClose={onClose} title="Edit Contact" description="Update the contact details, notes and contacted status.">
             <ContactSubmissionEvidenceDetails evidence={contact.submissionEvidence} />
+            <InternalPurchasePaymentDetails payment={contact.oneTimePayment} />
             <ContactForm
                 isAutosaveEnabled
                 initialIsContacted={contact.isContacted === true}

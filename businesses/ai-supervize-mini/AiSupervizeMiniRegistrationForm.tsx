@@ -11,6 +11,7 @@ import {
 } from '@/businesses/ai-supervize-mini/workshopRegistrationApi';
 import {
     createAiSupervizeMiniWorkshopPrice,
+    createAiSupervizeMiniWorkshopQuoteKey,
     formatCzechFreeSeatCount,
     getAiSupervizeMiniEventBySlug,
     getAiSupervizeMiniWorkshopAvailabilityByEventSlug,
@@ -40,6 +41,7 @@ import {
 } from '@/lib/events/eventOccurrence';
 import { formatCzechKoruna } from '@/lib/events/eventPrice';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
+import { createOneTimePaymentQuote, STRIPE_CZK_PAYMENT_POLICY, type InternalOneTimePayment } from '@/lib/payments/paymentCollectionPolicy';
 import { subscribeToWaitlist } from '@/lib/subscription/subscribeToWaitlist';
 import { cn } from '@/lib/utils';
 import { AlertTriangle, CheckCircle2, Loader2, Users } from 'lucide-react';
@@ -337,6 +339,7 @@ function AiSupervizeMiniEventRegistrationForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [submissionOutcome, setSubmissionOutcome] = useState<'confirmed' | 'waitlisted' | null>(null);
+    const [completedPayment, setCompletedPayment] = useState<InternalOneTimePayment | null>(null);
     const [showValidation, setShowValidation] = useState(false);
     const [isInterestDialogOpen, setIsInterestDialogOpen] = useState(false);
     const [interestForm, setInterestForm] = useState<ContactFieldsState>({
@@ -362,6 +365,8 @@ function AiSupervizeMiniEventRegistrationForm({
     const price = useMemo(() => {
         return createAiSupervizeMiniWorkshopPrice(selectedEvent, participantCount, activeDiscount);
     }, [activeDiscount, participantCount, selectedEvent]);
+    const paymentQuote = createOneTimePaymentQuote(Math.round(price.finalPriceCzk * 100), STRIPE_CZK_PAYMENT_POLICY);
+    const isNoCharge = paymentQuote.collection === 'internal';
 
     const participantError = getParticipantCountError(registrationState, availableSeatCount);
     const { fullnameError, emailError, companyError } = getContactFieldErrors({ fullname, email, company });
@@ -422,8 +427,10 @@ function AiSupervizeMiniEventRegistrationForm({
                 billingDetails,
                 userNote: note,
                 discountCode: discountCodeValidation.discountCode,
+                quotedPrice: createAiSupervizeMiniWorkshopQuoteKey(selectedEvent, participantCount, activeDiscount),
             });
             setWorkshopAvailabilities(registrationResult.workshopAvailabilities);
+            setCompletedPayment(registrationResult.oneTimePayment ?? null);
             setSubmissionOutcome(registrationResult.isWaitlisted ? 'waitlisted' : 'confirmed');
         } catch (error) {
             if (error instanceof AiSupervizeMiniWorkshopRegistrationError && error.workshopAvailabilities !== null) {
@@ -495,11 +502,13 @@ function AiSupervizeMiniEventRegistrationForm({
                     <CheckCircle2 className="h-8 w-8 text-emerald-600" />
                 </div>
                 <h3 className="mt-5 text-2xl font-bold text-slate-950">
-                    {submissionOutcome === 'waitlisted' ? 'Jste na čekací listině' : 'Přihláška je odeslaná'}
+                    {submissionOutcome === 'waitlisted' ? 'Jste na čekací listině' : completedPayment ? 'Registrace je dokončená' : 'Přihláška je odeslaná'}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
                     {submissionOutcome === 'waitlisted'
                         ? 'Termín je plný. Máme vás na čekací listině a ozveme se, jakmile se místo uvolní.'
+                        : completedPayment
+                        ? 'Za tento nákup vám nic neúčtujeme. Registrace je uhrazená a praktické informace k workshopu vám pošleme e-mailem.'
                         : 'Ozveme se e-mailem. Pošleme potvrzení termínu, fakturu a praktické informace k workshopu.'}
                 </p>
             </div>
@@ -515,7 +524,7 @@ function AiSupervizeMiniEventRegistrationForm({
                 </div>
                 <div className="rounded-xl bg-slate-950 px-4 py-3 text-white">
                     <div className="text-xs text-slate-300">{formatEventFormat(selectedEvent.event)}</div>
-                    <div className="text-2xl font-bold">{formatCzechKoruna(price.finalPriceCzk)}</div>
+                    <div className="text-2xl font-bold">{isNoCharge ? 'Zdarma' : formatCzechKoruna(price.finalPriceCzk)}</div>
                     {activeDiscount !== null && (
                         <div className="text-xs text-cyan-300">{describeDiscount(activeDiscount)} započtena</div>
                     )}
@@ -683,11 +692,28 @@ function AiSupervizeMiniEventRegistrationForm({
                         </strong>
                     </div>
                     <div className="mt-3 flex justify-between gap-4 border-t border-slate-200 pt-3 text-base">
-                        <span className="font-semibold text-slate-900">Celkem</span>
+                        <span className="font-semibold text-slate-900">Cena po slevě</span>
                         <strong className="text-slate-950">{formatCzechKoruna(price.finalPriceCzk)}</strong>
+                    </div>
+                    {paymentQuote.waivedAmount > 0 && (
+                        <div className="mt-2 flex justify-between gap-4">
+                            <span>Prominutá částka</span>
+                            <strong className="text-emerald-700">-{formatCzechKoruna(paymentQuote.waivedAmount / 100)}</strong>
+                        </div>
+                    )}
+                    <div className="mt-3 flex justify-between gap-4 border-t border-slate-200 pt-3 text-base">
+                        <span className="font-semibold text-slate-900">Celkem k úhradě</span>
+                        <strong className="text-slate-950">{isNoCharge ? 'Zdarma (0 Kč)' : formatCzechKoruna(paymentQuote.amountDue / 100)}</strong>
                     </div>
                     <p className="mt-3 border-t border-slate-200 pt-3 text-xs text-slate-500">Nejsme plátci DPH.</p>
                 </div>
+
+                {isNoCharge && !isSelectedWorkshopFull && (
+                    <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                        <p className="font-semibold">Dobrá zpráva: tento nákup máte zdarma.</p>
+                        <p className="mt-1">Nic vám nebudeme účtovat a kartu nepotřebujete. Registraci dokončíte tlačítkem níže.</p>
+                    </div>
+                )}
 
                 {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
@@ -702,7 +728,7 @@ function AiSupervizeMiniEventRegistrationForm({
                             Odesílám registraci
                         </>
                     ) : (
-                        isSelectedWorkshopFull ? 'Přidat na čekací listinu' : 'Rezervovat workshop'
+                        isSelectedWorkshopFull ? 'Přidat na čekací listinu' : isNoCharge ? 'Dokončit zdarma' : 'Rezervovat workshop'
                     )}
                 </Button>
 
