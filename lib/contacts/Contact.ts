@@ -1,4 +1,5 @@
 import type { ContactSubmissionEvidence } from './contactSubmissionPolicy';
+import type { InternalOneTimePayment } from '@/lib/payments/paymentCollectionPolicy';
 /**
  * One contact (lead) as stored in the `Contact` table
  *
@@ -6,6 +7,8 @@ import type { ContactSubmissionEvidence } from './contactSubmissionPolicy';
  */
 export type Contact = {
     readonly submissionEvidence?: ContactSubmissionEvidence | null;
+    /** Server-authored receipt, mirrored atomically to the private immutable payment ledger. */
+    readonly oneTimePayment?: InternalOneTimePayment | null;
     readonly id: number;
     readonly createdAt: string | null;
     readonly fullname: string | null;
@@ -28,7 +31,7 @@ export type Contact = {
  *
  * Note: `id` is only a technical identifier, it is never shown as a column
  */
-export type ContactColumnKey = Exclude<keyof Contact, 'id' | 'submissionEvidence'>;
+export type ContactColumnKey = Exclude<keyof Contact, 'id' | 'submissionEvidence' | 'oneTimePayment'>;
 
 /**
  * Key of a contact field which holds a text rather than a yes or no answer

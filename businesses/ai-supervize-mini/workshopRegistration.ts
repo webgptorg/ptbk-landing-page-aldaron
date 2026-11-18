@@ -1,4 +1,5 @@
-import { calculateDiscountedAmount, createDiscountSnapshot, type DiscountSnapshot } from '@/lib/discounts/discountPricing';
+import { calculateDiscountedAmount, createDiscountSnapshot, discountRuleKey, type DiscountSnapshot } from '@/lib/discounts/discountPricing';
+import { STRIPE_CZK_PAYMENT_POLICY } from '@/lib/payments/paymentCollectionPolicy';
 import {
     AI_SUPERVIZE_MINI_WORKSHOP_CONFIG,
     AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_TYPE,
@@ -61,6 +62,8 @@ export type AiSupervizeMiniWorkshopPrice = {
 };
 
 export type AiSupervizeMiniWorkshopRegistrationRequest = {
+    /** Omitted only by older clients. New forms require the server to honour exactly the displayed quote. */
+    readonly quotedPrice?: string;
     readonly eventSlug: string;
     readonly participantCount: number;
     readonly fullname: string;
@@ -244,14 +247,26 @@ export function createAiSupervizeMiniWorkshopPrice(
     participantCount: number,
     activeDiscount: ActiveDiscount | null,
 ): AiSupervizeMiniWorkshopPrice {
-    const basePriceCzk = event.event.priceCzk * participantCount;
-    const discountAmountCzk = basePriceCzk - calculateDiscountedAmount(Math.round(basePriceCzk * 100), activeDiscount, true) / 100;
+    const baseAmount = Math.round(event.event.priceCzk * participantCount * 100);
+    const finalAmount = calculateDiscountedAmount(baseAmount, activeDiscount, true);
 
     return {
-        basePriceCzk,
-        discountAmountCzk,
-        finalPriceCzk: basePriceCzk - discountAmountCzk,
+        basePriceCzk: baseAmount / 100,
+        discountAmountCzk: (baseAmount - finalAmount) / 100,
+        finalPriceCzk: finalAmount / 100,
     };
+}
+
+/** A stable quote includes the original offer, rule version and collection policy, not just the displayed zero. */
+export function createAiSupervizeMiniWorkshopQuoteKey(
+    event: EventOccurrence, participantCount: number, discount: ActiveDiscount | null,
+): string {
+    const baseAmount = Math.round(event.event.priceCzk * participantCount * 100);
+    return JSON.stringify([event.slug, participantCount, baseAmount, calculateDiscountedAmount(baseAmount, discount, true),
+        discount?.code ?? null, discount?.percent ?? null, discount?.definitionVersion ?? 1,
+        discount?.subscriptionDiscountDurationMonths ?? null, discountRuleKey(discount?.priceRule),
+        STRIPE_CZK_PAYMENT_POLICY.provider, STRIPE_CZK_PAYMENT_POLICY.currency,
+        STRIPE_CZK_PAYMENT_POLICY.minimumChargeAmount, STRIPE_CZK_PAYMENT_POLICY.version]);
 }
 
 export function createAiSupervizeMiniStoredWorkshopRegistration(

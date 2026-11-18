@@ -1,9 +1,11 @@
+import { STRIPE_CZK_PAYMENT_POLICY } from './paymentCollectionPolicy';
+
 /**
  * The one currency this application charges in
  */
 export const STRIPE_CZK_CURRENCY = 'czk';
 /** Minimum non-zero card payment, in CZK minor units. Zero-total subscriptions are separate. */
-export const STRIPE_CZK_MINIMUM_CHARGE_AMOUNT = 1500;
+export const STRIPE_CZK_MINIMUM_CHARGE_AMOUNT = STRIPE_CZK_PAYMENT_POLICY.minimumChargeAmount;
 
 const MINOR_UNITS_IN_CZK = 100;
 

@@ -1,4 +1,5 @@
 import { createContactNoticeFields } from '@/lib/contacts/contactSubmissionPolicy';
+import type { InternalOneTimePayment } from '@/lib/payments/paymentCollectionPolicy';
 import type {
     AiSupervizeMiniWorkshopAvailability,
     AiSupervizeMiniWorkshopPrice,
@@ -8,6 +9,7 @@ import type {
 const AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_API_PATH = '/api/ai-supervize-mini/registration';
 
 type AiSupervizeMiniWorkshopRegistrationResponse = {
+    readonly oneTimePayment?: InternalOneTimePayment | null;
     readonly isWaitlisted: boolean;
     readonly workshopAvailabilities: readonly AiSupervizeMiniWorkshopAvailability[];
     readonly workshopPrice: AiSupervizeMiniWorkshopPrice;

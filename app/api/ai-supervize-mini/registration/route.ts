@@ -7,6 +7,7 @@ import {
     createAiSupervizeMiniStoredWorkshopRegistration,
     createAiSupervizeMiniWorkshopAvailabilityAfterRegistration,
     createAiSupervizeMiniWorkshopPrice,
+    createAiSupervizeMiniWorkshopQuoteKey,
     createAiSupervizeMiniWorkshopRegistrationContactNote,
     getAiSupervizeMiniEventBySlug,
     getAiSupervizeMiniWorkshopAvailabilityByEventSlug,
@@ -27,10 +28,11 @@ import {
     getContactsTableOrNull,
     insertContact,
 } from '@/lib/contacts/contactsDatabase';
-import { consumeDiscountCode } from '@/lib/discounts/discountCodeDatabase';
+import { consumeDiscountCode, loadActiveDiscount } from '@/lib/discounts/discountCodeDatabase';
 import { EXHAUSTED_DISCOUNT_CODE_ERROR_MESSAGE } from '@/lib/discounts/discountCodeMessages';
 import { isEmailAddressValid } from '@/lib/isEmailAddressValid';
 import { formatCzechCountedNoun } from '@/lib/language/czechNumbers';
+import { createInternalOneTimePayment, createOneTimePaymentQuote, STRIPE_CZK_PAYMENT_POLICY } from '@/lib/payments/paymentCollectionPolicy';
 import { NextRequest, NextResponse } from 'next/server';
 
 const INVALID_REGISTRATION_ERROR_MESSAGE = 'Vyplňte prosím všechny povinné údaje správně.';
@@ -68,6 +70,7 @@ function readAiSupervizeMiniWorkshopRegistrationRequest(
     const billingDetails = readRequiredTextValue(body.billingDetails);
     const userNote = readTextValue(body.userNote);
     const discountCode = readTextValue(body.discountCode);
+    const quotedPrice = body.quotedPrice;
 
     if (
         eventSlug === null ||
@@ -79,7 +82,8 @@ function readAiSupervizeMiniWorkshopRegistrationRequest(
         invoiceType === null ||
         billingDetails === null ||
         userNote === null ||
-        discountCode === null
+        discountCode === null ||
+        (quotedPrice !== undefined && (typeof quotedPrice !== 'string' || quotedPrice.length > 2048))
     ) {
         return null;
     }
@@ -94,6 +98,7 @@ function readAiSupervizeMiniWorkshopRegistrationRequest(
         billingDetails,
         userNote,
         discountCode,
+        ...(typeof quotedPrice === 'string' ? { quotedPrice } : {}),
     };
 }
 
@@ -184,6 +189,17 @@ export async function POST(request: NextRequest) {
     }
 
     const isWaitlisted = registrationState === 'waitlisted';
+    const priceChanged = () => NextResponse.json({
+        error: 'Cena nebo slevový kód se změnily. Obnovte stránku, zkontrolujte novou cenu a registraci potvrďte znovu.',
+    }, { status: 409 });
+
+    // Check before consuming a limited use. A stale free preview must never silently become a payable order.
+    if (registrationRequest.quotedPrice !== undefined) {
+        const preview = await loadActiveDiscount(registrationRequest.discountCode, getAiSupervizeMiniDiscountPlaceId(event.event.locationKind));
+        if (preview.errorMessage !== null) return NextResponse.json({ error: DISCOUNT_CODE_NOT_LOADED_ERROR_MESSAGE }, { status: 503 });
+        if (registrationRequest.quotedPrice !== createAiSupervizeMiniWorkshopQuoteKey(event, registrationRequest.participantCount, preview.activeDiscount))
+            return priceChanged();
+    }
 
     // A limited code is consumed in the same database statement which checks its remaining count,
     // so concurrent registrations cannot both receive its last use.
@@ -206,6 +222,10 @@ export async function POST(request: NextRequest) {
     }
 
     const activeDiscount = discountCodeConsumption.activeDiscount;
+    // Recheck the atomic claim too, in case a code changed between the preview read and consumption.
+    if (registrationRequest.quotedPrice !== undefined &&
+        registrationRequest.quotedPrice !== createAiSupervizeMiniWorkshopQuoteKey(event, registrationRequest.participantCount, activeDiscount))
+        return priceChanged();
 
     const storedRegistration = createAiSupervizeMiniStoredWorkshopRegistration(
         registrationRequest,
@@ -213,6 +233,13 @@ export async function POST(request: NextRequest) {
         activeDiscount,
     );
     const contactNote = createAiSupervizeMiniWorkshopRegistrationContactNote(storedRegistration);
+    const paymentQuote = createOneTimePaymentQuote(
+        Math.round(storedRegistration.computedFinalPriceCzk * 100),
+        STRIPE_CZK_PAYMENT_POLICY,
+    );
+    // A waiting-list entry is not a completed purchase. The Contact insert and payment ledger insert
+    // share a database transaction; a failed receipt cannot leave a falsely successful registration.
+    const oneTimePayment = isWaitlisted ? null : createInternalOneTimePayment(paymentQuote);
 
     if (contactNote.length > MAXIMAL_CONTACT_TEXT_LENGTH) {
         return NextResponse.json({ error: INVALID_REGISTRATION_ERROR_MESSAGE }, { status: 400 });
@@ -223,6 +250,7 @@ export async function POST(request: NextRequest) {
         email: registrationRequest.email,
         userNote: contactNote,
         submissionEvidence,
+        ...(oneTimePayment ? { oneTimePayment } : {}),
         isWaitlisted,
         placeName: AI_SUPERVIZE_MINI_WORKSHOP_REGISTRATION_PLACE_NAME,
         appName: APP_NAME,
@@ -237,6 +265,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
+        oneTimePayment,
         isWaitlisted,
         workshopAvailabilities: createAiSupervizeMiniWorkshopAvailabilityAfterRegistration(
             workshopAvailabilities,
