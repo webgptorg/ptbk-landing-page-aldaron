@@ -1,3 +1,4 @@
+import { calculateDiscountedAmount, discountMatchesExpected, discountSnapshotsEqual, expectedDiscountSchema, snapshotFromExpected } from '@/lib/discounts/discountPricing';
 import { getCrossSiteResponseOrNull } from '@/lib/api/getCrossSiteResponseOrNull';
 import { normalizeDiscountCode } from '@/lib/discounts/discountCode';
 import { reservePromptbookDiscountCode, settlePromptbookDiscountReservation } from '@/lib/discounts/discountCodeDatabase';
@@ -38,7 +39,7 @@ const checkoutSchema = z.object({
     note: z.string().trim().max(4000).optional().transform((note) => note || null),
     immediateStart: z.boolean().optional().default(false),
     promoCode: z.string().trim().max(100).optional().transform((code) => normalizeDiscountCode(code ?? '') || null),
-    expectedDiscount: z.object({ percent: z.number().positive().max(100), months: z.number().int().positive().max(36).nullable() }).nullable(),
+    expectedDiscount: expectedDiscountSchema.nullable(),
     acceptedTerms: z.literal(true),
     termsVersion: z.literal(PROMPTBOOK_ONLINE_TERMS_VERSION),
 }).refine(({ promoCode, expectedDiscount }) => Boolean(promoCode) === Boolean(expectedDiscount))
@@ -77,6 +78,8 @@ export async function POST(request: NextRequest) {
     try {
         let order = await loadPromptbookOrder(database, input.requestId);
         if (!order) {
+            const acceptedSnapshot = snapshotFromExpected(input.promoCode, input.expectedDiscount, createStripeAmountFromCzk(input.plan === 'start' ? COMMERCIAL_TERMS.startCzk : COMMERCIAL_TERMS.businessCzk));
+            if (input.expectedDiscount?.finalAmount !== undefined && input.expectedDiscount.finalAmount !== acceptedSnapshot?.finalAmount) return fail(quoteChanged, 409);
             const identity = await resolvePromptbookCheckoutIdentity(input);
             const { error } = await database.from(PROMPTBOOK_ORDERS_TABLE).upsert({
                 id: input.requestId,
@@ -100,6 +103,7 @@ export async function POST(request: NextRequest) {
                 invoice_template_id: getBillingSetting(`PROMPTBOOK_BILLING_${identity.taxTreatment === 'reverse_charge' ? 'SK' : 'CZ'}_INVOICE_TEMPLATE_ID`),
                 supplier_tax_id: identity.taxTreatment === 'reverse_charge' ? getBillingSetting('PROMPTBOOK_BILLING_SUPPLIER_TAX_ID') : null,
                 base_amount: createStripeAmountFromCzk(input.plan === 'start' ? COMMERCIAL_TERMS.startCzk : COMMERCIAL_TERMS.businessCzk),
+                discount_snapshot: acceptedSnapshot,
                 discount_code: input.promoCode,
                 discount_percent: input.expectedDiscount?.percent ?? null,
                 discount_months: input.expectedDiscount?.months ?? null,
@@ -118,7 +122,8 @@ export async function POST(request: NextRequest) {
             order.customer_type !== (input.companyId ? 'business' : 'consumer') ||
             (order.referral_code ?? '') !== input.referralCode || order.order_note !== input.note || order.immediate_start !== input.immediateStart ||
             order.discount_code !== input.promoCode || order.discount_percent !== (input.expectedDiscount?.percent ?? null) ||
-            order.discount_months !== (input.expectedDiscount?.months ?? null) || order.terms_version !== input.termsVersion ||
+            order.discount_months !== (input.expectedDiscount?.months ?? null) ||
+            (order.discount_snapshot != null && !discountSnapshotsEqual(order.discount_snapshot, snapshotFromExpected(input.promoCode, input.expectedDiscount, order.base_amount))) || order.terms_version !== input.termsVersion ||
             order.billing_origin !== getBillingOrigin(request) || order.is_test !== gateway.configuration.isTestMode) {
             return fail('Objednávka se změnila. Začněte prosím novou objednávku.', 409);
         }
@@ -133,7 +138,7 @@ export async function POST(request: NextRequest) {
             return fail('Platnost pokusu vypršela. Začněte prosím novou objednávku.', 409);
         }
 
-        const priceAfterDiscount = order.base_amount - Math.round(order.base_amount * (order.discount_percent ?? 0) / 100);
+        const priceAfterDiscount = order.discount_snapshot?.finalAmount ?? calculateDiscountedAmount(order.base_amount, order.discount_percent ? { percent: order.discount_percent } : null);
         if (priceAfterDiscount > 0 && priceAfterDiscount < STRIPE_CZK_MINIMUM_CHARGE_AMOUNT) {
             return fail('Cena po této slevě je pod minimální částkou pro platbu kartou.', 422);
         }
@@ -142,8 +147,8 @@ export async function POST(request: NextRequest) {
         const reservation = order.discount_code && await reservePromptbookDiscountCode(order.discount_code, place, order.id);
         if (reservation && reservation.errorMessage) throw new Error('Promptbook coupon reservation failed');
         const discount = reservation ? reservation.activeDiscount : null;
-        if (order.discount_code && (!discount || discount.percent !== order.discount_percent ||
-            discount.subscriptionDiscountDurationMonths !== order.discount_months)) {
+        if (order.discount_code && !discountMatchesExpected(discount, { percent: order.discount_percent!, months: order.discount_months,
+            ...(order.discount_snapshot ? { priceRule: order.discount_snapshot.priceRule, definitionVersion: order.discount_snapshot.definitionVersion, finalAmount: order.discount_snapshot.finalAmount } : {}) }, order.base_amount)) {
             if (discount) {
                 const { errorMessage } = await settlePromptbookDiscountReservation(order.id, false);
                 if (errorMessage) throw new Error('Promptbook coupon reservation release failed');

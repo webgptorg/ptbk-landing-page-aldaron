@@ -1,3 +1,4 @@
+import { createDiscountSnapshot, type DiscountSnapshot } from '@/lib/discounts/discountPricing';
 import { isSubscriptionDiscountPermanent, type ActiveDiscount } from '@/lib/discounts/discountCode';
 import {
     COMMUNITY_MEMBERSHIP_NAME,
@@ -31,6 +32,7 @@ export type StoredCommunityMembershipRegistration = {
     readonly discountCodeEntered: string | null;
     readonly discountCodeUsed: string | null;
     readonly discountPercentApplied: number;
+    readonly discountSnapshot?: DiscountSnapshot | null;
     /** `null` means either no discount or a permanent subscription discount. */
     readonly subscriptionDiscountDurationMonths: number | null;
     readonly baseBillingPriceCzk: number;
@@ -83,7 +85,8 @@ export function createStoredCommunityMembershipRegistration(
         trialDayCount,
         discountCodeEntered: registrationRequest.discountCode.trim() || null,
         discountCodeUsed: activeDiscount?.code ?? null,
-        discountPercentApplied: activeDiscount?.percent ?? 0,
+        discountPercentApplied: activeDiscount?.priceRule ? 0 : activeDiscount?.percent ?? 0,
+        discountSnapshot: createDiscountSnapshot(activeDiscount, Math.round(price.baseBillingPriceCzk * 100), true),
         subscriptionDiscountDurationMonths: activeDiscount?.subscriptionDiscountDurationMonths ?? null,
         baseBillingPriceCzk: price.baseBillingPriceCzk,
         discountAmountCzk: price.discountAmountCzk,

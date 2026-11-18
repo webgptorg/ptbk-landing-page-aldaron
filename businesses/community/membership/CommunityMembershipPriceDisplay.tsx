@@ -1,3 +1,4 @@
+import { describeDiscount } from '@/lib/discounts/discountPricing';
 import { FORM_SURFACE_CLASS_NAMES, type FormSurfaceAppearance } from '@/components/forms/formSurfaceAppearance';
 import {
     formatSubscriptionDiscountDurationMonthCount,
@@ -35,7 +36,7 @@ function createCommunityMembershipPriceDescription(
     billingPeriod: CommunityMembershipBillingPeriod,
     activeDiscount: ActiveDiscount | null,
 ): string {
-    if (isSubscriptionDiscountFullAndPermanent(activeDiscount)) {
+    if (isSubscriptionDiscountFullAndPermanent(activeDiscount, Math.round(price.baseMonthlyEquivalentCzk * 100))) {
         return 'Slevový kód pokrývá celé členství, takže neplatíte nic.';
     }
 
@@ -48,6 +49,11 @@ function createCommunityMembershipPriceDescription(
     }
 
     const subscriptionDiscountDurationMonths = activeDiscount.subscriptionDiscountDurationMonths;
+    if (activeDiscount.priceRule) {
+        const effect = describeDiscount(activeDiscount, 'cs', Math.round(price.finalMonthlyEquivalentCzk * 100));
+        return subscriptionDiscountDurationMonths === null ? `${billingDescription} ${effect} po celou dobu členství.` :
+            `${billingDescription} ${effect} na první ${formatSubscriptionDiscountDurationMonthCount(subscriptionDiscountDurationMonths)}. Poté ${formatCommunityMembershipPrice(price.baseMonthlyEquivalentCzk)} měsíčně.`;
+    }
 
     return subscriptionDiscountDurationMonths === null
         ? `${billingDescription} Slevový kód přidává dalších ${activeDiscount.percent} % trvale po dobu členství.`

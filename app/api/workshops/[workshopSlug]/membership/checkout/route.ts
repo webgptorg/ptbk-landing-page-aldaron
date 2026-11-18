@@ -1,3 +1,6 @@
+import { createDiscountSnapshot, discountMatchesExpected, expectedDiscountSchema, type ExpectedDiscount } from '@/lib/discounts/discountPricing';
+import { STRIPE_CZK_MINIMUM_CHARGE_AMOUNT } from '@/lib/payments/stripeAmount';
+import { CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN } from '@/businesses/community/membership/communityMembershipConfig';
 import {
     CURRENT_PAID_COMMUNITY_MEMBERSHIP_BILLING_PERIOD,
     CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID,
@@ -47,6 +50,7 @@ type CommunityMembershipCheckoutRouteContext = {
 
 type CommunityMembershipCheckoutRequest = {
     readonly discountCode: string;
+    readonly expectedDiscount?: ExpectedDiscount | null;
 };
 
 /**
@@ -74,7 +78,9 @@ function readCheckoutRequest(body: Readonly<Record<string, unknown>>): Community
         return null;
     }
 
-    return { discountCode };
+    const expected = body.expectedDiscount === undefined ? undefined : expectedDiscountSchema.nullable().safeParse(body.expectedDiscount);
+    if (expected && !expected.success) return null;
+    return { discountCode, ...(expected?.success ? { expectedDiscount: expected.data } : {}) };
 }
 
 function createPurchaseResponse(purchaseResult: CommunityMembershipPurchaseResult): NextResponse {
@@ -130,6 +136,9 @@ async function openCommunityMembershipCheckout(
         activeDiscount,
     );
 
+    if (price.finalMonthlyEquivalentCzk > 0 && price.finalMonthlyEquivalentCzk * 100 < STRIPE_CZK_MINIMUM_CHARGE_AMOUNT) {
+        return NextResponse.json({ error: 'Cena po této slevě je pod minimální částkou 15 Kč pro platbu kartou.' }, { status: 422 });
+    }
     let checkoutSession;
     try {
         checkoutSession = await createCommunityMembershipCheckoutSession(
@@ -163,7 +172,8 @@ async function openCommunityMembershipCheckout(
             planId: CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID,
             monthlyPriceCzk: price.finalMonthlyEquivalentCzk,
             discountCode: activeDiscount?.code ?? null,
-            discountPercent: activeDiscount?.percent ?? 0,
+            discountPercent: activeDiscount?.priceRule ? 0 : activeDiscount?.percent ?? 0,
+            discountSnapshot: createDiscountSnapshot(activeDiscount, Math.round(price.baseBillingPriceCzk * 100), true),
             stripeCheckoutSessionId: checkoutSession.id,
             isTestPayment: gateway.configuration.isTestMode,
             requestedByParticipantId: member.participantId,
@@ -240,6 +250,9 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
         return NextResponse.json({ error: COMMUNITY_MEMBERSHIP_MESSAGES.discountCodeNotActive }, { status: 409 });
     }
 
+    if (checkoutRequest.expectedDiscount !== undefined && !discountMatchesExpected(activeDiscount, checkoutRequest.expectedDiscount, CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100, true)) {
+        return NextResponse.json({ error: 'Sleva se změnila. Ověřte kód znovu a potvrďte novou cenu.' }, { status: 409 });
+    }
     const previousCheckoutSessionId = currentMembership.membership?.stripeCheckoutSessionId ?? null;
     if (currentMembership.membership?.status === 'pending' && previousCheckoutSessionId !== null) {
         try {
@@ -282,7 +295,7 @@ export async function POST(request: NextRequest, context: CommunityMembershipChe
         discountCode: checkoutRequest.discountCode,
     };
 
-    return isSubscriptionDiscountFullAndPermanent(activeDiscount)
+    return isSubscriptionDiscountFullAndPermanent(activeDiscount, CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100)
         ? redeemCommunityMembershipVoucher(purchaseAttempt)
         : openCommunityMembershipCheckout(purchaseAttempt, activeDiscount);
 }

@@ -1103,3 +1103,19 @@ intro is hidden in this placement without rewriting stored/exported history or m
 The separately branded Pavol avatar is sold by AI Web s.r.o. on the existing Stripe account. PAVOL_AVATAR_ENABLED opts the full-avatar page/endpoints into verified account access; PAVOL_AVATAR_BILLING_ENABLED independently opens purchases. Keep legacy public chats and voice placements unchanged. Avatar orders, invoices, identities, transcripts, usage and connector tokens are product-private. Full is CZK 1,000 monthly for one person contractually, without technical seat/device restrictions; provisional Free/Light/Full monthly allowances are 5/50/500 across web/MCP/Telegram. Paid orders freeze accepted limits. Light derives read-only from paid Developers membership. Never infer Full from engine licences or mere email entry. No automatic overage charges. Every external call rechecks Full. Existing Supabase numeric verification remains available alongside the shared origin-preserving email link; optional branded delivery uses a separate sender and the same callback. Account uploads require conversation ownership, including durable reads. Static legal documents now live as authoritative Markdown under legal/<product>; dynamic placeholders explain real code sources and are never accepted contracts. Original seller and complete accepted legal snapshots are immutable. Voice for this paid pilot is deferred while unrelated public voice stays enabled. See docs/pavol-avatar-commerce.md and docs/pavol-avatar-integrations.md.
 
 Full uses the shared discount registry (`pavol-avatar-full`), validation, `?code=` links and atomic subscription reservations. Global codes include avatar; existing explicit product scopes remain intact. Freeze code/percentage/duration with the accepted order and verify the displayed quote against the reservation before Stripe. Use the shared coupon helper, preserve reservations across ambiguous retries, redeem paid invoices and release confirmed expiry once. Permanent 100% offers need no card; temporary 100% offers require a card for renewals. A verified paid zero-total invoice grants access; unpaid invoices and fully refunded positive invoices do not. Do not rewrite existing contracts or create production test purchases. See docs/pavol-avatar-billing.md.
+
+
+## Ecosystem discount price rules, 18 November 2026
+
+Shared discount codes support legacy percentages, fixed resulting CZK prices, CZK deductions and bounded arithmetic
+formulas. `lib/discounts/discountPricing.ts` owns evaluation, public labels, quotes and versioned purchase snapshots;
+never use eval or JavaScript execution. `price`/`cena` is the original purchase price in CZK. Keep monetary results in
+integer minor units and retain historical rounding for legacy workshop/community percentages. New explicit
+`applies_everywhere` includes every registered offer, including Promptbook and the paid avatar on both personal
+sites. Missing/false retains historical empty-scope exclusions; do not widen existing codes during migration/editing.
+Every accepted order freezes its definition/version, base/final amounts, currency and duration. Subscription
+reservations return their frozen rule on retries, including after editing/deletion. Stripe receives a separate
+percentage or resolved amount coupon with the accepted duration. Never re-evaluate paid subscriptions using today's
+code, rewrite old contracts or create production test purchases/codes. Below-minimum positive card amounts are
+refused clearly without raising the configured price; permanent zero prices skip cards and temporary ones collect
+a renewal card. Schema updates are additive and older RPC signatures remain available. See docs/discount-price-rules.md.

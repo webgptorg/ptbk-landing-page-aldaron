@@ -1,4 +1,5 @@
 'use client';
+import { calculateDiscountedAmount } from './discountPricing';
 
 import { normalizeDiscountCode, type ActiveDiscount, type ActiveDiscountByPlaceId } from '@/lib/discounts/discountCode';
 import { validateDiscountCode } from '@/lib/discounts/discountCodeApi';
@@ -11,6 +12,7 @@ type DiscountCodeValidationOptions = {
     readonly initialDiscountCode: string;
     readonly initialActiveDiscountByPlaceId: ActiveDiscountByPlaceId;
     readonly discountPlaceId: string;
+    readonly baseAmount?: number;
 };
 
 export type DiscountCodeValidation = {
@@ -19,6 +21,7 @@ export type DiscountCodeValidation = {
     readonly activeDiscount: ActiveDiscount | null;
     readonly isValidationPending: boolean;
     readonly validationError: string | null;
+    readonly finalAmount?: number;
 };
 
 /**
@@ -55,6 +58,7 @@ export function useDiscountCodeValidation({
     initialDiscountCode,
     initialActiveDiscountByPlaceId,
     discountPlaceId,
+    baseAmount,
 }: DiscountCodeValidationOptions): DiscountCodeValidation {
     const [discountCode, setDiscountCode] = useState(initialDiscountCode);
     const [validatedDiscount, setValidatedDiscount] = useState<ValidatedDiscount | null>(() => ({
@@ -136,16 +140,14 @@ export function useDiscountCodeValidation({
         normalizedDiscountCode,
     ]);
 
-    return {
-        discountCode,
-        setDiscountCode,
-        activeDiscount:
-            validatedDiscount !== null &&
-            validatedDiscount.discountCode === normalizedDiscountCode &&
-            validatedDiscount.discountPlaceId === discountPlaceId
-                ? validatedDiscount.activeDiscount
-                : null,
-        isValidationPending,
-        validationError,
-    };
+    let activeDiscount = validatedDiscount !== null &&
+        validatedDiscount.discountCode === normalizedDiscountCode && validatedDiscount.discountPlaceId === discountPlaceId
+        ? validatedDiscount.activeDiscount : null;
+    let calculationError: string | null = null;
+    if (activeDiscount && baseAmount !== undefined) {
+        try { calculateDiscountedAmount(baseAmount, activeDiscount); }
+        catch { activeDiscount = null; calculationError = 'Slevu pro tuto cenu nelze vypočítat. Ověřte jiný kód nebo pole vymažte.'; }
+    }
+    return { discountCode, setDiscountCode, activeDiscount, isValidationPending, validationError: calculationError ?? validationError,
+        ...(activeDiscount && baseAmount !== undefined ? { finalAmount: calculateDiscountedAmount(baseAmount, activeDiscount) } : {}) };
 }

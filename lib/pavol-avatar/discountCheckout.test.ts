@@ -1,3 +1,4 @@
+import { createExpectedDiscount, type DiscountPriceRule } from '@/lib/discounts/discountPricing';
 import Stripe from 'stripe';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -136,4 +137,40 @@ describe('avatar shared discount checkout', () => {
         await expect(createAvatarCheckout(request, principal, { ...input(), expectedDiscount: { percent: 99, months: null } })).rejects.toMatchObject({ status: 422 });
         expect(f.rows).toHaveLength(0); expect(mock.reserve).not.toHaveBeenCalled(); expect(f.create).not.toHaveBeenCalled();
     });
+    it.each([
+        [{ kind: 'fixed', amount: 20, currency: 'CZK' }, 2000, 98000],
+        [{ kind: 'amount', amount: 200, currency: 'CZK' }, 80000, 20000],
+        [{ kind: 'formula', expression: 'price * 0.1 + 1', currency: 'CZK' }, 10100, 89900],
+    ] as const)('freezes and charges a custom rule %j at the displayed amount', async (rule, finalAmount, amountOff) => {
+        const f = fixture();
+        const discount = { ...active().activeDiscount, priceRule: rule as DiscountPriceRule, definitionVersion: 7 };
+        mock.reserve.mockResolvedValue({ status: 'applied', activeDiscount: discount, errorMessage: null });
+        const expectedDiscount = createExpectedDiscount(discount, 100000);
+        await createAvatarCheckout(request, principal, { ...input(), expectedDiscount });
+        expect(f.rows[0].discount_snapshot).toMatchObject({ version: 1, definitionVersion: 7, priceRule: rule, baseAmount: 100000, finalAmount, months: 3, currency: 'CZK' });
+        expect(f.coupon).toHaveBeenCalledWith(expect.objectContaining({ amount_off: amountOff, currency: 'czk', duration: 'repeating', duration_in_months: 3 }), expect.anything());
+        expect(f.coupon.mock.calls[0][0]).not.toHaveProperty('percent_off');
+    });
+    it('rejects changed rules with the same legacy percentage and rejects a manipulated quote', async () => {
+        const f = fixture();
+        const discount = { ...active().activeDiscount, priceRule: { kind: 'fixed', amount: 20, currency: 'CZK' } as const, definitionVersion: 2 };
+        mock.reserve.mockResolvedValue({ status: 'applied', activeDiscount: discount, errorMessage: null });
+        const expectedDiscount = createExpectedDiscount({ ...discount, priceRule: { ...discount.priceRule, amount: 30 } }, 100000);
+        await expect(createAvatarCheckout(request, principal, { ...input(), expectedDiscount })).rejects.toMatchObject({ code: 'discount_changed' });
+        expect(f.create).not.toHaveBeenCalled();
+    });
+    it('keeps a 1 CZK rule definable but never raises or charges its below-minimum price', async () => {
+        const f = fixture();
+        const discount = { ...active().activeDiscount, priceRule: { kind: 'fixed', amount: 1, currency: 'CZK' } as const };
+        await expect(createAvatarCheckout(request, principal, { ...input(), expectedDiscount: createExpectedDiscount(discount, 100000) })).rejects.toMatchObject({ status: 422 });
+        expect(f.rows).toHaveLength(0); expect(mock.reserve).not.toHaveBeenCalled(); expect(f.create).not.toHaveBeenCalled();
+    });
+    it.each([null, 3])('uses a fixed zero price without a card only when it is permanent (%s)', async months => {
+        const f = fixture();
+        const discount = { ...active(30, months).activeDiscount, priceRule: { kind: 'fixed', amount: 0, currency: 'CZK' } as const };
+        mock.reserve.mockResolvedValue({ status: 'applied', activeDiscount: discount, errorMessage: null });
+        await createAvatarCheckout(request, principal, { ...input(), expectedDiscount: createExpectedDiscount(discount, 100000) });
+        expect(f.create.mock.calls[0][0].payment_method_collection).toBe(months === null ? 'if_required' : 'always');
+    });
+
 });

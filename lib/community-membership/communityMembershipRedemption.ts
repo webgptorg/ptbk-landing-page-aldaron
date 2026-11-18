@@ -1,3 +1,5 @@
+import { createDiscountSnapshot } from '@/lib/discounts/discountPricing';
+import { CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN } from '@/businesses/community/membership/communityMembershipConfig';
 import { DEFAULT_COMMUNITY_ID, type CommunityId } from '@/businesses/community/config';
 import {
     CURRENT_PAID_COMMUNITY_MEMBERSHIP_BILLING_PERIOD,
@@ -56,7 +58,7 @@ export async function redeemCommunityMembership(
     if (
         consumption.status !== 'applied' ||
         activeDiscount === null ||
-        !isSubscriptionDiscountFullAndPermanent(activeDiscount)
+        !isSubscriptionDiscountFullAndPermanent(activeDiscount, CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN.monthlyPriceCzk * 100)
     ) {
         return { status: 'discount-code-refused', membership: null };
     }
@@ -74,7 +76,8 @@ export async function redeemCommunityMembership(
         planId: CURRENT_PAID_COMMUNITY_MEMBERSHIP_PLAN_ID,
         monthlyPriceCzk: price.finalMonthlyEquivalentCzk,
         discountCode: activeDiscount.code,
-        discountPercent: activeDiscount.percent,
+        discountPercent: 100,
+        discountSnapshot: createDiscountSnapshot(activeDiscount, Math.round(price.baseBillingPriceCzk * 100), true),
         isTestPayment,
         requestedByParticipantId: member.participantId,
     });

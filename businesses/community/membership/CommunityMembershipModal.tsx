@@ -165,7 +165,7 @@ export function CommunityMembershipModal() {
                             isPaymentInTestMode={membership.isPaymentInTestMode}
                             isPurchaseStarting={isPurchaseStarting}
                             errorMessage={errorMessage}
-                            onPurchase={(discountCode) => void membershipRoom.startMembershipPurchase(discountCode)}
+                            onPurchase={(discountCode, expectedDiscount) => void membershipRoom.startMembershipPurchase(discountCode, expectedDiscount)}
                         />
                     )}
 

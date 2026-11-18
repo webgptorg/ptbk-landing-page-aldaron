@@ -68,6 +68,7 @@ describe('redeeming a community membership voucher', () => {
             monthlyPriceCzk: 0,
             discountCode: 'VOUCHER_FREE',
             discountPercent: 100,
+            discountSnapshot: expect.objectContaining({ version: 1, finalAmount: 0, baseAmount: 19900, currency: 'CZK', months: null }),
             isTestPayment: false,
             requestedByParticipantId: MEMBER.participantId,
         });

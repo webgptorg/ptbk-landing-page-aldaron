@@ -1,4 +1,5 @@
 'use client';
+import { describeDiscount } from '@/lib/discounts/discountPricing';
 
 import {
     AI_SUPERVIZE_MINI_WORKSHOP_INTEREST_PLACE_NAME,
@@ -328,6 +329,7 @@ function AiSupervizeMiniEventRegistrationForm({
         initialDiscountCode,
         initialActiveDiscountByPlaceId,
         discountPlaceId: getAiSupervizeMiniDiscountPlaceId(selectedEvent.event.locationKind),
+        baseAmount: Math.round(selectedEvent.event.priceCzk * participantCount * 100),
     });
     const activeDiscount = discountCodeValidation.activeDiscount;
     const isDiscountApplied = activeDiscount !== null;
@@ -515,7 +517,7 @@ function AiSupervizeMiniEventRegistrationForm({
                     <div className="text-xs text-slate-300">{formatEventFormat(selectedEvent.event)}</div>
                     <div className="text-2xl font-bold">{formatCzechKoruna(price.finalPriceCzk)}</div>
                     {activeDiscount !== null && (
-                        <div className="text-xs text-cyan-300">Sleva {activeDiscount.percent} % započtena</div>
+                        <div className="text-xs text-cyan-300">{describeDiscount(activeDiscount)} započtena</div>
                     )}
                 </div>
             </div>

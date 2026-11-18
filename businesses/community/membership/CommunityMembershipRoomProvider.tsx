@@ -1,4 +1,5 @@
 'use client';
+import type { ExpectedDiscount } from '@/lib/discounts/discountPricing';
 
 import {
     createUrlWithoutCommunityMembershipCheckoutReturn,
@@ -47,7 +48,7 @@ type CommunityMembershipRoomController = {
      * Asks for the membership once, however many surfaces of the room want to know it
      */
     readonly ensureMembershipLoaded: () => void;
-    readonly startMembershipPurchase: (discountCode: string) => Promise<void>;
+    readonly startMembershipPurchase: (discountCode: string, expectedDiscount?: ExpectedDiscount | null) => Promise<void>;
     readonly scheduleCancellation: () => Promise<boolean>;
     readonly reactivateMembership: () => Promise<boolean>;
     readonly openMembershipPortal: () => Promise<void>;
@@ -191,14 +192,14 @@ export function CommunityMembershipRoomProvider({
     }, [workshopSlug]);
 
     const startMembershipPurchase = useCallback(
-        async (discountCode: string) => {
+        async (discountCode: string, expectedDiscount?: ExpectedDiscount | null) => {
             setIsPurchaseStarting(true);
             setErrorMessage(null);
 
             try {
                 const { checkoutUrl, membership: purchasedMembership } = await startCommunityMembershipPurchase(
                     workshopSlug,
-                    { discountCode, termsAccepted: true },
+                    { discountCode, termsAccepted: true, ...(expectedDiscount !== undefined ? { expectedDiscount } : {}) },
                 );
 
                 if (checkoutUrl !== null) {

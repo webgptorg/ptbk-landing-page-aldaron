@@ -1,4 +1,5 @@
 'use client';
+import { calculateDiscountedAmount, createExpectedDiscount } from '@/lib/discounts/discountPricing';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { CompanyNameInput } from '@/businesses/new/CompanyNameInput';
 import { DiscountCodeField } from '@/components/discounts/DiscountCodeField';
@@ -20,20 +21,20 @@ export function AvatarCheckout({cs,limit,onCancel,slovakiaEnabled=false}:{cs:boo
  const[initialDiscountCode,setInitialDiscountCode]=useState('');
  const[initialDiscounts,setInitialDiscounts]=useState(INITIAL_DISCOUNTS);
  useEffect(()=>{setInitialDiscountCode(new URLSearchParams(window.location.search).get(DISCOUNT_CODE_QUERY_PARAMETER)??'');},[]);
- const discount=useDiscountCodeValidation({initialDiscountCode,initialActiveDiscountByPlaceId:initialDiscounts,discountPlaceId:PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID});
+ const discount=useDiscountCodeValidation({initialDiscountCode,initialActiveDiscountByPlaceId:initialDiscounts,discountPlaceId:PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID,baseAmount:AVATAR_PUBLIC_PRICE_CZK*100});
  const activeDiscount=discount.activeDiscount;
  const discountReady=isDiscountCodeReadyForSubmission(discount);
- const amount=AVATAR_PUBLIC_PRICE_CZK*100-Math.round(AVATAR_PUBLIC_PRICE_CZK*(activeDiscount?.percent??0));
+ const amount=calculateDiscountedAmount(AVATAR_PUBLIC_PRICE_CZK*100,activeDiscount);
  const belowMinimum=amount>0&&amount<STRIPE_CZK_MINIMUM_CHARGE_AMOUNT;
  const duration=activeDiscount?.subscriptionDiscountDurationMonths??null;
- const free=isSubscriptionDiscountFullAndPermanent(activeDiscount);
+ const free=isSubscriptionDiscountFullAndPermanent(activeDiscount,AVATAR_PUBLIC_PRICE_CZK*100);
  const attempt=useRef<{fingerprint:string;id:string}|null>(null);
  function choose(company:PromptbookBillingIdentity){setName(company.name);setCompanyId(company.companyId);setVatId(company.vatId??'');setAddress(company.address);}
  async function submit(event:FormEvent){event.preventDefault();if(busy||!discountReady||belowMinimum)return;setBusy(true);setError('');
   try{const payload={
    fullname,country,customerType:business?'business':'individual',companyId:business?companyId:undefined,vatId:business?vatId:undefined,billingName:name,
    billingAddress:{...address,country},termsAccepted:terms,immediateStartAccepted:immediate,termsVersion:AVATAR_PUBLIC_TERMS_VERSION,
-   discountCode:normalizeDiscountCode(discount.discountCode),expectedDiscount:activeDiscount?{percent:activeDiscount.percent,months:duration}:null,
+   discountCode:normalizeDiscountCode(discount.discountCode),expectedDiscount:createExpectedDiscount(activeDiscount,AVATAR_PUBLIC_PRICE_CZK*100),
   };const fingerprint=JSON.stringify(payload);if(attempt.current?.fingerprint!==fingerprint)attempt.current={fingerprint,id:crypto.randomUUID()};
   const response=await fetch('/api/pavol-avatar/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,requestId:attempt.current.id})});const data=await response.json() as {url?:unknown;error?:string;code?:string};
   if(!response.ok||typeof data.url!=='string'){
@@ -50,7 +51,7 @@ export function AvatarCheckout({cs,limit,onCancel,slovakiaEnabled=false}:{cs:boo
    {activeDiscount&&<p className="avatar-small">{duration===null
     ?(cs?'Sleva platí po celou dobu předplatného.':'The discount applies for the lifetime of this subscription.')
     :(cs?`Sleva na první ${formatSubscriptionDiscountDurationMonthCount(duration)}, poté ${AVATAR_PUBLIC_PRICE_CZK.toLocaleString('cs-CZ')} Kč měsíčně.`:`Discount for the first ${duration} ${duration===1?'month':'months'}, then ${AVATAR_PUBLIC_PRICE_CZK.toLocaleString('en-GB')} Kč per month.`)}</p>}
-   {free&&<p className="avatar-small">{cs?'Trvalá 100% sleva. Platební karta není potřeba.':'Permanent 100% discount. No payment card is required.'}</p>}
+   {free&&<p className="avatar-small">{cs?'Členství je trvale zdarma. Platební karta není potřeba.':'Free for the lifetime of this subscription. No payment card is required.'}</p>}
   </div>
   <fieldset className="avatar-discount-field" disabled={busy}><legend className="sr-only">{cs?'Sleva':'Discount'}</legend><DiscountCodeField inputId="avatar-discount-code" validation={discount} language={cs?'cs':'en'}/></fieldset>
   {belowMinimum&&<p className="avatar-error" role="alert">{cs?'Cena po slevě je pod minimální částkou 15 Kč pro platbu kartou. Použij jiný kód nebo pole vymaž.':'The discounted price is below the 15 Kč minimum card payment. Use another code or clear the field.'}</p>}

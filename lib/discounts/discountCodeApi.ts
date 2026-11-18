@@ -1,3 +1,4 @@
+import { discountPriceRuleSchema } from './discountPricing';
 import { sendJson } from '@/lib/api/requestJson';
 import type { ActiveDiscount } from '@/lib/discounts/discountCode';
 import { DISCOUNT_CODE_VALIDATION_API_PATH } from '@/lib/discounts/discountCodeConstants';
@@ -16,6 +17,8 @@ function isActiveDiscount(value: unknown): value is ActiveDiscount {
     return (
         typeof activeDiscount.code === 'string' &&
         typeof activeDiscount.percent === 'number' &&
+        (activeDiscount.priceRule == null || discountPriceRuleSchema.safeParse(activeDiscount.priceRule).success) &&
+        (activeDiscount.definitionVersion === undefined || (Number.isSafeInteger(activeDiscount.definitionVersion) && Number(activeDiscount.definitionVersion) > 0)) &&
         (activeDiscount.remainingUseCount === null || typeof activeDiscount.remainingUseCount === 'number') &&
         (activeDiscount.subscriptionDiscountDurationMonths === null ||
             typeof activeDiscount.subscriptionDiscountDurationMonths === 'number')

@@ -1,4 +1,6 @@
 'use client';
+import { DiscountPriceRuleEditor } from './DiscountPriceRuleEditor';
+import { validateDiscountPriceRule } from '@/lib/discounts/discountPricing';
 
 import { AdminAutosaveStatus } from '@/components/admin/AdminAutosaveStatus';
 import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
@@ -16,7 +18,6 @@ import {
 } from '@/lib/discounts/discountCode';
 import {
     MAXIMAL_DISCOUNT_CODE_USE_COUNT,
-    MAXIMAL_DISCOUNT_PERCENT,
     MAXIMAL_SUBSCRIPTION_DISCOUNT_DURATION_MONTH_COUNT,
 } from '@/lib/discounts/discountCodeConstants';
 import {
@@ -24,6 +25,7 @@ import {
     DISCOUNT_PLACES,
     getDiscountCodePlaces,
     isPromptbookDiscountPlaceId,
+    isSubscriptionDiscountPlaceId,
 } from '@/lib/discounts/discountPlaces';
 import { X } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
@@ -51,6 +53,8 @@ function createNewDiscountCodeValues(): DiscountCodeValues {
         isEnabled: true,
         isPromoted: false,
         placeIds: [],
+        appliesEverywhere: true,
+        priceRule: null,
         maximumUseCount: null,
         subscriptionDiscountDurationMonths: null,
     };
@@ -69,6 +73,8 @@ function createDiscountCodeValues(discountCode: DiscountCode | null): DiscountCo
         isEnabled: discountCode.isEnabled,
         isPromoted: discountCode.isPromoted ?? false,
         placeIds: discountCode.placeIds,
+        appliesEverywhere: discountCode.appliesEverywhere ?? false,
+        priceRule: discountCode.priceRule ?? null,
         maximumUseCount: discountCode.maximumUseCount,
         subscriptionDiscountDurationMonths: discountCode.subscriptionDiscountDurationMonths,
     };
@@ -104,9 +110,9 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
     const isEditing = discountCode !== null;
     const isUseCountLimited = values.maximumUseCount !== null;
     const isSubscriptionDiscountDurationLimited = values.subscriptionDiscountDurationMonths !== null;
-    const isPromptbookSelected = !isValidForAllPlaces && values.placeIds.some(isPromptbookDiscountPlaceId);
+    const isPromptbookSelected = values.appliesEverywhere === true || (!isValidForAllPlaces && values.placeIds.some(isPromptbookDiscountPlaceId));
     const isSubscriptionSelected =
-        isValidForAllPlaces || values.placeIds.includes(COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID) || isPromptbookSelected;
+        isValidForAllPlaces || values.placeIds.includes(COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID) || values.placeIds.some(isSubscriptionDiscountPlaceId);
 
     const updateValue = <TField extends keyof DiscountCodeValues>(field: TField, value: DiscountCodeValues[TField]) => {
         setValues((currentValues) => ({ ...currentValues, [field]: value }));
@@ -143,6 +149,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
             );
         }
 
+        try { validateDiscountPriceRule(values.priceRule); }
+        catch (error) { return rejectInvalidDraft(error instanceof Error ? error.message : 'Neplatný vzorec.'); }
         setValidationError(null);
         const isSaved = await onSave({
             ...values,
@@ -210,18 +218,6 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     />
                 </label>
                 <label className="text-sm font-medium text-slate-700">
-                    Sleva v procentech
-                    <Input
-                        type="number"
-                        min={1}
-                        max={MAXIMAL_DISCOUNT_PERCENT}
-                        value={values.percent}
-                        onChange={(event) => updateValue('percent', Number(event.target.value))}
-                        className="mt-2"
-                        required
-                    />
-                </label>
-                <label className="text-sm font-medium text-slate-700">
                     Začátek platnosti
                     <Input
                         type="datetime-local"
@@ -242,6 +238,8 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     />
                 </label>
             </div>
+
+            <DiscountPriceRuleEditor rule={values.priceRule ?? null} percent={values.percent} onRuleChange={rule => updateValue('priceRule', rule)} onPercentChange={percent => updateValue('percent', percent)} />
 
             <div className="mt-5 grid gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
                 <label className="flex items-start gap-3">
@@ -267,6 +265,7 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                         onChange={(event) => {
                             const nextIsValidForAllPlaces = event.target.checked;
                             setIsValidForAllPlaces(nextIsValidForAllPlaces);
+                            updateValue('appliesEverywhere', nextIsValidForAllPlaces);
                             if (nextIsValidForAllPlaces) {
                                 updateValue('isPromoted', false);
                             }
@@ -275,7 +274,7 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                             if (!nextIsValidForAllPlaces && values.placeIds.length === 0) {
                                 updateValue(
                                     'placeIds',
-                                    getDiscountCodePlaces([]).map((discountPlace) => discountPlace.id),
+                                    getDiscountCodePlaces([], values.appliesEverywhere).map((discountPlace) => discountPlace.id),
                                 );
                             }
                         }}
@@ -283,10 +282,11 @@ export function DiscountCodeForm({ discountCode, onSave, onCancelEditing }: Disc
                     />
                     <span>
                         <strong className="block text-slate-950">Všechna místa</strong>
-                        Pro tarify Promptbook Start a Business je vždy potřeba výslovný výběr.
+                        {values.appliesEverywhere ? 'Celý ekosystém včetně licencí Promptbooku a avatara na osobních webech.' : 'Původní rozsah staršího kódu: bez tarifů Promptbook Start a Business.'}
                     </span>
                 </label>
 
+                {isValidForAllPlaces && !values.appliesEverywhere && <Button type="button" variant="outline" className="mt-3" onClick={() => updateValue('appliesEverywhere', true)}>Rozšířit na celý ekosystém včetně Promptbooku</Button>}
                 {!isValidForAllPlaces && (
                     <div className="mt-4 grid gap-3 border-t border-slate-200 pt-4">
                         {DISCOUNT_PLACES.map((discountPlace) => (

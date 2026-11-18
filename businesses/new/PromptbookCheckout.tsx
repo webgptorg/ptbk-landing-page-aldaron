@@ -1,4 +1,5 @@
 'use client';
+import { calculateDiscountedAmount, createExpectedDiscount, describeDiscount } from '@/lib/discounts/discountPricing';
 
 import { JsonRequestError, sendJson } from '@/lib/api/requestJson';
 import { PROMPTBOOK_BILLING_CONTACT_NOTICE } from '@/lib/contacts/contactSubmissionPolicy';
@@ -79,6 +80,7 @@ export function PromptbookCheckout({
         initialDiscountCode: validatedQuote?.code ?? initialDiscountCode,
         initialActiveDiscountByPlaceId: validatedQuote?.discounts ?? initialActiveDiscountByPlaceId,
         discountPlaceId,
+        baseAmount: (plan === 'start' ? COMMERCIAL_TERMS.startCzk : COMMERCIAL_TERMS.businessCzk) * 100,
     });
 
     const planName = plan === 'start' ? 'Start' : 'Business';
@@ -86,7 +88,7 @@ export function PromptbookCheckout({
     const activeDiscount = discount.activeDiscount;
     const duration = activeDiscount?.subscriptionDiscountDurationMonths ?? null;
     const baseAmount = basePrice * 100;
-    const amount = activeDiscount ? baseAmount - Math.round(basePrice * activeDiscount.percent) : baseAmount;
+    const amount = calculateDiscountedAmount(baseAmount, activeDiscount);
     const discountReady = isDiscountCodeReadyForSubmission(discount);
     const discountMessage =
         discount.validationError ??
@@ -191,7 +193,7 @@ export function PromptbookCheckout({
             referralCode: referral.trim(),
             email: String(fields.get('email')).trim(),
             promoCode: activeDiscount ? normalizeDiscountCode(discount.discountCode) : undefined,
-            expectedDiscount: activeDiscount ? { percent: activeDiscount.percent, months: duration } : null,
+            expectedDiscount: createExpectedDiscount(activeDiscount, baseAmount),
             acceptedTerms: fields.get('terms') === 'on',
             immediateStart: fields.get('immediateStart') === 'on',
             termsVersion: PROMPTBOOK_ONLINE_TERMS_VERSION,
@@ -287,7 +289,7 @@ export function PromptbookCheckout({
                     {currentPromotion && (
                         <div className={styles.promotion}>
                             <p>
-                                <strong>{currentPromotion.percent} %{' '}
+                                <strong>{describeDiscount(currentPromotion)}{' '}
                                 {currentPromotion.subscriptionDiscountDurationMonths === null
                                     ? 'po dobu předplatného'
                                     : currentPromotion.subscriptionDiscountDurationMonths === 3

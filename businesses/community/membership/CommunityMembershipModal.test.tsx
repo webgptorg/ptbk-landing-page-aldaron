@@ -347,6 +347,7 @@ describe('community membership modal', () => {
             expect(startCommunityMembershipPurchase).toHaveBeenCalledWith(COMMUNITY_WORKSHOP_SLUG, {
                 discountCode: 'VOUCHER_FREE',
                 termsAccepted: true,
+                expectedDiscount: { percent: 100, months: null },
             }),
         );
         expect(await screen.findByText('Slevový kód uplatněn. Placené členství je vaše zdarma, díky!')).toBeDefined();

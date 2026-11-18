@@ -1,3 +1,4 @@
+import type { DiscountPriceRule } from './discountPricing';
 import {
     createActiveDiscount,
     isDiscountCodeNormalized,
@@ -9,7 +10,6 @@ import {
     type DiscountCodeValues,
 } from '@/lib/discounts/discountCode';
 import {
-    CONSUME_DISCOUNT_CODE_FUNCTION_NAME,
     DISCOUNT_CODE_TABLE_NAME,
     RESOLVE_DISCOUNT_CODE_FUNCTION_NAME,
 } from '@/lib/discounts/discountCodeConstants';
@@ -26,6 +26,9 @@ export type DiscountCodeRow = {
     readonly id: string;
     readonly code: string;
     readonly percent: number;
+    readonly price_rule?: DiscountPriceRule | null;
+    readonly definition_version?: number;
+    readonly applies_everywhere?: boolean;
     readonly starts_at: string;
     readonly ends_at: string;
     readonly is_enabled: boolean;
@@ -42,6 +45,8 @@ type DiscountCodeConsumptionRow = {
     readonly status: string;
     readonly code: string;
     readonly percent: number | null;
+    readonly price_rule?: DiscountPriceRule | null;
+    readonly definition_version?: number;
     readonly remaining_use_count: number | null;
     readonly subscription_discount_duration_months: number | null;
 };
@@ -101,6 +106,9 @@ export function mapDiscountCodeRow(discountCodeRow: DiscountCodeRow): DiscountCo
         id: discountCodeRow.id,
         code: discountCodeRow.code,
         percent: discountCodeRow.percent,
+        ...(discountCodeRow.price_rule ? { priceRule: discountCodeRow.price_rule } : {}),
+        ...(discountCodeRow.definition_version !== undefined ? { definitionVersion: discountCodeRow.definition_version } : {}),
+        ...(discountCodeRow.applies_everywhere !== undefined ? { appliesEverywhere: discountCodeRow.applies_everywhere } : {}),
         startsAt: discountCodeRow.starts_at,
         endsAt: discountCodeRow.ends_at,
         isEnabled: discountCodeRow.is_enabled,
@@ -116,10 +124,12 @@ export function mapDiscountCodeRow(discountCodeRow: DiscountCodeRow): DiscountCo
 
 export function createDiscountCodeDatabaseValues(
     discountCode: DiscountCodeValues,
-): Readonly<Record<string, string | number | boolean | readonly string[] | null>> {
+): Readonly<Record<string, unknown>> {
     return {
         code: discountCode.code,
         percent: discountCode.percent,
+        ...(discountCode.priceRule !== undefined ? { price_rule: discountCode.priceRule } : {}),
+        ...(discountCode.appliesEverywhere !== undefined ? { applies_everywhere: discountCode.appliesEverywhere } : {}),
         starts_at: discountCode.startsAt,
         ends_at: discountCode.endsAt,
         is_enabled: discountCode.isEnabled,
@@ -243,7 +253,7 @@ export async function loadPromotedDiscountsByPlace(
         .eq('is_enabled', true)
         .lte('starts_at', timestamp)
         .gte('ends_at', timestamp)
-        .overlaps('place_ids', [...PROMPTBOOK_DISCOUNT_PLACE_IDS])
+        .or(`applies_everywhere.eq.true,place_ids.ov.{${PROMPTBOOK_DISCOUNT_PLACE_IDS.join(',')}}`)
         .order('starts_at', { ascending: false })
         .order('created_at', { ascending: false })
         .order('id');
@@ -277,6 +287,8 @@ function createDiscountCodeConsumptionResult(
                 ? {
                       code: consumptionRow.code,
                       percent: consumptionRow.percent,
+                      ...(consumptionRow.price_rule ? { priceRule: consumptionRow.price_rule } : {}),
+                      ...(consumptionRow.definition_version !== undefined ? { definitionVersion: consumptionRow.definition_version } : {}),
                       remainingUseCount: consumptionRow.remaining_use_count,
                       subscriptionDiscountDurationMonths: consumptionRow.subscription_discount_duration_months,
                   }
@@ -307,7 +319,7 @@ export async function consumeDiscountCode(
         };
     }
 
-    const { data, error } = await supabase.rpc(CONSUME_DISCOUNT_CODE_FUNCTION_NAME, {
+    const { data, error } = await supabase.rpc('consume_discount_code_v2', {
         discount_code: normalizedDiscountCode,
         discount_place_id: discountPlaceId,
     });
@@ -338,7 +350,7 @@ export async function reserveSubscriptionDiscountCode(
         return { status: 'unusable', activeDiscount: null, errorMessage: DISCOUNT_CODE_DATABASE_UNAVAILABLE_ERROR_MESSAGE };
     }
 
-    const { data, error } = await supabase.rpc('reserve_subscription_discount_code', {
+    const { data, error } = await supabase.rpc('reserve_subscription_discount_code_v2', {
         submitted_code: normalizedDiscountCode,
         place_id: discountPlaceId,
         reservation_id: reservationId,

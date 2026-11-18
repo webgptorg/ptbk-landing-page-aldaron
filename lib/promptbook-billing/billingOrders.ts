@@ -1,3 +1,4 @@
+import type { DiscountSnapshot } from '@/lib/discounts/discountPricing';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -29,6 +30,7 @@ export type PromptbookOrder = {
     discount_code: string | null;
     discount_percent: number | null;
     discount_months: number | null;
+    discount_snapshot?: DiscountSnapshot | null;
     is_test: boolean;
     status: string;
     revision: number;

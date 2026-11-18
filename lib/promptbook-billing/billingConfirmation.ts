@@ -1,3 +1,4 @@
+import { describeDiscount } from '@/lib/discounts/discountPricing';
 import { isValidElement, type ReactNode } from 'react';
 import { getPromptbookOnlineTermsDocument } from '@/lib/legal/promptbookOnlineTermsDocument';
 import { formatPromptbookBillingAmount } from '@/businesses/new/promptbookBillingPresentation';
@@ -58,10 +59,10 @@ export function createPromptbookOrderConfirmation(order: PromptbookOrder): strin
     if (confirmedAt) rows.splice(2, 0, ['Potvrzena', printedDate(confirmedAt)]);
     if (order.company_id) rows.push(['IČO', order.company_id]);
     if (order.vat_id) rows.push(['DIČ / IČ DPH', order.vat_id]);
-    const discountedAmount = order.base_amount - Math.round(order.base_amount * (order.discount_percent ?? 0) / 100);
+    const discountedAmount = order.discount_snapshot?.finalAmount ?? order.base_amount - Math.round(order.base_amount * (order.discount_percent ?? 0) / 100);
     if (order.discount_code && order.discount_percent) {
         rows.push(['Slevový kód', order.discount_code]);
-        rows.push(['Sleva', `${order.discount_percent} %${order.discount_months ? ` na ${order.discount_months} měsíce` : ' po dobu předplatného'}`]);
+        rows.push(['Sleva', `${order.discount_snapshot?.priceRule ? describeDiscount({ percent: order.discount_percent, priceRule: order.discount_snapshot.priceRule }, 'cs', discountedAmount) : `${order.discount_percent} %`}${order.discount_months ? ` na ${order.discount_months} měsíce` : ' po dobu předplatného'}`]);
         rows.push(['Měsíční cena po slevě', formatPromptbookBillingAmount(discountedAmount)]);
         if (order.discount_months) rows.push(['Po slevě', `${formatPromptbookBillingAmount(order.base_amount)} měsíčně`]);
     }

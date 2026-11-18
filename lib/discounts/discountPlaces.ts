@@ -106,8 +106,8 @@ export function isKnownDiscountPlaceId(discountPlaceId: string): boolean {
 /**
  * Promptbook plans require explicit opt-in. Other places retain the existing all-places scope.
  */
-export function getDiscountCodePlaces(placeIds: readonly string[]): readonly DiscountPlace[] {
-    return placeIds.length === 0
+export function getDiscountCodePlaces(placeIds: readonly string[], appliesEverywhere = false): readonly DiscountPlace[] {
+    return appliesEverywhere ? DISCOUNT_PLACES : placeIds.length === 0
         ? DISCOUNT_PLACES.filter(({ id }) => !isPromptbookDiscountPlaceId(id))
         : placeIds
               .map(getDiscountPlaceById)

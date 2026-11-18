@@ -1,3 +1,5 @@
+import { createExpectedDiscount } from '@/lib/discounts/discountPricing';
+import { reservePromptbookDiscountCode, settlePromptbookDiscountReservation } from '@/lib/discounts/discountCodeDatabase';
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from './route';
@@ -142,5 +144,25 @@ describe('Promptbook order checkout input', () => {
         expect((await POST(request(input))).status).toBe(200);
         expect(createCheckout).toHaveBeenCalledTimes(1);
         expect(retrieveSession).toHaveBeenCalledWith('cs_consumer');
+    });
+});
+
+
+describe('Promptbook custom discount checkout', () => {
+    const active = { code: 'TWENTY', percent: 30, remainingUseCount: 0, subscriptionDiscountDurationMonths: 3,
+        priceRule: { kind: 'fixed', amount: 20, currency: 'CZK' } as const, definitionVersion: 2 };
+    it('stores the accepted custom price and verifies the exact reserved definition before opening Stripe', async () => {
+        vi.mocked(reservePromptbookDiscountCode).mockResolvedValue({ status: 'applied', activeDiscount: active, errorMessage: null });
+        const expectedDiscount = createExpectedDiscount(active, 39900);
+        expect((await POST(request({ ...input, promoCode: 'TWENTY', expectedDiscount }))).status).toBe(200);
+        expect(orders.get(id)?.discount_snapshot).toMatchObject({ finalAmount: 2000, baseAmount: 39900, definitionVersion: 2, priceRule: active.priceRule, months: 3 });
+        expect(createCheckout).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ discount_code: 'TWENTY' }), active);
+    });
+    it('refuses a changed formula even when the percentage and duration did not change', async () => {
+        vi.mocked(reservePromptbookDiscountCode).mockResolvedValue({ status: 'applied', activeDiscount: { ...active, priceRule: { ...active.priceRule, amount: 30 } }, errorMessage: null });
+        vi.mocked(settlePromptbookDiscountReservation).mockResolvedValue({ errorMessage: null });
+        expect((await POST(request({ ...input, promoCode: 'TWENTY', expectedDiscount: createExpectedDiscount(active, 39900) }))).status).toBe(409);
+        expect(createCheckout).not.toHaveBeenCalled();
+        expect(settlePromptbookDiscountReservation).toHaveBeenCalledWith(id, false);
     });
 });

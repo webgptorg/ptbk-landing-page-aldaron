@@ -1,5 +1,6 @@
 'use client';
 
+import { describeDiscount } from '@/lib/discounts/discountPricing';
 import { flushAdminSaves, runAfterAdminSaves } from '@/lib/admin/adminPendingSaves';
 
 import { DiscountCodeForm } from '@/components/admin/DiscountCodeForm';
@@ -27,6 +28,7 @@ import {
     getDiscountCodePlaces,
     getDiscountPlaceLabel,
     isPromptbookDiscountPlaceId,
+    isSubscriptionDiscountPlaceId,
 } from '@/lib/discounts/discountPlaces';
 import { Loader2, Pencil, TicketPercent, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -69,7 +71,7 @@ function getDiscountCodeUseSummary(discountCode: DiscountCode): string {
 function getSubscriptionDiscountSummary(discountCode: DiscountCode): string {
     const isValidForSubscription = isDiscountCodeValidForAllPlaces(discountCode) ||
         discountCode.placeIds.some(
-            (placeId) => placeId === COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID || isPromptbookDiscountPlaceId(placeId),
+            (placeId) => placeId === COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID || isSubscriptionDiscountPlaceId(placeId),
         );
 
     if (!isValidForSubscription) {
@@ -234,7 +236,7 @@ export function DiscountCodeAdmin() {
                                 {discountCodes.map((discountCode) => {
                                     const discountCodeStatus = getDiscountCodeStatus(discountCode);
                                     const isDeleting = isDeletingDiscountCodeId === discountCode.id;
-                                    const discountCodePlaces = getDiscountCodePlaces(discountCode.placeIds);
+                                    const discountCodePlaces = getDiscountCodePlaces(discountCode.placeIds, discountCode.appliesEverywhere);
 
                                     return (
                                         <tr key={discountCode.id} className="align-top">
@@ -258,7 +260,7 @@ export function DiscountCodeAdmin() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 font-semibold text-slate-900">
-                                                {discountCode.percent} %
+                                                {describeDiscount(discountCode)}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
                                                 {getSubscriptionDiscountSummary(discountCode)}
