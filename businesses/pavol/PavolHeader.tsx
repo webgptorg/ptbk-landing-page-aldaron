@@ -13,6 +13,7 @@ import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
+import { usePavolPageChrome } from './PavolPageChrome';
 
 const LANGUAGE_LINKS = [
     { language: 'cs', label: 'Čeština', shortLabel: 'CS', href: createPublicUrl(PAVOL_CZECH_INTERNAL_PATH) },
@@ -22,14 +23,16 @@ const LANGUAGE_LINKS = [
 export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { readonly language: SupportedHomepageLanguage; readonly pagePath?: string; readonly onPrimaryAction?: () => void }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language].header;
     const sectionPrefix = pagePath === '/' ? '' : '/';
-    const MENU_REF = useRef<HTMLDetailsElement>(null);
+    const defaultMenuRef = useRef<HTMLDetailsElement>(null);
+    const chrome = usePavolPageChrome();
+    const MENU_REF = chrome?.menuRef ?? defaultMenuRef;
 
     function closeMenu() {
         if (MENU_REF.current) MENU_REF.current.open = false;
     }
 
     return (
-        <header className="pavol-header fixed inset-x-0 top-0 z-50 border-b border-[var(--pavol-border)] backdrop-blur-md">
+        <header data-application={chrome ? true : undefined} className="pavol-header fixed inset-x-0 top-0 z-50 border-b border-[var(--pavol-border)] backdrop-blur-md">
             <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:left-5 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-white focus:p-4 focus:text-[var(--pavol-ink)]"
@@ -42,9 +45,9 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                     className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-md font-[family-name:var(--font-outfit)] text-base font-medium tracking-tight sm:text-xl"
                 >
                     <Image src="/logo/pavol-hejny-ph.svg" alt="" width={32} height={32} className="h-8 w-8" />
-                    <span>Pavol Hejný</span>
+                    <span>{chrome?.title ?? 'Pavol Hejný'}</span>
                 </Link>
-                <nav aria-label={CONTENT.navigationLabel} className="hidden items-center gap-1 lg:flex">
+                {!chrome && <nav aria-label={CONTENT.navigationLabel} className="hidden items-center gap-1 lg:flex">
                     {CONTENT.navItems.map((ITEM) => (
                         <Link
                             key={ITEM.href}
@@ -54,8 +57,8 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                             {ITEM.label}
                         </Link>
                     ))}
-                </nav>
-                <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+                </nav>}
+                <div className="pavol-header-actions flex shrink-0 items-center gap-2 sm:gap-4">
                     <nav
                         aria-label={CONTENT.languageSwitcherLabel}
                         className="flex items-center gap-0.5 text-xs font-semibold"
@@ -74,7 +77,8 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                             </a>
                         ))}
                     </nav>
-                    <Button
+                    {chrome && <div ref={chrome.outlets.headerActions} className="pavol-app-header-actions" />}
+                    {!chrome && <Button
                         asChild
                         className="pavol-primary-button hidden h-11 rounded-full px-5 sm:inline-flex"
                     >
@@ -82,17 +86,17 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                             {CONTENT.primaryAction}
                             <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4" />
                         </Link>
-                    </Button>
+                    </Button>}
                     <details
                         ref={MENU_REF}
-                        className="pavol-mobile-menu lg:hidden"
+                        className={`pavol-mobile-menu${chrome ? ' pavol-app-menu' : ' lg:hidden'}`}
                         onKeyDown={(event) => {
                             if (event.key !== 'Escape') return;
                             closeMenu();
                             MENU_REF.current?.querySelector('summary')?.focus();
                         }}
                         onBlur={(event) => {
-                            if (!event.currentTarget.contains(event.relatedTarget)) closeMenu();
+                            if (!chrome && !event.currentTarget.contains(event.relatedTarget)) closeMenu();
                         }}
                     >
                         <summary
@@ -102,10 +106,14 @@ export function PavolHeader({ language, pagePath = '/', onPrimaryAction }: { rea
                             <span className="pavol-menu-icon" aria-hidden="true"><span /><span /><span /></span>
                         </summary>
                         <nav
-                            aria-label={CONTENT.navigationLabel}
+                            aria-label={chrome ? chrome.title : CONTENT.navigationLabel}
                             className="absolute inset-x-0 top-full max-h-[calc(100dvh-5rem)] overflow-y-auto border-b border-[var(--pavol-border)] bg-[var(--pavol-paper)] p-5 shadow-lg"
                         >
                             <div className="mx-auto grid max-w-2xl gap-1">
+                                {chrome && <>
+                                    <div ref={chrome.outlets.menu} className="pavol-app-menu-content" />
+                                    <div ref={chrome.outlets.chatTools} className="pavol-app-menu-tools" />
+                                </>}
                                 {CONTENT.navItems.map((ITEM) => (
                                     <Link
                                         key={ITEM.href}

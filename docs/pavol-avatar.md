@@ -14,10 +14,23 @@ is bounded separately from the full visible/exported history.
 
 ## Conversation UX
 
+The 18 November layout uses one personal-site header labelled `Pavol Hejný AI` and a borderless chat.
+`PavolPageChromeProvider` scopes application identity/footer links to this page. Stateful account actions,
+navigation and chat tools are portalled into its header outlets by `PavolChromeSlot`; the components retain
+their original state and handlers. Ordinary personal pages outside the provider keep their original chrome.
+Sign-in/out belongs in the header; History, Subscription, Connections, New chat and exports live in its menu.
+Verified access opens Chat directly. Switching sections keeps the mounted chat and its draft; selecting
+another conversation or starting a new one retains the existing confirmation rules.
+Avatar terms, privacy and AI Web s.r.o. appear once in the site footer. Remove the duplicated intro,
+subtitle, usage banner, privacy paragraph and inline upload instructions. The initial seeded assistant
+introduction is hidden in this placement, including restored sessions, without changing recorded history,
+exports or model context. File limits remain enforced with errors when an invalid file is supplied.
+The latest-message button appears only after a real conversation exists, never over the empty-state suggestions.
+
 The page fits the current viewport below the personal-site header. Its transcript owns scrolling while
 the composer remains available, including on narrow screens. Message bodies have a bounded reading width;
 code and tables scroll inside their message. The same shared component provides per-message copy with
-actual clipboard feedback, expanding/growing drafts, a question-length counter, file-drop feedback and
+actual clipboard feedback, expanding/growing drafts, file-drop feedback and
 an explicit retry after failed requests. Suggested opening questions only fill the draft; they never send
 or call a model until the reader submits. Page-mode New chat confirms before clearing the current local
 draft/history; it does not delete private administrative records.
@@ -67,7 +80,7 @@ from Messages, `pavol-cs/en`, and comparison advisers. File uploads, question pe
 durable links and administration reuse the existing handlers. Host/language checks bind Czech chat/files
 to `pavolhejny.cz` and English chat/files to `pavolhejny.com`, including www aliases. Same-origin requests,
 file-byte validation, bounded bodies, rate limits and source/conversation ownership checks remain enforced.
-Visitors are told that the author can later read conversations and attachments. Anonymous database roles
+The product privacy notice explains that the author can later read conversations and attachments. Anonymous database roles
 cannot enumerate histories or file records. Preview hosts and local development follow the embed registry's
 existing preview policy; public primary and podcast domains cannot use this avatar.
 

@@ -1091,4 +1091,13 @@ Its explicit, journalled enrichment fills empty new fields only and preserves un
 
 ## Pavol avatar paid pilot, 17 November 2026
 
+The 18 November UI revision labels the page `Pavol Hejný AI`, with one shared header and a borderless chat.
+PavolPageChromeProvider scopes app identity, header outlets and footer links to the avatar; ordinary personal
+pages keep their existing chrome. Stateful account/chat controls use PavolChromeSlot portals. Sign-in/out is
+in the header; history, subscription, connections, new chat and exports are in its menu. Verified users open
+chat directly. Preserve mounted drafts across section changes, confirmations, existing auth/payment boundaries
+and file validation. No duplicate title/subtitle, remaining-question banner, generic disclosure paragraph or
+inline upload-limit instructions. Avatar terms, privacy and seller belong in the site footer. The seeded
+intro is hidden in this placement without rewriting stored/exported history or model context. See docs/pavol-avatar.md.
+
 The separately branded Pavol avatar is sold by AI Web s.r.o. on the existing Stripe account. PAVOL_AVATAR_ENABLED opts the full-avatar page/endpoints into verified account access; PAVOL_AVATAR_BILLING_ENABLED independently opens purchases. Keep legacy public chats and voice placements unchanged. Avatar orders, invoices, identities, transcripts, usage and connector tokens are product-private. Full is CZK 1,000 monthly for one person contractually, without technical seat/device restrictions; provisional Free/Light/Full monthly allowances are 5/50/500 across web/MCP/Telegram. Paid orders freeze accepted limits. Light derives read-only from paid Developers membership. Never infer Full from engine licences or mere email entry. No automatic overage charges. Every external call rechecks Full. Existing Supabase OTP remains intact; optional branded magic links use a separate sender. Account uploads require conversation ownership, including durable reads. Static legal documents now live as authoritative Markdown under legal/<product>; dynamic placeholders explain real code sources and are never accepted contracts. Original seller and complete accepted legal snapshots are immutable. Voice for this paid pilot is deferred while unrelated public voice stays enabled. See docs/pavol-avatar-commerce.md and docs/pavol-avatar-integrations.md.

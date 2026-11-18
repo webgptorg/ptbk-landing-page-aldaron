@@ -5,8 +5,10 @@ import { FloatingAgentChat } from '@/components/agents/FloatingAgentChat';
 import { SITE_AGENT_EMBEDS } from '@/lib/site-agents/registry';
 import { messageChatStorageKey,readMessageChatSession } from '@/lib/messages/messageChatSession';
 import type { MessageChatSession } from '@/lib/messages/messageChatSession';
-import { AVATAR_PUBLIC_PRICE_CZK,AVATAR_PUBLIC_TERMS_PATH,AVATAR_PUBLIC_PRIVACY_PATH,type AvatarAvailability,type AvatarAccountState,type AvatarHistoryItem } from '@/lib/pavol-avatar/presentation';
+import { AVATAR_PUBLIC_PRICE_CZK,AVATAR_PUBLIC_PRIVACY_PATH,type AvatarAvailability,type AvatarAccountState,type AvatarHistoryItem } from '@/lib/pavol-avatar/presentation';
 import { AvatarCheckout } from './AvatarCheckout';
+import { LogIn, LogOut } from 'lucide-react';
+import { PavolChromeSlot } from './PavolPageChrome';
 
 async function jsonRequest<T>(path:string,method='GET',body?:unknown):Promise<T>{
  const response=await fetch(path,{method,headers:body===undefined?undefined:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
@@ -16,11 +18,10 @@ type Connections={tokens:{id:string;label:string;createdAt:string}[];setup:{code
 export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';availability:AvatarAvailability}) {
  const cs=language==='cs',embed=SITE_AGENT_EMBEDS['pavol-avatar'];
  const[state,setState]=useState<AvatarAccountState>({principal:null,access:null,availability}),[loading,setLoading]=useState(true);
- const[tab,setTab]=useState<'chat'|'plans'|'connections'>('plans'),[email,setEmail]=useState(''),[code,setCode]=useState(''),[sent,setSent]=useState<'otp'|'magic-link'|null>(null);
+ const[tab,setTab]=useState<'chat'|'plans'|'connections'|'history'>('chat'),[email,setEmail]=useState(''),[code,setCode]=useState(''),[sent,setSent]=useState<'otp'|'magic-link'|null>(null);
  const[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[checkout,setCheckout]=useState(false);
  const[history,setHistory]=useState<AvatarHistoryItem[]>([]),[mount,setMount]=useState(0),[connections,setConnections]=useState<Connections|null>(null);
  const[label,setLabel]=useState(''),[newToken,setNewToken]=useState(''),[telegramUrl,setTelegramUrl]=useState('');
- const[historyOpen,setHistoryOpen]=useState(false);
  const source=state.principal?'avatar-account-'+state.principal.id+'-'+language:'avatar-account-guest';
  const refresh=useCallback(async()=>{
   try{const next=await jsonRequest<AvatarAccountState>('/api/pavol-avatar/access');setState(next);
@@ -47,7 +48,7 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
   try{const local=readMessageChatSession(window.localStorage,source);if(local?.draft.trim()&&!window.confirm(cs?'Otevřít jiný chat? Rozepsaný text v tomto okně se nahradí.':'Open another chat and replace this draft?'))return;
    const loaded=await jsonRequest<{conversationId:string;turns:MessageChatSession['turns']}>('/api/pavol-avatar/conversations?id='+encodeURIComponent(id));
    window.localStorage.setItem(messageChatStorageKey(source),JSON.stringify({version:1,conversationId:loaded.conversationId,turns:loaded.turns,draft:'',retry:null,attachments:[]}));
-   setMount(value=>value+1);setTab('chat');setHistoryOpen(false);
+   setMount(value=>value+1);setTab('chat');
   }catch(failure){setError((failure as Error).message);}finally{setBusy(false);}
  }
  async function deleteConversation(id:string){if(!window.confirm(cs?'Smazat tento chat a jeho přílohy?':'Delete this chat and its attachments?'))return;setBusy(true);setError('');
@@ -74,19 +75,23 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
    :<p className="avatar-small">{kind==='light'?(cs?'Nárok ověříme podle stejného e-mailu jako členství.':'Use the same verified email as your membership.'):(cs?'Bez platební karty.':'No card required.')}</p>}
   </article>)}
  </div>;
- return <div className="avatar-account">
-  <div className="avatar-account-bar">
-   {state.principal?<><div><strong>{state.principal.email}</strong><span className="avatar-plan-badge">{plan==='full'?'Full':plan==='light'?'Light':'Free'}</span>{state.access&&<small>{Math.max(0,state.access.limit-state.access.used)} / {state.access.limit} {cs?'otázek zbývá do':'questions left until'} {new Date(state.access.periodEnd).toLocaleDateString(cs?'cs-CZ':'en-GB')}</small>}</div><button type="button" disabled={busy} onClick={()=>void logout()}>{cs?'Odhlásit':'Sign out'}</button></>
-   :<p>{loading?(cs?'Načítám přístup…':'Loading access…'):(cs?'AI poradce pro tvoji skutečnou práci. Začni zdarma, pokračuj podle potřeby.':'AI advice for real work. Start free and continue as needed.')}</p>}
-  </div>
+ return <div className="avatar-account" data-view={state.principal?tab:'guest'}>
+  <PavolChromeSlot slot="headerActions">
+   {state.principal?<button className="pavol-app-auth" type="button" aria-label={cs?'Odhlásit':'Sign out'} title={cs?'Odhlásit':'Sign out'} disabled={busy} onClick={()=>void logout()}><LogOut size={18} aria-hidden="true"/><span>{cs?'Odhlásit':'Sign out'}</span></button>
+    :<button className="pavol-app-auth" type="button" aria-label={cs?'Přihlásit':'Sign in'} title={cs?'Přihlásit':'Sign in'} disabled={loading||busy} onClick={()=>document.getElementById('avatar-email')?.focus()}><LogIn size={18} aria-hidden="true"/><span>{cs?'Přihlásit':'Sign in'}</span></button>}
+  </PavolChromeSlot>
+  {state.principal&&<PavolChromeSlot slot="menu">
+   <div className="avatar-menu-account"><span>{state.principal.email}</span><span className="avatar-plan-badge">{plan==='full'?'Full':plan==='light'?'Light':'Free'}</span></div>
+   <nav className="avatar-menu-nav" aria-label="Pavol Hejný AI">
+    <button type="button" aria-current={tab==='chat'?'page':undefined} onClick={()=>{setTab('chat');setCheckout(false);}}>{cs?'Rozhovor':'Chat'}</button>
+    <button type="button" aria-current={tab==='history'?'page':undefined} onClick={()=>{setTab('history');void refresh();}}>{cs?'Historie':'History'}</button>
+    <button type="button" aria-current={tab==='plans'?'page':undefined} onClick={()=>setTab('plans')}>{cs?'Předplatné':'Subscription'}</button>
+    <button type="button" aria-current={tab==='connections'?'page':undefined} onClick={()=>void loadConnections()}>{cs?'Připojení':'Connections'}</button>
+   </nav>
+  </PavolChromeSlot>}
+  {loading&&<p className="avatar-small" role="status">{cs?'Načítám přístup…':'Loading access…'}</p>}
   {error&&<p className="avatar-error" role="alert">{error}</p>}{notice&&<p className="avatar-notice" role="status">{notice}</p>}
-  {state.principal&&<nav className="avatar-tabs" aria-label={cs?'Avatar':'Avatar'}>
-   <button aria-current={tab==='chat'?'page':undefined} onClick={()=>{setTab('chat');setCheckout(false);}}>{cs?'Rozhovor':'Chat'}</button>
-   <button aria-current={tab==='plans'?'page':undefined} onClick={()=>setTab('plans')}>{cs?'Předplatné':'Subscription'}</button>
-   <button aria-current={tab==='connections'?'page':undefined} onClick={()=>void loadConnections()}>{cs?'Připojení':'Connections'}</button>
-   <button className="avatar-history-toggle" onClick={()=>setHistoryOpen(!historyOpen)}>{cs?'Historie':'History'}</button>
-  </nav>}
-  {historyOpen&&state.principal&&<section className="avatar-history" aria-label={cs?'Tvoje konverzace':'Your conversations'}>
+  {tab==='history'&&state.principal&&<section className="avatar-history" aria-label={cs?'Tvoje konverzace':'Your conversations'}>
    <div className="avatar-section-heading"><h2>{cs?'Tvoje konverzace':'Your conversations'}</h2><button onClick={()=>void refresh()}>{cs?'Obnovit':'Refresh'}</button></div>
    {history.length===0?<p>{cs?'Zatím tu žádný chat není.':'No conversations yet.'}</p>:<ul>{history.map(item=><li key={item.id}><button disabled={busy} onClick={()=>void selectConversation(item.id)}>{item.title||'Chat'}<small>{item.channel} · {new Date(item.updated_at).toLocaleDateString(cs?'cs-CZ':'en-GB')}</small></button><button disabled={busy} onClick={()=>void deleteConversation(item.id)} aria-label={(cs?'Smazat chat ':'Delete chat ')+item.title}>×</button></li>)}</ul>}
   </section>}
@@ -98,17 +103,19 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
    {sent&&<button type="button" disabled={busy} onClick={()=>{setSent(null);setCode('');}}>{cs?'Použít jiný e-mail nebo poslat znovu':'Change email or send again'}</button>}
    <p className="avatar-small">{cs?'Odesláním žádáš o přístup ke službě. Nejde o přihlášení k marketingu.':'You are requesting service access, not subscribing to marketing.'} <a href={AVATAR_PUBLIC_PRIVACY_PATH}>{cs?'Soukromí':'Privacy'}</a></p>
   </form>}
-  {(!state.principal||tab==='plans')&&(checkout&&state.principal?<AvatarCheckout cs={cs} limit={limits.full} slovakiaEnabled={state.availability.slovakiaEnabled} onCancel={()=>setCheckout(false)}/>:<section className="avatar-offer">
+  {!loading&&(!state.principal||tab==='plans')&&(checkout&&state.principal?<AvatarCheckout cs={cs} limit={limits.full} slovakiaEnabled={state.availability.slovakiaEnabled} onCancel={()=>setCheckout(false)}/>:<section className="avatar-offer">
    {plans}
    <p className="avatar-small">{cs?'Full je licence pro jednoho člověka. Firma může být plátcem. Spotřeba je společná pro všechna připojení; další poplatky automaticky neúčtujeme. Hlasový rozhovor připravujeme.':'Full is licensed to one person; a business may pay. All connections share one allowance. No automatic overage charges. Voice conversations are planned.'}</p>
    {!state.availability.billingEnabled&&<p className="avatar-notice">{cs?'Placené objednávky zatím nejsou otevřené.':'Paid checkout is not open yet.'}</p>}
    {state.access?.subscription&&<div className="avatar-subscription"><p>{state.access.subscription.cancelAtPeriodEnd?(cs?'Obnovování je zrušené. Přístup trvá do konce uhrazeného období.':'Renewal is cancelled. Access continues through the paid period.'):(cs?'Předplatné se měsíčně obnovuje.':'Your subscription renews monthly.')}</p><a href={'/api/pavol-avatar/confirmation?id='+encodeURIComponent(state.access.subscription.id)} className="avatar-text-link">{cs?'Stáhnout potvrzení a přijaté podmínky':'Download confirmation and accepted terms'}</a><br/><button disabled={busy} onClick={()=>void managePayment()}>{cs?'Spravovat platbu a zrušení':'Manage payment and cancellation'}</button></div>}
   </section>)}
   {state.principal&&<div className="avatar-chat-holder" hidden={tab!=='chat'}>
-   <FloatingAgentChat key={source+':'+mount} variant="page" enableVoice={false} sourceKey={source} endpoint="/api/pavol-avatar/chat" attachmentEndpoint="/api/pavol-avatar/attachments"
-    introduction={embed.introduction[language]} language={language} title={embed.title[language]} launcherLabel={embed.launcher[language]}
-    subtitle={cs?'AI know-how · tvoje vlastní konverzace':'AI expertise · your private conversation'} conversationTitle={cs?'Rozhovor s Pavolovým avatarem':'Conversation with Pavol’s avatar'}
-    brandLabel="Pavol Hejný · AI avatar" icon={<Image src="/people/pavol-hejny-transparent-square.png" width={36} height={36} alt=""/>}
+   <FloatingAgentChat key={source+':'+mount} variant="page" pageLayout="plain" showComposerHelp={false} showIntroduction={false} enableVoice={false} sourceKey={source} endpoint="/api/pavol-avatar/chat" attachmentEndpoint="/api/pavol-avatar/attachments"
+    introduction={embed.introduction[language]} language={language} title="Pavol Hejný AI" launcherLabel={embed.launcher[language]}
+    conversationTitle="Pavol Hejný AI" suggestionsLabel={cs?'S čím ti můžu pomoct?':'How can I help?'}
+    renderPageTools={tools=><PavolChromeSlot slot="chatTools">{tools}</PavolChromeSlot>}
+    onNewChat={()=>{setTab('chat');setCheckout(false);}}
+    brandLabel="Pavol Hejný AI" icon={<Image src="/people/pavol-hejny-transparent-square.png" width={36} height={36} alt=""/>}
     suggestions={cs?['Kde má pro moji firmu smysl začít s AI agenty?','Pomoz mi připravit zadání pro AI vývojáře.','Zkontroluj můj návrh a najdi slabá místa.']:['Where should my company start with AI agents?','Help me write a specification for an AI developer.','Review my plan and find the weak spots.']}
     onResponse={()=>void refresh()}/>
   </div>}
@@ -124,6 +131,5 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
     <div className="avatar-telegram"><h3>Telegram</h3>{connections?.telegram.available?<><button disabled={busy} onClick={()=>void linkTelegram()}>{cs?'Propojit můj Telegram':'Connect my Telegram'}</button><button disabled={busy} onClick={()=>void unlinkTelegram()}>{cs?'Odpojit Telegram':'Disconnect Telegram'}</button>{telegramUrl&&<a className="avatar-button" href={telegramUrl} target="_blank" rel="noopener noreferrer">{cs?'Otevřít bota a potvrdit propojení':'Open bot and confirm connection'}</a>}</>:<p>{cs?'Připojení Telegramu zatím není otevřené.':'Telegram connection is not open yet.'}</p>}</div>
    </>}
   </section>}
-  <p className="avatar-legal-links"><a href={AVATAR_PUBLIC_TERMS_PATH}>{cs?'Podmínky avatara':'Avatar terms'}</a><span>·</span><a href={AVATAR_PUBLIC_PRIVACY_PATH}>{cs?'Soukromí':'Privacy'}</a><span>·</span><span>AI Web s.r.o.</span></p>
  </div>;
 }

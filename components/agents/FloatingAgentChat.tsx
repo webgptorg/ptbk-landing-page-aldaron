@@ -26,7 +26,13 @@ export type FloatingAgentChatProps = {
     readonly variant?: 'floating' | 'page'; readonly subtitle?: string;
     readonly suggestions?: readonly string[];
     readonly onResponse?: () => void;
+    readonly onNewChat?: () => void;
     readonly enableVoice?: boolean;
+    readonly pageLayout?: 'card' | 'plain';
+    readonly renderPageTools?: (tools: ReactNode) => ReactNode;
+    readonly showComposerHelp?: boolean;
+    readonly showIntroduction?: boolean;
+    readonly suggestionsLabel?: string;
 };
 
 /** Shared chat behavior; each embed has its own server endpoint and browser conversation. */
@@ -64,7 +70,8 @@ function ChatTurn({ turn, title, cs, introduction = false }: {
 }
 
 function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introduction = '', language = 'cs',
-    title, icon, launcherLabel, conversationTitle, id = sourceKey, brandLabel, variant = 'floating', subtitle, suggestions = [], onResponse, enableVoice = true }: FloatingAgentChatProps) {
+    title, icon, launcherLabel, conversationTitle, id = sourceKey, brandLabel, variant = 'floating', subtitle, suggestions = [], onResponse, onNewChat, enableVoice = true,
+    pageLayout = 'card', renderPageTools, showComposerHelp = true, showIntroduction = true, suggestionsLabel }: FloatingAgentChatProps) {
     const cs = language === 'cs';
     const [open, setOpen] = useState(false);
     const visible = variant === 'page' || open;
@@ -144,8 +151,8 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
         const element = historyElement.current;
         if (!visible || !element) return;
         if (followLatest.current) element.scrollTo({ top: element.scrollHeight });
-        else setAwayFromLatest(true);
-    }, [turns, pendingQuestion, streamingReply, voicePartial, visible]);
+        else if (hasConversation) setAwayFromLatest(true);
+    }, [turns, pendingQuestion, streamingReply, voicePartial, visible, hasConversation]);
     useEffect(() => {
         if (!visible || !historyContent.current || typeof ResizeObserver === 'undefined') return;
         const observer = new ResizeObserver(() => {
@@ -256,6 +263,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
 
     const tools = <div className="message-chat-tools">
         <button type="button" disabled={pending || uploading || !ready} aria-label={cs ? 'Nový chat' : 'New chat'} title={cs ? 'Nový chat' : 'New chat'} onClick={() => {
+            onNewChat?.();
             if (variant === 'page' && (hasConversation || draft.trim() || attachments.length)) setConfirmReset(true);
             else newChat();
         }}><MessageSquarePlus size={16} aria-hidden="true" /><span>{cs ? 'Nový chat' : 'New chat'}</span></button>
@@ -263,24 +271,25 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
             loadDocument={async () => ({ kind: 'chat', title: conversationTitle, language, assistantName: title, brandLabel,
                 createdAt: turns.find(turn => turn.createdAt)?.createdAt ?? new Date().toISOString(), sourceUrl: `${window.location.origin}${window.location.pathname}`, turns })} />
     </div>;
-    const content = <div ref={contentElement} className={`message-chat-content${dragging ? ' message-chat-is-dragging' : ''}`}
+    const content = <div ref={contentElement} data-empty={!hasConversation || undefined} className={`message-chat-content${dragging ? ' message-chat-is-dragging' : ''}`}
         onDragEnter={event => { if (attachmentEndpoint && event.dataTransfer.types.includes('Files')) { event.preventDefault(); dragDepth.current++; if (!pending && !uploading) setDragging(true); } }}
         onDragLeave={event => { if (event.currentTarget.contains(event.relatedTarget as Node | null)) return; dragDepth.current = 0; setDragging(false); }}
         onDragOver={event => { if (attachmentEndpoint && event.dataTransfer.types.includes('Files')) event.preventDefault(); }}
         onDrop={event => { if (attachmentEndpoint && event.dataTransfer.files.length) { event.preventDefault(); dragDepth.current = 0; setDragging(false); void uploadFiles(Array.from(event.dataTransfer.files)); } }}>
         {variant !== 'page' && tools}
-        {dragging && <div className="message-chat-drop-target" aria-hidden="true"><Paperclip size={28} /><strong>{cs ? 'Pusť soubory sem' : 'Drop files here'}</strong><span>{cs ? 'Obrázky, PDF nebo text · až 4 soubory po 4 MB' : 'Images, PDFs or text · up to 4 files, 4 MB each'}</span></div>}
+        {dragging && <div className="message-chat-drop-target" aria-hidden="true"><Paperclip size={28} /><strong>{cs ? 'Pusť soubory sem' : 'Drop files here'}</strong>{showComposerHelp && <span>{cs ? 'Obrázky, PDF nebo text · až 4 soubory po 4 MB' : 'Images, PDFs or text · up to 4 files, 4 MB each'}</span>}</div>}
         {confirmReset && <div className="message-chat-reset" role="group" aria-label={cs ? 'Začít nový chat?' : 'Start a new chat?'}>
             <p>{cs ? 'Začít znovu? Tato konverzace zmizí z tohoto okna. Rozepsaný text a přílohy se vyprázdní.' : 'Start fresh? This conversation will leave this window. Your draft and attached files will be cleared.'}</p>
             <div><button type="button" onClick={newChat}>{cs ? 'Začít nový chat' : 'Start new chat'}</button><button type="button" onClick={() => { setConfirmReset(false); input.current?.focus(); }}>{cs ? 'Pokračovat tady' : 'Keep this chat'}</button></div>
         </div>}
         <div className="message-chat-transcript">
             <div ref={historyElement} className="message-chat-history" role="log" aria-live="polite" aria-busy={pending} aria-label={conversationTitle} tabIndex={0}
-                onScroll={event => { const el = event.currentTarget; const nearBottom = el.scrollHeight - el.clientHeight - el.scrollTop < 64; followLatest.current = nearBottom; setAwayFromLatest(!nearBottom); }}>
+                onScroll={event => { const el = event.currentTarget; const nearBottom = el.scrollHeight - el.clientHeight - el.scrollTop < 64; followLatest.current = nearBottom; setAwayFromLatest(hasConversation && !nearBottom); }}>
                 <div ref={historyContent} className="message-chat-history-content">
-                    {turns.map((turn, index) => <ChatTurn key={index} turn={turn} cs={cs} title={title} introduction={index === 0 && turn.role === 'assistant' && turn.content === introduction} />)}
+                    {turns.map((turn, index) => !showIntroduction && index === 0 && turn.role === 'assistant' ? null
+                        : <ChatTurn key={index} turn={turn} cs={cs} title={title} introduction={index === 0 && turn.role === 'assistant' && turn.content === introduction} />)}
                     {!hasConversation && !pending && !draft.trim() && suggestions.length > 0 && <div className="message-chat-suggestions" aria-label={cs ? 'Zkus se zeptat' : 'Try a question'}>
-                        <p>{cs ? 'Třeba…' : 'For example…'}</p>
+                        <p>{suggestionsLabel ?? (cs ? 'Třeba…' : 'For example…')}</p>
                         {suggestions.map(suggestion => <button type="button" key={suggestion} disabled={!ready} onClick={() => { updateSession({ ...session, draft: suggestion }); input.current?.focus(); }}>
                             {suggestion}<ChevronRight size={16} aria-hidden="true" />
                         </button>)}
@@ -294,7 +303,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                     </>}
                 </div>
             </div>
-            {awayFromLatest && <button type="button" className="message-chat-jump" onClick={jumpToLatest}><ArrowDown size={15} aria-hidden="true" />{cs ? 'K nejnovější zprávě' : 'Latest message'}</button>}
+            {hasConversation && awayFromLatest && <button type="button" className="message-chat-jump" onClick={jumpToLatest}><ArrowDown size={15} aria-hidden="true" />{cs ? 'K nejnovější zprávě' : 'Latest message'}</button>}
         </div>
         <div ref={composerElement} className={`message-chat-composer${expanded ? ' message-chat-composer-expanded' : ''}`}>
             {voiceStatus !== 'off' && <div className="message-chat-voice" role="group" aria-label={cs ? 'Hlasový chat' : 'Voice chat'}>
@@ -311,7 +320,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                 onRemove={uploading ? undefined : fileId => updateSession({ ...session, attachments: attachments.filter(file => file.id !== fileId) })} /></div>}
             {uploading && <p className="message-chat-uploading" role="status"><LoaderCircle size={14} className="message-chat-loading" aria-hidden="true" />{cs ? 'Nahrávám přílohu…' : 'Uploading attachment…'}</p>}
             <form ref={form} onSubmit={submit} className="message-chat-form" aria-busy={pending || uploading}>
-                <textarea ref={input} aria-label={cs ? 'Tvoje otázka' : 'Your question'} aria-describedby={`${id}-composer-help`} placeholder={pending ? cs ? 'Počkej na odpověď…' : 'Waiting for the reply…' : cs ? 'Na co se chceš zeptat?' : 'What would you like to know?'} rows={2} maxLength={CHAT_QUESTION_MAX_CHARACTERS} value={pending ? '' : draft} disabled={pending || !ready}
+                <textarea ref={input} aria-label={cs ? 'Tvoje otázka' : 'Your question'} aria-describedby={showComposerHelp ? `${id}-composer-help` : undefined} placeholder={pending ? cs ? 'Počkej na odpověď…' : 'Waiting for the reply…' : cs ? 'Na co se chceš zeptat?' : 'What would you like to know?'} rows={2} maxLength={CHAT_QUESTION_MAX_CHARACTERS} value={pending ? '' : draft} disabled={pending || !ready}
                     onPaste={event => { const files = Array.from(event.clipboardData.files); if (attachmentEndpoint && files.length) { event.preventDefault(); void uploadFiles(files); } }}
                     onChange={event => updateSession({ ...session, draft: event.target.value })} onKeyDown={event => {
                         const touch = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
@@ -323,7 +332,7 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                         {attachmentEndpoint && <><input ref={fileInput} type="file" multiple accept={CHAT_ATTACHMENT_ACCEPT} className="sr-only" tabIndex={-1} aria-label={cs ? 'Vybrat přílohy' : 'Choose attachments'}
                             onChange={event => { void uploadFiles(Array.from(event.target.files ?? [])); event.target.value = ''; }} />
                         <button type="button" className="message-chat-attach" disabled={pending || uploading || !ready || attachments.length >= 4} aria-label={cs ? 'Přiložit soubor' : 'Attach file'}
-                            title={cs ? 'Obrázky, PDF nebo text · až 4 soubory po 4 MB' : 'Images, PDFs or text · up to 4 files, 4 MB each'} onClick={() => fileInput.current?.click()}><Paperclip size={18} aria-hidden="true" /><span>{cs ? 'Přiložit' : 'Attach'}</span></button></>}
+                            title={showComposerHelp ? cs ? 'Obrázky, PDF nebo text · až 4 soubory po 4 MB' : 'Images, PDFs or text · up to 4 files, 4 MB each' : cs ? 'Přiložit soubor' : 'Attach file'} onClick={() => fileInput.current?.click()}><Paperclip size={18} aria-hidden="true" /><span>{cs ? 'Přiložit' : 'Attach'}</span></button></>}
                         {(draft.length > 200 || draft.includes('\n')) && !pending && <button type="button" className="message-chat-expand" onClick={() => { setExpanded(!expanded); input.current?.focus(); }} aria-expanded={expanded} aria-label={expanded ? cs ? 'Zmenšit pole zprávy' : 'Collapse message editor' : cs ? 'Zvětšit pole zprávy' : 'Expand message editor'} title={cs ? 'Velikost pole zprávy' : 'Message editor size'}>
                             {expanded ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
                         </button>}
@@ -332,14 +341,14 @@ function AgentChatSession({ sourceKey, endpoint, attachmentEndpoint, introductio
                         : <button type="submit" disabled={uploading || !ready || (!draft.trim() && !attachments.length)} aria-label={cs ? 'Odeslat otázku' : 'Send question'} title={cs ? 'Odeslat otázku' : 'Send question'}><ArrowUp size={19} aria-hidden="true" /></button>}
                 </div>
             </form>
-            <div className="message-chat-composer-help" id={`${id}-composer-help`}><span className="message-chat-keyboard-hint">{cs ? 'Enter odešle · Shift + Enter nový řádek' : 'Enter to send · Shift + Enter for a new line'}</span><span className="message-chat-touch-hint">{cs ? 'Obrázky, PDF nebo text · až 4 × 4 MB' : 'Images, PDF or text · up to 4 × 4 MB'}</span>
+            {showComposerHelp && <div className="message-chat-composer-help" id={`${id}-composer-help`}><span className="message-chat-keyboard-hint">{cs ? 'Enter odešle · Shift + Enter nový řádek' : 'Enter to send · Shift + Enter for a new line'}</span><span className="message-chat-touch-hint">{cs ? 'Obrázky, PDF nebo text · až 4 × 4 MB' : 'Images, PDF or text · up to 4 × 4 MB'}</span>
                 {!pending && draft.length > 0 && <span className={draft.length >= CHAT_QUESTION_MAX_CHARACTERS ? 'message-chat-limit' : ''} aria-label={cs ? 'Délka otázky' : 'Question length'}>{draft.length.toLocaleString(cs ? 'cs-CZ' : 'en-GB')} / 4 000</span>}
-            </div>
+            </div>}
             {storageFailed && <p className="message-chat-error" role="status">{cs ? 'Konverzaci se nepodařilo uložit v tomto prohlížeči. Před zavřením si ji stáhni.' : 'This browser could not save the conversation. Download it before closing.'}</p>}
         </div>
     </div>;
-    if (variant === 'page') return <section id={id} className="message-chat message-chat-page" aria-label={conversationTitle}>
-        <header className="message-chat-page-heading"><div className="message-chat-identity"><span className="message-chat-avatar">{icon}</span><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div></div>{tools}</header>
+    if (variant === 'page') return <section id={id} className={`message-chat message-chat-page${pageLayout === 'plain' ? ' message-chat-plain' : ''}`} aria-label={conversationTitle}>
+        {renderPageTools ? renderPageTools(tools) : <header className="message-chat-page-heading"><div className="message-chat-identity"><span className="message-chat-avatar">{icon}</span><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div></div>{tools}</header>}
         {content}
     </section>;
     return <FloatingConversation id={id} open={open} onOpenChange={setOpen} title={title} icon={icon}

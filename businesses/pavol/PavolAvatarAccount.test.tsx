@@ -106,12 +106,14 @@ describe('avatar account and subscription boundaries', () => {
         expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
     });
 
-    it('shows a verified Free identity and shared remaining allowance without inheriting paid rights from a typed email', async () => {
+    it('opens verified Free access in chat without a remaining-question banner or paid connector rights', async () => {
         account = signedIn('free', 2);
         localStorage.setItem('pavol-chat:v1:pavol-cs', 'unrelated homepage history');
         render(<PavolAvatarAccount language="cs" availability={availability} />);
         expect(await screen.findByText(principal.email)).toBeVisible();
-        expect(document.body).toHaveTextContent('3 / 5');
+        expect(document.body).not.toHaveTextContent('3 / 5');
+        expect(screen.getByTestId('account-chat')).toBeVisible();
+        expect(screen.queryByRole('button', { name: 'Získat Full' })).not.toBeInTheDocument();
         const chat = screen.getByTestId('account-chat');
         expect(chat).toHaveAttribute('data-source', 'avatar-account-' + principal.id + '-cs');
         expect(chat).toHaveAttribute('data-endpoint', '/api/pavol-avatar/chat');
@@ -127,6 +129,7 @@ describe('avatar account and subscription boundaries', () => {
         account = signedIn('free');
         render(<PavolAvatarAccount language="cs" availability={availability} />);
         await screen.findByText(principal.email);
+        fireEvent.click(screen.getByRole('button', { name: 'Předplatné' }));
         fireEvent.click(screen.getByRole('button', { name: 'Získat Full' }));
         expect(await screen.findByRole('heading', { name: 'Objednat Full' })).toBeVisible();
         expect(screen.getByRole('button', { name: 'Objednat s povinností platby' })).toBeDisabled();

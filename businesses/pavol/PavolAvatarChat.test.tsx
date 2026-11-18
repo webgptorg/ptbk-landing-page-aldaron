@@ -15,7 +15,10 @@ describe('full-page avatar using the shared conversation', () => {
         localStorage.setItem('pavol-chat:v1:pavol-cs', 'leave the lightweight chat alone');
         const view = render(<PavolAvatarChat language="cs" />);
         expect(screen.queryByRole('dialog')).toBeNull();
-        expect(screen.getByRole('log')).toHaveTextContent('podrobně připravených podkladů');
+        expect(screen.getByRole('log')).toHaveTextContent('S čím ti můžu pomoct?');
+        expect(screen.queryByText(/podrobně připravených podkladů/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/až 4 × 4 MB/)).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'K nejnovější zprávě' })).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Přiložit soubor' })).toBeEnabled();
         fetchMock.mockResolvedValueOnce(Response.json({ attachment: file }));
         fireEvent.change(screen.getByLabelText('Vybrat přílohy'), { target: { files: [new File(['hello'], 'notes.txt', { type: 'text/plain' })] } });
@@ -47,8 +50,17 @@ describe('full-page avatar using the shared conversation', () => {
         fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Česká otázka' } });
         view.rerender(<PavolAvatarChat language="en" />);
         expect(screen.getByRole('textbox')).toHaveValue('');
-        expect(screen.getByRole('log')).toHaveTextContent('digital avatar');
+        expect(screen.getByRole('log')).toHaveTextContent('How can I help?');
         view.rerender(<PavolAvatarChat language="cs" />);
         expect(screen.getByRole('textbox')).toHaveValue('Česká otázka');
+    });
+    it('reports invalid attachments only after selection and preserves the draft', async () => {
+        render(<PavolAvatarChat language="cs" />);
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Moje rozepsaná otázka' } });
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        fireEvent.change(screen.getByLabelText('Vybrat přílohy'), { target: { files: [new File([], 'empty.txt', { type: 'text/plain' })] } });
+        expect(await screen.findByRole('alert')).toHaveTextContent('nesmí být prázdný');
+        expect(screen.getByRole('textbox')).toHaveValue('Moje rozepsaná otázka');
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 });

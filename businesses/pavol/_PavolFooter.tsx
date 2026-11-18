@@ -10,12 +10,14 @@ import { COOKIE_SETTINGS_HASH } from '@/lib/legal/cookieSettingsHash';
 import { getLegalHubPath, getLegalPagePath } from '@/lib/legal/legalPagePaths';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePavolPageChrome } from './PavolPageChrome';
 
 export function PavolFooter({ language, isHomepage = true, showCookieSettings = true }: { language: SupportedHomepageLanguage; readonly isHomepage?: boolean; readonly showCookieSettings?: boolean }) {
     const CONTENT = PAVOL_PAGE_CONTENT[language];
     const homeHref = isHomepage ? '#main-content' : '/';
     const privacyHref = usePublicNavigationUrl(getLegalPagePath('privacyPolicy', language));
     const legalHref = usePublicNavigationUrl(getLegalHubPath(language));
+    const chrome = usePavolPageChrome();
 
     return (
         <footer className="border-t border-[var(--pavol-border)] bg-[var(--pavol-ink)] text-white">
@@ -50,7 +52,10 @@ export function PavolFooter({ language, isHomepage = true, showCookieSettings = 
                     <p>© Pavol Hejný. {CONTENT.footer.rightsReservedText}</p>
                     <nav aria-label={language === 'cs' ? 'Právní informace' : 'Legal information'}>
                         <ul className="flex flex-wrap gap-x-5 gap-y-2">
-                            <li><Link href={privacyHref} className="hover:text-white">{language === 'cs' ? 'Ochrana osobních údajů' : 'Privacy policy'}</Link></li>
+                            {chrome ? chrome.footerLinks.map((link) => <li key={link.label}>{link.href
+                                ? <Link href={link.href} className="hover:text-white">{link.label}</Link>
+                                : <span>{link.label}</span>}</li>)
+                                : <li><Link href={privacyHref} className="hover:text-white">{language === 'cs' ? 'Ochrana osobních údajů' : 'Privacy policy'}</Link></li>}
                             <li><Link href={legalHref} className="hover:text-white">{language === 'cs' ? 'Právní dokumenty' : 'Legal documents'}</Link></li>
                             {showCookieSettings && <li><a href={COOKIE_SETTINGS_HASH} className="hover:text-white" onClick={() => {
                                 if (window.location.hash === COOKIE_SETTINGS_HASH) window.dispatchEvent(new Event('hashchange'));

@@ -72,6 +72,7 @@
 .message-chat :is(button, a, textarea, [tabindex]):focus-visible { outline: 2px solid var(--article-accent); outline-offset: 3px; }
 .message-chat .message-chat-form textarea:focus-visible { outline: none; }
 .message-chat-page { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid var(--article-line); border-radius: 22px; background: var(--article-paper, #faf8f2); box-shadow: 0 6px 35px #20393206; }
+.message-chat-page.message-chat-plain { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
 .message-chat-page-heading { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem 1rem; padding: .85rem 1.25rem; border-bottom: 1px solid var(--article-line); }
 .message-chat-identity { display: flex; min-width: 0; align-items: center; gap: .7rem; }
 .message-chat-avatar { display: grid; flex-shrink: 0; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--article-soft); overflow: hidden; }
