@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AvatarError, AVATAR_PRIVATE_HEADERS, assertAvatarRequest, readAvatarJson } from '@/lib/pavol-avatar/config';
 import { allowAvatarAuthAttempt, clearAvatarSession, createAvatarSession, sendAvatarEmail, verifyAvatarEmail } from '@/lib/pavol-avatar/auth';
+import { MAXIMAL_DISCOUNT_CODE_INPUT_LENGTH } from '@/lib/discounts/discountCodeConstants';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 const email = z.string().trim().toLowerCase().email().max(254);
 const schema = z.union([
     z.object({ email, code: z.string().trim().regex(/^\d{6,10}$/) }).strict(),
     z.object({ tokenHash: z.string().regex(/^[a-zA-Z0-9_-]{20,256}$/), email: email.optional() }).strict(),
-    z.object({ email }).strict(),
+    z.object({ email, discountCode: z.string().trim().max(MAXIMAL_DISCOUNT_CODE_INPUT_LENGTH).optional() }).strict(),
 ]);
 function failed(error: unknown) {
     return NextResponse.json({ error: error instanceof AvatarError ? error.message : 'Přihlášení teď není dostupné.' },
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
         const input = parsed.data;
         await allowAvatarAuthAttempt(request, 'email' in input ? input.email ?? '' : '');
         if (!('code' in input) && !('tokenHash' in input)) {
-            const method = await sendAvatarEmail(request, input.email);
+            const method = await sendAvatarEmail(request, input.email, input.discountCode);
             return NextResponse.json({ isCodeSent: method === 'otp', isLinkSent: method === 'magic-link', method }, { headers: AVATAR_PRIVATE_HEADERS });
         }
         const verifiedEmail = await verifyAvatarEmail(input);

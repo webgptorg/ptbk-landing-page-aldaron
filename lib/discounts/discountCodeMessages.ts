@@ -12,6 +12,7 @@ type DiscountCodeMessageState = {
     readonly activeDiscount: ActiveDiscount | null;
     readonly isValidationPending: boolean;
     readonly validationError: string | null;
+    readonly language?: 'cs' | 'en';
 };
 
 export function getDiscountCodeMessage({
@@ -19,7 +20,17 @@ export function getDiscountCodeMessage({
     activeDiscount,
     isValidationPending,
     validationError,
+    language = 'cs',
 }: DiscountCodeMessageState): string {
+    if (language === 'en') {
+        if (!discountCode.trim()) return 'Optional.';
+        if (isValidationPending) return 'Checking discount code…';
+        if (validationError !== null) return 'The code could not be checked. Please try again.';
+        if (activeDiscount === null) return 'This code is not active for this purchase.';
+        const message = `Active discount: ${activeDiscount.percent}%.`;
+        return activeDiscount.remainingUseCount === null
+            ? message : `${message} Remaining uses: ${activeDiscount.remainingUseCount}.`;
+    }
     if (!discountCode.trim()) {
         return OPTIONAL_DISCOUNT_CODE_MESSAGE;
     }

@@ -22,6 +22,7 @@ export const AI_SUPERVIZE_MINI_ONLINE_DISCOUNT_PLACE_ID = 'ai-supervize-mini-onl
 export const COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID = 'community-membership';
 export const PROMPTBOOK_START_DISCOUNT_PLACE_ID = 'promptbook-start';
 export const PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID = 'promptbook-business';
+export const PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID = 'pavol-avatar-full';
 export const PROMPTBOOK_DISCOUNT_PLACE_IDS = [
     PROMPTBOOK_START_DISCOUNT_PLACE_ID,
     PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID,
@@ -35,6 +36,10 @@ export function getPromptbookDiscountPlaceId(planId: 'start' | 'business'): Prom
 
 export function isPromptbookDiscountPlaceId(discountPlaceId: string): discountPlaceId is PromptbookDiscountPlaceId {
     return PROMPTBOOK_DISCOUNT_PLACE_IDS.some((placeId) => placeId === discountPlaceId);
+}
+
+export function isSubscriptionDiscountPlaceId(discountPlaceId: string): boolean {
+    return isPromptbookDiscountPlaceId(discountPlaceId) || discountPlaceId === PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID;
 }
 
 export const DISCOUNT_PLACES: readonly DiscountPlace[] = [
@@ -71,6 +76,13 @@ export const DISCOUNT_PLACES: readonly DiscountPlace[] = [
         label: 'Promptbook Business',
         description: 'Měsíční předplatné Business',
         pagePath: '/cs/pricing/objednat/business',
+        registrationSectionId: REGISTRATION_SECTION_ID,
+    },
+    {
+        id: PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID,
+        label: 'Pavolův AI avatar – Full',
+        description: 'Měsíční předplatné osobního avatara',
+        pagePath: 'https://pavolhejny.cz/avatar',
         registrationSectionId: REGISTRATION_SECTION_ID,
     },
 ];

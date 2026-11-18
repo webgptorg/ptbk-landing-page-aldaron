@@ -33,4 +33,11 @@ describe('avatar passwordless ownership verification',()=>{
         expect(result.status).toBe(200);expect(mocks.verify).toHaveBeenCalledWith({tokenHash:'a'.repeat(64),email:'person@example.test'});
         expect(mocks.session).toHaveBeenCalled();
     });
+    it('carries only the optional discount code into link delivery without granting access',async()=>{
+        mocks.send.mockResolvedValue('magic-link');
+        const result=await POST(request({email:'person@example.test',discountCode:' letní 30 '}));
+        expect(result.status).toBe(200);
+        expect(mocks.send).toHaveBeenCalledWith(expect.any(Request),'person@example.test','letní 30');
+        expect(mocks.session).not.toHaveBeenCalled(); expect(mocks.verify).not.toHaveBeenCalled();
+    });
 });

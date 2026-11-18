@@ -46,6 +46,15 @@ Current provider state and paid invoice periods are reconciled; duplicate delive
 Cancellation preserves the paid period; full refund removes the corresponding access.
 The customer can download the original accepted contract and invoice ledger and open the exact avatar order's payment portal.
 
+Full accepts the shared ecosystem discount codes through the same field, validation endpoint and administration.
+Select `Pavolův AI avatar – Full` (`pavol-avatar-full`) in `/admin/discount-codes` to limit a code to this product;
+existing global codes also apply. Explicitly scoped codes retain their scope, including Promptbook's explicit opt-in rule.
+Links such as `https://pavolhejny.cz/avatar?code=MY_CODE#registrace` prefill the code and retain it through verification;
+the English `.com` page supports the same parameter and translated feedback.
+The form shows the discounted monthly price, the duration and the normal renewal price after a limited offer.
+Checkout reserves one shared use atomically and verifies the displayed percentage/duration before opening Stripe.
+See `docs/pavol-avatar-billing.md` for reservation, retry, expiry and 100% discount behavior.
+
 Legal sources live under legal/<product>. See docs/legal-product-registry.md.
 A future personal sole-trader edition requires new seller/Stripe configuration and new accepted contracts; old AI Web records must retain their supplier.
 

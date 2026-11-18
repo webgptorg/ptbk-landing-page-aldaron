@@ -20,6 +20,6 @@ export async function POST(request: Request) {
     catch (error) {
         const status = error instanceof AvatarBillingError ? error.status : (error && typeof error === 'object' && 'status' in error && typeof error.status === 'number' ? error.status : 503);
         const message = error instanceof AvatarBillingError || status === 422 ? error instanceof Error ? error.message : 'Zkontrolujte formulář.' : 'Objednávku se nepodařilo otevřít. Zkuste to prosím znovu.';
-        return NextResponse.json({ error: message }, { status, headers });
+        return NextResponse.json({ error: message, ...(error instanceof AvatarBillingError && error.code ? { code: error.code } : {}) }, { status, headers });
     }
 }

@@ -5,6 +5,7 @@ import {
     DISCOUNT_PLACES,
     PROMPTBOOK_BUSINESS_DISCOUNT_PLACE_ID,
     PROMPTBOOK_START_DISCOUNT_PLACE_ID,
+    PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID,
     createDiscountCodePrefillPath,
     createDiscountCodeUrl,
     getDiscountCodePlaces,
@@ -26,8 +27,14 @@ describe('discount-place links', () => {
             'ai-supervize-mini-onsite',
             'ai-supervize-mini-online',
             COMMUNITY_MEMBERSHIP_DISCOUNT_PLACE_ID,
+            PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID,
         ]);
         expect(getDiscountCodePlaces(['ai-supervize-mini-online', 'unknown-place'])).toEqual([DISCOUNT_PLACES[1]]);
+    });
+
+    it('shares an avatar code on the personal domain instead of the Promptbook host', () => {
+        const [avatar] = getDiscountCodePlaces([PAVOL_AVATAR_FULL_DISCOUNT_PLACE_ID]);
+        expect(createDiscountCodeUrl(avatar!, 'AVATAR 30')).toBe('https://pavolhejny.cz/avatar?code=AVATAR%2030#registrace');
     });
 
     it('prefills a code on the selected Promptbook plan', () => {

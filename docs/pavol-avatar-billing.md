@@ -26,6 +26,39 @@ This configuration permits invoice history, payment-method updates and cancellat
 
 `PAVOL_AVATAR_PORTAL_CONFIGURATION_ID` remains an optional explicit dedicated override.
 
+## Shared discount codes
+
+Apply `2026-11-1800-pavol-avatar-discount-codes.sql` with the code deployment. The `pavol-avatar-full` place joins the
+existing discount registry, administration and `?code=` links. Global codes include the avatar; codes restricted to
+other products do not. Normalization, wildcard precedence, activation dates and maximum use counts use the same
+shared resolver and definitions. No new code catalogue or promotion-management screen is introduced.
+
+The client validates through `/api/discount-codes/validate` and blocks submission while a nonempty code is invalid
+or unresolved. It submits the normalized code and the displayed percentage/duration. The server stores these in
+immutable `avatar_orders.discount_code`, `discount_percent` and `discount_months` fields, then atomically reserves
+the actual shared terms using `reserve_subscription_discount_code`. A mismatch releases/closes the attempt and
+returns `discount_changed`; the client revalidates and requires a new submission with the new visible price.
+Client-submitted percentages never determine the Stripe coupon independently of this reservation.
+
+The existing private `promptbook_discount_reservations` table retains its historical name and holds both products'
+reservations against the same `discount_codes.use_count`. The legacy Promptbook RPC keeps its plan-only boundary.
+Order-ID reservations and Stripe customer/coupon/session idempotency keys make retries safe. An already-open
+Checkout Session keeps its frozen terms even if its code is subsequently exhausted or changed. A network timeout
+keeps the reservation for recovery; a definitive Stripe rejection or confirmed checkout expiry releases it once.
+Paid invoice reconciliation redeems it. A webhook retry finishes settlement after a temporary database outage;
+a late expiry cannot release an active subscription's use. Closing the browser alone does not release an open session.
+Avatar settlement additionally checks the reservation's product scope, so a client-selected UUID collision cannot
+release or redeem a Promptbook reservation.
+
+Stripe receives one coupon through the existing shared coupon helper, preserving the base recurring price:
+`NULL` months means `forever`; 1–36 months means `repeating` with that duration. Promotions do not stack.
+A permanent 100% offer uses `payment_method_collection=if_required`; a temporary 100% offer still collects a card
+for regular-price renewals. A verified `paid` zero-total invoice grants its service period; an unpaid invoice or
+a fully refunded positive invoice does not. The UI explains the duration and renewal price in Czech and English.
+Nonzero totals below the shared CZK card minimum (CZK 15) are refused before reserving a use or creating an order.
+Existing accepted avatar orders remain undiscounted and unchanged; a new code affects only a new subscription.
+The owner's contract export includes the accepted code, percentage and duration alongside the base price.
+
 ## Identity, contracts and accounting
 
 Only a verified mailbox may receive an avatar session. Existing shared Supabase numeric-OTP templates remain unchanged. Optional `PAVOL_AVATAR_EMAIL_API_KEY` and `PAVOL_AVATAR_EMAIL_FROM` enable avatar-branded one-time links through Resend; otherwise the account screen uses the existing email-code delivery.

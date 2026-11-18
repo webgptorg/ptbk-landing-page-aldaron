@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         const parsed = z.string().uuid().safeParse(new URL(request.url).searchParams.get('id'));
         if (!parsed.success) throw new AvatarError('Objednávku jsme nenašli.', 404);
         const db = getAvatarDatabase();
-        const order = await db.from('avatar_orders').select('id,email,fullname,customer_type,billing_name,company_id,vat_id,billing_address,country,base_amount,currency,terms_version,seller,legal_snapshot,usage_limits,immediate_start_accepted,status,paid_through,cancel_at_period_end,created_at,invoice_url')
+        const order = await db.from('avatar_orders').select('id,email,fullname,customer_type,billing_name,company_id,vat_id,billing_address,country,base_amount,discount_code,discount_percent,discount_months,currency,terms_version,seller,legal_snapshot,usage_limits,immediate_start_accepted,status,paid_through,cancel_at_period_end,created_at,invoice_url')
             .eq('id', parsed.data).eq('principal_id', principal.id).eq('is_test', getAvatarAvailability().isTest).maybeSingle();
         if (order.error) throw new AvatarError('Potvrzení objednávky teď nelze načíst.');
         if (!order.data) throw new AvatarError('Objednávku jsme nenašli.', 404);

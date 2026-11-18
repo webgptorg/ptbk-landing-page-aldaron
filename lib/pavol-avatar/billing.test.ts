@@ -3,7 +3,8 @@ import type Stripe from 'stripe';
 import type { SupabaseClient } from '@supabase/supabase-js';
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/legal/productLegalAvatar', () => ({ avatarLegalContractSnapshot: () => ({ terms: 'Frozen avatar terms' }) }));
-const mocks = vi.hoisted(() => ({ database: vi.fn(), availability: vi.fn() }));
+const mocks = vi.hoisted(() => ({ database: vi.fn(), availability: vi.fn(), settle: vi.fn() }));
+vi.mock('@/lib/discounts/discountCodeDatabase', () => ({ reserveSubscriptionDiscountCode: vi.fn(), settleSubscriptionDiscountReservation: mocks.settle }));
 vi.mock('./database', () => ({ getAvatarDatabase: mocks.database }));
 vi.mock('./config', () => ({ AVATAR_PRICE_CZK: 1000, AVATAR_TERMS_VERSION: '2026-11-17-v1', AVATAR_TERMS_PATH: '/avatar/legal/terms/2026-11-17-v1', getAvatarAvailability: mocks.availability, getAvatarOrigin: () => 'https://pavolhejny.cz' }));
 import { applyAvatarStripeEvent, avatarCheckoutSchema, avatarOrderHasAccess, refreshAvatarOrder, type AvatarOrder } from './billing';
@@ -11,7 +12,7 @@ const id = '7c97aabc-a109-4d83-b0fa-a14f13208fe1';
 const end = Math.floor(Date.now() / 1000) + 86400;
 const order = (): AvatarOrder => ({
     id, principal_id: 'e633f2df-8aa5-4d37-afd8-ff3f823e66e8', email: 'owner@example.com', fullname: 'Owner', customer_type: 'individual', billing_name: 'Owner', company_id: null, vat_id: null,
-    billing_address: { line1: 'Street 1', city: 'Prague', postal_code: '10000', country: 'CZ' }, country: 'CZ', base_amount: 100000, currency: 'czk', terms_version: '2026-11-17-v1', seller: { name: 'AI Web s.r.o.' },
+    billing_address: { line1: 'Street 1', city: 'Prague', postal_code: '10000', country: 'CZ' }, country: 'CZ', base_amount: 100000, discount_code: null, discount_percent: null, discount_months: null, currency: 'czk', terms_version: '2026-11-17-v1', seller: { name: 'AI Web s.r.o.' },
     status: 'active', is_test: true, stripe_customer_id: 'cus_avatar', stripe_session_id: 'cs_test_avatar', stripe_subscription_id: 'sub_avatar', paid_through: new Date(end * 1000).toISOString(),
     cancel_at_period_end: false, invoice_url: null, revision: 0, request_fingerprint: 'hash', created_at: new Date().toISOString(),
 });
@@ -44,7 +45,7 @@ function database(initialOrder = order()) {
             }
             if (sorting)
                 selected = selected.sort((a, b) => String(b[sorting!]).localeCompare(String(a[sorting!])));
-            return { data: selected, error: null };
+            return { data: selected.map(row => ({ ...row })), error: null };
         };
         const q = {
             select: () => q, eq: (key: string, value: unknown) => { filters.push(row => row[key] === value); return q; },
@@ -69,7 +70,7 @@ function stripe(refunded = 0) {
     return { client: client as unknown as Stripe, subscription, invoice, mocks: client };
 }
 const event = (type: string, object: unknown, eventId = 'evt_avatar') => ({ id: eventId, type, livemode: false, data: { object } } as unknown as Stripe.Event);
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => { vi.clearAllMocks(); mocks.settle.mockResolvedValue({ errorMessage: null }); });
 describe('avatar billing boundaries', () => {
     it('requires the avatar terms and explicit immediate-start choice', () => {
         const input = { requestId: id, fullname: 'Owner', country: 'CZ', customerType: 'individual', billingName: 'Owner', billingAddress: { line1: 'Street 1', city: 'Prague', postal_code: '10000', country: 'CZ' }, termsVersion: '2026-11-17-v1', termsAccepted: true, immediateStartAccepted: true };
@@ -123,6 +124,23 @@ describe('avatar billing boundaries', () => {
         expect(d.tables.avatar_orders[0].paid_through).toBeNull();
         expect(d.tables.avatar_invoices[0].refunded_amount).toBe(100000);
     });
+    it('grants a verified paid zero-total period without confusing it with a full refund', async () => {
+        const d = database();
+        const s = stripe();
+        s.invoice.amount_paid = 0;
+        await refreshAvatarOrder(d.db, s.client, order());
+        expect(d.tables.avatar_orders[0].paid_through).toBe(new Date(end * 1000).toISOString());
+        expect(d.tables.avatar_invoices[0].amount_paid).toBe(0);
+    });
+    it('does not grant an unpaid zero-total invoice', async () => {
+        const d = database();
+        const s = stripe();
+        s.invoice.amount_paid = 0;
+        s.invoice.status = 'draft';
+        await refreshAvatarOrder(d.db, s.client, order());
+        expect(d.tables.avatar_orders[0].paid_through).toBeNull();
+        expect(d.tables.avatar_invoices).toHaveLength(0);
+    });
     it('replays an already persisted event without generating another provider request', async () => {
         const d = database();
         const s = stripe();
@@ -133,11 +151,28 @@ describe('avatar billing boundaries', () => {
         expect(d.writes).toEqual([]);
     });
     it('does not let a late checkout expiry overwrite an active subscription', async () => {
-        const d = database();
+        const d = database({ ...order(), discount_code: 'SHARED', discount_percent: 30, discount_months: 3 });
         const s = stripe();
         mocks.database.mockReturnValue(d.db);
         await applyAvatarStripeEvent(s.client, event('checkout.session.expired', { id: 'cs_test_avatar', metadata: { avatarOrderId: id } }));
         expect(d.tables.avatar_orders[0].status).toBe('active');
         expect(d.tables.avatar_orders[0].paid_through).toBe(new Date(end * 1000).toISOString());
+        expect(mocks.settle).not.toHaveBeenCalled();
+    });
+    it('redeems the reservation for a verified zero-total paid period', async () => {
+        const discounted = { ...order(), discount_code: 'FREE', discount_percent: 100, discount_months: null };
+        const d = database(discounted), s = stripe(); s.invoice.amount_paid = 0;
+        await refreshAvatarOrder(d.db, s.client, discounted);
+        expect(mocks.settle).toHaveBeenCalledWith(id, true, 'pavol-avatar-full');
+    });
+    it('finishes releasing an expired checkout if the first settlement fails after the status was saved', async () => {
+        const d = database({ ...order(), status: 'pending', discount_code: 'SHARED', discount_percent: 30, discount_months: 3 });
+        const s = stripe(); mocks.database.mockReturnValue(d.db);
+        mocks.settle.mockResolvedValueOnce({ errorMessage: 'temporary database failure' });
+        const expired = event('checkout.session.expired', { id: 'cs_test_avatar', metadata: { avatarOrderId: id } });
+        await expect(applyAvatarStripeEvent(s.client, expired)).rejects.toThrow('Rezervaci');
+        expect(d.tables.avatar_stripe_events).toHaveLength(0);
+        await expect(applyAvatarStripeEvent(s.client, expired)).resolves.toBe(true);
+        expect(mocks.settle).toHaveBeenCalledTimes(2); expect(mocks.settle).toHaveBeenLastCalledWith(id, false, 'pavol-avatar-full');
     });
 });

@@ -3,7 +3,7 @@ import { normalizeDiscountCode } from '@/lib/discounts/discountCode';
 import { reservePromptbookDiscountCode, settlePromptbookDiscountReservation } from '@/lib/discounts/discountCodeDatabase';
 import { getPromptbookDiscountPlaceId } from '@/lib/discounts/discountPlaces';
 import { getStripeGatewayOrNull } from '@/lib/payments/stripeGateway';
-import { createStripeAmountFromCzk } from '@/lib/payments/stripeAmount';
+import { createStripeAmountFromCzk, STRIPE_CZK_MINIMUM_CHARGE_AMOUNT } from '@/lib/payments/stripeAmount';
 import { BILLING_ORDER_ID_PATTERN, writeOrderAccessCookie } from '@/lib/promptbook-billing/billingAccess';
 import { createPromptbookCheckout, PROMPTBOOK_CHECKOUT_MAX_AGE_MS } from '@/lib/promptbook-billing/billingCheckout';
 import { BillingIdentityError, resolvePromptbookCheckoutIdentity } from '@/lib/promptbook-billing/billingIdentity';
@@ -15,7 +15,6 @@ import Stripe from 'stripe';
 import { z } from 'zod';
 
 const NO_STORE = { 'Cache-Control': 'no-store' };
-const MINIMUM_STRIPE_CHARGE_CZK_MINOR = 1500;
 const quoteChanged = 'Sleva už není dostupná za zobrazených podmínek. Ověřte kód znovu.';
 
 const checkoutSchema = z.object({
@@ -135,7 +134,7 @@ export async function POST(request: NextRequest) {
         }
 
         const priceAfterDiscount = order.base_amount - Math.round(order.base_amount * (order.discount_percent ?? 0) / 100);
-        if (priceAfterDiscount > 0 && priceAfterDiscount < MINIMUM_STRIPE_CHARGE_CZK_MINOR) {
+        if (priceAfterDiscount > 0 && priceAfterDiscount < STRIPE_CZK_MINIMUM_CHARGE_AMOUNT) {
             return fail('Cena po této slevě je pod minimální částkou pro platbu kartou.', 422);
         }
 

@@ -140,6 +140,38 @@ describe('avatar account and subscription boundaries', () => {
         expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
         expect(callsTo('/api/promptbook-billing/checkout')).toHaveLength(0);
     });
+    it('keeps a shared discount link through verified login and opens the prefilled checkout', async () => {
+        window.history.replaceState(null, '', '/avatar?code=SHARED');
+        const original = fetchMock.getMockImplementation()!;
+        fetchMock.mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url === '/api/pavol-avatar/auth' && options?.method === 'POST') {
+                const input = JSON.parse(String(options.body)) as { code?: string };
+                if (input.code) { account = signedIn('free'); return Response.json({ isVerified: true }); }
+                return Response.json({ method: 'otp' });
+            }
+            if (url === '/api/discount-codes/validate') return Response.json({ activeDiscount: { code: 'SHARED', percent: 30, remainingUseCount: null, subscriptionDiscountDurationMonths: 3 } });
+            return original(url, options);
+        });
+        render(<PavolAvatarAccount language="cs" availability={availability} />);
+        const send = await screen.findByRole('button', { name: 'Poslat přihlašovací kód' });
+        await waitFor(() => expect(send).toBeEnabled());
+        fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: principal.email } }); fireEvent.click(send);
+        fireEvent.change(await screen.findByLabelText('Kód z e-mailu'), { target: { value: '123456' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Ověřit kód' }));
+        expect(await screen.findByRole('heading', { name: 'Objednat Full' })).toBeVisible();
+        expect(await screen.findByDisplayValue('SHARED')).toBeVisible();
+        expect(await screen.findByText('700 Kč')).toBeVisible();
+        expect(JSON.parse(String(callsTo('/api/pavol-avatar/auth', 'POST')[0][1].body))).toEqual({ email: principal.email, discountCode: 'SHARED' });
+        expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
+    });
+    it('does not open another purchase from a discount link for a current Full subscriber', async () => {
+        window.history.replaceState(null, '', '/avatar?code=SHARED'); account = signedIn('full');
+        render(<PavolAvatarAccount language="cs" availability={availability} />);
+        await screen.findByText(principal.email);
+        expect(screen.queryByRole('heading', { name: 'Objednat Full' })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Tvůj tarif' })).toBeDisabled();
+        expect(callsTo('/api/discount-codes/validate')).toHaveLength(0);
+    });
 
     it('shows a newly created connector secret once, lists only metadata, and revokes the selected connection', async () => {
         account = signedIn('full', 17);

@@ -9,7 +9,7 @@ vi.mock('@/lib/supabase', () => ({
     createSupabaseServiceRoleClient: createSupabaseServiceRoleClientMock,
 }));
 
-import { loadActiveDiscount, loadPromotedDiscountsByPlace } from './discountCodeDatabase';
+import { loadActiveDiscount, loadPromotedDiscountsByPlace, reservePromptbookDiscountCode, reserveSubscriptionDiscountCode } from './discountCodeDatabase';
 
 const WILDCARD_DISCOUNT_CODE_ROW = {
     id: '00000000-0000-0000-0000-000000000001',
@@ -103,5 +103,15 @@ describe('submitted discount-code loading', () => {
             errorMessage: null,
         });
         expect(query.eq).toHaveBeenCalledWith('is_promoted', true);
+    });
+    it('normalizes an avatar claim through the shared reservation RPC while keeping legacy Promptbook scope', async () => {
+        const rpc = vi.fn().mockResolvedValue({ data: [{ status: 'applied', code: 'LETNI_*', percent: 30, remaining_use_count: 0, subscription_discount_duration_months: 3 }], error: null });
+        createSupabaseServiceRoleClientMock.mockReturnValue({ rpc });
+        const result = await reserveSubscriptionDiscountCode(' letní 30 ', 'pavol-avatar-full', 'order-id');
+        expect(rpc).toHaveBeenCalledWith('reserve_subscription_discount_code', { submitted_code: 'LETNI_30', place_id: 'pavol-avatar-full', reservation_id: 'order-id' });
+        expect(result).toMatchObject({ status: 'applied', activeDiscount: { percent: 30, subscriptionDiscountDurationMonths: 3 } });
+        rpc.mockClear();
+        expect(await reservePromptbookDiscountCode('LETNI_30', 'pavol-avatar-full', 'order-id')).toMatchObject({ status: 'unusable' });
+        expect(rpc).not.toHaveBeenCalled();
     });
 });

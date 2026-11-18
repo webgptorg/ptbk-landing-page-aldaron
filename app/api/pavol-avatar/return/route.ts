@@ -28,7 +28,7 @@ export async function GET(request: Request) {
         if (!order || order.principal_id !== principal.id || order.stripe_session_id !== session.id)
             return finish('unconfirmed');
         await refreshAvatarOrder(db, gateway.stripe, order, { session });
-        return finish(session.status === 'complete' && session.payment_status === 'paid' ? 'confirmed' : 'pending');
+        return finish(session.status === 'complete' && ['paid', 'no_payment_required'].includes(session.payment_status) ? 'confirmed' : 'pending');
     }
     catch {
         return finish('unconfirmed');

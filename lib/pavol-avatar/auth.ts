@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { NextResponse } from 'next/server';
 import { AvatarError, getAvatarAvailability, getAvatarOrigin } from './config';
 import { getAvatarDatabase } from './database';
+import { normalizeDiscountCode } from '@/lib/discounts/discountCode';
+import { DISCOUNT_CODE_QUERY_PARAMETER } from '@/lib/discounts/discountCodeConstants';
 
 export type AvatarPrincipal = { id: string; email: string };
 export const AVATAR_SESSION_COOKIE = 'pavol_avatar_session';
@@ -71,7 +73,7 @@ export async function allowAvatarAuthAttempt(request: Request, email = ''): Prom
     }
 }
 /** Optional avatar-branded link delivery. The shared Supabase numeric-OTP templates remain untouched. */
-export async function sendAvatarEmail(request: Request, email: string): Promise<'magic-link' | 'otp'> {
+export async function sendAvatarEmail(request: Request, email: string, discountCode?: string): Promise<'magic-link' | 'otp'> {
     const availability = getAvatarAvailability();
     if (!availability.authEnabled) throw new AvatarError('Přihlášení avatara teď není dostupné.');
     if (availability.authMethod === 'magic-link') {
@@ -79,6 +81,7 @@ export async function sendAvatarEmail(request: Request, email: string): Promise<
         const hash = generated.data?.properties?.hashed_token;
         if (generated.error || !hash) throw new AvatarError('Přihlašovací odkaz se nepodařilo vytvořit.');
         const link = new URL('/avatar', getAvatarOrigin(request));
+        if (discountCode) link.searchParams.set(DISCOUNT_CODE_QUERY_PARAMETER, normalizeDiscountCode(discountCode));
         link.hash = new URLSearchParams({ login_token: hash, login_email: email }).toString();
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST', signal: AbortSignal.timeout(10000),

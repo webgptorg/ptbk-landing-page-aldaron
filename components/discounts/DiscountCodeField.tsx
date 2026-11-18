@@ -12,19 +12,20 @@ type DiscountCodeFieldProps = {
     readonly inputId: string;
     readonly validation: DiscountCodeValidation;
     readonly appearance?: FormSurfaceAppearance;
+    readonly language?: 'cs' | 'en';
 };
 
 /**
  * The one discount-code field shared by every paid registration form, on a light page and inside a dark room alike.
  */
-export function DiscountCodeField({ inputId, validation, appearance = 'light' }: DiscountCodeFieldProps) {
+export function DiscountCodeField({ inputId, validation, appearance = 'light', language = 'cs' }: DiscountCodeFieldProps) {
     const { discountCode, setDiscountCode, activeDiscount, isValidationPending, validationError } = validation;
     const surfaceClassNames = FORM_SURFACE_CLASS_NAMES[appearance];
 
     return (
         <div>
             <label htmlFor={inputId} className={cn('text-sm font-semibold', surfaceClassNames.label)}>
-                Slevový kód
+                {language === 'cs' ? 'Slevový kód' : 'Discount code'}
             </label>
             <div className="relative mt-2">
                 <BadgePercent className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-slate-400" />
@@ -38,10 +39,12 @@ export function DiscountCodeField({ inputId, validation, appearance = 'light' }:
                     autoCapitalize="characters"
                     autoCorrect="off"
                     spellCheck={false}
+                    aria-describedby={`${inputId}-status`}
+                    aria-invalid={discountCode.trim() !== '' && !isValidationPending && (validationError !== null || activeDiscount === null)}
                 />
             </div>
-            <p className={cn('mt-1 text-xs', surfaceClassNames.hint)}>
-                {getDiscountCodeMessage({ discountCode, activeDiscount, isValidationPending, validationError })}
+            <p id={`${inputId}-status`} role="status" className={cn('mt-1 text-xs', surfaceClassNames.hint)}>
+                {getDiscountCodeMessage({ discountCode, activeDiscount, isValidationPending, validationError, language })}
             </p>
         </div>
     );

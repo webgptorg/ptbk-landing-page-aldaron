@@ -13,7 +13,7 @@ import {
     DISCOUNT_CODE_TABLE_NAME,
     RESOLVE_DISCOUNT_CODE_FUNCTION_NAME,
 } from '@/lib/discounts/discountCodeConstants';
-import { isPromptbookDiscountPlaceId, PROMPTBOOK_DISCOUNT_PLACE_IDS } from '@/lib/discounts/discountPlaces';
+import { isPromptbookDiscountPlaceId, isSubscriptionDiscountPlaceId, PROMPTBOOK_DISCOUNT_PLACE_IDS } from '@/lib/discounts/discountPlaces';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
@@ -322,14 +322,14 @@ export async function consumeDiscountCode(
         : createDiscountCodeConsumptionResult(consumptionRow);
 }
 
-/** Reserves one use for a stable Promptbook order and returns the terms frozen for that order. */
-export async function reservePromptbookDiscountCode(
+/** Reserves one use for a stable subscription order and returns its frozen discount terms. */
+export async function reserveSubscriptionDiscountCode(
     discountCodeValue: string,
     discountPlaceId: string,
     reservationId: string,
 ): Promise<DiscountCodeConsumptionResult> {
     const normalizedDiscountCode = normalizeDiscountCode(discountCodeValue);
-    if (!isDiscountCodeNormalized(normalizedDiscountCode) || !isPromptbookDiscountPlaceId(discountPlaceId)) {
+    if (!isDiscountCodeNormalized(normalizedDiscountCode) || !isSubscriptionDiscountPlaceId(discountPlaceId)) {
         return { status: 'unusable', activeDiscount: null, errorMessage: null };
     }
 
@@ -338,7 +338,7 @@ export async function reservePromptbookDiscountCode(
         return { status: 'unusable', activeDiscount: null, errorMessage: DISCOUNT_CODE_DATABASE_UNAVAILABLE_ERROR_MESSAGE };
     }
 
-    const { data, error } = await supabase.rpc('reserve_promptbook_discount_code', {
+    const { data, error } = await supabase.rpc('reserve_subscription_discount_code', {
         submitted_code: normalizedDiscountCode,
         place_id: discountPlaceId,
         reservation_id: reservationId,
@@ -353,19 +353,43 @@ export async function reservePromptbookDiscountCode(
         : createDiscountCodeConsumptionResult(reservationRow);
 }
 
+/** Existing Promptbook callers retain their explicit plan-only boundary. */
+export async function reservePromptbookDiscountCode(
+    discountCodeValue: string,
+    discountPlaceId: string,
+    reservationId: string,
+): Promise<DiscountCodeConsumptionResult> {
+    if (!isPromptbookDiscountPlaceId(discountPlaceId)) {
+        return { status: 'unusable', activeDiscount: null, errorMessage: null };
+    }
+    return reserveSubscriptionDiscountCode(discountCodeValue, discountPlaceId, reservationId);
+}
+
 /** Commits a paid reservation or frees it when Stripe confirms that the checkout expired. */
-export async function settlePromptbookDiscountReservation(
+async function settleDiscountReservation(
     reservationId: string,
     isRedeemed: boolean,
+    discountPlaceId?: string,
 ): Promise<{ readonly errorMessage: string | null }> {
     const supabase = getDiscountCodeDatabaseOrNull();
     if (supabase === null) {
         return { errorMessage: DISCOUNT_CODE_DATABASE_UNAVAILABLE_ERROR_MESSAGE };
     }
 
-    const { error } = await supabase.rpc('settle_promptbook_discount_reservation', {
+    const { error } = await supabase.rpc(discountPlaceId ? 'settle_subscription_discount_reservation' : 'settle_promptbook_discount_reservation', {
         reservation_id: reservationId,
         is_redeemed: isRedeemed,
+        ...(discountPlaceId ? { reservation_place_id: discountPlaceId } : {}),
     });
     return { errorMessage: error?.message ?? null };
+}
+
+/** Scope a subscription settlement to its product, even when another order has the same UUID. */
+export function settleSubscriptionDiscountReservation(reservationId: string, isRedeemed: boolean, discountPlaceId: string) {
+    return settleDiscountReservation(reservationId, isRedeemed, discountPlaceId);
+}
+
+/** Existing plan callers keep their original RPC signature. */
+export function settlePromptbookDiscountReservation(reservationId: string, isRedeemed: boolean) {
+    return settleDiscountReservation(reservationId, isRedeemed);
 }

@@ -9,6 +9,9 @@ import { AVATAR_PUBLIC_PRICE_CZK,AVATAR_PUBLIC_PRIVACY_PATH,type AvatarAvailabil
 import { AvatarCheckout } from './AvatarCheckout';
 import { LogIn, LogOut } from 'lucide-react';
 import { PavolChromeSlot } from './PavolPageChrome';
+import { DISCOUNT_CODE_QUERY_PARAMETER } from '@/lib/discounts/discountCodeConstants';
+
+function discountCheckoutRequested(){return new URLSearchParams(window.location.search).has(DISCOUNT_CODE_QUERY_PARAMETER);}
 
 async function jsonRequest<T>(path:string,method='GET',body?:unknown):Promise<T>{
  const response=await fetch(path,{method,headers:body===undefined?undefined:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
@@ -29,18 +32,20 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
   }catch(failure){setError(failure instanceof Error?failure.message:'Služba teď není dostupná.');}finally{setLoading(false);}
  },[]);
  useEffect(()=>{void refresh();},[refresh]);
+ useEffect(()=>{if(discountCheckoutRequested()){setCheckout(true);setTab('plans');}},[]);
  useEffect(()=>{
   const hash=new URLSearchParams(window.location.hash.slice(1)),tokenHash=hash.get('login_token'),loginEmail=hash.get('login_email')??undefined;
   if(!tokenHash)return;
   window.history.replaceState(null,'',window.location.pathname+window.location.search);
   setBusy(true);setError('');
   void jsonRequest('/api/pavol-avatar/auth','POST',{tokenHash,email:loginEmail})
-   .then(async()=>{setTab('chat');setNotice(cs?'Přihlášení je ověřené.':'You are signed in.');await refresh();})
+   .then(async()=>{setTab(discountCheckoutRequested()?'plans':'chat');setNotice(cs?'Přihlášení je ověřené.':'You are signed in.');await refresh();})
    .catch((failure:unknown)=>setError(failure instanceof Error?failure.message:'Přihlášení se nepodařilo.')).finally(()=>setBusy(false));
  },[cs,refresh]);
  async function authenticate(event:FormEvent){event.preventDefault();if(busy)return;setBusy(true);setError('');
-  try{const data=await jsonRequest<{isVerified?:boolean;method?:'otp'|'magic-link'}>('/api/pavol-avatar/auth','POST',{email,...(code?{code}:{})});
-   if(data.isVerified){setSent(null);setCode('');setTab('chat');await refresh();}else setSent(data.method??state.availability.authMethod);
+  try{const discountCode=new URLSearchParams(window.location.search).get(DISCOUNT_CODE_QUERY_PARAMETER);
+   const data=await jsonRequest<{isVerified?:boolean;method?:'otp'|'magic-link'}>('/api/pavol-avatar/auth','POST',{email,...(code?{code}:discountCode?{discountCode}:{})});
+   if(data.isVerified){setSent(null);setCode('');setTab(discountCheckoutRequested()?'plans':'chat');await refresh();}else setSent(data.method??state.availability.authMethod);
   }catch(failure){setError(failure instanceof Error?failure.message:'Přihlášení se nepodařilo.');}finally{setBusy(false);}
  }
  async function logout(){setBusy(true);setError('');try{await jsonRequest('/api/pavol-avatar/auth','DELETE');setNewToken('');setConnections(null);setTelegramUrl('');setHistory([]);setCheckout(false);setTab('plans');await refresh();}catch(failure){setError((failure as Error).message);}finally{setBusy(false);}}
@@ -103,7 +108,7 @@ export function PavolAvatarAccount({language,availability}:{language:'cs'|'en';a
    {sent&&<button type="button" disabled={busy} onClick={()=>{setSent(null);setCode('');}}>{cs?'Použít jiný e-mail nebo poslat znovu':'Change email or send again'}</button>}
    <p className="avatar-small">{cs?'Odesláním žádáš o přístup ke službě. Nejde o přihlášení k marketingu.':'You are requesting service access, not subscribing to marketing.'} <a href={AVATAR_PUBLIC_PRIVACY_PATH}>{cs?'Soukromí':'Privacy'}</a></p>
   </form>}
-  {!loading&&(!state.principal||tab==='plans')&&(checkout&&state.principal?<AvatarCheckout cs={cs} limit={limits.full} slovakiaEnabled={state.availability.slovakiaEnabled} onCancel={()=>setCheckout(false)}/>:<section className="avatar-offer">
+  {!loading&&(!state.principal||tab==='plans')&&(checkout&&state.principal&&plan!=='full'&&state.availability.billingEnabled?<AvatarCheckout cs={cs} limit={limits.full} slovakiaEnabled={state.availability.slovakiaEnabled} onCancel={()=>setCheckout(false)}/>:<section className="avatar-offer">
    {plans}
    <p className="avatar-small">{cs?'Full je licence pro jednoho člověka. Firma může být plátcem. Spotřeba je společná pro všechna připojení; další poplatky automaticky neúčtujeme. Hlasový rozhovor připravujeme.':'Full is licensed to one person; a business may pay. All connections share one allowance. No automatic overage charges. Voice conversations are planned.'}</p>
    {!state.availability.billingEnabled&&<p className="avatar-notice">{cs?'Placené objednávky zatím nejsou otevřené.':'Paid checkout is not open yet.'}</p>}
