@@ -28,6 +28,9 @@ const COPY = {
         tourGuide: 'Otevřít návod se snímky terminálu',
         repository: 'GitHub', methods: 'Způsob instalace',
         aiTitle: 'Instalace přes AI agenta',
+        appSetup: 'Připojení přes App začněte vytvořením enginu.',
+        appSetupLink: 'Otevřít App',
+        appSetupNote: 'Zkopírujte příkaz nebo AI prompt přímo odtud, aby obsahoval Vaše propojení. Agendu pak nastavíte na stránce enginu.',
         aiText: 'Vložte prompt do Claude Code, Codexu nebo jiného agenta s přístupem k terminálu.',
         aiPermissions: 'Prompt obsahuje výchozí odpovědi na běžné instalační otázky. Povinná potvrzení Vašeho AI nástroje a přihlášení může být potřeba dokončit osobně.',
         aiTarget: 'Kam instalovat', aiLocal: 'Váš počítač', aiServer: 'VPS přes SSH',
@@ -96,6 +99,9 @@ Pravidla instalace a předem zodpovězené otázky:
         tourGuide: 'Open the illustrated guide (in Czech)',
         repository: 'GitHub', methods: 'Installation method',
         aiTitle: 'Install with your AI agent',
+        appSetup: 'To connect through App, start by adding an engine.',
+        appSetupLink: 'Open App',
+        appSetupNote: 'Copy the command or AI prompt there so it includes your pairing context. Then set up the agenda on the engine’s page.',
         aiText: 'Paste the prompt into Claude Code, Codex or another agent with terminal access.',
         aiPermissions: 'The prompt includes defaults for routine installation questions. Mandatory approvals in your AI tool and sign-in may still need your input.',
         aiTarget: 'Install on', aiLocal: 'Your computer', aiServer: 'VPS over SSH',
@@ -209,6 +215,9 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
             <Link className={s.back} href={path()}>{copy.back}</Link>
             <h1>{copy.title}</h1>
             <p>{copy.intro}</p>
+            <p id="engine-first-setup">
+                {copy.appSetup}{' '}<a href="https://app.ptbk.io/engines/new">{copy.appSetupLink}</a>{' '}{copy.appSetupNote}
+            </p>
             {release && <p>
                 <strong>{release.prerelease
                     ? (locale === 'cs' ? 'Verze k vyzkoušení' : 'Preview release')

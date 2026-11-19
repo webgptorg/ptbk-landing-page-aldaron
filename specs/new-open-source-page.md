@@ -1,5 +1,7 @@
 # Instalace Promptbooku
 
+Revize 18. listopadu 2026 rozlišuje samostatnou místní instalaci a připojení enginu přes App. Krátký odkaz u úvodu obou jazyků vede na `https://app.ptbk.io/engines/new`: konkrétní párovací příkaz i AI prompt vznikají tam, nikoli přidáním tajného odkazu do veřejné stránky. Nastavení agendy se v této cestě dokončuje na originu enginu. Obecný AI prompt na této stránce nadále slouží samostatnému projektu; jeho výchozí složka nesmí přebít App onboarding. Npm, EXE i oba DMG zůstávají svázané se skutečnými vydáními katalogu.
+
 `/cs/open-source` a `/en/open-source` jsou stručným instalačním rozcestníkem. Jeden nadpis, krátký pokyn, výběr způsobu instalace a obsah zvolené záložky. Bez opakovaného produktového hero, benefitů, přehledu ovládání, prodejních sekcí a výzvy ke hvězdičce. Dole pouze GitHub, dokumentace, BUSL-1.1 a stávající kontakt pro pomoc s instalací.
 
 Za zvolenou instalační metodou je v obou jazycích odpovídající tříkrokový postup. Změna záložky mění celý postup; AI rozlišuje také Váš počítač a VPS přes SSH. macOS ukazuje stažení DMG, přesunutí aplikace do Aplikací a první spuštění; Windows vlastní EXE instalátor, Shell SSH bootstrap a cloud přípravu serveru. Podrobný návod pro Mac vede na dokumentaci desktopové aplikace. Pouze npm obsahuje existující terminálové video a odkaz na `/cs/terminal`; anglická stránka označuje jeho češtinu. Přepnutí z npm video odpojí, takže nezůstává hrát u jiné metody.
