@@ -63,7 +63,7 @@ use cases, and audiences. Keep these rules current when behavior changes.
   stay explicitly labelled and open by default if no stable release exists; do not invent stable 0.115.0. Support
   runs at least 90 days from the first actual stable publication, not restarted by patches; existing higher
   promises remain. LTS is informational. Never turn prereleases into stable versions or claim a stable
-  release exists when the catalogue has none. Six-hourly sync preserves history and support extensions.
+  release exists when the catalogue has none. The 19 November revision uses the shared five-minute GitHub Releases runtime cache for both languages; scheduled sync only refreshes the committed outage fallback. GitHub owns versions, channel flags, notes and actual uploaded installers. CLI, Windows and each macOS architecture advance independently, with truthful per-download version labels and matching checksums. Preserve historical dates and support extensions; never cache an upstream failure as a successful empty catalogue. See `docs/release-catalog.md`.
 
 - `/book` is the primary-domain common-knowledge catalogue with English source Books. Readable topics live at
   `/book/<slug>`; latest `/book/<slug>.book` and immutable `/book/<slug>/<version>.book` return identical

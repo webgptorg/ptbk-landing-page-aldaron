@@ -24,10 +24,16 @@ Rozbalitelné přihlášení na VPS uvádí `codex login --device-auth` a `claud
 
 Windows odkazuje na veřejné GitHub Releases a pojmenování `Promptbook-Setup-<version>-windows-x64.exe`; nevymýšlí pevnou aktuální verzi ani neexistující asset.
 
-macOS nabízí DMG zvlášť pro Apple Silicon a Intel se SHA-256 odkazy ze stejné zvolené verze katalogu. Synchronizace zařadí pouze skutečně nahrané neprázdné assety s kontrolním součtem; upřednostní podepsané pojmenování před `-unsigned`. Nepodepsané aplikace mají stručné upozornění pro první otevření. Chybějící DMG odkazuje na GitHub vydání, nikdy na vymyšlený soubor.
+macOS nabízí DMG zvlášť pro Apple Silicon a Intel se SHA-256 odkazy ze stejného vydání jako příslušný DMG. Každá architektura a Windows vybírají samostatně nejnovější skutečně dostupný instalátor ve zvoleném stabilním/prerelease kanálu. Jeho vlastní verze je vždy u tlačítka; pokud se liší od nejnovější verze pro CLI, doplní se stručné vysvětlení dostupnosti. Synchronizace zařadí pouze skutečně nahrané neprázdné assety s kontrolním součtem; upřednostní podepsané pojmenování před `-unsigned`. Nepodepsané aplikace mají stručné upozornění pro první otevření. Chybějící DMG odkazuje na GitHub vydání, nikdy na vymyšlený soubor.
 
 Cloud ponechá **DigitalOcean první**, Azure a AWS. Každá volba má přímý odkaz a krátký popis skutečného kroku: vložení startovacího skriptu, formulář Azure, nahrání CloudFormation. Sdílí návod `deploy/README.md` a Azure ARM šablonu ve větvi `reborn/2026-10`. Server je placený a po jeho přípravě se inicializace a AI přihlášení dokončí přes SSH. Web server nezakládá ani nepřebírá klíče.
 
 ## Společné chování
 
 Příkazy i prompty jsou označitelné a dostupné z klávesnice. Sdílený clipboard helper potvrdí pouze skutečné zkopírování; při chybě zůstane text čitelný s pokynem k ruční kopii. Oba jazyky mají stejné příkazy a zdroje. Metadata, canonical/alternates, sitemap, jazyková přesměrování a oddělené značkové domény se zachovají. Licence se nemění.
+
+## Aktualizace vydání - 19. listopadu 2026
+
+GitHub Releases repozitáře `webgptorg/promptbook` je zdroj aktuálních verzí, příznaků prerelease, poznámek i instalačních souborů. České i anglické instalační stránky a přehledy vydání používají společnou serverovou cache s obnovou po 300 sekundách, nezávisle na nasazení webu a GitHub Actions. Po vypršení se poslední úspěšná odpověď obslouží během obnovy; další návštěva již dostane nová data. Používá se stránkovaný seznam, protože `/latest` vynechává prerelease. npm není podmínkou aktualizace katalogu.
+
+CLI může přejít na novou vydanou verzi před dokončením uploadu EXE/DMG. Neexistující soubory ani kontrolní součty se nekonstruují. Při chybě GitHubu zůstává poslední úspěšná odpověď, při studeném startu uložený katalog s upozorněním a odkazem na GitHub. Úspěch po výpadku musí automaticky obnovit aktuální data. Detaily obsahuje [provoz katalogu](../docs/release-catalog.md).

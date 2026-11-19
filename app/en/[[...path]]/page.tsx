@@ -1,17 +1,15 @@
 import { APPROACH_COMPARISONS } from '@/businesses/new/approachComparisons';
 import { ApproachComparisonPage } from '@/businesses/new/ApproachComparisonPage';
 import { GuidesPage, CapabilitiesPage, ReferralPage } from '@/businesses/new/GuidePages';
-import { getInstallationReleases } from '@/lib/releases/catalog';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { NewLandingPage } from '@/businesses/new/NewLandingPage';
-import { OpenSourcePage } from '@/businesses/new/OpenSourcePage';
 import { AgendasPage, AgendaPage, ComparisonsPage, ComparisonPage, PricingPage, StoryPage, SecurityPage, FaqPage, PageIntro } from '@/businesses/new/InformationPages';
 import { EconomicsCalculator } from '@/businesses/new/EconomicsCalculator';
 import { CalculatorUrlSync } from '@/businesses/new/CalculatorUrlSync';
 import { COMPARISONS } from '@/businesses/new/comparisons';
 import { SCENARIOS, type ScenarioId } from '@/businesses/new/economics';
-import { newPageMetadata, OPEN_SOURCE_PAGE_COPY, NEW_PAGE_DEFINITIONS, PARTNERSHIP_PAGE_DEFINITIONS, NEW_EN_METADATA, PARTNERSHIP_EN_METADATA } from '@/businesses/new/newMetadata';
+import { newPageMetadata, NEW_PAGE_DEFINITIONS, PARTNERSHIP_PAGE_DEFINITIONS, NEW_EN_METADATA, PARTNERSHIP_EN_METADATA } from '@/businesses/new/newMetadata';
 import { licencePrice, translate } from '@/businesses/new/localization';
 import { NewLegalPage } from '@/businesses/new/NewLegalPage';
 import { LEGAL_PAGE_METADATA } from '@/lib/legal/legalPageMetadata';
@@ -31,7 +29,6 @@ const pages: Record<string, [string, string]> = {
     faq: ['Questions and answers', 'Practical answers about deployment, data, models, licences and support before your first workflow.'],
     soukromi: ['Privacy policy', 'Personal data processing policy of AI Web s.r.o., operator of Promptbook.'],
     podminky: ['Website terms', 'Terms of use for the Promptbook website operated by AI Web s.r.o.'],
-    'open-source': [...OPEN_SOURCE_PAGE_COPY.en],
     'podminky-produktu': ['Product terms', 'Current subscription and product support terms.'],
     'partnerske-podminky': ['Partner terms', 'Current agency programme terms.'],
     licence: ['Engine licence', 'Version-specific licensing and commercial terms.'],
@@ -71,7 +68,6 @@ export default async function Page({ params, searchParams }: Props) {
     switch (key) {
         case '': return <NewLandingPage showTestimonials={query.testimonials === '1'}/>;
         case 'partnership': return <NewLandingPage partnership/>;
-        case 'open-source': return <OpenSourcePage {...getInstallationReleases()} />;
         case 'agendy': return <AgendasPage/>;
         case 'pricing': return <PricingPage/>;
         case 'srovnani': return <ComparisonsPage/>;

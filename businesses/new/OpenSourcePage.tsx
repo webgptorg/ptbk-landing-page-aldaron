@@ -8,7 +8,7 @@ import { useCopyTextToClipboard } from '@/hooks/useCopyTextToClipboard';
 import { LeadButton } from './LeadCapture';
 import { useSiteLocale } from './LocaleProvider';
 import { getInstallationWalkthrough, type InstallMethod, type InstallTarget } from './installationWalkthrough';
-import type { ProductRelease } from '@/lib/releases/catalog';
+import type { InstallationDownloads, ProductRelease } from '@/lib/releases/catalog';
 import s from './open-source.module.css';
 
 /** Shared, inspectable installation resources. */
@@ -176,15 +176,24 @@ function CommandBlock({ commands, title, labels, prompt = false }: { commands: s
 }
 
 /** Shared Czech/English installation page. */
-export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; preview?: ProductRelease } = {}) {
+export function OpenSourcePage({ stable, preview, stableInstallers, previewInstallers, stale = false }: {
+    stable?: ProductRelease; preview?: ProductRelease;
+    stableInstallers?: InstallationDownloads; previewInstallers?: InstallationDownloads; stale?: boolean;
+} = {}) {
     const { locale, path } = useSiteLocale();
     const copy = COPY[locale];
     const [usePreview, setUsePreview] = useState(false);
     const release = usePreview ? preview : stable ?? preview;
     const npmCommand = `npm install --global ptbk${release ? `@${release.version}` : ''}`;
     const shellCommand = release ? `${SHELL_COMMAND} -s -- --version ${release.version}` : SHELL_COMMAND;
-    const windows = release?.downloads?.windows;
-    const macos = release?.downloads?.macos;
+    const installers = usePreview || !stable ? previewInstallers : stableInstallers;
+    const windows = installers?.windows ?? (installers ? undefined : release?.downloads?.windows);
+    const macos = installers?.macos ?? (installers ? undefined : release?.downloads?.macos);
+    const windowsVersion = windows && ('version' in windows && typeof windows.version === 'string' ? windows.version : release?.version);
+    const macosVersion = (arch: 'arm64' | 'x64') => {
+        const download = macos?.[arch];
+        return download && 'version' in download && typeof download.version === 'string' ? download.version : release?.version;
+    };
     const [method, setMethod] = useState<InstallMethod>('ai');
     const [target, setTarget] = useState<InstallTarget>('local');
     const walkthrough = getInstallationWalkthrough(locale, method, target);
@@ -212,9 +221,12 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
             {release && <p>
                 <strong>{release.prerelease
                     ? (locale === 'cs' ? 'Verze k vyzkoušení' : 'Preview release')
-                    : (locale === 'cs' ? 'Doporučená stabilní verze' : 'Recommended stable release')} {release.version}</strong>
+                    : (locale === 'cs' ? 'Doporučená stabilní verze' : 'Recommended stable release')} <a href={release.githubUrl ?? `${REPOSITORY}/releases`}>{release.version}</a></strong>
                 {' · '}<Link href={path('releases')}>{locale === 'cs' ? 'Vydání a podpora' : 'Releases and support'}</Link>
             </p>}
+            {stale && <p className={s.note}>{locale === 'cs'
+                ? 'GitHub se nyní nepodařilo ověřit. Zobrazujeme poslední známá vydání.'
+                : 'GitHub could not be verified. Showing the last known releases.'} <a href={`${REPOSITORY}/releases`}>GitHub Releases</a></p>}
             {stable && preview && <label>
                 <input type="checkbox" checked={usePreview} onChange={event => setUsePreview(event.target.checked)} />
                 {' '}{locale === 'cs' ? 'Vyzkoušet verzi' : 'Try preview'} {preview.version}
@@ -261,15 +273,17 @@ export function OpenSourcePage({ stable, preview }: { stable?: ProductRelease; p
                     </details>
                 </> : item === 'npm' ? <CommandBlock title={copy.terminal} labels={copy} commands={`${npmCommand}\nptbk init`} />
                     : item === 'windows' ? <div className={s.download}>
-                        <a href={windows?.url ?? `${REPOSITORY}/releases`} className={s.primaryLink}>{copy.download}{windows && ` · ${release?.version}`}<ArrowRight size={17} aria-hidden="true" /></a>
+                        <a href={windows?.url ?? `${REPOSITORY}/releases`} className={s.primaryLink}>{copy.download}{windows && ` · ${windowsVersion}`}<ArrowRight size={17} aria-hidden="true" /></a>
                         {windows && <a href={windows.checksumUrl}>SHA-256</a>}
+                        {windows && windowsVersion !== release?.version && <p className={s.note}>{locale === 'cs' ? 'Nejnovější dostupný instalátor pro Windows.' : 'Latest available Windows installer.'}</p>}
                         {!windows && <code>Promptbook-Setup-&lt;version&gt;-windows-x64.exe</code>}
                     </div> : item === 'macos' ? <>
                         {(['arm64', 'x64'] as const).map(arch => {
                             const download = macos?.[arch];
                             return download && <div key={arch} className={s.download}>
-                                <a href={download.url} className={s.primaryLink}>{arch === 'arm64' ? copy.macosArm64 : copy.macosX64} · {release?.version}<ArrowRight size={17} aria-hidden="true" /></a>
+                                <a href={download.url} className={s.primaryLink}>{arch === 'arm64' ? copy.macosArm64 : copy.macosX64} · {macosVersion(arch)}<ArrowRight size={17} aria-hidden="true" /></a>
                                 <a href={download.checksumUrl} aria-label={`SHA-256 · ${arch === 'arm64' ? 'Apple Silicon' : 'Intel'}`}>SHA-256</a>
+                                {macosVersion(arch) !== release?.version && <p className={s.note}>{locale === 'cs' ? 'Nejnovější dostupný instalátor pro tuto architekturu.' : 'Latest available installer for this architecture.'}</p>}
                             </div>;
                         })}
                         {!macos?.arm64 && !macos?.x64 && <a href={release?.githubUrl ?? `${REPOSITORY}/releases`} className={s.primaryLink}>{copy.macosReleases}<ArrowRight size={17} aria-hidden="true" /></a>}

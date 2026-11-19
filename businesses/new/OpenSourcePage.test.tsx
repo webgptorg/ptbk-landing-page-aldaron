@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SiteLocaleProvider } from './LocaleProvider';
 import { LeadCaptureProvider } from './LeadCapture';
 import { OpenSourcePage } from './OpenSourcePage';
+import { getInstallationReleases, type ProductRelease } from '@/lib/releases/catalog';
 import { newPageMetadata, OPEN_SOURCE_PAGE_COPY } from './newMetadata';
 
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
@@ -17,6 +18,33 @@ function page(locale: 'cs' | 'en' = 'en', releases?: Parameters<typeof OpenSourc
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('self-hosted installation entry point', () => {
+    it.each(['cs', 'en'] as const)('labels older available installers truthfully while %s commands use the newest release', locale => {
+        const item = (version: string): ProductRelease => ({ version, publishedAt: '2026-11-19', listedAt: '2026-11-19', prerelease: true, installable: true });
+        const older = item('0.119.0-118');
+        const exe = 'https://github.com/webgptorg/promptbook/releases/download/v0.119.0-118/Promptbook-Setup-0.119.0-118-windows-x64.exe';
+        const dmg = 'https://github.com/webgptorg/promptbook/releases/download/v0.119.0-118/Promptbook-0.119.0-118-macos-arm64-unsigned.dmg';
+        older.downloads = { windows: { url: exe, checksumUrl: `${exe}.sha256` }, macos: { arm64: { url: dmg, checksumUrl: `${dmg}.sha256`, unsigned: true } } };
+        const latest = { ...item('0.119.0-120'), githubUrl: 'https://github.com/webgptorg/promptbook/releases/tag/v0.119.0-120' };
+        render(page(locale, getInstallationReleases([older, latest])));
+        expect(screen.getByRole('link', { name: latest.version }).getAttribute('href')).toBe(latest.githubUrl);
+        expect(screen.getByRole('tabpanel').textContent).toContain('ptbk@0.119.0-120');
+        fireEvent.click(screen.getByRole('tab', { name: 'Windows EXE' }));
+        let panel = within(screen.getByRole('tabpanel'));
+        expect(panel.getByRole('link', { name: /0.119.0-118/ }).getAttribute('href')).toBe(exe);
+        expect(panel.getByRole('link', { name: 'SHA-256' }).getAttribute('href')).toBe(`${exe}.sha256`);
+        expect(panel.queryByText(/0.119.0-120/)).toBeNull();
+        fireEvent.click(screen.getByRole('tab', { name: 'macOS DMG' }));
+        panel = within(screen.getByRole('tabpanel'));
+        expect(panel.getByRole('link', { name: /0.119.0-118/ }).getAttribute('href')).toBe(dmg);
+        expect(panel.getByRole('link', { name: 'SHA-256 · Apple Silicon' }).getAttribute('href')).toBe(`${dmg}.sha256`);
+    });
+
+    it('shows a GitHub fallback link and an honest status when the upstream check fails', () => {
+        render(page('cs', { stale: true }));
+        expect(screen.getByText(/Zobrazujeme poslední známá vydání/)).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'GitHub Releases' }).getAttribute('href')).toBe('https://github.com/webgptorg/promptbook/releases');
+    });
+
     it.each(['cs', 'en'] as const)('uses the same preview version for %s commands and Windows/macOS downloads', locale => {
         const version = '0.119.0-75';
         const url = `https://github.com/webgptorg/promptbook/releases/download/v${version}/Promptbook-Setup-${version}-windows-x64.exe`;
@@ -28,7 +56,7 @@ describe('self-hosted installation entry point', () => {
                 x64: { url: macUrl('x64'), checksumUrl: `${macUrl('x64')}.sha256`, unsigned: true },
             } },
         } }));
-        expect(screen.getByText(`${locale === 'cs' ? 'Verze k vyzkoušení' : 'Preview release'} ${version}`)).toBeTruthy();
+        expect(screen.getByRole('link', { name: version }).closest('strong')?.textContent).toBe(`${locale === 'cs' ? 'Verze k vyzkoušení' : 'Preview release'} ${version}`);
         expect(screen.getByRole('tabpanel').textContent).toContain(`npm install --global ptbk@${version}`);
         fireEvent.click(screen.getByRole('tab', { name: 'npm' }));
         expect(screen.getByRole('tabpanel').textContent).toContain(`npm install --global ptbk@${version}`);
