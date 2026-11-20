@@ -6,12 +6,23 @@ The launch revision in `docs/launch-2026-11-13.md` supersedes older homepage, na
 
 The owner's 18 November licence administration revision uses `/admin/promptbook-licensing` for manual CRUD and paid/trial rights,
 and `/admin/promptbook-subscriptions` for cross-linked Promptbook, community and avatar purchases/subscriptions/payments.
-Both remain superadmin-only. Direct manual grants create no order/payment/subscription; 100% checkout discounts retain the
+The owner's 20 November revision makes both independently delegable sections (`promptbook-licensing` and
+`promptbook-subscriptions`), alongside the separate `api-keys` permission. Enforce the current grants on pages and
+API handlers; a licence-only detail must not query or expose purchases, and a subscription-only detail must not expose licence records.
+Direct manual grants create no order/payment/subscription; 100% checkout discounts retain the
 existing purchase flow. Manual changes are revision-checked and atomically audited; deletion retains history and revokes access.
 Existing grants use the shared autosave/dialog conventions, while creation and lifecycle actions remain explicit. Never edit paid
 contracts or restart trials here. Public OpenAPI/Swagger are at `/api/promptbook-billing/app/openapi.json` and `/api/promptbook-billing/app/docs`.
 Generate schemas from runtime validators, serve pinned Swagger assets locally, and expose no credentials or billing data in App API.
 See `docs/license-administration.md`.
+
+The shared ecosystem API uses `/api/docs`, `/api/openapi.json`, `/api/v1/licenses` and `/api/v1/identity/exchange`;
+the established `/api/promptbook-billing/app/*` routes remain compatible aliases. `/admin/api-keys` explicitly creates
+and revokes individually scoped keys. Show each random key once, persist only its SHA-256 hash, and check storage,
+scope, expiry and revocation on every request without caching. Existing environment-backed server credentials remain
+compatible, but managed keys never fall back to that credential. Swagger supports explicit same-origin tests with
+in-memory authorization, cURL, response status/body/headers and timing. No public auto-authorization, persisted secrets,
+third-party validator or speculative requests. See `docs/ecosystem-api.md`.
 
 The 18 November licensing V0 adds an authenticated server-only POST email lookup at the existing App license route.
 Keep GET's strict numeric v1 snapshot intact; the separate POST envelope carries a Czech display label and advisory

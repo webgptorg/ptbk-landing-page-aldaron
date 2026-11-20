@@ -9,7 +9,7 @@ Revize vlastníka z 18. listopadu 2026 rozšiřuje existující licenční evide
 - Detail licence odkazuje na skutečně spárovanou objednávku a její historii plateb. Ostatní nákupy stejného e-mailu jsou samostatně označené; samotná shoda e-mailu nevytváří vztah platby k ruční licenci.
 - Detail předplatného odkazuje zpět na vzniklou licenci nebo přesný členský záznam. Čekající objednávka bez potvrzeného nároku zůstává objednávkou.
 
-Obě privátní sekce používají stávající kontrolu aktuální administrátorské relace a cross-site guard. Zůstávají jen pro superadministrátora. Delegovaný přístup ke komunitě neuděluje přístup k soukromým platbám jiných produktů.
+Obě privátní sekce používají stávající kontrolu aktuální administrátorské relace a cross-site guard. Od revize vlastníka 20. listopadu mají samostatně přidělitelná oprávnění `promptbook-licensing` a `promptbook-subscriptions`. Licence bez oprávnění k předplatným nečtou ani nevracejí související nákupy; předplatná bez oprávnění k licencím nevracejí spárované licenční záznamy. Navigace a odkazy odpovídají přístupu. Delegovaný přístup ke komunitě neuděluje přístup k soukromým platbám jiných produktů. Vytváření administrátorů zůstává superadministrátorovi.
 
 ## Dvě samostatné cesty
 
@@ -32,12 +32,13 @@ Komunitní evidence nemá vlastní deník faktur. Její detail čte posledních 
 
 ## Předání Sebastianovi
 
-- Swagger: `https://www.ptbk.io/api/promptbook-billing/app/docs`
-- OpenAPI JSON: `https://www.ptbk.io/api/promptbook-billing/app/openapi.json`
+- Swagger: `https://www.ptbk.io/api/docs`
+- OpenAPI JSON: `https://www.ptbk.io/api/openapi.json`
+- Správa klíčů: `https://www.ptbk.io/admin/api-keys` s nezávislým oprávněním `api-keys`.
 - Stažení: stejná adresa s `?download=1`, soubor `promptbook-licensing-openapi.json`.
 - [Lookup podle ověřeného e-mailu](app-license-email-lookup.md) obsahuje serverové příklady a pravidla cachování; oba API kontrakty zůstávají kompatibilní.
 
-OpenAPI 3.0.3 se generuje ze skutečných Zod validátorů lookupu, striktního v1 snapshotu a výměny identity. Příklady jsou existující syntetické fixture. Dokument je veřejný a nečte zákazníky ani tajné klíče. Swagger používá lokálně servírované připnuté assety `swagger-ui-dist`, bez cizího validátoru, ukládání autorizace nebo provádění požadavků v prohlížeči. Sdílený token zůstává na backendu; ve Swaggeru není vložen.
+OpenAPI 3.0.3 se generuje ze skutečných Zod validátorů lookupu, striktního v1 snapshotu a výměny identity. Příklady jsou existující syntetické fixture. Dokument je veřejný a nečte zákazníky ani tajné klíče. Swagger používá lokálně servírované připnuté assety `swagger-ui-dist`, bez cizího validátoru či ukládání autorizace. Ručně zadaný klíč dovolí explicitní `Try it out` a `Execute` na stejném webu s cURL, odpovědí, hlavičkami a časem. Aplikační integrace ponechává klíč na backendu; žádný klíč není předvyplněný. [Společné API a životní cyklus klíčů](ecosystem-api.md) popisují nové adresy i kompatibilitu původních cest.
 
 Licenční API nepřidává žádné platební/subscription/fakturační/komunitní údaje. Deaktivované/odstraněné ruční granty se nepočítají do práv App ani komunitních míst. Komunitní grant bez kapacity enginu není softwarová licence. Nikomu se automaticky neodesílá zpráva.
 

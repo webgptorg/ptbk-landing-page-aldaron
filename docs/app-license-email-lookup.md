@@ -1,7 +1,8 @@
 # Licenční badge V0 pro App / manGoweb
 
-OpenAPI ke stažení: `https://www.ptbk.io/api/promptbook-billing/app/openapi.json?download=1`.
-Swagger: `https://www.ptbk.io/api/promptbook-billing/app/docs`.
+OpenAPI ke stažení: `https://www.ptbk.io/api/openapi.json?download=1`.
+Swagger: `https://www.ptbk.io/api/docs`.
+Správa integračních klíčů: `https://www.ptbk.io/admin/api-keys`; pro lookup stačí `licenses:read`.
 Licenční administrace a provázání plateb jsou popsané v [administraci licencí](license-administration.md).
 
 Revize vlastníka: 18. 11. 2026. Web je jediná autorita plateb, zkoušek a grantů. Tento krok umožňuje osobnímu
@@ -11,8 +12,8 @@ neblokují. Aktuální množství používání se ve V0 nevyhodnocuje.
 ## Serverové API
 
 ```http
-POST https://www.ptbk.io/api/promptbook-billing/app/licenses
-Authorization: Bearer <PROMPTBOOK_APP_LICENSE_SECRET>
+POST https://www.ptbk.io/api/v1/licenses
+Authorization: Bearer <API_KEY>
 Content-Type: application/json
 
 {"email":"customer@example.test"}
@@ -22,9 +23,11 @@ Jediný povolený vstup je `email`: validní adresa do 254 znaků po trim/lowerc
 UTF-8 bajtů, včetně mezer. Neplatný JSON, UTF-8, Content-Type či nadbytečné pole (včetně `is_test`) vrací 400.
 Plus aliasy ani tečky se nemažou. E-mail není v URL. Výstup e-mail ani interní objednávky nevrací.
 
-Autentizace předchází čtení těla i databáze. Vyhrazený sdílený serverový klíč `PROMPTBOOK_APP_LICENSE_SECRET`
-musí mít alespoň 32 náhodných znaků. Znovu se používá existující guard a porovnání `timingSafeEqual`.
-Chybějící, krátká nebo chybná konfigurace i chybný bearer vracejí 401; žádný fallback klíč neexistuje.
+Autentizace předchází čtení těla i licenční databáze. Od revize 20. 11. 2026 použijte spravovaný klíč s `licenses:read`.
+Server při každém požadavku ověřuje jeho hash, oprávnění, expiraci a zneplatnění. Neplatný bearer vrací 401,
+nedostupná evidence klíčů 503. [Společné API](ecosystem-api.md) popisuje vydávání a zneplatnění.
+Původní cesta `/api/promptbook-billing/app/licenses` a vyhrazený serverový klíč `PROMPTBOOK_APP_LICENSE_SECRET`
+(alespoň 32 znaků, `timingSafeEqual`) zůstávají kompatibilní. Spravovaný klíč nikdy neobchází zneplatnění přes tento starší secret.
 
 Odpovědi včetně chyb mají `Cache-Control: private, no-store` a `Referrer-Policy: no-referrer`.
 API nepovoluje klientský CORS. Znovu se používá existující paměťový limiter: 3 000 autorizovaných POST
@@ -100,9 +103,9 @@ import { readBoundedJson } from './read-bounded-json'; // existující helper v 
 export async function readPersonalLicense(identity: { email: string; emailVerified: boolean }) {
     if (!identity.emailVerified) throw new Error('Verified identity required');
     const input = licenseLookupRequestSchema.parse({ email: identity.email });
-    const secret = process.env.PROMPTBOOK_APP_LICENSE_SECRET?.trim();
+    const secret = process.env.PROMPTBOOK_ECOSYSTEM_API_KEY?.trim();
     if (!secret || secret.length < 32) throw new Error('License client not configured');
-    const response = await fetch('https://www.ptbk.io/api/promptbook-billing/app/licenses', {
+    const response = await fetch('https://www.ptbk.io/api/v1/licenses', {
         method: 'POST',
         headers: { authorization: `Bearer ${secret}`, 'content-type': 'application/json' },
         body: JSON.stringify(input),

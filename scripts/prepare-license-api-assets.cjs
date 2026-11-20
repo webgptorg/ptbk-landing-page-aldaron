@@ -6,4 +6,5 @@ const source = path.dirname(require.resolve('swagger-ui-dist/package.json'));
 for (const name of ['swagger-ui-bundle.js', 'swagger-ui.css', 'LICENSE', 'NOTICE']) {
     fs.copyFileSync(path.join(source, name), path.join(destination, name));
 }
-fs.writeFileSync(path.join(destination, 'license-docs.js'), `window.ui=SwaggerUIBundle({url:'/api/promptbook-billing/app/openapi.json',dom_id:'#swagger-ui',deepLinking:true,persistAuthorization:false,validatorUrl:null,supportedSubmitMethods:[],queryConfigEnabled:false});\n`);
+fs.copyFileSync(path.join(__dirname, 'license-api/docs.js'), path.join(destination, 'license-docs.js'));
+fs.copyFileSync(path.join(__dirname, 'license-api/docs.css'), path.join(destination, 'ecosystem-docs.css'));

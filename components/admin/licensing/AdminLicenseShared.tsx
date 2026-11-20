@@ -2,6 +2,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
+import { useCanAccessAdminPath } from '@/components/admin/AdminAccessProvider';
+import { API_DOCS_PATH, API_OPENAPI_PATH } from '@/lib/ecosystem-api/contract';
 import { licenseAdminHref, subscriptionAdminHref, LICENSE_STATE_LABELS, SUBSCRIPTION_PRODUCT_LABELS, stripeObjectUrl,
     type AdminLicense, type AdminSubscription } from '@/lib/promptbook-licensing/adminContract';
 
@@ -32,12 +34,16 @@ export function ReadStatus({ loading, error, refresh }: { loading: boolean; erro
     return <>{loading && <p role="status">Načítám evidenci…</p>}{error && <div role="alert" className="rounded-lg bg-red-50 p-4 text-red-800">{error} <button className="underline" onClick={refresh}>Zkusit znovu</button></div>}</>;
 }
 export function AdminLicenseShell({ title, children }: { title: string; children: ReactNode }) {
+    const licenses = useCanAccessAdminPath('/admin/promptbook-licensing');
+    const subscriptions = useCanAccessAdminPath('/admin/promptbook-subscriptions');
+    const apiKeys = useCanAccessAdminPath('/admin/api-keys');
     return <main className="mx-auto max-w-7xl space-y-6 p-4 text-slate-900 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-2xl font-semibold">{title}</h1>
-            <nav aria-label="Licence a platby" className="flex flex-wrap gap-4 text-sm"><Link className={linkClass} href="/admin/promptbook-licensing">Licence</Link>
-                <Link className={linkClass} href="/admin/promptbook-subscriptions">Předplatná a objednávky</Link>
-                <a className={linkClass} href="/api/promptbook-billing/app/docs" target="_blank" rel="noreferrer">Swagger</a>
-                <a className={linkClass} href="/api/promptbook-billing/app/openapi.json?download=1" download>Stáhnout OpenAPI</a></nav>
+            <nav aria-label="Licence a API" className="flex flex-wrap gap-4 text-sm">{licenses && <Link className={linkClass} href="/admin/promptbook-licensing">Licence</Link>}
+                {subscriptions && <Link className={linkClass} href="/admin/promptbook-subscriptions">Předplatná a objednávky</Link>}
+                {apiKeys && <Link className={linkClass} href="/admin/api-keys">API klíče</Link>}
+                <a className={linkClass} href={API_DOCS_PATH} target="_blank" rel="noreferrer">Swagger</a>
+                <a className={linkClass} href={`${API_OPENAPI_PATH}?download=1`} download>Stáhnout OpenAPI</a></nav>
         </div>{children}</main>;
 }
 export function LicenseRows({ items }: { items: AdminLicense[] }) {
