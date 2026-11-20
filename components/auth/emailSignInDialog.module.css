@@ -1,0 +1,31 @@
+.dialog {
+    --ink: var(--pavol-ink, #1b2739);
+    --muted: var(--pavol-muted, #515d70);
+    --paper: var(--pavol-paper, #fff);
+    --accent: var(--pavol-accent, #17386c);
+    --line: var(--pavol-border, #cdd5e1);
+    color-scheme: light;
+    width: min(27rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    gap: .8rem;
+    padding: clamp(1.4rem, 4vw, 2rem);
+    border: 1px solid var(--line);
+    border-radius: 1.25rem;
+    background: var(--paper);
+    color: var(--ink);
+}
+.dialog .title { padding-right: 1.25rem; font-size: 1.5rem; line-height: 1.2; }
+.dialog .description, .form p, .footer { color: var(--muted); font-size: .9375rem; line-height: 1.5; }
+.dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.form { display: grid; gap: 1rem; margin-top: .35rem; }
+.form label { display: grid; gap: .375rem; font-size: .9375rem; font-weight: 550; }
+.form input { width: 100%; min-height: 2.875rem; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--paper); color: var(--ink); font: inherit; font-size: 1rem; }
+.form input:disabled { color: var(--muted); }
+.form .error { color: #982b24; }
+.submit, .retry { min-height: 2.75rem; border-radius: .55rem; font-weight: 600; }
+.submit { color: #fff; background: var(--accent); }
+.submit:hover { filter: brightness(.92); }
+.form button:disabled { opacity: .65; }
+.retry, .footer a { text-decoration: underline; text-underline-offset: .18em; }
+.footer { font-size: .875rem; }

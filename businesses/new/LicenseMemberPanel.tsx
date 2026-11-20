@@ -16,7 +16,7 @@ type State = {
     communitySeatLimit?: number;
     referral?: string | null;
 };
-export function LicenseMemberPanel() {
+export function LicenseMemberPanel({ openSignIn = false, onVerified }: { openSignIn?: boolean; onVerified?: () => void } = {}) {
     const [state, setState] = useState<State | null>(null);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
@@ -103,7 +103,7 @@ export function LicenseMemberPanel() {
                         14 dní Business bez karty. Čas začne běžet až po přípravě enginu a vašem potvrzení. Nejdříve
                         ověřte svůj e-mail.
                     </p>
-                    <MembershipAccess onVerified={() => void load()} />
+                    <MembershipAccess initiallyOpen={openSignIn} onVerified={onVerified ?? (() => void load())} />
                 </>
             )}
             {state?.verified && (

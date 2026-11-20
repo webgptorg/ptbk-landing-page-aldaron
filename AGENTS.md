@@ -1120,7 +1120,11 @@ Its explicit, journalled enrichment fills empty new fields only and preserves un
 The 18 November UI revision labels the page `Pavol Hejný AI`, with one shared header and a borderless chat.
 PavolPageChromeProvider scopes app identity, header outlets and footer links to the avatar; ordinary personal
 pages keep their existing chrome. Stateful account/chat controls use PavolChromeSlot portals. Sign-in/out is
-in the header; history, subscription, connections, new chat and exports are in its menu. Verified users open
+in the header; history, subscription, connections, new chat and exports are in its menu. Guests see the three
+plan cards with Full first at every size. Free and the header open the shared email sign-in dialog for chat.
+Light shows the current Developers membership price and links to its membership page. Full sign-in resumes
+the avatar order form after either verification method, including an email opened in another browser.
+The Promptbook member area uses the same dialog with its own billing session. Ordinary verified visits open
 chat directly. Preserve mounted drafts across section changes, confirmations, existing auth/payment boundaries
 and file validation. No duplicate title/subtitle, remaining-question banner, generic disclosure paragraph or
 inline upload-limit instructions. Avatar terms, privacy and seller belong in the site footer. The seeded

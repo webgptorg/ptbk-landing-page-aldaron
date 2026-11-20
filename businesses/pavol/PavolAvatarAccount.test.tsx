@@ -74,13 +74,13 @@ describe('avatar account and subscription boundaries', () => {
         const buy = await screen.findByRole('button', { name: 'Získat Full' });
         await waitFor(() => expect(buy).toBeEnabled());
         fireEvent.click(buy);
-        expect(await screen.findByText('Nejdřív ověř svůj e-mail. Pak můžeš dokončit objednávku.')).toBeVisible();
+        expect(await screen.findByRole('dialog')).toHaveAccessibleDescription('Po ověření e-mailu se otevře objednávka tarifu Full.');
         expect(screen.getByLabelText('E-mail')).toHaveFocus();
         expect(screen.queryByRole('button', { name: 'Objednat s povinností platby' })).not.toBeInTheDocument();
         expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
         expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
         expect(callsTo('/api/pavol-avatar/auth')).toHaveLength(0);
-        expect(document.body).toHaveTextContent('Nejde o přihlášení k marketingu.');
+        expect(screen.getByRole('link', { name: 'Soukromí' })).toHaveAttribute('href', '/avatar/legal/privacy/2026-11-17-v1');
         expect(screen.queryByRole('button', { name: 'Odhlásit' })).not.toBeInTheDocument();
     });
 
@@ -93,7 +93,8 @@ describe('avatar account and subscription boundaries', () => {
             return original(url, options);
         });
         render(<PavolAvatarAccount language="cs" availability={availability} />);
-        const send = await screen.findByRole('button', { name: 'Poslat přihlašovací kód' });
+        fireEvent.click(await screen.findByRole('button', { name: 'Vyzkoušet zdarma' }));
+        const send = await screen.findByRole('button', { name: 'Poslat přihlašovací odkaz' });
         await waitFor(() => expect(send).toBeEnabled());
         fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'buyer@example.test' } });
         fireEvent.click(send);
@@ -153,7 +154,7 @@ describe('avatar account and subscription boundaries', () => {
             return original(url, options);
         });
         render(<PavolAvatarAccount language="cs" availability={availability} />);
-        const send = await screen.findByRole('button', { name: 'Poslat přihlašovací kód' });
+        const send = await screen.findByRole('button', { name: 'Poslat přihlašovací odkaz' });
         await waitFor(() => expect(send).toBeEnabled());
         fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: principal.email } }); fireEvent.click(send);
         fireEvent.change(await screen.findByLabelText('Kód z e-mailu'), { target: { value: '123456' } });
@@ -205,7 +206,7 @@ describe('avatar account and subscription boundaries', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Vytvořit přístupový token' }));
         await screen.findByText(secret);
         fireEvent.click(screen.getByRole('button', { name: 'Odhlásit' }));
-        await screen.findByRole('button', { name: 'Poslat přihlašovací kód' });
+        await screen.findByRole('button', { name: 'Vyzkoušet zdarma' });
         expect(screen.queryByText(secret)).not.toBeInTheDocument();
         expect(screen.queryByText(principal.email)).not.toBeInTheDocument();
         expect(screen.queryByTestId('account-chat')).not.toBeInTheDocument();
@@ -214,14 +215,92 @@ describe('avatar account and subscription boundaries', () => {
         expect(callsTo('/api/promptbook-billing/portal')).toHaveLength(0);
     });
 
-    it('makes the paid allowance finite and shared and does not advertise automatic overages or unavailable voice', async () => {
+    it('starts with Full, shows community pricing and puts each action before the features', async () => {
+        render(<PavolAvatarAccount language="en" availability={availability} />);
+        const cards = await screen.findAllByRole('article');
+        expect(cards.map(card => within(card).getByRole('heading').textContent)).toEqual(['Full', 'Light', 'Free']);
+        const [full, light, free] = cards;
+        expect(full).toHaveTextContent('1,000 Kč');
+        expect(light).toHaveTextContent('199 Kč');
+        expect(free).toHaveTextContent('0 Kč');
+        expect(within(light).getByRole('link')).toHaveAttribute('href', 'https://ptbk.io/cs/komunity/vyvojari/clenstvi');
+        for (const card of cards) {
+            const action = within(card).queryByRole('button') ?? within(card).getByRole('link');
+            expect(action.compareDocumentPosition(within(card).getByRole('list')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        }
+        expect(full).toHaveTextContent('500 questions per calendar month');
+        expect(full).toHaveTextContent('Claude Code, Codex, OpenCode');
+        expect(full).not.toHaveTextContent('Telegram');
+        expect(document.body).not.toHaveTextContent('Full is licensed');
+        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    });
+
+    it.each([
+        ['Vyzkoušet zdarma', 'chat'],
+        ['Přihlásit', 'chat'],
+        ['Získat Full', 'full'],
+    ])('keeps the destination for %s through both email and code verification', async (action, intent) => {
+        window.history.replaceState(null, '', '/avatar?ref=post#plans');
+        const original = fetchMock.getMockImplementation()!;
+        fetchMock.mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url === '/api/pavol-avatar/auth' && options?.method === 'POST') {
+                const input = JSON.parse(String(options.body)) as { code?: string };
+                if (!input.code) return Response.json({ method: 'magic-link' });
+                account = signedIn('free');
+                return Response.json({ isVerified: true });
+            }
+            return original(url, options);
+        });
         render(<PavolAvatarAccount language="cs" availability={availability} />);
-        await waitFor(() => expect(screen.getByRole('button', { name: 'Získat Full' })).toBeEnabled());
-        const fullCard = screen.getByRole('button', { name: 'Získat Full' }).closest('article')!;
-        expect(within(fullCard).getByRole('heading')).toHaveTextContent(/1\s?000 Kč/);
-        expect(within(fullCard).getByText('500 otázek za kalendářní měsíc')).toBeVisible();
-        expect(within(fullCard).getByText('MCP · Claude Code, Codex, OpenCode')).toBeVisible();
-        expect(document.body).toHaveTextContent('Spotřeba je společná pro všechna připojení; další poplatky automaticky neúčtujeme.');
-        expect(document.body).toHaveTextContent('Hlasový rozhovor připravujeme.');
+        await screen.findByRole('article', { name: 'Free' });
+        fireEvent.click(screen.getByRole('button', { name: action }));
+        fireEvent.change(await screen.findByLabelText('E-mail'), { target: { value: principal.email } });
+        fireEvent.click(screen.getByRole('button', { name: 'Poslat přihlašovací odkaz' }));
+        const code = await screen.findByLabelText('Kód z e-mailu');
+        const body = JSON.parse(String(callsTo('/api/pavol-avatar/auth', 'POST')[0][1].body)) as { email: string; returnTo: string };
+        const returnTo = intent === 'full' ? '/avatar?ref=post&plan=full#plans' : '/avatar?ref=post#plans';
+        expect(body).toEqual({ email: principal.email, returnTo });
+        fireEvent.change(code, { target: { value: '123456' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Ověřit kód' }));
+        if (intent === 'full') {
+            expect(await screen.findByRole('heading', { name: 'Objednat Full' })).toBeVisible();
+        } else {
+            expect(await screen.findByTestId('account-chat')).toBeVisible();
+        }
+        expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
+
+        // A freshly opened email returns with its own verified cookie, without prior component state.
+        cleanup();
+        window.history.replaceState(null, '', body.returnTo);
+        render(<PavolAvatarAccount language="cs" availability={availability} />);
+        if (intent === 'full') {
+            expect(await screen.findByRole('heading', { name: 'Objednat Full' })).toBeVisible();
+            fireEvent.click(screen.getByRole('button', { name: 'Zpět' }));
+            expect(window.location.pathname + window.location.search + window.location.hash).toBe('/avatar?ref=post#plans');
+        } else {
+            expect(await screen.findByTestId('account-chat')).toBeVisible();
+        }
+        expect(callsTo('/api/pavol-avatar/checkout')).toHaveLength(0);
+    });
+
+    it('restores focus when Full is dismissed and lets the next sign-in open Free', async () => {
+        render(<PavolAvatarAccount language="en" availability={availability} />);
+        const full = await screen.findByRole('button', { name: 'Get Full' });
+        fireEvent.click(full);
+        fireEvent.keyDown(await screen.findByRole('dialog'), { key: 'Escape' });
+        await waitFor(() => expect(full).toHaveFocus());
+        fireEvent.click(screen.getByRole('button', { name: 'Try for free' }));
+        expect(await screen.findByRole('dialog')).toHaveAccessibleDescription('Verify your email to open your avatar chat.');
+    });
+
+    it('keeps billing closed while allowing Free and community access', async () => {
+        const settings = { ...availability, billingEnabled: false };
+        account = { principal: null, access: null, availability: settings };
+        window.history.replaceState(null, '', '/avatar?plan=full');
+        render(<PavolAvatarAccount language="en" availability={settings} />);
+        expect(await screen.findByRole('button', { name: 'Get Full' })).toBeDisabled();
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Try for free' })).toBeEnabled();
+        expect(screen.getByRole('link', { name: 'Visit the community' })).toBeVisible();
     });
 });

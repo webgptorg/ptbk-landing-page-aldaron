@@ -27,7 +27,7 @@ describe('approved Czech trial and English contact boundaries',()=>{
  });
  it('keeps both Czech header actions on trial, and English headers on contacts',()=>{
   for(const locale of ['cs','en'] as const){nav.pathname='/'+locale;const root=markup(<NewSiteShell checkoutEnabled><div/></NewSiteShell>);const header=root.querySelector('header')!;
-   expect(header.querySelectorAll('details a[href="/cs/pricing/predplatne"]')).toHaveLength(locale==='cs'?1:0);
+   expect(header.querySelectorAll('a[href="/cs/pricing/predplatne?signin=1"]')).toHaveLength(locale==='cs'?2:0);
    expect(header.querySelectorAll('a[href="/cs/pricing/zkouska"]')).toHaveLength(locale==='cs'?2:0);
    if(locale==='en')expect(Array.from(header.querySelectorAll('button')).filter(b=>b.textContent==='I’m interested')).toHaveLength(2);
   }

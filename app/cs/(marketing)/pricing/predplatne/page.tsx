@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 type MembersPageProps = {
-    readonly searchParams: Promise<{ stav?: string }>;
+    readonly searchParams: Promise<{ stav?: string; signin?: string }>;
 };
 
 export default async function MembersPage({ searchParams }: MembersPageProps) {
     const query = await searchParams;
-    return <PromptbookMembers confirming={query.stav === 'potvrzuji'} />;
+    return <PromptbookMembers confirming={query.stav === 'potvrzuji'} openSignIn={query.signin === '1'} />;
 }

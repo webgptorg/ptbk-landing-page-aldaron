@@ -59,7 +59,7 @@ function isPaymentPending(data: MembersResponse) {
     );
 }
 
-export function PromptbookMembers({ confirming }: { readonly confirming: boolean }) {
+export function PromptbookMembers({ confirming, openSignIn = false }: { readonly confirming: boolean; readonly openSignIn?: boolean }) {
     const [result, setResult] = useState<MembersResponse | null>(null);
     const [waiting, setWaiting] = useState(confirming);
     const [error, setError] = useState('');
@@ -114,7 +114,7 @@ export function PromptbookMembers({ confirming }: { readonly confirming: boolean
                     {error}
                 </p>
             )}
-            <LicenseMemberPanel/>
+            <LicenseMemberPanel key={refresh} openSignIn={openSignIn} onVerified={refreshMemberships} />
             {waiting && <p role="status">Ověřujeme platbu…</p>}
             {!waiting && !error && result === null && <p role="status">Načítáme předplatné…</p>}
             {!waiting && (error || (confirming && result && isPaymentPending(result))) && (
