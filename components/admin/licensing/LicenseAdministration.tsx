@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AdminEditorDialog } from '@/components/admin/AdminEditorDialog';
 import { useAdminEditorClose } from '@/components/admin/AdminEditorContext';
 import { requestAdminJson } from '@/lib/admin/requestAdminJson';
+import { useCanAccessAdminPath } from '@/components/admin/AdminAccessProvider';
 import { licenseAdminHref, subscriptionAdminHref, LICENSE_STATE_LABELS,
     type AdminLicense, type AdminLicenseDetail, type AdminPage } from '@/lib/promptbook-licensing/adminContract';
 import { LicenseGrantEditor } from './LicenseGrantEditor';
@@ -35,6 +36,7 @@ function LicenseList({ params }: { params: URLSearchParams }) {
     return <><ReadStatus {...result}/>{result.data && <><LicenseRows items={result.data.items}/><PageLinks path="/admin/promptbook-licensing" params={params} {...result.data}/></>}</>;
 }
 function LicenseDetail({ params }: { params: URLSearchParams }) {
+    const canReadSubscriptions = useCanAccessAdminPath('/admin/promptbook-subscriptions');
     const result = useAdminRead<AdminLicenseDetail>(`/api/admin/promptbook-licensing?${params}`);
     const [editing, setEditing] = useState(false);
     const [action, setAction] = useState<'revoke'|'restore'|'delete'|null>(null);
@@ -61,10 +63,10 @@ function LicenseDetail({ params }: { params: URLSearchParams }) {
                     const value = license.capabilities[key as keyof typeof license.capabilities]; return <div key={key}><dt className="text-slate-500">{label}</dt><dd>{value === null ? 'Neomezeno' : typeof value === 'boolean' ? value ? 'Ano' : 'Ne' : value}</dd></div>;
                 })}<div><dt className="text-slate-500">Komunitní místa</dt><dd>{license.community_seats}</dd></div></dl>
             </section>
-            <section className="space-y-3"><h2 className="text-lg font-semibold">Spárovaná objednávka, předplatné a platby</h2>
+            {canReadSubscriptions && <section className="space-y-3"><h2 className="text-lg font-semibold">Spárovaná objednávka, předplatné a platby</h2>
                 {paired.length ? <SubscriptionRows items={paired}/> : <p className="text-sm text-slate-600">Tato licence nemá spárovanou objednávku, platbu ani předplatné.</p>}
                 {paired.map((s) => <Link className={linkClass+' block text-sm'} key={s.id} href={subscriptionAdminHref(s)}>Otevřít historii plateb a objednávku</Link>)}
-            </section>
+            </section>}
             {others.length > 0 && <section className="space-y-3"><h2 className="text-lg font-semibold">Další nákupy stejného účtu</h2><SubscriptionRows items={others}/></section>}
             {detail.subscriptionsHasMore && <Link className={linkClass} href={`/admin/promptbook-subscriptions?${new URLSearchParams({q:license.email,mode:license.is_test ? 'test' : 'live'})}`}>Všechny nákupy tohoto účtu</Link>}
             <section className="space-y-3"><h2 className="text-lg font-semibold">Historie změn</h2>

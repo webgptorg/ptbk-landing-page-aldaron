@@ -55,6 +55,7 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         if (!messagePermissionMigration) throw new Error('Missing Messages administration permission migration.');
         await database.exec(messagePermissionMigration);
         await database.exec(readFileSync('migrations/2026-11-0941-article-admin-permission.sql', 'utf8'));
+        await database.exec(readFileSync('migrations/2026-11-2000-licensing-api-admin-permissions.sql', 'utf8'));
         await database.exec('CREATE TABLE workshops (id uuid PRIMARY KEY, room_kind text);');
     }, 20_000);
     beforeEach(async () => {
@@ -115,6 +116,28 @@ describe('delegated administrators through real handlers and PostgreSQL constrai
         expect((await DELETE(request('/api/admin/shortener/1', 'DELETE', undefined, cookie), { params: Promise.resolve({ shortcodeLinkId: '1' }) })).status).toBe(403);
         await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: [] }), userContext(user));
         expect((await getUnauthorizedResponseOrNull(request('/api/admin/shortener', 'GET', undefined, cookie)))?.status).toBe(403);
+    });
+
+    it('delegates licences, subscriptions and API keys independently and revokes access on the next request', async () => {
+        const permissions = ['promptbook-licensing', 'promptbook-subscriptions', 'api-keys'] as const;
+        const user = await createUser(['promptbook-licensing'], 'licence-admin');
+        const value = (await login(user.username, PASSWORD, '/admin/promptbook-licensing')).cookies.get(ADMIN_SESSION_COOKIE_NAME)!.value;
+        const cookie = `${ADMIN_SESSION_COOKIE_NAME}=${value}`;
+        for (const grant of permissions) {
+            expect((await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: [grant] }), userContext(user))).status).toBe(200);
+            const identity = (await getAdminIdentityForSession(value))!;
+            for (const section of permissions) {
+                expect(canAccessAdminPath(identity, `/admin/${section}`)).toBe(section === grant);
+                for (const method of section === 'api-keys' ? ['GET', 'POST', 'DELETE'] : ['GET', 'POST']) {
+                    const rejected = await getUnauthorizedResponseOrNull(request(`/api/admin/${section}`, method, undefined, cookie));
+                    expect(rejected?.status ?? 200).toBe(section === grant ? 200 : 403);
+                }
+            }
+            expect(canAccessAdminPath(identity, '/admin/users')).toBe(false);
+            expect((await getUnauthorizedResponseOrNull(request('/api/admin/api-keys-other', 'GET', undefined, cookie)))?.status).toBe(403);
+        }
+        await UPDATE_USER(request(`/api/admin/users/${user.id}`, 'PATCH', { permissions: [] }), userContext(user));
+        expect((await getUnauthorizedResponseOrNull(request('/api/admin/api-keys', 'GET', undefined, cookie)))?.status).toBe(403);
     });
 
     it('applies a changed permission to an existing cookie on its next request', async () => {

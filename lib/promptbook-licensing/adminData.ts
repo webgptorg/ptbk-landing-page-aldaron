@@ -13,7 +13,7 @@ export function readAdminPageQuery(params: URLSearchParams) {
 /** Treat SQL LIKE metacharacters as literal search text. */
 export function adminEmailPattern(value: string) { return `%${value.replace(/[\\%_]/g, '\\$&')}%`; }
 
-export async function loadLicenseDetail(id: string, source: string, isTest: boolean): Promise<AdminLicenseDetail | null> {
+export async function loadLicenseDetail(id: string, source: string, isTest: boolean, includeSubscriptions = true): Promise<AdminLicenseDetail | null> {
     const db = licenseDatabase();
     const found = await db.from('promptbook_admin_licenses').select('*').eq('id', id).eq('source', source).eq('is_test', isTest).maybeSingle<AdminLicense>();
     if (found.error) throw new Error('License unavailable');
@@ -21,10 +21,10 @@ export async function loadLicenseDetail(id: string, source: string, isTest: bool
     const license = found.data;
     const [history, subscriptions, account, referral, paired] = await Promise.all([
         db.from('promptbook_license_grant_history').select('id,action,actor,reason,created_at').eq('grant_id', id).order('id', { ascending: false }).limit(101),
-        db.from('promptbook_admin_subscriptions').select('*').eq('email', license.email).eq('is_test', isTest).order('created_at', { ascending: false }).limit(101),
+        includeSubscriptions ? db.from('promptbook_admin_subscriptions').select('*').eq('email', license.email).eq('is_test', isTest).order('created_at', { ascending: false }).limit(101) : Promise.resolve({ data: [], error: null }),
         db.from('promptbook_license_accounts').select('id,referral_code').eq('id', license.account_id ?? '00000000-0000-0000-0000-000000000000').maybeSingle(),
         db.from('promptbook_referral_history').select('id,code,reason,created_at').eq('account_id', license.account_id ?? '00000000-0000-0000-0000-000000000000').order('id', { ascending: false }).limit(100),
-        license.order_id ? db.from('promptbook_admin_subscriptions').select('*').eq('product','promptbook').eq('id',license.order_id).eq('is_test',isTest).maybeSingle<AdminSubscription>() : Promise.resolve({data:null,error:null}),
+        includeSubscriptions && license.order_id ? db.from('promptbook_admin_subscriptions').select('*').eq('product','promptbook').eq('id',license.order_id).eq('is_test',isTest).maybeSingle<AdminSubscription>() : Promise.resolve({data:null,error:null}),
     ]);
     if (history.error || subscriptions.error || account.error || referral.error || paired.error) throw new Error('License relations unavailable');
     const related = subscriptions.data.slice(0,100) as AdminSubscription[];
@@ -35,7 +35,7 @@ export async function loadLicenseDetail(id: string, source: string, isTest: bool
         account: account.data, referralHistory: referral.data };
 }
 
-export async function loadSubscriptionDetail(id: string, product: string, isTest: boolean, paymentOffset: number): Promise<AdminSubscriptionDetail | null> {
+export async function loadSubscriptionDetail(id: string, product: string, isTest: boolean, paymentOffset: number, includeLicenses = true): Promise<AdminSubscriptionDetail | null> {
     const db = licenseDatabase();
     const found = await db.from('promptbook_admin_subscriptions').select('*').eq('id', id).eq('product', product).eq('is_test', isTest).maybeSingle<AdminSubscription>();
     if (found.error) throw new Error('Subscription unavailable');
@@ -63,7 +63,7 @@ export async function loadSubscriptionDetail(id: string, product: string, isTest
     const [invoices, licenses] = await Promise.all([
         db.from(product === 'promptbook' ? 'promptbook_invoices' : 'avatar_invoices').select('*').eq('order_id', id)
             .order('paid_at', { ascending: false }).order('stripe_invoice_id').range(paymentOffset, paymentOffset+50),
-        db.from('promptbook_admin_licenses').select('*').eq('order_id', id).eq('is_test', isTest),
+        includeLicenses ? db.from('promptbook_admin_licenses').select('*').eq('order_id', id).eq('is_test', isTest) : Promise.resolve({ data: [], error: null }),
     ]);
     if (invoices.error || licenses.error) throw new Error('Payments unavailable');
     result.licenses = licenses.data as AdminLicense[];

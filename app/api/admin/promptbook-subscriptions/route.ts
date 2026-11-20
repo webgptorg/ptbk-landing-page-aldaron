@@ -4,6 +4,9 @@ import { getUnauthorizedResponseOrNull } from '@/lib/admin/adminApiGuard';
 import { memberResponse } from '@/lib/promptbook-billing/memberAccess';
 import { licenseDatabase } from '@/lib/promptbook-licensing/accounts';
 import { adminEmailPattern, loadSubscriptionDetail, readAdminPageQuery } from '@/lib/promptbook-licensing/adminData';
+import { getAdminIdentityForSession } from '@/lib/admin/adminIdentity';
+import { hasAdminPermission } from '@/lib/admin/adminPermissions';
+import { ADMIN_SESSION_COOKIE_NAME } from '@/lib/admin/adminConstants';
 
 export async function GET(request: NextRequest) {
     const rejected = await getUnauthorizedResponseOrNull(request);
@@ -14,7 +17,9 @@ export async function GET(request: NextRequest) {
         const product = z.enum(['all','promptbook','community','avatar']).parse(params.get('product') ?? 'all');
         if (params.has('record')) {
             if (product === 'all') return memberResponse({ error: 'Vyberte produkt.' }, 400);
-            const detail = await loadSubscriptionDetail(z.string().uuid().parse(params.get('record')), product, isTest, offset);
+            const identity = await getAdminIdentityForSession(request.cookies.get(ADMIN_SESSION_COOKIE_NAME)?.value);
+            const detail = await loadSubscriptionDetail(z.string().uuid().parse(params.get('record')), product, isTest, offset,
+                identity !== null && hasAdminPermission(identity, 'promptbook-licensing'));
             return detail ? memberResponse(detail) : memberResponse({ error: 'Předplatné nebylo nalezeno.' }, 404);
         }
         let lookup = licenseDatabase().from('promptbook_admin_subscriptions').select('*', { count: 'exact' }).eq('is_test', isTest);

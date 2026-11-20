@@ -1,6 +1,7 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useCanAccessAdminPath } from '@/components/admin/AdminAccessProvider';
 import { createCommunityMembershipAdminPath } from '@/lib/community-membership/communityMembershipAdminLinks';
 import { licenseAdminHref, stripeObjectUrl, safeInvoiceUrl, SUBSCRIPTION_PRODUCT_LABELS,
     type AdminSubscription, type AdminPage, type AdminSubscriptionDetail } from '@/lib/promptbook-licensing/adminContract';
@@ -21,6 +22,8 @@ function SubscriptionList({params}:{params:URLSearchParams}) {
     return <><ReadStatus {...result}/>{result.data && <><SubscriptionRows items={result.data.items}/><PageLinks path="/admin/promptbook-subscriptions" params={params} {...result.data}/></>}</>;
 }
 function SubscriptionDetail({params}:{params:URLSearchParams}) {
+    const canReadLicenses = useCanAccessAdminPath('/admin/promptbook-licensing');
+    const canReadCommunity = useCanAccessAdminPath('/admin/community');
     const result = useAdminRead<AdminSubscriptionDetail>(`/api/admin/promptbook-subscriptions?${params}`);
     const detail=result.data, s=detail?.subscription;
     function paymentHref(offset:number) { const copy=new URLSearchParams(params);copy.set('offset',String(offset));return `/admin/promptbook-subscriptions?${copy}`; }
@@ -37,10 +40,10 @@ function SubscriptionDetail({params}:{params:URLSearchParams}) {
                     <div><dt className="text-slate-500">Přijatá základní cena / měsíc</dt><dd>{money(s.base_amount,s.currency)}</dd></div>
                     <div><dt className="text-slate-500">Slevový kód</dt><dd>{s.discount_code ?? 'Bez kódu'}</dd></div>
                 </dl><div className="flex flex-wrap gap-4 text-sm">{customerUrl && <a className={linkClass} href={customerUrl} target="_blank" rel="noreferrer">Zákazník ve Stripe</a>}
-                    {s.product === 'community' && <Link className={linkClass} href={createCommunityMembershipAdminPath('memberships',s.email,s.community_id === 'promptbook' ? 'promptbook' : 'vyvojari')}>Otevřít členský záznam v komunitě</Link>}
-                    <Link className={linkClass} href={`/admin/promptbook-licensing?${new URLSearchParams({q:s.email,mode:s.is_test ? 'test' : 'live'})}`}>Licence stejného účtu</Link></div>
+                    {canReadCommunity && s.product === 'community' && <Link className={linkClass} href={createCommunityMembershipAdminPath('memberships',s.email,s.community_id === 'promptbook' ? 'promptbook' : 'vyvojari')}>Otevřít členský záznam v komunitě</Link>}
+                    {canReadLicenses && <Link className={linkClass} href={`/admin/promptbook-licensing?${new URLSearchParams({q:s.email,mode:s.is_test ? 'test' : 'live'})}`}>Licence stejného účtu</Link>}</div>
             </section>
-            <section className="space-y-3"><h2 className="text-lg font-semibold">Spárované licence</h2>{detail.licenses.length ? <LicenseRows items={detail.licenses}/> : <p className="text-sm text-slate-600">{s.product === 'promptbook' ? 'Objednávka zatím nemá potvrzený licenční nárok.' : 'Tento produkt není softwarová licence Promptbooku.'}</p>}</section>
+            {canReadLicenses && <section className="space-y-3"><h2 className="text-lg font-semibold">Spárované licence</h2>{detail.licenses.length ? <LicenseRows items={detail.licenses}/> : <p className="text-sm text-slate-600">{s.product === 'promptbook' ? 'Objednávka zatím nemá potvrzený licenční nárok.' : 'Tento produkt není softwarová licence Promptbooku.'}</p>}</section>}
             <section className="space-y-3"><h2 className="text-lg font-semibold">Platby a faktury</h2>
                 {detail.paymentsMessage && <p className="rounded-lg bg-slate-50 p-3 text-sm">{detail.paymentsMessage}</p>}
                 {detail.payments.length > 0 ? <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b"><tr>{['Faktura','Stav','Zaplaceno','Částka','Vráceno',''].map((title,index) => <th className="p-3" key={index}>{title}</th>)}</tr></thead>

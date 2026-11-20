@@ -11,6 +11,9 @@ export const ADMIN_PERMISSION_DEFINITIONS = [
     { id: 'messages', label: 'Messages', path: '/admin/messages' },
     { id: 'agents', label: 'Agents', path: '/admin/agents' },
     { id: 'discount-codes', label: 'Slevové kódy', path: '/admin/discount-codes' },
+    { id: 'promptbook-licensing', label: 'Licence', path: '/admin/promptbook-licensing' },
+    { id: 'promptbook-subscriptions', label: 'Předplatná a objednávky', path: '/admin/promptbook-subscriptions' },
+    { id: 'api-keys', label: 'API klíče', path: '/admin/api-keys' },
 ] as const;
 
 export const ADMIN_SHORTENER_PERMISSION_DEFINITIONS = [

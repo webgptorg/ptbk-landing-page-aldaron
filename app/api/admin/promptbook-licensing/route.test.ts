@@ -24,6 +24,11 @@ it('creates only one audited grant RPC with a stable retry ID and server-owned a
     expect(fakes.rpc).toHaveBeenCalledExactlyOnceWith('admin_mutate_promptbook_grant',expect.objectContaining({p_action:'grant',p_grant:input.requestId,p_email:'customer@example.test',p_actor:'owner-admin',p_is_test:false}));
     expect(response.headers.get('Cache-Control')).toContain('no-store');
 });
+it('allows the delegated licence administrator to create and mutate grants with its own audited identity', async () => {
+    fakes.identity.mockResolvedValue({ isSuperAdmin: false, username: 'licence-admin', permissions: ['promptbook-licensing'] });
+    expect((await POST(request(input))).status).toBe(200);
+    expect(fakes.rpc).toHaveBeenCalledWith('admin_mutate_promptbook_grant', expect.objectContaining({ p_actor: 'licence-admin' }));
+});
 it('refuses impossible dates, client payment fields and oversized bodies without writing',async () => {
     expect((await POST(request({...input,validUntil:'2026-11-17T00:00:00Z'}))).status).toBe(400);
     expect((await POST(request({...input,stripe_subscription_id:'sub_forged'}))).status).toBe(400);

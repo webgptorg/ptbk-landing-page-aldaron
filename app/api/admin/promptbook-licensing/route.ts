@@ -8,8 +8,9 @@ import { licenseDatabase } from '@/lib/promptbook-licensing/accounts';
 import { licenseAdminMutationSchema, type AdminLicense } from '@/lib/promptbook-licensing/adminContract';
 import { adminEmailPattern, loadLicenseDetail, readAdminPageQuery } from '@/lib/promptbook-licensing/adminData';
 import { readBoundedJson } from '@/lib/api/readBoundedJson';
+import { hasAdminPermission } from '@/lib/admin/adminPermissions';
 
-/** Private billing sections stay superadmin-only through the existing session and cross-site guards. */
+/** Section access and every mutation use the current identity, including delegated licence administrators. */
 export async function POST(request: NextRequest) {
     const rejected = await getUnauthorizedResponseOrNull(request);
     if (rejected) return rejected;
@@ -18,13 +19,13 @@ export async function POST(request: NextRequest) {
     try {
         const db = licenseDatabase();
         const p = parsed.data;
+        const identity = await getAdminIdentityForSession(request.cookies.get(ADMIN_SESSION_COOKIE_NAME)?.value);
+        if (!identity || !hasAdminPermission(identity, 'promptbook-licensing')) return memberResponse({ error: 'Forbidden' }, 403);
         if (p.action === 'referral') {
             const response = await db.rpc('correct_promptbook_referral', { p_account: p.accountId, p_code: p.code || null, p_reason: p.reason });
             if (response.error) throw new Error('Referral unavailable');
             return memberResponse({ saved: true });
         }
-        const identity = await getAdminIdentityForSession(request.cookies.get(ADMIN_SESSION_COOKIE_NAME)?.value);
-        if (!identity?.isSuperAdmin) return memberResponse({ error: 'Forbidden' }, 403);
         const fields = p.action === 'grant' || p.action === 'update' ? p : null;
         const validFrom = fields?.validFrom ?? new Date().toISOString();
         if (fields?.validUntil && Date.parse(fields.validUntil) <= Date.parse(validFrom)) return memberResponse({ error: 'Konec platnosti musí následovat po začátku.' }, 400);
@@ -52,7 +53,9 @@ export async function GET(request: NextRequest) {
         const params = request.nextUrl.searchParams;
         const { offset, isTest, query, limit } = readAdminPageQuery(params);
         if (params.has('grant')) {
-            const detail = await loadLicenseDetail(z.string().uuid().parse(params.get('grant')), z.enum(['manual','subscription']).parse(params.get('source') ?? 'manual'), isTest);
+            const identity = await getAdminIdentityForSession(request.cookies.get(ADMIN_SESSION_COOKIE_NAME)?.value);
+            const detail = await loadLicenseDetail(z.string().uuid().parse(params.get('grant')), z.enum(['manual','subscription']).parse(params.get('source') ?? 'manual'), isTest,
+                identity !== null && hasAdminPermission(identity, 'promptbook-subscriptions'));
             return detail ? memberResponse(detail) : memberResponse({ error: 'Licence nebyla nalezena.' }, 404);
         }
         const state = z.enum(['all','active','scheduled','expired','revoked','deleted','unverified']).parse(params.get('state') ?? 'all');

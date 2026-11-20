@@ -4,6 +4,7 @@ import { AdminSaveProtection } from '@/components/admin/AdminSaveProtection';
 import { ADMIN_NAVIGATION_ITEMS } from '@/components/admin/adminNavigationConfig';
 import { getCurrentAdminIdentity } from '@/lib/admin/getCurrentAdminIdentity';
 import { canAccessAdminPath } from '@/lib/admin/adminPermissions';
+import { AdminAccessProvider } from '@/components/admin/AdminAccessProvider';
 
 export const metadata: Metadata = {
     title: 'Promptbook administration',
@@ -18,7 +19,7 @@ export default async function AdminLayout({ children }: { readonly children: Rea
         <>
             <AdminNavigation allowedPaths={allowedPaths} username={identity?.username} />
             <AdminSaveProtection />
-            {children}
+            <AdminAccessProvider identity={identity}>{children}</AdminAccessProvider>
         </>
     );
 }
