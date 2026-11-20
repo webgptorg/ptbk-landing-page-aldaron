@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { memberResponse } from '@/lib/promptbook-billing/memberAccess';
-import { isLicenseAppRequest } from '@/lib/promptbook-licensing/appAuthentication';
+import { getUnauthorizedLicenseAppResponse } from '@/lib/promptbook-licensing/appAuthentication';
 import { licenseDatabase, licenseSnapshot, type LicenseAccount } from '@/lib/promptbook-licensing/accounts';
 import { z } from 'zod';
 import { readBoundedJson } from '@/lib/api/readBoundedJson';
@@ -8,7 +8,8 @@ import { allowPublicChatRequest } from '@/lib/messages/publicChatRateLimit';
 import { LicenseAccountBackfillRequired, lookupLicenseByEmail } from '@/lib/promptbook-licensing/lookup';
 import { licenseLookupRequestSchema } from '@/lib/promptbook-licensing/lookupContract';
 export async function GET(request: NextRequest) {
-    if (!isLicenseAppRequest(request)) return memberResponse({ error: 'Unauthorized' }, 401);
+    const rejected = await getUnauthorizedLicenseAppResponse(request);
+    if (rejected) return rejected;
     const subject = z.string().uuid().safeParse(request.nextUrl.searchParams.get('subject'));
     if (!subject.success) return memberResponse({ error: 'Invalid subject' }, 400);
     try {
@@ -28,7 +29,8 @@ export async function GET(request: NextRequest) {
 
 /** V0 badge lookup for a verified App identity. The original GET snapshot contract stays intact. */
 export async function POST(request: NextRequest) {
-    if (!isLicenseAppRequest(request)) return memberResponse({ error: 'Unauthorized' }, 401);
+    const rejected = await getUnauthorizedLicenseAppResponse(request);
+    if (rejected) return rejected;
     // Reuse the existing bounded per-instance limiter; no email, token or user content is retained as a key.
     if (!allowPublicChatRequest('promptbook-app-license-lookup', 3000)) {
         const response = memberResponse({ error: 'Too many requests' }, 429);

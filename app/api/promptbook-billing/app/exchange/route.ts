@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { memberResponse } from '@/lib/promptbook-billing/memberAccess';
-import { isLicenseAppRequest } from '@/lib/promptbook-licensing/appAuthentication';
+import { getUnauthorizedLicenseAppResponse } from '@/lib/promptbook-licensing/appAuthentication';
 import { licenseDatabase, type LicenseAccount } from '@/lib/promptbook-licensing/accounts';
 import { licenseExchangeRequestSchema, licenseExchangeResponseSchema } from '@/lib/promptbook-licensing/exchangeContract';
 export async function POST(request: NextRequest) {
-    if (!isLicenseAppRequest(request)) return memberResponse({ error: 'Unauthorized' }, 401);
+    const rejected = await getUnauthorizedLicenseAppResponse(request, 'identity:exchange');
+    if (rejected) return rejected;
     const parsed = licenseExchangeRequestSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return memberResponse({ error: 'Invalid ticket' }, 400);
     try {

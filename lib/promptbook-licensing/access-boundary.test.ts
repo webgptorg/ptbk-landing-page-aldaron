@@ -20,13 +20,13 @@ it('requires both verified ownership of the exact email and a current seat', asy
     expect(isPromptbookLicenseRoom('community', 'komunita-vyvojari')).toBe(false);
     expect(isPromptbookLicenseRoom('workshop', 'shared', ['promptbook', 'vyvojari'])).toBe(false);
 });
-it('keeps the App license API closed without the dedicated server credential', () => {
+it('keeps the App license API closed without the dedicated server credential', async () => {
     vi.stubEnv('PROMPTBOOK_APP_LICENSE_SECRET', 'x'.repeat(32));
     const request = (value?: string) => new Request('https://www.ptbk.io/api/promptbook-billing/app/licenses', { headers: value ? { authorization: value } : {} });
-    expect(isLicenseAppRequest(request())).toBe(false);
-    expect(isLicenseAppRequest(request('Bearer wrong'))).toBe(false);
-    expect(isLicenseAppRequest(request('Bearer ' + 'y'.repeat(32)))).toBe(false);
-    expect(isLicenseAppRequest(request('Bearer ' + 'x'.repeat(32)))).toBe(true);
+    expect(await isLicenseAppRequest(request())).toBe(false);
+    expect(await isLicenseAppRequest(request('Bearer wrong'))).toBe(false);
+    expect(await isLicenseAppRequest(request('Bearer ' + 'y'.repeat(32)))).toBe(false);
+    expect(await isLicenseAppRequest(request('Bearer ' + 'x'.repeat(32)))).toBe(true);
     vi.stubEnv('PROMPTBOOK_APP_LICENSE_SECRET', '');
-    expect(isLicenseAppRequest(request('Bearer ' + 'x'.repeat(32)))).toBe(false);
+    expect(await isLicenseAppRequest(request('Bearer ' + 'x'.repeat(32)))).toBe(false);
 });

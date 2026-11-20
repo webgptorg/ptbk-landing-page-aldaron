@@ -9,7 +9,7 @@ import {
 import { ADMIN_SHORTENER_PATH } from '@/lib/shortener/shortcodeLinkConstants';
 import { STUDIO_PATH } from '@/lib/recording-studio/studioProjectTypes';
 import { ADMIN_USERS_PATH } from '@/lib/admin/adminUserSchemas';
-import { Bot, MessageSquareText, ContactRound, FileText, LayoutDashboard, Link2, Radio, Rss, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
+import { Bot, KeyRound, MessageSquareText, ContactRound, FileText, LayoutDashboard, Link2, Radio, Rss, ShieldCheck, TicketPercent, UsersRound, Video, type LucideIcon } from 'lucide-react';
 
 export type AdminNavigationItem = {
     readonly path: string;
@@ -84,6 +84,7 @@ export const ADMIN_NAVIGATION_ITEMS: readonly AdminNavigationItem[] = [
     },
     { path: '/admin/promptbook-licensing', label: 'Licence', description: 'Licence z nákupů, zkoušky, ruční přidělení bez objednávky a historie změn.', icon: ShieldCheck },
     { path: '/admin/promptbook-subscriptions', label: 'Předplatná a objednávky', description: 'Licence, komunitní členství a avatar s propojenými platbami.', icon: ShieldCheck },
+    { path: '/admin/api-keys', label: 'API klíče', description: 'Vytváření a zneplatňování klíčů ke společnému API všech webů.', icon: KeyRound },
     { path: '/admin/messages', label: 'Messages', description: 'Zprávy s širším kontextem, hlasem a rozhovorem.', icon: MessageSquareText },
     { path: '/admin/agents', label: 'Agents', description: 'Sdílení Book agenti pro zprávy i workshopy.', icon: Bot },
     {

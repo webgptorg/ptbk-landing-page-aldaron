@@ -12,11 +12,15 @@ export function createAdminUserTestClient(database: PGlite): SupabaseClient {
         private filters: Array<[string, unknown]> = [];
         private values: Record<string, unknown> = {};
         private operation: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' = 'SELECT';
-        private orderColumn: string | null = null;
+        private orders: Array<{ column: string; ascending: boolean }> = [];
+        private rangeBounds: [number, number] | null = null;
+        private countExact = false;
         constructor(private readonly table: string) {}
-        select(columns = '*') { this.columns = columns; return this; }
+        select(columns = '*', options?: { count?: string }) { this.columns = columns; this.countExact = options?.count === 'exact'; return this; }
         eq(column: string, value: unknown) { this.filters.push([column, value]); return this; }
-        order(column: string) { this.orderColumn = column; return this; }
+        is(column: string, value: null) { this.filters.push([column, value]); return this; }
+        order(column: string, options?: { ascending?: boolean }) { this.orders.push({ column, ascending: options?.ascending ?? true }); return this; }
+        range(from: number, to: number) { this.rangeBounds = [from, to]; return this; }
         insert(values: Record<string, unknown>) { this.operation = 'INSERT'; this.values = values; return this; }
         update(values: Record<string, unknown>) { this.operation = 'UPDATE'; this.values = values; return this; }
         delete() { this.operation = 'DELETE'; return this; }
@@ -36,12 +40,15 @@ export function createAdminUserTestClient(database: PGlite): SupabaseClient {
             if (this.operation === 'INSERT') sql = `INSERT INTO ${quote(this.table)} (${fields.map(quote).join(',')}) VALUES (${fields.map((field) => bind(this.values[field])).join(',')})`;
             if (this.operation === 'UPDATE') sql = `UPDATE ${quote(this.table)} SET ${fields.map((field) => `${quote(field)}=${bind(this.values[field])}`).join(',')}`;
             if (this.operation === 'DELETE') sql = `DELETE FROM ${quote(this.table)}`;
-            if (this.filters.length) sql += ` WHERE ${this.filters.map(([field, value]) => `${quote(field)}=${bind(value)}`).join(' AND ')}`;
+            const where = this.filters.length ? ` WHERE ${this.filters.map(([field, value]) => value === null ? `${quote(field)} IS NULL` : `${quote(field)}=${bind(value)}`).join(' AND ')}` : '';
+            sql += where;
             if (this.operation !== 'SELECT') sql += ` RETURNING ${columns}`;
-            if (this.orderColumn) sql += ` ORDER BY ${quote(this.orderColumn)}`;
+            if (this.orders.length) sql += ` ORDER BY ${this.orders.map(({ column, ascending }) => `${quote(column)} ${ascending ? 'ASC' : 'DESC'}`).join(',')}`;
+            if (this.rangeBounds) sql += ` OFFSET ${this.rangeBounds[0]} LIMIT ${this.rangeBounds[1] - this.rangeBounds[0] + 1}`;
             try {
                 const result = await database.query<Record<string, unknown>>(sql, parameters);
-                return { data: result.rows, error: null };
+                const count = this.countExact ? Number((await database.query<{ total: number }>(`SELECT count(*) AS total FROM ${quote(this.table)}${where}`, parameters)).rows[0].total) : null;
+                return { data: result.rows, error: null, count };
             } catch (error) {
                 return { data: null, error: error as { code: string; message: string } };
             }
