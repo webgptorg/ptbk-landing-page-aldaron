@@ -74,8 +74,11 @@ export const SITE_METADATA: Metadata = {
         images: [DEFAULT_SOCIAL_PREVIEW_IMAGE],
     },
     icons: {
-        // Chrome on Windows can prefer an explicitly linked ICO over the adaptive SVG.
-        icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+        // Chromium caches rendered favicons by URL. A theme change must select a different URL.
+        icon: [
+            { url: '/favicon.svg?scheme=dark', type: 'image/svg+xml', media: '(prefers-color-scheme: dark)' },
+            { url: '/favicon.svg?scheme=light', type: 'image/svg+xml', media: '(prefers-color-scheme: light)' },
+        ],
         apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     },
     manifest: '/manifest.webmanifest',

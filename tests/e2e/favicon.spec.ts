@@ -1,22 +1,21 @@
 import { expect, test } from '@playwright/test';
 
-test('the Business trial page offers one tab icon that follows the browser theme', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'light' });
+test('the Business trial tab selects one transparent favicon for the current browser theme', async ({ page, context }) => {
     await page.goto('/cs/pricing/zkouska', { waitUntil: 'domcontentloaded' });
-    const icon = page.locator('head link[rel~="icon"]');
-    await expect(icon).toHaveCount(1);
-    await expect(icon).toHaveAttribute('type', 'image/svg+xml');
-    await expect(icon).toHaveAttribute('href', '/favicon.svg?scheme=light');
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await expect(icon).toHaveAttribute('href', '/favicon.svg?scheme=dark');
-    await page.emulateMedia({ colorScheme: 'light' });
-    await expect(icon).toHaveAttribute('href', '/favicon.svg?scheme=light');
+    await expect(page.locator('head link[rel~="icon"]')).toHaveCount(2);
 
-    const url = await icon.evaluate((link: HTMLLinkElement) => link.href);
-    await page.goto(url);
-    const mark = page.locator('svg path').first();
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await expect(mark).toHaveCSS('fill', 'rgb(255, 255, 255)');
-    await page.emulateMedia({ colorScheme: 'light' });
-    await expect(mark).toHaveCSS('fill', 'rgb(23, 56, 108)');
+    const iconPage = await context.newPage();
+    for (const scheme of ['light', 'dark', 'light'] as const) {
+        await page.emulateMedia({ colorScheme: scheme });
+        const active = await page.evaluate(() => Array.from(document.head.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]'))
+            .filter(link => !link.media || window.matchMedia(link.media).matches)
+            .map(link => ({ url: link.href, type: link.type })));
+        const url = new URL(`/favicon.svg?scheme=${scheme}`, page.url()).href;
+        expect(active).toEqual([{ url, type: 'image/svg+xml' }]);
+
+        await iconPage.emulateMedia({ colorScheme: scheme });
+        await iconPage.goto(active[0].url);
+        const color = scheme === 'dark' ? 'rgb(255, 255, 255)' : 'rgb(23, 56, 108)';
+        await expect(iconPage.locator('svg path').first()).toHaveCSS('fill', color);
+    }
 });
