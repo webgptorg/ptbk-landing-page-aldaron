@@ -74,10 +74,8 @@ export const SITE_METADATA: Metadata = {
         images: [DEFAULT_SOCIAL_PREVIEW_IMAGE],
     },
     icons: {
-        icon: [
-            { url: '/favicon.ico', type: 'image/x-icon' },
-            { url: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' },
-        ],
+        // Chrome on Windows can prefer an explicitly linked ICO over the adaptive SVG.
+        icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
         apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     },
     manifest: '/manifest.webmanifest',
