@@ -1,10 +1,16 @@
 import { expect, test } from '@playwright/test';
 
 test('the Business trial page offers one tab icon that follows the browser theme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/cs/pricing/zkouska', { waitUntil: 'domcontentloaded' });
     const icon = page.locator('head link[rel~="icon"]');
     await expect(icon).toHaveCount(1);
     await expect(icon).toHaveAttribute('type', 'image/svg+xml');
+    await expect(icon).toHaveAttribute('href', '/favicon.svg?scheme=light');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(icon).toHaveAttribute('href', '/favicon.svg?scheme=dark');
+    await page.emulateMedia({ colorScheme: 'light' });
+    await expect(icon).toHaveAttribute('href', '/favicon.svg?scheme=light');
 
     const url = await icon.evaluate((link: HTMLLinkElement) => link.href);
     await page.goto(url);

@@ -13,6 +13,22 @@ export function ClientWrapper({ children, publicHostname }: { children: React.Re
     const pathname = usePathname();
 
     useEffect(() => {
+        const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+        function updateTabIcon() {
+            // Chromium caches a rasterized tab icon by URL across theme changes.
+            const icon = document.head.querySelector<HTMLLinkElement>('link[rel~="icon"][href^="/favicon.svg"]');
+            const href = `/favicon.svg?scheme=${scheme.matches ? 'dark' : 'light'}`;
+            if (icon && icon.getAttribute('href') !== href) {
+                icon.href = href;
+            }
+        }
+
+        updateTabIcon();
+        scheme.addEventListener('change', updateTabIcon);
+        return () => scheme.removeEventListener('change', updateTabIcon);
+    }, [pathname]);
+
+    useEffect(() => {
         if (hasInitializedLogRocket || !isThirdPartyTrackingAllowed(pathname)) {
             return;
         }
