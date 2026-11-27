@@ -38,6 +38,11 @@ export function PavolFooter({ language, isHomepage = true, showCookieSettings = 
                                 </li>
                             ))}
                             <li>
+                                <Link href="/gallery" className="inline-flex min-h-11 items-center text-sm text-slate-200 hover:text-white">
+                                    {language === 'cs' ? 'Fotogalerie' : 'Photo gallery'}
+                                </Link>
+                            </li>
+                            <li>
                                 <ArticleRssLink
                                     language={language}
                                     url={getArticlePodcastUrl(language, 'personal')}
